@@ -216,7 +216,8 @@ def getStampFromId(stamp_id):
                     users.image,
                     users.user_id, 
                     comments.timestamp, 
-                    comments.comment
+                    comments.comment,
+                    comments.comment_id
                 FROM comments
                 JOIN users ON comments.user_id = users.user_id
                 WHERE comments.stamp_id = %d
@@ -233,6 +234,7 @@ def getStampFromId(stamp_id):
             comment['user_id'] = commentData[2]
             comment['timestamp'] = commentData[3]
             comment['comment'] = commentData[4]
+            comment['comment_id'] = commentData[5]
             
             comments.append(comment)
             
@@ -287,6 +289,27 @@ def addCommentToStamp(user_id, stamp_id, comment):
     query = ("SELECT * FROM comments WHERE comment_id = %d" % (db.insert_id()))
     cursor.execute(query)
     result = cursor.fetchone()
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
+
+###############################################################################
+def removeComment(comment_id):
+    print '--removeStamp: %s' % (comment_id)
+    comment_id = int(comment_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    query = "DELETE FROM comments WHERE comment_id = %d" % (comment_id)
+    cursor.execute(query)
+    if cursor.rowcount > 0:
+        result = "Success"
+    else:
+        result = "NA"
     
     cursor.close()
     db.commit()
