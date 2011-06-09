@@ -1,23 +1,25 @@
 import sys
-import datetime
+from datetime import datetime
 import gc
 import MySQLdb
 
+###############################################################################
 def sqlConnection():
     return MySQLdb.connect(user='root',db='stamped_api')
 
+###############################################################################
 def setup():
-    db=MySQLdb.connect(user='root')
-    c=db.cursor() 
-    c.execute('DROP DATABASE IF EXISTS stamped_api')
-    c.execute('CREATE DATABASE stamped_api') 
+    db = MySQLdb.connect(user='root')
+    cursor = db.cursor() 
+    cursor.execute('DROP DATABASE IF EXISTS stamped_api')
+    cursor.execute('CREATE DATABASE stamped_api') 
     print 'stamped_api db created'
-    c.close()
+    cursor.close()
 
-    db=MySQLdb.connect(user='root',db='stamped_api')
-    c=db.cursor()
+    db = MySQLdb.connect(user='root',db='stamped_api')
+    cursor = db.cursor()
 
-    q = """CREATE TABLE objects (
+    query = """CREATE TABLE objects (
             object_id INT NOT NULL AUTO_INCREMENT, 
             title VARCHAR(100), 
             description TEXT, 
@@ -30,10 +32,10 @@ def setup():
             date_created DATETIME,
             date_updated DATETIME, 
             PRIMARY KEY(object_id))"""
-    c.execute(q)
+    cursor.execute(query)
     print 'objects table created'
 
-    q = """CREATE TABLE stamps (
+    query = """CREATE TABLE stamps (
             stamp_id INT NOT NULL AUTO_INCREMENT, 
             object_id INT, 
             user_id INT, 
@@ -44,10 +46,10 @@ def setup():
             mention VARCHAR(100),
             flagged INT,
             PRIMARY KEY(stamp_id))"""
-    c.execute(q)
+    cursor.execute(query)
     print 'stamps table created'
 
-    q = """CREATE TABLE users (
+    query = """CREATE TABLE users (
             user_id INT NOT NULL AUTO_INCREMENT, 
             email VARCHAR(100), 
             username VARCHAR(20), 
@@ -62,19 +64,19 @@ def setup():
             locale VARCHAR(100),
             timezone VARCHAR(10),
             PRIMARY KEY(user_id))"""
-    c.execute(q)
+    cursor.execute(query)
     print 'users table created'
 
-    q = """CREATE TABLE friends (
+    query = """CREATE TABLE friends (
             user_id INT NOT NULL, 
             follower_id INT NOT NULL, 
             timestamp DATETIME, 
             approved INT, 
             PRIMARY KEY(user_id, follower_id))"""
-    c.execute(q)
+    cursor.execute(query)
     print 'friends table created'
 
-    q = """CREATE TABLE userstamps (
+    query = """CREATE TABLE userstamps (
             user_id INT NOT NULL, 
             stamp_id INT NOT NULL, 
             is_read INT, 
@@ -83,13 +85,23 @@ def setup():
             is_inbox INT, 
             is_transacted INT,
             PRIMARY KEY(user_id, stamp_id))"""
-    c.execute(q)
+    cursor.execute(query)
+    print 'userstamps table created'
+
+    query = """CREATE TABLE comments (
+            comment_id INT NOT NULL AUTO_INCREMENT, 
+            user_id INT NOT NULL, 
+            stamp_id INT NOT NULL, 
+            timestamp DATETIME, 
+            comment VARCHAR(250),
+            PRIMARY KEY(comment_id))"""
+    cursor.execute(query)
     print 'userstamps table created'
 
     print 
 
     # Add some users
-    c.executemany(
+    cursor.executemany(
           """INSERT INTO users (email, username, name, privacy)
           VALUES (%s, %s, %s, %s)""",
           [
@@ -100,7 +112,7 @@ def setup():
           ])
           
     # And add some objects
-    c.executemany(
+    cursor.executemany(
           """INSERT INTO objects (title, category, source)
           VALUES (%s, %s, %s)""",
           [
@@ -116,18 +128,18 @@ def setup():
           ])
 
 
-    c.execute('SELECT * FROM users')
-    result = c.fetchmany(3)
+    cursor.execute('SELECT * FROM users')
+    result = cursor.fetchmany(3)
     for record in result:
         print record
     print
 
-    c.execute('SELECT * FROM objects')
-    result = c.fetchmany(3)
+    cursor.execute('SELECT * FROM objects')
+    result = cursor.fetchmany(3)
     for record in result:
         print record
 
-    c.close()
+    cursor.close()
     db.commit()
     db.close()
 
@@ -140,80 +152,193 @@ def setup():
 
 
 
-
+###############################################################################
 def addStamp(uid, object_id, comment):
     print '--addStamp: %s %s %s' % (uid, object_id, comment)
     
-    now = datetime.datetime(2009,5,5)
-    str_now = now.date().isoformat()
+    str_now = datetime.now().isoformat()
     
-    q = ("""INSERT INTO stamps (object_id, user_id, comment, timestamp)
+    query = ("""INSERT INTO stamps (object_id, user_id, comment, timestamp)
             VALUES (%s, %s, '%s', '%s')""" %
          (uid, object_id, comment, str_now))
     db = sqlConnection()
-    c = db.cursor() 
-    c.execute(q)
+    cursor = db.cursor() 
+    cursor.execute(query)
     
-    q = ("SELECT * FROM stamps WHERE stamp_id = %d" % (db.insert_id()))
-    c.execute(q)
-    result = c.fetchone()
+    query = ("SELECT * FROM stamps WHERE stamp_id = %d" % (db.insert_id()))
+    cursor.execute(query)
+    result = cursor.fetchone()
     
-    c.close()
+    cursor.close()
     db.commit()
     db.close()
     
     return result
-    
 
-
-
-def getStampDetails(stamp_id):
+###############################################################################
+def getStampFromId(stamp_id):
+    stamp_id = int(stamp_id)
     print '--getStampDetails: %s' % (stamp_id)
     
     db = sqlConnection()
-    c = db.cursor() 
+    cursor = db.cursor() 
     
-    q = ("""SELECT * FROM stamps
+    query = ("""SELECT 
+                objects.object_id,
+                stamps.stamp_id,
+                stamps.user_id,
+                stamps.comment,
+                stamps.image,
+                objects.image,
+                stamps.timestamp
+            FROM stamps
             JOIN objects ON stamps.object_id = objects.object_id
             WHERE stamps.stamp_id = %d""" %
-         (int(stamp_id)))
-    c.execute(q)
-    data = c.fetchone()
+         (stamp_id))
+    cursor.execute(query)
     
-    c.close()
+    if cursor.rowcount > 0:
+        data = cursor.fetchone()
+        
+        result = {}
+        result['object_id'] = data[0]
+        result['stamp_id'] = data[1]
+        result['user_id'] = data[2]
+        result['comment'] = data[3]
+        if data[4]:
+            result['image'] = data[4]
+        else: 
+            result['image'] = data[5]
+        result['timestamp'] = data[6]
+        
+        query = ("""SELECT 
+                    users.name,
+                    users.image,
+                    users.user_id, 
+                    comments.timestamp, 
+                    comments.comment
+                FROM comments
+                JOIN users ON comments.user_id = users.user_id
+                WHERE comments.stamp_id = %d
+                ORDER BY comments.timestamp ASC""" %
+            (stamp_id))
+        cursor.execute(query)
+        commentsData = cursor.fetchall()
+        
+        comments = []
+        for commentData in commentsData:
+            comment = {}
+            comment['user_name'] = commentData[0]
+            comment['user_image'] = commentData[1]
+            comment['user_id'] = commentData[2]
+            comment['timestamp'] = commentData[3]
+            comment['comment'] = commentData[4]
+            
+            comments.append(comment)
+            
+        result['comment_thread'] = comments
+        
+    else: 
+        result = "NA"
+    
+    cursor.close()
     db.commit()
     db.close()
     
-    result = {}
-    result['object_id'] = data[0]
+    return result
+
+###############################################################################
+def removeStamp(stamp_id):
+    stamp_id = int(stamp_id)
+    print '--removeStamp: %d' % (stamp_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    query = "DELETE FROM stamps WHERE stamp_id = %d" % (stamp_id)
+    cursor.execute(query)
+    if cursor.rowcount > 0:
+        result = "Success"
+    else:
+        result = "NA"
+    
+    cursor.close()
+    db.commit()
+    db.close()
     
     return result
 
+###############################################################################
+def addCommentToStamp(user_id, stamp_id, comment):
+    print '--addCommentToStmp: %s %s %s' % (user_id, stamp_id, comment)
+    
+    user_id = int(user_id)
+    stamp_id = int(stamp_id)
+    
+    str_now = datetime.now().isoformat()
+    
+    query = ("""INSERT INTO comments (user_id, stamp_id, comment, timestamp)
+            VALUES (%s, %s, '%s', '%s')""" %
+         (user_id, stamp_id, comment, str_now))
+    db = sqlConnection()
+    cursor = db.cursor() 
+    cursor.execute(query)
+    
+    query = ("SELECT * FROM comments WHERE comment_id = %d" % (db.insert_id()))
+    cursor.execute(query)
+    result = cursor.fetchone()
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
 
+###############################################################################
+def checkNumberOfArguments(expected, length):
+    if length < expected + 2:
+        print 'Missing parameters'
+        sys.exit(1)
 
+###############################################################################
 def main():
     if len(sys.argv) == 1:
-        print 'usage: ./stamped-api.py {--setup | --addStamp} file'
+        print 'usage: ./stamped-api.py {--setup | --addStamp | ' \
+            '--getStampFromId | --removeStamp} file'
         sys.exit(1)
     
     option = sys.argv[1]
     if option == '--setup':
         setup()
+        
     elif option == '--addStamp':
         if len(sys.argv) < 5:
             print 'usage: ./stamped-api.py --addStamp uid object_id comment'
             sys.exit(1)
-        c = addStamp(sys.argv[2], sys.argv[3], sys.argv[4])
-        print 'Response: ', c
-    elif option == '--getStampDetails':
+        response = addStamp(sys.argv[2], sys.argv[3], sys.argv[4])
+        print 'Response: ', response
+        
+    elif option == '--getStampFromId':
         if len(sys.argv) < 3:
             print 'usage: ./stamped-api.py --getStampDetails stamp_id'
             sys.exit(1)
-        c = getStampDetails(sys.argv[2])
-        print 'Response: ', c
+        response = getStampFromId(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--removeStamp':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = removeStamp(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--addCommentToStamp':
+        checkNumberOfArguments(3, len(sys.argv))
+        response = addCommentToStamp(sys.argv[2], sys.argv[3], sys.argv[4])
+        print 'Response: ', response
+        
     else:
         print 'unknown option: ' + option
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
