@@ -298,7 +298,7 @@ def addCommentToStamp(user_id, stamp_id, comment):
 
 ###############################################################################
 def removeComment(comment_id):
-    print '--removeStamp: %s' % (comment_id)
+    print '--removeComment: %s' % (comment_id)
     comment_id = int(comment_id)
     
     db = sqlConnection()
@@ -356,6 +356,11 @@ def main():
     elif option == '--addCommentToStamp':
         checkNumberOfArguments(3, len(sys.argv))
         response = addCommentToStamp(sys.argv[2], sys.argv[3], sys.argv[4])
+        print 'Response: ', response
+        
+    elif option == '--removeComment':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = removeComment(sys.argv[2])
         print 'Response: ', response
         
     else:
