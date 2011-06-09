@@ -1,0 +1,658 @@
+TStamped
+v7
+r1
+cCheck dependencies
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk
+c000000004CC7DC9E0000000000000110
+t1288166558
+s272
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/ResourceRules.plist
+c000000004CB3DFCF00000000000001E5
+t1286856655
+s485
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/System/Library/Frameworks/CoreData.framework/CoreData
+c000000004CC10FA70000000000300DE0
+t1287720871
+s3149280
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/System/Library/Frameworks/CoreData.framework/Headers/CoreData.h
+c000000004CC10F8D000000000000046B
+t1287720845
+s1131
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics
+c000000004CC10EF500000000003532B0
+t1287720693
+s3486384
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/System/Library/Frameworks/Foundation.framework/Foundation
+c000000004CC10F4700000000003E1F20
+t1287720775
+s4071200
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/System/Library/Frameworks/Foundation.framework/Headers/Foundation.h
+c000000004CC10F1C0000000000001466
+t1287720732
+s5222
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/System/Library/Frameworks/UIKit.framework/Headers/UIKit.h
+c000000004CC11AE60000000000000AA1
+t1287723750
+s2721
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/System/Library/Frameworks/UIKit.framework/UIKit
+c000000004CC11B750000000000C769F0
+t1287723893
+s13068784
+
+N/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/usr/include/Availability.h
+c000000004CB3FBB80000000000001ADD
+t1286863800
+s6877
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/InboxTableViewController.h
+c000000004D4F0BE40000000000000162
+t1297026020
+s354
+i<UIKit/UIKit.h>
+i"CoreDataTableViewController.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/InboxTableViewController.m
+c000000004D4F0EB0000000000000069D
+t1297026736
+s1693
+i"InboxTableViewController.h"
+i"Stamp.h"
+i"StampDetailViewController.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/Stamp.h
+c000000004D4F073A000000000000043F
+t1297024826
+s1087
+i<CoreData/CoreData.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/Stamp.m
+c000000004D4F14480000000000000895
+t1297028168
+s2197
+i"Stamp.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampComment.h
+c000000004D4F02C700000000000001AC
+t1297023687
+s428
+i<CoreData/CoreData.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampComment.m
+c000000004D4F02C70000000000000114
+t1297023687
+s276
+i"StampComment.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampDetailViewController.h
+c000000004D4F0DF70000000000000191
+t1297026551
+s401
+i<UIKit/UIKit.h>
+i<CoreData/CoreData.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampDetailViewController.m
+c000000004D4F7C3600000000000021F7
+t1297054774
+s8695
+i"StampDetailViewController.h"
+i"Stamp.h"
+i"User.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampedAppDelegate.h
+c000000004D4F00190000000000000362
+t1297023001
+s866
+i<UIKit/UIKit.h>
+i<CoreData/CoreData.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampedAppDelegate.m
+c000000004D4F147300000000000024A3
+t1297028211
+s9379
+i"StampedAppDelegate.h"
+i"InboxTableViewController.h"
+i"User.h"
+i"Stamp.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/User.h
+c000000004D4F041C0000000000000250
+t1297024028
+s592
+i<CoreData/CoreData.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/User.m
+c000000004D4F0564000000000000066A
+t1297024356
+s1642
+i"User.h"
+i"Stamp.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/CoreDataTableViewController.h
+c000000004CC46F4D00000000000008D6
+t1287941965
+s2262
+i<UIKit/UIKit.h>
+i<CoreData/CoreData.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/CoreDataTableViewController.m
+c000000004CC9D95300000000000027A8
+t1288296787
+s10152
+i"CoreDataTableViewController.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSObject+SBJSON.h
+c000000004B74DB550000000000000A01
+t1265949525
+s2561
+i<Foundation/Foundation.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSObject+SBJSON.m
+c000000004B74DB55000000000000089E
+t1265949525
+s2206
+i"NSObject+SBJSON.h"
+i"SBJsonWriter.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSString+SBJSON.h
+c000000004B74DB550000000000000916
+t1265949525
+s2326
+i<Foundation/Foundation.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSString+SBJSON.m
+c000000004B74DB55000000000000087D
+t1265949525
+s2173
+i"NSString+SBJSON.h"
+i"SBJsonParser.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJSON.h
+c000000004B74DB550000000000000AED
+t1265949525
+s2797
+i<Foundation/Foundation.h>
+i"SBJsonParser.h"
+i"SBJsonWriter.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJSON.m
+c000000004B74DB550000000000001ABC
+t1265949525
+s6844
+i"SBJSON.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonBase.h
+c000000004B74DB550000000000000B82
+t1265949525
+s2946
+i<Foundation/Foundation.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonBase.m
+c000000004B74DB550000000000000AC1
+t1265949525
+s2753
+i"SBJsonBase.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonParser.h
+c000000004B74DB550000000000000C0B
+t1265949525
+s3083
+i<Foundation/Foundation.h>
+i"SBJsonBase.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonParser.m
+c000000004B74DB5500000000000036CF
+t1265949525
+s14031
+i"SBJsonParser.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonWriter.h
+c000000004B74DB550000000000001140
+t1265949525
+s4416
+i<Foundation/Foundation.h>
+i"SBJsonBase.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonWriter.m
+c000000004B74DB550000000000001E83
+t1265949525
+s7811
+i"SBJsonWriter.h"
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/MainWindow.xib
+c000000004D4F001900000000000021C5
+t1297023001
+s8645
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Stamped.xcdatamodeld
+c000000004D4F0CE80000000000000088
+t1297026280
+s136
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Stamped_Prefix.pch
+c000000004D4F00190000000000000162
+t1297023001
+s354
+i<Availability.h>
+i<Foundation/Foundation.h>
+i<UIKit/UIKit.h>
+i<CoreData/CoreData.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app.dSYM
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/Info.plist
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/MainWindow.nib
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/PkgInfo
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/ResourceRules.plist
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/Stamped
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/Stamped.momd
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-1-2x.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-1.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-2-2x.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-2.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-3-2x.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-3.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/endorsementDefault.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/u-1-2x.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/u-1.png
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/CoreDataTableViewController.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/InboxTableViewController.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/NSObject+SBJSON.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/NSString+SBJSON.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJSON.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJsonBase.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJsonParser.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJsonWriter.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/Stamp.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/StampComment.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/StampDetailViewController.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/Stamped
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/Stamped.LinkFileList
+c00000000000000000000000000000000
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/StampedAppDelegate.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/User.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/main.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/CoreDataTableViewController.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/InboxTableViewController.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/NSObject+SBJSON.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/NSString+SBJSON.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJSON.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJsonBase.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJsonParser.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJsonWriter.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/Stamp.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/StampComment.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/StampDetailViewController.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/Stamped
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/Stamped.LinkFileList
+c00000000000000000000000000000000
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/StampedAppDelegate.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/User.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/main.o
+t2
+s0
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/e-1-2x.png
+c000000004D4E2F7F0000000000006B07
+t1296969599
+s27399
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/e-1.png
+c000000004D4E2F920000000000001D80
+t1296969618
+s7552
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/e-2-2x.png
+c000000004D4E3A990000000000005056
+t1296972441
+s20566
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/e-2.png
+c000000004D4E3AB7000000000000166A
+t1296972471
+s5738
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/e-3-2x.png
+c000000004D4CE9680000000000006E80
+t1296886120
+s28288
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/e-3.png
+c000000004D4CE97C0000000000001F64
+t1296886140
+s8036
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/endorsementDefault.png
+c000000004D4E2E2A00000000000001D3
+t1296969258
+s467
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/main.m
+c000000004D4F00190000000000000167
+t1297023001
+s359
+i<UIKit/UIKit.h>
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/u-1-2x.png
+c000000004D4EE3500000000000002B23
+t1297015632
+s11043
+
+N/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/u-1.png
+c000000004D4EE35B0000000000000C70
+t1297015643
+s3184
+
+N/var/folders/yy/yyFdRIExEaOgsKfstlJhqk+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Stamped_Prefix-chcqsnxxfpvnihfsgljlzkymxueu/Stamped_Prefix.pch.gch
+t2
+s0
+
+N/var/folders/yy/yyFdRIExEaOgsKfstlJhqk+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Stamped_Prefix-cwehalvrwxfrwlffrsxubpnvzhqh/Stamped_Prefix.pch.gch
+t2
+s0
+
+NStamped-Info.plist
+c000000004D4F0019000000000000038D
+t1297023001
+s909
+
+CCheck dependencies
+r0
+lSLF07#2@18"Check dependencies318822304#318822305#0(133"[BEROR]Code Sign error: The identity 'iPhone Developer' doesn't match any valid certificate/private key pair in the default keychain1(4@125"Code Sign error: The identity 'iPhone Developer' doesn't match any valid certificate/private key pair in the default keychain318822305#18446744073709551615#0#0(1@0"0(0#1#0"3343187568374212096#0"0#
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/CoreDataTableViewController.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/CoreDataTableViewController.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/InboxTableViewController.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/InboxTableViewController.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/NSObject+SBJSON.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSObject+SBJSON.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/NSString+SBJSON.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSString+SBJSON.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJSON.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJSON.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJsonBase.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonBase.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJsonParser.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonParser.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/SBJsonWriter.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonWriter.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/Stamp.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/Stamp.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/StampComment.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampComment.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/StampDetailViewController.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampDetailViewController.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/StampedAppDelegate.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampedAppDelegate.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/User.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/User.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/main.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/main.m" normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/CoreDataTableViewController.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/CoreDataTableViewController.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/InboxTableViewController.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/InboxTableViewController.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/NSObject+SBJSON.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSObject+SBJSON.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/NSString+SBJSON.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/NSString+SBJSON.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJSON.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJSON.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJsonBase.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonBase.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJsonParser.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonParser.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/SBJsonWriter.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/JSON/SBJsonWriter.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/Stamp.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/Stamp.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/StampComment.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampComment.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/StampDetailViewController.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampDetailViewController.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/StampedAppDelegate.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/StampedAppDelegate.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/User.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Classes/User.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileC build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/main.o "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/main.m" normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CCompileXIB "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/MainWindow.xib"
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-1-2x.png" e-1-2x.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-1.png" e-1.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-2-2x.png" e-2-2x.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-2.png" e-2.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-3-2x.png" e-3-2x.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/e-3.png" e-3.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/endorsementDefault.png" endorsementDefault.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/u-1-2x.png" u-1-2x.png
+r0
+
+CCopyPNGFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/u-1.png" u-1.png
+r0
+
+CCpResource build/Debug-iphoneos/Stamped.app/ResourceRules.plist /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk/ResourceRules.plist
+r0
+
+CCreateUniversalBinary "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/Stamped" normal "armv6 armv7"
+r0
+
+CDataModelVersionCompile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/Stamped.momd" "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/Stamped.xcdatamodeld"
+r0
+
+CGenerateDSYMFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app.dSYM" "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/Stamped"
+r0
+
+CLd "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv6/Stamped" normal armv6
+r0
+
+CLd "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Stamped.build/Debug-iphoneos/Stamped.build/Objects-normal/armv7/Stamped" normal armv7
+r0
+
+CProcessInfoPlistFile "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app/Info.plist" Stamped-Info.plist
+r0
+
+CProcessPCH /var/folders/yy/yyFdRIExEaOgsKfstlJhqk+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Stamped_Prefix-chcqsnxxfpvnihfsgljlzkymxueu/Stamped_Prefix.pch.gch Stamped_Prefix.pch normal armv7 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CProcessPCH /var/folders/yy/yyFdRIExEaOgsKfstlJhqk+++TI/-Caches-/com.apple.Xcode.501/SharedPrecompiledHeaders/Stamped_Prefix-cwehalvrwxfrwlffrsxubpnvzhqh/Stamped_Prefix.pch.gch Stamped_Prefix.pch normal armv6 objective-c com.apple.compilers.gcc.4_2
+r0
+
+CTouch "/Users/kevin/Dropbox/Stamped/iOS/Prototypes/2011-02-14 Demo/Stamped v2/Stamped/build/Debug-iphoneos/Stamped.app"
+r0
+

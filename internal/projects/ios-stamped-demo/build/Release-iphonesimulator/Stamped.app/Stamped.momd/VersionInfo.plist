@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSManagedObjectModel_CurrentVersionName</key>
+	<string>Stamped</string>
+	<key>NSManagedObjectModel_VersionHashes</key>
+	<dict>
+		<key>Stamped</key>
+		<dict>
+			<key>Stamp</key>
+			<data>
+			/Vr/+W2Q0m0Lz+CTijCTIi37wQ3TIbUiAg9oUcScKeI=
+			</data>
+			<key>StampComment</key>
+			<data>
+			gcH5p8xyX7aTs1/jfKsy5/VzdIXqll9/vWh3eKoS2Rk=
+			</data>
+			<key>User</key>
+			<data>
+			e8SWzEX6LTM1vae8/Edywf8s755XU19fRQm2hx1cZHA=
+			</data>
+		</dict>
+	</dict>
+</dict>
+</plist>
