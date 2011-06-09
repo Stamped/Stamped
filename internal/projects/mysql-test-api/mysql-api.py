@@ -332,7 +332,7 @@ def removeStamp(stamp_id):
     return result
 
 ###############################################################################
-def addCommentToStamp(user_id, stamp_id, comment):
+def addCommentToThread(user_id, stamp_id, comment):
     print '--addCommentToStmp: %s %s %s' % (user_id, stamp_id, comment)
     
     user_id = int(user_id)
@@ -430,6 +430,51 @@ def removeMentionFromStamp(stamp_id, user_id):
     return result
 
 ###############################################################################
+def getStampsFromUser(user_id):
+    user_id = int(user_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    #query = "SELECT * FROM stamps WHERE user_id = %d" % (user_id)
+    query = ("""SELECT 
+            objects.object_id,
+            stamps.stamp_id,
+            stamps.user_id,
+            stamps.comment,
+            stamps.image,
+            objects.image,
+            stamps.timestamp,
+            users.name,
+            users.image
+        FROM stamps
+        JOIN objects ON stamps.object_id = objects.object_id
+        JOIN users ON stamps.user_id = users.user_id
+        WHERE users.user_id = %d
+        ORDER BY stamps.timestamp DESC""" %
+        (user_id))
+    cursor.execute(query)
+    resultData = cursor.fetchmany(10)
+    
+    result = []
+    for recordData in resultData:
+        record = {}
+        record['object_id'] = recordData[0]
+        record['stamp_id'] = recordData[1]
+        record['user_id'] = recordData[2]
+        record['comment'] = recordData[3]
+        if recordData[4]:
+            record['image'] = recordData[4]
+        else: 
+            record['image'] = recordData[5]
+        record['timestamp'] = recordData[6]
+        record['user_name'] = recordData[7]
+        record['user_image'] = recordData[8]
+        result.append(record)
+        
+    return result
+
+###############################################################################
 def checkNumberOfArguments(expected, length):
     if length < expected + 2:
         print 'Missing parameters'
@@ -443,11 +488,12 @@ def main():
         print '  --addStamp (uid, object_id, comment)'
         print '  --getStampFromId (stamp_id)'
         print '  --removeStamp (stamp_id)'
-        print '  --addCommentToStamp (user_id, stamp_id, comment)'
+        print '  --addCommentToThread (user_id, stamp_id, comment)'
         print '  --removeComment (comment_id)'
         print '  --listObjectsForAutocomplete (query)'
         print '  --addMentionToStamp (stamp_id, user_id)'
         print '  --removeMentionFromStamp (stamp_id, user_id)'
+        print '  --getStampsFromUser(user_id)'
         sys.exit(1)
     
     option = sys.argv[1]
@@ -473,9 +519,9 @@ def main():
         response = removeStamp(sys.argv[2])
         print 'Response: ', response
         
-    elif option == '--addCommentToStamp':
+    elif option == '--addCommentToThread':
         checkNumberOfArguments(3, len(sys.argv))
-        response = addCommentToStamp(sys.argv[2], sys.argv[3], sys.argv[4])
+        response = addCommentToThread(sys.argv[2], sys.argv[3], sys.argv[4])
         print 'Response: ', response
         
     elif option == '--removeComment':
@@ -496,6 +542,11 @@ def main():
     elif option == '--removeMentionFromStamp':
         checkNumberOfArguments(2, len(sys.argv))
         response = removeMentionFromStamp(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--getStampsFromUser':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = getStampsFromUser(sys.argv[2])
         print 'Response: ', response
         
         
