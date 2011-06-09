@@ -1,3 +1,5 @@
+#!/usr/local/python
+
 import sys
 from datetime import datetime
 import gc
@@ -96,7 +98,15 @@ def setup():
             comment VARCHAR(250),
             PRIMARY KEY(comment_id))"""
     cursor.execute(query)
-    print 'userstamps table created'
+    print 'comments table created'
+
+    query = """CREATE TABLE mentions ( 
+            stamp_id INT NOT NULL, 
+            user_id INT NOT NULL, 
+            timestamp DATETIME, 
+            PRIMARY KEY(stamp_id, user_id))"""
+    cursor.execute(query)
+    print 'mentions table created'
 
     print 
 
@@ -151,6 +161,32 @@ def setup():
     # http://mysql-python.sourceforge.net/MySQLdb.html#mysqldb
 
 
+
+###############################################################################
+def listObjectsForAutocomplete(query):
+    print '--listObjectsForAutocomplete: %s' % (query)
+    
+    query = ("""SELECT object_id, title, category, image
+            FROM objects
+            WHERE LEFT(title, %d) = '%s'
+            ORDER BY title ASC
+            LIMIT 0, 10""" % (len(query), query))
+    db = sqlConnection()
+    cursor = db.cursor()
+    cursor.execute(query)
+    resultData = cursor.fetchmany(10)
+    
+    result = []
+    for recordData in resultData:
+        record = {}
+        record['object_id'] = recordData[0]
+        record['title'] = recordData[1]
+        record['category'] = recordData[2]
+        record['image'] = recordData[3]
+        result.append(record)
+        
+    return result
+        
 
 ###############################################################################
 def addStamp(uid, object_id, comment):
@@ -211,7 +247,8 @@ def getStampFromId(stamp_id):
             result['image'] = data[5]
         result['timestamp'] = data[6]
         
-        query = ("""SELECT 
+        # Comments
+        commentsQuery = ("""SELECT 
                     users.name,
                     users.image,
                     users.user_id, 
@@ -223,7 +260,7 @@ def getStampFromId(stamp_id):
                 WHERE comments.stamp_id = %d
                 ORDER BY comments.timestamp ASC""" %
             (stamp_id))
-        cursor.execute(query)
+        cursor.execute(commentsQuery)
         commentsData = cursor.fetchall()
         
         comments = []
@@ -239,6 +276,30 @@ def getStampFromId(stamp_id):
             comments.append(comment)
             
         result['comment_thread'] = comments
+        
+        # Mentions        
+        mentionsQuery = ("""SELECT 
+                    users.name,
+                    users.image,
+                    users.user_id
+                FROM mentions
+                JOIN users ON mentions.user_id = users.user_id
+                WHERE mentions.stamp_id = %d
+                ORDER BY users.name ASC""" %
+            (stamp_id))
+        cursor.execute(mentionsQuery)
+        mentionsData = cursor.fetchall()
+        
+        mentions = []
+        for mentionData in mentionsData:
+            mention = {}
+            mention['user_name'] = mentionData[0]
+            mention['user_image'] = mentionData[1]
+            mention['user_id'] = mentionData[2]
+            
+            mentions.append(mention)
+            
+        result['mentions'] = mentions
         
     else: 
         result = "NA"
@@ -318,6 +379,35 @@ def removeComment(comment_id):
     return result
 
 ###############################################################################
+def addMentionToStamp(stamp_id, user_id):
+    stamp_id = int(stamp_id)
+    user_id = int(user_id)
+    str_now = datetime.now().isoformat()
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    query = ("SELECT * FROM mentions WHERE user_id = %d AND stamp_id = %d" %
+            (user_id, stamp_id))
+    cursor.execute(query)
+    if cursor.rowcount == 0:
+        insertQuery = ("""INSERT INTO mentions (stamp_id, user_id, timestamp)
+                VALUES (%d, %d, '%s')""" % (stamp_id, user_id, str_now))
+        cursor.execute(insertQuery)
+        if cursor.rowcount > 0:
+            result = "Success"
+        else:
+            result = "NA"
+    else:
+        result = "NA"
+        
+    cursor.close()
+    db.commit()
+    db.close()
+        
+    return result
+
+###############################################################################
 def checkNumberOfArguments(expected, length):
     if length < expected + 2:
         print 'Missing parameters'
@@ -326,8 +416,14 @@ def checkNumberOfArguments(expected, length):
 ###############################################################################
 def main():
     if len(sys.argv) == 1:
-        print 'usage: ./stamped-api.py {--setup | --addStamp | ' \
-            '--getStampFromId | --removeStamp} file'
+        print 'Available Functions:'
+        print '  --setup'
+        print '  --addStamp (uid, object_id, comment)'
+        print '  --getStampFromId (stamp_id)'
+        print '  --removeStamp (stamp_id)'
+        print '  --addCommentToStamp (user_id, stamp_id, comment)'
+        print '  --removeComment (comment_id)'
+        print '  --listObjectsForAutocomplete (query)'
         sys.exit(1)
     
     option = sys.argv[1]
@@ -362,6 +458,17 @@ def main():
         checkNumberOfArguments(1, len(sys.argv))
         response = removeComment(sys.argv[2])
         print 'Response: ', response
+        
+    elif option == '--listObjectsForAutocomplete':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = listObjectsForAutocomplete(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--addMentionToStamp':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = addMentionToStamp(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
         
     else:
         print 'unknown option: ' + option
