@@ -408,6 +408,28 @@ def addMentionToStamp(stamp_id, user_id):
     return result
 
 ###############################################################################
+def removeMentionFromStamp(stamp_id, user_id):
+    stamp_id = int(stamp_id)
+    user_id = int(user_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    query = ("DELETE FROM mentions WHERE stamp_id = %d AND user_id = %d" % 
+            (stamp_id, user_id))
+    cursor.execute(query)
+    if cursor.rowcount > 0:
+        result = "Success"
+    else:
+        result = "NA"
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
+
+###############################################################################
 def checkNumberOfArguments(expected, length):
     if length < expected + 2:
         print 'Missing parameters'
@@ -424,6 +446,8 @@ def main():
         print '  --addCommentToStamp (user_id, stamp_id, comment)'
         print '  --removeComment (comment_id)'
         print '  --listObjectsForAutocomplete (query)'
+        print '  --addMentionToStamp (stamp_id, user_id)'
+        print '  --removeMentionFromStamp (stamp_id, user_id)'
         sys.exit(1)
     
     option = sys.argv[1]
@@ -467,6 +491,11 @@ def main():
     elif option == '--addMentionToStamp':
         checkNumberOfArguments(2, len(sys.argv))
         response = addMentionToStamp(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--removeMentionFromStamp':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = removeMentionFromStamp(sys.argv[2], sys.argv[3])
         print 'Response: ', response
         
         
