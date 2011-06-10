@@ -1,4 +1,4 @@
-#!/usr/local/python
+#!/usr/bin/python
 
 import sys
 from datetime import datetime
@@ -42,11 +42,9 @@ def setup():
             object_id INT, 
             user_id INT, 
             comment VARCHAR(250), 
-            comment_thread VARCHAR(250),
             image VARCHAR(100), 
-            timestamp DATETIME, 
-            mention VARCHAR(100),
             flagged INT,
+            timestamp DATETIME, 
             PRIMARY KEY(stamp_id))"""
     cursor.execute(query)
     print 'stamps table created'
@@ -71,10 +69,10 @@ def setup():
 
     query = """CREATE TABLE friends (
             user_id INT NOT NULL, 
-            follower_id INT NOT NULL, 
+            following_id INT NOT NULL, 
             timestamp DATETIME, 
             approved INT, 
-            PRIMARY KEY(user_id, follower_id))"""
+            PRIMARY KEY(user_id, following_id))"""
     cursor.execute(query)
     print 'friends table created'
 
@@ -436,7 +434,6 @@ def getStampsFromUser(user_id):
     db = sqlConnection()
     cursor = db.cursor()
     
-    #query = "SELECT * FROM stamps WHERE user_id = %d" % (user_id)
     query = ("""SELECT 
             objects.object_id,
             stamps.stamp_id,
@@ -472,6 +469,112 @@ def getStampsFromUser(user_id):
         record['user_image'] = recordData[8]
         result.append(record)
         
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
+
+###############################################################################
+def addFriendship(uid, user_id):
+    uid = int(uid)
+    user_id = int(user_id)
+    str_now = datetime.now().isoformat()
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    if not checkFriendship(uid, user_id):
+        privacyQuery = ("SELECT privacy FROM users WHERE user_id = %d" % 
+                (user_id))
+        cursor.execute(privacyQuery)
+        record = cursor.fetchone()
+        print record
+        if record[0] == 1:
+            needsApproval = 1
+        else:
+            needsApproval = 0
+        
+        query = ("""INSERT 
+                INTO friends (user_id, following_id, timestamp, approved)
+                VALUES (%d, %d, '%s', %d)""" %
+                (uid, user_id, str_now, needsApproval))
+        cursor.execute(query)
+        if cursor.rowcount > 0:
+            result = "Success"
+        else:
+            result = "NA"
+    else: 
+        result = "NA"
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
+
+###############################################################################
+def checkFriendship(uid, user_id):
+    uid = int(uid)
+    user_id = int(user_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    query = ("SELECT * FROM friends WHERE user_id = %d AND following_id = %d" %
+            (uid, user_id))
+    cursor.execute(query)
+    if cursor.rowcount > 0:
+        result = True
+    else:
+        result = False
+        
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
+
+###############################################################################
+def getFriends(user_id):
+    user_id = int(user_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+
+    query = "SELECT following_id FROM friends WHERE user_id = %d" % (user_id)
+    cursor.execute(query)
+    resultData = cursor.fetchall()
+        
+    result = []
+    for recordData in resultData:
+        result.append(recordData[0])
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
+
+###############################################################################
+def getFollowers(user_id):
+    user_id = int(user_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+
+    query = "SELECT user_id FROM friends WHERE following_id = %d" % (user_id)
+    cursor.execute(query)
+    resultData = cursor.fetchall()
+        
+    result = []
+    for recordData in resultData:
+        result.append(recordData[0])
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
     return result
 
 ###############################################################################
@@ -493,7 +596,11 @@ def main():
         print '  --listObjectsForAutocomplete (query)'
         print '  --addMentionToStamp (stamp_id, user_id)'
         print '  --removeMentionFromStamp (stamp_id, user_id)'
-        print '  --getStampsFromUser(user_id)'
+        print '  --getStampsFromUser (user_id)'
+        print '  --addFriendship (uid, user_id)'
+        print '  --checkFriendship (uid, user_id)'
+        print '  --getFriends (user_id)'
+        print '  --getFollowers (user_id)'
         sys.exit(1)
     
     option = sys.argv[1]
@@ -547,6 +654,26 @@ def main():
     elif option == '--getStampsFromUser':
         checkNumberOfArguments(1, len(sys.argv))
         response = getStampsFromUser(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--addFriendship':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = addFriendship(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--checkFriendship':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = checkFriendship(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--getFriends':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = getFriends(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--getFollowers':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = getFollowers(sys.argv[2])
         print 'Response: ', response
         
         
