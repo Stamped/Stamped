@@ -8,7 +8,54 @@ def sqlConnection():
     return MySQLdb.connect(user='root',db='stamped_api')
 
 ###############################################################################
-def inbox(user_id):
+def create(stamp_id, user_id):
+    stamp_id = int(stamp_id)
+    user_id = int(user_id)
+    str_now = datetime.now().isoformat()
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    query = ("SELECT * FROM mentions WHERE user_id = %d AND stamp_id = %d" %
+            (user_id, stamp_id))
+    cursor.execute(query)
+    if cursor.rowcount == 0:
+        insertQuery = ("""INSERT INTO mentions (stamp_id, user_id, timestamp)
+                VALUES (%d, %d, '%s')""" % (stamp_id, user_id, str_now))
+        cursor.execute(insertQuery)
+        if cursor.rowcount > 0:
+            result = "Success"
+        else:
+            result = "NA"
+    else:
+        result = "NA"
+        
+    cursor.close()
+    db.commit()
+    db.close()
+        
+    return result
+
+###############################################################################
+def destroy(stamp_id, user_id):
+    stamp_id = int(stamp_id)
+    user_id = int(user_id)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    query = ("DELETE FROM mentions WHERE stamp_id = %d AND user_id = %d" % 
+            (stamp_id, user_id))
+    cursor.execute(query)
+    if cursor.rowcount > 0:
+        result = "Success"
+    else:
+        result = "NA"
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
     return result
 
 ###############################################################################
@@ -28,10 +75,11 @@ def user(user_id):
             stamps.timestamp,
             users.name,
             users.image
-        FROM stamps
+        FROM mentions
+        JOIN stamps ON mentions.stamp_id = stamps.stamp_id
         JOIN entities ON stamps.entity_id = entities.entity_id
         JOIN users ON stamps.user_id = users.user_id
-        WHERE users.user_id = %d
+        WHERE mentions.user_id = %d
         ORDER BY stamps.timestamp DESC
         LIMIT 0, 10""" %
         (user_id))
@@ -58,9 +106,4 @@ def user(user_id):
     db.commit()
     db.close()
     
-    return result
-
-###############################################################################
-def add_stamp(stamp_id):
-    # Add specific stamp to inbox. Not sure if this will be supported...
     return result

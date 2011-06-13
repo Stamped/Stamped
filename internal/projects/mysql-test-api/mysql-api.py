@@ -9,66 +9,13 @@ import setup
 import entities
 import stamps
 import conversation
+import mentions
 import collections
 
 ###############################################################################
 def sqlConnection():
     return MySQLdb.connect(user='root',db='stamped_api')
 
-
-
-
-
-###############################################################################
-def addMentionToStamp(stamp_id, user_id):
-    stamp_id = int(stamp_id)
-    user_id = int(user_id)
-    str_now = datetime.now().isoformat()
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-    
-    query = ("SELECT * FROM mentions WHERE user_id = %d AND stamp_id = %d" %
-            (user_id, stamp_id))
-    cursor.execute(query)
-    if cursor.rowcount == 0:
-        insertQuery = ("""INSERT INTO mentions (stamp_id, user_id, timestamp)
-                VALUES (%d, %d, '%s')""" % (stamp_id, user_id, str_now))
-        cursor.execute(insertQuery)
-        if cursor.rowcount > 0:
-            result = "Success"
-        else:
-            result = "NA"
-    else:
-        result = "NA"
-        
-    cursor.close()
-    db.commit()
-    db.close()
-        
-    return result
-
-###############################################################################
-def removeMentionFromStamp(stamp_id, user_id):
-    stamp_id = int(stamp_id)
-    user_id = int(user_id)
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-    
-    query = ("DELETE FROM mentions WHERE stamp_id = %d AND user_id = %d" % 
-            (stamp_id, user_id))
-    cursor.execute(query)
-    if cursor.rowcount > 0:
-        result = "Success"
-    else:
-        result = "NA"
-    
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
 
 ###############################################################################
 def addFriendship(uid, user_id):
@@ -200,6 +147,10 @@ def main():
         print '  --conversation/create (user_id, stamp_id, comment)'
         print '  --conversation/destroy (comment_id)'
         print '  --conversation/flag (comment_id, [is_flagged])'
+        print
+        print '  --mentions/create (stamp_id, user_id)'
+        print '  --mentions/destroy (stamp_id, user_id)'
+        print '  --mentions/user (user_id)'
         print 
         print '  --collections/inbox (user_id)'
         print '  --collections/user (user_id)'
@@ -313,6 +264,25 @@ def main():
             print 'Missing parameters'
             sys.exit(1)
         print 'Response: ', response
+        
+    
+    # Mentions:
+    elif option == '--mentions/create':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = mentions.create(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--mentions/destroy':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = mentions.destroy(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--mentions/user':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = mentions.user(sys.argv[2])
+        print 'Response: ', response
+        
+    
         
         
     # Collections:
