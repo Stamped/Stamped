@@ -6,7 +6,10 @@ import gc
 import MySQLdb
 
 import setup
+import entities
 import stamps
+import conversation
+import collections
 
 ###############################################################################
 def sqlConnection():
@@ -15,77 +18,6 @@ def sqlConnection():
 
 
 
-###############################################################################
-def listObjectsForAutocomplete(query):
-    print '--listObjectsForAutocomplete: %s' % (query)
-    
-    query = ("""SELECT object_id, title, category, image
-            FROM objects
-            WHERE LEFT(title, %d) = '%s'
-            ORDER BY title ASC
-            LIMIT 0, 10""" % (len(query), query))
-    db = sqlConnection()
-    cursor = db.cursor()
-    cursor.execute(query)
-    resultData = cursor.fetchmany(10)
-    
-    result = []
-    for recordData in resultData:
-        record = {}
-        record['object_id'] = recordData[0]
-        record['title'] = recordData[1]
-        record['category'] = recordData[2]
-        record['image'] = recordData[3]
-        result.append(record)
-        
-    return result
- 
-###############################################################################
-def addCommentToThread(user_id, stamp_id, comment):
-    print '--addCommentToStmp: %s %s %s' % (user_id, stamp_id, comment)
-    
-    user_id = int(user_id)
-    stamp_id = int(stamp_id)
-    
-    str_now = datetime.now().isoformat()
-    
-    query = ("""INSERT INTO comments (user_id, stamp_id, comment, timestamp)
-            VALUES (%s, %s, '%s', '%s')""" %
-         (user_id, stamp_id, comment, str_now))
-    db = sqlConnection()
-    cursor = db.cursor() 
-    cursor.execute(query)
-    
-    query = ("SELECT * FROM comments WHERE comment_id = %d" % (db.insert_id()))
-    cursor.execute(query)
-    result = cursor.fetchone()
-    
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
-
-###############################################################################
-def removeComment(comment_id):
-    print '--removeComment: %s' % (comment_id)
-    comment_id = int(comment_id)
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-    
-    query = "DELETE FROM comments WHERE comment_id = %d" % (comment_id)
-    cursor.execute(query)
-    if cursor.rowcount > 0:
-        result = "Success"
-    else:
-        result = "NA"
-    
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
 
 ###############################################################################
 def addMentionToStamp(stamp_id, user_id):
@@ -132,54 +64,6 @@ def removeMentionFromStamp(stamp_id, user_id):
     else:
         result = "NA"
     
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
-
-###############################################################################
-def getStampsFromUser(user_id):
-    user_id = int(user_id)
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-    
-    query = ("""SELECT 
-            objects.object_id,
-            stamps.stamp_id,
-            stamps.user_id,
-            stamps.comment,
-            stamps.image,
-            objects.image,
-            stamps.timestamp,
-            users.name,
-            users.image
-        FROM stamps
-        JOIN objects ON stamps.object_id = objects.object_id
-        JOIN users ON stamps.user_id = users.user_id
-        WHERE users.user_id = %d
-        ORDER BY stamps.timestamp DESC""" %
-        (user_id))
-    cursor.execute(query)
-    resultData = cursor.fetchmany(10)
-    
-    result = []
-    for recordData in resultData:
-        record = {}
-        record['object_id'] = recordData[0]
-        record['stamp_id'] = recordData[1]
-        record['user_id'] = recordData[2]
-        record['comment'] = recordData[3]
-        if recordData[4]:
-            record['image'] = recordData[4]
-        else: 
-            record['image'] = recordData[5]
-        record['timestamp'] = recordData[6]
-        record['user_name'] = recordData[7]
-        record['user_image'] = recordData[8]
-        result.append(record)
-        
     cursor.close()
     db.commit()
     db.close()
@@ -299,12 +183,28 @@ def main():
     if len(sys.argv) == 1:
         print 'Available Functions:'
         print '  --setup'
-        print '  --addStamp (uid, object_id, comment)'
-        print '  --getStampFromId (stamp_id)'
-        print '  --removeStamp (stamp_id)'
-        print '  --addCommentToThread (user_id, stamp_id, comment)'
-        print '  --removeComment (comment_id)'
-        print '  --listObjectsForAutocomplete (query)'
+        print
+        print '  --entities/show (entity_id)'
+        print '  --entities/create (title, category)'
+        print '  --entities/destroy (entity_id)'
+        print '  --entities/update (entity_id, title, category)'
+        print '  --entities/match (query)'
+        print
+        print '  --stamps/create (uid, entity_id, comment)'
+        print '  --stamps/show (stamp_id)'
+        print '  --stamps/destroy (stamp_id)'
+        print '  --stamps/flag (stamp_id, [is_flagged])'
+        print '  --stamps/read (stamp_id, [user_id], [is_read])'
+        print 
+        print '  --conversation/show (comment_id)'
+        print '  --conversation/create (user_id, stamp_id, comment)'
+        print '  --conversation/destroy (comment_id)'
+        print '  --conversation/flag (comment_id, [is_flagged])'
+        print 
+        print '  --collections/inbox (user_id)'
+        print '  --collections/user (user_id)'
+        print '  --collections/add_stamp (stamp_id)'
+        print
         print '  --addMentionToStamp (stamp_id, user_id)'
         print '  --removeMentionFromStamp (stamp_id, user_id)'
         print '  --getStampsFromUser (user_id)'
@@ -316,9 +216,38 @@ def main():
     
     option = sys.argv[1]
     
+    
     # Setup:
     if option == '--setup':
         setup.setup()
+        
+        
+    # Entities:
+    elif option == '--entities/show':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = entities.show(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--entities/create':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = entities.create(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--entities/destroy':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = entities.destroy(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--entities/update':
+        checkNumberOfArguments(3, len(sys.argv))
+        response = entities.update(sys.argv[2], sys.argv[3], sys.argv[4])
+        print 'Response: ', response
+        
+    elif option == '--entities/match':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = entities.match(sys.argv[2])
+        print 'Response: ', response
+        
         
     # Stamps:
     elif option == '--stamps/create':
@@ -337,25 +266,72 @@ def main():
         print 'Response: ', response
         
     elif option == '--stamps/flag':
-        checkNumberOfArguments(1, len(sys.argv))
-        response = stamps.flag(sys.argv[2])
+        if len(sys.argv) == 4:
+            response = stamps.read(sys.argv[2], sys.argv[3])
+        elif len(sys.argv) == 3:
+            response = stamps.read(sys.argv[2])
+        else:
+            print 'Missing parameters'
+            sys.exit(1)
         print 'Response: ', response
-    
         
-    elif option == '--addCommentToThread':
+    elif option == '--stamps/read':
+        if len(sys.argv) == 5:
+            response = stamps.read(sys.argv[2], sys.argv[3], sys.argv[4])
+        elif len(sys.argv) == 4:
+            response = stamps.read(sys.argv[2], sys.argv[3])
+        elif len(sys.argv) == 3:
+            response = stamps.read(sys.argv[2])
+        else:
+            print 'Missing parameters'
+            sys.exit(1)
+        print 'Response: ', response
+        
+        
+    # Conversation:
+    elif option == '--conversation/show':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = conversation.show(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--conversation/create':
         checkNumberOfArguments(3, len(sys.argv))
-        response = addCommentToThread(sys.argv[2], sys.argv[3], sys.argv[4])
+        response = conversation.create(sys.argv[2], sys.argv[3], sys.argv[4])
         print 'Response: ', response
         
-    elif option == '--removeComment':
+    elif option == '--conversation/destroy':
         checkNumberOfArguments(1, len(sys.argv))
-        response = removeComment(sys.argv[2])
+        response = conversation.destroy(sys.argv[2])
         print 'Response: ', response
         
-    elif option == '--listObjectsForAutocomplete':
-        checkNumberOfArguments(1, len(sys.argv))
-        response = listObjectsForAutocomplete(sys.argv[2])
+    elif option == '--conversation/flag':
+        if len(sys.argv) == 4:
+            response = conversation.flag(sys.argv[2], sys.argv[3])
+        elif len(sys.argv) == 3:
+            response = conversation.flag(sys.argv[2])
+        else:
+            print 'Missing parameters'
+            sys.exit(1)
         print 'Response: ', response
+        
+        
+    # Collections:
+    elif option == '--collections/inbox':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = collections.inbox(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--collections/user':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = collections.user(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--collections/add_stamp':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = collections.add_stamp(sys.argv[2])
+        print 'Response: ', response
+        
+        
         
     elif option == '--addMentionToStamp':
         checkNumberOfArguments(2, len(sys.argv))

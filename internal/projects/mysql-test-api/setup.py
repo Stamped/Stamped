@@ -14,8 +14,8 @@ def setup():
     db = MySQLdb.connect(user='root',db='stamped_api')
     cursor = db.cursor()
 
-    query = """CREATE TABLE objects (
-            object_id INT NOT NULL AUTO_INCREMENT, 
+    query = """CREATE TABLE entities (
+            entity_id INT NOT NULL AUTO_INCREMENT, 
             title VARCHAR(100), 
             description TEXT, 
             category VARCHAR(50), 
@@ -26,13 +26,13 @@ def setup():
             affiliate VARCHAR(100),
             date_created DATETIME,
             date_updated DATETIME, 
-            PRIMARY KEY(object_id))"""
+            PRIMARY KEY(entity_id))"""
     cursor.execute(query)
-    print 'objects table created'
+    print 'entities table created'
 
     query = """CREATE TABLE stamps (
             stamp_id INT NOT NULL AUTO_INCREMENT, 
-            object_id INT, 
+            entity_id INT, 
             user_id INT, 
             comment VARCHAR(250), 
             image VARCHAR(100), 
@@ -87,6 +87,7 @@ def setup():
             stamp_id INT NOT NULL, 
             timestamp DATETIME, 
             comment VARCHAR(250),
+            flagged INT,
             PRIMARY KEY(comment_id))"""
     cursor.execute(query)
     print 'comments table created'
@@ -112,9 +113,9 @@ def setup():
           ('travis@stamped.com', 'travisfischer', 'Travis', 0)
           ])
           
-    # And add some objects
+    # And add some entities
     cursor.executemany(
-          """INSERT INTO objects (title, category, source)
+          """INSERT INTO entities (title, category, source)
           VALUES (%s, %s, %s)""",
           [
           ('Kanye West - Family Business', 'Music', 'iTunes'),
@@ -135,7 +136,7 @@ def setup():
         print record
     print
 
-    cursor.execute('SELECT * FROM objects')
+    cursor.execute('SELECT * FROM entities')
     result = cursor.fetchmany(3)
     for record in result:
         print record

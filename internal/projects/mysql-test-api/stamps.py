@@ -8,12 +8,12 @@ def sqlConnection():
     return MySQLdb.connect(user='root',db='stamped_api')
        
 ###############################################################################
-def create(uid, object_id, comment):
+def create(uid, entity_id, comment):
     str_now = datetime.now().isoformat()
     
-    query = ("""INSERT INTO stamps (object_id, user_id, comment, timestamp)
+    query = ("""INSERT INTO stamps (entity_id, user_id, comment, timestamp)
             VALUES (%s, %s, '%s', '%s')""" %
-         (uid, object_id, comment, str_now))
+         (uid, entity_id, comment, str_now))
     db = sqlConnection()
     cursor = db.cursor() 
     cursor.execute(query)
@@ -21,6 +21,8 @@ def create(uid, object_id, comment):
     query = ("SELECT * FROM stamps WHERE stamp_id = %d" % (db.insert_id()))
     cursor.execute(query)
     result = cursor.fetchone()
+    
+    # Add functionality to create data in userstamps.....
     
     cursor.close()
     db.commit()
@@ -36,15 +38,15 @@ def show(stamp_id):
     cursor = db.cursor() 
     
     query = ("""SELECT 
-                objects.object_id,
+                entities.entity_id,
                 stamps.stamp_id,
                 stamps.user_id,
                 stamps.comment,
                 stamps.image,
-                objects.image,
+                entities.image,
                 stamps.timestamp
             FROM stamps
-            JOIN objects ON stamps.object_id = objects.object_id
+            JOIN entities ON stamps.entity_id = entities.entity_id
             WHERE stamps.stamp_id = %d""" %
          (stamp_id))
     cursor.execute(query)
@@ -53,7 +55,7 @@ def show(stamp_id):
         data = cursor.fetchone()
         
         result = {}
-        result['object_id'] = data[0]
+        result['entity_id'] = data[0]
         result['stamp_id'] = data[1]
         result['user_id'] = data[2]
         result['comment'] = data[3]
@@ -169,6 +171,56 @@ def flag(stamp_id, is_flagged = 1):
     db.close()
     
     return result
+
+###############################################################################
+def read(stamp_id, user_id = 1, is_read = 1):
+    # Remove 'user_id' as a parameter once we have authentication
+    stamp_id = int(stamp_id)
+    user_id = int(user_id)
+    is_read = int(is_read)
+    
+    db = sqlConnection()
+    cursor = db.cursor()
+    
+    existsQuery = ("""SELECT is_read FROM userstamps 
+            WHERE user_id = %d AND stamp_id = %d""" % 
+            (user_id, stamp_id))
+    cursor.execute(existsQuery)
+    
+    if cursor.rowcount == 0:
+        query = ("""INSERT INTO userstamps (user_id, stamp_id, is_read) 
+                VALUES (%d, %d, %d)""" %
+                (user_id, stamp_id, is_read))
+        cursor.execute(query)
+        
+        if cursor.rowcount > 0:
+            result = "Success"
+        else:
+            result = "NA"                
+                
+    else:
+        resultData = cursor.fetchone()
+        
+        if resultData[0] <> is_read:
+            query = ("""UPDATE userstamps SET is_read = %d
+                    WHERE user_id = %d AND stamp_id = %d""" %
+                    (is_read, user_id, stamp_id))
+            cursor.execute(query)
+            
+            if cursor.rowcount > 0:
+                result = "Success"
+            else:
+                result = "NA" 
+        
+        else:
+            result = "NA (Unnecessary)"
+    
+    cursor.close()
+    db.commit()
+    db.close()
+    
+    return result
+    
     
 
 
