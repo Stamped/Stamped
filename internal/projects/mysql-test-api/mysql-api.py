@@ -156,9 +156,6 @@ def main():
         print '  --collections/user (user_id)'
         print '  --collections/add_stamp (stamp_id)'
         print
-        print '  --addMentionToStamp (stamp_id, user_id)'
-        print '  --removeMentionFromStamp (stamp_id, user_id)'
-        print '  --getStampsFromUser (user_id)'
         print '  --addFriendship (uid, user_id)'
         print '  --checkFriendship (uid, user_id)'
         print '  --getFriends (user_id)'
@@ -302,21 +299,8 @@ def main():
         print 'Response: ', response
         
         
+    
         
-    elif option == '--addMentionToStamp':
-        checkNumberOfArguments(2, len(sys.argv))
-        response = addMentionToStamp(sys.argv[2], sys.argv[3])
-        print 'Response: ', response
-        
-    elif option == '--removeMentionFromStamp':
-        checkNumberOfArguments(2, len(sys.argv))
-        response = removeMentionFromStamp(sys.argv[2], sys.argv[3])
-        print 'Response: ', response
-        
-    elif option == '--getStampsFromUser':
-        checkNumberOfArguments(1, len(sys.argv))
-        response = getStampsFromUser(sys.argv[2])
-        print 'Response: ', response
         
     elif option == '--addFriendship':
         checkNumberOfArguments(2, len(sys.argv))
