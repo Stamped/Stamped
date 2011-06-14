@@ -7,6 +7,7 @@ import MySQLdb
 
 import setup
 import blocks
+import users
 import friends
 import followers
 import friendships
@@ -38,6 +39,11 @@ def main():
         print '  --blocks/blocking/ids (user_id)'
         print '  --blocks/create (user_id, follower_id)'
         print '  --blocks/destroy (user_id, follower_id)'
+        print
+        print '  --users/show (user_id)'
+        print '  --users/lookup (user_ids)'
+        print '  --users/search (query)'
+        print '  --users/flag (user_id)'
         print
         print '  --friends/ids (user_id)'
         print '  --followers/ids (user_id)'
@@ -107,6 +113,33 @@ def main():
     elif option == '--blocks/destroy':
         checkNumberOfArguments(2, len(sys.argv))
         response = blocks.destroy(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+    
+    
+    # Users:
+    elif option == '--users/show':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = users.show(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--users/lookup':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = users.lookup(sys.argv[2:])
+        print 'Response: ', response
+        
+    elif option == '--users/search':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = users.search(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--users/flag':
+        if len(sys.argv) == 4:
+            response = users.flag(sys.argv[2], sys.argv[3])
+        elif len(sys.argv) == 3:
+            response = users.flag(sys.argv[2])
+        else:
+            print 'Missing parameters'
+            sys.exit(1)
         print 'Response: ', response
         
         
@@ -199,9 +232,9 @@ def main():
         
     elif option == '--stamps/flag':
         if len(sys.argv) == 4:
-            response = stamps.read(sys.argv[2], sys.argv[3])
+            response = stamps.flag(sys.argv[2], sys.argv[3])
         elif len(sys.argv) == 3:
-            response = stamps.read(sys.argv[2])
+            response = stamps.flag(sys.argv[2])
         else:
             print 'Missing parameters'
             sys.exit(1)
