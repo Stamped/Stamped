@@ -6,118 +6,20 @@ import gc
 import MySQLdb
 
 import setup
+import friends
+import followers
+import friendships
 import entities
 import stamps
 import conversation
 import mentions
 import collections
+import favorites
 
 ###############################################################################
 def sqlConnection():
     return MySQLdb.connect(user='root',db='stamped_api')
 
-
-###############################################################################
-def addFriendship(uid, user_id):
-    uid = int(uid)
-    user_id = int(user_id)
-    str_now = datetime.now().isoformat()
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-    
-    if not checkFriendship(uid, user_id):
-        privacyQuery = ("SELECT privacy FROM users WHERE user_id = %d" % 
-                (user_id))
-        cursor.execute(privacyQuery)
-        record = cursor.fetchone()
-        print record
-        if record[0] == 1:
-            needsApproval = 1
-        else:
-            needsApproval = 0
-        
-        query = ("""INSERT 
-                INTO friends (user_id, following_id, timestamp, approved)
-                VALUES (%d, %d, '%s', %d)""" %
-                (uid, user_id, str_now, needsApproval))
-        cursor.execute(query)
-        if cursor.rowcount > 0:
-            result = "Success"
-        else:
-            result = "NA"
-    else: 
-        result = "NA"
-    
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
-
-###############################################################################
-def checkFriendship(uid, user_id):
-    uid = int(uid)
-    user_id = int(user_id)
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-    
-    query = ("SELECT * FROM friends WHERE user_id = %d AND following_id = %d" %
-            (uid, user_id))
-    cursor.execute(query)
-    if cursor.rowcount > 0:
-        result = True
-    else:
-        result = False
-        
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
-
-###############################################################################
-def getFriends(user_id):
-    user_id = int(user_id)
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-
-    query = "SELECT following_id FROM friends WHERE user_id = %d" % (user_id)
-    cursor.execute(query)
-    resultData = cursor.fetchall()
-        
-    result = []
-    for recordData in resultData:
-        result.append(recordData[0])
-    
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
-
-###############################################################################
-def getFollowers(user_id):
-    user_id = int(user_id)
-    
-    db = sqlConnection()
-    cursor = db.cursor()
-
-    query = "SELECT user_id FROM friends WHERE following_id = %d" % (user_id)
-    cursor.execute(query)
-    resultData = cursor.fetchall()
-        
-    result = []
-    for recordData in resultData:
-        result.append(recordData[0])
-    
-    cursor.close()
-    db.commit()
-    db.close()
-    
-    return result
 
 ###############################################################################
 def checkNumberOfArguments(expected, length):
@@ -130,6 +32,16 @@ def main():
     if len(sys.argv) == 1:
         print 'Available Functions:'
         print '  --setup'
+        print
+        print '  --friends/ids (user_id)'
+        print '  --followers/ids (user_id)'
+        print
+        print '  --friendships/create (user_id, following_id)'
+        print '  --friendships/destroy (user_id, following_id)'
+        print '  --friendships/exists (user_id, following_id)'
+        print '  --friendships/show (user_id, following_id)'
+        print '  --friendships/incoming (user_id)'
+        print '  --friendships/outgoing (user_id)'
         print
         print '  --entities/show (entity_id)'
         print '  --entities/create (title, category)'
@@ -156,10 +68,9 @@ def main():
         print '  --collections/user (user_id)'
         print '  --collections/add_stamp (stamp_id)'
         print
-        print '  --addFriendship (uid, user_id)'
-        print '  --checkFriendship (uid, user_id)'
-        print '  --getFriends (user_id)'
-        print '  --getFollowers (user_id)'
+        print '  --favorites/show (user_id)'
+        print '  --favorites/create (stamp_id, user_id)'
+        print '  --favorites/destroy (stamp_id, user_id)'
         sys.exit(1)
     
     option = sys.argv[1]
@@ -168,6 +79,49 @@ def main():
     # Setup:
     if option == '--setup':
         setup.setup()
+        
+    # Friends & Followers:
+    elif option == '--friends/ids':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = friends.ids(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--followers/ids':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = followers.ids(sys.argv[2])
+        print 'Response: ', response
+    
+    
+    # Friendships:
+    elif option == '--friendships/create':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = friendships.create(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+    
+    elif option == '--friendships/destroy':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = friendships.destroy(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+    
+    elif option == '--friendships/exists':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = friendships.exists(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+    
+    elif option == '--friendships/show':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = friendships.show(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+    
+    elif option == '--friendships/incoming':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = friendships.incoming(sys.argv[2])
+        print 'Response: ', response
+    
+    elif option == '--friendships/outgoing':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = friendships.outgoing(sys.argv[2])
+        print 'Response: ', response
         
         
     # Entities:
@@ -279,8 +233,6 @@ def main():
         response = mentions.user(sys.argv[2])
         print 'Response: ', response
         
-    
-        
         
     # Collections:
     elif option == '--collections/inbox':
@@ -299,28 +251,22 @@ def main():
         print 'Response: ', response
         
         
+    # Favorites:
+    elif option == '--favorites/show':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = favorites.show(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--favorites/create':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = favorites.create(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--favorites/destroy':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = favorites.destroy(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
     
-        
-        
-    elif option == '--addFriendship':
-        checkNumberOfArguments(2, len(sys.argv))
-        response = addFriendship(sys.argv[2], sys.argv[3])
-        print 'Response: ', response
-        
-    elif option == '--checkFriendship':
-        checkNumberOfArguments(2, len(sys.argv))
-        response = checkFriendship(sys.argv[2], sys.argv[3])
-        print 'Response: ', response
-        
-    elif option == '--getFriends':
-        checkNumberOfArguments(1, len(sys.argv))
-        response = getFriends(sys.argv[2])
-        print 'Response: ', response
-        
-    elif option == '--getFollowers':
-        checkNumberOfArguments(1, len(sys.argv))
-        response = getFollowers(sys.argv[2])
-        print 'Response: ', response
         
         
     else:

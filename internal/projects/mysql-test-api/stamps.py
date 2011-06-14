@@ -9,20 +9,41 @@ def sqlConnection():
        
 ###############################################################################
 def create(uid, entity_id, comment):
+    uid = int(uid)
+    entity_id = int(entity_id)
     str_now = datetime.now().isoformat()
     
     query = ("""INSERT INTO stamps (entity_id, user_id, comment, timestamp)
-            VALUES (%s, %s, '%s', '%s')""" %
+            VALUES (%d, %d, '%s', '%s')""" %
          (uid, entity_id, comment, str_now))
     db = sqlConnection()
     cursor = db.cursor() 
     cursor.execute(query)
     
-    query = ("SELECT * FROM stamps WHERE stamp_id = %d" % (db.insert_id()))
-    cursor.execute(query)
-    result = cursor.fetchone()
-    
-    # Add functionality to create data in userstamps.....
+    if cursor.rowcount > 0:
+        stamp_id = db.insert_id()
+        
+        followerInsert = ("""INSERT 
+                INTO userstamps (
+                    user_id, 
+                    stamp_id, 
+                    is_read, 
+                    is_starred, 
+                    is_stamped, 
+                    is_inbox, 
+                    is_transacted
+                )
+                SELECT user_id, %d, 0, 0, 0, 1, 0
+                FROM friends
+                WHERE following_id = %d""" %
+                (stamp_id, uid))
+        cursor.execute(followerInsert)
+        if cursor.rowcount > 0:
+            result = "Success"
+        else:
+            result = "Error"
+    else:
+        result = "NA"
     
     cursor.close()
     db.commit()
