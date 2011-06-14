@@ -100,6 +100,14 @@ def setup():
     cursor.execute(query)
     print 'mentions table created'
 
+    query = """CREATE TABLE blocks ( 
+            user_id INT NOT NULL, 
+            follower_id INT NOT NULL, 
+            timestamp DATETIME, 
+            PRIMARY KEY(user_id, follower_id))"""
+    cursor.execute(query)
+    print 'blocks table created'
+
     print 
 
     # Add some users

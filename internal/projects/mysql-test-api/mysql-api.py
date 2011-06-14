@@ -6,6 +6,7 @@ import gc
 import MySQLdb
 
 import setup
+import blocks
 import friends
 import followers
 import friendships
@@ -32,6 +33,11 @@ def main():
     if len(sys.argv) == 1:
         print 'Available Functions:'
         print '  --setup'
+        print 
+        print '  --blocks/exists (user_id, follower_id)'
+        print '  --blocks/blocking/ids (user_id)'
+        print '  --blocks/create (user_id, follower_id)'
+        print '  --blocks/destroy (user_id, follower_id)'
         print
         print '  --friends/ids (user_id)'
         print '  --followers/ids (user_id)'
@@ -71,6 +77,7 @@ def main():
         print '  --favorites/show (user_id)'
         print '  --favorites/create (stamp_id, user_id)'
         print '  --favorites/destroy (stamp_id, user_id)'
+        print
         sys.exit(1)
     
     option = sys.argv[1]
@@ -79,6 +86,29 @@ def main():
     # Setup:
     if option == '--setup':
         setup.setup()
+        
+        
+    # Blocks:
+    elif option == '--blocks/exists':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = blocks.exists(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+    
+    elif option == '--blocks/blocking':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = blocks.blocking(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--blocks/create':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = blocks.create(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+    
+    elif option == '--blocks/destroy':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = blocks.destroy(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
         
     # Friends & Followers:
     elif option == '--friends/ids':
