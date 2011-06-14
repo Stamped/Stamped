@@ -21,9 +21,6 @@ def show(user_id):
                 users.image,
                 users.username,
                 users.bio,
-                users.privacy,
-                users.locale,
-                users.timezone,
                 users.website
             FROM users
             WHERE users.user_id = %d""" %
@@ -40,10 +37,7 @@ def show(user_id):
         result['image'] = data[3]
         result['username'] = data[4]
         result['bio'] = data[5]
-        result['privacy'] = data[6]
-        result['locale'] = data[7]
-        result['timezone'] = data[8]
-        result['website'] = data[9]
+        result['website'] = data[6]
 
     else: 
         result = "NA"

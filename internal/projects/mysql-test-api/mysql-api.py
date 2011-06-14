@@ -6,6 +6,7 @@ import gc
 import MySQLdb
 
 import setup
+import account
 import blocks
 import users
 import friends
@@ -34,6 +35,12 @@ def main():
     if len(sys.argv) == 1:
         print 'Available Functions:'
         print '  --setup'
+        print
+        print '  --account/verify_credentials(email, password)'
+        print '  --account/settings (user_id)'
+        print '  --account/update_settings (user_id, email, password, privacy, locale, timezone)'
+        print '  --account/update_profile(user_id, username, name, bio, website, image)'
+        print '  --account/create(email, password, username, name, privacy)'
         print 
         print '  --blocks/exists (user_id, follower_id)'
         print '  --blocks/blocking/ids (user_id)'
@@ -92,6 +99,33 @@ def main():
     # Setup:
     if option == '--setup':
         setup.setup()
+    
+    
+    # Account:
+    elif option == '--account/verify_credentials':
+        checkNumberOfArguments(2, len(sys.argv))
+        response = account.verify_credentials(sys.argv[2], sys.argv[3])
+        print 'Response: ', response
+        
+    elif option == '--account/settings':
+        checkNumberOfArguments(1, len(sys.argv))
+        response = account.settings(sys.argv[2])
+        print 'Response: ', response
+        
+    elif option == '--account/update_settings':
+        checkNumberOfArguments(6, len(sys.argv))
+        response = account.update_settings(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
+        print 'Response: ', response
+        
+    elif option == '--account/update_profile':
+        checkNumberOfArguments(6, len(sys.argv))
+        response = account.update_profile(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
+        print 'Response: ', response
+        
+    elif option == '--account/create':
+        checkNumberOfArguments(5, len(sys.argv))
+        response = account.create(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+        print 'Response: ', response
         
         
     # Blocks:
