@@ -69,6 +69,7 @@ class GoogleGeocoderService(AGeocoder):
     """
         Uses the Google Geocoding API to convert between addresses and latitude
         longitude for a given location.
+        <a href="http://code.google.com/apis/maps/documentation/geocoding/">Google Geocoding API</a>
     """
     API_KEY = 'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok'
     
@@ -91,6 +92,7 @@ class YahooGeocoderService(AGeocoder):
     """
         Uses the Yahoo Geocoding API (named PlaceFinder) to convert between 
         addresses and latitude longitude for a given location.
+        <a href="http://developer.yahoo.com/geo/placefinder/guide/">Yahoo PlaceFinder</a>
     """
     
     API_KEY  = 'fa5cc08cf806ef67ab0dba71e7934da26fd9cdf7'
@@ -139,6 +141,7 @@ class USGeocoderService(AGeocoder):
     """
         Uses the Geocoder.us site to convert between addresses and latitude 
         longitude for a given location.
+        <a href="http://geocoder.us/">Geocoder.us</a>
     """
     
     BASE_URL = 'http://geocoder.us/demo.cgi'
@@ -178,11 +181,7 @@ class USGeocoderService(AGeocoder):
 
 """
 geocoder = Geocoder()
-(lat, lng) = geocoder.addressToLatLng('701 First Ave, Sunnyvale, CA')
-print (lat, lng)
-"""
-
-geocoder = USGeocoderService()
 (lat, lng) = geocoder.addressToLatLng('600 Pennsylvania Ave, Washington, DC')
 print (lat, lng)
+"""
 
