@@ -6,18 +6,18 @@ import gc
 import MySQLdb
 
 import setup
-import account
-import blocks
-import users
-import friends
-import followers
-import friendships
-import entities
-import stamps
-import conversation
-import mentions
-import collections
-import favorites
+from account import Account
+from blocks import Block
+from users import User
+from friends import Friend
+from followers import Follower
+from friendships import Friendship
+from entities import Entity
+from stamps import Stamp
+from conversation import Conversation
+from mentions import Mention
+from collections import Collection
+from favorites import Favorite
 
 ###############################################################################
 def sqlConnection():
@@ -103,26 +103,31 @@ def main():
     
     # Account:
     elif option == '--account/verify_credentials':
+        account = Account()
         checkNumberOfArguments(2, len(sys.argv))
         response = account.verify_credentials(sys.argv[2], sys.argv[3])
         print 'Response: ', response
         
     elif option == '--account/settings':
+        account = Account()
         checkNumberOfArguments(1, len(sys.argv))
         response = account.settings(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--account/update_settings':
+        account = Account()
         checkNumberOfArguments(6, len(sys.argv))
         response = account.update_settings(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
         print 'Response: ', response
         
     elif option == '--account/update_profile':
+        account = Account()
         checkNumberOfArguments(6, len(sys.argv))
         response = account.update_profile(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7])
         print 'Response: ', response
         
     elif option == '--account/create':
+        account = Account()
         checkNumberOfArguments(5, len(sys.argv))
         response = account.create(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
         print 'Response: ', response
@@ -130,47 +135,55 @@ def main():
         
     # Blocks:
     elif option == '--blocks/exists':
+        block = Block()
         checkNumberOfArguments(2, len(sys.argv))
-        response = blocks.exists(sys.argv[2], sys.argv[3])
+        response = block.exists(sys.argv[2], sys.argv[3])
         print 'Response: ', response
     
     elif option == '--blocks/blocking':
+        block = Block()
         checkNumberOfArguments(1, len(sys.argv))
-        response = blocks.blocking(sys.argv[2])
+        response = block.blocking(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--blocks/create':
+        block = Block()
         checkNumberOfArguments(2, len(sys.argv))
-        response = blocks.create(sys.argv[2], sys.argv[3])
+        response = block.create(sys.argv[2], sys.argv[3])
         print 'Response: ', response
     
     elif option == '--blocks/destroy':
+        block = Block()
         checkNumberOfArguments(2, len(sys.argv))
-        response = blocks.destroy(sys.argv[2], sys.argv[3])
+        response = block.destroy(sys.argv[2], sys.argv[3])
         print 'Response: ', response
     
     
     # Users:
     elif option == '--users/show':
+        user = User()
         checkNumberOfArguments(1, len(sys.argv))
-        response = users.show(sys.argv[2])
+        response = user.show(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--users/lookup':
+        user = User()
         checkNumberOfArguments(1, len(sys.argv))
-        response = users.lookup(sys.argv[2:])
+        response = user.lookup(sys.argv[2:])
         print 'Response: ', response
         
     elif option == '--users/search':
+        user = User()
         checkNumberOfArguments(1, len(sys.argv))
-        response = users.search(sys.argv[2])
+        response = user.search(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--users/flag':
+        user = User()
         if len(sys.argv) == 4:
-            response = users.flag(sys.argv[2], sys.argv[3])
+            response = user.flag(sys.argv[2], sys.argv[3])
         elif len(sys.argv) == 3:
-            response = users.flag(sys.argv[2])
+            response = user.flag(sys.argv[2])
         else:
             print 'Missing parameters'
             sys.exit(1)
@@ -179,108 +192,126 @@ def main():
         
     # Friends & Followers:
     elif option == '--friends/ids':
+        friend = Friend()
         checkNumberOfArguments(1, len(sys.argv))
-        response = friends.ids(sys.argv[2])
+        response = friend.ids(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--followers/ids':
+        follower = Follower()
         checkNumberOfArguments(1, len(sys.argv))
-        response = followers.ids(sys.argv[2])
+        response = follower.ids(sys.argv[2])
         print 'Response: ', response
     
     
     # Friendships:
     elif option == '--friendships/create':
+        friendship = Friendship()
         checkNumberOfArguments(2, len(sys.argv))
-        response = friendships.create(sys.argv[2], sys.argv[3])
+        response = friendship.create(sys.argv[2], sys.argv[3])
         print 'Response: ', response
     
     elif option == '--friendships/destroy':
+        friendship = Friendship()
         checkNumberOfArguments(2, len(sys.argv))
-        response = friendships.destroy(sys.argv[2], sys.argv[3])
+        response = friendship.destroy(sys.argv[2], sys.argv[3])
         print 'Response: ', response
     
     elif option == '--friendships/exists':
+        friendship = Friendship()
         checkNumberOfArguments(2, len(sys.argv))
-        response = friendships.exists(sys.argv[2], sys.argv[3])
+        response = friendship.exists(sys.argv[2], sys.argv[3])
         print 'Response: ', response
     
     elif option == '--friendships/show':
+        friendship = Friendship()
         checkNumberOfArguments(2, len(sys.argv))
-        response = friendships.show(sys.argv[2], sys.argv[3])
+        response = friendship.show(sys.argv[2], sys.argv[3])
         print 'Response: ', response
     
     elif option == '--friendships/incoming':
+        friendship = Friendship()
         checkNumberOfArguments(1, len(sys.argv))
-        response = friendships.incoming(sys.argv[2])
+        response = friendship.incoming(sys.argv[2])
         print 'Response: ', response
     
     elif option == '--friendships/outgoing':
+        friendship = Friendship()
         checkNumberOfArguments(1, len(sys.argv))
-        response = friendships.outgoing(sys.argv[2])
+        response = friendship.outgoing(sys.argv[2])
         print 'Response: ', response
         
         
     # Entities:
     elif option == '--entities/show':
+        entity = Entity()
         checkNumberOfArguments(1, len(sys.argv))
-        response = entities.show(sys.argv[2])
+        response = entity.show(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--entities/create':
+        entity = Entity()
         checkNumberOfArguments(2, len(sys.argv))
-        response = entities.create(sys.argv[2], sys.argv[3])
+        response = entity.create(sys.argv[2], sys.argv[3])
         print 'Response: ', response
         
     elif option == '--entities/destroy':
+        entity = Entity()
         checkNumberOfArguments(1, len(sys.argv))
-        response = entities.destroy(sys.argv[2])
+        response = entity.destroy(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--entities/update':
+        entity = Entity()
         checkNumberOfArguments(3, len(sys.argv))
-        response = entities.update(sys.argv[2], sys.argv[3], sys.argv[4])
+        response = entity.update(sys.argv[2], sys.argv[3], sys.argv[4])
         print 'Response: ', response
         
     elif option == '--entities/match':
+        entity = Entity()
         checkNumberOfArguments(1, len(sys.argv))
-        response = entities.match(sys.argv[2])
+        response = entity.match(sys.argv[2])
         print 'Response: ', response
         
         
     # Stamps:
     elif option == '--stamps/create':
+        stamp = Stamp()
         checkNumberOfArguments(3, len(sys.argv))
-        response = stamps.create(sys.argv[2], sys.argv[3], sys.argv[4])
+        response = stamp.create(sys.argv[2], sys.argv[3], sys.argv[4])
         print 'Response: ', response
         
     elif option == '--stamps/show':
+        stamp = Stamp()
         checkNumberOfArguments(1, len(sys.argv))
-        response = stamps.show(sys.argv[2])
+        response = stamp.show(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--stamps/destroy':
+        stamp = Stamp()
         checkNumberOfArguments(1, len(sys.argv))
-        response = stamps.destroy(sys.argv[2])
+        response = stamp.destroy(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--stamps/flag':
+        stamp = Stamp()
         if len(sys.argv) == 4:
-            response = stamps.flag(sys.argv[2], sys.argv[3])
+            response = stamp.flag(sys.argv[2], sys.argv[3])
         elif len(sys.argv) == 3:
-            response = stamps.flag(sys.argv[2])
+            response = stamp.flag(sys.argv[2])
         else:
             print 'Missing parameters'
             sys.exit(1)
         print 'Response: ', response
         
     elif option == '--stamps/read':
+        stamp = Stamp()
         if len(sys.argv) == 5:
-            response = stamps.read(sys.argv[2], sys.argv[3], sys.argv[4])
+            response = stamp.read(sys.argv[2], sys.argv[3], sys.argv[4])
         elif len(sys.argv) == 4:
-            response = stamps.read(sys.argv[2], sys.argv[3])
+            response = stamp.read(sys.argv[2], sys.argv[3])
         elif len(sys.argv) == 3:
-            response = stamps.read(sys.argv[2])
+            response = stamp.read(sys.argv[2])
         else:
             print 'Missing parameters'
             sys.exit(1)
@@ -289,21 +320,25 @@ def main():
         
     # Conversation:
     elif option == '--conversation/show':
+        conversation = Conversation()
         checkNumberOfArguments(1, len(sys.argv))
         response = conversation.show(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--conversation/create':
+        conversation = Conversation()
         checkNumberOfArguments(3, len(sys.argv))
         response = conversation.create(sys.argv[2], sys.argv[3], sys.argv[4])
         print 'Response: ', response
         
     elif option == '--conversation/destroy':
+        conversation = Conversation()
         checkNumberOfArguments(1, len(sys.argv))
         response = conversation.destroy(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--conversation/flag':
+        conversation = Conversation()
         if len(sys.argv) == 4:
             response = conversation.flag(sys.argv[2], sys.argv[3])
         elif len(sys.argv) == 3:
@@ -316,54 +351,62 @@ def main():
     
     # Mentions:
     elif option == '--mentions/create':
+        mention = Mention()
         checkNumberOfArguments(2, len(sys.argv))
-        response = mentions.create(sys.argv[2], sys.argv[3])
+        response = mention.create(sys.argv[2], sys.argv[3])
         print 'Response: ', response
         
     elif option == '--mentions/destroy':
+        mention = Mention()
         checkNumberOfArguments(2, len(sys.argv))
-        response = mentions.destroy(sys.argv[2], sys.argv[3])
+        response = mention.destroy(sys.argv[2], sys.argv[3])
         print 'Response: ', response
         
     elif option == '--mentions/user':
+        mention = Mention()
         checkNumberOfArguments(1, len(sys.argv))
-        response = mentions.user(sys.argv[2])
+        response = mention.user(sys.argv[2])
         print 'Response: ', response
         
         
     # Collections:
     elif option == '--collections/inbox':
+        collection = Collection()
         checkNumberOfArguments(1, len(sys.argv))
-        response = collections.inbox(sys.argv[2])
+        response = collection.inbox(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--collections/user':
+        collection = Collection()
         checkNumberOfArguments(1, len(sys.argv))
-        response = collections.user(sys.argv[2])
+        response = collection.user(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--collections/add_stamp':
+        collection = Collection()
         checkNumberOfArguments(1, len(sys.argv))
-        response = collections.add_stamp(sys.argv[2])
+        response = collection.add_stamp(sys.argv[2])
         print 'Response: ', response
         
         
     # Favorites:
     elif option == '--favorites/show':
+        favorite = Favorite()
         checkNumberOfArguments(1, len(sys.argv))
-        response = favorites.show(sys.argv[2])
+        response = favorite.show(sys.argv[2])
         print 'Response: ', response
         
     elif option == '--favorites/create':
+        favorite = Favorite()
         checkNumberOfArguments(2, len(sys.argv))
-        response = favorites.create(sys.argv[2], sys.argv[3])
+        response = favorite.create(sys.argv[2], sys.argv[3])
         print 'Response: ', response
         
     elif option == '--favorites/destroy':
+        favorite = Favorite()
         checkNumberOfArguments(2, len(sys.argv))
-        response = favorites.destroy(sys.argv[2], sys.argv[3])
+        response = favorite.destroy(sys.argv[2], sys.argv[3])
         print 'Response: ', response
-    
         
         
     else:
@@ -373,23 +416,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
