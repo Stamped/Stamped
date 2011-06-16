@@ -101,7 +101,6 @@ class Crawler(Thread):
             
             self.log('')
         
-        matchedDesc =         
         self.log('')
         self.log('MATCHED %d out of %d (%g%%)' % (matched, count, (100.0 * matched) / count))
         self.log('')
@@ -110,8 +109,9 @@ class Crawler(Thread):
         print("[" + self.getName() + "] " + str(s))
     
 def parseCommandLine():
-    usage = "Usage: %prog [options]"
-    parser = OptionParser(usage)
+    usage   = "Usage: %prog [options]"
+    version = "%prog 1.0"
+    parser  = OptionParser(usage=usage, version=version)
     
     parser.add_option("-s", "--sync", action="store_true", dest="sync", 
         default=True, help="Run crawler synchronously per request")

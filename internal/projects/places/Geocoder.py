@@ -183,8 +183,9 @@ class USGeocoderService(AGeocoder):
         return (lat, lng)
 
 def parseCommandLine():
-    usage = "Usage: %prog [options] address+"
-    parser = OptionParser(usage)
+    usage   = "Usage: %prog [options] address+"
+    version = "%prog 1.0"
+    parser  = OptionParser(usage=usage, version=version)
     
     parser.add_option("-g", "--google", action="store_true", dest="google", 
         default=False, help="Use Google Geocoding service")

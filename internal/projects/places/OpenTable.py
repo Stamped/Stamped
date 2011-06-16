@@ -37,7 +37,7 @@ class SiteOpenTable:
         self.crawler.log("\n")
         
         url   = self.baseURL + "state.aspx"
-        soup  = Utils.GetSoup(url)
+        soup  = Utils.getSoup(url)
         links = soup.find("div", {"id" : "Global"}).findAll("a", {"href" : re.compile("(city)|(country).*")})
         
         pages = set()
@@ -60,7 +60,7 @@ class SiteOpenTable:
     def parsePage(self, url, pages):
         #http://www.opentable.com/start.aspx?m=74&mn=1309
         self.crawler.log("Crawling " + url)
-        soup = Utils.GetSoup(url)
+        soup = Utils.getSoup(url)
         links = soup.findAll("a", {"href" : re.compile(".*m=[0-9]*.*mn=[0-9]*")})
         
         for link in links:
@@ -74,7 +74,7 @@ class SiteOpenTable:
     
     def parseSubPage(self, url):
         self.crawler.log("Crawling " + url)
-        soup = Utils.GetSoup(url)
+        soup = Utils.getSoup(url)
         resultsURL = soup.find("div", {"class" : "BrowseAll"}).find("a").get("href")
         
         SiteOpenTable.s_pages.add(resultsURL)
@@ -104,7 +104,7 @@ class SiteOpenTable:
         baseURL = "http://www.opentable.com/httphandlers/RestaurantinfoLiteNew.ashx";
         url = baseURL + "?" + urllib.urlencode({ 'rid' : rid })
         
-        detailsSoup = Utils.GetSoup(url)
+        detailsSoup = Utils.getSoup(url)
         
         entity['address'] = detailsSoup.find("div", {"class" : re.compile(".*address")}).renderContents().strip()
         self.crawler.log(entity)
@@ -114,7 +114,7 @@ class SiteOpenTable:
         #     Cross Street, Neighborhood, Parking Info, Cuisine, Price
     
     def extractData(self, url):
-        soup = Utils.GetSoup(url)
+        soup = Utils.getSoup(url)
         
         resultList = soup.findAll("tr", {"class" : re.compile("ResultRow.*")})
         results = {}

@@ -130,8 +130,9 @@ class GooglePlaces(object):
         return latLng
 
 def parseCommandLine():
-    usage = "Usage: %prog [options] address|latLng"
-    parser = OptionParser(usage)
+    usage   = "Usage: %prog [options] address|latLng"
+    version = "%prog 1.0"
+    parser  = OptionParser(usage=usage, version=version)
     
     parser.add_option("-a", "--address", action="store_true", dest="address", 
         default=True, help="Parse the argument as an address")
