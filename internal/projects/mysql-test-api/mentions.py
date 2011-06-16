@@ -1,28 +1,27 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Mention:
+class Mention(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     ###########################################################################
     def create(self, stamp_id, user_id):
         stamp_id = int(stamp_id)
         user_id = int(user_id)
-        str_now = datetime.now().isoformat()
+        timestamp = datetime.now().isoformat()
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("SELECT * FROM mentions WHERE user_id = %d AND stamp_id = %d" %
                 (user_id, stamp_id))
         cursor.execute(query)
         if cursor.rowcount == 0:
             insertQuery = ("""INSERT INTO mentions (stamp_id, user_id, timestamp)
-                    VALUES (%d, %d, '%s')""" % (stamp_id, user_id, str_now))
+                    VALUES (%d, %d, '%s')""" % (stamp_id, user_id, timestamp))
             cursor.execute(insertQuery)
             if cursor.rowcount > 0:
                 result = "Success"
@@ -32,8 +31,7 @@ class Mention:
             result = "NA"
             
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
             
         return result
     
@@ -42,8 +40,7 @@ class Mention:
         stamp_id = int(stamp_id)
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("DELETE FROM mentions WHERE stamp_id = %d AND user_id = %d" % 
                 (stamp_id, user_id))
@@ -54,8 +51,7 @@ class Mention:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -63,8 +59,7 @@ class Mention:
     def user(self, user_id):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT 
                 entities.entity_id,
@@ -85,6 +80,7 @@ class Mention:
             LIMIT 0, 10""" %
             (user_id))
         cursor.execute(query)
+        
         resultData = cursor.fetchmany(10)
         
         result = []
@@ -104,7 +100,6 @@ class Mention:
             result.append(record)
             
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Account:
+class Account(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     #######################################################################
-    def verify_credentials(email, password):
+    def verify_credentials(self, email, password):
         # Temporarily set to "True" for everything
         return True
     
@@ -17,8 +17,7 @@ class Account:
     def settings(self, user_id):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT 
                     users.user_id,
@@ -47,8 +46,7 @@ class Account:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -59,8 +57,7 @@ class Account:
         user_id = int(user_id)
         privacy = int(privacy)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor() 
         
         query = ("""UPDATE users SET
                     users.email = '%s',
@@ -78,8 +75,7 @@ class Account:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -87,8 +83,7 @@ class Account:
     def update_profile(self, user_id, username, name, bio, website, image):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor() 
         
         query = ("""UPDATE users SET
                     users.username = '%s',
@@ -106,8 +101,7 @@ class Account:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -115,8 +109,7 @@ class Account:
     def create(self, email, password, username, name, privacy):
         privacy = int(privacy)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor() 
         
         exists = ("""SELECT user_id FROM users
                 WHERE username = '%s' OR email = '%s'""" %
@@ -138,8 +131,7 @@ class Account:
                 result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     

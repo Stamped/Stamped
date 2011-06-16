@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Stamp:
+class Stamp(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
 
     ###########################################################################
     def create(self, uid, entity_id, comment):
@@ -14,15 +14,15 @@ class Stamp:
         entity_id = int(entity_id)
         str_now = datetime.now().isoformat()
         
+        cursor = self.getDatabase().cursor()
+        
         query = ("""INSERT INTO stamps (entity_id, user_id, comment, timestamp)
                 VALUES (%d, %d, '%s', '%s')""" %
              (uid, entity_id, comment, str_now))
-        db = self.database
-        cursor = db.cursor() 
         cursor.execute(query)
         
         if cursor.rowcount > 0:
-            stamp_id = db.insert_id()
+            stamp_id = self.database.insert_id()
             
             followerInsert = ("""INSERT 
                     INTO userstamps (
@@ -47,8 +47,7 @@ class Stamp:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
 
@@ -56,8 +55,7 @@ class Stamp:
     def show(self, stamp_id):
         stamp_id = int(stamp_id)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor() 
         
         query = ("""SELECT 
                     entities.entity_id,
@@ -145,8 +143,7 @@ class Stamp:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
 
@@ -154,8 +151,7 @@ class Stamp:
     def destroy(self, stamp_id):
         stamp_id = int(stamp_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = "DELETE FROM stamps WHERE stamp_id = %d" % (stamp_id)
         cursor.execute(query)
@@ -165,8 +161,7 @@ class Stamp:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -177,8 +172,7 @@ class Stamp:
         stamp_id = int(stamp_id)
         is_flagged = int(is_flagged)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("UPDATE stamps SET flagged = %d WHERE stamp_id = %d" % 
                 (is_flagged, stamp_id))
@@ -189,8 +183,7 @@ class Stamp:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -201,8 +194,7 @@ class Stamp:
         user_id = int(user_id)
         is_read = int(is_read)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         existsQuery = ("""SELECT is_read FROM userstamps 
                 WHERE user_id = %d AND stamp_id = %d""" % 
@@ -238,7 +230,6 @@ class Stamp:
                 result = "NA (Unnecessary)"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result

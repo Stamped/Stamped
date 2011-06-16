@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Collection:
+class Collection(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     ###########################################################################
     def inbox(self, user_id):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT 
                 entities.entity_id,
@@ -54,8 +53,7 @@ class Collection:
             result.append(record)
             
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -63,8 +61,7 @@ class Collection:
     def user(self, user_id):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT 
                 entities.entity_id,
@@ -103,12 +100,11 @@ class Collection:
             result.append(record)
             
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
     ###########################################################################
     def add_stamp(self, stamp_id):
         # Add specific stamp to inbox. Not sure if this will be supported...
-        return result
+        return 'Functionality not yet available'

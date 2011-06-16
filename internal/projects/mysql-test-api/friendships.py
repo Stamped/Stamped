@@ -1,26 +1,27 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
-    
-class Friendship:
+from dbconn import MySQLConnection
+
+class Friendship(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     ###########################################################################
     def create(self, user_id, following_id):
         user_id = int(user_id)
         following_id = int(following_id)
         timestamp = datetime.now().isoformat()
-        
-        db = self.database
-        cursor = db.cursor()
-        
-        if not exists(user_id, following_id):
+            
+        if not self.exists(user_id, following_id):
+            
+            cursor = self.getDatabase().cursor()
+
             privacyQuery = ("SELECT privacy FROM users WHERE user_id = %d" % 
                     (following_id))
             cursor.execute(privacyQuery)
+            
             record = cursor.fetchone()
             if record[0] == 1:
                 needs_approval = 1
@@ -40,8 +41,7 @@ class Friendship:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -50,8 +50,7 @@ class Friendship:
         user_id = int(user_id)
         following_id = int(following_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""DELETE FROM friends 
                 WHERE user_id = %d AND following_id = %d""" %
@@ -63,8 +62,7 @@ class Friendship:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -73,8 +71,7 @@ class Friendship:
         user_id = int(user_id)
         following_id = int(following_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT * FROM friends 
                 WHERE user_id = %d AND following_id = %d""" %
@@ -86,8 +83,7 @@ class Friendship:
             result = False
             
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -96,8 +92,7 @@ class Friendship:
         user_id = int(user_id)
         following_id = int(following_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT user_id, following_id, timestamp, approved 
                 FROM friends WHERE user_id = %d AND following_id = %d""" %
@@ -117,8 +112,7 @@ class Friendship:
             result = "NA"
             
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     

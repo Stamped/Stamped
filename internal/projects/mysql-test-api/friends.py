@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Friend:
+class Friend(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     #######################################################################
     def ids(self, user_id):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
     
-        query = "SELECT following_id FROM friends WHERE user_id = %d" % (user_id)
+        query = ("SELECT following_id FROM friends WHERE user_id = %d" % 
+                (user_id))
         cursor.execute(query)
         resultData = cursor.fetchall()
             
@@ -24,7 +24,6 @@ class Friend:
             result.append(recordData[0])
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result

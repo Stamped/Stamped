@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Favorite:
+class Favorite(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     ###########################################################################
     def show(self, user_id):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT 
                 entities.entity_id,
@@ -54,8 +53,7 @@ class Favorite:
             result.append(record)
             
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -64,8 +62,7 @@ class Favorite:
         stamp_id = int(stamp_id)
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT is_starred FROM userstamps 
                 WHERE stamp_id = %d AND user_id = %d""" %
@@ -101,8 +98,7 @@ class Favorite:
                 result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -111,8 +107,7 @@ class Favorite:
         stamp_id = int(stamp_id)
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT is_starred FROM userstamps 
                 WHERE stamp_id = %d AND user_id = %d""" %
@@ -133,7 +128,6 @@ class Favorite:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result

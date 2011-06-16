@@ -2,7 +2,6 @@
 
 import sys
 from datetime import datetime
-import gc
 import MySQLdb
 
 import setup
@@ -169,7 +168,10 @@ def main():
     elif option == '--users/lookup':
         user = User()
         checkNumberOfArguments(1, len(sys.argv))
-        response = user.lookup(sys.argv[2:])
+        user_ids = []
+        for user_id in sys.argv[2:]:
+            user_ids.append(user_id)
+        response = user.lookup(user_ids)
         print 'Response: ', response
         
     elif option == '--users/search':

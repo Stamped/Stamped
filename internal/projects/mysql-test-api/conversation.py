@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Conversation:
+class Conversation(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     ###########################################################################
     def show(self, comment_id):
         comment_id = int(comment_id)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT 
                     comments.comment_id,
@@ -47,8 +46,7 @@ class Conversation:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
         
@@ -56,25 +54,23 @@ class Conversation:
     def create(self, user_id, stamp_id, comment):
         user_id = int(user_id)
         stamp_id = int(stamp_id)
-        
         str_now = datetime.now().isoformat()
+        
+        cursor = self.getDatabase().cursor() 
         
         query = ("""INSERT 
                 INTO comments (user_id, stamp_id, comment, timestamp)
                 VALUES (%s, %s, '%s', '%s')""" %
              (user_id, stamp_id, comment, str_now))
-        db = self.database
-        cursor = db.cursor() 
         cursor.execute(query)
         
         query = ("SELECT * FROM comments WHERE comment_id = %d" % 
-            (db.insert_id()))
+            (self.database.insert_id()))
         cursor.execute(query)
         result = cursor.fetchone()
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -82,8 +78,7 @@ class Conversation:
     def destroy(self, comment_id):
         comment_id = int(comment_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor() 
         
         query = "DELETE FROM comments WHERE comment_id = %d" % (comment_id)
         cursor.execute(query)
@@ -93,8 +88,7 @@ class Conversation:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -105,8 +99,7 @@ class Conversation:
         comment_id = int(comment_id)
         is_flagged = int(is_flagged)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor() 
         
         query = ("UPDATE comments SET flagged = %d WHERE comment_id = %d" % 
                 (is_flagged, comment_id))
@@ -117,7 +110,6 @@ class Conversation:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result

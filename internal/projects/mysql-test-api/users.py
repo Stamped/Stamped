@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class User:
+class User(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     ###########################################################################
     def show(self, user_id):
         user_id = int(user_id)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT 
                     users.user_id,
@@ -44,18 +43,16 @@ class User:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
     ###########################################################################
     def lookup(self, user_ids):
         if not isinstance(user_ids, basestring):
-            print user_ids
             result = []
             for user_id in user_ids:
-                result.append(show(user_id))
+                result.append(self.show(user_id))
         else: 
             result = "NA"
         
@@ -65,8 +62,7 @@ class User:
     def search(self, query):
         # This needs to be changed to a fulltext search. Using the 'match' algo
         # for now.
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT user_id, name, username, email
                 FROM users
@@ -87,6 +83,9 @@ class User:
             record['username'] = recordData[2]
             record['email'] = recordData[3]
             result.append(record)
+        
+        cursor.close()
+        self.closeDatabase()
             
         return result
     
@@ -97,8 +96,7 @@ class User:
         user_id = int(user_id)
         is_flagged = int(is_flagged)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("UPDATE users SET flagged = %d WHERE user_id = %d" % 
                 (is_flagged, user_id))
@@ -109,7 +107,6 @@ class User:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result

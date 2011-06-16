@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from dbconn import DatabaseConnection
+from dbconn import MySQLConnection
     
-class Entity:
+class Entity(MySQLConnection):
 
     def __init__(self):
-        self.database = DatabaseConnection().connect()
+        self.database = self.connectDatabase()
     
     ###########################################################################
     def show(self, entity_id):
         entity_id = int(entity_id)
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor() 
         
         query = ("""SELECT 
                     entity_id, 
@@ -50,15 +49,18 @@ class Entity:
     
         else: 
             result = "NA"
+            
+        cursor.close()
+        self.closeDatabase()
         
         return result
     
     ###########################################################################
     def create(self, title, category):
         timestamp = datetime.now().isoformat()
+        title = title.replace("'", r"\'")
         
-        db = self.database
-        cursor = db.cursor() 
+        cursor = self.getDatabase().cursor()
         
         query = ("""INSERT 
                 INTO entities (title, category, date_created)
@@ -72,8 +74,7 @@ class Entity:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -81,8 +82,7 @@ class Entity:
     def destroy(self, entity_id):
         entity_id = int(entity_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = "DELETE FROM entities WHERE entity_id = %d" % (entity_id)
         cursor.execute(query)
@@ -92,8 +92,7 @@ class Entity:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
@@ -101,8 +100,7 @@ class Entity:
     def update(self, entity_id, title, category):
         entity_id = int(entity_id)
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""UPDATE entities 
                 SET title = '%s', category = '%s'
@@ -115,16 +113,14 @@ class Entity:
             result = "NA"
         
         cursor.close()
-        db.commit()
-        db.close()
+        self.closeDatabase()
         
         return result
     
     ###########################################################################
     def match(self, query):
         
-        db = self.database
-        cursor = db.cursor()
+        cursor = self.getDatabase().cursor()
         
         query = ("""SELECT entity_id, title, category, image
                 FROM entities
@@ -142,5 +138,8 @@ class Entity:
             record['category'] = recordData[2]
             record['image'] = recordData[3]
             result.append(record)
+        
+        cursor.close()
+        self.closeDatabase()
             
         return result
