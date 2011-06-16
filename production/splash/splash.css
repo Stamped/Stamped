@@ -1,0 +1,36 @@
+/* Document */
+html, body { 
+	height: 100%; 
+}
+body { 
+	background: #e6e1de url(background.jpg) repeat; 
+	margin: 0px; 
+	font-family: Helvetica, Arial, sans-serif; 
+	font-size: 12px; 
+	color: #777; 
+	text-shadow: white 0px 1px; 
+}
+
+/* Floater */
+#floater { 
+	position: relative; 
+	float: left; 
+	height: 40%; 
+	margin-bottom: -40px; 
+}
+#splash { 
+	clear: both; 
+	height: 40px; 
+	width: 600px; 
+	position: relative; 
+	margin: 0 auto; 
+	text-align: center; 
+}
+#splash h1 {
+   text-indent: -9999px;
+   width: 580px;
+   height: 40px;
+   background: url(title.png) transparent no-repeat;
+   margin: 0;
+   padding: 0;
+}
