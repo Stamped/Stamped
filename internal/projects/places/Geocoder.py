@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
-from BeautifulSoup import BeautifulSoup
-from googlemaps import *
+import json, re, urllib, Utils
 
-import json, re, urllib, urllib2, Utils
+from googlemaps import *
 
 class AGeocoder(object):
     """
@@ -49,12 +48,12 @@ class Geocoder(AGeocoder):
                 return latLng
             else:
                 if not decoder.isValid:
-                    ++self._decoderIndex
+                    self._decoderIndex += 1
                     if self._decoderIndex >= len(self._decoders):
                         _isValid = False
                         return None
                 else:
-                    ++index;
+                    index += 1;
     
     def _getDecoder(self, index):
         if index is None:
@@ -69,6 +68,7 @@ class GoogleGeocoderService(AGeocoder):
     """
         Uses the Google Geocoding API to convert between addresses and latitude
         longitude for a given location.
+        <a href="http://code.google.com/apis/maps/documentation/geocoding/">Google Geocoding API</a>
     """
     API_KEY = 'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok'
     
@@ -91,6 +91,7 @@ class YahooGeocoderService(AGeocoder):
     """
         Uses the Yahoo Geocoding API (named PlaceFinder) to convert between 
         addresses and latitude longitude for a given location.
+        <a href="http://developer.yahoo.com/geo/placefinder/guide/">Yahoo PlaceFinder</a>
     """
     
     API_KEY  = 'fa5cc08cf806ef67ab0dba71e7934da26fd9cdf7'
@@ -104,27 +105,24 @@ class YahooGeocoderService(AGeocoder):
         
         params = {
             'location'  : address, 
-            'flags'     : 'J', # indicates JSON output format (defaults to XML)
+            'flags'     : 'J', # indicates json output format (defaults to xml)
             'appid'     : self.API_KEY
         }
         
         url = self.BASE_URL + '?' + urllib.urlencode(params)
         
         try:
-            # GET the data
-            response = urllib2.urlopen(url)
+            # GET the data and parse the response as json
+            response = json.loads(Utils.GetFile(url))
             
-            # convert the response to JSON
-            jsonData = json.loads(response.read())
-            
-            # extract the results from the JSON
-            if jsonData['Error'] != 0:
+            # extract the results from the json
+            if response['Error'] != 0:
                 Utils.log('[YahooGeocoderService] error converting "' + url + '"\n' + 
-                          'ErrorCode: ' + jsonData['Error'] + '\n' + 
-                          'ErrorMsg:  ' + jsonData['ErrorMessage'] + '\n')
+                          'ErrorCode: ' + response['Error'] + '\n' + 
+                          'ErrorMsg:  ' + response['ErrorMessage'] + '\n')
                 return None
             
-            results = jsonData['ResultSet']['Results']
+            results = response['ResultSet']['Results']
             primary = results[0]
             
             # extract the lat / lng from the primary result
@@ -139,6 +137,7 @@ class USGeocoderService(AGeocoder):
     """
         Uses the Geocoder.us site to convert between addresses and latitude 
         longitude for a given location.
+        <a href="http://geocoder.us/">Geocoder.us</a>
     """
     
     BASE_URL = 'http://geocoder.us/demo.cgi'
@@ -156,11 +155,8 @@ class USGeocoderService(AGeocoder):
         url = self.BASE_URL + '?' + urllib.urlencode(params)
         
         try:
-            # GET the data
-            response = urllib2.urlopen(url)
-            
-            # extract the response HTML with BeautifulSoup
-            soup = BeautifulSoup(response.read())
+            # GET the data and parse the HTML response with BeautifulSoup
+            soup = Utils.GetSoup(url)
             row = soup.find("table").findAll("tr")[1]
             
             # extract the latitude
@@ -178,11 +174,7 @@ class USGeocoderService(AGeocoder):
 
 """
 geocoder = Geocoder()
-(lat, lng) = geocoder.addressToLatLng('701 First Ave, Sunnyvale, CA')
-print (lat, lng)
-"""
-
-geocoder = USGeocoderService()
 (lat, lng) = geocoder.addressToLatLng('600 Pennsylvania Ave, Washington, DC')
 print (lat, lng)
+"""
 

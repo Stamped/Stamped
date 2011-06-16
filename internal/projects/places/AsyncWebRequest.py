@@ -14,9 +14,9 @@ class AsyncWebRequest(Thread):
    """
    
    def __init__(self, url):
-      Thread.__init__(self);
-      self.url = url;
+      Thread.__init__(self)
+      self.url = url
    
    def run(self):
-      self.html = urllib.urlopen(self.url).read();
+      self.html = urllib.urlopen(self.url).read()
 
