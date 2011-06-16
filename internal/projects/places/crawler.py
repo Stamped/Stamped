@@ -101,10 +101,9 @@ class Crawler(Thread):
             
             self.log('')
         
-        matchedDesc = 'MATCHED %d out of %d (' % (matched, count)
-        
+        matchedDesc =         
         self.log('')
-        self.log(matchedDesc + str(float(matched) / float(count)) + ' )')
+        self.log('MATCHED %d out of %d (%g%%)' % (matched, count, (100.0 * matched) / count))
         self.log('')
     
     def log(self, s):

@@ -1,14 +1,18 @@
 #!/usr/bin/python
 
-import json, re, urllib, Utils
+import json, re, sys, urllib, Utils
 
+from optparse import OptionParser
 from googlemaps import *
 
 class AGeocoder(object):
     """
         Abstract geocoder which converts addresses to latitude / longitude.
     """
-    _isValid = True
+    
+    def __init__(self, name):
+        self._isValid = True
+        self._name = name
     
     def addressToLatLng(self, address):
         pass
@@ -16,6 +20,12 @@ class AGeocoder(object):
     def isValid(self):
         return _isValid
     
+    def getName(self):
+        return self._name
+    
+    def getEncodedLatLng(self, latLng):
+        return str(latLng[0]) + ',' + str(latLng[1])
+
 class Geocoder(AGeocoder):
     """
         Converts addresses to latitude / longitude, utilizing a set of underlying 
@@ -26,7 +36,7 @@ class Geocoder(AGeocoder):
     """
     
     def __init__(self):
-        AGeocoder.__init__(self)
+        AGeocoder.__init__(self, "Geocoder")
         
         self._decoderIndex = 0
         self._decoders = [ 
@@ -73,7 +83,7 @@ class GoogleGeocoderService(AGeocoder):
     API_KEY = 'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok'
     
     def __init__(self):
-        AGeocoder.__init__(self)
+        AGeocoder.__init__(self, "Google")
         self.googleMaps = GoogleMaps(self.API_KEY)
     
     def addressToLatLng(self, address):
@@ -98,7 +108,7 @@ class YahooGeocoderService(AGeocoder):
     BASE_URL = 'http://where.yahooapis.com/geocode'
     
     def __init__(self):
-        AGeocoder.__init__(self)
+        AGeocoder.__init__(self, "Yahoo")
     
     def addressToLatLng(self, address):
         (lat, lng) = (None, None)
@@ -113,7 +123,7 @@ class YahooGeocoderService(AGeocoder):
         
         try:
             # GET the data and parse the response as json
-            response = json.loads(Utils.GetFile(url))
+            response = json.loads(Utils.getFile(url))
             
             # extract the results from the json
             if response['Error'] != 0:
@@ -143,7 +153,7 @@ class USGeocoderService(AGeocoder):
     BASE_URL = 'http://geocoder.us/demo.cgi'
     
     def __init__(self):
-        AGeocoder.__init__(self)
+        AGeocoder.__init__(self, "US")
     
     def addressToLatLng(self, address):
         (lat, lng) = (None, None)
@@ -156,7 +166,7 @@ class USGeocoderService(AGeocoder):
         
         try:
             # GET the data and parse the HTML response with BeautifulSoup
-            soup = Utils.GetSoup(url)
+            soup = Utils.getSoup(url)
             row = soup.find("table").findAll("tr")[1]
             
             # extract the latitude
@@ -172,9 +182,96 @@ class USGeocoderService(AGeocoder):
         
         return (lat, lng)
 
-"""
-geocoder = Geocoder()
-(lat, lng) = geocoder.addressToLatLng('600 Pennsylvania Ave, Washington, DC')
-print (lat, lng)
-"""
+def parseCommandLine():
+    usage = "Usage: %prog [options] address+"
+    parser = OptionParser(usage)
+    
+    parser.add_option("-g", "--google", action="store_true", dest="google", 
+        default=False, help="Use Google Geocoding service")
+    parser.add_option("-y", "--yahoo", action="store_true", dest="yahoo", 
+        default=False, help="Use Yahoo Geocoding service")
+    parser.add_option("-u", "--us", action="store_true", dest="us", 
+        default=False, help="Use US Geocoding service")
+    parser.add_option("-a", "--all", action="store_true", dest="all", 
+        default=False, help="Use all Geocoding services")
+    
+    parser.set_defaults(google=False)
+    parser.set_defaults(yahoo=False)
+    parser.set_defaults(us=False)
+    parser.set_defaults(all=False)
+    
+    (options, args) = parser.parse_args()
+    
+    if len(args) < 1:
+        parser.print_help()
+        return None
+    
+    if options.all:
+        options.google = True
+        options.yahoo = True
+        options.us = True
+    
+    options.geocoders = []
+    
+    if options.google or options.yahoo or options.us:
+        if options.google:
+            options.geocoders.append(GoogleGeocoderService())
+        if options.yahoo:
+            options.geocoders.append(YahooGeocoderService())
+        if options.us:
+            options.geocoders.append(USGeocoderService())
+    else:
+        options.geocoders.append(Geocoder())
+    
+    return (options, args)
+
+def main():
+    """
+        Usage: Geocoder.py [options] address+
+
+        Options:
+          -h, --help    show this help message and exit
+          -g, --google  Use Google Geocoding service
+          -y, --yahoo   Use Yahoo Geocoding service
+          -u, --us      Use US Geocoding service
+          -a, --all     Use all Geocoding services
+    """
+    
+    result = parseCommandLine()
+    if result is None:
+        sys.exit(0)
+    
+    (options, args) = result
+    
+    numAddresses = len(args)
+    numConverted = 0
+    
+    for address in args:
+        isConverted = False
+        
+        for geocoder in options.geocoders:
+            latLng = geocoder.addressToLatLng(address)
+            
+            if latLng is None or latLng[0] is None or latLng[1] is None:
+                print "Service %s failed to convert address '%s'" % (geocoder.getName(), address)
+            else:
+                isConverted = True
+                result = {
+                    'Service' : geocoder.getName(), 
+                    'Address' : address, 
+                    'Latitude' : latLng[0], 
+                    'Longitude' : latLng[1], 
+                    'LatLng' : geocoder.getEncodedLatLng(latLng)
+                }
+                
+                print str(result)
+        
+        if isConverted:
+            numConverted += 1
+    
+    print "Converted %d out of %d addresses (%g%%)" % \
+        (numConverted, numAddresses, (100.0 * numConverted) / numAddresses)
+
+if __name__ == '__main__':
+    main()
 

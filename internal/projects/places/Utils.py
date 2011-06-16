@@ -4,11 +4,11 @@ import sys, time, traceback, urllib2
 
 from BeautifulSoup import BeautifulSoup
 
-def Log(s):
+def log(s):
     # TODO: look into logging module with logging.basicConfig(format="%(threadName)s:%(message)s")
     print str(s)
 
-def Write(s, n):
+def write(s, n):
     """
         Simple debug utility to write a string out to a file.
     """
@@ -18,13 +18,13 @@ def Write(s, n):
     f.write(s)
     f.close()
 
-def HandleException():
+def handleException():
     """
         Simple debug utility to print a stack trace.
     """
     traceback.print_exc()
 
-def GetFile(url):
+def getFile(url):
     """
         Wrapper around urllib2.urlopen(url).read(), which attempts to increase 
         the success rate by sidestepping server-side issues and usage limits by
@@ -59,6 +59,6 @@ def GetFile(url):
     # return the successfully parsed html
     return html
 
-def GetSoup(url):
+def getSoup(url):
     return BeautifulSoup(GetFile(url))
 
