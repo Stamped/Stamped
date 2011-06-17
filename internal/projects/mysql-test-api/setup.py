@@ -56,6 +56,15 @@ def createTables(database):
     cursor.execute(query)
     print 'entities table created'
 
+    query = "CREATE INDEX ix_title ON entities (title)"
+    cursor.execute(query)
+    print 'index for entities.title created'
+
+    query = "CREATE INDEX ix_category ON entities (category)"
+    cursor.execute(query)
+    print 'index for entities.category created'
+    
+
     query = """CREATE TABLE stamps (
             stamp_id INT NOT NULL AUTO_INCREMENT, 
             entity_id INT, 
@@ -67,6 +76,11 @@ def createTables(database):
             PRIMARY KEY(stamp_id))"""
     cursor.execute(query)
     print 'stamps table created'
+
+    query = "CREATE INDEX ix_user ON stamps (user_id, entity_id, timestamp)"
+    cursor.execute(query)
+    print 'index for stamps.user/entity/timestamp created'
+    
 
     query = """CREATE TABLE users (
             user_id INT NOT NULL AUTO_INCREMENT, 
@@ -86,6 +100,11 @@ def createTables(database):
     cursor.execute(query)
     print 'users table created'
 
+    query = "CREATE INDEX ix_email ON users (email)"
+    cursor.execute(query)
+    print 'index for users.email created'
+    
+
     query = """CREATE TABLE friends (
             user_id INT NOT NULL, 
             following_id INT NOT NULL, 
@@ -94,6 +113,7 @@ def createTables(database):
             PRIMARY KEY(user_id, following_id))"""
     cursor.execute(query)
     print 'friends table created'
+    
 
     query = """CREATE TABLE userstamps (
             user_id INT NOT NULL, 
@@ -107,6 +127,11 @@ def createTables(database):
     cursor.execute(query)
     print 'userstamps table created'
 
+    query = "CREATE INDEX ix_inbox ON userstamps (user_id, is_inbox)"
+    cursor.execute(query)
+    print 'index for userstamps.user/inbox created'
+    
+
     query = """CREATE TABLE comments (
             comment_id INT NOT NULL AUTO_INCREMENT, 
             user_id INT NOT NULL, 
@@ -118,13 +143,19 @@ def createTables(database):
     cursor.execute(query)
     print 'comments table created'
 
+    query = "CREATE INDEX ix_stamp ON comments (stamp_id, user_id, timestamp)"
+    cursor.execute(query)
+    print 'index for comments.stamp/user/timestamp created'
+    
+
     query = """CREATE TABLE mentions ( 
             stamp_id INT NOT NULL, 
             user_id INT NOT NULL, 
             timestamp DATETIME, 
-            PRIMARY KEY(stamp_id, user_id))"""
+            PRIMARY KEY(user_id, stamp_id))"""
     cursor.execute(query)
     print 'mentions table created'
+    
 
     query = """CREATE TABLE blocks ( 
             user_id INT NOT NULL, 
