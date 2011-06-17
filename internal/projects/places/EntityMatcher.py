@@ -23,41 +23,6 @@ class EntityMatcher(object):
         address = entity['address']
         latLng  = self.googlePlaces.addressToLatLng(address)
         
-        """
-        NOMATCH {'desc': 'Kent | Seafood', 'name': 'The Dering Arms', 'address': 'Station Road, Pluckley,   TN27 0RR'}
-
-        NOMATCH {'desc': 'Dubai | Japanese', 'name': 'Sushi - Grand Hyatt Dubai', 'address': 'Grand Hyatt Dubai, Dubai,   7978'}
-
-        NOMATCH {'desc': 'Dubai | French', 'name': 'Traiteur - Park Hyatt Dubai', 'address': 'Park Hyatt Dubai, Dubai,   2822'}
-
-        NOMATCH {'desc': 'London - North & Northwest | Indian', 'name': 'Gulshan Tandoori', 'address': '15-17 Exmouth Market, London,   ECIR 4QD'}
-
-        NOMATCH {'desc': 'Irvine | Japanese', 'name': 'Tokyo Table - Irvine', 'address': '2710 Alton Parkway #101., Irvine, CA  92601'}
-        NOMATCH {'desc': 'Esmeralda/Atizapan | Mexicana', 'name': 'Andersons Chiluca', 'address': 'Av. Jorge Jimenez Cantu, MZ 1 Lte. 1 Local 63, Bosque Esmeralda, dentro de Plaza Espacio Esmeralda, 52930 Atizapan'}
-
-        NOMATCH {'desc': 'Polanco / Lomas | Italiana', 'name': 'Piazza Navona', 'address': 'Av. Juan Vazquez de Mella, #481, Col. Los Morales, 11540 Mexico'}
-
-        NOMATCH {'desc': 'Gold Coast / Streeterville | Contemporary European', 'name': 'NoMI', 'address': '800 North Michigan Avenue, Seventh Floor of the Park Hyatt Chicago, Chicago, IL  60611'}
-        NOMATCH {'desc': 'Belfast | Global, International', 'name': 'Cayenne', 'address': '7 Ascot House, Shaftesbury Square, Belfast,   BT2 7DB'}
-        NOMATCH {'desc': 'Kent | Seafood', 'name': 'The Dering Arms', 'address': 'Station Road, Pluckley,   TN27 0RR'}
-
-        NOMATCH {'desc': 'Dubai | Japanese', 'name': 'Sushi - Grand Hyatt Dubai', 'address': 'Grand Hyatt Dubai, Dubai,   7978'}
-
-        NOMATCH {'desc': 'Dubai | French', 'name': 'Traiteur - Park Hyatt Dubai', 'address': 'Park Hyatt Dubai, Dubai,   2822'}
-
-        NOMATCH {'desc': 'London - North & Northwest | Indian', 'name': 'Gulshan Tandoori', 'address': '15-17 Exmouth Market, London,   ECIR 4QD'}
-
-        NOMATCH {'desc': 'Irvine | Japanese', 'name': 'Tokyo Table - Irvine', 'address': '2710 Alton Parkway #101., Irvine, CA  92601'}
-        """
-        # !!!TODO!!!
-        # !!!TODO!!!
-        # !!!TODO!!!
-        # Make the Geocoding stage more robust!
-        # Use data from out7!
-        # !!!TODO!!!
-        # !!!TODO!!!
-        # !!!TODO!!!
-        
         if latLng is None:
             return None
         

@@ -23,7 +23,7 @@ def write(s, n):
     f.write(s)
     f.close()
 
-def handleException():
+def printException():
     """
         Simple debug utility to print a stack trace.
     """
@@ -40,26 +40,47 @@ def getFile(url):
     
     maxDelay = 64
     delay = 0.5
-    html = ""
+    html = None
     
     while True:
         try:
             html = urllib2.urlopen(url).read()
             break
-        except IOError:
-            # encountered error GETing document. delay for a bit and try again,
-            # or if delay is already too large, request will likely not 
-            # complete successfully, so propagate the error and return.
-            if delay > maxDelay:
+        except urllib2.HTTPError as e:
+            log("Encountered HTTPError fetching url '" + url + "'")
+            log("Error: %s" % str(e))
+            
+            # reraise the exception if the request resulted in an HTTP client 4xx error code, 
+            # since it was a problem with the url / headers and retrying most likely won't 
+            # solve the problem.
+            if e.code >= 400 and e.code < 500:
                 raise
             
+            # if delay is already too large, request will likely not complete successfully, 
+            # so propagate the error and return.
+            if delay > maxDelay:
+                raise
+        except IOError as e:
             log("Encountered IOError fetching url '" + url + "'")
-            log("Attempting to recover with delay of %d" % delay)
+            log("Error: %s" % str(e))
             
-            # put the current thread to sleep for a bit, increase the delay, 
-            # and retry the request
-            time.sleep(delay)
-            delay *= 2
+            # if delay is already too large, request will likely not complete successfully, 
+            # so propagate the error and return.
+            if delay > maxDelay:
+                raise
+        except e:
+            log("Encountered unexpected error fetching url '" + url + "'")
+            log("Error: %s" % str(e))
+            printException()
+            raise
+        
+        # encountered error GETing document. delay for a bit and try again
+        log("Attempting to recover with delay of %d" % delay)
+        
+        # put the current thread to sleep for a bit, increase the delay, 
+        # and retry the request
+        time.sleep(delay)
+        delay *= 2
     
     # return the successfully parsed html
     return html

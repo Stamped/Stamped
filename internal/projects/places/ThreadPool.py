@@ -23,7 +23,7 @@ class Worker(Thread):
                 try: func(*args, **kargs)
                 except Exception, e:
                      print e
-                     Utils.handleException()
+                     Utils.printException()
                 self.tasks.task_done()
 
 class ThreadPool:

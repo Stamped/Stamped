@@ -9,6 +9,7 @@ import json, sys, urllib, Utils
 
 from optparse import OptionParser
 from Geocoder import Geocoder
+from Google import Google
 
 class GooglePlaces(object):
     API_KEY         = 'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok'
@@ -70,17 +71,18 @@ class GooglePlaces(object):
             for key in optionalParams:
                 params[key] = optionalParams[key]
         
-        # example URL:
-        # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
-        url = self._getAPIURL('search', params)
-        self.log('[GooglePlaces] ' + url)
-        
-        try:
-            # GET the data and parse the response as json
-            return json.loads(Utils.getFile(url))
-        except:
-            self.log('[GooglePlaces] unexpected error searching "' + url + '"')
-            return None
+        while True:
+            # example URL:
+            # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
+            url = self._getAPIURL('search', params)
+            self.log('[GooglePlaces] ' + url)
+            
+            try:
+                # GET the data and parse the response as json
+                return json.loads(Utils.getFile(url))
+            except:
+                self.log('[GooglePlaces] unexpected error searching "' + url + '"')
+                return None
         
         return None
     
