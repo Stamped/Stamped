@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
 import sys, time, traceback, urllib2
 
 from BeautifulSoup import BeautifulSoup
@@ -48,8 +53,8 @@ def getFile(url):
             if delay > maxDelay:
                 raise
             
-            Log("Encountered IOError fetching url '" + url + "'")
-            Log("Attempting to recover with delay of %d" % delay)
+            log("Encountered IOError fetching url '" + url + "'")
+            log("Attempting to recover with delay of %d" % delay)
             
             # put the current thread to sleep for a bit, increase the delay, 
             # and retry the request
@@ -60,5 +65,5 @@ def getFile(url):
     return html
 
 def getSoup(url):
-    return BeautifulSoup(GetFile(url))
+    return BeautifulSoup(getFile(url))
 

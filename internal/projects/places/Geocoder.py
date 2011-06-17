@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
 import json, re, sys, urllib, Utils
 
 from optparse import OptionParser
@@ -35,9 +40,10 @@ class Geocoder(AGeocoder):
             (lat, lng) = geocoder.addressToLatLng('701 First Ave, Sunnyvale CA')
     """
     
-    def __init__(self):
+    def __init__(self, log=Utils.log):
         AGeocoder.__init__(self, "Geocoder")
         
+        self.log = log
         self._decoderIndex = 0
         self._decoders = [ 
             GoogleGeocoderService(), 
@@ -66,8 +72,7 @@ class Geocoder(AGeocoder):
                     index += 1;
     
     def _getDecoder(self, index):
-        if index is None:
-            index = self._decoderIndex
+        index = index or self._decoderIndex
         
         if index < len(self._decoders):
             return self._decoders[index];
@@ -127,9 +132,9 @@ class YahooGeocoderService(AGeocoder):
             
             # extract the results from the json
             if response['Error'] != 0:
-                Utils.log('[YahooGeocoderService] error converting "' + url + '"\n' + 
-                          'ErrorCode: ' + response['Error'] + '\n' + 
-                          'ErrorMsg:  ' + response['ErrorMessage'] + '\n')
+                self.log('[YahooGeocoderService] error converting "' + url + '"\n' + 
+                         'ErrorCode: ' + response['Error'] + '\n' + 
+                         'ErrorMsg:  ' + response['ErrorMessage'] + '\n')
                 return None
             
             results = response['ResultSet']['Results']
@@ -177,14 +182,14 @@ class USGeocoderService(AGeocoder):
             lngStr = row.findAll("td")[1].renderContents()
             lng = float(re.search("([0-9.]+)", lngStr).group(0))
         except:
-            Utils.log('[USGeocoderService] error converting "' + url + '"\n')
+            self.log('[USGeocoderService] error converting "' + url + '"\n')
             pass
         
         return (lat, lng)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] address+"
-    version = "%prog 1.0"
+    version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
     parser.add_option("-g", "--google", action="store_true", dest="google", 

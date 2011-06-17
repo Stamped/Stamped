@@ -1,5 +1,10 @@
 ## {{{ http://code.activestate.com/recipes/577187/ (r9)
 
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
 from Queue import Queue
 from threading import Thread
 import Utils
@@ -18,7 +23,7 @@ class Worker(Thread):
                 try: func(*args, **kargs)
                 except Exception, e:
                      print e
-                     Utils.HandleException()
+                     Utils.handleException()
                 self.tasks.task_done()
 
 class ThreadPool:

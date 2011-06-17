@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
 import urllib, string, re, os
 import Utils
 
@@ -28,8 +33,8 @@ class SiteOpenTable:
     
     def initPages(self):
         if self.crawler.options.test:
-            # hardcoded page of ~20 new york restaurants for testing purposes
-            SiteOpenTable.s_pages.add("http://www.opentable.com/opentables.aspx?t=reg&n=11,18,66,7376,7382,7394,7397,7616,7628,7682&m=8&p=2&d=6/14/2011%207:00:00%20PM&scpref=108")
+            # hardcoded page of ~30 new york restaurants for testing purposes
+            SiteOpenTable.s_pages.add("http://www.opentable.com/opentables.aspx?t=reg&n=11,18,66,2987,2999,3032,3044,3047,3068,3101,3113,3128,3131,3161,7376,7382,7394,7397,7616,7628,7682&m=8&p=2&d=6/14/2011%207:00:00%20PM&scpref=108")
             return
         
         self.crawler.log("\n")

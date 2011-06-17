@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
 import sys, thread
 import MySQLdb, Utils
 
+from EntityMatcher import EntityMatcher
 from optparse import OptionParser
 from threading import *
-
-from GooglePlaces import GooglePlaces
 
 # import site-specific crawlers
 from OpenTable import *
@@ -40,7 +44,7 @@ class Crawler(Thread):
         url = self.site.getNextURL()
         
         while 1:
-            if url == None or url == "" or (self.options.test and len(self.entities) > 10):
+            if url == None or url == "" or (self.options.test and len(self.entities) > 30):
                 numEntities = self.getNumEntities()
                 
                 self.log("\n")
@@ -81,13 +85,14 @@ class Crawler(Thread):
         self.log('')
         self.log('')
         self.log('')
-        googlePlaces = GooglePlaces(self.log)
+        
+        matcher = EntityMatcher(self.log)
         matched = 0
-        count = len(self.entities)
+        count   = len(self.entities)
         
         for opentable_rid in self.entities:
             entity = self.entities[opentable_rid]
-            match  = googlePlaces.tryMatchEntity(entity)
+            match  = matcher.tryMatchEntityWithGooglePlaces(entity)
             
             if match is None:
                 self.log('NOMATCH opentable_rid ' + opentable_rid)
@@ -107,10 +112,10 @@ class Crawler(Thread):
     
     def log(self, s):
         print("[" + self.getName() + "] " + str(s))
-    
+
 def parseCommandLine():
     usage   = "Usage: %prog [options]"
-    version = "%prog 1.0"
+    version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
     parser.add_option("-s", "--sync", action="store_true", dest="sync", 
@@ -120,10 +125,13 @@ def parseCommandLine():
     parser.set_defaults(sync=True)
     
     parser.add_option("-t", "--test", action="store_true", dest="test", 
-        default=False, help="Run crawler in test mode on a small subset of all possible links")
+        default=False, help="Run crawler in test mode on a small subset of " + 
+        "all possible links (~30 New York restaurants, which should be " + 
+        "statistically significant)")
     parser.set_defaults(test=False)
     
-    parser.add_option("-n", "--numThreads", default=4)
+    parser.add_option("-n", "--numThreads", default=4, 
+        help="Set the number of top-level threads to run (assumes --async)")
     
     (options, args) = parser.parse_args()
     
@@ -134,6 +142,21 @@ def parseCommandLine():
     return options
 
 def main():
+    """
+        Usage: crawler.py [options]
+
+        Options:
+          --version             show program's version number and exit
+          -h, --help            show this help message and exit
+          -s, --sync            Run crawler synchronously per request
+          -a, --async           Run crawler asynchronously per request
+          -t, --test            Run crawler in test mode on a small subset of all
+                                possible links
+          -n NUMTHREADS, --numThreads=NUMTHREADS
+                                Set the number of top-level threads to run (assumes
+                                --async)
+    """
+    
     options = parseCommandLine()
     if options is None:
         sys.exit(0)
