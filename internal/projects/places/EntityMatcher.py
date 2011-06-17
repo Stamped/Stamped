@@ -21,42 +21,120 @@ class EntityMatcher(object):
     
     def tryMatchEntityWithGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
         address = entity['address']
+        latLng  = self.googlePlaces.addressToLatLng(address)
         
-        numComplexityLevels = 6
+        """
+        NOMATCH {'desc': 'Kent | Seafood', 'name': 'The Dering Arms', 'address': 'Station Road, Pluckley,   TN27 0RR'}
+
+        NOMATCH {'desc': 'Dubai | Japanese', 'name': 'Sushi - Grand Hyatt Dubai', 'address': 'Grand Hyatt Dubai, Dubai,   7978'}
+
+        NOMATCH {'desc': 'Dubai | French', 'name': 'Traiteur - Park Hyatt Dubai', 'address': 'Park Hyatt Dubai, Dubai,   2822'}
+
+        NOMATCH {'desc': 'London - North & Northwest | Indian', 'name': 'Gulshan Tandoori', 'address': '15-17 Exmouth Market, London,   ECIR 4QD'}
+
+        NOMATCH {'desc': 'Irvine | Japanese', 'name': 'Tokyo Table - Irvine', 'address': '2710 Alton Parkway #101., Irvine, CA  92601'}
+        NOMATCH {'desc': 'Esmeralda/Atizapan | Mexicana', 'name': 'Andersons Chiluca', 'address': 'Av. Jorge Jimenez Cantu, MZ 1 Lte. 1 Local 63, Bosque Esmeralda, dentro de Plaza Espacio Esmeralda, 52930 Atizapan'}
+
+        NOMATCH {'desc': 'Polanco / Lomas | Italiana', 'name': 'Piazza Navona', 'address': 'Av. Juan Vazquez de Mella, #481, Col. Los Morales, 11540 Mexico'}
+
+        NOMATCH {'desc': 'Gold Coast / Streeterville | Contemporary European', 'name': 'NoMI', 'address': '800 North Michigan Avenue, Seventh Floor of the Park Hyatt Chicago, Chicago, IL  60611'}
+        NOMATCH {'desc': 'Belfast | Global, International', 'name': 'Cayenne', 'address': '7 Ascot House, Shaftesbury Square, Belfast,   BT2 7DB'}
+        NOMATCH {'desc': 'Kent | Seafood', 'name': 'The Dering Arms', 'address': 'Station Road, Pluckley,   TN27 0RR'}
+
+        NOMATCH {'desc': 'Dubai | Japanese', 'name': 'Sushi - Grand Hyatt Dubai', 'address': 'Grand Hyatt Dubai, Dubai,   7978'}
+
+        NOMATCH {'desc': 'Dubai | French', 'name': 'Traiteur - Park Hyatt Dubai', 'address': 'Park Hyatt Dubai, Dubai,   2822'}
+
+        NOMATCH {'desc': 'London - North & Northwest | Indian', 'name': 'Gulshan Tandoori', 'address': '15-17 Exmouth Market, London,   ECIR 4QD'}
+
+        NOMATCH {'desc': 'Irvine | Japanese', 'name': 'Tokyo Table - Irvine', 'address': '2710 Alton Parkway #101., Irvine, CA  92601'}
+        """
+        # !!!TODO!!!
+        # !!!TODO!!!
+        # !!!TODO!!!
+        # Make the Geocoding stage more robust!
+        # Use data from out7!
+        # !!!TODO!!!
+        # !!!TODO!!!
+        # !!!TODO!!!
+        
+        if latLng is None:
+            return None
+        
+        numComplexityLevels = 16
         prevName = None
+        origName = entity['name'].lower()
         
+        # attempt to match the entity with increasing simplifications applied 
+        # to the search name, beginning with no simplification and retrying as 
+        # necessary until we find a match, eventually falling back to a blank 
+        # name search at the most simplified level
         for i in xrange(numComplexityLevels):
-            complexity = float(numComplexityLevels - i - 1) / numComplexityLevels
-            name = self.getSimplifiedName(entity['name'], complexity)
+            complexity = float(numComplexityLevels - i - 1) / (max(1, numComplexityLevels - 1))
+            name = self.getSimplifiedName(origName, complexity)
             
-            print "NAME: %s, complexity: %g" % (name, complexity)
-            
+            # don't attempt to find a match if this simplified name is the same 
+            # as the previous level's simplified name (e.g., because we know it 
+            # will return the same negative results)
             if name != prevName:
+                self.log("NAME: %s, complexity: %g" % (name, complexity))
                 prevName = name
                 
-                match = self.tryMatchNameAddressWithGooglePlaces(name, address, tolerance)
+                # attempt to match the current simplified name and latLng 
+                match = self.tryMatchNameLatLngWithGooglePlaces(name, latLng, tolerance, origName)
                 if match is not None:
-                    return match
+                    return (match[0], ((match[1] + 0.2) * complexity / 1.2))
         
         return None
     
-    def tryMatchNameAddressWithGooglePlaces(self, name, address, tolerance=DEFAULT_TOLERANCE):
+    def tryMatchNameAddressWithGooglePlaces(self, 
+                                            name, 
+                                            address, 
+                                            tolerance=DEFAULT_TOLERANCE, 
+                                            origName=None):
         params = { 'name' : name }
         results = self.googlePlaces.getSearchResultsByAddress(address, params)
         
         if results is None:
             return None
         
+        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance, origName)
+    
+    def tryMatchNameLatLngWithGooglePlaces(self, 
+                                           name, 
+                                           latLng, 
+                                           tolerance=DEFAULT_TOLERANCE, 
+                                           origName=None):
+        params = { 'name' : name }
+        results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
+        
+        if results is None:
+            return None
+        
+        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance)
+    
+    def tryMatchNameWithGooglePlacesResults(self, 
+                                            name, 
+                                            results, 
+                                            tolerance=DEFAULT_TOLERANCE, 
+                                            origName=None):
         # perform case-insensitive, fuzzy string matching to determine the 
         # best match in the google places result set for the target entity
-        bestRatio  = -1
-        bestMatch  = None
+        bestRatio = -1
+        bestMatch = None
+        
+        if origName:
+            origName = origName.lower()
         
         for result in results:
-            # TODO: alternatively look into using edit distance via:
+            # TODO: look into using edit distance as an alternative via:
             #       http://code.google.com/p/pylevenshtein/
-            matcher = SequenceMatcher(None, name, result['name'].lower())
-            ratio = matcher.ratio()
+            resultName = result['name'].lower()
+            ratio = SequenceMatcher(None, name, resultName).ratio()
+            
+            if origName:
+                origRatio = SequenceMatcher(None, origName, resultName).ratio()
+                ratio = max(ratio, origRatio)
             
             if ratio > bestRatio:
                 bestRatio = ratio
@@ -81,12 +159,18 @@ class EntityMatcher(object):
         self.wordBlacklistSet.add("restaurant")
         self.wordBlacklistSet.add("ristorante")
         
+        # remove characters delimiting the start of a detail suffix string
+        # e.g., "Mike's Bar - Soho" would remove " - Soho" as extraneous detail
+        self.wordDetailDelimiterBlacklistSet = set()
+        self.wordDetailDelimiterBlacklistSet.add("-")
+        self.wordDetailDelimiterBlacklistSet.add("@")
+        self.wordDetailDelimiterBlacklistSet.add("...")
+        
         # remove trailing words
         self.wordSuffixBlacklistSet = set()
-        self.wordSuffixBlacklistSet.add("-")
-        self.wordSuffixBlacklistSet.add("@")
-        self.wordSuffixBlacklistSet.add("...")
+        self.wordSuffixBlacklistSet.add("&")
         self.wordSuffixBlacklistSet.add("at")
+        self.wordSuffixBlacklistSet.add("the")
         
         # remove special character sequences
         self.wordSpecialBlacklistSet = set()
@@ -95,47 +179,97 @@ class EntityMatcher(object):
     def getSimplifiedName(self, name, complexity):
         complexity = min(max(complexity, 0), 1.0)
         name = name.lower()
-
+        
+        # return the lowercase name if no simplification is to occur
         if complexity >= 1.0:
             return name
         
+        # initialize complexity-dependent detail delimiters
+        wordDetailDelimiterBlacklistSet  = set()
+        wordDetailDelimiterBlacklistSet |= self.wordDetailDelimiterBlacklistSet
+        if complexity < 0.8:
+            wordDetailDelimiterBlacklistSet.add("at")
+            wordDetailDelimiterBlacklistSet.add("on")
+        
+        # filter and process individual words
         words = name.split()
         
-        while words[0] in self.wordPrefixBlacklistSet:
-            words = words[1:]
-        
-        if complexity < 0.8:
-            words = filter(lambda x: not x in self.wordBlacklistSet, words)
-        
-        finalWords = None
-        
-        for i in xrange(len(words)):
-            if finalWords is not None:
+        prevWords = None
+        while (prevWords is None or len(words) != len(prevWords)) and len(words) > 0:
+            prevWords = words
+            
+            # remove blacklisted prefix words
+            while words[0] in self.wordPrefixBlacklistSet:
+                words = words[1:]
+            
+            if complexity < 0.8:
+                # remove blacklisted words that are agnostic to where they appear
+                # in the query string
+                words = filter(lambda x: not x in self.wordBlacklistSet, words)
+            
+            truncatedWords = None
+            
+            # loop through each word, filtering it if it's blacklisted w.r.t. the 
+            # context it appears in
+            for i in xrange(len(words)):
+                if truncatedWords is not None:
+                    break
+                
+                word = words[i]
+                
+                if word in wordDetailDelimiterBlacklistSet:
+                    # remove all words after and including this one which are 
+                    # (hopefully) extraneous
+                    truncatedWords = words[0:i]
+                else:
+                    # search within word for special blacklisted sequences which 
+                    # hint at the start of detail (e.g., "Mike's bar...great food!"
+                    # we'd remove "...great food!")
+                    for sequence in self.wordSpecialBlacklistSet:
+                        j = word.find(sequence)
+                        if j == 0:
+                            truncatedWords = words[0:i]
+                            break
+                        elif j >= 0:
+                            words[i] = word[0:j]
+                            truncatedWords = words[0:i+1]
+                            break
+            
+            # strip all remaining words of extra whitespace
+            words = map(lambda x: x.strip(), truncatedWords or words)
+            
+            # remove all blacklisted suffix words
+            while words[-1] in self.wordSuffixBlacklistSet:
+                words = words[0:max(len(words) - 1, 0)]
+            
+            # depending on the desired complexity level, break and refrain from 
+            # looping on the simplification process multiple times
+            limit = 0.7
+            if complexity > limit:
                 break
             
-            word = words[i]
+            # depending on complexity, cap the number of remaining words such that 
+            # more simplified queries will use less words, with a base case of 
+            # complexity being less than 0.1 resulting in no words and thus, an 
+            # empty search string
+            percent = (complexity + 1.0 - limit)
+            count   = len(words)
             
-            if word in self.wordSuffixBlacklistSet:
-                finalWords = words[0:i]
+            # if we only have one word left, truncate the number of 
+            # characters depending on the desired complexity
+            if count == 1 and complexity > 0:
+                count    = len(words[0])
+                numChars = min(count, max(int(percent * count), 0))
+                words[0] = words[0][0:numChars]
             else:
-                for suffix in self.wordSpecialBlacklistSet:
-                    j = word.find(suffix)
-                    if j == 0:
-                        finalWords = words[0:i]
-                        break
-                    elif j >= 0:
-                        words[i] = word[0:j]
-                        finalWords = words[0:i+1]
-                        break
+                # else truncate the number of words depending on the 
+                # desired complexity
+                numWords = min(count, max(int(percent * count), 0))
+                words    = words[0:numWords]
         
-        finalWords = map(lambda x: x.strip(), finalWords or words)
-        
-        if complexity <= 0.5:
-            numWords = int(complexity * 10)
-            numWords = min(len(finalWords), max(numWords, 0))
-            finalWords = finalWords[0:numWords]
-        
-        return string.joinfields(finalWords, ' ').strip()
+        # join the remaining words back together and strip any possible 
+        # whitespace that might've snuck in to form the resulting name
+        return string.joinfields(words, ' ').strip()
 
 def parseCommandLine():
     pass

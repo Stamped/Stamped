@@ -17,6 +17,7 @@ from OpenTable import *
 
 #-----------------------------------------------------------
 
+# TODO: use Crawler(multiprocessing.Process) instead of Thread!
 class Crawler(Thread):
     """Crawls for objects..."""
     

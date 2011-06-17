@@ -22,7 +22,7 @@ class GooglePlaces(object):
         pass
     
     def getSearchResultsByAddress(self, address, optionalParams=None):
-        latLng = self._addressToLatLng(address)
+        latLng = self.addressToLatLng(address)
         
         if latLng is None:
             # geocoding translation from address to lat/lng failed, so we will 
@@ -49,7 +49,7 @@ class GooglePlaces(object):
         return results
     
     def getSearchResponseByAddress(self, address, optionalParams=None):
-        latLng = self._addressToLatLng(address)
+        latLng = self.addressToLatLng(address)
         
         if latLng is None:
             # geocoding translation from address to lat/lng failed, so we will 
@@ -73,7 +73,7 @@ class GooglePlaces(object):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('search', params)
-        self.log(url)
+        self.log('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
@@ -84,10 +84,7 @@ class GooglePlaces(object):
         
         return None
     
-    def _getAPIURL(self, method, params):
-        return self.BASE_URL + '/' + method + '/' + self.FORMAT + '?' + urllib.urlencode(params)
-    
-    def _addressToLatLng(self, address):
+    def addressToLatLng(self, address):
         latLng = self._geocoder.addressToLatLng(address)
         
         if latLng is None or latLng[0] is None or latLng[1] is None:
@@ -95,6 +92,9 @@ class GooglePlaces(object):
             return None
         
         return latLng
+    
+    def _getAPIURL(self, method, params):
+        return self.BASE_URL + '/' + method + '/' + self.FORMAT + '?' + urllib.urlencode(params)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] address|latLng"
