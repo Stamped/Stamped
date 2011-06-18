@@ -32,7 +32,7 @@ class SiteOpenTable:
         SiteOpenTable.s_lock.release()
     
     def initPages(self):
-        if self.crawler.options.test:
+        if self.crawler.options.test or not self.crawler.options.crawl:
             # hardcoded page of ~30 new york restaurants for testing purposes
             SiteOpenTable.s_pages.add("http://www.opentable.com/opentables.aspx?t=reg&n=11,18,66,2987,2999,3032,3044,3047,3068,3101,3113,3128,3131,3161,7376,7382,7394,7397,7616,7628,7682&m=8&p=2&d=6/14/2011%207:00:00%20PM&scpref=108")
             return
@@ -99,15 +99,13 @@ class SiteOpenTable:
     def parseEntity(self, row):
         return {
             'name' : row.find("a").renderContents().strip(), 
-            'desc' : row.find("div").renderContents().strip()
+            'desc' : row.find("div").renderContents().strip(), 
+            'rid'  : row.get("rid")
         }
     
-    def getEntityDetailsRequest(self, rid):
-        return AsyncWebRequest(url);
-    
-    def getEntityDetails(self, rid, entity):
+    def getEntityDetails(self, entity):
         baseURL = "http://www.opentable.com/httphandlers/RestaurantinfoLiteNew.ashx";
-        url = baseURL + "?" + urllib.urlencode({ 'rid' : rid })
+        url = baseURL + "?" + urllib.urlencode({ 'rid' : entity['rid'] })
         
         detailsSoup = Utils.getSoup(url)
         
@@ -122,18 +120,16 @@ class SiteOpenTable:
         soup = Utils.getSoup(url)
         
         resultList = soup.findAll("tr", {"class" : re.compile("ResultRow.*")})
-        results = {}
+        results = []
         
         for i in xrange(len(resultList)):
             result = resultList[i]
             # note: some pages have <div class="rinfo" rid=###> and some have <div rid=###>...
             row = result.find("div", {"rid" : re.compile(".*")})
-            rid = row.get("rid")
             entity = self.parseEntity(row)
-            results[rid] = entity
             
-            #self.crawler.log(str(i) + ") " + str(rid))
-            self.pool.add_task(self.getEntityDetails, rid, entity)
+            results.append(entity)
+            self.pool.add_task(self.getEntityDetails, entity)
         
         self.pool.wait_completion()
         return results

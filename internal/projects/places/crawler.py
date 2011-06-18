@@ -26,7 +26,6 @@ class Crawler(Thread):
         self.siteName = siteName.strip()
         self.lock = lock
         self.entities = {}
-        self.numDuplicates = 0
         self.options = options
     
     def run(self):
@@ -35,7 +34,12 @@ class Crawler(Thread):
         else:
             raise Exception, "Unsupported site '%' specified." % (self.siteName,)
         
-        self.crawl()
+        if self.options.crawl:
+            self.crawl()
+        else:
+            import opentabledata
+            self.entities = opentabledata.g_opentable_entities
+        
         self.crossRencerenceResults()
     
     def getNumEntities(self):
@@ -50,7 +54,6 @@ class Crawler(Thread):
                 
                 self.log("\n")
                 self.log("Crawling finished; DB contains %d entities!" % numEntities)
-                self.log("Encountered %d duplicates." % self.numDuplicates)
                 self.log("\n")
                 break
             else:
@@ -60,14 +63,7 @@ class Crawler(Thread):
     def crawlURL(self, url):
         try:
             self.log("Crawling url " + url + "\n")
-            entities = self.site.extractData(url)
-            #print entities
-            
-            for entity in entities:
-                if entity in self.entities:
-                    self.numDuplicates += 1
-                else:
-                    self.entities[entity] = entities[entity]
+            self.entities = self.site.extractData(url)
             
             #self.updateDB(data)
         except (KeyboardInterrupt, SystemExit):
@@ -91,18 +87,24 @@ class Crawler(Thread):
         matched = 0
         count   = len(self.entities)
         
-        for opentable_rid in self.entities:
-            entity = self.entities[opentable_rid]
-            match  = matcher.tryMatchEntityWithGooglePlaces(entity)
+        for entity in self.entities:
+            match = None
+            
+            try:
+                match = matcher.tryMatchEntityWithGooglePlaces(entity)
+            except (KeyboardInterrupt, SystemExit):
+                thread.interrupt_main()
+                raise
+            except:
+                self.log("Error matching entity " + str(entity) + "\n")
+                Utils.HandleException()
+                pass
             
             if match is None:
-                self.log('NOMATCH opentable_rid ' + opentable_rid)
-                self.log(entity)
-                self.log('')
+                self.log('NOMATCH ' + str(entity))
             else:
                 matched += 1
-                self.log('MATCH opentable_rid ' + opentable_rid)
-                self.log(entity)
+                self.log('MATCH ' + str(entity))
                 self.log(match)
             
             self.log('')
@@ -129,13 +131,19 @@ def parseCommandLine():
         default=False, help="Run crawler in test mode on a small subset of " + 
         "all possible links (~30 New York restaurants, which should be " + 
         "statistically significant)")
+    
+    parser.add_option("-l", "--load", action="store_false", dest="crawl", 
+        help="Bypass crawling by loading OpenTable data from " +
+        "previous run and only process the results")
+    
     parser.set_defaults(test=False)
+    parser.set_defaults(crawl=True)
     
     parser.add_option("-n", "--numThreads", default=4, 
         help="Set the number of top-level threads to run (assumes --async)")
     
     (options, args) = parser.parse_args()
-    
+    print str(options)
     if len(args) > 0:
         parser.print_help()
         return None
@@ -152,7 +160,10 @@ def main():
           -s, --sync            Run crawler synchronously per request
           -a, --async           Run crawler asynchronously per request
           -t, --test            Run crawler in test mode on a small subset of all
-                                possible links
+                                possible links (~30 New York restaurants, which should
+                                be statistically significant)
+          -l, --load            Bypass crawling by loading OpenTable data from
+                                previous run and only process the results
           -n NUMTHREADS, --numThreads=NUMTHREADS
                                 Set the number of top-level threads to run (assumes
                                 --async)

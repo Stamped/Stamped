@@ -13,6 +13,7 @@ from GooglePlaces import GooglePlaces
 
 class EntityMatcher(object):
     DEFAULT_TOLERANCE = 0.9
+    TYPES = 'restaurant|food|establishment'
     
     def __init__(self, log=Utils.log):
         self.log = log
@@ -36,7 +37,8 @@ class EntityMatcher(object):
         # name search at the most simplified level
         for i in xrange(numComplexityLevels):
             complexity = float(numComplexityLevels - i - 1) / (max(1, numComplexityLevels - 1))
-            name = self.getSimplifiedName(origName, complexity)
+            name = self.getCanonicalizedName(origName, complexity, True)
+            nameToMatch = self.getCanonicalizedName(origName, complexity, False)
             
             # don't attempt to find a match if this simplified name is the same 
             # as the previous level's simplified name (e.g., because we know it 
@@ -46,7 +48,9 @@ class EntityMatcher(object):
                 prevName = name
                 
                 # attempt to match the current simplified name and latLng 
-                match = self.tryMatchNameLatLngWithGooglePlaces(name, latLng, tolerance, origName)
+                match = self.tryMatchNameLatLngWithGooglePlaces(name, 
+                    latLng, tolerance, nameToMatch)
+                
                 if match is not None:
                     return (match[0], ((match[1] + 0.2) * complexity / 1.2))
         
@@ -56,50 +60,61 @@ class EntityMatcher(object):
                                             name, 
                                             address, 
                                             tolerance=DEFAULT_TOLERANCE, 
-                                            origName=None):
-        params = { 'name' : name }
+                                            nameToMatch=None):
+        params  = self._getParams(name, { 'types' : self.TYPES })
         results = self.googlePlaces.getSearchResultsByAddress(address, params)
         
         if results is None:
-            return None
+            # occasionally a google place search will leave out valid results 
+            # if the optional 'types' parameter is set, even though those 
+            # results conform to the given types... to get around this bug, 
+            # if a more specific query containing the desired 'types' fails 
+            # to return any results, we try once more without the 'types'.
+            params  = self._getParams(name)
+            results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
+            
+            if results is None:
+                return None
         
-        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance, origName)
+        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance, nameToMatch)
     
     def tryMatchNameLatLngWithGooglePlaces(self, 
                                            name, 
                                            latLng, 
                                            tolerance=DEFAULT_TOLERANCE, 
-                                           origName=None):
-        params = { 'name' : name }
+                                           nameToMatch=None):
+        params  = self._getParams(name, { 'types' : self.TYPES })
         results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
         
         if results is None:
-            return None
+            # occasionally a google place search will leave out valid results 
+            # if the optional 'types' parameter is set, even though those 
+            # results conform to the given types... to get around this bug, 
+            # if a more specific query containing the desired 'types' fails 
+            # to return any results, we try once more without the 'types'.
+            params  = self._getParams(name)
+            results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
+            
+            if results is None:
+                return None
         
-        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance)
+        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance, nameToMatch)
     
     def tryMatchNameWithGooglePlacesResults(self, 
                                             name, 
                                             results, 
                                             tolerance=DEFAULT_TOLERANCE, 
-                                            origName=None):
+                                            nameToMatch=None):
         # perform case-insensitive, fuzzy string matching to determine the 
         # best match in the google places result set for the target entity
         bestRatio = -1
         bestMatch = None
         
-        if origName:
-            origName = origName.lower()
-        
         for result in results:
             # TODO: look into using edit distance as an alternative via:
             #       http://code.google.com/p/pylevenshtein/
             resultName = result['name'].lower()
-            ratio = SequenceMatcher(None, name, resultName).ratio()
-            
-            if origName:
-                origRatio = SequenceMatcher(None, origName, resultName).ratio()
-                ratio = max(ratio, origRatio)
+            ratio = SequenceMatcher(None, nameToMatch, resultName).ratio()
             
             if ratio > bestRatio:
                 bestRatio = ratio
@@ -123,6 +138,7 @@ class EntityMatcher(object):
         self.wordBlacklistSet = set()
         self.wordBlacklistSet.add("restaurant")
         self.wordBlacklistSet.add("ristorante")
+        self.wordBlacklistSet.add("steakhouse")
         
         # remove characters delimiting the start of a detail suffix string
         # e.g., "Mike's Bar - Soho" would remove " - Soho" as extraneous detail
@@ -141,7 +157,7 @@ class EntityMatcher(object):
         self.wordSpecialBlacklistSet = set()
         self.wordSpecialBlacklistSet.add("...")
     
-    def getSimplifiedName(self, name, complexity):
+    def getCanonicalizedName(self, name, complexity, crippleName):
         complexity = min(max(complexity, 0), 1.0)
         name = name.lower()
         
@@ -167,7 +183,7 @@ class EntityMatcher(object):
             while words[0] in self.wordPrefixBlacklistSet:
                 words = words[1:]
             
-            if complexity < 0.8:
+            if complexity < 0.9:
                 # remove blacklisted words that are agnostic to where they appear
                 # in the query string
                 words = filter(lambda x: not x in self.wordBlacklistSet, words)
@@ -202,39 +218,59 @@ class EntityMatcher(object):
             
             # strip all remaining words of extra whitespace
             words = map(lambda x: x.strip(), truncatedWords or words)
+            if len(words) == 0:
+                break
             
             # remove all blacklisted suffix words
             while words[-1] in self.wordSuffixBlacklistSet:
                 words = words[0:max(len(words) - 1, 0)]
+                
+                if len(words) == 0:
+                    break
             
             # depending on the desired complexity level, break and refrain from 
             # looping on the simplification process multiple times
-            limit = 0.7
+            limit = 0.85
             if complexity > limit:
                 break
             
-            # depending on complexity, cap the number of remaining words such that 
-            # more simplified queries will use less words, with a base case of 
-            # complexity being less than 0.1 resulting in no words and thus, an 
-            # empty search string
-            percent = (complexity + 1.0 - limit)
-            count   = len(words)
-            
-            # if we only have one word left, truncate the number of 
-            # characters depending on the desired complexity
-            if count == 1 and complexity > 0:
-                count    = len(words[0])
-                numChars = min(count, max(int(percent * count), 0))
-                words[0] = words[0][0:numChars]
-            else:
-                # else truncate the number of words depending on the 
-                # desired complexity
-                numWords = min(count, max(int(percent * count), 0))
-                words    = words[0:numWords]
+            if crippleName:
+                # note: only cripple the name once during multiple iterations
+                # (by truncating either the number of words or the number of 
+                # characters within a single word)
+                crippleName = False
+                
+                # depending on complexity, cap the number of remaining words such that 
+                # more simplified queries will use less words, with a base case of 
+                # complexity being less than 0.1 resulting in no words and thus, an 
+                # empty search string
+                percent = (complexity + 1.0 - limit)
+                count   = len(words)
+                
+                # if we only have one word left, truncate the number of 
+                # characters depending on the desired complexity
+                if count == 1 and complexity > 0:
+                    count    = len(words[0])
+                    numChars = min(count, max(int(percent * count), 0))
+                    words[0] = words[0][0:numChars]
+                else:
+                    # else truncate the number of words depending on the 
+                    # desired complexity
+                    numWords = min(count, max(int(percent * count), 0))
+                    words    = words[0:numWords]
         
         # join the remaining words back together and strip any possible 
         # whitespace that might've snuck in to form the resulting name
         return string.joinfields(words, ' ').strip()
+    
+    def _getParams(self, name, optionalParams=None):
+        params = { 'name' : name }
+        
+        if optionalParams is not None:
+            for param in optionalParams:
+                params[param] = optionalParams[param]
+        
+        return params
 
 def parseCommandLine():
     pass

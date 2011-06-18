@@ -35,6 +35,9 @@ class GooglePlaces(object):
     def getSearchResultsByLatLng(self, latLng, optionalParams=None):
         response = self.getSearchResponseByLatLng(latLng, optionalParams)
         
+        if response is None:
+            return None
+        
         # ensure that we received a valid response
         if response['status'] != 'OK':
             self.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 

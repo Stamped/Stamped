@@ -45,7 +45,7 @@ class AGeocoder(object):
         if self._apiKeys is None or count >= len(self._apiKeys):
             return None
         else:
-            index = (offset + offset) % len(self._apiKeys)
+            index = (offset + count) % len(self._apiKeys)
             return self._apiKeys[index]
     
     def _initAPIKeyIndices(self):
@@ -139,7 +139,7 @@ class GoogleGeocoderService(AGeocoder):
                     self.log('[GoogleGeocoderService] error converting "' + url + '"\n' + 
                              'ErrorStatus: ' + response['status'] + '\n')
                     
-                    if response['status' == 'OVER_QUERY_LIMIT']:
+                    if response['status'] == 'OVER_QUERY_LIMIT':
                         # over the quota for this api key; retry with another key
                         count += 1
                         continue
@@ -155,7 +155,6 @@ class GoogleGeocoderService(AGeocoder):
                 return self.getValidatedLatLng(latLng)
             except:
                 self.log('[GoogleGeocoderService] error converting "' + url + '"')
-                Utils.printException()
                 break
         
         return None
@@ -205,7 +204,7 @@ class BingGeocoderService(AGeocoder):
                 
                 # extract the primary result from the json
                 resource = response['resourceSets'][0]['resources'][0]
-                result   = resource['point']['coordinates']
+                result   = (resource['point'])['coordinates']
                 
                 # extract the lat / lng from the primary result
                 latLng = (float(result[0]), float(result[1]))
@@ -278,7 +277,6 @@ class YahooGeocoderService(AGeocoder):
                 return self.getValidatedLatLng(latLng)
             except:
                 self.log('[YahooGeocoderService] error converting "' + url + '"')
-                Utils.printException()
                 
                 # retry with another api key
                 count += 1
@@ -322,7 +320,6 @@ class USGeocoderService(AGeocoder):
             return self.getValidatedLatLng((lat, lng))
         except:
             self.log('[USGeocoderService] error converting "' + url + '"\n')
-            Utils.printException()
         
         return None
 

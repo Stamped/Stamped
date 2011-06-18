@@ -46,7 +46,7 @@ def getFile(url):
         try:
             html = urllib2.urlopen(url).read()
             break
-        except urllib2.HTTPError as e:
+        except urllib2.HTTPError, e:
             log("Encountered HTTPError fetching url '" + url + "'")
             log("Error: %s" % str(e))
             
@@ -60,7 +60,7 @@ def getFile(url):
             # so propagate the error and return.
             if delay > maxDelay:
                 raise
-        except IOError as e:
+        except IOError, e:
             log("Encountered IOError fetching url '" + url + "'")
             log("Error: %s" % str(e))
             
@@ -68,7 +68,7 @@ def getFile(url):
             # so propagate the error and return.
             if delay > maxDelay:
                 raise
-        except e:
+        except Exception, e:
             log("Encountered unexpected error fetching url '" + url + "'")
             log("Error: %s" % str(e))
             printException()

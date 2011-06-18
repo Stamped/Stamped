@@ -6,6 +6,11 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 class Google(object):
+    """
+        Common place to expose Google functionality shared across all Google 
+        services.
+    """
+    
     API_KEYS = [
         'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok',  # Travis
         'AIzaSyAEjlMEfxmlCBQeyw_82jjobQAFjYx-Las',  # Kevin
