@@ -203,7 +203,7 @@ class BingGeocoderService(AGeocoder):
                 response = json.loads(Utils.getFile(url))
                 
                 # extract the primary result from the json
-                resource = response['resourceSets'][0]['resources'][0]
+                resource = (((response['resourceSets'])[0])['resources'])[0]
                 result   = (resource['point'])['coordinates']
                 
                 # extract the lat / lng from the primary result
@@ -212,7 +212,6 @@ class BingGeocoderService(AGeocoder):
                 return self.getValidatedLatLng(latLng)
             except:
                 self.log('[BingGeocoderService] error converting "' + url + '"')
-                Utils.printException()
                 
                 # retry with another api key
                 count += 1
