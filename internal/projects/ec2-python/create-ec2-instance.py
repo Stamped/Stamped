@@ -76,7 +76,7 @@ def run_instance(conn, image, instancetype):
     
     # Wait a moment, just to make sure the instance is ready to run
     print "Pausing before we begin...."
-    time.sleep(10)
+    time.sleep(30)
     
     try:
         print "Connecting to %s" % instance.dns_name 
@@ -108,9 +108,9 @@ def run_instance(conn, image, instancetype):
     print "Terminating the instance in 30 seconds..." 
     time.sleep(30)
     
-    if instance.root_device_type == 'ebs': 
-        instance.stop()
-    instance.terminate()
+    #if instance.root_device_type == 'ebs': 
+        #instance.stop()
+    #instance.terminate()
     
 def main():
     # Get current IP address
@@ -125,7 +125,7 @@ def main():
             ip_protocol='tcp', 
             from_port='22', 
             to_port='22', 
-            cidr_ip='%s/22' % our_ip)
+            cidr_ip='%s/32' % our_ip)
         
         # Run for images defined above
         for image in IMAGES:
