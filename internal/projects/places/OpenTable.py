@@ -8,10 +8,11 @@ __license__ = "TODO"
 import urllib, string, re, os
 import Utils
 
+from AEntityDataSource import AExternalSiteEntityDataSource
 from ThreadPool import ThreadPool
 from threading import Lock
 
-class SiteOpenTable:
+class SiteOpenTable(AExternalSiteEntityDataSource):
     """OpenTable-specific crawling logic"""
     
     s_lock  = Lock()
@@ -19,6 +20,8 @@ class SiteOpenTable:
     s_first = True
     
     def __init__(self, crawler):
+        AExternalSiteEntityDataSource.__init__(self, "OpenTable")
+        
         self.crawler = crawler;
         self.baseURL = "http://www.opentable.com/"
         self.name = "OpenTable"

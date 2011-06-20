@@ -71,7 +71,7 @@ class Crawler(Thread):
             raise
         except:
             self.log("Error crawling " + url + "\n")
-            Utils.HandleException()
+            Utils.printException()
             pass
     
     def crossRencerenceResults(self):
@@ -97,7 +97,7 @@ class Crawler(Thread):
                 raise
             except:
                 self.log("Error matching entity " + str(entity) + "\n")
-                Utils.HandleException()
+                Utils.printException()
                 pass
             
             if match is None:
