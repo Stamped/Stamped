@@ -89,6 +89,5 @@ def getSoup(url):
     return BeautifulSoup(getFile(url))
 
 def createEnum(*sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    return type('Enum', (), enums)
+    return dict(zip(sequential, range(len(sequential))), **named)
 

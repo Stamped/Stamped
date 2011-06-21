@@ -23,7 +23,7 @@ class AGeocoder(object):
         self.log = log
     
     def addressToLatLng(self, address):
-        pass
+        raise NotImplementedError
 
     def getName(self):
         return self._name

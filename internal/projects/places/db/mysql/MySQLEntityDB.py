@@ -8,9 +8,10 @@ __license__ = "TODO"
 import re, Utils
 import MySQLdb as mysqldb
 
-from datetime import datetime
 from AEntityDB import AEntityDB
 from Entity import Entity
+from threading import Lock
+from datetime import datetime
 
 class MySQLEntityDB(AEntityDB):
     USER  = 'root'
@@ -20,6 +21,7 @@ class MySQLEntityDB(AEntityDB):
     def __init__(self):
         AEntityDB.__init__(self, self.DESC)
         
+        self._lock = Lock()
         self._setup()
     
     def addEntity(self, entity):
@@ -82,8 +84,9 @@ class MySQLEntityDB(AEntityDB):
         return self._transact(_removeEntity)
     
     def addEntities(self, entities):
+        entities = (self._encodeEntity for entity in entities)
+        
         def _addEntities(cursor):
-            entities = (self._encodeEntity for entity in entities)
             query = """INSERT INTO entities 
                     (title, description, category, date_created) VALUES 
                     (%(title)s, %(desc)s, %(category)s, %(date_created)s)"""
@@ -137,6 +140,7 @@ class MySQLEntityDB(AEntityDB):
     def _transact(self, func, customCursor=None):
         retVal = None
         
+        self._lock.acquire()
         try:
             if self.db is None:
                 self.db = self._getConnection()
@@ -156,6 +160,8 @@ class MySQLEntityDB(AEntityDB):
         except mysqldb.Error, e:
             Utils.log("[MySQLEntityDB] Error: %s" % str(e))
             self.db.rollback()
+        finally:
+            self._lock.release()
         
         return retVal
     
@@ -166,23 +172,34 @@ class MySQLEntityDB(AEntityDB):
         timestamp = datetime.now().isoformat()
         
         return {
-            'title' : self.db.escape_string(entity['title']), 
-            'desc'  : self.db.escape_string(entity['desc']), 
-            'category' : 'TODO', 
-            'date_created' : timestamp
+            'title' : self._encode(entity['title']), 
+            'desc'  : self._encode(entity['desc']), 
+            'category' : self._encode('TODO'), 
+            'date_created' : self._encode(timestamp)
         }
     
     def _decodeEntity(self, entityID, data):
         entity = Entity()
         
-        decode = lambda x: x.replace("\\n", "\n").replace("\\", "")
-        entity['title'] = decode(data['title'])
-        entity['desc'] = decode(data['description'])
-        entity['category'] = decode(data['category'])
+        entity['title'] = self._decode(data['title'])
+        entity['desc'] = self._decode(data['description'])
+        entity['category'] = self._decode(data['category'])
         
         entity['id'] = entityID
-        entity['date_created'] = data['date_created']
+        entity['date_created'] = self._decode(data['date_created'])
         return entity
+    
+    def _encode(self, attr):
+        if type(attr) == str:
+            return self.db.escape_string(attr)
+        else:
+            return attr
+    
+    def _decode(self, attr):
+        if type(attr) == str:
+            return attr.replace("\\n", "\n").replace("\\", "")
+        else:
+            return attr
 
 """
 db=MySQLEntityDB()

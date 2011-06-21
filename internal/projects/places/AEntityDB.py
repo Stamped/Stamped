@@ -6,7 +6,6 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from Entity import Entity
-from db.mysql.MySQLEntityDB import *
 
 class AEntityDB(object):
     
@@ -14,16 +13,16 @@ class AEntityDB(object):
         self._desc = desc
     
     def addEntity(self, entity):
-        pass
+        raise NotImplementedError
     
     def getEntity(self, entityID):
-        pass
+        raise NotImplementedError
     
     def updateEntity(self, entity):
-        pass
+        raise NotImplementedError
     
     def removeEntity(self, entityID):
-        pass
+        raise NotImplementedError
     
     def addEntities(self, entities):
         return map(self.addEntity, entities)
@@ -38,10 +37,10 @@ class AEntityDB(object):
         return map(self.removeEntity, entityIDs)
     
     def close(self):
-        pass
+        raise NotImplementedError
     
     def __len__(self):
-        pass
+        raise NotImplementedError
     
     def __str__(self):
         return self._desc

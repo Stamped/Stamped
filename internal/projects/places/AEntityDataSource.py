@@ -8,7 +8,7 @@ __license__ = "TODO"
 from AEntityDB import AEntityDB
 from Entity import Entity
 
-import thread
+import Utils
 
 class AEntityDataSource(object):
     SOURCES = Utils.createEnum('OpenTable', 'GooglePlaces')
@@ -17,10 +17,13 @@ class AEntityDataSource(object):
         self._name = name
         self._id = self._getSourceID(name)
     
-    def import(self, entityDB, entityIDs=None, limit=None):
-        pass
+    def importAll(self, entityDB, limit=None):
+        raise NotImplementedError
     
-    def _getSourceID(name):
+    def update(self, entityDB, entities):
+        raise NotImplementedError
+    
+    def _getSourceID(self, name):
         if name in self.SOURCES:
             return self.SOURCES[name]
         else:
@@ -29,7 +32,7 @@ class AEntityDataSource(object):
 class AExternalEntityDataSource(AEntityDataSource):
     
     def __init__(self, name):
-        AEntityDataSource.__init__(self, name))
+        AEntityDataSource.__init__(self, name)
 
 class AExternalSiteEntityDataSource(AExternalEntityDataSource):
     """
@@ -37,9 +40,9 @@ class AExternalSiteEntityDataSource(AExternalEntityDataSource):
     """
     
     def __init__(self, name):
-        AExternalEntityDataSource.__init__(self, name))
+        AExternalEntityDataSource.__init__(self, name)
     
-    def import(self, entityDB, entityIDs=None, limit=None):
+    def importAll(self, entityDB, limit=None):
         url = self.getNextURL()
         
         while url is not None and len(url) > 0 and ((not self.options.test) or len(self.entities) < 30):
@@ -49,25 +52,15 @@ class AExternalSiteEntityDataSource(AExternalEntityDataSource):
                 if not entityDB.addEntities(entities):
                     self.log("Error storing %d entities to %s from %s" % \
                             (len(entities), str(entityDB), url))
-            except (KeyboardInterrupt, SystemExit):
-                thread.interrupt_main()
-                raise
             except:
                 self.log("Error crawling " + url + "\n")
                 Utils.printException()
-                pass
     
     def getNextURL(self):
-        pass
+        raise NotImplementedError
     
-    def getEntityFromURL(self, url, entityID=None):
-        if entityID is None:
-            entities = self.getEntitiesFromURL(url, entityIDs: None, limit: 1)
-        else:
-            entities = self.getEntitiesFromURL(url, entityIDs: [ entityID ], limit: 1)
-    
-    def getEntitiesFromURL(self, url, entityIDs=None, limit=None):
-        pass
+    def getEntitiesFromURL(self, url, limit=None):
+        raise NotImplementedError
 
 class AExternalServiceEntityDataSource(AExternalEntityDataSource):
     """
@@ -75,17 +68,17 @@ class AExternalServiceEntityDataSource(AExternalEntityDataSource):
     """
     
     def __init__(self, name):
-        AExternalEntityDataSource.__init__(self, name))
+        AExternalEntityDataSource.__init__(self, name)
     
 
-class AExternalDropEntityDataSource(AExternalEntityDataSource):
+class AExternalDumpEntityDataSource(AExternalEntityDataSource):
     """
-        An external data drop which may be crawled as a source of entity data 
+        An external data dump which may be crawled as a source of entity data 
         (e.g., compressed bulk datafile).
     """
     
     def __init__(self, name):
-        AExternalEntityDataSource.__init__(self, name))
+        AExternalEntityDataSource.__init__(self, name)
     
 
 class AUserDataSource(AEntityDataSource):
@@ -94,6 +87,6 @@ class AUserDataSource(AEntityDataSource):
     """
     
     def __init__(self, name):
-        AEntityDataSource.__init__(self, name))
+        AEntityDataSource.__init__(self, name)
     
 

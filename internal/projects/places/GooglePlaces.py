@@ -20,7 +20,6 @@ class GooglePlaces(object):
     def __init__(self, log=Utils.log):
         self._geocoder = Geocoder()
         self.log = log
-        pass
     
     def getSearchResultsByAddress(self, address, optionalParams=None):
         latLng = self.addressToLatLng(address)

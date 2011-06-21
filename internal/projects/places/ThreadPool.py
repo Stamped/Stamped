@@ -9,6 +9,9 @@ from Queue import Queue
 from threading import Thread
 import Utils
 
+# TODO: lazily instantiate threads up to num_threads
+# TODO: look into more production-quality thread pool options
+
 class Worker(Thread):
      """Thread executing tasks from a given tasks queue"""
      def __init__(self, tasks):
