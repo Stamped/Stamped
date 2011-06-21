@@ -2,4 +2,8 @@
 *.swp
 *~
 *.pyc
+*.pyo
 *.o
+*.old
+out
+build*

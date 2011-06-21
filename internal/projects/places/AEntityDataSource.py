@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from AEntityDatabase import AEntityDatabase
+from AEntityDB import AEntityDB
 from Entity import Entity
 
 import thread
@@ -46,7 +46,9 @@ class AExternalSiteEntityDataSource(AExternalEntityDataSource):
             try:
                 entities = self.getEntitiesFromURL(url)
                 
-                entityDB.addEntities(entities)
+                if not entityDB.addEntities(entities):
+                    self.log("Error storing %d entities to %s from %s" % \
+                            (len(entities), str(entityDB), url))
             except (KeyboardInterrupt, SystemExit):
                 thread.interrupt_main()
                 raise

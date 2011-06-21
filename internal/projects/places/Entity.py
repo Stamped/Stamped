@@ -8,7 +8,7 @@ __license__ = "TODO"
 class Entity(object):
     
     def __init__(self, data=None):
-        self._data = data
+        self._data = data or { }
     
     def __getitem__(self, key):
         return self._data[key]
@@ -20,5 +20,8 @@ class Entity(object):
         del self._data[key]
     
     def __len__(self):
-        del len(self._data)
+        return len(self._data)
+    
+    def __str__(self):
+        return str(self._data)
 
