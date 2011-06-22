@@ -13,7 +13,9 @@ from ThreadPool import ThreadPool
 from threading import Lock
 
 class OpenTableCrawler(AExternalSiteEntityDataSource):
-    """OpenTable-specific crawling logic"""
+    """
+        OpenTable-specific crawling logic
+    """
     
     BASE_URL = "http://www.opentable.com/"
     NAME     = "OpenTable"

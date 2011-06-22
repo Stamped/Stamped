@@ -11,7 +11,7 @@ from BeautifulSoup import BeautifulSoup
 
 def log(s):
     # TODO: look into logging module with logging.basicConfig(format="%(threadName)s:%(message)s")
-    print str(s)
+    print unicode(str(s), "utf-8")
 
 def write(s, n):
     """
@@ -47,8 +47,7 @@ def getFile(url):
             html = urllib2.urlopen(url).read()
             break
         except urllib2.HTTPError, e:
-            log("Encountered HTTPError fetching url '" + url + "'")
-            log("Error: %s" % str(e))
+            log("'%s' fetching url '%s'" % (str(e), url))
             
             # reraise the exception if the request resulted in an HTTP client 4xx error code, 
             # since it was a problem with the url / headers and retrying most likely won't 
@@ -61,16 +60,14 @@ def getFile(url):
             if delay > maxDelay:
                 raise
         except IOError, e:
-            log("Encountered IOError fetching url '" + url + "'")
-            log("Error: %s" % str(e))
+            log("Error '%s' fetching url '%s'" % (str(e), url))
             
             # if delay is already too large, request will likely not complete successfully, 
             # so propagate the error and return.
             if delay > maxDelay:
                 raise
         except Exception, e:
-            log("Encountered unexpected error fetching url '" + url + "'")
-            log("Error: %s" % str(e))
+            log("Unexpected Error '%s' fetching url '%s'" % (str(e), url))
             printException()
             raise
         

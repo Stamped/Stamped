@@ -196,7 +196,9 @@ def main():
         for thread in threads:
            thread.join()
 
+from sources.OpenTable import OpenTable
+
 # where all the magic starts
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()
 
