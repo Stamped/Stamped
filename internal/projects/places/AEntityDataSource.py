@@ -11,11 +11,11 @@ from Entity import Entity
 import Utils
 
 class AEntityDataSource(object):
-    SOURCES = Utils.createEnum('OpenTable', 'GooglePlaces')
+    s_sources = Utils.createEnum('OpenTable', 'GooglePlaces')
     
     def __init__(self, name):
         self._name = name
-        self._id = self._getSourceID(name)
+        self._id = self.getSourceID(name)
     
     def importAll(self, entityDB, limit=None):
         raise NotImplementedError
@@ -23,9 +23,10 @@ class AEntityDataSource(object):
     def update(self, entityDB, entities):
         raise NotImplementedError
     
-    def _getSourceID(self, name):
-        if name in self.SOURCES:
-            return self.SOURCES[name]
+    @staticmethod
+    def getSourceID(name):
+        if name in AEntityDataSource.s_sources:
+            return AEntityDataSource.s_sources[name]
         else:
             return None
 
