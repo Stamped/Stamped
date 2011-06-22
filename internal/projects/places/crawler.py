@@ -12,8 +12,12 @@ from EntityMatcher import EntityMatcher
 from optparse import OptionParser
 from threading import *
 
-# import site-specific crawlers
-from OpenTable import *
+# import specific data sources
+from sources.crawlers.OpenTableCrawler import OpenTableCrawler
+from sources.dumps.OpenTableDump import OpenTableDump
+
+# import specific databases
+from db.mysql.MySQLEntityDB import MySQLEntityDB
 
 #-----------------------------------------------------------
 
@@ -30,7 +34,7 @@ class Crawler(Thread):
     
     def run(self):
         if (self.siteName == "opentable"):
-            self.site = SiteOpenTable(self)
+            self.site = OpenTableCrawler(self)
         else:
             raise Exception, "Unsupported site '%' specified." % (self.siteName,)
         
@@ -71,7 +75,7 @@ class Crawler(Thread):
             raise
         except:
             self.log("Error crawling " + url + "\n")
-            Utils.HandleException()
+            Utils.printException()
             pass
     
     def crossRencerenceResults(self):
@@ -97,7 +101,7 @@ class Crawler(Thread):
                 raise
             except:
                 self.log("Error matching entity " + str(entity) + "\n")
-                Utils.HandleException()
+                Utils.printException()
                 pass
             
             if match is None:

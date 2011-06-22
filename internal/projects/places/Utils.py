@@ -88,3 +88,6 @@ def getFile(url):
 def getSoup(url):
     return BeautifulSoup(getFile(url))
 
+def createEnum(*sequential, **named):
+    return dict(zip(sequential, range(len(sequential))), **named)
+
