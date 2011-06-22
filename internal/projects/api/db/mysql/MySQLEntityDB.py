@@ -66,30 +66,16 @@ class MySQLEntityDB(AEntityDB):
             return (cursor.rowcount > 0)
         
         return MySQL()._transact(_updateEntity)
-    """  
+      
     def removeEntity(self, entityID):
         def _removeEntity(cursor):
-            query = "DELETE FROM entities WHERE entity_id = %d" % \
+            query = "DELETE FROM entities WHERE entity_id = %s" % \
                     (entityID)
             cursor.execute(query)
             
             return (cursor.rowcount > 0)
         
-        return self._transact(_removeEntity)
-    
-    def addEntities(self, entities):
-        entities = (self._encodeEntity for entity in entities)
-        
-        def _addEntities(cursor):
-#            query = "INSERT INTO entities 
-                    (title, description, category, date_created) VALUES 
-#                    (%(title)s, %(desc)s, %(category)s, %(date_created)s)"
-            cursor.executemany(query, entities)
-            
-            return (cursor.rowcount == len(entities))
-        
-        return self._transact(_addEntities)
-    """
+        return MySQL()._transact(_removeEntity)
     
     def _encodeEntity(self, entity):
         timestamp = datetime.now().isoformat()

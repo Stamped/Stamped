@@ -38,6 +38,10 @@ def main():
     print entityCopy
     
     db.updateEntity(entityCopy)
+    
+    #db.removeEntity(entityID)
+    
+    db.addEntities([entity, entityCopy])
 
 # where all the magic starts
 if __name__ == '__main__':
