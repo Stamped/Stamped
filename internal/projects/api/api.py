@@ -7,42 +7,85 @@ __license__ = "TODO"
 
 import sys, thread
 import MySQLdb
+
+from db.mysql.MySQL import MySQL
+from optparse import OptionParser
+
 from Entity import Entity
+from User import User
 
 # import specific databases
 from db.mysql.MySQLEntityDB import MySQLEntityDB
+from db.mysql.MySQLUserDB import MySQLUserDB
 
 
 
-
+def _setup():
+    MySQL(setup=True)
+    MySQLEntityDB(setup=True)
+    MySQLUserDB(setup=True)
 
 
 def main():
 
-    db = MySQLEntityDB()
+    _setup()
+    
+    entityDB = MySQLEntityDB()
+    userDB = MySQLUserDB()
 
+    print
+
+    # ENTITIES
     entity = Entity({
         'title' : 'Little Owl',
         'category' : 'Restaurant'
         })
     # print entity
-    
 
-    entityID = db.addEntity(entity)
-    print entityID
+    entityID = entityDB.addEntity(entity)
+    print 'entityID:       ', entityID
     
-    entityCopy = db.getEntity(entityID)
-    print entityCopy
+    entityCopy = entityDB.getEntity(entityID)
+    print 'entityCopy:     ', entityCopy
     
     entityCopy['title'] = 'Little Owl 2'
-    print entityCopy
+    entityCopy['description'] = 'Great Food'
+    entityDB.updateEntity(entityCopy)
     
-    db.updateEntity(entityCopy)
+    print 'updated entity: ', entityDB.getEntity(entityID)
     
-    #db.removeEntity(entityID)
+    #entityDB.removeEntity(entityID)
     
-    db.addEntities([entity, entityCopy])
+    entityDB.addEntities([entity, entityCopy])
+    
+    print
+    
+    # USERS
+    user = User({
+        'name' : 'Kevin',
+        'email' : 'kevin@stamped.com',
+        'privacy' : 0})
+    
+    userID = userDB.addUser(user)
+    print 'userID:         ', userID
+    
+    userCopy = userDB.getUser(userID)
+    print 'userCopy:       ', userCopy
+    
+    userCopy['username'] = 'kpalms'
+    userCopy['privacy'] = 1
+    userDB.updateUser(userCopy)
+    
+    print 'updated user:   ', userDB.getUser(userID)
+    
+    userDB.removeUser(userID)
+    
+    userDB.addUsers([user, userCopy])
+    
+    print
 
 # where all the magic starts
 if __name__ == '__main__':
     main()
+
+

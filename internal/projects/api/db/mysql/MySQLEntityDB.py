@@ -5,36 +5,50 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import re
-from MySQL import MySQL
-
-from AEntityDB import AEntityDB
-from Entity import Entity
 from threading import Lock
 from datetime import datetime
 
-class MySQLEntityDB(AEntityDB):
-    USER  = 'root'
-    DB    = 'stamped'
-    DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
-    
-    def __init__(self):
+from MySQL import MySQL
+from AEntityDB import AEntityDB
+from Entity import Entity
+
+class MySQLEntityDB(AEntityDB, MySQL):
+
+    MAPPING = [
+            ('id', 'entity_id'),
+            ('title', 'title'),
+            ('description', 'description'),
+            ('category', 'category'),
+            ('image', 'image'),
+            ('source', 'source'),
+            ('location', 'locale'),
+            ('date_created', 'date_created'),
+            ('date_updated', 'date_updated')
+        ]
+
+    def __init__(self, setup=False):
         AEntityDB.__init__(self, self.DESC)
         
+        self.db = self._getConnection()
         self._lock = Lock()
+        if setup:
+            self._createEntityTable()
+        
+    ### PUBLIC
     
     def addEntity(self, entity):
-        entity = self._encodeEntity(entity)
+        entity = self._mapObjToSQL(entity)
+        entity['date_created'] = datetime.now().isoformat()
         
         def _addEntity(cursor):
             query = """INSERT INTO entities 
                     (title, description, category, date_created) 
-                    VALUES (%(title)s, %(desc)s, %(category)s, %(date_created)s)"""
+                    VALUES (%(title)s, %(description)s, %(category)s, %(date_created)s)"""
             cursor.execute(query, entity)
             return cursor.lastrowid
 
-        return MySQL()._transact(_addEntity)
-   
+        return self._transact(_addEntity)
+    
     def getEntity(self, entityID):
         entityID = int(entityID)
         
@@ -44,28 +58,30 @@ class MySQLEntityDB(AEntityDB):
             
             if cursor.rowcount > 0:
                 data = cursor.fetchone()
-                return self._decodeEntity(entityID, data)
+                #return self._decodeEntity(entityID, data)
+                entity = Entity()
+                return self._mapSQLToObj(data, entity)
             else:
                 return None
         
-        return MySQL()._transact(_getEntity, returnDict=True)
+        return self._transact(_getEntity, returnDict=True)
     
     def updateEntity(self, entity):
-        entity = self._encodeEntity(entity)
-        
+        entity = self._mapObjToSQL(entity)
+        entity['date_updated'] = datetime.now().isoformat()
+                
         def _updateEntity(cursor):
             query = """UPDATE entities SET 
                        title = %(title)s, 
-                       description = %(desc)s, 
+                       description = %(description)s, 
                        category = %(category)s, 
-                       date_created = %(date_created)s 
-                       WHERE entity_id = %(id)s"""
-            print entity
+                       date_updated = %(date_updated)s 
+                       WHERE entity_id = %(entity_id)s"""
             cursor.execute(query, entity)
             
             return (cursor.rowcount > 0)
         
-        return MySQL()._transact(_updateEntity)
+        return self._transact(_updateEntity)
       
     def removeEntity(self, entityID):
         def _removeEntity(cursor):
@@ -75,38 +91,30 @@ class MySQLEntityDB(AEntityDB):
             
             return (cursor.rowcount > 0)
         
-        return MySQL()._transact(_removeEntity)
+        return self._transact(_removeEntity)
     
-    def _encodeEntity(self, entity):
-        timestamp = datetime.now().isoformat()
-        
-        encodedEntity = {}
-        encodedEntity['date_created'] = timestamp
-        
-        attributes = ['title', 'desc', 'category', 'id']
-        for attribute in attributes:
-            if attribute in entity:
-                encodedEntity[attribute] = self._encode(entity[attribute])
-            else:
-                encodedEntity[attribute] = None
-        return encodedEntity
+    ### PRIVATE
     
-    def _decodeEntity(self, entityID, data):
-        entity = Entity()
+    def _createEntityTable(self):
+        def _createTable(cursor):
+            query = """CREATE TABLE entities (
+                entity_id INT NOT NULL AUTO_INCREMENT, 
+                title VARCHAR(100), 
+                description TEXT, 
+                category VARCHAR(50), 
+                image VARCHAR(100), 
+                source VARCHAR(50), 
+                location VARCHAR(100), 
+                locale VARCHAR(100),
+                affiliate VARCHAR(100),
+                date_created DATETIME,
+                date_updated DATETIME, 
+                PRIMARY KEY(entity_id))"""
+            cursor.execute(query)
+            cursor.execute("CREATE INDEX ix_title ON entities (title)")
+            cursor.execute("CREATE INDEX ix_category ON entities (category)")
+            
+            return True
+            
+        return self._transact(_createTable)
         
-        entity['title'] = self._decode(data['title'])
-        entity['desc'] = self._decode(data['description'])
-        entity['category'] = self._decode(data['category'])
-        
-        entity['id'] = entityID
-        entity['date_created'] = self._decode(data['date_created'])
-        return entity
-    
-    def _encode(self, attr):
-        return attr
-    
-    def _decode(self, attr):
-        if type(attr) == str:
-            return attr.replace("\\n", "\n").replace("\\", "")
-        else:
-            return attr
