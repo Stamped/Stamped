@@ -10,6 +10,7 @@ import xlrd
 
 from AEntityDataSource import AExternalDumpEntityDataSource
 from Entity import Entity
+import OpenTableParser
 
 from ThreadPool import ThreadPool
 from threading import Lock
@@ -19,7 +20,7 @@ class OpenTableDump(AExternalDumpEntityDataSource):
         OpenTable XLS dump importer
     """
     
-    # TODO: automate downloading latest dump file from OpenTable FTP server
+    # TODO: automate downloading latest dump file from the OpenTable FTP server
     DUMP_FILE = "opentabledata.raw.xls"
     NAME = "OpenTable"
     
@@ -35,32 +36,26 @@ class OpenTableDump(AExternalDumpEntityDataSource):
         
         return entities
     
-    def importAll(self, entityDB, limit=None):
-        entities = self.getAll(limit)
-        
-        return entityDB.addEntities(entities)
-    
     def _parseEntity(self, sheet, index):
         row = sheet.row_values(index)
         
-        return Entity({
-            'name' : self._decode(row[1]), 
-            'addr' : self._decode(row[3]) + ', ' + 
-                     self._decode(row[4]) + ', ' + 
-                     self._decode(row[5]) + ' ' + 
-                     self._decode(row[6]), 
-            
-            'sources' : {
-                self._id : {
-                    'phone' : self._decode(row[7]), 
-                    'rid' : int(row[8]), 
-                    'reserveURL' : self._decode(row[9]), 
-                    'countryID' : self._decode(row[10]), 
-                    'metroName' : self._decode(row[0]), 
-                    'neighborhoodName' : self._decode(row[2]), 
-                }
-            }
-        })
+        entity = Entity()
+        entity.name = self._decode(row[1])
+        entity.addr = self._decode(row[3]) + ', ' + 
+                      self._decode(row[4]) + ', ' + 
+                      self._decode(row[5]) + ' ' + 
+                      self._decode(row[6])
+        
+        entity.openTable = {
+            'id' : int(row[8]), 
+            'reserveURL' : self._decode(row[9]), 
+            'countryID' : self._decode(row[10]), 
+            'metroName' : self._decode(row[0]), 
+            'neighborhoodName' : self._decode(row[2]), 
+        }
+        
+        OpenTableParser.parseEntity(entity)
+        return entity
     
     def _removeNonAscii(self, s):
         return "".join(ch for ch in s if ord(ch) < 128)

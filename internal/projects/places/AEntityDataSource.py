@@ -20,8 +20,8 @@ class AEntityDataSource(object):
     def importAll(self, entityDB, limit=None):
         raise NotImplementedError
     
-    def update(self, entityDB, entities):
-        raise NotImplementedError
+    #def update(self, entityDB, entities):
+    #    raise NotImplementedError
     
     @staticmethod
     def getSourceID(name):
@@ -71,6 +71,8 @@ class AExternalServiceEntityDataSource(AExternalEntityDataSource):
     def __init__(self, name):
         AExternalEntityDataSource.__init__(self, name)
     
+    def importAll(self, entityDB, limit=None):
+        return True
 
 class AExternalDumpEntityDataSource(AExternalEntityDataSource):
     """
@@ -81,6 +83,13 @@ class AExternalDumpEntityDataSource(AExternalEntityDataSource):
     def __init__(self, name):
         AExternalEntityDataSource.__init__(self, name)
     
+    def getAll(self, limit=None):
+        raise NotImplementedError
+    
+    def importAll(self, entityDB, limit=None):
+        entities = self.getAll(limit)
+        
+        return entityDB.addEntities(entities)
 
 class AUserDataSource(AEntityDataSource):
     """
@@ -89,5 +98,4 @@ class AUserDataSource(AEntityDataSource):
     
     def __init__(self, name):
         AEntityDataSource.__init__(self, name)
-    
 

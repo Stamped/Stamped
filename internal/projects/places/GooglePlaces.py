@@ -11,13 +11,17 @@ from optparse import OptionParser
 from Geocoder import Geocoder
 from Google import Google
 
-class GooglePlaces(object):
+# TODO: take API_KEY from GooglePlaces API_KEY set
+
+class GooglePlaces(AExternalServiceEntityDataSource):
     API_KEY         = 'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok'
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
     FORMAT          = 'json'
     DEFAULT_RADIUS  = 500 # meters
+    NAME            = 'GooglePlaces'
     
     def __init__(self, log=Utils.log):
+        AExternalServiceEntityDataSource.__init__(self, self.NAME)
         self._geocoder = Geocoder()
         self.log = log
     
