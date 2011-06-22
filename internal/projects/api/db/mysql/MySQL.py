@@ -17,7 +17,6 @@ class MySQL():
     DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
     
     def __init__(self):
-        #AEntityDB.__init__(self, self.DESC)
         self._desc = self.DESC
         self._lock = Lock()
         self._setup()
@@ -26,14 +25,21 @@ class MySQL():
         return mysqldb.connect(user=self.USER, db=self.DB)
     
     def commit(self):
-        #AEntityDB.close(self)
-        
         if self.db:
             self.db.commit()
             self.db.close()
             self.db = None
     
-    def _setup(self):
+    def _setup(self, reset=False):
+        def _checkDB(cursor):
+            cursor.execute("""SELECT SCHEMA_NAME 
+                FROM INFORMATION_SCHEMA.SCHEMATA 
+                WHERE SCHEMA_NAME = '%s'""" % self.DB)
+            if cursor.rowcount > 0:
+                return True
+            else:
+                return False
+    
         def _createDB(cursor):
             cursor.execute('DROP DATABASE IF EXISTS %s' % self.DB)
             cursor.execute('CREATE DATABASE %s' % self.DB)
@@ -61,21 +67,25 @@ class MySQL():
             return True
         
         self.db = mysqldb.connect(user=self.USER)
-        self._transact(_createDB)
-        self.commit()
-        
-        self._transact(_createTables)
+        if not self._transact(_checkDB) or reset == True:
+            self.db = mysqldb.connect(user=self.USER)
+            self._transact(_createDB)
+            self.commit()
+            
+            self._transact(_createTables)
+        else:
+            self.db = self._getConnection()
     
-    def _transact(self, func, customCursor=None):
+    def _transact(self, func, returnDict=False):
         retVal = None
-        print func
+        
         self._lock.acquire()
         try:
             if self.db is None:
                 self.db = self._getConnection()
             
-            if customCursor:
-                cursor = self.db.cursor(customCursor)
+            if returnDict:
+                cursor = self.db.cursor(cursorclass=mysqldb.cursors.DictCursor)
             else:
                 cursor = self.db.cursor()
             

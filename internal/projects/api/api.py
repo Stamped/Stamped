@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import sys, thread
 import MySQLdb
-import Entity
+from Entity import Entity
 
 # import specific databases
 from db.mysql.MySQLEntityDB import MySQLEntityDB
@@ -18,8 +18,26 @@ from db.mysql.MySQLEntityDB import MySQLEntityDB
 
 
 def main():
-    MySQLEntityDB().addEntity(1)
-   
+
+    db = MySQLEntityDB()
+
+    entity = Entity({
+        'title' : 'Little Owl',
+        'category' : 'Restaurant'
+        })
+    # print entity
+    
+
+    entityID = db.addEntity(entity)
+    print entityID
+    
+    entityCopy = db.getEntity(entityID)
+    print entityCopy
+    
+    entityCopy['title'] = 'Little Owl 2'
+    print entityCopy
+    
+    db.updateEntity(entityCopy)
 
 # where all the magic starts
 if __name__ == '__main__':

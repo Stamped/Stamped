@@ -24,4 +24,10 @@ class Entity(object):
     
     def __str__(self):
         return str(self._data)
+        
+    def __contains__(self, key):
+        if key in self._data:
+            return True
+        else:
+            return False
 

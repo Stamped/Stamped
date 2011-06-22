@@ -28,46 +28,45 @@ class MySQLEntityDB(AEntityDB):
         
         def _addEntity(cursor):
             query = """INSERT INTO entities 
-                    (title) 
-                    VALUES ('asf')"""
+                    (title, description, category, date_created) 
+                    VALUES (%(title)s, %(desc)s, %(category)s, %(date_created)s)"""
             cursor.execute(query, entity)
-            
+            return cursor.lastrowid
 
         return MySQL()._transact(_addEntity)
-    """    
+   
     def getEntity(self, entityID):
         entityID = int(entityID)
         
         def _getEntity(cursor):
-            query = "SELECT * FROM entities WHERE entity_id = %d" % \
-                    (entityID)
+            query = "SELECT * FROM entities WHERE entity_id = %d" % (entityID)
             cursor.execute(query)
             
             if cursor.rowcount > 0:
                 data = cursor.fetchone()
-                
                 return self._decodeEntity(entityID, data)
             else:
                 return None
         
-        return self._transact(_getEntity, mysqldb.cursors.DictCursor)
+        return MySQL()._transact(_getEntity, returnDict=True)
     
     def updateEntity(self, entity):
         entity = self._encodeEntity(entity)
         
         def _updateEntity(cursor):
- #           query = "UPDATE entities SET 
+            query = """UPDATE entities SET 
                        title = %(title)s, 
                        description = %(desc)s, 
                        category = %(category)s, 
-                       date_created = %(date_created)s, 
- #                      WHERE entity_id = %(id)d"
+                       date_created = %(date_created)s 
+                       WHERE entity_id = %(id)s"""
+            print entity
             cursor.execute(query, entity)
             
             return (cursor.rowcount > 0)
         
-        return self._transact(_updateEntity)
-    
+        return MySQL()._transact(_updateEntity)
+    """  
     def removeEntity(self, entityID):
         def _removeEntity(cursor):
             query = "DELETE FROM entities WHERE entity_id = %d" % \
@@ -95,12 +94,16 @@ class MySQLEntityDB(AEntityDB):
     def _encodeEntity(self, entity):
         timestamp = datetime.now().isoformat()
         
-        return {
-            'title' : self._encode('SAMPLE TITLE'), 
-            'desc'  : self._encode('SAMPLE DESCRIPTION'), 
-            'category' : self._encode('TODO'), 
-            'date_created' : self._encode(timestamp)
-        }
+        encodedEntity = {}
+        encodedEntity['date_created'] = timestamp
+        
+        attributes = ['title', 'desc', 'category', 'id']
+        for attribute in attributes:
+            if attribute in entity:
+                encodedEntity[attribute] = self._encode(entity[attribute])
+            else:
+                encodedEntity[attribute] = None
+        return encodedEntity
     
     def _decodeEntity(self, entityID, data):
         entity = Entity()
