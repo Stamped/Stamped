@@ -5,9 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from AObject import APIObject
+from AObject import AObject
 
-class Stamp(APIObject):
+class Stamp(AObject):
     
     def __init__(self, data=None):
         self._data = data or { }

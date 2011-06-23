@@ -15,12 +15,14 @@ from Entity import Entity
 from User import User
 from Stamp import Stamp
 from Mention import Mention
+from Comment import Comment
 
 # import specific databases
 from db.mysql.MySQLEntityDB import MySQLEntityDB
 from db.mysql.MySQLUserDB import MySQLUserDB
 from db.mysql.MySQLStampDB import MySQLStampDB
 from db.mysql.MySQLMentionDB import MySQLMentionDB
+from db.mysql.MySQLCommentDB import MySQLCommentDB
 
 
 def _setup():
@@ -29,6 +31,7 @@ def _setup():
     MySQLUserDB(setup=True)
     MySQLStampDB(setup=True)
     MySQLMentionDB(setup=True)
+    MySQLCommentDB(setup=True)
 
 def main():
 
@@ -38,6 +41,7 @@ def main():
     userDB = MySQLUserDB()
     stampDB = MySQLStampDB()
     mentionDB = MySQLMentionDB()
+    commentDB = MySQLCommentDB()
 
     print
 
@@ -127,6 +131,36 @@ def main():
     print 'stamped entity: ', mentionCopy['stamp']['entity']['title']
     
     #mentionDB.removeMention(stampID, userID)
+    
+    print
+    
+    # COMMENTS
+    comment = Comment({
+        'user_id' : userID,
+        'stamp_id' : stampID,
+        'comment' : 'Oh man, I love that'})
+    
+    commentID = commentDB.addComment(comment)
+    print 'commentID:      ', commentID
+    
+    commentCopy = commentDB.getComment(commentID)
+    print 'commentCopy:    ', commentCopy
+    print 'user email:     ', commentCopy['user']['email']
+    print 'stamped entity: ', commentCopy['stamp']['entity']['title']
+    
+    secondComment = Comment({
+        'user_id' : userID,
+        'stamp_id' : stampID,
+        'comment' : 'I mean I REALLY love that'})
+    commentDB.addComment(secondComment)
+    
+    conversation = commentDB.getConversation(stampID)
+    
+    for comment in conversation:
+        print '                ', comment['user']['name'], 'says "', comment['comment'], '"'
+        
+    #commentDB.removeComment(commentID)
+    #commentDB.removeConversation(commentID)
     
     print
 

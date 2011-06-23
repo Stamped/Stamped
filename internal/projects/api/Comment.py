@@ -7,19 +7,16 @@ __license__ = "TODO"
 
 from AObject import AObject
 
-class Entity(AObject):
+class Comment(AObject):
     
     def __init__(self, data=None):
         self._data = data or { }
         
         self.id = None
-        self.title = None
-        self.description = None
-        self.category = None
-        self.image = None
-        self.source = None
-        self.location = None
-        self.locale = None
-        self.date_created = None
-        self.date_updated = None
+        self.stamp_id = None
+        self.user_id = None
+        self.timestamp = None
+        self.comment = None
+        self.flagged = None
         self.other = {}
+        
