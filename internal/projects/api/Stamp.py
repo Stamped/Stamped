@@ -7,19 +7,16 @@ __license__ = "TODO"
 
 from AObject import APIObject
 
-class Entity(APIObject):
+class Stamp(APIObject):
     
     def __init__(self, data=None):
         self._data = data or { }
         
         self.id = None
-        self.title = None
-        self.description = None
-        self.category = None
+        self.entity_id = None
+        self.user_id = None
+        self.comment = None
         self.image = None
-        self.source = None
-        self.location = None
-        self.locale = None
+        self.flagged = None
         self.date_created = None
-        self.date_updated = None
         self.other = {}

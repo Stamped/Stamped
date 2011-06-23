@@ -36,9 +36,6 @@ class AEntityDB(object):
     def removeEntities(self, entityIDs):
         return map(self.removeEntity, entityIDs)
     
-    def close(self):
-        raise NotImplementedError
-    
     def __len__(self):
         raise NotImplementedError
     

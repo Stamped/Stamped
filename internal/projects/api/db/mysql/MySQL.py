@@ -9,6 +9,7 @@ import MySQLdb as mysqldb
 
 from AEntityDB import AEntityDB
 from threading import Lock
+from datetime import datetime
 
 class MySQL():
     USER  = 'root'
@@ -16,18 +17,19 @@ class MySQL():
     DB    = 'stamped_test'
     DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
     
-    def __init__(self):
-        #AEntityDB.__init__(self, self.DESC)
+    def __init__(self, mapping=None, setup=False):
+        self.user = self.USER
         self._desc = self.DESC
         self._lock = Lock()
-        self._setup()
+        self.MAPPING = mapping
+        if setup:
+            self._setup()
+        self._getConnection()
     
     def _getConnection(self):
         return mysqldb.connect(user=self.USER, db=self.DB)
     
-    def commit(self):
-        #AEntityDB.close(self)
-        
+    def _commit(self):
         if self.db:
             self.db.commit()
             self.db.close()
@@ -39,49 +41,55 @@ class MySQL():
             cursor.execute('CREATE DATABASE %s' % self.DB)
             return True
         
-        def _createTables(cursor):
-            query = """CREATE TABLE entities (
-                entity_id INT NOT NULL AUTO_INCREMENT, 
-                title VARCHAR(100), 
-                description TEXT, 
-                category VARCHAR(50), 
-                image VARCHAR(100), 
-                source VARCHAR(50), 
-                location VARCHAR(100), 
-                locale VARCHAR(100),
-                affiliate VARCHAR(100),
-                date_created DATETIME,
-                date_updated DATETIME, 
-                PRIMARY KEY(entity_id))"""
-            cursor.execute(query)
-            
-            cursor.execute("CREATE INDEX ix_title ON entities (title)")
-            cursor.execute("CREATE INDEX ix_category ON entities (category)")
-            
-            return True
-        
         self.db = mysqldb.connect(user=self.USER)
         self._transact(_createDB)
-        self.commit()
         
-        self._transact(_createTables)
+        self.db = self._getConnection()
     
-    def _transact(self, func, customCursor=None):
+    """ Requires mapping of object attributes to SQL column names """
+
+    def _mapObjToSQL(self, obj):
+        result = {}
+        for mapping in self.MAPPING:
+            if mapping[0] in obj:
+                result[mapping[1]] = self._encode(obj[mapping[0]])
+            else:
+                result[mapping[1]] = None
+        return result
+    
+    def _mapSQLToObj(self, data, obj):
+        for mapping in self.MAPPING:
+            if mapping[1] in data:
+                obj[mapping[0]] = self._decode(data[mapping[1]])
+            else:
+                obj[mapping[0]] = None
+        return obj
+    
+    def _encode(self, attr):
+        return attr
+    
+    def _decode(self, attr):
+        if type(attr) == str:
+            return attr.replace("\\n", "\n").replace("\\", "")
+        else:
+            return attr
+            
+    def _transact(self, func, returnDict=False):
         retVal = None
-        print func
+        
         self._lock.acquire()
         try:
             if self.db is None:
                 self.db = self._getConnection()
             
-            if customCursor:
-                cursor = self.db.cursor(customCursor)
+            if returnDict:
+                cursor = self.db.cursor(cursorclass=mysqldb.cursors.DictCursor)
             else:
                 cursor = self.db.cursor()
             
             retVal = func(cursor)
             if retVal is not None and (type(retVal) is not bool or retVal == True):
-                self.db.commit()
+                self._commit()
             else:
                 self.db.rollback()
             
@@ -90,3 +98,4 @@ class MySQL():
             self._lock.release()
         
         return retVal
+        
