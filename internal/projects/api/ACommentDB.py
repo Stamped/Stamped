@@ -17,8 +17,14 @@ class ACommentDB(object):
     
     def getComment(self, commentID):
         raise NotImplementedError
+        
+    def getConversation(self, stampID):
+        raise NotImplementedError
     
     def removeComment(self, commentID):
+        raise NotImplementedError
+        
+    def removeConversation(self, stampID):
         raise NotImplementedError
     
     def addComments(self, comments):

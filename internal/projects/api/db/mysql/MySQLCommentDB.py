@@ -21,8 +21,8 @@ class MySQLCommentDB(ACommentDB, MySQL):
     # First item in tuple is OBJECT ATTRIBUTE, second is COLUMN NAME.
     MAPPING = [
             ('id', 'comment_id'),
-            ('stamp_id', 'stamp_id'),
-            ('user_id', 'user_id'),
+            ('stampID', 'stamp_id'),
+            ('userID', 'user_id'),
             ('timestamp', 'timestamp'),
             ('comment', 'comment'),
             ('flagged', 'flagged')
@@ -67,8 +67,8 @@ class MySQLCommentDB(ACommentDB, MySQL):
                 return None
         
         comment = self._transact(_getComment, returnDict=True)
-        comment['user'] = MySQLUserDB().getUser(comment['user_id'])
-        comment['stamp'] = MySQLStampDB().getStamp(comment['stamp_id'])
+        comment['user'] = MySQLUserDB().getUser(comment['userID'])
+        comment['stamp'] = MySQLStampDB().getStamp(comment['stampID'])
         
         return comment
         
@@ -79,28 +79,17 @@ class MySQLCommentDB(ACommentDB, MySQL):
             query = ("SELECT * FROM comments WHERE stamp_id = %s" % 
                 (stampID))
             cursor.execute(query)
-            
-            
-            
             conversastionData = cursor.fetchall()
             
             conversation = []
             for commentData in conversastionData:
                 comment = Comment()
                 comment = self._mapSQLToObj(commentData, comment)
-                comment['user'] = MySQLUserDB().getUser(comment['user_id'])
+                comment['user'] = MySQLUserDB().getUser(comment['userID'])
                 comment['stamp'] = stamp
                 conversation.append(comment)
                 
             return conversation
-            
-            
-            if cursor.rowcount > 0:
-                data = cursor.fetchone()
-                comment = Comment()
-                return self._mapSQLToObj(data, comment)
-            else:
-                return None
         
         conversation = self._transact(_getConversation, returnDict=True)
         

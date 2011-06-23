@@ -13,8 +13,8 @@ class Stamp(AObject):
         self._data = data or { }
         
         self.id = None
-        self.entity_id = None
-        self.user_id = None
+        self.entityID = None
+        self.userID = None
         self.comment = None
         self.image = None
         self.flagged = None

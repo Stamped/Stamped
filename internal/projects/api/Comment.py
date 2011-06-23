@@ -13,8 +13,8 @@ class Comment(AObject):
         self._data = data or { }
         
         self.id = None
-        self.stamp_id = None
-        self.user_id = None
+        self.stampID = None
+        self.userID = None
         self.timestamp = None
         self.comment = None
         self.flagged = None
