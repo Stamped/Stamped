@@ -10,6 +10,7 @@ import json, sys, urllib, Utils
 from optparse import OptionParser
 from Geocoder import Geocoder
 from Google import Google
+from AEntityDataSource import AExternalServiceEntityDataSource
 
 # TODO: take API_KEY from GooglePlaces API_KEY set
 

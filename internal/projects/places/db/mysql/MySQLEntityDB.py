@@ -84,15 +84,16 @@ class MySQLEntityDB(AEntityDB):
         return self._transact(_removeEntity)
     
     def addEntities(self, entities):
-        entities = (self._encodeEntity for entity in entities)
+        entities = (self._encodeEntity(e) for e in entities)
+        entities = ((e['title'], e['desc'], e['category'], e['date_created']) for e in entities)
         
         def _addEntities(cursor):
             query = """INSERT INTO entities 
                     (title, description, category, date_created) VALUES 
-                    (%(title)s, %(desc)s, %(category)s, %(date_created)s)"""
+                    (%s, %s, %s, %s)"""
             cursor.executemany(query, entities)
             
-            return (cursor.rowcount == len(entities))
+            return (cursor.rowcount == Utils.count(entities))
         
         return self._transact(_addEntities)
     
@@ -172,8 +173,8 @@ class MySQLEntityDB(AEntityDB):
         timestamp = datetime.now().isoformat()
         
         return {
-            'title' : self._encode(entity['title']), 
-            'desc'  : self._encode(entity['desc']), 
+            'title' : self._encode(entity.name), 
+            'desc'  : self._encode(entity.desc), 
             'category' : self._encode('TODO'), 
             'date_created' : self._encode(timestamp)
         }
@@ -222,4 +223,7 @@ for k, v in e._data.iteritems():
         print "Error: '%s'\n'%s'" % (str(f[k]), str(v))
 
 """
+
+import EntityDatabases
+EntityDatabases.registerDB('mysql', MySQLEntityDB)
 

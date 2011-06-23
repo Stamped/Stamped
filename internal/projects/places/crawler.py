@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import sys, thread
-import MySQLdb, Utils
+import EntityDatabases, EntityDataSources
+import Globals, MySQLdb, Utils
 
 from EntityMatcher import EntityMatcher
 from optparse import OptionParser
@@ -25,58 +26,18 @@ from db.mysql.MySQLEntityDB import MySQLEntityDB
 class Crawler(Thread):
     """Crawls for objects..."""
     
-    def __init__(self, siteName, lock, options):
+    def __init__(self, lock, options):
         Thread.__init__(self)
-        self.siteName = siteName.strip()
         self.lock = lock
-        self.entities = {}
         self.options = options
+        self.log = Utils.log
     
     def run(self):
-        if (self.siteName == "opentable"):
-            self.site = OpenTableCrawler(self)
-        else:
-            raise Exception, "Unsupported site '%' specified." % (self.siteName,)
+        for source in self.options.sources:
+            self.log("Importing entities from '%s'" % source.name)
+            source.importAll(self.options.db, self.options.limit)
         
-        if self.options.crawl:
-            self.crawl()
-        else:
-            import opentabledata
-            self.entities = opentabledata.g_opentable_entities
-        
-        self.crossRencerenceResults()
-    
-    def getNumEntities(self):
-        return len(self.entities)
-    
-    def crawl(self):
-        url = self.site.getNextURL()
-        
-        while 1:
-            if url == None or url == "" or (self.options.test and len(self.entities) > 30):
-                numEntities = self.getNumEntities()
-                
-                self.log("\n")
-                self.log("Crawling finished; DB contains %d entities!" % numEntities)
-                self.log("\n")
-                break
-            else:
-                self.crawlURL(url)
-                url = self.site.getNextURL()
-    
-    def crawlURL(self, url):
-        try:
-            self.log("Crawling url " + url + "\n")
-            self.entities = self.site.extractData(url)
-            
-            #self.updateDB(data)
-        except (KeyboardInterrupt, SystemExit):
-            thread.interrupt_main()
-            raise
-        except:
-            self.log("Error crawling " + url + "\n")
-            Utils.printException()
-            pass
+        #self.crossRencerenceResults()
     
     def crossRencerenceResults(self):
         self.log('')
@@ -116,61 +77,73 @@ class Crawler(Thread):
         self.log('')
         self.log('MATCHED %d out of %d (%g%%)' % (matched, count, (100.0 * matched) / count))
         self.log('')
-    
-    def log(self, s):
-        print("[" + self.getName() + "] " + str(s))
 
 def parseCommandLine():
-    usage   = "Usage: %prog [options]"
+    usage   = "Usage: %prog [options] [sources]"
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
-    parser.add_option("-s", "--sync", action="store_true", dest="sync", 
-        default=True, help="Run crawler synchronously per request")
-    parser.add_option("-a", "--async", action="store_false", dest="sync", 
-        default=False, help="Run crawler asynchronously per request")
-    parser.set_defaults(sync=True)
+    parser.add_option("-a", "--all", action="store_true", dest="all", 
+        default=False, help="crawl all available sources")
     
-    parser.add_option("-t", "--test", action="store_true", dest="test", 
-        default=False, help="Run crawler in test mode on a small subset of " + 
-        "all possible links (~30 New York restaurants, which should be " + 
-        "statistically significant)")
+    parser.set_defaults(all=False)
     
-    parser.add_option("-l", "--load", action="store_false", dest="crawl", 
-        help="Bypass crawling by loading OpenTable data from " +
-        "previous run and only process the results")
+    parser.add_option("-n", "--numThreads", default=1, type="int", 
+        help="sets the number of top-level threads to run")
     
-    parser.set_defaults(test=False)
-    parser.set_defaults(crawl=True)
+    parser.add_option("-l", "--limit", default=None, type="int", 
+        help="limits the number of entities to import")
     
-    parser.add_option("-n", "--numThreads", default=4, 
-        help="Set the number of top-level threads to run (assumes --async)")
+    parser.add_option("-d", "--db", 
+        type = 'choice', 
+        action = 'store', 
+        dest = 'db', 
+        choices = ['mysql', 'mongo', 'cassandra', 'riak', 'redis', 'simpledb'], 
+        default = 'mysql', 
+        help="sets the destination database to persist entities to")
     
     (options, args) = parser.parse_args()
-    print str(options)
-    if len(args) > 0:
-        parser.print_help()
-        return None
+    
+    if options.all:
+        options.sources = EntityDataSources.instantiateAll()
+    else:
+        if len(args) == 0:
+            parser.print_help()
+            return None
+        
+        options.sources = [ ]
+        for arg in args:
+            source = EntityDataSources.instantiateSource(arg)
+            
+            if not source:
+                print "Error: unrecognized source '%s'" % arg
+                parser.print_help()
+                return None
+            else:
+                options.sources.append(source)
+    
+    if options.db:
+        db = EntityDatabases.instantiateDB(options.db)
+        if not db:
+            print "Error: unrecognized db '%s'" % options.db
+            parser.print_help()
+            return None
+        else:
+            options.db = db
     
     return options
 
 def main():
     """
-        Usage: crawler.py [options]
+        Usage: crawler.py [options] [sources]
 
         Options:
           --version             show program's version number and exit
           -h, --help            show this help message and exit
-          -s, --sync            Run crawler synchronously per request
-          -a, --async           Run crawler asynchronously per request
-          -t, --test            Run crawler in test mode on a small subset of all
-                                possible links (~30 New York restaurants, which should
-                                be statistically significant)
-          -l, --load            Bypass crawling by loading OpenTable data from
-                                previous run and only process the results
+          -a, --all             Crawl all available sources
           -n NUMTHREADS, --numThreads=NUMTHREADS
-                                Set the number of top-level threads to run (assumes
-                                --async)
+                                Set the number of top-level threads to run
+          -d DB, --db=DB        Sets the destination database to persist entities to.
     """
     
     options = parseCommandLine()
@@ -179,26 +152,18 @@ def main():
     
     # global lock used to synchronize access to the DB across threads
     lock = Lock()
-    site = "opentable"
     
-    if options.sync:
-        # synchronous version
-        Crawler(site, lock, options).run()
-    else:
-        # asynchronous, threaded version
-        threads = []
-        for i in range(options.numThreads):
-            thread = Crawler(site, lock, options)
-            threads.append(thread)
-            thread.log("Spawning thread %d" % i)
-            thread.start()
-
-        for thread in threads:
-           thread.join()
-
-from sources.OpenTable import OpenTable
+    threads = []
+    for i in range(options.numThreads):
+        thread = Crawler(lock, options)
+        threads.append(thread)
+        thread.log("Spawning thread %d" % i)
+        thread.start()
+    
+    for thread in threads:
+       thread.join()
 
 # where all the magic starts
-#if __name__ == '__main__':
-#    main()
+if __name__ == '__main__':
+    main()
 

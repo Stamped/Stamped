@@ -11,6 +11,8 @@ from Entity import Entity
 __BASE_URL = "http://www.opentable.com/"
 
 def parseEntity(entity):
+    Utils.log("[OpenTable] parsing '%s'" % entity.name)
+    
     def encodeName(name):
         toReplace = {
             "'" : "", 
@@ -25,7 +27,7 @@ def parseEntity(entity):
             "." : " ", 
         }
         
-        def replaceAll(text, dic):
+        def __replaceAll(text, dic):
             for i, j in dic.iteritems():
                 text = text.replace(i, j)
             
@@ -40,7 +42,6 @@ def parseEntity(entity):
     nickname = entity.openTable['reserveURL']
     
     encodedName = encodeName(name)
-    entity = None
     
     urls = [
         __BASE_URL + encodedName, 
@@ -82,19 +83,13 @@ def parseEntity(entity):
         return None
     
     try:
-        entity = { }
-        
-        elem = soup.find("h2", {"class" : "RestaurantProfileNameHeader2"})
-        if elem is None:
-            return None
-        
-        #entity.name = elem.renderContents().strip()
+        #elem = soup.find("h2", {"class" : "RestaurantProfileNameHeader2"})
+        #if elem is not None:
+        #    entity.name = elem.renderContents().strip()
         
         elem = soup.find("span", {"id" : re.compile("RestaurantProfile.*Description")})
-        if elem is None:
-            return None
-        
-        entity.desc = elem.renderContents().strip()
+        if elem is not None:
+            entity.desc = elem.renderContents().strip()
         
         details = { }
         
@@ -151,7 +146,7 @@ def parseEntity(entity):
         entity.add(details)
     except:
         Utils.log("[OpenTable] Error crawling " + url)
-        #Utils.printException()
+        Utils.printException()
     
     return entity
 

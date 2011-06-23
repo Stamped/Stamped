@@ -5,13 +5,14 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import sys, time, traceback, urllib2
+import sys, threading, time, traceback, urllib2
 
 from BeautifulSoup import BeautifulSoup
 
 def log(s):
     # TODO: look into logging module with logging.basicConfig(format="%(threadName)s:%(message)s")
-    print unicode(str(s), "utf-8")
+    #print unicode(str(s), "utf-8")
+    print "[%s] %s" % (threading.currentThread().getName(), str(s))
 
 def write(s, n):
     """
@@ -87,4 +88,11 @@ def getSoup(url):
 
 def createEnum(*sequential, **named):
     return dict(zip(sequential, range(len(sequential))), **named)
+
+def count(container):
+    try:
+        return len(container)
+    except:
+        # count the number of elements in a generator expression
+        return sum(1 for item in container)
 

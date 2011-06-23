@@ -6,10 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import urllib, string, re, os
-import Utils
+import Globals, Utils
 
 from AEntityDataSource import AExternalSiteEntityDataSource
-from ThreadPool import ThreadPool
 from threading import Lock
 
 class OpenTableCrawler(AExternalSiteEntityDataSource):
@@ -28,7 +27,7 @@ class OpenTableCrawler(AExternalSiteEntityDataSource):
         AExternalSiteEntityDataSource.__init__(self, self.NAME)
         
         self._crawler = crawler;
-        self._pool = ThreadPool(64)
+        self._pool = Globals.threadPool
         
         self.s_lock.acquire()
         if self.s_first:
@@ -38,10 +37,12 @@ class OpenTableCrawler(AExternalSiteEntityDataSource):
         self.s_lock.release()
     
     def _initPages(self):
+        """
         if self._crawler.options.test or not self._crawler.options.crawl:
             # hardcoded page of ~30 new york restaurants for testing purposes
             self.s_pages.add("http://www.opentable.com/opentables.aspx?t=reg&n=11,18,66,2987,2999,3032,3044,3047,3068,3101,3113,3128,3131,3161,7376,7382,7394,7397,7616,7628,7682&m=8&p=2&d=6/14/2011%207:00:00%20PM&scpref=108")
             return
+        """
         
         self._crawler.log("\n")
         self._crawler.log("Initializing crawl index for " + self._name + " (" + self.BASE_URL + ")\n")

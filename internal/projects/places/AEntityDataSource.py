@@ -5,30 +5,22 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+from abc import abstractmethod
 from AEntityDB import AEntityDB
 from Entity import Entity
 
-import Utils
+import EntityDataSources, Utils
 
 class AEntityDataSource(object):
-    s_sources = Utils.createEnum('OpenTable', 'GooglePlaces')
-    
     def __init__(self, name):
         self._name = name
-        self._id = self.getSourceID(name)
+        self._id = EntityDataSources.getSourceID(name)
     
-    def importAll(self, entityDB, limit=None):
-        raise NotImplementedError
+    @abstractmethod
+    def importAll(self, entityDB, limit=None): pass
     
-    #def update(self, entityDB, entities):
-    #    raise NotImplementedError
-    
-    @staticmethod
-    def getSourceID(name):
-        if name in AEntityDataSource.s_sources:
-            return AEntityDataSource.s_sources[name]
-        else:
-            return None
+    @property
+    def name(self): return self._name
 
 class AExternalEntityDataSource(AEntityDataSource):
     
@@ -57,11 +49,13 @@ class AExternalSiteEntityDataSource(AExternalEntityDataSource):
                 self.log("Error crawling " + url + "\n")
                 Utils.printException()
     
+    @abstractmethod
     def getNextURL(self):
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     def getEntitiesFromURL(self, url, limit=None):
-        raise NotImplementedError
+        pass
 
 class AExternalServiceEntityDataSource(AExternalEntityDataSource):
     """
@@ -83,8 +77,9 @@ class AExternalDumpEntityDataSource(AExternalEntityDataSource):
     def __init__(self, name):
         AExternalEntityDataSource.__init__(self, name)
     
+    @abstractmethod
     def getAll(self, limit=None):
-        raise NotImplementedError
+        pass
     
     def importAll(self, entityDB, limit=None):
         entities = self.getAll(limit)

@@ -6,23 +6,28 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from Entity import Entity
+from abc import abstractmethod
 
 class AEntityDB(object):
     
     def __init__(self, desc):
         self._desc = desc
     
+    @abstractmethod
     def addEntity(self, entity):
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     def getEntity(self, entityID):
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     def updateEntity(self, entity):
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     def removeEntity(self, entityID):
-        raise NotImplementedError
+        pass
     
     def addEntities(self, entities):
         return map(self.addEntity, entities)
@@ -36,11 +41,9 @@ class AEntityDB(object):
     def removeEntities(self, entityIDs):
         return map(self.removeEntity, entityIDs)
     
+    @abstractmethod
     def close(self):
-        raise NotImplementedError
-    
-    def __len__(self):
-        raise NotImplementedError
+        pass
     
     def __str__(self):
         return self._desc
