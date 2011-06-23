@@ -14,6 +14,9 @@ from User import User
 
 class MySQLUserDB(AUserDB, MySQL):
 
+    # Denotes relationship between object and SQL table structure -- primary
+    # use is to map fields between both structures.
+    # First item in tuple is OBJECT ATTRIBUTE, second is COLUMN NAME.
     MAPPING = [
             ('id', 'user_id'),
             ('email', 'email'),
@@ -32,6 +35,7 @@ class MySQLUserDB(AUserDB, MySQL):
     
     def __init__(self, setup=False):
         AUserDB.__init__(self, self.DESC)
+        MySQL.__init__(self, mapping=self.MAPPING)
         
         self.db = self._getConnection()
         self._lock = Lock()
@@ -42,7 +46,6 @@ class MySQLUserDB(AUserDB, MySQL):
     
     def addUser(self, user):
         user = self._mapObjToSQL(user)
-        #user['date_created'] = datetime.now().isoformat()
         
         def _addUser(cursor):
             query = """INSERT INTO users 
@@ -62,7 +65,6 @@ class MySQLUserDB(AUserDB, MySQL):
             
             if cursor.rowcount > 0:
                 data = cursor.fetchone()
-                #return self._decodeUser(userID, data)
                 user = User()
                 return self._mapSQLToObj(data, user)
             else:

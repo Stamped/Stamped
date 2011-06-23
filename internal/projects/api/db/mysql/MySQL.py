@@ -17,10 +17,11 @@ class MySQL():
     DB    = 'stamped_test'
     DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
     
-    def __init__(self, setup=False):
+    def __init__(self, mapping=None, setup=False):
         self.user = self.USER
         self._desc = self.DESC
         self._lock = Lock()
+        self.MAPPING = mapping
         if setup:
             self._setup()
         self._getConnection()
@@ -45,11 +46,13 @@ class MySQL():
         
         self.db = self._getConnection()
     
-    def _mapObjToSQL(self, entity):
+    """ Requires mapping of object attributes to SQL column names """
+
+    def _mapObjToSQL(self, obj):
         result = {}
         for mapping in self.MAPPING:
-            if mapping[0] in entity:
-                result[mapping[1]] = self._encode(entity[mapping[0]])
+            if mapping[0] in obj:
+                result[mapping[1]] = self._encode(obj[mapping[0]])
             else:
                 result[mapping[1]] = None
         return result

@@ -14,6 +14,9 @@ from Entity import Entity
 
 class MySQLEntityDB(AEntityDB, MySQL):
 
+    # Denotes relationship between object and SQL table structure -- primary
+    # use is to map fields between both structures.
+    # First item in tuple is OBJECT ATTRIBUTE, second is COLUMN NAME.
     MAPPING = [
             ('id', 'entity_id'),
             ('title', 'title'),
@@ -28,6 +31,7 @@ class MySQLEntityDB(AEntityDB, MySQL):
 
     def __init__(self, setup=False):
         AEntityDB.__init__(self, self.DESC)
+        MySQL.__init__(self, mapping=self.MAPPING)
         
         self.db = self._getConnection()
         self._lock = Lock()
