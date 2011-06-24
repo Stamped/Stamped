@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-class APIObject(object):
+class AObject(object):
     
     def __init__(self, data=None):
         self._data = data or { }

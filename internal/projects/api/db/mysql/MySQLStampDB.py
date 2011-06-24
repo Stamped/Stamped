@@ -21,8 +21,8 @@ class MySQLStampDB(AStampDB, MySQL):
     # First item in tuple is OBJECT ATTRIBUTE, second is COLUMN NAME.
     MAPPING = [
             ('id', 'stamp_id'),
-            ('entity_id', 'entity_id'),
-            ('user_id', 'user_id'),
+            ('entityID', 'entity_id'),
+            ('userID', 'user_id'),
             ('comment', 'comment'),
             ('image', 'image'),
             ('flagged', 'flagged'),
@@ -68,10 +68,34 @@ class MySQLStampDB(AStampDB, MySQL):
                 return None
         
         stamp = self._transact(_getStamp, returnDict=True)
-        stamp['user'] = MySQLUserDB().getUser(stamp['user_id'])
-        stamp['entity'] = MySQLEntityDB().getEntity(stamp['entity_id'])
+        stamp['user'] = MySQLUserDB().getUser(stamp['userID'])
+        stamp['entity'] = MySQLEntityDB().getEntity(stamp['entityID'])
         
         return stamp
+    
+    def getStamps(self, stampIDs):
+        
+        def _getStamps(cursor):
+            
+            format_strings = ','.join(['%s'] * len(stampIDs))
+            cursor.execute("SELECT * FROM stamps WHERE stamp_id IN (%s)" % 
+                format_strings, tuple(stampIDs))
+            stampsData = cursor.fetchall()
+            
+            stamps = []
+            for stampData in stampsData:
+                stamp = Stamp()
+                stamp = self._mapSQLToObj(stampData, stamp)
+                # probably a more efficient way to do this (as opposed to iterating)
+                stamp['entity'] = MySQLEntityDB().getEntity(stamp['entityID'])
+                stamp['user'] = MySQLUserDB().getUser(stamp['userID'])
+                stamps.append(stamp)
+                
+            return stamps
+        
+        stamps = self._transact(_getStamps, returnDict=True)
+        
+        return stamps
     
     def updateStamp(self, stamp):
         stamp = self._mapObjToSQL(stamp)

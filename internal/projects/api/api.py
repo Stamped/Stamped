@@ -15,12 +15,23 @@ from Entity import Entity
 from User import User
 from Stamp import Stamp
 from Mention import Mention
+from Comment import Comment
+from Favorite import Favorite
+from Friendship import Friendship
+from Friends import Friends
+from Friendship import Friendship
 
 # import specific databases
 from db.mysql.MySQLEntityDB import MySQLEntityDB
 from db.mysql.MySQLUserDB import MySQLUserDB
 from db.mysql.MySQLStampDB import MySQLStampDB
 from db.mysql.MySQLMentionDB import MySQLMentionDB
+from db.mysql.MySQLCommentDB import MySQLCommentDB
+from db.mysql.MySQLFavoriteDB import MySQLFavoriteDB
+from db.mysql.MySQLCollectionDB import MySQLCollectionDB
+from db.mysql.MySQLFriendshipDB import MySQLFriendshipDB
+from db.mysql.MySQLFriendsDB import MySQLFriendsDB
+from db.mysql.MySQLFollowersDB import MySQLFollowersDB
 
 
 def _setup():
@@ -29,6 +40,12 @@ def _setup():
     MySQLUserDB(setup=True)
     MySQLStampDB(setup=True)
     MySQLMentionDB(setup=True)
+    MySQLCommentDB(setup=True)
+    MySQLFavoriteDB(setup=True)
+    MySQLCollectionDB()
+    MySQLFriendshipDB(setup=True)
+    MySQLFriendsDB()
+    MySQLFollowersDB()
 
 def main():
 
@@ -38,6 +55,12 @@ def main():
     userDB = MySQLUserDB()
     stampDB = MySQLStampDB()
     mentionDB = MySQLMentionDB()
+    commentDB = MySQLCommentDB()
+    favoriteDB = MySQLFavoriteDB()
+    collectionDB = MySQLCollectionDB()
+    friendshipDB = MySQLFriendshipDB()
+    friendsDB = MySQLFriendsDB()
+    followersDB = MySQLFollowersDB()
 
     print
 
@@ -91,8 +114,8 @@ def main():
     
     # STAMPS
     stamp = Stamp({
-        'user_id' : userID,
-        'entity_id' : entityID,
+        'userID' : userID,
+        'entityID' : entityID,
         'comment' : 'Great entity!'})
     
     stampID = stampDB.addStamp(stamp)
@@ -116,8 +139,8 @@ def main():
     
     # MENTIONS
     mention = Mention({
-        'user_id' : userID,
-        'stamp_id' : stampID})
+        'userID' : userID,
+        'stampID' : stampID})
     
     mentionDB.addMention(mention)
     
@@ -129,6 +152,105 @@ def main():
     #mentionDB.removeMention(stampID, userID)
     
     print
+    
+    # COMMENTS
+    comment = Comment({
+        'userID' : userID,
+        'stampID' : stampID,
+        'comment' : 'Oh man, I love that'})
+    
+    commentID = commentDB.addComment(comment)
+    print 'commentID:      ', commentID
+    
+    commentCopy = commentDB.getComment(commentID)
+    print 'commentCopy:    ', commentCopy
+    print 'user email:     ', commentCopy['user']['email']
+    print 'stamped entity: ', commentCopy['stamp']['entity']['title']
+    
+    secondComment = Comment({
+        'userID' : userID,
+        'stampID' : stampID,
+        'comment' : 'I mean I REALLY love that'})
+    commentDB.addComment(secondComment)
+    
+    conversation = commentDB.getConversation(stampID)
+    
+    for comment in conversation:
+        print '                ', comment['user']['name'], 'says "', comment['comment'], '"'
+        
+    #commentDB.removeComment(commentID)
+    #commentDB.removeConversation(commentID)
+    
+    print
+    
+    # FAVORITES
+    favorite = Favorite({
+        'userID' : userID,
+        'stampID' : stampID})
+    
+    favoriteDB.addFavorite(favorite)
+    favoriteDB.addFavorite(Favorite({'userID' : userID, 'stampID' : 2}))
+    
+    favoriteCopy = favoriteDB.getFavorite(stampID, userID)
+    print 'favoriteCopy:   ', favoriteCopy
+    print 'user email:     ', favoriteCopy['user']['email']
+    print 'stamped entity: ', favoriteCopy['stamp']['entity']['title']
+    
+    #mentionDB.removeMention(stampID, userID)
+    
+    print
+    
+    # COLLECTIONS
+    
+    userCollection = collectionDB.getUser(userID)
+    print 'User Collection'
+    for stamp in userCollection:
+        print '                ', stamp['entity']['title']
+        print '                 Stamped by', stamp['user']['name']
+        print '                ', stamp['comment']
+        print
+    
+    favoritesCollection = collectionDB.getFavorites(userID)
+    print 'Favorites Collection'
+    for stamp in favoritesCollection:
+        print '                ', stamp['entity']['title']
+        print '                 Stamped by', stamp['user']['name']
+        print '                ', stamp['comment']
+        print
+    
+    mentionsCollection = collectionDB.getMentions(userID)
+    print 'Mentions Collection'
+    for stamp in mentionsCollection:
+        print '                ', stamp['entity']['title']
+        print '                 Stamped by', stamp['user']['name']
+        print '                ', stamp['comment'] 
+        print
+    
+    print
+    
+    # FRIENDSHIP
+    friendship = Friendship({
+        'userID' : 1,
+        'followingID' : 2})
+    
+    friendshipDB.addFriendship(friendship)
+    
+    friendshipCopy = friendshipDB.getFriendship(1, 2)
+    print 'friendshipCopy: ', friendshipCopy
+    print 'user email:     ', friendshipCopy['user']['email']
+    print 'following name: ', friendshipCopy['following']['name']
+    
+    print friendshipDB.checkFriendship(1, 2)
+    friendshipDB.removeFriendship(1, 2)
+    print friendshipDB.checkFriendship(1, 2)
+    
+    friendshipDB.addFriendship(friendship)
+    
+    print
+    
+    #friends = Friends({'userID' : 1})
+    print friendsDB.getFriends(1)
+    print followersDB.getFollowers(2)
 
 # where all the magic starts
 if __name__ == '__main__':

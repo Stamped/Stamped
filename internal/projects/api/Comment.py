@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 from AObject import AObject
 
-class Mention(AObject):
+class Comment(AObject):
     
     def __init__(self, data=None):
         self._data = data or { }
@@ -15,5 +15,8 @@ class Mention(AObject):
         self.id = None
         self.stampID = None
         self.userID = None
-        self.date_created = None
+        self.timestamp = None
+        self.comment = None
+        self.flagged = None
         self.other = {}
+        

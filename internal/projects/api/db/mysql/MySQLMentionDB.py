@@ -20,8 +20,8 @@ class MySQLMentionDB(AMentionDB, MySQL):
     # use is to map fields between both structures.
     # First item in tuple is OBJECT ATTRIBUTE, second is COLUMN NAME.
     MAPPING = [
-            ('stamp_id', 'stamp_id'),
-            ('user_id', 'user_id'),
+            ('stampID', 'stamp_id'),
+            ('userID', 'user_id'),
             ('date_created', 'date_created')
         ]
     
@@ -63,8 +63,8 @@ class MySQLMentionDB(AMentionDB, MySQL):
                 return None
         
         mention = self._transact(_getMention, returnDict=True)
-        mention['user'] = MySQLUserDB().getUser(mention['user_id'])
-        mention['stamp'] = MySQLStampDB().getStamp(mention['stamp_id'])
+        mention['user'] = MySQLUserDB().getUser(mention['userID'])
+        mention['stamp'] = MySQLStampDB().getStamp(mention['stampID'])
         
         return mention
     
@@ -86,7 +86,7 @@ class MySQLMentionDB(AMentionDB, MySQL):
                     stamp_id INT NOT NULL, 
                     user_id INT NOT NULL, 
                     date_created DATETIME, 
-                    PRIMARY KEY(user_id, stamp_id))"""
+                    PRIMARY KEY(stamp_id, user_id))"""
             cursor.execute(query)
             
             return True

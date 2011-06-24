@@ -7,13 +7,12 @@ __license__ = "TODO"
 
 from AObject import AObject
 
-class Mention(AObject):
+class Favorite(AObject):
     
     def __init__(self, data=None):
         self._data = data or { }
         
-        self.id = None
         self.stampID = None
         self.userID = None
-        self.date_created = None
-        self.other = {}
+        self.timestamp = None
+        
