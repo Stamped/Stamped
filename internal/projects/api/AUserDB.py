@@ -26,6 +26,14 @@ class AUserDB(object):
         
     def flagUser(self, userID, flag=1):
         raise NotImplementedError
+        
+    def lookupUsers(self, userIDs, usernames):
+        # Must set userIDs or usernames to 'None' if not using
+        raise NotImplementedError
+        
+    def searchUsers(self, searchQuery):
+        raise NotImplementedError
+        
     
     def addUsers(self, users):
         return map(self.addUser, users)
