@@ -21,7 +21,7 @@ class EntityMatcher(object):
         self.initWordBlacklistSets()
     
     def tryMatchEntityWithGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
-        address = entity['addr']
+        address = entity.address
         latLng  = self.googlePlaces.addressToLatLng(address)
         
         if latLng is None:

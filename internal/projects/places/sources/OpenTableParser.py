@@ -110,7 +110,6 @@ def parseEntity(entity):
             'publicTransit', 
             'parking', 
             'parkingDetails', 
-            'catering', 
             'privatePartyFacilities', 
             'privatePartyContact', 
             'entertainment', 
@@ -127,6 +126,8 @@ def parseEntity(entity):
                 raw = elem.renderContents()
                 regex = re.compile(r'[^:]*:(.*)')
                 details[item] = regex.sub(r'\1', raw).strip()
+                
+                Utils.log("'%s' => '%s'" % (item, details[item]))
         
         """
         imageWrapper = soup.find("div", {"class" : "restaurantImageWrapper"})

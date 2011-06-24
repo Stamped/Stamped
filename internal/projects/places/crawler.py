@@ -37,6 +37,7 @@ class Crawler(Thread):
             self.log("Importing entities from '%s'" % source.name)
             source.importAll(self.options.db, self.options.limit)
         
+        self.options.db.close()
         #self.crossRencerenceResults()
     
     def crossRencerenceResults(self):
@@ -153,15 +154,18 @@ def main():
     # global lock used to synchronize access to the DB across threads
     lock = Lock()
     
-    threads = []
-    for i in range(options.numThreads):
-        thread = Crawler(lock, options)
-        threads.append(thread)
-        thread.log("Spawning thread %d" % i)
-        thread.start()
-    
-    for thread in threads:
-       thread.join()
+    if options.numThreads <= 1:
+        Crawler(lock, options).run()
+    else:
+        threads = []
+        for i in range(options.numThreads):
+            thread = Crawler(lock, options)
+            threads.append(thread)
+            thread.log("Spawning thread %d" % i)
+            thread.start()
+        
+        for thread in threads:
+           thread.join()
 
 # where all the magic starts
 if __name__ == '__main__':

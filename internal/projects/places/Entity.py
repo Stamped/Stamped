@@ -5,82 +5,82 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-"""
-{
-    'name' : str, 
-    'desc' : str, 
-    
-    'locale' : locale, 
-    'images' : [ image* ], 
-    
-    'dates' : {
-        'created'  : str, 
-        'modified' : str, 
-    }, 
-    
-    'details' : {
-        'place' :? {
-            'address' : str
-            'coordinates' : {
-                'lat' : float, 
-                'lng' : float
-            }
-            'types' : [ str* ], 
-            'vicinity' :? str, 
-        }, 
-        
-        'contact' :? {
-            'phone' :? str, 
-            'site'  :? str, 
-            'email' :? str, 
-        }, 
-        
-        'restaurant' :? {
-            'diningStyle', 
-            'cuisine', 
-            'price', 
-            'payment', 
-            'dressCode', 
-            'acceptsWalkins', 
-            'offers', 
-            'publicTransit', 
-            'parking', 
-            'parkingDetails', 
-            'catering', 
-            'privatePartyFacilities', 
-            'privatePartyContact', 
-            'entertainment', 
-            'specialEvents', 
-            'catering', 
-        }, 
-        'book' :? {
-        }, 
-        'movie' :? {
-        }, 
-    }, 
-    
-    'sources' : {
-        'googlePlaces' :? {
-            'id' : str, 
-            'reference' : str, 
-        }, 
-        'openTable' :? {
-            'id' : str, 
-            'reserveURL' : str, 
-            'countryID'  : str, 
-            'metroName'  : str, 
-            'neighborhoodName' : str, 
-        }
-    }
-}
-"""
-
-def __isString(s):
-    return s and isinstance(s, basestring)
+import Utils
 
 class Entity(object):
-    __details = set([ 'place', 'contact', 'restaurant', 'book', 'movie' ])
-    __sources = set([ 'googlePlaces', 'openTable' ])
+    _schema = \
+    {
+        'id'   : int, 
+        'name' : basestring, 
+        'desc' : basestring, 
+        
+        'locale' : basestring, 
+        'images' : list, 
+        
+        'date' : {
+            'created'  : basestring, 
+            'modified' : basestring, 
+        }, 
+        
+        'details' : {
+            'place' : {
+                'address' : basestring, 
+                'coordinates' : {
+                    'lat' : float, 
+                    'lng' : float
+                }, 
+                'types' : list, 
+                'vicinity' : basestring, 
+                'neighborhood' : basestring, 
+                'crossStreet' : basestring, 
+                'publicTransit' : basestring, 
+                'parking' : basestring, 
+                'parkingDetails' : basestring, 
+            }, 
+            
+            'contact' : {
+                'phone' : basestring, 
+                'site'  : basestring, 
+                'email' : basestring, 
+                'hoursOfOperation' : basestring, 
+            }, 
+            
+            'restaurant' : {
+                'diningStyle' : basestring, 
+                'cuisine' : basestring, 
+                'price' : basestring, 
+                'payment' : basestring, 
+                'dressCode' : basestring, 
+                'acceptsWalkins' : basestring, 
+                'offers' : basestring, 
+                'privatePartyFacilities' : basestring, 
+                'privatePartyContact' : basestring, 
+                'entertainment' : basestring, 
+                'specialEvents' : basestring, 
+                'catering' : basestring, 
+            }, 
+            'book' : {
+                # TODO
+            }, 
+            'movie' : {
+                # TODO
+            }, 
+        }, 
+        
+        'sources' : {
+            'googlePlaces' : {
+                'id' : basestring, 
+                'reference' : basestring, 
+            }, 
+            'openTable' : {
+                'id' : basestring, 
+                'reserveURL' : basestring, 
+                'countryID'  : basestring, 
+                'metroName'  : basestring, 
+                'neighborhoodName' : basestring, 
+            }
+        }
+    }
     
     def __init__(self, data=None):
         if data:
@@ -115,11 +115,12 @@ class Entity(object):
                 return dic[name]
             else:
                 for k, v in dic.iteritems():
-                    if v is dict:
+                    if isinstance(v, dict):
                         retVal = _get(v)
                         if retVal:
                             return retVal
             return None
+        
         return _get(self._data)
     
     def __setattr__(self, name, value):
@@ -127,43 +128,84 @@ class Entity(object):
         
         if name == '_data':
             object.__setattr__(self, name, value)
-            return
+            return None
         
-        if name in self.__details and not name in self.details:
-            self._data['details'][name] = value
-        if name in self.__sources and not name in self.sources:
-            self._data['sources'][name] = value
-        
-        self.add({ name : value })
+        return self.add({ name : value })
     
     def add(self, data):
-        def _union(data, dic):
-            for k, v in data.iteritems():
-                if k in dic:
-                    if v is dict:
-                        _union(v, dic[v])
-                    else:
-                        dic[k] = v
-                else:
-                    dic[k] = v
+        def _unionDict(source, schema, dest):
+            for k, v in source.iteritems():
+                if not _unionItem(k, v, schema, dest):
+                    #Utils.log("item not found %s %s" % (k, v))
+                    return False
+            
+            return True
         
-        _union(data, self._data)
+        def _unionItem(k, v, schema, dest):
+            #print "_union %s %s %s" % (type(source), type(schema), type(dest))
+            
+            if k in schema:
+                schemaVal = schema[k]
+                
+                if isinstance(schemaVal, type):
+                    schemaValType = schemaVal
+                else:
+                    schemaValType = type(schemaVal)
+                
+                # basic type checking
+                if not isinstance(v, schemaValType):
+                    if schemaValType == basestring:
+                        v = str(v)
+                    else:
+                        raise KeyError("Entity error; key '%s' found '%s', expected '%s'" % \
+                            (k, str(type(v)), str(schemaVal)))
+                
+                if isinstance(v, dict):
+                    if k not in dest:
+                        dest[k] = { }
+                    
+                    return _unionDict(v, schemaVal, dest[k])
+                else:
+                    dest[k] = v
+                    return True
+            else:
+                for k2, v2 in schema.iteritems():
+                    if isinstance(v2, dict):
+                        if k2 in dest:
+                            if not isinstance(dest[k2], dict):
+                                raise KeyError(k2)
+                            
+                            if _unionItem(k, v, v2, dest[k2]):
+                                return True
+                        else:
+                            temp = { }
+                            
+                            if _unionItem(k, v, v2, temp):
+                                dest[k2] = temp
+                                return True
+            
+            return False
+        
+        if not _unionDict(data, self._schema, self._data):
+            raise KeyError("Entity error %s" % str(data))
+        
+        return
     
     @property
     def isValid(self):
         valid = True
         
-        valid &= 'name' in self and __isString(self.name)
-        valid &= 'desc' in self and __isString(self.desc)
-        valid &= 'locale' in self and __isString(self.locale)
-        valid &= 'images' in self and self.images is list
+        valid &= 'name' in self and isinstance(self.name, basestring)
+        valid &= 'desc' in self and isinstance(self.desc, basestring)
+        valid &= 'locale' in self and isinstance(self.locale, basestring)
+        valid &= 'images' in self and isinstance(self.images, list)
         
-        valid &= 'dates' in self and self.dates is dict
-        valid &= 'created' in self.dates and __isString(self.dateCreated)
-        valid &= 'modified' in self.dates and __isString(self.dateModified)
+        valid &= 'date' in self and isinstance(self.date, dict)
+        valid &= 'created' in self.date and isinstance(self.date['created'], basestring)
+        valid &= 'modified' in self.date and isinstance(self.date['modified'], basestring)
         
-        valid &= 'sources' in self and self.sources is dict
-        valid &= 'details' in self and self.details is dict
+        valid &= 'sources' in self and isinstance(self.sources, dict)
+        valid &= 'details' in self and isinstance(self.details, dict)
     
     def _getSkeletonData(self):
         return {
@@ -171,13 +213,8 @@ class Entity(object):
             'desc' : None, 
             'locale' : None, 
             'images' : None, 
-            'dates' : {
-                'created'  : None, 
-                'modified' : None
-            }, 
-            'details' : {
-            }, 
-            'sources' : {
-            }
+            'date' : { }, 
+            'details' : { }, 
+            'sources' : { }, 
         }
 

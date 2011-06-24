@@ -51,10 +51,10 @@ class OpenTableDump(AExternalDumpEntityDataSource):
         row = sheet.row_values(index)
         
         entity.name = self._decode(row[1])
-        entity.addr = self._decode(row[3]) + ', ' + \
-                      self._decode(row[4]) + ', ' + \
-                      self._decode(row[5]) + ' ' + \
-                      self._decode(row[6])
+        entity.address = self._decode(row[3]) + ', ' + \
+                         self._decode(row[4]) + ', ' + \
+                         self._decode(row[5]) + ' ' + \
+                         self._decode(row[6])
         
         entity.openTable = {
             'id' : int(row[8]), 
