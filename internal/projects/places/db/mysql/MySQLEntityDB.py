@@ -19,7 +19,6 @@ class MySQLEntityDB(AEntityDB):
     DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
     
     _rawSchema = {
-        #'entity_id' : 'INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE', 
         'title' : 'VARCHAR(128)', 
         'description' : 'TEXT', 
         'locale' : 'VARCHAR(32)', 
@@ -43,20 +42,20 @@ class MySQLEntityDB(AEntityDB):
         'detailsContact' : 'BOOL', 
         'detailsContactPhone' : 'VARCHAR(128)', 
         'detailsContactSite' : 'VARCHAR(2048)', 
-        'detailsContactEmail' : 'VARCHAR(256)', 
-        'detailsContactHoursOfOperation' : 'VARCHAR(256)', 
+        'detailsContactEmail' : 'VARCHAR(512)', 
+        'detailsContactHoursOfOperation' : 'VARCHAR(1024)', 
         
         'detailsRestaurant' : 'BOOL', 
-        'detailsRestaurantDiningStyle' : 'VARCHAR(256)', 
-        'detailsRestaurantCuisine' : 'VARCHAR(256)', 
-        'detailsRestaurantPrice' : 'VARCHAR(256)', 
-        'detailsRestaurantPayment' : 'VARCHAR(256)', 
-        'detailsRestaurantDressCode' : 'VARCHAR(256)', 
-        'detailsRestaurantAcceptsWalkins' : 'VARCHAR(256)', 
+        'detailsRestaurantDiningStyle' : 'VARCHAR(512)', 
+        'detailsRestaurantCuisine' : 'VARCHAR(512)', 
+        'detailsRestaurantPrice' : 'VARCHAR(512)', 
+        'detailsRestaurantPayment' : 'VARCHAR(512)', 
+        'detailsRestaurantDressCode' : 'VARCHAR(512)', 
+        'detailsRestaurantAcceptsWalkins' : 'VARCHAR(512)', 
         'detailsRestaurantOffers' : 'VARCHAR(1024)', 
         'detailsRestaurantPrivatePartyFacilities' : 'VARCHAR(1024)', 
-        'detailsRestaurantPrivatePartyContact' : 'VARCHAR(128)', 
-        'detailsRestaurantEntertainment' : 'VARCHAR(256)', 
+        'detailsRestaurantPrivatePartyContact' : 'VARCHAR(512)', 
+        'detailsRestaurantEntertainment' : 'VARCHAR(1024)', 
         'detailsRestaurantSpecialEvents' : 'VARCHAR(1024)', 
         'detailsRestaurantCatering' : 'VARCHAR(1024)', 
         
@@ -70,7 +69,7 @@ class MySQLEntityDB(AEntityDB):
         'sourcesOpenTable' : 'BOOL', 
         'sourcesOpenTableID' : 'VARCHAR(128)', 
         'sourcesOpenTableReserveURL' : 'VARCHAR(128)', 
-        'sourcesOpenTableCountryID' : 'VARCHAR(32)', 
+        'sourcesOpenTableCountryID' : 'VARCHAR(64)', 
         'sourcesOpenTableMetroName' : 'VARCHAR(128)', 
         'sourcesOpenTableNeighborhoodName' : 'VARCHAR(256)', 
     }
@@ -133,6 +132,8 @@ class MySQLEntityDB(AEntityDB):
         return self._transact(_removeEntity)
     
     def addEntities(self, entities):
+        numEntities = Utils.count(entities)
+        Utils.logRaw("[MySQLEntityDB] adding %d entities... " % numEntities, True)
         #for entity in entities:
         #    Utils.log(entity)
         
@@ -148,9 +149,22 @@ class MySQLEntityDB(AEntityDB):
             numRowsAffected = cursor.executemany(query, paramValues)
             #Utils.log("%d vs %d" % (numRowsAffected, numRowsExpected))
             
-            return (numRowsAffected == numRowsExpected)
+            if numRowsAffected != numRowsExpected:
+                Utils.log('[MySQLEntityDB.addEntities] error inserting %d entities' % numRowsExpected)
+                Utils.log(query)
+                
+                for e in paramValues:
+                    Utils.log(e)
+                
+                return False
+            else:
+                return True
         
-        return self._transact(_addEntities)
+        retVal = self._transact(_addEntities)
+        if retVal:
+            Utils.logRaw("done!\n")
+        
+        return retVal
     
     def close(self):
         AEntityDB.close(self)
@@ -210,6 +224,7 @@ class MySQLEntityDB(AEntityDB):
         except mysqldb.Error, e:
             Utils.log("[MySQLEntityDB] Error: %s" % str(e))
             self.db.rollback()
+            retVal = None
         finally:
             self._lock.release()
         
@@ -229,13 +244,15 @@ class MySQLEntityDB(AEntityDB):
             unionParams = rawParams.copy()
             unionParams.update(curParams)
             
-            curValues = self._getEncodedParamValues(unionParams)
+            curValues = self._getEncodedParamValues(unionParams, rawParams)
             paramValues.append(curValues)
         
         return (paramNames, paramFormat, paramValues)
     
     def _getParams(self, entity):
         def _encode(attr):
+            attr = Utils.normalize(attr)
+            
             if isinstance(attr, basestring):
                 return self.db.escape_string(attr)
             else:
@@ -266,7 +283,7 @@ class MySQLEntityDB(AEntityDB):
         
         params = {
             'title' : _encode(entity.name), 
-            'description' : _encode(entity.desc), 
+            #'description' : _encode(entity.desc), 
         }
         
         if 'id' in entity:
@@ -302,7 +319,7 @@ class MySQLEntityDB(AEntityDB):
         params = self._getParams(entity)
         
         (paramNames, paramFormat) = self._getEncodedParamKeys(params)
-        paramValues = self._getEncodedParamValues(params.values())
+        paramValues = self._getEncodedParamValues(params)
         
         return (paramNames, paramFormat, paramValues)
     
@@ -313,8 +330,11 @@ class MySQLEntityDB(AEntityDB):
         
         return (paramNames, paramFormat)
     
-    def _getEncodedParamValues(self, params):
-        return tuple(params.values())
+    def _getEncodedParamValues(self, params, stableParams=None):
+        if stableParams is None:
+            stableParams = params
+        
+        return tuple(params[k] for k in stableParams.keys())
     
     def _decodeEntity(self, entityID, data):
         entity = Entity()
@@ -338,7 +358,7 @@ class MySQLEntityDB(AEntityDB):
         return string.joinfields((k + ' ' + v + ', ' for k, v in schema.iteritems()))
     
     def _createDefaultParams(self, schema):
-        return dict((k, None) for k in schema.iterkeys())
+        return dict([ k, None ] for k in schema.iterkeys())
 
 """
 db=MySQLEntityDB()

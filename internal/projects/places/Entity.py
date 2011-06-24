@@ -125,6 +125,7 @@ class Entity(object):
     
     def __setattr__(self, name, value):
         #print "__setattr__ %s, %s" % (name, str(value))
+        value = Utils.normalize(value)
         
         if name == '_data':
             object.__setattr__(self, name, value)

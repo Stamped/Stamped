@@ -89,7 +89,7 @@ def parseEntity(entity):
         
         elem = soup.find("span", {"id" : re.compile("RestaurantProfile.*Description")})
         if elem is not None:
-            entity.desc = elem.renderContents().strip()
+            entity.desc = elem.getText().strip()
         
         details = { }
         
@@ -123,11 +123,11 @@ def parseEntity(entity):
             elem   = soup.find("span", {"id" : itemID})
             
             if elem is not None:
-                raw = elem.renderContents()
+                raw = elem.getText()
                 regex = re.compile(r'[^:]*:(.*)')
                 details[item] = regex.sub(r'\1', raw).strip()
                 
-                Utils.log("'%s' => '%s'" % (item, details[item]))
+                #Utils.log("'%s' => '%s'" % (item, details[item]))
         
         """
         imageWrapper = soup.find("div", {"class" : "restaurantImageWrapper"})

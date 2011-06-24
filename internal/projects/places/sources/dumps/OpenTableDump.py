@@ -50,30 +50,21 @@ class OpenTableDump(AExternalDumpEntityDataSource):
     def _parseEntity(self, sheet, index, entity):
         row = sheet.row_values(index)
         
-        entity.name = self._decode(row[1])
-        entity.address = self._decode(row[3]) + ', ' + \
-                         self._decode(row[4]) + ', ' + \
-                         self._decode(row[5]) + ' ' + \
-                         self._decode(row[6])
+        entity.name = row[1]
+        entity.address = row[3] + ', ' + \
+                         row[4] + ', ' + \
+                         row[5] + ' ' + \
+                         row[6]
         
         entity.openTable = {
             'id' : int(row[8]), 
-            'reserveURL' : self._decode(row[9]), 
-            'countryID' : self._decode(row[10]), 
-            'metroName' : self._decode(row[0]), 
-            'neighborhoodName' : self._decode(row[2]), 
+            'reserveURL' : row[9], 
+            'countryID' : row[10], 
+            'metroName' : row[0], 
+            'neighborhoodName' : row[2], 
         }
         
         OpenTableParser.parseEntity(entity)
-    
-    def _removeNonAscii(self, s):
-        return "".join(ch for ch in s if ord(ch) < 128)
-    
-    def _decode(self, s):
-        if isinstance(s, unicode):
-            return self._removeNonAscii(s.encode("utf-8"))
-        else:
-            return s
 
 """
 dump = OpenTableDump()

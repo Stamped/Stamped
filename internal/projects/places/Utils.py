@@ -12,7 +12,18 @@ from BeautifulSoup import BeautifulSoup
 def log(s):
     # TODO: look into logging module with logging.basicConfig(format="%(threadName)s:%(message)s")
     #print unicode(str(s), "utf-8")
-    print "[%s] %s" % (threading.currentThread().getName(), str(s))
+    print _formatLog(s)
+
+def logRaw(s, includeFormat=False):
+    # TODO: look into logging module with logging.basicConfig(format="%(threadName)s:%(message)s")
+    #print unicode(str(s), "utf-8")
+    if includeFormat:
+        s = _formatLog(s)
+    
+    sys.stdout.write(s)
+
+def _formatLog(s):
+    return "[%s] %s" % (threading.currentThread().getName(), str(s))
 
 def write(s, n):
     """
@@ -95,4 +106,13 @@ def count(container):
     except:
         # count the number of elements in a generator expression
         return sum(1 for item in container)
+
+def removeNonAscii(s):
+    return "".join(ch for ch in s if ord(ch) < 128)
+
+def normalize(s):
+    if isinstance(s, unicode):
+        return removeNonAscii(s.encode("utf-8"))
+    else:
+        return s
 
