@@ -98,7 +98,56 @@ class MySQLUserDB(AUserDB, MySQL):
             return (cursor.rowcount > 0)
         
         return self._transact(_removeUser)
-    
+        
+    def lookupUsers(self, userIDs, usernames):
+        
+        def _lookupUsers(cursor):
+            if userIDs:                
+                format_strings = ','.join(['%s'] * len(userIDs))
+                cursor.execute("SELECT * FROM users WHERE user_id IN (%s)" % 
+                    format_strings, tuple(userIDs))
+            elif usernames:                
+                format_strings = ','.join(['%s'] * len(usernames))
+                cursor.execute("SELECT * FROM users WHERE username IN (%s)" % 
+                    format_strings, tuple(usernames))
+            else:
+                return None
+                    
+            usersData = cursor.fetchall()
+            
+            users = []
+            for userData in usersData:
+                user = User()
+                user = self._mapSQLToObj(userData, user)
+                users.append(user)
+                
+            return users
+        
+        return self._transact(_lookupUsers, returnDict=True)
+        
+    def searchUsers(self, searchQuery):
+        
+        def _searchUsers(cursor):
+            query = ("""SELECT user_id, email, username, name, image, privacy,
+                    MATCH (username, name, email) AGAINST ('%s') AS score
+                    FROM users
+                    ORDER BY score DESC
+                    LIMIT 0, 10""" %
+                    (searchQuery))
+                    
+            cursor.execute(query)
+            usersData = cursor.fetchall()
+            
+            users = []
+            for userData in usersData:
+                user = User()
+                user = self._mapSQLToObj(userData, user)
+                users.append(user)
+                
+            return users
+        
+        return self._transact(_searchUsers, returnDict=True)
+            
     ### PRIVATE
     
     def _createUserTable(self):
@@ -117,9 +166,13 @@ class MySQLUserDB(AUserDB, MySQL):
                     flagged INT,
                     locale VARCHAR(100),
                     timezone VARCHAR(10),
-                    PRIMARY KEY(user_id))"""
+                    PRIMARY KEY(user_id))
+                    ENGINE = MyISAM"""
             cursor.execute(query)
             cursor.execute("CREATE INDEX ix_email ON users (email)")
+            
+            ## TODO: Remove fulltext index and switch the table back to using InnoDB
+            cursor.execute("ALTER TABLE users ADD FULLTEXT(username, name, email)")
             
             return True
             

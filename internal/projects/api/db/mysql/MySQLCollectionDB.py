@@ -15,6 +15,7 @@ from Stamp import Stamp
 from MySQLUserDB import MySQLUserDB
 from MySQLStampDB import MySQLStampDB
 from MySQLEntityDB import MySQLEntityDB
+from MySQLFriendsDB import MySQLFriendsDB
 
 class MySQLCollectionDB(ACollectionDB, MySQL):
 
@@ -23,8 +24,8 @@ class MySQLCollectionDB(ACollectionDB, MySQL):
     # First item in tuple is OBJECT ATTRIBUTE, second is COLUMN NAME.
     MAPPING = [
             ('id', 'stamp_id'),
-            ('entity_id', 'entity_id'),
-            ('user_id', 'user_id'),
+            ('entityID', 'entity_id'),
+            ('userID', 'user_id'),
             ('comment', 'comment'),
             ('image', 'image'),
             ('flagged', 'flagged'),
@@ -42,7 +43,34 @@ class MySQLCollectionDB(ACollectionDB, MySQL):
     ### PUBLIC
     
     def getInbox(self, userID):
-        raise NotImplementedError
+        def _getCollection(cursor):
+        
+            followingIDs = MySQLFriendsDB().getFriends(userID)
+            #print followingIDs
+            followingIDs.append(userID)
+            
+            format_strings = ','.join(['%s'] * len(followingIDs))
+            cursor.execute("SELECT * FROM stamps WHERE user_id IN (%s)" % 
+                format_strings, tuple(followingIDs))
+            collectionData = cursor.fetchall()
+            
+            collection = []
+            for stampData in collectionData:
+                stamp = Stamp()
+                stamp = self._mapSQLToObj(stampData, stamp)
+                # probably a more efficient way to do this (as opposed to iterating)
+                stamp['entity'] = MySQLEntityDB().getEntity(stamp['entityID'])
+                stamp['user'] = MySQLUserDB().getUser(stamp['userID'])
+                collection.append(stamp)
+                
+            return collection
+        
+        ## TODO: Add functionality to sort the returned stamps by date created
+        ##      or date modified. This should happen here and not on the database.
+        
+        collection = self._transact(_getCollection, returnDict=True)
+        
+        return collection
     
     def getUser(self, userID):
         def _getCollection(cursor):
@@ -57,7 +85,7 @@ class MySQLCollectionDB(ACollectionDB, MySQL):
                 stamp = Stamp()
                 stamp = self._mapSQLToObj(stampData, stamp)
                 # probably a more efficient way to do this (as opposed to iterating)
-                stamp['entity'] = MySQLEntityDB().getEntity(stamp['entity_id'])
+                stamp['entity'] = MySQLEntityDB().getEntity(stamp['entityID'])
                 stamp['user'] = user
                 collection.append(stamp)
                 

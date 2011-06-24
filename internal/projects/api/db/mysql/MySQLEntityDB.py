@@ -97,6 +97,25 @@ class MySQLEntityDB(AEntityDB, MySQL):
         
         return self._transact(_removeEntity)
     
+    def matchEntities(self, string):
+        def _matchEntities(cursor):
+            query = ("""SELECT entity_id, title, category 
+                    FROM entities 
+                    WHERE LEFT(title, %d) = '%s'
+                    LIMIT 0, 10""" % 
+                    (len(string), string))
+            cursor.execute(query)
+            entitiesData = cursor.fetchall()
+            
+            entities = []
+            for entityData in entitiesData:
+                entity = Entity()
+                entity = self._mapSQLToObj(entityData, entity)
+                entities.append(entity)
+            return entities
+        
+        return self._transact(_matchEntities, returnDict=True)
+    
     ### PRIVATE
     
     def _createEntityTable(self):

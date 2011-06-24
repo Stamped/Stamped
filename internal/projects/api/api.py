@@ -76,7 +76,7 @@ def main():
     entityCopy = entityDB.getEntity(entityID)
     print 'entityCopy:     ', entityCopy
     
-    entityCopy['title'] = 'Little Owl 2'
+    entityCopy['title'] = 'Recette'
     entityCopy['description'] = 'Great Food'
     entityDB.updateEntity(entityCopy)
     
@@ -85,6 +85,8 @@ def main():
     #entityDB.removeEntity(entityID)
     
     entityDB.addEntities([entity, entityCopy])
+    
+    print '"lit" entities: ', entityDB.matchEntities('lit')
     
     print
     
@@ -109,6 +111,11 @@ def main():
     #userDB.removeUser(userID)
     
     userDB.addUsers([user, userCopy])
+    
+    print userDB.lookupUsers(userIDs=None, usernames=['kevin','kpalms'])
+    print userDB.lookupUsers(userIDs=[1,2,3,4,5], usernames=None)
+    
+    print userDB.searchUsers('kpalms')
     
     print
     
@@ -200,6 +207,32 @@ def main():
     
     print
     
+    # FRIENDSHIP
+    friendship = Friendship({
+        'userID' : 1,
+        'followingID' : 2})
+    
+    friendshipDB.addFriendship(friendship)
+    
+    friendshipCopy = friendshipDB.getFriendship(1, 2)
+    print 'friendshipCopy: ', friendshipCopy
+    print 'user email:     ', friendshipCopy['user']['email']
+    print 'following name: ', friendshipCopy['following']['name']
+    
+    print 'exists:         ', friendshipDB.checkFriendship(1, 2)
+    print 'delete:         ', friendshipDB.removeFriendship(1, 2)
+    print 'exists:         ', friendshipDB.checkFriendship(1, 2)
+    
+    friendshipDB.addFriendship(friendship)
+    
+    print
+    
+    #friends = Friends({'userID' : 1})
+    print 'Friend list:    ', friendsDB.getFriends(1)
+    print 'Follower list:  ', followersDB.getFollowers(2)
+    
+    print
+    
     # COLLECTIONS
     
     userCollection = collectionDB.getUser(userID)
@@ -226,31 +259,15 @@ def main():
         print '                ', stamp['comment'] 
         print
     
-    print
-    
-    # FRIENDSHIP
-    friendship = Friendship({
-        'userID' : 1,
-        'followingID' : 2})
-    
-    friendshipDB.addFriendship(friendship)
-    
-    friendshipCopy = friendshipDB.getFriendship(1, 2)
-    print 'friendshipCopy: ', friendshipCopy
-    print 'user email:     ', friendshipCopy['user']['email']
-    print 'following name: ', friendshipCopy['following']['name']
-    
-    print friendshipDB.checkFriendship(1, 2)
-    friendshipDB.removeFriendship(1, 2)
-    print friendshipDB.checkFriendship(1, 2)
-    
-    friendshipDB.addFriendship(friendship)
+    inboxCollection = collectionDB.getInbox(userID)
+    print 'Inbox Collection'
+    for stamp in inboxCollection:
+        print '                ', stamp['entity']['title']
+        print '                 Stamped by', stamp['user']['name']
+        print '                ', stamp['comment']
+        print
     
     print
-    
-    #friends = Friends({'userID' : 1})
-    print friendsDB.getFriends(1)
-    print followersDB.getFollowers(2)
 
 # where all the magic starts
 if __name__ == '__main__':
