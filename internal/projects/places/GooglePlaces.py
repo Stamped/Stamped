@@ -5,26 +5,59 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import json, sys, urllib, Utils
+import json, urllib, Utils
 
 from optparse import OptionParser
 from Geocoder import Geocoder
-from Google import Google
+from AKeyBasedAPI import AKeyBasedAPI
 from AEntityDataSource import AExternalServiceEntityDataSource
 
-# TODO: take API_KEY from GooglePlaces API_KEY set
-
-class GooglePlaces(AExternalServiceEntityDataSource):
-    API_KEY         = 'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok'
+class GooglePlaces(AExternalServiceEntityDataSource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
     FORMAT          = 'json'
     DEFAULT_RADIUS  = 500 # meters
     NAME            = 'GooglePlaces'
     
-    def __init__(self, log=Utils.log):
+    API_KEYS = [
+        'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok',  # Travis
+        'AIzaSyAEjlMEfxmlCBQeyw_82jjobQAFjYx-Las',  # Kevin
+        'AIzaSyDTW6GnCmfP_mdxklSaArWrPoQo6cJQhOs',  # Bart
+        'AIzaSyA90G9YbjX7q3kXOBdmi0JFB3mTCOl45c4',  # Ed
+        'AIzaSyCZnt6jjlHxzRsyklNoYJKsv6kcPeQs-W8',  # Jake
+    ]
+    
+    def __init__(self):
         AExternalServiceEntityDataSource.__init__(self, self.NAME)
+        AKeyBasedAPI.__init__(self, self.API_KEYS)
+        
         self._geocoder = Geocoder()
-        self.log = log
+    
+    def getPlaceDetails(self, reference, optionalParams=None):
+        (offset, count) = self._initAPIKeyIndices()
+        
+        while True:
+            # try a different API key for each attempt
+            apiKey = self._getAPIKey(offset, count)
+            if apiKey is None:
+                return None
+            
+            response = self.getPlaceDetailsResponse(reference, apiKey, optionalParams)
+            
+            if response is None:
+                return None
+            
+            # ensure that we received a valid response
+            if response['status'] != 'OK':
+                #Utils.log('[GooglePlaces] error searching "' + reference + '"\n' + 
+                #          'ErrorCode: ' + response['status'] + '\n')
+                
+                if response['status'] == 'OVER_QUERY_LIMIT':
+                    count += 1
+                    continue
+                else:
+                    return None
+            
+            return response['result']
     
     def getSearchResultsByAddress(self, address, optionalParams=None):
         latLng = self.addressToLatLng(address)
@@ -37,59 +70,79 @@ class GooglePlaces(AExternalServiceEntityDataSource):
         return self.getSearchResultsByLatLng(latLng, optionalParams)
     
     def getSearchResultsByLatLng(self, latLng, optionalParams=None):
-        response = self.getSearchResponseByLatLng(latLng, optionalParams)
+        (offset, count) = self._initAPIKeyIndices()
         
-        if response is None:
-            return None
-        
-        # ensure that we received a valid response
-        if response['status'] != 'OK':
-            self.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
-                     'ErrorCode: ' + response['status'] + '\n')
-            return None
-        
-        results = response['results']
-        if len(results) <= 0:
-            self.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
-                     'Zero results returned\n')
-            return None
-        
-        return results
+        while True:
+            # try a different API key for each attempt
+            apiKey = self._getAPIKey(offset, count)
+            if apiKey is None:
+                return None
+            
+            response = self._getSearchResponseByLatLng(latLng, apiKey, optionalParams)
+            
+            if response is None:
+                return None
+            
+            # ensure that we received a valid response
+            if response['status'] != 'OK' or len(response['results']) <= 0:
+                #Utils.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
+                #          'ErrorCode: ' + response['status'] + '\n')
+                
+                if response['status'] == 'OVER_QUERY_LIMIT':
+                    count += 1
+                    continue
+                else:
+                    return None
+            
+            return response['results']
     
-    def getSearchResponseByAddress(self, address, optionalParams=None):
-        latLng = self.addressToLatLng(address)
-        
-        if latLng is None:
-            # geocoding translation from address to lat/lng failed, so we will 
-            # be unable to cross-reference this address with google places.
-            return None
-        
-        return self.getSearchResponseByLatLng(latLng, optionalParams)
-    
-    def getSearchResponseByLatLng(self, latLng, optionalParams=None):
+    def _getSearchResponseByLatLng(self, latLng, apiKey, optionalParams=None):
         params = {
-            'location'  : self._geocoder.getEncodedLatLng(latLng), 
-            'radius'    : self.DEFAULT_RADIUS, 
-            'sensor'    : 'false', 
-            'key'       : self.API_KEY
+            'location' : self._geocoder.getEncodedLatLng(latLng), 
+            'radius'   : self.DEFAULT_RADIUS, 
+            'sensor'   : 'false', 
+            'key'      : apiKey, 
         }
         
         if optionalParams is not None:
             for key in optionalParams:
                 params[key] = optionalParams[key]
         
-        while True:
-            # example URL:
-            # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
-            url = self._getAPIURL('search', params)
-            self.log('[GooglePlaces] ' + url)
-            
-            try:
-                # GET the data and parse the response as json
-                return json.loads(Utils.getFile(url))
-            except:
-                self.log('[GooglePlaces] unexpected error searching "' + url + '"')
-                return None
+        # example URL:
+        # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
+        url = self._getAPIURL('search', params)
+        Utils.log('[GooglePlaces] ' + url)
+        
+        try:
+            # GET the data and parse the response as json
+            return json.loads(Utils.getFile(url))
+        except:
+            Utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
+            return None
+        
+        return None
+    
+    def getPlaceDetailsResponse(self, reference, apiKey, optionalParams=None):
+        params = {
+            'reference' : reference, 
+            'sensor'    : 'false', 
+            'key'       : apiKey, 
+        }
+        
+        if optionalParams is not None:
+            for key in optionalParams:
+                params[key] = optionalParams[key]
+        
+        # example URL:
+        # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
+        url = self._getAPIURL('details', params)
+        Utils.log('[GooglePlaces] ' + url)
+        
+        try:
+            # GET the data and parse the response as json
+            return json.loads(Utils.getFile(url))
+        except:
+            Utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
         
         return None
     
@@ -125,12 +178,15 @@ def parseCommandLine():
         "of the pipe character(s).")
     parser.add_option("-l", "--limit", action="store", type="int", dest="limit", 
         default=None, help="Limit the number of results shown to the top n results")
+    #parser.add_option("-d", "--detail", action="store_true", dest="detail", 
+    #    default=False, help="Included more detailed search result info.")
     
     parser.set_defaults(address=True)
     parser.set_defaults(name=None)
     parser.set_defaults(types=None)
     parser.set_defaults(limit=None)
     parser.set_defaults(radius=500)
+    parser.set_defaults(detail=False)
     
     (options, args) = parser.parse_args()
     
@@ -166,11 +222,11 @@ def main():
     
     result = parseCommandLine()
     if result is None:
-        sys.exit(0)
+        return
     
     (options, args) = result
     
-    places = GooglePlaces(Utils.log)
+    places = GooglePlaces()
     results = []
     optionalParams = {}
     

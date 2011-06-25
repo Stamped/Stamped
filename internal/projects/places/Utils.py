@@ -116,3 +116,9 @@ def normalize(s):
     else:
         return s
 
+def numEntitiesToStr(numEntities):
+    if numEntities == 1:
+        return 'entity'
+    else:
+        return 'entities'
+

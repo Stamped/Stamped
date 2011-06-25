@@ -63,11 +63,12 @@ class MySQLEntityDB(AEntityDB):
         'detailsMovie' : 'BOOL', 
         
         'sourcesGooglePlaces' : 'BOOL', 
-        'sourcesGooglePlacesID' : 'VARCHAR(128)', 
+        'sourcesGooglePlacesGid' : 'VARCHAR(128)', 
+        'sourcesGooglePlacesGurl' : 'VARCHAR(1024)', 
         'sourcesGooglePlacesReference' : 'VARCHAR(256)', 
         
         'sourcesOpenTable' : 'BOOL', 
-        'sourcesOpenTableID' : 'VARCHAR(128)', 
+        'sourcesOpenTableRid' : 'VARCHAR(128)', 
         'sourcesOpenTableReserveURL' : 'VARCHAR(128)', 
         'sourcesOpenTableCountryID' : 'VARCHAR(64)', 
         'sourcesOpenTableMetroName' : 'VARCHAR(128)', 
@@ -133,7 +134,11 @@ class MySQLEntityDB(AEntityDB):
     
     def addEntities(self, entities):
         numEntities = Utils.count(entities)
-        Utils.logRaw("[MySQLEntityDB] adding %d entities... " % numEntities, True)
+        Utils.log("")
+        Utils.logRaw("[MySQLEntityDB] adding %d %s... " % \
+            (numEntities, Utils.numEntitiesToStr(numEntities)), True)
+        
+        #Utils.log("%s %s" % (str(type(entities)), str(entities)))
         #for entity in entities:
         #    Utils.log(entity)
         
@@ -163,6 +168,7 @@ class MySQLEntityDB(AEntityDB):
         retVal = self._transact(_addEntities)
         if retVal:
             Utils.logRaw("done!\n")
+            Utils.log("")
         
         return retVal
     
@@ -261,12 +267,9 @@ class MySQLEntityDB(AEntityDB):
         def _flattenOptionalParams(keyPrefix, source, dest):
             for k, v in source.iteritems():
                 if keyPrefix:
-                    kl = k.lower()
                     keySuffix = ''
                     
-                    if kl == 'id':
-                        keySuffix = 'ID'
-                    elif len(k) > 0:
+                    if len(k) > 0:
                         keySuffix = k[0:1].upper() + k[1:]
                     
                     key = keyPrefix + keySuffix

@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import string, sys, Utils
+import Utils
 
 from optparse import OptionParser
 from difflib import SequenceMatcher
@@ -15,14 +15,26 @@ class EntityMatcher(object):
     DEFAULT_TOLERANCE = 0.9
     TYPES = 'restaurant|food|establishment'
     
-    def __init__(self, log=Utils.log):
-        self.log = log
-        self.googlePlaces = GooglePlaces(log)
+    def __init__(self):
+        self._googlePlaces = GooglePlaces()
         self.initWordBlacklistSets()
+    
+    def getEntityDetailsFromGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
+        Utils.log("[EntityMatcher] cross-referencing entity '%s' with Google Places" % entity.name)
+        match = self.tryMatchEntityWithGooglePlaces(entity, tolerance)
+        
+        if match:
+            result = match[0]
+            reference = result['reference']
+            details = self._googlePlaces.getPlaceDetails(reference)
+            
+            return details
+        
+        return None
     
     def tryMatchEntityWithGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
         address = entity.address
-        latLng  = self.googlePlaces.addressToLatLng(address)
+        latLng  = self._googlePlaces.addressToLatLng(address)
         
         if latLng is None:
             return None
@@ -44,7 +56,7 @@ class EntityMatcher(object):
             # as the previous level's simplified name (e.g., because we know it 
             # will return the same negative results)
             if name != prevName:
-                self.log("NAME: %s, complexity: %g" % (name, complexity))
+                #Utils.log("NAME: %s, complexity: %g" % (name, complexity))
                 prevName = name
                 
                 # attempt to match the current simplified name and latLng 
@@ -62,7 +74,7 @@ class EntityMatcher(object):
                                             tolerance=DEFAULT_TOLERANCE, 
                                             nameToMatch=None):
         params  = self._getParams(name, { 'types' : self.TYPES })
-        results = self.googlePlaces.getSearchResultsByAddress(address, params)
+        results = self._googlePlaces.getSearchResultsByAddress(address, params)
         
         if results is None:
             # occasionally a google place search will leave out valid results 
@@ -71,7 +83,7 @@ class EntityMatcher(object):
             # if a more specific query containing the desired 'types' fails 
             # to return any results, we try once more without the 'types'.
             params  = self._getParams(name)
-            results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
+            results = self._googlePlaces.getSearchResultsByLatLng(latLng, params)
             
             if results is None:
                 return None
@@ -84,7 +96,7 @@ class EntityMatcher(object):
                                            tolerance=DEFAULT_TOLERANCE, 
                                            nameToMatch=None):
         params  = self._getParams(name, { 'types' : self.TYPES })
-        results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
+        results = self._googlePlaces.getSearchResultsByLatLng(latLng, params)
         
         if results is None:
             # occasionally a google place search will leave out valid results 
@@ -93,7 +105,7 @@ class EntityMatcher(object):
             # if a more specific query containing the desired 'types' fails 
             # to return any results, we try once more without the 'types'.
             params  = self._getParams(name)
-            results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
+            results = self._googlePlaces.getSearchResultsByLatLng(latLng, params)
             
             if results is None:
                 return None
@@ -261,6 +273,7 @@ class EntityMatcher(object):
         
         # join the remaining words back together and strip any possible 
         # whitespace that might've snuck in to form the resulting name
+        import string
         return string.joinfields(words, ' ').strip()
     
     def _getParams(self, name, optionalParams=None):

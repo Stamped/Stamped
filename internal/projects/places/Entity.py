@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Utils
+import copy, Utils
 
 class Entity(object):
     _schema = \
@@ -69,11 +69,12 @@ class Entity(object):
         
         'sources' : {
             'googlePlaces' : {
-                'id' : basestring, 
+                'gid' : basestring, 
+                'gurl' : basestring, 
                 'reference' : basestring, 
             }, 
             'openTable' : {
-                'id' : basestring, 
+                'rid' : basestring, 
                 'reserveURL' : basestring, 
                 'countryID'  : basestring, 
                 'metroName'  : basestring, 
@@ -105,6 +106,12 @@ class Entity(object):
     
     def __contains__(self, item):
         return item in self._data
+    
+    def __copy__(self):
+        return Entity(copy.copy(self._data))
+    
+    def __deepcopy__(self):
+        return Entity(copy.deepcopy(self._data))
     
     def __getattr__(self, name):
         if name == '_data':

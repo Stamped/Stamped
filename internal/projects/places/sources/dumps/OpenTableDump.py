@@ -57,7 +57,7 @@ class OpenTableDump(AExternalDumpEntityDataSource):
                          row[6]
         
         entity.openTable = {
-            'id' : int(row[8]), 
+            'rid' : int(row[8]), 
             'reserveURL' : row[9], 
             'countryID' : row[10], 
             'metroName' : row[0], 

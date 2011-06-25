@@ -8,8 +8,8 @@ __license__ = "TODO"
 import sys, thread
 import EntityDatabases, EntityDataSources
 import Globals, MySQLdb, Utils
+from GooglePlacesProxyEntityDB import GooglePlacesProxyEntityDB as GooglePlacesProxyEntityDB
 
-from EntityMatcher import EntityMatcher
 from optparse import OptionParser
 from threading import *
 
@@ -22,6 +22,11 @@ from db.mysql.MySQLEntityDB import MySQLEntityDB
 
 #-----------------------------------------------------------
 
+
+# TODO: commandline control over setting up / erasing / updating crawler
+# TODO: commandline control over DB versioning s.t. an entire run of the crawler may be rolled back if desired
+
+
 # TODO: use Crawler(multiprocessing.Process) instead of Thread!
 class Crawler(Thread):
     """Crawls for objects..."""
@@ -30,54 +35,17 @@ class Crawler(Thread):
         Thread.__init__(self)
         self.lock = lock
         self.options = options
-        self.log = Utils.log
     
     def run(self):
+        sinkDB = GooglePlacesProxyEntityDB(self.options.db)
+        
         for source in self.options.sources:
-            self.log("Importing entities from '%s'" % source.name)
-            source.importAll(self.options.db, self.options.limit)
+            Utils.log("")
+            Utils.log("Importing entities from source '%s'" % source.name)
+            Utils.log("")
+            source.importAll(sinkDB, self.options.limit)
         
-        self.options.db.close()
-        #self.crossRencerenceResults()
-    
-    def crossRencerenceResults(self):
-        self.log('')
-        self.log('')
-        self.log('')
-        self.log('Attempting to cross-reference OpenTable restaurants with Google Places')
-        self.log('')
-        self.log('')
-        self.log('')
-        
-        matcher = EntityMatcher(self.log)
-        matched = 0
-        count   = len(self.entities)
-        
-        for entity in self.entities:
-            match = None
-            
-            try:
-                match = matcher.tryMatchEntityWithGooglePlaces(entity)
-            except (KeyboardInterrupt, SystemExit):
-                thread.interrupt_main()
-                raise
-            except:
-                self.log("Error matching entity " + str(entity) + "\n")
-                Utils.printException()
-                pass
-            
-            if match is None:
-                self.log('NOMATCH ' + str(entity))
-            else:
-                matched += 1
-                self.log('MATCH ' + str(entity))
-                self.log(match)
-            
-            self.log('')
-        
-        self.log('')
-        self.log('MATCHED %d out of %d (%g%%)' % (matched, count, (100.0 * matched) / count))
-        self.log('')
+        sinkDB.close()
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] [sources]"
@@ -85,9 +53,9 @@ def parseCommandLine():
     parser  = OptionParser(usage=usage, version=version)
     
     parser.add_option("-a", "--all", action="store_true", dest="all", 
-        default=False, help="crawl all available sources")
+        default=True, help="crawl all available sources")
     
-    parser.set_defaults(all=False)
+    parser.set_defaults(all=True)
     
     parser.add_option("-n", "--numThreads", default=1, type="int", 
         help="sets the number of top-level threads to run")

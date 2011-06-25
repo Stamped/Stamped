@@ -43,10 +43,10 @@ class AExternalSiteEntityDataSource(AExternalEntityDataSource):
                 entities = self.getEntitiesFromURL(url)
                 
                 if not entityDB.addEntities(entities):
-                    self.log("Error storing %d entities to %s from %s" % \
+                    Utils.log("Error storing %d entities to %s from %s" % \
                             (Utils.count(entities), str(entityDB), url))
             except:
-                self.log("Error crawling " + url + "\n")
+                Utils.log("Error crawling " + url + "\n")
                 Utils.printException()
     
     @abstractmethod
