@@ -91,8 +91,7 @@ class MySQLUserDB(AUserDB, MySQL):
       
     def removeUser(self, userID):
         def _removeUser(cursor):
-            query = "DELETE FROM users WHERE user_id = %s" % \
-                    (userID)
+            query = "DELETE FROM users WHERE user_id = %s" % (userID)
             cursor.execute(query)
             
             return (cursor.rowcount > 0)

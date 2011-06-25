@@ -20,6 +20,7 @@ from Favorite import Favorite
 from Friendship import Friendship
 from Friends import Friends
 from Friendship import Friendship
+from Block import Block
 
 # import specific databases
 from db.mysql.MySQLEntityDB import MySQLEntityDB
@@ -32,6 +33,7 @@ from db.mysql.MySQLCollectionDB import MySQLCollectionDB
 from db.mysql.MySQLFriendshipDB import MySQLFriendshipDB
 from db.mysql.MySQLFriendsDB import MySQLFriendsDB
 from db.mysql.MySQLFollowersDB import MySQLFollowersDB
+from db.mysql.MySQLBlockDB import MySQLBlockDB
 
 
 def _setup():
@@ -46,6 +48,7 @@ def _setup():
     MySQLFriendshipDB(setup=True)
     MySQLFriendsDB()
     MySQLFollowersDB()
+    MySQLBlockDB(setup=True)
 
 def main():
 
@@ -61,6 +64,7 @@ def main():
     friendshipDB = MySQLFriendshipDB()
     friendsDB = MySQLFriendsDB()
     followersDB = MySQLFollowersDB()
+    blockDB = MySQLBlockDB()
 
     print
 
@@ -268,9 +272,34 @@ def main():
         print
     
     print
+    
+    # BLOCK
+    block = Block({
+        'userID' : 1,
+        'blockingID' : 2})
+    
+    print 'Add block'
+    blockDB.addBlock(block)
+    
+    print 'exists:         ', blockDB.checkBlock(1, 2)
+    print 'delete:         ', blockDB.removeBlock(1, 2)
+    print 'exists:         ', blockDB.checkBlock(1, 2)
+    
+    blockDB.addBlock(block)
+    
+    print
+    print 'Add block'
+    print 'Block list:    ', blockDB.getBlocking(1)
+    
+    print
+    
+    friendshipDB.addFriendship({'userID' : 2, 'followingID' : 1})
+    friendshipDB.addFriendship({'userID' : 2, 'followingID' : 3})
+    friendshipDB.addFriendship({'userID' : 1, 'followingID' : 3})
 
 # where all the magic starts
 if __name__ == '__main__':
     main()
+
 
 

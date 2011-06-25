@@ -12,6 +12,7 @@ from MySQL import MySQL
 from AFriendshipDB import AFriendshipDB
 from Friendship import Friendship
 from MySQLUserDB import MySQLUserDB
+from MySQLBlockDB import MySQLBlockDB
 
 class MySQLFriendshipDB(AFriendshipDB, MySQL):
 
@@ -37,6 +38,22 @@ class MySQLFriendshipDB(AFriendshipDB, MySQL):
     ### PUBLIC
     
     def addFriendship(self, friendship):
+        
+        # Check if friend is blocking user's request
+        if MySQLBlockDB().checkBlock(userID=friendship['followingID'], blockingID=friendship['userID']):
+            print 'BLOCKED'
+            return False
+            
+        # Check if friendship already exists
+        if self.checkFriendship(userID=friendship['userID'], followingID=friendship['followingID']):
+            print 'ALREADY FRIENDS'
+            return False
+            
+        # Check if friend requires approval
+        if MySQLUserDB().getUser(friendship['followingID'])['privacy']:
+            print 'REQUIRES APPROVAL'
+            friendship['approved'] = 0
+        
         friendship = self._mapObjToSQL(friendship)
         friendship['timestamp'] = datetime.now().isoformat()
         
@@ -68,7 +85,8 @@ class MySQLFriendshipDB(AFriendshipDB, MySQL):
     def getFriendship(self, userID, followingID):
         def _getFriendship(cursor):
             query = ("""SELECT * FROM friends 
-                WHERE user_id = %s AND following_id = %s""" % 
+                WHERE user_id = %s AND following_id = %s
+                AND (approved IS NULL OR approved = 1)""" % 
                 (userID, followingID))
             cursor.execute(query)
             
