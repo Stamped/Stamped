@@ -23,7 +23,7 @@ def logRaw(s, includeFormat=False):
     sys.stdout.write(s)
 
 def _formatLog(s):
-    return "[%s] %s" % (threading.currentThread().getName(), str(s))
+    return "[%s] %s" % (threading.currentThread().getName(), unicode(s))
 
 def write(s, n):
     """

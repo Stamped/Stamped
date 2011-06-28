@@ -15,11 +15,13 @@ from datetime import datetime
 
 class MySQLEntityDB(AEntityDB):
     USER  = 'root'
-    DB    = 'stamped'
+    #DB    = 'stamped'
+    DB    = 'stamped2'
     DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
     
+    # TODO: truncate / validate sql input
     _rawSchema = {
-        'title' : 'VARCHAR(128)', 
+        'title' : 'VARCHAR(512)', 
         'description' : 'TEXT', 
         'locale' : 'VARCHAR(32)', 
         'image' : 'BLOB', 
@@ -38,9 +40,11 @@ class MySQLEntityDB(AEntityDB):
         'detailsPlacePublicTransit' : 'VARCHAR(1024)', 
         'detailsPlaceParking' : 'VARCHAR(128)', 
         'detailsPlaceParkingDetails' : 'TEXT', 
+        'detailsWheelchairAccess' : 'VARCHAR(256)', 
         
         'detailsContact' : 'BOOL', 
         'detailsContactPhone' : 'VARCHAR(128)', 
+        'detailsContactFax' : 'VARCHAR(128)', 
         'detailsContactSite' : 'VARCHAR(2048)', 
         'detailsContactEmail' : 'VARCHAR(512)', 
         'detailsContactHoursOfOperation' : 'VARCHAR(1024)', 
@@ -58,6 +62,36 @@ class MySQLEntityDB(AEntityDB):
         'detailsRestaurantEntertainment' : 'VARCHAR(1024)', 
         'detailsRestaurantSpecialEvents' : 'VARCHAR(1024)', 
         'detailsRestaurantCatering' : 'VARCHAR(1024)', 
+        'detailsRestaurantAlcohol' : 'VARCHAR(256)', 
+        'detailsRestaurantTakeout' : 'VARCHAR(256)', 
+        'detailsRestaurantDelivery' : 'VARCHAR(256)', 
+        'detailsRestaurantKosher' : 'VARCHAR(256)', 
+        'detailsRestaurantBar' : 'VARCHAR(256)', 
+        'detailsRestaurantMenuLink' : 'VARCHAR(2048)', 
+        'detailsRestaurantChef' : 'VARCHAR(512)', 
+        'detailsRestaurantOwner' : 'VARCHAR(512)', 
+        'detailsRestaurantReviewLinks' : 'VARCHAR(2048)', 
+        
+        'detailsiPhoneApp' : 'BOOL', 
+        'detailsiPhoneAppDeveloper' : 'VARCHAR(512)', 
+        'detailsiPhoneAppDeveloperURL' : 'VARCHAR(2048)', 
+        'detailsiPhoneAppDeveloperSupportURL' : 'VARCHAR(2048)', 
+        'detailsiPhoneAppPublisher' : 'VARCHAR(256)', 
+        'detailsiPhoneAppReleaseDate' : 'VARCHAR(256)', 
+        'detailsiPhoneAppPrice' : 'VARCHAR(256)', 
+        'detailsiPhoneAppCategory' : 'VARCHAR(256)', 
+        'detailsiPhoneAppLanguage' : 'VARCHAR(256)', 
+        'detailsiPhoneAppRating' : 'VARCHAR(256)', 
+        'detailsiPhoneAppPopularity' : 'VARCHAR(256)', 
+        'detailsiPhoneAppParentalRating' : 'VARCHAR(256)', 
+        'detailsiPhoneAppPlatform' : 'VARCHAR(256)', 
+        'detailsiPhoneAppRequirements' : 'VARCHAR(256)', 
+        'detailsiPhoneAppSize' : 'VARCHAR(256)', 
+        'detailsiPhoneAppVersion' : 'VARCHAR(256)', 
+        'detailsiPhoneAppDownloadURL' : 'VARCHAR(2048)', 
+        'detailsiPhoneAppThumbnailURL' : 'VARCHAR(2048)', 
+        'detailsiPhoneAppScreenshotURL' : 'VARCHAR(2048)', 
+        'detailsiPhoneAppVideoURL' : 'VARCHAR(2048)', 
         
         'detailsBook' : 'BOOL', 
         'detailsMovie' : 'BOOL', 
@@ -73,6 +107,10 @@ class MySQLEntityDB(AEntityDB):
         'sourcesOpenTableCountryID' : 'VARCHAR(64)', 
         'sourcesOpenTableMetroName' : 'VARCHAR(128)', 
         'sourcesOpenTableNeighborhoodName' : 'VARCHAR(256)', 
+        
+        'sourcesFactual' : 'BOOL', 
+        'sourcesFactualFid' : 'VARCHAR(128)', 
+        'sourcesFactualTable' : 'VARCHAR(256)', 
     }
     
     def __init__(self):
@@ -286,7 +324,7 @@ class MySQLEntityDB(AEntityDB):
         
         params = {
             'title' : _encode(entity.name), 
-            #'description' : _encode(entity.desc), 
+            'description' : _encode(entity.desc), 
         }
         
         if 'id' in entity:

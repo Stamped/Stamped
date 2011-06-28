@@ -12,19 +12,33 @@ from Entity import Entity
 import EntityDataSources, Utils
 
 class AEntityDataSource(object):
-    def __init__(self, name):
+    _supportedTypes = set([ 'place', 'contact', 'restaurant', 'iPhoneApp', 'book', 'movie' ])
+    
+    def __init__(self, name, types=None):
         self._name = name
         self._id = EntityDataSources.getSourceID(name)
+        if types is None:
+            types = set()
+        
+        self._types = types
+        
+        # validate the types
+        for t in types:
+            if not t in self._supportedTypes:
+                raise AttributeError("Source category '%s' not supported" % t)
     
     @abstractmethod
     def importAll(self, entityDB, limit=None): pass
     
     @property
     def name(self): return self._name
+    
+    @property
+    def types(self): return self._types
 
 class AExternalEntityDataSource(AEntityDataSource):
     
-    def __init__(self, name):
+    def __init__(self, name, types=None):
         AEntityDataSource.__init__(self, name)
 
 class AExternalSiteEntityDataSource(AExternalEntityDataSource):
@@ -32,7 +46,7 @@ class AExternalSiteEntityDataSource(AExternalEntityDataSource):
         An external site which may be crawled as a source of entity data.
     """
     
-    def __init__(self, name):
+    def __init__(self, name, types=None):
         AExternalEntityDataSource.__init__(self, name)
     
     def importAll(self, entityDB, limit=None):
@@ -62,7 +76,7 @@ class AExternalServiceEntityDataSource(AExternalEntityDataSource):
         An external service which may be queried as a source of entity data.
     """
     
-    def __init__(self, name):
+    def __init__(self, name, types=None):
         AExternalEntityDataSource.__init__(self, name)
     
     def importAll(self, entityDB, limit=None):
@@ -74,7 +88,7 @@ class AExternalDumpEntityDataSource(AExternalEntityDataSource):
         (e.g., compressed bulk datafile).
     """
     
-    def __init__(self, name):
+    def __init__(self, name, types=None):
         AExternalEntityDataSource.__init__(self, name)
     
     @abstractmethod
@@ -91,6 +105,6 @@ class AUserDataSource(AEntityDataSource):
         User-entered / manual data source.
     """
     
-    def __init__(self, name):
+    def __init__(self, name, types=None):
         AEntityDataSource.__init__(self, name)
 

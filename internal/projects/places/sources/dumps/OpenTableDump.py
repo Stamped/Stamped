@@ -19,11 +19,12 @@ class OpenTableDump(AExternalDumpEntityDataSource):
     """
     
     # TODO: automate downloading latest dump file from the OpenTable FTP server
-    DUMP_FILE = "opentabledata.raw.xls"
+    DUMP_FILE = "sources/dumps/data/opentabledata.raw.xls"
     NAME = "OpenTable"
+    TYPES = set([ 'place', 'contact', 'restaurant' ])
     
     def __init__(self):
-        AExternalDumpEntityDataSource.__init__(self, self.NAME)
+        AExternalDumpEntityDataSource.__init__(self, self.NAME, self.TYPES)
         self._pool = Globals.threadPool
     
     def getAll(self, limit=None):

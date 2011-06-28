@@ -69,8 +69,9 @@ class ProxyEntityDB(AEntityDB):
     def removeEntities(self, entityIDs):
         return self._target.removeEntities(entityIDs)
     
-    def close(self):
-        self._target.close()
+    def close(self, closeTarget=False):
+        if closeTarget:
+            self._target.close()
     
     def _transformInput(self, entity):
         return entity

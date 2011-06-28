@@ -36,10 +36,12 @@ class Entity(object):
                 'publicTransit' : basestring, 
                 'parking' : basestring, 
                 'parkingDetails' : basestring, 
+                'wheelchairAccess' : basestring, 
             }, 
             
             'contact' : {
                 'phone' : basestring, 
+                'fax'   : basestring, 
                 'site'  : basestring, 
                 'email' : basestring, 
                 'hoursOfOperation' : basestring, 
@@ -51,6 +53,7 @@ class Entity(object):
                 'price' : basestring, 
                 'payment' : basestring, 
                 'dressCode' : basestring, 
+                'acceptsReservations' : basestring, 
                 'acceptsWalkins' : basestring, 
                 'offers' : basestring, 
                 'privatePartyFacilities' : basestring, 
@@ -58,6 +61,37 @@ class Entity(object):
                 'entertainment' : basestring, 
                 'specialEvents' : basestring, 
                 'catering' : basestring, 
+                'takeout' : basestring, 
+                'delivery' : basestring, 
+                'kosher' : basestring, 
+                'bar' : basestring, 
+                'alcohol' : basestring, 
+                'menuLink' : basestring, 
+                'chef' : basestring, 
+                'owner' : basestring, 
+                'reviewLinks' : basestring, 
+            }, 
+            
+            'iPhoneApp' : {
+                'developer' : basestring, 
+                'developerURL' : basestring, 
+                'developerSupportURL' : basestring, 
+                'publisher' : basestring, 
+                'releaseDate' : basestring, 
+                'price' : basestring, 
+                'category' : basestring, 
+                'language' : basestring, 
+                'rating' : basestring, 
+                'popularity' : basestring, 
+                'parentalRating' : basestring, 
+                'platform' : basestring, 
+                'requirements' : basestring, 
+                'size' : basestring, 
+                'version' : basestring, 
+                'downloadURL' : basestring, 
+                'thumbnailURL' : basestring, 
+                'screenshotURL' : basestring, 
+                'videoURL' : basestring, 
             }, 
             'book' : {
                 # TODO
@@ -79,6 +113,10 @@ class Entity(object):
                 'countryID'  : basestring, 
                 'metroName'  : basestring, 
                 'neighborhoodName' : basestring, 
+            }, 
+            'factual' : {
+                'fid' : basestring, 
+                'table' : basestring, 
             }
         }
     }
@@ -93,7 +131,7 @@ class Entity(object):
         return self._data[key]
     
     def __setitem__(self, key, value):
-        self._data[key] = value
+        self.add({key : value})
     
     def __delitem__(self, key):
         del self._data[key]
@@ -162,9 +200,24 @@ class Entity(object):
                 
                 # basic type checking
                 if not isinstance(v, schemaValType):
-                    if schemaValType == basestring:
-                        v = str(v)
-                    else:
+                    isValid = True
+                    
+                    # basic implicit type conversion s.t. if you pass in, for example, 
+                    # "23.4" for longitude as a string, it'll automatically parse to 
+                    # the required float format.
+                    try:
+                        if schemaValType == basestring:
+                            v = str(v)
+                        elif schemaValType == float:
+                            v = float(v)
+                        elif schemaValType == int:
+                            v = int(v)
+                        else:
+                            isValid = False
+                    except ValueError:
+                        isValid = False
+                    
+                    if not isValid:
                         raise KeyError("Entity error; key '%s' found '%s', expected '%s'" % \
                             (k, str(type(v)), str(schemaVal)))
                 

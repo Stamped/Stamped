@@ -9,6 +9,7 @@ import sys, thread
 import EntityDatabases, EntityDataSources
 import Globals, MySQLdb, Utils
 from GooglePlacesProxyEntityDB import GooglePlacesProxyEntityDB as GooglePlacesProxyEntityDB
+from ProxyEntityDB import ProxyEntityDB
 
 from optparse import OptionParser
 from threading import *
@@ -16,6 +17,9 @@ from threading import *
 # import specific data sources
 from sources.crawlers.OpenTableCrawler import OpenTableCrawler
 from sources.dumps.OpenTableDump import OpenTableDump
+from sources.dumps.FactualiPhoneAppsDump import FactualiPhoneAppsDump
+from sources.dumps.FactualUSPlacesDump import FactualUSPlacesDump
+from sources.dumps.FactualUSRestaurantsDump import FactualUSRestaurantsDump
 
 # import specific databases
 from db.mysql.MySQLEntityDB import MySQLEntityDB
@@ -37,15 +41,22 @@ class Crawler(Thread):
         self.options = options
     
     def run(self):
-        sinkDB = GooglePlacesProxyEntityDB(self.options.db)
-        
         for source in self.options.sources:
             Utils.log("")
             Utils.log("Importing entities from source '%s'" % source.name)
             Utils.log("")
+            
+            if 'place' in source.types:
+                sinkDB = GooglePlacesProxyEntityDB(self.options.db)
+            else:
+                sinkDB = self.options.db
+            
             source.importAll(sinkDB, self.options.limit)
+            
+            if isinstance(sinkDB, ProxyEntityDB):
+                sinkDB.close(closeTarget=False)
         
-        sinkDB.close()
+        self.options.db.close()
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] [sources]"
@@ -55,7 +66,7 @@ def parseCommandLine():
     parser.add_option("-a", "--all", action="store_true", dest="all", 
         default=True, help="crawl all available sources")
     
-    parser.set_defaults(all=True)
+    parser.set_defaults(all=False)
     
     parser.add_option("-n", "--numThreads", default=1, type="int", 
         help="sets the number of top-level threads to run")
@@ -73,13 +84,12 @@ def parseCommandLine():
     
     (options, args) = parser.parse_args()
     
+    if len(args) == 0:
+        options.all = True
+    
     if options.all:
         options.sources = EntityDataSources.instantiateAll()
     else:
-        if len(args) == 0:
-            parser.print_help()
-            return None
-        
         options.sources = [ ]
         for arg in args:
             source = EntityDataSources.instantiateSource(arg)
