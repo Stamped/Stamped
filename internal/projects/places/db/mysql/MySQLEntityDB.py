@@ -42,7 +42,7 @@ class MySQLEntityDB(AEntitySink):
         'detailsPlacePublicTransit' : 'VARCHAR(1024)', 
         'detailsPlaceParking' : 'VARCHAR(128)', 
         'detailsPlaceParkingDetails' : 'TEXT', 
-        'detailsWheelchairAccess' : 'VARCHAR(256)', 
+        'detailsPlaceWheelchairAccess' : 'VARCHAR(256)', 
         
         'detailsContact' : 'BOOL', 
         'detailsContactPhone' : 'VARCHAR(128)', 
@@ -57,6 +57,7 @@ class MySQLEntityDB(AEntitySink):
         'detailsRestaurantPrice' : 'VARCHAR(512)', 
         'detailsRestaurantPayment' : 'VARCHAR(512)', 
         'detailsRestaurantDressCode' : 'VARCHAR(512)', 
+        'detailsRestaurantAcceptsReservations' : 'VARCHAR(128)', 
         'detailsRestaurantAcceptsWalkins' : 'VARCHAR(512)', 
         'detailsRestaurantOffers' : 'VARCHAR(1024)', 
         'detailsRestaurantPrivatePartyFacilities' : 'VARCHAR(1024)', 
