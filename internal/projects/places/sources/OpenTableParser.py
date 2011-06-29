@@ -5,7 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import re, string, urllib, Utils
+import Globals, Utils
+import re, string, urllib
+
 from Entity import Entity
 
 __BASE_URL = "http://www.opentable.com/"
@@ -62,10 +64,10 @@ def parseEntity(entity):
                 url = None
                 topNav = soup.find("ul", {"id" : "TopNav_breadcrumbs"})
                 
-                if topNav:
+                if topNav is not None:
                     links = topNav.findAll("a")
                     
-                    if links and len(links) > 0:
+                    if links is not None and len(links) > 0:
                         relativeURL = links[-1].get("href")
                         url = __BASE_URL + relativeURL
                         urls.append(url)

@@ -5,11 +5,13 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import sys, thread
-import EntityDatabases, EntityDataSources
-import Globals, MySQLdb, Utils
-from GooglePlacesProxyEntityDB import GooglePlacesProxyEntityDB as GooglePlacesProxyEntityDB
-from ProxyEntityDB import ProxyEntityDB
+import Globals, gevent, Utils
+import gevent, thread
+
+import EntitySinks, EntitySources
+from GooglePlacesEntityProxy import GooglePlacesEntityProxy
+from AEntityProxy import AEntityProxy
+from ASyncGatherSource import ASyncGatherSource
 
 from optparse import OptionParser
 from threading import *
@@ -41,22 +43,28 @@ class Crawler(Thread):
         self.options = options
     
     def run(self):
-        for source in self.options.sources:
-            Utils.log("")
-            Utils.log("Importing entities from source '%s'" % source.name)
-            Utils.log("")
-            
-            if 'place' in source.types:
-                sinkDB = GooglePlacesProxyEntityDB(self.options.db)
-            else:
-                sinkDB = self.options.db
-            
-            source.importAll(sinkDB, self.options.limit)
-            
-            if isinstance(sinkDB, ProxyEntityDB):
-                sinkDB.close(closeTarget=False)
+        sources = (self._createSourceChain(source) for source in self.options.sources)
         
-        self.options.db.close()
+        self.options.sink.start()
+        gather = ASyncGatherSource(sources)
+        
+        gather.startProducing()
+        for entity in gather:
+            self.options.sink.put(entity)
+        
+        gevent.joinall(self.options.sources)
+        gather.join()
+        
+        self.options.sink.join()
+        self.options.sink.close()
+    
+    def _createSourceChain(self, source):
+        source.limit = self.options.limit
+        
+        if 'place' in source.types:
+            source = GooglePlacesEntityProxy(source)
+        
+        return source
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] [sources]"
@@ -77,7 +85,7 @@ def parseCommandLine():
     parser.add_option("-d", "--db", 
         type = 'choice', 
         action = 'store', 
-        dest = 'db', 
+        dest = 'sink', 
         choices = ['mysql', 'mongo', 'cassandra', 'riak', 'redis', 'simpledb'], 
         default = 'mysql', 
         help="sets the destination database to persist entities to")
@@ -88,27 +96,28 @@ def parseCommandLine():
         options.all = True
     
     if options.all:
-        options.sources = EntityDataSources.instantiateAll()
+        options.sources = EntitySources.instantiateAll()
     else:
         options.sources = [ ]
         for arg in args:
-            source = EntityDataSources.instantiateSource(arg)
+            source = EntitySources.instantiateSource(arg)
             
-            if not source:
+            if source is None:
                 print "Error: unrecognized source '%s'" % arg
                 parser.print_help()
                 return None
             else:
                 options.sources.append(source)
     
-    if options.db:
-        db = EntityDatabases.instantiateDB(options.db)
-        if not db:
-            print "Error: unrecognized db '%s'" % options.db
+    if options.sink:
+        sink = EntitySinks.instantiateSink(options.sink)
+        
+        if sink is None:
+            print "Error: unrecognized db '%s'" % options.sink
             parser.print_help()
             return None
         else:
-            options.db = db
+            options.sink = sink
     
     return options
 
@@ -127,7 +136,7 @@ def main():
     
     options = parseCommandLine()
     if options is None:
-        sys.exit(0)
+        return
     
     # global lock used to synchronize access to the DB across threads
     lock = Lock()

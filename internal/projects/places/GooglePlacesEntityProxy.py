@@ -5,12 +5,12 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from Entity import Entity
-from EntityMatcher import EntityMatcher
-from ProxyEntityDB import ProxyEntityDB
-import Utils
+import Globals, Utils
 
-class GooglePlacesProxyEntityDB(ProxyEntityDB):
+from EntityMatcher import EntityMatcher
+from AEntityProxy import AEntityProxy
+
+class GooglePlacesEntityProxy(AEntityProxy):
     
     # maps of entity attribute names to funcs which extract the corresponding 
     # attribute from a Google Places detail response.
@@ -26,17 +26,18 @@ class GooglePlacesProxyEntityDB(ProxyEntityDB):
         'gurl'      : lambda src: src['url'], 
     }
     
-    def __init__(self, targetEntityDB):
-        ProxyEntityDB.__init__(self, targetEntityDB, "GooglePlaces")
+    def __init__(self, source):
+        AEntityProxy.__init__(self, source, "GooglePlaces")
         
-        self._target = targetEntityDB
         self._entityMatcher = EntityMatcher()
     
-    def _transformInput(self, entity):
+    def _transform(self, entity):
         details = self._entityMatcher.getEntityDetailsFromGooglePlaces(entity)
         
-        if details:
+        if details is not None:
             for key, extractFunc in self._map.iteritems():
                 entity[key] = extractFunc(details)
                 #Utils.log("'%s' => '%s'" % (key, str(entity[key])))
+        
+        return entity
 

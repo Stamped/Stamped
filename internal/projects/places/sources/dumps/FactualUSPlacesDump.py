@@ -5,12 +5,13 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from AEntityDataSource import AExternalDumpEntityDataSource
+import Globals, CSVUtils, Utils
+
+from gevent.pool import Pool
+from AEntitySource import AExternalDumpEntitySource
 from Entity import Entity
 
-import CSVUtils, Globals, Utils
-
-class FactualUSPlacesDump(AExternalDumpEntityDataSource):
+class FactualUSPlacesDump(AExternalDumpEntitySource):
     """
         Factual US POI and Business listings importer
     """
@@ -30,9 +31,10 @@ class FactualUSPlacesDump(AExternalDumpEntityDataSource):
     }
     
     def __init__(self):
-        AExternalDumpEntityDataSource.__init__(self, self.NAME, self.TYPES)
+        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES)
     
-    def getAll(self, limit=None):
+    def _run(self):
+        """
         csvFile = open(self.DUMP_FILE, 'rb')
         reader = CSVUtils.UnicodeReader(csvFile)
         entities = [ ]
@@ -47,7 +49,6 @@ class FactualUSPlacesDump(AExternalDumpEntityDataSource):
                 import sys
                 sys.exit(0)
             
-            """
             if row['category'] is not None and len(row['category']) > 0:
                 curCat = row['category']
                 if not curCat in cat:
@@ -60,7 +61,7 @@ class FactualUSPlacesDump(AExternalDumpEntityDataSource):
         Utils.log(cat)
         """
         """
-            if limit and len(entities) >= limit:
+            if self.limit and len(entities) >= self.limit:
                 break
             
             entity = Entity()
@@ -73,11 +74,11 @@ class FactualUSPlacesDump(AExternalDumpEntityDataSource):
                     entity[destKey] = row[srcKey]
             
             entities.append(entity)
-        """
         csvFile.close()
+        """
         Utils.log("%s parsed %d entities" % (self.NAME, len(entities)))
         return entities
 
-#import EntityDataSources
-#EntityDataSources.registerSource('factualUSPlaces', FactualUSPlacesDump)
+#import EntitySources
+#EntitySources.registerSource('factualUSPlaces', FactualUSPlacesDump)
 

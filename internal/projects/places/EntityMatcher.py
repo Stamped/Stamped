@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Utils
+import Globals, Utils
 
 from optparse import OptionParser
 from difflib import SequenceMatcher

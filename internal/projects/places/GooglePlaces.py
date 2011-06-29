@@ -5,18 +5,20 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import json, urllib, Utils
+import Globals, Utils
+import json, urllib
 
 from optparse import OptionParser
 from Geocoder import Geocoder
 from AKeyBasedAPI import AKeyBasedAPI
-from AEntityDataSource import AExternalServiceEntityDataSource
+from AEntitySource import AExternalServiceEntitySource
 
-class GooglePlaces(AExternalServiceEntityDataSource, AKeyBasedAPI):
+class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
     FORMAT          = 'json'
     DEFAULT_RADIUS  = 500 # meters
     NAME            = 'GooglePlaces'
+    TYPES           = set([ 'place', 'contact', 'restaurant' ])
     
     API_KEYS = [
         'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok',  # Travis
@@ -27,7 +29,7 @@ class GooglePlaces(AExternalServiceEntityDataSource, AKeyBasedAPI):
     ]
     
     def __init__(self):
-        AExternalServiceEntityDataSource.__init__(self, self.NAME)
+        AExternalServiceEntitySource.__init__(self, self.NAME, self.TYPES)
         AKeyBasedAPI.__init__(self, self.API_KEYS)
         
         self._geocoder = Geocoder()

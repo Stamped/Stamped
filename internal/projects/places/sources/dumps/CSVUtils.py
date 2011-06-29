@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals, Utils
 import csv, codecs, cStringIO
 
 class UTF8Recoder:

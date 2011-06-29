@@ -5,7 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import json, re, urllib, Utils
+import Globals, Utils
+import json, re, urllib
+
 from optparse import OptionParser
 from AKeyBasedAPI import AKeyBasedAPI
 

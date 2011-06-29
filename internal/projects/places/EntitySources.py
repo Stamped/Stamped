@@ -5,7 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-__sources = { }
+import Globals, Utils
+
+sources = { }
 
 def registerSource(name, factory):
     source = __getSource(name)
@@ -13,9 +15,9 @@ def registerSource(name, factory):
     if source:
         return source['id']
     else:
-        sourceID = len(__sources)
+        sourceID = len(sources)
         
-        __sources[name] = {
+        sources[name] = {
             'factory' : factory, 
             'id' : sourceID, 
         }
@@ -39,12 +41,12 @@ def instantiateSource(name):
         return None
 
 def instantiateAll():
-    return (v['factory']() for v in __sources.itervalues())
+    return (v['factory']() for v in sources.itervalues())
 
 def __getSource(name):
     name = name.lower().strip()
     
-    for k, v in __sources.iteritems():
+    for k, v in sources.iteritems():
         if name == k.lower():
             return v
     

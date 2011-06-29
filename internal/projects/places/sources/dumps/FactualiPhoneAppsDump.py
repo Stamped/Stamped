@@ -5,12 +5,14 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from AEntityDataSource import AExternalDumpEntityDataSource
+import Globals, CSVUtils, Utils
+import gevent
+
+from gevent.pool import Pool
+from AEntitySource import AExternalDumpEntitySource
 from Entity import Entity
 
-import CSVUtils, Globals, Utils
-
-class FactualiPhoneAppsDump(AExternalDumpEntityDataSource):
+class FactualiPhoneAppsDump(AExternalDumpEntitySource):
     """
         Factual iPhoneApps data importer
     """
@@ -43,32 +45,47 @@ class FactualiPhoneAppsDump(AExternalDumpEntityDataSource):
     }
     
     def __init__(self):
-        AExternalDumpEntityDataSource.__init__(self, self.NAME, self.TYPES)
+        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES)
     
-    def getAll(self, limit=None):
-        reader = CSVUtils.openCSVFile(self.DUMP_FILE)
-        entities = [ ]
+    def _run(self):
+        Utils.log("")
+        Utils.log("importing data from source '%s'" % self.NAME)
+        Utils.log("")
+        
+        csvFile = open(self.DUMP_FILE, 'rb')
+        reader  = CSVUtils.UnicodeReader(csvFile)
+        pool    = Pool(256)
+        count   = 0
         
         for row in reader:
-            #Utils.log('Parsing %s' % row['Name'])
-            
-            if limit and len(entities) >= limit:
+            if self.limit and count >= self.limit:
                 break
             
-            entity = Entity()
-            entity.factual = {
-                'table' : 'iPhone_Apps.csv'
-            }
-            
-            for srcKey, destKey in self._map.iteritems():
-                if srcKey in row and row[srcKey] and len(row[srcKey]) > 0:
-                    entity[destKey] = row[srcKey]
-            
-            entities.append(entity)
+            pool.spawn(self._parseEntity, row, count)
+            count += 1
         
-        Utils.log("%s parsed %d entities" % (self.NAME, len(entities)))
-        return entities
+        pool.join()
+        self._output.put(StopIteration)
+        csvFile.close()
+        
+        Utils.log("")
+        Utils.log("%s parsed %d entities" % (self.NAME, count))
+        Utils.log("")
+    
+    def _parseEntity(self, row, count):
+        #Utils.log("[%s] parsing app %d" % (self.NAME, count))
+        
+        entity = Entity()
+        entity.factual = {
+            'table' : 'iPhone_Apps.csv'
+        }
+        
+        for srcKey, destKey in self._map.iteritems():
+            if srcKey in row and row[srcKey] and len(row[srcKey]) > 0:
+                entity[destKey] = row[srcKey]
+        
+        self._output.put(entity)
 
-import EntityDataSources
-EntityDataSources.registerSource('factualiPhoneApps', FactualiPhoneAppsDump)
+import EntitySources
+EntitySources.registerSource('factualiPhoneApps', FactualiPhoneAppsDump)
 

@@ -5,7 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import random, Utils
+import Globals, Utils
+import random
 
 class AKeyBasedAPI(object):
     """

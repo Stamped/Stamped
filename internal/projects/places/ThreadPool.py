@@ -5,9 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals, Utils
+
 from Queue import Queue
 from threading import Thread
-import Utils
 
 # TODO: lazily instantiate threads up to num_threads
 # TODO: look into more production-quality thread pool options

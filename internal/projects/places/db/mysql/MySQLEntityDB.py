@@ -5,15 +5,16 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import re, string, Utils
+import Globals, Utils
+import re, string
 import MySQLdb as mysqldb
 
-from AEntityDB import AEntityDB
+from AEntitySink import AEntitySink
 from Entity import Entity
 from threading import Lock
 from datetime import datetime
 
-class MySQLEntityDB(AEntityDB):
+class MySQLEntityDB(AEntitySink):
     USER  = 'root'
     #DB    = 'stamped'
     DB    = 'stamped2'
@@ -114,12 +115,46 @@ class MySQLEntityDB(AEntityDB):
     }
     
     def __init__(self):
-        AEntityDB.__init__(self, self.DESC)
+        AEntitySink.__init__(self, self.DESC)
         
         self._lock = Lock()
         self._setup()
     
+    def _run(self):
+        stop = False
+        
+        while not stop:
+            entities = []
+            
+            entity = self._input.get()
+            if isinstance(entity, StopIteration):
+                stop = True
+                break
+            
+            entities.append(entity)
+            
+            while not self._input.empty():
+                entity = self._input.get_nowait()
+                
+                if isinstance(entity, StopIteration):
+                    stop = True
+                    break
+                
+                entities.append(entity)
+            
+            if len(entities) > 1:
+                self.addEntities(entities)
+            else:
+                self.addEntity(entities[0])
+        
+        #for entity in self._input:
+        #    self.addEntity(entity)
+        
+        self.close()
+    
     def addEntity(self, entity):
+        Utils.log("[MySQLEntityDB] adding 1 entity")
+        
         def _addEntity(cursor):
             (paramNames, paramFormat, paramValues) = self._getEncodedParams(entity)
             
@@ -211,8 +246,6 @@ class MySQLEntityDB(AEntityDB):
         return retVal
     
     def close(self):
-        AEntityDB.close(self)
-        
         if self.db:
             self.db.commit()
             self.db.close()
@@ -423,6 +456,6 @@ for k, v in e._data.iteritems():
 
 """
 
-import EntityDatabases
-EntityDatabases.registerDB('mysql', MySQLEntityDB)
+import EntitySinks
+EntitySinks.registerSink('mysql', MySQLEntityDB)
 

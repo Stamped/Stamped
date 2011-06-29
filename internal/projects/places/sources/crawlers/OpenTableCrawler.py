@@ -8,10 +8,10 @@ __license__ = "TODO"
 import urllib, string, re, os
 import Globals, Utils
 
-from AEntityDataSource import AExternalSiteEntityDataSource
+from AEntitySource import AExternalSiteEntitySource
 from threading import Lock
 
-class OpenTableCrawler(AExternalSiteEntityDataSource):
+class OpenTableCrawler(AExternalSiteEntitySource):
     """
         OpenTable-specific crawling logic
     """
@@ -24,7 +24,7 @@ class OpenTableCrawler(AExternalSiteEntityDataSource):
     s_first = True
     
     def __init__(self, crawler):
-        AExternalSiteEntityDataSource.__init__(self, self.NAME)
+        AExternalSiteEntitySource.__init__(self, self.NAME)
         
         self._crawler = crawler;
         self._pool = Globals.threadPool
