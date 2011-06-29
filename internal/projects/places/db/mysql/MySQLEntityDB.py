@@ -160,8 +160,8 @@ class MySQLEntityDB(AEntitySink):
             
             query = "INSERT INTO entities %s VALUES %s" % (paramNames, paramFormat)
             
-            Utils.log(query)
-            Utils.log(paramValues)
+            #Utils.log(query)
+            #Utils.log(paramValues)
             
             numRowsAffected = cursor.execute(query, paramValues)
             
