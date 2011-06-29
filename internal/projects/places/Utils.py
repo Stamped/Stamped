@@ -123,3 +123,6 @@ def numEntitiesToStr(numEntities):
     else:
         return 'entities'
 
+def getStatusStr(count, maxCount):
+    return "%d%% (%d / %d)" % (round((100.0 * count) / maxCount), count, maxCount)
+

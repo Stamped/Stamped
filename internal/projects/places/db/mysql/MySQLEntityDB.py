@@ -6,8 +6,8 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, Utils
-import re, string
 import MySQLdb as mysqldb
+import re, string
 
 from AEntitySink import AEntitySink
 from Entity import Entity
@@ -32,6 +32,7 @@ class MySQLEntityDB(AEntitySink):
         
         'detailsPlace' : 'BOOL', 
         'detailsPlaceAddress' : 'VARCHAR(128)', 
+        'detailsPlaceCoordinates' : 'BOOL', 
         'detailsPlaceCoordinatesLat' : 'FLOAT', 
         'detailsPlaceCoordinatesLng' : 'FLOAT', 
         'detailsPlaceTypes' : 'VARCHAR(256)', 
@@ -133,6 +134,8 @@ class MySQLEntityDB(AEntitySink):
             
             entities.append(entity)
             
+            # retrieve as many items in the input queue at once to prefer 
+            # multi-insert over single insert if possible
             while not self._input.empty():
                 entity = self._input.get_nowait()
                 
@@ -147,9 +150,6 @@ class MySQLEntityDB(AEntitySink):
             else:
                 self.addEntity(entities[0])
         
-        #for entity in self._input:
-        #    self.addEntity(entity)
-        
         self.close()
     
     def addEntity(self, entity):
@@ -159,6 +159,10 @@ class MySQLEntityDB(AEntitySink):
             (paramNames, paramFormat, paramValues) = self._getEncodedParams(entity)
             
             query = "INSERT INTO entities %s VALUES %s" % (paramNames, paramFormat)
+            
+            Utils.log(query)
+            Utils.log(paramValues)
+            
             numRowsAffected = cursor.execute(query, paramValues)
             
             if numRowsAffected > 0:
@@ -206,8 +210,11 @@ class MySQLEntityDB(AEntitySink):
         return self._transact(_removeEntity)
     
     def addEntities(self, entities):
+        #for entity in entities:
+        #    self.addEntity(entity)
+        #return True
+        
         numEntities = Utils.count(entities)
-        Utils.log("")
         Utils.logRaw("[MySQLEntityDB] adding %d %s... " % \
             (numEntities, Utils.numEntitiesToStr(numEntities)), True)
         
@@ -241,7 +248,6 @@ class MySQLEntityDB(AEntitySink):
         retVal = self._transact(_addEntities)
         if retVal:
             Utils.logRaw("done!\n")
-            Utils.log("")
         
         return retVal
     
@@ -351,6 +357,11 @@ class MySQLEntityDB(AEntitySink):
                     #print "%s dict" % key
                     dest[key] = True
                     _flattenOptionalParams(key, v, dest)
+                elif isinstance(v, list):
+                    # TODO: ensure encoding of a list separated by a 
+                    # given character is robust. note: this is a hack...
+                    separator = ';'
+                    dest[key] = _encode(reduce(lambda x, y: x + separator + y, v))
                 else:
                     #print "%s = %s (%s)" % (key, _encode(v), type(v))
                     dest[key] = _encode(v)

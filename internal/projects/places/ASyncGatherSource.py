@@ -21,6 +21,7 @@ class ASyncGatherSource(IASyncProducer):
             source = self._source
             
             if source is not None:
+                #Utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
                 source.startProducing()
     
     def get(self, block=True, timeout=None):
@@ -43,7 +44,6 @@ class ASyncGatherSource(IASyncProducer):
         source = self._source
         
         if source is not None:
-            Utils.log("[ASyncGatherSource] pulling from source %s" % str(source))
             item = source.next()
             
             if isinstance(item, StopIteration):
@@ -51,6 +51,7 @@ class ASyncGatherSource(IASyncProducer):
                 
                 source = self._source
                 if source is not None:
+                    #Utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
                     source.startProducing()
                 
                 return self.next()

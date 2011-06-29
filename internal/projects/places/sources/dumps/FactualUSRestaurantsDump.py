@@ -16,7 +16,11 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
         Factual US Restaurants importer
     """
     
-    DUMP_FILE = "sources/dumps/data/factual/US_Restaurants_V2.csv"
+    DUMP_FILE_PREFIX = "sources/dumps/data/factual/"
+    DUMP_FILE_NAME   = "US_Restaurants_V2"
+    DUMP_FILE_SUFFIX = ".csv"
+    DUMP_FILE = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_SUFFIX
+    
     NAME = "Factual US Restaurants"
     TYPES = set([ 'place', 'contact', 'restaurant' ])
     
@@ -65,39 +69,40 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     }
     
     def __init__(self):
-        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES)
+        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 2048)
     
     def _run(self):
-        Utils.log("%s parsing '%s'" % (self.NAME, self.DUMP_FILE))
+        csvFile  = open(self.DUMP_FILE, 'rb')
+        numLines = max(1, CSVUtils.getNumLines(csvFile) - 1)
+        if self.limit: numLines = min(self.limit, numLines)
         
-        csvFile = open(self.DUMP_FILE, 'rb')
-        reader  = CSVUtils.UnicodeReader(csvFile)
+        Utils.log("[%s] parsing %d entities from '%s'" % \
+            (self.NAME, numLines, self.DUMP_FILE_NAME))
         
-        #Utils.logRaw("Parsing restaurant:                 ")
-        pool  = Pool(256)
-        count = 0
+        reader = CSVUtils.UnicodeReader(csvFile)
+        pool   = Pool(2048)
+        count  = 0
         
         for row in reader:
             if self.limit and count >= self.limit:
                 break
             
-            #update = str(count).ljust(16)
-            #Utils.logRaw('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%s' % update)
-            #Utils.log('Parsing %s' % row['name'])
-            #Utils.log(row)
-            
-            pool.spawn(self._parseEntity, row)
+            pool.spawn(self._parseEntity, row, count)
             count += 1
+            
+            if numLines > 100 and (count % (numLines / 100)) == 0:
+                Utils.log("[%s] done parsing %s" % \
+                    (self.NAME, Utils.getStatusStr(count, numLines)))
         
         pool.join()
         self._output.put(StopIteration)
         csvFile.close()
         
-        Utils.log("")
-        Utils.log("%s parsed %d entities" % (self.NAME, count))
-        Utils.log("")
+        Utils.log("[%s] finished parsing %d entities" % (self.NAME, count))
     
-    def _parseEntity(self, row):
+    def _parseEntity(self, row, count):
+        #Utils.log("[%s] parsing entity %d" % (self.NAME, count))
+        
         entity = Entity()
         entity.factual = {
             'table' : 'US_Restaurants_V2.csv'

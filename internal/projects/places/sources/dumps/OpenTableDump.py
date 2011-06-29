@@ -19,12 +19,16 @@ class OpenTableDump(AExternalDumpEntitySource):
     """
     
     # TODO: automate downloading latest dump file from the OpenTable FTP server
-    DUMP_FILE = "sources/dumps/data/opentabledata.raw.xls"
+    DUMP_FILE_PREFIX = "sources/dumps/data/"
+    DUMP_FILE_NAME   = "opentabledata"
+    DUMP_FILE_SUFFIX = ".raw.xls"
+    DUMP_FILE = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_SUFFIX
+    
     NAME = "OpenTable"
     TYPES = set([ 'place', 'contact', 'restaurant' ])
     
     def __init__(self):
-        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES)
+        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 128)
     
     def _run(self):
         book  = xlrd.open_workbook(self.DUMP_FILE)
@@ -36,14 +40,19 @@ class OpenTableDump(AExternalDumpEntitySource):
         else:
             numEntities = sheet.nrows
         
-        pool = Pool(256)
+        pool = Pool(128)
         for i in xrange(1, numEntities):
-            pool.spawn(self._parseEntity, sheet, i)
+            pool.spawn(self._parseEntity, sheet, i, numEntities)
         
         pool.join()
         self._output.put(StopIteration)
+        Utils.log("[%s] finished parsing %d entities" % (self.NAME, numEntities - 1))
     
-    def _parseEntity(self, sheet, index):
+    def _parseEntity(self, sheet, index, numEntities):
+        if numEntities > 100 and ((index - 1) % (numEntities / 100)) == 0:
+            Utils.log("[%s] dont parsing %s" % \
+                (self.NAME, Utils.getStatusStr(index - 1, numEntities)))
+        
         row = sheet.row_values(index)
         
         entity = Entity()

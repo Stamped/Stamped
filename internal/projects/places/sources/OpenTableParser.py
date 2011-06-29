@@ -13,7 +13,7 @@ from Entity import Entity
 __BASE_URL = "http://www.opentable.com/"
 
 def parseEntity(entity):
-    Utils.log("[OpenTable] parsing '%s'" % entity.name)
+    #Utils.log("[OpenTable] parsing '%s'" % entity.name)
     
     def encodeName(name):
         toReplace = {
@@ -57,7 +57,7 @@ def parseEntity(entity):
     while index < len(urls):
         try:
             url = urls[index]
-            Utils.log("[OpenTable] crawling " + url)
+            #Utils.log("[OpenTable] crawling " + url)
             soup = Utils.getSoup(url)
             
             if index == numOrigURLs - 1:

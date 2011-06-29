@@ -36,7 +36,11 @@ class GooglePlacesEntityProxy(AEntityProxy):
         
         if details is not None:
             for key, extractFunc in self._map.iteritems():
-                entity[key] = extractFunc(details)
+                try:
+                    value = extractFunc(details)
+                    entity[key] = value
+                except KeyError:
+                    pass
                 #Utils.log("'%s' => '%s'" % (key, str(entity[key])))
         
         return entity

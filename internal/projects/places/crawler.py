@@ -53,15 +53,15 @@ class Crawler(Thread):
             self.options.sink.put(entity)
         
         gevent.joinall(self.options.sources)
-        gather.join()
         
-        self.options.sink.join()
+        #self.options.sink.join()
+        self.options.sink.kill()
         self.options.sink.close()
     
     def _createSourceChain(self, source):
         source.limit = self.options.limit
         
-        if 'place' in source.types:
+        if self.options.googlePlaces and 'place' in source.types:
             source = GooglePlacesEntityProxy(source)
         
         return source
@@ -81,6 +81,10 @@ def parseCommandLine():
     
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
+    
+    parser.add_option("-g", "--googlePlaces", default=False, 
+        action="store_true", dest="googlePlaces", 
+        help="cross-reference place entities with the google places api")
     
     parser.add_option("-d", "--db", 
         type = 'choice', 
