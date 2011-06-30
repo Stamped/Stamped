@@ -43,7 +43,7 @@ class Crawler(Thread):
         self.options = options
     
     def run(self):
-        sources = (self._createSourceChain(source) for source in self.options.sources)
+        sources = map(self._createSourceChain, self.options.sources)
         
         self.options.sink.start()
         gather = ASyncGatherSource(sources)
@@ -52,9 +52,9 @@ class Crawler(Thread):
         for entity in gather:
             self.options.sink.put(entity)
         
-        gevent.joinall(self.options.sources)
+        gevent.joinall(sources)
         
-        #self.options.sink.join()
+        self.options.sink.join(timeout=2)
         self.options.sink.kill()
         self.options.sink.close()
     

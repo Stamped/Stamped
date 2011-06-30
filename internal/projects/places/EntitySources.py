@@ -41,7 +41,7 @@ def instantiateSource(name):
         return None
 
 def instantiateAll():
-    return (v['factory']() for v in sources.itervalues())
+    return list(v['factory']() for v in sources.itervalues())
 
 def __getSource(name):
     name = name.lower().strip()

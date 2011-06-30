@@ -44,9 +44,10 @@ class ASyncGatherSource(IASyncProducer):
         source = self._source
         
         if source is not None:
+            #Utils.log("[ASyncGatherSource] next %s" % (str(source), ))
             item = source.next()
             
-            if isinstance(item, StopIteration):
+            if item is StopIteration:
                 self._sources = self._sources[1:]
                 
                 source = self._source

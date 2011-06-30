@@ -15,7 +15,11 @@ class IASyncProducer():
         pass
     
     def get_nowait(self):
-        return self.get(block=True, timeout=None)
+        return self.get(block=False, timeout=None)
+    
+    @abstractmethod
+    def empty(self):
+        pass
     
     @abstractmethod
     def next(self):

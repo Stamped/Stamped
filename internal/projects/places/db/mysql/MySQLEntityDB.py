@@ -123,35 +123,14 @@ class MySQLEntityDB(AEntitySink):
         self._setup()
     
     def _run(self):
-        stop = False
-        
-        while not stop:
-            entities = []
-            
-            entity = self._input.get()
-            if isinstance(entity, StopIteration):
-                stop = True
-                break
-            
-            entities.append(entity)
-            
-            # retrieve as many items in the input queue at once to prefer 
-            # multi-insert over single insert if possible
-            while not self._input.empty():
-                entity = self._input.get_nowait()
-                
-                if isinstance(entity, StopIteration):
-                    stop = True
-                    break
-                
-                entities.append(entity)
-            
-            if len(entities) > 1:
-                self.addEntities(entities)
-            else:
-                self.addEntity(entities[0])
-        
+        self.processQueue(self._input)
         self.close()
+    
+    def _processItem(self, item):
+        return self.addEntity(item)
+    
+    def _processItems(self, items):
+        return self.addEntities(items)
     
     def addEntity(self, entity):
         Utils.log("[MySQLEntityDB] adding 1 entity")

@@ -29,6 +29,44 @@ class AEntitySink(Greenlet, IASyncConsumer):
     def _run(self):
         pass
     
+    def processQueue(self, queue):
+        #Utils.log("[%s] AEntitySink.processQueue" % (self, ))
+        stop = False
+        
+        while not stop:
+            items = []
+            
+            item = queue.get()
+            if item is StopIteration:
+                stop = True
+                break
+            
+            items.append(item)
+            
+            # retrieve as many items in the input queue at once to process  
+            # multiple items at a time if possible
+            while not queue.empty():
+                item = queue.get_nowait()
+                
+                if item is StopIteration:
+                    stop = True
+                    break
+                
+                items.append(item)
+            
+            if len(items) > 1:
+                self._processItems(items)
+            else:
+                self._processItem(items[0])
+    
+    @abstractmethod
+    def _processItem(self, item):
+        pass
+    
+    @abstractmethod
+    def _processItems(self, items):
+        pass
+    
     def __str__(self):
         return self._desc
 
