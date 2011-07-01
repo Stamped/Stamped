@@ -44,19 +44,22 @@ class Crawler(Thread):
     
     def run(self):
         sources = map(self._createSourceChain, self.options.sources)
+        sink = self.options.sink
         
-        self.options.sink.start()
+        sink.start()
         gather = ASyncGatherSource(sources)
         
         gather.startProducing()
-        for entity in gather:
-            self.options.sink.put(entity)
+        #for entity in gather:
+        #    sink.put(entity)
         
+        sink.processQueue(gather)
+        gather.join()
         gevent.joinall(sources)
         
-        self.options.sink.join(timeout=2)
-        self.options.sink.kill()
-        self.options.sink.close()
+        sink.join(timeout=2)
+        sink.kill()
+        sink.close()
     
     def _createSourceChain(self, source):
         source.limit = self.options.limit
@@ -82,6 +85,10 @@ def parseCommandLine():
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
     
+    parser.add_option("-t", "--test", default=False, 
+        action="store_true", dest="test", 
+        help="run the crawler with limited input for testing purposes")
+    
     parser.add_option("-g", "--googlePlaces", default=False, 
         action="store_true", dest="googlePlaces", 
         help="cross-reference place entities with the google places api")
@@ -95,6 +102,7 @@ def parseCommandLine():
         help="sets the destination database to persist entities to")
     
     (options, args) = parser.parse_args()
+    Globals.options = options
     
     if len(args) == 0:
         options.all = True

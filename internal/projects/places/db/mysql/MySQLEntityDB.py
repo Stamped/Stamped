@@ -16,8 +16,9 @@ from datetime import datetime
 
 class MySQLEntityDB(AEntitySink):
     USER  = 'root'
-    #DB    = 'stamped'
-    DB    = 'stamped2'
+    DB    = 'stamped'
+    #DB    = 'stamped2'
+    #DB    = 'stamped3'
     DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
     
     # TODO: truncate / validate sql input

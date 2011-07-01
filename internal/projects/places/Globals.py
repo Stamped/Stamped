@@ -22,3 +22,5 @@ import Utils
 #from ThreadPool import ThreadPool
 #threadPool = ThreadPool(__MAX_NUM_THREADS)
 
+options = { }
+

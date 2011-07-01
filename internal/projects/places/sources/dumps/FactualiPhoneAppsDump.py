@@ -17,10 +17,12 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         Factual iPhoneApps data importer
     """
     
-    DUMP_FILE_PREFIX = "sources/dumps/data/factual/"
-    DUMP_FILE_NAME   = "iPhone_Apps"
-    DUMP_FILE_SUFFIX = ".csv"
+    DUMP_FILE_PREFIX      = "sources/dumps/data/factual/"
+    DUMP_FILE_NAME        = "iPhone_Apps"
+    DUMP_FILE_SUFFIX      = ".csv"
+    DUMP_FILE_TEST_SUFFIX = ".test"
     DUMP_FILE = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_SUFFIX
+    DUMP_FILE_TEST = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_TEST_SUFFIX + DUMP_FILE_SUFFIX
     
     NAME = "Factual iPhone Apps"
     TYPES = set([ 'iPhoneApp' ])
@@ -50,9 +52,14 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
     
     def __init__(self):
         AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 512)
+        
+        if Globals.options.test:
+            self._dumpFile = self.DUMP_FILE_TEST
+        else:
+            self._dumpFile = self.DUMP_FILE
     
     def _run(self):
-        csvFile  = open(self.DUMP_FILE, 'rb')
+        csvFile  = open(self._dumpFile, 'rb')
         numLines = max(1, CSVUtils.getNumLines(csvFile) - 1)
         if self.limit: numLines = min(self.limit, numLines)
         
