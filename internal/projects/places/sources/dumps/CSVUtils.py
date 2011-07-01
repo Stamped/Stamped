@@ -23,8 +23,8 @@ class UTF8Recoder:
 
 class UnicodeReader:
     """
-    A CSV reader which will iterate over lines in the CSV file "f",
-    which is encoded in the given encoding.
+        A CSV reader which will iterate over lines in the CSV file "f", 
+        which is encoded in the given encoding.
     """
 
     def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):

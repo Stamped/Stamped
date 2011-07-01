@@ -85,9 +85,18 @@ def parseCommandLine():
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
     
+    parser.add_option("-c", "--collection", default="entities", type="string", 
+        action="store", dest="collection", 
+        help="the collection (mongodb parlance or table in SQL) to populate")
+    
     parser.add_option("-t", "--test", default=False, 
         action="store_true", dest="test", 
         help="run the crawler with limited input for testing purposes")
+    
+    parser.add_option("-u", "--update", default=False, 
+        action="store_true", dest="update", 
+        help="update the existing collection as opposed to dropping it and " + 
+        "overwriting any previous contents (the default)")
     
     parser.add_option("-g", "--googlePlaces", default=False, 
         action="store_true", dest="googlePlaces", 

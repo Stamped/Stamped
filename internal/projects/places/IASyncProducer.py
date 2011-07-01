@@ -10,6 +10,10 @@ import Globals, Utils
 from abc import abstractmethod
 
 class IASyncProducer():
+    """
+        Interface for an asynchronous, pull-based producer.
+    """
+    
     @abstractmethod
     def get(self, block = True, timeout=None):
         pass

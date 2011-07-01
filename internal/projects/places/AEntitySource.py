@@ -58,6 +58,8 @@ class AEntitySource(Greenlet, IASyncProducer):
     
     @abstractmethod
     def _run(self):
+        """Subclasses should override to process the pull-based loop in the 
+        context of this sink's Greenlet."""
         pass
         #Utils.log("")
         #Utils.log("Importing entities from source '%s'" % self.name)

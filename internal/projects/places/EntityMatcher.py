@@ -12,6 +12,11 @@ from difflib import SequenceMatcher
 from GooglePlaces import GooglePlaces
 
 class EntityMatcher(object):
+    """
+        Utility class which attempts to cross-reference entities from various 
+    sources with Google Places.
+    """
+    
     DEFAULT_TOLERANCE = 0.9
     TYPES = 'restaurant|food|establishment'
     
@@ -33,11 +38,17 @@ class EntityMatcher(object):
         return None
     
     def tryMatchEntityWithGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
-        address = entity.address
-        latLng  = self._googlePlaces.addressToLatLng(address)
+        if (not 'lat' in entity) or (not 'lng' in entity):
+            address = entity.address
+            latLng  = self._googlePlaces.addressToLatLng(address)
+            
+            if latLng is None:
+                return None
+            
+            entity.lat = latLng[0]
+            entity.lng = latLng[1]
         
-        if latLng is None:
-            return None
+        latLng = (entity.lat, entity.lng)
         
         numComplexityLevels = 16
         prevName = None

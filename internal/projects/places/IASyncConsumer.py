@@ -10,6 +10,10 @@ import Globals, Utils
 from abc import abstractmethod
 
 class IASyncConsumer():
+    """
+        Interface for an asynchronous, push-based consumer.
+    """
+    
     @abstractmethod
     def put(self, item, block=True, timeout=None):
         pass
