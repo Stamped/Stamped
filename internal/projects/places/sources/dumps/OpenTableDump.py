@@ -19,9 +19,9 @@ class OpenTableDump(AExternalDumpEntitySource):
     """
     
     # TODO: automate downloading latest dump file from the OpenTable FTP server
-    DUMP_FILE_PREFIX = "sources/dumps/data/"
-    DUMP_FILE_NAME   = "opentabledata"
-    DUMP_FILE_SUFFIX = ".raw.xls"
+    DUMP_FILE_PREFIX      = "sources/dumps/data/"
+    DUMP_FILE_NAME        = "opentabledata"
+    DUMP_FILE_SUFFIX      = ".xls"
     DUMP_FILE = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_SUFFIX
     
     NAME = "OpenTable"
@@ -29,9 +29,11 @@ class OpenTableDump(AExternalDumpEntitySource):
     
     def __init__(self):
         AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 128)
+        
+        self._dumpFile = self.DUMP_FILE
     
     def _run(self):
-        book  = xlrd.open_workbook(self.DUMP_FILE)
+        book  = xlrd.open_workbook(self._dumpFile)
         sheet = book.sheet_by_index(0)
         
         if self.limit:
@@ -70,7 +72,10 @@ class OpenTableDump(AExternalDumpEntitySource):
             'neighborhoodName' : row[2], 
         }
         
-        OpenTableParser.parseEntity(entity)
+        # don't make external calls to opentable in test mode
+        if not Globals.options.test:
+            OpenTableParser.parseEntity(entity)
+        
         self._output.put(entity)
 
 """

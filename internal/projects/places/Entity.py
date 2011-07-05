@@ -204,7 +204,7 @@ class Entity(object):
                     isValid = True
                     
                     # basic implicit type conversion s.t. if you pass in, for example, 
-                    # "23.4" for longitude as a string, it'll automatically parse to 
+                    # "23.4" for longitude as a string, it'll automatically cast to 
                     # the required float format.
                     try:
                         if schemaValType == basestring:

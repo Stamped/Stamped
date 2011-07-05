@@ -30,6 +30,8 @@ class AEntitySource(Greenlet, IASyncProducer):
         self._types = types
         self._output = Queue(maxQueueSize)
         self._started = False
+        self._maxQueueSize = maxQueueSize
+        
         self.limit = None
         
         # validate the types
@@ -43,6 +45,9 @@ class AEntitySource(Greenlet, IASyncProducer):
     def get_nowait(self):
         return self._output.get_nowait()
     
+    def empty(self):
+        return self._output.empty()
+    
     def next(self):
         return self._output.next()
     
@@ -53,6 +58,8 @@ class AEntitySource(Greenlet, IASyncProducer):
     
     @abstractmethod
     def _run(self):
+        """Subclasses should override to process the pull-based loop in the 
+        context of this sink's Greenlet."""
         pass
         #Utils.log("")
         #Utils.log("Importing entities from source '%s'" % self.name)
@@ -63,6 +70,9 @@ class AEntitySource(Greenlet, IASyncProducer):
     
     @property
     def types(self): return self._types
+    
+    @property
+    def maxQueueSize(self): return self._maxQueueSize
 
 class AExternalEntitySource(AEntitySource):
     
@@ -107,9 +117,6 @@ class AExternalServiceEntitySource(AExternalEntitySource):
     def __init__(self, name, types=None, maxQueueSize=None):
         AExternalEntitySource.__init__(self, name, types, maxQueueSize)
     
-    def importAll(self, sink, limit=None):
-        return True
-
 class AExternalDumpEntitySource(AExternalEntitySource):
     """
         An external data dump which may be crawled as a source of entity data 

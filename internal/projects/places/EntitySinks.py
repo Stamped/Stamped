@@ -41,7 +41,7 @@ def instantiateSink(name):
         return None
 
 def instantiateAll():
-    return (v['factory']() for v in __sinks.itervalues())
+    return list(v['factory']() for v in __sinks.itervalues())
 
 def __getSink(name):
     name = name.lower().strip()

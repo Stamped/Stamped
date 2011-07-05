@@ -15,10 +15,8 @@ from threading import Lock
 from datetime import datetime
 
 class MySQLEntityDB(AEntitySink):
-    USER  = 'root'
-    #DB    = 'stamped'
-    DB    = 'stamped2'
-    DESC  = 'MySQL:%s@%s.entities' % (USER, DB)
+    USER = 'root'
+    DB   = 'stamped'
     
     # TODO: truncate / validate sql input
     _rawSchema = {
@@ -75,26 +73,26 @@ class MySQLEntityDB(AEntitySink):
         'detailsRestaurantOwner' : 'VARCHAR(512)', 
         'detailsRestaurantReviewLinks' : 'VARCHAR(2048)', 
         
-        'detailsiPhoneApp' : 'BOOL', 
-        'detailsiPhoneAppDeveloper' : 'VARCHAR(512)', 
-        'detailsiPhoneAppDeveloperURL' : 'VARCHAR(2048)', 
-        'detailsiPhoneAppDeveloperSupportURL' : 'VARCHAR(2048)', 
-        'detailsiPhoneAppPublisher' : 'VARCHAR(256)', 
-        'detailsiPhoneAppReleaseDate' : 'VARCHAR(256)', 
-        'detailsiPhoneAppPrice' : 'VARCHAR(256)', 
-        'detailsiPhoneAppCategory' : 'VARCHAR(256)', 
-        'detailsiPhoneAppLanguage' : 'VARCHAR(256)', 
-        'detailsiPhoneAppRating' : 'VARCHAR(256)', 
-        'detailsiPhoneAppPopularity' : 'VARCHAR(256)', 
-        'detailsiPhoneAppParentalRating' : 'VARCHAR(256)', 
-        'detailsiPhoneAppPlatform' : 'VARCHAR(256)', 
-        'detailsiPhoneAppRequirements' : 'VARCHAR(256)', 
-        'detailsiPhoneAppSize' : 'VARCHAR(256)', 
-        'detailsiPhoneAppVersion' : 'VARCHAR(256)', 
-        'detailsiPhoneAppDownloadURL' : 'VARCHAR(2048)', 
-        'detailsiPhoneAppThumbnailURL' : 'VARCHAR(2048)', 
-        'detailsiPhoneAppScreenshotURL' : 'VARCHAR(2048)', 
-        'detailsiPhoneAppVideoURL' : 'VARCHAR(2048)', 
+        'detailsIPhoneApp' : 'BOOL', 
+        'detailsIPhoneAppDeveloper' : 'VARCHAR(512)', 
+        'detailsIPhoneAppDeveloperURL' : 'VARCHAR(2048)', 
+        'detailsIPhoneAppDeveloperSupportURL' : 'VARCHAR(2048)', 
+        'detailsIPhoneAppPublisher' : 'VARCHAR(256)', 
+        'detailsIPhoneAppReleaseDate' : 'VARCHAR(256)', 
+        'detailsIPhoneAppPrice' : 'VARCHAR(256)', 
+        'detailsIPhoneAppCategory' : 'VARCHAR(256)', 
+        'detailsIPhoneAppLanguage' : 'VARCHAR(256)', 
+        'detailsIPhoneAppRating' : 'VARCHAR(256)', 
+        'detailsIPhoneAppPopularity' : 'VARCHAR(256)', 
+        'detailsIPhoneAppParentalRating' : 'VARCHAR(256)', 
+        'detailsIPhoneAppPlatform' : 'VARCHAR(256)', 
+        'detailsIPhoneAppRequirements' : 'VARCHAR(256)', 
+        'detailsIPhoneAppSize' : 'VARCHAR(256)', 
+        'detailsIPhoneAppVersion' : 'VARCHAR(256)', 
+        'detailsIPhoneAppDownloadURL' : 'VARCHAR(2048)', 
+        'detailsIPhoneAppThumbnailURL' : 'VARCHAR(2048)', 
+        'detailsIPhoneAppScreenshotURL' : 'VARCHAR(2048)', 
+        'detailsIPhoneAppVideoURL' : 'VARCHAR(2048)', 
         
         'detailsBook' : 'BOOL', 
         'detailsMovie' : 'BOOL', 
@@ -117,41 +115,22 @@ class MySQLEntityDB(AEntitySink):
     }
     
     def __init__(self):
-        AEntitySink.__init__(self, self.DESC)
+        self._table = Globals.options.collection
+        desc = 'MySQL:%s@%s.%s' % (self.USER, self.DB, self._table)
+        AEntitySink.__init__(self, desc)
         
         self._lock = Lock()
         self._setup()
     
     def _run(self):
-        stop = False
-        
-        while not stop:
-            entities = []
-            
-            entity = self._input.get()
-            if isinstance(entity, StopIteration):
-                stop = True
-                break
-            
-            entities.append(entity)
-            
-            # retrieve as many items in the input queue at once to prefer 
-            # multi-insert over single insert if possible
-            while not self._input.empty():
-                entity = self._input.get_nowait()
-                
-                if isinstance(entity, StopIteration):
-                    stop = True
-                    break
-                
-                entities.append(entity)
-            
-            if len(entities) > 1:
-                self.addEntities(entities)
-            else:
-                self.addEntity(entities[0])
-        
+        self.processQueue(self._input)
         self.close()
+    
+    def _processItem(self, item):
+        return self.addEntity(item)
+    
+    def _processItems(self, items):
+        return self.addEntities(items)
     
     def addEntity(self, entity):
         Utils.log("[MySQLEntityDB] adding 1 entity")
@@ -159,10 +138,10 @@ class MySQLEntityDB(AEntitySink):
         def _addEntity(cursor):
             (paramNames, paramFormat, paramValues) = self._getEncodedParams(entity)
             
-            query = "INSERT INTO entities %s VALUES %s" % (paramNames, paramFormat)
+            query = "INSERT INTO %s %s VALUES %s" % (self._table, paramNames, paramFormat)
             
-            #Utils.log(query)
-            #Utils.log(paramValues)
+            Utils.log(query)
+            Utils.log(paramValues)
             
             numRowsAffected = cursor.execute(query, paramValues)
             
@@ -177,7 +156,7 @@ class MySQLEntityDB(AEntitySink):
         entityID = int(entityID)
         
         def _getEntity(cursor):
-            query = "SELECT * FROM entities WHERE entity_id = %d" % (entityID, )
+            query = "SELECT * FROM %s WHERE entity_id = %d" % (self._table, entityID, )
             numRowsAffected = cursor.execute(query)
             
             if numRowsAffected > 0:
@@ -194,7 +173,7 @@ class MySQLEntityDB(AEntitySink):
             (paramNames, paramFormat, paramValues) = self._getEncodedParams(entity)
             
             # TODO: look into using UPDATE
-            query = "REPLACE INTO entities %s VALUES %s" % (paramNames, paramFormat)
+            query = "REPLACE INTO %s %s VALUES %s" % (self._table, paramNames, paramFormat)
             numRowsAffected = cursor.execute(query, paramValues)
             
             return (numRowsAffected > 0)
@@ -203,7 +182,7 @@ class MySQLEntityDB(AEntitySink):
     
     def removeEntity(self, entityID):
         def _removeEntity(cursor):
-            query = "DELETE FROM entities WHERE entity_id = %d" % (entityID, )
+            query = "DELETE FROM %s WHERE entity_id = %d" % (self._table, entityID, )
             numRowsAffected = cursor.execute(query)
             
             return (numRowsAffected > 0)
@@ -225,18 +204,21 @@ class MySQLEntityDB(AEntitySink):
         
         def _addEntities(cursor):
             (paramNames, paramFormat, paramValues) = self._getEncodedParamsMany(entities)
-            query = "INSERT INTO entities %s VALUES %s" % (paramNames, paramFormat)
+            query = "INSERT INTO %s %s VALUES %s" % (self._table, paramNames, paramFormat)
             
             #Utils.log(query)
             #for e in paramValues:
             #    Utils.log(e)
+            
+            #Utils.log(query)
+            #Utils.log(paramValues[0])
             
             numRowsExpected = Utils.count(paramValues)
             numRowsAffected = cursor.executemany(query, paramValues)
             #Utils.log("%d vs %d" % (numRowsAffected, numRowsExpected))
             
             if numRowsAffected != numRowsExpected:
-                Utils.log('[MySQLEntityDB.addEntities] error inserting %d entities' % numRowsExpected)
+                Utils.log('[MySQLEntityDB.addEntities] error inserting %d %s' % (numRowsExpected, self._table))
                 Utils.log(query)
                 
                 for e in paramValues:
@@ -267,22 +249,26 @@ class MySQLEntityDB(AEntitySink):
         def _createTables(cursor):
             # SERIAL = BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE
             
-            query = """CREATE TABLE entities (
+            query = """CREATE TABLE %s (
                 entity_id INT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE, 
-                """ + self._schema + "PRIMARY KEY(entity_id))"
+                %s PRIMARY KEY(entity_id))""" % (self._table, self._schema)
+            
             #Utils.log(query)
             cursor.execute(query)
             
-            cursor.execute("CREATE INDEX ix_title ON entities (title)")
+            cursor.execute("CREATE INDEX ix_title ON %s (title)" % self._table)
             return True
         
         self._schema = self._createSchema(self._rawSchema)
         
-        self.db = mysqldb.connect(user=self.USER)
-        self._transact(_createDB)
-        self.close()
-        
-        self._transact(_createTables)
+        if not Globals.options.update:
+            self.db = mysqldb.connect(user=self.USER)
+            self._transact(_createDB)
+            self.close()
+            
+            self._transact(_createTables)
+        else:
+            self.db = self._getConnection()
     
     def _transact(self, func, customCursor=None):
         retVal = None

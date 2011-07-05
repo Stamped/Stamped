@@ -13,6 +13,7 @@ from Entity import Entity
 __BASE_URL = "http://www.opentable.com/"
 
 def parseEntity(entity):
+    """Attempts to find and append OpenTable details to the given entity."""
     #Utils.log("[OpenTable] parsing '%s'" % entity.name)
     
     def encodeName(name):

@@ -7,6 +7,9 @@ __license__ = "TODO"
 
 import Globals, Utils
 
+from AEntityProxy import AEntityProxy
+
+"""
 from IASyncProducer import IASyncProducer
 
 class ASyncGatherSource(IASyncProducer):
@@ -44,9 +47,10 @@ class ASyncGatherSource(IASyncProducer):
         source = self._source
         
         if source is not None:
+            #Utils.log("[ASyncGatherSource] next %s" % (str(source), ))
             item = source.next()
             
-            if isinstance(item, StopIteration):
+            if item is StopIteration:
                 self._sources = self._sources[1:]
                 
                 source = self._source
@@ -62,6 +66,52 @@ class ASyncGatherSource(IASyncProducer):
     
     @property
     def _source(self):
+        if len(self._sources) > 0:
+            return self._sources[0]
+        else:
+            return None
+"""
+
+class ASyncGatherSource(AEntityProxy):
+    
+    def __init__(self, sources, name=None):
+        sources = list(sources)
+        
+        if name is None:
+            name = "GatherSource(%d)" % (len(sources), )
+        
+        AEntityProxy.__init__(self, sources[0], name)
+        self._sources = list(sources)
+    
+    def _run(self):
+        for source in self._sources:
+            source.startProducing()
+            self.processQueue(source)
+        
+        self._output.put(StopIteration)
+    
+    def next(self):
+        source = self.getSource()
+        
+        if source is not None:
+            #Utils.log("[ASyncGatherSource] next %s" % (str(source), ))
+            item = source.next()
+            
+            if item is StopIteration:
+                self._sources = self._sources[1:]
+                
+                source = self.getSource()
+                if source is not None:
+                    #Utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
+                    source.startProducing()
+                
+                return self.next()
+            else:
+                return item
+        else:
+            return StopIteration
+    
+    def getSource(self):
         if len(self._sources) > 0:
             return self._sources[0]
         else:
