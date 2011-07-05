@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
+		7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177713C3754300ABE6E2 /* Foundation.framework */; };
+		7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */; };
+		7EC0178013C3754300ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */; };
+		7EC0178313C3754300ABE6E2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178213C3754300ABE6E2 /* main.m */; };
+		7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */; };
+		7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0178713C3754300ABE6E2 /* MainWindow.xib */; };
+		7EC0178C13C3754300ABE6E2 /* StampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178B13C3754300ABE6E2 /* StampsViewController.m */; };
+		7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */; };
+		7EC0179513C3754300ABE6E2 /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */; };
+		7EC0179C13C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
+		7EC0179D13C3754300ABE6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177713C3754300ABE6E2 /* Foundation.framework */; };
+		7EC0179E13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */; };
+		7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A413C3754300ABE6E2 /* InfoPlist.strings */; };
+		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
+		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
+		7EFE8F2413C39C7200324F34 /* CustomUITabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2313C39C7200324F34 /* CustomUITabBarController.m */; };
+		7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* StampsListViewController.m */; };
+		7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7EC0179F13C3754300ABE6E2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EC0176813C3754300ABE6E2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7EC0177013C3754300ABE6E2;
+			remoteInfo = Stamped;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		7EC0177113C3754300ABE6E2 /* Stamped.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stamped.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EC0177513C3754300ABE6E2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		7EC0177713C3754300ABE6E2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		7EC0177D13C3754300ABE6E2 /* Stamped-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Stamped-Info.plist"; sourceTree = "<group>"; };
+		7EC0177F13C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7EC0178113C3754300ABE6E2 /* Stamped-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Stamped-Prefix.pch"; sourceTree = "<group>"; };
+		7EC0178213C3754300ABE6E2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedAppDelegate.h; sourceTree = "<group>"; };
+		7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedAppDelegate.m; sourceTree = "<group>"; };
+		7EC0178813C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
+		7EC0178A13C3754300ABE6E2 /* StampsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampsViewController.h; sourceTree = "<group>"; };
+		7EC0178B13C3754300ABE6E2 /* StampsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampsViewController.m; sourceTree = "<group>"; };
+		7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActivityViewController.h; sourceTree = "<group>"; };
+		7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActivityViewController.m; sourceTree = "<group>"; };
+		7EC0179413C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActivityViewController.xib; sourceTree = "<group>"; };
+		7EC0179B13C3754300ABE6E2 /* StampedTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StampedTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EC017A313C3754300ABE6E2 /* StampedTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "StampedTests-Info.plist"; sourceTree = "<group>"; };
+		7EC017A513C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StampedTests-Prefix.pch"; sourceTree = "<group>"; };
+		7EC017A813C3754400ABE6E2 /* StampedTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedTests.h; sourceTree = "<group>"; };
+		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
+		7EFE8F2213C39C7200324F34 /* CustomUITabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomUITabBarController.h; sourceTree = "<group>"; };
+		7EFE8F2313C39C7200324F34 /* CustomUITabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomUITabBarController.m; sourceTree = "<group>"; };
+		7EFE8F2513C39FA100324F34 /* StampsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListViewController.h; sourceTree = "<group>"; };
+		7EFE8F2613C39FA100324F34 /* StampsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampsListViewController.m; sourceTree = "<group>"; };
+		7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampsListViewController.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7EC0176E13C3754300ABE6E2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */,
+				7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */,
+				7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EC0179713C3754300ABE6E2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC0179C13C3754300ABE6E2 /* UIKit.framework in Frameworks */,
+				7EC0179D13C3754300ABE6E2 /* Foundation.framework in Frameworks */,
+				7EC0179E13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7EC0176613C3754300ABE6E2 = {
+			isa = PBXGroup;
+			children = (
+				7EC0177B13C3754300ABE6E2 /* Stamped */,
+				7EC017A113C3754300ABE6E2 /* StampedTests */,
+				7EC0177413C3754300ABE6E2 /* Frameworks */,
+				7EC0177213C3754300ABE6E2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7EC0177213C3754300ABE6E2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0177113C3754300ABE6E2 /* Stamped.app */,
+				7EC0179B13C3754300ABE6E2 /* StampedTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7EC0177413C3754300ABE6E2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0177513C3754300ABE6E2 /* UIKit.framework */,
+				7EC0177713C3754300ABE6E2 /* Foundation.framework */,
+				7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		7EC0177B13C3754300ABE6E2 /* Stamped */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
+				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
+				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
+				7EC0178A13C3754300ABE6E2 /* StampsViewController.h */,
+				7EC0178B13C3754300ABE6E2 /* StampsViewController.m */,
+				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
+				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
+				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
+				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
+				7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */,
+				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
+				7EC0177C13C3754300ABE6E2 /* Supporting Files */,
+				7EFE8F2213C39C7200324F34 /* CustomUITabBarController.h */,
+				7EFE8F2313C39C7200324F34 /* CustomUITabBarController.m */,
+			);
+			path = Stamped;
+			sourceTree = "<group>";
+		};
+		7EC0177C13C3754300ABE6E2 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0177D13C3754300ABE6E2 /* Stamped-Info.plist */,
+				7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */,
+				7EC0178113C3754300ABE6E2 /* Stamped-Prefix.pch */,
+				7EC0178213C3754300ABE6E2 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		7EC017A113C3754300ABE6E2 /* StampedTests */ = {
+			isa = PBXGroup;
+			children = (
+				7EC017A813C3754400ABE6E2 /* StampedTests.h */,
+				7EC017AA13C3754400ABE6E2 /* StampedTests.m */,
+				7EC017A213C3754300ABE6E2 /* Supporting Files */,
+			);
+			path = StampedTests;
+			sourceTree = "<group>";
+		};
+		7EC017A213C3754300ABE6E2 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				7EC017A313C3754300ABE6E2 /* StampedTests-Info.plist */,
+				7EC017A413C3754300ABE6E2 /* InfoPlist.strings */,
+				7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7EC0177013C3754300ABE6E2 /* Stamped */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EC017AE13C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "Stamped" */;
+			buildPhases = (
+				7EC0176D13C3754300ABE6E2 /* Sources */,
+				7EC0176E13C3754300ABE6E2 /* Frameworks */,
+				7EC0176F13C3754300ABE6E2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Stamped;
+			productName = Stamped;
+			productReference = 7EC0177113C3754300ABE6E2 /* Stamped.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7EC0179A13C3754300ABE6E2 /* StampedTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EC017B113C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "StampedTests" */;
+			buildPhases = (
+				7EC0179613C3754300ABE6E2 /* Sources */,
+				7EC0179713C3754300ABE6E2 /* Frameworks */,
+				7EC0179813C3754300ABE6E2 /* Resources */,
+				7EC0179913C3754300ABE6E2 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7EC017A013C3754300ABE6E2 /* PBXTargetDependency */,
+			);
+			name = StampedTests;
+			productName = StampedTests;
+			productReference = 7EC0179B13C3754300ABE6E2 /* StampedTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7EC0176813C3754300ABE6E2 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 7EC0176B13C3754300ABE6E2 /* Build configuration list for PBXProject "Stamped" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7EC0176613C3754300ABE6E2;
+			productRefGroup = 7EC0177213C3754300ABE6E2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7EC0177013C3754300ABE6E2 /* Stamped */,
+				7EC0179A13C3754300ABE6E2 /* StampedTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7EC0176F13C3754300ABE6E2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC0178013C3754300ABE6E2 /* InfoPlist.strings in Resources */,
+				7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */,
+				7EC0179513C3754300ABE6E2 /* ActivityViewController.xib in Resources */,
+				7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EC0179813C3754300ABE6E2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */,
+				7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7EC0179913C3754300ABE6E2 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7EC0176D13C3754300ABE6E2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC0178313C3754300ABE6E2 /* main.m in Sources */,
+				7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */,
+				7EC0178C13C3754300ABE6E2 /* StampsViewController.m in Sources */,
+				7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */,
+				7EFE8F2413C39C7200324F34 /* CustomUITabBarController.m in Sources */,
+				7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EC0179613C3754300ABE6E2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7EC017A013C3754300ABE6E2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7EC0177013C3754300ABE6E2 /* Stamped */;
+			targetProxy = 7EC0179F13C3754300ABE6E2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC0177F13C3754300ABE6E2 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		7EC0178713C3754300ABE6E2 /* MainWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC0178813C3754300ABE6E2 /* en */,
+			);
+			name = MainWindow.xib;
+			sourceTree = "<group>";
+		};
+		7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC0179413C3754300ABE6E2 /* en */,
+			);
+			name = ActivityViewController.xib;
+			sourceTree = "<group>";
+		};
+		7EC017A413C3754300ABE6E2 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC017A513C3754300ABE6E2 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		7EC017AC13C3754400ABE6E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		7EC017AD13C3754400ABE6E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		7EC017AF13C3754400ABE6E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		7EC017B013C3754400ABE6E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		7EC017B213C3754400ABE6E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stamped.app/Stamped";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";
+				INFOPLIST_FILE = "StampedTests/StampedTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		7EC017B313C3754400ABE6E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stamped.app/Stamped";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";
+				INFOPLIST_FILE = "StampedTests/StampedTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7EC0176B13C3754300ABE6E2 /* Build configuration list for PBXProject "Stamped" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EC017AC13C3754400ABE6E2 /* Debug */,
+				7EC017AD13C3754400ABE6E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7EC017AE13C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "Stamped" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EC017AF13C3754400ABE6E2 /* Debug */,
+				7EC017B013C3754400ABE6E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7EC017B113C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "StampedTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EC017B213C3754400ABE6E2 /* Debug */,
+				7EC017B313C3754400ABE6E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7EC0176813C3754300ABE6E2 /* Project object */;
+}
