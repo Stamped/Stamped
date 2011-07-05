@@ -10,7 +10,9 @@
 
 
 @interface StampsListViewController : UITableViewController {
-    
+  UITableViewCell* stampCell_;
 }
+
+@property (nonatomic, assign) IBOutlet UITableViewCell* stampCell;
 
 @end

@@ -34,5 +34,10 @@
 	</array>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleBlackOpaque</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>TGLight.otf</string>
+		<string>TitlingGothicFBComp-Reg.otf</string>
+	</array>
 </dict>
 </plist>
