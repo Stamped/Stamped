@@ -8,6 +8,8 @@
 
 #import "StampsListViewController.h"
 
+#import "StampDetailViewController.h"
+
 @implementation StampsListViewController
 
 @synthesize stampCell = stampCell_;
@@ -36,6 +38,8 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   NSLog(@"Fonts: %@", [UIFont familyNames]);
+  NSLog(@"Font names: %@\n%@", [UIFont fontNamesForFamilyName:@"TGLight"],
+        [UIFont fontNamesForFamilyName:@"TitlingGothicFB Comp"]);
 
   // Uncomment the following line to preserve selection between presentations.
   // self.clearsSelectionOnViewWillAppear = NO;
@@ -77,9 +81,8 @@
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-//#warning Incomplete method implementation.
   // Return the number of rows in the section.
-  return 1;
+  return 300;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -91,8 +94,11 @@
     cell = stampCell_;
     self.stampCell = nil;
   }
-  
+
   cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+  UILabel* stampLabel = (UILabel*)[cell viewWithTag:1];
+  stampLabel.text = @"Ramen Takumi";
+  stampLabel.font = [UIFont fontWithName:@"TGLight" size:46];
   
   return cell;
 }
@@ -100,14 +106,12 @@
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  // Navigation logic may go here. Create and push another view controller.
-  /*
-   <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-   // ...
+   StampDetailViewController* detailViewController =
+      [[StampDetailViewController alloc] initWithNibName:@"StampDetailViewController" bundle:nil];
+
    // Pass the selected object to the new view controller.
    [self.navigationController pushViewController:detailViewController animated:YES];
    [detailViewController release];
-   */
 }
 
 @end
