@@ -8,6 +8,7 @@
 
 #import "StampsListViewController.h"
 
+#import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 
 @implementation StampsListViewController
@@ -23,6 +24,7 @@
 }
 
 - (void)dealloc {
+  self.stampCell = nil;
   [super dealloc];
 }
 
@@ -40,18 +42,12 @@
   NSLog(@"Fonts: %@", [UIFont familyNames]);
   NSLog(@"Font names: %@\n%@", [UIFont fontNamesForFamilyName:@"TGLight"],
         [UIFont fontNamesForFamilyName:@"TitlingGothicFB Comp"]);
-
-  // Uncomment the following line to preserve selection between presentations.
-  // self.clearsSelectionOnViewWillAppear = NO;
-
-  // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-  // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  // Release any retained subviews of the main view.
-  // e.g. self.myOutlet = nil;
+  
+  self.stampCell = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -106,12 +102,14 @@
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-   StampDetailViewController* detailViewController =
+  [tableView deselectRowAtIndexPath:indexPath animated:YES];
+  StampDetailViewController* detailViewController =
       [[StampDetailViewController alloc] initWithNibName:@"StampDetailViewController" bundle:nil];
 
-   // Pass the selected object to the new view controller.
-   [self.navigationController pushViewController:detailViewController animated:YES];
-   [detailViewController release];
+  // Pass the selected object to the new view controller.
+  StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
 }
 
 @end

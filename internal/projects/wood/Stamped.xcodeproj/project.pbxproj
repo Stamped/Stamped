@@ -22,7 +22,8 @@
 		7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A413C3754300ABE6E2 /* InfoPlist.strings */; };
 		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
 		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
-		7EFE8F2413C39C7200324F34 /* CustomUITabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2313C39C7200324F34 /* CustomUITabBarController.m */; };
+		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
+		7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */; };
 		7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* StampsListViewController.m */; };
 		7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */; };
 		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
@@ -37,6 +38,8 @@
 		7EFE8F8613C3D36E00324F34 /* map_pin_small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8513C3D36E00324F34 /* map_pin_small@2x.png */; };
 		7EFE8F8A13C3DD4D00324F34 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8813C3DD4D00324F34 /* StampDetailViewController.m */; };
 		7EFE8F8B13C3DD4D00324F34 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8913C3DD4D00324F34 /* StampDetailViewController.xib */; };
+		7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */; };
+		7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,8 +73,9 @@
 		7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StampedTests-Prefix.pch"; sourceTree = "<group>"; };
 		7EC017A813C3754400ABE6E2 /* StampedTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedTests.h; sourceTree = "<group>"; };
 		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
-		7EFE8F2213C39C7200324F34 /* CustomUITabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomUITabBarController.h; sourceTree = "<group>"; };
-		7EFE8F2313C39C7200324F34 /* CustomUITabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomUITabBarController.m; sourceTree = "<group>"; };
+		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
+		7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNavigationBar.m; sourceTree = "<group>"; };
+		7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
 		7EFE8F2513C39FA100324F34 /* StampsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListViewController.h; sourceTree = "<group>"; };
 		7EFE8F2613C39FA100324F34 /* StampsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampsListViewController.m; sourceTree = "<group>"; };
 		7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampsListViewController.xib; sourceTree = "<group>"; };
@@ -88,6 +92,9 @@
 		7EFE8F8713C3DD4D00324F34 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
 		7EFE8F8813C3DD4D00324F34 /* StampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailViewController.m; sourceTree = "<group>"; };
 		7EFE8F8913C3DD4D00324F34 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampDetailViewController.xib; sourceTree = "<group>"; };
+		7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTabBarViewController.h; sourceTree = "<group>"; };
+		7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTabBarViewController.m; sourceTree = "<group>"; };
+		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RootTabBarViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,18 +153,9 @@
 		7EC0177B13C3754300ABE6E2 /* Stamped */ = {
 			isa = PBXGroup;
 			children = (
+				7EFE8FC813C4D8E300324F34 /* Classes */,
 				7EFE8F8213C3CE3000324F34 /* Interface */,
-				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
-				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
-				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
-				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
-				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
-				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
-				7EFE8F8713C3DD4D00324F34 /* StampDetailViewController.h */,
-				7EFE8F8813C3DD4D00324F34 /* StampDetailViewController.m */,
 				7EC0177C13C3754300ABE6E2 /* Supporting Files */,
-				7EFE8F2213C39C7200324F34 /* CustomUITabBarController.h */,
-				7EFE8F2313C39C7200324F34 /* CustomUITabBarController.m */,
 			);
 			path = Stamped;
 			sourceTree = "<group>";
@@ -165,6 +163,7 @@
 		7EC0177C13C3754300ABE6E2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */,
 				7EFE8F8313C3CFBF00324F34 /* user-image-jake@2x.png */,
 				7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */,
 				7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */,
@@ -207,11 +206,31 @@
 			children = (
 				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
+				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
 				7EFE8F3613C3B4AF00324F34 /* StampCell.xib */,
 				7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */,
 				7EFE8F8913C3DD4D00324F34 /* StampDetailViewController.xib */,
 			);
 			name = Interface;
+			sourceTree = "<group>";
+		};
+		7EFE8FC813C4D8E300324F34 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
+				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
+				7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */,
+				7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */,
+				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
+				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
+				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
+				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
+				7EFE8F8713C3DD4D00324F34 /* StampDetailViewController.h */,
+				7EFE8F8813C3DD4D00324F34 /* StampDetailViewController.m */,
+				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
+				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
+			);
+			name = Classes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -296,6 +315,8 @@
 				7EFE8F8413C3CFBF00324F34 /* user-image-jake@2x.png in Resources */,
 				7EFE8F8613C3D36E00324F34 /* map_pin_small@2x.png in Resources */,
 				7EFE8F8B13C3DD4D00324F34 /* StampDetailViewController.xib in Resources */,
+				7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */,
+				7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,9 +355,10 @@
 				7EC0178313C3754300ABE6E2 /* main.m in Sources */,
 				7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */,
 				7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */,
-				7EFE8F2413C39C7200324F34 /* CustomUITabBarController.m in Sources */,
 				7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */,
 				7EFE8F8A13C3DD4D00324F34 /* StampDetailViewController.m in Sources */,
+				7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */,
+				7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
