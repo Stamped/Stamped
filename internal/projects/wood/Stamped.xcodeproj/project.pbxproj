@@ -1,0 +1,584 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
+		7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
+		7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177713C3754300ABE6E2 /* Foundation.framework */; };
+		7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */; };
+		7EC0178013C3754300ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */; };
+		7EC0178313C3754300ABE6E2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178213C3754300ABE6E2 /* main.m */; };
+		7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */; };
+		7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0178713C3754300ABE6E2 /* MainWindow.xib */; };
+		7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */; };
+		7EC0179513C3754300ABE6E2 /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */; };
+		7EC0179C13C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
+		7EC0179D13C3754300ABE6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177713C3754300ABE6E2 /* Foundation.framework */; };
+		7EC0179E13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */; };
+		7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A413C3754300ABE6E2 /* InfoPlist.strings */; };
+		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
+		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
+		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
+		7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */; };
+		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
+		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
+		7EDE38DE13C4F6CE003AEE52 /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */; };
+		7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E313C5093E003AEE52 /* QuartzCore.framework */; };
+		7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E513C51133003AEE52 /* CoreText.framework */; };
+		7EDE38E813C521F7003AEE52 /* stamp_purple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */; };
+		7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* StampsListViewController.m */; };
+		7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */; };
+		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
+		7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */; };
+		7EFE8F3713C3B4AF00324F34 /* StampCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3613C3B4AF00324F34 /* StampCell.xib */; };
+		7EFE8F7D13C3C96D00324F34 /* toolbar_must_do@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */; };
+		7EFE8F7E13C3C96D00324F34 /* toolbar_people@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */; };
+		7EFE8F7F13C3C96D00324F34 /* toolbar_add_stamp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7A13C3C96D00324F34 /* toolbar_add_stamp@2x.png */; };
+		7EFE8F8013C3C96D00324F34 /* toolbar_activity@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */; };
+		7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */; };
+		7EFE8F8413C3CFBF00324F34 /* user-image-jake@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8313C3CFBF00324F34 /* user-image-jake@2x.png */; };
+		7EFE8F8613C3D36E00324F34 /* map_pin_small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8513C3D36E00324F34 /* map_pin_small@2x.png */; };
+		7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */; };
+		7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7EC0179F13C3754300ABE6E2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7EC0176813C3754300ABE6E2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7EC0177013C3754300ABE6E2;
+			remoteInfo = Stamped;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
+		7EC0177113C3754300ABE6E2 /* Stamped.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stamped.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EC0177513C3754300ABE6E2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		7EC0177713C3754300ABE6E2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		7EC0177D13C3754300ABE6E2 /* Stamped-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Stamped-Info.plist"; sourceTree = "<group>"; };
+		7EC0177F13C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7EC0178113C3754300ABE6E2 /* Stamped-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Stamped-Prefix.pch"; sourceTree = "<group>"; };
+		7EC0178213C3754300ABE6E2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedAppDelegate.h; sourceTree = "<group>"; };
+		7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedAppDelegate.m; sourceTree = "<group>"; };
+		7EC0178813C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
+		7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActivityViewController.h; sourceTree = "<group>"; };
+		7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActivityViewController.m; sourceTree = "<group>"; };
+		7EC0179413C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActivityViewController.xib; sourceTree = "<group>"; };
+		7EC0179B13C3754300ABE6E2 /* StampedTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StampedTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EC017A313C3754300ABE6E2 /* StampedTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "StampedTests-Info.plist"; sourceTree = "<group>"; };
+		7EC017A513C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StampedTests-Prefix.pch"; sourceTree = "<group>"; };
+		7EC017A813C3754400ABE6E2 /* StampedTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedTests.h; sourceTree = "<group>"; };
+		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
+		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
+		7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNavigationBar.m; sourceTree = "<group>"; };
+		7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
+		7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
+		7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailViewController.m; sourceTree = "<group>"; };
+		7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampDetailViewController.xib; sourceTree = "<group>"; };
+		7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "app_launcher_icon@2x.png"; path = "../app_launcher_icon@2x.png"; sourceTree = "<group>"; };
+		7EDE38E313C5093E003AEE52 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		7EDE38E513C51133003AEE52 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_purple@2x.png"; sourceTree = "<group>"; };
+		7EFE8F2513C39FA100324F34 /* StampsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListViewController.h; sourceTree = "<group>"; };
+		7EFE8F2613C39FA100324F34 /* StampsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampsListViewController.m; sourceTree = "<group>"; };
+		7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampsListViewController.xib; sourceTree = "<group>"; };
+		7EFE8F3213C3AFA300324F34 /* TGLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = TGLight.otf; sourceTree = "<group>"; };
+		7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TitlingGothicFBComp-Reg.otf"; sourceTree = "<group>"; };
+		7EFE8F3613C3B4AF00324F34 /* StampCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampCell.xib; sourceTree = "<group>"; };
+		7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_must_do@2x.png"; sourceTree = "<group>"; };
+		7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_people@2x.png"; sourceTree = "<group>"; };
+		7EFE8F7A13C3C96D00324F34 /* toolbar_add_stamp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_add_stamp@2x.png"; sourceTree = "<group>"; };
+		7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_activity@2x.png"; sourceTree = "<group>"; };
+		7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_stamps@2x.png"; sourceTree = "<group>"; };
+		7EFE8F8313C3CFBF00324F34 /* user-image-jake@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "user-image-jake@2x.png"; sourceTree = "<group>"; };
+		7EFE8F8513C3D36E00324F34 /* map_pin_small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_pin_small@2x.png"; sourceTree = "<group>"; };
+		7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTabBarViewController.h; sourceTree = "<group>"; };
+		7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTabBarViewController.m; sourceTree = "<group>"; };
+		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RootTabBarViewController.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7EC0176E13C3754300ABE6E2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */,
+				7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */,
+				7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */,
+				7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */,
+				7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EC0179713C3754300ABE6E2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC0179C13C3754300ABE6E2 /* UIKit.framework in Frameworks */,
+				7EC0179D13C3754300ABE6E2 /* Foundation.framework in Frameworks */,
+				7EC0179E13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7EC0176613C3754300ABE6E2 = {
+			isa = PBXGroup;
+			children = (
+				7EDE38E513C51133003AEE52 /* CoreText.framework */,
+				7EDE38E313C5093E003AEE52 /* QuartzCore.framework */,
+				7EC0177B13C3754300ABE6E2 /* Stamped */,
+				7EC017A113C3754300ABE6E2 /* StampedTests */,
+				7EC0177413C3754300ABE6E2 /* Frameworks */,
+				7EC0177213C3754300ABE6E2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7EC0177213C3754300ABE6E2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0177113C3754300ABE6E2 /* Stamped.app */,
+				7EC0179B13C3754300ABE6E2 /* StampedTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7EC0177413C3754300ABE6E2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0177513C3754300ABE6E2 /* UIKit.framework */,
+				7EC0177713C3754300ABE6E2 /* Foundation.framework */,
+				7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		7EC0177B13C3754300ABE6E2 /* Stamped */ = {
+			isa = PBXGroup;
+			children = (
+				7EFE8FC813C4D8E300324F34 /* Classes */,
+				7EFE8F8213C3CE3000324F34 /* Interface */,
+				7EC0177C13C3754300ABE6E2 /* Supporting Files */,
+			);
+			path = Stamped;
+			sourceTree = "<group>";
+		};
+		7EC0177C13C3754300ABE6E2 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */,
+				7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */,
+				7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */,
+				7EFE8F8313C3CFBF00324F34 /* user-image-jake@2x.png */,
+				7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */,
+				7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */,
+				7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */,
+				7EFE8F7A13C3C96D00324F34 /* toolbar_add_stamp@2x.png */,
+				7EFE8F8513C3D36E00324F34 /* map_pin_small@2x.png */,
+				7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */,
+				7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */,
+				7EFE8F3213C3AFA300324F34 /* TGLight.otf */,
+				7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */,
+				7EC0177D13C3754300ABE6E2 /* Stamped-Info.plist */,
+				7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */,
+				7EC0178113C3754300ABE6E2 /* Stamped-Prefix.pch */,
+				7EC0178213C3754300ABE6E2 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		7EC017A113C3754300ABE6E2 /* StampedTests */ = {
+			isa = PBXGroup;
+			children = (
+				7EC017A813C3754400ABE6E2 /* StampedTests.h */,
+				7EC017AA13C3754400ABE6E2 /* StampedTests.m */,
+				7EC017A213C3754300ABE6E2 /* Supporting Files */,
+			);
+			path = StampedTests;
+			sourceTree = "<group>";
+		};
+		7EC017A213C3754300ABE6E2 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				7EC017A313C3754300ABE6E2 /* StampedTests-Info.plist */,
+				7EC017A413C3754300ABE6E2 /* InfoPlist.strings */,
+				7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		7EFE8F8213C3CE3000324F34 /* Interface */ = {
+			isa = PBXGroup;
+			children = (
+				7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */,
+				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
+				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
+				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
+				7EFE8F3613C3B4AF00324F34 /* StampCell.xib */,
+				7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */,
+			);
+			name = Interface;
+			sourceTree = "<group>";
+		};
+		7EFE8FC813C4D8E300324F34 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
+				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
+				7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */,
+				7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */,
+				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
+				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
+				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
+				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
+				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
+				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
+				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
+				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7EC0177013C3754300ABE6E2 /* Stamped */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EC017AE13C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "Stamped" */;
+			buildPhases = (
+				7EC0176D13C3754300ABE6E2 /* Sources */,
+				7EC0176E13C3754300ABE6E2 /* Frameworks */,
+				7EC0176F13C3754300ABE6E2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Stamped;
+			productName = Stamped;
+			productReference = 7EC0177113C3754300ABE6E2 /* Stamped.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7EC0179A13C3754300ABE6E2 /* StampedTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7EC017B113C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "StampedTests" */;
+			buildPhases = (
+				7EC0179613C3754300ABE6E2 /* Sources */,
+				7EC0179713C3754300ABE6E2 /* Frameworks */,
+				7EC0179813C3754300ABE6E2 /* Resources */,
+				7EC0179913C3754300ABE6E2 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7EC017A013C3754300ABE6E2 /* PBXTargetDependency */,
+			);
+			name = StampedTests;
+			productName = StampedTests;
+			productReference = 7EC0179B13C3754300ABE6E2 /* StampedTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7EC0176813C3754300ABE6E2 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 7EC0176B13C3754300ABE6E2 /* Build configuration list for PBXProject "Stamped" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7EC0176613C3754300ABE6E2;
+			productRefGroup = 7EC0177213C3754300ABE6E2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7EC0177013C3754300ABE6E2 /* Stamped */,
+				7EC0179A13C3754300ABE6E2 /* StampedTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7EC0176F13C3754300ABE6E2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC0178013C3754300ABE6E2 /* InfoPlist.strings in Resources */,
+				7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */,
+				7EC0179513C3754300ABE6E2 /* ActivityViewController.xib in Resources */,
+				7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */,
+				7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */,
+				7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */,
+				7EFE8F3713C3B4AF00324F34 /* StampCell.xib in Resources */,
+				7EFE8F7D13C3C96D00324F34 /* toolbar_must_do@2x.png in Resources */,
+				7EFE8F7E13C3C96D00324F34 /* toolbar_people@2x.png in Resources */,
+				7EFE8F7F13C3C96D00324F34 /* toolbar_add_stamp@2x.png in Resources */,
+				7EFE8F8013C3C96D00324F34 /* toolbar_activity@2x.png in Resources */,
+				7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */,
+				7EFE8F8413C3CFBF00324F34 /* user-image-jake@2x.png in Resources */,
+				7EFE8F8613C3D36E00324F34 /* map_pin_small@2x.png in Resources */,
+				7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */,
+				7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */,
+				7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */,
+				7EDE38DE13C4F6CE003AEE52 /* app_launcher_icon@2x.png in Resources */,
+				7EDE38E813C521F7003AEE52 /* stamp_purple@2x.png in Resources */,
+				7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EC0179813C3754300ABE6E2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */,
+				7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7EC0179913C3754300ABE6E2 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7EC0176D13C3754300ABE6E2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC0178313C3754300ABE6E2 /* main.m in Sources */,
+				7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */,
+				7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */,
+				7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */,
+				7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */,
+				7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */,
+				7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EC0179613C3754300ABE6E2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7EC017A013C3754300ABE6E2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7EC0177013C3754300ABE6E2 /* Stamped */;
+			targetProxy = 7EC0179F13C3754300ABE6E2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC0177F13C3754300ABE6E2 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		7EC0178713C3754300ABE6E2 /* MainWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC0178813C3754300ABE6E2 /* en */,
+			);
+			name = MainWindow.xib;
+			sourceTree = "<group>";
+		};
+		7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC0179413C3754300ABE6E2 /* en */,
+			);
+			name = ActivityViewController.xib;
+			sourceTree = "<group>";
+		};
+		7EC017A413C3754300ABE6E2 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7EC017A513C3754300ABE6E2 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		7EC017AC13C3754400ABE6E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		7EC017AD13C3754400ABE6E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		7EC017AF13C3754400ABE6E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Stamped\"",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		7EC017B013C3754400ABE6E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Stamped\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		7EC017B213C3754400ABE6E2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stamped.app/Stamped";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";
+				INFOPLIST_FILE = "StampedTests/StampedTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		7EC017B313C3754400ABE6E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stamped.app/Stamped";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";
+				INFOPLIST_FILE = "StampedTests/StampedTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7EC0176B13C3754300ABE6E2 /* Build configuration list for PBXProject "Stamped" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EC017AC13C3754400ABE6E2 /* Debug */,
+				7EC017AD13C3754400ABE6E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7EC017AE13C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "Stamped" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EC017AF13C3754400ABE6E2 /* Debug */,
+				7EC017B013C3754400ABE6E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7EC017B113C3754400ABE6E2 /* Build configuration list for PBXNativeTarget "StampedTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7EC017B213C3754400ABE6E2 /* Debug */,
+				7EC017B313C3754400ABE6E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7EC0176813C3754300ABE6E2 /* Project object */;
+}
