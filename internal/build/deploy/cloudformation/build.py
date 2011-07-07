@@ -13,6 +13,10 @@ import sys
 KEYPAIR = 'test-keypair'
 WEBSERVER_IMAGEID = 'ami-8c1fece5'
 WEBSERVER_PORT = '8888'
+WEBSERVER_SIZE = 't1.micro'
+WEBSERVER_REGION = 'us-east-1'
+WEBSERVER_EBS = True
+WEBSERVER_OS = 'Ubuntu 10.04'
 
 ###############################################################################
 ## USERDATA COMMANDS
@@ -89,6 +93,27 @@ Ec2WebServerUserData += cloudformation.AddWaitHandle('3RunInitWaitHandle')
 t = cloudformation.Template()
 t.Description = 'Stamped CloudFormation Script (v1)'
 
+## Mappings
+# t.Mappings.add('AWSInstanceType2Arch',
+#       "t1.micro"    : { "Arch" : "32" },
+#       "m1.small"    : { "Arch" : "32" },
+#       "m1.large"    : { "Arch" : "64" },
+#       "m1.xlarge"   : { "Arch" : "64" },
+#       "m2.xlarge"   : { "Arch" : "64" },
+#       "m2.2xlarge"  : { "Arch" : "64" },
+#       "m2.4xlarge"  : { "Arch" : "64" },
+#       "c1.medium"   : { "Arch" : "32" },
+#       "c1.xlarge"   : { "Arch" : "64" },
+#       "cc1.4xlarge" : { "Arch" : "64" }
+#     }
+#     "AWSRegionArch2AMI" : {
+#       "us-east-1" : { "32" : "ami-8c1fece5", "64" : "ami-8e1fece7" },
+#       "us-west-1" : { "32" : "ami-c9c7978c", "64" : "ami-cfc7978a" },
+#       "eu-west-1" : { "32" : "ami-37c2f643", "64" : "ami-31c2f645" },
+#       "ap-southeast-1" : { "32" : "ami-66f28c34", "64" : "ami-60f28c32" },
+#       "ap-northeast-1" : { "32" : "ami-9c03a89d", "64" : "ami-a003a8a1" }
+#     }
+# )
 
 ## Outputs
 t.Outputs.add('InstanceId',
@@ -119,8 +144,11 @@ t.Resources.add('Ec2WebServerInstance',
     Type='AWS::EC2::Instance',
     Properties={'SecurityGroups': [{'Ref': 'Ec2WebServerSecurityGroup'}],'ImageId': {'Ref': 'ImageId'},
                 'KeyName': {'Ref': 'KeyName'},
-                'ImageId': WEBSERVER_IMAGEID,
-                'InstanceType': {'Ref': 'InstanceType'},
+                'ImageId': cloudformation.GetAMI(size=WEBSERVER_SIZE, 
+                                                 region=WEBSERVER_REGION, 
+                                                 software=WEBSERVER_OS, 
+                                                 ebs=WEBSERVER_EBS),
+                'InstanceType': WEBSERVER_SIZE,
                 'Tags': [
                         {'Key': 'stamped:family', 'Value': 'WebServer'},
                         {'Key': 'stamped:server:role', 'Value': 'API'}],

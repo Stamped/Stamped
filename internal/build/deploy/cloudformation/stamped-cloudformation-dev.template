@@ -80,10 +80,8 @@
     }, 
     "Ec2WebServerInstance": {
       "Properties": {
-        "ImageId": "ami-8c1fece5", 
-        "InstanceType": {
-          "Ref": "InstanceType"
-        }, 
+        "ImageId": "ami-2ec83147", 
+        "InstanceType": "t1.micro", 
         "KeyName": {
           "Ref": "KeyName"
         }, 
