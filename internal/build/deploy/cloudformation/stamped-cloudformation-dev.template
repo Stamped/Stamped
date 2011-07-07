@@ -187,7 +187,7 @@
                 "\n", 
                 "    echo '>>>> Install git'", 
                 "\n", 
-                "    yum -y install git", 
+                "    apt-get -y install git-core", 
                 "\n", 
                 "    ", 
                 "\n", 

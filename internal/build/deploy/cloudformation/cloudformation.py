@@ -47,6 +47,7 @@ COPYRIGHT:
 from collections import defaultdict
 import json
 
+
 INSTANCE_ARCHITECTURE = {
     "t1.micro"    : "64",
     "m1.small"    : "32",
@@ -83,6 +84,7 @@ INSTANCE_AMI_UBUNTU_1004_EBS = {
     "ap-southeast-1" : { "32" : "ami-e8c4bdba", "64" : "ami-eec4bdbc" },
     "ap-northeast-1" : { "32" : "ami-624ee463", "64" : "ami-644ee465" }
 }
+
 
 def _dict_property(name):
     """
