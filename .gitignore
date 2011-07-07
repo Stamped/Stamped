@@ -6,4 +6,4 @@
 *.o
 *.old
 out
-build*
+Kevin.xcuserdatad*
