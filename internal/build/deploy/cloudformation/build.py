@@ -81,11 +81,11 @@ Ec2WebServerCommands = [
     ssh -o StrictHostKeyChecking=no git@github.com
     set -e
     
-    echo '>>>> Clone stamped repo'
+    echo '>>>> Clone stamped-bootstrap repo'
     git clone git@github.com:Stamped/stamped-bootstrap.git /stamped-bootstrap
     """,
     """
-    echo '>>>> Run INIT script (TODO)'
+    echo '>>>> Running INIT script'
     bash /stamped-bootstrap/init.sh &> /stamped-bootstrap/log
     """
 ]
