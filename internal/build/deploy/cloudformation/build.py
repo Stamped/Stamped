@@ -82,10 +82,11 @@ Ec2WebServerCommands = [
     set -e
     
     echo '>>>> Clone stamped repo'
-    git clone git@github.com:Stamped/Stamped.git /stamped
+    git clone git@github.com:Stamped/stamped-bootstrap.git /stamped-bootstrap
     """,
     """
     echo '>>>> Run INIT script (TODO)'
+    bash /stamped-bootstrap/init.sh &> /stamped-bootstrap/log
     """
 ]
 Ec2WebServerUserData = cloudformation.EncodeUserData('#!/bin/bash -ex')
