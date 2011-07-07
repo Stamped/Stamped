@@ -1,0 +1,14 @@
+. .bashrc
+
+export PIP_DOWNLOAD_CACHE=/tmp/pip
+export DJANGO_SETTINGS_MODULE=settings
+export PYTHONPATH=$PYTHONPATH:/sites/stamped/
+export EDITOR=vim
+
+#. /sites/stamped/bin/activate
+
+#alias chk='cd /sites/stamped/'
+#alias run='cd /sites/stamped/run'
+
+cd /sites/stamped/
+
