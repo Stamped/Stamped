@@ -4,3 +4,6 @@ Assuming you have ruby, rubygems, and chef + prerequisites installed, and the ch
 Note that the sudo is required. If you want more detailed logging output, run:
     sudo chef-solo -l debug -c solo.rb
 
+TODO:
+    * Can you seriously not test Chef locally on Mac OS X?  WTF?
+
