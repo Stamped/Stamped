@@ -12,3 +12,49 @@ export EDITOR=vim
 
 cd /sites/stamped/
 
+export PS1="\u:\w> "
+
+#
+# Force interactive rm, cp, and mv for safety.
+#
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+#alias ls='ls -F --color=auto'
+alias ls='ls -F -G'
+alias f='finger'
+alias c='clear'
+alias tree='tree -CF'
+alias ll='ls -l'
+# -I --> don't match binary files
+alias g='grep -R -I'
+#alias gcc='gcc -Wall -o'
+alias ..='cd ..;ls'
+alias ...='cd ../..;ls'
+alias ....='cd ../../..;ls'
+alias .....='cd ../../../..;ls'
+alias ......='cd ../../../../..;ls'
+alias .......='cd ../../../../../..;ls'
+alias ........='cd ../../../../../../..;ls'
+alias .........='cd ../../../../../../../..;ls'
+alias ..........='cd ../../../../../../../../..;ls'
+alias vi=vim
+alias :e='vim'
+alias sedi='sed -i ""'
+alias p='python'
+alias pdb='python -m pdb'
+
+# C/C++
+#alias m='g++ -o a a.C -g -ggdb -DDEBUG'
+#alias mr='m && ./a'
+#alias r='./a'
+#alias m='make -j2' # use n threads
+#alias mopt='make -j2 MODE=OPT' # use n threads
+#alias mc='make -j2 clean all'
+#alias mgdb='make && make gdb'
+#alias r='make -j2 run'
+#alias rc='make clean all && make run'
+
+# quickly kill the python program 'crawler'
+alias kc='ps -e | grep "python.*crawler" | grep -v grep | sed "s/^ *\([0-9]*\).*/\1/" | xargs kill -9'
+

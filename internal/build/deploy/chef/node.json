@@ -1,6 +1,13 @@
 {
     "run_list": [
-        "vim"
+        "build-essential", 
+        "python", 
+        "runit", 
+        "git", 
+        "nginx", 
+        "gunicorn", 
+        "vim", 
+        "main"
     ],
     
     "base_packages": [

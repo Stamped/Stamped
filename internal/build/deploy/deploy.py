@@ -6,10 +6,10 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from fabric.api import run, sudo
-from subprocess import Popen, PIPE
 import os
 
 def shell(cmd, customEnv=None):
+    from subprocess import Popen, PIPE
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
     result = pp.stdout.read().strip()
     pp.kill()
@@ -64,5 +64,4 @@ def main():
 # where all the magic starts
 if __name__ == '__main__':
     main()
-
 
