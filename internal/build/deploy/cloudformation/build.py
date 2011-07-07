@@ -10,9 +10,22 @@ import sys
 
 ###############################################################################
 ## VARIABLES
-KEYPAIR = 'test-keypair'
-WEBSERVER_IMAGEID = 'ami-8c1fece5'
-WEBSERVER_PORT = '8888'
+KEYPAIR             = 'test-keypair'
+
+WEBSERVER_IMAGEID   = 'ami-8c1fece5'
+WEBSERVER_PORT      = '8888'
+WEBSERVER_SIZE      = 't1.micro'
+WEBSERVER_REGION    = 'us-east-1'
+WEBSERVER_EBS       = True
+WEBSERVER_OS        = 'Ubuntu 10.04'
+
+DATABASE_IMAGEID    = 'ami-8c1fece5'
+DATABASE_PORT       = '8888'
+DATABASE_SIZE       = 't1.micro'
+DATABASE_REGION     = 'us-east-1'
+DATABASE_EBS        = True
+DATABASE_OS         = 'Ubuntu 10.04'
+
 
 ###############################################################################
 ## USERDATA COMMANDS
@@ -61,7 +74,7 @@ Ec2WebServerCommands = [
     chmod 644 ~/.ssh/id_rsa.pub
     
     echo '>>>> Install git'
-    yum -y install git
+    apt-get -y install git-core
     
     echo '>>>> Set bash to ignore errors, then run ssh so that clone command ignores validation of URL'
     set +e
@@ -119,8 +132,11 @@ t.Resources.add('Ec2WebServerInstance',
     Type='AWS::EC2::Instance',
     Properties={'SecurityGroups': [{'Ref': 'Ec2WebServerSecurityGroup'}],'ImageId': {'Ref': 'ImageId'},
                 'KeyName': {'Ref': 'KeyName'},
-                'ImageId': WEBSERVER_IMAGEID,
-                'InstanceType': {'Ref': 'InstanceType'},
+                'ImageId': cloudformation.GetAMI(size=WEBSERVER_SIZE, 
+                                                 region=WEBSERVER_REGION, 
+                                                 software=WEBSERVER_OS, 
+                                                 ebs=WEBSERVER_EBS),
+                'InstanceType': WEBSERVER_SIZE,
                 'Tags': [
                         {'Key': 'stamped:family', 'Value': 'WebServer'},
                         {'Key': 'stamped:server:role', 'Value': 'API'}],

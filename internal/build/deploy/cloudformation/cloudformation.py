@@ -47,6 +47,45 @@ COPYRIGHT:
 from collections import defaultdict
 import json
 
+
+INSTANCE_ARCHITECTURE = {
+    "t1.micro"    : "64",
+    "m1.small"    : "32",
+    "m1.large"    : "64",
+    "m1.xlarge"   : "64",
+    "m2.xlarge"   : "64",
+    "m2.2xlarge"  : "64",
+    "m2.4xlarge"  : "64",
+    "c1.medium"   : "32",
+    "c1.xlarge"   : "64",
+    "cc1.4xlarge" : "64"
+}
+
+INSTANCE_AMI_AMAZON_EBS = {
+    "us-east-1"      : { "32" : "ami-8c1fece5", "64" : "ami-8e1fece7" },
+    "us-west-1"      : { "32" : "ami-c9c7978c", "64" : "ami-cfc7978a" },
+    "eu-west-1"      : { "32" : "ami-37c2f643", "64" : "ami-31c2f645" },
+    "ap-southeast-1" : { "32" : "ami-66f28c34", "64" : "ami-60f28c32" },
+    "ap-northeast-1" : { "32" : "ami-9c03a89d", "64" : "ami-a003a8a1" }
+}
+
+INSTANCE_AMI_UBUNTU_1004 = {
+    "us-east-1"      : { "32" : "ami-e4d42d8d", "64" : "ami-04c9306d" },
+    "us-west-1"      : { "32" : "ami-991c4edc", "64" : "ami-f11d4fb4" },
+    "eu-west-1"      : { "32" : "ami-3693a542", "64" : "ami-8293a5f6" },
+    "ap-southeast-1" : { "32" : "ami-76c4bd24", "64" : "ami-c0c4bd92" },
+    "ap-northeast-1" : { "32" : "ami-fe49e3ff", "64" : "ami-304ee431" }
+}
+
+INSTANCE_AMI_UBUNTU_1004_EBS = {
+    "us-east-1"      : { "32" : "ami-2cc83145", "64" : "ami-2ec83147" },
+    "us-west-1"      : { "32" : "ami-831d4fc6", "64" : "ami-8d1d4fc8" },
+    "eu-west-1"      : { "32" : "ami-4090a634", "64" : "ami-4290a636" },
+    "ap-southeast-1" : { "32" : "ami-e8c4bdba", "64" : "ami-eec4bdbc" },
+    "ap-northeast-1" : { "32" : "ami-624ee463", "64" : "ami-644ee465" }
+}
+
+
 def _dict_property(name):
     """
     Return a property that gets and sets the given dictionary item.
@@ -70,6 +109,16 @@ def AddWaitHandle(handle):
     data.append({"Ref": handle})
     data.append("\"\n")
     return data
+    
+def GetAMI(size, region, software='Ubuntu 10.04', ebs=True):
+    if software == 'Amazon' and ebs == True:
+        return INSTANCE_AMI_AMAZON_EBS[region][INSTANCE_ARCHITECTURE[size]]
+    if software == 'Ubuntu 10.04' and ebs == True:
+        return INSTANCE_AMI_UBUNTU_1004_EBS[region][INSTANCE_ARCHITECTURE[size]]
+    if software == 'Ubuntu 10.04' and ebs == False:
+        return INSTANCE_AMI_UBUNTU_1004[region][INSTANCE_ARCHITECTURE[size]]
+    return False
+        
 
 class Template(defaultdict):
     """
