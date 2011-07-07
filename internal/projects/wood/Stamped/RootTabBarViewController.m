@@ -22,12 +22,6 @@
 @synthesize mustDoTabBarItem = mustDoTabBarItem_;
 @synthesize peopleTabBarItem = peopleTabBarItem_;
 
-- (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-  if (self) {}
-  return self;
-}
-
 - (void)dealloc {
   self.selectedViewController = nil;
   self.viewControllers = nil;
@@ -51,6 +45,8 @@
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
+  [super viewDidLoad];
+
   // Do this so that there is no title shown.
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
 
@@ -59,20 +55,17 @@
   ActivityViewController* activity = [[ActivityViewController alloc]
       initWithNibName:@"ActivityViewController" bundle:nil];
   self.viewControllers = [NSArray arrayWithObjects:stampsList, activity, nil];
-  
   [self.view addSubview:stampsList.view];
   self.selectedViewController = stampsList;  
   [stampsList release];
   [activity release];
 
   self.tabBar.selectedItem = stampsTabBarItem_;
-
-  [super viewDidLoad];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-
+  
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -81,6 +74,26 @@
   self.activityTabBarItem = nil;
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  [self.selectedViewController viewWillAppear:animated];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  [self.selectedViewController viewDidAppear:animated];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+  [self.selectedViewController viewWillDisappear:animated];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
+  [self.selectedViewController viewDidDisappear:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -101,8 +114,12 @@
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 
+  [self.selectedViewController viewWillDisappear:NO];
   [self.selectedViewController.view removeFromSuperview];
+  [self.selectedViewController viewDidDisappear:NO];
+  [newViewController viewWillAppear:NO];
   [self.view addSubview:newViewController.view];
+  [newViewController viewDidAppear:NO];
   self.selectedViewController = newViewController;
 }
 

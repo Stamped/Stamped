@@ -8,8 +8,13 @@
 
 #import "StampsListViewController.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
+
+static const CGFloat kFilterRowHeight = 46.0;
+static const CGFloat kNormalRowHeight = 83.0;
 
 @implementation StampsListViewController
 
@@ -39,6 +44,7 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+
   NSLog(@"Fonts: %@", [UIFont familyNames]);
   NSLog(@"Font names: %@\n%@", [UIFont fontNamesForFamilyName:@"TGLight"],
         [UIFont fontNamesForFamilyName:@"TitlingGothicFB Comp"]);
@@ -56,6 +62,8 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  if (!userDidScroll_)
+    self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -82,9 +90,22 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString* CellIdentifier = @"StampCell";
+  if (indexPath.row == 0) {
+    static NSString* FilterCellIdentifier = @"FilterStampsCell";
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:FilterCellIdentifier];
 
+    if (cell == nil) {
+      cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+          reuseIdentifier:FilterCellIdentifier] autorelease];
+    }
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.contentView.layer.backgroundColor = [UIColor lightGrayColor].CGColor;
+    return cell;
+  }
+
+  static NSString* CellIdentifier = @"StampCell";
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+
   if (cell == nil) {
     [[NSBundle mainBundle] loadNibNamed:@"StampCell" owner:self options:nil];
     cell = stampCell_;
@@ -94,7 +115,7 @@
   cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
   UILabel* stampLabel = (UILabel*)[cell viewWithTag:1];
   stampLabel.text = @"Ramen Takumi";
-  stampLabel.font = [UIFont fontWithName:@"TGLight" size:46];
+  stampLabel.font = [UIFont fontWithName:@"TGLight" size:47];
   
   return cell;
 }
@@ -102,6 +123,9 @@
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.row == 0)
+    return;
+
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
   StampDetailViewController* detailViewController =
       [[StampDetailViewController alloc] initWithNibName:@"StampDetailViewController" bundle:nil];
@@ -110,6 +134,19 @@
   StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
+}
+
+- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.row == 0)
+    return kFilterRowHeight;
+
+  return kNormalRowHeight;
+}
+
+#pragma mark - UIScrollView delegate methods
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  userDidScroll_ = YES;
 }
 
 @end

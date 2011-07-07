@@ -24,6 +24,12 @@
 		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
 		7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */; };
+		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
+		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
+		7EDE38DE13C4F6CE003AEE52 /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */; };
+		7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E313C5093E003AEE52 /* QuartzCore.framework */; };
+		7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E513C51133003AEE52 /* CoreText.framework */; };
+		7EDE38E813C521F7003AEE52 /* stamp_purple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */; };
 		7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* StampsListViewController.m */; };
 		7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */; };
 		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
@@ -36,8 +42,6 @@
 		7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */; };
 		7EFE8F8413C3CFBF00324F34 /* user-image-jake@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8313C3CFBF00324F34 /* user-image-jake@2x.png */; };
 		7EFE8F8613C3D36E00324F34 /* map_pin_small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8513C3D36E00324F34 /* map_pin_small@2x.png */; };
-		7EFE8F8A13C3DD4D00324F34 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8813C3DD4D00324F34 /* StampDetailViewController.m */; };
-		7EFE8F8B13C3DD4D00324F34 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F8913C3DD4D00324F34 /* StampDetailViewController.xib */; };
 		7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */; };
 		7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */; };
 /* End PBXBuildFile section */
@@ -76,6 +80,13 @@
 		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
 		7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNavigationBar.m; sourceTree = "<group>"; };
 		7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
+		7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
+		7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailViewController.m; sourceTree = "<group>"; };
+		7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampDetailViewController.xib; sourceTree = "<group>"; };
+		7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "app_launcher_icon@2x.png"; path = "../app_launcher_icon@2x.png"; sourceTree = "<group>"; };
+		7EDE38E313C5093E003AEE52 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		7EDE38E513C51133003AEE52 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_purple@2x.png"; sourceTree = "<group>"; };
 		7EFE8F2513C39FA100324F34 /* StampsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListViewController.h; sourceTree = "<group>"; };
 		7EFE8F2613C39FA100324F34 /* StampsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampsListViewController.m; sourceTree = "<group>"; };
 		7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampsListViewController.xib; sourceTree = "<group>"; };
@@ -89,9 +100,6 @@
 		7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_stamps@2x.png"; sourceTree = "<group>"; };
 		7EFE8F8313C3CFBF00324F34 /* user-image-jake@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "user-image-jake@2x.png"; sourceTree = "<group>"; };
 		7EFE8F8513C3D36E00324F34 /* map_pin_small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_pin_small@2x.png"; sourceTree = "<group>"; };
-		7EFE8F8713C3DD4D00324F34 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
-		7EFE8F8813C3DD4D00324F34 /* StampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailViewController.m; sourceTree = "<group>"; };
-		7EFE8F8913C3DD4D00324F34 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampDetailViewController.xib; sourceTree = "<group>"; };
 		7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTabBarViewController.h; sourceTree = "<group>"; };
 		7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTabBarViewController.m; sourceTree = "<group>"; };
 		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RootTabBarViewController.xib; sourceTree = "<group>"; };
@@ -102,6 +110,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */,
+				7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */,
 				7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */,
 				7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */,
 				7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
@@ -124,6 +134,8 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				7EDE38E513C51133003AEE52 /* CoreText.framework */,
+				7EDE38E313C5093E003AEE52 /* QuartzCore.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -164,9 +176,11 @@
 			isa = PBXGroup;
 			children = (
 				7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */,
+				7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */,
 				7EFE8F8313C3CFBF00324F34 /* user-image-jake@2x.png */,
 				7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */,
 				7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */,
+				7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */,
 				7EFE8F7A13C3C96D00324F34 /* toolbar_add_stamp@2x.png */,
 				7EFE8F8513C3D36E00324F34 /* map_pin_small@2x.png */,
 				7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */,
@@ -204,12 +218,12 @@
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
 			isa = PBXGroup;
 			children = (
+				7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */,
 				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
 				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
 				7EFE8F3613C3B4AF00324F34 /* StampCell.xib */,
 				7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */,
-				7EFE8F8913C3DD4D00324F34 /* StampDetailViewController.xib */,
 			);
 			name = Interface;
 			sourceTree = "<group>";
@@ -225,8 +239,8 @@
 				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
 				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
 				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
-				7EFE8F8713C3DD4D00324F34 /* StampDetailViewController.h */,
-				7EFE8F8813C3DD4D00324F34 /* StampDetailViewController.m */,
+				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
+				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
 				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
 			);
@@ -314,9 +328,11 @@
 				7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */,
 				7EFE8F8413C3CFBF00324F34 /* user-image-jake@2x.png in Resources */,
 				7EFE8F8613C3D36E00324F34 /* map_pin_small@2x.png in Resources */,
-				7EFE8F8B13C3DD4D00324F34 /* StampDetailViewController.xib in Resources */,
 				7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */,
 				7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */,
+				7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */,
+				7EDE38DE13C4F6CE003AEE52 /* app_launcher_icon@2x.png in Resources */,
+				7EDE38E813C521F7003AEE52 /* stamp_purple@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,9 +372,9 @@
 				7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */,
 				7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */,
 				7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */,
-				7EFE8F8A13C3DD4D00324F34 /* StampDetailViewController.m in Sources */,
 				7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */,
 				7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */,
+				7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -453,6 +469,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Stamped\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
@@ -467,6 +487,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Stamped\"",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";

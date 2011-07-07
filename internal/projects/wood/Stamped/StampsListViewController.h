@@ -9,8 +9,11 @@
 #import <UIKit/UIKit.h>
 
 
-@interface StampsListViewController : UITableViewController {
+@interface StampsListViewController : UITableViewController<UIScrollViewDelegate> {
   UITableViewCell* stampCell_;
+
+ @private
+  BOOL userDidScroll_;
 }
 
 @property (nonatomic, assign) IBOutlet UITableViewCell* stampCell;
