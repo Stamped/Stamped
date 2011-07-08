@@ -52,7 +52,6 @@
 		7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */; };
 		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
 		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
-		7EDE38DE13C4F6CE003AEE52 /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */; };
 		7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E313C5093E003AEE52 /* QuartzCore.framework */; };
 		7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E513C51133003AEE52 /* CoreText.framework */; };
 		7EDE38E813C521F7003AEE52 /* stamp_purple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */; };
@@ -134,7 +133,6 @@
 		7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
 		7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailViewController.m; sourceTree = "<group>"; };
 		7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampDetailViewController.xib; sourceTree = "<group>"; };
-		7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "app_launcher_icon@2x.png"; path = "../app_launcher_icon@2x.png"; sourceTree = "<group>"; };
 		7EDE38E313C5093E003AEE52 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7EDE38E513C51133003AEE52 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_purple@2x.png"; sourceTree = "<group>"; };
@@ -263,7 +261,6 @@
 				7EC6B4A513C6039000CE83DD /* Stamp List Filter */,
 				7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */,
 				7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */,
-				7EDE38DD13C4F6CE003AEE52 /* app_launcher_icon@2x.png */,
 				7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */,
 				7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */,
 				7EDE38E713C521F7003AEE52 /* stamp_purple@2x.png */,
@@ -427,7 +424,6 @@
 				7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */,
 				7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */,
 				7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */,
-				7EDE38DE13C4F6CE003AEE52 /* app_launcher_icon@2x.png in Resources */,
 				7EDE38E813C521F7003AEE52 /* stamp_purple@2x.png in Resources */,
 				7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */,
 				7EC6B4A213C5FFC400CE83DD /* StampListFilterCell.xib in Resources */,
