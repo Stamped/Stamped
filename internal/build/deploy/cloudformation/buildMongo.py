@@ -16,8 +16,13 @@ OUTPUT              = 'stamped-cloudformation-mongo'
 DATABASE_PORT       = '8888'
 DATABASE_SIZE       = 't1.micro'
 DATABASE_REGION     = 'us-east-1'
+DATABASE_ZONES      = ['us-east-1a']
 DATABASE_EBS        = True
 DATABASE_OS         = 'Ubuntu 10.04'
+
+DATABASE_MIN_NODES  = '2'
+DATABASE_MAX_NODES  = '2'
+DATABASE_PREF_NODES = '2'
 
 
 ###############################################################################
@@ -57,10 +62,11 @@ t.Resources.add('Ec2DatabaseClusterConfig',
 t.Resources.add('Ec2DatabaseCluster',
     Type='AWS::AutoScaling::AutoScalingGroup',
     Properties={
-        'AvailabilityZones': ['us-east-1a'],
-        'LaunchConfigurationName': 'Ec2DatabaseClusterConfig',
-        'MinSize': '2',
-        'MaxSize': '2'
+        'AvailabilityZones': DATABASE_ZONES,
+        'LaunchConfigurationName': {'Ref': 'Ec2DatabaseClusterConfig'},
+        'MinSize': DATABASE_MIN_NODES,
+        'MaxSize': DATABASE_MAX_NODES,
+        'DesiredCapacity': DATABASE_PREF_NODES
     }
 )
 
