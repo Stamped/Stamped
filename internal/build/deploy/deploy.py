@@ -57,6 +57,29 @@ def listStacks(stackStatus=None):
     else:
         print local('cfn-list-stacks %s' % (commonOptions, ))
 
+def createAndConnect(name):
+    createStack(name)
+    while True:
+        result = local('cfn-describe-stack-events --stack-name %s | grep "%s *1CreateInstance .*CREATE_COMPLETE"' % (name, name))
+        if len(result) > 5:
+            break
+        else:
+            result = local('cfn-describe-stack-events --stack-name %s | grep "%s .*ROLLBACK.*"' % (name, name))
+            if len(result) > 5:
+                print "aborting connection because stack %s has been rolled back" % (name, )
+                return 1
+            
+            result = local('cfn-describe-stack-events --stack-name %s | grep "%s .*DELETE.*"' % (name, name))
+            if len(result) > 5:
+                print "aborting connection because stack %s has been deleted" % (name, )
+                return 1
+            
+            import time
+            time.sleep(10)
+    
+    os.system('connect.sh %s' % (name, ))
+    return 0
+
 def main():
     createStack('StampedStagingStack0')
     listStacks()
