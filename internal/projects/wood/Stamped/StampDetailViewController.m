@@ -81,7 +81,7 @@
     cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
         reuseIdentifier:CellIdentifier] autorelease];
   }
-  NSString* nameString = @"Ramen Takumi Slut";
+  NSString* nameString = @"Ramen Takumi";
   NSString* fontString = @"TGLight";
   CGSize stringSize = [nameString sizeWithFont:[UIFont fontWithName:fontString size:47]
                                       forWidth:280
@@ -89,21 +89,11 @@
   
   cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
   cell.selectionStyle = UITableViewCellSelectionStyleNone;
-  CTFontRef nameFont = CTFontCreateWithName((CFStringRef)fontString, 47, NULL);
-  NSDictionary* strAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-      (id)nameFont, (id)kCTFontAttributeName, nil];
 
-  NSAttributedString* nameAttributedString =
-      [[NSAttributedString alloc] initWithString:nameString
-                                      attributes:strAttributes];
-
-  CATextLayer* nameLayer = [[CATextLayer alloc] init];
-  nameLayer.frame = CGRectMake(10, 10, stringSize.width, stringSize.height);
-  nameLayer.contentsScale = [[UIScreen mainScreen] scale];
-  nameLayer.truncationMode = kCATruncationEnd;
-  // Needed for the ellipsis.
-  nameLayer.foregroundColor = [UIColor blackColor].CGColor;
-  nameLayer.string = nameAttributedString;
+  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, stringSize.width, stringSize.height)];
+  nameLabel.font = [UIFont fontWithName:fontString size:47];
+  nameLabel.text = nameString;
+  nameLabel.backgroundColor = [UIColor clearColor];
 
   // Badge stamp.
   CALayer* stampLayer = [[CALayer alloc] init];
@@ -113,13 +103,11 @@
   stampLayer.contents = (id)[UIImage imageNamed:@"stamp_purple"].CGImage;
 
   [cell.contentView.layer addSublayer:stampLayer];
-  [cell.contentView.layer addSublayer:nameLayer];
+  [cell.contentView addSubview:nameLabel];
 
   // Cleanup.
-  CFRelease(nameFont);
   [stampLayer release];
-  [nameLayer release];
-  [nameAttributedString release];
+  [nameLabel release];
   
   return cell;
 }
