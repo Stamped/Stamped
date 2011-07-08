@@ -11,6 +11,7 @@ import sys
 ###############################################################################
 ## VARIABLES
 KEYPAIR             = 'test-keypair'
+OUTPUT              = 'stamped-cloudformation-dev'
 
 WEBSERVER_IMAGEID   = 'ami-8c1fece5'
 WEBSERVER_PORT      = '8888'
@@ -194,4 +195,4 @@ t.Resources.add('1CreateInstance',
         'Timeout': '600'})
         
 ## Produce the file
-t.dumps()
+t.dumps(OUTPUT)

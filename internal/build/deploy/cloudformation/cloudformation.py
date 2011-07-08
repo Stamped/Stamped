@@ -151,13 +151,13 @@ class Template(defaultdict):
         """
         self[key] = self.__class__(*args, **kwargs)
 
-    def dumps(self, pretty=True):
+    def dumps(self, saveAs):
         """
         Return a string representation of this CloudFormation template.
         """
         self['AWSTemplateFormatVersion'] = '2010-09-09'
         
-        f = open('stamped-cloudformation-dev.template', 'w')
+        f = open(saveAs+'.template', 'w')
         json.dump(self, f, indent=2, sort_keys=True)
         f.close()
         
