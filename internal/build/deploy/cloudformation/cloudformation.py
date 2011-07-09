@@ -162,3 +162,157 @@ class Template(defaultdict):
         f.close()
         
         print json.JSONEncoder(indent=2, sort_keys=True).encode(self)
+
+
+
+
+class CloudFormation(object):
+    
+    def __init__(self):
+        self._description = 'Stamped: CloudFormation Script'
+        self._mappings = {}
+        self._outputs = {}
+        self._parameters = {}
+        self._resources = {}
+        
+    def setDescription(self, string):
+        self._description = string
+
+    def buildSecurityGroupProperties(self, fromPort, toPort, ipProtocol = 'tcp', cidrIp = '0.0.0.0/0'):
+        return {'IpProtocol': ipProtocol,
+                'FromPort': fromPort,
+                'ToPort': toPort,
+                'CidrIp': cidrIp}
+
+    def addEC2SecurityGroup(self, groupName, groupDescription, groupProperties):
+        data = {'Type': 'AWS::EC2::SecurityGroup',
+                'Properties': {
+                    'GroupDescription': groupDescription,
+                    'SecurityGroupIngress': groupProperties}
+                }
+        self._resources[groupName] = data
+        
+    def addEC2Instance(self, instanceName, securityGroups, imageId, instanceType, keyName, tags = [], userData = []):
+        data = {'Type': 'AWS::EC2::Instance',
+                'Properties': {
+                    'SecurityGroups': securityGroups,
+                    'ImageId': imageId,
+                    'InstanceType': instanceType,
+                    'Tags': tags,
+                    'UserData': {'Fn::Base64': {'Fn::Join': ["", userData]}}
+                    }
+                }
+        self._resources[instanceName] = data
+        
+    def addEC2WaitHandle(self, waitName, dependsOn, timeout = '600'):
+        waitName = waitName + 'Wait'
+        handleName = waitName + 'Handle'
+        wait = {'Type': 'AWS::CloudFormation::WaitCondition',
+                'DependsOn': dependsOn,
+                'Properties': {
+                    'Handle': {'Ref': handleName},
+                    'Timeout': timeout
+                    }
+                }
+        handle = {'Type': 'AWS::CloudFormation::WaitConditionHandle',
+                'Properties': {}
+                }
+        self._resources[waitName] = wait
+        self._resources[handleName] = handle
+        
+    def build(self):
+        return {
+            'AWSTemplateFormatVersion': '2010-09-09',
+            'Description': self._description,
+            'Resources': self._resources
+        }
+        
+    def save(self, filename):
+        f = open(filename + '.template', 'w')
+        json.dump(self.build(), f, indent=2, sort_keys=True)
+        f.close()
+        
+
+
+class CloudInit(object):
+
+    def __init__(self, instanceName):
+        self.instanceName = instanceName
+        self._bootstrap = []
+        self._createDefaultBootstrapScript()
+    
+    def add(self, cmd):
+        self._bootstrap.append(cmd)
+        self._bootstrap.append('\n')
+
+    def get(self):
+        return self._bootstrap
+                
+    def _createDefaultBootstrapScript(self, operatingSystem = 'Ubuntu'):
+        
+        self.add('#!/bin/bash -ex')
+                
+        # Create keys for root to connect to GitHub
+        self.add('echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAvAzcTXbF0V/Pjja3b2Q9hsBQSHv8R8S6yoESb' \
+                 '6CuR5HNzD3rIcfP9r2t3dJnVjeCZKx4JTadGXAr7ysVysGMLgbUMkngJ0bgnqkXPfLnKW07uYsrAF6Q' \
+                 '1Gz79RSEIFfQP53p8XKpIkiRnbogM5RG2aIjJobuAsu0J8F9bGL6UfoRv1gGR0VcDbWAnp5SV8iJUBI' \
+                 '0ULvVmdKKkFyeVHEZe2zjoplFr4b9jAUwDnNYpWobmsNoC4+1pw5fZRREJ32gCp4iYJIN5eJvylfpbh' \
+                 'p6DtKPqrWmCEtIeVkS9pvqgVrlXMiaOPG972FuQJWiC5/iMApUlcTwCcAWkWfRTC4K1w== devbot@s' \
+                 'tamped.com" > ~/.ssh/id_rsa.pub')
+        self.add('echo "-----BEGIN RSA PRIVATE KEY-----" > ~/.ssh/id_rsa')
+        self.add('echo "MIIEogIBAAKCAQEAvAzcTXbF0V/Pjja3b2Q9hsBQSHv8R8S6yoESb6CuR5HNzD3r" >> ~/.ssh/id_rsa')
+        self.add('echo "IcfP9r2t3dJnVjeCZKx4JTadGXAr7ysVysGMLgbUMkngJ0bgnqkXPfLnKW07uYsr" >> ~/.ssh/id_rsa')
+        self.add('echo "AF6Q1Gz79RSEIFfQP53p8XKpIkiRnbogM5RG2aIjJobuAsu0J8F9bGL6UfoRv1gG" >> ~/.ssh/id_rsa')
+        self.add('echo "R0VcDbWAnp5SV8iJUBI0ULvVmdKKkFyeVHEZe2zjoplFr4b9jAUwDnNYpWobmsNo" >> ~/.ssh/id_rsa')
+        self.add('echo "C4+1pw5fZRREJ32gCp4iYJIN5eJvylfpbhp6DtKPqrWmCEtIeVkS9pvqgVrlXMia" >> ~/.ssh/id_rsa')
+        self.add('echo "OPG972FuQJWiC5/iMApUlcTwCcAWkWfRTC4K1wIBIwKCAQAVfdAI2l/AKDT6T2Vr" >> ~/.ssh/id_rsa')
+        self.add('echo "0PEWtuSakdOwbkE7tvrK7crGWc5gfBrfSgkjg2RT3YgnHElql14wI3+rIsMxRsCp" >> ~/.ssh/id_rsa')
+        self.add('echo "dTSXi8B6xp1GUT4+BLIy9zBcgYMrJdkHW0PAgXvhfrADskOvf8L3Bcovzcd/vYAF" >> ~/.ssh/id_rsa')
+        self.add('echo "5Q9pVFvJ44jqYGxcUKCerDnde3fmxRqmZT96NnY2VQcDXJWOs4Z0n5cN5caobZ4Q" >> ~/.ssh/id_rsa')
+        self.add('echo "rFnOa23YbY0EFsUrrl1cFsfxy0LhXWJFIS38SaIQ2RNIxMVgOGvelN6aah1hROn2" >> ~/.ssh/id_rsa')
+        self.add('echo "sYRbiYXpGEIGU6xsOtBY79SAX4NYIhFfJuCACQyQp8Iq+QXolggl0NkK0jY2blNt" >> ~/.ssh/id_rsa')
+        self.add('echo "MiirAoGBAPAjjWUlJVTvRoVIygiWEVNW2uJOjl2MfkO/LgYOzlczpz87QRMEfeBD" >> ~/.ssh/id_rsa')
+        self.add('echo "jz6CyqNCsiJZwW/1tdcjwkpBNPuVIHFHjPTv0VBZ852YTy0Z5vga681VRbNiDP7T" >> ~/.ssh/id_rsa')
+        self.add('echo "Jkltgoft8S4fBYZ/WvFaqhq1Mk/k5hMVLEd8mnVEzCG5NWUTN0gzAoGBAMh4jffy" >> ~/.ssh/id_rsa')
+        self.add('echo "KhuxEnD6bExkTRlYlHmFuQ5TubyPb3EzvrB5maNBmaDHQeAKQECl4V/fBXANENw4" >> ~/.ssh/id_rsa')
+        self.add('echo "94wjx8sQc9/Vo2+5I32VKiHEzlEe7b0lojvS826d27Du4iTzMCp+5t8wJfn6mPu5" >> ~/.ssh/id_rsa')
+        self.add('echo "AqA0aCWZp28utttnvUXORw+mRJp77RI9f97NAoGAUlVVDLxHUFIJjMh/yG33T8YB" >> ~/.ssh/id_rsa')
+        self.add('echo "5zDgWpaRsNPVQ+fRt39sirU64fLpVDRroGdbayzPXDwHzp1i6q0sq76V0pmHd0u7" >> ~/.ssh/id_rsa')
+        self.add('echo "TKn+nzTIjc3SANWuRm+hTbbWEZ3107YbwWdf9BcQ3Jzr85lhAkr4fi9+9tIi/zp1" >> ~/.ssh/id_rsa')
+        self.add('echo "lNpDleuzs8p4tPClPVMCgYEAg7zvlE6t9PC0WN8T96+gYRzz2tQ3x5Ya+EEAFzCh" >> ~/.ssh/id_rsa')
+        self.add('echo "4a7+j9qmyL10bqemkOIJIb5xSaIvpqkXs9z/orMKUUM/g+6w7CAxoSmO5NnPbasE" >> ~/.ssh/id_rsa')
+        self.add('echo "NfEGXqI/6UyF+wY1mETDmfsRpEWXu1xSLsNaYdoAUGCGyrHix3js3mXykWdhRoAv" >> ~/.ssh/id_rsa')
+        self.add('echo "dScCgYEAxOhXQNfCBQPBiVaApYCblNb0ASMh9gQyh5ZVhdcGu84qpTTxt2cIOV2p" >> ~/.ssh/id_rsa')
+        self.add('echo "ylKJVSS3R3bzPw3goGkvFL0e7Mlzr7uwj70pGqw1kXzbe4pLC1GE3PC4QlvPA8lE" >> ~/.ssh/id_rsa')
+        self.add('echo "WCy7/RohwIRd02/7s7UUW118xQYcrT27o/4BJpNd1uWsUT07BgI=" >> ~/.ssh/id_rsa')
+        self.add('echo "-----END RSA PRIVATE KEY-----" >> ~/.ssh/id_rsa')
+        self.add('echo "" >> ~/.ssh/id_rsa')
+        
+        # Set permissions for keys
+        self.add('chmod 600 ~/.ssh/id_rsa')
+        self.add('chmod 644 ~/.ssh/id_rsa.pub')
+        
+        # Install git
+        if operatingSystem == 'Ubuntu':
+            self.add('apt-get -y install git-core')
+        elif operatingSystem == 'Amazon':
+            self.add('yum -y install git-core')
+        else:
+            return
+        
+        # Set bash to ignore errors, then run ssh so that clone command ignores validation of URL
+        self.add('set +e')
+        self.add('ssh -o StrictHostKeyChecking=no git@github.com')
+        self.add('set -e')
+        
+        # Clone stamped-bootstrap repo
+        self.add('git clone git@github.com:Stamped/stamped-bootstrap.git /stamped-bootstrap')
+        
+        # Add wait 
+        waitName = self.instanceName + 'WaitHandle'
+        self._bootstrap.append("curl -X PUT -H 'Content-Type:' --data-binary '{"\
+            "\"Status\": \"SUCCESS\", \"Reason\": \"Instance is ready\", "\
+            "\"UniqueId\": \"stamped\", \"Data\": \"Done\"}' \"")
+        self._bootstrap.append({"Ref": waitName})
+        self._bootstrap.append("\"\n")
+        

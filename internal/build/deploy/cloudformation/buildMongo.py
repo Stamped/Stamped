@@ -13,7 +13,7 @@ import sys
 KEYPAIR             = 'test-keypair'
 OUTPUT              = 'stamped-cloudformation-mongo'
 
-DATABASE_PORT       = '8888'
+DATABASE_PORT       = '27017'
 DATABASE_SIZE       = 't1.micro'
 DATABASE_REGION     = 'us-east-1'
 DATABASE_ZONES      = ['us-east-1a']
@@ -77,8 +77,7 @@ t.Resources.add('Ec2DatabaseClusterSecurityGroup',
         'SecurityGroupIngress': [{'IpProtocol': 'tcp',
                                   'FromPort': '22',
                                   'ToPort': '22',
-                                  'CidrIp': '0.0.0.0/0'
-                                 },
+                                  'CidrIp': '0.0.0.0/0'},
                                  {'IpProtocol': 'tcp',
                                   'FromPort': DATABASE_PORT,
                                   'ToPort': DATABASE_PORT,
@@ -87,4 +86,4 @@ t.Resources.add('Ec2DatabaseClusterSecurityGroup',
 
         
 ## Produce the file
-t.dumps(OUTPUT)
+#t.dumps(OUTPUT)
