@@ -10,8 +10,6 @@
 
 
 @interface StampsListViewController : UITableViewController<UIScrollViewDelegate> {
-  UITableViewCell* filterCell_;
-
  @private
   NSMutableArray* stampsArray_;
   BOOL userDidScroll_;
@@ -19,6 +17,6 @@
 
 - (IBAction)filterButtonPushed:(id)sender;
 
-@property (nonatomic, assign) IBOutlet UITableViewCell* filterCell;
+@property (nonatomic, assign) IBOutlet UIView* filterView;
 
 @end

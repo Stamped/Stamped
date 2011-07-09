@@ -12,19 +12,12 @@
 
 @synthesize userImage = userImage_;
 @synthesize stampImage = stampImage_;
+@synthesize categoryImage = categoryImage_;
 @synthesize name = name_;
 @synthesize userName = userName_;
+@synthesize detail = detail_;
 @synthesize comment = comment_;
 @synthesize subEntities = subEntities_;
 @synthesize type = type_;
-
-- (id)init {
-  self = [super init];
-  if (self) {
-    // Initialization code here.
-  }
-
-  return self;
-}
 
 @end

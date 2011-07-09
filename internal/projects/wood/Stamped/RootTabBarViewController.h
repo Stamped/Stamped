@@ -9,9 +9,7 @@
 #import <UIKit/UIKit.h>
 
 
-@interface RootTabBarViewController : UIViewController <UITabBarDelegate> {
-
-}
+@interface RootTabBarViewController : UIViewController <UITabBarDelegate> {}
 
 @property (nonatomic, retain) NSArray* viewControllers;
 @property (nonatomic, retain) UIViewController* selectedViewController;

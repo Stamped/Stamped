@@ -15,11 +15,9 @@
 #import "StampDetailViewController.h"
 #import "StampEntity.h"
 
-static const CGFloat kFilterRowHeight = 46.0;
-static const CGFloat kNormalRowHeight = 83.0;
+static const CGFloat kFilterRowHeight = 44.0;
 
 @interface StampsListViewController ()
-- (UITableViewCell*)filterCellForTableView:(UITableView*)tableView;
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity;
 
 @property (nonatomic, retain) NSMutableArray* stampsArray;
@@ -27,7 +25,7 @@ static const CGFloat kNormalRowHeight = 83.0;
 
 @implementation StampsListViewController
 
-@synthesize filterCell = filterCell_;
+@synthesize filterView = filterView_;
 @synthesize stampsArray = stampsArray_;
 
 - (id)initWithStyle:(UITableViewStyle)style {
@@ -39,7 +37,7 @@ static const CGFloat kNormalRowHeight = 83.0;
 }
 
 - (void)dealloc {
-  self.filterCell = nil;
+  self.filterView = nil;
   self.stampsArray = nil;
   [super dealloc];
 }
@@ -55,6 +53,18 @@ static const CGFloat kNormalRowHeight = 83.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
+  // Setup filter view's gradient.
+  CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
+  gradientLayer.colors = [NSArray arrayWithObjects:
+                          (id)[UIColor colorWithWhite:0.95 alpha:1.0].CGColor,
+                          (id)[UIColor colorWithWhite:0.889 alpha:1.0].CGColor, nil];
+  gradientLayer.frame = self.filterView.frame;
+  // Gotta make sure the gradient is under the buttons.
+  [self.filterView.layer insertSublayer:gradientLayer atIndex:0];
+  [gradientLayer release];
+
+  // Load dummy data.
   NSString* data = [NSString stringWithContentsOfFile:
       [[NSBundle mainBundle] pathForResource:@"stamp_data" ofType:@"csv"]
       encoding:NSStringEncodingConversionAllowLossy error:NULL];
@@ -65,7 +75,12 @@ static const CGFloat kNormalRowHeight = 83.0;
     //NSLog(@"%@", entityLine);
     StampEntity* entity = [[StampEntity alloc] init];
     entity.name = (NSString*)[entityLine objectAtIndex:2];
-    const NSString* typeStr = (NSString*)[entityLine objectAtIndex:1];
+    NSString* typeStr = (NSString*)[entityLine objectAtIndex:1];
+    entity.categoryImage = 
+        [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[typeStr lowercaseString]]];
+    if (!entity.categoryImage)
+      entity.categoryImage = [UIImage imageNamed:@"cat_icon_place"];
+
     if (typeStr == @"Place") {
       entity.type = StampEntityTypePlace;
     } else if (typeStr == @"Music") {
@@ -77,17 +92,18 @@ static const CGFloat kNormalRowHeight = 83.0;
     } else {
       entity.type = StampEntityTypeOther;
     }
+    entity.detail = typeStr;
     NSString* userName = (NSString*)[entityLine objectAtIndex:0];
-    NSString* userImg = [userName stringByReplacingOccurrencesOfString:@"." withString:@""];
-    userImg = [[[[userImg lowercaseString] componentsSeparatedByString:@" "]
-        componentsJoinedByString:@"_"] stringByAppendingString:@"_user_image"];
-    entity.userImage = [UIImage imageNamed:userImg];
+    NSString* userFile = [userName stringByReplacingOccurrencesOfString:@"." withString:@""];
+    userFile = [[[userFile lowercaseString] componentsSeparatedByString:@" "]
+        componentsJoinedByString:@"_"];
+    entity.userImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_user_image"]];
+    entity.stampImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_stamp_color"]];
     entity.userName = userName;
     if ([entityLine count] > 3) {
       entity.comment = [(NSString*)[entityLine objectAtIndex:3]
           stringByReplacingOccurrencesOfString:@"\"" withString:@""];
     }
-    entity.stampImage = [UIImage imageNamed:@"stamp_purple"];
     [stampsArray_ addObject:entity];
     [entity release];
   }
@@ -98,7 +114,7 @@ static const CGFloat kNormalRowHeight = 83.0;
 - (void)viewDidUnload {
   [super viewDidUnload];
   
-  self.filterCell = nil;
+  self.filterView = nil;
   self.stampsArray = nil;
 }
 
@@ -138,39 +154,12 @@ static const CGFloat kNormalRowHeight = 83.0;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  // Return the number of rows in the section (in addition to the filter cell).
-  return [stampsArray_ count] + 1;
+  // Return the number of rows in the section.
+  return [stampsArray_ count];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.row == 0)
-    return [self filterCellForTableView:tableView];
-
-  return [self cellForTableView:tableView withEntity:[stampsArray_ objectAtIndex:(indexPath.row - 1)]];
-}
-
-- (UITableViewCell*)filterCellForTableView:(UITableView*)tableView {
-  static NSString* FilterCellIdentifier = @"FilterStampsCell";
-  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:FilterCellIdentifier];
-
-  if (cell == nil) {
-    [[NSBundle mainBundle] loadNibNamed:@"StampListFilterCell" owner:self options:nil];
-    cell = filterCell_;
-    self.filterCell = nil;
-  }
-
-  CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
-  gradientLayer.colors = [NSArray arrayWithObjects:
-                          (id)[UIColor colorWithWhite:0.95 alpha:1.0].CGColor,
-                          (id)[UIColor colorWithWhite:0.889 alpha:1.0].CGColor, nil];
-  CGRect gradientFrame = cell.contentView.frame;
-  //gradientFrame.size.height += 1.0;  // Account for bottom border.
-  gradientLayer.frame = gradientFrame;
-  // Gotta make sure the gradient is under the buttons.
-  [cell.contentView.layer insertSublayer:gradientLayer atIndex:0];
-  [gradientLayer release];
-  
-  return cell;
+  return [self cellForTableView:tableView withEntity:[stampsArray_ objectAtIndex:indexPath.row]];
 }
 
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity {
@@ -180,13 +169,12 @@ static const CGFloat kNormalRowHeight = 83.0;
   if (cell == nil) {
     cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                    reuseIdentifier:CellIdentifier] autorelease];
+    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
   }
 
-  // This is hacky. Fix.
+  // TODO(andybons): Use layer caching for this shit.
   cell.contentView.layer.sublayers = nil;
 
-  cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-  
   CALayer* userImgLayer = [[CALayer alloc] init];
   userImgLayer.contents = (id)entity.userImage.CGImage;
   userImgLayer.contentsGravity = kCAGravityResizeAspect;
@@ -214,32 +202,32 @@ static const CGFloat kNormalRowHeight = 83.0;
       leftPadding, 8, stringSize.width, stringSize.height)];
   nameLabel.font = [UIFont fontWithName:fontString size:47];
   nameLabel.text = entity.name;
+  nameLabel.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   nameLabel.backgroundColor = [UIColor clearColor];
   [cell.contentView addSubview:nameLabel];
   [nameLabel release];
 
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
-  typeIconLayer.contents = (id)[UIImage imageNamed:@"map_pin_small"].CGImage;
-  typeIconLayer.frame = CGRectMake(leftPadding, 58, 12, 12);
+  typeIconLayer.contents = (id)entity.categoryImage.CGImage;
+  typeIconLayer.frame = CGRectMake(leftPadding, 59, 12, 12);
   [cell.contentView.layer addSublayer:typeIconLayer];
 
-  NSString* shortNameStr = entity.userName;
   fontString = @"Helvetica-Bold";
-  stringSize = [shortNameStr sizeWithFont:[UIFont fontWithName:fontString size:12]
-                                 forWidth:218
-                            lineBreakMode:UILineBreakModeTailTruncation];
+  stringSize = [entity.userName sizeWithFont:[UIFont fontWithName:fontString size:12]
+                                    forWidth:218
+                               lineBreakMode:UILineBreakModeTailTruncation];
   
   UILabel* subTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(
-      leftPadding + 14, 58, stringSize.width, stringSize.height)];
+      leftPadding + 16, 58, stringSize.width, stringSize.height)];
   subTextLabel.font = [UIFont fontWithName:fontString size:12];
-  subTextLabel.textColor = [UIColor grayColor];
-  subTextLabel.text = shortNameStr;
+  subTextLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  subTextLabel.text = entity.userName;
   [cell.contentView addSubview:subTextLabel];
   [subTextLabel release];
   
   if (entity.comment) {
-    fontString = @"Helvetica";
+    fontString = @"HelveticaNeue";
     stringSize = [entity.comment sizeWithFont:[UIFont fontWithName:fontString size:12]
                                      forWidth:218 - stringSize.width - 14
                                 lineBreakMode:UILineBreakModeTailTruncation];
@@ -247,7 +235,7 @@ static const CGFloat kNormalRowHeight = 83.0;
         CGRectGetMaxX(subTextLabel.frame) + 3, 58, stringSize.width, stringSize.height)];
     commentLabel.text = entity.comment;
     commentLabel.font = [UIFont fontWithName:fontString size:12];
-    commentLabel.textColor = [UIColor grayColor];
+    commentLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
     [cell.contentView addSubview:commentLabel];
     [commentLabel release];
   }
@@ -261,25 +249,19 @@ static const CGFloat kNormalRowHeight = 83.0;
 
 #pragma mark - Table view delegate
 
-- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.row == 0)
-    return;
+- (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
+  cell.backgroundColor = [UIColor whiteColor];
+}
 
+- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
   StampDetailViewController* detailViewController =
-      [[StampDetailViewController alloc] initWithNibName:@"StampDetailViewController" bundle:nil];
+      [[StampDetailViewController alloc] initWithEntity:[stampsArray_ objectAtIndex:indexPath.row]];
 
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
-}
-
-- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.row == 0)
-    return kFilterRowHeight;
-
-  return kNormalRowHeight;
 }
 
 #pragma mark - UIScrollView delegate methods

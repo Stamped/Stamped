@@ -8,9 +8,18 @@
 
 #import <UIKit/UIKit.h>
 
+@class StampEntity;
 
-@interface StampDetailViewController : UITableViewController {
-
+@interface StampDetailViewController : UIViewController {
+ @private
+  StampEntity* entity_;
 }
+
+- (id)initWithEntity:(StampEntity*)entity;
+
+@property (nonatomic, retain) IBOutlet UITableViewCell* topHeaderCell;
+@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
+@property (nonatomic, retain) IBOutlet UIView* activityView;
+@property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
 
 @end

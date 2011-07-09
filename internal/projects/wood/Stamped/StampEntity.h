@@ -20,8 +20,10 @@ typedef enum {
 
 @property (nonatomic, retain) UIImage* userImage;
 @property (nonatomic, retain) UIImage* stampImage;
+@property (nonatomic, retain) UIImage* categoryImage;
 @property (nonatomic, copy) NSString* name;
 @property (nonatomic, copy) NSString* userName;
+@property (nonatomic, copy) NSString* detail;
 @property (nonatomic, copy) NSString* comment;
 @property (nonatomic, copy) NSArray* subEntities;
 @property (nonatomic) StampEntityType type;
