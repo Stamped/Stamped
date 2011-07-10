@@ -11,31 +11,40 @@
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "EntityDetailViewController.h"
+#import "PlaceDetailViewController.h"
 #import "StampEntity.h"
+#import "StampedAppDelegate.h"
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
 - (void)setUpToolbarAndBackground;
-- (void)setUpActivityView;
+- (void)setUpMainContentView;
+- (void)setUpCommentsView;
+- (void)handleTap:(UITapGestureRecognizer*)sender;
+- (void)handleEntityTap:(UITapGestureRecognizer*)sender;
 @end
 
 @implementation StampDetailViewController
 
 @synthesize topHeaderCell = topHeaderCell_;
 @synthesize scrollView = scrollView_;
+@synthesize addCommentField = addCommentField_;
+@synthesize commentsView = commentsView_;
 @synthesize activityView = activityView_;
 @synthesize bottomToolbar = bottomToolbar_;
 
 - (id)initWithEntity:(StampEntity*)entity {
   self = [self initWithNibName:@"StampDetailViewController" bundle:nil];
   if (self) {
-    entity_ = entity;
-    scrollView_.contentSize = self.view.bounds.size;
+    entity_ = [entity retain];
   }
   return self;
 }
 
 - (void)dealloc {
+  [entity_ release];
+
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
@@ -53,9 +62,23 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UITapGestureRecognizer* gestureRecognizer =
+      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+  [self.view addGestureRecognizer:gestureRecognizer];
+  [gestureRecognizer release];
+
+  scrollView_.contentSize = self.view.bounds.size;
+  
   [self setUpToolbarAndBackground];
   [self setUpHeader];
-  [self setUpActivityView];
+
+  activityView_.layer.shadowOpacity = 0.1;
+  activityView_.layer.shadowOffset = CGSizeMake(0, 1);
+  activityView_.layer.shadowRadius = 2;
+  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+
+  [self setUpMainContentView];
+  [self setUpCommentsView];
 }
 
 - (void)setUpHeader {
@@ -99,6 +122,12 @@
   detailLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   [topHeaderCell_ addSubview:detailLabel];
   [detailLabel release];
+
+  UITapGestureRecognizer* gestureRecognizer =
+      [[UITapGestureRecognizer alloc] initWithTarget:self 
+                                              action:@selector(handleEntityTap:)];
+  [topHeaderCell_ addGestureRecognizer:gestureRecognizer];
+  [gestureRecognizer release];
 }
 
 - (void)setUpToolbarAndBackground {
@@ -122,12 +151,7 @@
   bottomToolbar_.alpha = 0.5;
 }
 
-- (void)setUpActivityView {
-  activityView_.layer.shadowOpacity = 0.1;
-  activityView_.layer.shadowOffset = CGSizeMake(0, 1);
-  activityView_.layer.shadowRadius = 2;
-  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-
+- (void)setUpMainContentView {
   CALayer* userImgLayer = [[CALayer alloc] init];
   userImgLayer.contents = (id)entity_.userImage.CGImage;
   userImgLayer.contentsGravity = kCAGravityResizeAspect;
@@ -186,6 +210,21 @@
   [commentLabel release];
 }
 
+- (void)setUpCommentsView {
+  CALayer* userImgLayer = [[CALayer alloc] init];
+  userImgLayer.contents = (id)[UIImage imageNamed:@"robby_s_user_image"].CGImage;
+  userImgLayer.contentsGravity = kCAGravityResizeAspect;
+  userImgLayer.frame = CGRectMake(10, 10, 31, 31);
+  userImgLayer.borderColor = [UIColor whiteColor].CGColor;
+  userImgLayer.borderWidth = 2.0;
+  userImgLayer.shadowOpacity = 0.5;
+  userImgLayer.shadowOffset = CGSizeMake(0, 0.5);
+  userImgLayer.shadowRadius = 1.0;
+  userImgLayer.shadowPath = [UIBezierPath bezierPathWithRect:userImgLayer.bounds].CGPath;
+  [commentsView_.layer addSublayer:userImgLayer];
+  [userImgLayer release];
+}
+
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.topHeaderCell = nil;
@@ -194,20 +233,32 @@
   self.scrollView = nil;
 }
 
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
+- (void)handleTap:(UITapGestureRecognizer*)sender {
+  if (sender.state != UIGestureRecognizerStateEnded)
+    return;
+
+  [addCommentField_ resignFirstResponder];
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-}
+- (void)handleEntityTap:(UITapGestureRecognizer*)sender {
+  if (sender.state != UIGestureRecognizerStateEnded)
+    return;
 
-- (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];
+  [addCommentField_ resignFirstResponder];
+  EntityDetailViewController* detailViewController = nil;
+  switch (entity_.type) {
+    case StampEntityTypePlace:
+      detailViewController = [[PlaceDetailViewController alloc] initWithNibName:@"PlaceDetailViewController" entity:entity_];
+      break;
+    default:
+      detailViewController = [[EntityDetailViewController alloc] initWithNibName:@"EntityDetailViewController" entity:entity_];
+      break;
+  }
+  detailViewController = [[PlaceDetailViewController alloc] initWithNibName:@"PlaceDetailViewController" entity:entity_];
+  // Pass the selected object to the new view controller.
+  StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

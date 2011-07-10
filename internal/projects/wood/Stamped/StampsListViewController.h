@@ -11,12 +11,17 @@
 
 @interface StampsListViewController : UITableViewController<UIScrollViewDelegate> {
  @private
-  NSMutableArray* stampsArray_;
   BOOL userDidScroll_;
+  NSArray* filterButtons_;
+  NSMutableArray* stampsArray_;
+  
+  IBOutlet UIView* filterView_;
+  IBOutlet UIButton* placesFilterButton_;
+  IBOutlet UIButton* booksFilterButton_;
+  IBOutlet UIButton* filmsFilterButton_;
+  IBOutlet UIButton* musicFilterButton_;
 }
 
 - (IBAction)filterButtonPushed:(id)sender;
-
-@property (nonatomic, assign) IBOutlet UIView* filterView;
 
 @end

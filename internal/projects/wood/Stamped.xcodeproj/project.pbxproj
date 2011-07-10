@@ -37,6 +37,20 @@
 		7E2CED2713C7A6C90068D576 /* robby_s_stamp_color@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CED1D13C7A6C90068D576 /* robby_s_stamp_color@2x.png */; };
 		7E2CED2813C7A6C90068D576 /* scott_f_stamp_color@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CED1E13C7A6C90068D576 /* scott_f_stamp_color@2x.png */; };
 		7E2CED2913C7A6C90068D576 /* travis_f_stamp_color@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CED1F13C7A6C90068D576 /* travis_f_stamp_color@2x.png */; };
+		7E76129313C926660023CCC4 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129213C926660023CCC4 /* toolbar_bg@2x.png */; };
+		7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */; };
+		7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */; };
+		7E76129A13C9344D0023CCC4 /* cat_icon_other@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129913C9344D0023CCC4 /* cat_icon_other@2x.png */; };
+		7E76129C13C938DE0023CCC4 /* main_action_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */; };
+		7E76129E13C93F1D0023CCC4 /* call_action_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129D13C93F1D0023CCC4 /* call_action_button_bg@2x.png */; };
+		7E7612A413C940970023CCC4 /* logo_amazon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7612A013C940970023CCC4 /* logo_amazon@2x.png */; };
+		7E7612A513C940970023CCC4 /* logo_fandango@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7612A113C940970023CCC4 /* logo_fandango@2x.png */; };
+		7E7612A613C940970023CCC4 /* logo_itunes@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7612A213C940970023CCC4 /* logo_itunes@2x.png */; };
+		7E7612A713C940970023CCC4 /* logo_opentable@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7612A313C940970023CCC4 /* logo_opentable@2x.png */; };
+		7E7612A913C943E30023CCC4 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7612A813C943E30023CCC4 /* MapKit.framework */; };
+		7E7612AD13C94D7E0023CCC4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E7612AC13C94D7E0023CCC4 /* CoreLocation.framework */; };
+		7E7612B613C95C170023CCC4 /* place_detail@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7612B513C95C170023CCC4 /* place_detail@2x.png */; };
+		7E7612B813C95C5B0023CCC4 /* map_inner_shadow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7612B713C95C5B0023CCC4 /* map_inner_shadow@2x.png */; };
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
 		7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
 		7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177713C3754300ABE6E2 /* Foundation.framework */; };
@@ -66,11 +80,12 @@
 		7EC6B4D613C656E700CE83DD /* scott_f_user_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC6B4CC13C656E700CE83DD /* scott_f_user_image.png */; };
 		7EC6B4D713C656E700CE83DD /* travis_f_user_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC6B4CD13C656E700CE83DD /* travis_f_user_image.png */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
-		7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */; };
 		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
 		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
 		7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E313C5093E003AEE52 /* QuartzCore.framework */; };
 		7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E513C51133003AEE52 /* CoreText.framework */; };
+		7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
+		7EF1105A13C906AA0059F9BD /* EntityDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */; };
 		7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* StampsListViewController.m */; };
 		7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */; };
 		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
@@ -125,6 +140,21 @@
 		7E2CED1D13C7A6C90068D576 /* robby_s_stamp_color@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "robby_s_stamp_color@2x.png"; sourceTree = "<group>"; };
 		7E2CED1E13C7A6C90068D576 /* scott_f_stamp_color@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "scott_f_stamp_color@2x.png"; sourceTree = "<group>"; };
 		7E2CED1F13C7A6C90068D576 /* travis_f_stamp_color@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "travis_f_stamp_color@2x.png"; sourceTree = "<group>"; };
+		7E76129213C926660023CCC4 /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
+		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
+		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
+		7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlaceDetailViewController.xib; sourceTree = "<group>"; };
+		7E76129913C9344D0023CCC4 /* cat_icon_other@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_other@2x.png"; sourceTree = "<group>"; };
+		7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "main_action_button_bg@2x.png"; sourceTree = "<group>"; };
+		7E76129D13C93F1D0023CCC4 /* call_action_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "call_action_button_bg@2x.png"; sourceTree = "<group>"; };
+		7E7612A013C940970023CCC4 /* logo_amazon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo_amazon@2x.png"; sourceTree = "<group>"; };
+		7E7612A113C940970023CCC4 /* logo_fandango@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo_fandango@2x.png"; sourceTree = "<group>"; };
+		7E7612A213C940970023CCC4 /* logo_itunes@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo_itunes@2x.png"; sourceTree = "<group>"; };
+		7E7612A313C940970023CCC4 /* logo_opentable@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo_opentable@2x.png"; sourceTree = "<group>"; };
+		7E7612A813C943E30023CCC4 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		7E7612AC13C94D7E0023CCC4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		7E7612B513C95C170023CCC4 /* place_detail@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "place_detail@2x.png"; sourceTree = "<group>"; };
+		7E7612B713C95C5B0023CCC4 /* map_inner_shadow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map_inner_shadow@2x.png"; sourceTree = "<group>"; };
 		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
 		7EC0177113C3754300ABE6E2 /* Stamped.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stamped.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EC0177513C3754300ABE6E2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -161,12 +191,14 @@
 		7EC6B4CD13C656E700CE83DD /* travis_f_user_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = travis_f_user_image.png; sourceTree = "<group>"; };
 		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
 		7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNavigationBar.m; sourceTree = "<group>"; };
-		7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
 		7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
 		7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailViewController.m; sourceTree = "<group>"; };
 		7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampDetailViewController.xib; sourceTree = "<group>"; };
 		7EDE38E313C5093E003AEE52 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7EDE38E513C51133003AEE52 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		7EF1105613C906A90059F9BD /* EntityDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntityDetailViewController.h; sourceTree = "<group>"; };
+		7EF1105713C906A90059F9BD /* EntityDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EntityDetailViewController.m; sourceTree = "<group>"; };
+		7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EntityDetailViewController.xib; sourceTree = "<group>"; };
 		7EFE8F2513C39FA100324F34 /* StampsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListViewController.h; sourceTree = "<group>"; };
 		7EFE8F2613C39FA100324F34 /* StampsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = StampsListViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampsListViewController.xib; sourceTree = "<group>"; };
@@ -187,6 +219,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E7612AD13C94D7E0023CCC4 /* CoreLocation.framework in Frameworks */,
+				7E7612A913C943E30023CCC4 /* MapKit.framework in Frameworks */,
 				7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */,
 				7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */,
 				7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */,
@@ -214,6 +248,7 @@
 				7E2CED0D13C7A2F30068D576 /* cat_icon_book@2x.png */,
 				7E2CED0E13C7A2F30068D576 /* cat_icon_film@2x.png */,
 				7E2CED0F13C7A2F30068D576 /* cat_icon_music@2x.png */,
+				7E76129913C9344D0023CCC4 /* cat_icon_other@2x.png */,
 				7E2CED1013C7A2F30068D576 /* cat_icon_place@2x.png */,
 			);
 			name = Categories;
@@ -236,9 +271,32 @@
 			name = Stamps;
 			sourceTree = "<group>";
 		};
+		7E76129F13C940500023CCC4 /* Logos */ = {
+			isa = PBXGroup;
+			children = (
+				7E7612A013C940970023CCC4 /* logo_amazon@2x.png */,
+				7E7612A113C940970023CCC4 /* logo_fandango@2x.png */,
+				7E7612A213C940970023CCC4 /* logo_itunes@2x.png */,
+				7E7612A313C940970023CCC4 /* logo_opentable@2x.png */,
+			);
+			name = Logos;
+			sourceTree = "<group>";
+		};
+		7E7612B413C95BBD0023CCC4 /* Place Entity */ = {
+			isa = PBXGroup;
+			children = (
+				7E7612B513C95C170023CCC4 /* place_detail@2x.png */,
+				7E7612B713C95C5B0023CCC4 /* map_inner_shadow@2x.png */,
+				7E76129D13C93F1D0023CCC4 /* call_action_button_bg@2x.png */,
+			);
+			name = "Place Entity";
+			sourceTree = "<group>";
+		};
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				7E7612AC13C94D7E0023CCC4 /* CoreLocation.framework */,
+				7E7612A813C943E30023CCC4 /* MapKit.framework */,
 				7EDE38E513C51133003AEE52 /* CoreText.framework */,
 				7EDE38E313C5093E003AEE52 /* QuartzCore.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
@@ -315,12 +373,15 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7E76129F13C940500023CCC4 /* Logos */,
 				7E2CED1513C7A5FD0068D576 /* Stamps */,
 				7E2CED0C13C7A2630068D576 /* Categories */,
 				7EC6B4C313C656BC00CE83DD /* User Images */,
 				7EC6B4A513C6039000CE83DD /* Stamp List Filter */,
+				7E7612B413C95BBD0023CCC4 /* Place Entity */,
 				7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */,
-				7EDE38D113C4DD96003AEE52 /* toolbar_bg@2x.png */,
+				7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */,
+				7E76129213C926660023CCC4 /* toolbar_bg@2x.png */,
 				7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */,
 				7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */,
 				7EFE8F7A13C3C96D00324F34 /* toolbar_add_stamp@2x.png */,
@@ -378,6 +439,8 @@
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
 				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
 				7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */,
+				7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */,
+				7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */,
 			);
 			name = Interface;
 			sourceTree = "<group>";
@@ -395,6 +458,10 @@
 				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
 				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
 				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
+				7EF1105613C906A90059F9BD /* EntityDetailViewController.h */,
+				7EF1105713C906A90059F9BD /* EntityDetailViewController.m */,
+				7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */,
+				7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
 				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
 				7EC6B4BE13C63DC100CE83DD /* StampEntity.h */,
@@ -482,7 +549,6 @@
 				7EFE8F8013C3C96D00324F34 /* toolbar_activity@2x.png in Resources */,
 				7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */,
 				7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */,
-				7EDE38D213C4DD96003AEE52 /* toolbar_bg@2x.png in Resources */,
 				7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */,
 				7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */,
 				7EC6B4C213C64C4300CE83DD /* stamp_data.csv in Resources */,
@@ -526,6 +592,18 @@
 				7E2CED2713C7A6C90068D576 /* robby_s_stamp_color@2x.png in Resources */,
 				7E2CED2813C7A6C90068D576 /* scott_f_stamp_color@2x.png in Resources */,
 				7E2CED2913C7A6C90068D576 /* travis_f_stamp_color@2x.png in Resources */,
+				7EF1105A13C906AA0059F9BD /* EntityDetailViewController.xib in Resources */,
+				7E76129313C926660023CCC4 /* toolbar_bg@2x.png in Resources */,
+				7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */,
+				7E76129A13C9344D0023CCC4 /* cat_icon_other@2x.png in Resources */,
+				7E76129C13C938DE0023CCC4 /* main_action_button_bg@2x.png in Resources */,
+				7E76129E13C93F1D0023CCC4 /* call_action_button_bg@2x.png in Resources */,
+				7E7612A413C940970023CCC4 /* logo_amazon@2x.png in Resources */,
+				7E7612A513C940970023CCC4 /* logo_fandango@2x.png in Resources */,
+				7E7612A613C940970023CCC4 /* logo_itunes@2x.png in Resources */,
+				7E7612A713C940970023CCC4 /* logo_opentable@2x.png in Resources */,
+				7E7612B613C95C170023CCC4 /* place_detail@2x.png in Resources */,
+				7E7612B813C95C5B0023CCC4 /* map_inner_shadow@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -569,6 +647,8 @@
 				7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */,
 				7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */,
 				7EC6B4C013C63DC100CE83DD /* StampEntity.m in Sources */,
+				7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */,
+				7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

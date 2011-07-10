@@ -12,8 +12,10 @@
 @implementation STNavigationBar
 
 - (void)drawRect:(CGRect)rect {
-  UIImage* img = [UIImage imageNamed:@"toolbar_bg"];
-  [img drawInRect:CGRectMake(0, 0, rect.size.width, rect.size.height)];
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+  CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.85 alpha:1.0].CGColor);
+  CGContextFillRect(ctx, rect);
+  [[UIImage imageNamed:@"toolbar_bg"] drawInRect:rect];
 }
 
 @end

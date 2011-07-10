@@ -17,16 +17,37 @@
 
 static const CGFloat kFilterRowHeight = 44.0;
 
+typedef enum {
+  StampsListFilterTypeBook,
+  StampsListFilterTypeFilm,
+  StampsListFilterTypeMusic,
+  StampsListFilterTypePlace,
+  StampsListFilterTypeOther,
+  StampsListFilterTypeAll
+} StampsListFilterType;
+
 @interface StampsListViewController ()
+- (void)loadTableData;
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity;
 
+@property (nonatomic, copy) NSArray* filterButtons;
 @property (nonatomic, retain) NSMutableArray* stampsArray;
+@property (nonatomic, assign) UIView* filterView;
+@property (nonatomic, retain) UIButton* placesFilterButton;
+@property (nonatomic, retain) UIButton* booksFilterButton;
+@property (nonatomic, retain) UIButton* filmsFilterButton;
+@property (nonatomic, retain) UIButton* musicFilterButton;
 @end
 
 @implementation StampsListViewController
 
+@synthesize filterButtons = filterButtons_;
 @synthesize filterView = filterView_;
 @synthesize stampsArray = stampsArray_;
+@synthesize placesFilterButton = placesFilterButton_;
+@synthesize booksFilterButton = booksFilterButton_;
+@synthesize filmsFilterButton = filmsFilterButton_;
+@synthesize musicFilterButton = musicFilterButton_;
 
 - (id)initWithStyle:(UITableViewStyle)style {
   self = [super initWithStyle:style];
@@ -37,8 +58,13 @@ static const CGFloat kFilterRowHeight = 44.0;
 }
 
 - (void)dealloc {
+  self.filterButtons = nil;
   self.filterView = nil;
   self.stampsArray = nil;
+  self.placesFilterButton = nil;
+  self.booksFilterButton = nil;
+  self.filmsFilterButton = nil;
+  self.musicFilterButton = nil;
   [super dealloc];
 }
 
@@ -53,6 +79,13 @@ static const CGFloat kFilterRowHeight = 44.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+
+  self.filterButtons =
+      [NSArray arrayWithObjects:(id)placesFilterButton_,
+                                (id)booksFilterButton_,
+                                (id)filmsFilterButton_,
+                                (id)musicFilterButton_, nil];
+  
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
   // Setup filter view's gradient.
   CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
@@ -63,63 +96,25 @@ static const CGFloat kFilterRowHeight = 44.0;
   // Gotta make sure the gradient is under the buttons.
   [self.filterView.layer insertSublayer:gradientLayer atIndex:0];
   [gradientLayer release];
-
-  // Load dummy data.
-  NSString* data = [NSString stringWithContentsOfFile:
-      [[NSBundle mainBundle] pathForResource:@"stamp_data" ofType:@"csv"]
-      encoding:NSStringEncodingConversionAllowLossy error:NULL];
-  NSArray* lineArray = [data componentsSeparatedByString:@"\n"];
-  self.stampsArray = [NSMutableArray arrayWithCapacity:[lineArray count]];
-  for (NSString* line in lineArray) {
-    NSArray* entityLine = [line componentsSeparatedByString:@","];
-    //NSLog(@"%@", entityLine);
-    StampEntity* entity = [[StampEntity alloc] init];
-    entity.name = (NSString*)[entityLine objectAtIndex:2];
-    NSString* typeStr = (NSString*)[entityLine objectAtIndex:1];
-    entity.categoryImage = 
-        [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[typeStr lowercaseString]]];
-    if (!entity.categoryImage)
-      entity.categoryImage = [UIImage imageNamed:@"cat_icon_place"];
-
-    if (typeStr == @"Place") {
-      entity.type = StampEntityTypePlace;
-    } else if (typeStr == @"Music") {
-      entity.type = StampEntityTypeMusic;
-    } else if (typeStr == @"Film") {
-      entity.type = StampEntityTypeFilm;
-    } else if (typeStr == @"Book") {
-      entity.type = StampEntityTypeBook;
-    } else {
-      entity.type = StampEntityTypeOther;
-    }
-    entity.detail = typeStr;
-    NSString* userName = (NSString*)[entityLine objectAtIndex:0];
-    NSString* userFile = [userName stringByReplacingOccurrencesOfString:@"." withString:@""];
-    userFile = [[[userFile lowercaseString] componentsSeparatedByString:@" "]
-        componentsJoinedByString:@"_"];
-    entity.userImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_user_image"]];
-    entity.stampImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_stamp_color"]];
-    entity.userName = userName;
-    if ([entityLine count] > 3) {
-      entity.comment = [(NSString*)[entityLine objectAtIndex:3]
-          stringByReplacingOccurrencesOfString:@"\"" withString:@""];
-    }
-    [stampsArray_ addObject:entity];
-    [entity release];
-  }
-
-  
+  [self loadTableData];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  
+
   self.filterView = nil;
+  self.filterButtons = nil;
   self.stampsArray = nil;
+  self.placesFilterButton = nil;
+  self.booksFilterButton = nil;
+  self.filmsFilterButton = nil;
+  self.musicFilterButton = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  if (!userDidScroll_)
+    self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -140,11 +135,89 @@ static const CGFloat kFilterRowHeight = 44.0;
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (void)loadTableData {
+  // Load dummy data.
+  NSString* data = [NSString stringWithContentsOfFile:
+      [[NSBundle mainBundle] pathForResource:@"stamp_data" ofType:@"csv"]
+                                    encoding:NSStringEncodingConversionAllowLossy
+                                       error:NULL];
+  NSArray* lineArray = [data componentsSeparatedByString:@"\n"];
+  self.stampsArray = [NSMutableArray arrayWithCapacity:[lineArray count]];
+  BOOL shouldFilter = NO;
+  StampsListFilterType filterType = StampsListFilterTypeAll;
+  for (UIButton* button in self.filterButtons) {
+    if (button.selected) {
+      shouldFilter = YES;
+      if (button == placesFilterButton_) {
+        filterType = StampsListFilterTypePlace;
+      } else if (button == booksFilterButton_) {
+        filterType = StampsListFilterTypeBook;
+      } else if (button == filmsFilterButton_) {
+        filterType = StampsListFilterTypeFilm;
+      } else if (button == musicFilterButton_) {
+        filterType = StampsListFilterTypeMusic;
+      }
+    }
+  }
+  for (NSString* line in lineArray) {
+    NSArray* entityLine = [line componentsSeparatedByString:@","];
+    //NSLog(@"%@", entityLine);
+    StampEntity* entity = [[StampEntity alloc] init];
+    entity.name = (NSString*)[entityLine objectAtIndex:2];
+    NSString* typeStr = (NSString*)[entityLine objectAtIndex:1];
+    entity.categoryImage = 
+       [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[typeStr lowercaseString]]];
+    if (!entity.categoryImage)
+      entity.categoryImage = [UIImage imageNamed:@"cat_icon_other"];
+  
+    if ([typeStr isEqualToString:@"Place"]) {
+      if (shouldFilter && filterType != StampsListFilterTypePlace)
+        continue;
+      entity.type = StampEntityTypePlace;
+    } else if ([typeStr isEqualToString:@"Music"]) {
+      if (shouldFilter && filterType != StampsListFilterTypeMusic)
+        continue;
+      entity.type = StampEntityTypeMusic;
+    } else if ([typeStr isEqualToString:@"Film"]) {
+      if (shouldFilter && filterType != StampsListFilterTypeFilm)
+        continue;
+      entity.type = StampEntityTypeFilm;
+    } else if ([typeStr isEqualToString:@"Book"]) {
+      if (shouldFilter && filterType != StampsListFilterTypeBook)
+        continue;
+      entity.type = StampEntityTypeBook;
+    } else {
+      if (shouldFilter)
+        continue;
+      entity.type = StampEntityTypeOther;
+    }
+    entity.detail = typeStr;
+    NSString* userName = (NSString*)[entityLine objectAtIndex:0];
+    NSString* userFile = [userName stringByReplacingOccurrencesOfString:@"." withString:@""];
+    userFile = [[[userFile lowercaseString] componentsSeparatedByString:@" "]
+                componentsJoinedByString:@"_"];
+    entity.userImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_user_image"]];
+    entity.stampImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_stamp_color"]];
+    entity.userName = userName;
+    if ([entityLine count] > 3) {
+      entity.comment = [(NSString*)[entityLine objectAtIndex:3]
+                        stringByReplacingOccurrencesOfString:@"\"" withString:@""];
+    }
+
+    [stampsArray_ addObject:entity];
+    [entity release];
+  }
+}
+
 #pragma mark - Filter stuff
 
 - (IBAction)filterButtonPushed:(id)sender {
-  UIButton* button = (UIButton*)sender;
-  [button setSelected:!button.selected];
+  UIButton* selectedButton = (UIButton*)sender;
+  for (UIButton* button in self.filterButtons)
+    button.selected = (button == selectedButton && !button.selected);
+
+  [self loadTableData];
+  [self.tableView reloadData];
 }
 
 #pragma mark - Table view data source
