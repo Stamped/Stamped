@@ -8,6 +8,7 @@
 
 #import "FontTestAppDelegate.h"
 #import "FontsViewController.h"
+#import "CreateImageViewController.h"
 
 @implementation FontTestAppDelegate
 
@@ -17,12 +18,17 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   // Override point for customization after application launch.
-  FontsViewController *fontsvc = [[FontsViewController alloc] init];
-	
-	[self.window addSubview:fontsvc.view];
-  [fontsvc release];
+  
+  //FontsViewController *fontsvc = [[FontsViewController alloc] init];
+	//[self.window addSubview:fontsvc.view];
+  //[fontsvc release];
+  
+  CreateImageViewController *imagevc = [[[CreateImageViewController alloc] init] retain];
+  [self.window addSubview:imagevc.view];
+  [imagevc release];
+  
   [self.window makeKeyAndVisible];
-    return YES;
+  return YES;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

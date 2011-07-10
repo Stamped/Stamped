@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A54531713C7FCA5008809A3 /* CreateImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A54531613C7FCA5008809A3 /* CreateImageViewController.m */; };
+		0A54532013C802F0008809A3 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A54531F13C802F0008809A3 /* MessageUI.framework */; };
 		0AF88C0813C400AF00F08491 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF88C0713C400AF00F08491 /* UIKit.framework */; };
 		0AF88C0A13C400AF00F08491 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF88C0913C400AF00F08491 /* Foundation.framework */; };
 		0AF88C0C13C400AF00F08491 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AF88C0B13C400AF00F08491 /* CoreGraphics.framework */; };
 		0AF88C1213C400AF00F08491 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0AF88C1013C400AF00F08491 /* InfoPlist.strings */; };
 		0AF88C1513C400AF00F08491 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AF88C1413C400AF00F08491 /* main.m */; };
 		0AF88C1813C400AF00F08491 /* FontTestAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0AF88C1713C400AF00F08491 /* FontTestAppDelegate.m */; };
-		0AF88C1B13C400AF00F08491 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0AF88C1913C400AF00F08491 /* MainWindow.xib */; };
 		0AF88C2313C400E000F08491 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0AF88C2113C400E000F08491 /* TGLight.otf */; };
 		0AF88C2413C400E000F08491 /* TitlingGothicFBComp-Reg.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0AF88C2213C400E000F08491 /* TitlingGothicFBComp-Reg.otf */; };
 		0AF88C2613C4010400F08491 /* TitlingGothicFBComp-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0AF88C2513C4010400F08491 /* TitlingGothicFBComp-Light.otf */; };
@@ -21,6 +22,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0A54531513C7FCA5008809A3 /* CreateImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateImageViewController.h; sourceTree = "<group>"; };
+		0A54531613C7FCA5008809A3 /* CreateImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateImageViewController.m; sourceTree = "<group>"; };
+		0A54531F13C802F0008809A3 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		0AF88C0313C400AF00F08491 /* FontTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FontTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AF88C0713C400AF00F08491 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		0AF88C0913C400AF00F08491 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -31,7 +35,6 @@
 		0AF88C1413C400AF00F08491 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0AF88C1613C400AF00F08491 /* FontTestAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FontTestAppDelegate.h; sourceTree = "<group>"; };
 		0AF88C1713C400AF00F08491 /* FontTestAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FontTestAppDelegate.m; sourceTree = "<group>"; };
-		0AF88C1A13C400AF00F08491 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
 		0AF88C2113C400E000F08491 /* TGLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = TGLight.otf; sourceTree = "<group>"; };
 		0AF88C2213C400E000F08491 /* TitlingGothicFBComp-Reg.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TitlingGothicFBComp-Reg.otf"; sourceTree = "<group>"; };
 		0AF88C2513C4010400F08491 /* TitlingGothicFBComp-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TitlingGothicFBComp-Light.otf"; sourceTree = "<group>"; };
@@ -44,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A54532013C802F0008809A3 /* MessageUI.framework in Frameworks */,
 				0AF88C0813C400AF00F08491 /* UIKit.framework in Frameworks */,
 				0AF88C0A13C400AF00F08491 /* Foundation.framework in Frameworks */,
 				0AF88C0C13C400AF00F08491 /* CoreGraphics.framework in Frameworks */,
@@ -73,6 +77,7 @@
 		0AF88C0613C400AF00F08491 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0A54531F13C802F0008809A3 /* MessageUI.framework */,
 				0AF88C0713C400AF00F08491 /* UIKit.framework */,
 				0AF88C0913C400AF00F08491 /* Foundation.framework */,
 				0AF88C0B13C400AF00F08491 /* CoreGraphics.framework */,
@@ -87,7 +92,8 @@
 				0AF88C1713C400AF00F08491 /* FontTestAppDelegate.m */,
 				0AF88C2F13C4019C00F08491 /* FontsViewController.h */,
 				0AF88C3013C4019C00F08491 /* FontsViewController.m */,
-				0AF88C1913C400AF00F08491 /* MainWindow.xib */,
+				0A54531513C7FCA5008809A3 /* CreateImageViewController.h */,
+				0A54531613C7FCA5008809A3 /* CreateImageViewController.m */,
 				0AF88C0E13C400AF00F08491 /* Supporting Files */,
 			);
 			path = FontTest;
@@ -155,7 +161,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				0AF88C1213C400AF00F08491 /* InfoPlist.strings in Resources */,
-				0AF88C1B13C400AF00F08491 /* MainWindow.xib in Resources */,
 				0AF88C2313C400E000F08491 /* TGLight.otf in Resources */,
 				0AF88C2413C400E000F08491 /* TitlingGothicFBComp-Reg.otf in Resources */,
 				0AF88C2613C4010400F08491 /* TitlingGothicFBComp-Light.otf in Resources */,
@@ -172,6 +177,7 @@
 				0AF88C1513C400AF00F08491 /* main.m in Sources */,
 				0AF88C1813C400AF00F08491 /* FontTestAppDelegate.m in Sources */,
 				0AF88C3113C4019C00F08491 /* FontsViewController.m in Sources */,
+				0A54531713C7FCA5008809A3 /* CreateImageViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,14 +190,6 @@
 				0AF88C1113C400AF00F08491 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		0AF88C1913C400AF00F08491 /* MainWindow.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				0AF88C1A13C400AF00F08491 /* en */,
-			);
-			name = MainWindow.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -276,6 +274,7 @@
 				0AF88C2013C400AF00F08491 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

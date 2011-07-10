@@ -7,3 +7,10 @@
 *.old
 out
 Kevin.xcuserdatad*
+internal/projects/ios-fonts-test/FontTest/FontTest/FontTestAppDelegate.m
+
+internal/projects/ios-fonts-test/FontTest/FontTest/CreateImageViewController.m
+
+internal/projects/ios-fonts-test/FontTest/FontTest/CreateImageViewController.h
+
+internal/projects/ios-fonts-test/FontTest/FontTest.xcodeproj/project.xcworkspace/xcuserdata/kevin.xcuserdatad/UserInterfaceState.xcuserstate
