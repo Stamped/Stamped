@@ -12,6 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "EntityDetailViewController.h"
+#import "FilmDetailViewController.h"
 #import "PlaceDetailViewController.h"
 #import "BookDetailViewController.h"
 #import "MusicDetailViewController.h"
@@ -257,6 +258,9 @@
       break;
     case StampEntityTypeMusic:
       detailViewController = [[MusicDetailViewController alloc] initWithNibName:@"MusicDetailViewController" entity:entity_];
+      break;
+    case StampEntityTypeFilm:
+      detailViewController = [[FilmDetailViewController alloc] initWithNibName:@"FilmDetailViewController" entity:entity_];
       break;
     default:
       detailViewController = [[EntityDetailViewController alloc] initWithNibName:@"EntityDetailViewController" entity:entity_];

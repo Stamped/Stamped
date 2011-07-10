@@ -42,6 +42,9 @@
 		7E514A9913C97A9700EEC598 /* MusicDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E514A9713C97A9700EEC598 /* MusicDetailViewController.m */; };
 		7E514A9A13C97A9700EEC598 /* MusicDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A9813C97A9700EEC598 /* MusicDetailViewController.xib */; };
 		7E514A9D13C97E8000EEC598 /* music_detail_filler@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A9C13C97E8000EEC598 /* music_detail_filler@2x.png */; };
+		7E514AA713C9827000EEC598 /* FilmDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E514AA513C9827000EEC598 /* FilmDetailViewController.m */; };
+		7E514AA813C9827000EEC598 /* FilmDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */; };
+		7E514AAA13C9851800EEC598 /* film_detail_filler@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */; };
 		7E76129313C926660023CCC4 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129213C926660023CCC4 /* toolbar_bg@2x.png */; };
 		7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */; };
 		7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */; };
@@ -153,6 +156,10 @@
 		7E514A9713C97A9700EEC598 /* MusicDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicDetailViewController.m; sourceTree = "<group>"; };
 		7E514A9813C97A9700EEC598 /* MusicDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MusicDetailViewController.xib; sourceTree = "<group>"; };
 		7E514A9C13C97E8000EEC598 /* music_detail_filler@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "music_detail_filler@2x.png"; sourceTree = "<group>"; };
+		7E514AA413C9827000EEC598 /* FilmDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FilmDetailViewController.h; sourceTree = "<group>"; };
+		7E514AA513C9827000EEC598 /* FilmDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FilmDetailViewController.m; sourceTree = "<group>"; };
+		7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FilmDetailViewController.xib; sourceTree = "<group>"; };
+		7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "film_detail_filler@2x.png"; sourceTree = "<group>"; };
 		7E76129213C926660023CCC4 /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
 		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
 		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
@@ -287,6 +294,23 @@
 			name = Stamps;
 			sourceTree = "<group>";
 		};
+		7E514AA213C9824D00EEC598 /* Entity Details */ = {
+			isa = PBXGroup;
+			children = (
+				7EF1105613C906A90059F9BD /* EntityDetailViewController.h */,
+				7EF1105713C906A90059F9BD /* EntityDetailViewController.m */,
+				7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */,
+				7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */,
+				7E7612BD13C96B380023CCC4 /* BookDetailViewController.h */,
+				7E7612BE13C96B380023CCC4 /* BookDetailViewController.m */,
+				7E514A9613C97A9700EEC598 /* MusicDetailViewController.h */,
+				7E514A9713C97A9700EEC598 /* MusicDetailViewController.m */,
+				7E514AA413C9827000EEC598 /* FilmDetailViewController.h */,
+				7E514AA513C9827000EEC598 /* FilmDetailViewController.m */,
+			);
+			name = "Entity Details";
+			sourceTree = "<group>";
+		};
 		7E76129F13C940500023CCC4 /* Logos */ = {
 			isa = PBXGroup;
 			children = (
@@ -301,6 +325,7 @@
 		7E7612B413C95BBD0023CCC4 /* Entity Details */ = {
 			isa = PBXGroup;
 			children = (
+				7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */,
 				7E514A9C13C97E8000EEC598 /* music_detail_filler@2x.png */,
 				7E514A8913C9735800EEC598 /* book_detail_fillter@2x.png */,
 				7E514A8C13C977E800EEC598 /* place_detail_filler@2x.png */,
@@ -462,6 +487,7 @@
 				7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */,
 				7E7612BF13C96B380023CCC4 /* BookDetailViewController.xib */,
 				7E514A9813C97A9700EEC598 /* MusicDetailViewController.xib */,
+				7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */,
 			);
 			name = Interface;
 			sourceTree = "<group>";
@@ -483,14 +509,7 @@
 				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
 				7EC6B4BE13C63DC100CE83DD /* StampEntity.h */,
 				7EC6B4BF13C63DC100CE83DD /* StampEntity.m */,
-				7EF1105613C906A90059F9BD /* EntityDetailViewController.h */,
-				7EF1105713C906A90059F9BD /* EntityDetailViewController.m */,
-				7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */,
-				7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */,
-				7E7612BD13C96B380023CCC4 /* BookDetailViewController.h */,
-				7E7612BE13C96B380023CCC4 /* BookDetailViewController.m */,
-				7E514A9613C97A9700EEC598 /* MusicDetailViewController.h */,
-				7E514A9713C97A9700EEC598 /* MusicDetailViewController.m */,
+				7E514AA213C9824D00EEC598 /* Entity Details */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -634,6 +653,8 @@
 				7E514A8D13C977E800EEC598 /* place_detail_filler@2x.png in Resources */,
 				7E514A9A13C97A9700EEC598 /* MusicDetailViewController.xib in Resources */,
 				7E514A9D13C97E8000EEC598 /* music_detail_filler@2x.png in Resources */,
+				7E514AA813C9827000EEC598 /* FilmDetailViewController.xib in Resources */,
+				7E514AAA13C9851800EEC598 /* film_detail_filler@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -681,6 +702,7 @@
 				7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */,
 				7E7612C013C96B380023CCC4 /* BookDetailViewController.m in Sources */,
 				7E514A9913C97A9700EEC598 /* MusicDetailViewController.m in Sources */,
+				7E514AA713C9827000EEC598 /* FilmDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -47,6 +47,20 @@
 						<int key="NSvFlags">274</int>
 						<object class="NSMutableArray" key="NSSubviews">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBUIImageView" id="639894822">
+								<reference key="NSNextResponder" ref="582508261"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{0, 42}, {320, 409}}</string>
+								<reference key="NSSuperview" ref="582508261"/>
+								<reference key="NSWindow"/>
+								<int key="IBUIContentMode">1</int>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<object class="NSCustomResource" key="IBUIImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">music_detail_filler@2x.png</string>
+								</object>
+							</object>
 							<object class="IBUILabel" id="764406955">
 								<reference key="NSNextResponder" ref="582508261"/>
 								<int key="NSvFlags">292</int>
@@ -207,7 +221,7 @@
 							<object class="IBUILabel" id="9118764">
 								<reference key="NSNextResponder" ref="582508261"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{101, 74}, {13, 10}}</string>
+								<string key="NSFrame">{{101, 73}, {13, 10}}</string>
 								<reference key="NSSuperview" ref="582508261"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="429969830"/>
@@ -251,21 +265,6 @@
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">logo_itunes@2x.png</string>
-								</object>
-							</object>
-							<object class="IBUIImageView" id="639894822">
-								<reference key="NSNextResponder" ref="582508261"/>
-								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{0, 42}, {320, 409}}</string>
-								<reference key="NSSuperview" ref="582508261"/>
-								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
-								<int key="IBUIContentMode">1</int>
-								<bool key="IBUIUserInteractionEnabled">NO</bool>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<object class="NSCustomResource" key="IBUIImage">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">music_detail_filler@2x.png</string>
 								</object>
 							</object>
 						</object>
@@ -403,9 +402,9 @@
 							<reference ref="18180027"/>
 							<reference ref="256600175"/>
 							<reference ref="437990520"/>
+							<reference ref="639894822"/>
 							<reference ref="9118764"/>
 							<reference ref="429969830"/>
-							<reference ref="639894822"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 					</object>

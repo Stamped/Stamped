@@ -1,32 +1,30 @@
 //
-//  BookDetailViewController.m
+//  FilmDetailViewController.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/10/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "BookDetailViewController.h"
+#import "FilmDetailViewController.h"
 
-@implementation BookDetailViewController
+@implementation FilmDetailViewController
 
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width,
-                                           self.view.bounds.size.height + 20);
+                                           self.view.bounds.size.height + 60);
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  // Release any retained subviews of the main view.
-  // e.g. self.myOutlet = nil;
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {
   [[UIApplication sharedApplication] openURL:
-       [NSURL URLWithString:@"http://www.amazon.com/Freedom-Novel-Jonathan-Franzen/dp/0312600844/"]];
+      [NSURL URLWithString:@"http://www.fandango.com/xmen:firstclass_133869/movieoverview"]];
 }
 
 @end
