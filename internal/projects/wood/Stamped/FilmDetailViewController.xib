@@ -100,7 +100,7 @@
 							<object class="IBUILabel" id="683198894">
 								<reference key="NSNextResponder" ref="392448798"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{15, 38}, {200, 21}}</string>
+								<string key="NSFrame">{{15, 38}, {180, 21}}</string>
 								<reference key="NSSuperview" ref="392448798"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="408697091"/>
@@ -110,7 +110,7 @@
 								<int key="IBUIContentMode">7</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<string key="IBUIText">by The Creator of Things</string>
+								<string key="IBUIText">Directed by Matthew Vaughn</string>
 								<reference key="IBUITextColor" ref="830939244"/>
 								<nil key="IBUIHighlightedColor"/>
 								<int key="IBUIBaselineAdjustment">1</int>

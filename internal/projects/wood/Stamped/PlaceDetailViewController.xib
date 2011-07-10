@@ -334,7 +334,6 @@
 								<string key="NSFrame">{{0, 293}, {320, 237}}</string>
 								<reference key="NSSuperview" ref="1016267558"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
