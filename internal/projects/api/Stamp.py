@@ -20,3 +20,5 @@ class Stamp(AObject):
         self.flagged = None
         self.date_created = None
         self.other = {}
+        
+        self.entity = {}
