@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <MessageUI/MessageUI.h>
+#import <MessageUI/MFMailComposeViewController.h>
 
-
-@interface CreateImageViewController : UIViewController {
+@interface CreateImageViewController : UIViewController < MFMailComposeViewControllerDelegate > {
     
 }
 
