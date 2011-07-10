@@ -13,6 +13,7 @@
 
 #import "EntityDetailViewController.h"
 #import "PlaceDetailViewController.h"
+#import "BookDetailViewController.h"
 #import "StampEntity.h"
 #import "StampedAppDelegate.h"
 
@@ -250,11 +251,13 @@
     case StampEntityTypePlace:
       detailViewController = [[PlaceDetailViewController alloc] initWithNibName:@"PlaceDetailViewController" entity:entity_];
       break;
+    case StampEntityTypeBook:
+      detailViewController = [[BookDetailViewController alloc] initWithNibName:@"BookDetailViewController" entity:entity_];
+      break;
     default:
       detailViewController = [[EntityDetailViewController alloc] initWithNibName:@"EntityDetailViewController" entity:entity_];
       break;
   }
-  detailViewController = [[PlaceDetailViewController alloc] initWithNibName:@"PlaceDetailViewController" entity:entity_];
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];

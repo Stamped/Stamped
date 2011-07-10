@@ -331,16 +331,17 @@
 							<object class="IBUIImageView" id="535061402">
 								<reference key="NSNextResponder" ref="1016267558"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{0, 291}, {320, 280}}</string>
+								<string key="NSFrame">{{0, 293}, {320, 237}}</string>
 								<reference key="NSSuperview" ref="1016267558"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
-								<int key="IBUIContentMode">2</int>
+								<bool key="IBUIOpaque">NO</bool>
+								<int key="IBUIContentMode">1</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">place_detail@2x.png</string>
+									<string key="NSResourceName">place_detail_filler@2x.png</string>
 								</object>
 							</object>
 						</object>
@@ -755,7 +756,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">PlaceDetailViewController</string>
-					<string key="superclassName">UIViewController</string>
+					<string key="superclassName">EntityDetailViewController</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
@@ -851,7 +852,7 @@
 				<string>logo_opentable@2x.png</string>
 				<string>main_action_button_bg@2x.png</string>
 				<string>map_inner_shadow@2x.png</string>
-				<string>place_detail@2x.png</string>
+				<string>place_detail_filler@2x.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
@@ -860,7 +861,7 @@
 				<string>{129, 21}</string>
 				<string>{11, 50}</string>
 				<string>{640, 304}</string>
-				<string>{640, 559}</string>
+				<string>{640, 475}</string>
 			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">876</string>
