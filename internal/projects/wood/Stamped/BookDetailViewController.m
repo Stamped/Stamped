@@ -14,7 +14,7 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  // Do any additional setup after loading the view from its nib.
+  self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width, self.view.bounds.size.height + 20);
 }
 
 - (void)viewDidUnload {

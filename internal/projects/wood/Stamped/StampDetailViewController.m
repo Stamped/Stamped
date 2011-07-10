@@ -14,6 +14,7 @@
 #import "EntityDetailViewController.h"
 #import "PlaceDetailViewController.h"
 #import "BookDetailViewController.h"
+#import "MusicDetailViewController.h"
 #import "StampEntity.h"
 #import "StampedAppDelegate.h"
 
@@ -253,6 +254,9 @@
       break;
     case StampEntityTypeBook:
       detailViewController = [[BookDetailViewController alloc] initWithNibName:@"BookDetailViewController" entity:entity_];
+      break;
+    case StampEntityTypeMusic:
+      detailViewController = [[MusicDetailViewController alloc] initWithNibName:@"MusicDetailViewController" entity:entity_];
       break;
     default:
       detailViewController = [[EntityDetailViewController alloc] initWithNibName:@"EntityDetailViewController" entity:entity_];
