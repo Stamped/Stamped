@@ -10,9 +10,7 @@
 
 @class CustomUITabBarController;
 
-@interface StampedAppDelegate : NSObject <UIApplicationDelegate> {
-
-}
+@interface StampedAppDelegate : NSObject <UIApplicationDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;
