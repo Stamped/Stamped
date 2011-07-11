@@ -104,7 +104,7 @@
       $('#entry_0').keyup(function() {  
         var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
 
-        if(!emailReg.test($('#entry_0').val())) {
+        if(!emailReg.test($('#entry_0').val()) || $('#entry_0').val().length == 0) {
           $("#submit").attr("disabled", "disabled");
           $("#submit").removeClass("active");
           return false; 
@@ -149,8 +149,10 @@
             },
             error: function(jqXHR, textStatus, errorThrown){
               console.log(jqXHR);
+/*
               alert(jqXHR.responseText);
               alert(textStatus);
+*/
             }
           });
         });
