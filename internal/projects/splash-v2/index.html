@@ -2,150 +2,16 @@
 <html lang="en">
   <head>
     <meta content-type="utf-8" />
+    <meta name="description" content="Stamped. Be the first to know." /> 
+    <meta name="author" content="Stamped, Inc."> 
+    <meta name="copyright" content="Stamped, Inc."> 
+    <meta name="robots" content="index,follow"> 
+    <title>Stamped</title>
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Droid+Serif">
+    <link rel="stylesheet" href="style.css">
     <script src="https://www.google.com/jsapi?key=ABQIAAAAUCbzdAVykq92nuhrYOjlshRB6mhcr2m5Q6fm3mUuDbLfyI5H4xRz_5v5Yx3pAO5Tn-lmmUcfrod7zg" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Droid+Serif">
-    
-    <title>Stamped</title>
-    <style type="text/css" media="screen">
-    * {
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      background-image: url('bg.png');
-    }
-    
-    #main-container {
-      background: url('ribbon.png') repeat-x;
-      height: 310px;
-      margin-top: 200px;
-    }
-    
-    #logo {
-      margin: 45px 0 0 75px;
-      float: left;
-    }
-
-    form {
-      display: block;
-      float: left;
-      margin: 117px 0 0 44px;
-    }
-    
-    label {
-      display: block;
-      font-family: "Droid Serif", serif;
-      color: #4D4D4D;
-      padding: 0 0 4px 2px;
-    }
-    
-    #entry_0_wrapper {
-      display: block;
-      background: url('img/input.png') no-repeat;
-      width: 300px;
-      height: 46px;
-      float: left;
-    }
-    
-    #entry_0_wrapper.active {
-      background-position: 0px -46px;
-    }
-    
-    #entry_0 {
-      border: none;
-      background: transparent;
-      color: #4D4D4D;
-      font-family: "Droid Serif", serif;
-      width: 268px;
-      height: 26px;
-      padding: 10px 16px;
-      font-size: 13px;
-      outline: none;
-    }
-    
-    #submit {
-      background: url('img/btn.png') top left no-repeat;
-      width: 66px;
-      height: 46px;
-      border: none;
-      float: left;
-      margin: 0 0 0 4px;
-    }
-    
-    #submit.active {
-      background-position: 0px -46px;
-    }
-    
-    #submit.active.pressed {
-      background-position: 0px -92px;
-    }
-    
-    #thanks {
-      display: block;
-      float: left;
-      margin: 144px 0 0 46px;
-      font-family: "Droid Serif", serif;
-      display: none;
-    }
-    
-    </style>
-    
-    <script type="text/javascript">
-
-    $(document).ready(function() { 
- 
-      $('#entry_0').keyup(function() {  
-        var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-
-        if(!emailReg.test($('#entry_0').val()) || $('#entry_0').val().length == 0) {
-          $("#submit").attr("disabled", "disabled");
-          $("#submit").removeClass("active");
-          return false; 
-        }        
-        $("#submit").removeAttr("disabled");
-        $("#submit").addClass("active"); 
-      });
-        
-      $('#entry_0').focus(function() {
-        $('#entry_0_wrapper').addClass('active');
-      });
-      
-      $('#entry_0').blur(function() {
-        $('#entry_0_wrapper').removeClass('active');
-      });
-      
-      $("#submit").mousedown(function() {
-        $("#submit").addClass('pressed')
-      });
-      
-      $("#submit").mouseup(function() {
-        $("#submit").removeClass('pressed')
-      });
-      
-      $("#submit").mouseleave(function() {
-        $("#submit").removeClass('pressed')
-      });
-      
-      $("#submit").attr("disabled", "disabled");
-      
-      $('#submit').click(function() {
-        var data = "entry.0.single=" + encodeURIComponent($("#entry_0").val());
-        $("#main-container").append("<div id=\"thanks\">Your email has been saved.</div>");
-        $("#form").fadeOut(200, function() {
-          $("#thanks").fadeIn(200);
-          $.ajax({
-            url: "https://spreadsheets.google.com/a/stamped.com/spreadsheet/formResponse?formkey=dGFzSUpKR3l3NEJMVmM2QlVYbS1UbGc6MQ&amp;ifq",
-            type: "POST",
-            data: data
-          });
-        });
-        return false;
-      });
-      
-    });
-    </script>
+    <script src="script.js"></script>
     
   </head>
   <body>
@@ -161,18 +27,6 @@
     </div>
 </body>
 
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-24470954-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
+<script type="text/javascript">var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-24470954-1']);_gaq.push(['_trackPageview']);(function() {var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);})();</script>
 
 </html>
