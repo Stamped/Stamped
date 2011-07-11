@@ -38,7 +38,7 @@ $(document).ready(function() {
   
   $('#submit').click(function() {
     var data = "entry.0.single=" + encodeURIComponent($("#entry_0").val());
-    $("#main-container").append("<div id=\"thanks\">Your email has been saved.</div>");
+    $("#main-container").append("<div id=\"thanks\">Whoa. Thanks!</div>");
     $("#form").fadeOut(250, function() {
       $("#thanks").fadeIn(250);
       $.ajax({
