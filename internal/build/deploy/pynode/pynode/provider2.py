@@ -5,7 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Utils
+import pynode.Utils
+from pynode.Utils import lazyProperty
 from abc import abstractmethod
 
 class Provider(object):
@@ -15,7 +16,7 @@ class Provider(object):
     def _installProvider(self):
         return True
     
-    @Utils.lazy_property
+    @lazyProperty
     def installed(self):
         return self._installProvider()
     

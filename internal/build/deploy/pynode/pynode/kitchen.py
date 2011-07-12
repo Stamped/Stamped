@@ -5,5 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from pynode.providers.package import *
+import pynode.Utils
+from pynode.Environment import Environment
+
+class Kitchen(Environment):
+    
 

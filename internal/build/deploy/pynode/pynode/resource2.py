@@ -8,7 +8,8 @@ __license__ = "TODO"
 __all__ = [ "ResourceArgument", "ResourceArgumentList", "ResourceArgumentBoolean", 
             "Resource" ]
 
-import Utils
+import pynode.Utils
+from pynode.Utils import AttributeDictionary
 
 class ResourceArgument(object):
     def __init__(self, default=None, required=False, expectedType=None):
@@ -68,7 +69,7 @@ class ResourceArgumentBoolean(ResourceArgument):
         
         return value
 
-class Resource(Utils.AttributeDictionary):
+class Resource(AttributeDictionary):
     def __init__(self, schema, *args, **kwargs):
         seen = set()
         

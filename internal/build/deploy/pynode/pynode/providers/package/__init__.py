@@ -5,10 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Utils
+import pynode.Utils
+from pynode.exceptions import Fail
+from pynode.Provider import Provider
 from abc import abstractmethod
-from exceptions import Fail
-from Provider import Provider
 
 class PackageProvider(Provider):
     def __init__(self, *args, **kwargs):

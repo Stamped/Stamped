@@ -6,8 +6,8 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 __all__     = [ "Package" ]
 
-import Utils
-from Resource import *
+import pynode.Utils
+from pynode.Resource import *
 
 
 

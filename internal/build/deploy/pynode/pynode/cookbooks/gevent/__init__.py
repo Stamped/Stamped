@@ -5,8 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from resources import PythonPackage
+from pynode import PythonPackage
 
-env.include("libevent")
+env.includeRecipe("libevent")
+
 PythonPackage("gevent")
 

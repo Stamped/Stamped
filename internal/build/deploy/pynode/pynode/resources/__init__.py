@@ -5,8 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from Accounts import *
-from Package import *
-from Service import *
-from System import *
+from pynode.resources.Accounts import *
+from pynode.resources.Package import *
+from pynode.resources.Service import *
+from pynode.resources.System import *
 

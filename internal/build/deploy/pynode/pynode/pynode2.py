@@ -5,9 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import os, sys, virtualenv, Utils
-import pip.commands.install
+import os, sys, virtualenv
 from optparse import OptionParser
+
+import pynode.Utils
 
 class PyNode(object):
     def __init__(self, configFile):
@@ -58,9 +59,6 @@ class PyNode(object):
         logArgs = (len(packages), self._getPackageStr(len(packages)))
         Utils.log("Installing %d python %s..." % logArgs)
         
-        #command = pip.commands.install.InstallCommand()
-        #opts, args = command.parser.parse_args()
-        
         for package in packages:
             distros = [ package ]
             
@@ -69,9 +67,6 @@ class PyNode(object):
             try:
                 # TBD, why do we have to run the next part here twice before actual install
                 (output, status) = Utils.shell('source %s/bin/activate && pip install %s' % (activate, package))
-                #requirement_set = command.run(opts, distros)
-                #requirement_set = command.run(opts, distros)
-                #requirement_set.install(opts)
                 
                 if status != 0:
                     import time

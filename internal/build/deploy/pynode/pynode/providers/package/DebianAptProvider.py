@@ -5,10 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Utils
+import pynode.Utils
+from pynode.exceptions import Fail
+from pynode.providers.package import PackageProvider
 from subprocess import Popen, STDOUT, PIPE, check_call
-from exceptions import Fail
-from providers.package import PackageProvider
 
 class DebianAptProvider(PackageProvider):
     def _updateCurrentStatus(self):
