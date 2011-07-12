@@ -8,31 +8,9 @@ __license__ = "TODO"
 from AObject import AObject
 
 class User(AObject):
-    
-#     def __init__(self, data=None):
-#         self._data = data or { }
-#         
-#         self.id = None
-#         self.email = None
-#         self.username = None
-#         self.name = None
-#         self.password = None
-#         self.bio = None
-#         self.website = None
-#         self.image = None
-#         self.privacy = None
-#         self.account = None
-#         self.flagged = None
-#         self.locale = None
-#         self.timezone = None
-#         self.other = {}
-#         
-#         
-#         
-
 
     _schema = {
-        '_id': object,
+        'id': basestring,
         'first_name': basestring,
         'last_name': basestring,
         'username': basestring,
@@ -72,8 +50,8 @@ class User(AObject):
     def isValid(self):
         valid = True
         
-        if '_id' in self:
-            valid &= isinstance(self._id, object) 
+        if 'id' in self:
+            valid &= isinstance(self.id, basestring) 
         
         valid &= 'first_name' in self and isinstance(self.first_name, basestring)
         valid &= 'last_name' in self and isinstance(self.last_name, basestring)

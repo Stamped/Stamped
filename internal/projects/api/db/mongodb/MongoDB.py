@@ -7,6 +7,7 @@ __license__ = "TODO"
 
 import pymongo
 import bson
+import copy
 
 from AEntityDB import AEntityDB
 from threading import Lock
@@ -50,9 +51,34 @@ class Mongo():
     def _encodeBSON(self, obj):
         return bson.BSON.encode(obj)
         
-    def _getObjectIdAsString(self, objId):
-        return pymongo.objectid.ObjectId(objId)
-
+    def _getStringFromObjectId(self, objId):
+        return str(bson.objectid.ObjectId(objId))
+        
+    def _getObjectIdFromString(self, string):
+        return bson.objectid.ObjectId(string)
+        
+        
+    def _mongoToObj(self, data):
+        data['id'] = self._getStringFromObjectId(data['_id'])
+        del(data['_id'])
+        return data
+    
+    def _objToMongo(self, obj):
+        if obj.isValid == False:
+            # print obj
+            raise KeyError("Object not valid")
+        data = copy.copy(obj.getDataAsDict())
+        if '_id' in data:
+            if isinstance(data['_id'], basestring):
+                data['_id'] = self._getObjectIdFromString(data['_id'])
+        if 'id' in data:
+            data['_id'] = self._getObjectIdFromString(data['id'])
+            del(data['id'])
+        return self._mapDataToSchema(data, self.SCHEMA)
+        
+    def _objsToMongo(self, objs):
+        return map(self._objToMongo, objs)
+        
         
     def _mapDataToSchema(self, data, schema):
         
@@ -120,7 +146,27 @@ class Mongo():
         
         result = {}
         if not _unionDict(data, schema, result):
-            raise KeyError("Error %s" % str(data))
+            raise KeyError("Error: %s" % str(data))
 
         return result
         
+    ### GENERIC CRUD FUNCTIONS
+    
+    def _addDocument(self, document):
+        return self._getStringFromObjectId(self._collection.insert(self._objToMongo(document)))
+    
+    def _addDocuments(self, documents):
+        return self._collection.insert(self._objsToMongo(documents))
+        
+    def _getDocumentFromId(self, documentId):
+        document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)))
+        return document
+        
+    def _updateDocument(self, document):
+        return self._collection.save(self._objToMongo(document))
+#         print '_updateDocument', self._objToMongo(document)
+        
+    def _removeDocument(self, document):
+        return self._collection.remove(self._objToMongo(document))
+        
+    

@@ -5,12 +5,19 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from AObject import AObject
+from threading import Lock
+from datetime import datetime
 
-class Entity(AObject):
+from MongoDB import Mongo
+from AEntityDB import AEntityDB
+from Entity import Entity
 
-    _schema = {
-        'id': basestring, 
+class MongoEntity(AEntityDB, Mongo):
+        
+    COLLECTION = 'entities'
+        
+    SCHEMA = {
+        '_id': object, 
         'title': basestring, 
         'desc': basestring, 
         'locale': basestring, 
@@ -115,57 +122,43 @@ class Entity(AObject):
         }
     }
     
-    def __init__(self, data=None):
-        self._data = data or { }
+    def __init__(self, setup=False):
+        AEntityDB.__init__(self, self.DESC)
+        Mongo.__init__(self, collection=self.COLLECTION)
         
-    @property
-    def isValid(self):
-        valid = True
+        self.db = self._getDatabase()
+        self._lock = Lock()
         
-        if 'id' in self:
-            valid &= isinstance(self.id, basestring) 
         
-        valid &= 'title' in self and isinstance(self.title, basestring)
-        valid &= 'desc' in self and isinstance(self.desc, basestring)
-        valid &= 'category' in self and isinstance(self.category, basestring)
+    ### PUBLIC
+    
+    def addEntity(self, entity):
+        return self._addDocument(entity)
+    
+    def getEntity(self, entityID):
+        entity = Entity(self._getDocumentFromId(entityID))
+        if entity.isValid == False:
+            raise KeyError("Entity not valid")
+        return entity
         
-                
-#         if 'website' in self:
-#             valid &= isinstance(self.website, basestring)
-#         if 'bio' in self:
-#             valid &= isinstance(self.bio, basestring)
-#             
-#         valid &= 'colors' in self and isinstance(self.colors, dict)
-#         valid &= 'primary_color' in self.colors and isinstance(self.colors['primary_color'], basestring)
-#         if 'secondary_color' in self.colors:
-#             valid &= isinstance(self.colors['secondary_color'], basestring)
-#             
-#         if 'linked_accounts' in self:
-#             valid &= isinstance(self.linked_accounts, dict) 
-#             if 'itunes' in self.linked_accounts:
-#                 valid &= isinstance(self.linked_accounts['itunes'], float)
-#         
-#         valid &= 'flags' in self and isinstance(self.flags, dict)
-#         valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
-#         if 'flagged' in self.flags:
-#             valid &= isinstance(self.flags['flagged'], bool)
-#         if 'locked' in self.flags:
-#             valid &= isinstance(self.flags['locked'], bool)
-#             
-#         if 'stats' in self:
-#             valid &= isinstance(self.stats, dict) 
-#             if 'total_stamps' in self.stats:
-#                 valid &= isinstance(self.stats['total_stamps'], int)
-#             if 'total_following' in self.stats:
-#                 valid &= isinstance(self.stats['total_following'], int)
-#             if 'total_followers' in self.stats:
-#                 valid &= isinstance(self.stats['total_followers'], int)
-#             if 'total_todos' in self.stats:
-#                 valid &= isinstance(self.stats['total_todos'], int)
-#             if 'total_credit_received' in self.stats:
-#                 valid &= isinstance(self.stats['total_credit_received'], int)
-#             if 'total_credit_given' in self.stats:
-#                 valid &= isinstance(self.stats['total_credit_given'], int)
+    def updateEntity(self, entity):
+#         return self.getEntity(self._updateDocument(entity))
+        self._updateDocument(entity)
         
-        return valid
-
+    def removeEntity(self, entity):
+        return self._removeDocument(entity)
+    
+    def addEntities(self, entities):
+        return self._addDocuments(entities)
+        
+    def matchEntities(self, searchQuery, searchLimit=20):
+        # Using a simple regex here. Need to rank results at some point...
+        searchQuery = '^%s' % searchQuery
+        result = []
+        for entity in self._collection.find({"title": {"$regex": searchQuery, "$options": "i"}}).limit(searchLimit):
+            result.append(Entity(self._mongoToObj(entity)))
+        return result
+            
+    
+    ### PRIVATE
+        

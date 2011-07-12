@@ -34,8 +34,9 @@ from Block import Block
 # from db.mysql.MySQLFriendsDB import MySQLFriendsDB
 # from db.mysql.MySQLFollowersDB import MySQLFollowersDB
 # from db.mysql.MySQLBlockDB import MySQLBlockDB
-from db.mongodb.MongoStamp import MongoStamp
+from db.mongodb.MongoEntity import MongoEntity
 from db.mongodb.MongoUser import MongoUser
+from db.mongodb.MongoStamp import MongoStamp
 
 
 def _setup():
@@ -69,73 +70,41 @@ def main():
 #     friendsDB = MySQLFriendsDB()
 #     followersDB = MySQLFollowersDB()
 #     blockDB = MySQLBlockDB()
-    stampDB = MongoStamp()
+    entityDB = MongoEntity()
     userDB = MongoUser()
+    stampDB = MongoStamp()
 
     print
 
-#     # ENTITIES
-#     entity = Entity({
-#         'title' : 'Little Owl',
-#         'category' : 'Restaurant'
-#         })
-# 
-#     entityID = entityDB.addEntity(entity)
-#     print 'entityID:       ', entityID
-#     
-#     entityCopy = entityDB.getEntity(entityID)
-#     print 'entityCopy:     ', entityCopy
-#     
-#     entityCopy['title'] = 'Recette'
-#     entityCopy['description'] = 'Great Food'
-#     entityDB.updateEntity(entityCopy)
-#     
-#     print 'updated entity: ', entityDB.getEntity(entityID)
-#     
-#     #entityDB.removeEntity(entityID)
-#     
-#     entityDB.addEntities([entity, entityCopy])
-#     
-#     print '"lit" entities: ', entityDB.matchEntities('lit')
-#     
-#     print
-#     
+    # ENTITIES
+    entity = Entity({
+        'title': 'Little Owl',
+        'category': 'Restaurant',
+        'desc': 'Restaurant on Grove St.'
+        })
 
-
-
-    _schema = {
-        '_id': object,
-        'first_name': basestring,
-        'last_name': basestring,
-        'username': basestring,
-        'email': basestring,
-        'password': basestring,
-        'img': basestring,
-        'locale': basestring,
-        'timestamp': basestring,
-        'website': basestring,
-        'bio': basestring,
-        'colors': {
-            'primary_color': basestring,
-            'secondary_color': basestring
-        },
-        'linked_accounts': {
-            'itunes': basestring
-        },
-        'flags': {
-            'privacy': bool,
-            'flagged': bool,
-            'locked': bool
-        },
-        'stats': {
-            'total_stamps': int,
-            'total_following': int,
-            'total_followers': int,
-            'total_todos': int,
-            'total_credit_received': int,
-            'total_credit_given': int
-        }
-    }
+    entityID = entityDB.addEntity(entity)
+    print 'entityID:       ', entityID
+    
+    entityCopy = entityDB.getEntity(entityID)
+    print 'entityCopy:     ', entityCopy.id
+    
+    entityCopy.title = 'Recette'
+    entityCopy.desc = 'Great Food'
+    
+    entityDB.updateEntity(entityCopy)
+    
+    print 'updated entity: ', entityDB.getEntity(entityID).title
+    
+    entityDB.removeEntity(entity)
+    
+    entityDB.addEntities([entity, entityCopy])
+    
+    print '"little" entities: '
+    for entity in entityDB.matchEntities('little'):
+        print '                ', entity
+    
+    print
 
 
     # USERS
@@ -156,47 +125,45 @@ def main():
     
     userID = userDB.addUser(user)
     print 'userID:         ', userID
-#     
-#     userCopy = userDB.getUser(userID)
-#     print 'userCopy:       ', userCopy
-#     
-#     userCopy['username'] = 'kpalms'
-#     userCopy['privacy'] = 1
-#     userDB.updateUser(userCopy)
-#     
-#     print 'updated user:   ', userDB.getUser(userID)
-#     
-#     #userDB.removeUser(userID)
-#     
-#     userDB.addUsers([user, userCopy])
-#     
-#     print userDB.lookupUsers(userIDs=None, usernames=['kevin','kpalms'])
-#     print userDB.lookupUsers(userIDs=[1,2,3,4,5], usernames=None)
-#     
-#     print userDB.searchUsers('kpalms')
-#     
-#     print
+    
+    userCopy = userDB.getUser(userID)
+    print 'userCopy:       ', userCopy.id
+    
+    userCopy['username'] = 'kpalms'
+    userCopy['privacy'] = False
+    userDB.updateUser(userCopy)
+    
+    print 'updated user:   ', userDB.getUser(userID).username
+    
+    userDB.removeUser(user)
+    
+    userDB.addUsers([user, userCopy])
+    
+    print 'find by name:   ', len(userDB.lookupUsers(userIDs=None, usernames=['kevin','kpalms']))
+    print 'find by id:     ', len(userDB.lookupUsers(userIDs=[userID, '4e1ca9bd32a7ba15ab000002'], usernames=None))
+    
+    print 'search string:  ', len(userDB.searchUsers('kpalms')) # Limited to 20 by default
+    
+    print
+    
     
     # STAMPS
-#     stamp = Stamp({
-#         'userID' : userID,
-#         'entityID' : entityID,
-#         'comment' : 'Great entity!'})
-        
     stamp = Stamp({
         'entity': {
-            'title': 'Ramen Takumi',
+            'entity_id': entityCopy.id,
+            'title': entityCopy.title,
             'subtitle': 'New York, NY',
-            'category': 'Restaurant'
+            'category': entityCopy.category
         },
         'user': {
-            'user_name': 'Kevin Palms',
-            'user_img': 'kevin.png'
+            'user_id': userCopy.id,
+            'user_name': userCopy.first_name,
+            'user_img': userCopy.img
         },
         'blurb': 'Best place.. ever?!?',
         'timestamp': 'Now',
-        'flags': { 'privacy': False },
-        'credit': [1, 2, 3]
+        'flags': { 'privacy': user.flags['privacy'] },
+        'credit': ['4e1c6a2532a7ba05ef000000']
     })
     
     stampID = stampDB.addStamp(stamp)
@@ -204,21 +171,18 @@ def main():
     print 'stampID:        ', stampID
     
     stampCopy = stampDB.getStamp(stampID)
-    print 'stampCopy:      ', stampCopy
-    print 'user name:      ', stampCopy['user']['user_name']
-    print 'entity title:   ', stampCopy['entity']['title']
+    print 'stampCopy:      ', stampCopy.blurb
+    print 'user id:        ', stampCopy.user['user_id']
+    print 'entity id:      ', stampCopy.entity['entity_id']
     
     stampCopy['blurb'] = 'Really great entity...!'
     stampDB.updateStamp(stampCopy)
     
-    print 'updated stamp:  ', stampDB.getStamp(stampID)
+    print 'updated stamp:  ', stampDB.getStamp(stampID).blurb
     
     stampDB.removeStamp(stamp)
-#     stampDB.removeStamp(stampCopy)
     
     stampDB.addStamps([stamp, stampCopy])
-    
-#     stampDB.addStamps([stamp, stampCopy])
     
     print
 #     

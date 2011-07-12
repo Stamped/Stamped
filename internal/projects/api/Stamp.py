@@ -10,7 +10,7 @@ from AObject import AObject
 class Stamp(AObject):
 
     _schema = {
-        '_id': object,
+        'id': basestring,
         'entity': {
             'entity_id': object,
             'title': basestring,
@@ -50,11 +50,11 @@ class Stamp(AObject):
     def isValid(self):
         valid = True
         
-        if '_id' in self:
-            valid &= isinstance(self._id, object) 
+        if 'id' in self:
+            valid &= isinstance(self.id, basestring) 
         
         valid &= 'entity' in self and isinstance(self.entity, dict)
-#         valid &= 'entity_id' in self and isinstance(self.entity_id, object)
+        valid &= 'entity_id' in self.entity and isinstance(self.entity['entity_id'], basestring)
         valid &= 'title' in self.entity and isinstance(self.entity['title'], basestring)
         valid &= 'category' in self.entity and isinstance(self.entity['category'], basestring)
         valid &= 'subtitle' in self.entity and isinstance(self.entity['subtitle'], basestring)
@@ -66,7 +66,7 @@ class Stamp(AObject):
                 valid &= isinstance(self.entity['coordinates']['lng'], float)
         
         valid &= 'user' in self and isinstance(self.user, dict)
-#         valid &= 'user_id' in self and isinstance(self.user_id, object)
+        valid &= 'user_id' in self.user and isinstance(self.user['user_id'], basestring)
         valid &= 'user_name' in self.user and isinstance(self.user['user_name'], basestring)
         valid &= 'user_img' in self.user and isinstance(self.user['user_img'], basestring)
         

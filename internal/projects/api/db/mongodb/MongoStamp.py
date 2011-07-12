@@ -61,53 +61,23 @@ class MongoStamp(AStampDB, Mongo):
     ### PUBLIC
     
     def addStamp(self, stamp):
-#         self.addStamps([stamp])
-        return self._collection.insert(self._stampToBSON(stamp))
+        return self._addDocument(stamp)
     
     def getStamp(self, stampID):
-        stamp = Stamp(self._collection.find_one(stampID))
+        stamp = Stamp(self._getDocumentFromId(stampID))
         if stamp.isValid == False:
             raise KeyError("Stamp not valid")
         return stamp
         
     def updateStamp(self, stamp):
-        return self._collection.save(self._stampToBSON(stamp))
+        return self._updateDocument(stamp)
         
     def removeStamp(self, stamp):
-        return self._collection.remove(self._stampToBSON(stamp))
+        return self._removeDocument(stamp)
     
     def addStamps(self, stamps):
-        stampData = []
-        for stamp in stamps:
-            stampData.append(self._stampToBSON(stamp))
-        return self._collection.insert(stampData)
+        return self._addDocuments(stamps)
 
     
     ### PRIVATE
-    
-    def _stampToBSON(self, stamp):
-        if stamp.isValid == False:
-            raise KeyError("Stamp not valid")
-        data = stamp.getDataAsDict()
-        return self._mapDataToSchema(data, self.SCHEMA)
-        
-    
-#     def _createStampTable(self):
-#         def _createTable(cursor):
-#             query = """CREATE TABLE stamps (
-#                     stamp_id INT NOT NULL AUTO_INCREMENT, 
-#                     entity_id INT, 
-#                     user_id INT, 
-#                     comment VARCHAR(250), 
-#                     image VARCHAR(100), 
-#                     flagged INT,
-#                     date_created DATETIME, 
-#                     date_updated DATETIME, 
-#                     PRIMARY KEY(stamp_id))"""
-#             cursor.execute(query)
-#             cursor.execute("CREATE INDEX ix_user ON stamps (user_id, entity_id, date_created)")
-#             
-#             return True
-#             
-#         return self._transact(_createTable)
         
