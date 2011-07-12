@@ -77,11 +77,12 @@ def createAndConnect(name):
             import time
             time.sleep(10)
     
+    print "Default instance in stack %s has been initialized! Attempting to connect via ssh..." % (name, )
     os.system('connect.sh %s' % (name, ))
     return 0
 
 def main():
-    createStack('StampedStagingStack0')
+    createAndConnect('StampedStagingStack0')
     listStacks()
 
 # where all the magic starts

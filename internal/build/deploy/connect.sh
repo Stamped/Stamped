@@ -24,5 +24,5 @@ echo "stack: $stack"
 dns=`./get_dns_by_stack_name.py $stack`
 echo "dns:   $dns"
 
-ssh -i 'keys/test-keypair' "$user@$dns"
+ssh -o StrictHostKeyChecking=no -i 'keys/test-keypair' "$user@$dns"
 
