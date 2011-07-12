@@ -89,6 +89,6 @@ class Resource(Utils.AttributeDictionary):
                     Utils.printException()
                     raise
     
-    def updated():
+    def updated(self):
         pass
 

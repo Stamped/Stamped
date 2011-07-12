@@ -31,7 +31,8 @@ class PyNode(object):
             return False
         
         if 'python' in self.config and 'requirements' in self.config['python']:
-            if not self._installPackages(self.config['python']['requirements']):
+            if not self._installPackages(self.config['python']['requirements'], 
+                                         self.config['path']):
                 return False
         
         if 'cookbooks' in self.config and not self._importCookbooks(self.config['cookbook_path'], self.config['cookbooks']):
@@ -48,37 +49,46 @@ class PyNode(object):
         
         return True
     
-    def _installPackages(self, packages):
-        if len(packages) <= 0:
-            return
-        
-        Utils.logRaw("Installing %d python packages..." % len(packages), True)
-        
-        try:
-            command = pip.commands.install.InstallCommand()
-            opts, args = command.parser.parse_args()
-            
-            # TBD, why do we have to run the next part here twice before actual install
-            requirement_set = command.run(opts, packages)
-            requirement_set = command.run(opts, packages)
-            requirement_set.install(opts)
-        except Exception as e:
-            Utils.log("Error installing python packages with pip")
-            Utils.printException()
-            return False
-        
-        Utils.logRaw("done!\n")
-        
-        # ensure packages installed successfully by importing them one at a time
+    def _installPackages(self, packages, activate):
         success = True
+        
+        if len(packages) <= 0:
+            return success
+        
+        logArgs = (len(packages), self._getPackageStr(len(packages)))
+        Utils.log("Installing %d python %s..." % logArgs)
+        
+        #command = pip.commands.install.InstallCommand()
+        #opts, args = command.parser.parse_args()
+        
         for package in packages:
+            distros = [ package ]
+            
+            Utils.logRaw("Installing python package %s... " % package, True)
+            
             try:
-                importExec = "import %s" % package
-                exec importExec in { }
-                Utils.log("Installed python package '%s'" % package)
-            except ImportError as e:
+                # TBD, why do we have to run the next part here twice before actual install
+                (output, status) = Utils.shell('source %s/bin/activate && pip install %s' % (activate, package))
+                #requirement_set = command.run(opts, distros)
+                #requirement_set = command.run(opts, distros)
+                #requirement_set.install(opts)
+                
+                if status != 0:
+                    import time
+                    time.sleep(1)
+                    # ensure packages installed successfully by importing them one at a time
+                    importExec = "import %s" % package
+                    exec importExec in { }
+                
+                Utils.logRaw("done!\n")
+            except Exception as e:
+                Utils.logRaw("\n")
+                Utils.log("Error installing python package '%s'" % package)
+                Utils.printException()
                 success = False
-                Utils.log("Error installing package '%s'" % package)
+        
+        if success:
+            Utils.log("Installed %d python %s successfully!" % logArgs)
         
         return success
     
@@ -127,11 +137,11 @@ class PyNode(object):
         
         return os.path.abspath(path)
     
+    def _getPackageStr(self, count):
+        return "package" if count == 1 else "packages"
+    
     def _getCookbookStr(self, count):
-        if count == 1:
-            return "cookbook"
-        else:
-            return "cookbooks"
+        return "cookbook" if count == 1 else "cookbooks"
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] configfile"

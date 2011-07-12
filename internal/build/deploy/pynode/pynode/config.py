@@ -9,11 +9,11 @@
             "fabric", 
             "BeautifulSoup", 
             "boto", 
-            "gevent", 
             "xlrd", 
             "pymongo", 
             "flask", 
             "gunicorn", 
+            "gevent", 
         ], 
     }, 
     
