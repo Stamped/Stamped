@@ -50,78 +50,77 @@ class Mongo():
     def _encodeBSON(self, obj):
         return bson.BSON.encode(obj)
         
+    def _getObjectIdAsString(self, objId):
+        return pymongo.objectid.ObjectId(objId)
+
         
+    def _mapDataToSchema(self, data, schema):
         
+        def _unionDict(source, schema, dest):
+            for k, v in source.iteritems():
+                _unionItem(k, v, schema, dest)
+            return dest
         
-           
-    
-#     def _commit(self):
-#         if self.db:
-#             self.db.commit()
-#             self.db.close()
-#             self.db = None
-#     
-#     def _setup(self):
-#         def _createDB(cursor):
-#             cursor.execute('DROP DATABASE IF EXISTS %s' % self.DB)
-#             cursor.execute('CREATE DATABASE %s' % self.DB)
-#             return True
-#         
-#         self.db = mysqldb.connect(user=self.USER)
-#         self._transact(_createDB)
-#         
-#         self.db = self._getConnection()
-#     
-#     """ Requires mapping of object attributes to SQL column names """
-# 
-#     def _mapObjToSQL(self, obj):
-#         result = {}
-#         for mapping in self._mapping:
-#             if mapping[0] in obj:
-#                 result[mapping[1]] = self._encode(obj[mapping[0]])
-#             else:
-#                 result[mapping[1]] = None
-#         return result
-#     
-#     def _mapSQLToObj(self, data, obj):
-#         for mapping in self._mapping:
-#             if mapping[1] in data:
-#                 obj[mapping[0]] = self._decode(data[mapping[1]])
-#             else:
-#                 obj[mapping[0]] = None
-#         return obj
-#     
-#     def _encode(self, attr):
-#         return attr
-#     
-#     def _decode(self, attr):
-#         if type(attr) == str:
-#             return attr.replace("\\n", "\n").replace("\\", "")
-#         else:
-#             return attr
-#             
-#     def _transact(self, func, returnDict=False):
-#         retVal = None
-#         
-#         self._lock.acquire()
-#         try:
-#             if self.db is None:
-#                 self.db = self._getConnection()
-#             
-#             if returnDict:
-#                 cursor = self.db.cursor(cursorclass=mysqldb.cursors.DictCursor)
-#             else:
-#                 cursor = self.db.cursor()
-#             
-#             retVal = func(cursor)
-#             if retVal is not None and (type(retVal) is not bool or retVal == True):
-#                 self._commit()
-#             else:
-#                 self.db.rollback()
-#             
-#             cursor.close()
-#         finally:
-#             self._lock.release()
-#         
-#         return retVal
+        def _unionItem(k, v, schema, dest):
+            if k in schema:
+                schemaVal = schema[k]
+                
+                if isinstance(schemaVal, type):
+                    schemaValType = schemaVal
+                else:
+                    schemaValType = type(schemaVal)
+                
+                # basic type checking
+                if not isinstance(v, schemaValType):
+                    isValid = True
+                    
+                    # basic implicit type conversion s.t. if you pass in, for example, 
+                    # "23.4" for longitude as a string, it'll automatically cast to 
+                    # the required float format.
+                    try:
+                        if schemaValType == basestring:
+                            v = str(v)
+                        elif schemaValType == float:
+                            v = float(v)
+                        elif schemaValType == int:
+                            v = int(v)
+                        else:
+                            isValid = False
+                    except ValueError:
+                        isValid = False
+                    
+                    if not isValid:
+                        raise KeyError("Entity error; key '%s' found '%s', expected '%s'" % \
+                            (k, str(type(v)), str(schemaVal)))
+                
+                if isinstance(v, dict):
+                    if k not in dest:
+                        dest[k] = { }
+                    
+                    return _unionDict(v, schemaVal, dest[k])
+                else:
+                    dest[k] = v
+                    return dest
+            else:
+                for k2, v2 in schema.iteritems():
+                    if isinstance(v2, dict):
+                        if k2 in dest:
+                            if not isinstance(dest[k2], dict):
+                                raise KeyError(k2)
+                            
+                            if _unionItem(k, v, v2, dest[k2]):
+                                return dest
+                        else:
+                            temp = { }
+                            
+                            if _unionItem(k, v, v2, temp):
+                                dest[k2] = temp
+                                return dest
+            return dest
+        
+        result = {}
+        if not _unionDict(data, schema, result):
+            raise KeyError("Error %s" % str(data))
+
+        return result
         

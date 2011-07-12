@@ -11,54 +11,42 @@ from datetime import datetime
 from MongoDB import Mongo
 from AStampDB import AStampDB
 from Stamp import Stamp
-# from MySQLUserDB import MySQLUserDB
-# from MySQLEntityDB import MySQLEntityDB
 
 class MongoStamp(AStampDB, Mongo):
-
-    # Denotes relationship between object and SQL table structure -- primary
-    # use is to map fields between both structures.
-    # First item in tuple is OBJECT ATTRIBUTE, second is COLUMN NAME.
-    MAPPING = [
-            ('id', 'stamp_id'),
-            ('entityID', 'entity_id'),
-            ('userID', 'user_id'),
-            ('comment', 'comment'),
-            ('image', 'image'),
-            ('flagged', 'flagged'),
-            ('date_created', 'date_created'),
-            ('date_updated', 'date_updated')
-        ]
         
     COLLECTION = 'stamps'
         
-    STRUCT = {
-        "entity": {
-            "id": None,
-            "title": None,
-            "latlong": None,
-            "category": None,
-            "subtitle": None
+    SCHEMA = {
+        '_id': object,
+        'entity': {
+            'entity_id': basestring,
+            'title': basestring,
+            'coordinates': {
+                'lat': float, 
+                'lng': float
+            },
+            'category': basestring,
+            'subtitle': basestring
         },
-        "user": {
-            "id": None,
-            "name": None,
-            "img": None,
+        'user': {
+            'user_id': basestring,
+            'user_name': basestring,
+            'user_img': basestring,
         },
-        "blurb": None,
-        "img": None,
-        "mentions": [],
-        "credit": [],
-        "timestamp": None,
-        "flags": {
-            "privacy": None,
-            "flagged": None,
-            "locked": None
+        'blurb': basestring,
+        'img': basestring,
+        'mentions': list,
+        'credit': list,
+        'timestamp': basestring,
+        'flags': {
+            'privacy': bool,
+            'flagged': bool,
+            'locked': bool
         },
-        "stats": {
-            "comments": None,
-            "todos": None,
-            "credit": None
+        'stats': {
+            'total_comments': int,
+            'total_todos': int,
+            'total_credit': int
         }
     }
     
@@ -69,107 +57,40 @@ class MongoStamp(AStampDB, Mongo):
         self.db = self._getDatabase()
         self._lock = Lock()
         
-#         if setup:
-#             self._createStampTable()
-
-
-    def _mapObjToBSON(self, obj):
-        stamp = self.STRUCT
-        stamp['entity']['title'] = obj['entity']['title']
-        stamp['entity']['subtitle'] = obj['entity']['subtitle']
-        print stamp
-        return self._encodeBSON(stamp)
-
         
     ### PUBLIC
     
     def addStamp(self, stamp):
-        stamp = self._mapObjToBSON(stamp)
-#         print stamp
-        self._collection.insert(stamp)
-
-#         stamp['date_created'] = datetime.now().isoformat()
-        
-#         def _addStamp(cursor):
-#             query = """INSERT INTO stamps 
-#                     (entity_id, user_id, comment, date_created) 
-#                     VALUES (%(entity_id)s, %(user_id)s, %(comment)s, %(date_created)s)"""
-#             cursor.execute(query, stamp)
-#             return cursor.lastrowid
-# 
-#         return self._transact(_addStamp)
+#         self.addStamps([stamp])
+        return self._collection.insert(self._stampToBSON(stamp))
     
-#     def getStamp(self, stampID):
-#         
-#         def _getStamp(cursor):
-#             query = "SELECT * FROM stamps WHERE stamp_id = %d" % (stampID)
-#             cursor.execute(query)
-#             
-#             if cursor.rowcount > 0:
-#                 data = cursor.fetchone()
-#                 stamp = Stamp()
-#                 return self._mapSQLToObj(data, stamp)
-#             else:
-#                 return None
-#         
-#         stamp = self._transact(_getStamp, returnDict=True)
-#         stamp['user'] = MySQLUserDB().getUser(stamp['userID'])
-#         stamp['entity'] = MySQLEntityDB().getEntity(stamp['entityID'])
-#         
-#         return stamp
-#     
-#     def getStamps(self, stampIDs):
-#         
-#         def _getStamps(cursor):
-#             
-#             format_strings = ','.join(['%s'] * len(stampIDs))
-#             cursor.execute("SELECT * FROM stamps WHERE stamp_id IN (%s)" % 
-#                 format_strings, tuple(stampIDs))
-#             stampsData = cursor.fetchall()
-#             
-#             stamps = []
-#             for stampData in stampsData:
-#                 stamp = Stamp()
-#                 stamp = self._mapSQLToObj(stampData, stamp)
-#                 # probably a more efficient way to do this (as opposed to iterating)
-#                 stamp['entity'] = MySQLEntityDB().getEntity(stamp['entityID'])
-#                 stamp['user'] = MySQLUserDB().getUser(stamp['userID'])
-#                 stamps.append(stamp)
-#                 
-#             return stamps
-#         
-#         stamps = self._transact(_getStamps, returnDict=True)
-#         
-#         return stamps
-#     
-#     def updateStamp(self, stamp):
-#         stamp = self._mapObjToSQL(stamp)
-#         stamp['date_updated'] = datetime.now().isoformat()
-#                 
-#         def _updateStamp(cursor):
-#             query = """UPDATE stamps SET 
-#                        entity_id = %(entity_id)s, 
-#                        user_id = %(user_id)s, 
-#                        comment = %(comment)s, 
-#                        date_updated = %(date_updated)s 
-#                        WHERE stamp_id = %(stamp_id)s"""
-#             cursor.execute(query, stamp)
-#             
-#             return (cursor.rowcount > 0)
-#         
-#         return self._transact(_updateStamp)
-#     
-#     def removeStamp(self, stampID):
-#         def _removeStamp(cursor):
-#             query = "DELETE FROM stamps WHERE stamp_id = %s" % \
-#                     (stampID)
-#             cursor.execute(query)
-#             
-#             return (cursor.rowcount > 0)
-#         
-#         return self._transact(_removeStamp)
+    def getStamp(self, stampID):
+        stamp = Stamp(self._collection.find_one(stampID))
+        if stamp.isValid == False:
+            raise KeyError("Stamp not valid")
+        return stamp
+        
+    def updateStamp(self, stamp):
+        return self._collection.save(self._stampToBSON(stamp))
+        
+    def removeStamp(self, stamp):
+        return self._collection.remove(self._stampToBSON(stamp))
+    
+    def addStamps(self, stamps):
+        stampData = []
+        for stamp in stamps:
+            stampData.append(self._stampToBSON(stamp))
+        return self._collection.insert(stampData)
+
     
     ### PRIVATE
+    
+    def _stampToBSON(self, stamp):
+        if stamp.isValid == False:
+            raise KeyError("Stamp not valid")
+        data = stamp.getDataAsDict()
+        return self._mapDataToSchema(data, self.SCHEMA)
+        
     
 #     def _createStampTable(self):
 #         def _createTable(cursor):

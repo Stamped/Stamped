@@ -35,6 +35,7 @@ from Block import Block
 # from db.mysql.MySQLFollowersDB import MySQLFollowersDB
 # from db.mysql.MySQLBlockDB import MySQLBlockDB
 from db.mongodb.MongoStamp import MongoStamp
+from db.mongodb.MongoUser import MongoUser
 
 
 def _setup():
@@ -69,6 +70,7 @@ def main():
 #     followersDB = MySQLFollowersDB()
 #     blockDB = MySQLBlockDB()
     stampDB = MongoStamp()
+    userDB = MongoUser()
 
     print
 
@@ -98,14 +100,62 @@ def main():
 #     
 #     print
 #     
-#     # USERS
-#     user = User({
-#         'name' : 'Kevin',
-#         'email' : 'kevin@stamped.com',
-#         'privacy' : 0})
-#     
-#     userID = userDB.addUser(user)
-#     print 'userID:         ', userID
+
+
+
+    _schema = {
+        '_id': object,
+        'first_name': basestring,
+        'last_name': basestring,
+        'username': basestring,
+        'email': basestring,
+        'password': basestring,
+        'img': basestring,
+        'locale': basestring,
+        'timestamp': basestring,
+        'website': basestring,
+        'bio': basestring,
+        'colors': {
+            'primary_color': basestring,
+            'secondary_color': basestring
+        },
+        'linked_accounts': {
+            'itunes': basestring
+        },
+        'flags': {
+            'privacy': bool,
+            'flagged': bool,
+            'locked': bool
+        },
+        'stats': {
+            'total_stamps': int,
+            'total_following': int,
+            'total_followers': int,
+            'total_todos': int,
+            'total_credit_received': int,
+            'total_credit_given': int
+        }
+    }
+
+
+    # USERS
+    user = User({
+        'first_name': 'Kevin',
+        'last_name': 'Palms',
+        'username': 'kevin',
+        'email': 'kevin@stamped.com',
+        'password': '12345',
+        'img': 'kevin.png',
+        'locale': 'EST',
+        'timestamp': 'now',
+        'colors': { 'primary_color': 'blue' },
+        'flags': {
+            'privacy' : True
+        }    
+    })
+    
+    userID = userDB.addUser(user)
+    print 'userID:         ', userID
 #     
 #     userCopy = userDB.getUser(userID)
 #     print 'userCopy:       ', userCopy
@@ -135,25 +185,38 @@ def main():
         
     stamp = Stamp({
         'entity': {
-            'title': 'Ramen Takui',
-            'subtitle': 'New York, NY'
-        }
+            'title': 'Ramen Takumi',
+            'subtitle': 'New York, NY',
+            'category': 'Restaurant'
+        },
+        'user': {
+            'user_name': 'Kevin Palms',
+            'user_img': 'kevin.png'
+        },
+        'blurb': 'Best place.. ever?!?',
+        'timestamp': 'Now',
+        'flags': { 'privacy': False },
+        'credit': [1, 2, 3]
     })
     
     stampID = stampDB.addStamp(stamp)
-#     print 'stampID:        ', stampID
     
-#     stampCopy = stampDB.getStamp(stampID)
-#     print 'stampCopy:      ', stampCopy
-#     print 'user email:     ', stampCopy['user']['email']
-#     print 'entity title:   ', stampCopy['entity']['title']
+    print 'stampID:        ', stampID
     
-#     stampCopy['comment'] = 'Really great entity...'
-#     stampDB.updateStamp(stampCopy)
+    stampCopy = stampDB.getStamp(stampID)
+    print 'stampCopy:      ', stampCopy
+    print 'user name:      ', stampCopy['user']['user_name']
+    print 'entity title:   ', stampCopy['entity']['title']
     
-#     print 'updated stamp:  ', stampDB.getStamp(stampID)
+    stampCopy['blurb'] = 'Really great entity...!'
+    stampDB.updateStamp(stampCopy)
     
-    #stampDB.removeStamp(stampID)
+    print 'updated stamp:  ', stampDB.getStamp(stampID)
+    
+    stampDB.removeStamp(stamp)
+#     stampDB.removeStamp(stampCopy)
+    
+    stampDB.addStamps([stamp, stampCopy])
     
 #     stampDB.addStamps([stamp, stampCopy])
     
