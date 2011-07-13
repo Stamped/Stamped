@@ -8,12 +8,25 @@ __license__ = "TODO"
 from AObject import AObject
 
 class Friendship(AObject):
+
+    _schema = {
+        'user_id': basestring,
+        'following_id': basestring,
+        'timestamp': basestring
+    }
     
     def __init__(self, data=None):
         self._data = data or { }
         
-        self.userID = None
-        self.followingID = None
-        self.timestamp = None
-        self.approved = None
+    @property
+    def isValid(self):
+        valid = True
+        
+        valid &= 'user_id' in self and isinstance(self.user_id, basestring)
+        valid &= 'following_id' in self and isinstance(self.following_id, basestring)
+        
+        if 'timestamp' in self:
+            valid &= isinstance(self.timestamp, basestring)
+        
+        return valid
         
