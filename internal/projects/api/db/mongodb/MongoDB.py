@@ -164,7 +164,6 @@ class Mongo():
         
     def _updateDocument(self, document):
         return self._collection.save(self._objToMongo(document))
-#         print '_updateDocument', self._objToMongo(document)
         
     def _removeDocument(self, document):
         return self._collection.remove(self._objToMongo(document))
