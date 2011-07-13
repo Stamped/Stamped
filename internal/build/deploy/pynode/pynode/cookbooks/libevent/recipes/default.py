@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from resources import File, Directory, Package
+from pynode.resources.package import Package
 
-Package("mongodb")
+Package("libevent")
 

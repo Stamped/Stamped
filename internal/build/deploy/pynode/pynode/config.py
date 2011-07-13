@@ -2,7 +2,7 @@
     "name" : "test0", 
     "port" : "22333", 
     "path" : "/pynode/test0", 
-    "cookbook_path" : "cookbooks", 
+    "cookbook_path" : [ "pynode.cookbooks", ], 
     
     "python" : {
         "requirements" : [
@@ -17,7 +17,7 @@
         ], 
     }, 
     
-    "cookbooks" : [
-        "mongodb", 
+    "recipes" : [
+        "pythonenv", 
     ], 
 }

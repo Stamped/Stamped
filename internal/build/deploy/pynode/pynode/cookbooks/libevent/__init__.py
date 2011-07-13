@@ -1,11 +1,5 @@
-#!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
-__copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__description__ = "Installs libevent package"
 
-from resources import Package
-
-Package("libevent")
+__config__ = { }
 

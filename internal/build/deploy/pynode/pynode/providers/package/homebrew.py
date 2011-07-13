@@ -5,46 +5,47 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import pynode.Utils
+from pynode.utils import shell
 from pynode.exceptions import Fail
 from pynode.providers.package import PackageProvider
 from subprocess import STDOUT, PIPE, check_call
 
-class MacOSHomebrewProvider(PackageProvider):
-    def _installProvider(self):
+class HomebrewProvider(PackageProvider):
+    def _install(self):
         # TODO: support installing ruby as a prerequisite to homebrew...
-        brewInstalled = (0 == Utils.shell('brew --help')[1])
+        brewInstalled = (0 == shell('brew --help')[1])
         
         if brewInstalled:
-            return True
+            return
         else:
             # attempt to install homebrew
             p = Popen('ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"', shell=TRUE)
             status = p.wait()
             
-            return 0 == status
+            if 0 != status:
+                raise Fail("error installing homebrew")
     
     def _updateCurrentStatus(self):
-        super(__class__, self)._updateCurrentStatus()
-        self.currentVersion = None
+        PackageProvider._updateCurrentStatus(self)
+        self.currentVersion   = None
         self.candidateVersion = None
         
-        (output, status) = Utils.shell("brew which %s" % self.resource.name)
+        (output, status) = shell("brew which %s" % self.resource.name)
         if output != "":
             output = output[len(self.resource.name):]
-            self.currentVersion = output
+            self.currentVersion   = output
             self.candidateVersion = output
         else:
             self.candidateVersion = "latest"
     
-    def _install(self, name, version):
+    def _install_package(self, name, version):
         return 0 == check_call("brew install %s" % (name, ), shell=True, 
                                stdout=PIPE, stderr=STDOUT)
     
-    def _remove(self, name):
+    def _remove_package(self, name):
         return 0 == check_call("brew uninstall --force %s" % name,
             shell=True, stdout=PIPE, stderr=STDOUT)
     
-    def _upgrade(self, name, version):
-        return self._install(name, version)
+    def _upgrade_package(self, name, version):
+        return self._install_package(name, version)
 

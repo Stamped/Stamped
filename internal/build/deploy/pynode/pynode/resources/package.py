@@ -1,43 +1,25 @@
 #!/usr/bin/env python
 
-__author__  = "Stamped (dev@stamped.com)"
+__author__ = "Stamped (dev@stamped.com)"
 __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
-__all__     = [ "Package" ]
 
-import pynode.Utils
-from pynode.Resource import *
+__all__ = [ "Package", "PythonPackage" ]
 
-
-
-
-# TODO: how to specify provider s.t. python packages may be listed 
-# before external dependencies such as libevent before gevent?
-
-
+from pynode.resource import *
 
 class Package(Resource):
-    _schema = {
-        "name"      : ResourceArgument(required=True, 
-                                       expectedType=basestring), 
-        "action"    : ResourceArgumentList(default="install", 
-                                           options=[ "install", "upgrade", "remove" ]), 
-        "version"   : ResourceArgument(expectedType=basestring), 
-    }
-    
-    def __init__(self, *args, **kwargs):
-        Resource.__init__(self, self._schema, *args, **kwargs)
+    _schema = ResourceArgumentSchema([
+        ("name",    ResourceArgument(required=True, expectedType=basestring)), 
+        ("action",  ResourceArgumentList(default="install", 
+                                         options=[ "install", "upgrade", "remove" ])), 
+        ("version", ResourceArgument(expectedType=basestring)), 
+    ])
 
-class PythonPackage(Resource):
-    _schema = {
-        "name"      : ResourceArgument(required=True, 
-                                       expectedType=basestring), 
-        "action"    : ResourceArgumentList(default="install", 
-                                           options=[ "install", "upgrade", "remove" ]), 
-        "version"   : ResourceArgument(expectedType=basestring), 
-    }
-    
-    def __init__(self, *args, **kwargs):
-        Resource.__init__(self, self._schema, *args, **kwargs)
+class PythonPackage(Package):
+    # the only difference between PythonPackage and Package by default is 
+    # that pynode uses a different provider for PythonPackages as opposed 
+    # to normal system packages. see Provider.getProvider for details.
+    pass
 

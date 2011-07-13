@@ -5,18 +5,17 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import os, sys, virtualenv
+import os, utils
+from kitchen import Kitchen
 from optparse import OptionParser
 
-import pynode.Utils
-
 class PyNode(object):
-    def __init__(self, configFile):
-        self.configFile = configFile
+    def __init__(self, options):
+        self.options = options
     
-    @Utils.lazyProperty
+    @utils.lazyProperty
     def config(self):
-        configFilePath = self._resolvePath(self.configFile)
+        configFilePath = utils.resolvePath(self.options.config)
         
         with open(configFilePath, "rb") as fp:
             source = fp.read()
@@ -27,116 +26,22 @@ class PyNode(object):
         
         return cfg
     
-    def init(self):
-        if not 'path' in self.config or not self._createVirtualEnv(self.config['path']):
-            return False
+    def run(self):
+        kitchen = Kitchen()
+        kitchen.updateConfig({ "node" : self.config })
         
-        if 'python' in self.config and 'requirements' in self.config['python']:
-            if not self._installPackages(self.config['python']['requirements'], 
-                                         self.config['path']):
-                return False
-        
-        if 'cookbooks' in self.config and not self._importCookbooks(self.config['cookbook_path'], self.config['cookbooks']):
-            return False
-        
-        return True
-    
-    def _createVirtualEnv(self, path):
-        if not os.path.exists(path):
-            os.makedirs(path, 0755)
-        
-        virtualenv.create_environment(path)
-        Utils.log("Installed virtualenv '%s'" % path)
-        
-        return True
-    
-    def _installPackages(self, packages, activate):
-        success = True
-        
-        if len(packages) <= 0:
-            return success
-        
-        logArgs = (len(packages), self._getPackageStr(len(packages)))
-        Utils.log("Installing %d python %s..." % logArgs)
-        
-        for package in packages:
-            distros = [ package ]
-            
-            Utils.logRaw("Installing python package %s... " % package, True)
-            
-            try:
-                # TBD, why do we have to run the next part here twice before actual install
-                (output, status) = Utils.shell('source %s/bin/activate && pip install %s' % (activate, package))
+        if 'cookbook_path' in self.config:
+            for path in self.config['cookbook_path']:
+                if "." not in path:
+                    path = os.path.join(os.path.dirname(utils.resolvePath(self.options.config)), path)
                 
-                if status != 0:
-                    import time
-                    time.sleep(1)
-                    # ensure packages installed successfully by importing them one at a time
-                    importExec = "import %s" % package
-                    exec importExec in { }
-                
-                Utils.logRaw("done!\n")
-            except Exception as e:
-                Utils.logRaw("\n")
-                Utils.log("Error installing python package '%s'" % package)
-                Utils.printException()
-                success = False
+                kitchen.addCookbookPath(path)
         
-        if success:
-            Utils.log("Installed %d python %s successfully!" % logArgs)
+        if 'recipes' in self.config:
+            for recipe in self.config['recipes']:
+                kitchen.includeRecipe(recipe)
         
-        return success
-    
-    def _importCookbooks(self, cookbookPath, cookbooks):
-        logArgs = (len(cookbooks), self._getCookbookStr(len(cookbooks)))
-        Utils.log("Importing %d %s..." % logArgs)
-        
-        if not isinstance(cookbookPath, (tuple, list)):
-            cookbookPath = [ cookbookPath ]
-        
-        success = True
-        for cookbook in cookbooks:
-            importedCookbook = False
-            
-            for path in cookbookPath:
-                completePath = os.path.join(path, cookbook)
-                
-                if os.path.exists(completePath) and os.path.isdir(completePath):
-                    try:
-                        # !!!TODO!!!
-                        # importing pollutes the local / global namespace!
-                        # want to have isolated import with exec in { }
-                        importExec = "import " + path + "." + cookbook
-                        test = { }
-                        exec importExec in test
-                        Utils.log("Imported '%s' cookbook from '%s'" % (cookbook, completePath))
-                        importedCookbook = True
-                        break
-                    except ImportError as e:
-                        Utils.log("Error importing cookbook %s from '%s'" % (cookbook, completePath))
-                        Utils.printException()
-            
-            if not importedCookbook:
-                Utils.log("Error: could not import cookbook %s" % (cookbook, ))
-                success = False
-        
-        if success:
-            Utils.log("Imported %d %s successfully!" % logArgs)
-        
-        return success
-    
-    def _resolvePath(self, path):
-        if "." in path and not os.path.exists(path):
-            pkg  = __import__(path, {}, {}, path)
-            path = os.path.abspath(pkg.__file__)
-        
-        return os.path.abspath(path)
-    
-    def _getPackageStr(self, count):
-        return "package" if count == 1 else "packages"
-    
-    def _getCookbookStr(self, count):
-        return "cookbook" if count == 1 else "cookbooks"
+        kitchen.run()
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] configfile"
@@ -159,10 +64,9 @@ def main():
     if options is None:
         return
     
-    node = PyNode(options.config)
-    node.init()
+    node = PyNode(options)
+    node.run()
 
-# where all the magic starts
 if __name__ == '__main__':
     main()
 

@@ -8,7 +8,7 @@ execfile(os.path.join('pynode', 'version.py'))
 setup(
     name = 'pynode',
     version = VERSION,
-    description = 'PyNode is a light-weight Python configuration management framework influenced by Chef', 
+    description = 'PyNode is a light-weight Python configuration management framework influenced by Chef and based largely off of another Python Chef derivative, Kokki (http://samuelks.com/kokki/)', 
     author = 'Travis Fischer',
     author_email = 'travis@stamped.com',
     url = 'http://www.stamped.com/pynode/',
@@ -16,7 +16,7 @@ setup(
     test_suite = "tests", 
     entry_points = {
         "console_scripts": [
-            "pynode = pynode.PyNode:main",
+            "pynode = pynode.pynode:main",
         ],
     },
     classifiers = [
@@ -27,8 +27,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires = [
-        'jinja2', 
-        'virtualenv', 
-        'pip', 
+        #'jinja2', 
     ],
 )

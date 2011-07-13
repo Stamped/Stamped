@@ -5,14 +5,14 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import pynode.Utils
+import pynode.utils
 from pynode.exceptions import Fail
 from pynode.providers.package import PackageProvider
 from subprocess import Popen, STDOUT, PIPE, check_call
 
 class DebianAptProvider(PackageProvider):
     def _updateCurrentStatus(self):
-        self.currentVersion = None
+        self.currentVersion   = None
         self.candidateVersion = None
         
         proc = Popen("apt-cache policy %s" % self.resource.name, shell=True, stdout=PIPE)
@@ -33,14 +33,14 @@ class DebianAptProvider(PackageProvider):
         if self.candidateVersion == "(none)":
             raise Fail("APT does not provide a version of package %s" % self.resource.name)
     
-    def _install(self, name, version):
+    def _install_package(self, name, version):
         return 0 == check_call("DEBIAN_FRONTEND=noninteractive apt-get -q -y install %s=%s" % (name, version),
             shell=True, stdout=PIPE, stderr=STDOUT)
     
-    def _remove(self, name):
+    def _remove_package(self, name):
         return 0 == check_call("DEBIAN_FRONTEND=noninteractive apt-get -q -y remove %s" % name,
             shell=True, stdout=PIPE, stderr=STDOUT)
     
-    def _upgrade(self, name, version):
-        return self._install(name, version)
+    def _upgrade_package(self, name, version):
+        return self._install_package(name, version)
 

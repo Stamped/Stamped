@@ -5,9 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import pynode.Utils
+from pynode.utils import log
 from pynode.exceptions import Fail
-from pynode.Provider import Provider
+from pynode.provider import Provider
 from abc import abstractmethod
 
 class PackageProvider(Provider):
@@ -15,7 +15,7 @@ class PackageProvider(Provider):
         super(PackageProvider, self).__init__(*args, **kwargs)
         self._updateCurrentStatus()
     
-    def install(self):
+    def action_install(self):
         if self.resource.version != None and self.resource.version != self.currentVersion:
             installVersion = self.resource.version
         elif self.currentVersion is None:
@@ -26,50 +26,42 @@ class PackageProvider(Provider):
         if not installVersion:
             raise Fail("No version specified, and no candidate version available.")
         
-        Utils.log("Install %s version %s (resource %s, current %s, candidate %s) location %s",
-                  self.resource.name, installVersion, self.resource.version,
-                  self.currentVersion, self.candidateVersion, self.resource.location)
+        log("Install %s version %s" % (self.resource.name, installVersion))
         
-        status = self._install(self.resource.location, installVersion)
+        status = self._install_package(self.resource.name, installVersion)
         if status:
             self.resource.updated()
     
-    def upgrade(self):
+    def action_upgrade(self):
         if self.currentVersion != self.candidateVersion:
             origVersion = self.currentVersion or "uninstalled"
-            Utils.log("Upgrading %s from version %s to %s",
-                str(self.resource), origVersion, self.candidateVersion)
+            log("Upgrading %s from version %s to %s" % \
+                (str(self.resource), origVersion, self.candidateVersion))
             
-            status = self._upgrade(self.resource.location, self.candidateVersion)
+            status = self._upgrade(self.resource.name, self.candidateVersion)
             if status:
                 self.resource.updated()
     
-    def remove(self):
+    def action_remove(self):
         if self.currentVersion:
-            Utils.log("Remove %s version %s", self.resource.name, self.currentVersion)
-            self._remove(self.resource.name)
+            log("Remove %s version %s" % (self.resource.name, self.currentVersion))
+            self._remove_package(self.resource.name)
             self.resource.updated()
     
-    def purge(self):
-        if self.currentVersion:
-            Utils.log("Purging %s version %s", self.resource.name, self.currentVersion)
-            self._purge(self.resource.name)
-            self.resource.updated()
-    
+    @abstractmethod
     def _updateCurrentStatus(self):
-        if not self.installed:
-            raise Fail("Unable to install provider %s for resource %s" % str(self), str(self.resource))
-    
-    @abstractmethod
-    def _install(self, name, version):
         pass
     
     @abstractmethod
-    def _remove(self, name):
+    def _install_package(self, name, version):
         pass
     
     @abstractmethod
-    def _upgrade(self, name, version):
+    def _remove_package_package(self, name):
+        pass
+    
+    @abstractmethod
+    def _upgrade_package(self, name, version):
         pass
     
     def __repr__(self):
