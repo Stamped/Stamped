@@ -176,6 +176,16 @@ class Mongo():
         document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)))
         return document
         
+    def _getDocumentsFromIds(self, documentIds):
+        ids = []
+        for documentId in documentIds:
+            ids.append(self._getObjectIdFromString(documentId))
+        documents = self._collection.find({'_id': {'$in': ids}})
+        result = []
+        for document in documents:
+            result.append(self._mongoToObj(document))
+        return result
+        
     def _updateDocument(self, document):
         return self._collection.save(self._objToMongo(document))
         

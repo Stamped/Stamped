@@ -14,6 +14,7 @@ from datetime import datetime
 from ACollectionDB import ACollectionDB
 # from Friendship import Friendship
 from MongoUserStamps import MongoUserStamps
+from MongoStamp import MongoStamp
 
 class MongoCollection(ACollectionDB):
         
@@ -33,13 +34,16 @@ class MongoCollection(ACollectionDB):
         
     ### PUBLIC
     
-    def getInbox(self, userId):
+    def getInboxStamps(self, userId):
         raise NotImplementedError
     
-    def getUser(self, userId):
-        return MongoUserStamps().getUserStamps(userId)
+    def getUserStampIds(self, userId):
+        return MongoUserStamps().getUserStampIds(userId)
     
-    def getFavorites(self, userId):
+    def getUserStamps(self, userId):
+        return MongoStamp().getStamps(self.getUserStampIds(userId))
+    
+    def getFavoriteStamps(self, userId):
         raise NotImplementedError
     
     def getMentions(self, userId):

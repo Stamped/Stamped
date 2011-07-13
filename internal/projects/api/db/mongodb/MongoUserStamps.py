@@ -13,7 +13,6 @@ from datetime import datetime
 from MongoDB import Mongo
 # from AFriendshipDB import AFriendshipDB
 # from Friendship import Friendship
-# from MongoUser import MongoUser
 
 class MongoUserStamps(Mongo):
         
@@ -45,7 +44,7 @@ class MongoUserStamps(Mongo):
     def removeUserStamp(self, userId, stampId):
         return self._removeRelationship(keyId=userId, refId=stampId)
             
-    def getUserStamps(self, userId):
+    def getUserStampIds(self, userId):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId)
 

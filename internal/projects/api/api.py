@@ -292,14 +292,11 @@ def main():
     
     # COLLECTIONS
     
-    userCollection = collectionDB.getUser('4e1cac6d32a7ba16a4000002')
+    userCollection = collectionDB.getUserStamps(userCopy.id)
     print 'User Collection'
     for stamp in userCollection:
-        print stamp
-#         print '                ', stamp['entity']['title']
-#         print '                 Stamped by', stamp['user']['name']
-#         print '                ', stamp['comment']
-        print
+        print '                ', stamp['entity']['title'], '-', stamp['blurb']
+    print
     
 #     favoritesCollection = collectionDB.getFavorites(userID)
 #     print 'Favorites Collection'

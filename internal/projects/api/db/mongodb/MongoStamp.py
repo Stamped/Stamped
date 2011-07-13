@@ -66,8 +66,8 @@ class MongoStamp(AStampDB, Mongo):
         MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)
         return stampId
     
-    def getStamp(self, stampID):
-        stamp = Stamp(self._getDocumentFromId(stampID))
+    def getStamp(self, stampId):
+        stamp = Stamp(self._getDocumentFromId(stampId))
         if stamp.isValid == False:
             raise KeyError("Stamp not valid")
         return stamp
@@ -77,9 +77,24 @@ class MongoStamp(AStampDB, Mongo):
         
     def removeStamp(self, stamp):
         return self._removeDocument(stamp)
+        MongoUserStamps().removeUserStamp(stamp['user']['user_id'], stamp['id'])
     
     def addStamps(self, stamps):
-        return self._addDocuments(stamps)
+        stampIds = [] 
+        for stampId in self._addDocuments(stamps):
+            stampIds.append(self._getStringFromObjectId(stampId))
+        for stamp in self.getStamps(stampIds):
+            MongoUserStamps().addUserStamp(stamp['user']['user_id'], stamp['id'])
+    
+    def getStamps(self, stampIds):
+        stamps = self._getDocumentsFromIds(stampIds)
+        result = []
+        for stamp in stamps:
+            stamp = Stamp(stamp)
+            if stamp.isValid == False:
+                raise KeyError("Stamp not valid")
+            result.append(stamp)
+        return result
 
     
     ### PRIVATE
