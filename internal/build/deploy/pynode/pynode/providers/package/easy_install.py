@@ -5,8 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import re, pynode.utils
-from pynode.utils import lazyProperty
+import re
+from pynode.utils import lazyProperty, log, shell
 from pynode.exceptions import Fail
 from pynode.providers.package import PackageProvider
 from subprocess import check_call, Popen, PIPE, STDOUT
@@ -16,17 +16,15 @@ BEST_MATCH_RE = re.compile(r'Best match: (.*) (.*)\n')
 
 class EasyInstallProvider(PackageProvider):
     def _updateCurrentStatus(self):
-        proc = Popen(["python", "-c", "import %s; print %s.__path__" % (self.resource.name, self.resource.name)], stdout=PIPE, stderr=STDOUT)
-        path = proc.communicate()[0]
+        prog = "import pkg_resources; print pkg_resources.get_distribution('virtualenv').version"
+        (output, status) = shell('python -c "%s"' % prog)
         
-        if proc.wait() != 0:
-            self.currentVersion = None
+        if 0 == status:
+            self.currentVersion = output
         else:
-            match = VERSION_RE.search(path)
-            if match:
-                self.currentVersion = match.group(3)
-            else:
-                self.currentVersion = "unknown"
+            self.currentVersion = None
+        
+        log(self.currentVersion)
     
     @lazyProperty
     def candidateVersion(self):
@@ -35,7 +33,7 @@ class EasyInstallProvider(PackageProvider):
         res  = proc.wait()
         
         if res != 0:
-            utils.log("easy_install check returned a non-zero result (%d) %s" % (res, self.resource))
+            log("easy_install check returned a non-zero result (%d) %s" % (res, self.resource))
         
         match = BEST_MATCH_RE.search(out)
         
