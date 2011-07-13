@@ -107,6 +107,10 @@ class MongoUser(AUserDB, Mongo):
     def flagUser(self, user):
         ### TODO
         print 'TODO'
+        
+    def checkPrivacy(self, userId):
+        privacy = self._collection.find_one({"_id": self._getObjectIdFromString(userId)}, fields={"flags": 1})['flags']['privacy']
+        return privacy
             
     
     ### PRIVATE

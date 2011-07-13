@@ -37,6 +37,7 @@ from Block import Block
 from db.mongodb.MongoEntity import MongoEntity
 from db.mongodb.MongoUser import MongoUser
 from db.mongodb.MongoStamp import MongoStamp
+from db.mongodb.MongoFriendship import MongoFriendship
 
 
 def _setup():
@@ -73,6 +74,7 @@ def main():
     entityDB = MongoEntity()
     userDB = MongoUser()
     stampDB = MongoStamp()
+    friendshipDB = MongoFriendship()
 
     print
 
@@ -248,13 +250,13 @@ def main():
 #     #mentionDB.removeMention(stampID, userID)
 #     
 #     print
-#     
-#     # FRIENDSHIP
-#     friendship = Friendship({
-#         'userID' : 1,
-#         'followingID' : 2})
-#     
-#     friendshipDB.addFriendship(friendship)
+    
+    # FRIENDSHIP
+    friendship = Friendship({
+        'user_id': '4e1cac6d32a7ba16a4000002',
+        'following_id': userCopy.id})
+    
+    friendshipDB.addFriendship(friendship)
 #     
 #     friendshipCopy = friendshipDB.getFriendship(1, 2)
 #     print 'friendshipCopy: ', friendshipCopy
@@ -272,9 +274,9 @@ def main():
 #     #friends = Friends({'userID' : 1})
 #     print 'Friend list:    ', friendsDB.getFriends(1)
 #     print 'Follower list:  ', followersDB.getFollowers(2)
-#     
-#     print
-#     
+    
+    print
+    
 #     # COLLECTIONS
 #     
 #     userCollection = collectionDB.getUser(userID)
