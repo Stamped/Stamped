@@ -21,7 +21,7 @@ class MongoFriendship(AFriendshipDB, Mongo):
         
     SCHEMA = {
         '_id': basestring,
-        'following_id': basestring,
+        'friend_id': basestring,
         'timestamp': basestring
     }
     
@@ -41,36 +41,30 @@ class MongoFriendship(AFriendshipDB, Mongo):
         
         # Check if friendship already exists (???)
         
-        # Check if blocks exist
+        # Check if block exists
         
         # Check if following_id is private
-        if MongoUser().checkPrivacy(friendship['following_id']):
+        if MongoUser().checkPrivacy(friendship['friend_id']):
             # Request approval before creating friendship
             print 'TODO: Locked account friendship request'
+            return False
             
         else:
             # Create friendship
-            self._createFriendship(friendship)
+            self._createRelationship(keyId=friendship['_id'], refId=friendship['friend_id'])
+#             self._createFollower(userId=friendship['friend_id'], followerId=friendship['_id'])
             return True
-        
-        
-#         return self._addDocument(friendship)
     
-#     def getUser(self, userID):
-#         user = User(self._getDocumentFromId(userID))
-#         if user.isValid == False:
-#             raise KeyError('User not valid')
-#         return user
-#         
-#     def updateUser(self, user):
-#         return self._updateDocument(user)
-#         
-#     def removeUser(self, user):
-#         return self._removeDocument(user)
-#     
-#     def addUsers(self, users):
-#         return self._addDocuments(users)
-
+    def checkFriendship(self, friendship):
+        return self._checkRelationship(keyId=friendship['user_id'], 
+                                        refId=friendship['friend_id'])
+            
+    def removeFriendship(self, friendship):
+        return self._removeRelationship(keyId=friendship['user_id'], 
+                                        refId=friendship['friend_id'])
+            
+    def getFriendships(self, userId):
+        return self._getRelationships(userId)
 
     def approveFriendship(self, friendship):
         ### TODO
@@ -87,21 +81,3 @@ class MongoFriendship(AFriendshipDB, Mongo):
         data['_id'] = data['user_id']
         del(data['user_id'])
         return self._mapDataToSchema(data, self.SCHEMA)
-        
-    def _createFriendship(self, friendship):
-        bucketId = self._getOverflowBucket(friendship['_id'])
-        self._collection.update({'_id': friendship['_id']}, 
-                                {'$addToSet': {'following_id': friendship['following_id']}})
-        return True
-        
-    def _getOverflowBucket(self, objId):
-        overflow = self._collection.find_one({'_id': objId}, fields={'overflow': 1})
-        if overflow == None:
-            return objId
-        else:
-            # Do something to manage overflow conditions?
-            # Grabs the most recent bucket to use and appends that to the id. This is our new key!
-            return '%s%s' % (objId, overflow['overflow'][-1])
-            
-            
-            

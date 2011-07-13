@@ -38,6 +38,7 @@ from db.mongodb.MongoEntity import MongoEntity
 from db.mongodb.MongoUser import MongoUser
 from db.mongodb.MongoStamp import MongoStamp
 from db.mongodb.MongoFriendship import MongoFriendship
+from db.mongodb.MongoCollection import MongoCollection
 
 
 def _setup():
@@ -75,6 +76,7 @@ def main():
     userDB = MongoUser()
     stampDB = MongoStamp()
     friendshipDB = MongoFriendship()
+    collectionDB = MongoCollection()
 
     print
 
@@ -254,19 +256,30 @@ def main():
     # FRIENDSHIP
     friendship = Friendship({
         'user_id': '4e1cac6d32a7ba16a4000002',
-        'following_id': userCopy.id})
+        'friend_id': userCopy.id})
     
-    friendshipDB.addFriendship(friendship)
-#     
+    print 'add friendship: ', friendshipDB.addFriendship(friendship)
+    
+    checkFriendship = Friendship({
+        'user_id': '4e1cac6d32a7ba16a4000002',
+        'friend_id': '4e1dc66e32a7ba4a26000002'
+    })
+    
+    print 'get friends:    ', len(friendshipDB.getFriendships('4e1cac6d32a7ba16a4000002'))
+    
+#     print 'is friend:      ', friendshipDB.checkFriendship(friendship)
+    
 #     friendshipCopy = friendshipDB.getFriendship(1, 2)
 #     print 'friendshipCopy: ', friendshipCopy
 #     print 'user email:     ', friendshipCopy['user']['email']
 #     print 'following name: ', friendshipCopy['following']['name']
-#     
-#     print 'exists:         ', friendshipDB.checkFriendship(1, 2)
-#     print 'delete:         ', friendshipDB.removeFriendship(1, 2)
-#     print 'exists:         ', friendshipDB.checkFriendship(1, 2)
-#     
+    
+    print 'exists:         ', friendshipDB.checkFriendship(friendship)
+    print 'delete:         ', friendshipDB.removeFriendship(friendship)
+    print 'exists:         ', friendshipDB.checkFriendship(friendship)
+    
+    print 'get friends:    ', len(friendshipDB.getFriendships('4e1cac6d32a7ba16a4000002'))
+    
 #     friendshipDB.addFriendship(friendship)
 #     
 #     print
@@ -277,16 +290,17 @@ def main():
     
     print
     
-#     # COLLECTIONS
-#     
-#     userCollection = collectionDB.getUser(userID)
-#     print 'User Collection'
-#     for stamp in userCollection:
+    # COLLECTIONS
+    
+    userCollection = collectionDB.getUser('4e1cac6d32a7ba16a4000002')
+    print 'User Collection'
+    for stamp in userCollection:
+        print stamp
 #         print '                ', stamp['entity']['title']
 #         print '                 Stamped by', stamp['user']['name']
 #         print '                ', stamp['comment']
-#         print
-#     
+        print
+    
 #     favoritesCollection = collectionDB.getFavorites(userID)
 #     print 'Favorites Collection'
 #     for stamp in favoritesCollection:

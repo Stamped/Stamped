@@ -11,6 +11,7 @@ from datetime import datetime
 from MongoDB import Mongo
 from AStampDB import AStampDB
 from Stamp import Stamp
+from MongoUserStamps import MongoUserStamps
 
 class MongoStamp(AStampDB, Mongo):
         
@@ -61,7 +62,9 @@ class MongoStamp(AStampDB, Mongo):
     ### PUBLIC
     
     def addStamp(self, stamp):
-        return self._addDocument(stamp)
+        stampId = self._addDocument(stamp)
+        MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)
+        return stampId
     
     def getStamp(self, stampID):
         stamp = Stamp(self._getDocumentFromId(stampID))

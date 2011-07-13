@@ -150,6 +150,20 @@ class Mongo():
 
         return result
         
+        
+    ### RELATIONSHIP MANAGEMENT
+        
+    def _getOverflowBucket(self, objId):
+        overflow = self._collection.find_one({'_id': objId}, fields={'overflow': 1})
+
+        if overflow == None or 'overflow' not in overflow:
+            return objId            
+        else:
+            # Do something to manage overflow conditions?
+            # Grabs the most recent bucket to use and appends that to the id. This is our new key!
+            return '%s%s' % (objId, overflow['overflow'][-1])
+        
+        
     ### GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document):
@@ -168,4 +182,81 @@ class Mongo():
     def _removeDocument(self, document):
         return self._collection.remove(self._objToMongo(document))
         
+    
+    ### GENERIC RELATIONSHIP FUNCTIONS
+        
+    def _createRelationship(self, keyId, refId):
+        self._collection.update({'_id': self._getOverflowBucket(keyId)}, 
+                                {'$addToSet': {'ref_ids': refId}},
+                                upsert=True)
+        return True
+            
+    def _removeRelationship(self, keyId, refId):
+        doc = self._collection.find_one({'_id': keyId})
+        
+        if doc == None:
+            return False
+            
+        elif refId in doc['ref_ids']:
+            self._collection.update({'_id': keyId}, 
+                                    {'$pull': {'ref_ids': refId}})
+            return True
+            
+        elif 'overflow' in doc:
+            # Check other buckets
+            buckets = []
+            for bucket in doc['overflow']:
+                buckets.append('%s%s' % (keyId, bucket))
+                
+            for moreDocs in self._collection.find({'_id': {'$in': buckets}}):
+                if refId in moreDocs['ref_ids']:
+                    self._collection.update({'_id': moreDocs['_id']}, 
+                                            {'$pull': {'ref_ids': refId}})
+                    return True
+            return False
+            
+        else:
+            return False
+    
+    def _checkRelationship(self, keyId, refId):
+        doc = self._collection.find_one({'_id': keyId})
+        
+        if doc == None:
+            return False
+            
+        elif refId in doc['ref_ids']:
+            return True
+            
+        elif 'overflow' in doc:
+            # Check other buckets
+            buckets = []
+            for bucket in doc['overflow']:
+                buckets.append('%s%s' % (keyId, bucket))
+                
+            for moreDocs in self._collection.find({'_id': {'$in': buckets}}):
+                if refId in moreDocs['ref_ids']:
+                    return True
+            return False
+            
+        else:
+            return False
+            
+    def _getRelationships(self, keyId):
+        doc = self._collection.find_one({'_id': keyId})
+        
+        if doc == None:
+            return []
+        else:
+            ids = doc['ref_ids']
+            if 'overflow' in doc:
+                # Check other buckets
+                buckets = []
+                for bucket in doc['overflow']:
+                    buckets.append('%s%s' % (keyId, bucket))
+                    
+                for moreDocs in self._collection.find({'_id': {'$in': buckets}}):
+                    ids = ids + moreDocs['ref_ids']
+            return ids
+            
+
     

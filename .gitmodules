@@ -1,0 +1,3 @@
+[submodule "internal/projects/bulleit/RestKit"]
+	path = internal/projects/bulleit/RestKit
+	url = git://github.com/RestKit/RestKit.git

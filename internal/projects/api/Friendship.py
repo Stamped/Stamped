@@ -11,7 +11,7 @@ class Friendship(AObject):
 
     _schema = {
         'user_id': basestring,
-        'following_id': basestring,
+        'friend_id': basestring,
         'timestamp': basestring
     }
     
@@ -23,7 +23,7 @@ class Friendship(AObject):
         valid = True
         
         valid &= 'user_id' in self and isinstance(self.user_id, basestring)
-        valid &= 'following_id' in self and isinstance(self.following_id, basestring)
+        valid &= 'friend_id' in self and isinstance(self.friend_id, basestring)
         
         if 'timestamp' in self:
             valid &= isinstance(self.timestamp, basestring)
