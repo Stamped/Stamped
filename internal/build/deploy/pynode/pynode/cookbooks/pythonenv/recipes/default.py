@@ -7,7 +7,7 @@ path = env.config.node.path
 env.cookbooks.virtualenv.VirtualEnv(path) #, site_packages=False)
 
 env.includeRecipe("pip")
-env.includeRecipe("libevent")
+#env.includeRecipe("libevent")
 
 for package in env.config.node.python.requirements:
     env.cookbooks.pip.PipPackage(package, virtualenv=path)

@@ -54,14 +54,18 @@ class PipPackageProvider(PackageProvider):
     
     def _install_package(self, name, version):
         if self.resource.virtualenv is not None:
+            prefix     = "source %s/bin/activate && " % self.resource.virtualenv
             virtualenv = "--environment %s" % self.resource.virtualenv
         else:
+            prefix     = ""
             virtualenv = ""
         
         if name == 'pip' or not version:
-            (_, status) = self._shell("%s %s install --upgrade %s" % (self.pip_binary_path, virtualenv, name))
+            (_, status) = self._shell("%s %s %s install --upgrade %s" % \
+                (prefix, self.pip_binary_path, virtualenv, name))
         else:
-            (_, status) = self._shell("%s %s install %s==%s" % (self.pip_binary_path, virtualenv, name, version))
+            (_, status) = self._shell("%s %s %s install %s==%s" % \
+                (prefix, self.pip_binary_path, virtualenv, name, version))
         
         if 0 != status:
             raise Fail("error installing package %s with version %s" % (name, version))
