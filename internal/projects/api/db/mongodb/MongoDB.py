@@ -245,7 +245,7 @@ class Mongo():
         doc = self._collection.find_one({'_id': keyId})
         
         if doc == None:
-            return None
+            return []
         else:
             ids = doc['ref_ids']
             if 'overflow' in doc:

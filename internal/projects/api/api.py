@@ -38,6 +38,7 @@ from db.mongodb.MongoEntity import MongoEntity
 from db.mongodb.MongoUser import MongoUser
 from db.mongodb.MongoStamp import MongoStamp
 from db.mongodb.MongoFriendship import MongoFriendship
+from db.mongodb.MongoCollection import MongoCollection
 
 
 def _setup():
@@ -75,6 +76,7 @@ def main():
     userDB = MongoUser()
     stampDB = MongoStamp()
     friendshipDB = MongoFriendship()
+    collectionDB = MongoCollection()
 
     print
 
@@ -288,16 +290,17 @@ def main():
     
     print
     
-#     # COLLECTIONS
-#     
-#     userCollection = collectionDB.getUser(userID)
-#     print 'User Collection'
-#     for stamp in userCollection:
+    # COLLECTIONS
+    
+    userCollection = collectionDB.getUser('4e1cac6d32a7ba16a4000002')
+    print 'User Collection'
+    for stamp in userCollection:
+        print stamp
 #         print '                ', stamp['entity']['title']
 #         print '                 Stamped by', stamp['user']['name']
 #         print '                ', stamp['comment']
-#         print
-#     
+        print
+    
 #     favoritesCollection = collectionDB.getFavorites(userID)
 #     print 'Favorites Collection'
 #     for stamp in favoritesCollection:
