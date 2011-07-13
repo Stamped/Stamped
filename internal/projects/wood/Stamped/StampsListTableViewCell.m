@@ -19,10 +19,10 @@ static NSString* kUserNameFontString = @"Helvetica-Bold";
 static NSString* kCommentFontString = @"HelveticaNeue";
 static const CGFloat kSubstringFontSize = 12.0;
 static const CGFloat kUserImageHorizontalMargin = 14.0;
-static const CGFloat kUserImageSize = 37.0;
+static const CGFloat kUserImageSize = 41.0;
 static const CGFloat kCellTopPadding = 8.0;
 static const CGFloat kTypeIconSize = 12.0;
-static const CGFloat kTitleMaxWidth = 225;
+static const CGFloat kTitleMaxWidth = 220;
 static const CGFloat kSubstringMaxWidth = 218.0;
 
 @interface StampCellView : UIView {
@@ -73,7 +73,7 @@ static const CGFloat kSubstringMaxWidth = 218.0;
     [self addSubview:userImageView_];
     [userImageView_ release];
     
-    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 59, kTypeIconSize, kTypeIconSize)];
+    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 58, kTypeIconSize, kTypeIconSize)];
     typeImageView_.contentMode = UIViewContentModeScaleAspectFit;
     [self addSubview:typeImageView_];
     [typeImageView_ release];
@@ -155,7 +155,7 @@ static const CGFloat kSubstringMaxWidth = 218.0;
                                   forWidth:kTitleMaxWidth
                              lineBreakMode:UILineBreakModeTailTruncation];
   stampImageFrame_ = CGRectMake(userImageRightMargin_ + stringSize.width - (23 / 2), 7, 23, 23);
-  titleLabel_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding, stringSize.width, stringSize.height);
+  titleLabel_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding + 2, stringSize.width, stringSize.height);
   titleLabel_.text = title;
   [self setNeedsDisplay];
 }
@@ -165,7 +165,7 @@ static const CGFloat kSubstringMaxWidth = 218.0;
   CGSize stringSize = [userName_ sizeWithFont:[UIFont fontWithName:kUserNameFontString size:kSubstringFontSize]
                                      forWidth:kSubstringMaxWidth
                                 lineBreakMode:UILineBreakModeTailTruncation];
-  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 16, 58, stringSize.width, stringSize.height);
+  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 16, 57, stringSize.width, stringSize.height);
   userNameLabel_.text = userName_;
 }
 
@@ -175,7 +175,7 @@ static const CGFloat kSubstringMaxWidth = 218.0;
                                     forWidth:kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 14
                                lineBreakMode:UILineBreakModeTailTruncation];
   commentLabel_.text = comment_;
-  commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3, 58, stringSize.width, stringSize.height);
+  commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3, 57, stringSize.width, stringSize.height);
 }
 
 @end

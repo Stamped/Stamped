@@ -81,6 +81,9 @@
   activityView_.layer.shadowRadius = 2;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
 
+  // Black, semi-transparent.
+  addCommentField_.keyboardAppearance = UIKeyboardAppearanceAlert;
+
   [self setUpMainContentView];
   [self setUpCommentsView];
 }
