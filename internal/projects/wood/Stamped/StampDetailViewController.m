@@ -18,6 +18,7 @@
 #import "MusicDetailViewController.h"
 #import "StampEntity.h"
 #import "StampedAppDelegate.h"
+#import "UserImageView.h"
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
@@ -155,20 +156,12 @@
 }
 
 - (void)setUpMainContentView {
-  CALayer* userImgLayer = [[CALayer alloc] init];
-  userImgLayer.contents = (id)entity_.userImage.CGImage;
-  userImgLayer.contentsGravity = kCAGravityResizeAspect;
-  userImgLayer.frame = CGRectMake(10, 10, 55, 55);
-  userImgLayer.borderColor = [UIColor whiteColor].CGColor;
-  userImgLayer.borderWidth = 2.0;
-  userImgLayer.shadowOpacity = 0.5;
-  userImgLayer.shadowOffset = CGSizeMake(0, 0.5);
-  userImgLayer.shadowRadius = 1.0;
-  userImgLayer.shadowPath = [UIBezierPath bezierPathWithRect:userImgLayer.bounds].CGPath;
-  [activityView_.layer addSublayer:userImgLayer];
-  [userImgLayer release];
-  
-  const CGFloat leftPadding = CGRectGetMaxX(userImgLayer.frame) + 10;
+  UserImageView* userImgView = [[UserImageView alloc] initWithFrame:CGRectMake(10, 10, 55, 55)];
+  userImgView.image = entity_.userImage;
+  [activityView_ addSubview:userImgView];
+  [userImgView release];
+
+  const CGFloat leftPadding = CGRectGetMaxX(userImgView.frame) + 10;
   NSString* fontString = @"Helvetica-Bold";
   CGSize stringSize = [entity_.userName sizeWithFont:[UIFont fontWithName:fontString size:14]
                                             forWidth:218
@@ -214,18 +207,10 @@
 }
 
 - (void)setUpCommentsView {
-  CALayer* userImgLayer = [[CALayer alloc] init];
-  userImgLayer.contents = (id)[UIImage imageNamed:@"robby_s_user_image"].CGImage;
-  userImgLayer.contentsGravity = kCAGravityResizeAspect;
-  userImgLayer.frame = CGRectMake(10, 10, 31, 31);
-  userImgLayer.borderColor = [UIColor whiteColor].CGColor;
-  userImgLayer.borderWidth = 2.0;
-  userImgLayer.shadowOpacity = 0.5;
-  userImgLayer.shadowOffset = CGSizeMake(0, 0.5);
-  userImgLayer.shadowRadius = 1.0;
-  userImgLayer.shadowPath = [UIBezierPath bezierPathWithRect:userImgLayer.bounds].CGPath;
-  [commentsView_.layer addSublayer:userImgLayer];
-  [userImgLayer release];
+  UserImageView* userImgView = [[UserImageView alloc] initWithFrame:CGRectMake(10, 10, 31, 31)];
+  userImgView.image = [UIImage imageNamed:@"robby_s_user_image"];
+  [commentsView_ addSubview:userImgView];
+  [userImgView release];
 }
 
 - (void)viewDidUnload {

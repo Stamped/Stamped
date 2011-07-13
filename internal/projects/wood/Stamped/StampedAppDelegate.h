@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@class CustomUITabBarController;
-
 @interface StampedAppDelegate : NSObject <UIApplicationDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;

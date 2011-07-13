@@ -15,7 +15,7 @@
   CGContextRef ctx = UIGraphicsGetCurrentContext();
   CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.85 alpha:1.0].CGColor);
   CGContextFillRect(ctx, rect);
-  [[UIImage imageNamed:@"toolbar_bg"] drawInRect:rect];
+  [[UIImage imageNamed:@"nav_bar"] drawInRect:rect];
 }
 
 @end

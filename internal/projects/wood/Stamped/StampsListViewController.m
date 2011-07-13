@@ -14,6 +14,8 @@
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 #import "StampEntity.h"
+#import "StampsListTableViewCell.h"
+#import "UserImageView.h"
 
 static const CGFloat kFilterRowHeight = 44.0;
 
@@ -161,8 +163,7 @@ typedef enum {
   }
   for (NSString* line in lineArray) {
     NSArray* entityLine = [line componentsSeparatedByString:@","];
-    //NSLog(@"%@", entityLine);
-    StampEntity* entity = [[StampEntity alloc] init];
+    StampEntity* entity = [[[StampEntity alloc] init] autorelease];
     entity.name = (NSString*)[entityLine objectAtIndex:2];
     NSString* typeStr = (NSString*)[entityLine objectAtIndex:1];
     entity.categoryImage = 
@@ -205,7 +206,6 @@ typedef enum {
     }
 
     [stampsArray_ addObject:entity];
-    [entity release];
   }
 }
 
@@ -237,85 +237,13 @@ typedef enum {
 
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity {
   static NSString* CellIdentifier = @"StampCell";
-  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  StampsListTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
   if (cell == nil) {
-    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
-                                   reuseIdentifier:CellIdentifier] autorelease];
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    cell = [[[StampsListTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
 
-  // TODO(andybons): Use layer caching for this shit.
-  cell.contentView.layer.sublayers = nil;
-
-  CALayer* userImgLayer = [[CALayer alloc] init];
-  userImgLayer.contents = (id)entity.userImage.CGImage;
-  userImgLayer.contentsGravity = kCAGravityResizeAspect;
-  userImgLayer.frame = CGRectMake(14, 8, 37, 37);
-  userImgLayer.borderColor = [UIColor whiteColor].CGColor;
-  userImgLayer.borderWidth = 2.0;
-  userImgLayer.shadowOpacity = 0.5;
-  userImgLayer.shadowOffset = CGSizeMake(0, 0.5);
-  userImgLayer.shadowRadius = 1.0;
-  userImgLayer.shadowPath = [UIBezierPath bezierPathWithRect:userImgLayer.bounds].CGPath;
-  [cell.contentView.layer addSublayer:userImgLayer];
-
-  const CGFloat leftPadding = CGRectGetMaxX(userImgLayer.frame) + 14;
-  NSString* fontString = @"TGLight";
-  CGSize stringSize = [entity.name sizeWithFont:[UIFont fontWithName:fontString size:47]
-                                       forWidth:225
-                                  lineBreakMode:UILineBreakModeTailTruncation];
-  CALayer* stampLayer = [[CALayer alloc] init];
-  stampLayer.frame = CGRectMake(leftPadding + stringSize.width - (23 / 2), 7, 23, 23);
-  stampLayer.contents = (id)entity.stampImage.CGImage;
-  [cell.contentView.layer addSublayer:stampLayer];
-  [stampLayer release];
-  
-  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(
-      leftPadding, 8, stringSize.width, stringSize.height)];
-  nameLabel.font = [UIFont fontWithName:fontString size:47];
-  nameLabel.text = entity.name;
-  nameLabel.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
-  nameLabel.backgroundColor = [UIColor clearColor];
-  [cell.contentView addSubview:nameLabel];
-  [nameLabel release];
-
-  CALayer* typeIconLayer = [[CALayer alloc] init];
-  typeIconLayer.contentsGravity = kCAGravityResizeAspect;
-  typeIconLayer.contents = (id)entity.categoryImage.CGImage;
-  typeIconLayer.frame = CGRectMake(leftPadding, 59, 12, 12);
-  [cell.contentView.layer addSublayer:typeIconLayer];
-
-  fontString = @"Helvetica-Bold";
-  stringSize = [entity.userName sizeWithFont:[UIFont fontWithName:fontString size:12]
-                                    forWidth:218
-                               lineBreakMode:UILineBreakModeTailTruncation];
-  
-  UILabel* subTextLabel = [[UILabel alloc] initWithFrame:CGRectMake(
-      leftPadding + 16, 58, stringSize.width, stringSize.height)];
-  subTextLabel.font = [UIFont fontWithName:fontString size:12];
-  subTextLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  subTextLabel.text = entity.userName;
-  [cell.contentView addSubview:subTextLabel];
-  [subTextLabel release];
-  
-  if (entity.comment) {
-    fontString = @"HelveticaNeue";
-    stringSize = [entity.comment sizeWithFont:[UIFont fontWithName:fontString size:12]
-                                     forWidth:218 - stringSize.width - 14
-                                lineBreakMode:UILineBreakModeTailTruncation];
-    UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectMake(
-        CGRectGetMaxX(subTextLabel.frame) + 3, 58, stringSize.width, stringSize.height)];
-    commentLabel.text = entity.comment;
-    commentLabel.font = [UIFont fontWithName:fontString size:12];
-    commentLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-    [cell.contentView addSubview:commentLabel];
-    [commentLabel release];
-  }
-
-  // Cleanup.
-  [userImgLayer release];
-  [typeIconLayer release];
+  cell.stampEntity = entity;
 
   return cell;
 }

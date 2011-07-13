@@ -45,7 +45,6 @@
 		7E514AA713C9827000EEC598 /* FilmDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E514AA513C9827000EEC598 /* FilmDetailViewController.m */; };
 		7E514AA813C9827000EEC598 /* FilmDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */; };
 		7E514AAA13C9851800EEC598 /* film_detail_filler@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */; };
-		7E76129313C926660023CCC4 /* toolbar_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129213C926660023CCC4 /* toolbar_bg@2x.png */; };
 		7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */; };
 		7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */; };
 		7E76129A13C9344D0023CCC4 /* cat_icon_other@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129913C9344D0023CCC4 /* cat_icon_other@2x.png */; };
@@ -93,6 +92,11 @@
 		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
 		7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E313C5093E003AEE52 /* QuartzCore.framework */; };
 		7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E513C51133003AEE52 /* CoreText.framework */; };
+		7EE7E35A13CCB2A800FA3B3A /* StampsListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35913CCB2A800FA3B3A /* StampsListTableViewCell.m */; };
+		7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */; };
+		7EE7E36913CD163300FA3B3A /* nav_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE7E36813CD163300FA3B3A /* nav_bar@2x.png */; };
+		7EE7E36B13CD16F700FA3B3A /* nav_bar_ripple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE7E36A13CD16F700FA3B3A /* nav_bar_ripple@2x.png */; };
+		7EE7E37013CD223100FA3B3A /* inbox_top_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */; };
 		7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
 		7EF1105A13C906AA0059F9BD /* EntityDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */; };
 		7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* StampsListViewController.m */; };
@@ -159,7 +163,6 @@
 		7E514AA513C9827000EEC598 /* FilmDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FilmDetailViewController.m; sourceTree = "<group>"; };
 		7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FilmDetailViewController.xib; sourceTree = "<group>"; };
 		7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "film_detail_filler@2x.png"; sourceTree = "<group>"; };
-		7E76129213C926660023CCC4 /* toolbar_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_bg@2x.png"; sourceTree = "<group>"; };
 		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
 		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
 		7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlaceDetailViewController.xib; sourceTree = "<group>"; };
@@ -217,6 +220,13 @@
 		7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampDetailViewController.xib; sourceTree = "<group>"; };
 		7EDE38E313C5093E003AEE52 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7EDE38E513C51133003AEE52 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		7EE7E35813CCB2A800FA3B3A /* StampsListTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListTableViewCell.h; sourceTree = "<group>"; };
+		7EE7E35913CCB2A800FA3B3A /* StampsListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampsListTableViewCell.m; sourceTree = "<group>"; };
+		7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserImageView.h; sourceTree = "<group>"; };
+		7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserImageView.m; sourceTree = "<group>"; };
+		7EE7E36813CD163300FA3B3A /* nav_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar@2x.png"; sourceTree = "<group>"; };
+		7EE7E36A13CD16F700FA3B3A /* nav_bar_ripple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_ripple@2x.png"; sourceTree = "<group>"; };
+		7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_top_border@2x.png"; sourceTree = "<group>"; };
 		7EF1105613C906A90059F9BD /* EntityDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntityDetailViewController.h; sourceTree = "<group>"; };
 		7EF1105713C906A90059F9BD /* EntityDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EntityDetailViewController.m; sourceTree = "<group>"; };
 		7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EntityDetailViewController.xib; sourceTree = "<group>"; };
@@ -422,7 +432,9 @@
 				7E7612B413C95BBD0023CCC4 /* Entity Details */,
 				7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */,
 				7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */,
-				7E76129213C926660023CCC4 /* toolbar_bg@2x.png */,
+				7EE7E36813CD163300FA3B3A /* nav_bar@2x.png */,
+				7EE7E36A13CD16F700FA3B3A /* nav_bar_ripple@2x.png */,
+				7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */,
 				7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */,
 				7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */,
 				7EFE8F7A13C3C96D00324F34 /* toolbar_add_stamp@2x.png */,
@@ -472,6 +484,17 @@
 			name = "User Images";
 			sourceTree = "<group>";
 		};
+		7EE7E35C13CCB2D600FA3B3A /* Stamps List */ = {
+			isa = PBXGroup;
+			children = (
+				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
+				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
+				7EE7E35813CCB2A800FA3B3A /* StampsListTableViewCell.h */,
+				7EE7E35913CCB2A800FA3B3A /* StampsListTableViewCell.m */,
+			);
+			name = "Stamps List";
+			sourceTree = "<group>";
+		};
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
 			isa = PBXGroup;
 			children = (
@@ -498,12 +521,13 @@
 				7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */,
 				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
 				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
-				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
-				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
+				7EE7E35C13CCB2D600FA3B3A /* Stamps List */,
 				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
 				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
 				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
+				7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */,
+				7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */,
 				7EC6B4BE13C63DC100CE83DD /* StampEntity.h */,
 				7EC6B4BF13C63DC100CE83DD /* StampEntity.m */,
 				7E514AA213C9824D00EEC598 /* Entity Details */,
@@ -634,7 +658,6 @@
 				7E2CED2813C7A6C90068D576 /* scott_f_stamp_color@2x.png in Resources */,
 				7E2CED2913C7A6C90068D576 /* travis_f_stamp_color@2x.png in Resources */,
 				7EF1105A13C906AA0059F9BD /* EntityDetailViewController.xib in Resources */,
-				7E76129313C926660023CCC4 /* toolbar_bg@2x.png in Resources */,
 				7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */,
 				7E76129A13C9344D0023CCC4 /* cat_icon_other@2x.png in Resources */,
 				7E76129C13C938DE0023CCC4 /* main_action_button_bg@2x.png in Resources */,
@@ -651,6 +674,9 @@
 				7E514A9D13C97E8000EEC598 /* music_detail_filler@2x.png in Resources */,
 				7E514AA813C9827000EEC598 /* FilmDetailViewController.xib in Resources */,
 				7E514AAA13C9851800EEC598 /* film_detail_filler@2x.png in Resources */,
+				7EE7E36913CD163300FA3B3A /* nav_bar@2x.png in Resources */,
+				7EE7E36B13CD16F700FA3B3A /* nav_bar_ripple@2x.png in Resources */,
+				7EE7E37013CD223100FA3B3A /* inbox_top_border@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -699,6 +725,8 @@
 				7E7612C013C96B380023CCC4 /* BookDetailViewController.m in Sources */,
 				7E514A9913C97A9700EEC598 /* MusicDetailViewController.m in Sources */,
 				7E514AA713C9827000EEC598 /* FilmDetailViewController.m in Sources */,
+				7EE7E35A13CCB2A800FA3B3A /* StampsListTableViewCell.m in Sources */,
+				7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
