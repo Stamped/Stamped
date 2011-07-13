@@ -12,6 +12,8 @@ from MongoDB import Mongo
 from AStampDB import AStampDB
 from Stamp import Stamp
 from MongoUserStamps import MongoUserStamps
+from MongoInboxStamps import MongoInboxStamps
+# from MongoFriends import MongoFriends
 
 class MongoStamp(AStampDB, Mongo):
         

@@ -265,20 +265,15 @@ def main():
         'friend_id': '4e1dc66e32a7ba4a26000002'
     })
     
-    print 'get friends:    ', len(friendshipDB.getFriendships('4e1cac6d32a7ba16a4000002'))
-    
-#     print 'is friend:      ', friendshipDB.checkFriendship(friendship)
-    
-#     friendshipCopy = friendshipDB.getFriendship(1, 2)
-#     print 'friendshipCopy: ', friendshipCopy
-#     print 'user email:     ', friendshipCopy['user']['email']
-#     print 'following name: ', friendshipCopy['following']['name']
-    
     print 'exists:         ', friendshipDB.checkFriendship(friendship)
+    print 'get friends:    ', len(friendshipDB.getFriends('4e1cac6d32a7ba16a4000002'))
+    print 'get followers:  ', len(friendshipDB.getFollowers(userCopy.id))
+    
     print 'delete:         ', friendshipDB.removeFriendship(friendship)
-    print 'exists:         ', friendshipDB.checkFriendship(friendship)
     
-    print 'get friends:    ', len(friendshipDB.getFriendships('4e1cac6d32a7ba16a4000002'))
+    print 'exists:         ', friendshipDB.checkFriendship(friendship)    
+    print 'get friends:    ', len(friendshipDB.getFriends('4e1cac6d32a7ba16a4000002'))
+    print 'get followers:  ', len(friendshipDB.getFollowers(userCopy.id))
     
 #     friendshipDB.addFriendship(friendship)
 #     

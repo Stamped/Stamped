@@ -12,13 +12,10 @@ from datetime import datetime
 
 # from MongoDB import Mongo
 from ACollectionDB import ACollectionDB
-# from Friendship import Friendship
 from MongoUserStamps import MongoUserStamps
 from MongoStamp import MongoStamp
 
 class MongoCollection(ACollectionDB):
-        
-    COLLECTION = 'userstamps'
         
     SCHEMA = {
         '_id': basestring,
@@ -29,19 +26,23 @@ class MongoCollection(ACollectionDB):
     
     def __init__(self, setup=False):
         ACollectionDB.__init__(self, self.DESC)
-#         Mongo.__init__(self, collection=self.COLLECTION)
         
         
     ### PUBLIC
     
+    def getInboxStampIds(self, userId):
+        return MongoInboxStamps().getInboxStampIds(userId)
+    
     def getInboxStamps(self, userId):
-        raise NotImplementedError
+        return MongoStamp().getStamps(self.getInboxStampIds(userId))
     
     def getUserStampIds(self, userId):
         return MongoUserStamps().getUserStampIds(userId)
     
     def getUserStamps(self, userId):
         return MongoStamp().getStamps(self.getUserStampIds(userId))
+        
+        
     
     def getFavoriteStamps(self, userId):
         raise NotImplementedError
