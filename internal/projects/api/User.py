@@ -21,7 +21,7 @@ class User(AObject):
         'timestamp': basestring,
         'website': basestring,
         'bio': basestring,
-        'colors': {
+        'color': {
             'primary_color': basestring,
             'secondary_color': basestring
         },
@@ -67,10 +67,10 @@ class User(AObject):
         if 'bio' in self:
             valid &= isinstance(self.bio, basestring)
             
-        valid &= 'colors' in self and isinstance(self.colors, dict)
-        valid &= 'primary_color' in self.colors and isinstance(self.colors['primary_color'], basestring)
-        if 'secondary_color' in self.colors:
-            valid &= isinstance(self.colors['secondary_color'], basestring)
+        valid &= 'color' in self and isinstance(self.color, dict)
+        valid &= 'primary_color' in self.color and isinstance(self.color['primary_color'], basestring)
+        if 'secondary_color' in self.color:
+            valid &= isinstance(self.color['secondary_color'], basestring)
             
         if 'linked_accounts' in self:
             valid &= isinstance(self.linked_accounts, dict) 

@@ -38,6 +38,7 @@ from db.mongodb.MongoStamp import MongoStamp
 from db.mongodb.MongoFriendship import MongoFriendship
 from db.mongodb.MongoCollection import MongoCollection
 from db.mongodb.MongoFavorite import MongoFavorite
+from db.mongodb.MongoComment import MongoComment
 
 
 def _setup():
@@ -77,6 +78,7 @@ def main():
     friendshipDB = MongoFriendship()
     collectionDB = MongoCollection()
     favoriteDB = MongoFavorite()
+    commentDB = MongoComment()
 
     print
 
@@ -122,7 +124,7 @@ def main():
         'img': 'kevin.png',
         'locale': 'EST',
         'timestamp': 'now',
-        'colors': { 'primary_color': 'blue' },
+        'color': { 'primary_color': 'blue' },
         'flags': {
             'privacy' : True
         }    
@@ -233,20 +235,29 @@ def main():
 #     
 #     print
 #     
-#     # COMMENTS
-#     comment = Comment({
-#         'userID' : userID,
-#         'stampID' : stampID,
-#         'comment' : 'Oh man, I love that'})
-#     
-#     commentID = commentDB.addComment(comment)
-#     print 'commentID:      ', commentID
-#     
-#     commentCopy = commentDB.getComment(commentID)
-#     print 'commentCopy:    ', commentCopy
-#     print 'user email:     ', commentCopy['user']['email']
-#     print 'stamped entity: ', commentCopy['stamp']['entity']['title']
-#     
+    # COMMENTS
+    comment = Comment({
+        'stamp_id': stampCopy.id,
+        'user': {
+            'user_id': userCopy.id,
+            'user_name': userCopy.first_name,
+            'user_img': userCopy.img,
+            'user_primary_color': userCopy.color['primary_color']
+        },
+        'blurb': 'This is a comment',
+        'timestamp': 'Right now'
+    })
+    
+    commentId = commentDB.addComment(comment)
+    print 'commentID:      ', commentId
+    
+    print 'comment:        ', commentDB.getComment(commentId)['blurb']
+    
+    print 'all comments:   '
+    for comment in commentDB.getComments(stampCopy.id):
+        print '                ', comment['user']['user_name'], '-', comment['blurb']
+    print
+    
 #     secondComment = Comment({
 #         'userID' : userID,
 #         'stampID' : stampID,
@@ -260,8 +271,8 @@ def main():
 #         
 #     #commentDB.removeComment(commentID)
 #     #commentDB.removeConversation(commentID)
-#     
-#     print
+    
+    print
     
     # FAVORITES
 

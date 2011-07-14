@@ -28,7 +28,7 @@ class MongoUser(AUserDB, Mongo):
         'timestamp': basestring,
         'website': basestring,
         'bio': basestring,
-        'colors': {
+        'color': {
             'primary_color': basestring,
             'secondary_color': basestring
         },
