@@ -164,6 +164,7 @@ class Resource(AttributeDict):
                     value = resolvedArgs[arg]
                     value = resourceArg.validate(value)
                     self[arg] = value
+                    #utils.log("added '%s'='%s' to resource '%s'" % (arg, str(value), str(self)))
                 except InvalidArgument as e:
                     utils.log("Error initializing argument '%s' for resource %s" % (arg, str(self)))
                     utils.printException()
@@ -177,7 +178,7 @@ class Resource(AttributeDict):
             if not key in self:
                 self[key] = self.s_globalSchema[key].default
         
-        self._subscriptions = {
+        self.subscriptions = {
             'immediate' : set(), 
             'delayed' : set()
         }
@@ -204,7 +205,7 @@ class Resource(AttributeDict):
     def subscribe(self, action, resource, immediate=False):
         imm = "immediate" if immediate else "delayed"
         sub = (action, resource)
-        self._subscriptions[imm].add(sub)
+        self.subscriptions[imm].add(sub)
     
     def _validate(self):
         if not 'name' in self:
