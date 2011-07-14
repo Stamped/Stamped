@@ -12,7 +12,7 @@ class Stamp(AObject):
     _schema = {
         'id': basestring,
         'entity': {
-            'entity_id': object,
+            'entity_id': basestring,
             'title': basestring,
             'coordinates': {
                 'lat': float, 
@@ -22,7 +22,7 @@ class Stamp(AObject):
             'subtitle': basestring
         },
         'user': {
-            'user_id': object,
+            'user_id': basestring,
             'user_name': basestring,
             'user_img': basestring,
         },

@@ -46,6 +46,14 @@ class Mongo():
         
     def _endRequest(self):
         self._connection.end_request()
+    
+    def _validateUpdate(self, result):
+        try:
+            if result['ok'] == 1 and result['err'] == None:
+                return True
+        except:
+            return False
+        return False
         
         
     def _encodeBSON(self, obj):
@@ -251,13 +259,15 @@ class Mongo():
         else:
             return False
             
-    def _getRelationships(self, keyId):
+    def _getRelationships(self, keyId, limit=None):
         doc = self._collection.find_one({'_id': keyId})
         
         if doc == None:
             return []
         else:
             ids = doc['ref_ids']
+            if limit != None and len(ids) > limit:
+                return ids[:limit]
             if 'overflow' in doc:
                 # Check other buckets
                 buckets = []
@@ -266,6 +276,8 @@ class Mongo():
                     
                 for moreDocs in self._collection.find({'_id': {'$in': buckets}}):
                     ids = ids + moreDocs['ref_ids']
+                    if limit != None and len(ids) > limit:
+                        return ids[:limit]
             return ids
             
 

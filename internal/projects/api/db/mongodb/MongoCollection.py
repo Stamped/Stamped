@@ -13,6 +13,7 @@ from datetime import datetime
 # from MongoDB import Mongo
 from ACollectionDB import ACollectionDB
 from MongoUserStamps import MongoUserStamps
+from MongoInboxStamps import MongoInboxStamps
 from MongoStamp import MongoStamp
 
 class MongoCollection(ACollectionDB):
@@ -30,11 +31,11 @@ class MongoCollection(ACollectionDB):
         
     ### PUBLIC
     
-    def getInboxStampIds(self, userId):
-        return MongoInboxStamps().getInboxStampIds(userId)
+    def getInboxStampIds(self, userId, limit=None):
+        return MongoInboxStamps().getInboxStampIds(userId, limit)
     
-    def getInboxStamps(self, userId):
-        return MongoStamp().getStamps(self.getInboxStampIds(userId))
+    def getInboxStamps(self, userId, limit=None):
+        return MongoStamp().getStamps(self.getInboxStampIds(userId, limit))
     
     def getUserStampIds(self, userId):
         return MongoUserStamps().getUserStampIds(userId)

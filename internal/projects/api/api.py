@@ -18,8 +18,6 @@ from Mention import Mention
 from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship
-from Friends import Friends
-from Friendship import Friendship
 from Block import Block
 
 # import specific databases
@@ -39,6 +37,7 @@ from db.mongodb.MongoUser import MongoUser
 from db.mongodb.MongoStamp import MongoStamp
 from db.mongodb.MongoFriendship import MongoFriendship
 from db.mongodb.MongoCollection import MongoCollection
+from db.mongodb.MongoFavorite import MongoFavorite
 
 
 def _setup():
@@ -77,8 +76,10 @@ def main():
     stampDB = MongoStamp()
     friendshipDB = MongoFriendship()
     collectionDB = MongoCollection()
+    favoriteDB = MongoFavorite()
 
     print
+
 
     # ENTITIES
     entity = Entity({
@@ -151,6 +152,32 @@ def main():
     print
     
     
+    # FRIENDSHIP
+    friendship = Friendship({
+        'user_id': '4e1cac6d32a7ba16a4000002',
+        'friend_id': userCopy.id})
+    
+    revFriendship = Friendship({
+        'user_id': userCopy.id,
+        'friend_id': '4e1cac6d32a7ba16a4000002'
+    })
+    
+    print 'add friendship: ', friendshipDB.addFriendship(friendship)
+    print 'add friendship: ', friendshipDB.addFriendship(revFriendship)
+    
+    print 'exists:         ', friendshipDB.checkFriendship(friendship)
+    print 'get friends:    ', len(friendshipDB.getFriends('4e1cac6d32a7ba16a4000002'))
+    print 'get followers:  ', len(friendshipDB.getFollowers(userCopy.id))
+    
+#     print 'delete:         ', friendshipDB.removeFriendship(friendship)
+    
+    print 'exists:         ', friendshipDB.checkFriendship(friendship)    
+    print 'get friends:    ', len(friendshipDB.getFriends('4e1cac6d32a7ba16a4000002'))
+    print 'get followers:  ', len(friendshipDB.getFollowers(userCopy.id))
+    
+    print
+    
+    
     # STAMPS
     stamp = Stamp({
         'entity': {
@@ -184,12 +211,12 @@ def main():
     
     print 'updated stamp:  ', stampDB.getStamp(stampID).blurb
     
-    stampDB.removeStamp(stamp)
+    stampDB.removeStamp(stampCopy)
     
     stampDB.addStamps([stamp, stampCopy])
     
     print
-#     
+    
 #     # MENTIONS
 #     mention = Mention({
 #         'userID' : userID,
@@ -235,61 +262,59 @@ def main():
 #     #commentDB.removeConversation(commentID)
 #     
 #     print
-#     
-#     # FAVORITES
-#     favorite = Favorite({
-#         'userID' : userID,
-#         'stampID' : stampID})
-#     
-#     favoriteDB.addFavorite(favorite)
-#     favoriteDB.addFavorite(Favorite({'userID' : userID, 'stampID' : 2}))
-#     
-#     favoriteCopy = favoriteDB.getFavorite(stampID, userID)
-#     print 'favoriteCopy:   ', favoriteCopy
-#     print 'user email:     ', favoriteCopy['user']['email']
-#     print 'stamped entity: ', favoriteCopy['stamp']['entity']['title']
-#     
-#     #mentionDB.removeMention(stampID, userID)
-#     
-#     print
     
-    # FRIENDSHIP
-    friendship = Friendship({
-        'user_id': '4e1cac6d32a7ba16a4000002',
-        'friend_id': userCopy.id})
-    
-    print 'add friendship: ', friendshipDB.addFriendship(friendship)
-    
-    checkFriendship = Friendship({
-        'user_id': '4e1cac6d32a7ba16a4000002',
-        'friend_id': '4e1dc66e32a7ba4a26000002'
+    # FAVORITES
+
+    favorite = Favorite({
+        'entity': {
+            'entity_id': stampCopy.entity['entity_id'],
+            'title': stampCopy.entity['title'],
+            'category': stampCopy.entity['category'],
+            'subtitle': stampCopy.entity['subtitle']
+        },
+        'user': {
+            'user_id': userCopy.id,
+            'user_name': userCopy.first_name
+        },
+        'stamp': {
+            'stamp_id': stampCopy.id,
+            'stamp_blurb': stampCopy.blurb, 
+            'stamp_timestamp': stampCopy.timestamp,
+            'stamp_user_id': stampCopy.user['user_id'],
+            'stamp_user_name': stampCopy.user['user_name'],
+            'stamp_user_img': stampCopy.user['user_img']  
+        },
+        'timestamp': 'now'
     })
     
-    print 'exists:         ', friendshipDB.checkFriendship(friendship)
-    print 'get friends:    ', len(friendshipDB.getFriends('4e1cac6d32a7ba16a4000002'))
-    print 'get followers:  ', len(friendshipDB.getFollowers(userCopy.id))
+    favorite.id = favoriteDB.addFavorite(favorite)
+    print 'favoriteID:     ', favorite.id
     
-    print 'delete:         ', friendshipDB.removeFriendship(friendship)
+    print 'get favorite:   ', favoriteDB.getFavorite(favorite.id)['entity']['title']
+
+    print 'complete item:  ', favoriteDB.completeFavorite(favorite.id)
     
-    print 'exists:         ', friendshipDB.checkFriendship(friendship)    
-    print 'get friends:    ', len(friendshipDB.getFriends('4e1cac6d32a7ba16a4000002'))
-    print 'get followers:  ', len(friendshipDB.getFollowers(userCopy.id))
-    
-#     friendshipDB.addFriendship(friendship)
-#     
-#     print
-#     
-#     #friends = Friends({'userID' : 1})
-#     print 'Friend list:    ', friendsDB.getFriends(1)
-#     print 'Follower list:  ', followersDB.getFollowers(2)
-    
+    print 'all favorites:  '
+    for favorite in favoriteDB.getFavorites(userCopy.id):
+        print '                ', favorite['entity']['title'], '-', favorite['complete']
     print
+    
+    print 'remove item:    ', favoriteDB.removeFavorite(favorite)
+    
+    print    
+    
     
     # COLLECTIONS
     
     userCollection = collectionDB.getUserStamps(userCopy.id)
     print 'User Collection'
     for stamp in userCollection:
+        print '                ', stamp['entity']['title'], '-', stamp['blurb']
+    print
+    
+    inboxCollection = collectionDB.getInboxStamps('4e1cac6d32a7ba16a4000002', 4)
+    print 'Inbox Collection'
+    for stamp in inboxCollection:
         print '                ', stamp['entity']['title'], '-', stamp['blurb']
     print
     
@@ -309,13 +334,6 @@ def main():
 #         print '                ', stamp['comment'] 
 #         print
 #     
-#     inboxCollection = collectionDB.getInbox(userID)
-#     print 'Inbox Collection'
-#     for stamp in inboxCollection:
-#         print '                ', stamp['entity']['title']
-#         print '                 Stamped by', stamp['user']['name']
-#         print '                ', stamp['comment']
-#         print
 #     
 #     print
 #     

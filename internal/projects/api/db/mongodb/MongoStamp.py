@@ -13,7 +13,7 @@ from AStampDB import AStampDB
 from Stamp import Stamp
 from MongoUserStamps import MongoUserStamps
 from MongoInboxStamps import MongoInboxStamps
-# from MongoFriends import MongoFriends
+from MongoFriendship import MongoFriendship
 
 class MongoStamp(AStampDB, Mongo):
         
@@ -66,6 +66,8 @@ class MongoStamp(AStampDB, Mongo):
     def addStamp(self, stamp):
         stampId = self._addDocument(stamp)
         MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)
+        followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
+        MongoInboxStamps().addInboxStamps(followerIds, stampId)
         return stampId
     
     def getStamp(self, stampId):
@@ -78,8 +80,8 @@ class MongoStamp(AStampDB, Mongo):
         return self._updateDocument(stamp)
         
     def removeStamp(self, stamp):
-        return self._removeDocument(stamp)
         MongoUserStamps().removeUserStamp(stamp['user']['user_id'], stamp['id'])
+        return self._removeDocument(stamp)
     
     def addStamps(self, stamps):
         stampIds = [] 
@@ -87,6 +89,8 @@ class MongoStamp(AStampDB, Mongo):
             stampIds.append(self._getStringFromObjectId(stampId))
         for stamp in self.getStamps(stampIds):
             MongoUserStamps().addUserStamp(stamp['user']['user_id'], stamp['id'])
+            followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
+            MongoInboxStamps().addInboxStamps(followerIds, stamp['id'])
     
     def getStamps(self, stampIds):
         stamps = self._getDocumentsFromIds(stampIds)

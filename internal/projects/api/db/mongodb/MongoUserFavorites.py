@@ -14,13 +14,13 @@ from MongoDB import Mongo
 # from AFriendshipDB import AFriendshipDB
 # from Friendship import Friendship
 
-class MongoInboxStamps(Mongo):
+class MongoUserFavorites(Mongo):
         
-    COLLECTION = 'inboxstamps'
+    COLLECTION = 'userfavorites'
         
     SCHEMA = {
         '_id': basestring,
-        'stamp_id': basestring
+        'favorite_id': basestring
     }
     
     def __init__(self, setup=False):
@@ -32,24 +32,20 @@ class MongoInboxStamps(Mongo):
         
     ### PUBLIC
     
-    def addInboxStamp(self, userId, stampId):
+    def addUserFavorite(self, userId, favoriteId):
         
-        if not isinstance(userId, basestring) or not isinstance(stampId, basestring):
+        if not isinstance(userId, basestring) or not isinstance(favoriteId, basestring):
             raise KeyError("ID not valid")
-        self._createRelationship(keyId=userId, refId=stampId)
-        return True
         
-    def addInboxStamps(self, userIds, stampId):
-        for userId in userIds:
-            self.addInboxStamp(userId, stampId)
+        self._createRelationship(keyId=userId, refId=favoriteId)
         return True
             
-    def removeInboxStamp(self, userId, stampId):
-        return self._removeRelationship(keyId=userId, refId=stampId)
+    def removeUserFavorite(self, userId, favoriteId):
+        return self._removeRelationship(keyId=userId, refId=favoriteId)
             
-    def getInboxStampIds(self, userId, limit=None):
+    def getUserFavoriteIds(self, userId):
         ### TODO: Add limit? Add timestamp to slice?
-        return self._getRelationships(userId, limit)
+        return self._getRelationships(userId)
 
 
     ### PRIVATE
