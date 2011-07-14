@@ -12,7 +12,10 @@ from pynode.resource import *
 class Service(Resource):
     _schema = ResourceArgumentSchema([
         ("name",             ResourceArgument(required=True, expectedType=basestring)), 
-        ("enabled",          ResourceArgumentBoolean()), 
+        ("action",           ResourceArgumentList(default="start", 
+                                                  expectedType=basestring, 
+                                                  options=[ "start", "reload", "restart", "status" ])), 
+        ("enabled",          ResourceArgumentBoolean(default=True)), 
         ("running",          ResourceArgumentBoolean()), 
         ("pattern",          ResourceArgumentBoolean()), 
         ("start_cmd",        ResourceArgument(expectedType=basestring)), 
