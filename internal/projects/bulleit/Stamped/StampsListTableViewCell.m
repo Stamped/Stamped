@@ -8,6 +8,9 @@
 
 #import "StampsListTableViewCell.h"
 
+#include <math.h>
+
+#import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "StampEntity.h"
@@ -34,7 +37,6 @@ static const CGFloat kSubstringMaxWidth = 218.0;
   UILabel* commentLabel_;
 
   // NOT managed. Must manage ownership.
-  UILabel* titleLabel_;
   CGRect stampImageFrame_;
   CGFloat userImageRightMargin_;
 }
@@ -48,6 +50,10 @@ static const CGFloat kSubstringMaxWidth = 218.0;
 @property (nonatomic, copy) NSString* userName;
 @property (nonatomic, copy) NSString* comment;
 
+@end
+
+@interface StampCellView ()
+- (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img;
 @end
 
 @implementation StampCellView
@@ -90,11 +96,6 @@ static const CGFloat kSubstringMaxWidth = 218.0;
     commentLabel_.textColor = substringTextColor;
     [self addSubview:commentLabel_];
     [commentLabel_ release];
-
-    // Drawn within |drawRect:|. Don't add it as a subview.
-    titleLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
-    titleLabel_.font = [UIFont fontWithName:kTitleFontString size:kTitleFontSize];
-    titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   }
   return self;
 }
@@ -103,26 +104,89 @@ static const CGFloat kSubstringMaxWidth = 218.0;
   self.userImage = nil;
   self.stampImage = nil;
   self.typeImage = nil;
-  [titleLabel_ release];
-
   [super dealloc];
 }
 
 - (void)drawRect:(CGRect)rect {
   [super drawRect:rect];
-  
+  UIImage* localStampImage = stampImage_;
+  CGColorRef titleColor = [UIColor colorWithWhite:0.37 alpha:1.0].CGColor;
   if (highlighted_) {
     userNameLabel_.textColor = [UIColor whiteColor];
     commentLabel_.textColor = [UIColor whiteColor];
-    titleLabel_.textColor = [UIColor whiteColor];
+    titleColor = [UIColor whiteColor].CGColor;
+    typeImageView_.image = [self whiteMaskedImageUsingImage:typeImage_];
+    localStampImage = [self whiteMaskedImageUsingImage:stampImage_];
   } else {
     UIColor* substringTextColor = [UIColor colorWithWhite:0.6 alpha:1.0];
     userNameLabel_.textColor = substringTextColor;
     commentLabel_.textColor = substringTextColor;
-    titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
+    typeImageView_.image = typeImage_;
   }
-  [titleLabel_ drawTextInRect:titleLabel_.frame];
-  [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
+  CTFontRef titleFont = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
+  CFIndex numSettings = 1;
+  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+  CTParagraphStyleSetting settings[1] = {
+    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+  };
+  CTParagraphStyleRef titleStyle = CTParagraphStyleCreate(settings, numSettings);
+  NSDictionary* titleAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+      (id)titleFont, (id)kCTFontAttributeName,
+      (id)titleColor, (id)kCTForegroundColorAttributeName,
+      (id)titleStyle, (id)kCTParagraphStyleAttributeName,
+      (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName,
+      nil];
+  NSAttributedString* titleAttributedString = [[NSAttributedString alloc] initWithString:title_
+                                                                              attributes:titleAttributes];
+	CGContextRef context = UIGraphicsGetCurrentContext();
+  CGContextSaveGState(context);
+
+	CGContextSetTextMatrix(context, CGAffineTransformIdentity);
+	CGContextTranslateCTM(context, 0, self.bounds.size.height);
+	CGContextScaleCTM(context, 1.0, -1.0);
+
+	CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)titleAttributedString);
+  CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)titleAttributedString);
+  CGMutablePathRef titlePath = CGPathCreateMutable();
+	const CGFloat maxWidth = self.bounds.size.width - 80.0;
+  CGPathAddRect(titlePath, NULL, CGRectMake(userImageRightMargin_,
+                                            -kCellTopPadding - 2,
+                                            maxWidth,
+                                            self.bounds.size.height));
+	CTFrameRef titleFrame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), titlePath, NULL);
+  CTFrameDraw(titleFrame, context);
+
+  CGContextRestoreGState(context);
+  CGFloat ascent, descent, leading, width;
+  width = fmin(maxWidth, CTLineGetTypographicBounds(line, &ascent, &descent, &leading));
+  stampImageFrame_ = CGRectMake(userImageRightMargin_ + width - (18 / 2), (18 / 2), 18, 18);
+
+  CFRelease(titleFont);
+  CFRelease(line);
+  CFRelease(framesetter);
+  CGPathRelease(titlePath);
+  CFRelease(titleFrame);
+  [titleAttributedString release];
+
+  [localStampImage drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
+}
+
+- (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img {
+  CGFloat width = img.size.width;
+  CGFloat height = img.size.height;
+
+  UIGraphicsBeginImageContextWithOptions(img.size, NO, 0.0);
+  CGContextRef context = UIGraphicsGetCurrentContext();
+
+  CGContextTranslateCTM(context, 0, height);
+  CGContextScaleCTM(context, 1.0, -1.0);
+  
+  CGContextClipToMask(context, CGRectMake(0, 0, width, height), img.CGImage);
+  CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
+  CGContextFillRect(context, CGRectMake(0, 0, img.size.width, img.size.height));
+  UIImage* maskedImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  return maskedImage;
 }
 
 - (void)setUserImage:(UIImage*)userImage {
@@ -151,12 +215,6 @@ static const CGFloat kSubstringMaxWidth = 218.0;
 
 - (void)setTitle:(NSString*)title {
   title_ = title;
-  CGSize stringSize = [title_ sizeWithFont:[UIFont fontWithName:kTitleFontString size:kTitleFontSize]
-                                  forWidth:kTitleMaxWidth
-                             lineBreakMode:UILineBreakModeTailTruncation];
-  stampImageFrame_ = CGRectMake(userImageRightMargin_ + stringSize.width - (23 / 2), 7, 23, 23);
-  titleLabel_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding + 2, stringSize.width, stringSize.height);
-  titleLabel_.text = title;
   [self setNeedsDisplay];
 }
 
