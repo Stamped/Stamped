@@ -44,6 +44,7 @@ class MongoComment(ACommentDB, Mongo):
     ### PUBLIC
     
     def addComment(self, comment):
+        ### TODO: Make sure that the user can publish comment (public stamp and not blocked)
         commentId = self._addDocument(comment)
         MongoStampComments().addStampComment(comment['stamp_id'], commentId)
         ### TODO: Add to activity feed
@@ -58,15 +59,9 @@ class MongoComment(ACommentDB, Mongo):
     def removeComment(self, comment):
         return self._removeDocument(comment)
         
-#     def updateComment(self, commentId, complete=True):
-#         if not isinstance(complete, bool):
-#             raise TypeError("Not a bool!")
-#         return self._validateUpdate(
-#             self._collection.update(
-#                 {'_id': self._getObjectIdFromString(favoriteId)}, 
-#                 {'$set': {'complete': complete}},
-#                 safe=True)
-#             )
+    
+    # Can comments be updated? If a comment then *no*, but if it's a restamp 
+    # then *maybe*. Discuss on product side before implementing here.
     
     def getCommentIds(self, stampId):
         return MongoStampComments().getStampCommentIds(stampId)

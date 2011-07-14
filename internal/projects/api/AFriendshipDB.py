@@ -15,30 +15,30 @@ class AFriendshipDB(object):
     def addFriendship(self, friendship):
         raise NotImplementedError
     
-    def removeFriendship(self, userID, followingID):
+    def checkFriendship(self, friendship):
         raise NotImplementedError
     
-    def checkFriendship(self, userID, followingID):
+    def removeFriendship(self, friendship):
         raise NotImplementedError
     
-    def getFriendship(self, userID, followingID):
+    def getFriends(self, userId):
+        raise NotImplementedError
+        
+    def getFollowers(self, userId):
+        raise NotImplementedError
+        
+    def approveFriendship(self, friendship):
         raise NotImplementedError
     
-    def addFriendships(self, friendships):
-        return map(self.addFriendship, friendships)
-    
-    def getFriendships(self, friendships):
-        return map(self.getFriendship, friendships)
-    
-    def checkFriendships(self, friendships):
-        return map(self.checkFriendship, friendships)
-    
-    def removeFriendships(self, friendships):
-        return map(self.removeFriendship, friendships)
-    
-    def __len__(self):
+    def addBlock(self, friendship):
         raise NotImplementedError
     
-    def __str__(self):
-        return self._desc
-
+    def checkBlock(self, friendship):
+        raise NotImplementedError
+            
+    def removeBlock(self, friendship):
+        raise NotImplementedError
+            
+    def getBlocks(self, userId):
+        raise NotImplementedError
+    
