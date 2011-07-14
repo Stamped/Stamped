@@ -18,7 +18,6 @@ from Mention import Mention
 from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship
-from Block import Block
 
 # import specific databases
 # from db.mysql.MySQLEntityDB import MySQLEntityDB
@@ -84,6 +83,7 @@ def main():
 
 
     # ENTITIES
+    
     entity = Entity({
         'title': 'Little Owl',
         'category': 'Restaurant',
@@ -115,6 +115,7 @@ def main():
 
 
     # USERS
+    
     user = User({
         'first_name': 'Kevin',
         'last_name': 'Palms',
@@ -155,6 +156,7 @@ def main():
     
     
     # FRIENDSHIP
+    
     friendship = Friendship({
         'user_id': '4e1cac6d32a7ba16a4000002',
         'friend_id': userCopy.id})
@@ -173,6 +175,18 @@ def main():
     
 #     print 'delete:         ', friendshipDB.removeFriendship(friendship)
     
+    print 'Add block:      ', friendshipDB.addBlock(friendship)
+
+    print 'Show blocks:    '
+    for userId in friendshipDB.getBlocks('4e1cac6d32a7ba16a4000002'):
+        print '                ', userId
+    
+    print 'is blocked:     ', friendshipDB.checkBlock(friendship)
+    print 'delete block:   ', friendshipDB.removeBlock(friendship)
+    print 'is blocked:     ', friendshipDB.checkBlock(friendship)
+    
+    print 'add friendship: ', friendshipDB.addFriendship(friendship)
+    
     print 'exists:         ', friendshipDB.checkFriendship(friendship)    
     print 'get friends:    ', len(friendshipDB.getFriends('4e1cac6d32a7ba16a4000002'))
     print 'get followers:  ', len(friendshipDB.getFollowers(userCopy.id))
@@ -181,6 +195,7 @@ def main():
     
     
     # STAMPS
+    
     stamp = Stamp({
         'entity': {
             'entity_id': entityCopy.id,
@@ -234,7 +249,8 @@ def main():
 #     #mentionDB.removeMention(stampID, userID)
 #     
 #     print
-#     
+
+
     # COMMENTS
     comment = Comment({
         'stamp_id': stampCopy.id,
@@ -258,21 +274,8 @@ def main():
         print '                ', comment['user']['user_name'], '-', comment['blurb']
     print
     
-#     secondComment = Comment({
-#         'userID' : userID,
-#         'stampID' : stampID,
-#         'comment' : 'I mean I REALLY love that'})
-#     commentDB.addComment(secondComment)
-#     
-#     conversation = commentDB.getConversation(stampID)
-#     
-#     for comment in conversation:
-#         print '                ', comment['user']['name'], 'says "', comment['comment'], '"'
-#         
-#     #commentDB.removeComment(commentID)
-#     #commentDB.removeConversation(commentID)
-    
     print
+    
     
     # FAVORITES
 
@@ -329,14 +332,6 @@ def main():
         print '                ', stamp['entity']['title'], '-', stamp['blurb']
     print
     
-#     favoritesCollection = collectionDB.getFavorites(userID)
-#     print 'Favorites Collection'
-#     for stamp in favoritesCollection:
-#         print '                ', stamp['entity']['title']
-#         print '                 Stamped by', stamp['user']['name']
-#         print '                ', stamp['comment']
-#         print
-#     
 #     mentionsCollection = collectionDB.getMentions(userID)
 #     print 'Mentions Collection'
 #     for stamp in mentionsCollection:
@@ -344,33 +339,10 @@ def main():
 #         print '                 Stamped by', stamp['user']['name']
 #         print '                ', stamp['comment'] 
 #         print
-#     
-#     
-#     print
-#     
-#     # BLOCK
-#     block = Block({
-#         'userID' : 1,
-#         'blockingID' : 2})
-#     
-#     print 'Add block'
-#     blockDB.addBlock(block)
-#     
-#     print 'exists:         ', blockDB.checkBlock(1, 2)
-#     print 'delete:         ', blockDB.removeBlock(1, 2)
-#     print 'exists:         ', blockDB.checkBlock(1, 2)
-#     
-#     blockDB.addBlock(block)
-#     
-#     print
-#     print 'Add block'
-#     print 'Block list:    ', blockDB.getBlocking(1)
-#     
-#     print
-#     
-#     friendshipDB.addFriendship({'userID' : 2, 'followingID' : 1})
-#     friendshipDB.addFriendship({'userID' : 2, 'followingID' : 3})
-#     friendshipDB.addFriendship({'userID' : 1, 'followingID' : 3})
+    
+    
+    print
+    
 
 # where all the magic starts
 if __name__ == '__main__':
