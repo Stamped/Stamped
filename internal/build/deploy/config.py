@@ -3,7 +3,7 @@
     "port" : "22333", 
     "path" : "/pynode/test0", 
     "cookbook_path" : [ "pynode.cookbooks", "cookbooks", ], 
-    "wsgi_app" : "/users/fisch0920/dev/stamped/sites/stamped.com/bin/serve.py", 
+    "wsgi_app" : "/users/Kevin/Sites/Stamped/sites/stamped.com/bin/serve.py", 
     "wsgi_log" : "/tmp/wsgi.log", 
     
     "python" : {

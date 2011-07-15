@@ -5,7 +5,7 @@ __all__ = [ "PipPackageProvider" ]
 import re
 
 from subprocess import check_call, Popen, PIPE, STDOUT
-from pynode.utils import log, lazyProperty, shell
+from pynode.utils import log, lazyProperty, shell3
 from pynode.exceptions import Fail
 from pynode.providers.package import PackageProvider
 
@@ -85,8 +85,7 @@ class PipPackageProvider(PackageProvider):
         log(cmd)
         
         try:
-            #return shell(cmd)
-            return Popen(cmd, shell=True).wait()
+            return shell3(cmd)
         except Exception:
             log("error executing command: %s" % cmd)
             raise

@@ -23,6 +23,13 @@ def shell2(cmd, *args, **kwargs):
     
     return (output, status)
 
+def shell3(cmd):
+    pp = Popen(cmd, shell=True)
+    output = None
+    status = pp.wait()
+    
+    return (output, status)
+
 def lazyProperty(undecorated):
     name = '_' + undecorated.__name__
     @property

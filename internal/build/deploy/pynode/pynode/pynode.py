@@ -64,6 +64,8 @@ def main():
     if options is None:
         return
     
+    os.putenv("ARCHFLAGS", "-arch i386 -arch x86_64")
+    
     node = PyNode(options)
     node.run()
 
