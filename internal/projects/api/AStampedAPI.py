@@ -22,10 +22,6 @@ class AStampedAPI(object):
         pass
     
     @abstractmethod
-    def addAccounts(users):
-        pass
-    
-    @abstractmethod
     def getAccount(userID):
         pass
     

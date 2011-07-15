@@ -7,6 +7,8 @@ __license__ = "TODO"
 
 from abc import abstractmethod
 
+from Exceptions import InvalidArgument
+
 from Account import Account
 from Entity import Entity
 from User import User
@@ -62,12 +64,12 @@ class StampedAPI(AStampedAPI):
         username,
         email,
         password,
-        img,
         locale,
-        website=None,
-        bio=None,
         primary_color,
         secondary_color=None,
+        img=None,
+        website=None,
+        bio=None,
         privacy=False
     ):
         account = Account()
@@ -76,25 +78,70 @@ class StampedAPI(AStampedAPI):
         account.username = username
         account.email = email
         account.password = password
-        account.img = img
         account.locale = locale
+        account.color = { 'primary_color': primary_color }
+        if secondary_color:
+            account.color['secondary_color'] = secondary_color
+        if img:
+            account.img = img
         if website:
             account.website = website
         if bio:
             account.bio = bio
-        account.color = { 'primary_color': primary_color }
-        if secondary_color:
-            account.color['secondary_color'] = secondary_color
         account.flags = { 'privacy': privacy }
+        
+        if not account.isValid:
+            raise InvalidArgument('Invalid input')
+        
         return self._userDB.addUser(account)
-    
-    def addAccounts(users):
-        return self._userDB.addUsers(users)
     
     def getAccount(userID):
         return self._accountDB.getAccount(userID)
     
-    def updateAccount(account):
+    def updateAccount(
+        id,
+        firstName=None,
+        lastName=None,
+        username=None,
+        email=None,
+        password=None,
+        locale=None,
+        primary_color=None,
+        secondary_color=None,
+        img=None,
+        website=None,
+        bio=None,
+        privacy=None
+    ):
+        account = self.getAccount(id)
+        if firstName:
+            account.first_name = firstName
+        if lastName:
+            account.last_name = lastName
+        if username:
+            account.username = username
+        if email:
+            account.email = email
+        if password:
+            account.password = password
+        if locale:
+            account.locale = locale
+        if primary_color:
+            account.color['primary_color'] = primary_color
+        if secondary_color:
+            account.color['secondary_color'] = secondary_color
+        if img:
+            account.img = img
+        if website:
+            account.website = website
+        if bio:
+            account.bio = bio
+        if privacy:
+            account.flags['privacy'] = privacy
+        
+        if not account.isValid:
+            raise InvalidArgument('Invalid input')
+        
         return self._accountDB.updateAccount(account)
     
     def removeAccount(userID):

@@ -30,10 +30,6 @@ class AAccountDB(object):
         pass
         
     @abstractmethod
-    def addAccounts(self, users):
-        pass
-        
-    @abstractmethod
     def flagAccount(self, user):
         pass
         
