@@ -176,7 +176,7 @@ class Mongo():
     ### GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document):
-        return self._getStringFromObjectId(self._collection.insert(self._objToMongo(document)))
+        return self._getStringFromObjectId(self._collection.insert(self._objToMongo(document), safe=True))
     
     def _addDocuments(self, documents):
         return self._collection.insert(self._objsToMongo(documents))
