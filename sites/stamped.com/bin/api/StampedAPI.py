@@ -9,15 +9,7 @@ from abc import abstractmethod
 from datetime import datetime
 
 from Exceptions import InvalidArgument
-
-from Account import Account
-from Entity import Entity
-from User import User
-from Stamp import Stamp
-from Comment import Comment
-from Favorite import Favorite
-from Friendship import Friendship
-from Collection import Collection
+from AStampedAPI import AStampedAPI
 
 from AAccountDB import AAccountDB
 from AEntityDB import AEntityDB
@@ -27,6 +19,15 @@ from ACommentDB import ACommentDB
 from AFavoriteDB import AFavoriteDB
 from ACollectionDB import ACollectionDB
 from AFriendshipDB import AFriendshipDB
+
+from Account import Account
+from Entity import Entity
+from User import User
+from Stamp import Stamp
+from Comment import Comment
+from Favorite import Favorite
+from Friendship import Friendship
+from Collection import Collection
 
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 
@@ -50,7 +51,7 @@ class StampedAPI(AStampedAPI):
         self._validated = False
     
     def _validate(self):
-        assert hasattr(self, '_accountDB')    and isinstance(self._userDB, AAccountDB)
+        assert hasattr(self, '_accountDB')    and isinstance(self._accountDB, AAccountDB)
         assert hasattr(self, '_entityDB')     and isinstance(self._entityDB, AEntityDB)
         assert hasattr(self, '_userDB')       and isinstance(self._userDB, AUserDB)
         assert hasattr(self, '_stampDB')      and isinstance(self._stampDB, AStampDB)
@@ -69,86 +70,47 @@ class StampedAPI(AStampedAPI):
     # Accounts #
     # ######## #
     
-    def addAccount(self, 
-        firstName,
-        lastName,
-        username,
-        email,
-        password,
-        locale,
-        primary_color,
-        secondary_color=None,
-        img=None,
-        website=None,
-        bio=None,
-        privacy=False
-    ):
+    def addAccount(self, params):
         account = Account()
-        account.first_name = firstName
-        account.last_name = lastName
-        account.username = username
-        account.email = email
-        account.password = password
-        account.locale = locale
-        account.color = { 'primary_color': primary_color }
-        if secondary_color:
-            account.color['secondary_color'] = secondary_color
-        if img:
-            account.img = img
-        if website:
-            account.website = website
-        if bio:
-            account.bio = bio
-        account.flags = { 'privacy': privacy }
+        account.first_name = params.firstName
+        account.last_name = params.lastName
+        account.username = params.username
+        account.email = params.email
+        account.password = params.password
+        account.locale = params.locale
+        account.color = { 'primary_color': params.primary_color }
         
+        account.color['secondary_color'] = params.secondary_color
+        account.img = params.img
+        account.website = params.website
+        account.bio = params.bio
+        account.flags = { 'privacy': params.privacy }
+        
+        import utils
+        utils.log(account)
         if not account.isValid:
             raise InvalidArgument('Invalid input')
         
-        return self._userDB.addUser(account)
+        return self._accountDB.addAccount(account)
     
     def getAccount(self, userID):
         return self._accountDB.getAccount(userID)
     
-    def updateAccount(self, 
-        id,
-        firstName=None,
-        lastName=None,
-        username=None,
-        email=None,
-        password=None,
-        locale=None,
-        primary_color=None,
-        secondary_color=None,
-        img=None,
-        website=None,
-        bio=None,
-        privacy=None
-    ):
-        account = self.getAccount(id)
-        if firstName:
-            account.first_name = firstName
-        if lastName:
-            account.last_name = lastName
-        if username:
-            account.username = username
-        if email:
-            account.email = email
-        if password:
-            account.password = password
-        if locale:
-            account.locale = locale
-        if primary_color:
-            account.color['primary_color'] = primary_color
-        if secondary_color:
-            account.color['secondary_color'] = secondary_color
-        if img:
-            account.img = img
-        if website:
-            account.website = website
-        if bio:
-            account.bio = bio
-        if privacy:
-            account.flags['privacy'] = privacy
+    def updateAccount(self, params):
+        account = self.getAccount(accountID)
+        
+        account.first_name = params.firstName
+        account.last_name = params.lastName
+        account.username = params.username
+        account.email = params.email
+        account.password = params.password
+        account.locale = params.locale
+        account.color['primary_color'] = params.primary_color
+        account.color['secondary_color'] = params.secondary_color
+        account.img = params.img
+        account.website = params.website
+        account.bio = params.bio
+        account.flags['privacy'] = params.privacy
         
         if not account.isValid:
             raise InvalidArgument('Invalid input')
@@ -231,17 +193,18 @@ class StampedAPI(AStampedAPI):
     # Favorites #
     # ######### #
     
-    def addFavorite(self, userID, entityID, stampID):
+    def addFavorite(self, params):
         # TODO: construct a favorite object from (userID, entityID, stampID)
+        raise NotImplementedError
         favorite = Favorite()
         
-        user = self.getUser(userID)
+        user = self.getUser(params.userID)
         favorite.user = {
             'user_id': user.id,
             'user_name': user.username
         }
         
-        entity = self.getEntity(entityID)
+        entity = self.getEntity(params.entityID)
         favorite.entity = {
             'entity_id': entity.id,
             'title': entity.title,
@@ -252,16 +215,16 @@ class StampedAPI(AStampedAPI):
             favorite.entity['coordinates'] = entity.details['place']['coordinates']
         
         if stampID:
-            stamp = self.getStamp(stampID)
+            stamp = self.getStamp(params.stampID)
             favorite.stamp = {
                 'stamp_id': stamp.id,
-                'stamp_blurb': stamp.blurb
+                'stamp_blurb': stamp.blurb, 
                 'stamp_timestamp': stamp.timestamp,
                 'stamp_user_id': stamp.user['user_id'],
                 'stamp_user_name': stamp.user['user_name'],
                 'stamp_user_img': stamp.user['user_img']
             }
-            
+        
         favorite.timestamp = datetime.utcnow()
         
         if not favorite.isValid:
@@ -291,17 +254,17 @@ class StampedAPI(AStampedAPI):
     # Entities #
     # ######## #
     
-    def addEntity(self, 
-        title,
-        desc,
-        category,
-    ):
+    def addEntity(self, params):
+        # params.title, params.desc, params.category
+        raise NotImplementedError
         return self._entityDB.addEntity(entity)
     
     def getEntity(self, entityID):
         return self._entityDB.getEntity(entityID)
     
-    def updateEntity(self, entity):
+    def updateEntity(self, params):
+        # TODO: create Entity from params
+        raise NotImplementedError
         return self._entityDB.updateEntity(entity)
     
     def removeEntity(self, entityID):
@@ -314,7 +277,9 @@ class StampedAPI(AStampedAPI):
     # Stamps #
     # ###### #
     
-    def addStamp(self, stamp):
+    def addStamp(self, params):
+        # TODO: create Stamp from params
+        raise NotImplementedError
         return self._stampDB.addStamp(stamp)
     
     def getStamp(self, stampID):
@@ -323,7 +288,9 @@ class StampedAPI(AStampedAPI):
     def getStamps(self, stampIDs):
         return self._stampDB.getStamps(stampIDs)
     
-    def updateStamp(self, stamp):
+    def updateStamp(self, params):
+        # TODO: create Stamp from params
+        raise NotImplementedError
         return self._stampDB.updateStamp(stamp)
     
     def removeStamp(self, stampID, userID):

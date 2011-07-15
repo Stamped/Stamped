@@ -64,18 +64,25 @@ class Account(AObject):
         valid &= 'locale' in self and isinstance(self.locale, basestring)
         #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
         
-        if 'img' in self:
+        if 'img' in self and self.img is not None:
             valid &= isinstance(self.img, basestring)
-        if 'website' in self:
+        if 'website' in self and self.website is not None:
             valid &= isinstance(self.website, basestring)
-        if 'bio' in self:
+        if 'bio' in self and self.bio is not None:
             valid &= isinstance(self.bio, basestring)
-            
+        
+        
         valid &= 'color' in self and isinstance(self.color, dict)
         valid &= 'primary_color' in self.color and isinstance(self.color['primary_color'], basestring)
-        if 'secondary_color' in self.color:
-            valid &= isinstance(self.color['secondary_color'], basestring)
-            
+        
+        # TODO: there's something weird going on here, where self.color.secondary_color is None, but 
+        # it's not being equality tested against None... fuck off, Python!
+        #if 'secondary_color' in self.color and self.color.secondary_color is not None:
+        #print str(self.color['secondary_color'])
+        #print repr(self.color['secondary_color'])
+        #print str(type(self.color['secondary_color']))
+        #    valid &= isinstance(self.color['secondary_color'], basestring)
+        
         if 'linked_accounts' in self:
             valid &= isinstance(self.linked_accounts, dict) 
             if 'itunes' in self.linked_accounts:
@@ -88,6 +95,7 @@ class Account(AObject):
         
         valid &= 'flags' in self and isinstance(self.flags, dict)
         valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
+        
         if 'flagged' in self.flags:
             valid &= isinstance(self.flags['flagged'], bool)
         if 'locked' in self.flags:

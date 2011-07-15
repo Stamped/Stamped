@@ -18,20 +18,7 @@ class AStampedAPI(object):
     # ######## #
     
     @abstractmethod
-    def addAccount(self, 
-        firstName,
-        lastName,
-        username,
-        email,
-        password,
-        locale,
-        primary_color,
-        secondary_color=None,
-        img=None,
-        website=None,
-        bio=None,
-        privacy=False
-    ):
+    def addAccount(self, acct):
         pass
     
     @abstractmethod
