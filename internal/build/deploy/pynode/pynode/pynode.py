@@ -5,8 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import os, utils
+import os, sys, utils
 from kitchen import Kitchen
+from system import System
 from optparse import OptionParser
 
 class PyNode(object):
@@ -60,12 +61,15 @@ def parseCommandLine():
     return options
 
 def main():
+    # initialize system
+    system = System.getInstance()
+    
+    # parse commandline
     options = parseCommandLine()
     if options is None:
-        return
+        sys.exit(1)
     
-    os.putenv("ARCHFLAGS", "-arch i386 -arch x86_64")
-    
+    # initialize and run PyNode
     node = PyNode(options)
     node.run()
 

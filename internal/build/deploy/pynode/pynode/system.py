@@ -11,6 +11,15 @@ from utils import lazyProperty, Singleton
 from subprocess import Popen, PIPE
 
 class System(Singleton):
+    def __init__(self):
+        Singleton.__init__(self)
+        
+        # Mac OS X with certain versions of XCode and GCC incorrectly default 
+        # to using incorrect ARCHFLAGS, so correct this by using explicit 
+        # environment ARCHFLAGS.
+        if self.platform == "mac_os_x":
+            os.putenv("ARCHFLAGS", "-arch i386 -arch x86_64")
+    
     @lazyProperty
     def os(self):
         platform = sys.platform.lower()
