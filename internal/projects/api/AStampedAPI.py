@@ -122,7 +122,7 @@ class AStampedAPI(object):
     # ######### #
     
     @abstractmethod
-    def addFavorite(userID, stampID):
+    def addFavorite(userID, entityID, stampID):
         pass
     
     @abstractmethod

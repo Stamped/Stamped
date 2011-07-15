@@ -7,6 +7,15 @@ __license__ = "TODO"
 
 from abc import abstractmethod
 
+from db.mongodb.MongoAccount import MongoAccount
+from db.mongodb.MongoEntity import MongoEntity
+from db.mongodb.MongoUser import MongoUser
+from db.mongodb.MongoStamp import MongoStamp
+from db.mongodb.MongoComment import MongoComment
+from db.mongodb.MongoFavorite import MongoFavorite
+from db.mongodb.MongoCollection import MongoCollection
+from db.mongodb.MongoFriendship import MongoFriendship
+
 class MongoStampedAPI(StampedAPI):
     """
         Implementation of Stamped API atop MongoDB.
@@ -22,7 +31,7 @@ class MongoStampedAPI(StampedAPI):
         self._commentDB    = MongoComment()
         self._favoriteDB   = MongoFavorite()
         self._collectionDB = MongoCollection()
-        self._friendshipDB = MySQLFriendshipDB()
+        self._friendshipDB = MongoFriendship()
         
         self._validate()
 

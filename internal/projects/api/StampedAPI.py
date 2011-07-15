@@ -7,6 +7,14 @@ __license__ = "TODO"
 
 from abc import abstractmethod
 
+from Account import Account
+from Entity import Entity
+from User import User
+from Stamp import Stamp
+from Comment import Comment
+from Favorite import Favorite
+from Friendship import Friendship
+
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 
 # db-specific validation should occur elsewhere. This validation includes 
@@ -48,8 +56,37 @@ class StampedAPI(AStampedAPI):
     # Accounts #
     # ######## #
     
-    def addAccount(user):
-        return self._userDB.addUser(user)
+    def addAccount(
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+        img,
+        locale,
+        website=None,
+        bio=None,
+        primary_color,
+        secondary_color=None,
+        privacy=False
+    ):
+        account = Account()
+        account.first_name = firstName
+        account.last_name = lastName
+        account.username = username
+        account.email = email
+        account.password = password
+        account.img = img
+        account.locale = locale
+        if website:
+            account.website = website
+        if bio:
+            account.bio = bio
+        account.color = { 'primary_color': primary_color }
+        if secondary_color:
+            account.color['secondary_color'] = secondary_color
+        account.flags = { 'privacy': privacy }
+        return self._userDB.addUser(account)
     
     def addAccounts(users):
         return self._userDB.addUsers(users)
@@ -129,8 +166,8 @@ class StampedAPI(AStampedAPI):
     # Favorites #
     # ######### #
     
-    def addFavorite(userID, stampID):
-        # TODO: construct a favorite object from (userID, stampID)
+    def addFavorite(userID, entityID, stampID):
+        # TODO: construct a favorite object from (userID, entityID, stampID)
         raise NotImplementedError
         return self._favoriteDB.addFavorite(favorite)
     
