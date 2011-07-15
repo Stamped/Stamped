@@ -86,8 +86,6 @@ class StampedAPI(AStampedAPI):
         account.bio = params.bio
         account.flags = { 'privacy': params.privacy }
         
-        import utils
-        utils.log(account)
         if not account.isValid:
             raise InvalidArgument('Invalid input')
         

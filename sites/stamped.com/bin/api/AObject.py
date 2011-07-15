@@ -33,8 +33,11 @@ class AObject(object):
     def __len__(self):
         return len(self._data)
     
+    def __repr__(self):
+        return str(self._dict)
+    
     def __str__(self):
-        return str(self._data)
+        return str(self._dict)
     
     def __contains__(self, item):
         return item in self._data

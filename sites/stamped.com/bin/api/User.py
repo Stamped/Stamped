@@ -58,9 +58,9 @@ class User(AObject):
         valid &= 'username' in self and isinstance(self.username, basestring)
 #         valid &= 'email' in self and isinstance(self.email, basestring)
 #         valid &= 'password' in self and isinstance(self.password, basestring)
-        valid &= 'img' in self and isinstance(self.img, basestring)
+        #valid &= 'img' in self and isinstance(self.img, basestring)
 #         valid &= 'locale' in self and isinstance(self.locale, basestring)
-        valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
+        #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
         
         if 'website' in self:
             valid &= isinstance(self.website, basestring)
@@ -69,8 +69,8 @@ class User(AObject):
             
         valid &= 'color' in self and isinstance(self.color, dict)
         valid &= 'primary_color' in self.color and isinstance(self.color['primary_color'], basestring)
-        if 'secondary_color' in self.color:
-            valid &= isinstance(self.color['secondary_color'], basestring)
+        #if 'secondary_color' in self.color:
+        #    valid &= isinstance(self.color['secondary_color'], basestring)
             
 #         if 'linked_accounts' in self:
 #             valid &= isinstance(self.linked_accounts, dict) 
@@ -100,3 +100,4 @@ class User(AObject):
                 valid &= isinstance(self.stats['total_credit_given'], int)
         
         return valid
+

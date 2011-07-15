@@ -27,8 +27,16 @@ stampedAPI = MongoStampedAPI()
 # Utility Functions #
 # ################# #
 
+def encodeType(obj):
+    if '_dict' in obj:
+        return obj._dict
+    else:
+        return obj.__dict__
+
 def transformOutput(d):
-    return json.dumps(d, sort_keys=True, indent=2)
+    print str(d)
+    print repr(d)
+    return json.dumps(d, sort_keys=True, indent=2, default=encodeType)
 
 def parseRequestForm(schema, form):
     apiFuncName = utils.getFuncName(1)
@@ -58,11 +66,12 @@ def handleGETRequest(request, stampedAPIFunc, args):
     for arg in args:
         try:
             funcArg = request.args[arg]
+            funcArgs.append(funcArg)
             #vars()['arg%d' % index]
         except KeyError as e:
             return "Required argument '%s' to API function '%s' not found" % (arg, utils.getFuncName(1)), 400
     
-    return transformOutput(stampedAPIFunc(funcArgs))
+    return transformOutput(stampedAPIFunc(*funcArgs))
 
 # ######## #
 # Accounts #
