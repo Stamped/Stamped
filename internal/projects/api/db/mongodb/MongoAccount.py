@@ -75,8 +75,8 @@ class MongoAccount(AAccountDB, Mongo):
     def updateAccount(self, user):
         return self._updateDocument(user)
         
-    def removeAccount(self, user):
-        return self._removeDocument(user)
+    def removeAccount(self, userID):
+        return self._removeDocument(userID)
     
     def addAccounts(self, users):
         return self._addDocuments(users)

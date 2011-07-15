@@ -106,7 +106,7 @@ def main():
     
     print 'updated entity: ', entityDB.getEntity(entityID).title
     
-    entityDB.removeEntity(entity)
+    entityDB.removeEntity(entityID)
     
     entityDB.addEntities([entity, entityCopy])
     
@@ -146,7 +146,7 @@ def main():
     
     print 'updated user:   ', userDB.getUser(userID).username
     
-    accountDB.removeAccount(user)
+    accountDB.removeAccount(userID)
     
     accountDB.addAccounts([user, userCopy])
     
@@ -231,7 +231,7 @@ def main():
     
     print 'updated stamp:  ', stampDB.getStamp(stampID).blurb
     
-    stampDB.removeStamp(stampCopy)
+    stampDB.removeStamp(stampCopy.id, userCopy.id)
     
     stampDB.addStamps([stamp, stampCopy])
     
@@ -316,7 +316,7 @@ def main():
         print '                ', favorite['entity']['title'], '-', favorite['complete']
     print
     
-    print 'remove item:    ', favoriteDB.removeFavorite(favorite)
+    print 'remove item:    ', favoriteDB.removeFavorite(favorite.id)
     
     print    
     

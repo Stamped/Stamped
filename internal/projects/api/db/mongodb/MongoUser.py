@@ -70,15 +70,6 @@ class MongoUser(AUserDB, Mongo):
             raise KeyError("User not valid")
         return user
         
-#     def updateUser(self, user):
-#         return self._updateDocument(user)
-        
-#     def removeUser(self, user):
-#         return self._removeDocument(user)
-    
-#     def addUsers(self, users):
-#         return self._addDocuments(users)
-        
     def lookupUsers(self, userIDs, usernames):
         query = []
         if userIDs:

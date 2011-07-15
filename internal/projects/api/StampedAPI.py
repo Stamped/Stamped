@@ -9,7 +9,7 @@ from abc import abstractmethod
 
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 
-# db-specific validation should occur elsewhere. this validation incluedes, 
+# db-specific validation should occur elsewhere. This validation includes 
 # but is not limited to:
 #    * ensuring that a given ID is "valid"
 #    * ensuring that a given relationship is "valid"
@@ -80,7 +80,7 @@ class StampedAPI(AStampedAPI):
         return self._userDB.lookupUsers(userIDs, None)
     
     def getUserByName(username):
-        return self._userDB.lookupUsers(None, [ username ])
+        return self._userDB.lookupUsers(None, [ username ])[-1]
     
     def getUsersByNames(usernames):
         return self._userDB.lookupUsers(None, usernames)
@@ -154,61 +154,61 @@ class StampedAPI(AStampedAPI):
     # ######## #
     
     def addEntity(entity):
-        pass
+        return self._entityDB.addEntity(entity)
     
     def addEntities(entities):
-        pass
+        return self._entityDB.addEntities(entities)
     
     def getEntity(entityID):
-        pass
+        return self._entityDB.getEntity(entityID)
     
     def updateEntity(entity):
-        pass
+        return self._entityDB.updateEntity(entity)
     
     def removeEntity(entityID):
-        pass
+        return self._entityDB.removeEntity(entityID)
     
     def searchEntities(query, limit=20):
-        pass
+        return self._entityDB.matchEntities(query, limit)
     
     # ###### #
     # Stamps #
     # ###### #
     
     def addStamp(stamp):
-        pass
+        return self._stampDB.addStamp(stamp)
     
     def addStamps(stamps):
-        pass
+        return self._stampDB.addStamps(stamps)
     
     def getStamp(stampID):
-        pass
+        return self._stampDB.getStamp(stampID)
     
     def getStamps(stampIDs):
-        pass
+        return self._stampDB.getStamps(stampIDs)
     
-    def updateStamp(stampID):
-        pass
+    def updateStamp(stamp):
+        return self._stampDB.updateStamp(stamp)
     
-    def removeStamp(stampID):
-        pass
+    def removeStamp(stampID, userID):
+        return self._stampDB.removeStamp(stampID, userID)
     
     # ########### #
     # Collections #
     # ########### #
     
     def getInboxStampIDs(userID, limit=None):
-        pass
+        return self._collectionDB.getInboxStampIDs(userID, limit)
     
     def getInboxStamps(userID, limit=None):
-        pass
+        return self._collectionDB.getInboxStamps(userID, limit)
     
-    def getUserStampIDs(userID):
-        pass
+    def getUserStampIDs(userID, limit=None):
+        return self._collectionDB.getUserStampIDs(userID, limit)
     
-    def getUserStamps(userID):
-        pass
+    def getUserStamps(userID, limit=None):
+        return self._collectionDB.getUserStamps(userID, limit)
     
-    def getUserMentions(userID):
-        pass
+    def getUserMentions(userID, limit=None):
+        return self._collectionDB.getUserMentions(userID, limit)
 

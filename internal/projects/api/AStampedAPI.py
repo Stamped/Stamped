@@ -194,7 +194,7 @@ class AStampedAPI(object):
         pass
     
     @abstractmethod
-    def updateStamp(stampID):
+    def updateStamp(stamp):
         pass
     
     @abstractmethod

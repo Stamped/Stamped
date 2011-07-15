@@ -79,9 +79,10 @@ class MongoStamp(AStampDB, Mongo):
     def updateStamp(self, stamp):
         return self._updateDocument(stamp)
         
-    def removeStamp(self, stamp):
-        MongoUserStamps().removeUserStamp(stamp['user']['user_id'], stamp['id'])
-        return self._removeDocument(stamp)
+    def removeStamp(self, stampId, userId):
+        MongoUserStamps().removeUserStamp(userId, stampId)
+        ### TODO: Add removal from Inbox, etc.
+        return self._removeDocument(stampId)
     
     def addStamps(self, stamps):
         stampIds = [] 

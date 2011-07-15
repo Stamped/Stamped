@@ -66,8 +66,8 @@ class MongoFavorite(AFavoriteDB, Mongo):
             raise KeyError("Favorite not valid")
         return favorite
         
-    def removeFavorite(self, favorite):
-        return self._removeDocument(favorite)
+    def removeFavorite(self, favoriteID):
+        return self._removeDocument(favoriteID)
         
     def completeFavorite(self, favoriteId, complete=True):
         if not isinstance(complete, bool):

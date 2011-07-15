@@ -14,7 +14,7 @@ class ACollectionDB(object):
         self._desc = desc
     
     @abstractmethod
-    def getInboxStampIds(self, userId, limit=None):
+    def getInboxStampIDs(self, userId, limit=None):
         pass
         
     @abstractmethod
@@ -22,14 +22,14 @@ class ACollectionDB(object):
         pass
         
     @abstractmethod
-    def getUserStampIds(self, userId):
+    def getUserStampIDs(self, userId, limit=None):
         pass
         
     @abstractmethod
-    def getUserStamps(self, userId):
+    def getUserStamps(self, userId, limit=None):
         pass
         
     @abstractmethod
-    def getMentions(self, userId):
+    def getMentions(self, userId, limit=None):
         pass
     

@@ -31,24 +31,19 @@ class MongoCollection(ACollectionDB):
         
     ### PUBLIC
     
-    def getInboxStampIds(self, userId, limit=None):
+    def getInboxStampIDs(self, userId, limit=None):
         return MongoInboxStamps().getInboxStampIds(userId, limit)
     
     def getInboxStamps(self, userId, limit=None):
-        return MongoStamp().getStamps(self.getInboxStampIds(userId, limit))
+        return MongoStamp().getStamps(self.getInboxStampIDs(userId, limit))
     
-    def getUserStampIds(self, userId):
+    def getUserStampIDs(self, userId, limit=None):
         return MongoUserStamps().getUserStampIds(userId)
     
-    def getUserStamps(self, userId):
-        return MongoStamp().getStamps(self.getUserStampIds(userId))
-        
-        
+    def getUserStamps(self, userId, limit=None):
+        return MongoStamp().getStamps(self.getUserStampIDs(userId))
     
-    def getFavoriteStamps(self, userId):
-        raise NotImplementedError
-    
-    def getMentions(self, userId):
+    def getMentions(self, userId, limit=None):
         raise NotImplementedError
 
 

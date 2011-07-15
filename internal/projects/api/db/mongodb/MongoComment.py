@@ -56,8 +56,8 @@ class MongoComment(ACommentDB, Mongo):
             raise KeyError("Comment not valid")
         return comment
         
-    def removeComment(self, comment):
-        return self._removeDocument(comment)
+    def removeComment(self, commentID):
+        return self._removeDocument(commentID)
         
     
     # Can comments be updated? If a comment then *no*, but if it's a restamp 
