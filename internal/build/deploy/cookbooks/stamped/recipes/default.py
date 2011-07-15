@@ -4,7 +4,7 @@ from pynode.resources import Service
 env.includeRecipe("virtualenv")
 
 path = env.config.node.path
-env.cookbooks.virtualenv.VirtualEnv(path) #, site_packages=False)
+env.cookbooks.virtualenv.VirtualEnv(path, site_packages=False)
 
 env.includeRecipe("pip")
 env.includeRecipe("libevent")

@@ -8,7 +8,7 @@ __license__ = "TODO"
 from pynode.utils import log, shell
 from pynode.exceptions import Fail
 from pynode.providers.package import PackageProvider
-from subprocess import STDOUT, PIPE, check_call
+from subprocess import Popen, STDOUT, PIPE, check_call
 
 class HomebrewProvider(PackageProvider):
     def _install(self):
@@ -21,7 +21,7 @@ class HomebrewProvider(PackageProvider):
             log("installing homebrew...")
             
             # attempt to install homebrew
-            p = Popen('ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"', shell=TRUE)
+            p = Popen('ruby -e "$(curl -fsSL https://raw.github.com/gist/323731)"', shell=True)
             status = p.wait()
             
             if 0 != status:

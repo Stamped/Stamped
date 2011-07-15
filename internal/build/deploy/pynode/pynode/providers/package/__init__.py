@@ -24,7 +24,8 @@ class PackageProvider(Provider):
             return
         
         if not installVersion:
-            raise Fail("No version specified, and no candidate version available.")
+            log("No version specified, and no candidate version available for resource %s." % str(self.resource))
+            #raise Fail("No version specified, and no candidate version available.")
         
         log("Install %s version %s" % (self.resource.name, installVersion))
         log("(current: %s, candidate: %s)" % (self.currentVersion, self.candidateVersion))

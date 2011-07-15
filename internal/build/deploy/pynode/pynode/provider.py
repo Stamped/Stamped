@@ -44,9 +44,9 @@ class Provider(object):
         
         try:
             self._install()
-        except Exception as e:
+        except Exception:
             utils.log("Unable to install provider %s for resource %s" % (self, self.resource))
-            raise e
+            raise
     
     def _install(self):
         pass

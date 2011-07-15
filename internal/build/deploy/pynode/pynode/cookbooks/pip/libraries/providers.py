@@ -46,7 +46,10 @@ class PipPackageProvider(PackageProvider):
     
     @property
     def pip_binary_path(self):
-        return "pip"
+	if self.resource.virtualenv:
+            return self.resource.virtualenv + "/bin/pip"
+        else:
+            return "pip"
     
     @property
     def easy_install_binary_path(self):
@@ -61,7 +64,7 @@ class PipPackageProvider(PackageProvider):
             virtualenv = ""
         
         if name == 'pip' or not version:
-            (_, status) = self._shell("%s %s %s install --upgrade %s" % \
+            (_, status) = self._shell("%s %s %s install %s" % \
                 (prefix, self.pip_binary_path, virtualenv, name))
         else:
             (_, status) = self._shell("%s %s %s install %s==%s" % \
@@ -79,8 +82,11 @@ class PipPackageProvider(PackageProvider):
         self._shell([self.pip_binary_path, "uninstall", name])
     
     def _shell(self, cmd):
+        log(cmd)
+        
         try:
-            return shell(cmd)
+            #return shell(cmd)
+            return Popen(cmd, shell=True).wait()
         except Exception:
             log("error executing command: %s" % cmd)
             raise
