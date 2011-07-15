@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+from abc import abstractmethod
 from Stamp import Stamp
 
 class AStampDB(object):
@@ -12,39 +13,27 @@ class AStampDB(object):
     def __init__(self, desc):
         self._desc = desc
     
+    @abstractmethod
     def addStamp(self, stamp):
-        raise NotImplementedError
-    
-    def getStamp(self, stampID):
-        raise NotImplementedError
-    
+        pass
+        
+    @abstractmethod
+    def getStamp(self, stampId):
+        pass
+        
+    @abstractmethod
     def updateStamp(self, stamp):
-        raise NotImplementedError
-    
-    def removeStamp(self, stampID):
-        raise NotImplementedError
+        pass
         
-    def flagStamp(self, stampID, flag=1):
-        raise NotImplementedError
-    
+    @abstractmethod
+    def removeStamp(self, stamp):
+        pass
+        
+    @abstractmethod
     def addStamps(self, stamps):
-        return map(self.addStamp, stamps)
-    
-    def getStamps(self, stampIDs):
-        return map(self.getStamp, stampIDs)
-    
-    def updateStamps(self, stamps):
-        return map(self.updateStamp, stamps)
-    
-    def removeStamps(self, stampIDs):
-        return map(self.removeStamp, stampIDs)
+        pass
         
-    def flagStamps(self, stampIDs, flag=1):
-        return map(self.flagStamp, stampIDs, flag)
+    @abstractmethod
+    def getStamps(self, stampIds):
+        pass
     
-    def __len__(self):
-        raise NotImplementedError
-    
-    def __str__(self):
-        return self._desc
-

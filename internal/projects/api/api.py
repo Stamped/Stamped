@@ -18,6 +18,7 @@ from Mention import Mention
 from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship
+from Account import Account
 
 # import specific databases
 # from db.mysql.MySQLEntityDB import MySQLEntityDB
@@ -38,6 +39,7 @@ from db.mongodb.MongoFriendship import MongoFriendship
 from db.mongodb.MongoCollection import MongoCollection
 from db.mongodb.MongoFavorite import MongoFavorite
 from db.mongodb.MongoComment import MongoComment
+from db.mongodb.MongoAccount import MongoAccount
 
 
 def _setup():
@@ -78,6 +80,7 @@ def main():
     collectionDB = MongoCollection()
     favoriteDB = MongoFavorite()
     commentDB = MongoComment()
+    accountDB = MongoAccount()
 
     print
 
@@ -131,7 +134,7 @@ def main():
         }    
     })
     
-    userID = userDB.addUser(user)
+    userID = accountDB.addAccount(user)
     print 'userID:         ', userID
     
     userCopy = userDB.getUser(userID)
@@ -139,13 +142,13 @@ def main():
     
     userCopy['username'] = 'kpalms'
     userCopy['privacy'] = False
-    userDB.updateUser(userCopy)
+    accountDB.updateAccount(userCopy)
     
     print 'updated user:   ', userDB.getUser(userID).username
     
-    userDB.removeUser(user)
+    accountDB.removeAccount(user)
     
-    userDB.addUsers([user, userCopy])
+    accountDB.addAccounts([user, userCopy])
     
     print 'find by name:   ', len(userDB.lookupUsers(userIDs=None, usernames=['kevin','kpalms']))
     print 'find by id:     ', len(userDB.lookupUsers(userIDs=[userID, '4e1ca9bd32a7ba15ab000002'], usernames=None))

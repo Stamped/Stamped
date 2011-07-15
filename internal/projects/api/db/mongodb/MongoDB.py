@@ -67,6 +67,7 @@ class Mongo():
         
         
     def _mongoToObj(self, data):
+#         print '_mongoToObj: ', data
         data['id'] = self._getStringFromObjectId(data['_id'])
         del(data['_id'])
         return data
@@ -181,6 +182,7 @@ class Mongo():
         return self._collection.insert(self._objsToMongo(documents))
         
     def _getDocumentFromId(self, documentId):
+#         print 'documentId: ', documentId
         document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)))
         return document
         

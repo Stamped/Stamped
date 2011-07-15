@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped, Inc."
 __license__ = "TODO"
 
+from abc import abstractmethod
 from Collection import Collection
 
 class ACollectionDB(object):
@@ -12,21 +13,23 @@ class ACollectionDB(object):
     def __init__(self, desc):
         self._desc = desc
     
-    def getInbox(self, userID):
-        raise NotImplementedError
+    @abstractmethod
+    def getInboxStampIds(self, userId, limit=None):
+        pass
+        
+    @abstractmethod
+    def getInboxStamps(self, userId, limit=None):
+        pass
+        
+    @abstractmethod
+    def getUserStampIds(self, userId):
+        pass
+        
+    @abstractmethod
+    def getUserStamps(self, userId):
+        pass
+        
+    @abstractmethod
+    def getMentions(self, userId):
+        pass
     
-    def getUser(self, userID):
-        raise NotImplementedError
-    
-    def getFavorites(self, userID):
-        raise NotImplementedError
-    
-    def getMentions(self, userID):
-        raise NotImplementedError
-    
-    def __len__(self):
-        raise NotImplementedError
-    
-    def __str__(self):
-        return self._desc
-

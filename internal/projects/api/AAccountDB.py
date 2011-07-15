@@ -6,26 +6,34 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from abc import abstractmethod
-from User import User
+from Account import Account
 
-class AUserDB(object):
+class AAccountDB(object):
     
     def __init__(self, desc):
         self._desc = desc
         
     @abstractmethod
-    def getUser(self, userID):
+    def addAccount(self, user):
         pass
         
     @abstractmethod
-    def lookupUsers(self, userIDs, usernames):
+    def getAccount(self, userId):
         pass
         
     @abstractmethod
-    def searchUsers(self, searchQuery, searchLimit=20):
+    def updateAccount(self, user):
         pass
         
     @abstractmethod
-    def checkPrivacy(self, userId):
+    def removeAccount(self, user):
+        pass
+        
+    @abstractmethod
+    def addAccounts(self, users):
+        pass
+        
+    @abstractmethod
+    def flagAccount(self, user):
         pass
         

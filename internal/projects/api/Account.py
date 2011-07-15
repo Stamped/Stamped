@@ -7,17 +7,17 @@ __license__ = "TODO"
 
 from AObject import AObject
 
-class User(AObject):
+class Account(AObject):
 
     _schema = {
         'id': basestring,
         'first_name': basestring,
         'last_name': basestring,
         'username': basestring,
-#         'email': basestring,
-#         'password': basestring,
+        'email': basestring,
+        'password': basestring,
         'img': basestring,
-#         'locale': basestring,
+        'locale': basestring,
         'timestamp': basestring,
         'website': basestring,
         'bio': basestring,
@@ -25,9 +25,12 @@ class User(AObject):
             'primary_color': basestring,
             'secondary_color': basestring
         },
-#         'linked_accounts': {
-#             'itunes': basestring
-#         },
+        'linked_accounts': {
+            'itunes': basestring
+        },
+        'devices': {
+            'ios_device_tokens': list
+        },
         'flags': {
             'privacy': bool,
             'flagged': bool,
@@ -56,10 +59,10 @@ class User(AObject):
         valid &= 'first_name' in self and isinstance(self.first_name, basestring)
         valid &= 'last_name' in self and isinstance(self.last_name, basestring)
         valid &= 'username' in self and isinstance(self.username, basestring)
-#         valid &= 'email' in self and isinstance(self.email, basestring)
-#         valid &= 'password' in self and isinstance(self.password, basestring)
+        valid &= 'email' in self and isinstance(self.email, basestring)
+        valid &= 'password' in self and isinstance(self.password, basestring)
         valid &= 'img' in self and isinstance(self.img, basestring)
-#         valid &= 'locale' in self and isinstance(self.locale, basestring)
+        valid &= 'locale' in self and isinstance(self.locale, basestring)
         valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
         
         if 'website' in self:
@@ -72,10 +75,15 @@ class User(AObject):
         if 'secondary_color' in self.color:
             valid &= isinstance(self.color['secondary_color'], basestring)
             
-#         if 'linked_accounts' in self:
-#             valid &= isinstance(self.linked_accounts, dict) 
-#             if 'itunes' in self.linked_accounts:
-#                 valid &= isinstance(self.linked_accounts['itunes'], float)
+        if 'linked_accounts' in self:
+            valid &= isinstance(self.linked_accounts, dict) 
+            if 'itunes' in self.linked_accounts:
+                valid &= isinstance(self.linked_accounts['itunes'], float)
+            
+        if 'devices' in self:
+            valid &= isinstance(self.devices, dict) 
+            if 'ios_device_tokens' in self.devices:
+                valid &= isinstance(self.devices['ios_device_tokens'], list)
         
         valid &= 'flags' in self and isinstance(self.flags, dict)
         valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)

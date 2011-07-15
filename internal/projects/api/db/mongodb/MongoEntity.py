@@ -135,8 +135,8 @@ class MongoEntity(AEntityDB, Mongo):
     def addEntity(self, entity):
         return self._addDocument(entity)
     
-    def getEntity(self, entityID):
-        entity = Entity(self._getDocumentFromId(entityID))
+    def getEntity(self, entityId):
+        entity = Entity(self._getDocumentFromId(entityId))
         if entity.isValid == False:
             raise KeyError("Entity not valid")
         return entity
@@ -151,11 +151,11 @@ class MongoEntity(AEntityDB, Mongo):
     def addEntities(self, entities):
         return self._addDocuments(entities)
         
-    def matchEntities(self, searchQuery, searchLimit=20):
+    def matchEntities(self, query, limit=20):
         # Using a simple regex here. Need to rank results at some point...
-        searchQuery = '^%s' % searchQuery
+        query = '^%s' % query
         result = []
-        for entity in self._collection.find({"title": {"$regex": searchQuery, "$options": "i"}}).limit(searchLimit):
+        for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
             result.append(Entity(self._mongoToObj(entity)))
         return result
             

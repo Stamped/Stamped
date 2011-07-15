@@ -21,10 +21,10 @@ class MongoUser(AUserDB, Mongo):
         'first_name': basestring,
         'last_name': basestring,
         'username': basestring,
-        'email': basestring,
-        'password': basestring,
+#         'email': basestring,
+#         'password': basestring,
         'img': basestring,
-        'locale': basestring,
+#         'locale': basestring,
         'timestamp': basestring,
         'website': basestring,
         'bio': basestring,
@@ -32,9 +32,9 @@ class MongoUser(AUserDB, Mongo):
             'primary_color': basestring,
             'secondary_color': basestring
         },
-        'linked_accounts': {
-            'itunes': basestring
-        },
+#         'linked_accounts': {
+#             'itunes': basestring
+#         },
         'flags': {
             'privacy': bool,
             'flagged': bool,
@@ -60,23 +60,24 @@ class MongoUser(AUserDB, Mongo):
         
     ### PUBLIC
     
-    def addUser(self, user):
-        return self._addDocument(user)
+#     def addUser(self, user):
+#         return self._addDocument(user)
     
-    def getUser(self, userID):
-        user = User(self._getDocumentFromId(userID))
+    def getUser(self, userId):
+#         print userId
+        user = User(self._getDocumentFromId(userId))
         if user.isValid == False:
             raise KeyError("User not valid")
         return user
         
-    def updateUser(self, user):
-        return self._updateDocument(user)
+#     def updateUser(self, user):
+#         return self._updateDocument(user)
         
-    def removeUser(self, user):
-        return self._removeDocument(user)
+#     def removeUser(self, user):
+#         return self._removeDocument(user)
     
-    def addUsers(self, users):
-        return self._addDocuments(users)
+#     def addUsers(self, users):
+#         return self._addDocuments(users)
         
     def lookupUsers(self, userIDs, usernames):
         query = []

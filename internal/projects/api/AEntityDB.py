@@ -5,40 +5,34 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+from abc import abstractmethod
 from Entity import Entity
 
 class AEntityDB(object):
     
     def __init__(self, desc):
         self._desc = desc
-    
+        
+    @abstractmethod
     def addEntity(self, entity):
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     def getEntity(self, entityID):
-        raise NotImplementedError
-    
+        pass
+        
+    @abstractmethod
     def updateEntity(self, entity):
-        raise NotImplementedError
+        pass
+        
+    @abstractmethod
+    def removeEntity(self, entity):
+        pass
     
-    def removeEntity(self, entityID):
-        raise NotImplementedError
-    
+    @abstractmethod
     def addEntities(self, entities):
-        return map(self.addEntity, entities)
-    
-    def getEntities(self, entityIDs):
-        return map(self.getEntity, entityIDs)
-    
-    def updateEntities(self, entities):
-        return map(self.updateEntities, entities)
-    
-    def removeEntities(self, entityIDs):
-        return map(self.removeEntity, entityIDs)
-    
-    def __len__(self):
-        raise NotImplementedError
-    
-    def __str__(self):
-        return self._desc
-
+        pass
+        
+    @abstractmethod
+    def matchEntities(self, query, limit=20):
+        pass

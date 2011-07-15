@@ -9,10 +9,8 @@ from threading import Lock
 from datetime import datetime
 
 from MongoDB import Mongo
-from ABlockDB import ABlockDB
-from Block import Block
 
-class MongoBlock(ABlockDB, Mongo):
+class MongoBlock(Mongo):
         
     COLLECTION = 'blocks'
         
@@ -23,7 +21,6 @@ class MongoBlock(ABlockDB, Mongo):
     }
     
     def __init__(self, setup=False):
-        ABlockDB.__init__(self, self.DESC)
         Mongo.__init__(self, collection=self.COLLECTION)
         
         self.db = self._getDatabase()

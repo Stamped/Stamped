@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+from abc import abstractmethod
 from Friendship import Friendship
 
 class AFriendshipDB(object):
@@ -13,32 +14,42 @@ class AFriendshipDB(object):
         self._desc = desc
     
     def addFriendship(self, friendship):
-        raise NotImplementedError
-    
+        pass
+        
+    @abstractmethod
     def checkFriendship(self, friendship):
-        raise NotImplementedError
-    
+        pass
+        
+    @abstractmethod
     def removeFriendship(self, friendship):
-        raise NotImplementedError
-    
+        pass
+        
+    @abstractmethod
     def getFriends(self, userId):
-        raise NotImplementedError
+        pass
         
+    @abstractmethod
     def getFollowers(self, userId):
-        raise NotImplementedError
+        pass
         
+    @abstractmethod
     def approveFriendship(self, friendship):
-        raise NotImplementedError
-    
+        pass
+        
+    @abstractmethod
     def addBlock(self, friendship):
-        raise NotImplementedError
-    
+        pass
+        
+    @abstractmethod
     def checkBlock(self, friendship):
-        raise NotImplementedError
-            
+        pass
+        
+    @abstractmethod
     def removeBlock(self, friendship):
-        raise NotImplementedError
-            
+        pass
+        
+    @abstractmethod
     def getBlocks(self, userId):
-        raise NotImplementedError
+        pass
+        
     
