@@ -61,10 +61,11 @@ class Account(AObject):
         valid &= 'username' in self and isinstance(self.username, basestring)
         valid &= 'email' in self and isinstance(self.email, basestring)
         valid &= 'password' in self and isinstance(self.password, basestring)
-        valid &= 'img' in self and isinstance(self.img, basestring)
         valid &= 'locale' in self and isinstance(self.locale, basestring)
-        valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
+        #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
         
+        if 'img' in self:
+            valid &= isinstance(self.img, basestring)
         if 'website' in self:
             valid &= isinstance(self.website, basestring)
         if 'bio' in self:

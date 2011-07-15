@@ -9,8 +9,8 @@ from threading import Lock
 from datetime import datetime
 
 from MongoDB import Mongo
-from AEntityDB import AEntityDB
-from Entity import Entity
+from api.AEntityDB import AEntityDB
+from api.Entity import Entity
 
 class MongoEntity(AEntityDB, Mongo):
         

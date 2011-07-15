@@ -5,6 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+def removeNonAscii(s):
+    return "".join(ch for ch in s if ord(ch) < 128)
+
 def normalize(s):
     if isinstance(s, unicode):
         return removeNonAscii(s.encode("utf-8"))

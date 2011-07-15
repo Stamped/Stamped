@@ -8,9 +8,9 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
+from api.AFavoriteDB import AFavoriteDB
+from api.Favorite import Favorite
 from MongoDB import Mongo
-from AFavoriteDB import AFavoriteDB
-from Favorite import Favorite
 from MongoUserFavorites import MongoUserFavorites
 
 class MongoFavorite(AFavoriteDB, Mongo):

@@ -8,9 +8,9 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
+from api.ACommentDB import ACommentDB
+from api.Comment import Comment
 from MongoDB import Mongo
-from ACommentDB import ACommentDB
-from Comment import Comment
 from MongoStampComments import MongoStampComments
 
 class MongoComment(ACommentDB, Mongo):

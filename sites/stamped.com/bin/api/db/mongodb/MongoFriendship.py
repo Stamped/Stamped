@@ -10,9 +10,9 @@ import copy
 from threading import Lock
 from datetime import datetime
 
+from api.AFriendshipDB import AFriendshipDB
+from api.Friendship import Friendship
 from MongoDB import Mongo
-from AFriendshipDB import AFriendshipDB
-from Friendship import Friendship
 from MongoUser import MongoUser
 from MongoFriends import MongoFriends
 from MongoFollowers import MongoFollowers

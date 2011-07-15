@@ -8,9 +8,9 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
+from api.AUserDB import AUserDB
+from api.User import User
 from MongoDB import Mongo
-from AUserDB import AUserDB
-from User import User
 
 class MongoUser(AUserDB, Mongo):
         

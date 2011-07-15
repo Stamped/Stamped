@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from abc import abstractmethod
+from StampedAPI import StampedAPI
 
 from db.mongodb.MongoAccount import MongoAccount
 from db.mongodb.MongoEntity import MongoEntity

@@ -11,6 +11,7 @@ __all__ = [
     "ResourceArgumentList", 
     "ResourceArgumentBoolean", 
     "Resource", 
+    "Template", 
 ]
 
 import utils
@@ -22,7 +23,7 @@ from exceptions import *
 # ResourceArgumentList.validate, and ResourceArgumentBoolean.validate.
 
 class ResourceArgumentSchema(OrderedDict):
-    def __init__(self, items):
+    def __init__(self, items=[]):
         OrderedDict.__init__(self)
         
         # hack to make ordering work... would be *much* nicer if python 
@@ -243,4 +244,10 @@ class Resource(AttributeDict):
             return item(self)
         else:
             return item
+
+class Template(object):
+    
+    def __init__(self, path):
+        self.path = path
+        # TODO
 

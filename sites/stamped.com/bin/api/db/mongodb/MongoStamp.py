@@ -8,9 +8,9 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
+from api.AStampDB import AStampDB
+from api.Stamp import Stamp
 from MongoDB import Mongo
-from AStampDB import AStampDB
-from Stamp import Stamp
 from MongoUserStamps import MongoUserStamps
 from MongoInboxStamps import MongoInboxStamps
 from MongoFriendship import MongoFriendship

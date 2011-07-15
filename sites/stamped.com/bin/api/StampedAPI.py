@@ -17,6 +17,16 @@ from Stamp import Stamp
 from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship
+from Collection import Collection
+
+from AAccountDB import AAccountDB
+from AEntityDB import AEntityDB
+from AUserDB import AUserDB
+from AStampDB import AStampDB
+from ACommentDB import ACommentDB
+from AFavoriteDB import AFavoriteDB
+from ACollectionDB import ACollectionDB
+from AFriendshipDB import AFriendshipDB
 
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 

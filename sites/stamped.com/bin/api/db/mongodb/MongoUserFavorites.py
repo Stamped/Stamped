@@ -11,7 +11,7 @@ from threading import Lock
 from datetime import datetime
 
 from MongoDB import Mongo
-# from AFriendshipDB import AFriendshipDB
+# from api.AFriendshipDB import AFriendshipDB
 # from Friendship import Friendship
 
 class MongoUserFavorites(Mongo):
