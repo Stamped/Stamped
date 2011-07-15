@@ -41,7 +41,7 @@ class MongoFavorite(AFavoriteDB, Mongo):
             'stamp_user_name': basestring,
             'stamp_user_img': basestring    # ??
         },
-        'timestamp': basestring,
+        'timestamp': datetime,
         'complete': bool
     }
     
@@ -79,7 +79,7 @@ class MongoFavorite(AFavoriteDB, Mongo):
                 safe=True)
             )
     
-    def getFavoriteIds(self, userId):
+    def getFavoriteIDs(self, userId):
         return MongoUserFavorites().getUserFavoriteIds(userId)
     
     def getFavorites(self, userId):
@@ -91,12 +91,7 @@ class MongoFavorite(AFavoriteDB, Mongo):
                 raise KeyError("Favorite not valid")
             result.append(favorite)
         return result
-        
-    
-#     def addUsers(self, users):
-#         return self._addDocuments(users)
             
     
     ### PRIVATE
-            
     

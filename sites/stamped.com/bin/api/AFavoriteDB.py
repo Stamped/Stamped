@@ -30,7 +30,7 @@ class AFavoriteDB(object):
         pass
         
     @abstractmethod
-    def getFavoriteIds(self, userId):
+    def getFavoriteIDs(self, userId):
         pass
         
     @abstractmethod

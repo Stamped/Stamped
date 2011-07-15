@@ -5,6 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+from datetime import datetime
+
 from AObject import AObject
 
 class Favorite(AObject):
@@ -33,7 +35,7 @@ class Favorite(AObject):
             'stamp_user_name': basestring,
             'stamp_user_img': basestring    # ??
         },
-        'timestamp': basestring,
+        'timestamp': datetime,
         'complete': bool
     }
     
@@ -72,7 +74,7 @@ class Favorite(AObject):
             valid &= 'stamp_user_name' in self.stamp and isinstance(self.stamp['stamp_user_name'], basestring)
             valid &= 'stamp_user_img' in self.stamp and isinstance(self.stamp['stamp_user_img'], basestring)
         
-        valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
+        valid &= 'timestamp' in self and isinstance(self.timestamp, datetime)
         if 'complete' in self:
             valid &= isinstance(self.complete, bool)
             

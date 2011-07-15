@@ -18,7 +18,20 @@ class AStampedAPI(object):
     # ######## #
     
     @abstractmethod
-    def addAccount(user):
+    def addAccount(self, 
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+        locale,
+        primary_color,
+        secondary_color=None,
+        img=None,
+        website=None,
+        bio=None,
+        privacy=False
+    ):
         pass
     
     @abstractmethod
@@ -122,15 +135,15 @@ class AStampedAPI(object):
         pass
     
     @abstractmethod
-    def getFavorite(favoriteID):
+    def getFavorite(userID, favoriteID):
         pass
     
     @abstractmethod
-    def removeFavorite(favoriteID):
+    def removeFavorite(userID, favoriteID):
         pass
     
     @abstractmethod
-    def completeFavorite(favoriteID):
+    def completeFavorite(userID, favoriteID):
         pass
     
     @abstractmethod
@@ -147,10 +160,6 @@ class AStampedAPI(object):
     
     @abstractmethod
     def addEntity(entity):
-        pass
-    
-    @abstractmethod
-    def addEntities(entities):
         pass
     
     @abstractmethod
@@ -175,10 +184,6 @@ class AStampedAPI(object):
     
     @abstractmethod
     def addStamp(stamp):
-        pass
-    
-    @abstractmethod
-    def addStamps(stamps):
         pass
     
     @abstractmethod

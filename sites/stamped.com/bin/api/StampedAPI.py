@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from abc import abstractmethod
+from datetime import datetime
 
 from Exceptions import InvalidArgument
 
@@ -58,7 +59,7 @@ class StampedAPI(AStampedAPI):
     # Accounts #
     # ######## #
     
-    def addAccount(
+    def addAccount(self, 
         firstName,
         lastName,
         username,
@@ -95,10 +96,10 @@ class StampedAPI(AStampedAPI):
         
         return self._userDB.addUser(account)
     
-    def getAccount(userID):
+    def getAccount(self, userID):
         return self._accountDB.getAccount(userID)
     
-    def updateAccount(
+    def updateAccount(self, 
         id,
         firstName=None,
         lastName=None,
@@ -144,155 +145,196 @@ class StampedAPI(AStampedAPI):
         
         return self._accountDB.updateAccount(account)
     
-    def removeAccount(userID):
+    def removeAccount(self, userID):
         return self._accountDB.removeAccount(userID)
     
-    def flagAccount(userID):
+    def flagAccount(self, userID):
         return self._accountDB.flagAccount(userID)
     
-    def unflagAccount(userID):
+    def unflagAccount(self, userID):
         return self._accountDB.unflagAccount(userID)
     
     # ##### #
     # Users #
     # ##### #
     
-    def getUser(userID):
+    def getUser(self, userID):
         return self._userDB.getUser(userID)
     
-    def getUsers(userIDs):
+    def getUsers(self, userIDs):
         return self._userDB.lookupUsers(userIDs, None)
     
-    def getUserByName(username):
+    def getUserByName(self, username):
         return self._userDB.lookupUsers(None, [ username ])[-1]
     
-    def getUsersByNames(usernames):
+    def getUsersByNames(self, usernames):
         return self._userDB.lookupUsers(None, usernames)
     
-    def searchUsers(query, limit=20):
+    def searchUsers(self, query, limit=20):
         return self._userDB.searchUsers(query, limit)
     
-    def getPrivacy(userID):
+    def getPrivacy(self, userID):
         return self._userDB.getPrivacy(userID)
     
     # ############# #
     # Relationships #
     # ############# #
     
-    def addFriendship(relationship):
+    def addFriendship(self, userID, friendID):
+        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
         return self._friendshipDB.addFriendship(relationship)
     
-    def checkFriendship(relationship):
+    def checkFriendship(self, userID, friendID):
+        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
         return self._friendshipDB.checkFriendship(relationship)
     
-    def removeFriendship(relationship):
+    def removeFriendship(self, userID, friendID):
+        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
         return self._friendshipDB.removeFriendship(relationship)
     
-    def getFriends(userID):
+    def getFriends(self, userID):
         return self._friendshipDB.getFriends(userID)
     
-    def getFollowers(userID):
+    def getFollowers(self, userID):
         return self._friendshipDB.getFollowers(userID)
     
-    def approveFriendship(relationship):
+    def approveFriendship(self, userID, friendID):
+        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
         return self._friendshipDB.approveFriendship(relationship)
     
-    def addBlock(relationship):
+    def addBlock(self, userID, friendID):
+        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
         return self._friendshipDB.addBlock(relationship)
     
-    def checkBlock(relationship):
+    def checkBlock(self, userID, friendID):
+        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
         return self._friendshipDB.checkBlock(relationship)
     
-    def removeBlock(relationship):
+    def removeBlock(self, userID, friendID):
+        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
         return self._friendshipDB.removeBlock(relationship)
     
-    def getBlocks(userID):
+    def getBlocks(self, userID):
         return self._friendshipDB.getBlocks(userID)
     
     # ######### #
     # Favorites #
     # ######### #
     
-    def addFavorite(userID, entityID, stampID):
+    def addFavorite(self, userID, entityID, stampID):
         # TODO: construct a favorite object from (userID, entityID, stampID)
-        raise NotImplementedError
+        favorite = Favorite()
+        
+        user = self.getUser(userID)
+        favorite.user = {
+            'user_id': user.id,
+            'user_name': user.username
+        }
+        
+        entity = self.getEntity(entityID)
+        favorite.entity = {
+            'entity_id': entity.id,
+            'title': entity.title,
+            'category': entity.category,
+            'subtitle': entity.desc ### TODO: Change to appropriate subtitle
+        }
+        if entity.coordinates:
+            favorite.entity['coordinates'] = entity.details['place']['coordinates']
+        
+        if stampID:
+            stamp = self.getStamp(stampID)
+            favorite.stamp = {
+                'stamp_id': stamp.id,
+                'stamp_blurb': stamp.blurb
+                'stamp_timestamp': stamp.timestamp,
+                'stamp_user_id': stamp.user['user_id'],
+                'stamp_user_name': stamp.user['user_name'],
+                'stamp_user_img': stamp.user['user_img']
+            }
+            
+        favorite.timestamp = datetime.utcnow()
+        
+        if not favorite.isValid:
+            raise InvalidArgument('Invalid input')
+            
         return self._favoriteDB.addFavorite(favorite)
     
-    def getFavorite(favoriteID):
+    def getFavorite(self, userID, favoriteID):
+        ### TODO: Verify userID has permission to access
         return self._favoriteDB.getFavorite(favoriteID)
     
-    def removeFavorite(favoriteID):
+    def removeFavorite(self, userID, favoriteID):
+        ### TODO: Verify userID has permission to access
         return self._favoriteDB.removeFavorite(favoriteID)
     
-    def completeFavorite(favoriteID):
+    def completeFavorite(self, userID, favoriteID):
+        ### TODO: Verify userID has permission to access
         return self._favoriteDB.completeFavorite(favoriteID)
     
-    def getFavoriteIDs(userID):
-        return self._favoriteDB.getFavoriteIds(favoriteID)
+    def getFavoriteIDs(self, userID):
+        return self._favoriteDB.getFavoriteIDs(userID)
     
-    def getFavorites(userID):
-        return self._favoriteDB.getFavoriteIds(favoriteID)
+    def getFavorites(self, userID):
+        return self._favoriteDB.getFavoriteIds(userID)
     
     # ######## #
     # Entities #
     # ######## #
     
-    def addEntity(entity):
+    def addEntity(self, 
+        title,
+        desc,
+        category,
+    ):
         return self._entityDB.addEntity(entity)
     
-    def addEntities(entities):
-        return self._entityDB.addEntities(entities)
-    
-    def getEntity(entityID):
+    def getEntity(self, entityID):
         return self._entityDB.getEntity(entityID)
     
-    def updateEntity(entity):
+    def updateEntity(self, entity):
         return self._entityDB.updateEntity(entity)
     
-    def removeEntity(entityID):
+    def removeEntity(self, entityID):
         return self._entityDB.removeEntity(entityID)
     
-    def searchEntities(query, limit=20):
+    def searchEntities(self, query, limit=20):
         return self._entityDB.matchEntities(query, limit)
     
     # ###### #
     # Stamps #
     # ###### #
     
-    def addStamp(stamp):
+    def addStamp(self, stamp):
         return self._stampDB.addStamp(stamp)
     
-    def addStamps(stamps):
-        return self._stampDB.addStamps(stamps)
-    
-    def getStamp(stampID):
+    def getStamp(self, stampID):
         return self._stampDB.getStamp(stampID)
     
-    def getStamps(stampIDs):
+    def getStamps(self, stampIDs):
         return self._stampDB.getStamps(stampIDs)
     
-    def updateStamp(stamp):
+    def updateStamp(self, stamp):
         return self._stampDB.updateStamp(stamp)
     
-    def removeStamp(stampID, userID):
+    def removeStamp(self, stampID, userID):
         return self._stampDB.removeStamp(stampID, userID)
     
     # ########### #
     # Collections #
     # ########### #
     
-    def getInboxStampIDs(userID, limit=None):
+    def getInboxStampIDs(self, userID, limit=None):
         return self._collectionDB.getInboxStampIDs(userID, limit)
     
-    def getInboxStamps(userID, limit=None):
+    def getInboxStamps(self, userID, limit=None):
         return self._collectionDB.getInboxStamps(userID, limit)
     
-    def getUserStampIDs(userID, limit=None):
+    def getUserStampIDs(self, userID, limit=None):
         return self._collectionDB.getUserStampIDs(userID, limit)
     
-    def getUserStamps(userID, limit=None):
+    def getUserStamps(self, userID, limit=None):
         return self._collectionDB.getUserStamps(userID, limit)
     
-    def getUserMentions(userID, limit=None):
+    def getUserMentions(self, userID, limit=None):
         return self._collectionDB.getUserMentions(userID, limit)
 
