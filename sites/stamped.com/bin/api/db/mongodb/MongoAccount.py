@@ -11,7 +11,6 @@ from datetime import datetime
 from MongoDB import Mongo
 from api.AAccountDB import AAccountDB
 from api.Account import Account
-from api.User import User
 
 class MongoAccount(AAccountDB, Mongo):
         
@@ -68,7 +67,7 @@ class MongoAccount(AAccountDB, Mongo):
         return self._addDocument(user)
     
     def getAccount(self, userID):
-        user = User(self._getDocumentFromId(userID))
+        user = Account(self._getDocumentFromId(userID))
         if user.isValid == False:
             print str(user)
             raise KeyError("User not valid")

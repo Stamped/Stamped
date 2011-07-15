@@ -21,7 +21,7 @@ REST_API_VERSION = "v1"
 REST_API_PREFIX  = "/api/%s/" % REST_API_VERSION
 
 app = Flask(__name__)
-stampedAPI = MongoStampedAPI()
+stampedAPI = MongoStampedAPI() 
 
 # ################# #
 # Utility Functions #
@@ -68,9 +68,11 @@ def handleGETRequest(request, stampedAPIFunc, args):
             funcArg = request.args[arg]
             funcArgs.append(funcArg)
             #vars()['arg%d' % index]
-        except KeyError as e:
-            return "Required argument '%s' to API function '%s' not found" % (arg, utils.getFuncName(1)), 400
-    
+        except:
+            print 'False'
+    #         except KeyError as e:
+    #             return "Required argument '%s' to API function '%s' not found" % (arg, utils.getFuncName(1)), 400
+
     return transformOutput(stampedAPIFunc(*funcArgs))
 
 # ######## #
@@ -80,8 +82,8 @@ def handleGETRequest(request, stampedAPIFunc, args):
 @app.route(REST_API_PREFIX + 'addAccount', methods=['POST'])
 def addAccount():
     schema = ResourceArgumentSchema([
-        ("firstName",         ResourceArgument(required=True, expectedType=basestring)), 
-        ("lastName",          ResourceArgument(required=True, expectedType=basestring)), 
+        ("first_name",        ResourceArgument(required=True, expectedType=basestring)), 
+        ("last_name",         ResourceArgument(required=True, expectedType=basestring)), 
         ("username",          ResourceArgument(required=True, expectedType=basestring)), 
         ("email",             ResourceArgument(required=True, expectedType=basestring)), 
         ("password",          ResourceArgument(required=True, expectedType=basestring)), 
@@ -98,14 +100,14 @@ def addAccount():
 
 @app.route(REST_API_PREFIX + 'getAccount', methods=['GET'])
 def getAccount():
-    return handleGETRequest(request, stampedAPI.getAccount, [ 'userID' ])
+    return handleGETRequest(request, stampedAPI.getAccount, [ 'account_id' ])
 
-@app.route(REST_API_PREFIX + 'updateAccount', methods=['GET'])
+@app.route(REST_API_PREFIX + 'updateAccount', methods=['POST'])
 def updateAccount():
     schema = ResourceArgumentSchema([
-        ("accountID",         ResourceArgument(required=True, expectedType=basestring)), 
-        ("firstName",         ResourceArgument(expectedType=basestring)), 
-        ("lastName",          ResourceArgument(expectedType=basestring)), 
+        ("account_id",        ResourceArgument(required=True, expectedType=basestring)), 
+        ("first_name",        ResourceArgument(expectedType=basestring)), 
+        ("last_name",         ResourceArgument(expectedType=basestring)), 
         ("username",          ResourceArgument(expectedType=basestring)), 
         ("email",             ResourceArgument(expectedType=basestring)), 
         ("password",          ResourceArgument(expectedType=basestring)), 
@@ -120,21 +122,53 @@ def updateAccount():
     
     return handlePOSTRequest(request, stampedAPI.updateAccount, schema)
 
-@app.route(REST_API_PREFIX + 'removeAccount', methods=['GET'])
+@app.route(REST_API_PREFIX + 'removeAccount', methods=['POST'])
 def removeAccount():
-    return handleGETRequest(request, stampedAPI.removeAccount, [ 'userID' ])
+    schema = ResourceArgumentSchema([
+        ("account_id",        ResourceArgument(required=True, expectedType=basestring)), 
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.removeAccount, schema)
 
 @app.route(REST_API_PREFIX + 'flagAccount', methods=['GET'])
 def flagAccount():
-    return handleGETRequest(request, stampedAPI.flagAccount, [ 'userID' ])
+    return handleGETRequest(request, stampedAPI.flagAccount, [ 'account_id' ])
 
 @app.route(REST_API_PREFIX + 'unflagAccount', methods=['GET'])
 def unflagAccount():
-    return handleGETRequest(request, stampedAPI.unflagAccount, [ 'userID' ])
+    return handleGETRequest(request, stampedAPI.unflagAccount, [ 'account_id' ])
 
 # ##### #
 # Users #
 # ##### #
+
+@app.route(REST_API_PREFIX + 'getUser', methods=['GET'])
+def getUser():
+    return handleGETRequest(request, stampedAPI.getUser, [ 'user_id' ])
+
+@app.route(REST_API_PREFIX + 'getUsers', methods=['GET'])
+def getUsers():
+    return handleGETRequest(request, stampedAPI.getUsers, [ 'user_ids' ])
+
+@app.route(REST_API_PREFIX + 'getUserByName', methods=['GET'])
+def getUserByName():
+    return handleGETRequest(request, stampedAPI.getUserByName, [ 'username' ])
+
+@app.route(REST_API_PREFIX + 'getUsersByName', methods=['GET'])
+def getUsersByName():
+    return handleGETRequest(request, stampedAPI.getUsersByName, [ 'usernames' ])
+
+@app.route(REST_API_PREFIX + 'searchUsers', methods=['GET'])
+def searchUsers():
+    return handleGETRequest(request, stampedAPI.searchUsers, [ 'query', 'limit' ])
+
+@app.route(REST_API_PREFIX + 'getPrivacy', methods=['GET'])
+def getPrivacy():
+    return handleGETRequest(request, stampedAPI.getPrivacy, [ 'user_id' ])        
+
+# ########### ##
+# Friendships #
+# ########### #
 
 @app.route(REST_API_PREFIX + 'addFriendship', methods=['GET'])
 def addFriendship():
@@ -219,33 +253,37 @@ def addEntity():
     schema = ResourceArgumentSchema([
         ("title",            ResourceArgument(required=True, expectedType=basestring)), 
         ("desc",             ResourceArgument(required=True, expectedType=basestring)), 
-        ("category",         ResourceArgumentList(expectedType=basestring)), 
+        ("category",         ResourceArgument(required=True, expectedType=basestring)), 
     ])
     
     return handlePOSTRequest(request, stampedAPI.addEntity, schema)
 
 @app.route(REST_API_PREFIX + 'getEntity', methods=['GET'])
 def getEntity():
-    return handleGETRequest(request, stampedAPI.getEntity, [ 'entityID' ])
+    return handleGETRequest(request, stampedAPI.getEntity, [ 'entity_id' ])
 
 @app.route(REST_API_PREFIX + 'updateEntity', methods=['POST'])
 def updateEntity():
     schema = ResourceArgumentSchema([
-        ("entityID",         ResourceArgument(required=True, expectedType=basestring)), 
+        ("entity_id",        ResourceArgument(required=True, expectedType=basestring)), 
         ("title",            ResourceArgument(expectedType=basestring)), 
         ("desc",             ResourceArgument(expectedType=basestring)), 
-        ("category",         ResourceArgumentList(expectedType=basestring)), 
+        ("category",         ResourceArgument(expectedType=basestring)), 
     ])
     
     return handlePOSTRequest(request, stampedAPI.updateEntity, schema)
 
-@app.route(REST_API_PREFIX + 'removeEntity', methods=['GET'])
+@app.route(REST_API_PREFIX + 'removeEntity', methods=['POST'])
 def removeEntity():
-    return handleGETRequest(request, stampedAPI.removeEntity, [ 'entityID' ])
+    schema = ResourceArgumentSchema([
+        ("entity_id",        ResourceArgument(required=True, expectedType=basestring)), 
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.removeEntity, schema)
 
 @app.route(REST_API_PREFIX + 'searchEntities', methods=['GET'])
 def searchEntities():
-    return handleGETRequest(request, stampedAPI.searchEntities, [ 'query', 'limit' ])
+    return handleGETRequest(request, stampedAPI.searchEntities, [ 'query', 'limit' ])    
 
 # ###### #
 # Stamps #
@@ -329,6 +367,6 @@ def hello():
 # ######## #
 
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run(host='0.0.0.0')
+    app.run(debug=True)
+    #app.run(host='0.0.0.0') 
 

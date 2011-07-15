@@ -72,51 +72,75 @@ class StampedAPI(AStampedAPI):
     
     def addAccount(self, params):
         account = Account()
-        account.first_name = params.firstName
-        account.last_name = params.lastName
+        account.first_name = params.first_name
+        account.last_name = params.last_name
         account.username = params.username
         account.email = params.email
         account.password = params.password
         account.locale = params.locale
         account.color = { 'primary_color': params.primary_color }
         
-        account.color['secondary_color'] = params.secondary_color
-        account.img = params.img
-        account.website = params.website
-        account.bio = params.bio
+        if params.secondary_color != None:
+            account.color['secondary_color'] = params.secondary_color
+        if params.img != None:
+            account.img = params.img
+        if params.website != None:
+            account.website = params.website
+        if params.bio != None:
+            account.bio = params.bio
+            
         account.flags = { 'privacy': params.privacy }
         
         if not account.isValid:
             raise InvalidArgument('Invalid input')
         
-        return self._accountDB.addAccount(account)
+        result = {}
+        result['id'] = self._accountDB.addAccount(account)
+        return result
     
     def getAccount(self, userID):
         return self._accountDB.getAccount(userID)
     
     def updateAccount(self, params):
-        account = self.getAccount(accountID)
+        account = self.getAccount(params.account_id)
         
-        account.first_name = params.firstName
-        account.last_name = params.lastName
-        account.username = params.username
-        account.email = params.email
-        account.password = params.password
-        account.locale = params.locale
-        account.color['primary_color'] = params.primary_color
-        account.color['secondary_color'] = params.secondary_color
-        account.img = params.img
-        account.website = params.website
-        account.bio = params.bio
-        account.flags['privacy'] = params.privacy
+        if params.first_name != None:
+            account.first_name = params.first_name
+        if params.last_name != None:
+            account.last_name = params.last_name
+        if params.username != None:
+            account.username = params.username
+        if params.email != None:
+            account.email = params.email
+        if params.password != None:
+            account.password = params.password
+        if params.locale != None:
+            account.locale = params.locale
+        if params.primary_color != None:
+            account.color['primary_color'] = params.primary_color
+        if params.secondary_color != None:
+            account.color['secondary_color'] = params.secondary_color
+        if params.img != None:
+            account.img = params.img
+        if params.website != None:
+            account.website = params.website
+        if params.bio != None:
+            account.bio = params.bio
+        if params.privacy != None:
+            account.flags['privacy'] = params.privacy
         
         if not account.isValid:
             raise InvalidArgument('Invalid input')
-        
-        return self._accountDB.updateAccount(account)
+            
+        result = {}
+        result['id'] = self._accountDB.updateAccount(account)
+        ### CLARIFY: What do we want to return?
+        return result
     
-    def removeAccount(self, userID):
-        return self._accountDB.removeAccount(userID)
+    def removeAccount(self, params):
+        self._accountDB.removeAccount(params.account_id)
+        ### CLARIFY: What do we want to return?
+        return {'id': params.account_id}
     
     def flagAccount(self, userID):
         return self._accountDB.flagAccount(userID)
@@ -132,19 +156,21 @@ class StampedAPI(AStampedAPI):
         return self._userDB.getUser(userID)
     
     def getUsers(self, userIDs):
+        userIDs = userIDs.split(',')
         return self._userDB.lookupUsers(userIDs, None)
     
     def getUserByName(self, username):
         return self._userDB.lookupUsers(None, [ username ])[-1]
     
-    def getUsersByNames(self, usernames):
-        return self._userDB.lookupUsers(None, usernames)
+    def getUsersByName(self, usernames):
+        usernames = usernames.split(',')
+        return {'users': self._userDB.lookupUsers(None, usernames)}
     
     def searchUsers(self, query, limit=20):
-        return self._userDB.searchUsers(query, limit)
+        return {'users': self._userDB.searchUsers(query, limit)}
     
     def getPrivacy(self, userID):
-        return self._userDB.getPrivacy(userID)
+        return self._userDB.checkPrivacy(userID)
     
     # ############# #
     # Relationships #
@@ -253,23 +279,45 @@ class StampedAPI(AStampedAPI):
     # ######## #
     
     def addEntity(self, params):
-        # params.title, params.desc, params.category
-        raise NotImplementedError
-        return self._entityDB.addEntity(entity)
+        entity = Entity()
+        entity.title = params.title
+        entity.desc = params.desc
+        entity.category = params.category
+        
+        if not entity.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        result = {}
+        result['id'] = self._entityDB.addEntity(entity)
+        return result
     
     def getEntity(self, entityID):
         return self._entityDB.getEntity(entityID)
     
     def updateEntity(self, params):
-        # TODO: create Entity from params
-        raise NotImplementedError
-        return self._entityDB.updateEntity(entity)
+        entity = self.getEntity(params.entity_id)
+        
+        if params.title != None:
+            entity.title = params.title
+        if params.desc != None:
+            entity.desc = params.desc
+        if params.category != None:
+            entity.category = params.category
+                    
+        result = {}
+        result['id'] = self._entityDB.updateEntity(entity)
+        ### CLARIFY: What do we want to return?
+        return result
     
-    def removeEntity(self, entityID):
-        return self._entityDB.removeEntity(entityID)
-    
+    def removeEntity(self, params):
+        self._entityDB.removeEntity(params.entity_id)
+        ### CLARIFY: What do we want to return?
+        return {'id': params.entity_id}
+        
     def searchEntities(self, query, limit=20):
-        return self._entityDB.matchEntities(query, limit)
+        entities = {}
+        entities['entities'] = self._entityDB.matchEntities(query, limit)
+        return entities
     
     # ###### #
     # Stamps #

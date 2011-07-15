@@ -89,6 +89,11 @@ class ResourceArgumentBoolean(ResourceArgument):
         if hasattr(value, '__call__'):
             return value
         
+        if value == "True" or value == "true" or value == 1:
+            value = True
+        if value == "False" or value == "false" or value == 0:
+            value = False
+        
         value = ResourceArgument.validate(self, value)
         if not value in (None, True, False):
             raise InvalidArgument("Expected a boolean but received %r" % value)

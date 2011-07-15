@@ -145,7 +145,7 @@ class AObject(object):
             return False
         
         if not _unionDict(data, self._schema, self._data):
-            raise KeyError("Error %s" % str(data))
+            raise KeyError("Error %s ---- %s ---- %s" % (data, self._schema, self._data))
         
         return
 
