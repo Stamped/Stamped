@@ -92,6 +92,8 @@ class ResourceArgumentBoolean(ResourceArgument):
             return value
         
         value = ResourceArgument.validate(self, value)
+            
+        print(value)
         if not value in (None, True, False):
             raise InvalidArgument("Expected a boolean but received %r" % value)
         

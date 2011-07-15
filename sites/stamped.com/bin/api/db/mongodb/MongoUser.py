@@ -64,7 +64,6 @@ class MongoUser(AUserDB, Mongo):
 #         return self._addDocument(user)
     
     def getUser(self, userId):
-#         print userId
         user = User(self._getDocumentFromId(userId))
         if user.isValid == False:
             raise KeyError("User not valid")
@@ -85,6 +84,8 @@ class MongoUser(AUserDB, Mongo):
             
         result = []
         for userData in data:
+            userData['id'] = self._getStringFromObjectId(userData['_id'])
+            del(userData['_id'])
             result.append(User(userData))
         return result
 

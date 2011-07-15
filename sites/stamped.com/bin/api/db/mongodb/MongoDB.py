@@ -197,7 +197,7 @@ class Mongo():
         return result
         
     def _updateDocument(self, document):
-        return self._collection.save(self._objToMongo(document))
+        return self._getStringFromObjectId(self._collection.save(self._objToMongo(document), safe=True))
         
     def _removeDocument(self, keyId):
         return self._collection.remove({'_id': self._getObjectIdFromString(keyId)})
