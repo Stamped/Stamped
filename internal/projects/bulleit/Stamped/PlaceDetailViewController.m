@@ -70,7 +70,16 @@
   [super viewDidUnload];
   self.callActionButton = nil;
   self.callActionLabel = nil;
+  self.mapView.delegate = nil;
   self.mapView = nil;
+}
+
+- (void)dealloc {
+  self.callActionButton = nil;
+  self.callActionLabel = nil;
+  self.mapView.delegate = nil;
+  self.mapView = nil;
+  [super dealloc];
 }
 
 #pragma mark - Actions

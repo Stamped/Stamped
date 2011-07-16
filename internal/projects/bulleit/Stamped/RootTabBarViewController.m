@@ -59,6 +59,8 @@
   self.selectedViewController = stampsList;  
   [stampsList release];
   [activity release];
+  if ([self.tabBar respondsToSelector:@selector(setSelectedImageTintColor:)])
+    [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
 
   self.tabBar.selectedItem = stampsTabBarItem_;
 }

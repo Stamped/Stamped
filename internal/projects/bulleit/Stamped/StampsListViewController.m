@@ -119,20 +119,6 @@ typedef enum {
     self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  if (!userDidScroll_)
-    self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];
-}
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
@@ -255,7 +241,6 @@ typedef enum {
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  [tableView deselectRowAtIndexPath:indexPath animated:YES];
   StampDetailViewController* detailViewController =
       [[StampDetailViewController alloc] initWithEntity:[stampsArray_ objectAtIndex:indexPath.row]];
 
