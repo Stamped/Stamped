@@ -36,7 +36,325 @@ def main():
 #     
 #     userTest(baseurl)
 #     
-    friendshipTest(baseurl)
+#     friendshipTest(baseurl)
+#
+#     stampTest(baseurl)
+#
+    collectionTest(baseurl)
+    
+    
+    
+# ########### #
+# Collections #
+# ############ #
+
+def collectionTest(baseurl):
+
+    print    
+    print '      COLLECTION'
+    
+    
+    path = "addAccount"
+    data = {
+        "first_name": "User",
+        "last_name": "A", 
+        "username": "userA", 
+        "email": "userA@stamped.com", 
+        "locale": "en_US", 
+        "primary_color": "[255, 255, 255]",
+        "password": "******",
+        "privacy": False,
+        "img": "userA.png"
+    }
+    userA = testPOST(baseurl, path, data)['id']
+    data = {
+        "first_name": "User",
+        "last_name": "B", 
+        "username": "userB", 
+        "email": "userB@stamped.com", 
+        "locale": "en_US", 
+        "primary_color": "[255, 255, 255]",
+        "password": "******",
+        "img": "userB.png"
+    }
+    userB = testPOST(baseurl, path, data)['id']
+    if len(userA) == 24 and len(userB) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+    
+    
+    path = "addFriendship"
+    data = {
+        "user_id": userB,
+        "friend_id": userA
+    }
+    result = testPOST(baseurl, path, data)['_data']
+    if result['user_id'] == userB and result['friend_id'] == userA:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "addEntity"
+    data = {
+        "title": "Little Owl",
+        "desc": "American food in the West Village", 
+        "category": "Restaurant"
+    }
+    entityID = testPOST(baseurl, path, data)['id']
+    if len(entityID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entityID
+        raise Exception
+        
+    
+    path = "addStamp"
+    data = {
+        "user_id": userA,
+        "entity_id": entityID,
+        "blurb": "Favorite restaurant in the Village.", 
+        "img": "image.png",
+        "mentions": "userA,userB"
+    }
+    stampID = testPOST(baseurl, path, data)['id']
+    if len(stampID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'result: %s' % path
+        print stampID
+        raise Exception
+
+
+    path = "getUserStamps"
+    data = {"user_id": userA}
+    result = testGET(baseurl, path, data)
+    stamps = []
+    for stamp in result:
+        stamps.append(stamp['_data'])
+    if len(stamps) == 1:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+
+
+    path = "getInboxStamps"
+    data = {"user_id": userB}
+    result = testGET(baseurl, path, data)
+    stamps = []
+    for stamp in result:
+        stamps.append(stamp['_data'])
+    if len(stamps) == 1:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "removeStamp"
+    data = {
+        "stamp_id": stampID,
+        "user_id": userA
+    }
+    result = testPOST(baseurl, path, data)['id']
+    if result == stampID:
+        print 'DATA: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "removeEntity"
+    data = {"entity_id": entityID}
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+    
+    
+    path = "removeFriendship"
+    data = {
+        "user_id": userB,
+        "friend_id": userA
+    }
+    result = testPOST(baseurl, path, data)['_data']
+    if result['user_id'] == userB and result['friend_id'] == userA:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "removeAccount"
+    data = {"account_id": userA}
+    resultA = testPOST(baseurl, path, data)
+    data = {"account_id": userB}
+    resultB = testPOST(baseurl, path, data)
+    if resultA and resultB:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    print
+
+    
+    
+# ###### #
+# Stamps #
+# ###### #
+
+def stampTest(baseurl):
+
+    print    
+    print '      STAMP'
+    
+    
+    path = "addAccount"
+    data = {
+        "first_name": "User",
+        "last_name": "A", 
+        "username": "userA", 
+        "email": "userA@stamped.com", 
+        "locale": "en_US", 
+        "primary_color": "[255, 255, 255]",
+        "password": "******",
+        "privacy": False,
+        "img": "user.png"
+    }
+    userA = testPOST(baseurl, path, data)['id']
+    if len(userA) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+        
+    
+    path = "addEntity"
+    data = {
+        "title": "Little Owl",
+        "desc": "American food in the West Village", 
+        "category": "Restaurant"
+    }
+    entityID = testPOST(baseurl, path, data)['id']
+    if len(entityID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entityID
+        raise Exception
+        
+    
+    path = "addStamp"
+    data = {
+        "user_id": userA,
+        "entity_id": entityID,
+        "blurb": "Favorite restaurant in the Village.", 
+        "img": "image.png",
+        "mentions": "userA,userB"
+    }
+    stampID = testPOST(baseurl, path, data)['id']
+    if len(stampID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print stampID
+        raise Exception
+        
+    
+    path = "updateStamp"
+    data = {
+        "stamp_id": stampID,
+        "img": "image2.png"
+    }
+    result = testPOST(baseurl, path, data)['id']
+    if result == stampID:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "getStamp"
+    data = {"stamp_id": stampID}
+    result = testGET(baseurl, path, data)['_data']
+    if result['img'] == 'image2.png':
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "getStamps"
+    data = {"stamp_ids": stampID}
+    result = testGET(baseurl, path, data)
+    stamps = []
+    for stamp in result:
+        stamps.append(stamp['_data'])
+    if len(stamps) == 1:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "removeStamp"
+    data = {
+        "stamp_id": stampID,
+        "user_id": userA
+    }
+    result = testPOST(baseurl, path, data)['id']
+    if result == stampID:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "removeEntity"
+    data = {"entity_id": entityID}
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "removeAccount"
+    data = {"account_id": userA}
+    resultA = testPOST(baseurl, path, data)
+    if resultA:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    print
     
     
     
@@ -58,7 +376,8 @@ def friendshipTest(baseurl):
         "locale": "en_US", 
         "primary_color": "[255, 255, 255]",
         "password": "******",
-        "privacy": False
+        "privacy": False,
+        "img": "userA.png"
     }
     userA = testPOST(baseurl, path, data)['id']
     data = {
@@ -68,7 +387,8 @@ def friendshipTest(baseurl):
         "email": "userB@stamped.com", 
         "locale": "en_US", 
         "primary_color": "[255, 255, 255]",
-        "password": "******"
+        "password": "******",
+        "img": "userB.png"
     }
     userB = testPOST(baseurl, path, data)['id']
     if len(userA) == 24 and len(userB) == 24:
@@ -234,7 +554,8 @@ def userTest(baseurl):
         "locale": "en_US", 
         "primary_color": "[255, 255, 255]",
         "password": "******",
-        "privacy": True
+        "privacy": True,
+        "img": "userA.png"
     }
     userA = testPOST(baseurl, path, data)['id']
     data = {
@@ -244,7 +565,8 @@ def userTest(baseurl):
         "email": "userB@stamped.com", 
         "locale": "en_US", 
         "primary_color": "[255, 255, 255]",
-        "password": "******"
+        "password": "******",
+        "img": "userB.png"
     }
     userB = testPOST(baseurl, path, data)['id']
     if len(userA) == 24 and len(userB) == 24:
@@ -432,7 +754,8 @@ def accountTest(baseurl):
         "email": "kevin@stamped.com", 
         "locale": "en_US", 
         "primary_color": "[255, 255, 255]",
-        "password": "******"
+        "password": "******",
+        "img": "user.png"
     }
     userID = testPOST(baseurl, path, data)['id']
     if len(userID) == 24:

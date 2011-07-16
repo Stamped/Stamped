@@ -357,24 +357,92 @@ class StampedAPI(AStampedAPI):
     # Stamps #
     # ###### #
     
-    def addStamp(self, params):
-        # TODO: create Stamp from params
-        raise NotImplementedError
-        return self._stampDB.addStamp(stamp)
+    def addStamp(self, params):        
+        stamp = Stamp()
+        
+        user = self._userDB.getUser(params.user_id)
+        stamp.user = {}
+        stamp.user['user_id'] = user.id
+        stamp.user['user_name'] = user.first_name
+        stamp.user['user_img'] = user.img
+        stamp.flags = {}
+        stamp.flags['privacy'] = user.flags['privacy']
+        
+        entity = self._entityDB.getEntity(params.entity_id)
+        stamp.entity = {}
+        stamp.entity['entity_id'] = entity.id
+        stamp.entity['title'] = entity.title
+        stamp.entity['category'] = entity.category
+        stamp.entity['subtitle'] = entity.desc
+        if entity.coordinates:
+            stamp.entity['coordinates']['lat'] = entity.coordinates['lat']
+            stamp.entity['coordinates']['lng'] = entity.coordinates['lng']
+        
+        if params.blurb != None:
+            stamp.blurb = params.blurb
+        if params.img != None:
+            stamp.img = params.img
+            
+        if params.mentions != None:
+            stamp.mentions = []
+            for userID in params.mentions.split(','):
+                stamp.mentions.append(userID)
+            
+        if params.credit != None:
+            stamp.credit = []
+            for userID in params.credit.split(','):
+                stamp.credit.append(userID)
+                
+        stamp.timestamp = datetime.utcnow()
+
+        if not stamp.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        result = {}
+        result['id'] = self._stampDB.addStamp(stamp)
+        return result
+    
+    def updateStamp(self, params):        
+        stamp = self._stampDB.getStamp(params.stamp_id)
+        
+        if params.blurb != None:
+            stamp.blurb = params.blurb
+        if params.img != None:
+            stamp.img = params.img
+            
+        if params.mentions != None:
+            if not stamp.mentions:
+                stamp.mentions = []
+            for userID in params.mentions.split(','):
+                stamp.mentions.append(userID)
+            
+        if params.credit != None:
+            if not stamp.credit:
+                stamp.credit = []
+            for userID in params.credit.split(','):
+                stamp.credit.append(userID)
+                
+        stamp.timestamp = datetime.utcnow()
+
+        if not stamp.isValid:
+            raise InvalidArgument('Invalid input')
+            
+        result = {}
+        result['id'] = self._stampDB.updateStamp(stamp)
+        ### CLARIFY: What do we want to return?
+        return result
+    
+    def removeStamp(self, params):
+        self._stampDB.removeStamp(params.stamp_id, params.user_id)
+        ### CLARIFY: What do we want to return?
+        return {'id': params.stamp_id}
     
     def getStamp(self, stampID):
         return self._stampDB.getStamp(stampID)
     
     def getStamps(self, stampIDs):
+        stampIDs = stampIDs.split(',')
         return self._stampDB.getStamps(stampIDs)
-    
-    def updateStamp(self, params):
-        # TODO: create Stamp from params
-        raise NotImplementedError
-        return self._stampDB.updateStamp(stamp)
-    
-    def removeStamp(self, stampID, userID):
-        return self._stampDB.removeStamp(stampID, userID)
     
     # ########### #
     # Collections #
