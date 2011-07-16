@@ -8,7 +8,7 @@ __license__ = "TODO"
 __all__ = [ "GreenUnicornConfigFileProvider" ]
 
 from pynode.utils import log, shell
-from pynode.exceptions import Fail
+from pynode.errors import Fail
 from pynode.provider import Provider
 from pynode.providers import DirectoryProvider, FileProvider
 

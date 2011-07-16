@@ -9,7 +9,7 @@ import os, utils
 from utils import AttributeDict
 from environment import Environment
 from system import System
-from exceptions import Fail
+from errors import Fail
 
 class Cookbook(object):
     def __init__(self, name, path, config=None):

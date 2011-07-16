@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from pynode.utils import log, shell
-from pynode.exceptions import Fail
+from pynode.errors import Fail
 from pynode.providers.package import PackageProvider
 from subprocess import Popen, STDOUT, PIPE, check_call
 

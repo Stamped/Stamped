@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import grp, os, pwd, subprocess, pynode.utils
 
-from pynode.exceptions import Fail
+from pynode.errors import Fail
 from pynode.provider import Provider
 
 def _coerce_uid(user):

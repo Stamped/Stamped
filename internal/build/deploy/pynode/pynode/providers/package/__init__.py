@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from pynode.utils import log
-from pynode.exceptions import Fail
+from pynode.errors import Fail
 from pynode.provider import Provider
 from abc import abstractmethod
 

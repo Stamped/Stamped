@@ -8,7 +8,7 @@ __license__ = "TODO"
 import os, re, pynode.utils
 
 from subprocess import Popen, PIPE, STDOUT, check_call
-from pynode.exceptions import Fail
+from pynode.errors import Fail
 from pynode.provider import Provider
 
 class MountProvider(Provider):

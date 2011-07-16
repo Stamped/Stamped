@@ -8,7 +8,7 @@ __license__ = "TODO"
 __all__ = [ "Provider" ]
 
 import utils
-from exceptions import Fail
+from errors import Fail
 
 class Provider(object):
     BUILTIN_PREFIX = "pynode.providers."

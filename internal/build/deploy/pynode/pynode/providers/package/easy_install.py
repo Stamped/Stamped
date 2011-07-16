@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import re
 from pynode.utils import lazyProperty, log, shell
-from pynode.exceptions import Fail
+from pynode.errors import Fail
 from pynode.providers.package import PackageProvider
 from subprocess import check_call, Popen, PIPE, STDOUT
 

@@ -6,7 +6,7 @@ import re
 
 from subprocess import check_call, Popen, PIPE, STDOUT
 from pynode.utils import log, lazyProperty, shell3
-from pynode.exceptions import Fail
+from pynode.errors import Fail
 from pynode.providers.package import PackageProvider
 
 best_match_re = re.compile(r'Best match: (.*) (.*)\n')

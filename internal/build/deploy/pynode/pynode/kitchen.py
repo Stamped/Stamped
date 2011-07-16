@@ -9,7 +9,7 @@ import os, utils
 from utils import AttributeDict, OrderedDict
 from cookbook import Cookbook
 from environment import Environment
-from exceptions import Fail
+from errors import Fail
 
 class Kitchen(Environment):
     

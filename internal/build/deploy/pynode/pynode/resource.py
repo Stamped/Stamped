@@ -17,7 +17,7 @@ __all__ = [
 import utils
 from utils import AttributeDict, OrderedDict
 from environment import Environment
-from exceptions import *
+from errors import *
 
 # TODO: cleanup the code duplication between ResourceArgument.validate, 
 # ResourceArgumentList.validate, and ResourceArgumentBoolean.validate.
