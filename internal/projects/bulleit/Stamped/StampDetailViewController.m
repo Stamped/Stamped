@@ -37,6 +37,7 @@
 @synthesize commentsView = commentsView_;
 @synthesize activityView = activityView_;
 @synthesize bottomToolbar = bottomToolbar_;
+@synthesize commenterImageView = commenterImageView_;
 
 - (id)initWithEntity:(StampEntity*)entity {
   self = [self initWithNibName:@"StampDetailViewController" bundle:nil];
@@ -53,6 +54,7 @@
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.scrollView = nil;
+  self.commenterImageView = nil;
   [super dealloc];
 }
 
@@ -121,7 +123,7 @@
   [typeIconLayer release];
   
   UILabel* detailLabel =
-  [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 3, 48, 258, 15)];
+      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 3, 48, 258, 15)];
   detailLabel.opaque = NO;
   detailLabel.backgroundColor = [UIColor clearColor];
   detailLabel.text = entity_.detail;
@@ -200,20 +202,22 @@
   commentLabel.font = commentFont;
   commentLabel.textColor = [UIColor colorWithWhite:0.2 alpha:1.0];
   commentLabel.text = entity_.comment;
-  commentLabel.numberOfLines = 2;
+  commentLabel.numberOfLines = 0;
   stringSize = [entity_.comment sizeWithFont:commentFont
-                           constrainedToSize:CGSizeMake(210, 40) 
+                           constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                lineBreakMode:commentLabel.lineBreakMode];
   commentLabel.frame = CGRectMake(leftPadding, 29, stringSize.width, stringSize.height);
   [activityView_ addSubview:commentLabel];
+  
+  CGRect activityFrame = activityView_.frame;
+  activityFrame.size.height = CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds);
+  activityView_.frame = activityFrame;
+  
   [commentLabel release];
 }
 
 - (void)setUpCommentsView {
-  UserImageView* userImgView = [[UserImageView alloc] initWithFrame:CGRectMake(10, 10, 31, 31)];
-  userImgView.image = [UIImage imageNamed:@"robby_s_user_image"];
-  [commentsView_ addSubview:userImgView];
-  [userImgView release];
+  commenterImageView_.image = [UIImage imageNamed:@"robby_s_user_image"];
 }
 
 - (void)viewDidUnload {
@@ -222,6 +226,7 @@
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.scrollView = nil;
+  self.commenterImageView = nil;
 }
 
 - (void)handleTap:(UITapGestureRecognizer*)sender {

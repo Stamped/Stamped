@@ -8,8 +8,6 @@
 
 #import "StampedAppDelegate.h"
 
-#import <QuartzCore/QuartzCore.h>
-
 @implementation StampedAppDelegate
 
 @synthesize window = window_;
@@ -17,17 +15,6 @@
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   self.window.rootViewController = self.navigationController;
-
-  CGFloat ripplesY = CGRectGetMaxY(self.navigationController.navigationBar.bounds);
-  CALayer* ripplesLayer = [[CALayer alloc] init];
-  ripplesLayer.frame = CGRectMake(0, ripplesY, 320, 3);
-  ripplesLayer.contentsGravity = kCAGravityResizeAspect;
-  ripplesLayer.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
-  UINavigationBar* navBar = self.navigationController.navigationBar;
-  [navBar.layer addSublayer:ripplesLayer];
-  navBar.layer.masksToBounds = NO;
-  [ripplesLayer release];
-
   [self.window makeKeyAndVisible];
   return YES;
 }

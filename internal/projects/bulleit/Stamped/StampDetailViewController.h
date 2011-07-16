@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@class UserImageView;
 @class StampEntity;
 
 @interface StampDetailViewController : UIViewController {
@@ -23,5 +24,6 @@
 @property (nonatomic, retain) IBOutlet UIView* commentsView;
 @property (nonatomic, retain) IBOutlet UIView* activityView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
+@property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
 
 @end

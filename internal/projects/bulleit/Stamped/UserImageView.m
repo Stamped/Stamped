@@ -10,23 +10,27 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+@interface UserImageView ()
+- (void)initialize;
+@end
+
 @implementation UserImageView
 
 @synthesize image = image_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
-  if (self) {
-    CALayer* layer = self.layer;
-    layer.contentsGravity = kCAGravityResizeAspect;
-    layer.frame = frame;
-    layer.borderColor = [UIColor whiteColor].CGColor;
-    layer.borderWidth = 2.0;
-    layer.shadowOpacity = 0.5;
-    layer.shadowOffset = CGSizeMake(0, 0.5);
-    layer.shadowRadius = 1.0;
-    layer.shadowPath = [UIBezierPath bezierPathWithRect:layer.bounds].CGPath;
-  }
+  if (self)
+    [self initialize];
+
+  return self;
+}
+
+- (id)initWithCoder:(NSCoder*)aDecoder {
+  self = [super initWithCoder:aDecoder];
+  if (self)
+    [self initialize];
+
   return self;
 }
 
@@ -38,6 +42,18 @@
 - (void)setFrame:(CGRect)frame {
   [super setFrame:frame];
   self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.layer.bounds].CGPath;
+}
+
+- (void)initialize {
+  CALayer* layer = self.layer;
+  layer.contentsGravity = kCAGravityResizeAspect;
+  layer.frame = self.frame;
+  layer.borderColor = [UIColor whiteColor].CGColor;
+  layer.borderWidth = 2.0;
+  layer.shadowOpacity = 0.5;
+  layer.shadowOffset = CGSizeMake(0, 0.5);
+  layer.shadowRadius = 1.0;
+  layer.shadowPath = [UIBezierPath bezierPathWithRect:layer.bounds].CGPath;
 }
 
 - (void)setImage:(UIImage*)image {
