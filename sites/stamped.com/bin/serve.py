@@ -54,7 +54,7 @@ def handlePOSTRequest(request, stampedAPIFunc, schema):
         parsedInput = parseRequestForm(schema, request.form)
     except (InvalidArgument, Fail) as e:
         return str(e), 400
-    
+        
     return transformOutput(stampedAPIFunc(parsedInput))
 
 def handleGETRequest(request, stampedAPIFunc, args):
@@ -170,45 +170,69 @@ def getPrivacy():
 # Friendships #
 # ########### #
 
-@app.route(REST_API_PREFIX + 'addFriendship', methods=['GET'])
+@app.route(REST_API_PREFIX + 'addFriendship', methods=['POST'])
 def addFriendship():
-    return handleGETRequest(request, stampedAPI.addFriendship, [ 'userID', 'friendID' ])
+    schema = ResourceArgumentSchema([
+        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
+        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+    ])
+    return handlePOSTRequest(request, stampedAPI.addFriendship, schema)
+
+@app.route(REST_API_PREFIX + 'removeFriendship', methods=['POST'])
+def removeFriendship():
+    schema = ResourceArgumentSchema([
+        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
+        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.removeFriendship, schema)
+
+@app.route(REST_API_PREFIX + 'approveFriendship', methods=['POST'])
+def approveFriendship():
+    schema = ResourceArgumentSchema([
+        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
+        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.approveFriendship, schema)
+
+@app.route(REST_API_PREFIX + 'addBlock', methods=['POST'])
+def addBlock():
+    schema = ResourceArgumentSchema([
+        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
+        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.addBlock, schema)
+
+@app.route(REST_API_PREFIX + 'removeBlock', methods=['POST'])
+def removeBlock():
+    schema = ResourceArgumentSchema([
+        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
+        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.removeBlock, schema)
 
 @app.route(REST_API_PREFIX + 'checkFriendship', methods=['GET'])
 def checkFriendship():
-    return handleGETRequest(request, stampedAPI.checkFriendship, [ 'userID', 'friendID' ])
-
-@app.route(REST_API_PREFIX + 'removeFriendship', methods=['GET'])
-def removeFriendship():
-    return handleGETRequest(request, stampedAPI.removeFriendship, [ 'userID', 'friendID' ])
+    return handleGETRequest(request, stampedAPI.checkFriendship, [ 'user_id', 'friend_id' ])
 
 @app.route(REST_API_PREFIX + 'getFriends', methods=['GET'])
 def getFriends():
-    return handleGETRequest(request, stampedAPI.getFriends, [ 'userID' ])
+    return handleGETRequest(request, stampedAPI.getFriends, [ 'user_id' ])
 
 @app.route(REST_API_PREFIX + 'getFollowers', methods=['GET'])
 def getFollowers():
-    return handleGETRequest(request, stampedAPI.getFollowers, [ 'userID' ])
-
-@app.route(REST_API_PREFIX + 'approveFriendship', methods=['GET'])
-def approveFriendship():
-    return handleGETRequest(request, stampedAPI.approveFriendship, [ 'userID', 'friendID' ])
-
-@app.route(REST_API_PREFIX + 'addBlock', methods=['GET'])
-def addBlock():
-    return handleGETRequest(request, stampedAPI.addBlock, [ 'userID', 'friendID' ])
+    return handleGETRequest(request, stampedAPI.getFollowers, [ 'user_id' ])
 
 @app.route(REST_API_PREFIX + 'checkBlock', methods=['GET'])
 def checkBlock():
-    return handleGETRequest(request, stampedAPI.checkBlock, [ 'userID', 'friendID' ])
-
-@app.route(REST_API_PREFIX + 'removeBlock', methods=['GET'])
-def removeBlock():
-    return handleGETRequest(request, stampedAPI.removeBlock, [ 'userID', 'friendID' ])
+    return handleGETRequest(request, stampedAPI.checkBlock, [ 'user_id', 'friend_id' ])
 
 @app.route(REST_API_PREFIX + 'getBlocks', methods=['GET'])
 def getBlocks():
-    return handleGETRequest(request, stampedAPI.getBlocks, [ 'userID' ])
+    return handleGETRequest(request, stampedAPI.getBlocks, [ 'user_id' ])
 
 # ######### #
 # Favorites #

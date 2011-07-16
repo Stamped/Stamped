@@ -30,13 +30,190 @@ def main():
     
     baseurl = "http://0.0.0.0:5000/api/v1"
     
-    accountTest(baseurl)
+#     accountTest(baseurl)
+#     
+#     entityTest(baseurl)
+#     
+#     userTest(baseurl)
+#     
+    friendshipTest(baseurl)
     
-    entityTest(baseurl)
-    
-    userTest(baseurl)
     
     
+# ########### #
+# Friendships #
+# ########### #
+
+def friendshipTest(baseurl):
+
+    print    
+    print '      FRIENDSHIP'
+    
+    path = "addAccount"
+    data = {
+        "first_name": "User",
+        "last_name": "A", 
+        "username": "userA", 
+        "email": "userA@stamped.com", 
+        "locale": "en_US", 
+        "primary_color": "[255, 255, 255]",
+        "password": "******",
+        "privacy": False
+    }
+    userA = testPOST(baseurl, path, data)['id']
+    data = {
+        "first_name": "User",
+        "last_name": "B", 
+        "username": "userB", 
+        "email": "userB@stamped.com", 
+        "locale": "en_US", 
+        "primary_color": "[255, 255, 255]",
+        "password": "******"
+    }
+    userB = testPOST(baseurl, path, data)['id']
+    if len(userA) == 24 and len(userB) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+    
+    
+    path = "addFriendship"
+    data = {
+        "user_id": userA,
+        "friend_id": userB
+    }
+    result = testPOST(baseurl, path, data)['_data']
+    if result['user_id'] == userA and result['friend_id'] == userB:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "checkFriendship"
+    data = {
+        "user_id": userA,
+        "friend_id": userB
+    }
+    result = testGET(baseurl, path, data)
+    if result == True:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "getFriends"
+    data = {"user_id": userA}
+    result = testGET(baseurl, path, data)[-1]
+    if result == userB:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "getFollowers"
+    data = {"user_id": userB}
+    result = testGET(baseurl, path, data)[-1]
+    if result == userA:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "approveFriendship"
+    print 'SKIP: %s' % path
+    
+    
+    path = "removeFriendship"
+    data = {
+        "user_id": userA,
+        "friend_id": userB
+    }
+    result = testPOST(baseurl, path, data)['_data']
+    if result['user_id'] == userA and result['friend_id'] == userB:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+    
+    
+    path = "addBlock"
+    data = {
+        "user_id": userA,
+        "friend_id": userB
+    }
+    result = testPOST(baseurl, path, data)['_data']
+    if result['user_id'] == userA and result['friend_id'] == userB:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "checkBlock"
+    data = {
+        "user_id": userA,
+        "friend_id": userB
+    }
+    result = testGET(baseurl, path, data)
+    if result == True:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "getBlocks"
+    data = {"user_id": userA}
+    result = testGET(baseurl, path, data)[-1]
+    if result == userB:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+    
+    
+    path = "removeBlock"
+    data = {
+        "user_id": userA,
+        "friend_id": userB
+    }
+    result = testPOST(baseurl, path, data)['_data']
+    if result['user_id'] == userA and result['friend_id'] == userB:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "removeAccount"
+    data = {"account_id": userA}
+    resultA = testPOST(baseurl, path, data)
+    data = {"account_id": userB}
+    resultB = testPOST(baseurl, path, data)
+    if resultA and resultB:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+
+    print
     
     
 # ##### #

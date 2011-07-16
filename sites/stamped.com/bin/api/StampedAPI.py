@@ -176,17 +176,63 @@ class StampedAPI(AStampedAPI):
     # Relationships #
     # ############# #
     
-    def addFriendship(self, userID, friendID):
-        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.addFriendship(relationship)
+    def addFriendship(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.user_id
+        friendship.friend_id = params.friend_id
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        self._friendshipDB.addFriendship(friendship)
+        return friendship
+    
+    def removeFriendship(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.user_id
+        friendship.friend_id = params.friend_id
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+        self._friendshipDB.removeFriendship(friendship)
+        return friendship
+    
+    def approveFriendship(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.user_id
+        friendship.friend_id = params.friend_id
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+            
+        self._friendshipDB.approveFriendship(friendship)
+        return friendship
+    
+    def addBlock(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.user_id
+        friendship.friend_id = params.friend_id
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+            
+        self._friendshipDB.addBlock(friendship)
+        return friendship
+    
+    def removeBlock(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.user_id
+        friendship.friend_id = params.friend_id
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        self._friendshipDB.removeBlock(friendship)
+        return friendship        
     
     def checkFriendship(self, userID, friendID):
-        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.checkFriendship(relationship)
-    
-    def removeFriendship(self, userID, friendID):
-        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.removeFriendship(relationship)
+        friendship = Friendship({'user_id': userID, 'friend_id': friendID})
+        return self._friendshipDB.checkFriendship(friendship)
     
     def getFriends(self, userID):
         return self._friendshipDB.getFriends(userID)
@@ -194,21 +240,9 @@ class StampedAPI(AStampedAPI):
     def getFollowers(self, userID):
         return self._friendshipDB.getFollowers(userID)
     
-    def approveFriendship(self, userID, friendID):
-        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.approveFriendship(relationship)
-    
-    def addBlock(self, userID, friendID):
-        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.addBlock(relationship)
-    
     def checkBlock(self, userID, friendID):
-        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.checkBlock(relationship)
-    
-    def removeBlock(self, userID, friendID):
-        relationship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.removeBlock(relationship)
+        friendship = Friendship({'user_id': userID, 'friend_id': friendID})
+        return self._friendshipDB.checkBlock(friendship)
     
     def getBlocks(self, userID):
         return self._friendshipDB.getBlocks(userID)
