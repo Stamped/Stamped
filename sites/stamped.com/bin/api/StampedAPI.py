@@ -438,11 +438,56 @@ class StampedAPI(AStampedAPI):
         return {'id': params.stamp_id}
     
     def getStamp(self, stampID):
-        return self._stampDB.getStamp(stampID)
+        return self._stampDB.getStamp(stampID).getDataAsDict()
     
     def getStamps(self, stampIDs):
         stampIDs = stampIDs.split(',')
-        return self._stampDB.getStamps(stampIDs)
+        stamps = []
+        for stamp in self._stampDB.getStamps(stampIDs):
+            stamps.append(stamp.getDataAsDict())
+        return stamps
+    
+    # ######## #
+    # Comments #
+    # ######## #
+    
+    def addComment(self, params):
+        comment = Comment()
+        
+        user = self._userDB.getUser(params.user_id)
+        comment.user = {}
+        comment.user['user_id'] = user.id
+        comment.user['user_name'] = user.first_name
+        comment.user['user_img'] = user.img
+        comment.user['user_primary_color'] = user.color['primary_color']
+        if 'secondary_color' in user.color:
+            comment.user['user_secondary_color'] = user.color['secondary_color']
+        
+        if params.stamp_id != None:
+            comment.stamp_id = params.stamp_id
+        if params.blurb != None:
+            comment.blurb = params.blurb
+        if params.mentions != None:
+            comment.mentions = []
+            for userID in params.mentions.split(','):
+                comment.mentions.append(userID)
+                
+        comment.timestamp = datetime.utcnow()
+
+        if not comment.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        result = {}
+        result['id'] = self._commentDB.addComment(comment)
+        return result
+    
+    def removeComment(self, params):
+        self._commentDB.removeComment(params.comment_id)
+        ### CLARIFY: What do we want to return?
+        return {'id': params.comment_id}
+    
+    def getComments(self, stampID):
+        return self._commentDB.getComments(stampID)
     
     # ########### #
     # Collections #
@@ -451,14 +496,14 @@ class StampedAPI(AStampedAPI):
     def getInboxStampIDs(self, userID, limit=None):
         return self._collectionDB.getInboxStampIDs(userID, limit)
     
-    def getInboxStamps(self, userID, limit=None):
-        return self._collectionDB.getInboxStamps(userID, limit)
-    
     def getUserStampIDs(self, userID, limit=None):
         return self._collectionDB.getUserStampIDs(userID, limit)
     
+    def getInboxStamps(self, userID, limit=None):
+        return self._collectionDB.getInboxStamps(userID, limit)
+    
     def getUserStamps(self, userID, limit=None):
-        return self._collectionDB.getUserStamps(userID, limit)
+        return self._collectionDB.getUserStamps(userID, limit, output='dict')
     
     def getUserMentions(self, userID, limit=None):
         return self._collectionDB.getUserMentions(userID, limit)

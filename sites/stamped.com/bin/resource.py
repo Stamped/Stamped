@@ -107,7 +107,7 @@ class Resource():
     
     @staticmethod
     def parse(name, schema, args):
-        utils.log("Parsing API function '%s' with args: %s" % (name, args))
+        #utils.log("Parsing API function '%s' with args: %s" % (name, args))
         output = AttributeDict()
         seen = set()
         

@@ -34,9 +34,9 @@ def encodeType(obj):
         return obj.__dict__
 
 def transformOutput(d):
-    print str(d)
-    print repr(d)
-    return json.dumps(d, sort_keys=True, indent=2, default=encodeType)
+    output = json.dumps(d, sort_keys=True, indent=2, default=encodeType)
+    print 'Output: ', output
+    return output
 
 def parseRequestForm(schema, form):
     apiFuncName = utils.getFuncName(1)
@@ -69,7 +69,7 @@ def handleGETRequest(request, stampedAPIFunc, args):
             funcArgs.append(funcArg)
             #vars()['arg%d' % index]
         except:
-            print 'False'
+            print 'Mismatched Argument'
     #         except KeyError as e:
     #             return "Required argument '%s' to API function '%s' not found" % (arg, utils.getFuncName(1)), 400
 
@@ -313,7 +313,7 @@ def searchEntities():
 # Stamps #
 # ###### #
 
-@app.route(REST_API_PREFIX + 'addStamp', methods=['POST'])
+@app.route(REST_API_PREFIX + 'stamps/add.json', methods=['POST'])
 def addStamp():
     # TODO: the arguments here need work
     schema = ResourceArgumentSchema([
@@ -327,7 +327,7 @@ def addStamp():
     
     return handlePOSTRequest(request, stampedAPI.addStamp, schema)
 
-@app.route(REST_API_PREFIX + 'updateStamp', methods=['POST'])
+@app.route(REST_API_PREFIX + 'stamps/update.json', methods=['POST'])
 def updateStamp():
     # TODO: the arguments here need work
     schema = ResourceArgumentSchema([
@@ -340,7 +340,7 @@ def updateStamp():
     
     return handlePOSTRequest(request, stampedAPI.updateStamp, schema)
 
-@app.route(REST_API_PREFIX + 'removeStamp', methods=['POST'])
+@app.route(REST_API_PREFIX + 'stamps/remove.json', methods=['POST'])
 def removeStamp():
     # TODO: the arguments here need work
     schema = ResourceArgumentSchema([
@@ -350,13 +350,43 @@ def removeStamp():
     
     return handlePOSTRequest(request, stampedAPI.removeStamp, schema)
 
-@app.route(REST_API_PREFIX + 'getStamp', methods=['GET'])
-def getStamp():
-    return handleGETRequest(request, stampedAPI.getStamp, [ 'stamp_id' ])
+@app.route(REST_API_PREFIX + 'stamps/show/<stamp_id>.json', methods=['GET'])
+def getStamp(stamp_id):
+    return transformOutput(stampedAPI.getStamp(stamp_id))
+#     return handleGETRequest(arguments, stampedAPI.getStamp, [ 'stamp_id' ])
 
 @app.route(REST_API_PREFIX + 'getStamps', methods=['GET'])
 def getStamps():
-    return handleGETRequest(request, stampedAPI.getStamps, [ 'stamp_ids' ])
+    return handleGETRequest(request, stampedAPI.getStamps, [ 'stamp_ids' ]) 
+
+# ######## #
+# Comments #
+# ######## #
+
+@app.route(REST_API_PREFIX + 'addComment', methods=['POST'])
+def addComment():
+    # TODO: the arguments here need work
+    schema = ResourceArgumentSchema([
+        ("stamp_id",        ResourceArgument(required=True, expectedType=basestring)), 
+        ("user_id",         ResourceArgument(required=True, expectedType=basestring)), 
+        ("blurb",           ResourceArgument(required=True, expectedType=basestring)), 
+        ("mentions",        ResourceArgument(expectedType=basestring))
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.addComment, schema)
+
+@app.route(REST_API_PREFIX + 'removeComment', methods=['POST'])
+def removeComment():
+    # TODO: the arguments here need work
+    schema = ResourceArgumentSchema([
+        ("comment_id",      ResourceArgument(required=True, expectedType=basestring))
+    ])
+    
+    return handlePOSTRequest(request, stampedAPI.removeComment, schema)
+
+@app.route(REST_API_PREFIX + 'getComments', methods=['GET'])
+def getComments():
+    return handleGETRequest(request, stampedAPI.getComments, [ 'stamp_id' ])
 
 # ########### #
 # Collections #
@@ -366,7 +396,7 @@ def getStamps():
 def getInboxStampIDs():
     return handleGETRequest(request, stampedAPI.getInboxStampIDs, [ 'user_id', 'limit' ])
 
-@app.route(REST_API_PREFIX + 'getInboxStamps', methods=['GET'])
+@app.route(REST_API_PREFIX + 'collections/inbox.json', methods=['GET'])
 def getInboxStamps():
     return handleGETRequest(request, stampedAPI.getInboxStamps, [ 'user_id', 'limit' ])
 
@@ -374,7 +404,7 @@ def getInboxStamps():
 def getUserStampIDs():
     return handleGETRequest(request, stampedAPI.getUserStampIDs, [ 'user_id', 'limit' ])
 
-@app.route(REST_API_PREFIX + 'getUserStamps', methods=['GET'])
+@app.route(REST_API_PREFIX + 'collections/user.json', methods=['GET'])
 def getUserStamps():
     return handleGETRequest(request, stampedAPI.getUserStamps, [ 'user_id', 'limit' ])
 
