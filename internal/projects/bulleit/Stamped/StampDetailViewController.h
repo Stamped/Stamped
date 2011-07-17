@@ -24,6 +24,10 @@
 @property (nonatomic, retain) IBOutlet UIView* commentsView;
 @property (nonatomic, retain) IBOutlet UIView* activityView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
+@property (nonatomic, retain) IBOutlet UserImageView* currentUserImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
+@property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
+@property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
+
 
 @end

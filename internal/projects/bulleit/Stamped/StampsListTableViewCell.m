@@ -149,8 +149,11 @@ static const CGFloat kTitleMaxWidth = 210.0;
   userNameLabel_.textColor = substringColor;
   commentLabel_.textColor = substringColor;
 
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
-  titleLayer_.foregroundColor = titleColor.CGColor;
+  titleLayer_.foregroundColor = titleColor.CGColor;  
+  [CATransaction commit];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

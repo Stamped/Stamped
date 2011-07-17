@@ -20,6 +20,8 @@
 #import "StampedAppDelegate.h"
 #import "UserImageView.h"
 
+static const CGFloat kActivityFrameMinHeight = 126.0;
+
 @interface StampDetailViewController ()
 - (void)setUpHeader;
 - (void)setUpToolbarAndBackground;
@@ -37,7 +39,10 @@
 @synthesize commentsView = commentsView_;
 @synthesize activityView = activityView_;
 @synthesize bottomToolbar = bottomToolbar_;
+@synthesize currentUserImageView = currentUserImageView_;
 @synthesize commenterImageView = commenterImageView_;
+@synthesize commenterNameLabel = commenterNameLabel_;
+@synthesize stampedLabel = stampedLabel_;
 
 - (id)initWithEntity:(StampEntity*)entity {
   self = [self initWithNibName:@"StampDetailViewController" bundle:nil];
@@ -54,7 +59,10 @@
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.scrollView = nil;
+  self.currentUserImageView = nil;
   self.commenterImageView = nil;
+  self.commenterNameLabel = nil;
+  self.stampedLabel = nil;
   [super dealloc];
 }
 
@@ -88,6 +96,18 @@
 
   [self setUpMainContentView];
   [self setUpCommentsView];
+}
+
+- (void)viewDidUnload {
+  [super viewDidUnload];
+  self.topHeaderCell = nil;
+  self.bottomToolbar = nil;
+  self.activityView = nil;
+  self.scrollView = nil;
+  self.currentUserImageView = nil;
+  self.commenterImageView = nil;
+  self.commenterNameLabel = nil;
+  self.stampedLabel = nil;
 }
 
 - (void)setUpHeader {
@@ -161,38 +181,27 @@
 }
 
 - (void)setUpMainContentView {
-  UserImageView* userImgView = [[UserImageView alloc] initWithFrame:CGRectMake(10, 10, 55, 55)];
-  userImgView.image = entity_.userImage;
-  [activityView_ addSubview:userImgView];
-  [userImgView release];
+  commenterImageView_.image = entity_.userImage;
 
-  const CGFloat leftPadding = CGRectGetMaxX(userImgView.frame) + 10;
-  NSString* fontString = @"Helvetica-Bold";
-  CGSize stringSize = [entity_.userName sizeWithFont:[UIFont fontWithName:fontString size:14]
+  const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
+  CGSize stringSize = [entity_.userName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
                                             forWidth:218
                                        lineBreakMode:UILineBreakModeTailTruncation];
-  
-  UILabel* userNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(
-      leftPadding, 10, stringSize.width, stringSize.height)];
-  userNameLabel.font = [UIFont fontWithName:fontString size:14];
-  userNameLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  userNameLabel.text = entity_.userName;
-  [activityView_ addSubview:userNameLabel];
-  [userNameLabel release];
+  CGRect nameLabelFrame = commenterNameLabel_.frame;
+  nameLabelFrame.size = stringSize;
+  commenterNameLabel_.frame = nameLabelFrame;
+  commenterNameLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  commenterNameLabel_.text = entity_.userName;
 
-  // TODO(andybons): Ripe for caching.
-  fontString = @"HelveticaNeue";
-  stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:fontString size:14]
-                               forWidth:218  // TODO(andybons) right width, here.
+  stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"HelveticaNeue" size:14]
+                               forWidth:60
                           lineBreakMode:UILineBreakModeTailTruncation];
-  UILabel* stampedLabel = [[UILabel alloc] initWithFrame:CGRectMake(
-      CGRectGetMaxX(userNameLabel.frame) + 2, 10, stringSize.width, stringSize.height)];
-  stampedLabel.font = [UIFont fontWithName:fontString size:14];
-  stampedLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  stampedLabel.text = @"stamped";
-  [activityView_ addSubview:stampedLabel];
-  [stampedLabel release];
-
+  CGRect stampedFrame = stampedLabel_.frame;
+  stampedFrame.origin.x = CGRectGetMaxX(nameLabelFrame) + 3;
+  stampedFrame.size = stringSize;
+  stampedLabel_.frame = stampedFrame;
+  stampedLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+ 
   if (!entity_.comment)
     return;
 
@@ -208,25 +217,17 @@
                                lineBreakMode:commentLabel.lineBreakMode];
   commentLabel.frame = CGRectMake(leftPadding, 29, stringSize.width, stringSize.height);
   [activityView_ addSubview:commentLabel];
-  
+
   CGRect activityFrame = activityView_.frame;
-  activityFrame.size.height = CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds);
+  activityFrame.size.height = fmaxf(kActivityFrameMinHeight, 
+      CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds));
   activityView_.frame = activityFrame;
   
   [commentLabel release];
 }
 
 - (void)setUpCommentsView {
-  commenterImageView_.image = [UIImage imageNamed:@"robby_s_user_image"];
-}
-
-- (void)viewDidUnload {
-  [super viewDidUnload];
-  self.topHeaderCell = nil;
-  self.bottomToolbar = nil;
-  self.activityView = nil;
-  self.scrollView = nil;
-  self.commenterImageView = nil;
+  currentUserImageView_.image = [UIImage imageNamed:@"robby_s_user_image"];
 }
 
 - (void)handleTap:(UITapGestureRecognizer*)sender {
