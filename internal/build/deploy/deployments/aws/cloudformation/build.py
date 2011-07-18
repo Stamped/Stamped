@@ -83,11 +83,13 @@ Ec2WebServerCommands = [
     set -e
     
     echo '>>>> Clone repo'
-    git clone git@github.com:Stamped/stamped-bootstrap.git /bootstrap
+    git clone git@github.com:Stamped/stamped-bootstrap.git /stamped/bootstrap
     """,
     """
+    echo '>>>> Installing python-setuptools'
+    sudo apt-get install python-setuptools
     echo '>>>> Running init script'
-    bash /bootstrap/init.sh &> /bootstrap/log
+    python /stamped/bootstrap/init.py name=dev0 type=dev port_base=70217 &> /stamped/bootstrap/log
     """
 ]
 

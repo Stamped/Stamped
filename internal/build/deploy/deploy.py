@@ -12,6 +12,31 @@ from deployments.aws import AWSDeploymentSystem
 from deployments.local import LocalDeploymentSystem
 from errors import Fail
 
+available_commands = {
+    'create' : 'create_stack', 
+    'create_stack' : 'create_stack', 
+    
+    'delete' : 'delete_stack', 
+    'delete_stack' : 'delete_stack', 
+    
+    'describe' : 'describe_stack', 
+    'describe_stack' : 'describe_stack', 
+    
+    'describe_events' : 'describe_stack_events', 
+    'describe_stack_events' : 'describe_stack_events', 
+    
+    'connect' : 'connect', 
+    'connect_stack' : 'connect', 
+    
+    'delete' : 'delete_stack', 
+    'delete_stack' : 'delete_stack', 
+    
+    'list' : 'list_stacks', 
+    'list_stacks' : 'list_stacks', 
+    
+    'create_and_connect' : [ 'create_stack', 'connect' ], 
+}
+
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
     version = "%prog " + __version__
@@ -27,18 +52,13 @@ def parseCommandLine():
         default="", type="string", help="Params to pass when creating a new stack")
     
     (options, args) = parser.parse_args()
+    args = map(lambda arg: arg.lower(), args)
     
-    commands = [
-        'create_stack', 
-        'delete_stack', 
-        'describe_stack', 
-        'describe_stack_events', 
-        'connect_stack', 
-        'list_stacks', 
-    ]
-    
-    if len(args) < 1:
-        print "Error: must provide at least one command"
+    if len(args) < 1 or not args[0] in available_commands:
+        print "Error: must provide a command from the list of available commands:"
+        for command in available_commands:
+            print "   %s" % command
+        
         parser.print_help()
         sys.exit(1)
     else:
@@ -61,15 +81,20 @@ def main():
     deploymentSystemClass = deployments[options.deployment]
     deploymentSystem = deploymentSystemClass(deploymentSystemClass.__name__, options)
     
-    func = getattr(deploymentSystem, args[0], None)
-    if func is None:
-        raise Fail("'%s' does not support command '%s'" % (deploymentSystem, args[0]))
+    commands = available_commands[args[0]]
+    if commands not in (list, tuple):
+        commands = [ commands ]
     
-    try:
-        func(*args[1:])
-    except Exception:
-        utils.log("Error: command '%s' on '%s' failed" % (args[0], deploymentSystem))
-        raise
+    for command in commands:
+        func = getattr(deploymentSystem, command, None)
+        if func is None:
+            raise Fail("'%s' does not support command '%s'" % (deploymentSystem, command))
+        
+        try:
+            func(*args[1:])
+        except Exception:
+            utils.log("Error: command '%s' on '%s' failed" % (command, deploymentSystem))
+            raise
 
 if __name__ == '__main__':
     main()
