@@ -1,0 +1,207 @@
+
+# USERS #
+
+
+------------------------------------------------------------------------------
+## GET users/show ##
+
+### Description ###
+Shows detailed information for a given user.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the requested user.
+
+**authenticated_user_id** _optional_
+The user id of the authenticating user. This is necessary if the requested account is locked.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/show.json
+	user_id=47cc67093475061e3d95369d
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"screen_name": "kevin",
+		"display_name": "Kevin P.",
+		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+		"website": null,
+		"color": {
+			"primary": "D14836",
+			"secondary": "EC8B3F"
+		},
+	    "recent_stamps": [
+			"blurb": "Really, the best ever.", 
+			"entity": {
+			    "category": "Restaurant", 
+			    "entity_id": "4e226fcd4e61754161000006", 
+			    "subtitle": "American food in the West Village", 
+			    "title": "Little Owl"
+			}, 
+			"flags": {
+				"privacy": false
+			}, 
+			"stamp_id": "4e226fcd4e18474561000000", 
+			"image": "image2.png", 
+			"credit": [
+				"4e226fcd4e61754161000007", 
+				"4e226fcd4e61754161000008"
+			], 
+			"timestamp": "2011-07-17 05:14:54.128641"
+	    ]
+	}
+
+
+------------------------------------------------------------------------------
+## GET users/lookup ##
+
+### Description ###
+Return detailed information for up to 100 users. Users can be specified by id, screen name, or a combination of the two.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**user_ids** or **screen_names** _required_
+The user ids or screen names of the requested users. Values should be separated by commas.
+
+**authenticated_user_id** _optional_
+The user id of the authenticating user. This is necessary if any of the requested accounts are locked.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/lookup.json
+	user_ids=47cc67093475061e3d95369d,4e226fcd4e61754161000007&screen_names=kevin,robby
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"first_name": "Kevin",
+			"last_name": "Palms",
+			"screen_name": "kevin",
+			"display_name": "Kevin P.",
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"website": null,
+			"color": {
+				"primary": "D14836",
+				"secondary": "EC8B3F"
+			},
+		    "last_stamp": {
+				"blurb": "Really, the best ever.", 
+				"entity": {
+				    "category": "Restaurant", 
+				    "entity_id": "4e226fcd4e61754161000006", 
+				    "subtitle": "American food in the West Village", 
+				    "title": "Little Owl"
+				}, 
+				"flags": {
+					"privacy": false
+				}, 
+				"id": "4e226fcd4e18474561000000", 
+				"img": "image2.png", 
+				"credit": [
+					"4e226fcd4e61754161000007", 
+					"4e226fcd4e61754161000008"
+				], 
+				"timestamp": "2011-07-17 05:14:54.128641"
+		    }
+		},
+		{
+			"user_id": "4e226fcd4e61754161000007",
+			"first_name": "Robby",
+			"last_name": "Stein",
+			"screen_name": "robby",
+			"display_name": "Robby S.",
+			"bio": "Starting something new in NYC. Former Google product manager.",
+			"website": null,
+			"color": {
+				"primary": "3AD8CC"
+			},
+		    "last_stamp": {
+				"blurb": "Best burger in the city.", 
+				"entity": {
+				    "category": "Restaurant", 
+				    "entity_id": "3r426fcd4e61754161000006", 
+				    "subtitle": "Burgers, and that's all.", 
+				    "title": "Spotted Pig"
+				}, 
+				"flags": {
+					"privacy": false
+				}, 
+				"id": "3e526fcd4e18474561000000", 
+				"img": "image3.png", 
+				"credit": null, 
+				"timestamp": "2011-05-12 18:24:44.432141"
+		    }
+		}
+	]
+
+
+------------------------------------------------------------------------------
+## GET users/search ##
+
+### Description ###
+Search users via their name, screen name, and bio.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**q** _required_
+The search query to run. 
+
+**limit** _optional_
+The number of results to return. Default is 20.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/search.json
+	q=Kevin%20Palms
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"first_name": "Kevin",
+			"last_name": "Palms",
+			"screen_name": "kevin",
+			"display_name": "Kevin P.",
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"website": null,
+			"color": {
+				"primary": "D14836",
+				"secondary": "EC8B3F"
+			}
+		}
+	]
+
+
+------------------------------------------------------------------------------
+## GET users/privacy ##
+
+### Description ###
+Check whether a given user's account is publicly available or not.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the requested user.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/privacy.json
+	user_id=47cc67093475061e3d95369d
+
+### Sample Result ###
+	false
+
+

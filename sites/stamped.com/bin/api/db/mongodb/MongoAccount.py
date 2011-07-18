@@ -20,17 +20,20 @@ class MongoAccount(AAccountDB, Mongo):
         '_id': object,
         'first_name': basestring,
         'last_name': basestring,
-        'username': basestring,
+        'screen_name': basestring,
+        'display_name': basestring,
         'email': basestring,
         'password': basestring,
-        'img': basestring,
-        'locale': basestring,
-        'timestamp': basestring,
-        'website': basestring,
+        'image': basestring,
         'bio': basestring,
+        'website': basestring,
         'color': {
-            'primary_color': basestring,
-            'secondary_color': basestring
+            'primary': basestring,
+            'secondary': basestring
+        },
+        'locale': {
+            'language': basestring,
+            'time_zone': basestring
         },
         'linked_accounts': {
             'itunes': basestring
@@ -50,6 +53,10 @@ class MongoAccount(AAccountDB, Mongo):
             'total_todos': int,
             'total_credit_received': int,
             'total_credit_given': int
+        },
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
         }
     }
     
@@ -64,20 +71,21 @@ class MongoAccount(AAccountDB, Mongo):
     ### PUBLIC
     
     def addAccount(self, user):
-        return self._addDocument(user)
+        return self._addDocument(user, objId='user_id')
     
     def getAccount(self, userID):
-        user = Account(self._getDocumentFromId(userID))
+        user = Account(self._getDocumentFromId(userID, objId='user_id'))
         if user.isValid == False:
             print str(user)
             raise KeyError("User not valid")
         return user
         
     def updateAccount(self, user):
-        return self._updateDocument(user)
+        return self._updateDocument(user, objId='user_id')
         
     def removeAccount(self, userID):
         return self._removeDocument(userID)
+        return True
         
     def flagUser(self, user):
         ### TODO

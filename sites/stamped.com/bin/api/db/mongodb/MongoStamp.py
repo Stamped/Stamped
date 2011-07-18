@@ -93,14 +93,17 @@ class MongoStamp(AStampDB, Mongo):
             followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
             MongoInboxStamps().addInboxStamps(followerIds, stamp['id'])
     
-    def getStamps(self, stampIds):
+    def getStamps(self, stampIds, output='object'):
         stamps = self._getDocumentsFromIds(stampIds)
         result = []
         for stamp in stamps:
             stamp = Stamp(stamp)
             if stamp.isValid == False:
                 raise KeyError("Stamp not valid")
-            result.append(stamp)
+            if output == 'data' or output == 'dict':
+                result.append(stamp.getDataAsDict())
+            else:
+                result.append(stamp)
         return result
 
     

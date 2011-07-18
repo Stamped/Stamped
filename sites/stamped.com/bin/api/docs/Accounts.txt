@@ -1,0 +1,266 @@
+
+# ACCOUNTS #
+
+
+------------------------------------------------------------------------------
+## POST account/create ##
+
+### Description ###
+Creates a new account on Stamped for a user. 
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**first_name** _required_
+The first name of the registering user. This field has a maximum of 80 characters.
+
+**last_name** _required_
+The last name of the registering user. This field has a maximum of 80 characters.
+
+**email** _required_
+The email address of the registering user. This must be in a valid format and must be unique within Stamped.
+
+**password** _required_
+The password for the new account. This must be a minimum of six characters.
+
+**screen_name** _required_
+A unique string that acts as a handle for the user. This will be used for authentication and for account identification. The screen name must be unique within Stamped, and account creation will fail if it is not.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/create.json
+	first_name=Kevin&last_name=Palms&email=kevin@stamped.com&password=12345&screen_name=kevin
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"email": "kevin@stamped.com",
+		"screen_name": "kevin",
+		"display_name": "Kevin P."
+	}
+
+
+------------------------------------------------------------------------------
+## POST account/settings ##
+
+### Description ###
+Updates settings for the authenticating user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user. 
+
+**email** _optional_
+The email address of the registering user. This must be in a valid format and must be unique within Stamped.
+
+**password** _optional_
+The password for the account. This must be a minimum of six characters.
+
+**screen_name** _optional_
+A unique string that acts as a handle for the user. This will be used for authentication and for account identification. The screen name must be unique within Stamped.
+
+**privacy** _optional_
+A Boolean value representing whether or not the account should be publicly visible. The default value is 'true'. Only Boolean values are accepted, i.e. 'true', '1', 'false', and '0'.
+
+**language** _optional_
+The language used by Stamped for the user. Inputs must be in the form of the appropriate ISO 639-1 code. Currently only "en" is supported.
+
+**time_zone** _optional_
+The time zone that should be used for the user. Inputs must be in the form of the appropriate TZ (or Olson) representation, such as "America/New_York".
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/settings.json
+	screen_name=kpalms&privacy=true&language=en
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"email": "kevin@stamped.com",
+		"screen_name": "kpalms",
+		"privacy": true,
+		"locale": {
+			"language": "en",
+			"time_zone": "America/New_York"
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## GET account/settings ##
+
+### Description ###
+Retrieve settings for the authenticating user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user. 
+
+### Sample Request ###
+	GET https://api.stamped.com/1/account/settings.json
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"email": "kevin@stamped.com",
+		"screen_name": "kpalms",
+		"privacy": true,
+		"locale": {
+			"language": "en",
+			"time_zone": "America/New_York"
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## POST account/update_profile ##
+
+### Description ###
+Update profile information for the authenticating user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user. 
+
+**first_name** _optional_
+The first name of the registering user. This field has a maximum of 80 characters.
+
+**last_name** _optional_
+The last name of the registering user. This field has a maximum of 80 characters.
+
+**bio** _optional_
+A brief biography of the user. This is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.
+
+**website** _optional_
+A link to the user's website. This is optional. The maximum length is 140 characters.
+
+**color** _optional_
+The hexidecimal representation of the user's stamp color. If two color are provided they should be separated by a comma.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/update_profile.json
+	color=D14836,EC8B3F&bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"display_name": "Kevin P.",
+		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+		"website": null,
+		"color": {
+			"primary": "D14836",
+			"secondary": "EC8B3F"
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## POST account/update_profile_image ##
+
+### Description ###
+Update the profile image for the authenticating user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**image** _required_
+The base64-encoded image for the user. Image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/update_profile_image.json
+	image=<<data>>
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"image": "http://img.stamped.com/user/47cc67093475061e3d95369d"
+	}
+
+
+------------------------------------------------------------------------------
+## GET account/verify_credentials ##
+
+### Description ###
+Checks if the supplied credentials are valid.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/account/verify_credentials.json
+
+### Sample Result ###
+	true
+
+
+------------------------------------------------------------------------------
+## POST account/remove ##
+
+### Description ###
+Removes the account of the authenticating user. 
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/remove.json
+
+### Sample Result ###
+	true
+
+
+------------------------------------------------------------------------------
+## POST account/reset_password ##
+
+### Description ###
+Resets the password for the authenticating user.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/reset_password.json
+
+### Sample Result ###
+	true
+

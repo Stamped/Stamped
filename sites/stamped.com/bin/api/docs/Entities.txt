@@ -1,0 +1,245 @@
+
+# ENTITIES #
+
+
+------------------------------------------------------------------------------
+## POST entities/create ##
+
+### Description ###
+Create a new entity. This is only used for custom entities added by users.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**title** _required_
+The title of the custom entity.
+
+**category** _required_
+The category of the custom entity. If an invalid category is passed it will default to "Other".
+
+**desc** _required_
+A brief description of the entity.
+
+**image** _optional_
+A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+
+**address** _optional_
+The address of the entity.
+
+**coordinates** _optional_
+The latitude and longitude of the entity, separated by a comma.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/entities/create.json
+	title=Spotted+Pig&category=Restaurant&desc=Burger+place&coordinates=40.714623,-74.006605
+
+### Sample Result ###
+	{
+		"entity_id": "4e226ea84e61754161000000",
+		"title": "Spotted Pig",
+		"category": "Restaurant",
+		"desc": "Burger place",
+		"image": null,
+		"details": {
+			"place": {
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"coordinates": {
+					"lat": 40.714623,
+					"lng": -74.006605
+				}
+			}
+		},
+		"timestamp": {
+			"created": "2011-07-17 19:03:22.354813"
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## GET entities/show ##
+
+### Description ###
+Show details for a given entity.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**entity_id** _required_
+The unique identifier for the entity.
+
+**authenticated_user_id** _optional_
+The user id of the authenticating user. This is used to display stamps from any friends.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/entities/show.json
+	entity_id=4e226ea84e61754161000000
+
+### Sample Result ###
+	{
+		"entity_id": "4e226ea84e61754161000000",
+		"title": "Spotted Pig",
+		"category": "Restaurant",
+		"desc": "Burger place",
+		"image": null,
+		"details": {
+			"place": {
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"coordinates": {
+					"lat": 40.714623,
+					"lng": -74.006605
+				}
+			}
+		},
+		"timestamp": {
+			"created": "2011-07-17 19:03:22.354813"
+		},
+		"stamps": [
+			{
+				"blurb": "Best place ever!", 
+				"flags": {
+					"privacy": false
+				}, 
+				"id": "4e226fcd4e18474561000000", 
+				"img": "image2.png", 
+				"credit": [
+					"4e226fcd4e61754161000007", 
+					"4e226fcd4e61754161000008"
+				], 
+				"timestamp": "2011-07-17 05:14:54.128641", 
+				"user": {
+					"user_id": "47cc67093475061e3d95369d", 
+					"user_img": "user.png", 
+					"user_name": "Kevin P"
+				}
+			}
+		]
+	}
+
+
+------------------------------------------------------------------------------
+## POST entities/update ##
+
+### Description ###
+Update details for a custom entity.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user. The user must be the creator of the entity.
+
+**entity_id** _required_
+The unique identifier of the entity being updated.
+
+**title** _optional_
+The title of the custom entity.
+
+**category** _optional_
+The category of the custom entity. If an invalid category is passed it will default to "Other".
+
+**desc** _optional_
+A brief description of the entity.
+
+**image** _optional_
+A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+
+**address** _optional_
+The address of the entity.
+
+**coordinates** _optional_
+The latitude and longitude of the entity, separated by a comma.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/entities/update.json
+	entity_id=4e226ea84e61754161000000&desc=Gastropub+in+the+West+Village,+NYC
+
+### Sample Result ###
+	{
+		"entity_id": "4e226ea84e61754161000000",
+		"title": "Spotted Pig",
+		"category": "Restaurant",
+		"desc": "Gastropub in the West Village, NYC",
+		"image": null,
+		"details": {
+			"place": {
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"coordinates": {
+					"lat": 40.714623,
+					"lng": -74.006605
+				}
+			}
+		},
+		"timestamp": {
+			"created": "2011-07-17 19:03:22.354813",
+			"modified": "2011-07-17 21:25:31.583402"
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## POST entities/remove ##
+
+### Description ###
+Remove a custom entity.
+**Warning:** How will this impact subsequent stamps on this entity?
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user. The user must be the creator of the entity.
+
+**entity_id** _required_
+The unique identifier of the entity being removed.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/entities/remove.json
+	entity_id=4e226ea84e61754161000000
+
+### Sample Result ###
+	true
+
+
+------------------------------------------------------------------------------
+## GET entities/search ##
+
+### Description ###
+Search for an entity.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**q** _required_
+Text string to match against the entity title.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/entities/search.json
+	q=Spotted+Pig
+
+### Sample Result ###
+	[
+		{
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"category": "Restaurant",
+			"desc": "Gastropub in the West Village, NYC"
+		}
+	]
+
+

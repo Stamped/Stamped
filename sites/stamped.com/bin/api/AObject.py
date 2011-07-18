@@ -71,8 +71,6 @@ class AObject(object):
         
             
     def getDataAsDict(self):
-#         if 'id' in self._data:
-#             self._data['_id'] = self._data['id']
         return self._data
         
     def add(self, data):

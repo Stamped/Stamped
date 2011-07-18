@@ -6,24 +6,28 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from AObject import AObject
+from datetime import datetime
 
 class Account(AObject):
 
     _schema = {
-        'id': basestring,
+        'user_id': basestring,
         'first_name': basestring,
         'last_name': basestring,
-        'username': basestring,
         'email': basestring,
         'password': basestring,
-        'img': basestring,
-        'locale': basestring,
-        'timestamp': basestring,
-        'website': basestring,
+        'screen_name': basestring,
+        'display_name': basestring,
+        'image': basestring,
         'bio': basestring,
+        'website': basestring,
         'color': {
-            'primary_color': basestring,
-            'secondary_color': basestring
+            'primary': basestring,
+            'secondary': basestring
+        },
+        'locale': {
+            'language': basestring,
+            'time_zone': basestring
         },
         'linked_accounts': {
             'itunes': basestring
@@ -43,6 +47,10 @@ class Account(AObject):
             'total_todos': int,
             'total_credit_received': int,
             'total_credit_given': int
+        },
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
         }
     }
     
@@ -53,35 +61,39 @@ class Account(AObject):
     def isValid(self):
         valid = True
         
-        if 'id' in self:
-            valid &= isinstance(self.id, basestring) 
+        if 'user_id' in self:
+            valid &= isinstance(self.user_id, basestring) 
+        
+        ### REQUIRED
         
         valid &= 'first_name' in self and isinstance(self.first_name, basestring)
         valid &= 'last_name' in self and isinstance(self.last_name, basestring)
-        valid &= 'username' in self and isinstance(self.username, basestring)
         valid &= 'email' in self and isinstance(self.email, basestring)
         valid &= 'password' in self and isinstance(self.password, basestring)
-        valid &= 'locale' in self and isinstance(self.locale, basestring)
-        #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
+        valid &= 'screen_name' in self and isinstance(self.screen_name, basestring)
+        valid &= 'display_name' in self and isinstance(self.display_name, basestring)
         
-        if 'img' in self and self.img is not None:
-            valid &= isinstance(self.img, basestring)
+        valid &= 'color' in self and isinstance(self.color, dict)
+        valid &= 'primary' in self.color and isinstance(self.color['primary'], basestring)
+        
+        valid &= 'locale' in self and isinstance(self.locale, dict)
+        valid &= 'language' in self.locale and isinstance(self.locale['language'], basestring)
+        valid &= 'time_zone' in self.locale and isinstance(self.locale['time_zone'], basestring)
+        
+        valid &= 'flags' in self and isinstance(self.flags, dict)
+        valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
+        
+        ### OPTIONAL
+        
+        if 'image' in self and self.image is not None:
+            valid &= isinstance(self.image, basestring)
         if 'website' in self and self.website is not None:
             valid &= isinstance(self.website, basestring)
         if 'bio' in self and self.bio is not None:
             valid &= isinstance(self.bio, basestring)
         
-        
-        valid &= 'color' in self and isinstance(self.color, dict)
-        valid &= 'primary_color' in self.color and isinstance(self.color['primary_color'], basestring)
-        
-        # TODO: there's something weird going on here, where self.color.secondary_color is None, but 
-        # it's not being equality tested against None... fuck off, Python!
-        #if 'secondary_color' in self.color and self.color.secondary_color is not None:
-        #print str(self.color['secondary_color'])
-        #print repr(self.color['secondary_color'])
-        #print str(type(self.color['secondary_color']))
-        #    valid &= isinstance(self.color['secondary_color'], basestring)
+        if 'secondary' in self.color and self.color['secondary'] is not None:
+            valid &= isinstance(self.color['secondary'], basestring)
         
         if 'linked_accounts' in self:
             valid &= isinstance(self.linked_accounts, dict) 
@@ -92,9 +104,6 @@ class Account(AObject):
             valid &= isinstance(self.devices, dict) 
             if 'ios_device_tokens' in self.devices:
                 valid &= isinstance(self.devices['ios_device_tokens'], list)
-        
-        valid &= 'flags' in self and isinstance(self.flags, dict)
-        valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
         
         if 'flagged' in self.flags:
             valid &= isinstance(self.flags['flagged'], bool)
@@ -115,5 +124,8 @@ class Account(AObject):
                 valid &= isinstance(self.stats['total_credit_received'], int)
             if 'total_credit_given' in self.stats:
                 valid &= isinstance(self.stats['total_credit_given'], int)
+                
+        ### SELF GENERATED
+        #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
         
         return valid

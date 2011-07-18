@@ -1,0 +1,211 @@
+
+# FRIENDSHIPS #
+
+
+------------------------------------------------------------------------------
+## POST friendships/create ##
+
+### Description ###
+Create a friendship between two users. This allows the authenticating user to subscribe to their friend's stamps.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the friend.
+
+### Sample Request ###
+POST https://api.stamped.com/1/friendships/create.json
+user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+{
+	"user_id": "4e226fcd4e61754161000007",
+	"screen_name": "robby"
+}
+
+
+------------------------------------------------------------------------------
+## GET friendships/check ##
+
+### Description ###
+Check whether or not a friendship exists.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the friend.
+
+### Sample Request ###
+GET https://api.stamped.com/1/friendships/check.json
+user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+true
+
+
+------------------------------------------------------------------------------
+## GET friendships/friends ##
+
+### Description ###
+Return a list of the authenticating user's friends.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+GET https://api.stamped.com/1/friendships/friends.json
+
+### Sample Result ###
+{
+	"user_ids": [
+		"4e226fcd4e61754161000007"
+	]
+}
+
+
+------------------------------------------------------------------------------
+## GET friendships/followers ##
+
+### Description ###
+Return a list of the authenticating user's followers.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+GET https://api.stamped.com/1/friendships/followers.json
+
+### Sample Result ###
+{
+	"user_ids": [
+		"4e226fcd4e61754161000007"
+	]
+}
+
+
+------------------------------------------------------------------------------
+## GET friendships/pending ##
+
+### Description ###
+Return a list of the authenticating user's followers that are pending approval. For private accounts only.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+GET https://api.stamped.com/1/friendships/pending.json
+
+### Sample Result ###
+{
+	"user_ids": [
+		"4e226fcd4e61754161000007"
+	]
+}
+
+
+------------------------------------------------------------------------------
+## GET friendships/approve ##
+
+### Description ###
+Approve a follower of the authenticating user. For private accounts only.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**user_id** or **screen_name** _required_
+
+### Sample Request ###
+GET https://api.stamped.com/1/friendships/approve.json
+user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+{
+	"user_id": "4e226fcd4e61754161000007",
+	"first_name": "Robby",
+	"last_name": "Stein",
+	"screen_name": "robby",
+	"display_name": "Robby S.",
+	"bio": "Starting something new in NYC. Former Google product manager.",
+	"website": null,
+	"color": {
+		"primary": "3AD8CC"
+	},
+    "last_stamp": {
+		"blurb": "Best burger in the city.", 
+		"entity": {
+		    "category": "Restaurant", 
+		    "entity_id": "3r426fcd4e61754161000006", 
+		    "subtitle": "Burgers, and that's all.", 
+		    "title": "Spotted Pig"
+		}, 
+		"flags": {
+			"privacy": false
+		}, 
+		"id": "3e526fcd4e18474561000000", 
+		"img": "image3.png", 
+		"credit": null, 
+		"timestamp": "2011-05-12 18:24:44.432141"
+    }
+}
+
+
+------------------------------------------------------------------------------
+## POST friendships/remove ##
+
+### Description ###
+Remove a friendship between two users.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the friend.
+
+### Sample Request ###
+POST https://api.stamped.com/1/friendships/remove.json
+user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+{
+	"user_id": "4e226fcd4e61754161000007",
+	"screen_name": "robby"
+}
+
+

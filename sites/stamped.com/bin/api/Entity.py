@@ -10,13 +10,13 @@ from AObject import AObject
 class Entity(AObject):
 
     _schema = {
-        'id': basestring, 
+        'entity_id': basestring, 
         'title': basestring, 
         'desc': basestring, 
         'locale': basestring, 
         'category': basestring,
-        'images': list, 
-        'date': {
+        'image': basestring, 
+        'timestamp': {
             'created' : basestring, 
             'modified': basestring, 
         }, 

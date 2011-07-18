@@ -22,8 +22,8 @@ class MongoEntity(AEntityDB, Mongo):
         'desc': basestring, 
         'locale': basestring, 
         'category': basestring,
-        'images': list, 
-        'date': {
+        'image': basestring, 
+        'timestamp': {
             'created' : basestring, 
             'modified': basestring, 
         }, 
@@ -133,30 +133,29 @@ class MongoEntity(AEntityDB, Mongo):
     ### PUBLIC
     
     def addEntity(self, entity):
-        return self._addDocument(entity)
+        return self._addDocument(entity, 'entity_id')
     
     def getEntity(self, entityId):
-        entity = Entity(self._getDocumentFromId(entityId))
+        entity = Entity(self._getDocumentFromId(entityId, 'entity_id'))
         if entity.isValid == False:
             raise KeyError("Entity not valid")
         return entity
         
     def updateEntity(self, entity):
-#         return self.getEntity(self._updateDocument(entity))
-        self._updateDocument(entity)
+        self._updateDocument(entity, 'entity_id')
         
     def removeEntity(self, entityID):
         return self._removeDocument(entityID)
     
     def addEntities(self, entities):
-        return self._addDocuments(entities)
+        return self._addDocuments(entities, 'entity_id')
         
     def matchEntities(self, query, limit=20):
         # Using a simple regex here. Need to rank results at some point...
         query = '^%s' % query
         result = []
         for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
-            result.append(Entity(self._mongoToObj(entity)))
+            result.append(Entity(self._mongoToObj(entity, 'entity_id')))
         return result
             
     
