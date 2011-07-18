@@ -82,7 +82,7 @@ def main():
     deploymentSystem = deploymentSystemClass(deploymentSystemClass.__name__, options)
     
     commands = available_commands[args[0]]
-    if commands not in (list, tuple):
+    if not isinstance(commands, (list, tuple)):
         commands = [ commands ]
     
     for command in commands:
