@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7E22679513D4964700657A66 /* LoginOrSignUpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22679313D4964700657A66 /* LoginOrSignUpViewController.m */; };
+		7E22679613D4964700657A66 /* LoginOrSignUpViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E22679413D4964700657A66 /* LoginOrSignUpViewController.xib */; };
+		7E22679913D4D90F00657A66 /* AccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22679813D4D90F00657A66 /* AccountManager.m */; };
+		7E22679D13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */; };
+		7E22679E13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E22679C13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png */; };
 		7E2CECEC13C795840068D576 /* stamp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CECEB13C795840068D576 /* stamp@2x.png */; };
 		7E2CECF113C79C530068D576 /* must_do@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CECEE13C79C530068D576 /* must_do@2x.png */; };
 		7E2CECF213C79C530068D576 /* comment@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CECEF13C79C530068D576 /* comment@2x.png */; };
@@ -210,6 +215,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7E22679213D4964700657A66 /* LoginOrSignUpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginOrSignUpViewController.h; sourceTree = "<group>"; };
+		7E22679313D4964700657A66 /* LoginOrSignUpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginOrSignUpViewController.m; sourceTree = "<group>"; };
+		7E22679413D4964700657A66 /* LoginOrSignUpViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LoginOrSignUpViewController.xib; sourceTree = "<group>"; };
+		7E22679713D4D90F00657A66 /* AccountManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountManager.h; sourceTree = "<group>"; };
+		7E22679813D4D90F00657A66 /* AccountManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountManager.m; sourceTree = "<group>"; };
+		7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_detail_ripple_bottom@2x.png"; sourceTree = "<group>"; };
+		7E22679C13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_detail_ripple_top@2x.png"; sourceTree = "<group>"; };
 		7E2CECEB13C795840068D576 /* stamp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp@2x.png"; sourceTree = "<group>"; };
 		7E2CECEE13C79C530068D576 /* must_do@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "must_do@2x.png"; sourceTree = "<group>"; };
 		7E2CECEF13C79C530068D576 /* comment@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "comment@2x.png"; sourceTree = "<group>"; };
@@ -376,6 +388,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7E22679A13D4E94800657A66 /* Stamp Detail */ = {
+			isa = PBXGroup;
+			children = (
+				7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */,
+				7E22679C13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png */,
+				7E2CECEB13C795840068D576 /* stamp@2x.png */,
+				7E2CECEE13C79C530068D576 /* must_do@2x.png */,
+				7E2CECEF13C79C530068D576 /* comment@2x.png */,
+				7E2CECF013C79C530068D576 /* share@2x.png */,
+			);
+			name = "Stamp Detail";
+			sourceTree = "<group>";
+		};
 		7E2CED0C13C7A2630068D576 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
@@ -532,6 +557,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7E22679A13D4E94800657A66 /* Stamp Detail */,
 				7E76129F13C940500023CCC4 /* Logos */,
 				7E2CED1513C7A5FD0068D576 /* Stamps */,
 				7E2CED0C13C7A2630068D576 /* Categories */,
@@ -548,10 +574,6 @@
 				7EFE8F7A13C3C96D00324F34 /* toolbar_add_stamp@2x.png */,
 				7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */,
 				7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */,
-				7E2CECEB13C795840068D576 /* stamp@2x.png */,
-				7E2CECEE13C79C530068D576 /* must_do@2x.png */,
-				7E2CECEF13C79C530068D576 /* comment@2x.png */,
-				7E2CECF013C79C530068D576 /* share@2x.png */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -623,6 +645,7 @@
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
 			isa = PBXGroup;
 			children = (
+				7E22679413D4964700657A66 /* LoginOrSignUpViewController.xib */,
 				7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */,
 				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
@@ -640,8 +663,12 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				7E22679713D4D90F00657A66 /* AccountManager.h */,
+				7E22679813D4D90F00657A66 /* AccountManager.m */,
 				7EF5138B13D240B60028B612 /* STTabBar.h */,
 				7EF5138C13D240B60028B612 /* STTabBar.m */,
+				7E22679213D4964700657A66 /* LoginOrSignUpViewController.h */,
+				7E22679313D4964700657A66 /* LoginOrSignUpViewController.m */,
 				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
 				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
 				7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */,
@@ -884,6 +911,9 @@
 				7EE7E37013CD223100FA3B3A /* inbox_top_border@2x.png in Resources */,
 				7E5FEED913D0C497008BCA48 /* nav_bar_ripple@2x.png in Resources */,
 				7E5FEEDA13D0C497008BCA48 /* nav_bar@2x.png in Resources */,
+				7E22679613D4964700657A66 /* LoginOrSignUpViewController.xib in Resources */,
+				7E22679D13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png in Resources */,
+				7E22679E13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -935,6 +965,8 @@
 				7EE7E35A13CCB2A800FA3B3A /* StampsListTableViewCell.m in Sources */,
 				7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */,
 				7EF5138D13D240B60028B612 /* STTabBar.m in Sources */,
+				7E22679513D4964700657A66 /* LoginOrSignUpViewController.m in Sources */,
+				7E22679913D4D90F00657A66 /* AccountManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1053,6 +1085,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -1070,6 +1103,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VALIDATE_PRODUCT = YES;
