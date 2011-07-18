@@ -421,21 +421,13 @@ def getComments():
 # Collections #
 # ########### #
 
-@app.route(REST_API_PREFIX + 'getInboxStampIDs', methods=['GET'])
-def getInboxStampIDs():
-    return handleGETRequest(request, stampedAPI.getInboxStampIDs, [ 'user_id', 'limit' ])
-
 @app.route(REST_API_PREFIX + 'collections/inbox.json', methods=['GET'])
 def getInboxStamps():
-    return handleGETRequest(request, stampedAPI.getInboxStamps, [ 'user_id', 'limit' ])
-
-@app.route(REST_API_PREFIX + 'getUserStampIDs', methods=['GET'])
-def getUserStampIDs():
-    return handleGETRequest(request, stampedAPI.getUserStampIDs, [ 'user_id', 'limit' ])
+    return handleGETRequest(request, stampedAPI.getInboxStamps, [ 'authenticated_user_id' ])
 
 @app.route(REST_API_PREFIX + 'collections/user.json', methods=['GET'])
 def getUserStamps():
-    return handleGETRequest(request, stampedAPI.getUserStamps, [ 'user_id', 'limit' ])
+    return handleGETRequest(request, stampedAPI.getUserStamps, [ 'user_id', 'authenticated_user_id' ])
 
 @app.route(REST_API_PREFIX + 'getUserMentions', methods=['GET'])
 def getUserMentions():

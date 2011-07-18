@@ -1,0 +1,335 @@
+<!DOCTYPE html>  
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Markdown Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif; } 
+html>body { font-size: 14px; } 
+p { margin: 1.3125em  0; font-size: 1.1429em; line-height: 1.3125em; }
+li {
+	font-size: 110%;
+}
+li li {
+	font-size: 100%;
+}
+li p {
+    font-size: 100%;
+}
+h1 { margin: 0.6563em 0; font-size: 2.2857em; line-height: 0.6563em; }
+h2 { margin: 0.875em 0; font-size: 1.7143em; line-height: 0.875em; }
+h3 { margin: 1em 0; font-size: 1.5em; line-height: 1em; }
+h4 { margin: 1.1667em 0; font-size: 1.2857em; line-height: 1.1667em; }
+h5 { margin: 1.3125em 0; font-size: 1.1429em; line-height: 1.3125em; }
+h6 { margin: 1.5em 0; font-size: 1em; line-height: 1.5em; }body,p,td,div {
+    font-family: Helvetica,Arial,sans-serif;
+    color: #111;
+    word-wrap: break-word
+}
+h1,h2,h3,h4,h5,h6 { line-height:1.5em; }
+a {
+    color: rgb(13,110,161);
+    text-decoration: none;
+    -webkit-transition: color .2s ease-in-out
+}
+a:hover {
+    color: #3593d9
+}
+h1 {
+    color: #000;
+}
+h2 {
+    color: #111;
+}
+h2 em {
+    color: #111;
+    text-shadow: 0 1px 0 #FFF;
+    padding-left: 10px
+}
+h3 {
+    color: #111
+}
+h4 {
+    color: #111;
+}
+.footnote {
+    font-size: .8em;
+    vertical-align: super;
+    color: rgb(13,110,161)
+}
+#contentdiv img {
+    max-width: 100%
+}
+dt {
+    font-weight: bold
+}
+dd {
+    margin-bottom: 1em
+}
+@media print {body {
+    overflow: auto;
+}
+    #wrapper {
+        background: #fff;
+        position: relative
+    }
+    #contentdiv {
+        position: relative;
+        background: transparent;
+        color: #303030;
+        text-indent: 0px;
+        padding: 10px;
+        font-size:85%;
+    }
+    
+}
+@media screen {
+    body {
+        overflow: hidden
+    }
+    .inverted, .inverted #wrapper { background:#111 !important }
+    .inverted #contentdiv {background:transparent !important }
+    .inverted p,.inverted td,.inverted li,.inverted h1,.inverted h2,
+    .inverted h3,.inverted h4, .inverted h5, .inverted h6, .inverted pre,
+    .inverted code,.inverted th {
+        color:#eee !important;
+    }
+    .inverted a { color:#fff;text-decoration:underline }
+    #wrapper {
+        background: transparent;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        -webkit-box-shadow: inset 0px 0px 4px #8F8D87
+    }
+    #contentdiv {
+        position: fixed;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        background: transparent;
+        color: #303030;
+        overflow: auto;
+        text-indent: 0px;
+        padding: 15px;
+        margin:0 10px
+    }
+    #contentdiv::-webkit-scrollbar {
+        width: 6px
+    }
+    #contentdiv::-webkit-scrollbar:horizontal {
+        height: 6px;
+        display: none
+    }
+    #contentdiv::-webkit-scrollbar-track {
+        background: transparent;
+        -webkit-border-radius: 0;
+        right: 10px
+    }
+    #contentdiv::-webkit-scrollbar-track:disabled {
+        display: none
+    }
+    #contentdiv::-webkit-scrollbar-thumb {
+        border-width: 0;
+        min-height: 20px;
+        background: rgba(40,40,40,0.22);
+        opacity: 0.4;
+        -webkit-border-radius: 5px
+    }
+    
+}
+
+li > p:first-child {
+    margin:0;
+}
+li p {
+    margin:.5em 0;
+}
+ul ul,ul ol {
+    margin-bottom: .4em
+}
+caption,col,colgroup,table,tbody,td,tfoot,th,thead,tr{
+    border-spacing:0;
+}
+table{
+    display:table;
+    table-layout:fixed;
+    border-collapse:collapse;
+    empty-cells:hide;
+    margin:0;padding:0;
+    margin-bottom:24px;
+    border:0;
+}
+caption{
+    display:table-caption;
+    font-weight:bold;
+}
+col{display:table-column;}
+colgroup{display:table-column-group;}
+tbody{display:table-row-group;}
+tfoot{display:table-footer-group;}
+thead{display:table-header-group;}
+td,th{display:table-cell;}
+th{font-weight:bold;}
+tr{display:table-row;}
+
+table{
+    margin-top:-1px;
+    margin-bottom:23px;
+    border:1px solid rgba(0,0,0,0.25);
+}
+table th,
+table td{
+    padding:0 1em;
+    font-size:1.1em;
+    line-height:23px;
+}
+table thead{
+    background-color:rgba(0,0,0,0.15);
+}
+table tbody{
+    background-color:rgba(0,0,0,0.05);
+}
+table tfoot{
+    background-color:rgba(0,0,0,0.15);
+}
+table tr:nth-child(odd){background-color:rgba(255,255,255,0.06);}
+table tr:nth-child(even){background-color:rgba(0,0,0,0.06);}
+table th:nth-child(odd),
+table td:nth-child(odd){background-color:rgba(255,255,255,0.06);}
+
+table td:nth-child(even){background-color:rgba(0,0,0,0.06);}
+
+table thead{
+    border:1px solid rgba(0,0,0,0.15);
+    border-bottom:1px solid rgba(0,0,0,0.2);
+}
+table tfoot{
+    border:1px solid rgba(0,0,0,0.15);
+    border-top:1px solid rgba(0,0,0,0.2);
+}
+figure {position:relative;display:inline-block;margin-bottom:1.2em}
+figcaption {text-align:center;position:absolute;background:rgba(0,0,0,0);width:100%;left:0;bottom:0;color:rgba(255,255,255,0);-webkit-transition:all .2s ease-in-out;
+}
+figure:hover {
+    cursor:pointer
+}
+figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
+
+.footnotes p {display:inline}
+</style>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="contentdiv">
+      <h1 id="collections">COLLECTIONS</h1>
+
+<hr />
+
+<h2 id="getcollectionsuser">GET collections/user</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Show stamps for a given user.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>No Authentication</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
+The user id of the requested user.</p>
+
+<p><strong>authenticated_user_id</strong> <em>optional</em>
+The user id of the authenticating user. This is necessary if the requested user is locked.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/1/collections/user.json
+user_id=47cc67093475061e3d95369d</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>[
+    {
+        "blurb": "Really, the best ever.", 
+        "entity": {
+            "category": "Restaurant", 
+            "entity_id": "4e226fcd4e61754161000006", 
+            "subtitle": "American food in the West Village", 
+            "title": "Little Owl"
+        }, 
+        "flags": {
+            "privacy": false
+        }, 
+        "id": "4e226fcd4e18474561000000", 
+        "img": "image2.png", 
+        "credit": [
+            "4e226fcd4e61754161000007", 
+            "4e226fcd4e61754161000008"
+        ], 
+        "timestamp": "2011-07-17 05:14:54.128641", 
+        "user": {
+            "user_id": "47cc67093475061e3d95369d", 
+            "user_img": "user.png", 
+            "user_name": "Kevin P"
+        }
+    }
+]</code></pre>
+
+<hr />
+
+<h2 id="getcollectionsinbox">GET collections/inbox</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Show stamps in the authenticating user&#8217;s inbox.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>Requires Authentication</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>authenticated_user_id</strong> <em>required</em>
+The user id of the authenticating user.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/1/collections/inbox.json
+authenticated_user_id=47cc67093475061e3d95369d</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>[
+    {
+        "stamp_id": "8ac73h4532a7ba01cb00000e",
+        "blurb": "Best burger in the city.", 
+        "entity": {
+            "category": "Restaurant", 
+            "entity_id": "3r426fcd4e61754161000006", 
+            "subtitle": "Burgers, and that's all.", 
+            "title": "Spotted Pig"
+        }, 
+        "flags": {
+            "privacy": false
+        }, 
+        "img": "image3.png", 
+        "credit": null, 
+        "timestamp": "2011-05-12 18:24:44.432141"
+    }
+]</code></pre>
+
+    </div>
+</body>
+</html>

@@ -44,9 +44,9 @@ class MongoUserStamps(Mongo):
     def removeUserStamp(self, userId, stampId):
         return self._removeRelationship(keyId=userId, refId=stampId)
             
-    def getUserStampIds(self, userId):
+    def getUserStampIds(self, userId, limit=None):
         ### TODO: Add limit? Add timestamp to slice?
-        return self._getRelationships(userId)
+        return self._getRelationships(userId, limit)
 
 
     ### PRIVATE

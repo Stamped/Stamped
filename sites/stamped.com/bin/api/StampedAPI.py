@@ -916,10 +916,78 @@ class StampedAPI(AStampedAPI):
         return self._collectionDB.getUserStampIDs(userID, limit)
     
     def getInboxStamps(self, userID, limit=None):
-        return self._collectionDB.getInboxStamps(userID, limit)
+        stamps = self._collectionDB.getInboxStamps(userID, limit)
+        result = []
+        
+        for stamp in stamps:
+            data = {}
+            
+            data['stamp_id'] = stamp.stamp_id
+            data['entity'] = stamp['entity']
+            data['user'] = stamp['user']
+            data['flags'] = stamp['flags']
+            
+            if 'image' in stamp:
+                data['image'] = stamp.image
+            else:
+                data['image'] = None
+            
+            if 'credit' in stamp:
+                data['credit'] = stamp.credit
+            else:
+                data['credit'] = None
+            
+            if 'mentions' in stamp:
+                data['mentions'] = stamp.mentions
+            else:
+                data['mentions'] = None
+                
+            data['timestamp'] = {}
+            if 'created' in stamp.timestamp:
+                data['timestamp']['created'] = str(stamp.timestamp['created'])
+            if 'modified' in stamp.timestamp:
+                data['timestamp']['modified'] = str(stamp.timestamp['modified'])
+
+            result.append(data)
+        
+        return result
     
-    def getUserStamps(self, userID, limit=None):
-        return self._collectionDB.getUserStamps(userID, limit, output='dict')
+    def getUserStamps(self, userID, limit=None):        
+        stamps = self._collectionDB.getUserStamps(userID, limit)
+        result = []
+        
+        for stamp in stamps:
+            data = {}
+            
+            data['stamp_id'] = stamp.stamp_id
+            data['entity'] = stamp['entity']
+            data['user'] = stamp['user']
+            data['flags'] = stamp['flags']
+            
+            if 'image' in stamp:
+                data['image'] = stamp.image
+            else:
+                data['image'] = None
+            
+            if 'credit' in stamp:
+                data['credit'] = stamp.credit
+            else:
+                data['credit'] = None
+            
+            if 'mentions' in stamp:
+                data['mentions'] = stamp.mentions
+            else:
+                data['mentions'] = None
+                
+            data['timestamp'] = {}
+            if 'created' in stamp.timestamp:
+                data['timestamp']['created'] = str(stamp.timestamp['created'])
+            if 'modified' in stamp.timestamp:
+                data['timestamp']['modified'] = str(stamp.timestamp['modified'])
+
+            result.append(data)
+        
+        return result
     
     def getUserMentions(self, userID, limit=None):
         return self._collectionDB.getUserMentions(userID, limit)

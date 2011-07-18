@@ -34,14 +34,14 @@ class MongoCollection(ACollectionDB):
     def getInboxStampIDs(self, userId, limit=None):
         return MongoInboxStamps().getInboxStampIds(userId, limit)
     
-    def getInboxStamps(self, userId, limit=None):
-        return MongoStamp().getStamps(self.getInboxStampIDs(userId, limit))
+    def getInboxStamps(self, userId, limit=None, output='object'):
+        return MongoStamp().getStamps(self.getInboxStampIDs(userId, limit), output)
     
     def getUserStampIDs(self, userId, limit=None):
         return MongoUserStamps().getUserStampIds(userId)
     
     def getUserStamps(self, userId, limit=None, output='object'):
-        return MongoStamp().getStamps(self.getUserStampIDs(userId), output)
+        return MongoStamp().getStamps(self.getUserStampIDs(userId, limit), output)
     
     def getMentions(self, userId, limit=None):
         raise NotImplementedError
