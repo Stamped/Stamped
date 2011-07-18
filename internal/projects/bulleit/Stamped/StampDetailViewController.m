@@ -93,6 +93,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 
   // Black, semi-transparent.
   addCommentField_.keyboardAppearance = UIKeyboardAppearanceAlert;
+  addCommentField_.returnKeyType = UIReturnKeySend;
 
   [self setUpMainContentView];
   [self setUpCommentsView];
@@ -222,6 +223,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   activityFrame.size.height = fmaxf(kActivityFrameMinHeight, 
       CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds));
   activityView_.frame = activityFrame;
+  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   
   [commentLabel release];
 }
