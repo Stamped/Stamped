@@ -6,28 +6,23 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from AObject import AObject
+from datetime import datetime
 
 class User(AObject):
 
     _schema = {
-        'id': basestring,
+        'user_id': basestring,
         'first_name': basestring,
         'last_name': basestring,
-        'username': basestring,
-#         'email': basestring,
-#         'password': basestring,
-        'img': basestring,
-#         'locale': basestring,
-        'timestamp': basestring,
-        'website': basestring,
+        'screen_name': basestring,
+        'display_name': basestring,
+        'image': basestring,
         'bio': basestring,
+        'website': basestring,
         'color': {
-            'primary_color': basestring,
-            'secondary_color': basestring
+            'primary': basestring,
+            'secondary': basestring
         },
-#         'linked_accounts': {
-#             'itunes': basestring
-#         },
         'flags': {
             'privacy': bool,
             'flagged': bool,
@@ -40,6 +35,10 @@ class User(AObject):
             'total_todos': int,
             'total_credit_received': int,
             'total_credit_given': int
+        },
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
         }
     }
     
@@ -55,30 +54,25 @@ class User(AObject):
         
         valid &= 'first_name' in self and isinstance(self.first_name, basestring)
         valid &= 'last_name' in self and isinstance(self.last_name, basestring)
-        valid &= 'username' in self and isinstance(self.username, basestring)
-#         valid &= 'email' in self and isinstance(self.email, basestring)
-#         valid &= 'password' in self and isinstance(self.password, basestring)
-        #valid &= 'img' in self and isinstance(self.img, basestring)
-#         valid &= 'locale' in self and isinstance(self.locale, basestring)
-        #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
+        valid &= 'screen_name' in self and isinstance(self.screen_name, basestring)
+        valid &= 'display_name' in self and isinstance(self.display_name, basestring)
         
-        if 'website' in self:
-            valid &= isinstance(self.website, basestring)
-        if 'bio' in self:
-            valid &= isinstance(self.bio, basestring)
-            
         valid &= 'color' in self and isinstance(self.color, dict)
-        valid &= 'primary_color' in self.color and isinstance(self.color['primary_color'], basestring)
-        #if 'secondary_color' in self.color:
-        #    valid &= isinstance(self.color['secondary_color'], basestring)
-            
-#         if 'linked_accounts' in self:
-#             valid &= isinstance(self.linked_accounts, dict) 
-#             if 'itunes' in self.linked_accounts:
-#                 valid &= isinstance(self.linked_accounts['itunes'], float)
+        valid &= 'primary' in self.color and isinstance(self.color['primary'], basestring)
         
         valid &= 'flags' in self and isinstance(self.flags, dict)
         valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
+        
+        if 'image' in self and self.image is not None:
+            valid &= isinstance(self.image, basestring)
+        if 'website' in self and self.website is not None:
+            valid &= isinstance(self.website, basestring)
+        if 'bio' in self and self.bio is not None:
+            valid &= isinstance(self.bio, basestring)
+        
+        if 'secondary' in self.color and self.color['secondary'] is not None:
+            valid &= isinstance(self.color['secondary'], basestring)
+        
         if 'flagged' in self.flags:
             valid &= isinstance(self.flags['flagged'], bool)
         if 'locked' in self.flags:

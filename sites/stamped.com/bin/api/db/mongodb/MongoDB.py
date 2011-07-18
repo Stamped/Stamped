@@ -66,13 +66,13 @@ class Mongo():
         return bson.objectid.ObjectId(string)
         
         
-    def _mongoToObj(self, data):
+    def _mongoToObj(self, data, objId='id'):
 #         print '_mongoToObj: ', data
-        data['id'] = self._getStringFromObjectId(data['_id'])
+        data[objId] = self._getStringFromObjectId(data['_id'])
         del(data['_id'])
         return data
     
-    def _objToMongo(self, obj):
+    def _objToMongo(self, obj, objId='id'):
         if obj.isValid == False:
             # print obj
             raise KeyError("Object not valid")
@@ -80,13 +80,13 @@ class Mongo():
         if '_id' in data:
             if isinstance(data['_id'], basestring):
                 data['_id'] = self._getObjectIdFromString(data['_id'])
-        if 'id' in data:
-            data['_id'] = self._getObjectIdFromString(data['id'])
-            del(data['id'])
+        if objId in data:
+            data['_id'] = self._getObjectIdFromString(data[objId])
+            del(data[objId])
         return self._mapDataToSchema(data, self.SCHEMA)
         
-    def _objsToMongo(self, objs):
-        return map(self._objToMongo, objs)
+    def _objsToMongo(self, objs, objId='id'):
+        return map(self._objToMongo, objs, objId)
         
         
     def _mapDataToSchema(self, data, schema):
@@ -175,32 +175,37 @@ class Mongo():
         
     ### GENERIC CRUD FUNCTIONS
     
-    def _addDocument(self, document):
-        return self._getStringFromObjectId(self._collection.insert(self._objToMongo(document), safe=True))
+    def _addDocument(self, document, objId='id'):
+        return self._getStringFromObjectId(self._collection.insert(self._objToMongo(document, objId), safe=True))
     
-    def _addDocuments(self, documents):
-        return self._collection.insert(self._objsToMongo(documents))
+    def _addDocuments(self, documents, objId='id'):
+        return self._collection.insert(self._objsToMongo(documents, objId))
         
-    def _getDocumentFromId(self, documentId):
+    def _getDocumentFromId(self, documentId, objId='id'):
         #print 'documentId: ', documentId
-        document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)))
+        document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)), objId)
         return document
         
-    def _getDocumentsFromIds(self, documentIds):
+    def _getDocumentsFromIds(self, documentIds, objId='id'):
         ids = []
         for documentId in documentIds:
             ids.append(self._getObjectIdFromString(documentId))
         documents = self._collection.find({'_id': {'$in': ids}})
         result = []
         for document in documents:
-            result.append(self._mongoToObj(document))
+            result.append(self._mongoToObj(document, objId))
         return result
         
-    def _updateDocument(self, document):
-        return self._getStringFromObjectId(self._collection.save(self._objToMongo(document), safe=True))
+    def _updateDocument(self, document, objId='id'):
+        return self._getStringFromObjectId(self._collection.save(self._objToMongo(document, objId), safe=True))
         
     def _removeDocument(self, keyId):
-        return self._collection.remove({'_id': self._getObjectIdFromString(keyId)})
+        # Confused here. Supposed to return None on success, so I guess it's working,
+        # but should probably test more.
+        if self._collection.remove({'_id': self._getObjectIdFromString(keyId)}):
+            return False
+        else:
+            return True
         
     
     ### GENERIC RELATIONSHIP FUNCTIONS

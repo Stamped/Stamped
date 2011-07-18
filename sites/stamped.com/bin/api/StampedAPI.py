@@ -71,106 +71,272 @@ class StampedAPI(AStampedAPI):
     # ######## #
     
     def addAccount(self, params):
+        ### TODO: Add validation to ensure no duplicate screen_names
         account = Account()
         account.first_name = params.first_name
         account.last_name = params.last_name
-        account.username = params.username
         account.email = params.email
         account.password = params.password
-        account.locale = params.locale
-        account.color = { 'primary_color': params.primary_color }
+        account.screen_name = params.screen_name
+        account.display_name = "%s %s." % (params.first_name, params.last_name[0])
         
-        if params.secondary_color != None:
-            account.color['secondary_color'] = params.secondary_color
-        if params.img != None:
-            account.img = params.img
-        if params.website != None:
-            account.website = params.website
-        if params.bio != None:
-            account.bio = params.bio
-            
-        account.flags = { 'privacy': params.privacy }
+        account.locale = {
+            'language': 'en',
+            'time_zone': None
+        }
         
-        if not account.isValid:
+        account.color = { 
+            'primary': None
+        }
+           
+        account.flags = { 
+            'privacy': True
+        }
+        
+        if account.isValid == False:
             raise InvalidArgument('Invalid input')
         
         result = {}
-        result['id'] = self._accountDB.addAccount(account)
+        result['user_id'] = self._accountDB.addAccount(account)
+        result['first_name'] = account.first_name
+        result['last_name'] = account.last_name
+        result['email'] = account.email
+        result['screen_name'] = account.screen_name
+        result['display_name'] = account.display_name
+        return result
+    
+    def updateAccount(self, params):
+        account = self._accountDB.getAccount(params.authenticated_user_id)
+        
+        if params.email != None:
+            account.email = params.email
+        if params.password != None:
+            account.password = params.password
+        if params.screen_name != None:
+            account.screen_name = params.screen_name
+        if params.privacy != None:
+            account.flags['privacy'] = params.privacy
+            
+        if params.language != None:
+            account.locale['language'] = params.language
+        if params.time_zone != None:
+            account.locale['time_zone'] = params.time_zone
+        
+        if not account.isValid:
+            raise InvalidArgument('Invalid input')
+            
+        result = {}
+        result['user_id'] = self._accountDB.updateAccount(account)
+        result['first_name'] = account.first_name
+        result['last_name'] = account.last_name
+        result['email'] = account.email
+        result['screen_name'] = account.screen_name
+        result['privacy'] = account.flags['privacy']
+        result['locale'] = {}
+        if 'language' in account.locale:
+            result['locale']['language'] = account.locale['language']
+        else:
+            result['locale']['language'] = None
+        if 'time_zone' in account.locale:
+            result['locale']['time_zone'] = account.locale['time_zone']
+        else:
+            result['locale']['time_zone'] = None
         return result
     
     def getAccount(self, userID):
-        return self._accountDB.getAccount(userID)
-    
-    def updateAccount(self, params):
-        account = self.getAccount(params.account_id)
+        account = self._accountDB.getAccount(userID)
+        result = {}
+        result['user_id'] = account.user_id
+        result['first_name'] = account.first_name
+        result['last_name'] = account.last_name
+        result['email'] = account.email
+        result['screen_name'] = account.screen_name
+        result['privacy'] = account.flags['privacy']
+        result['locale'] = {}
+        if 'language' in account.locale:
+            result['locale']['language'] = account.locale['language']
+        else:
+            result['locale']['language'] = None
+        if 'time_zone' in account.locale:
+            result['locale']['time_zone'] = account.locale['time_zone']
+        else:
+            result['locale']['time_zone'] = None
+        return result
+        
+    def updateProfile(self, params):
+        account = self._accountDB.getAccount(params.authenticated_user_id)
         
         if params.first_name != None:
             account.first_name = params.first_name
         if params.last_name != None:
             account.last_name = params.last_name
-        if params.username != None:
-            account.username = params.username
-        if params.email != None:
-            account.email = params.email
-        if params.password != None:
-            account.password = params.password
-        if params.locale != None:
-            account.locale = params.locale
-        if params.primary_color != None:
-            account.color['primary_color'] = params.primary_color
-        if params.secondary_color != None:
-            account.color['secondary_color'] = params.secondary_color
-        if params.img != None:
-            account.img = params.img
-        if params.website != None:
-            account.website = params.website
         if params.bio != None:
             account.bio = params.bio
-        if params.privacy != None:
-            account.flags['privacy'] = params.privacy
+        if params.website != None:
+            account.website = params.website
+        if params.color != None:
+            color = params.color.split(',')
+            account.color['primary'] = color[0]
+            if len(color) == 2:
+                account.color['secondary'] = color[1]
         
         if not account.isValid:
             raise InvalidArgument('Invalid input')
             
         result = {}
-        result['id'] = self._accountDB.updateAccount(account)
-        ### CLARIFY: What do we want to return?
+        result['user_id'] = self._accountDB.updateAccount(account)
+        result['first_name'] = account.first_name
+        result['last_name'] = account.last_name
+        result['display_name'] = account.display_name
+        if 'bio' in account:
+            result['bio'] = account.bio
+        else:
+            result['bio'] = None
+        if 'website' in account:
+            result['website'] = account.flags['website']
+        else:
+            result['website'] = None
+        result['color'] = { 
+            'primary': account.color['primary']
+        }
+        if 'secondary' in account.color:
+            result['color']['secondary'] = account.color['secondary']
         return result
+        
+    def updateProfileImage(self, params):
+        raise NotImplementedError
+        
+    def verifyAccountCredentials(self, userID):
+        return True
     
     def removeAccount(self, params):
-        self._accountDB.removeAccount(params.account_id)
-        ### CLARIFY: What do we want to return?
-        return {'id': params.account_id}
-    
-    def flagAccount(self, userID):
-        return self._accountDB.flagAccount(userID)
-    
-    def unflagAccount(self, userID):
-        return self._accountDB.unflagAccount(userID)
+        if self._accountDB.removeAccount(params.authenticated_user_id):
+            return True
+        else:
+            return False
+                    
+    def resetPassword(self, params):
+        raise NotImplementedError
+        
     
     # ##### #
     # Users #
     # ##### #
     
-    def getUser(self, userID):
-        return self._userDB.getUser(userID)
+    def getUser(self, userID=None, screenName=None):
+        if userID:
+            user = self._userDB.getUser(userID)
+        elif screenName:
+            user = self._userDB.lookupUsers(None, [screenName])[-1]
+            print user
+        else:
+            return 'error', 400
+        
+        result = {}
+        result['user_id'] = user.user_id
+        result['first_name'] = user.first_name
+        result['last_name'] = user.last_name
+        result['screen_name'] = user.screen_name
+        result['display_name'] = user.display_name
+        if 'bio' in user:
+            result['bio'] = user.bio
+        else:
+            result['bio'] = None
+        if 'website' in user:
+            result['website'] = user.flags['website']
+        else:
+            result['website'] = None
+        result['color'] = { 
+            'primary': user.color['primary']
+        }
+        if 'secondary' in user.color:
+            result['color']['secondary'] = user.color['secondary']
+        ### TODO: Pull in recent stamps
+        result['recent_stamps'] = None
+        
+        return result
     
-    def getUsers(self, userIDs):
-        userIDs = userIDs.split(',')
-        return self._userDB.lookupUsers(userIDs, None)
+    def getUserByName(self, screenName):
+        return self.getUser(None, screenName)
+        
     
-    def getUserByName(self, username):
-        return self._userDB.lookupUsers(None, [ username ])[-1]
+    def getUsers(self, userIDs=None, screenNames=None):
+        if userIDs:
+            userIDs = userIDs.split(',')
+            users = self._userDB.lookupUsers(userIDs, None)
+        elif screenNames:
+            screenNames = screenNames.split(',')
+            users = self._userDB.lookupUsers(None, screenNames)
+        else:
+            return 'error', 400
+            
+        result = []
+        for user in users:
+            data = {}
+            
+            data['user_id'] = user.user_id
+            data['first_name'] = user.first_name
+            data['last_name'] = user.last_name
+            data['screen_name'] = user.screen_name
+            data['display_name'] = user.display_name
+            if 'bio' in user:
+                data['bio'] = user.bio
+            else:
+                data['bio'] = None
+            if 'website' in user:
+                data['website'] = user.flags['website']
+            else:
+                data['website'] = None
+            data['color'] = { 
+                'primary': user.color['primary']
+            }
+            if 'secondary' in user.color:
+                data['color']['secondary'] = user.color['secondary']
+            ### TODO: Pull in recent stamps
+            data['last_stamp'] = None
+            result.append(data)
+        
+        return result
     
-    def getUsersByName(self, usernames):
-        usernames = usernames.split(',')
-        return {'users': self._userDB.lookupUsers(None, usernames)}
+    def getUsersByName(self, screenNames):
+        return self.getUsers(None, screenNames)
     
     def searchUsers(self, query, limit=20):
-        return {'users': self._userDB.searchUsers(query, limit)}
+        users = self._userDB.searchUsers(query, limit)
+        
+        result = []
+        for user in users:
+            data = {}
+            
+            data['user_id'] = user.user_id
+            data['first_name'] = user.first_name
+            data['last_name'] = user.last_name
+            data['screen_name'] = user.screen_name
+            data['display_name'] = user.display_name
+            if 'bio' in user:
+                data['bio'] = user.bio
+            else:
+                data['bio'] = None
+            if 'website' in user:
+                data['website'] = user.flags['website']
+            else:
+                data['website'] = None
+            data['color'] = { 
+                'primary': user.color['primary']
+            }
+            if 'secondary' in user.color:
+                data['color']['secondary'] = user.color['secondary']
+            ### TODO: Pull in recent stamps
+            data['last_stamp'] = None
+            result.append(data)
+        
+        return result
     
     def getPrivacy(self, userID):
-        return self._userDB.checkPrivacy(userID)
+        if self._userDB.checkPrivacy(userID):
+            return True
+        else:
+            return False
     
     # ############# #
     # Relationships #
@@ -259,7 +425,7 @@ class StampedAPI(AStampedAPI):
         user = self.getUser(params.userID)
         favorite.user = {
             'user_id': user.id,
-            'user_name': user.username
+            'user_name': user.screen_name
         }
         
         entity = self.getEntity(params.entityID)
@@ -318,18 +484,82 @@ class StampedAPI(AStampedAPI):
         entity.desc = params.desc
         entity.category = params.category
         
+        if params.image != None:
+            entity.image = params.image
+            
+        if params.address != None or params.coordinates != None:
+            entity.details = {
+                'place': {}
+            }
+            if params.address != None:
+                entity.details['place']['address'] = params.address
+            if params.coordinates != None:
+                coordinates = params.coordinates.split(',')
+                entity.details['place']['coordinates'] = {
+                    'lat': coordinates[0],
+                    'lng': coordinates[1]
+                }
+            
+        entity.timestamp = {
+            'created': datetime.utcnow()
+        }
+        
+        ### TODO: Log data of user who created it
+        
         if not entity.isValid:
             raise InvalidArgument('Invalid input')
         
         result = {}
-        result['id'] = self._entityDB.addEntity(entity)
+        result['entity_id'] = self._entityDB.addEntity(entity)
+        result['title'] = entity.title
+        result['category'] = entity.category
+        result['desc'] = entity.desc
+        
+        if 'image' in entity:
+            result['image'] = entity.image
+        else:
+            result['image'] = None
+            
+        result['details'] = {}
+        if 'details' in entity and 'place' in entity.details:
+            result['details']['place'] = {}
+            if 'address' in entity.details['place']:
+                result['details']['place']['address'] = entity.details['place']['address']
+            if 'coordinates' in entity.details['place']:
+                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
+        
+        result['timestamp'] = entity.timestamp
+        
         return result
     
     def getEntity(self, entityID):
-        return self._entityDB.getEntity(entityID)
+        entity = self._entityDB.getEntity(entityID)
+        
+        result = {}
+        result['entity_id'] = entity.entity_id
+        result['title'] = entity.title
+        result['category'] = entity.category
+        result['desc'] = entity.desc
+        
+        if 'image' in entity:
+            result['image'] = entity.image
+        else:
+            result['image'] = None
+            
+        result['details'] = {}
+        if 'details' in entity and 'place' in entity.details:
+            result['details']['place'] = {}
+            if 'address' in entity.details['place']:
+                result['details']['place']['address'] = entity.details['place']['address']
+            if 'coordinates' in entity.details['place']:
+                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
+        
+        result['timestamp'] = entity.timestamp
+        
+        return result
     
     def updateEntity(self, params):
-        entity = self.getEntity(params.entity_id)
+        entity = self._entityDB.getEntity(params.entity_id)
         
         if params.title != None:
             entity.title = params.title
@@ -337,21 +567,76 @@ class StampedAPI(AStampedAPI):
             entity.desc = params.desc
         if params.category != None:
             entity.category = params.category
+            
+        if params.image != None:
+            entity.image = params.image            
+            
+        if params.address != None or params.coordinates != None:
+            if 'details' not in entity:
+                entity.details = {}
+            if 'place' not in entity.details:
+                entity.details['place'] = {}
+            if params.address != None:
+                entity.details['place']['address'] = params.address
+            if params.coordinates != None:
+                coordinates = params.coordinates.split(',')
+                entity.details['place']['coordinates'] = {
+                    'lat': coordinates[0],
+                    'lng': coordinates[1]
+                }
+                
+        entity.timestamp['modified'] = datetime.utcnow()
+        
+        if not entity.isValid:
+            raise InvalidArgument('Invalid input')
                     
         result = {}
-        result['id'] = self._entityDB.updateEntity(entity)
-        ### CLARIFY: What do we want to return?
+        result['entity_id'] = self._entityDB.updateEntity(entity)
+        result['title'] = entity.title
+        result['category'] = entity.category
+        result['desc'] = entity.desc
+        
+        if 'image' in entity:
+            result['image'] = entity.image
+        else:
+            result['image'] = None
+            
+        result['details'] = {}
+        if 'details' in entity and 'place' in entity.details:
+            result['details']['place'] = {}
+            if 'address' in entity.details['place']:
+                result['details']['place']['address'] = entity.details['place']['address']
+            if 'coordinates' in entity.details['place']:
+                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
+        
+        result['timestamp'] = {}
+        if 'created' in entity.timestamp:
+            result['timestamp']['created'] = str(entity.timestamp['created'])
+        if 'modified' in entity.timestamp:
+            result['timestamp']['modified'] = str(entity.timestamp['modified'])
+        
         return result
     
     def removeEntity(self, params):
-        self._entityDB.removeEntity(params.entity_id)
-        ### CLARIFY: What do we want to return?
-        return {'id': params.entity_id}
+        if self._entityDB.removeEntity(params.entity_id):
+            return True
+        else:
+            return False
         
     def searchEntities(self, query, limit=20):
-        entities = {}
-        entities['entities'] = self._entityDB.matchEntities(query, limit)
-        return entities
+        entities = self._entityDB.matchEntities(query, limit)
+        result = []
+        
+        for entity in entities:
+            data = {}
+            data['entity_id'] = self._entityDB.updateEntity(entity)
+            data['title'] = entity.title
+            data['category'] = entity.category
+            data['desc'] = entity.desc
+
+            result.append(data)
+        
+        return result
     
     # ###### #
     # Stamps #

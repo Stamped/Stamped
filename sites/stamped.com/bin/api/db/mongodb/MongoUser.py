@@ -20,21 +20,15 @@ class MongoUser(AUserDB, Mongo):
         '_id': object,
         'first_name': basestring,
         'last_name': basestring,
-        'username': basestring,
-#         'email': basestring,
-#         'password': basestring,
-        'img': basestring,
-#         'locale': basestring,
-        'timestamp': basestring,
-        'website': basestring,
+        'screen_name': basestring,
+        'display_name': basestring,
+        'image': basestring,
         'bio': basestring,
+        'website': basestring,
         'color': {
-            'primary_color': basestring,
-            'secondary_color': basestring
+            'primary': basestring,
+            'secondary': basestring
         },
-#         'linked_accounts': {
-#             'itunes': basestring
-#         },
         'flags': {
             'privacy': bool,
             'flagged': bool,
@@ -47,6 +41,10 @@ class MongoUser(AUserDB, Mongo):
             'total_todos': int,
             'total_credit_received': int,
             'total_credit_given': int
+        },
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
         }
     }
     
@@ -64,7 +62,7 @@ class MongoUser(AUserDB, Mongo):
 #         return self._addDocument(user)
     
     def getUser(self, userId):
-        user = User(self._getDocumentFromId(userId))
+        user = User(self._getDocumentFromId(userId, 'user_id'))
         if user.isValid == False:
             raise KeyError("User not valid")
         return user
@@ -78,13 +76,13 @@ class MongoUser(AUserDB, Mongo):
         elif usernames:
             for username in usernames:
                 query.append(username)
-            data = self._collection.find({"username": {"$in": query}})
+            data = self._collection.find({"screen_name": {"$in": query}})
         else:
             return None
             
         result = []
         for userData in data:
-            userData['id'] = self._getStringFromObjectId(userData['_id'])
+            userData['user_id'] = self._getStringFromObjectId(userData['_id'])
             del(userData['_id'])
             result.append(User(userData))
         return result
@@ -93,8 +91,10 @@ class MongoUser(AUserDB, Mongo):
         # Using a simple regex here. Need to rank results at some point...
         searchQuery = '^%s' % searchQuery
         result = []
-        for user in self._collection.find({"username": {"$regex": searchQuery, "$options": "i"}}).limit(searchLimit):
-            result.append(User(self._mongoToObj(user)))
+        for userData in self._collection.find({"screen_name": {"$regex": searchQuery, "$options": "i"}}).limit(searchLimit):
+            userData['user_id'] = self._getStringFromObjectId(userData['_id'])
+            del(userData['_id'])
+            result.append(User(userData))
         return result
         
     def flagUser(self, user):

@@ -79,92 +79,117 @@ def handleGETRequest(request, stampedAPIFunc, args):
 # Accounts #
 # ######## #
 
-@app.route(REST_API_PREFIX + 'addAccount', methods=['POST'])
+@app.route(REST_API_PREFIX + 'account/create.json', methods=['POST'])
 def addAccount():
     schema = ResourceArgumentSchema([
-        ("first_name",        ResourceArgument(required=True, expectedType=basestring)), 
-        ("last_name",         ResourceArgument(required=True, expectedType=basestring)), 
-        ("username",          ResourceArgument(required=True, expectedType=basestring)), 
-        ("email",             ResourceArgument(required=True, expectedType=basestring)), 
-        ("password",          ResourceArgument(required=True, expectedType=basestring)), 
-        ("locale",            ResourceArgument(required=True, expectedType=basestring)), 
-        ("primary_color",     ResourceArgument(required=True, expectedType=basestring)), 
-        ("secondary_color",   ResourceArgument(expectedType=basestring)), 
-        ("img",               ResourceArgument(expectedType=basestring)), 
-        ("website",           ResourceArgument(expectedType=basestring)), 
-        ("bio",               ResourceArgument(expectedType=basestring)), 
-        ("privacy",           ResourceArgumentBoolean(default=False)), 
+        ("first_name",            ResourceArgument(required=True, expectedType=basestring)), 
+        ("last_name",             ResourceArgument(required=True, expectedType=basestring)), 
+        ("email",                 ResourceArgument(required=True, expectedType=basestring)), 
+        ("password",              ResourceArgument(required=True, expectedType=basestring)), 
+        ("screen_name",           ResourceArgument(required=True, expectedType=basestring))
     ])
-    
     return handlePOSTRequest(request, stampedAPI.addAccount, schema)
 
-@app.route(REST_API_PREFIX + 'getAccount', methods=['GET'])
-def getAccount():
-    return handleGETRequest(request, stampedAPI.getAccount, [ 'account_id' ])
-
-@app.route(REST_API_PREFIX + 'updateAccount', methods=['POST'])
+@app.route(REST_API_PREFIX + 'account/settings.json', methods=['POST', 'GET'])
 def updateAccount():
-    schema = ResourceArgumentSchema([
-        ("account_id",        ResourceArgument(required=True, expectedType=basestring)), 
-        ("first_name",        ResourceArgument(expectedType=basestring)), 
-        ("last_name",         ResourceArgument(expectedType=basestring)), 
-        ("username",          ResourceArgument(expectedType=basestring)), 
-        ("email",             ResourceArgument(expectedType=basestring)), 
-        ("password",          ResourceArgument(expectedType=basestring)), 
-        ("locale",            ResourceArgument(expectedType=basestring)), 
-        ("primary_color",     ResourceArgument(expectedType=basestring)), 
-        ("secondary_color",   ResourceArgument(expectedType=basestring)), 
-        ("img",               ResourceArgument(expectedType=basestring)), 
-        ("website",           ResourceArgument(expectedType=basestring)), 
-        ("bio",               ResourceArgument(expectedType=basestring)), 
-        ("privacy",           ResourceArgumentBoolean()), 
-    ])
-    
-    return handlePOSTRequest(request, stampedAPI.updateAccount, schema)
+    if request.method == 'POST':
+        schema = ResourceArgumentSchema([
+            ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+            ("email",                 ResourceArgument(expectedType=basestring)), 
+            ("password",              ResourceArgument(expectedType=basestring)), 
+            ("screen_name",           ResourceArgument(expectedType=basestring)), 
+            ("privacy",               ResourceArgumentBoolean()), 
+            ("language",              ResourceArgument(expectedType=basestring)), 
+            ("time_zone",             ResourceArgument(expectedType=basestring))
+        ])
+        return handlePOSTRequest(request, stampedAPI.updateAccount, schema)
+    elif request.method == 'GET':
+        return handleGETRequest(request, stampedAPI.getAccount, [ 'authorized_user_id' ])
+    else:
+        return 'Error', 400
 
-@app.route(REST_API_PREFIX + 'removeAccount', methods=['POST'])
+@app.route(REST_API_PREFIX + 'account/update_profile.json', methods=['POST'])
+def updateProfile():
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("first_name",            ResourceArgument(expectedType=basestring)), 
+        ("last_name",             ResourceArgument(expectedType=basestring)), 
+        ("bio",                   ResourceArgument(expectedType=basestring)), 
+        ("website",               ResourceArgument(expectedType=basestring)), 
+        ("color",                 ResourceArgument(expectedType=basestring))
+    ])
+    return handlePOSTRequest(request, stampedAPI.updateProfile, schema)
+
+@app.route(REST_API_PREFIX + 'account/update_profile_image.json', methods=['POST'])
+def updateProfileImage():
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("image",                 ResourceArgument(required=True, expectedType=basestring))
+    ])
+    return handlePOSTRequest(request, stampedAPI.updateProfileImage, schema)
+
+@app.route(REST_API_PREFIX + 'account/verify_credentials.json', methods=['GET'])
+def verifyAccountCredentials():
+    return handleGETRequest(request, stampedAPI.verifyAccountCredentials, [ 'authenticated_user_id' ])
+
+@app.route(REST_API_PREFIX + 'account/remove.json', methods=['POST'])
 def removeAccount():
     schema = ResourceArgumentSchema([
-        ("account_id",        ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
-    
     return handlePOSTRequest(request, stampedAPI.removeAccount, schema)
 
-@app.route(REST_API_PREFIX + 'flagAccount', methods=['GET'])
-def flagAccount():
-    return handleGETRequest(request, stampedAPI.flagAccount, [ 'account_id' ])
-
-@app.route(REST_API_PREFIX + 'unflagAccount', methods=['GET'])
-def unflagAccount():
-    return handleGETRequest(request, stampedAPI.unflagAccount, [ 'account_id' ])
+@app.route(REST_API_PREFIX + 'account/reset_password.json', methods=['POST'])
+def resetPassword():
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+    ])
+    return handlePOSTRequest(request, stampedAPI.resetPassword, schema)
 
 # ##### #
 # Users #
 # ##### #
 
-@app.route(REST_API_PREFIX + 'getUser', methods=['GET'])
+@app.route(REST_API_PREFIX + 'users/show.json', methods=['GET'])
 def getUser():
-    return handleGETRequest(request, stampedAPI.getUser, [ 'user_id' ])
+    if request.args.get('user_id'):
+        return handleGETRequest(request, stampedAPI.getUser, [ 'user_id' ])
+    elif request.args.get('screen_name'):
+        return handleGETRequest(request, stampedAPI.getUserByName, [ 'screen_name' ])
+    else:
+        return 'Error', 400
 
-@app.route(REST_API_PREFIX + 'getUsers', methods=['GET'])
+@app.route(REST_API_PREFIX + 'users/lookup.json', methods=['GET'])
 def getUsers():
-    return handleGETRequest(request, stampedAPI.getUsers, [ 'user_ids' ])
+    if request.args.get('user_ids'):
+        return handleGETRequest(request, stampedAPI.getUsers, [ 'user_ids' ])
+    elif request.args.get('screen_names'):
+        return handleGETRequest(request, stampedAPI.getUsersByName, [ 'screen_names' ])
+    else:
+        return 'Error', 400
+
+@app.route(REST_API_PREFIX + 'users/search.json', methods=['GET'])
+def searchUsers():
+    return handleGETRequest(request, stampedAPI.searchUsers, [ 'q', 'limit' ])
+
+@app.route(REST_API_PREFIX + 'users/privacy.json', methods=['GET'])
+def getPrivacy():
+    if request.args.get('user_id'):
+        return handleGETRequest(request, stampedAPI.getPrivacy, [ 'user_id' ])
+    elif request.args.get('screen_name'):
+        return handleGETRequest(request, stampedAPI.getPrivacyByName, [ 'screen_name' ])
+    else:
+        return 'Error', 400
+    
+    
 
 @app.route(REST_API_PREFIX + 'getUserByName', methods=['GET'])
 def getUserByName():
-    return handleGETRequest(request, stampedAPI.getUserByName, [ 'username' ])
+    return handleGETRequest(request, stampedAPI.getUserByName, [ 'screen_name' ])
 
 @app.route(REST_API_PREFIX + 'getUsersByName', methods=['GET'])
 def getUsersByName():
-    return handleGETRequest(request, stampedAPI.getUsersByName, [ 'usernames' ])
-
-@app.route(REST_API_PREFIX + 'searchUsers', methods=['GET'])
-def searchUsers():
-    return handleGETRequest(request, stampedAPI.searchUsers, [ 'query', 'limit' ])
-
-@app.route(REST_API_PREFIX + 'getPrivacy', methods=['GET'])
-def getPrivacy():
-    return handleGETRequest(request, stampedAPI.getPrivacy, [ 'user_id' ])        
+    return handleGETRequest(request, stampedAPI.getUsersByName, [ 'screen_names' ])     
 
 # ########### ##
 # Friendships #
@@ -272,42 +297,51 @@ def getFavorites():
 # Entities #
 # ######## #
 
-@app.route(REST_API_PREFIX + 'addEntity', methods=['POST'])
+@app.route(REST_API_PREFIX + 'entities/create.json', methods=['POST'])
 def addEntity():
     schema = ResourceArgumentSchema([
-        ("title",            ResourceArgument(required=True, expectedType=basestring)), 
-        ("desc",             ResourceArgument(required=True, expectedType=basestring)), 
-        ("category",         ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("title",                 ResourceArgument(required=True, expectedType=basestring)), 
+        ("desc",                  ResourceArgument(required=True, expectedType=basestring)), 
+        ("category",              ResourceArgument(required=True, expectedType=basestring)), 
+        ("image",                 ResourceArgument(expectedType=basestring)), 
+        ("address",               ResourceArgument(expectedType=basestring)), 
+        ("coordinates",           ResourceArgument(expectedType=basestring))
     ])
     
     return handlePOSTRequest(request, stampedAPI.addEntity, schema)
 
-@app.route(REST_API_PREFIX + 'getEntity', methods=['GET'])
+@app.route(REST_API_PREFIX + 'entities/show.json', methods=['GET'])
 def getEntity():
     return handleGETRequest(request, stampedAPI.getEntity, [ 'entity_id' ])
 
-@app.route(REST_API_PREFIX + 'updateEntity', methods=['POST'])
+@app.route(REST_API_PREFIX + 'entities/update.json', methods=['POST'])
 def updateEntity():
     schema = ResourceArgumentSchema([
-        ("entity_id",        ResourceArgument(required=True, expectedType=basestring)), 
-        ("title",            ResourceArgument(expectedType=basestring)), 
-        ("desc",             ResourceArgument(expectedType=basestring)), 
-        ("category",         ResourceArgument(expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("entity_id",             ResourceArgument(required=True, expectedType=basestring)), 
+        ("title",                 ResourceArgument(expectedType=basestring)), 
+        ("desc",                  ResourceArgument(expectedType=basestring)), 
+        ("category",              ResourceArgument(expectedType=basestring)), 
+        ("image",                 ResourceArgument(expectedType=basestring)), 
+        ("address",               ResourceArgument(expectedType=basestring)), 
+        ("coordinates",           ResourceArgument(expectedType=basestring))
     ])
     
     return handlePOSTRequest(request, stampedAPI.updateEntity, schema)
 
-@app.route(REST_API_PREFIX + 'removeEntity', methods=['POST'])
+@app.route(REST_API_PREFIX + 'entities/remove.json', methods=['POST'])
 def removeEntity():
     schema = ResourceArgumentSchema([
-        ("entity_id",        ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("entity_id",             ResourceArgument(required=True, expectedType=basestring))
     ])
     
     return handlePOSTRequest(request, stampedAPI.removeEntity, schema)
 
-@app.route(REST_API_PREFIX + 'searchEntities', methods=['GET'])
+@app.route(REST_API_PREFIX + 'entities/search.json', methods=['GET'])
 def searchEntities():
-    return handleGETRequest(request, stampedAPI.searchEntities, [ 'query', 'limit' ])    
+    return handleGETRequest(request, stampedAPI.searchEntities, [ 'q', 'limit' ])    
 
 # ###### #
 # Stamps #

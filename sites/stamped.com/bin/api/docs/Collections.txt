@@ -1,0 +1,91 @@
+
+# COLLECTIONS #
+
+
+------------------------------------------------------------------------------
+## GET collections/user ##
+
+### Description ###
+Show stamps for a given user.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**user_id** _required_
+The user id of the requested user.
+
+**authenticated_user_id** _optional_
+The user id of the authenticating user. This is necessary if the requested user is locked.
+
+### Sample Request ###
+GET https://api.stamped.com/1/collections/user.json
+user_id=47cc67093475061e3d95369d
+
+### Sample Result ###
+[
+	{
+		"blurb": "Really, the best ever.", 
+		"entity": {
+		    "category": "Restaurant", 
+		    "entity_id": "4e226fcd4e61754161000006", 
+		    "subtitle": "American food in the West Village", 
+		    "title": "Little Owl"
+		}, 
+		"flags": {
+			"privacy": false
+		}, 
+		"id": "4e226fcd4e18474561000000", 
+		"img": "image2.png", 
+		"credit": [
+			"4e226fcd4e61754161000007", 
+			"4e226fcd4e61754161000008"
+		], 
+		"timestamp": "2011-07-17 05:14:54.128641", 
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"user_img": "user.png", 
+			"user_name": "Kevin P"
+		}
+	}
+]
+
+
+------------------------------------------------------------------------------
+## GET collections/inbox ##
+
+### Description ###
+Show stamps in the authenticating user's inbox.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+GET https://api.stamped.com/1/collections/inbox.json
+user_id=47cc67093475061e3d95369d
+
+### Sample Result ###
+[
+	{
+		"stamp_id": "8ac73h4532a7ba01cb00000e",
+		"blurb": "Best burger in the city.", 
+		"entity": {
+		    "category": "Restaurant", 
+		    "entity_id": "3r426fcd4e61754161000006", 
+		    "subtitle": "Burgers, and that's all.", 
+		    "title": "Spotted Pig"
+		}, 
+		"flags": {
+			"privacy": false
+		}, 
+		"img": "image3.png", 
+		"credit": null, 
+		"timestamp": "2011-05-12 18:24:44.432141"
+	}
+]

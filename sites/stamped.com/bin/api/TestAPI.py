@@ -32,18 +32,362 @@ def main():
     
 #     accountTest(baseurl)
 #     
-#     entityTest(baseurl)
-#     
 #     userTest(baseurl)
+#     
+    entityTest(baseurl)
 #     
 #     friendshipTest(baseurl)
 # 
-    stampTest(baseurl)
+#     stampTest(baseurl)
 # 
 #     collectionTest(baseurl)
 # 
 #     commentTest(baseurl)
     
+
+    
+# ######## #
+# Accounts #
+# ######## #
+
+def accountTest(baseurl):
+
+    print    
+    print '      ACCOUNT'
+    
+    path = "account/create.json"
+    data = {
+        "first_name": "Kevin",
+        "last_name": "Palms", 
+        "email": "kevin@stamped.com", 
+        "password": "******",
+        "screen_name": "kpalms"
+    }
+    userID = testPOST(baseurl, path, data)['user_id']
+    if len(userID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+        
+        
+    path = "account/settings.json"
+    data = {
+        "authenticated_user_id": userID,
+        "screen_name": "kevin",
+        "privacy": False,
+    }
+    result = testPOST(baseurl, path, data)
+    if result['privacy'] == False:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/settings.json"
+    data = {
+        "authorized_user_id": userID
+    }
+    result = testGET(baseurl, path, data)
+    if result['privacy'] == False:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/update_profile.json"
+    data = {
+        "authenticated_user_id": userID,
+        "bio": "My long biography goes here.",
+        "color": "AAAAAA,BBBBBB"
+    }
+    result = testPOST(baseurl, path, data)
+    if result['color']['secondary'] == 'BBBBBB':
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/update_profile_image.json"
+    data = {
+        "authenticated_user_id": userID,
+        "image": "image data!"
+    }
+    #result = testPOST(baseurl, path, data)
+    print 'SKIP: %s' % path
+        
+        
+    path = "account/verify_credentials.json"
+    data = {
+        "authenticated_user_id": userID
+    }
+    result = testGET(baseurl, path, data)
+    if result == True:
+        print 'SKIP: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/reset_password.json"
+    data = {
+        "authenticated_user_id": userID
+    }
+    #result = testPOST(baseurl, path, data)
+    print 'SKIP: %s' % path
+        
+        
+    path = "account/remove.json"
+    data = {"authenticated_user_id": userID}
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+
+    print
+    
+    
+# ##### #
+# Users #
+# ##### #
+
+def userTest(baseurl):
+
+    print    
+    print '      USER'
+    
+    path = "account/create.json"
+    data = {
+        "first_name": "User",
+        "last_name": "A", 
+        "email": "usera@stamped.com", 
+        "password": "******",
+        "screen_name": "UserA"
+    }
+    userA = testPOST(baseurl, path, data)['user_id']
+    data = {
+        "first_name": "User",
+        "last_name": "B", 
+        "email": "userb@stamped.com", 
+        "password": "******",
+        "screen_name": "UserB"
+    }
+    userB = testPOST(baseurl, path, data)['user_id']
+    if len(userA) == 24 and len(userB) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+        
+        
+    path = "users/show.json"
+    data = { "user_id": userA }
+    user = testGET(baseurl, path, data)
+    if user["screen_name"] == "UserA":
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entity
+        raise Exception
+        
+        
+    path = "users/show.json"
+    data = { "screen_name": "UserA" }
+    user = testGET(baseurl, path, data)
+    if user["user_id"] == userA:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entity
+        raise Exception
+        
+        
+    path = "users/lookup.json"
+    data = { "user_ids": "%s,%s" % (userA, userB) }
+    users = testGET(baseurl, path, data)
+    if len(users) == 2:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print users
+        raise Exception
+        
+        
+    path = "users/lookup.json"
+    data = { "screen_names": "UserA,UserB" }
+    users = testGET(baseurl, path, data)
+    if len(users) >= 2:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print users
+        raise Exception
+        
+        
+    path = "users/search.json"
+    data = { "q": "user" }
+    users = testGET(baseurl, path, data)
+    if len(users) >= 2:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print users
+        raise Exception
+        
+        
+    path = "users/privacy.json"
+    data = { "user_id": userA }
+    privacy = testGET(baseurl, path, data)
+    if privacy == True:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print privacy
+        raise Exception
+        
+        
+    path = "users/privacy.json"
+    data = { "screen_name": "UserA" }
+    #result = testGET(baseurl, path, data)
+    print 'SKIP: %s' % path
+        
+        
+    path = "account/remove.json"
+    data = {"authenticated_user_id": userA}
+    resultA = testPOST(baseurl, path, data)
+    data = {"authenticated_user_id": userB}
+    resultB = testPOST(baseurl, path, data)
+    if resultA and resultB:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+
+    print
+    
+    
+# ######## #
+# Entities #
+# ######## #
+
+def entityTest(baseurl):
+
+    print    
+    print '      ENTITY'
+    
+    path = "account/create.json"
+    data = {
+        "first_name": "Kevin",
+        "last_name": "Palms", 
+        "email": "kevin@stamped.com", 
+        "password": "******",
+        "screen_name": "kpalms"
+    }
+    userID = testPOST(baseurl, path, data)['user_id']
+    if len(userID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+        
+    
+    path = "entities/create.json"
+    data = {
+        "authenticated_user_id": userID,
+        "title": "Little Owl",
+        "desc": "American food in the West Village", 
+        "category": "Restaurant",
+        "coordinates": "40.714623,-74.006605"
+    }
+    entityID = testPOST(baseurl, path, data)['entity_id']
+    if len(entityID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entityID
+        raise Exception
+        
+        
+    path = "entities/show.json"
+    data = { "entity_id": entityID }
+    entity = testGET(baseurl, path, data)
+    if entity["desc"] == "American food in the West Village":
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entity
+        raise Exception
+    
+        
+    path = "entities/update.json"
+    data = {
+        "authenticated_user_id": userID,
+        "entity_id": entityID,
+        "desc": "Gastropub in the West Village, NYC"
+    }
+    result = testPOST(baseurl, path, data)
+    if result['desc'] == "Gastropub in the West Village, NYC":
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "entities/search.json"
+    data = {
+        "authenticated_user_id": userID,
+        "q": "Litt"
+    }
+    entities = testGET(baseurl, path, data)
+    if len(entities) > 0:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entity
+        raise Exception
+        
+        
+    path = "entities/remove.json"
+    data = {
+        "authenticated_user_id": userID,
+        "entity_id": entityID
+    }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/remove.json"
+    data = { "authenticated_user_id": userID }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+
+    print
+
     
     
 # ########### #
@@ -678,276 +1022,6 @@ def friendshipTest(baseurl):
 
     print
     
-    
-# ##### #
-# Users #
-# ##### #
-
-def userTest(baseurl):
-
-    print    
-    print '      USER'
-    
-    path = "addAccount"
-    data = {
-        "first_name": "User",
-        "last_name": "A", 
-        "username": "userA", 
-        "email": "userA@stamped.com", 
-        "locale": "en_US", 
-        "primary_color": "[255, 255, 255]",
-        "password": "******",
-        "privacy": True,
-        "img": "userA.png"
-    }
-    userA = testPOST(baseurl, path, data)['id']
-    data = {
-        "first_name": "User",
-        "last_name": "B", 
-        "username": "userB", 
-        "email": "userB@stamped.com", 
-        "locale": "en_US", 
-        "primary_color": "[255, 255, 255]",
-        "password": "******",
-        "img": "userB.png"
-    }
-    userB = testPOST(baseurl, path, data)['id']
-    if len(userA) == 24 and len(userB) == 24:
-        print 'DATA: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print userID
-        raise Exception
-        
-        
-    path = "getUser"
-    data = {"user_id": userA}
-    user = testGET(baseurl, path, data)['_data']
-    if user["username"] == "userA":
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print entity
-        raise Exception
-        
-        
-    path = "getUsers"
-    data = {"user_ids": "%s,%s" % (userA, userB)}
-    usersData = testGET(baseurl, path, data)
-    users = []
-    for user in usersData:
-        users.append(user['_data'])
-    if len(users) == 2:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print users
-        raise Exception
-        
-        
-    path = "getUserByName"
-    data = {"username": "userA"}
-    user = testGET(baseurl, path, data)['_data']
-    if user["username"] == "userA":
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print user
-        raise Exception
-        
-        
-    path = "getUsersByName"
-    data = {"usernames": "userA,userB"}
-    usersData = testGET(baseurl, path, data)['users']
-    users = []
-    for user in usersData:
-        users.append(user['_data'])
-    if len(users) >= 2:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print users
-        raise Exception
-        
-        
-    path = "searchUsers"
-    data = {"query": "user"}
-    users = testGET(baseurl, path, data)['users']
-    if len(users) > 0:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print users
-        raise Exception
-        
-        
-    path = "getPrivacy"
-    data = {"user_id": userA}
-    privacy = testGET(baseurl, path, data)
-    if privacy == True:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print privacy
-        raise Exception
-        
-        
-    path = "removeAccount"
-    data = {"account_id": userA}
-    resultA = testPOST(baseurl, path, data)
-    data = {"account_id": userB}
-    resultB = testPOST(baseurl, path, data)
-    if resultA and resultB:
-        print 'DATA: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print result
-        raise Exception
-
-    print
-    
-    
-# ######## #
-# Entities #
-# ######## #
-
-def entityTest(baseurl):
-
-    print    
-    print '      ENTITY'
-    
-    path = "addEntity"
-    data = {
-        "title": "Little Owl",
-        "desc": "American food in the West Village", 
-        "category": "Restaurant"
-    }
-    entityID = testPOST(baseurl, path, data)['id']
-    if len(entityID) == 24:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print entityID
-        raise Exception
-    
-    
-    path = "updateEntity"
-    data = {
-        "entity_id": entityID,
-        "desc": "Great American food in the West Village"
-    }
-    result = testPOST(baseurl, path, data)
-    if result:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print result
-        raise Exception
-        
-        
-    path = "getEntity"
-    data = {"entity_id": entityID}
-    entity = testGET(baseurl, path, data)['_data']
-    if entity["desc"] == "Great American food in the West Village":
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print entity
-        raise Exception
-        
-        
-    path = "searchEntities"
-    data = {"query": "Litt"}
-    entities = testGET(baseurl, path, data)['entities']
-    if len(entities) > 0:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print entity
-        raise Exception
-        
-        
-    path = "removeEntity"
-    data = {"entity_id": entityID}
-    result = testPOST(baseurl, path, data)
-    if result:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print result
-        raise Exception
-
-    print
-
-    
-# ######## #
-# Accounts #
-# ######## #
-
-def accountTest(baseurl):
-
-    print    
-    print '      ACCOUNT'
-    
-    path = "addAccount"
-    data = {
-        "first_name": "Kevin",
-        "last_name": "Palms", 
-        "username": "kpalms!", 
-        "email": "kevin@stamped.com", 
-        "locale": "en_US", 
-        "primary_color": "[255, 255, 255]",
-        "password": "******",
-        "img": "user.png"
-    }
-    userID = testPOST(baseurl, path, data)['id']
-    if len(userID) == 24:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print userID
-        raise Exception
-        
-        
-    path = "updateAccount"
-    data = {
-        "account_id": userID,
-        "first_name": "Robby",
-        "last_name": "Stein",
-        "email": "robby@stamped.com"
-    }
-    result = testPOST(baseurl, path, data)
-    if result:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print result
-        raise Exception
-        
-        
-    path = "getAccount"
-    data = {"account_id": userID}
-    user = testGET(baseurl, path, data)['_data']
-    if user["email"] == "robby@stamped.com":
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print user
-        raise Exception
-        
-        
-    path = "removeAccount"
-    data = {"account_id": userID}
-    result = testPOST(baseurl, path, data)
-    if result:
-        print 'PASS: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print result
-        raise Exception
-
-    print
-
 
 # where all the magic starts
 if __name__ == '__main__':
