@@ -384,10 +384,9 @@ def removeStamp():
     
     return handlePOSTRequest(request, stampedAPI.removeStamp, schema)
 
-@app.route(REST_API_PREFIX + 'stamps/show/<stamp_id>.json', methods=['GET'])
-def getStamp(stamp_id):
-    return transformOutput(stampedAPI.getStamp(stamp_id))
-#     return handleGETRequest(arguments, stampedAPI.getStamp, [ 'stamp_id' ])
+@app.route(REST_API_PREFIX + 'stamps/show.json', methods=['GET'])
+def getStamp():
+    return handleGETRequest(arguments, stampedAPI.getStamp, [ 'stamp_id' ])
 
 @app.route(REST_API_PREFIX + 'getStamps', methods=['GET'])
 def getStamps():
