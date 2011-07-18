@@ -39,7 +39,7 @@ def transformOutput(d):
     return json.dumps(d, sort_keys=True, indent=2, default=encodeType)
 
 def parseRequestForm(schema, form):
-    apiFuncName = utils.getFuncName(1)
+    apiFuncName = utils.getFuncName(2)
     
     try:
         return Resource.parse(apiFuncName, schema, form)
@@ -395,6 +395,6 @@ def hello():
 # ######## #
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(host='0.0.0.0') 
+    #app.run(debug=True)
+    app.run(host='0.0.0.0') 
 
