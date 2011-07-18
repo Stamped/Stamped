@@ -20,14 +20,14 @@ The user id of the authenticating user.
 The user id or screen name of the friend.
 
 ### Sample Request ###
-POST https://api.stamped.com/1/friendships/create.json
-user_id=4e226fcd4e61754161000007
+	POST https://api.stamped.com/1/friendships/create.json
+	user_id=4e226fcd4e61754161000007
 
 ### Sample Result ###
-{
-	"user_id": "4e226fcd4e61754161000007",
-	"screen_name": "robby"
-}
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"screen_name": "robby"
+	}
 
 
 ------------------------------------------------------------------------------
@@ -48,11 +48,11 @@ The user id of the authenticating user.
 The user id or screen name of the friend.
 
 ### Sample Request ###
-GET https://api.stamped.com/1/friendships/check.json
-user_id=4e226fcd4e61754161000007
+	GET https://api.stamped.com/1/friendships/check.json
+	user_id=4e226fcd4e61754161000007
 
 ### Sample Result ###
-true
+	true
 
 
 ------------------------------------------------------------------------------
@@ -70,14 +70,14 @@ Return a list of the authenticating user's friends.
 The user id of the authenticating user.
 
 ### Sample Request ###
-GET https://api.stamped.com/1/friendships/friends.json
+	GET https://api.stamped.com/1/friendships/friends.json
 
 ### Sample Result ###
-{
-	"user_ids": [
-		"4e226fcd4e61754161000007"
-	]
-}
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007"
+		]
+	}
 
 
 ------------------------------------------------------------------------------
@@ -95,14 +95,14 @@ Return a list of the authenticating user's followers.
 The user id of the authenticating user.
 
 ### Sample Request ###
-GET https://api.stamped.com/1/friendships/followers.json
+	GET https://api.stamped.com/1/friendships/followers.json
 
 ### Sample Result ###
-{
-	"user_ids": [
-		"4e226fcd4e61754161000007"
-	]
-}
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007"
+		]
+	}
 
 
 ------------------------------------------------------------------------------
@@ -120,14 +120,14 @@ Return a list of the authenticating user's followers that are pending approval. 
 The user id of the authenticating user.
 
 ### Sample Request ###
-GET https://api.stamped.com/1/friendships/pending.json
+	GET https://api.stamped.com/1/friendships/pending.json
 
 ### Sample Result ###
-{
-	"user_ids": [
-		"4e226fcd4e61754161000007"
-	]
-}
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007"
+		]
+	}
 
 
 ------------------------------------------------------------------------------
@@ -147,38 +147,38 @@ The user id of the authenticating user.
 **user_id** or **screen_name** _required_
 
 ### Sample Request ###
-GET https://api.stamped.com/1/friendships/approve.json
-user_id=4e226fcd4e61754161000007
+	GET https://api.stamped.com/1/friendships/approve.json
+	user_id=4e226fcd4e61754161000007
 
 ### Sample Result ###
-{
-	"user_id": "4e226fcd4e61754161000007",
-	"first_name": "Robby",
-	"last_name": "Stein",
-	"screen_name": "robby",
-	"display_name": "Robby S.",
-	"bio": "Starting something new in NYC. Former Google product manager.",
-	"website": null,
-	"color": {
-		"primary": "3AD8CC"
-	},
-    "last_stamp": {
-		"blurb": "Best burger in the city.", 
-		"entity": {
-		    "category": "Restaurant", 
-		    "entity_id": "3r426fcd4e61754161000006", 
-		    "subtitle": "Burgers, and that's all.", 
-		    "title": "Spotted Pig"
-		}, 
-		"flags": {
-			"privacy": false
-		}, 
-		"id": "3e526fcd4e18474561000000", 
-		"img": "image3.png", 
-		"credit": null, 
-		"timestamp": "2011-05-12 18:24:44.432141"
-    }
-}
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"first_name": "Robby",
+		"last_name": "Stein",
+		"screen_name": "robby",
+		"display_name": "Robby S.",
+		"bio": "Starting something new in NYC. Former Google product manager.",
+		"website": null,
+		"color": {
+			"primary": "3AD8CC"
+		},
+	    "last_stamp": {
+			"blurb": "Best burger in the city.", 
+			"entity": {
+			    "category": "Restaurant", 
+			    "entity_id": "3r426fcd4e61754161000006", 
+			    "subtitle": "Burgers, and that's all.", 
+			    "title": "Spotted Pig"
+			}, 
+			"flags": {
+				"privacy": false
+			}, 
+			"id": "3e526fcd4e18474561000000", 
+			"img": "image3.png", 
+			"credit": null, 
+			"timestamp": "2011-05-12 18:24:44.432141"
+	    }
+	}
 
 
 ------------------------------------------------------------------------------
@@ -199,13 +199,119 @@ The user id of the authenticating user.
 The user id or screen name of the friend.
 
 ### Sample Request ###
-POST https://api.stamped.com/1/friendships/remove.json
-user_id=4e226fcd4e61754161000007
+	POST https://api.stamped.com/1/friendships/remove.json
+	user_id=4e226fcd4e61754161000007
 
 ### Sample Result ###
-{
-	"user_id": "4e226fcd4e61754161000007",
-	"screen_name": "robby"
-}
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"screen_name": "robby"
+	}
+
+
+------------------------------------------------------------------------------
+## POST friendships/blocks/create ##
+
+### Description ###
+Create a block between two users. This destroys any friendships that exist between the two users and prevents the blocked user from viewing the authenticating user's stamps in their inbox. It also prevents the blocked user from commenting on the authenticating user's stamps, and mutes any activity from the blocked user towards the authenticating user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the blocked user.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/friendships/blocks/create.json
+	user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"screen_name": "robby"
+	}
+
+
+------------------------------------------------------------------------------
+## GET friendships/blocks/check ##
+
+### Description ###
+Check whether or not a block exists.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the blocked user.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/friendships/blocks/check.json
+	user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	true
+
+
+------------------------------------------------------------------------------
+## GET friendships/blocking ##
+
+### Description ###
+Return a list of the user ids blocked by the authenticating user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/friendships/blocking.json
+
+### Sample Result ###
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007"
+		]
+	}
+
+
+------------------------------------------------------------------------------
+## POST friendships/blocks/remove ##
+
+### Description ###
+Remove a block for a specific user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the blocked user.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/friendships/blocks/remove.json
+	user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"screen_name": "robby"
+	}
 
 

@@ -33,14 +33,17 @@ class MongoStamp(AStampDB, Mongo):
         },
         'user': {
             'user_id': basestring,
-            'user_name': basestring,
-            'user_img': basestring,
+            'user_display_name': basestring,
+            'user_image': basestring,
         },
         'blurb': basestring,
-        'img': basestring,
+        'image': basestring,
         'mentions': list,
         'credit': list,
-        'timestamp': basestring,
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
+        },
         'flags': {
             'privacy': bool,
             'flagged': bool,
@@ -64,20 +67,20 @@ class MongoStamp(AStampDB, Mongo):
     ### PUBLIC
     
     def addStamp(self, stamp):
-        stampId = self._addDocument(stamp)
+        stampId = self._addDocument(stamp, 'stamp_id')
         MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)
         followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
         MongoInboxStamps().addInboxStamps(followerIds, stampId)
         return stampId
     
     def getStamp(self, stampId):
-        stamp = Stamp(self._getDocumentFromId(stampId))
+        stamp = Stamp(self._getDocumentFromId(stampId, 'stamp_id'))
         if stamp.isValid == False:
             raise KeyError("Stamp not valid")
         return stamp
         
     def updateStamp(self, stamp):
-        return self._updateDocument(stamp)
+        return self._updateDocument(stamp, 'stamp_id')
         
     def removeStamp(self, stampId, userId):
         MongoUserStamps().removeUserStamp(userId, stampId)

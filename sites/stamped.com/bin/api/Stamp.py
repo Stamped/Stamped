@@ -6,11 +6,12 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from AObject import AObject
+from datetime import datetime
 
 class Stamp(AObject):
 
     _schema = {
-        'id': basestring,
+        'stamp_id': basestring,
         'entity': {
             'entity_id': basestring,
             'title': basestring,
@@ -23,14 +24,17 @@ class Stamp(AObject):
         },
         'user': {
             'user_id': basestring,
-            'user_name': basestring,
-            'user_img': basestring,
+            'user_display_name': basestring,
+            'user_image': basestring,
         },
         'blurb': basestring,
-        'img': basestring,
+        'image': basestring,
         'mentions': list,
         'credit': list,
-        'timestamp': basestring,
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
+        },
         'flags': {
             'privacy': bool,
             'flagged': bool,
@@ -50,8 +54,8 @@ class Stamp(AObject):
     def isValid(self):
         valid = True
         
-        if 'id' in self:
-            valid &= isinstance(self.id, basestring) 
+        if 'stamp_id' in self:
+            valid &= isinstance(self.stamp_id, basestring) 
         
         valid &= 'entity' in self and isinstance(self.entity, dict)
         valid &= 'entity_id' in self.entity and isinstance(self.entity['entity_id'], basestring)
@@ -67,14 +71,16 @@ class Stamp(AObject):
         
         valid &= 'user' in self and isinstance(self.user, dict)
         valid &= 'user_id' in self.user and isinstance(self.user['user_id'], basestring)
-        valid &= 'user_name' in self.user and isinstance(self.user['user_name'], basestring)
-        valid &= 'user_img' in self.user and isinstance(self.user['user_img'], basestring)
+        valid &= 'user_display_name' in self.user and isinstance(self.user['user_display_name'], basestring)
+        valid &= 'user_image' in self.user and isinstance(self.user['user_image'], basestring)
         
-        valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
+        valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
+        valid &= 'created' in self.timestamp and isinstance(self.timestamp['created'], datetime)
+        
         if 'blurb' in self:
             valid &= isinstance(self.blurb, basestring)
-        if 'img' in self:
-            valid &= isinstance(self.img, basestring)
+        if 'image' in self:
+            valid &= isinstance(self.image, basestring)
         if 'mentions' in self:
             valid &= isinstance(self.mentions, list)
         if 'credit' in self:

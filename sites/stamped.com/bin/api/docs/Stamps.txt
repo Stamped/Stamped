@@ -32,34 +32,36 @@ User information for any users that are mentioned in the stamp. Any users mentio
 User information for any users that are named as receiving credit in the stamp. Multiple screen names must be separated by commas.
 
 ### Sample Request ###
-POST https://api.stamped.com/1/stamps/create.json
-authenticated_user_id=47cc67093475061e3d95369d&entity_id=4e226fcd4e61754161000006&blurb=Best+place+ever!&credit=4e226fcd4e61754161000007,4e226fcd4e61754161000008
+	POST https://api.stamped.com/1/stamps/create.json
+	authenticated_user_id=47cc67093475061e3d95369d&entity_id=4e226fcd4e61754161000006&blurb=Best+place+ever!&credit=4e226fcd4e61754161000007,4e226fcd4e61754161000008
 
 ### Sample Result ###
-{
-	"blurb": "Best place ever!", 
-	"entity": {
-	    "category": "Restaurant", 
-	    "entity_id": "4e226fcd4e61754161000006", 
-	    "subtitle": "American food in the West Village", 
-	    "title": "Little Owl"
-	}, 
-	"flags": {
-		"privacy": false
-	}, 
-	"id": "4e226fcd4e18474561000000", 
-	"img": "image2.png", 
-	"credit": [
-		"4e226fcd4e61754161000007", 
-		"4e226fcd4e61754161000008"
-	], 
-	"timestamp": "2011-07-17 05:14:54.128641", 
-	"user": {
-		"user_id": "47cc67093475061e3d95369d", 
-		"user_img": "user.png", 
-		"user_name": "Kevin P"
+	{
+		"blurb": "Best place ever!", 
+		"entity": {
+		    "category": "Restaurant", 
+		    "entity_id": "4e226fcd4e61754161000006", 
+		    "subtitle": "American food in the West Village", 
+		    "title": "Little Owl"
+		}, 
+		"flags": {
+			"privacy": false
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"image": "image2.png", 
+		"credit": [
+			"4e226fcd4e61754161000007", 
+			"4e226fcd4e61754161000008"
+		], 
+		"timestamp": {
+			"created": "2011-07-17 05:14:54.128641"
+		},
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"user_image": "user.png", 
+			"user_display_name": "Kevin P."
+		}
 	}
-}
 
 
 
@@ -93,34 +95,34 @@ User information for any users that are mentioned in the stamp. Any users mentio
 User information for any users that are named as receiving credit in the stamp. Multiple screen names must be separated by commas.
 
 ### Sample Request ###
-POST https://api.stamped.com/1/stamps/update.json
-authenticated_user_id=47cc67093475061e3d95369d&stamp_id=4e226fcd4e18474561000000&blurb=Really,+the+best+ever.
+	POST https://api.stamped.com/1/stamps/update.json
+	authenticated_user_id=47cc67093475061e3d95369d&stamp_id=4e226fcd4e18474561000000&blurb=Really,+the+best+ever.
 
 ### Sample Result ###
-{
-	"blurb": "Really, the best ever.", 
-	"entity": {
-	    "category": "Restaurant", 
-	    "entity_id": "4e226fcd4e61754161000006", 
-	    "subtitle": "American food in the West Village", 
-	    "title": "Little Owl"
-	}, 
-	"flags": {
-		"privacy": false
-	}, 
-	"id": "4e226fcd4e18474561000000", 
-	"img": "image2.png", 
-	"credit": [
-		"4e226fcd4e61754161000007", 
-		"4e226fcd4e61754161000008"
-	], 
-	"timestamp": "2011-07-17 05:14:54.128641", 
-	"user": {
-		"user_id": "47cc67093475061e3d95369d", 
-		"user_img": "user.png", 
-		"user_name": "Kevin P"
+	{
+		"blurb": "Really, the best ever.", 
+		"entity": {
+		    "category": "Restaurant", 
+		    "entity_id": "4e226fcd4e61754161000006", 
+		    "subtitle": "American food in the West Village", 
+		    "title": "Little Owl"
+		}, 
+		"flags": {
+			"privacy": false
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"image": "image2.png", 
+		"credit": [
+			"4e226fcd4e61754161000007", 
+			"4e226fcd4e61754161000008"
+		], 
+		"timestamp": "2011-07-17 05:14:54.128641", 
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"user_image": "user.png", 
+			"user_display_name": "Kevin P."
+		}
 	}
-}
 
 
 ------------------------------------------------------------------------------
@@ -141,16 +143,14 @@ The user id of the authenticating user. This user must be the owner of the stamp
 The unique id of the stamp.
 
 ### Sample Request ###
-POST https://api.stamped.com/1/stamps/remove.json
-authenticated_user_id=47cc67093475061e3d95369d&stamp_id=4e226fcd4e18474561000000
+	POST https://api.stamped.com/1/stamps/remove.json
+	authenticated_user_id=47cc67093475061e3d95369d&stamp_id=4e226fcd4e18474561000000
 
 ### Sample Result ###
-{
-	"id": "4e226fcd4e18474561000000"
-}
+	true
 
 ------------------------------------------------------------------------------
-## POST stamps/show/:id ##
+## GET stamps/show ##
 
 ### Description ###
 Show details for a given stamp.
@@ -167,31 +167,33 @@ The unique id of the stamp.
 The user id of the authenticating user. This is necessary for stamps that are private.
 
 ### Sample Request ###
-GET https://api.stamped.com/1/stamps/show/4e226fcd4e18474561000000.json
-authenticated_user_id=47cc67093475061e3d95369d
+	GET https://api.stamped.com/1/stamps/show.json
+	stamp_id=4e226fcd4e18474561000000&authenticated_user_id=47cc67093475061e3d95369d
 
 ### Sample Result ###
-{
-	"blurb": "Really, the best ever.", 
-	"entity": {
-	    "category": "Restaurant", 
-	    "entity_id": "4e226fcd4e61754161000006", 
-	    "subtitle": "American food in the West Village", 
-	    "title": "Little Owl"
-	}, 
-	"flags": {
-		"privacy": false
-	}, 
-	"id": "4e226fcd4e18474561000000", 
-	"img": "image2.png", 
-	"credit": [
-		"4e226fcd4e61754161000007", 
-		"4e226fcd4e61754161000008"
-	], 
-	"timestamp": "2011-07-17 05:14:54.128641", 
-	"user": {
-		"user_id": "47cc67093475061e3d95369d", 
-		"user_img": "user.png", 
-		"user_name": "Kevin P"
+	{
+		"blurb": "Really, the best ever.", 
+		"entity": {
+		    "category": "Restaurant", 
+		    "entity_id": "4e226fcd4e61754161000006", 
+		    "subtitle": "American food in the West Village", 
+		    "title": "Little Owl"
+		}, 
+		"flags": {
+			"privacy": false
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"image": "image2.png", 
+		"credit": [
+			"4e226fcd4e61754161000007", 
+			"4e226fcd4e61754161000008"
+		], 
+		"timestamp": "2011-07-17 05:14:54.128641", 
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"user_image": "user.png", 
+			"user_display_name": "Kevin P."
+		}
 	}
-}
+
+

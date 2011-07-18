@@ -195,19 +195,21 @@ def getUsersByName():
 # Friendships #
 # ########### #
 
-@app.route(REST_API_PREFIX + 'addFriendship', methods=['POST'])
+@app.route(REST_API_PREFIX + 'friendships/create.json', methods=['POST'])
 def addFriendship():
     schema = ResourceArgumentSchema([
-        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
-        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("user_id",               ResourceArgument(expectedType=basestring)), 
+        ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
     return handlePOSTRequest(request, stampedAPI.addFriendship, schema)
 
-@app.route(REST_API_PREFIX + 'removeFriendship', methods=['POST'])
+@app.route(REST_API_PREFIX + 'friendships/remove.json', methods=['POST'])
 def removeFriendship():
     schema = ResourceArgumentSchema([
-        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
-        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("user_id",               ResourceArgument(expectedType=basestring)), 
+        ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
     
     return handlePOSTRequest(request, stampedAPI.removeFriendship, schema)
@@ -221,43 +223,45 @@ def approveFriendship():
     
     return handlePOSTRequest(request, stampedAPI.approveFriendship, schema)
 
-@app.route(REST_API_PREFIX + 'addBlock', methods=['POST'])
+@app.route(REST_API_PREFIX + 'friendships/blocks/create.json', methods=['POST'])
 def addBlock():
     schema = ResourceArgumentSchema([
-        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
-        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("user_id",               ResourceArgument(expectedType=basestring)), 
+        ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
     
     return handlePOSTRequest(request, stampedAPI.addBlock, schema)
 
-@app.route(REST_API_PREFIX + 'removeBlock', methods=['POST'])
+@app.route(REST_API_PREFIX + 'friendships/blocks/remove.json', methods=['POST'])
 def removeBlock():
     schema = ResourceArgumentSchema([
-        ("user_id",           ResourceArgument(required=True, expectedType=basestring)), 
-        ("friend_id",         ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("user_id",               ResourceArgument(expectedType=basestring)), 
+        ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
     
     return handlePOSTRequest(request, stampedAPI.removeBlock, schema)
 
-@app.route(REST_API_PREFIX + 'checkFriendship', methods=['GET'])
+@app.route(REST_API_PREFIX + 'friendships/check.json', methods=['GET'])
 def checkFriendship():
-    return handleGETRequest(request, stampedAPI.checkFriendship, [ 'user_id', 'friend_id' ])
+    return handleGETRequest(request, stampedAPI.checkFriendship, [ 'authenticated_user_id', 'user_id' ])
 
-@app.route(REST_API_PREFIX + 'getFriends', methods=['GET'])
+@app.route(REST_API_PREFIX + 'friendships/friends.json', methods=['GET'])
 def getFriends():
-    return handleGETRequest(request, stampedAPI.getFriends, [ 'user_id' ])
+    return handleGETRequest(request, stampedAPI.getFriends, [ 'authenticated_user_id' ])
 
-@app.route(REST_API_PREFIX + 'getFollowers', methods=['GET'])
+@app.route(REST_API_PREFIX + 'friendships/followers.json', methods=['GET'])
 def getFollowers():
-    return handleGETRequest(request, stampedAPI.getFollowers, [ 'user_id' ])
+    return handleGETRequest(request, stampedAPI.getFollowers, [ 'authenticated_user_id' ])
 
-@app.route(REST_API_PREFIX + 'checkBlock', methods=['GET'])
+@app.route(REST_API_PREFIX + 'friendships/blocks/check.json', methods=['GET'])
 def checkBlock():
-    return handleGETRequest(request, stampedAPI.checkBlock, [ 'user_id', 'friend_id' ])
+    return handleGETRequest(request, stampedAPI.checkBlock, [ 'authenticated_user_id', 'user_id' ])
 
-@app.route(REST_API_PREFIX + 'getBlocks', methods=['GET'])
+@app.route(REST_API_PREFIX + 'friendships/blocking.json', methods=['GET'])
 def getBlocks():
-    return handleGETRequest(request, stampedAPI.getBlocks, [ 'user_id' ])
+    return handleGETRequest(request, stampedAPI.getBlocks, [ 'authenticated_user_id' ])
 
 # ######### #
 # Favorites #
@@ -347,50 +351,42 @@ def searchEntities():
 # Stamps #
 # ###### #
 
-@app.route(REST_API_PREFIX + 'stamps/add.json', methods=['POST'])
+@app.route(REST_API_PREFIX + 'stamps/create.json', methods=['POST'])
 def addStamp():
-    # TODO: the arguments here need work
     schema = ResourceArgumentSchema([
-        ("user_id",         ResourceArgument(required=True, expectedType=basestring)), 
-        ("entity_id",       ResourceArgument(required=True, expectedType=basestring)), 
-        ("blurb",           ResourceArgument(required=True, expectedType=basestring)), 
-        ("img",             ResourceArgument(expectedType=basestring)), 
-        ("mentions",        ResourceArgument(expectedType=basestring)), 
-        ("credit",          ResourceArgument(expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("entity_id",             ResourceArgument(required=True, expectedType=basestring)), 
+        ("blurb",                 ResourceArgument(expectedType=basestring)), 
+        ("image",                 ResourceArgument(expectedType=basestring)), 
+        ("mentions",              ResourceArgument(expectedType=basestring)), 
+        ("credit",                ResourceArgument(expectedType=basestring)), 
     ])
-    
     return handlePOSTRequest(request, stampedAPI.addStamp, schema)
 
 @app.route(REST_API_PREFIX + 'stamps/update.json', methods=['POST'])
 def updateStamp():
     # TODO: the arguments here need work
     schema = ResourceArgumentSchema([
-        ("stamp_id",        ResourceArgument(required=True, expectedType=basestring)), 
-        ("blurb",           ResourceArgument(expectedType=basestring)), 
-        ("img",             ResourceArgument(expectedType=basestring)), 
-        ("mentions",        ResourceArgument(expectedType=basestring)), 
-        ("credit",          ResourceArgument(expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("stamp_id",              ResourceArgument(required=True, expectedType=basestring)), 
+        ("blurb",                 ResourceArgument(expectedType=basestring)), 
+        ("image",                 ResourceArgument(expectedType=basestring)), 
+        ("mentions",              ResourceArgument(expectedType=basestring)), 
+        ("credit",                ResourceArgument(expectedType=basestring)), 
     ])
-    
     return handlePOSTRequest(request, stampedAPI.updateStamp, schema)
-
-@app.route(REST_API_PREFIX + 'stamps/remove.json', methods=['POST'])
-def removeStamp():
-    # TODO: the arguments here need work
-    schema = ResourceArgumentSchema([
-        ("stamp_id",        ResourceArgument(required=True, expectedType=basestring)),
-        ("user_id",         ResourceArgument(required=True, expectedType=basestring))
-    ])
-    
-    return handlePOSTRequest(request, stampedAPI.removeStamp, schema)
 
 @app.route(REST_API_PREFIX + 'stamps/show.json', methods=['GET'])
 def getStamp():
-    return handleGETRequest(arguments, stampedAPI.getStamp, [ 'stamp_id' ])
+    return handleGETRequest(request, stampedAPI.getStamp, [ 'stamp_id' ])
 
-@app.route(REST_API_PREFIX + 'getStamps', methods=['GET'])
-def getStamps():
-    return handleGETRequest(request, stampedAPI.getStamps, [ 'stamp_ids' ]) 
+@app.route(REST_API_PREFIX + 'stamps/remove.json', methods=['POST'])
+def removeStamp():
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("stamp_id",              ResourceArgument(required=True, expectedType=basestring))
+    ])
+    return handlePOSTRequest(request, stampedAPI.removeStamp, schema)
 
 # ######## #
 # Comments #
@@ -458,6 +454,6 @@ def hello():
 # ######## #
 
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run(host='0.0.0.0') 
+    app.run(debug=True)
+    #app.run(host='0.0.0.0') 
 

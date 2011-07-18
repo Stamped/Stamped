@@ -92,6 +92,7 @@ class StampedAPI(AStampedAPI):
         account.flags = { 
             'privacy': True
         }
+        account.image = None
         
         if account.isValid == False:
             raise InvalidArgument('Invalid input')
@@ -344,24 +345,44 @@ class StampedAPI(AStampedAPI):
     
     def addFriendship(self, params):
         friendship = Friendship()
-        friendship.user_id = params.user_id
-        friendship.friend_id = params.friend_id
+        friendship.user_id = params.authenticated_user_id
+        
+        if params.user_id != None:
+            friendship.friend_id = params.user_id
+        elif params.screen_name != None:
+            raise NotImplementedError
+        else:
+            return 'error', 400
         
         if not friendship.isValid:
             raise InvalidArgument('Invalid input')
         
         self._friendshipDB.addFriendship(friendship)
-        return friendship
+        
+        result = {}
+        result['user_id'] = friendship.friend_id
+        result['screen_name'] = self._userDB.getUser(friendship.friend_id)['screen_name']
+        
+        return result
     
     def removeFriendship(self, params):
         friendship = Friendship()
-        friendship.user_id = params.user_id
-        friendship.friend_id = params.friend_id
+        friendship.user_id = params.authenticated_user_id
+        
+        if params.user_id != None:
+            friendship.friend_id = params.user_id
+        elif params.screen_name != None:
+            raise NotImplementedError
+        else:
+            return 'error', 400
         
         if not friendship.isValid:
             raise InvalidArgument('Invalid input')
-        self._friendshipDB.removeFriendship(friendship)
-        return friendship
+            
+        if self._friendshipDB.removeFriendship(friendship):
+            return True
+        else:
+            return False
     
     def approveFriendship(self, params):
         friendship = Friendship()
@@ -376,42 +397,67 @@ class StampedAPI(AStampedAPI):
     
     def addBlock(self, params):
         friendship = Friendship()
-        friendship.user_id = params.user_id
-        friendship.friend_id = params.friend_id
+        friendship.user_id = params.authenticated_user_id
+        
+        if params.user_id != None:
+            friendship.friend_id = params.user_id
+        elif params.screen_name != None:
+            raise NotImplementedError
+        else:
+            return 'error', 400
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        self._friendshipDB.addBlock(friendship)
+        
+        result = {}
+        result['user_id'] = friendship.friend_id
+        result['screen_name'] = self._userDB.getUser(friendship.friend_id)['screen_name']
+        
+        return result
+    
+    def removeBlock(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.authenticated_user_id
+        
+        if params.user_id != None:
+            friendship.friend_id = params.user_id
+        elif params.screen_name != None:
+            raise NotImplementedError
+        else:
+            return 'error', 400
         
         if not friendship.isValid:
             raise InvalidArgument('Invalid input')
             
-        self._friendshipDB.addBlock(friendship)
-        return friendship
-    
-    def removeBlock(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.user_id
-        friendship.friend_id = params.friend_id
-        
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
-        
-        self._friendshipDB.removeBlock(friendship)
-        return friendship        
+        if self._friendshipDB.removeBlock(friendship):
+            return True
+        else:
+            return False
     
     def checkFriendship(self, userID, friendID):
         friendship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.checkFriendship(friendship)
+        if self._friendshipDB.checkFriendship(friendship):
+            return True
+        else:
+            return False
     
     def getFriends(self, userID):
-        return self._friendshipDB.getFriends(userID)
+        return {'user_ids': self._friendshipDB.getFriends(userID)}
     
     def getFollowers(self, userID):
-        return self._friendshipDB.getFollowers(userID)
+        return {'user_ids': self._friendshipDB.getFollowers(userID)}
     
     def checkBlock(self, userID, friendID):
         friendship = Friendship({'user_id': userID, 'friend_id': friendID})
-        return self._friendshipDB.checkBlock(friendship)
+        if self._friendshipDB.checkBlock(friendship):
+            return True
+        else:
+            return False
     
     def getBlocks(self, userID):
-        return self._friendshipDB.getBlocks(userID)
+        return {'user_ids': self._friendshipDB.getBlocks(userID)}
     
     # ######### #
     # Favorites #
@@ -645,28 +691,29 @@ class StampedAPI(AStampedAPI):
     def addStamp(self, params):        
         stamp = Stamp()
         
-        user = self._userDB.getUser(params.user_id)
+        user = self._userDB.getUser(params.authenticated_user_id)
         stamp.user = {}
-        stamp.user['user_id'] = user.id
-        stamp.user['user_name'] = user.first_name
-        stamp.user['user_img'] = user.img
+        stamp.user['user_id'] = user.user_id
+        stamp.user['user_display_name'] = user.display_name
+        stamp.user['user_image'] = user.image
         stamp.flags = {}
         stamp.flags['privacy'] = user.flags['privacy']
         
         entity = self._entityDB.getEntity(params.entity_id)
         stamp.entity = {}
-        stamp.entity['entity_id'] = entity.id
+        stamp.entity['entity_id'] = entity.entity_id
         stamp.entity['title'] = entity.title
         stamp.entity['category'] = entity.category
         stamp.entity['subtitle'] = entity.desc
-        if entity.coordinates:
-            stamp.entity['coordinates']['lat'] = entity.coordinates['lat']
-            stamp.entity['coordinates']['lng'] = entity.coordinates['lng']
+        if 'details' in entity and 'place' in entity.details and 'coordinates' in entity.details['place']:
+            stamp.entity['coordinates'] = {}
+            stamp.entity['coordinates']['lat'] = entity.details['place']['coordinates']['lat']
+            stamp.entity['coordinates']['lng'] = entity.details['place']['coordinates']['lng']
         
         if params.blurb != None:
             stamp.blurb = params.blurb
-        if params.img != None:
-            stamp.img = params.img
+        if params.image != None:
+            stamp.image = params.image
             
         if params.mentions != None:
             stamp.mentions = []
@@ -678,22 +725,49 @@ class StampedAPI(AStampedAPI):
             for userID in params.credit.split(','):
                 stamp.credit.append(userID)
                 
-        stamp.timestamp = datetime.utcnow()
+        stamp.timestamp = {
+            'created': datetime.utcnow()
+        }
 
         if not stamp.isValid:
             raise InvalidArgument('Invalid input')
         
         result = {}
-        result['id'] = self._stampDB.addStamp(stamp)
+        result['stamp_id'] = self._stampDB.addStamp(stamp)
+        result['entity'] = stamp['entity']
+        result['user'] = stamp['user']
+        result['flags'] = stamp['flags']
+        
+        if 'image' in stamp:
+            result['image'] = stamp.image
+        else:
+            result['image'] = None
+        
+        if 'credit' in stamp:
+            result['credit'] = stamp.credit
+        else:
+            result['credit'] = None
+        
+        if 'mentions' in stamp:
+            result['mentions'] = stamp.mentions
+        else:
+            result['mentions'] = None
+            
+        result['timestamp'] = {}
+        if 'created' in stamp.timestamp:
+            result['timestamp']['created'] = str(stamp.timestamp['created'])
+        if 'modified' in stamp.timestamp:
+            result['timestamp']['modified'] = str(stamp.timestamp['modified'])
+        
         return result
-    
+            
     def updateStamp(self, params):        
         stamp = self._stampDB.getStamp(params.stamp_id)
         
         if params.blurb != None:
             stamp.blurb = params.blurb
-        if params.img != None:
-            stamp.img = params.img
+        if params.image != None: 
+            stamp.image = params.image
             
         if params.mentions != None:
             if not stamp.mentions:
@@ -707,23 +781,80 @@ class StampedAPI(AStampedAPI):
             for userID in params.credit.split(','):
                 stamp.credit.append(userID)
                 
-        stamp.timestamp = datetime.utcnow()
+        if 'timestamp' not in stamp:
+            stamp['timestamp'] = {}
+        stamp.timestamp['modified'] = datetime.utcnow()
 
         if not stamp.isValid:
             raise InvalidArgument('Invalid input')
             
         result = {}
-        result['id'] = self._stampDB.updateStamp(stamp)
-        ### CLARIFY: What do we want to return?
+        result['stamp_id'] = self._stampDB.updateStamp(stamp)
+        result['entity'] = stamp['entity']
+        result['user'] = stamp['user']
+        result['flags'] = stamp['flags']
+        
+        if 'image' in stamp:
+            result['image'] = stamp.image
+        else:
+            result['image'] = None
+        
+        if 'credit' in stamp:
+            result['credit'] = stamp.credit
+        else:
+            result['credit'] = None
+        
+        if 'mentions' in stamp:
+            result['mentions'] = stamp.mentions
+        else:
+            result['mentions'] = None
+            
+        result['timestamp'] = {}
+        if 'created' in stamp.timestamp:
+            result['timestamp']['created'] = str(stamp.timestamp['created'])
+        if 'modified' in stamp.timestamp:
+            result['timestamp']['modified'] = str(stamp.timestamp['modified'])
+        
         return result
     
     def removeStamp(self, params):
-        self._stampDB.removeStamp(params.stamp_id, params.user_id)
-        ### CLARIFY: What do we want to return?
-        return {'id': params.stamp_id}
+        if self._stampDB.removeStamp(params.stamp_id, params.authenticated_user_id):
+            return True
+        else:
+            return False
     
     def getStamp(self, stampID):
-        return self._stampDB.getStamp(stampID).getDataAsDict()
+        stamp = self._stampDB.getStamp(stampID)
+        
+        result = {}
+        result['stamp_id'] = stamp.stamp_id
+        result['entity'] = stamp['entity']
+        result['user'] = stamp['user']
+        result['flags'] = stamp['flags']
+        
+        if 'image' in stamp:
+            result['image'] = stamp.image
+        else:
+            result['image'] = None
+        
+        if 'credit' in stamp:
+            result['credit'] = stamp.credit
+        else:
+            result['credit'] = None
+        
+        if 'mentions' in stamp:
+            result['mentions'] = stamp.mentions
+        else:
+            result['mentions'] = None
+            
+        result['timestamp'] = {}
+        if 'created' in stamp.timestamp:
+            result['timestamp']['created'] = str(stamp.timestamp['created'])
+        if 'modified' in stamp.timestamp:
+            result['timestamp']['modified'] = str(stamp.timestamp['modified'])
+        
+        return result
+        
     
     def getStamps(self, stampIDs):
         stampIDs = stampIDs.split(',')
