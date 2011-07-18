@@ -82,14 +82,15 @@ Ec2WebServerCommands = [
     ssh -o StrictHostKeyChecking=no git@github.com
     set -e
     
-    echo '>>>> Clone stamped-bootstrap repo'
-    git clone git@github.com:Stamped/stamped-bootstrap.git /stamped-bootstrap
+    echo '>>>> Clone repo'
+    git clone git@github.com:Stamped/stamped-bootstrap.git /bootstrap
     """,
     """
-    echo '>>>> Running INIT script'
-    bash /stamped-bootstrap/init.sh &> /stamped-bootstrap/log
+    echo '>>>> Running init script'
+    bash /bootstrap/init.sh &> /bootstrap/log
     """
 ]
+
 Ec2WebServerUserData = cloudformation.EncodeUserData('#!/bin/bash -ex')
 Ec2WebServerUserData += cloudformation.AddWaitHandle('1CreateInstanceWaitHandle')
 Ec2WebServerUserData += cloudformation.EncodeUserData(Ec2WebServerCommands[0])

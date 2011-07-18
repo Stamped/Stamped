@@ -74,6 +74,15 @@ def getFuncName(offset=0):
     import inspect
     return inspect.stack()[1 + offset][3]
 
+def getPythonConfigFile(path):
+    if os.path.exists(path):
+        with open(path, "rb") as fp:
+            source = fp.read()
+        
+        return eval(source)
+    else:
+        return { }
+
 class AttributeDict(object):
     def __init__(self, *args, **kwargs):
         d = kwargs

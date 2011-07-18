@@ -9,8 +9,9 @@ import utils
 from abc import abstractmethod
 
 class ADeploymentSystem(object):
-    def __init__(self, name):
+    def __init__(self, name, options):
         self.name = name
+        self.options = options
     
     @abstractmethod
     def create_stack(self, *args):
@@ -48,8 +49,9 @@ class ADeploymentSystem(object):
         return self.name
 
 class ADeploymentStack(object):
-    def __init__(self, name):
+    def __init__(self, name, options):
         self.name = name
+        self.options = options
     
     @abstractmethod
     def init(self):

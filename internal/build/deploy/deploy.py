@@ -8,7 +8,8 @@ __license__ = "TODO"
 import os, sys, utils
 from optparse import OptionParser
 
-from deployments.aws import AWSDeploymentSystem, AWSDeploymentStack
+from deployments.aws import AWSDeploymentSystem
+from deployments.local import LocalDeploymentSystem
 from errors import Fail
 
 def parseCommandLine():
@@ -18,6 +19,12 @@ def parseCommandLine():
     
     parser.add_option("-l", "--local", action="store_true", dest="local", 
         default=False, help="Run all commands locally (defaults to AWS)")
+    
+    parser.add_option("-a", "--aws", action="store_false", dest="local", 
+        default=False, help="Run all commands locally on AWS")
+    
+    parser.add_option("-p", "--params", action="store", dest="params", 
+        default="", type="string", help="Params to pass when creating a new stack")
     
     (options, args) = parser.parse_args()
     
@@ -52,7 +59,7 @@ def main():
     }
     
     deploymentSystemClass = deployments[options.deployment]
-    deploymentSystem = deploymentSystemClass(deploymentSystemClass.__name__)
+    deploymentSystem = deploymentSystemClass(deploymentSystemClass.__name__, options)
     
     func = getattr(deploymentSystem, args[0], None)
     if func is None:

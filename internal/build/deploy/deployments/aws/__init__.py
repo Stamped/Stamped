@@ -11,8 +11,8 @@ from ADeployment import ADeploymentSystem, ADeploymentStack
 from errors import Fail
 
 class AWSDeploymentSystem(ADeploymentSystem):
-    def __init__(self, name):
-        ADeploymentSystem.__init__(self, name)
+    def __init__(self, name, options):
+        ADeploymentSystem.__init__(self, name, options)
         self._stacks = { }
         self.commonOptions = '--headers'
         self._init_env()
@@ -43,7 +43,7 @@ class AWSDeploymentSystem(ADeploymentSystem):
             stacks = output.split("\n")
             
             for stackName in stacks:
-                self._stacks[stackName] = AWSDeploymentStack(stackName, self.env, self.commonOptions)
+                self._stacks[stackName] = AWSDeploymentStack(stackName, self.options, self.env, self.commonOptions)
     
     def get_matching_stacks(self, stackNameRegex, unique=False):
         stacks = [ ]
@@ -62,7 +62,7 @@ class AWSDeploymentSystem(ADeploymentSystem):
             if stackName in self._stacks:
                 raise Fail("Error: cannot create duplicate AWS stack '%s'" % stackName)
             
-            stack = AWSDeploymentStack(stackName, self.env, self.commonOptions)
+            stack = AWSDeploymentStack(stackName, self.options, self.env, self.commonOptions)
             stack.create()
             
             self._stacks[stackName] = stack
@@ -121,8 +121,8 @@ class AWSDeploymentSystem(ADeploymentSystem):
             self.local('cfn-list-stacks %s' % (self.commonOptions, ))
 
 class AWSDeploymentStack(ADeploymentStack):
-    def __init__(self, name, env, commonOptions=""):
-        ADeploymentStack.__init__(self, name)
+    def __init__(self, name, options, env, commonOptions=""):
+        ADeploymentStack.__init__(self, name, options)
         self.env = env
         self.commonOptions = commonOptions
    
