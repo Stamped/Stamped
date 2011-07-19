@@ -9,7 +9,7 @@ import bson, copy, os, pymongo
 
 from ...Exceptions import Fail
 from ...AEntityDB import AEntityDB
-from ...Utils import getPythonConfigFile
+from ...Utils import getenv, getPythonConfigFile
 from threading import Lock
 from datetime import datetime
 
@@ -25,7 +25,7 @@ class Mongo():
         from subprocess import Popen
         Popen('env', shell=True).wait()
         
-        config_path = Utils.getenv('STAMPED_CONF_PATH')
+        config_path = getenv('STAMPED_CONF_PATH')
         self._config = getPythonConfigFile(config_path, True)
         
         self._mapping = mapping
