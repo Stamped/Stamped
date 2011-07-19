@@ -5,38 +5,56 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import pymongo
-import bson
-import copy
+import bson, copy, env, pymongo
 
-from api.AEntityDB import AEntityDB
+from ..Exceptions import Fail
+from ..AEntityDB import AEntityDB
 from threading import Lock
 from datetime import datetime
 
 class Mongo():
-    USER    = 'root'
-    PASS    = None
-    CONN    = 'ec2-50-19-194-148.compute-1.amazonaws.com'
-    PORT    = 27017
+    #USER    = 'root'
+    #PASS    = None
+    #HOST    = 'ec2-50-19-194-148.compute-1.amazonaws.com'
+    #PORT    = 27017
     DB      = 'stamped_test'
     DESC    = 'MongoDB:%s' % (DB)
     
-    def __init__(self, collection, mapping=None, setup=False, conn=CONN, port=PORT, db=DB):
-        self.user = self.USER
-        self._desc = self.DESC
-        self._lock = Lock()
+    def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
         self._mapping = mapping
-        self._conn = conn
-        self._port = port
-        self._db = db
-#         if setup:
-#             self._setup()
+        self.user = self._getenv_user()
+        self._desc = self.DESC
+        self._host = host or self._getenv_host()
+        self._port = port or self._getenv_port()
+        self._db = db or self.DB
+        self._lock = Lock()
+        
         self._connection = self._connect()
         self._database = self._getDatabase()
         self._collection = self._getCollection(collection)
     
+    def _getenv(self, var, default=None):
+        value = env.getenv(var):
+        
+        if value is None or value == "":
+            if default:
+                return default
+            else:
+                raise Fail("error: environment variable %s not set!" % var)
+        
+        return value
+    
+    def _getenv_host(self):
+        return self._getenv('STAMPED_MONGODB_HOST')
+    
+    def _getenv_port(self):
+        return self._getenv('STAMPED_MONGODB_PORT')
+    
+    def _getenv_user(self):
+        return self._getenv('STAMPED_MONGODB_USER', 'root')
+    
     def _connect(self):
-        return pymongo.Connection(self._conn, self._port)
+        return pymongo.Connection(self._host, self._port)
         
     def _getDatabase(self):
         return self._connection[self._db]

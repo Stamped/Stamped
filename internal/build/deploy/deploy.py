@@ -95,6 +95,8 @@ def main():
         except Exception:
             utils.log("Error: command '%s' on '%s' failed" % (command, deploymentSystem))
             raise
+    
+    deploymentSystem.shutdown()
 
 if __name__ == '__main__':
     main()

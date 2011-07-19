@@ -13,6 +13,9 @@ class ADeploymentSystem(object):
         self.name = name
         self.options = options
     
+    def shutdown(self):
+        pass
+    
     @abstractmethod
     def create_stack(self, *args):
         pass
@@ -73,8 +76,9 @@ class ADeploymentStack(object):
     def connect(self):
         pass
     
-    def local(self, cmd, env=None):
-        print "[%s-local] %s" % (self, cmd, )
+    def local(self, cmd, env=None, show_cmd=True):
+        if show_cmd:
+            print "[%s-local] %s" % (self, cmd, )
         
         if env is None:
             env = self.env

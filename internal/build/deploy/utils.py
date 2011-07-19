@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import os, sys, threading, traceback
+import os, pickle, sys, threading, traceback
 from subprocess import Popen, PIPE
 from functools import wraps
 
@@ -74,12 +74,15 @@ def getFuncName(offset=0):
     import inspect
     return inspect.stack()[1 + offset][3]
 
-def getPythonConfigFile(path):
+def getPythonConfigFile(path, pickled=False):
     if os.path.exists(path):
         with open(path, "rb") as fp:
             source = fp.read()
         
-        return eval(source)
+        if pickled:
+            return pickle.loads(source)
+        else:
+            return eval(source)
     else:
         return { }
 

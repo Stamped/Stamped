@@ -23,15 +23,24 @@ class LocalDeploymentSystem(ADeploymentSystem):
         
         user = getpass.getuser()
         self._config_path_dir = os.path.join(os.getenv("HOME"), ".stamped")
-        self._config_path = os.path.join(self._config_path_dir, "local.stacks.config.py")
+        self._config_path = os.path.join(self._config_path_dir, "local_stacks_config.py")
         
         if not os.path.exists(self._config_path_dir):
             os.system('mkdir -p %s' % self._config_path_dir)
         
-        config = utils.getPythonConfigFile(self._config_path)
+        config = utils.getPythonConfigFile(self._config_path, pickled=True)
         for (stackName, params) in config.iteritems():
             #env = copy.deepcopy(self.env)
-            self._stacks.append(LocalDeploymentStack(stackName, params, env))
+            self._stacks[stackName] = LocalDeploymentStack(stackName, params, env)
+    
+    def shutdown(self):
+        self.saveConfigFile()
+        ADeploymentSystem.shutdown(self)
+    
+    def saveConfigFile(self):
+        f = open(self._config_path, "w")
+        f.write(pickle.dumps(self._stacks))
+        f.close()
     
     def get_matching_stacks(self, stackNameRegex, unique=False):
         stacks = [ ]
@@ -52,7 +61,8 @@ class LocalDeploymentSystem(ADeploymentSystem):
         
         for stackName in args:
             if stackName in self._stacks:
-                raise Fail("Error: cannot create duplicate Local stack '%s'" % stackName)
+                utils.log("Warning: deleting duplicate Local stack '%s' before create can occur" % stackName)
+                self.delete_stack(stackName)
             
             stack = LocalDeploymentStack(stackName, self.options, self.env)
             stack.create()
@@ -116,18 +126,67 @@ class LocalDeploymentStack(ADeploymentStack):
         self.env = env
         self.root = "/stamped"
         self.path = os.path.join(self.root, self.name)
-        self.instances = [
-            {
-                'name' : 'dev0', 
-                'roles' : [ 'web_server', ], 
-                'port_base' : '70217', 
-            }, 
+        
+        self.replSetName = 'stamped-dev-01'
+        
+        dbs = [
             {
                 'name' : 'db0', 
                 'roles' : [ 'db', ], 
-                'mongodb' : { }, 
+                'mongodb' : {
+                    'replSet' : self.replSetName, 
+                    'port' : 30000, 
+                }, 
+            }, 
+            {
+                'name' : 'db1', 
+                'roles' : [ 'db', ], 
+                'mongodb' : {
+                    'replSet' : self.replSetName, 
+                    'port' : 32000, 
+                }, 
+            }, 
+            {
+                'name' : 'db2', 
+                'roles' : [ 'db', ], 
+                'mongodb' : {
+                    'replSet' : self.replSetName, 
+                    'port' : 34000, 
+                }, 
             }, 
         ]
+        
+        servers = [
+            {
+                'name' : 'dev0', 
+                'roles' : [ 'web_server', 'replSetInit', ], 
+                'port_base' : '70217', 
+                
+                'replSet' : {
+                    '_id' : self.replSetName, 
+                    'members' : [ ], 
+                }, 
+            }, 
+        ]
+        
+        self.instances = [ ]
+        for instance in dbs:
+            self.instances.append(instance)
+        
+        for instance in servers:
+            if 'replSet' in instance:
+                assert 'replSetInit' in instance['roles']
+                members = instance['replSet']['members']
+                
+                for index in xrange(len(dbs)):
+                    db = dbs[index]
+                    
+                    members.append({
+                        '_id'  : index, 
+                        'host' : 'localhost:%s' % db['mongodb']['port'], 
+                    })
+            
+            self.instances.append(instance)
    
     def create(self):
         self.delete()
@@ -145,11 +204,23 @@ class LocalDeploymentStack(ADeploymentStack):
             params_str = pickle.dumps(instance)
             
             self.local('git clone git@github.com:Stamped/stamped-bootstrap.git %s' % instance_bootstrap_path)
-            self.local('python %s "%s"' % (instance_bootstrap_init_path, params_str))
+            self.local('python %s "%s"' % (instance_bootstrap_init_path, params_str), show_cmd=False)
     
     def delete(self):
         if os.path.exists(self.path):
             utils.log("deleting stack '%s' at '%s'" % (self.name, self.path))
+            
+            # delete all instances
+            for instance in self.instances:
+                name = instance['name']
+                instance_path = os.path.join(self.path, name)
+                instance_bootstrap_path = os.path.join(instance_path, 'bootstrap')
+                instance_bootstrap_delete_path = os.path.join(instance_bootstrap_path, 'destroy.py')
+                
+                if os.path.exists(instance_bootstrap_delete_path):
+                    params_str = pickle.dumps(instance)
+                    self.local('python %s "%s"' % (instance_bootstrap_delete_path, params_str), show_cmd=False)
+            
             self.local('rm -rf %s' % self.path)
             assert not os.path.exists(self.path)
     
