@@ -22,15 +22,13 @@ class MongoUser(AUserDB, Mongo):
         'last_name': basestring,
         'screen_name': basestring,
         'display_name': basestring,
-        'image': basestring,
+        'profile_image': basestring,
+        'color_primary': basestring,
+        'color_secondary': basestring,
         'bio': basestring,
         'website': basestring,
-        'color': {
-            'primary': list,
-            'secondary': list
-        },
+        'privacy': bool,
         'flags': {
-            'privacy': bool,
             'flagged': bool,
             'locked': bool
         },
@@ -57,9 +55,6 @@ class MongoUser(AUserDB, Mongo):
         
         
     ### PUBLIC
-    
-#     def addUser(self, user):
-#         return self._addDocument(user)
     
     def getUser(self, userId):
         user = User(self._getDocumentFromId(userId, 'user_id'))
@@ -102,7 +97,7 @@ class MongoUser(AUserDB, Mongo):
         print 'TODO'
         
     def checkPrivacy(self, userId):
-        privacy = self._collection.find_one({"_id": self._getObjectIdFromString(userId)}, fields={"flags": 1})['flags']['privacy']
+        privacy = self._collection.find_one({"_id": self._getObjectIdFromString(userId)}, fields={"privacy": 1})['privacy']
         return privacy
             
     

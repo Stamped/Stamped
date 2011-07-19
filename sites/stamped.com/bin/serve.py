@@ -37,7 +37,7 @@ def transformOutput(request, d):
     output_json = json.dumps(d, sort_keys=True, indent=None if request.is_xhr else 2, default=encodeType)
     output = Response(output_json, mimetype='application/json')
     
-    print 'Output: ', output
+    print 'Output: ', output_json
     return output
 
 def parseRequestForm(schema, form):
@@ -126,7 +126,7 @@ def updateProfile():
 def updateProfileImage():
     schema = ResourceArgumentSchema([
         ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
-        ("image",                 ResourceArgument(required=True, expectedType=basestring))
+        ("profile_image",         ResourceArgument(required=True, expectedType=basestring))
     ])
     return handlePOSTRequest(request, stampedAPI.updateProfileImage, schema)
 
@@ -394,30 +394,27 @@ def removeStamp():
 # Comments #
 # ######## #
 
-@app.route(REST_API_PREFIX + 'addComment', methods=['POST'])
+@app.route(REST_API_PREFIX + 'comments/create.json', methods=['POST'])
 def addComment():
-    # TODO: the arguments here need work
     schema = ResourceArgumentSchema([
-        ("stamp_id",        ResourceArgument(required=True, expectedType=basestring)), 
-        ("user_id",         ResourceArgument(required=True, expectedType=basestring)), 
-        ("blurb",           ResourceArgument(required=True, expectedType=basestring)), 
-        ("mentions",        ResourceArgument(expectedType=basestring))
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("stamp_id",              ResourceArgument(required=True, expectedType=basestring)), 
+        ("blurb",                 ResourceArgument(required=True, expectedType=basestring)), 
+        ("mentions",              ResourceArgument(expectedType=basestring))
     ])
-    
     return handlePOSTRequest(request, stampedAPI.addComment, schema)
 
-@app.route(REST_API_PREFIX + 'removeComment', methods=['POST'])
+@app.route(REST_API_PREFIX + 'comments/remove.json', methods=['POST'])
 def removeComment():
-    # TODO: the arguments here need work
     schema = ResourceArgumentSchema([
-        ("comment_id",      ResourceArgument(required=True, expectedType=basestring))
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("comment_id",            ResourceArgument(required=True, expectedType=basestring))
     ])
-    
     return handlePOSTRequest(request, stampedAPI.removeComment, schema)
 
-@app.route(REST_API_PREFIX + 'getComments', methods=['GET'])
+@app.route(REST_API_PREFIX + 'comments/show.json', methods=['GET'])
 def getComments():
-    return handleGETRequest(request, stampedAPI.getComments, [ 'stamp_id' ])
+    return handleGETRequest(request, stampedAPI.getComments, [ 'stamp_id', 'authenticated_user_id' ])
 
 # ########### #
 # Collections #

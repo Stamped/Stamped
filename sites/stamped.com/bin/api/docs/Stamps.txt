@@ -68,7 +68,6 @@ User information for any users that are named as receiving credit in the stamp. 
 	}
 
 
-
 ------------------------------------------------------------------------------
 ## POST stamps/update ##
 
@@ -156,6 +155,7 @@ The unique id of the stamp.
 
 ### Sample Result ###
 	true
+
 
 ------------------------------------------------------------------------------
 ## GET stamps/show ##

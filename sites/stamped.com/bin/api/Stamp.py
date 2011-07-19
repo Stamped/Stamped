@@ -24,12 +24,12 @@ class Stamp(AObject):
         },
         'user': {
             'user_id': basestring,
-            'user_display_name': basestring,
-            'user_image': basestring,
-            'user_color': {
-                'primary': list,
-                'secondary': list
-            }
+            'screen_name': basestring,
+            'display_name': basestring,
+            'profile_image': basestring,
+            'color_primary': basestring,
+            'color_secondary': basestring,
+            'privacy': bool
         },
         'blurb': basestring,
         'image': basestring,
@@ -40,7 +40,6 @@ class Stamp(AObject):
             'modified': datetime
         },
         'flags': {
-            'privacy': bool,
             'flagged': bool,
             'locked': bool
         },
@@ -75,10 +74,13 @@ class Stamp(AObject):
         
         valid &= 'user' in self and isinstance(self.user, dict)
         valid &= 'user_id' in self.user and isinstance(self.user['user_id'], basestring)
-        valid &= 'user_display_name' in self.user and isinstance(self.user['user_display_name'], basestring)
-        valid &= 'user_image' in self.user and isinstance(self.user['user_image'], basestring)
-        valid &= 'user_color' in self.user and isinstance(self.user['user_color'], dict)
-        valid &= 'primary' in self.user['user_color'] and isinstance(self.user['user_color']['primary'], list)
+        valid &= 'screen_name' in self.user and isinstance(self.user['screen_name'], basestring)
+        valid &= 'display_name' in self.user and isinstance(self.user['display_name'], basestring)
+        valid &= 'profile_image' in self.user and isinstance(self.user['profile_image'], basestring)
+        valid &= 'color_primary' in self.user and isinstance(self.user['color_primary'], basestring)
+        if 'color_secondary' in self.user:
+            valid &= isinstance(self.user['color_secondary'], basestring)
+        valid &= 'privacy' in self.user and isinstance(self.user['privacy'], bool)
         
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
         valid &= 'created' in self.timestamp and isinstance(self.timestamp['created'], datetime)
@@ -92,12 +94,12 @@ class Stamp(AObject):
         if 'credit' in self:
             valid &= isinstance(self.credit, list)
         
-        valid &= 'flags' in self and isinstance(self.flags, dict)
-        valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
-        if 'flagged' in self.flags:
-            valid &= isinstance(self.flags['flagged'], bool)
-        if 'locked' in self.flags:
-            valid &= isinstance(self.flags['locked'], bool)
+        if 'flags' in self:
+            valid &= isinstance(self.flags, dict)
+            if 'flagged' in self.flags:
+                valid &= isinstance(self.flags['flagged'], bool)
+            if 'locked' in self.flags:
+                valid &= isinstance(self.flags['locked'], bool)
         
         if 'stats' in self:
             valid &= isinstance(self.stats, dict) 

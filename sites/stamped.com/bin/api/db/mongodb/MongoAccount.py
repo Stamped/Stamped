@@ -20,17 +20,16 @@ class MongoAccount(AAccountDB, Mongo):
         '_id': object,
         'first_name': basestring,
         'last_name': basestring,
-        'screen_name': basestring,
-        'display_name': basestring,
         'email': basestring,
         'password': basestring,
-        'image': basestring,
+        'screen_name': basestring,
+        'display_name': basestring,
+        'profile_image': basestring,
+        'color_primary': basestring,
+        'color_secondary': basestring,
         'bio': basestring,
         'website': basestring,
-        'color': {
-            'primary': list,
-            'secondary': list
-        },
+        'privacy': bool,
         'locale': {
             'language': basestring,
             'time_zone': basestring
@@ -42,7 +41,6 @@ class MongoAccount(AAccountDB, Mongo):
             'ios_device_tokens': list
         },
         'flags': {
-            'privacy': bool,
             'flagged': bool,
             'locked': bool
         },

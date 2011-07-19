@@ -33,12 +33,12 @@ class MongoStamp(AStampDB, Mongo):
         },
         'user': {
             'user_id': basestring,
-            'user_display_name': basestring,
-            'user_image': basestring,
-            'user_color': {
-                'primary': list,
-                'secondary': list
-            }
+            'screen_name': basestring,
+            'display_name': basestring,
+            'profile_image': basestring,
+            'color_primary': basestring,
+            'color_secondary': basestring,
+            'privacy': bool
         },
         'blurb': basestring,
         'image': basestring,
@@ -49,7 +49,6 @@ class MongoStamp(AStampDB, Mongo):
             'modified': datetime
         },
         'flags': {
-            'privacy': bool,
             'flagged': bool,
             'locked': bool
         },
@@ -101,7 +100,7 @@ class MongoStamp(AStampDB, Mongo):
             MongoInboxStamps().addInboxStamps(followerIds, stamp['id'])
     
     def getStamps(self, stampIds, output='object'):
-        stamps = self._getDocumentsFromIds(stampIds)
+        stamps = self._getDocumentsFromIds(stampIds, 'stamp_id')
         result = []
         for stamp in stamps:
             stamp = Stamp(stamp)

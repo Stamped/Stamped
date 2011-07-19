@@ -22,15 +22,19 @@ class MongoComment(ACommentDB, Mongo):
         'stamp_id': basestring,
         'user': {
             'user_id': basestring,
-            'user_name': basestring,
-            'user_img': basestring,
-            'user_primary_color': basestring,
-            'user_secondary_color': basestring
+            'screen_name': basestring,
+            'display_name': basestring,
+            'profile_image': basestring,
+            'color_primary': basestring,
+            'color_secondary': basestring,
+            'privacy': bool
         },
         'restamp_id': basestring,
         'blurb': basestring,
         'mentions': [],
-        'timestamp': basestring
+        'timestamp': {
+            'created': datetime
+        }
     }
     
     def __init__(self, setup=False):
@@ -45,13 +49,13 @@ class MongoComment(ACommentDB, Mongo):
     
     def addComment(self, comment):
         ### TODO: Make sure that the user can publish comment (public stamp and not blocked)
-        commentId = self._addDocument(comment)
+        commentId = self._addDocument(comment, 'comment_id')
         MongoStampComments().addStampComment(comment['stamp_id'], commentId)
         ### TODO: Add to activity feed
         return commentId
     
     def getComment(self, commentId):
-        comment = Comment(self._getDocumentFromId(commentId))
+        comment = Comment(self._getDocumentFromId(commentId, 'comment_id'))
         if comment.isValid == False:
             raise KeyError("Comment not valid")
         return comment
@@ -67,7 +71,7 @@ class MongoComment(ACommentDB, Mongo):
         return MongoStampComments().getStampCommentIds(stampId)
     
     def getComments(self, stampId):
-        comments = self._getDocumentsFromIds(self.getCommentIds(stampId))
+        comments = self._getDocumentsFromIds(self.getCommentIds(stampId), 'comment_id')
         result = []
         for comment in comments:
             comment = Comment(comment)

@@ -73,7 +73,7 @@ def betaAccountData(baseurl):
     data = {
         "authenticated_user_id": kevin,
         "bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
-        "color": "51-182-218,0-108-137"
+        "color": "33B6DA,006C89"
     }
     result = testPOST(baseurl, path, data)
     if result['user_id'] == kevin:
@@ -118,7 +118,7 @@ def betaAccountData(baseurl):
     data = {
         "authenticated_user_id": robby,
         "bio": "Starting something new in NYC. Former Google product manager.",
-        "color": "22-115-255,146-197-22"
+        "color": "1673FF,92C516"
     }
     result = testPOST(baseurl, path, data)
     if result['user_id'] == robby:
@@ -163,7 +163,7 @@ def betaAccountData(baseurl):
     data = {
         "authenticated_user_id": bart,
         "bio": "Co-Founder of a new startup in NYC. Formerly at Google Creative Lab.",
-        "color": "85-151-170,0-47-73"
+        "color": "5597AA,002F49"
     }
     result = testPOST(baseurl, path, data)
     if result['user_id'] == bart:
@@ -209,7 +209,7 @@ def betaAccountData(baseurl):
         "authenticated_user_id": ed,
         "bio": "Product Designer at new NYC start-up. Formerly at Google and Apple.",
         "website": "http://weartoday.tumblr.com",
-        "color": "225-0-25,255-91-91"
+        "color": "E10019,FF5B5B"
     }
     result = testPOST(baseurl, path, data)
     if result['user_id'] == ed:
@@ -255,7 +255,7 @@ def betaAccountData(baseurl):
         "authenticated_user_id": jake,
         "bio": "Designer and programmer with a particular focus on building awesome interfaces. Working at a startup that, with any luck, you'll hear about later this year.",
         "website": "http://www.jakezien.com",
-        "color": "204-41-41,93-217-209"
+        "color": "CC2929,5DD9D1"
     }
     result = testPOST(baseurl, path, data)
     if result['user_id'] == jake:
@@ -300,7 +300,7 @@ def betaAccountData(baseurl):
     data = {
         "authenticated_user_id": travis,
         "bio": "Lead engineer at NYC Startup; formerly worked at Microsoft and Pixar.",
-        "color": "255-96-0,255-186-0"
+        "color": "FF6000"
     }
     result = testPOST(baseurl, path, data)
     if result['user_id'] == travis:
@@ -346,7 +346,7 @@ def betaAccountData(baseurl):
         "authenticated_user_id": bons,
         "bio": "Head of mobile awesomeness at NYC startup. Formerly at the Google. Went to Tufts. It was not my safety school.",
         "website": "http://about.me/andybons",
-        "color": "20-168-0,93-217-96"
+        "color": "14A800,5DD960"
     }
     result = testPOST(baseurl, path, data)
     if result['user_id'] == bons:
@@ -572,7 +572,7 @@ def betaAccountData(baseurl):
     
     path = "stamps/create.json"
     data = {
-        "authenticated_user_id": ed,
+        "authenticated_user_id": jake,
         "entity_id": entityID,
         "blurb": "Suffocatingly intense, but one of the best Films of the year."
     }
@@ -601,7 +601,7 @@ def betaAccountData(baseurl):
     
     path = "stamps/create.json"
     data = {
-        "authenticated_user_id": ed,
+        "authenticated_user_id": travis,
         "entity_id": entityID,
         "blurb": "Softer electronica with a perfect blend of harder beats mixed in."
     }

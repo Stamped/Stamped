@@ -85,14 +85,9 @@ class StampedAPI(AStampedAPI):
             'time_zone': None
         }
         
-        account.color = { 
-            'primary': [0,0,0]
-        }
-           
-        account.flags = { 
-            'privacy': True
-        }
-        account.image = None
+        account.color_primary = None
+        account.profile_image = None   
+        account.privacy = True
         
         if account.isValid == False:
             raise InvalidArgument('Invalid input')
@@ -116,7 +111,7 @@ class StampedAPI(AStampedAPI):
         if params.screen_name != None:
             account.screen_name = params.screen_name
         if params.privacy != None:
-            account.flags['privacy'] = params.privacy
+            account.privacy = params.privacy
             
         if params.language != None:
             account.locale['language'] = params.language
@@ -132,7 +127,7 @@ class StampedAPI(AStampedAPI):
         result['last_name'] = account.last_name
         result['email'] = account.email
         result['screen_name'] = account.screen_name
-        result['privacy'] = account.flags['privacy']
+        result['privacy'] = account.privacy
         result['locale'] = {}
         if 'language' in account.locale:
             result['locale']['language'] = account.locale['language']
@@ -152,7 +147,7 @@ class StampedAPI(AStampedAPI):
         result['last_name'] = account.last_name
         result['email'] = account.email
         result['screen_name'] = account.screen_name
-        result['privacy'] = account.flags['privacy']
+        result['privacy'] = account.privacy
         result['locale'] = {}
         if 'language' in account.locale:
             result['locale']['language'] = account.locale['language']
@@ -177,9 +172,9 @@ class StampedAPI(AStampedAPI):
             account.website = params.website
         if params.color != None:
             color = params.color.split(',')
-            account.color['primary'] = color[0].split('-')
+            account.color_primary = color[0]
             if len(color) == 2:
-                account.color['secondary'] = color[1].split('-')
+                account.color_secondary = color[1]
         
         if not account.isValid:
             raise InvalidArgument('Invalid input')
@@ -197,11 +192,11 @@ class StampedAPI(AStampedAPI):
             result['website'] = account.website
         else:
             result['website'] = None
-        result['color'] = { 
-            'primary': account.color['primary']
-        }
-        if 'secondary' in account.color:
-            result['color']['secondary'] = account.color['secondary']
+        result['color_primary'] = account.color_primary
+        if 'color_secondary' in account:
+            result['color_secondary'] = account.color_secondary
+        else:
+            result['color_secondary'] = None
         return result
         
     def updateProfileImage(self, params):
@@ -242,6 +237,8 @@ class StampedAPI(AStampedAPI):
         result['last_name'] = user.last_name
         result['screen_name'] = user.screen_name
         result['display_name'] = user.display_name
+        result['profile_image'] = user.profile_image
+        
         if 'bio' in user:
             result['bio'] = user.bio
         else:
@@ -250,11 +247,15 @@ class StampedAPI(AStampedAPI):
             result['website'] = user['website']
         else:
             result['website'] = None
-        result['color'] = { 
-            'primary': user.color['primary']
-        }
-        if 'secondary' in user.color:
-            result['color']['secondary'] = user.color['secondary']
+        
+        result['color_primary'] = user.color_primary
+        if 'color_secondary' in user:
+            result['color_secondary'] = user.color_secondary
+        else:
+            result['color_secondary'] = None
+        
+        result['privacy'] = user.privacy
+            
         ### TODO: Pull in recent stamps
         result['recent_stamps'] = None
         
@@ -273,7 +274,7 @@ class StampedAPI(AStampedAPI):
             users = self._userDB.lookupUsers(None, screenNames)
         else:
             return 'error', 400
-            
+        
         result = []
         for user in users:
             data = {}
@@ -283,6 +284,7 @@ class StampedAPI(AStampedAPI):
             data['last_name'] = user.last_name
             data['screen_name'] = user.screen_name
             data['display_name'] = user.display_name
+            data['profile_image'] = user.profile_image
             if 'bio' in user:
                 data['bio'] = user.bio
             else:
@@ -291,11 +293,12 @@ class StampedAPI(AStampedAPI):
                 data['website'] = user.flags['website']
             else:
                 data['website'] = None
-            data['color'] = { 
-                'primary': user.color['primary']
-            }
-            if 'secondary' in user.color:
-                data['color']['secondary'] = user.color['secondary']
+            data['color_primary'] = user.color_primary
+            if 'color_secondary' in user:
+                data['color_secondary'] = user.color_secondary
+            else:
+                data['color_secondary'] = None
+            data['privacy'] = user.privacy
             ### TODO: Pull in recent stamps
             data['last_stamp'] = None
             result.append(data)
@@ -317,6 +320,7 @@ class StampedAPI(AStampedAPI):
             data['last_name'] = user.last_name
             data['screen_name'] = user.screen_name
             data['display_name'] = user.display_name
+            data['profile_image'] = user.profile_image
             if 'bio' in user:
                 data['bio'] = user.bio
             else:
@@ -325,11 +329,12 @@ class StampedAPI(AStampedAPI):
                 data['website'] = user.flags['website']
             else:
                 data['website'] = None
-            data['color'] = { 
-                'primary': user.color['primary']
-            }
-            if 'secondary' in user.color:
-                data['color']['secondary'] = user.color['secondary']
+            data['color_primary'] = user.color_primary
+            if 'color_secondary' in user:
+                data['color_secondary'] = user.color_secondary
+            else:
+                data['color_secondary'] = None
+            data['privacy'] = user.privacy
             ### TODO: Pull in recent stamps
             data['last_stamp'] = None
             result.append(data)
@@ -697,15 +702,13 @@ class StampedAPI(AStampedAPI):
         user = self._userDB.getUser(params.authenticated_user_id)
         stamp.user = {}
         stamp.user['user_id'] = user.user_id
-        stamp.user['user_display_name'] = user.display_name
-        stamp.user['user_image'] = user.image
-        stamp.user['user_color'] = {
-            'primary': user.color['primary']
-        }
-        if 'secondary' in user.color:
-            stamp.user['user_color']['secondary'] = user.color['secondary']
-        stamp.flags = {}
-        stamp.flags['privacy'] = user.flags['privacy']
+        stamp.user['screen_name'] = user.screen_name
+        stamp.user['display_name'] = user.display_name
+        stamp.user['profile_image'] = user.profile_image
+        stamp.user['color_primary'] = user.color_primary
+        if 'color_secondary' in user:
+            stamp.user['color_secondary'] = user.color_secondary
+        stamp.user['privacy'] = user.privacy
         
         entity = self._entityDB.getEntity(params.entity_id)
         stamp.entity = {}
@@ -744,7 +747,6 @@ class StampedAPI(AStampedAPI):
         result['stamp_id'] = self._stampDB.addStamp(stamp)
         result['entity'] = stamp['entity']
         result['user'] = stamp['user']
-        result['flags'] = stamp['flags']
         
         if 'image' in stamp:
             result['image'] = stamp.image
@@ -800,7 +802,6 @@ class StampedAPI(AStampedAPI):
         result['stamp_id'] = self._stampDB.updateStamp(stamp)
         result['entity'] = stamp['entity']
         result['user'] = stamp['user']
-        result['flags'] = stamp['flags']
         
         if 'image' in stamp:
             result['image'] = stamp.image
@@ -838,7 +839,6 @@ class StampedAPI(AStampedAPI):
         result['stamp_id'] = stamp.stamp_id
         result['entity'] = stamp['entity']
         result['user'] = stamp['user']
-        result['flags'] = stamp['flags']
         
         if 'image' in stamp:
             result['image'] = stamp.image
@@ -878,17 +878,19 @@ class StampedAPI(AStampedAPI):
     def addComment(self, params):
         comment = Comment()
         
-        user = self._userDB.getUser(params.user_id)
+        user = self._userDB.getUser(params.authenticated_user_id)
         comment.user = {}
-        comment.user['user_id'] = user.id
-        comment.user['user_name'] = user.first_name
-        comment.user['user_img'] = user.img
-        comment.user['user_primary_color'] = user.color['primary_color']
-        if 'secondary_color' in user.color:
-            comment.user['user_secondary_color'] = user.color['secondary_color']
+        comment.user['user_id'] = user.user_id
+        comment.user['user_display_name'] = user.display_name
+        comment.user['user_image'] = user.image
+        comment.user['user_color'] = {
+            'primary': user.color['primary']
+        }
+        if 'secondary' in user.color:
+            comment.user['user_color']['secondary'] = user.color['secondary']
         
-        if params.stamp_id != None:
-            comment.stamp_id = params.stamp_id
+        comment.stamp_id = params.stamp_id
+        
         if params.blurb != None:
             comment.blurb = params.blurb
         if params.mentions != None:
@@ -896,22 +898,76 @@ class StampedAPI(AStampedAPI):
             for userID in params.mentions.split(','):
                 comment.mentions.append(userID)
                 
-        comment.timestamp = datetime.utcnow()
-
+        comment.timestamp = {
+            'created': datetime.utcnow()
+        }
+        
         if not comment.isValid:
             raise InvalidArgument('Invalid input')
         
         result = {}
-        result['id'] = self._commentDB.addComment(comment)
+        result['comment_id'] = self._commentDB.addComment(comment)
+        result['stamp_id'] = comment['stamp_id']
+        result['user'] = comment['user']
+        result['blurb'] = comment['blurb']
+        
+        if 'mentions' in comment:
+            result['mentions'] = comment.mentions
+        else:
+            result['mentions'] = None
+        
+        if 'restamp_id' in comment:
+            result['restamp_id'] = comment.restamp_id
+        else:
+            result['restamp_id'] = None
+            
+        result['timestamp'] = {}
+        if 'created' in comment.timestamp:
+            result['timestamp']['created'] = str(comment.timestamp['created'])
+        
         return result
     
     def removeComment(self, params):
-        self._commentDB.removeComment(params.comment_id)
-        ### CLARIFY: What do we want to return?
-        return {'id': params.comment_id}
+        if self._commentDB.removeComment(params.comment_id):
+            return True
+        else:
+            return False
     
-    def getComments(self, stampID):
-        return self._commentDB.getComments(stampID)
+    def getComments(self, stampID, userID=None):
+#         return self._commentDB.getComments(stampID)
+        
+        comments = self._commentDB.getComments(stampID)
+            
+        result = []
+        for comment in comments:
+            data = {}
+            
+            data['comment_id'] = comment.comment_id
+            data['stamp_id'] = comment.stamp_id
+            data['user'] = comment.user
+            data['blurb'] = comment.blurb
+            
+            if 'mentions' in comment:
+                data['mentions'] = comment.mentions
+            else:
+                data['mentions'] = None
+            
+            if 'restamp_id' in comment:
+                data['restamp_id'] = comment.restamp_id
+            else:
+                data['restamp_id'] = None
+                
+            data['timestamp'] = {}
+            if 'created' in comment.timestamp:
+                data['timestamp']['created'] = str(comment.timestamp['created'])
+            
+            result.append(data)
+        
+        return result
+        
+        
+        
+        
     
     # ########### #
     # Collections #
@@ -933,7 +989,9 @@ class StampedAPI(AStampedAPI):
             data['stamp_id'] = stamp.stamp_id
             data['entity'] = stamp['entity']
             data['user'] = stamp['user']
-            data['flags'] = stamp['flags']
+            
+            if 'flags' in stamp:
+                data['flags'] = stamp['flags']
             
             if 'image' in stamp:
                 data['image'] = stamp.image
@@ -970,7 +1028,9 @@ class StampedAPI(AStampedAPI):
             data['stamp_id'] = stamp.stamp_id
             data['entity'] = stamp['entity']
             data['user'] = stamp['user']
-            data['flags'] = stamp['flags']
+            
+            if 'flags' in stamp:
+                data['flags'] = stamp['flags']
             
             if 'image' in stamp:
                 data['image'] = stamp.image

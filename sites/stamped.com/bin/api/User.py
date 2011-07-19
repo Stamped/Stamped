@@ -16,15 +16,13 @@ class User(AObject):
         'last_name': basestring,
         'screen_name': basestring,
         'display_name': basestring,
-        'image': basestring,
+        'profile_image': basestring,
+        'color_primary': basestring,
+        'color_secondary': basestring,
         'bio': basestring,
         'website': basestring,
-        'color': {
-            'primary': list,
-            'secondary': list
-        },
+        'privacy': bool,
         'flags': {
-            'privacy': bool,
             'flagged': bool,
             'locked': bool
         },
@@ -57,26 +55,26 @@ class User(AObject):
         valid &= 'screen_name' in self and isinstance(self.screen_name, basestring)
         valid &= 'display_name' in self and isinstance(self.display_name, basestring)
         
-        valid &= 'color' in self and isinstance(self.color, dict)
-        valid &= 'primary' in self.color and isinstance(self.color['primary'], list) and len(self.color['primary']) == 3
+        if 'profile_image' in self and self.profile_image is not None:
+            valid &= isinstance(self.profile_image, basestring)
         
-        valid &= 'flags' in self and isinstance(self.flags, dict)
-        valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
+        valid &= 'color_primary' in self and isinstance(self.color_primary, basestring)
+        if 'color_secondary' in self and self.color_secondary is not None:
+            valid &= isinstance(self.color_secondary, basestring)
         
-        if 'image' in self and self.image is not None:
-            valid &= isinstance(self.image, basestring)
-        if 'website' in self and self.website is not None:
-            valid &= isinstance(self.website, basestring)
         if 'bio' in self and self.bio is not None:
             valid &= isinstance(self.bio, basestring)
+        if 'website' in self and self.website is not None:
+            valid &= isinstance(self.website, basestring)
         
-        if 'secondary' in self.color and self.color['secondary'] is not None:
-            valid &= isinstance(self.color['secondary'], list) and len(self.color['secondary']) == 3
+        valid &= 'privacy' in self and isinstance(self.privacy, bool)
         
-        if 'flagged' in self.flags:
-            valid &= isinstance(self.flags['flagged'], bool)
-        if 'locked' in self.flags:
-            valid &= isinstance(self.flags['locked'], bool)
+        if 'flags' in self:
+            valid &= isinstance(self.flags, dict)
+            if 'flagged' in self.flags:
+                valid &= isinstance(self.flags['flagged'], bool)
+            if 'locked' in self.flags:
+                valid &= isinstance(self.flags['locked'], bool)
             
         if 'stats' in self:
             valid &= isinstance(self.stats, dict) 

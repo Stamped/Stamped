@@ -1,0 +1,127 @@
+
+# COMMENTS #
+
+
+------------------------------------------------------------------------------
+## POST comments/create ##
+
+### Description ###
+Add a comment to a specified stamp. The authenticated user must have permission to view and comment on the stamp.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**stamp_id** _required_
+The id of the stamp commented on.
+
+**blurb** _required_
+A brief text field containing the comment. This is currently limited to 512 characters.
+
+**mentions** _optional_
+User information for any users that are mentioned in the comment. Any users mentioned must also be referenced in the text of the blurb in the format "@screen_name". Multiple screen names must be separated by commas.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/comments/create.json
+	authenticated_user_id=4e259ca532a7ba6cd7000008&stamp_id=4e259ca532a7ba6cd700000a&blurb=That+looks+awesome.
+
+### Sample Result ###
+	{
+		"blurb": "That looks awesome.", 
+		"comment_id": "4e259ca532a7ba6cd700000b", 
+		"mentions": null, 
+		"restamp_id": null, 
+		"stamp_id": "4e259ca532a7ba6cd700000a", 
+		"timestamp": {
+			"created": "2011-07-19 15:03:01.843073"
+		}, 
+		"user": {
+			"user_color": {
+				"primary": [
+				    0, 
+				    0, 
+				    0
+				]
+			}, 
+			"user_display_name": "Kevin P.", 
+			"user_id": "4e259ca532a7ba6cd7000008", 
+			"user_image": "None"
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## GET comments/show ##
+
+### Description ###
+Return comments for a given stamp. This includes any restamps that have occurred on the stamp.
+
+### Details ###
+* No Authentication
+
+### Parameters ###
+
+**stamp_id** _required_
+The id of the stamp commented on.
+
+**authenticated_user_id** _optional_
+The user id of the authenticating user. This is necessary only if the stamp is private.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/comments/show.json
+	authenticated_user_id=4e259ca532a7ba6cd7000008&stamp_id=4e259ca532a7ba6cd700000a
+
+### Sample Result ###
+	{
+		"blurb": "That looks awesome.", 
+		"comment_id": "4e259ca532a7ba6cd700000b", 
+		"mentions": null, 
+		"restamp_id": null, 
+		"stamp_id": "4e259ca532a7ba6cd700000a", 
+		"timestamp": {
+			"created": "2011-07-19 15:03:01.843073"
+		}, 
+		"user": {
+			"user_color": {
+				"primary": [
+				    0, 
+				    0, 
+				    0
+				]
+			}, 
+			"user_display_name": "Kevin P.", 
+			"user_id": "4e259ca532a7ba6cd7000008", 
+			"user_image": "None"
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## POST comments/remove ##
+
+### Description ###
+Remove a comment owned by the authenticating user.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user. This user must be the owner of the stamp or the owner of the comment.
+
+**comment_id** _required_
+The unique id of the stamp.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/comments/remove.json
+	authenticated_user_id=4e259ca532a7ba6cd7000008&comment_id=4e259ca532a7ba6cd700000b
+
+### Sample Result ###
+	true
+
+

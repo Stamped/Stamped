@@ -30,13 +30,15 @@ The user id of the authenticating user. This is necessary if the requested accou
 		"last_name": "Palms",
 		"screen_name": "kevin",
 		"display_name": "Kevin P.",
+		"profile_image": "http://www.stampedimgs.com/profile_images/47cc67093475061e3d95369d/001_normal.jpg",
 		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 		"website": null,
 		"color": {
 			"primary": [91, 172, 253],
 			"secondary": [95, 167, 56]
 		},
-	    "recent_stamps": [
+		privacy: false,
+	    "last_stamp": {
 			"blurb": "Really, the best ever.", 
 			"entity": {
 			    "category": "Restaurant", 
@@ -54,7 +56,7 @@ The user id of the authenticating user. This is necessary if the requested accou
 				"4e226fcd4e61754161000008"
 			], 
 			"timestamp": "2011-07-17 05:14:54.128641"
-	    ]
+	    }
 	}
 
 
@@ -87,12 +89,12 @@ The user id of the authenticating user. This is necessary if any of the requeste
 			"last_name": "Palms",
 			"screen_name": "kevin",
 			"display_name": "Kevin P.",
+			"profile_image": "http://www.stampedimgs.com/profile_images/47cc67093475061e3d95369d/001_normal.jpg",
 			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 			"website": null,
-			"color": {
-				"primary": [91, 172, 253],
-				"secondary": [95, 167, 56]
-			},
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"privacy": false,
 		    "last_stamp": {
 				"blurb": "Really, the best ever.", 
 				"entity": {
@@ -104,8 +106,8 @@ The user id of the authenticating user. This is necessary if any of the requeste
 				"flags": {
 					"privacy": false
 				}, 
-				"id": "4e226fcd4e18474561000000", 
-				"img": "image2.png", 
+				"stamp_id": "4e226fcd4e18474561000000", 
+				"image": "image2.png", 
 				"credit": [
 					"4e226fcd4e61754161000007", 
 					"4e226fcd4e61754161000008"
@@ -119,11 +121,12 @@ The user id of the authenticating user. This is necessary if any of the requeste
 			"last_name": "Stein",
 			"screen_name": "robby",
 			"display_name": "Robby S.",
+			"profile_image": "http://www.stampedimgs.com/profile_images/4e226fcd4e61754161000007/001_normal.jpg",
 			"bio": "Starting something new in NYC. Former Google product manager.",
 			"website": null,
-			"color": {
-				"primary": [39, 40, 34]
-			},
+			"color_primary": "A0EE33",
+			"color_secondary": null,
+			"privacy": false,
 		    "last_stamp": {
 				"blurb": "Best burger in the city.", 
 				"entity": {
@@ -135,8 +138,8 @@ The user id of the authenticating user. This is necessary if any of the requeste
 				"flags": {
 					"privacy": false
 				}, 
-				"id": "3e526fcd4e18474561000000", 
-				"img": "image3.png", 
+				"stamp_id": "3e526fcd4e18474561000000", 
+				"image": "image3.png", 
 				"credit": null, 
 				"timestamp": "2011-05-12 18:24:44.432141"
 		    }
@@ -173,12 +176,12 @@ The number of results to return. Default is 20.
 			"last_name": "Palms",
 			"screen_name": "kevin",
 			"display_name": "Kevin P.",
+			"profile_image": "http://www.stampedimgs.com/profile_images/47cc67093475061e3d95369d/001_normal.jpg",
 			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 			"website": null,
-			"color": {
-				"primary": [91, 172, 253],
-				"secondary": [95, 167, 56]
-			}
+			"primary_color": "333333",
+			"secondary_color": "999999",
+			"privacy": false
 		}
 	]
 

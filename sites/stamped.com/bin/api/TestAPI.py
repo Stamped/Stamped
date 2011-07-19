@@ -31,16 +31,16 @@ def main():
     baseurl = "http://0.0.0.0:5000/api/v1"
 #     baseurl = "http://50.19.163.247:5000/api/v1"
     
-    accountTest(baseurl)
-    
-    userTest(baseurl)
-    
-    entityTest(baseurl)
-
-    stampTest(baseurl)
-    
-    friendshipTest(baseurl)
-
+#     accountTest(baseurl)
+#     
+#     userTest(baseurl)
+#     
+#     entityTest(baseurl)
+# 
+#     stampTest(baseurl)
+#     
+#     friendshipTest(baseurl)
+# 
     collectionTest(baseurl)
 
 #     commentTest(baseurl)
@@ -105,10 +105,10 @@ def accountTest(baseurl):
     data = {
         "authenticated_user_id": userID,
         "bio": "My long biography goes here.",
-        "color": "255-255-255,100-100-9"
+        "color": "333333,999999"
     }
     result = testPOST(baseurl, path, data)
-    if result['bio'] == 'My long biography goes here.':
+    if result['color_primary'] == '333333':
         print 'PASS: %s' % path
     else:
         print 'FAIL: %s' % path
@@ -932,20 +932,16 @@ def commentTest(baseurl):
     print '      COMMENT'
     
     
-    path = "addAccount"
+    path = "account/create.json"
     data = {
-        "first_name": "User",
-        "last_name": "A", 
-        "username": "userA", 
-        "email": "userA@stamped.com", 
-        "locale": "en_US", 
-        "primary_color": "[255, 255, 255]",
+        "first_name": "Kevin",
+        "last_name": "Palms", 
+        "email": "kevin@stamped.com", 
         "password": "******",
-        "privacy": False,
-        "img": "user.png"
+        "screen_name": "kpalms"
     }
-    userA = testPOST(baseurl, path, data)['id']
-    if len(userA) == 24:
+    userID = testPOST(baseurl, path, data)['user_id']
+    if len(userID) == 24:
         print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path
@@ -953,13 +949,15 @@ def commentTest(baseurl):
         raise Exception
         
     
-    path = "addEntity"
+    path = "entities/create.json"
     data = {
+        "authenticated_user_id": userID,
         "title": "Little Owl",
         "desc": "American food in the West Village", 
-        "category": "Restaurant"
+        "category": "Restaurant",
+        "coordinates": "40.714623,-74.006605"
     }
-    entityID = testPOST(baseurl, path, data)['id']
+    entityID = testPOST(baseurl, path, data)['entity_id']
     if len(entityID) == 24:
         print 'DATA: %s' % path
     else:
@@ -968,59 +966,59 @@ def commentTest(baseurl):
         raise Exception
         
     
-    path = "stamps/add.json"
+    path = "stamps/create.json"
     data = {
-        "user_id": userA,
+        "authenticated_user_id": userID,
         "entity_id": entityID,
         "blurb": "Favorite restaurant in the Village.", 
-        "img": "image.png",
+        "image": "image.png",
         "mentions": "userA,userB"
     }
-    stampID = testPOST(baseurl, path, data)['id']
+    stampID = testPOST(baseurl, path, data)['stamp_id']
     if len(stampID) == 24:
         print 'DATA: %s' % path
     else:
         print 'result: %s' % path
         print stampID
         raise Exception
-        
+                
     
-    path = "addComment"
+    path = "comments/create.json"
     data = {
-        "user_id": userA,
+        "authenticated_user_id": userID,
         "stamp_id": stampID,
-        "blurb": "Should I check this place out?", 
-        "mentions": "userA,userB"
+        "blurb": "That looks awesome."
     }
-    commentID = testPOST(baseurl, path, data)['id']
+    commentID = testPOST(baseurl, path, data)['comment_id']
     if len(commentID) == 24:
-        print 'PASS: %s' % path
-    else:
-        print 'result: %s' % path
-        print commentID
-        raise Exception
-        
-        
-    path = "getComments"
-    data = {"stamp_id": stampID}
-    result = testGET(baseurl, path, data)
-    comments = []
-    for comment in result:
-        comments.append(comment['_data'])
-    if len(comments) == 1:
         print 'PASS: %s' % path
     else:
         print 'result: %s' % path
         print result
         raise Exception
-                
+        
     
-    path = "removeComment"
+    path = "comments/show.json"
     data = {
-        "comment_id": commentID
+        "stamp_id": stampID,
+        "authenticated_user_id": userID
     }
-    result = testPOST(baseurl, path, data)['id']
-    if result == commentID:
+    result = testGET(baseurl, path, data)
+    if len(result) == 1:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "comments/remove.json"
+    data = {
+        "comment_id": commentID,
+        "authenticated_user_id": userID
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
         print 'PASS: %s' % path
     else:
         print 'result: %s' % path
@@ -1030,11 +1028,11 @@ def commentTest(baseurl):
     
     path = "stamps/remove.json"
     data = {
-        "stamp_id": stampID,
-        "user_id": userA
+        "authenticated_user_id": userID,
+        "stamp_id": stampID
     }
-    result = testPOST(baseurl, path, data)['id']
-    if result == stampID:
+    result = testPOST(baseurl, path, data)
+    if result == True:
         print 'DATA: %s' % path
     else:
         print 'result: %s' % path
@@ -1042,8 +1040,11 @@ def commentTest(baseurl):
         raise Exception
         
         
-    path = "removeEntity"
-    data = {"entity_id": entityID}
+    path = "entities/remove.json"
+    data = {
+        "authenticated_user_id": userID,
+        "entity_id": entityID
+    }
     result = testPOST(baseurl, path, data)
     if result:
         print 'DATA: %s' % path
@@ -1053,10 +1054,10 @@ def commentTest(baseurl):
         raise Exception
         
         
-    path = "removeAccount"
-    data = {"account_id": userA}
-    resultA = testPOST(baseurl, path, data)
-    if resultA:
+    path = "account/remove.json"
+    data = { "authenticated_user_id": userID }
+    result = testPOST(baseurl, path, data)
+    if result:
         print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path

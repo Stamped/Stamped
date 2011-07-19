@@ -18,13 +18,12 @@ class Account(AObject):
         'password': basestring,
         'screen_name': basestring,
         'display_name': basestring,
-        'image': basestring,
+        'profile_image': basestring,
+        'color_primary': basestring,
+        'color_secondary': basestring,
         'bio': basestring,
         'website': basestring,
-        'color': {
-            'primary': list,
-            'secondary': list
-        },
+        'privacy': bool,
         'locale': {
             'language': basestring,
             'time_zone': basestring
@@ -36,7 +35,6 @@ class Account(AObject):
             'ios_device_tokens': list
         },
         'flags': {
-            'privacy': bool,
             'flagged': bool,
             'locked': bool
         },
@@ -64,8 +62,6 @@ class Account(AObject):
         if 'user_id' in self:
             valid &= isinstance(self.user_id, basestring) 
         
-        ### REQUIRED
-        
         valid &= 'first_name' in self and isinstance(self.first_name, basestring)
         valid &= 'last_name' in self and isinstance(self.last_name, basestring)
         valid &= 'email' in self and isinstance(self.email, basestring)
@@ -73,27 +69,23 @@ class Account(AObject):
         valid &= 'screen_name' in self and isinstance(self.screen_name, basestring)
         valid &= 'display_name' in self and isinstance(self.display_name, basestring)
         
-        valid &= 'color' in self and isinstance(self.color, dict)
-        valid &= 'primary' in self.color and isinstance(self.color['primary'], list) and len(self.color['primary']) == 3
+        if 'profile_image' in self and self.profile_image is not None:
+            valid &= isinstance(self.profile_image, basestring)
+        
+        valid &= 'color_primary' in self and isinstance(self.color_primary, basestring)
+        if 'color_secondary' in self and self.color_secondary is not None:
+            valid &= isinstance(self.color_secondary, basestring)
+        
+        if 'bio' in self and self.bio is not None:
+            valid &= isinstance(self.bio, basestring)
+        if 'website' in self and self.website is not None:
+            valid &= isinstance(self.website, basestring)
+        
+        valid &= 'privacy' in self and isinstance(self.privacy, bool)
         
         valid &= 'locale' in self and isinstance(self.locale, dict)
         valid &= 'language' in self.locale and isinstance(self.locale['language'], basestring)
         valid &= 'time_zone' in self.locale and isinstance(self.locale['time_zone'], basestring)
-        
-        valid &= 'flags' in self and isinstance(self.flags, dict)
-        valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
-        
-        ### OPTIONAL
-        
-        if 'image' in self and self.image is not None:
-            valid &= isinstance(self.image, basestring)
-        if 'website' in self and self.website is not None:
-            valid &= isinstance(self.website, basestring)
-        if 'bio' in self and self.bio is not None:
-            valid &= isinstance(self.bio, basestring)
-        
-        if 'secondary' in self.color and self.color['secondary'] is not None:
-            valid &= isinstance(self.color['secondary'], list) and len(self.color['secondary']) == 3
         
         if 'linked_accounts' in self:
             valid &= isinstance(self.linked_accounts, dict) 
@@ -105,10 +97,12 @@ class Account(AObject):
             if 'ios_device_tokens' in self.devices:
                 valid &= isinstance(self.devices['ios_device_tokens'], list)
         
-        if 'flagged' in self.flags:
-            valid &= isinstance(self.flags['flagged'], bool)
-        if 'locked' in self.flags:
-            valid &= isinstance(self.flags['locked'], bool)
+        if 'flags' in self:
+            valid &= isinstance(self.flags, dict)
+            if 'flagged' in self.flags:
+                valid &= isinstance(self.flags['flagged'], bool)
+            if 'locked' in self.flags:
+                valid &= isinstance(self.flags['locked'], bool)
             
         if 'stats' in self:
             valid &= isinstance(self.stats, dict) 
@@ -125,7 +119,6 @@ class Account(AObject):
             if 'total_credit_given' in self.stats:
                 valid &= isinstance(self.stats['total_credit_given'], int)
                 
-        ### SELF GENERATED
         #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
         
         return valid
