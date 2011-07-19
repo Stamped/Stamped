@@ -403,12 +403,12 @@ A brief biography of the user. This is optional but is strongly suggested. The m
 A link to the user&#8217;s website. This is optional. The maximum length is 140 characters.</p>
 
 <p><strong>color</strong> <em>optional</em>
-The RGB representation of the user&#8217;s stamp color. Values can range from 0 to 255 and should be separated by a dash (&#8220;-&#8220;). If two colors are provided they should be separated by a comma (&#8220;,&#8221;).</p>
+The hexadecimal representation of the user&#8217;s stamp color. If two colors are provided they should be separated by a comma (&#8220;,&#8221;).</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>POST https://api.stamped.com/1/account/update_profile.json
-color=91+172+253,95+167+56&amp;bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.</code></pre>
+color=333333,999999&amp;bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
@@ -419,10 +419,8 @@ color=91+172+253,95+167+56&amp;bio=The%20very%20purpose%20of%20existence%20is%20
     "display_name": "Kevin P.",
     "bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
     "website": null,
-    "color": {
-        "primary": [91, 172, 253],
-        "secondary": [95, 167, 56]
-    }
+    "color_primary": "333333",
+    "color_secondary": "999999"
 }</code></pre>
 
 <hr />
@@ -444,19 +442,19 @@ color=91+172+253,95+167+56&amp;bio=The%20very%20purpose%20of%20existence%20is%20
 <p><strong>authenticated_user_id</strong> <em>required</em>
 The user id of the authenticating user.</p>
 
-<p><strong>image</strong> <em>required</em>
+<p><strong>profile_image</strong> <em>required</em>
 The base64-encoded image for the user. Image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. </p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>POST https://api.stamped.com/1/account/update_profile_image.json
-image=&lt;&lt;data&gt;&gt;</code></pre>
+profile_image=&lt;&lt;data&gt;&gt;</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
     "user_id": "47cc67093475061e3d95369d",
-    "image": "http://img.stamped.com/user/47cc67093475061e3d95369d"
+    "profile_image": "http://img.stamped.com/user/47cc67093475061e3d95369d"
 }</code></pre>
 
 <hr />

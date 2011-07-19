@@ -58,12 +58,12 @@ User information for any users that are named as receiving credit in the stamp. 
 		},
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
-			"user_image": "user.png", 
-			"user_display_name": "Kevin P.", 
-			"user_color": { 
-				"primary": [ "51", "182", "218" ], 
-				"secondary": [ "0", "108", "137" ] 
-			}
+			"profile__image": "user.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kpalms",
+			"privacy": false
 		}
 	}
 
@@ -122,12 +122,12 @@ User information for any users that are named as receiving credit in the stamp. 
 		"timestamp": "2011-07-17 05:14:54.128641", 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
-			"user_image": "user.png", 
-			"user_display_name": "Kevin P.", 
-			"user_color": { 
-				"primary": [ "51", "182", "218" ], 
-				"secondary": [ "0", "108", "137" ] 
-			}
+			"profile__image": "user.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kpalms",
+			"privacy": false
 		}
 	}
 
@@ -199,12 +199,12 @@ The user id of the authenticating user. This is necessary for stamps that are pr
 		"timestamp": "2011-07-17 05:14:54.128641", 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
-			"user_image": "user.png", 
-			"user_display_name": "Kevin P.", 
-			"user_color": { 
-				"primary": [ "51", "182", "218" ], 
-				"secondary": [ "0", "108", "137" ] 
-			}
+			"profile__image": "user.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kpalms",
+			"privacy": false
 		}
 	}
 

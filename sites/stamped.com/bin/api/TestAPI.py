@@ -41,9 +41,9 @@ def main():
 #     
 #     friendshipTest(baseurl)
 # 
-    collectionTest(baseurl)
+#     collectionTest(baseurl)
 
-#     commentTest(baseurl)
+    commentTest(baseurl)
     
 
     

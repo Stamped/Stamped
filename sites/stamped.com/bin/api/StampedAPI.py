@@ -881,13 +881,13 @@ class StampedAPI(AStampedAPI):
         user = self._userDB.getUser(params.authenticated_user_id)
         comment.user = {}
         comment.user['user_id'] = user.user_id
-        comment.user['user_display_name'] = user.display_name
-        comment.user['user_image'] = user.image
-        comment.user['user_color'] = {
-            'primary': user.color['primary']
-        }
-        if 'secondary' in user.color:
-            comment.user['user_color']['secondary'] = user.color['secondary']
+        comment.user['screen_name'] = user.screen_name
+        comment.user['display_name'] = user.display_name
+        comment.user['profile_image'] = user.profile_image
+        comment.user['color_primary'] = user.color_primary
+        if 'color_secondary' in user:
+            comment.user['color_secondary'] = user.color_secondary
+        comment.user['privacy'] = user.privacy
         
         comment.stamp_id = params.stamp_id
         

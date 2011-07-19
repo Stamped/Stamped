@@ -227,75 +227,15 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 <body>
   <div id="wrapper">
     <div id="contentdiv">
-      <h1 id="collections">COLLECTIONS</h1>
+      <h1 id="comments">COMMENTS</h1>
 
 <hr />
 
-<h2 id="getcollectionsuser">GET collections/user</h2>
+<h2 id="postcommentscreate">POST comments/create</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Show stamps for a given user.</p>
-
-<h3 id="details">Details</h3>
-
-<ul>
-<li>No Authentication</li>
-</ul>
-
-<h3 id="parameters">Parameters</h3>
-
-<p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
-The user id of the requested user.</p>
-
-<p><strong>authenticated_user_id</strong> <em>optional</em>
-The user id of the authenticating user. This is necessary if the requested user is locked.</p>
-
-<h3 id="samplerequest">Sample Request</h3>
-
-<pre><code>GET https://api.stamped.com/1/collections/user.json
-user_id=47cc67093475061e3d95369d</code></pre>
-
-<h3 id="sampleresult">Sample Result</h3>
-
-<pre><code>[
-    {
-        "blurb": "Really, the best ever.", 
-        "entity": {
-            "category": "Restaurant", 
-            "entity_id": "4e226fcd4e61754161000006", 
-            "subtitle": "American food in the West Village", 
-            "title": "Little Owl"
-        }, 
-        "flags": {
-            "privacy": false
-        }, 
-        "stamp_id": "4e226fcd4e18474561000000", 
-        "image": "image2.png", 
-        "credit": [
-            "4e226fcd4e61754161000007", 
-            "4e226fcd4e61754161000008"
-        ], 
-        "timestamp": "2011-07-17 05:14:54.128641", 
-        "user": {
-            "user_id": "47cc67093475061e3d95369d", 
-            "profile__image": "user.png", 
-            "display_name": "Kevin P.", 
-            "color_primary": "333333",
-            "color_secondary": "999999",
-            "screen_name": "kpalms",
-            "privacy": false
-        }
-    }
-]</code></pre>
-
-<hr />
-
-<h2 id="getcollectionsinbox">GET collections/inbox</h2>
-
-<h3 id="description">Description</h3>
-
-<p>Show stamps in the authenticating user&#8217;s inbox.</p>
+<p>Add a comment to a specified stamp. The authenticated user must have permission to view and comment on the stamp.</p>
 
 <h3 id="details">Details</h3>
 
@@ -308,40 +248,121 @@ user_id=47cc67093475061e3d95369d</code></pre>
 <p><strong>authenticated_user_id</strong> <em>required</em>
 The user id of the authenticating user.</p>
 
+<p><strong>stamp_id</strong> <em>required</em>
+The id of the stamp commented on.</p>
+
+<p><strong>blurb</strong> <em>required</em>
+A brief text field containing the comment. This is currently limited to 512 characters.</p>
+
+<p><strong>mentions</strong> <em>optional</em>
+User information for any users that are mentioned in the comment. Any users mentioned must also be referenced in the text of the blurb in the format &#8220;@screen_name&#8221;. Multiple screen names must be separated by commas.</p>
+
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/collections/inbox.json
-authenticated_user_id=47cc67093475061e3d95369d</code></pre>
+<pre><code>POST https://api.stamped.com/1/comments/create.json
+authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700000a&amp;blurb=That+looks+awesome.</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
-<pre><code>[
-    {
-        "stamp_id": "8ac73h4532a7ba01cb00000e",
-        "blurb": "Best burger in the city.", 
-        "entity": {
-            "category": "Restaurant", 
-            "entity_id": "3r426fcd4e61754161000006", 
-            "subtitle": "Burgers, and that's all.", 
-            "title": "Spotted Pig"
-        }, 
-        "flags": {
-            "privacy": false
-        }, 
-        "image": "image3.png", 
-        "credit": null, 
-        "timestamp": "2011-05-12 18:24:44.432141",
-        "user": {
-            "user_id": "47cc67093475061e3d95369d", 
-            "profile__image": "user.png", 
-            "display_name": "Kevin P.", 
-            "color_primary": "333333",
-            "color_secondary": "999999",
-            "screen_name": "kpalms",
-            "privacy": false
-        }
+<pre><code>{
+    "blurb": "That looks awesome.", 
+    "comment_id": "4e259ca532a7ba6cd700000b", 
+    "mentions": null, 
+    "restamp_id": null, 
+    "stamp_id": "4e259ca532a7ba6cd700000a", 
+    "timestamp": {
+        "created": "2011-07-19 15:03:01.843073"
+    }, 
+    "user": {
+        "user_id": "47cc67093475061e3d95369d", 
+        "profile__image": "user.png", 
+        "display_name": "Kevin P.", 
+        "color_primary": "333333",
+        "color_secondary": "999999",
+        "screen_name": "kpalms",
+        "privacy": false
     }
-]</code></pre>
+}</code></pre>
+
+<hr />
+
+<h2 id="getcommentsshow">GET comments/show</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Return comments for a given stamp. This includes any restamps that have occurred on the stamp.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>No Authentication</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>stamp_id</strong> <em>required</em>
+The id of the stamp commented on.</p>
+
+<p><strong>authenticated_user_id</strong> <em>optional</em>
+The user id of the authenticating user. This is necessary only if the stamp is private.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/1/comments/show.json
+authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700000a</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    "blurb": "That looks awesome.", 
+    "comment_id": "4e259ca532a7ba6cd700000b", 
+    "mentions": null, 
+    "restamp_id": null, 
+    "stamp_id": "4e259ca532a7ba6cd700000a", 
+    "timestamp": {
+        "created": "2011-07-19 15:03:01.843073"
+    }, 
+    "user": {
+        "user_id": "47cc67093475061e3d95369d", 
+        "profile__image": "user.png", 
+        "display_name": "Kevin P.", 
+        "color_primary": "333333",
+        "color_secondary": "999999",
+        "screen_name": "kpalms",
+        "privacy": false
+    }
+}</code></pre>
+
+<hr />
+
+<h2 id="postcommentsremove">POST comments/remove</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Remove a comment owned by the authenticating user.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>Requires Authentication</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>authenticated_user_id</strong> <em>required</em>
+The user id of the authenticating user. This user must be the owner of the stamp or the owner of the comment.</p>
+
+<p><strong>comment_id</strong> <em>required</em>
+The unique id of the stamp.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/1/comments/remove.json
+authenticated_user_id=4e259ca532a7ba6cd7000008&amp;comment_id=4e259ca532a7ba6cd700000b</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>true</code></pre>
 
     </div>
 </body>

@@ -159,9 +159,8 @@ The user id of the authenticating user.
 		"display_name": "Robby S.",
 		"bio": "Starting something new in NYC. Former Google product manager.",
 		"website": null,
-		"color": {
-			"primary": [91, 172, 253]
-		},
+		"color_primary": "333333",
+		"color_secondary": "999999",
 	    "last_stamp": {
 			"blurb": "Best burger in the city.", 
 			"entity": {
@@ -173,8 +172,8 @@ The user id of the authenticating user.
 			"flags": {
 				"privacy": false
 			}, 
-			"id": "3e526fcd4e18474561000000", 
-			"img": "image3.png", 
+			"stamp_id": "3e526fcd4e18474561000000", 
+			"image": "image3.png", 
 			"credit": null, 
 			"timestamp": "2011-05-12 18:24:44.432141"
 	    }
