@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import flask, json, utils
-from flask import request, Flask
+from flask import request, Response, Flask
 
 from api.MongoStampedAPI import MongoStampedAPI
 from utils import AttributeDict
@@ -33,9 +33,9 @@ def encodeType(obj):
     else:
         return obj.__dict__
 
-def transformOutput(d):
+def transformOutput(request, d):
     output_json = json.dumps(d, sort_keys=True, indent=None if request.is_xhr else 2, default=encodeType)
-    output = current_app.response_class(output_json, mimetype='application/json')
+    output = Response(output_json, mimetype='application/json')
     
     print 'Output: ', output
     return output
@@ -57,7 +57,7 @@ def handlePOSTRequest(request, stampedAPIFunc, schema):
     except (InvalidArgument, Fail) as e:
         return str(e), 400
         
-    return transformOutput(stampedAPIFunc(parsedInput))
+    return transformOutput(request, stampedAPIFunc(parsedInput))
 
 def handleGETRequest(request, stampedAPIFunc, args):
     funcArgs = [ ]
@@ -75,7 +75,7 @@ def handleGETRequest(request, stampedAPIFunc, args):
     #         except KeyError as e:
     #             return "Required argument '%s' to API function '%s' not found" % (arg, utils.getFuncName(1)), 400
 
-    return transformOutput(stampedAPIFunc(*funcArgs))
+    return transformOutput(request, stampedAPIFunc(*funcArgs))
 
 # ######## #
 # Accounts #
