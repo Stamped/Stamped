@@ -89,7 +89,7 @@ Ec2WebServerCommands = [
     echo '>>>> Installing python-setuptools'
     sudo apt-get install python-setuptools
     echo '>>>> Running init script'
-    python /stamped/bootstrap/init.py name=dev0 type=dev port_base=70217 &> /stamped/bootstrap/log
+    python /stamped/bootstrap/init.py name=dev0 roles=web_server port_base=70217 &> /stamped/bootstrap/log
     """
 ]
 

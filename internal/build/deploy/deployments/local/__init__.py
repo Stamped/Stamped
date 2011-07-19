@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, getpass, os, re, string, utils
+import copy, getpass, os, pickle, re, string, utils
 from ADeployment import ADeploymentSystem, ADeploymentStack
 from errors import Fail
 
@@ -116,12 +116,17 @@ class LocalDeploymentStack(ADeploymentStack):
         self.env = env
         self.root = "/stamped"
         self.path = os.path.join(self.root, self.name)
-        self.instances = {
-            'dev0' : {
-                'type' : 'dev', 
+        self.instances = utils.OrderedDict([
+            ('dev0' : {
+                'roles' : [ 'web_server', ], 
                 'port_base' : '70217', 
-            }, 
-        }
+            }), 
+            ('db0' : {
+                'roles' : [ 'db', ], 
+                'mongodb' : {
+                }, 
+            }), 
+        ])
    
     def create(self):
         self.delete()
@@ -133,10 +138,12 @@ class LocalDeploymentStack(ADeploymentStack):
             instance_bootstrap_path = os.path.join(instance_path, 'bootstrap')
             instance_bootstrap_init_path = os.path.join(instance_bootstrap_path, 'init.py')
             
-            params_str = string.joinfields(('%s=%s' % (k, v) for k, v in params.iteritems()), ' ')
+            #flatten = lambda v: v if not isinstance(v, (tuple, list)) else string.joinfields(v, ',')
+            #params_str = string.joinfields(('%s=%s' % (k, flatten(v)) for k, v in params.iteritems()), ' ')
+            params_str = pickle.dumps({ name : params })
             
             self.local('git clone git@github.com:Stamped/stamped-bootstrap.git %s' % instance_bootstrap_path)
-            self.local('python %s name=%s %s' % (instance_bootstrap_init_path, name, params_str))
+            self.local('python %s %s' % (instance_bootstrap_init_path, params_str))
     
     def delete(self):
         if os.path.exists(self.path):

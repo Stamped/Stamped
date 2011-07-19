@@ -34,7 +34,9 @@ def encodeType(obj):
         return obj.__dict__
 
 def transformOutput(d):
-    output = json.dumps(d, sort_keys=True, indent=2, default=encodeType)
+    output_json = json.dumps(d, sort_keys=True, indent=None if request.is_xhr else 2, default=encodeType)
+    output = current_app.response_class(output_json, mimetype='application/json')
+    
     print 'Output: ', output
     return output
 

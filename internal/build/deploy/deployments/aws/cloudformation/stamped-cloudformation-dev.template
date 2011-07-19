@@ -221,7 +221,7 @@
                 "\n", 
                 "    echo '>>>> Running init script'", 
                 "\n", 
-                "    python /stamped/bootstrap/init.py name=dev0 type=dev port_base=70217 &> /stamped/bootstrap/log", 
+                "    python /stamped/bootstrap/init.py name=dev0 roles=dev port_base=70217 &> /stamped/bootstrap/log", 
                 "\n", 
                 "    ", 
                 "\n", 
