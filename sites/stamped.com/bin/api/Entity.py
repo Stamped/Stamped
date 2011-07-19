@@ -12,6 +12,7 @@ class Entity(AObject):
     _schema = {
         'entity_id': basestring, 
         'title': basestring, 
+        'subtitle': basestring,
         'desc': basestring, 
         'locale': basestring, 
         'category': basestring,
@@ -122,11 +123,11 @@ class Entity(AObject):
     def isValid(self):
         valid = True
         
-        if 'id' in self:
-            valid &= isinstance(self.id, basestring) 
+        if 'entity_id' in self:
+            valid &= isinstance(self.entity_id, basestring) 
         
         valid &= 'title' in self and isinstance(self.title, basestring)
-        valid &= 'desc' in self and isinstance(self.desc, basestring)
+        valid &= 'subtitle' in self and isinstance(self.subtitle, basestring)
         valid &= 'category' in self and isinstance(self.category, basestring)
         
                 

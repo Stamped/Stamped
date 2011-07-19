@@ -31,7 +31,7 @@ def main():
     baseurl = "http://0.0.0.0:5000/api/v1"
 #     baseurl = "http://50.19.163.247:5000/api/v1"
     
-#     accountTest(baseurl)
+    accountTest(baseurl)
 #     
 #     userTest(baseurl)
 #     
@@ -42,8 +42,8 @@ def main():
 #     friendshipTest(baseurl)
 # 
 #     collectionTest(baseurl)
-
-    commentTest(baseurl)
+#
+#     commentTest(baseurl)
     
 
     
@@ -119,10 +119,15 @@ def accountTest(baseurl):
     path = "account/update_profile_image.json"
     data = {
         "authenticated_user_id": userID,
-        "image": "image data!"
+        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!
     }
-    #result = testPOST(baseurl, path, data)
-    print 'SKIP: %s' % path
+    result = testPOST(baseurl, path, data)
+    if result['profile_image'] == 'https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg':
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
         
         
     path = "account/verify_credentials.json"

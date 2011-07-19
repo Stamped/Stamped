@@ -439,6 +439,46 @@ def getUserMentions():
 @app.route('/')
 def hello():
     return "This is where stamped.com will go -- huzzah!"
+    
+@app.route(REST_API_PREFIX )
+def indexDoc():
+    f = open('api/docs/Index.html')
+    return f.read()
+    
+@app.route(REST_API_PREFIX + 'stamps')
+def stampsDoc():
+    f = open('api/docs/Stamps.html')
+    return f.read()
+    
+@app.route(REST_API_PREFIX + 'accounts')
+def accountsDoc():
+    f = open('api/docs/Accounts.html')
+    return f.read()
+    
+@app.route(REST_API_PREFIX + 'users')
+def usersDoc():
+    f = open('api/docs/Users.html')
+    return f.read()
+    
+@app.route(REST_API_PREFIX + 'friendships')
+def friendshipsDoc():
+    f = open('api/docs/Friendships.html')
+    return f.read()
+    
+@app.route(REST_API_PREFIX + 'collections')
+def collectionsDoc():
+    f = open('api/docs/Collections.html')
+    return f.read()
+    
+@app.route(REST_API_PREFIX + 'entities')
+def entitiesDoc():
+    f = open('api/docs/Entities.html')
+    return f.read()
+    
+@app.route(REST_API_PREFIX + 'comments')
+def commentsDoc():
+    f = open('api/docs/Comments.html')
+    return f.read()
 
 # ######## #
 # Mainline #

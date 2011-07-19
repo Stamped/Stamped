@@ -26,6 +26,7 @@ The user id of the authenticating user. This is necessary if the requested user 
 ### Sample Result ###
 	[
 		{
+			"stamp_id": "4e226fcd4e18474561000000", 
 			"blurb": "Really, the best ever.", 
 			"entity": {
 			    "category": "Restaurant", 
@@ -36,7 +37,6 @@ The user id of the authenticating user. This is necessary if the requested user 
 			"flags": {
 				"privacy": false
 			}, 
-			"stamp_id": "4e226fcd4e18474561000000", 
 			"image": "image2.png", 
 			"credit": [
 				"4e226fcd4e61754161000007", 
