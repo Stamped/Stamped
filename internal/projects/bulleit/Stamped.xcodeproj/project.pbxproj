@@ -12,6 +12,8 @@
 		7E22679913D4D90F00657A66 /* AccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22679813D4D90F00657A66 /* AccountManager.m */; };
 		7E22679D13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */; };
 		7E22679E13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E22679C13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png */; };
+		7E2267D413D501CB00657A66 /* StampedModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */; };
+		7E2267D713D52E9C00657A66 /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E2267D613D52E9C00657A66 /* Stamp.m */; };
 		7E2CECEC13C795840068D576 /* stamp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CECEB13C795840068D576 /* stamp@2x.png */; };
 		7E2CECF113C79C530068D576 /* must_do@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CECEE13C79C530068D576 /* must_do@2x.png */; };
 		7E2CECF213C79C530068D576 /* comment@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CECEF13C79C530068D576 /* comment@2x.png */; };
@@ -108,14 +110,14 @@
 		7EE1194013CE0C8500378139 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193C13CE0C8500378139 /* CoreData.framework */; };
 		7EE1194113CE0C8500378139 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193D13CE0C8500378139 /* MobileCoreServices.framework */; };
 		7EE1194213CE0C8500378139 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193E13CE0C8500378139 /* SystemConfiguration.framework */; };
-		7EE7E35A13CCB2A800FA3B3A /* StampsListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35913CCB2A800FA3B3A /* StampsListTableViewCell.m */; };
+		7EE7E35A13CCB2A800FA3B3A /* InboxTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */; };
 		7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */; };
 		7EE7E37013CD223100FA3B3A /* inbox_top_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */; };
 		7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
 		7EF1105A13C906AA0059F9BD /* EntityDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */; };
 		7EF5138D13D240B60028B612 /* STTabBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF5138C13D240B60028B612 /* STTabBar.m */; };
-		7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* StampsListViewController.m */; };
-		7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */; };
+		7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* InboxViewController.m */; };
+		7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* InboxViewController.xib */; };
 		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
 		7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */; };
 		7EFE8F7D13C3C96D00324F34 /* toolbar_must_do@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */; };
@@ -222,6 +224,9 @@
 		7E22679813D4D90F00657A66 /* AccountManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountManager.m; sourceTree = "<group>"; };
 		7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_detail_ripple_bottom@2x.png"; sourceTree = "<group>"; };
 		7E22679C13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_detail_ripple_top@2x.png"; sourceTree = "<group>"; };
+		7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = StampedModel.xcdatamodel; sourceTree = "<group>"; };
+		7E2267D513D52E9C00657A66 /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
+		7E2267D613D52E9C00657A66 /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
 		7E2CECEB13C795840068D576 /* stamp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp@2x.png"; sourceTree = "<group>"; };
 		7E2CECEE13C79C530068D576 /* must_do@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "must_do@2x.png"; sourceTree = "<group>"; };
 		7E2CECEF13C79C530068D576 /* comment@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "comment@2x.png"; sourceTree = "<group>"; };
@@ -326,8 +331,8 @@
 		7EE1193C13CE0C8500378139 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		7EE1193D13CE0C8500378139 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		7EE1193E13CE0C8500378139 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
-		7EE7E35813CCB2A800FA3B3A /* StampsListTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListTableViewCell.h; sourceTree = "<group>"; };
-		7EE7E35913CCB2A800FA3B3A /* StampsListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampsListTableViewCell.m; sourceTree = "<group>"; };
+		7EE7E35813CCB2A800FA3B3A /* InboxTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InboxTableViewCell.h; sourceTree = "<group>"; };
+		7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InboxTableViewCell.m; sourceTree = "<group>"; };
 		7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserImageView.h; sourceTree = "<group>"; };
 		7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserImageView.m; sourceTree = "<group>"; };
 		7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_top_border@2x.png"; sourceTree = "<group>"; };
@@ -336,9 +341,9 @@
 		7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EntityDetailViewController.xib; sourceTree = "<group>"; };
 		7EF5138B13D240B60028B612 /* STTabBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTabBar.h; sourceTree = "<group>"; };
 		7EF5138C13D240B60028B612 /* STTabBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTabBar.m; sourceTree = "<group>"; };
-		7EFE8F2513C39FA100324F34 /* StampsListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampsListViewController.h; sourceTree = "<group>"; };
-		7EFE8F2613C39FA100324F34 /* StampsListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = StampsListViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampsListViewController.xib; sourceTree = "<group>"; };
+		7EFE8F2513C39FA100324F34 /* InboxViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InboxViewController.h; sourceTree = "<group>"; };
+		7EFE8F2613C39FA100324F34 /* InboxViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = InboxViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		7EFE8F2713C39FA100324F34 /* InboxViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = InboxViewController.xib; sourceTree = "<group>"; };
 		7EFE8F3213C3AFA300324F34 /* TGLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = TGLight.otf; sourceTree = "<group>"; };
 		7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TitlingGothicFBComp-Reg.otf"; sourceTree = "<group>"; };
 		7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_must_do@2x.png"; sourceTree = "<group>"; };
@@ -401,6 +406,15 @@
 			name = "Stamp Detail";
 			sourceTree = "<group>";
 		};
+		7E2267D813D52FF500657A66 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				7E2267D513D52E9C00657A66 /* Stamp.h */,
+				7E2267D613D52E9C00657A66 /* Stamp.m */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
 		7E2CED0C13C7A2630068D576 /* Categories */ = {
 			isa = PBXGroup;
 			children = (
@@ -430,7 +444,7 @@
 			name = Stamps;
 			sourceTree = "<group>";
 		};
-		7E514AA213C9824D00EEC598 /* Entity Details */ = {
+		7E514AA213C9824D00EEC598 /* Entity Detail */ = {
 			isa = PBXGroup;
 			children = (
 				7EF1105613C906A90059F9BD /* EntityDetailViewController.h */,
@@ -444,7 +458,7 @@
 				7E514AA413C9827000EEC598 /* FilmDetailViewController.h */,
 				7E514AA513C9827000EEC598 /* FilmDetailViewController.m */,
 			);
-			name = "Entity Details";
+			name = "Entity Detail";
 			sourceTree = "<group>";
 		};
 		7E76129F13C940500023CCC4 /* Logos */ = {
@@ -524,6 +538,7 @@
 			isa = PBXGroup;
 			children = (
 				7EC6B4C113C64C4300CE83DD /* stamp_data.csv */,
+				7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */,
 				7EFE8F3213C3AFA300324F34 /* TGLight.otf */,
 				7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */,
 				7EC0177D13C3754300ABE6E2 /* Stamped-Info.plist */,
@@ -631,15 +646,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		7EE7E35C13CCB2D600FA3B3A /* Stamps List */ = {
+		7EE7E35C13CCB2D600FA3B3A /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
-				7EFE8F2513C39FA100324F34 /* StampsListViewController.h */,
-				7EFE8F2613C39FA100324F34 /* StampsListViewController.m */,
-				7EE7E35813CCB2A800FA3B3A /* StampsListTableViewCell.h */,
-				7EE7E35913CCB2A800FA3B3A /* StampsListTableViewCell.m */,
+				7EFE8F2513C39FA100324F34 /* InboxViewController.h */,
+				7EFE8F2613C39FA100324F34 /* InboxViewController.m */,
+				7EE7E35813CCB2A800FA3B3A /* InboxTableViewCell.h */,
+				7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */,
 			);
-			name = "Stamps List";
+			name = Inbox;
 			sourceTree = "<group>";
 		};
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
@@ -650,7 +665,7 @@
 				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
 				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
-				7EFE8F2713C39FA100324F34 /* StampsListViewController.xib */,
+				7EFE8F2713C39FA100324F34 /* InboxViewController.xib */,
 				7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */,
 				7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */,
 				7E7612BF13C96B380023CCC4 /* BookDetailViewController.xib */,
@@ -663,6 +678,9 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				7E2267D813D52FF500657A66 /* Model */,
+				7E514AA213C9824D00EEC598 /* Entity Detail */,
+				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
 				7E22679713D4D90F00657A66 /* AccountManager.h */,
 				7E22679813D4D90F00657A66 /* AccountManager.m */,
 				7EF5138B13D240B60028B612 /* STTabBar.h */,
@@ -675,7 +693,6 @@
 				7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */,
 				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
 				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
-				7EE7E35C13CCB2D600FA3B3A /* Stamps List */,
 				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
 				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
@@ -684,7 +701,6 @@
 				7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */,
 				7EC6B4BE13C63DC100CE83DD /* StampEntity.h */,
 				7EC6B4BF13C63DC100CE83DD /* StampEntity.m */,
-				7E514AA213C9824D00EEC598 /* Entity Details */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -839,7 +855,7 @@
 				7EC0178013C3754300ABE6E2 /* InfoPlist.strings in Resources */,
 				7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */,
 				7EC0179513C3754300ABE6E2 /* ActivityViewController.xib in Resources */,
-				7EFE8F2913C39FA200324F34 /* StampsListViewController.xib in Resources */,
+				7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */,
 				7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */,
 				7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */,
 				7EFE8F7D13C3C96D00324F34 /* toolbar_must_do@2x.png in Resources */,
@@ -952,7 +968,7 @@
 				7EC0178313C3754300ABE6E2 /* main.m in Sources */,
 				7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */,
 				7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */,
-				7EFE8F2813C39FA200324F34 /* StampsListViewController.m in Sources */,
+				7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */,
 				7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */,
 				7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */,
 				7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */,
@@ -962,11 +978,13 @@
 				7E7612C013C96B380023CCC4 /* BookDetailViewController.m in Sources */,
 				7E514A9913C97A9700EEC598 /* MusicDetailViewController.m in Sources */,
 				7E514AA713C9827000EEC598 /* FilmDetailViewController.m in Sources */,
-				7EE7E35A13CCB2A800FA3B3A /* StampsListTableViewCell.m in Sources */,
+				7EE7E35A13CCB2A800FA3B3A /* InboxTableViewCell.m in Sources */,
 				7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */,
 				7EF5138D13D240B60028B612 /* STTabBar.m in Sources */,
 				7E22679513D4964700657A66 /* LoginOrSignUpViewController.m in Sources */,
 				7E22679913D4D90F00657A66 /* AccountManager.m in Sources */,
+				7E2267D413D501CB00657A66 /* StampedModel.xcdatamodeld in Sources */,
+				7E2267D713D52E9C00657A66 /* Stamp.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1186,6 +1204,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
+			);
+			currentVersion = 7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */;
+			path = StampedModel.xcdatamodeld;
+			sourceTree = SOURCE_ROOT;
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 7EC0176813C3754300ABE6E2 /* Project object */;
 }
