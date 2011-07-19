@@ -7,8 +7,8 @@ __license__ = "TODO"
 
 import bson, copy, os, pymongo
 
-from ..Exceptions import Fail
-from ..AEntityDB import AEntityDB
+from ...Exceptions import Fail
+from ...AEntityDB import AEntityDB
 from threading import Lock
 from datetime import datetime
 
