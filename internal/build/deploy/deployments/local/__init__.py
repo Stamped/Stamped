@@ -116,23 +116,25 @@ class LocalDeploymentStack(ADeploymentStack):
         self.env = env
         self.root = "/stamped"
         self.path = os.path.join(self.root, self.name)
-        self.instances = utils.OrderedDict([
-            ('dev0' : {
+        self.instances = [
+            {
+                'name' : 'dev0', 
                 'roles' : [ 'web_server', ], 
                 'port_base' : '70217', 
-            }), 
-            ('db0' : {
+            }, 
+            {
+                'name' : 'db0', 
                 'roles' : [ 'db', ], 
-                'mongodb' : {
-                }, 
-            }), 
-        ])
+                'mongodb' : { }, 
+            }, 
+        ]
    
     def create(self):
         self.delete()
         os.system('mkdir -p %s' % self.path)
         
-        for (name, params) in self.instances.iteritems():
+        for instance in self.instances:
+            name = instance['name']
             instance_path = os.path.join(self.path, name)
             os.system('mkdir -p %s' % instance_path)
             instance_bootstrap_path = os.path.join(instance_path, 'bootstrap')
@@ -140,10 +142,10 @@ class LocalDeploymentStack(ADeploymentStack):
             
             #flatten = lambda v: v if not isinstance(v, (tuple, list)) else string.joinfields(v, ',')
             #params_str = string.joinfields(('%s=%s' % (k, flatten(v)) for k, v in params.iteritems()), ' ')
-            params_str = pickle.dumps({ name : params })
+            params_str = pickle.dumps(instance)
             
             self.local('git clone git@github.com:Stamped/stamped-bootstrap.git %s' % instance_bootstrap_path)
-            self.local('python %s %s' % (instance_bootstrap_init_path, params_str))
+            self.local('python %s "%s"' % (instance_bootstrap_init_path, params_str))
     
     def delete(self):
         if os.path.exists(self.path):
