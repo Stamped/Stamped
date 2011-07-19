@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="848" systemVersion="10K540" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="848" systemVersion="11A511" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Account">
         <attribute name="bio" optional="YES" attributeType="String"/>
         <attribute name="displayName" optional="YES" attributeType="String"/>
@@ -8,7 +8,14 @@
         <attribute name="lastName" optional="YES" attributeType="String"/>
         <attribute name="userID" optional="YES" attributeType="String"/>
         <attribute name="website" optional="YES" attributeType="String"/>
+        <relationship name="Colors" optional="YES" toMany="YES" maxCount="2" deletionRule="Nullify" destinationEntity="Color" inverseName="Account" inverseEntity="Color"/>
         <relationship name="Stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="Account" inverseEntity="Stamp"/>
+    </entity>
+    <entity name="Color">
+        <attribute name="blue" optional="YES" attributeType="Float" defaultValueString="0.0"/>
+        <attribute name="green" optional="YES" attributeType="Float" defaultValueString="0.0"/>
+        <attribute name="red" optional="YES" attributeType="Float" defaultValueString="0.0"/>
+        <relationship name="Account" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Account" inverseName="Colors" inverseEntity="Account"/>
     </entity>
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="stampID" optional="YES" attributeType="String"/>
@@ -17,7 +24,8 @@
         <relationship name="Account" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Account" inverseName="Stamps" inverseEntity="Account"/>
     </entity>
     <elements>
-        <element name="Account" positionX="160" positionY="192" width="128" height="165"/>
-        <element name="Stamp" positionX="160" positionY="192" width="128" height="105"/>
+        <element name="Account" positionX="160" positionY="192" width="128" height="180"/>
+        <element name="Stamp" positionX="439" positionY="369" width="128" height="105"/>
+        <element name="Color" positionX="439" positionY="201" width="128" height="105"/>
     </elements>
 </model>
