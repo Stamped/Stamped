@@ -7,3 +7,7 @@ __license__ = "TODO"
 
 class InvalidArgument(Exception):
     pass
+
+class Fail(Exception):
+    pass
+

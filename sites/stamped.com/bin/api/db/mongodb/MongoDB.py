@@ -34,7 +34,7 @@ class Mongo():
         self._collection = self._getCollection(collection)
     
     def _getenv(self, var, default=None):
-        value = env.getenv(var):
+        value = env.getenv(var)
         
         if value is None or value == "":
             if default:
