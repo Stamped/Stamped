@@ -41,14 +41,14 @@ class Mongo():
         self._collection = self._getCollection(collection)
     
     def _getenv_host(self):
-        return self._config.mongodb.host
+        return str(self._config.mongodb.host)
     
     def _getenv_port(self):
-        return self._config.mongodb.port
+        return int(self._config.mongodb.port)
     
     def _getenv_user(self):
         if 'user' in self._config.mongodb:
-            return self._config.mongodb.user
+            return str(self._config.mongodb.user)
         else:
             return 'root'
     
