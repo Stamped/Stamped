@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import bson, copy, env, pymongo
+import bson, copy, os, pymongo
 
 from ..Exceptions import Fail
 from ..AEntityDB import AEntityDB
@@ -34,7 +34,7 @@ class Mongo():
         self._collection = self._getCollection(collection)
     
     def _getenv(self, var, default=None):
-        value = env.getenv(var)
+        value = os.getenv(var)
         
         if value is None or value == "":
             if default:
