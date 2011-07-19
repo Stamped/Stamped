@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <RestKit/RestKit.h>
 
-@interface StampedAppDelegate : NSObject <UIApplicationDelegate>
+@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKObjectLoaderDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;
