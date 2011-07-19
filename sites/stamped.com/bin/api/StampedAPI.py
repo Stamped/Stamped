@@ -86,7 +86,7 @@ class StampedAPI(AStampedAPI):
         }
         
         account.color = { 
-            'primary': None
+            'primary': [0,0,0]
         }
            
         account.flags = { 
@@ -177,9 +177,9 @@ class StampedAPI(AStampedAPI):
             account.website = params.website
         if params.color != None:
             color = params.color.split(',')
-            account.color['primary'] = color[0]
+            account.color['primary'] = color[0].split('-')
             if len(color) == 2:
-                account.color['secondary'] = color[1]
+                account.color['secondary'] = color[1].split('-')
         
         if not account.isValid:
             raise InvalidArgument('Invalid input')
@@ -194,7 +194,7 @@ class StampedAPI(AStampedAPI):
         else:
             result['bio'] = None
         if 'website' in account:
-            result['website'] = account.flags['website']
+            result['website'] = account.website
         else:
             result['website'] = None
         result['color'] = { 
@@ -228,8 +228,11 @@ class StampedAPI(AStampedAPI):
         if userID:
             user = self._userDB.getUser(userID)
         elif screenName:
-            user = self._userDB.lookupUsers(None, [screenName])[-1]
-            print user
+            user = self._userDB.lookupUsers(None, [screenName])
+            if len(user) == 0:
+                return 'error', 400
+            else:
+                user = user[-1]
         else:
             return 'error', 400
         
@@ -244,7 +247,7 @@ class StampedAPI(AStampedAPI):
         else:
             result['bio'] = None
         if 'website' in user:
-            result['website'] = user.flags['website']
+            result['website'] = user['website']
         else:
             result['website'] = None
         result['color'] = { 

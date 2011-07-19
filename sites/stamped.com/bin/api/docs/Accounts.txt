@@ -153,11 +153,11 @@ A brief biography of the user. This is optional but is strongly suggested. The m
 A link to the user's website. This is optional. The maximum length is 140 characters.
 
 **color** _optional_
-The hexidecimal representation of the user's stamp color. If two color are provided they should be separated by a comma.
+The RGB representation of the user's stamp color. Values can range from 0 to 255 and should be separated by a dash ("-"). If two colors are provided they should be separated by a comma (",").
 
 ### Sample Request ###
 	POST https://api.stamped.com/1/account/update_profile.json
-	color=D14836,EC8B3F&bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.
+	color=91+172+253,95+167+56&bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.
 
 ### Sample Result ###
 	{
@@ -168,8 +168,8 @@ The hexidecimal representation of the user's stamp color. If two color are provi
 		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 		"website": null,
 		"color": {
-			"primary": "D14836",
-			"secondary": "EC8B3F"
+			"primary": [91, 172, 253],
+			"secondary": [95, 167, 56]
 		}
 	}
 

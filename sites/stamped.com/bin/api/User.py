@@ -20,8 +20,8 @@ class User(AObject):
         'bio': basestring,
         'website': basestring,
         'color': {
-            'primary': basestring,
-            'secondary': basestring
+            'primary': list,
+            'secondary': list
         },
         'flags': {
             'privacy': bool,
@@ -58,7 +58,7 @@ class User(AObject):
         valid &= 'display_name' in self and isinstance(self.display_name, basestring)
         
         valid &= 'color' in self and isinstance(self.color, dict)
-        valid &= 'primary' in self.color and isinstance(self.color['primary'], basestring)
+        valid &= 'primary' in self.color and isinstance(self.color['primary'], list) and len(self.color['primary']) == 3
         
         valid &= 'flags' in self and isinstance(self.flags, dict)
         valid &= 'privacy' in self.flags and isinstance(self.flags['privacy'], bool)
@@ -71,7 +71,7 @@ class User(AObject):
             valid &= isinstance(self.bio, basestring)
         
         if 'secondary' in self.color and self.color['secondary'] is not None:
-            valid &= isinstance(self.color['secondary'], basestring)
+            valid &= isinstance(self.color['secondary'], list) and len(self.color['secondary']) == 3
         
         if 'flagged' in self.flags:
             valid &= isinstance(self.flags['flagged'], bool)
