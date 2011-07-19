@@ -9,6 +9,7 @@ import bson, copy, os, pymongo
 
 from ...Exceptions import Fail
 from ...AEntityDB import AEntityDB
+from ...Utils import getPythonConfigFile
 from threading import Lock
 from datetime import datetime
 
@@ -24,6 +25,9 @@ class Mongo():
         from subprocess import Popen
         Popen('env', shell=True).wait()
         
+        config_path = Utils.getenv('STAMPED_CONF_PATH')
+        self._config = getPythonConfigFile(config_path, True)
+        
         self._mapping = mapping
         self.user = self._getenv_user()
         self._desc = self.DESC
@@ -36,25 +40,17 @@ class Mongo():
         self._database = self._getDatabase()
         self._collection = self._getCollection(collection)
     
-    def _getenv(self, var, default=None):
-        value = os.getenv(var)
-        
-        if value is None or value == "":
-            if default:
-                return default
-            else:
-                raise Fail("error: environment variable %s not set!" % var)
-        
-        return value
-    
     def _getenv_host(self):
-        return self._getenv('STAMPED_MONGODB_HOST')
+        return self._config.mongodb.host
     
     def _getenv_port(self):
-        return self._getenv('STAMPED_MONGODB_PORT')
+        return self._config.mongodb.port
     
     def _getenv_user(self):
-        return self._getenv('STAMPED_MONGODB_USER', 'root')
+        if 'user' in self._config.mongodb:
+            return self._config.mongodb.user
+        else:
+            return 'root'
     
     def _connect(self):
         return pymongo.Connection(self._host, self._port)
