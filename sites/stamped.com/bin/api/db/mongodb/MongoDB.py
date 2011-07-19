@@ -21,6 +21,9 @@ class Mongo():
     DESC    = 'MongoDB:%s' % (DB)
     
     def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
+        from subprocess import Popen
+        Popen('env', shell=True).wait()
+        
         self._mapping = mapping
         self.user = self._getenv_user()
         self._desc = self.DESC
