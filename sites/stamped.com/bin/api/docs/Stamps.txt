@@ -59,7 +59,11 @@ User information for any users that are named as receiving credit in the stamp. 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"user_image": "user.png", 
-			"user_display_name": "Kevin P."
+			"user_display_name": "Kevin P.", 
+			"user_color": { 
+				"primary": [ "51", "182", "218" ], 
+				"secondary": [ "0", "108", "137" ] 
+			}
 		}
 	}
 
@@ -120,7 +124,11 @@ User information for any users that are named as receiving credit in the stamp. 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"user_image": "user.png", 
-			"user_display_name": "Kevin P."
+			"user_display_name": "Kevin P.", 
+			"user_color": { 
+				"primary": [ "51", "182", "218" ], 
+				"secondary": [ "0", "108", "137" ] 
+			}
 		}
 	}
 
@@ -192,7 +200,11 @@ The user id of the authenticating user. This is necessary for stamps that are pr
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"user_image": "user.png", 
-			"user_display_name": "Kevin P."
+			"user_display_name": "Kevin P.", 
+			"user_color": { 
+				"primary": [ "51", "182", "218" ], 
+				"secondary": [ "0", "108", "137" ] 
+			}
 		}
 	}
 

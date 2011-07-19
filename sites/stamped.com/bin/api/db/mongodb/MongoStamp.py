@@ -35,6 +35,10 @@ class MongoStamp(AStampDB, Mongo):
             'user_id': basestring,
             'user_display_name': basestring,
             'user_image': basestring,
+            'user_color': {
+                'primary': list,
+                'secondary': list
+            }
         },
         'blurb': basestring,
         'image': basestring,

@@ -699,6 +699,11 @@ class StampedAPI(AStampedAPI):
         stamp.user['user_id'] = user.user_id
         stamp.user['user_display_name'] = user.display_name
         stamp.user['user_image'] = user.image
+        stamp.user['user_color'] = {
+            'primary': user.color['primary']
+        }
+        if 'secondary' in user.color:
+            stamp.user['user_color']['secondary'] = user.color['secondary']
         stamp.flags = {}
         stamp.flags['privacy'] = user.flags['privacy']
         

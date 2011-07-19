@@ -45,8 +45,12 @@ The user id of the authenticating user. This is necessary if the requested user 
 			"timestamp": "2011-07-17 05:14:54.128641", 
 			"user": {
 				"user_id": "47cc67093475061e3d95369d", 
-				"user_img": "user.png", 
-				"user_name": "Kevin P"
+				"user_display_name": "Kevin P.",
+				"user_image": "user.png", 
+				"user_color": { 
+					"primary": [ "51", "182", "218" ], 
+					"secondary": [ "0", "108", "137" ] 
+				}
 			}
 		}
 	]
@@ -86,7 +90,16 @@ The user id of the authenticating user.
 			}, 
 			"img": "image3.png", 
 			"credit": null, 
-			"timestamp": "2011-05-12 18:24:44.432141"
+			"timestamp": "2011-05-12 18:24:44.432141",
+			"user": {
+				"user_id": "4e24db9332a7ba42ec000003", 
+				"user_display_name": "Ed K.", 
+				"user_image": "None",
+				"user_color": { 
+					"primary": [ "225", "0", "25" ], 
+					"secondary": [ "255", "91", "91" ] 
+				}
+			}
 		}
 	]
 
