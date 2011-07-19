@@ -160,7 +160,7 @@ The user id of the authenticating user.
 		"bio": "Starting something new in NYC. Former Google product manager.",
 		"website": null,
 		"color": {
-			"primary": "3AD8CC"
+			"primary": [91, 172, 253]
 		},
 	    "last_stamp": {
 			"blurb": "Best burger in the city.", 

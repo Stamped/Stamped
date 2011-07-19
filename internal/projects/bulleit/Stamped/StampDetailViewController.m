@@ -91,10 +91,6 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   activityView_.layer.shadowRadius = 2;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
 
-  // Black, semi-transparent.
-  addCommentField_.keyboardAppearance = UIKeyboardAppearanceAlert;
-  addCommentField_.returnKeyType = UIReturnKeySend;
-
   [self setUpMainContentView];
   [self setUpCommentsView];
 }
@@ -221,7 +217,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 
   CGRect activityFrame = activityView_.frame;
   activityFrame.size.height = fmaxf(kActivityFrameMinHeight, 
-      CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds));
+      CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds)) + 5;
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   

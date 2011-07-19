@@ -28,8 +28,8 @@ class MongoAccount(AAccountDB, Mongo):
         'bio': basestring,
         'website': basestring,
         'color': {
-            'primary': basestring,
-            'secondary': basestring
+            'primary': list,
+            'secondary': list
         },
         'locale': {
             'language': basestring,

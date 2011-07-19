@@ -26,8 +26,8 @@ class MongoUser(AUserDB, Mongo):
         'bio': basestring,
         'website': basestring,
         'color': {
-            'primary': basestring,
-            'secondary': basestring
+            'primary': list,
+            'secondary': list
         },
         'flags': {
             'privacy': bool,

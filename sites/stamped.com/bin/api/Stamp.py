@@ -26,6 +26,10 @@ class Stamp(AObject):
             'user_id': basestring,
             'user_display_name': basestring,
             'user_image': basestring,
+            'user_color': {
+                'primary': list,
+                'secondary': list
+            }
         },
         'blurb': basestring,
         'image': basestring,
@@ -73,6 +77,8 @@ class Stamp(AObject):
         valid &= 'user_id' in self.user and isinstance(self.user['user_id'], basestring)
         valid &= 'user_display_name' in self.user and isinstance(self.user['user_display_name'], basestring)
         valid &= 'user_image' in self.user and isinstance(self.user['user_image'], basestring)
+        valid &= 'user_color' in self.user and isinstance(self.user['user_color'], dict)
+        valid &= 'primary' in self.user['user_color'] and isinstance(self.user['user_color']['primary'], list)
         
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
         valid &= 'created' in self.timestamp and isinstance(self.timestamp['created'], datetime)
