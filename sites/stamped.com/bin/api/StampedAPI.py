@@ -487,7 +487,7 @@ class StampedAPI(AStampedAPI):
             'entity_id': entity.id,
             'title': entity.title,
             'category': entity.category,
-            'subtitle': entity.desc ### TODO: Change to appropriate subtitle
+            'subtitle': entity.subtitle
         }
         if entity.coordinates:
             favorite.entity['coordinates'] = entity.details['place']['coordinates']
@@ -535,6 +535,7 @@ class StampedAPI(AStampedAPI):
     def addEntity(self, params):
         entity = Entity()
         entity.title = params.title
+        entity.subtitle = 'Other'
         entity.desc = params.desc
         entity.category = params.category
         
@@ -567,7 +568,7 @@ class StampedAPI(AStampedAPI):
         result['entity_id'] = self._entityDB.addEntity(entity)
         result['title'] = entity.title
         result['category'] = entity.category
-        result['desc'] = entity.desc
+        result['subtitle'] = entity.subtitle
         
         if 'image' in entity:
             result['image'] = entity.image
@@ -593,7 +594,9 @@ class StampedAPI(AStampedAPI):
         result['entity_id'] = entity.entity_id
         result['title'] = entity.title
         result['category'] = entity.category
-        result['desc'] = entity.desc
+        result['subtitle'] = entity.subtitle
+        if 'desc' in entity:
+            result['desc'] = entity.desc
         
         if 'image' in entity:
             result['image'] = entity.image
@@ -648,7 +651,9 @@ class StampedAPI(AStampedAPI):
         result['entity_id'] = self._entityDB.updateEntity(entity)
         result['title'] = entity.title
         result['category'] = entity.category
-        result['desc'] = entity.desc
+        result['subtitle'] = entity.subtitle
+        if 'desc' in entity:
+            result['desc'] = entity.desc
         
         if 'image' in entity:
             result['image'] = entity.image
@@ -683,10 +688,14 @@ class StampedAPI(AStampedAPI):
         
         for entity in entities:
             data = {}
-            data['entity_id'] = self._entityDB.updateEntity(entity)
+            data['entity_id'] = entity.entity_id
             data['title'] = entity.title
             data['category'] = entity.category
-            data['desc'] = entity.desc
+            data['subtitle'] = entity.subtitle
+            if 'desc' in entity:
+                data['desc'] = entity.desc
+            else:
+                data['desc'] = None
 
             result.append(data)
         
@@ -715,7 +724,7 @@ class StampedAPI(AStampedAPI):
         stamp.entity['entity_id'] = entity.entity_id
         stamp.entity['title'] = entity.title
         stamp.entity['category'] = entity.category
-        stamp.entity['subtitle'] = entity.desc
+        stamp.entity['subtitle'] = entity.subtitle
         if 'details' in entity and 'place' in entity.details and 'coordinates' in entity.details['place']:
             stamp.entity['coordinates'] = {}
             stamp.entity['coordinates']['lat'] = entity.details['place']['coordinates']['lat']
@@ -993,6 +1002,11 @@ class StampedAPI(AStampedAPI):
             if 'flags' in stamp:
                 data['flags'] = stamp['flags']
             
+            if 'blurb' in stamp:
+                data['blurb'] = stamp.blurb
+            else:
+                data['blurb'] = None
+            
             if 'image' in stamp:
                 data['image'] = stamp.image
             else:
@@ -1031,6 +1045,11 @@ class StampedAPI(AStampedAPI):
             
             if 'flags' in stamp:
                 data['flags'] = stamp['flags']
+            
+            if 'blurb' in stamp:
+                data['blurb'] = stamp.blurb
+            else:
+                data['blurb'] = None
             
             if 'image' in stamp:
                 data['image'] = stamp.image

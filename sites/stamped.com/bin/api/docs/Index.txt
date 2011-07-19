@@ -1,0 +1,50 @@
+# STAMPED API #
+
+### [Entities](entities) ###
+* POST entities/create
+* GET entities/show
+* POST entities/update
+* POST entities/remove
+* GET entities/search
+
+### [Stamps](stamps) ###
+* POST stamps/create
+* POST stamps/update
+* POST stamps/remove
+* GET stamps/show
+
+### [Accounts](accounts) ###
+* POST accounts/create
+* POST accounts/settings
+* GET accounts/settings
+* POST account/update_profile
+* POST account/update_profile_image
+* GET account/verify_credentials
+
+### [Users](users) ###
+* GET users/show
+* GET users/lookup
+* GET users/search
+* GET users/privacy
+
+### [Friendships](friendships) ###
+* POST friendships/create
+* GET friendships/check
+* GET friendships/friends
+* GET friendships/followers
+* GET friendships/pending 
+* GET friendships/approve 
+* POST friendships/remove
+* POST friendships/blocks/create 
+* GET friendships/blocks/check 
+* GET friendships/blocking 
+* POST friendships/blocks/remove
+
+### [Comments](comments) ###
+* POST comments/create
+* GET comments/show
+* POST comments/remove
+
+### [Collections](collections) ###
+* GET collections/inbox
+* GET collections/user

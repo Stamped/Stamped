@@ -35,9 +35,9 @@ def main():
 #     
 #     userTest(baseurl)
 #     
-#     entityTest(baseurl)
+    entityTest(baseurl)
 # 
-#     stampTest(baseurl)
+    stampTest(baseurl)
 #     
 #     friendshipTest(baseurl)
 # 

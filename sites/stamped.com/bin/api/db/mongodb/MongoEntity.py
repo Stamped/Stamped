@@ -19,6 +19,7 @@ class MongoEntity(AEntityDB, Mongo):
     SCHEMA = {
         '_id': object, 
         'title': basestring, 
+        'subtitle': basestring,
         'desc': basestring, 
         'locale': basestring, 
         'category': basestring,
