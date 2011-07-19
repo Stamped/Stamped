@@ -8,7 +8,7 @@
 
 #import "RootTabBarViewController.h"
 
-#import "StampsListViewController.h"
+#import "InboxViewController.h"
 #import "ActivityViewController.h"
 
 @implementation RootTabBarViewController
@@ -50,8 +50,8 @@
   // Do this so that there is no title shown.
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
 
-  StampsListViewController* stampsList = [[StampsListViewController alloc]
-      initWithNibName:@"StampsListViewController" bundle:nil];
+  InboxViewController* stampsList = [[InboxViewController alloc]
+      initWithNibName:@"InboxViewController" bundle:nil];
   ActivityViewController* activity = [[ActivityViewController alloc]
       initWithNibName:@"ActivityViewController" bundle:nil];
   self.viewControllers = [NSArray arrayWithObjects:stampsList, activity, nil];
