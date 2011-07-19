@@ -200,6 +200,19 @@ class StampedAPI(AStampedAPI):
         return result
         
     def updateProfileImage(self, params):
+        ### TODO: Grab image and do something with it. Currently just sets as url.
+        
+        account = self._accountDB.getAccount(params.authenticated_user_id)
+        if params.profile_image != None:
+            account.profile_image = params.profile_image
+        
+        if not account.isValid:
+            raise InvalidArgument('Invalid input')
+            
+        result = {}
+        result['user_id'] = self._accountDB.updateAccount(account)
+        result['profile_image'] = account.profile_image
+        return result
         raise NotImplementedError
         
     def verifyAccountCredentials(self, userID):
@@ -756,6 +769,11 @@ class StampedAPI(AStampedAPI):
         result['stamp_id'] = self._stampDB.addStamp(stamp)
         result['entity'] = stamp['entity']
         result['user'] = stamp['user']
+        
+        if 'blurb' in stamp:
+            result['blurb'] = stamp.blurb
+        else:
+            result['blurb'] = None
         
         if 'image' in stamp:
             result['image'] = stamp.image
