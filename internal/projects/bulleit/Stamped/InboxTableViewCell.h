@@ -1,5 +1,5 @@
 //
-//  StampsListTableViewCell.h
+//  InboxTableViewCell.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/12/11.
@@ -11,7 +11,7 @@
 @class StampCellView;
 @class StampEntity;
 
-@interface StampsListTableViewCell : UITableViewCell {
+@interface InboxTableViewCell : UITableViewCell {
  @private  
   StampCellView* customView_;
 }

@@ -1,12 +1,12 @@
 //
-//  StampsListViewController.m
+//  InboxViewController.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/5/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "StampsListViewController.h"
+#import "InboxViewController.h"
 
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
@@ -14,7 +14,7 @@
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 #import "StampEntity.h"
-#import "StampsListTableViewCell.h"
+#import "InboxTableViewCell.h"
 #import "UserImageView.h"
 
 static const CGFloat kFilterRowHeight = 44.0;
@@ -28,7 +28,7 @@ typedef enum {
   StampsListFilterTypeAll
 } StampsListFilterType;
 
-@interface StampsListViewController ()
+@interface InboxViewController ()
 - (void)loadTableData;
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity;
 
@@ -41,7 +41,7 @@ typedef enum {
 @property (nonatomic, retain) UIButton* musicFilterButton;
 @end
 
-@implementation StampsListViewController
+@implementation InboxViewController
 
 @synthesize filterButtons = filterButtons_;
 @synthesize filterView = filterView_;
@@ -223,10 +223,10 @@ typedef enum {
 
 - (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity {
   static NSString* CellIdentifier = @"StampCell";
-  StampsListTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  InboxTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
   if (cell == nil) {
-    cell = [[[StampsListTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
 
   cell.stampEntity = entity;

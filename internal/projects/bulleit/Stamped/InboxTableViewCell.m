@@ -1,12 +1,12 @@
 //
-//  StampsListTableViewCell.m
+//  InboxTableViewCell.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/12/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "StampsListTableViewCell.h"
+#import "InboxTableViewCell.h"
 
 #include <math.h>
 
@@ -268,7 +268,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
 @end
 
 
-@implementation StampsListTableViewCell
+@implementation InboxTableViewCell
 
 @synthesize stampEntity = stampEntity_;
 

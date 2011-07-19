@@ -1,5 +1,5 @@
 //
-//  StampsListViewController.h
+//  InboxViewController.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/5/11.
@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 
-@interface StampsListViewController : UITableViewController<UIScrollViewDelegate> {
+@interface InboxViewController : UITableViewController<UIScrollViewDelegate> {
  @private
   BOOL userDidScroll_;
   NSArray* filterButtons_;
