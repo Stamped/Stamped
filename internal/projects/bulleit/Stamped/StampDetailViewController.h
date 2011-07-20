@@ -9,14 +9,14 @@
 #import <UIKit/UIKit.h>
 
 @class UserImageView;
-@class StampEntity;
+@class Stamp;
 
 @interface StampDetailViewController : UIViewController {
  @private
-  StampEntity* entity_;
+  Stamp* stamp_;
 }
 
-- (id)initWithEntity:(StampEntity*)entity;
+- (id)initWithStamp:(Stamp*)stamp;
 
 @property (nonatomic, retain) IBOutlet UITableViewCell* topHeaderCell;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;

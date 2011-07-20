@@ -7,13 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <RestKit/RestKit.h>
 
-
-@interface InboxViewController : UITableViewController<UIScrollViewDelegate> {
+@interface InboxViewController : UITableViewController<UIScrollViewDelegate, RKObjectLoaderDelegate> {
  @private
   BOOL userDidScroll_;
   NSArray* filterButtons_;
-  NSMutableArray* stampsArray_;
+  NSArray* stampsArray_;
   
   IBOutlet UIView* filterView_;
   IBOutlet UIButton* placesFilterButton_;

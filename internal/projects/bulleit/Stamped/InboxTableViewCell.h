@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @class StampCellView;
-@class StampEntity;
+@class Stamp;
 
 @interface InboxTableViewCell : UITableViewCell {
  @private  
@@ -18,6 +18,6 @@
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
-@property (nonatomic, retain) StampEntity* stampEntity;
+@property (nonatomic, retain) Stamp* stamp;
 
 @end
