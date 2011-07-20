@@ -19,7 +19,7 @@
 }
 
 - (id)transformedValue:(id)value {
-  return UIImagePNGRepresentation(value);
+  return UIImageJPEGRepresentation(value, 1.0);
 }
 
 - (id)reverseTransformedValue:(id)value {

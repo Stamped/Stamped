@@ -11,6 +11,7 @@
 #import <RestKit/RestKit.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "Comment.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
@@ -59,12 +60,18 @@ static NSString* kDataBaseURL = @"http://192.168.0.10:5000/api/v1";
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withObjectMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withObjectMapping:userMapping];
   
+  RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
+  commentMapping.primaryKeyAttribute = @"commentID";
+  [commentMapping mapAttributes:@"blurb", nil];
+  [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
+                                          @"restamp_id", @"restampID",
+                                          @"stamp_id", @"stampID",
+                                          @"last_modified", @"lastModified", nil];
+  [commentMapping mapRelationship:@"user" withObjectMapping:stampMapping];
   // Example date string: 2011-07-19 20:49:42.037000
-	[stampMapping.dateFormatStrings addObject:@"yyyy-MM-dd HH:mm:ss.SSSSSS"];
-  NSDate* now = [NSDate date];
-  NSDateFormatter* weekday = [[[NSDateFormatter alloc] init] autorelease];
-  [weekday setDateFormat: @"yyyy-MM-dd HH:mm:ss.SSSSSS"];
-  NSLog(@"The day of the week is: %@", [weekday stringFromDate:now]);
+  NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
+	[stampMapping.dateFormatStrings addObject:dateFormat];
+  [commentMapping.dateFormatStrings addObject:dateFormat];
   
   [objectManager.mappingProvider setObjectMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setObjectMapping:stampMapping forKeyPath:@"Stamp"];
