@@ -9,7 +9,7 @@ import bson, copy, os, pymongo
 
 from ...Exceptions import Fail
 from ...AEntityDB import AEntityDB
-from ...Utils import getenv, getPythonConfigFile
+from ...Utils import AttributeDict, getenv, getPythonConfigFile
 from threading import Lock
 from datetime import datetime
 
@@ -22,8 +22,17 @@ class Mongo():
     DESC    = 'MongoDB:%s' % (DB)
     
     def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
-        config_path = getenv('STAMPED_CONF_PATH')
-        self._config = getPythonConfigFile(config_path, True)
+        try:
+            config_path = getenv('STAMPED_CONF_PATH')
+            self._config = getPythonConfigFile(config_path, True)
+        except:
+            ### DELETE (eventually)
+            self._config = AttributeDict({
+                'mongodb' : {
+                    'host' : 'ec2-50-19-194-148.compute-1.amazonaws.com', 
+                    'port' : 27017
+                }
+            })
         
         self._mapping = mapping
         self.user = self._getenv_user()
