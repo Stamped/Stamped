@@ -227,85 +227,145 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 <body>
   <div id="wrapper">
     <div id="contentdiv">
-      <h1 id="stampedapi">STAMPED API</h1>
+      <h1 id="favorites">FAVORITES</h1>
 
-<h3 id="entitiesentities"><a href="entities">Entities</a></h3>
+<hr />
 
-<ul>
-<li>POST entities/create</li>
-<li>GET entities/show</li>
-<li>POST entities/update</li>
-<li>POST entities/remove</li>
-<li>GET entities/search</li>
-</ul>
+<h2 id="postfavoritescreate">POST favorites/create</h2>
 
-<h3 id="stampsstamps"><a href="stamps">Stamps</a></h3>
+<h3 id="description">Description</h3>
+
+<p>Add a given entity to the authenticated user&#8217;s list. If inspired a stamp, the stamp&#8217;s unique id is recorded as well.</p>
+
+<h3 id="details">Details</h3>
 
 <ul>
-<li>POST stamps/create</li>
-<li>POST stamps/update</li>
-<li>POST stamps/remove</li>
-<li>GET stamps/show</li>
+<li>Requires Authentication</li>
 </ul>
 
-<h3 id="accountsaccounts"><a href="accounts">Accounts</a></h3>
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>authenticated_user_id</strong> <em>required</em>
+The user id of the authenticating user.</p>
+
+<p><strong>entity_id</strong> <em>required</em>
+The id of the entity added to the list</p>
+
+<p><strong>stamp_id</strong> <em>optional</em>
+The id of the stamp that the entity was saved from. This is used to suggest credit upon completion of the item. </p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/1/favorites/create.json
+authenticated_user_id=4e26294e32a7ba0d4a000004&amp;entity_id=4e26294e32a7ba0d4a000005</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    "complete": false, 
+    "entity": {
+        "category": "Restaurant", 
+        "coordinates": {
+            "lat": 40.714623000000003, 
+            "lng": -74.006604999999993
+        }, 
+        "entity_id": "4e26294e32a7ba0d4a000005", 
+        "subtitle": "Other", 
+        "title": "Little Owl"
+    }, 
+    "favorite_id": "4e26294f32a7ba0d4a000007", 
+    "stamp": {
+        "display_name": "Kevin P.", 
+        "stamp_id": "4e26294e32a7ba0d4a000006"
+    }, 
+    "timestamp": {
+        "created": "2011-07-20 01:03:11.223326"
+    }, 
+    "user_id": "4e26294e32a7ba0d4a000004"
+}</code></pre>
+
+<hr />
+
+<h2 id="getfavoritesshow">GET favorites/show</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Return all favorites for a given user. </p>
+
+<h3 id="details">Details</h3>
 
 <ul>
-<li>POST accounts/create</li>
-<li>POST accounts/settings</li>
-<li>GET accounts/settings</li>
-<li>POST account/update_profile</li>
-<li>POST account/update_profile_image</li>
-<li>GET account/verify_credentials</li>
+<li>Requires Authentication</li>
 </ul>
 
-<h3 id="usersusers"><a href="users">Users</a></h3>
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>authenticated_user_id</strong> <em>required</em>
+The user id of the authenticating user.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/1/favorites/show.json
+authenticated_user_id=4e26294e32a7ba0d4a000004</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<p>[
+    {
+        &#8220;complete&#8221;: false, 
+        &#8220;entity&#8221;: {
+            &#8220;category&#8221;: &#8220;Restaurant&#8221;, 
+            &#8220;coordinates&#8221;: {
+                &#8220;lat&#8221;: 40.714623000000003, 
+                &#8220;lng&#8221;: -74.006604999999993
+            }, 
+            &#8220;entity_id&#8221;: &#8220;4e26294e32a7ba0d4a000005&#8221;, 
+            &#8220;subtitle&#8221;: &#8220;Other&#8221;, 
+            &#8220;title&#8221;: &#8220;Little Owl&#8221;
+        }, 
+        &#8220;favorite_id&#8221;: &#8220;4e26294f32a7ba0d4a000007&#8221;, 
+        &#8220;stamp&#8221;: {
+            &#8220;display_name&#8221;: &#8220;Kevin P.&#8221;, 
+            &#8220;stamp_id&#8221;: &#8220;4e26294e32a7ba0d4a000006&#8221;
+        }, 
+        &#8220;timestamp&#8221;: {
+            &#8220;created&#8221;: &#8220;2011-07-20 01:03:11.223000&#8221;, 
+            &#8220;modified&#8221;: null
+        }, 
+        &#8220;user_id&#8221;: &#8220;4e26294e32a7ba0d4a000004&#8221;
+    }
+]</p>
+
+<hr />
+
+<h2 id="postfavoritesremove">POST favorites/remove</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Remove a given item from the list of favorites. This does not destroy any stamps that were created from the item.</p>
+
+<h3 id="details">Details</h3>
 
 <ul>
-<li>GET users/show</li>
-<li>GET users/lookup</li>
-<li>GET users/search</li>
-<li>GET users/privacy</li>
+<li>Requires Authentication</li>
 </ul>
 
-<h3 id="friendshipsfriendships"><a href="friendships">Friendships</a></h3>
+<h3 id="parameters">Parameters</h3>
 
-<ul>
-<li>POST friendships/create</li>
-<li>GET friendships/check</li>
-<li>GET friendships/friends</li>
-<li>GET friendships/followers</li>
-<li>GET friendships/pending </li>
-<li>GET friendships/approve </li>
-<li>POST friendships/remove</li>
-<li>POST friendships/blocks/create </li>
-<li>GET friendships/blocks/check </li>
-<li>GET friendships/blocking </li>
-<li>POST friendships/blocks/remove</li>
-</ul>
+<p><strong>authenticated_user_id</strong> <em>required</em>
+The user id of the authenticating user.</p>
 
-<h3 id="commentscomments"><a href="comments">Comments</a></h3>
+<p><strong>favorite_id</strong> <em>required</em>
+The unique id of the favorited item.</p>
 
-<ul>
-<li>POST comments/create</li>
-<li>GET comments/show</li>
-<li>POST comments/remove</li>
-</ul>
+<h3 id="samplerequest">Sample Request</h3>
 
-<h3 id="collectionscollections"><a href="collections">Collections</a></h3>
+<pre><code>POST https://api.stamped.com/1/favorites/remove.json
+authenticated_user_id=4e26294e32a7ba0d4a000004&amp;favorite_id=4e26294f32a7ba0d4a000007</code></pre>
 
-<ul>
-<li>GET collections/inbox</li>
-<li>GET collections/user</li>
-</ul>
+<h3 id="sampleresult">Sample Result</h3>
 
-<h3 id="favoritesfavorites"><a href="favorites">Favorites</a></h3>
-
-<ul>
-<li>POST favorites/create</li>
-<li>GET favorites/show</li>
-<li>POST favorites/remove</li>
-</ul>
+<pre><code>true</code></pre>
 
     </div>
 </body>

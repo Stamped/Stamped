@@ -960,9 +960,7 @@ class StampedAPI(AStampedAPI):
         else:
             return False
     
-    def getComments(self, stampID, userID=None):
-#         return self._commentDB.getComments(stampID)
-        
+    def getComments(self, stampID, userID=None):        
         comments = self._commentDB.getComments(stampID)
             
         result = []
@@ -991,9 +989,6 @@ class StampedAPI(AStampedAPI):
             result.append(data)
         
         return result
-        
-        
-        
         
     
     # ########### #
@@ -1096,4 +1091,95 @@ class StampedAPI(AStampedAPI):
     
     def getUserMentions(self, userID, limit=None):
         return self._collectionDB.getUserMentions(userID, limit)
+    
+    # ######### #
+    # Favorites #
+    # ######### #
+    
+    def addFavorite(self, params):
+        favorite = Favorite()
+        
+        user = self._userDB.getUser(params.authenticated_user_id)
+        favorite.user_id = user.user_id
+        
+        entity = self._entityDB.getEntity(params.entity_id)
+        favorite.entity = {}
+        favorite.entity['entity_id'] = entity.entity_id
+        favorite.entity['title'] = entity.title
+        favorite.entity['category'] = entity.category
+        favorite.entity['subtitle'] = entity.subtitle
+        if 'details' in entity and 'place' in entity.details and 'coordinates' in entity.details['place']:
+            favorite.entity['coordinates'] = {}
+            favorite.entity['coordinates']['lat'] = entity.details['place']['coordinates']['lat']
+            favorite.entity['coordinates']['lng'] = entity.details['place']['coordinates']['lng']
+        
+        if params.stamp_id != None:
+            stamp = self._stampDB.getStamp(params.stamp_id)
+            favorite.stamp = {}
+            favorite.stamp['stamp_id'] = stamp.stamp_id
+            favorite.stamp['display_name'] = stamp.user['display_name']
+                
+        favorite.timestamp = {
+            'created': datetime.utcnow()
+        }   
+        
+        favorite.complete = False
+        
+        if not favorite.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        result = {}
+        result['favorite_id'] = self._favoriteDB.addFavorite(favorite)
+        result['user_id'] = favorite.user_id
+        result['entity'] = favorite.entity
+        if 'stamp' in favorite:
+            result['stamp'] = favorite.stamp
+        else:
+            result['stamp'] = None
+            
+        result['timestamp'] = {}
+        if 'created' in favorite.timestamp:
+            result['timestamp']['created'] = str(favorite.timestamp['created'])
+            
+        result['complete'] = favorite.complete
+        
+        return result
+    
+    def removeFavorite(self, params):
+        if self._favoriteDB.removeFavorite(params.favorite_id):
+            return True
+        return False
+    
+    def getFavorites(self, userID):        
+        favorites = self._favoriteDB.getFavorites(userID)
+            
+        result = []
+        for favorite in favorites:
+            data = {}
+            data['favorite_id'] = favorite.favorite_id
+            data['user_id'] = favorite.user_id
+            data['entity'] = favorite.entity
+            if 'stamp' in favorite:
+                data['stamp'] = favorite.stamp
+            else:
+                data['stamp'] = None
+                
+            data['timestamp'] = {}
+            if 'created' in favorite.timestamp:
+                data['timestamp']['created'] = str(favorite.timestamp['created'])
+            else:
+                data['timestamp']['created'] = None
+            if 'modified' in favorite.timestamp:
+                data['timestamp']['modified'] = str(favorite.timestamp['modified'])
+            else:
+                data['timestamp']['modified'] = None
+                
+            if 'complete' in favorite:
+                data['complete'] = favorite.complete
+            else:
+                data['complete'] = False
+            
+            result.append(data)
+        
+        return result
 

@@ -13,7 +13,9 @@
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 
-#import "StampEntity.h"
+#import "Entity.h"
+#import "Stamp.h"
+#import "User.h"
 #import "UserImageView.h"
 
 static NSString* kTitleFontString = @"TGLight";
@@ -270,7 +272,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
 
 @implementation InboxTableViewCell
 
-@synthesize stampEntity = stampEntity_;
+@synthesize stamp = stamp_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
@@ -286,13 +288,8 @@ static const CGFloat kTitleMaxWidth = 210.0;
 }
 
 - (void)dealloc {  
-  self.stampEntity = nil;
+  self.stamp = nil;
   [super dealloc];
-}
-
-- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
-  //[customView_ setHighlighted:highlighted animated:animated];
-  [super setHighlighted:highlighted animated:animated];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
@@ -300,18 +297,16 @@ static const CGFloat kTitleMaxWidth = 210.0;
   [customView_ setSelected:selected animated:animated];
 }
 
-- (void)setStampEntity:(StampEntity*)stampEntity {
-  if (stampEntity != stampEntity_) {
-    [stampEntity_ release];
-    stampEntity_ = [stampEntity retain];
-    customView_.userImage = stampEntity.userImage;
-    customView_.stampImage = stampEntity.stampImage;
-    customView_.title = stampEntity.name;
-    customView_.typeImage = stampEntity.categoryImage;
-    customView_.userName = stampEntity.userName;
-    
-    if (stampEntity.comment)
-      customView_.comment = stampEntity.comment;
+- (void)setStamp:(Stamp*)stamp {
+  if (stamp != stamp_) {
+    [stamp_ release];
+    stamp_ = [stamp retain];
+    //customView_.userImage = stamp.user.userImage;
+    customView_.stampImage = stamp.user.stampImage;
+    customView_.title = stamp.entityObject.title;
+    customView_.typeImage = stamp.categoryImage;
+    customView_.userName = stamp.user.displayName;
+    customView_.comment = stamp.blurb;
   }
 }
 

@@ -31,7 +31,7 @@ def main():
     baseurl = "http://0.0.0.0:5000/api/v1"
 #     baseurl = "http://50.19.163.247:5000/api/v1"
     
-    accountTest(baseurl)
+#     accountTest(baseurl)
 #     
 #     userTest(baseurl)
 #     
@@ -44,6 +44,11 @@ def main():
 #     collectionTest(baseurl)
 #
 #     commentTest(baseurl)
+#
+    favoriteTest(baseurl)
+ 
+    print '      COMPLETE'
+    print   
     
 
     
@@ -1021,6 +1026,152 @@ def commentTest(baseurl):
     data = {
         "comment_id": commentID,
         "authenticated_user_id": userID
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "stamps/remove.json"
+    data = {
+        "authenticated_user_id": userID,
+        "stamp_id": stampID
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
+        print 'DATA: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "entities/remove.json"
+    data = {
+        "authenticated_user_id": userID,
+        "entity_id": entityID
+    }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/remove.json"
+    data = { "authenticated_user_id": userID }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    print
+
+    
+    
+# ######### #
+# Favorites #
+# ######### #
+
+def favoriteTest(baseurl):
+
+    print    
+    print '      FAVORITE'
+    
+    
+    path = "account/create.json"
+    data = {
+        "first_name": "Kevin",
+        "last_name": "Palms", 
+        "email": "kevin@stamped.com", 
+        "password": "******",
+        "screen_name": "kpalms"
+    }
+    userID = testPOST(baseurl, path, data)['user_id']
+    if len(userID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+        
+    
+    path = "entities/create.json"
+    data = {
+        "authenticated_user_id": userID,
+        "title": "Little Owl",
+        "desc": "American food in the West Village", 
+        "category": "Restaurant",
+        "coordinates": "40.714623,-74.006605"
+    }
+    entityID = testPOST(baseurl, path, data)['entity_id']
+    if len(entityID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entityID
+        raise Exception
+        
+    
+    path = "stamps/create.json"
+    data = {
+        "authenticated_user_id": userID,
+        "entity_id": entityID,
+        "blurb": "Favorite restaurant in the Village.", 
+        "image": "image.png",
+        "mentions": "userA,userB"
+    }
+    stampID = testPOST(baseurl, path, data)['stamp_id']
+    if len(stampID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'result: %s' % path
+        print stampID
+        raise Exception
+                
+    
+    path = "favorites/create.json"
+    data = {
+        "authenticated_user_id": userID,
+        "entity_id": entityID,
+        "stamp_id": stampID
+    }
+    favoriteID = testPOST(baseurl, path, data)['favorite_id']
+    if len(favoriteID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "favorites/show.json"
+    data = {
+        "authenticated_user_id": userID
+    }
+    result = testGET(baseurl, path, data)
+    if result[-1]['complete'] == False:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "favorites/remove.json"
+    data = {
+        "authenticated_user_id": userID,
+        "favorite_id": favoriteID
     }
     result = testPOST(baseurl, path, data)
     if result == True:

@@ -6,14 +6,14 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-@class StampEntity;
+@class Stamp;
 
 @interface EntityDetailViewController : UIViewController {
  @protected
-  StampEntity* entity_;
+  Stamp* stamp_;
 }
 
-- (id)initWithNibName:(NSString*)nibNameOrNil entity:(StampEntity*)entity;
+- (id)initWithNibName:(NSString*)nibNameOrNil stamp:(Stamp*)stamp;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;

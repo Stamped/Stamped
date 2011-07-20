@@ -8,11 +8,14 @@
 
 #import "StampedAppDelegate.h"
 
+#import <RestKit/RestKit.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "Entity.h"
 #import "Stamp.h"
+#import "User.h"
 
-static NSString* kDataBaseURL = @"http://50.19.163.247:5000/api/v1";
+static NSString* kDataBaseURL = @"http://192.168.0.10:5000/api/v1";
 
 @implementation StampedAppDelegate
 
@@ -20,57 +23,48 @@ static NSString* kDataBaseURL = @"http://50.19.163.247:5000/api/v1";
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-#if 0
-  RKLogConfigureByName("RestKit/ObjectMapping", RKLogLevelDebug);
+  // RKLogConfigureByName("RestKit/ObjectMapping", RKLogLevelDebug);
   [RKRequestQueue sharedQueue].showsNetworkActivityIndicatorWhenBusy = YES;
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
-  
+
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
-  RKManagedObjectMapping* accountMapping = [RKManagedObjectMapping mappingForEntityWithName:@"Account"];
-  accountMapping.primaryKeyAttribute = @"userID";
-  [accountMapping mapKeyPathsToAttributes:@"user_id", @"userID",
-                                          @"first_name", @"firstName",
-                                          @"last_name", @"lastName",
-                                          @"display_name", @"displayName",
-                                          nil];
-  [accountMapping mapAttributes:@"bio", @"website", @"email", nil];
+  RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
+  userMapping.primaryKeyAttribute = @"userID";
+  [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
+                                       @"first_name", @"firstName",
+                                       @"last_name", @"lastName",
+                                       @"display_name", @"displayName",
+                                       @"color_primary", @"primaryColor",
+                                       @"color_secondary", @"secondaryColor",
+                                       @"profile_image", @"profileImageURL",
+                                       @"screen_name", @"screenName",
+                                       nil];
+  [userMapping mapAttributes:@"bio", @"website", nil];
   
+  RKManagedObjectMapping* coordinateMapping = [RKManagedObjectMapping mappingForEntityWithName:@"Coordinate"];
+  [coordinateMapping mapAttributes:@"lat", @"lng", nil];
+
+  RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
+  entityMapping.primaryKeyAttribute = @"entityID";
+  [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", nil];
+  [entityMapping mapAttributes:@"category", @"subtitle", @"title", nil];
+  [entityMapping mapRelationship:@"coordinates" withObjectMapping:coordinateMapping];  
+
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
   stampMapping.primaryKeyAttribute = @"stampID";
   [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID", nil];
-  [stampMapping mapAttributes:@"title", @"subtitle", nil];
-  //[stampMapping mapRelationship:@"user" withObjectMapping:accountMapping];
+  [stampMapping mapAttributes:@"blurb", nil];
+  [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withObjectMapping:entityMapping];
+  [stampMapping mapRelationship:@"user" withObjectMapping:userMapping];
   
-  [objectManager.mappingProvider setObjectMapping:accountMapping forKeyPath:@"Account"];
+  [objectManager.mappingProvider setObjectMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setObjectMapping:stampMapping forKeyPath:@"Stamp"];
-  
-  
-  [objectManager loadObjectsAtResourcePath:@"/users/show.json?screen_name=sample_andybons" objectMapping:accountMapping delegate:self];
-  [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e24db9332a7ba42ec000006" objectMapping:stampMapping delegate:self];
-#endif
+  [objectManager.mappingProvider setObjectMapping:entityMapping forKeyPath:@"Entity"];
+
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];
   return YES;
-}
-
-#pragma mark - RKObjectLoaderDelegate methods.
-
-- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-	NSLog(@"Loaded stamps: %@", objects);
-	//[self loadObjectsFromDataStore];
-	//[_tableView reloadData];
-}
-
-- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error" 
-                                                   message:[error localizedDescription] 
-                                                  delegate:nil 
-                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-	[alert show];
-	NSLog(@"Hit error: %@", error);
 }
 
 - (void)applicationWillResignActive:(UIApplication*)application {

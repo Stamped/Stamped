@@ -29,19 +29,15 @@ class MongoFavorite(AFavoriteDB, Mongo):
             'category': basestring,
             'subtitle': basestring
         },
-        'user': {
-            'user_id': basestring,
-            'user_name': basestring
-        },
+        'user_id': basestring,
         'stamp': {
             'stamp_id': basestring,
-            'stamp_blurb': basestring,      # ??
-            'stamp_timestamp': basestring,
-            'stamp_user_id': basestring,    # ??
-            'stamp_user_name': basestring,
-            'stamp_user_img': basestring    # ??
+            'display_name': basestring
         },
-        'timestamp': datetime,
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
+        },
         'complete': bool
     }
     
@@ -56,12 +52,12 @@ class MongoFavorite(AFavoriteDB, Mongo):
     ### PUBLIC
     
     def addFavorite(self, favorite):
-        favoriteId = self._addDocument(favorite)
-        MongoUserFavorites().addUserFavorite(favorite['user']['user_id'], favoriteId)
+        favoriteId = self._addDocument(favorite, 'favorite_id')
+        MongoUserFavorites().addUserFavorite(favorite['user_id'], favoriteId)
         return favoriteId
     
     def getFavorite(self, favoriteId):
-        favorite = Favorite(self._getDocumentFromId(favoriteId))
+        favorite = Favorite(self._getDocumentFromId(favoriteId, 'favorite_id'))
         if favorite.isValid == False:
             raise KeyError("Favorite not valid")
         return favorite
@@ -83,7 +79,7 @@ class MongoFavorite(AFavoriteDB, Mongo):
         return MongoUserFavorites().getUserFavoriteIds(userId)
     
     def getFavorites(self, userId):
-        favorites = self._getDocumentsFromIds(self.getFavoriteIds(userId))
+        favorites = self._getDocumentsFromIds(self.getFavoriteIDs(userId), 'favorite_id')
         result = []
         for favorite in favorites:
             favorite = Favorite(favorite)

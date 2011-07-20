@@ -10,7 +10,8 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-#import "StampEntity.h"
+#import "Entity.h"
+#import "Stamp.h"
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 
@@ -26,10 +27,10 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize mainActionButton = mainActionButton_;
 @synthesize mainActionLabel = mainActionLabel_;
 
-- (id)initWithNibName:(NSString*)nibNameOrNil entity:(StampEntity*)entity {
+- (id)initWithNibName:(NSString*)nibNameOrNil stamp:(Stamp*)stamp {
   self = [self initWithNibName:nibNameOrNil bundle:nil];
   if (self) {
-    entity_ = [entity retain];
+    stamp_ = [stamp retain];
   }
   return self;
 }
@@ -40,7 +41,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainActionLabel = nil;
   self.mainActionButton = nil;
   self.scrollView = nil;
-  [entity_ release];
+  [stamp_ release];
   [super dealloc];
 }
 
@@ -63,7 +64,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   backgroundGradient.frame = self.view.bounds;
   [self.view.layer insertSublayer:backgroundGradient atIndex:0];
   [backgroundGradient release];
-  titleLabel_.text = entity_.name;
+  titleLabel_.text = stamp_.entityObject.title;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   descriptionLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];

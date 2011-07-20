@@ -16,7 +16,9 @@
 #import "PlaceDetailViewController.h"
 #import "BookDetailViewController.h"
 #import "MusicDetailViewController.h"
-#import "StampEntity.h"
+#import "Entity.h"
+#import "Stamp.h"
+#import "User.h"
 #import "StampedAppDelegate.h"
 #import "UserImageView.h"
 
@@ -44,16 +46,16 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
 
-- (id)initWithEntity:(StampEntity*)entity {
+- (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:@"StampDetailViewController" bundle:nil];
   if (self) {
-    entity_ = [entity retain];
+    stamp_ = [stamp retain];
   }
   return self;
 }
 
 - (void)dealloc {
-  [entity_ release];
+  [stamp_ release];
 
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
@@ -110,13 +112,13 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 - (void)setUpHeader {
   NSString* fontString = @"TitlingGothicFBComp-Regular";
   CGFloat fontSize = 36.0;
-  CGSize stringSize = [entity_.name sizeWithFont:[UIFont fontWithName:fontString size:fontSize]
-                                        forWidth:280
-                                   lineBreakMode:UILineBreakModeTailTruncation];
+  CGSize stringSize = [stamp_.entityObject.title sizeWithFont:[UIFont fontWithName:fontString size:fontSize]
+                                                     forWidth:280
+                                                lineBreakMode:UILineBreakModeTailTruncation];
   
   UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 11, stringSize.width, stringSize.height)];
   nameLabel.font = [UIFont fontWithName:fontString size:fontSize];
-  nameLabel.text = entity_.name;
+  nameLabel.text = stamp_.entityObject.title;
   nameLabel.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   nameLabel.backgroundColor = [UIColor clearColor];
   
@@ -125,7 +127,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   stampLayer.frame = CGRectMake(15 + stringSize.width - (46 / 2),
                                 11 - (46 / 2),
                                 46, 46);
-  stampLayer.contents = (id)entity_.stampImage.CGImage;
+  stampLayer.contents = (id)stamp_.user.stampImage.CGImage;
   
   [topHeaderCell_.contentView.layer addSublayer:stampLayer];
   [topHeaderCell_.contentView addSubview:nameLabel];
@@ -134,7 +136,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
-  typeIconLayer.contents = (id)entity_.categoryImage.CGImage;
+  typeIconLayer.contents = (id)stamp_.categoryImage.CGImage;
   typeIconLayer.frame = CGRectMake(15, 48, 12, 12);
   [topHeaderCell_.layer addSublayer:typeIconLayer];
   [typeIconLayer release];
@@ -143,7 +145,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
       [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 3, 48, 258, 15)];
   detailLabel.opaque = NO;
   detailLabel.backgroundColor = [UIColor clearColor];
-  detailLabel.text = entity_.detail;
+  detailLabel.text = stamp_.entityObject.subtitle;
   detailLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:11];
   detailLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   [topHeaderCell_ addSubview:detailLabel];
@@ -178,17 +180,17 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 }
 
 - (void)setUpMainContentView {
-  commenterImageView_.image = entity_.userImage;
+  //commenterImageView_.image = stamp_.userImage;
 
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
-  CGSize stringSize = [entity_.userName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
-                                            forWidth:218
-                                       lineBreakMode:UILineBreakModeTailTruncation];
+  CGSize stringSize = [stamp_.user.displayName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
+                                                   forWidth:218
+                                              lineBreakMode:UILineBreakModeTailTruncation];
   CGRect nameLabelFrame = commenterNameLabel_.frame;
   nameLabelFrame.size = stringSize;
   commenterNameLabel_.frame = nameLabelFrame;
   commenterNameLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  commenterNameLabel_.text = entity_.userName;
+  commenterNameLabel_.text = stamp_.user.displayName;
 
   stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"HelveticaNeue" size:14]
                                forWidth:60
@@ -198,20 +200,17 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   stampedFrame.size = stringSize;
   stampedLabel_.frame = stampedFrame;
   stampedLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
- 
-  if (!entity_.comment)
-    return;
 
   // TODO(andybons): Use this pattern for labels.
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
   UIFont* commentFont = [UIFont fontWithName:@"HelveticaNeue" size:14];
   commentLabel.font = commentFont;
   commentLabel.textColor = [UIColor colorWithWhite:0.2 alpha:1.0];
-  commentLabel.text = entity_.comment;
+  commentLabel.text = stamp_.blurb;
   commentLabel.numberOfLines = 0;
-  stringSize = [entity_.comment sizeWithFont:commentFont
-                           constrainedToSize:CGSizeMake(210, MAXFLOAT)
-                               lineBreakMode:commentLabel.lineBreakMode];
+  stringSize = [stamp_.blurb sizeWithFont:commentFont
+                        constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                            lineBreakMode:commentLabel.lineBreakMode];
   commentLabel.frame = CGRectMake(leftPadding, 29, stringSize.width, stringSize.height);
   [activityView_ addSubview:commentLabel];
 
@@ -241,21 +240,21 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 
   [addCommentField_ resignFirstResponder];
   EntityDetailViewController* detailViewController = nil;
-  switch (entity_.type) {
-    case StampEntityTypePlace:
-      detailViewController = [[PlaceDetailViewController alloc] initWithNibName:@"PlaceDetailViewController" entity:entity_];
+  switch (stamp_.category) {
+    case StampCategoryPlace:
+      detailViewController = [[PlaceDetailViewController alloc] initWithNibName:@"PlaceDetailViewController" stamp:stamp_];
       break;
-    case StampEntityTypeBook:
-      detailViewController = [[BookDetailViewController alloc] initWithNibName:@"BookDetailViewController" entity:entity_];
+    case StampCategoryBook:
+      detailViewController = [[BookDetailViewController alloc] initWithNibName:@"BookDetailViewController" stamp:stamp_];
       break;
-    case StampEntityTypeMusic:
-      detailViewController = [[MusicDetailViewController alloc] initWithNibName:@"MusicDetailViewController" entity:entity_];
+    case StampCategoryMusic:
+      detailViewController = [[MusicDetailViewController alloc] initWithNibName:@"MusicDetailViewController" stamp:stamp_];
       break;
-    case StampEntityTypeFilm:
-      detailViewController = [[FilmDetailViewController alloc] initWithNibName:@"FilmDetailViewController" entity:entity_];
+    case StampCategoryFilm:
+      detailViewController = [[FilmDetailViewController alloc] initWithNibName:@"FilmDetailViewController" stamp:stamp_];
       break;
     default:
-      detailViewController = [[EntityDetailViewController alloc] initWithNibName:@"EntityDetailViewController" entity:entity_];
+      detailViewController = [[EntityDetailViewController alloc] initWithNibName:@"EntityDetailViewController" stamp:stamp_];
       break;
   }
   // Pass the selected object to the new view controller.

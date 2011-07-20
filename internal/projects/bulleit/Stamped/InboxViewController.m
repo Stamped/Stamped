@@ -10,10 +10,12 @@
 
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/CoreData/CoreData.h>
 
+#import "Entity.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
-#import "StampEntity.h"
+#import "Stamp.h"
 #import "InboxTableViewCell.h"
 #import "UserImageView.h"
 
@@ -30,10 +32,11 @@ typedef enum {
 
 @interface InboxViewController ()
 - (void)loadTableData;
-- (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity;
+- (void)loadStampsFromDataStore;
+- (UITableViewCell*)cellForTableView:(UITableView*)tableView withStamp:(Stamp*)stamp;
 
 @property (nonatomic, copy) NSArray* filterButtons;
-@property (nonatomic, retain) NSMutableArray* stampsArray;
+@property (nonatomic, retain) NSArray* stampsArray;
 @property (nonatomic, assign) UIView* filterView;
 @property (nonatomic, retain) UIButton* placesFilterButton;
 @property (nonatomic, retain) UIButton* booksFilterButton;
@@ -125,7 +128,7 @@ typedef enum {
 
 - (void)loadTableData {
   // Load dummy data.
-  NSString* data = [NSString stringWithContentsOfFile:
+  /*NSString* data = [NSString stringWithContentsOfFile:
       [[NSBundle mainBundle] pathForResource:@"stamp_data" ofType:@"csv"]
                                     encoding:NSStringEncodingConversionAllowLossy
                                        error:NULL];
@@ -192,7 +195,22 @@ typedef enum {
     }
 
     [stampsArray_ addObject:entity];
-  }
+  }*/
+  
+  // Load real data.
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
+  [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e25ede432a7ba84600000c0"
+                             objectMapping:stampMapping
+                                  delegate:self];
+}
+
+- (void)loadStampsFromDataStore {
+  self.stampsArray = nil;
+	NSFetchRequest* request = [Stamp fetchRequest];
+	//NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"createdAt" ascending:NO];
+	//[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+	self.stampsArray = [Stamp objectsWithFetchRequest:request];
 }
 
 #pragma mark - Filter stuff
@@ -202,8 +220,7 @@ typedef enum {
   for (UIButton* button in self.filterButtons)
     button.selected = (button == selectedButton && !button.selected);
 
-  [self loadTableData];
-  [self.tableView reloadData];
+  //[self loadTableData];
 }
 
 #pragma mark - Table view data source
@@ -218,20 +235,37 @@ typedef enum {
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  return [self cellForTableView:tableView withEntity:[stampsArray_ objectAtIndex:indexPath.row]];
+  return [self cellForTableView:tableView withStamp:[stampsArray_ objectAtIndex:indexPath.row]];
 }
 
-- (UITableViewCell*)cellForTableView:(UITableView*)tableView withEntity:(StampEntity*)entity {
+- (UITableViewCell*)cellForTableView:(UITableView*)tableView withStamp:(Stamp*)stamp {
   static NSString* CellIdentifier = @"StampCell";
   InboxTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-
-  cell.stampEntity = entity;
+  cell.stamp = stamp;
 
   return cell;
+}
+
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	[self loadStampsFromDataStore];
+	[self.tableView reloadData];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                   message:[error localizedDescription] 
+                                                  delegate:nil 
+                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
+	[alert show];
+	NSLog(@"Hit error: %@", error);
 }
 
 #pragma mark - Table view delegate
@@ -242,7 +276,7 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   StampDetailViewController* detailViewController =
-      [[StampDetailViewController alloc] initWithEntity:[stampsArray_ objectAtIndex:indexPath.row]];
+      [[StampDetailViewController alloc] initWithStamp:[stampsArray_ objectAtIndex:indexPath.row]];
 
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
