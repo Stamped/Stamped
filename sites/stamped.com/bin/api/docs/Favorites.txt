@@ -1,0 +1,124 @@
+
+# FAVORITES #
+
+
+------------------------------------------------------------------------------
+## POST favorites/create ##
+
+### Description ###
+Add a given entity to the authenticated user's list. If inspired a stamp, the stamp's unique id is recorded as well.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**entity_id** _required_
+The id of the entity added to the list
+
+**stamp_id** _optional_
+The id of the stamp that the entity was saved from. This is used to suggest credit upon completion of the item. 
+
+### Sample Request ###
+	POST https://api.stamped.com/1/favorites/create.json
+	authenticated_user_id=4e26294e32a7ba0d4a000004&entity_id=4e26294e32a7ba0d4a000005
+
+### Sample Result ###
+	{
+		"complete": false, 
+		"entity": {
+			"category": "Restaurant", 
+			"coordinates": {
+				"lat": 40.714623000000003, 
+				"lng": -74.006604999999993
+			}, 
+			"entity_id": "4e26294e32a7ba0d4a000005", 
+			"subtitle": "Other", 
+			"title": "Little Owl"
+		}, 
+		"favorite_id": "4e26294f32a7ba0d4a000007", 
+		"stamp": {
+			"display_name": "Kevin P.", 
+			"stamp_id": "4e26294e32a7ba0d4a000006"
+		}, 
+		"timestamp": {
+			"created": "2011-07-20 01:03:11.223326"
+		}, 
+		"user_id": "4e26294e32a7ba0d4a000004"
+	}
+
+
+------------------------------------------------------------------------------
+## GET favorites/show ##
+
+### Description ###
+Return all favorites for a given user. 
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/favorites/show.json
+	authenticated_user_id=4e26294e32a7ba0d4a000004
+
+### Sample Result ###
+[
+	{
+		"complete": false, 
+		"entity": {
+			"category": "Restaurant", 
+			"coordinates": {
+				"lat": 40.714623000000003, 
+				"lng": -74.006604999999993
+			}, 
+			"entity_id": "4e26294e32a7ba0d4a000005", 
+			"subtitle": "Other", 
+			"title": "Little Owl"
+		}, 
+		"favorite_id": "4e26294f32a7ba0d4a000007", 
+		"stamp": {
+			"display_name": "Kevin P.", 
+			"stamp_id": "4e26294e32a7ba0d4a000006"
+		}, 
+		"timestamp": {
+			"created": "2011-07-20 01:03:11.223000", 
+			"modified": null
+		}, 
+		"user_id": "4e26294e32a7ba0d4a000004"
+	}
+]
+
+
+------------------------------------------------------------------------------
+## POST favorites/remove ##
+
+### Description ###
+Remove a given item from the list of favorites. This does not destroy any stamps that were created from the item.
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+**favorite_id** _required_
+The unique id of the favorited item.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/favorites/remove.json
+	authenticated_user_id=4e26294e32a7ba0d4a000004&favorite_id=4e26294f32a7ba0d4a000007
+
+### Sample Result ###
+	true
+
+

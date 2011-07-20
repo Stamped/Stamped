@@ -48,3 +48,9 @@
 ### [Collections](collections) ###
 * GET collections/inbox
 * GET collections/user
+
+### [Favorites](favorites) ###
+* POST favorites/create
+* GET favorites/show
+* POST favorites/remove
+

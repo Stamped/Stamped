@@ -432,6 +432,31 @@ def getUserStamps():
 def getUserMentions():
     return handleGETRequest(request, stampedAPI.getUserMentions, [ 'user_id', 'limit' ])
 
+# ######### #
+# Favorites #
+# ######### #
+
+@app.route(REST_API_PREFIX + 'favorites/create.json', methods=['POST'])
+def addFavorite():
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("entity_id",             ResourceArgument(required=True, expectedType=basestring)), 
+        ("stamp_id",              ResourceArgument(expectedType=basestring))
+    ])
+    return handlePOSTRequest(request, stampedAPI.addFavorite, schema)
+
+@app.route(REST_API_PREFIX + 'favorites/remove.json', methods=['POST'])
+def removeFavorite():
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("favorite_id",           ResourceArgument(required=True, expectedType=basestring))
+    ])
+    return handlePOSTRequest(request, stampedAPI.removeFavorite, schema)
+
+@app.route(REST_API_PREFIX + 'favorites/show.json', methods=['GET'])
+def getFavorites():
+    return handleGETRequest(request, stampedAPI.getFavorites, [ 'authenticated_user_id' ])
+
 # ############# #
 # Miscellaneous #
 # ############# #

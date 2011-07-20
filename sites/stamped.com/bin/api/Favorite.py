@@ -6,13 +6,12 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from datetime import datetime
-
 from AObject import AObject
 
 class Favorite(AObject):
 
     _schema = {
-        'id': basestring,
+        'favorite_id': basestring,
         'entity': {
             'entity_id': basestring,
             'title': basestring,
@@ -23,19 +22,15 @@ class Favorite(AObject):
             'category': basestring,
             'subtitle': basestring
         },
-        'user': {
-            'user_id': basestring,
-            'user_name': basestring
-        },
+        'user_id': basestring,
         'stamp': {
             'stamp_id': basestring,
-            'stamp_blurb': basestring,      # ??
-            'stamp_timestamp': basestring,
-            'stamp_user_id': basestring,    # ??
-            'stamp_user_name': basestring,
-            'stamp_user_img': basestring    # ??
+            'display_name': basestring
         },
-        'timestamp': datetime,
+        'timestamp': {
+            'created': datetime,
+            'modified': datetime
+        },
         'complete': bool
     }
     
@@ -61,20 +56,19 @@ class Favorite(AObject):
             if 'lng' in self.entity['coordinates']:
                 valid &= isinstance(self.entity['coordinates']['lng'], float)
         
-        valid &= 'user' in self and isinstance(self.user, dict)
-        valid &= 'user_id' in self.user and isinstance(self.user['user_id'], basestring)
-        valid &= 'user_name' in self.user and isinstance(self.user['user_name'], basestring)
+        valid &= 'user_id' in self and isinstance(self.user_id, basestring)
         
         if 'stamp' in self:
             valid &= isinstance(self.stamp, dict) 
             valid &= 'stamp_id' in self.stamp and isinstance(self.stamp['stamp_id'], basestring)
-            valid &= 'stamp_blurb' in self.stamp and isinstance(self.stamp['stamp_blurb'], basestring)
-            valid &= 'stamp_timestamp' in self.stamp and isinstance(self.stamp['stamp_timestamp'], basestring)
-            valid &= 'stamp_user_id' in self.stamp and isinstance(self.stamp['stamp_user_id'], basestring)
-            valid &= 'stamp_user_name' in self.stamp and isinstance(self.stamp['stamp_user_name'], basestring)
-            valid &= 'stamp_user_img' in self.stamp and isinstance(self.stamp['stamp_user_img'], basestring)
+            valid &= 'display_name' in self.stamp and isinstance(self.stamp['display_name'], basestring)
         
-        valid &= 'timestamp' in self and isinstance(self.timestamp, datetime)
+        valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
+        if 'created' in self.timestamp:
+            valid &= isinstance(self.timestamp['created'], datetime) 
+        if 'modified' in self.timestamp:
+            valid &= isinstance(self.timestamp['modified'], datetime) 
+        
         if 'complete' in self:
             valid &= isinstance(self.complete, bool)
             
