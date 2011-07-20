@@ -41,6 +41,12 @@ static const CGFloat kTitleMaxWidth = 210.0;
   CATextLayer* titleLayer_;
 
   // NOT managed. Must manage ownership.
+  UIColor* defaultTitleColor_;
+  UIColor* defaultSubstringColor_;
+  UIColor* whiteColor_;
+  CTFontRef titleFont_;
+  CTParagraphStyleRef titleStyle_;
+  NSMutableDictionary* titleAttributes_;
   CGRect stampImageFrame_;
   CGFloat userImageRightMargin_;
 }
@@ -80,9 +86,14 @@ static const CGFloat kTitleMaxWidth = 210.0;
   self = [super initWithFrame:frame];
   if (self) {
     self.opaque = YES;
-		self.backgroundColor = [UIColor whiteColor];
-    self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+		whiteColor_ = [[UIColor alloc] initWithWhite:1.0 alpha:1.0];
 
+    self.backgroundColor = whiteColor_;
+    self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    defaultTitleColor_ = [[UIColor alloc] initWithWhite:0.37 alpha:1.0];
+    defaultSubstringColor_ = [[UIColor alloc] initWithWhite:0.6 alpha:1.0];
+    
     userImageRightMargin_ = kUserImageSize + (kUserImageHorizontalMargin * 2.0);
     CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding, kUserImageSize, kUserImageSize);
     userImageView_ = [[UserImageView alloc] initWithFrame:userImgFrame];
@@ -94,24 +105,24 @@ static const CGFloat kTitleMaxWidth = 210.0;
     [self addSubview:typeImageView_];
     [typeImageView_ release];
 
-    UIColor* substringTextColor = [UIColor colorWithWhite:0.6 alpha:1.0];
     userNameLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     userNameLabel_.lineBreakMode = UILineBreakModeTailTruncation;
-    userNameLabel_.textColor = substringTextColor;
+    userNameLabel_.textColor = defaultSubstringColor_;
     userNameLabel_.font = [UIFont fontWithName:kUserNameFontString size:kSubstringFontSize];
     [self addSubview:userNameLabel_];
     [userNameLabel_ release];
     
     commentLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     commentLabel_.font = [UIFont fontWithName:kCommentFontString size:kSubstringFontSize];
-    commentLabel_.textColor = substringTextColor;
+    commentLabel_.textColor = defaultSubstringColor_;
     [self addSubview:commentLabel_];
     [commentLabel_ release];
 
     titleLayer_ = [[CATextLayer alloc] init];
     titleLayer_.truncationMode = kCATruncationEnd;
     titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
-    titleLayer_.foregroundColor = [UIColor colorWithWhite:0.37 alpha:1.0].CGColor;
+    titleLayer_.foregroundColor = defaultTitleColor_.CGColor;
+    titleLayer_.fontSize = 24.0;
     titleLayer_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding + 2.0, kTitleMaxWidth, kTitleFontSize);
     // Disable implicit animations for this layer.
     NSMutableDictionary* actions = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
@@ -125,6 +136,19 @@ static const CGFloat kTitleMaxWidth = 210.0;
     [actions release];
     [self.layer addSublayer:titleLayer_];
     [titleLayer_ release];
+    
+    titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
+    CFIndex numSettings = 1;
+    CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+    CTParagraphStyleSetting settings[1] = {
+      {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+    };
+    titleStyle_ = CTParagraphStyleCreate(settings, numSettings);
+    titleAttributes_ = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+        (id)titleFont_, (id)kCTFontAttributeName,
+        (id)defaultTitleColor_.CGColor, (id)kCTForegroundColorAttributeName,
+        (id)titleStyle_, (id)kCTParagraphStyleAttributeName,
+        (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName, nil];
   }
   return self;
 }
@@ -133,16 +157,22 @@ static const CGFloat kTitleMaxWidth = 210.0;
   self.userImage = nil;
   self.stampImage = nil;
   self.typeImage = nil;
+  [defaultTitleColor_ release];
+  [defaultSubstringColor_ release];
+  [whiteColor_ release];
+  [titleAttributes_ release];
+  CFRelease(titleFont_);
+  CFRelease(titleStyle_);
   [super dealloc];
 }
 
 - (void)invertColors:(BOOL)inverted {
-  UIColor* titleColor = [UIColor colorWithWhite:0.37 alpha:1.0];
-  UIColor* substringColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  UIColor* titleColor = defaultTitleColor_;
+  UIColor* substringColor = defaultSubstringColor_;
   
   if (inverted) {
-    substringColor = [UIColor whiteColor];
-    titleColor = [UIColor whiteColor];
+    substringColor = whiteColor_;
+    titleColor = whiteColor_;
     typeImageView_.image = [self whiteMaskedImageUsingImage:typeImage_];
   } else {
     typeImageView_.image = typeImage_;
@@ -171,23 +201,9 @@ static const CGFloat kTitleMaxWidth = 210.0;
 }
 
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
-  CTFontRef titleFont = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
-  CFIndex numSettings = 1;
-  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
-  CTParagraphStyleSetting settings[1] = {
-    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
-  };
-  CTParagraphStyleRef titleStyle = CTParagraphStyleCreate(settings, numSettings);
-  NSDictionary* titleAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
-                                   (id)titleFont, (id)kCTFontAttributeName,
-                                   (id)color.CGColor, (id)kCTForegroundColorAttributeName,
-                                   (id)titleStyle, (id)kCTParagraphStyleAttributeName,
-                                   (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName,
-                                   nil];
-  NSAttributedString* titleAttributedString =
-      [[NSAttributedString alloc] initWithString:title_ attributes:titleAttributes];
-  CFRelease(titleFont);
-  CFRelease(titleStyle);
+  [titleAttributes_ setObject:(id)color.CGColor forKey:(id)kCTForegroundColorAttributeName];
+  NSAttributedString* titleAttributedString = [[NSAttributedString alloc] initWithString:title_
+                                                                              attributes:titleAttributes_];
   return [titleAttributedString autorelease];
 }
 
@@ -202,7 +218,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
   CGContextScaleCTM(context, 1.0, -1.0);
   
   CGContextClipToMask(context, CGRectMake(0, 0, width, height), img.CGImage);
-  CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
+  CGContextSetFillColorWithColor(context, whiteColor_.CGColor);
   CGContextFillRect(context, CGRectMake(0, 0, img.size.width, img.size.height));
   UIImage* maskedImage = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
@@ -235,11 +251,12 @@ static const CGFloat kTitleMaxWidth = 210.0;
 
 - (void)setTitle:(NSString*)title {
   title_ = title;
-  NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor colorWithWhite:0.37 alpha:1.0]];
+  NSAttributedString* attrString = [self titleAttributedStringWithColor:defaultTitleColor_];
   titleLayer_.string = attrString;
   CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
   CGFloat ascent, descent, leading, width;
   width = fmin(kTitleMaxWidth, CTLineGetTypographicBounds(line, &ascent, &descent, &leading));
+  CFRelease(line);
   CGRect oldFrame = stampImageFrame_;
   stampImageFrame_ = CGRectMake(userImageRightMargin_ + width - (kStampSize / 2.0),
                                 kStampSize / 2.0,
@@ -301,7 +318,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
   if (stamp != stamp_) {
     [stamp_ release];
     stamp_ = [stamp retain];
-    //customView_.userImage = stamp.user.userImage;
+    customView_.userImage = stamp.user.profileImage;
     customView_.stampImage = stamp.user.stampImage;
     customView_.title = stamp.entityObject.title;
     customView_.typeImage = stamp.categoryImage;

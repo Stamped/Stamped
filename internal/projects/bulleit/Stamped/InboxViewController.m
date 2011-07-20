@@ -127,77 +127,7 @@ typedef enum {
 }
 
 - (void)loadTableData {
-  // Load dummy data.
-  /*NSString* data = [NSString stringWithContentsOfFile:
-      [[NSBundle mainBundle] pathForResource:@"stamp_data" ofType:@"csv"]
-                                    encoding:NSStringEncodingConversionAllowLossy
-                                       error:NULL];
-  NSArray* lineArray = [data componentsSeparatedByString:@"\n"];
-  self.stampsArray = [NSMutableArray arrayWithCapacity:[lineArray count]];
-  BOOL shouldFilter = NO;
-  StampsListFilterType filterType = StampsListFilterTypeAll;
-  for (UIButton* button in self.filterButtons) {
-    if (button.selected) {
-      shouldFilter = YES;
-      if (button == placesFilterButton_) {
-        filterType = StampsListFilterTypePlace;
-      } else if (button == booksFilterButton_) {
-        filterType = StampsListFilterTypeBook;
-      } else if (button == filmsFilterButton_) {
-        filterType = StampsListFilterTypeFilm;
-      } else if (button == musicFilterButton_) {
-        filterType = StampsListFilterTypeMusic;
-      }
-    }
-  }
-  for (NSString* line in lineArray) {
-    NSArray* entityLine = [line componentsSeparatedByString:@","];
-    StampEntity* entity = [[[StampEntity alloc] init] autorelease];
-    entity.name = (NSString*)[entityLine objectAtIndex:2];
-    NSString* typeStr = (NSString*)[entityLine objectAtIndex:1];
-    entity.categoryImage = 
-       [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[typeStr lowercaseString]]];
-    if (!entity.categoryImage)
-      entity.categoryImage = [UIImage imageNamed:@"cat_icon_other"];
-  
-    if ([typeStr isEqualToString:@"Place"]) {
-      if (shouldFilter && filterType != StampsListFilterTypePlace)
-        continue;
-      entity.type = StampEntityTypePlace;
-    } else if ([typeStr isEqualToString:@"Music"]) {
-      if (shouldFilter && filterType != StampsListFilterTypeMusic)
-        continue;
-      entity.type = StampEntityTypeMusic;
-    } else if ([typeStr isEqualToString:@"Film"]) {
-      if (shouldFilter && filterType != StampsListFilterTypeFilm)
-        continue;
-      entity.type = StampEntityTypeFilm;
-    } else if ([typeStr isEqualToString:@"Book"]) {
-      if (shouldFilter && filterType != StampsListFilterTypeBook)
-        continue;
-      entity.type = StampEntityTypeBook;
-    } else {
-      if (shouldFilter)
-        continue;
-      entity.type = StampEntityTypeOther;
-    }
-    entity.detail = typeStr;
-    NSString* userName = (NSString*)[entityLine objectAtIndex:0];
-    NSString* userFile = [userName stringByReplacingOccurrencesOfString:@"." withString:@""];
-    userFile = [[[userFile lowercaseString] componentsSeparatedByString:@" "]
-                componentsJoinedByString:@"_"];
-    entity.userImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_user_image"]];
-    entity.stampImage = [UIImage imageNamed:[userFile stringByAppendingString:@"_stamp_color"]];
-    entity.userName = userName;
-    if ([entityLine count] > 3) {
-      entity.comment = [(NSString*)[entityLine objectAtIndex:3]
-                        stringByReplacingOccurrencesOfString:@"\"" withString:@""];
-    }
-
-    [stampsArray_ addObject:entity];
-  }*/
-  
-  // Load real data.
+  [self loadStampsFromDataStore];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
   [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e25ede432a7ba84600000c0"
@@ -211,6 +141,7 @@ typedef enum {
 	//NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"createdAt" ascending:NO];
 	//[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
 	self.stampsArray = [Stamp objectsWithFetchRequest:request];
+  [self.tableView reloadData];
 }
 
 #pragma mark - Filter stuff

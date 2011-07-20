@@ -25,19 +25,19 @@
         <attribute name="firstName" optional="YES" attributeType="String"/>
         <attribute name="lastName" optional="YES" attributeType="String"/>
         <attribute name="primaryColor" optional="YES" attributeType="String"/>
+        <attribute name="profileImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
         <attribute name="profileImageURL" optional="YES" attributeType="String"/>
         <attribute name="screenName" optional="YES" attributeType="String"/>
         <attribute name="secondaryColor" optional="YES" attributeType="String"/>
         <attribute name="stampImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
         <attribute name="userID" attributeType="String"/>
-        <attribute name="userImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
         <attribute name="website" optional="YES" attributeType="String"/>
         <relationship name="Stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="user" inverseEntity="Stamp"/>
     </entity>
     <elements>
-        <element name="User" positionX="144" positionY="225" width="128" height="240"/>
-        <element name="Stamp" positionX="439" positionY="369" width="128" height="105"/>
-        <element name="Entity" positionX="556" positionY="216" width="128" height="135"/>
         <element name="Coordinate" positionX="396" positionY="81" width="128" height="90"/>
+        <element name="Entity" positionX="556" positionY="216" width="128" height="135"/>
+        <element name="Stamp" positionX="439" positionY="369" width="128" height="105"/>
+        <element name="User" positionX="144" positionY="225" width="128" height="240"/>
     </elements>
 </model>
