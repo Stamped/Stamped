@@ -70,6 +70,16 @@ class MongoStamp(AStampDB, Mongo):
     ### PUBLIC
     
     def addStamp(self, stamp):
+    
+        ### ADDING A STAMP:
+        #   - Add the stamp data to the database
+        #   - Add a reference to the stamp in followers' inbox
+        #   - Add a reference to the stamp in the user's collection
+        #   - If stamped entity is on the to do list, mark as complete
+        #   - If users are mentioned or credit is given, add stamp to their
+        #     activity feed
+        #   - If credit is given, add comment to credited stamp(s)
+    
         stampId = self._addDocument(stamp, 'stamp_id')
         MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)
         followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
