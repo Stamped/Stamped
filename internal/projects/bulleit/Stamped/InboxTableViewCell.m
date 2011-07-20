@@ -196,8 +196,8 @@ static const CGFloat kTitleMaxWidth = 210.0;
 - (void)drawRect:(CGRect)rect {
   [self invertColors:(highlighted_ || selected_)];
 
-  [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
   [super drawRect:rect];
+  [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
 }
 
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
