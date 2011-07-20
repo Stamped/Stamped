@@ -54,9 +54,7 @@ The latitude and longitude of the entity, separated by a comma.
 				}
 			}
 		},
-		"timestamp": {
-			"created": "2011-07-17 19:03:22.354813"
-		}
+		"last_modified": "2011-07-17 19:03:22.354813"
 	}
 
 
@@ -97,9 +95,7 @@ The user id of the authenticating user. This is used to display stamps from any 
 				}
 			}
 		},
-		"timestamp": {
-			"created": "2011-07-17 19:03:22.354813"
-		},
+		"last_modified": "2011-07-17 19:03:22.354813",
 		"stamps": [
 			{
 				"blurb": "Best place ever!", 
@@ -178,10 +174,7 @@ The latitude and longitude of the entity, separated by a comma.
 				}
 			}
 		},
-		"timestamp": {
-			"created": "2011-07-17 19:03:22.354813",
-			"modified": "2011-07-17 21:25:31.583402"
-		}
+		"last_modified": "2011-07-17 21:25:31.583402"
 	}
 
 

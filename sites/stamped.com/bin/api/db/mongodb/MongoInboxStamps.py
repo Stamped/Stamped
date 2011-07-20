@@ -50,6 +50,9 @@ class MongoInboxStamps(Mongo):
     def getInboxStampIds(self, userId, limit=None):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId, limit)
+        
+    def checkInboxStamp(self, userID, stampID):
+        return self._checkRelationship(keyId=userId, refId=stampId)
 
 
     ### PRIVATE

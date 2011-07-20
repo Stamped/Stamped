@@ -596,7 +596,12 @@ class StampedAPI(AStampedAPI):
             if 'coordinates' in entity.details['place']:
                 result['details']['place']['coordinates'] = entity.details['place']['coordinates']
         
-        result['timestamp'] = entity.timestamp
+        if 'modified' in entity.timestamp:
+            result['last_modified'] = str(entity.timestamp['modified'])
+        elif 'created' in entity.timestamp:
+            result['last_modified'] = str(entity.timestamp['created'])
+        else:
+            result['last_modified'] = None
         
         return result
     
@@ -624,7 +629,12 @@ class StampedAPI(AStampedAPI):
             if 'coordinates' in entity.details['place']:
                 result['details']['place']['coordinates'] = entity.details['place']['coordinates']
         
-        result['timestamp'] = entity.timestamp
+        if 'modified' in entity.timestamp:
+            result['last_modified'] = str(entity.timestamp['modified'])
+        elif 'created' in entity.timestamp:
+            result['last_modified'] = str(entity.timestamp['created'])
+        else:
+            result['last_modified'] = None
         
         return result
     
@@ -681,11 +691,12 @@ class StampedAPI(AStampedAPI):
             if 'coordinates' in entity.details['place']:
                 result['details']['place']['coordinates'] = entity.details['place']['coordinates']
         
-        result['timestamp'] = {}
-        if 'created' in entity.timestamp:
-            result['timestamp']['created'] = str(entity.timestamp['created'])
         if 'modified' in entity.timestamp:
-            result['timestamp']['modified'] = str(entity.timestamp['modified'])
+            result['last_modified'] = str(entity.timestamp['modified'])
+        elif 'created' in entity.timestamp:
+            result['last_modified'] = str(entity.timestamp['created'])
+        else:
+            result['last_modified'] = None
         
         return result
     
@@ -789,12 +800,13 @@ class StampedAPI(AStampedAPI):
             result['mentions'] = stamp.mentions
         else:
             result['mentions'] = None
-            
-        result['timestamp'] = {}
-        if 'created' in stamp.timestamp:
-            result['timestamp']['created'] = str(stamp.timestamp['created'])
+                
         if 'modified' in stamp.timestamp:
-            result['timestamp']['modified'] = str(stamp.timestamp['modified'])
+            result['last_modified'] = str(stamp.timestamp['modified'])
+        elif 'created' in stamp.timestamp:
+            result['last_modified'] = str(stamp.timestamp['created'])
+        else:
+            result['last_modified'] = None
         
         return result
             
@@ -844,12 +856,13 @@ class StampedAPI(AStampedAPI):
             result['mentions'] = stamp.mentions
         else:
             result['mentions'] = None
-            
-        result['timestamp'] = {}
-        if 'created' in stamp.timestamp:
-            result['timestamp']['created'] = str(stamp.timestamp['created'])
+                
         if 'modified' in stamp.timestamp:
-            result['timestamp']['modified'] = str(stamp.timestamp['modified'])
+            result['last_modified'] = str(stamp.timestamp['modified'])
+        elif 'created' in stamp.timestamp:
+            result['last_modified'] = str(stamp.timestamp['created'])
+        else:
+            result['last_modified'] = None
         
         return result
     
@@ -881,12 +894,13 @@ class StampedAPI(AStampedAPI):
             result['mentions'] = stamp.mentions
         else:
             result['mentions'] = None
-            
-        result['timestamp'] = {}
-        if 'created' in stamp.timestamp:
-            result['timestamp']['created'] = str(stamp.timestamp['created'])
+                
         if 'modified' in stamp.timestamp:
-            result['timestamp']['modified'] = str(stamp.timestamp['modified'])
+            result['last_modified'] = str(stamp.timestamp['modified'])
+        elif 'created' in stamp.timestamp:
+            result['last_modified'] = str(stamp.timestamp['created'])
+        else:
+            result['last_modified'] = None
         
         return result
         
@@ -947,10 +961,11 @@ class StampedAPI(AStampedAPI):
             result['restamp_id'] = comment.restamp_id
         else:
             result['restamp_id'] = None
-            
-        result['timestamp'] = {}
+                
         if 'created' in comment.timestamp:
-            result['timestamp']['created'] = str(comment.timestamp['created'])
+            result['last_modified'] = str(comment.timestamp['created'])
+        else:
+            result['last_modified'] = None
         
         return result
     
@@ -981,10 +996,11 @@ class StampedAPI(AStampedAPI):
                 data['restamp_id'] = comment.restamp_id
             else:
                 data['restamp_id'] = None
-                
-            data['timestamp'] = {}
+                    
             if 'created' in comment.timestamp:
-                data['timestamp']['created'] = str(comment.timestamp['created'])
+                data['last_modified'] = str(comment.timestamp['created'])
+            else:
+                data['last_modified'] = None
             
             result.append(data)
         
@@ -1035,11 +1051,12 @@ class StampedAPI(AStampedAPI):
             else:
                 data['mentions'] = None
                 
-            data['timestamp'] = {}
-            if 'created' in stamp.timestamp:
-                data['timestamp']['created'] = str(stamp.timestamp['created'])
             if 'modified' in stamp.timestamp:
-                data['timestamp']['modified'] = str(stamp.timestamp['modified'])
+                data['last_modified'] = str(stamp.timestamp['modified'])
+            elif 'created' in stamp.timestamp:
+                data['last_modified'] = str(stamp.timestamp['created'])
+            else:
+                data['last_modified'] = None
 
             result.append(data)
         
@@ -1079,11 +1096,12 @@ class StampedAPI(AStampedAPI):
             else:
                 data['mentions'] = None
                 
-            data['timestamp'] = {}
-            if 'created' in stamp.timestamp:
-                data['timestamp']['created'] = str(stamp.timestamp['created'])
             if 'modified' in stamp.timestamp:
-                data['timestamp']['modified'] = str(stamp.timestamp['modified'])
+                data['last_modified'] = str(stamp.timestamp['modified'])
+            elif 'created' in stamp.timestamp:
+                data['last_modified'] = str(stamp.timestamp['created'])
+            else:
+                data['last_modified'] = None
 
             result.append(data)
         

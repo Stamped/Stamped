@@ -42,7 +42,7 @@ The user id of the authenticating user. This is necessary if the requested user 
 				"4e226fcd4e61754161000007", 
 				"4e226fcd4e61754161000008"
 			], 
-			"timestamp": "2011-07-17 05:14:54.128641", 
+			"last_modified": "2011-07-17 05:14:54.128641", 
 			"user": {
 				"user_id": "47cc67093475061e3d95369d", 
 				"profile__image": "user.png", 
@@ -90,7 +90,7 @@ The user id of the authenticating user.
 			}, 
 			"image": "image3.png", 
 			"credit": null, 
-			"timestamp": "2011-05-12 18:24:44.432141",
+			"last_modified": "2011-05-12 18:24:44.432141",
 			"user": {
 				"user_id": "47cc67093475061e3d95369d", 
 				"profile__image": "user.png", 
