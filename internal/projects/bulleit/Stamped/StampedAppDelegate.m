@@ -52,10 +52,19 @@ static NSString* kDataBaseURL = @"http://192.168.0.10:5000/api/v1";
 
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID", nil];
+  [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
+                                        @"last_modified", @"lastModified",
+                                        @"num_comments", @"numComments", nil];
   [stampMapping mapAttributes:@"blurb", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withObjectMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withObjectMapping:userMapping];
+  
+  // Example date string: 2011-07-19 20:49:42.037000
+	[stampMapping.dateFormatStrings addObject:@"yyyy-MM-dd HH:mm:ss.SSSSSS"];
+  NSDate* now = [NSDate date];
+  NSDateFormatter* weekday = [[[NSDateFormatter alloc] init] autorelease];
+  [weekday setDateFormat: @"yyyy-MM-dd HH:mm:ss.SSSSSS"];
+  NSLog(@"The day of the week is: %@", [weekday stringFromDate:now]);
   
   [objectManager.mappingProvider setObjectMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setObjectMapping:stampMapping forKeyPath:@"Stamp"];

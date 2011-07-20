@@ -13,9 +13,11 @@
 @implementation Stamp
 @dynamic stampID;
 @dynamic blurb;
+@dynamic numComments;
+@dynamic lastModified;
 @dynamic user;
 @dynamic entityObject;
-@dynamic stampImage;
+@dynamic categoryImage;
 
 - (StampCategory)category {
   NSString* cat = self.entityObject.category;
@@ -31,8 +33,12 @@
   return StampCategoryOther;
 }
 
-- (UIImage*)categoryImage {
-  return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.entityObject.category lowercaseString]]];
+- (void)awakeFromFetch {
+  [super awakeFromFetch];
+  if (!self.categoryImage) {
+    self.categoryImage =
+        [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.entityObject.category lowercaseString]]];
+  }
 }
 
 @end

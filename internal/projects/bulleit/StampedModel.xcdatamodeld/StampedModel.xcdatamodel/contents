@@ -15,6 +15,9 @@
     </entity>
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="blurb" optional="YES" attributeType="String"/>
+        <attribute name="categoryImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
+        <attribute name="lastModified" optional="YES" attributeType="Date"/>
+        <attribute name="numComments" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamp" inverseEntity="Entity"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="Stamps" inverseEntity="User"/>
@@ -37,7 +40,7 @@
     <elements>
         <element name="Coordinate" positionX="396" positionY="81" width="128" height="90"/>
         <element name="Entity" positionX="556" positionY="216" width="128" height="135"/>
-        <element name="Stamp" positionX="439" positionY="369" width="128" height="105"/>
+        <element name="Stamp" positionX="439" positionY="369" width="128" height="150"/>
         <element name="User" positionX="144" positionY="225" width="128" height="240"/>
     </elements>
 </model>
