@@ -20,9 +20,9 @@ DATABASE_ZONES      = ['us-east-1a']
 DATABASE_EBS        = True
 DATABASE_OS         = 'Ubuntu 10.04'
 
-DATABASE_MIN_NODES  = '2'
-DATABASE_MAX_NODES  = '2'
-DATABASE_PREF_NODES = '2'
+DATABASE_MIN_NODES  = '3'
+DATABASE_MAX_NODES  = '3'
+DATABASE_PREF_NODES = '3'
 
 
 ###############################################################################
@@ -84,6 +84,6 @@ t.Resources.add('Ec2DatabaseClusterSecurityGroup',
                                   'CidrIp': '0.0.0.0/0'}
                                 ]})
 
-        
+
 ## Produce the file
 #t.dumps(OUTPUT)

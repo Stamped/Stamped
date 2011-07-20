@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, getpass, os, pickle, re, string, utils
+import config, copy, getpass, os, pickle, re, string, utils
 from ADeployment import ADeploymentSystem, ADeploymentStack
 from errors import Fail
 
@@ -127,67 +127,11 @@ class LocalDeploymentStack(ADeploymentStack):
         self.root = "/stamped"
         self.path = os.path.join(self.root, self.name)
         
-        self.replSetName = 'stamped-dev-01'
+        self.instances = config.getInstances()
         
-        dbs = [
-            {
-                'name' : 'db0', 
-                'roles' : [ 'db', ], 
-                'mongodb' : {
-                    'replSet' : self.replSetName, 
-                    'port' : 30000, 
-                }, 
-            }, 
-            {
-                'name' : 'db1', 
-                'roles' : [ 'db', ], 
-                'mongodb' : {
-                    'replSet' : self.replSetName, 
-                    'port' : 32000, 
-                }, 
-            }, 
-            {
-                'name' : 'db2', 
-                'roles' : [ 'db', ], 
-                'mongodb' : {
-                    'replSet' : self.replSetName, 
-                    'port' : 34000, 
-                }, 
-            }, 
-        ]
-        
-        servers = [
-            {
-                'name' : 'dev0', 
-                'roles' : [ 'web_server', 'replSetInit', ], 
-                'port_base' : '70217', 
-                
-                'replSet' : {
-                    '_id' : self.replSetName, 
-                    'members' : [ ], 
-                }, 
-            }, 
-        ]
-        
-        self.instances = [ ]
-        for instance in dbs:
-            self.instances.append(instance)
-        
-        for instance in servers:
-            if 'replSet' in instance:
-                assert 'replSetInit' in instance['roles']
-                members = instance['replSet']['members']
-                
-                for index in xrange(len(dbs)):
-                    db = dbs[index]
-                    
-                    members.append({
-                        '_id'  : index, 
-                        'host' : 'localhost:%s' % db['mongodb']['port'], 
-                    })
-            
-            self.instances.append(instance)
-   
+        for instance in instances:
+            instance.stack_name = self.name
+    
     def create(self):
         self.delete()
         os.system('mkdir -p %s' % self.path)

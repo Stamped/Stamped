@@ -5,10 +5,13 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import re, os
+import config, pickle, re, os
 from utils import log, logRaw, shell, AttributeDict
 from ADeployment import ADeploymentSystem, ADeploymentStack
 from errors import Fail
+
+AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
+AWS_ACCESS_KEY_SECRET = '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'
 
 class AWSDeploymentSystem(ADeploymentSystem):
     def __init__(self, name, options):
@@ -18,13 +21,13 @@ class AWSDeploymentSystem(ADeploymentSystem):
         self._init_env()
     
     def _init_env(self):
-        #env = AttributeDict(os.environ)
-        env = os.environ
-        env['CLOUDFORMATION_ROOT'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cloudformation")
-        env['CLOUDFORMATION_TEMPLATE_FILE'] = os.path.join(env['CLOUDFORMATION_ROOT'], "stamped-cloudformation-dev.template")
-        env['AWS_CLOUDFORMATION_HOME'] = os.path.join(env['CLOUDFORMATION_ROOT'], "aws")
-        env['AWS_CREDENTIAL_FILE'] = os.path.join(env['CLOUDFORMATION_ROOT'], "credentials.txt")
-        env['PATH'] = env['PATH'] + ':' + env['AWS_CLOUDFORMATION_HOME'] + '/bin'
+        env = AttributeDict(os.environ)
+        curdir = os.path.dirname(os.path.abspath(__file__))
+        env.CLOUDFORMATION_ROOT = os.path.join(curdir, "cloudformation")
+        env.CLOUDFORMATION_TEMPLATE_FILE = os.path.join(env.CLOUDFORMATION_ROOT, "stamped-cloudformation-dev.template")
+        env.AWS_CLOUDFORMATION_HOME = os.path.join(env.CLOUDFORMATION_ROOT, "aws")
+        env.AWS_CREDENTIAL_FILE = os.path.join(env.CLOUDFORMATION_ROOT, "credentials.txt")
+        env.PATH = env.PATH + ':' + env.AWS_CLOUDFORMATION_HOME + '/bin' + ':' + curdir
         
         # note (tfischer): JAVA_HOME is known to be incorrect on Mac OS X with the default 
         # Java installation of 1.6... this is a hack to get around this and should work on 
@@ -32,7 +35,7 @@ class AWSDeploymentSystem(ADeploymentSystem):
         # this blog post was useful in debugging this quirk: 
         #    http://www.johnnypez.com/design-development/unable-to-find-a-java_home-at-on-mac-osx/
         java_home = os.path.join(os.path.dirname(os.path.abspath(shell("ls -l `which java` | sed 's/.*-> \\(.*\\)/\\1/'")[0])), "java_home")
-        env['JAVA_HOME'] = shell(java_home)[0]
+        env.JAVA_HOME = shell(java_home)[0]
         self.env = env
         
         # find all stacks which haven't been deleted and add them to the initial 
@@ -124,10 +127,21 @@ class AWSDeploymentStack(ADeploymentStack):
     def __init__(self, name, options, env, commonOptions=""):
         ADeploymentStack.__init__(self, name, options)
         self.env = env
+        
         self.commonOptions = commonOptions
-   
+        self.instances = config.getInstances()
+        
+        for instance in instances:
+            instance.stack_name = self.name
+            instance.aws_access_key_id = AWS_ACCESS_KEY_ID
+            instance.aws_secret_key = AWS_SECRET_KEY
+    
     def create(self):
-        self.local('cfn-create-stack %s --template-file %s' % (self.name, self.env['CLOUDFORMATION_TEMPLATE_FILE']))
+        params_str = pickle.dumps(self.instances)
+        build_template_path = os.path.join(self.env.CLOUDFORMATION_ROOT, "build.py")
+        
+        self.local('python %s "%s" > %s' % (build_template_path, params_str, self.env.CLOUDFORMATION_TEMPLATE_FILE), show_cmd=False)
+        self.local('cfn-create-stack %s --template-file %s' % (self.name, self.env.CLOUDFORMATION_TEMPLATE_FILE))
     
     def delete(self):
         self.local('cfn-delete-stack %s --force' % (self.name, ))
@@ -144,7 +158,7 @@ class AWSDeploymentStack(ADeploymentStack):
     def connect(self):
         while True:
             logRaw("Checking if stack '%s' is ready for connection... " % self.name, True)
-            (result, status) = shell('cfn-describe-stack-events --stack-name %s | grep "%s *1CreateInstance .*CREATE_COMPLETE"' % (self.name, self.name))
+            (result, status) = shell('cfn-describe-stack-events --stack-name %s | grep "%s *CreateWebServerInstance .*CREATE_COMPLETE"' % (self.name, self.name))
             
             if len(result) > 5:
                 logRaw("ready! connecting...\n")

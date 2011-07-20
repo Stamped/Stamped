@@ -95,21 +95,21 @@ def _dict_property(name):
     def set(self, value):
         self[name] = value
     return property(get, set)
-    
+
 def EncodeUserData(string):
     data = []
     for line in string.split('\n'):
         data.append(line)
         data.append("\n")
     return data
-    
+
 def AddWaitHandle(handle):
     data = ["\n"]
     data.append("curl -X PUT -H 'Content-Type:' --data-binary '{\"Status\": \"SUCCESS\", \"Reason\": \"Instance is ready\", \"UniqueId\": \"stamped\", \"Data\": \"Done\"}' \"")
     data.append({"Ref": handle})
     data.append("\"\n")
     return data
-    
+
 def GetAMI(size, region, software='Ubuntu 10.04', ebs=True):
     if software == 'Amazon' and ebs == True:
         return INSTANCE_AMI_AMAZON_EBS[region][INSTANCE_ARCHITECTURE[size]]
@@ -118,16 +118,15 @@ def GetAMI(size, region, software='Ubuntu 10.04', ebs=True):
     if software == 'Ubuntu 10.04' and ebs == False:
         return INSTANCE_AMI_UBUNTU_1004[region][INSTANCE_ARCHITECTURE[size]]
     return False
-        
 
 class Template(defaultdict):
     """
-    A CloudFormation template.
+        A CloudFormation template.
     """
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize a neverending tree of Template objects.
+            Initialize a never-ending tree of Template objects.
         """
         super(self.__class__, self).__init__(*args, **kwargs)
         self.default_factory = lambda: self.__class__(self.__class__)
@@ -142,29 +141,27 @@ class Template(defaultdict):
 
     def add(self, key, *args, **kwargs):
         """
-        Add an item to this CloudFormation template.  This is typically
-        called on non-root Template objects, for example
+            Add an item to this CloudFormation template.  This is typically
+            called on non-root Template objects, for example
 
-            t.Parameters.add(...)
+                t.Parameters.add(...)
 
-        to add an item to the Parameters object.
+            to add an item to the Parameters object.
         """
         self[key] = self.__class__(*args, **kwargs)
-
-    def dumps(self, saveAs):
+    
+    def dumps(self):
+        return json.dumps(self, indent=2, sort_keys=True)
+    
+    def save(self, fileName):
         """
-        Return a string representation of this CloudFormation template.
+            Return a string representation of this CloudFormation template.
         """
         self['AWSTemplateFormatVersion'] = '2010-09-09'
         
-        f = open(saveAs+'.template', 'w')
-        json.dump(self, f, indent=2, sort_keys=True)
+        f = open(fileName, 'w')
+        f.write(self.dumps())
         f.close()
-        
-        print json.JSONEncoder(indent=2, sort_keys=True).encode(self)
-
-
-
 
 class CloudFormation(object):
     
@@ -183,7 +180,7 @@ class CloudFormation(object):
                 'FromPort': fromPort,
                 'ToPort': toPort,
                 'CidrIp': cidrIp}
-
+    
     def addEC2SecurityGroup(self, groupName, groupDescription, groupProperties):
         data = {'Type': 'AWS::EC2::SecurityGroup',
                 'Properties': {
@@ -231,88 +228,4 @@ class CloudFormation(object):
         f = open(filename + '.template', 'w')
         json.dump(self.build(), f, indent=2, sort_keys=True)
         f.close()
-        
 
-
-class CloudInit(object):
-
-    def __init__(self, instanceName):
-        self.instanceName = instanceName
-        self._bootstrap = []
-        self._createDefaultBootstrapScript()
-    
-    def add(self, cmd):
-        self._bootstrap.append(cmd)
-        self._bootstrap.append('\n')
-
-    def get(self):
-        return self._bootstrap
-                
-    def _createDefaultBootstrapScript(self, operatingSystem = 'Ubuntu'):
-        
-        self.add('#!/bin/bash -ex')
-                
-        # Create keys for root to connect to GitHub
-        self.add('echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAvAzcTXbF0V/Pjja3b2Q9hsBQSHv8R8S6yoESb' \
-                 '6CuR5HNzD3rIcfP9r2t3dJnVjeCZKx4JTadGXAr7ysVysGMLgbUMkngJ0bgnqkXPfLnKW07uYsrAF6Q' \
-                 '1Gz79RSEIFfQP53p8XKpIkiRnbogM5RG2aIjJobuAsu0J8F9bGL6UfoRv1gGR0VcDbWAnp5SV8iJUBI' \
-                 '0ULvVmdKKkFyeVHEZe2zjoplFr4b9jAUwDnNYpWobmsNoC4+1pw5fZRREJ32gCp4iYJIN5eJvylfpbh' \
-                 'p6DtKPqrWmCEtIeVkS9pvqgVrlXMiaOPG972FuQJWiC5/iMApUlcTwCcAWkWfRTC4K1w== devbot@s' \
-                 'tamped.com" > ~/.ssh/id_rsa.pub')
-        self.add('echo "-----BEGIN RSA PRIVATE KEY-----" > ~/.ssh/id_rsa')
-        self.add('echo "MIIEogIBAAKCAQEAvAzcTXbF0V/Pjja3b2Q9hsBQSHv8R8S6yoESb6CuR5HNzD3r" >> ~/.ssh/id_rsa')
-        self.add('echo "IcfP9r2t3dJnVjeCZKx4JTadGXAr7ysVysGMLgbUMkngJ0bgnqkXPfLnKW07uYsr" >> ~/.ssh/id_rsa')
-        self.add('echo "AF6Q1Gz79RSEIFfQP53p8XKpIkiRnbogM5RG2aIjJobuAsu0J8F9bGL6UfoRv1gG" >> ~/.ssh/id_rsa')
-        self.add('echo "R0VcDbWAnp5SV8iJUBI0ULvVmdKKkFyeVHEZe2zjoplFr4b9jAUwDnNYpWobmsNo" >> ~/.ssh/id_rsa')
-        self.add('echo "C4+1pw5fZRREJ32gCp4iYJIN5eJvylfpbhp6DtKPqrWmCEtIeVkS9pvqgVrlXMia" >> ~/.ssh/id_rsa')
-        self.add('echo "OPG972FuQJWiC5/iMApUlcTwCcAWkWfRTC4K1wIBIwKCAQAVfdAI2l/AKDT6T2Vr" >> ~/.ssh/id_rsa')
-        self.add('echo "0PEWtuSakdOwbkE7tvrK7crGWc5gfBrfSgkjg2RT3YgnHElql14wI3+rIsMxRsCp" >> ~/.ssh/id_rsa')
-        self.add('echo "dTSXi8B6xp1GUT4+BLIy9zBcgYMrJdkHW0PAgXvhfrADskOvf8L3Bcovzcd/vYAF" >> ~/.ssh/id_rsa')
-        self.add('echo "5Q9pVFvJ44jqYGxcUKCerDnde3fmxRqmZT96NnY2VQcDXJWOs4Z0n5cN5caobZ4Q" >> ~/.ssh/id_rsa')
-        self.add('echo "rFnOa23YbY0EFsUrrl1cFsfxy0LhXWJFIS38SaIQ2RNIxMVgOGvelN6aah1hROn2" >> ~/.ssh/id_rsa')
-        self.add('echo "sYRbiYXpGEIGU6xsOtBY79SAX4NYIhFfJuCACQyQp8Iq+QXolggl0NkK0jY2blNt" >> ~/.ssh/id_rsa')
-        self.add('echo "MiirAoGBAPAjjWUlJVTvRoVIygiWEVNW2uJOjl2MfkO/LgYOzlczpz87QRMEfeBD" >> ~/.ssh/id_rsa')
-        self.add('echo "jz6CyqNCsiJZwW/1tdcjwkpBNPuVIHFHjPTv0VBZ852YTy0Z5vga681VRbNiDP7T" >> ~/.ssh/id_rsa')
-        self.add('echo "Jkltgoft8S4fBYZ/WvFaqhq1Mk/k5hMVLEd8mnVEzCG5NWUTN0gzAoGBAMh4jffy" >> ~/.ssh/id_rsa')
-        self.add('echo "KhuxEnD6bExkTRlYlHmFuQ5TubyPb3EzvrB5maNBmaDHQeAKQECl4V/fBXANENw4" >> ~/.ssh/id_rsa')
-        self.add('echo "94wjx8sQc9/Vo2+5I32VKiHEzlEe7b0lojvS826d27Du4iTzMCp+5t8wJfn6mPu5" >> ~/.ssh/id_rsa')
-        self.add('echo "AqA0aCWZp28utttnvUXORw+mRJp77RI9f97NAoGAUlVVDLxHUFIJjMh/yG33T8YB" >> ~/.ssh/id_rsa')
-        self.add('echo "5zDgWpaRsNPVQ+fRt39sirU64fLpVDRroGdbayzPXDwHzp1i6q0sq76V0pmHd0u7" >> ~/.ssh/id_rsa')
-        self.add('echo "TKn+nzTIjc3SANWuRm+hTbbWEZ3107YbwWdf9BcQ3Jzr85lhAkr4fi9+9tIi/zp1" >> ~/.ssh/id_rsa')
-        self.add('echo "lNpDleuzs8p4tPClPVMCgYEAg7zvlE6t9PC0WN8T96+gYRzz2tQ3x5Ya+EEAFzCh" >> ~/.ssh/id_rsa')
-        self.add('echo "4a7+j9qmyL10bqemkOIJIb5xSaIvpqkXs9z/orMKUUM/g+6w7CAxoSmO5NnPbasE" >> ~/.ssh/id_rsa')
-        self.add('echo "NfEGXqI/6UyF+wY1mETDmfsRpEWXu1xSLsNaYdoAUGCGyrHix3js3mXykWdhRoAv" >> ~/.ssh/id_rsa')
-        self.add('echo "dScCgYEAxOhXQNfCBQPBiVaApYCblNb0ASMh9gQyh5ZVhdcGu84qpTTxt2cIOV2p" >> ~/.ssh/id_rsa')
-        self.add('echo "ylKJVSS3R3bzPw3goGkvFL0e7Mlzr7uwj70pGqw1kXzbe4pLC1GE3PC4QlvPA8lE" >> ~/.ssh/id_rsa')
-        self.add('echo "WCy7/RohwIRd02/7s7UUW118xQYcrT27o/4BJpNd1uWsUT07BgI=" >> ~/.ssh/id_rsa')
-        self.add('echo "-----END RSA PRIVATE KEY-----" >> ~/.ssh/id_rsa')
-        self.add('echo "" >> ~/.ssh/id_rsa')
-        
-        # Set permissions for keys
-        self.add('chmod 600 ~/.ssh/id_rsa')
-        self.add('chmod 644 ~/.ssh/id_rsa.pub')
-        
-        # Install git
-        if operatingSystem == 'Ubuntu':
-            self.add('apt-get -y install git-core')
-        elif operatingSystem == 'Amazon':
-            self.add('yum -y install git-core')
-        else:
-            return
-        
-        # Set bash to ignore errors, then run ssh so that clone command ignores validation of URL
-        self.add('set +e')
-        self.add('ssh -o StrictHostKeyChecking=no git@github.com')
-        self.add('set -e')
-        
-        # Clone stamped-bootstrap repo
-        self.add('git clone git@github.com:Stamped/stamped-bootstrap.git /stamped-bootstrap')
-        
-        # Add wait 
-        waitName = self.instanceName + 'WaitHandle'
-        self._bootstrap.append("curl -X PUT -H 'Content-Type:' --data-binary '{"\
-            "\"Status\": \"SUCCESS\", \"Reason\": \"Instance is ready\", "\
-            "\"UniqueId\": \"stamped\", \"Data\": \"Done\"}' \"")
-        self._bootstrap.append({"Ref": waitName})
-        self._bootstrap.append("\"\n")
-        

@@ -10,7 +10,7 @@ from optparse import OptionParser
 import sys
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
-AWS_ACCESS_KEY_SECRET = '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'
+AWS_SECRET_KEY = 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX'
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] stack-name"
@@ -31,7 +31,7 @@ def main():
     if options is None:
         return
     
-    conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_ACCESS_KEY_SECRET)
+    conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
     reservations = conn.get_all_instances()
     stackNameKey = 'aws:cloudformation:stack-name'
     found = False
