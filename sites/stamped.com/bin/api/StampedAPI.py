@@ -947,7 +947,7 @@ class StampedAPI(AStampedAPI):
             raise InvalidArgument('Invalid input')
         
         result = {}
-        result['comment_id'] = self._commentDB.addComment(comment)
+        result['comment_id'] = self._stampDB.addComment(comment)
         result['stamp_id'] = comment['stamp_id']
         result['user'] = comment['user']
         result['blurb'] = comment['blurb']
@@ -970,13 +970,13 @@ class StampedAPI(AStampedAPI):
         return result
     
     def removeComment(self, params):
-        if self._commentDB.removeComment(params.comment_id):
+        if self._stampDB.removeComment(params.comment_id):
             return True
         else:
             return False
     
     def getComments(self, stampID, userID=None):        
-        comments = self._commentDB.getComments(stampID)
+        comments = self._stampDB.getComments(stampID)
             
         result = []
         for comment in comments:
@@ -1057,6 +1057,11 @@ class StampedAPI(AStampedAPI):
                 data['last_modified'] = str(stamp.timestamp['created'])
             else:
                 data['last_modified'] = None
+                
+            if 'stats' in stamp and 'num_comments' in stamp.stats:
+                data['num_comments'] = stamp.stats['num_comments']
+            else:
+                data['num_comments'] = 0
 
             result.append(data)
         
@@ -1102,6 +1107,11 @@ class StampedAPI(AStampedAPI):
                 data['last_modified'] = str(stamp.timestamp['created'])
             else:
                 data['last_modified'] = None
+                
+            if 'stats' in stamp and 'num_comments' in stamp.stats:
+                data['num_comments'] = stamp.stats['num_comments']
+            else:
+                data['num_comments'] = 0
 
             result.append(data)
         

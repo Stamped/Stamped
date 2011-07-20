@@ -48,8 +48,7 @@ def main():
 #     favoriteTest(baseurl)
  
     print '      COMPLETE'
-    print   
-    
+    print       
 
     
 # ######## #

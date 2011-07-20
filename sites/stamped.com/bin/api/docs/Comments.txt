@@ -71,23 +71,25 @@ The user id of the authenticating user. This is necessary only if the stamp is p
 	authenticated_user_id=4e259ca532a7ba6cd7000008&stamp_id=4e259ca532a7ba6cd700000a
 
 ### Sample Result ###
-	{
-		"blurb": "That looks awesome.", 
-		"comment_id": "4e259ca532a7ba6cd700000b", 
-		"mentions": null, 
-		"restamp_id": null, 
-		"stamp_id": "4e259ca532a7ba6cd700000a", 
-		"last_modified": "2011-07-19 15:03:01.843073", 
-		"user": {
-			"user_id": "47cc67093475061e3d95369d", 
-			"profile__image": "user.png", 
-			"display_name": "Kevin P.", 
-			"color_primary": "333333",
-			"color_secondary": "999999",
-			"screen_name": "kpalms",
-			"privacy": false
+	[
+		{
+			"blurb": "That looks awesome.", 
+			"comment_id": "4e259ca532a7ba6cd700000b", 
+			"mentions": null, 
+			"restamp_id": null, 
+			"stamp_id": "4e259ca532a7ba6cd700000a", 
+			"last_modified": "2011-07-19 15:03:01.843073", 
+			"user": {
+				"user_id": "47cc67093475061e3d95369d", 
+				"profile__image": "user.png", 
+				"display_name": "Kevin P.", 
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"screen_name": "kpalms",
+				"privacy": false
+			}
 		}
-	}
+	]
 
 
 ------------------------------------------------------------------------------

@@ -10,10 +10,12 @@ from datetime import datetime
 
 from api.AStampDB import AStampDB
 from api.Stamp import Stamp
+from api.Comment import Comment
 from MongoDB import Mongo
 from MongoUserStamps import MongoUserStamps
 from MongoInboxStamps import MongoInboxStamps
 from MongoFriendship import MongoFriendship
+from MongoComment import MongoComment
 
 class MongoStamp(AStampDB, Mongo):
         
@@ -53,9 +55,9 @@ class MongoStamp(AStampDB, Mongo):
             'locked': bool
         },
         'stats': {
-            'total_comments': int,
-            'total_todos': int,
-            'total_credit': int
+            'num_comments': int,
+            'num_todos': int,
+            'num_credit': int
         }
     }
     
@@ -121,7 +123,33 @@ class MongoStamp(AStampDB, Mongo):
             else:
                 result.append(stamp)
         return result
-
+        
+    def incrementStatsForStamp(self, stampId, stat, increment=1):
+        key = 'stats.%s' % (stat)
+        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
+                                {'$inc': {key: increment}},
+                                upsert=True)
+        return True
+        
+    def addComment(self, comment):
+        commentId = MongoComment().addComment(comment)
+        self.incrementStatsForStamp(comment['stamp_id'], 'num_comments', 1)
+        return commentId
+        
+    def getComments(self, stampId):
+        return MongoComment().getComments(stampId)
+    
+    def removeComment(self, commentId):
+        _commentDB = MongoComment()
+        comment = _commentDB.getComment(commentId)
+        if _commentDB.removeComment(commentId):
+            numComments = _commentDB.getNumberOfComments(comment.stamp_id)
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(comment.stamp_id)}, 
+                {'$set': {'num_comments': numComments}},
+                upsert=True)
+            return True
+        return False
     
     ### PRIVATE
         
