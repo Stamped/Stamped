@@ -11,7 +11,7 @@ from ADeployment import ADeploymentSystem, ADeploymentStack
 from errors import Fail
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
-AWS_ACCESS_KEY_SECRET = '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'
+AWS_SECRET_KEY = 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX'
 
 class AWSDeploymentSystem(ADeploymentSystem):
     def __init__(self, name, options):
@@ -131,10 +131,10 @@ class AWSDeploymentStack(ADeploymentStack):
         self.commonOptions = commonOptions
         self.instances = config.getInstances()
         
-        for instance in instances:
-            instance.stack_name = self.name
-            instance.aws_access_key_id = AWS_ACCESS_KEY_ID
-            instance.aws_secret_key = AWS_SECRET_KEY
+        for instance in self.instances:
+            instance['stack_name'] = self.name
+            instance['aws_access_key_id'] = AWS_ACCESS_KEY_ID
+            instance['aws_access_key_secret'] = AWS_SECRET_KEY
     
     def create(self):
         params_str = pickle.dumps(self.instances)
@@ -179,6 +179,6 @@ class AWSDeploymentStack(ADeploymentStack):
                 import time
                 time.sleep(wait)
         
-        print "Default instance in stack %s has been initialized! Attempting to connect via ssh..." % (self.name, )
-        os.system('connect.sh %s' % (self.name, ))
+        print "WebServer instance in stack %s has been initialized! Attempting to connect via ssh..." % (self.name, )
+        os.system('connect.sh %s %s' % (self.name, "WebServer"))
 

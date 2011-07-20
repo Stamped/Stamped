@@ -39,6 +39,7 @@ def buildUserData(instance):
         set as a list, broken up into groups that you want to separate with 
         Wait Handles. It is then combined with the actual Wait Handles below.
     """
+    name = instance.name
     commands = [
         """
         echo '>>>> Create keys for root to connect to GitHub'
@@ -90,21 +91,18 @@ def buildUserData(instance):
         """
         echo '>>>> Installing python-setuptools'
         sudo apt-get install python-setuptools
+        cd /stamped/bootstrap && git pull
         echo '>>>> Running init script'
-        python /stamped/bootstrap/init.py "{{ init_params }}" &> /stamped/bootstrap/log
-        """
+        python /stamped/bootstrap/init.py "{{ %s.init_params }}" &> /stamped/bootstrap/log
+        """ % (name, )
     ]
-    
-    params = {
-        'init_params' : pickle.dumps(instance)
-    }
     
     userData = cloudformation.EncodeUserData('#!/bin/bash -ex')
     if 'webServer' in instance.roles:
         userData += cloudformation.AddWaitHandle('CreateWebServerInstanceWaitHandle')
     
     for command in commands:
-        userData += cloudformation.EncodeUserData(convert.parse(command, params))
+        userData += cloudformation.EncodeUserData(command)
     
     userData += cloudformation.AddWaitHandle('RunInitWaitHandle')
     return userData
@@ -228,7 +226,7 @@ def buildTemplate(instances):
         Properties={
             'Handle': {'Ref': 'RunInitWaitHandle'},
             'Timeout': '600'})
-            
+    
     template.Resources.add('CreateWebServerInstanceWaitHandle',
         Type='AWS::CloudFormation::WaitConditionHandle',
         Properties={})
@@ -240,7 +238,17 @@ def buildTemplate(instances):
             'Handle': {'Ref': 'CreateWebServerInstanceWaitHandle'},
             'Timeout': '600'})
     
-    return template.dumps()
+    output = template.dumps()
+    params = { }
+    
+    for instance in instances:
+        import json
+        params[instance['name']] = {
+            "init_params" : json.dumps(instance).replace('"', "'"), 
+        }
+    
+    output = convert.parse(output, params)
+    return output
 
 def parseCommandLine():
     usage   = "Usage: %prog pickled_instance_info"

@@ -26,14 +26,14 @@ def getInstances():
                 'port' : 32000, 
             }, 
         }, 
-        {
-            'name' : 'db2', 
-            'roles' : [ 'db', ], 
-            'mongodb' : {
-                'replSet' : replSetName, 
-                'port' : 34000, 
-            }, 
-        }, 
+        #{
+        #    'name' : 'db2', 
+        #    'roles' : [ 'db', ], 
+        #    'mongodb' : {
+        #        'replSet' : replSetName, 
+        #        'port' : 34000, 
+        #    }, 
+        #}, 
     ]
     
     servers = [

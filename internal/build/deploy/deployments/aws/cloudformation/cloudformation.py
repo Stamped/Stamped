@@ -96,9 +96,9 @@ def _dict_property(name):
         self[name] = value
     return property(get, set)
 
-def EncodeUserData(string):
+def EncodeUserData(s):
     data = []
-    for line in string.split('\n'):
+    for line in s.split('\n'):
         data.append(line)
         data.append("\n")
     return data

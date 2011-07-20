@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import config, copy, getpass, os, pickle, re, string, utils
+import config, copy, getpass, json, os, pickle, re, string, utils
 from ADeployment import ADeploymentSystem, ADeploymentStack
 from errors import Fail
 
@@ -129,8 +129,8 @@ class LocalDeploymentStack(ADeploymentStack):
         
         self.instances = config.getInstances()
         
-        for instance in instances:
-            instance.stack_name = self.name
+        for instance in self.instances:
+            instance['stack_name'] = self.name
     
     def create(self):
         self.delete()
@@ -145,10 +145,10 @@ class LocalDeploymentStack(ADeploymentStack):
             
             #flatten = lambda v: v if not isinstance(v, (tuple, list)) else string.joinfields(v, ',')
             #params_str = string.joinfields(('%s=%s' % (k, flatten(v)) for k, v in params.iteritems()), ' ')
-            params_str = pickle.dumps(instance)
+            params_str = json.dumps(instance).replace('"', "'")
             
             self.local('git clone git@github.com:Stamped/stamped-bootstrap.git %s' % instance_bootstrap_path)
-            self.local('python %s "%s"' % (instance_bootstrap_init_path, params_str), show_cmd=False)
+            self.local('python %s "%s"' % (instance_bootstrap_init_path, params_str))
     
     def delete(self):
         if os.path.exists(self.path):

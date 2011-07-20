@@ -17,6 +17,9 @@ def parseCommandLine():
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
+    parser.add_option("-t", "--tag", action="store", dest="tag", type="string", 
+        default=None, help="Specify a tag to find on an instance within the given stack-name")
+    
     (options, args) = parser.parse_args()
     
     if len(args) == 0:
@@ -34,7 +37,7 @@ def main():
     conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
     reservations = conn.get_all_instances()
     stackNameKey = 'aws:cloudformation:stack-name'
-    found = False
+    tagKey = "stamped:family"
     
     for reservation in reservations:
         for instance in reservation.instances:
@@ -45,14 +48,13 @@ def main():
                 stackName = instance.tags[stackNameKey]
                 
                 if options.stackName is None or stackName.lower() == options.stackName:
-                    found = True
-                    print instance.public_dns_name
+                    if not options.tag or \
+                        (tagKey in instance.tags and instance.tags[tagKey].lower() == options.tag.lower()):
+                        print instance.public_dns_name
+                        sys.exit(0)
     
-    if not found:
-        print "error: unable to find instance matching stack-name"
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    print "error: unable to find instance matching stack-name '%s'" % options.stackName
+    sys.exit(1)
 
 if __name__ == '__main__':
     main()
