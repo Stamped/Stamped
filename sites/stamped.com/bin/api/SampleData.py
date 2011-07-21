@@ -818,7 +818,7 @@ def betaAccountData(baseurl):
     createStamp(baseurl=baseurl, user=robby, title='Ariana Afghan Kebab Place', category='Place', comment='Kabuli palow and kabobs -- great price for the place. ')
     createStamp(baseurl=baseurl, user=jake, title='Pacific Catch', category='Place', comment='Fantastic fish tacos -- but really small beware. Go if you\'ve never been. ')
     createStamp(baseurl=baseurl, user=robby, title='Stamped', category='App', comment='This is the best app on the market. ')
-    createStamp(baseurl=baseurl, user=robby, title='The Breslin', category='Place', comment='The lamb burger or the entire pig feast with large groups. ')
+    toRestamp = createStamp(baseurl=baseurl, user=robby, title='The Breslin', category='Place', comment='The lamb burger or the entire pig feast with large groups. ')
     createStamp(baseurl=baseurl, user=ed, title='Freedom', category='Book', comment='Worthy follow-up to The Corrections.  ')
     createStamp(baseurl=baseurl, user=bart, title='Four Seasons Boston', category='Place', comment='If you want to spend a lot of money, this Place is extremely nice.  Gorgeous pool overlooking the park.')
     createStamp(baseurl=baseurl, user=travis, title='Phantogram', category='Music', comment='Softer electronica with a perfect blend of harder beats mixed in.')
@@ -830,7 +830,9 @@ def betaAccountData(baseurl):
     stampID = createStamp(baseurl=baseurl, user=bart, title='Timer', category='Film', comment='Indie Film that makes really interesting points about relationships.  Not incredible but very thought-provoking.')       
     createStamp(baseurl=baseurl, user=robby, title='The Elegant Universe', category='Book', comment='This books makes me feel smart.')
     createStamp(baseurl=baseurl, user=bart, title='The Tipsy Pig', category='Place', comment='Mac and cheese and burger.  Incredible.')
-
+    
+    
+    ## COMMENTS
 
     path = "comments/create.json"
     data = {
@@ -858,6 +860,37 @@ def betaAccountData(baseurl):
     else:
         print 'result: %s' % path
         print result
+        raise Exception
+        
+        
+    ## RESTAMP
+    
+    path = "stamps/show.json"
+    data = {
+        "authenticated_user_id": kevin,
+        "stamp_id": toRestamp
+    }
+    restamp = testGET(baseurl, path, data)
+    if len(restamp['stamp_id']) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+    
+    
+    path = "stamps/create.json"
+    data = {
+        "authenticated_user_id": kevin,
+        "entity_id": restamp['entity']['entity_id'],
+        "blurb": "Lamb burger rocked my world.",
+        "credit": 'sample_robby'
+    }
+    stampID = testPOST(baseurl, path, data)['stamp_id']
+    if len(stampID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
         raise Exception
         
         

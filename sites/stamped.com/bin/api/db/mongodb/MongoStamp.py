@@ -125,7 +125,8 @@ class MongoStamp(AStampDB, Mongo):
                     }),
                     'stamp_id'))
                 
-                if 'stamp_id' in creditedStamp:                
+                if 'stamp_id' in creditedStamp and creditedStamp.stamp_id != None:    
+                    # Just in case the credited user hasn't stamped it yet...            
                     self._collection.update(
                         {'_id': self._getObjectIdFromString(creditedStamp.stamp_id)}, 
                         {'$inc': {'num_credit': 1}, '$inc': {'num_comments': 1}},
