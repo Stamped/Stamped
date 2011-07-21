@@ -8,11 +8,11 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
-from MySQL import MySQL
-from AMentionDB import AMentionDB
-from Mention import Mention
-from MySQLUserDB import MySQLUserDB
-from MySQLStampDB import MySQLStampDB
+from QL import MySQL
+from ntionDB import AMentionDB
+from tion import Mention
+from QLUserDB import MySQLUserDB
+from QLStampDB import MySQLStampDB
 
 class MySQLMentionDB(AMentionDB, MySQL):
 

@@ -32,4 +32,4 @@ class AAccountDB(object):
     @abstractmethod
     def flagAccount(self, user):
         pass
-        
+

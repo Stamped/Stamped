@@ -123,14 +123,13 @@ class MongoEntity(AEntityDB, Mongo):
         }
     }
     
-    def __init__(self, setup=False):
+    def __init__(self):
         AEntityDB.__init__(self, self.DESC)
         Mongo.__init__(self, collection=self.COLLECTION)
         
         self.db = self._getDatabase()
         self._lock = Lock()
-        
-        
+    
     ### PUBLIC
     
     def addEntity(self, entity):

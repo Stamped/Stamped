@@ -8,38 +8,38 @@ __license__ = "TODO"
 import sys, thread
 # import MySQLdb
 
-# from db.mysql.MySQL import MySQL
-from optparse import OptionParser
+# from mysql.MySQL import MySQL
+from parse import OptionParser
 
 from Entity import Entity
 from User import User
 from Stamp import Stamp
-from Mention import Mention
+from tion import Mention
 from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship
 from Account import Account
 
 # import specific databases
-# from db.mysql.MySQLEntityDB import MySQLEntityDB
-# from db.mysql.MySQLUserDB import MySQLUserDB
-# from db.mysql.MySQLStampDB import MySQLStampDB
-# from db.mysql.MySQLMentionDB import MySQLMentionDB
-# from db.mysql.MySQLCommentDB import MySQLCommentDB
-# from db.mysql.MySQLFavoriteDB import MySQLFavoriteDB
-# from db.mysql.MySQLCollectionDB import MySQLCollectionDB
-# from db.mysql.MySQLFriendshipDB import MySQLFriendshipDB
-# from db.mysql.MySQLFriendsDB import MySQLFriendsDB
-# from db.mysql.MySQLFollowersDB import MySQLFollowersDB
-# from db.mysql.MySQLBlockDB import MySQLBlockDB
-from db.mongodb.MongoEntity import MongoEntity
-from db.mongodb.MongoUser import MongoUser
-from db.mongodb.MongoStamp import MongoStamp
-from db.mongodb.MongoFriendship import MongoFriendship
-from db.mongodb.MongoCollection import MongoCollection
-from db.mongodb.MongoFavorite import MongoFavorite
-from db.mongodb.MongoComment import MongoComment
-from db.mongodb.MongoAccount import MongoAccount
+# from mysql.MySQLEntityDB import MySQLEntityDB
+# from mysql.MySQLUserDB import MySQLUserDB
+# from mysql.MySQLStampDB import MySQLStampDB
+# from mysql.MySQLMentionDB import MySQLMentionDB
+# from mysql.MySQLCommentDB import MySQLCommentDB
+# from mysql.MySQLFavoriteDB import MySQLFavoriteDB
+# from mysql.MySQLCollectionDB import MySQLCollectionDB
+# from mysql.MySQLFriendshipDB import MySQLFriendshipDB
+# from mysql.MySQLFriendsDB import MySQLFriendsDB
+# from mysql.MySQLFollowersDB import MySQLFollowersDB
+# from mysql.MySQLBlockDB import MySQLBlockDB
+from mongodb.MongoEntity import MongoEntity
+from mongodb.MongoUser import MongoUser
+from mongodb.MongoStamp import MongoStamp
+from mongodb.MongoFriendship import MongoFriendship
+from mongodb.MongoCollection import MongoCollection
+from mongodb.MongoFavorite import MongoFavorite
+from mongodb.MongoComment import MongoComment
+from mongodb.MongoAccount import MongoAccount
 
 
 def _setup():

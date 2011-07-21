@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from Mention import Mention
+from tion import Mention
 
 class AMentionDB(object):
     

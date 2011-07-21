@@ -59,14 +59,13 @@ class MongoAccount(AAccountDB, Mongo):
         }
     }
     
-    def __init__(self, setup=False):
+    def __init__(self):
         AAccountDB.__init__(self, self.DESC)
         Mongo.__init__(self, collection=self.COLLECTION)
         
         self.db = self._getDatabase()
         self._lock = Lock()
-        
-        
+    
     ### PUBLIC
     
     def addAccount(self, user):

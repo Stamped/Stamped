@@ -8,11 +8,11 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
-from MySQL import MySQL
+from QL import MySQL
 from AFriendshipDB import AFriendshipDB
 from Friendship import Friendship
-from MySQLUserDB import MySQLUserDB
-from MySQLBlockDB import MySQLBlockDB
+from QLUserDB import MySQLUserDB
+from QLBlockDB import MySQLBlockDB
 
 class MySQLFriendshipDB(AFriendshipDB, MySQL):
 

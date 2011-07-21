@@ -164,7 +164,7 @@ class MongoStamp(AStampDB, Mongo):
         
     def removeStamp(self, stampId, userId):
         MongoUserStamps().removeUserStamp(userId, stampId)
-        ### TODO: Add removal from Inbox, etc.
+        ### TODO: Add removal from ox, etc.
         return self._removeDocument(stampId)
     
     def addStamps(self, stamps):

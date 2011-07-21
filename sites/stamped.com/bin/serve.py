@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import flask, json, utils
+import init, flask, json, utils
 from flask import request, Response, Flask
 
 from api.MongoStampedAPI import MongoStampedAPI

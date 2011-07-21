@@ -8,7 +8,7 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
-from MySQL import MySQL
+from QL import MySQL
 from AUserDB import AUserDB
 from User import User
 

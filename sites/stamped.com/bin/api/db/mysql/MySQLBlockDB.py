@@ -8,10 +8,10 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
-from MySQL import MySQL
-from ABlockDB import ABlockDB
-from Block import Block
-from MySQLUserDB import MySQLUserDB
+from QL import MySQL
+from ockDB import ABlockDB
+from ck import Block
+from QLUserDB import MySQLUserDB
 
 class MySQLBlockDB(ABlockDB, MySQL):
 

@@ -5,7 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import os, sys, threading, time, traceback, urllib2
+import os, sys, threading, pickle, time, traceback, urllib2
+from errors import *
 from subprocess import Popen, PIPE
 from functools import wraps
 from BeautifulSoup import BeautifulSoup
@@ -23,6 +24,12 @@ def shell2(cmd, *args, **kwargs):
     status = pp.wait()
     
     return (output, status)
+
+def shell3(cmd, customEnv=None):
+    pp = Popen(cmd, shell=True)
+    status = pp.wait()
+    
+    return status
 
 def lazyProperty(undecorated):
     name = '_' + undecorated.__name__
@@ -75,6 +82,29 @@ def resolvePath(path):
 def getFuncName(offset=0):
     import inspect
     return inspect.stack()[1 + offset][3]
+
+def getPythonConfigFile(path, pickled=False):
+    if os.path.exists(path):
+        with open(path, "rb") as fp:
+            source = fp.read()
+        
+        if pickled:
+            return AttributeDict(pickle.loads(source))
+        else:
+            return AttributeDict(eval(source))
+    else:
+        return AttributeDict()
+
+def getenv(var, default=None):
+    value = os.getenv(var)
+    
+    if value is None or value == "":
+        if default:
+            return default
+        else:
+            raise Fail("error: environment variable '%s' not set!" % var)
+    
+    return value
 
 class AttributeDict(object):
     def __init__(self, *args, **kwargs):

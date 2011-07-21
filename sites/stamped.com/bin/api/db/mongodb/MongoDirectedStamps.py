@@ -16,7 +16,7 @@ from MongoInboxStamps import MongoInboxStamps
 from MongoFriends import MongoFriends
 from MongoBlock import MongoBlock
 # from api.AFriendshipDB import AFriendshipDB
-# from Friendship import Friendship
+# from api.Friendship import Friendship
 
 class MongoDirectedStamps(Mongo):
         
@@ -112,7 +112,7 @@ class MongoDirectedStamps(Mongo):
     def removeDirectedStamps(self, userId, senderId):
         """
         This function allows the recipient of directed stamps to remove
-        them from their inbox. It cannot be called on individual stamps, but is
+        them from ir inbox. It cannot be called on individual stamps, but is
         only called when the recipient unfollows the sender.
         """
         
@@ -142,5 +142,5 @@ class MongoDirectedStamps(Mongo):
 ####### NOTES
 # How to do this? Edge case is where two distinct users have sent one recipient the same
 # directed stamp. No easy way to delete references to the stamp in the inbox, because you
-# have to check to see if any other users have sent it before deleting stamps from the
+# have to check to see if any other users have sent it before deleting stamps from 
 # intended user. COME BACK TO.

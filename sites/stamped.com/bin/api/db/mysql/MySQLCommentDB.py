@@ -8,11 +8,11 @@ __license__ = "TODO"
 from threading import Lock
 from datetime import datetime
 
-from MySQL import MySQL
+from QL import MySQL
 from ACommentDB import ACommentDB
 from Comment import Comment
-from MySQLUserDB import MySQLUserDB
-from MySQLStampDB import MySQLStampDB
+from QLUserDB import MySQLUserDB
+from QLStampDB import MySQLStampDB
 
 class MySQLCommentDB(ACommentDB, MySQL):
 

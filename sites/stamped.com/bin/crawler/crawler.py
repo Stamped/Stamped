@@ -23,8 +23,8 @@ from sources.dumps.FactualiPhoneAppsDump import FactualiPhoneAppsDump
 from sources.dumps.FactualUSPlacesDump import FactualUSPlacesDump
 from sources.dumps.FactualUSRestaurantsDump import FactualUSRestaurantsDump
 
-# import specific databases
-#from db.mysql.MySQLEntityDB import MySQLEntityDB
+# import all databases
+import api.db
 
 #-----------------------------------------------------------
 
@@ -106,8 +106,8 @@ def parseCommandLine():
         type = 'choice', 
         action = 'store', 
         dest = 'sink', 
-        choices = ['mysql', 'mongo', 'cassandra', 'riak', 'redis', 'simpledb'], 
-        default = 'mysql', 
+        choices = ['mongodb', ], 
+        default = 'mongodb', 
         help="sets the destination database to persist entities to")
     
     (options, args) = parser.parse_args()

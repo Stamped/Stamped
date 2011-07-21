@@ -7,9 +7,9 @@ __license__ = "TODO"
 
 import bson, copy, os, pymongo
 
-from ...Exceptions import Fail
-from ...AEntityDB import AEntityDB
-from ...Utils import AttributeDict, getenv, getPythonConfigFile
+from errors import Fail
+from api.AEntityDB import AEntityDB
+from utils import AttributeDict, getenv, getPythonConfigFile
 from threading import Lock
 from datetime import datetime
 
@@ -318,6 +318,4 @@ class Mongo():
                     if limit != None and len(ids) > limit:
                         return ids[:limit]
             return ids
-            
 
-    

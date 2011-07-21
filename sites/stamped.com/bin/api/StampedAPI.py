@@ -8,7 +8,7 @@ __license__ = "TODO"
 from abc import abstractmethod
 from datetime import datetime
 
-from Exceptions import InvalidArgument
+from errors import InvalidArgument
 from AStampedAPI import AStampedAPI
 
 from AAccountDB import AAccountDB
@@ -36,7 +36,7 @@ from Collection import Collection
 #    * ensuring that a given ID is "valid"
 #    * ensuring that a given relationship is "valid"
 #    * ensuring that for methods which accept a user ID and should be 
-#      considered "priveleged", then the request is coming from a properly 
+#      considered "priveleged", then the request is coming from roperly 
 #      authenticated user. e.g., either an administrator or the user who is 
 #      currently logged into the application.
 
@@ -51,7 +51,13 @@ class StampedAPI(AStampedAPI):
         self._validated = False
     
     def _validate(self):
-        assert hasattr(self, '_accountDB')    and isinstance(self._accountDB, AAccountDB)
+        assert hasattr(self, '_accountDB')
+        
+        print self._accountDB
+        print isinstance(self._accountDB, AAccountDB)
+        from db.mongodb.MongoDB import Mongo
+        print isinstance(self._accountDB, Mongo)
+        assert isinstance(self._accountDB, AAccountDB)
         assert hasattr(self, '_entityDB')     and isinstance(self._entityDB, AEntityDB)
         assert hasattr(self, '_userDB')       and isinstance(self._userDB, AUserDB)
         assert hasattr(self, '_stampDB')      and isinstance(self._stampDB, AStampDB)
@@ -485,7 +491,7 @@ class StampedAPI(AStampedAPI):
     # ######### #
     
     def addFavorite(self, params):
-        # TODO: construct a favorite object from (userID, entityID, stampID)
+        # TODO: construct a favorite object from erID, entityID, stampID)
         raise NotImplementedError
         favorite = Favorite()
         

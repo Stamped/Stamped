@@ -12,7 +12,7 @@ from datetime import datetime
 
 from MongoDB import Mongo
 # from api.AFriendshipDB import AFriendshipDB
-# from Friendship import Friendship
+# from api.Friendship import Friendship
 
 class MongoUserStamps(Mongo):
         

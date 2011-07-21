@@ -62,7 +62,7 @@ class AEntitySource(Greenlet, IASyncProducer):
         context of this sink's Greenlet."""
         pass
         #utils.log("")
-        #utils.log("Importing entities from source '%s'" % self.name)
+        #utils.log("Importing entities from rce '%s'" % self.name)
         #utils.log("")
     
     @property

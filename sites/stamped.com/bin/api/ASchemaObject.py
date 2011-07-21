@@ -76,7 +76,7 @@ class ASchemaObject(object):
         def _unionDict(source, schema, dest):
             for k, v in source.iteritems():
                 if not _unionItem(k, v, schema, dest):
-                    #Utils.log("item not found %s %s" % (k, v))
+                    #utils.log("item not found %s %s" % (k, v))
                     return False
             
             return True
