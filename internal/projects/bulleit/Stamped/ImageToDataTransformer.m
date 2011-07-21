@@ -19,7 +19,9 @@
 }
 
 - (id)transformedValue:(id)value {
-  return UIImageJPEGRepresentation(value, 1.0);
+  // While this may be slower than JPEG, the extra alpha channel is needed for
+  // image compositing.
+  return UIImagePNGRepresentation(value);
 }
 
 - (id)reverseTransformedValue:(id)value {

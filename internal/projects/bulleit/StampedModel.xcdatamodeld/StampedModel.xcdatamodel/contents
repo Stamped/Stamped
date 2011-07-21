@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="848" systemVersion="10K540" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+<model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="848" systemVersion="11A511" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Comment" representedClassName="Comment">
         <attribute name="blurb" optional="YES" attributeType="String"/>
         <attribute name="commentID" optional="YES" attributeType="String"/>
@@ -19,7 +19,7 @@
         <attribute name="subtitle" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="coordinates" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Coordinate" inverseName="entityObject" inverseEntity="Coordinate"/>
-        <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="entityObject" inverseEntity="Stamp"/>
+        <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="entityObject" inverseEntity="Stamp"/>
     </entity>
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="blurb" optional="YES" attributeType="String"/>
@@ -27,7 +27,7 @@
         <attribute name="lastModified" optional="YES" attributeType="Date"/>
         <attribute name="numComments" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
-        <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamp" inverseEntity="Entity"/>
+        <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamps" inverseEntity="Entity"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="stamps" inverseEntity="User"/>
     </entity>
     <entity name="User" representedClassName="User">
@@ -47,10 +47,10 @@
         <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="user" inverseEntity="Stamp"/>
     </entity>
     <elements>
-        <element name="Coordinate" positionX="396" positionY="81" width="128" height="90"/>
+        <element name="Comment" positionX="234" positionY="-63" width="128" height="135"/>
+        <element name="Coordinate" positionX="315" positionY="189" width="128" height="90"/>
         <element name="Entity" positionX="556" positionY="216" width="128" height="135"/>
-        <element name="Stamp" positionX="439" positionY="369" width="128" height="150"/>
-        <element name="User" positionX="144" positionY="225" width="128" height="240"/>
-        <element name="Comment" positionX="160" positionY="192" width="128" height="135"/>
+        <element name="Stamp" positionX="306" positionY="342" width="128" height="150"/>
+        <element name="User" positionX="-45" positionY="63" width="128" height="240"/>
     </elements>
 </model>
