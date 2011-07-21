@@ -120,7 +120,6 @@ def parseCommandLine():
                 options.sources.append(source)
     
     options.sink = MongoStampedAPI()
-    
     return options
 
 def main():

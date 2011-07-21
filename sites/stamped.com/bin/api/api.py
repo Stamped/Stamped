@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import sys, thread
 # import MySQLdb
 
@@ -14,7 +15,7 @@ from parse import OptionParser
 from Entity import Entity
 from User import User
 from Stamp import Stamp
-from tion import Mention
+from Mention import Mention
 from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship

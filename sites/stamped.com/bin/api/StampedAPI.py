@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 from abc import abstractmethod
 from datetime import datetime
 
@@ -118,7 +119,7 @@ class StampedAPI(AStampedAPI):
             account.screen_name = params.screen_name
         if params.privacy != None:
             account.privacy = params.privacy
-            
+        
         if params.language != None:
             account.locale['language'] = params.language
         if params.time_zone != None:

@@ -5,30 +5,33 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import sys, thread, urllib, json
+import Globals
+import sys, thread, urllib, urllib2, json
+from pprint import pprint
 
 # import StampedAPI from StampedAPI
 
 def testGET(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
-    result = json.load(urllib.urlopen("%s/%s?%s" % (baseurl, path, params)))
+    result = json.load(urllib2.urlopen("%s/%s?%s" % (baseurl, path, params)))
     return result
     
 def testPOST(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
-    result = urllib.urlopen("%s/%s" % (baseurl, path), params)
+    result = urllib2.urlopen("%s/%s" % (baseurl, path), params)
+    pprint(result)
     jsonResult = json.load(result)
     return jsonResult
 
 
 def main():
-
     print    
     print '      BEGIN'
     
     baseurl = "http://0.0.0.0:5000/api/v1"
+    baseurl = "http://192.168.0.46:5000/api/v1"
     #baseurl = "http://192.168.0.10:5000/api/v1"
     
     betaAccountData(baseurl)

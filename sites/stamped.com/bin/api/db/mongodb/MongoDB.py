@@ -7,6 +7,7 @@ __license__ = "TODO"
 
 import bson, copy, os, pymongo
 
+import Globals
 from errors import Fail
 from api.AEntityDB import AEntityDB
 from utils import AttributeDict, getenv, getPythonConfigFile
@@ -39,6 +40,7 @@ class Mongo():
                 }
             })
             print self._config
+            raise Fail("no config file")
         
         if not 'mongodb' in self._config:
             raise Fail("invalid configuration file")

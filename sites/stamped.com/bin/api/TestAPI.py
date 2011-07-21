@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import sys, thread, urllib, json
 
 # import StampedAPI from StampedAPI
