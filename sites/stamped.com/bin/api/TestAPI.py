@@ -37,20 +37,55 @@ def main():
 #     
 #     entityTest(baseurl)
 # 
-    stampTest(baseurl)
+#     stampTest(baseurl)
 #     
 #     friendshipTest(baseurl)
 # 
 #     collectionTest(baseurl)
 #
-#     commentTest(baseurl)
+    commentTest(baseurl)
 #
 #     favoriteTest(baseurl)
+
+#     regexTest()
  
     print '      COMPLETE'
-    print       
+    print      
 
+
+def regexTest():
+    import re
     
+    sampleText = []
+    sampleText.append("This is a comment with @robby and @kevin in it.")
+    sampleText.append("@robby what do you think?")
+    sampleText.append("Normal comment")
+    sampleText.append("Sending an email to robby@stamped.com")
+    sampleText.append("My handle is @sample_kevin")
+    sampleText.append("LOOK.ITS.@KEVIN.")
+    sampleText.append("Oh @reallyLongNameThatShouldBreak, really?")
+    sampleText.append("Maybe he'll finally find his keys. @peterfalk")
+    
+    user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
+    reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
+        
+    for text in sampleText:
+        print 'TEST:', text  
+        mentions = [] 
+        reply = reply_regex.match(text)
+        if reply:
+            data = {}
+            data['indices'] = [(reply.start()), reply.end()]
+            data['screen_name'] = reply.group(0)[1:]
+            mentions.append(data)
+        for user in user_regex.finditer(text):
+            data = {}
+            data['indices'] = [(user.start()+1), user.end()]
+            data['screen_name'] = user.group(0)[2:]
+            mentions.append(data)
+        print mentions
+
+
 # ######## #
 # Accounts #
 # ######## #
@@ -458,8 +493,7 @@ def stampTest(baseurl):
         "authenticated_user_id": userA,
         "entity_id": entityID,
         "blurb": "Favorite restaurant in the Village.", 
-        "image": "image.png",
-        "mentions": "userA,userB"
+        "image": "image.png"
     }
     stampID = testPOST(baseurl, path, data)['stamp_id']
     if len(stampID) == 24:
@@ -474,7 +508,7 @@ def stampTest(baseurl):
     data = {
         "authenticated_user_id": userB,
         "entity_id": entityID,
-        "blurb": "Favorite restaurant in the Village.", 
+        "blurb": "Favorite restaurant in the Village. Thanks, @UserA.", 
         "image": "image.png",
         "credit": "UserA"
     }
@@ -874,8 +908,7 @@ def collectionTest(baseurl):
         "authenticated_user_id": userA,
         "entity_id": entityID,
         "blurb": "Favorite restaurant in the Village.", 
-        "image": "image.png",
-        "mentions": "userA,userB"
+        "image": "image.png"
     }
     stampID = testPOST(baseurl, path, data)['stamp_id']
     if len(stampID) == 24:
@@ -1020,8 +1053,7 @@ def commentTest(baseurl):
         "authenticated_user_id": userID,
         "entity_id": entityID,
         "blurb": "Favorite restaurant in the Village.", 
-        "image": "image.png",
-        "mentions": "userA,userB"
+        "image": "image.png"
     }
     stampID = testPOST(baseurl, path, data)['stamp_id']
     if len(stampID) == 24:
@@ -1036,7 +1068,7 @@ def commentTest(baseurl):
     data = {
         "authenticated_user_id": userID,
         "stamp_id": stampID,
-        "blurb": "That looks awesome."
+        "blurb": "That looks awesome. Well done, @kpalms.."
     }
     commentID = testPOST(baseurl, path, data)['comment_id']
     if len(commentID) == 24:
@@ -1167,8 +1199,7 @@ def favoriteTest(baseurl):
         "authenticated_user_id": userID,
         "entity_id": entityID,
         "blurb": "Favorite restaurant in the Village.", 
-        "image": "image.png",
-        "mentions": "userA,userB"
+        "image": "image.png"
     }
     stampID = testPOST(baseurl, path, data)['stamp_id']
     if len(stampID) == 24:

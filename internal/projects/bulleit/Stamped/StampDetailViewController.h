@@ -17,9 +17,11 @@
 }
 
 - (id)initWithStamp:(Stamp*)stamp;
+- (IBAction)handleCommentButtonTap:(id)sender;
 
-@property (nonatomic, retain) IBOutlet UITableViewCell* topHeaderCell;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
+@property (nonatomic, retain) IBOutlet UITableViewCell* topHeaderCell;
+@property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
 @property (nonatomic, retain) IBOutlet UITextField* addCommentField;
 @property (nonatomic, retain) IBOutlet UIView* commentsView;
 @property (nonatomic, retain) IBOutlet UIView* activityView;
@@ -28,6 +30,8 @@
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
+
+
 
 
 @end

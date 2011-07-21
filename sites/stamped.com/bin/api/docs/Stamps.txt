@@ -25,9 +25,6 @@ A brief text description of why the user is stamping the entity. This is current
 **image** _optional_
 An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
 
-**mentions** _optional_
-User information for any users that are mentioned in the stamp. Any users mentioned must also be referenced in the text of the blurb in the format "@screen_name". Multiple screen names must be separated by commas.
-
 **credit** _optional_
 User information for any users that are named as receiving credit in the stamp. Multiple screen names must be separated by commas.
 
@@ -54,6 +51,7 @@ User information for any users that are named as receiving credit in the stamp. 
 			"4e226fcd4e61754161000008"
 		], 
 		"last_modified": "2011-07-17 05:14:54.128641",
+		"mentions": null,
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"profile__image": "user.png", 
@@ -89,19 +87,16 @@ A brief text description of why the user is stamping the entity. This is current
 **image** _optional_
 An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
 
-**mentions** _optional_
-User information for any users that are mentioned in the stamp. Any users mentioned must also be referenced in the text of the blurb in the format "@screen_name". Multiple screen names must be separated by commas.
-
 **credit** _optional_
 User information for any users that are named as receiving credit in the stamp. Multiple screen names must be separated by commas.
 
 ### Sample Request ###
 	POST https://api.stamped.com/1/stamps/update.json
-	authenticated_user_id=47cc67093475061e3d95369d&stamp_id=4e226fcd4e18474561000000&blurb=Really,+the+best+ever.
+	authenticated_user_id=47cc67093475061e3d95369d&stamp_id=4e226fcd4e18474561000000&blurb=Went+here+with+%40robby...+Really,+the+best+ever.
 
 ### Sample Result ###
 	{
-		"blurb": "Really, the best ever.", 
+		"blurb": "Went here with @robby... Really, the best ever.", 
 		"entity": {
 		    "category": "Restaurant", 
 		    "entity_id": "4e226fcd4e61754161000006", 
@@ -116,6 +111,14 @@ User information for any users that are named as receiving credit in the stamp. 
 		"credit": [
 			"4e226fcd4e61754161000007", 
 			"4e226fcd4e61754161000008"
+		], 
+		"mentions": [
+			{
+				"display_name": "Robby S.", 
+				"indices": [15,21], 
+				"screen_name": "robby", 
+				"user_id": "4e2854ba32a7ba9d96000008"
+			}
 		], 
 		"last_modified": "2011-07-17 05:14:54.128641", 
 		"user": {
@@ -196,6 +199,7 @@ The user id of the authenticating user. This is necessary for stamps that are pr
 			"4e226fcd4e61754161000008"
 		], 
 		"last_modified": "2011-07-17 05:14:54.128641", 
+		"mentions": null,
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"profile__image": "user.png", 

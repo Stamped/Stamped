@@ -130,7 +130,7 @@ typedef enum {
   [self loadStampsFromDataStore];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
-  [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e25ede432a7ba84600000c0"
+  [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e2792f732a7ba6a560004b1"
                              objectMapping:stampMapping
                                   delegate:self];
 }

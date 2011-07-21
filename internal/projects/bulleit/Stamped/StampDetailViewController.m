@@ -23,7 +23,7 @@
 #import "StampedAppDelegate.h"
 #import "UserImageView.h"
 
-static const CGFloat kActivityFrameMinHeight = 126.0;
+static const CGFloat kMainCommentFrameMinHeight = 75.0;
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
@@ -37,6 +37,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 @implementation StampDetailViewController
 
 @synthesize topHeaderCell = topHeaderCell_;
+@synthesize mainCommentContainer = mainCommentContainer_;
 @synthesize scrollView = scrollView_;
 @synthesize addCommentField = addCommentField_;
 @synthesize commentsView = commentsView_;
@@ -61,6 +62,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
+  self.mainCommentContainer = nil;
   self.scrollView = nil;
   self.currentUserImageView = nil;
   self.commenterImageView = nil;
@@ -81,7 +83,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   [super viewDidLoad];
   UITapGestureRecognizer* gestureRecognizer =
       [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-  [self.view addGestureRecognizer:gestureRecognizer];
+  [self.activityView addGestureRecognizer:gestureRecognizer];
   [gestureRecognizer release];
 
   scrollView_.contentSize = self.view.bounds.size;
@@ -94,6 +96,12 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   activityView_.layer.shadowRadius = 2;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
 
+  mainCommentContainer_.layer.shadowOpacity = 0.1;
+  mainCommentContainer_.layer.shadowOffset = CGSizeMake(0, 0);
+  mainCommentContainer_.layer.shadowRadius = 2;
+  mainCommentContainer_.layer.shadowPath =
+      [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
+  
   [self setUpMainContentView];
   [self setUpCommentsView];
 }
@@ -103,6 +111,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
+  self.mainCommentContainer = nil;
   self.scrollView = nil;
   self.currentUserImageView = nil;
   self.commenterImageView = nil;
@@ -212,12 +221,14 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   stringSize = [stamp_.blurb sizeWithFont:commentFont
                         constrainedToSize:CGSizeMake(210, MAXFLOAT)
                             lineBreakMode:commentLabel.lineBreakMode];
-  commentLabel.frame = CGRectMake(leftPadding, 29, stringSize.width, stringSize.height);
-  [activityView_ addSubview:commentLabel];
-
+  commentLabel.frame = CGRectMake(leftPadding, 25, stringSize.width, stringSize.height);
+  [mainCommentContainer_ addSubview:commentLabel];
+  CGRect mainCommentFrame = mainCommentContainer_.frame;
+  mainCommentFrame.size.height = fmaxf(kMainCommentFrameMinHeight, CGRectGetMaxY(commentLabel.frame) + 10);
+  mainCommentContainer_.frame = mainCommentFrame;
+  mainCommentContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
   CGRect activityFrame = activityView_.frame;
-  activityFrame.size.height = fmaxf(kActivityFrameMinHeight, 
-      CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds)) + 5;
+  activityFrame.size.height = CGRectGetMaxY(mainCommentContainer_.frame) + CGRectGetHeight(commentsView_.bounds) + 5;
   [commentLabel release];
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
@@ -244,6 +255,10 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 
 - (void)setUpCommentsView {
   currentUserImageView_.image = [UIImage imageNamed:@"robby_s_user_image"];
+}
+
+- (IBAction)handleCommentButtonTap:(id)sender {
+  [addCommentField_ becomeFirstResponder];
 }
 
 - (void)handleTap:(UITapGestureRecognizer*)sender {
