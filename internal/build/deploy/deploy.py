@@ -8,8 +8,7 @@ __license__ = "TODO"
 import os, sys, utils
 from optparse import OptionParser
 
-from deployments.aws import AWSDeploymentSystem
-from deployments.local import LocalDeploymentSystem
+from deployments import AWSDeploymentSystem, LocalDeploymentSystem
 from errors import Fail
 
 available_commands = {
@@ -35,6 +34,12 @@ available_commands = {
     'list_stacks' : 'list_stacks', 
     
     'create_and_connect' : [ 'create_stack', 'connect' ], 
+    
+    'init' : 'init_stack', 
+    'init_stack' : 'init_stack', 
+    
+    'update' : 'update_stack', 
+    'update_stack' : 'update_stack', 
 }
 
 def parseCommandLine():

@@ -35,7 +35,7 @@ def shell3(cmd, customEnv=None):
     
     return status
 
-def lazyProperty(undecorated):
+def lazy_property(undecorated):
     name = '_' + undecorated.__name__
     @property
     @wraps(undecorated)

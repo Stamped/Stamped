@@ -60,7 +60,7 @@
         }, 
         "SecurityGroups": [
           {
-            "Ref": "webServerreplSetInitSecurityGroup"
+            "Ref": "webServerSecurityGroup"
           }
         ], 
         "Tags": [
@@ -190,7 +190,7 @@
                 "\n", 
                 "        echo '>>>> Running init script'", 
                 "\n", 
-                "        python /stamped/bootstrap/init.py \"{'aws_access_key_secret': 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX', 'replSet': {'_id': 'stamped-dev-01', 'members': [{'host': 'localhost:30000', '_id': 0}, {'host': 'localhost:32000', '_id': 1}]}, 'name': 'dev0', 'roles': ['webServer', 'replSetInit'], 'stack_name': 'fischtest20', 'aws_access_key_id': 'AKIAIXLZZZT4DMTKZBDQ', 'port': '5000'}\" &> /stamped/bootstrap/log", 
+                "        python /stamped/bootstrap/init.py \"{'aws_access_key_secret': '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', 'replSet': 'stamped-dev-01', 'name': 'dev0', 'roles': ['webServer'], 'stack_name': 'fischtest34', 'aws_access_key_id': 'AKIAIXLZZZT4DMTKZBDQ', 'port': '5000'}\" &> /stamped/bootstrap/log", 
                 "\n", 
                 "        ", 
                 "\n", 
@@ -342,7 +342,7 @@
                 "\n", 
                 "        echo '>>>> Running init script'", 
                 "\n", 
-                "        python /stamped/bootstrap/init.py \"{'aws_access_key_secret': 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX', 'name': 'db0', 'roles': ['db'], 'stack_name': 'fischtest20', 'mongodb': {'port': 30000, 'replSet': 'stamped-dev-01'}, 'aws_access_key_id': 'AKIAIXLZZZT4DMTKZBDQ'}\" &> /stamped/bootstrap/log", 
+                "        python /stamped/bootstrap/init.py \"{'aws_access_key_secret': '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', 'name': 'db0', 'roles': ['db'], 'stack_name': 'fischtest34', 'mongodb': {'port': 27017, 'replSet': 'stamped-dev-01'}, 'aws_access_key_id': 'AKIAIXLZZZT4DMTKZBDQ'}\" &> /stamped/bootstrap/log", 
                 "\n", 
                 "        ", 
                 "\n", 
@@ -494,7 +494,7 @@
                 "\n", 
                 "        echo '>>>> Running init script'", 
                 "\n", 
-                "        python /stamped/bootstrap/init.py \"{'aws_access_key_secret': 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX', 'name': 'db1', 'roles': ['db'], 'stack_name': 'fischtest20', 'mongodb': {'port': 32000, 'replSet': 'stamped-dev-01'}, 'aws_access_key_id': 'AKIAIXLZZZT4DMTKZBDQ'}\" &> /stamped/bootstrap/log", 
+                "        python /stamped/bootstrap/init.py \"{'aws_access_key_secret': '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', 'name': 'db1', 'roles': ['db'], 'stack_name': 'fischtest34', 'mongodb': {'port': 27017, 'replSet': 'stamped-dev-01'}, 'aws_access_key_id': 'AKIAIXLZZZT4DMTKZBDQ'}\" &> /stamped/bootstrap/log", 
                 "\n", 
                 "        ", 
                 "\n", 
@@ -537,15 +537,15 @@
           }, 
           {
             "CidrIp": "0.0.0.0/0", 
-            "FromPort": "32000", 
+            "FromPort": "27017", 
             "IpProtocol": "tcp", 
-            "ToPort": "32000"
+            "ToPort": "27017"
           }
         ]
       }, 
       "Type": "AWS::EC2::SecurityGroup"
     }, 
-    "webServerreplSetInitSecurityGroup": {
+    "webServerSecurityGroup": {
       "Properties": {
         "GroupDescription": "Enable access to stuff", 
         "SecurityGroupIngress": [

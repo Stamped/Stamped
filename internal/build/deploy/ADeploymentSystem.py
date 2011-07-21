@@ -1,4 +1,4 @@
-#print !/usr/bin/env python
+#!/usr/bin/env python
 
 __author__ = "Stamped (dev@stamped.com)"
 __version__ = "1.0"
@@ -40,45 +40,16 @@ class ADeploymentSystem(object):
     def list_stacks(self, *args, **kwargs):
         pass
     
+    @abstractmethod
+    def init_stack(self, *args):
+        pass
+    
+    @abstractmethod
+    def update_stack(self, *args):
+        pass
+    
     def local(self, cmd, env=None):
         print "[%s-local] %s" % (self, cmd, )
-        
-        if env is None:
-            env = self.env
-        
-        return utils.shell3(cmd, env)
-    
-    def __str__(self):
-        return self.name
-
-class ADeploymentStack(object):
-    def __init__(self, name, options):
-        self.name = name
-        self.options = options
-    
-    @abstractmethod
-    def init(self):
-        pass
-    
-    @abstractmethod
-    def delete(self):
-        pass
-    
-    @abstractmethod
-    def describe(self):
-        pass
-    
-    @abstractmethod
-    def describe_events(self):
-        pass
-    
-    @abstractmethod
-    def connect(self):
-        pass
-    
-    def local(self, cmd, env=None, show_cmd=True):
-        if show_cmd:
-            print "[%s-local] %s" % (self, cmd, )
         
         if env is None:
             env = self.env

@@ -9,13 +9,14 @@ import utils
 
 def getInstances():
     replSetName = 'stamped-dev-01'
-    dbs = [
+    
+    return [
         {
             'name' : 'db0', 
             'roles' : [ 'db', ], 
             'mongodb' : {
                 'replSet' : replSetName, 
-                'port' : 30000, 
+                'port' : 27017, 
             }, 
         }, 
         {
@@ -23,7 +24,7 @@ def getInstances():
             'roles' : [ 'db', ], 
             'mongodb' : {
                 'replSet' : replSetName, 
-                'port' : 32000, 
+                'port' : 27017, 
             }, 
         }, 
         #{
@@ -31,41 +32,15 @@ def getInstances():
         #    'roles' : [ 'db', ], 
         #    'mongodb' : {
         #        'replSet' : replSetName, 
-        #        'port' : 34000, 
+        #        'port' : 27017, 
         #    }, 
         #}, 
-    ]
-    
-    servers = [
         {
             'name' : 'dev0', 
-            'roles' : [ 'webServer', 'replSetInit', ], 
+            'roles' : [ 'webServer', ], 
             'port' : '5000', 
             
-            'replSet' : {
-                '_id' : replSetName, 
-                'members' : [ ], 
-            }, 
+            'replSet' : replSetName, 
         }, 
     ]
-    
-    instances = [ ]
-    for instance in dbs:
-        instances.append(instance)
-    
-    for instance in servers:
-        if 'replSet' in instance:
-            assert 'replSetInit' in instance['roles']
-            members = instance['replSet']['members']
-            
-            for index in xrange(len(dbs)):
-                db = dbs[index]
-                
-                members.append({
-                    '_id'  : index, 
-                    'host' : 'localhost:%s' % db['mongodb']['port'], 
-                })
-        
-        instances.append(instance)
-    return instances
 
