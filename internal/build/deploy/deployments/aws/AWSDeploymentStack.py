@@ -101,7 +101,7 @@ class AWSDeploymentStack(ADeploymentStack):
         with settings(host_string=webServerInstances[0]['public_dns_name']):
             with cd("/stamped"):
                 with prefix('source bin/activate'):
-                    sudo('python /stamped/bootstrap/bin/init.py "%s"' % params_str)
+                    sudo('python /stamped/bootstrap/bin/init.py "%s" >& /stamped/out' % params_str)
     
     def update(self):
         webServerInstances, dbInstances = self.getInstances()
@@ -164,5 +164,5 @@ class AWSDeploymentStack(ADeploymentStack):
                 time.sleep(wait)
         
         print "WebServer instance in stack %s has been initialized! Attempting to connect via ssh..." % (self.name, )
-        os.system('connect.sh %s %s' % (self.name, "Database"))
+        os.system('connect.sh %s %s' % (self.name, "WebServer"))
 

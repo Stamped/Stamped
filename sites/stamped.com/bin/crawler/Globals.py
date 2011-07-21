@@ -19,8 +19,5 @@ monkey.patch_all()
 
 import Utils
 
-#from ThreadPool import ThreadPool
-#threadPool = ThreadPool(__MAX_NUM_THREADS)
-
 options = { }
 
