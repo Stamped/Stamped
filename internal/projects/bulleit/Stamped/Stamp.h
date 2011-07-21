@@ -24,11 +24,13 @@ typedef enum {
 
 @property (nonatomic, retain) NSString* stampID;
 @property (nonatomic, retain) NSString* blurb;
+@property (nonatomic, retain) NSDate* lastModified;
+@property (nonatomic, retain) NSNumber* numComments;
+@property (nonatomic, retain) UIImage* categoryImage;
+
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) Entity* entityObject;
 
 @property (nonatomic, readonly) StampCategory category;
-@property (nonatomic, readonly) UIImage* categoryImage;
-@property (nonatomic, retain) UIImage* stampImage;
 
 @end

@@ -45,11 +45,10 @@ def main():
 #
 #     commentTest(baseurl)
 #
-    favoriteTest(baseurl)
+#     favoriteTest(baseurl)
  
     print '      COMPLETE'
-    print   
-    
+    print       
 
     
 # ######## #

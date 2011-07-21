@@ -2,7 +2,7 @@
 //  Entity.m
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/19/11.
+//  Created by Andrew Bonventre on 7/20/11.
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
@@ -11,8 +11,8 @@
 
 
 @implementation Entity
-@dynamic entityID;
 @dynamic category;
+@dynamic entityID;
 @dynamic subtitle;
 @dynamic title;
 @dynamic coordinates;

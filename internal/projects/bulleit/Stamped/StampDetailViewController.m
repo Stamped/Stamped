@@ -19,6 +19,7 @@
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
+#import "Util.h"
 #import "StampedAppDelegate.h"
 #import "UserImageView.h"
 
@@ -180,7 +181,7 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
 }
 
 - (void)setUpMainContentView {
-  //commenterImageView_.image = stamp_.userImage;
+  commenterImageView_.image = stamp_.user.profileImage;
 
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
   CGSize stringSize = [stamp_.user.displayName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
@@ -217,10 +218,28 @@ static const CGFloat kActivityFrameMinHeight = 126.0;
   CGRect activityFrame = activityView_.frame;
   activityFrame.size.height = fmaxf(kActivityFrameMinHeight, 
       CGRectGetMaxY(commentLabel.frame) + 10 + CGRectGetHeight(commentsView_.bounds)) + 5;
+  [commentLabel release];
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+  CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
+  CGFloat r1, g1, b1, r2, g2, b2;
+  [Util splitHexString:stamp_.user.primaryColor toRed:&r1 green:&g1 blue:&b1];
   
-  [commentLabel release];
+  if (stamp_.user.secondaryColor) {
+    [Util splitHexString:stamp_.user.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+  } else {
+    r2 = r1;
+    g2 = g1;
+    b2 = b1;
+  }
+  gradientLayer.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
+                                                   (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
+                                                   nil];
+  gradientLayer.frame = activityView_.bounds;
+  gradientLayer.startPoint = CGPointMake(0.0, 0.0);
+  gradientLayer.endPoint = CGPointMake(1.0, 1.0);
+  [activityView_.layer insertSublayer:gradientLayer atIndex:0];
+  [gradientLayer release];
 }
 
 - (void)setUpCommentsView {

@@ -44,9 +44,9 @@ class Stamp(AObject):
             'locked': bool
         },
         'stats': {
-            'total_comments': int,
-            'total_todos': int,
-            'total_credit': int
+            'num_comments': int,
+            'num_todos': int,
+            'num_credit': int
         }
     }
     
@@ -103,12 +103,12 @@ class Stamp(AObject):
         
         if 'stats' in self:
             valid &= isinstance(self.stats, dict) 
-            if 'total_comments' in self.stats:
-                valid &= isinstance(self.stats['total_comments'], int)
-            if 'total_todos' in self.stats:
-                valid &= isinstance(self.stats['total_todos'], int)
-            if 'total_credit' in self.stats:
-                valid &= isinstance(self.stats['total_credit'], int)
+            if 'num_comments' in self.stats:
+                valid &= isinstance(self.stats['num_comments'], int)
+            if 'num_todos' in self.stats:
+                valid &= isinstance(self.stats['num_todos'], int)
+            if 'num_credit' in self.stats:
+                valid &= isinstance(self.stats['num_credit'], int)
         
         return valid
         

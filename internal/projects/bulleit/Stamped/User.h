@@ -9,10 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-
-@interface ImageToDataTransformer : NSValueTransformer
-@end
-
 @interface User : NSManagedObject
 
 @property (nonatomic, retain) NSString* bio;

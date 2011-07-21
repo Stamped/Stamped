@@ -11,6 +11,7 @@
 #import <RestKit/RestKit.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "Comment.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
@@ -52,10 +53,25 @@ static NSString* kDataBaseURL = @"http://192.168.0.10:5000/api/v1";
 
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID", nil];
+  [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
+                                        @"last_modified", @"lastModified",
+                                        @"num_comments", @"numComments", nil];
   [stampMapping mapAttributes:@"blurb", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withObjectMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withObjectMapping:userMapping];
+  
+  RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
+  commentMapping.primaryKeyAttribute = @"commentID";
+  [commentMapping mapAttributes:@"blurb", nil];
+  [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
+                                          @"restamp_id", @"restampID",
+                                          @"stamp_id", @"stampID",
+                                          @"last_modified", @"lastModified", nil];
+  [commentMapping mapRelationship:@"user" withObjectMapping:stampMapping];
+  // Example date string: 2011-07-19 20:49:42.037000
+  NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
+	[stampMapping.dateFormatStrings addObject:dateFormat];
+  [commentMapping.dateFormatStrings addObject:dateFormat];
   
   [objectManager.mappingProvider setObjectMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setObjectMapping:stampMapping forKeyPath:@"Stamp"];

@@ -2,7 +2,7 @@
 //  Entity.h
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/19/11.
+//  Created by Andrew Bonventre on 7/20/11.
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
@@ -13,8 +13,8 @@
 
 @interface Entity : NSManagedObject
 
-@property (nonatomic, retain) NSString* entityID;
 @property (nonatomic, retain) NSString* category;
+@property (nonatomic, retain) NSString* entityID;
 @property (nonatomic, retain) NSString* subtitle;
 @property (nonatomic, retain) NSString* title;
 @property (nonatomic, retain) NSManagedObject* coordinates;

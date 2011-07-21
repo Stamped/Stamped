@@ -53,9 +53,7 @@ User information for any users that are named as receiving credit in the stamp. 
 			"4e226fcd4e61754161000007", 
 			"4e226fcd4e61754161000008"
 		], 
-		"timestamp": {
-			"created": "2011-07-17 05:14:54.128641"
-		},
+		"last_modified": "2011-07-17 05:14:54.128641",
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"profile__image": "user.png", 
@@ -119,7 +117,7 @@ User information for any users that are named as receiving credit in the stamp. 
 			"4e226fcd4e61754161000007", 
 			"4e226fcd4e61754161000008"
 		], 
-		"timestamp": "2011-07-17 05:14:54.128641", 
+		"last_modified": "2011-07-17 05:14:54.128641", 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"profile__image": "user.png", 
@@ -196,7 +194,7 @@ The user id of the authenticating user. This is necessary for stamps that are pr
 			"4e226fcd4e61754161000007", 
 			"4e226fcd4e61754161000008"
 		], 
-		"timestamp": "2011-07-17 05:14:54.128641", 
+		"last_modified": "2011-07-17 05:14:54.128641", 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"profile__image": "user.png", 

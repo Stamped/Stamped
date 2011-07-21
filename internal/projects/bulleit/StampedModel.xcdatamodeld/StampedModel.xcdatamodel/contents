@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model name="" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="848" systemVersion="10K540" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Comment" representedClassName="Comment">
+        <attribute name="blurb" optional="YES" attributeType="String"/>
+        <attribute name="commentID" optional="YES" attributeType="String"/>
+        <attribute name="lastModified" optional="YES" attributeType="Date"/>
+        <attribute name="restampID" optional="YES" attributeType="String"/>
+        <attribute name="stampID" optional="YES" attributeType="String"/>
+        <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="comments" inverseEntity="User"/>
+    </entity>
     <entity name="Coordinate">
         <attribute name="lat" optional="YES" attributeType="Float" defaultValueString="0.0"/>
         <attribute name="lng" optional="YES" attributeType="Float" defaultValueString="0.0"/>
@@ -15,9 +23,12 @@
     </entity>
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="blurb" optional="YES" attributeType="String"/>
+        <attribute name="categoryImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
+        <attribute name="lastModified" optional="YES" attributeType="Date"/>
+        <attribute name="numComments" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamp" inverseEntity="Entity"/>
-        <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="Stamps" inverseEntity="User"/>
+        <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="stamps" inverseEntity="User"/>
     </entity>
     <entity name="User" representedClassName="User">
         <attribute name="bio" optional="YES" attributeType="String"/>
@@ -25,19 +36,21 @@
         <attribute name="firstName" optional="YES" attributeType="String"/>
         <attribute name="lastName" optional="YES" attributeType="String"/>
         <attribute name="primaryColor" optional="YES" attributeType="String"/>
+        <attribute name="profileImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
         <attribute name="profileImageURL" optional="YES" attributeType="String"/>
         <attribute name="screenName" optional="YES" attributeType="String"/>
         <attribute name="secondaryColor" optional="YES" attributeType="String"/>
         <attribute name="stampImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
         <attribute name="userID" attributeType="String"/>
-        <attribute name="userImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
         <attribute name="website" optional="YES" attributeType="String"/>
-        <relationship name="Stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="user" inverseEntity="Stamp"/>
+        <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="user" inverseEntity="Comment"/>
+        <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="user" inverseEntity="Stamp"/>
     </entity>
     <elements>
-        <element name="User" positionX="144" positionY="225" width="128" height="240"/>
-        <element name="Stamp" positionX="439" positionY="369" width="128" height="105"/>
-        <element name="Entity" positionX="556" positionY="216" width="128" height="135"/>
         <element name="Coordinate" positionX="396" positionY="81" width="128" height="90"/>
+        <element name="Entity" positionX="556" positionY="216" width="128" height="135"/>
+        <element name="Stamp" positionX="439" positionY="369" width="128" height="150"/>
+        <element name="User" positionX="144" positionY="225" width="128" height="240"/>
+        <element name="Comment" positionX="160" positionY="192" width="128" height="135"/>
     </elements>
 </model>
