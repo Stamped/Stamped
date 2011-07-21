@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, EntitySources, Utils
+import Globals, EntitySources, utils
 
 from IASyncProducer import IASyncProducer
 from gevent import Greenlet
@@ -61,9 +61,9 @@ class AEntitySource(Greenlet, IASyncProducer):
         """Subclasses should override to process the pull-based loop in the 
         context of this sink's Greenlet."""
         pass
-        #Utils.log("")
-        #Utils.log("Importing entities from source '%s'" % self.name)
-        #Utils.log("")
+        #utils.log("")
+        #utils.log("Importing entities from source '%s'" % self.name)
+        #utils.log("")
     
     @property
     def name(self): return self._name
@@ -95,11 +95,11 @@ class AExternalSiteEntitySource(AExternalEntitySource):
                 entities = self.getEntitiesFromURL(url)
                 
                 if not sink.addEntities(entities):
-                    Utils.log("Error storing %d entities to %s from %s" % \
-                            (Utils.count(entities), str(sink), url))
+                    utils.log("Error storing %d entities to %s from %s" % \
+                            (utils.count(entities), str(sink), url))
             except:
-                Utils.log("Error crawling " + url + "\n")
-                Utils.printException()
+                utils.log("Error crawling " + url + "\n")
+                utils.printException()
     
     @abstractmethod
     def getNextURL(self):

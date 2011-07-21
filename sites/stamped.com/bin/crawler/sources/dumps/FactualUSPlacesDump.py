@@ -5,11 +5,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, CSVUtils, Utils
+import Globals, CSVUtils, utils
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
-from Entity import Entity
+from api.AEntitySource import AExternalDumpEntitySource
+from api.Entity import Entity
 
 class FactualUSPlacesDump(AExternalDumpEntitySource):
     """
@@ -41,11 +41,11 @@ class FactualUSPlacesDump(AExternalDumpEntitySource):
         
         cat = set()
         for row in reader:
-            #Utils.log('Parsing %s' % row['name'])
-            Utils.log(row)
+            #utils.log('Parsing %s' % row['name'])
+            utils.log(row)
             
             if row['category'] == '1':
-                Utils.log("_____________")
+                utils.log("_____________")
                 import sys
                 sys.exit(0)
             
@@ -58,7 +58,7 @@ class FactualUSPlacesDump(AExternalDumpEntitySource):
                     print row
                     print ""
         
-        Utils.log(cat)
+        utils.log(cat)
         """
         """
             if self.limit and len(entities) >= self.limit:
@@ -76,7 +76,7 @@ class FactualUSPlacesDump(AExternalDumpEntitySource):
             entities.append(entity)
         csvFile.close()
         """
-        Utils.log("%s parsed %d entities" % (self.NAME, len(entities)))
+        utils.log("%s parsed %d entities" % (self.NAME, len(entities)))
         return entities
 
 #import EntitySources

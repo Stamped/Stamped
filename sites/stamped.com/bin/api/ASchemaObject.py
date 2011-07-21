@@ -14,8 +14,8 @@ def normalize(s):
     else:
         return s
 
-class AObject(object):
-
+class ASchemaObject(object):
+    
     _schema = {}
     
     def __init__(self, data=None):
@@ -68,8 +68,7 @@ class AObject(object):
             return None
         
         return self.add({ name : value })
-        
-            
+    
     def getDataAsDict(self):
         return self._data
         
@@ -147,7 +146,7 @@ class AObject(object):
         
         return
 
-            
     @property
     def isValid(self):
         return False
+

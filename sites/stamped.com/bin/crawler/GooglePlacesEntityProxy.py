@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 
 from EntityMatcher import EntityMatcher
 from AEntityProxy import AEntityProxy
@@ -41,7 +41,7 @@ class GooglePlacesEntityProxy(AEntityProxy):
                     entity[key] = value
                 except KeyError:
                     pass
-                #Utils.log("'%s' => '%s'" % (key, str(entity[key])))
+                #utils.log("'%s' => '%s'" % (key, str(entity[key])))
         
         return entity
 

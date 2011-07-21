@@ -5,13 +5,13 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 import json, urllib
 
 from optparse import OptionParser
 from Geocoder import Geocoder
 from AKeyBasedAPI import AKeyBasedAPI
-from AEntitySource import AExternalServiceEntitySource
+from api.AEntitySource import AExternalServiceEntitySource
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
@@ -50,7 +50,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             # ensure that we received a valid response
             if response['status'] != 'OK':
-                #Utils.log('[GooglePlaces] error searching "' + reference + '"\n' + 
+                #utils.log('[GooglePlaces] error searching "' + reference + '"\n' + 
                 #          'ErrorCode: ' + response['status'] + '\n')
                 
                 if response['status'] == 'OVER_QUERY_LIMIT':
@@ -87,7 +87,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             # ensure that we received a valid response
             if response['status'] != 'OK' or len(response['results']) <= 0:
-                #Utils.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
+                #utils.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
                 #          'ErrorCode: ' + response['status'] + '\n')
                 
                 if response['status'] == 'OVER_QUERY_LIMIT':
@@ -113,13 +113,13 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('search', params)
-        Utils.log('[GooglePlaces] ' + url)
+        utils.log('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
-            return json.loads(Utils.getFile(url))
+            return json.loads(utils.getFile(url))
         except:
-            Utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
+            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
             return None
         
         return None
@@ -138,13 +138,13 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('details', params)
-        Utils.log('[GooglePlaces] ' + url)
+        utils.log('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
-            return json.loads(Utils.getFile(url))
+            return json.loads(utils.getFile(url))
         except:
-            Utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
+            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
         
         return None
     

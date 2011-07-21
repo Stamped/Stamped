@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 
 from optparse import OptionParser
 from difflib import SequenceMatcher
@@ -25,7 +25,7 @@ class EntityMatcher(object):
         self.initWordBlacklistSets()
     
     def getEntityDetailsFromGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
-        Utils.log("[EntityMatcher] cross-referencing entity '%s' with Google Places" % entity.name)
+        utils.log("[EntityMatcher] cross-referencing entity '%s' with Google Places" % entity.name)
         match = self.tryMatchEntityWithGooglePlaces(entity, tolerance)
         
         if match:
@@ -67,7 +67,7 @@ class EntityMatcher(object):
             # as the previous level's simplified name (e.g., because we know it 
             # will return the same negative results)
             if name != prevName:
-                #Utils.log("NAME: %s, complexity: %g" % (name, complexity))
+                #utils.log("NAME: %s, complexity: %g" % (name, complexity))
                 prevName = name
                 
                 # attempt to match the current simplified name and latLng 

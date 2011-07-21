@@ -5,13 +5,13 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 import gevent, xlrd
 import sources.OpenTableParser as OpenTableParser
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
-from Entity import Entity
+from api.AEntitySource import AExternalDumpEntitySource
+from api.Entity import Entity
 
 class OpenTableDump(AExternalDumpEntitySource):
     """
@@ -48,12 +48,12 @@ class OpenTableDump(AExternalDumpEntitySource):
         
         pool.join()
         self._output.put(StopIteration)
-        Utils.log("[%s] finished parsing %d entities" % (self.NAME, numEntities - 1))
+        utils.log("[%s] finished parsing %d entities" % (self.NAME, numEntities - 1))
     
     def _parseEntity(self, sheet, index, numEntities):
         if numEntities > 100 and ((index - 1) % (numEntities / 100)) == 0:
-            Utils.log("[%s] dont parsing %s" % \
-                (self.NAME, Utils.getStatusStr(index - 1, numEntities)))
+            utils.log("[%s] dont parsing %s" % \
+                (self.NAME, utils.getStatusStr(index - 1, numEntities)))
         
         row = sheet.row_values(index)
         

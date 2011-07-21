@@ -5,12 +5,12 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 
 from gevent.pool import Pool
-from AEntitySink import AEntitySink
-from AEntitySource import AEntitySource
-from IASyncProducer import IASyncProducer
+from api.AEntitySink import AEntitySink
+from api.AEntitySource import AEntitySource
+from api.IASyncProducer import IASyncProducer
 
 class AEntityProxy(AEntitySink, AEntitySource):
     
@@ -24,7 +24,7 @@ class AEntityProxy(AEntitySink, AEntitySource):
         self._pool = Pool(source.maxQueueSize)
     
     def _run(self):
-        Utils.log("[%s] pulling from source '%s'" % (self.name, self._source.name))
+        utils.log("[%s] pulling from source '%s'" % (self.name, self._source.name))
         
         self._source.startProducing()
         self.processQueue(self._source._output)
@@ -38,7 +38,7 @@ class AEntityProxy(AEntitySink, AEntitySource):
     """
     
     def _processItem(self, item):
-        #Utils.log("[%s] _processItem %s" % (self.name, str(item), ))
+        #utils.log("[%s] _processItem %s" % (self.name, str(item), ))
         
         if item is not StopIteration:
             item = self._transform(item)

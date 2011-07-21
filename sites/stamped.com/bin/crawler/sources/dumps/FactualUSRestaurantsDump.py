@@ -5,11 +5,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, CSVUtils, FactualUtils, Utils
+import Globals, CSVUtils, FactualUtils, utils
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
-from Entity import Entity
+from api.AEntitySource import AExternalDumpEntitySource
+from api.Entity import Entity
 
 class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     """
@@ -83,7 +83,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
         numLines = max(1, CSVUtils.getNumLines(csvFile) - 1)
         if self.limit: numLines = min(self.limit, numLines)
         
-        Utils.log("[%s] parsing %d entities from '%s'" % \
+        utils.log("[%s] parsing %d entities from '%s'" % \
             (self.NAME, numLines, self.DUMP_FILE_NAME))
         
         reader = CSVUtils.UnicodeReader(csvFile)
@@ -98,17 +98,17 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
             count += 1
             
             if numLines > 100 and (count % (numLines / 100)) == 0:
-                Utils.log("[%s] done parsing %s" % \
-                    (self.NAME, Utils.getStatusStr(count, numLines)))
+                utils.log("[%s] done parsing %s" % \
+                    (self.NAME, utils.getStatusStr(count, numLines)))
         
         pool.join()
         self._output.put(StopIteration)
         csvFile.close()
         
-        Utils.log("[%s] finished parsing %d entities" % (self.NAME, count))
+        utils.log("[%s] finished parsing %d entities" % (self.NAME, count))
     
     def _parseEntity(self, row, count):
-        #Utils.log("[%s] parsing entity %d" % (self.NAME, count))
+        #utils.log("[%s] parsing entity %d" % (self.NAME, count))
         
         entity = Entity()
         entity.factual = {
@@ -123,7 +123,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
             if srcKey in row and row[srcKey]:
                 entity[destKey] = row[srcKey]
         
-        #Utils.log(entity)
+        #utils.log(entity)
         self._output.put(entity)
 
 import EntitySources

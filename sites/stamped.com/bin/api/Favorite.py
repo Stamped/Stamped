@@ -6,9 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from datetime import datetime
-from AObject import AObject
+from ASchemaObject import ASchemaObject
 
-class Favorite(AObject):
+class Favorite(ASchemaObject):
 
     _schema = {
         'favorite_id': basestring,

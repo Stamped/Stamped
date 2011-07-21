@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 import json, re, urllib
 
 from optparse import OptionParser
@@ -67,7 +67,7 @@ class Geocoder(AGeocoder):
             else:
                 return None
             
-            Utils.log('[Geocoder] Service \'%s\' : %s' % (decoder.getName(), address))
+            utils.log('[Geocoder] Service \'%s\' : %s' % (decoder.getName(), address))
             
             latLng = decoder.addressToLatLng(address)
             if latLng is not None:
@@ -98,11 +98,11 @@ class GoogleGeocoderService(AGeocoder):
             url = self.BASE_URL + '?' + urllib.urlencode(params)
             
             # GET the data and parse the response as json
-            response = json.loads(Utils.getFile(url))
+            response = json.loads(utils.getFile(url))
             
             # extract the primary result from the json
             if response['status'] != 'OK':
-                Utils.log('[GoogleGeocoderService] error converting "' + url + '"\n' + 
+                utils.log('[GoogleGeocoderService] error converting "' + url + '"\n' + 
                          'ErrorStatus: ' + response['status'] + '\n')
                 return None
             
@@ -114,7 +114,7 @@ class GoogleGeocoderService(AGeocoder):
             
             return self.getValidatedLatLng(latLng)
         except:
-            Utils.log('[GoogleGeocoderService] error converting "' + url + '"')
+            utils.log('[GoogleGeocoderService] error converting "' + url + '"')
         
         return None
 
@@ -159,7 +159,7 @@ class BingGeocoderService(AGeocoder):
                 url = self.BASE_URL + '?' + urllib.urlencode(params)
                 
                 # GET the data and parse the response as json
-                response = json.loads(Utils.getFile(url))
+                response = json.loads(utils.getFile(url))
                 
                 # extract the primary result from the json
                 resource = (((response['resourceSets'])[0])['resources'])[0]
@@ -170,7 +170,7 @@ class BingGeocoderService(AGeocoder):
                 
                 return self.getValidatedLatLng(latLng)
             except:
-                Utils.log('[BingGeocoderService] error converting "' + url + '"')
+                utils.log('[BingGeocoderService] error converting "' + url + '"')
                 
                 # retry with another api key
                 count += 1
@@ -217,12 +217,12 @@ class YahooGeocoderService(AGeocoder):
                 url = self.BASE_URL + '?' + urllib.urlencode(params)
                 
                 # GET the data and parse the response as json
-                response  = json.loads(Utils.getFile(url))
+                response  = json.loads(utils.getFile(url))
                 resultSet = response['ResultSet']
                 
                 # extract the results from the json
                 if resultSet['Error'] != 0:
-                    Utils.log('[YahooGeocoderService] error converting "' + url + '"\n' + 
+                    utils.log('[YahooGeocoderService] error converting "' + url + '"\n' + 
                              'ErrorCode: ' + resultSet['Error'] + '\n' + 
                              'ErrorMsg:  ' + resultSet['ErrorMessage'] + '\n')
                     return None
@@ -234,7 +234,7 @@ class YahooGeocoderService(AGeocoder):
                 
                 return self.getValidatedLatLng(latLng)
             except:
-                Utils.log('[YahooGeocoderService] error converting "' + url + '"')
+                utils.log('[YahooGeocoderService] error converting "' + url + '"')
                 
                 # retry with another api key
                 count += 1
@@ -262,7 +262,7 @@ class USGeocoderService(AGeocoder):
         
         try:
             # GET the data and parse the HTML response with BeautifulSoup
-            soup = Utils.getSoup(url)
+            soup = utils.getSoup(url)
             rows = soup.find("table").findAll("tr")
             
             # extract the latitude
@@ -277,7 +277,7 @@ class USGeocoderService(AGeocoder):
             
             return self.getValidatedLatLng((lat, lng))
         except:
-            Utils.log('[USGeocoderService] error converting "' + url + '"\n')
+            utils.log('[USGeocoderService] error converting "' + url + '"\n')
         
         return None
 

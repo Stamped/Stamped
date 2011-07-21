@@ -5,9 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from AObject import AObject
+from ASchemaObject import ASchemaObject
 
-class Entity(AObject):
+class Entity(ASchemaObject):
 
     _schema = {
         'entity_id': basestring, 

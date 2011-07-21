@@ -7,32 +7,41 @@ __license__ = "TODO"
 
 from abc import abstractmethod
 from Entity import Entity
+from AEntitySink import AEntitySink
 
-class AEntityDB(object):
+class AEntityDB(AEntitySink):
     
     def __init__(self, desc):
+        AEntitySink.__init__(self, desc)
         self._desc = desc
-        
+    
+    def _processItem(self, item):
+        return self.addEntity(item)
+    
+    def _processItems(self, items):
+        return self.addEntities(items)
+    
     @abstractmethod
     def addEntity(self, entity):
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def getEntity(self, entityID):
-        pass
+        raise NotImplementedError
         
     @abstractmethod
     def updateEntity(self, entity):
-        pass
+        raise NotImplementedError
         
     @abstractmethod
     def removeEntity(self, entity):
-        pass
+        raise NotImplementedError
     
     @abstractmethod
     def addEntities(self, entities):
-        pass
+        raise NotImplementedError
         
     @abstractmethod
     def matchEntities(self, query, limit=20):
-        pass
+        raise NotImplementedError
+

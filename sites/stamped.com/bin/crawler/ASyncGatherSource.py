@@ -5,12 +5,12 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 
 from AEntityProxy import AEntityProxy
 
 """
-from IASyncProducer import IASyncProducer
+from api.IASyncProducer import IASyncProducer
 
 class ASyncGatherSource(IASyncProducer):
     
@@ -24,7 +24,7 @@ class ASyncGatherSource(IASyncProducer):
             source = self._source
             
             if source is not None:
-                #Utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
+                #utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
                 source.startProducing()
     
     def get(self, block=True, timeout=None):
@@ -47,7 +47,7 @@ class ASyncGatherSource(IASyncProducer):
         source = self._source
         
         if source is not None:
-            #Utils.log("[ASyncGatherSource] next %s" % (str(source), ))
+            #utils.log("[ASyncGatherSource] next %s" % (str(source), ))
             item = source.next()
             
             if item is StopIteration:
@@ -55,7 +55,7 @@ class ASyncGatherSource(IASyncProducer):
                 
                 source = self._source
                 if source is not None:
-                    #Utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
+                    #utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
                     source.startProducing()
                 
                 return self.next()
@@ -94,7 +94,7 @@ class ASyncGatherSource(AEntityProxy):
         source = self.getSource()
         
         if source is not None:
-            #Utils.log("[ASyncGatherSource] next %s" % (str(source), ))
+            #utils.log("[ASyncGatherSource] next %s" % (str(source), ))
             item = source.next()
             
             if item is StopIteration:
@@ -102,7 +102,7 @@ class ASyncGatherSource(AEntityProxy):
                 
                 source = self.getSource()
                 if source is not None:
-                    #Utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
+                    #utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
                     source.startProducing()
                 
                 return self.next()

@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, gevent, Utils
+import Globals, gevent, utils
 import gevent, thread
 
 import EntitySinks, EntitySources
@@ -24,7 +24,7 @@ from sources.dumps.FactualUSPlacesDump import FactualUSPlacesDump
 from sources.dumps.FactualUSRestaurantsDump import FactualUSRestaurantsDump
 
 # import specific databases
-from db.mysql.MySQLEntityDB import MySQLEntityDB
+#from db.mysql.MySQLEntityDB import MySQLEntityDB
 
 #-----------------------------------------------------------
 
@@ -149,10 +149,21 @@ def main():
         Options:
           --version             show program's version number and exit
           -h, --help            show this help message and exit
-          -a, --all             Crawl all available sources
+          -a, --all             crawl all available sources
           -n NUMTHREADS, --numThreads=NUMTHREADS
-                                Set the number of top-level threads to run
-          -d DB, --db=DB        Sets the destination database to persist entities to.
+                                sets the number of top-level threads to run
+          -l LIMIT, --limit=LIMIT
+                                limits the number of entities to import
+          -c COLLECTION, --collection=COLLECTION
+                                the collection (mongodb parlance or table in SQL) to
+                                populate
+          -t, --test            run the crawler with limited input for testing
+                                purposes
+          -u, --update          update the existing collection as opposed to dropping
+                                it and overwriting any previous contents (the default)
+          -g, --googlePlaces    cross-reference place entities with the google places
+                                api
+          -d SINK, --db=SINK    sets the destination database to persist entities to
     """
     
     options = parseCommandLine()

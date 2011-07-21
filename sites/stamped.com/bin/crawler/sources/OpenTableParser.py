@@ -5,16 +5,16 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 import re, string, urllib
 
-from Entity import Entity
+from api.Entity import Entity
 
 __BASE_URL = "http://www.opentable.com/"
 
 def parseEntity(entity):
     """Attempts to find and append OpenTable details to the given entity."""
-    #Utils.log("[OpenTable] parsing '%s'" % entity.name)
+    #utils.log("[OpenTable] parsing '%s'" % entity.name)
     
     def encodeName(name):
         toReplace = {
@@ -58,8 +58,8 @@ def parseEntity(entity):
     while index < len(urls):
         try:
             url = urls[index]
-            #Utils.log("[OpenTable] crawling " + url)
-            soup = Utils.getSoup(url)
+            #utils.log("[OpenTable] crawling " + url)
+            soup = utils.getSoup(url)
             
             if index == numOrigURLs - 1:
                 url = None
@@ -75,13 +75,13 @@ def parseEntity(entity):
             else:
                 break
         except:
-            #Utils.printException()
+            #utils.printException()
             url = None
         
         index += 1
     
     if url is None:
-        Utils.log("[OpenTable] Error retrieving detailed page for '%s' => '%s' ('%s')" % \
+        utils.log("[OpenTable] Error retrieving detailed page for '%s' => '%s' ('%s')" % \
                 (name, encodedName, nickname))
         return None
     
@@ -130,7 +130,7 @@ def parseEntity(entity):
                 regex = re.compile(r'[^:]*:(.*)')
                 details[item] = regex.sub(r'\1', raw).strip()
                 
-                #Utils.log("'%s' => '%s'" % (item, details[item]))
+                #utils.log("'%s' => '%s'" % (item, details[item]))
         
         """
         imageWrapper = soup.find("div", {"class" : "restaurantImageWrapper"})
@@ -143,14 +143,14 @@ def parseEntity(entity):
                 
                 if imageRelativeURL is not None:
                     imageAbsoluteURL = __BASE_URL + imageRelativeURL
-                    imageData = Utils.getFile(imageAbsoluteURL)
+                    imageData = utils.getFile(imageAbsoluteURL)
                     details['images'] = [ imageData ]
         """
         
         entity.add(details)
     except:
-        Utils.log("[OpenTable] Error crawling " + url)
-        Utils.printException()
+        utils.log("[OpenTable] Error crawling " + url)
+        utils.printException()
     
     return entity
 

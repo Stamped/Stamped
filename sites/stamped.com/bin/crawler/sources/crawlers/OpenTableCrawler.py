@@ -6,9 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import urllib, string, re, os
-import Globals, Utils
+import Globals, utils
 
-from AEntitySource import AExternalSiteEntitySource
+from api.AEntitySource import AExternalSiteEntitySource
 from threading import Lock
 
 class OpenTableCrawler(AExternalSiteEntitySource):
@@ -49,7 +49,7 @@ class OpenTableCrawler(AExternalSiteEntitySource):
         self._crawler.log("\n")
         
         url   = self.BASE_URL + "state.aspx"
-        soup  = Utils.getSoup(url)
+        soup  = utils.getSoup(url)
         links = soup.find("div", {"id" : "Global"}).findAll("a", {"href" : re.compile("(city)|(country).*")})
         
         pages = set()
@@ -72,7 +72,7 @@ class OpenTableCrawler(AExternalSiteEntitySource):
     def _parsePage(self, url, pages):
         #http://www.opentable.com/start.aspx?m=74&mn=1309
         self._crawler.log("Crawling " + url)
-        soup = Utils.getSoup(url)
+        soup = utils.getSoup(url)
         links = soup.findAll("a", {"href" : re.compile(".*m=[0-9]*.*mn=[0-9]*")})
         
         for link in links:
@@ -86,7 +86,7 @@ class OpenTableCrawler(AExternalSiteEntitySource):
     
     def _parseSubPage(self, url):
         self._crawler.log("Crawling " + url)
-        soup = Utils.getSoup(url)
+        soup = utils.getSoup(url)
         resultsURL = soup.find("div", {"class" : "BrowseAll"}).find("a").get("href")
         
         self.s_pages.add(resultsURL)
@@ -102,7 +102,7 @@ class OpenTableCrawler(AExternalSiteEntitySource):
         baseURL = "http://www.opentable.com/httphandlers/RestaurantinfoLiteNew.ashx";
         url = baseURL + "?" + urllib.urlencode({ 'rid' : entity['rid'] })
         
-        detailsSoup = Utils.getSoup(url)
+        detailsSoup = utils.getSoup(url)
         
         entity['address'] = detailsSoup.find("div", {"class" : re.compile(".*address")}).renderContents().strip()
         self._crawler.log(entity)
@@ -124,7 +124,7 @@ class OpenTableCrawler(AExternalSiteEntitySource):
         return url
     
     def getEntitiesFromURL(self, url, limit=None):
-        soup = Utils.getSoup(url)
+        soup = utils.getSoup(url)
         
         resultList = soup.findAll("tr", {"class" : re.compile("ResultRow.*")})
         results = []

@@ -5,10 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-from AObject import AObject
+from ASchemaObject import ASchemaObject
 from datetime import datetime
 
-class Stamp(AObject):
+class Stamp(ASchemaObject):
 
     _schema = {
         'stamp_id': basestring,

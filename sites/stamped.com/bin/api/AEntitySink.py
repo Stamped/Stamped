@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, Utils
+import Globals, utils
 
 from IASyncConsumer import IASyncConsumer
 from gevent.queue import Queue
@@ -40,7 +40,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
     def processQueue(self, queue):
         """Processes the given queue as many items at a time as possible between 
         blocking until StopIteration is received."""
-        #Utils.log("[%s] AEntitySink.processQueue" % (self, ))
+        #utils.log("[%s] AEntitySink.processQueue" % (self, ))
         stop = False
         
         while not stop:
