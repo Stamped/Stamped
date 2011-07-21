@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import os, sys, threading, pickle, time, traceback, urllib2
+import json, os, sys, pickle, threading, time, traceback, urllib2
 from errors import *
 from subprocess import Popen, PIPE
 from functools import wraps
@@ -83,13 +83,15 @@ def getFuncName(offset=0):
     import inspect
     return inspect.stack()[1 + offset][3]
 
-def getPythonConfigFile(path, pickled=False):
+def getPythonConfigFile(path, pickled=False, jsonPickled=False):
     if os.path.exists(path):
         with open(path, "rb") as fp:
             source = fp.read()
         
         if pickled:
             return AttributeDict(pickle.loads(source))
+        elif jsonPickled:
+            return AttributeDict(json.loads(source))
         else:
             return AttributeDict(eval(source))
     else:
