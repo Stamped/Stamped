@@ -21,7 +21,7 @@ def testPOST(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
     result = urllib2.urlopen("%s/%s" % (baseurl, path), params)
-    pprint(result)
+    #pprint(result)
     jsonResult = json.load(result)
     return jsonResult
 
