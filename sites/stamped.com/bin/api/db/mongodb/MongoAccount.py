@@ -7,6 +7,7 @@ __license__ = "TODO"
 
 from threading import Lock
 from datetime import datetime
+import pymongo
 
 from MongoDB import Mongo
 from api.AAccountDB import AAccountDB
@@ -69,6 +70,9 @@ class MongoAccount(AAccountDB, Mongo):
     ### PUBLIC
     
     def addAccount(self, user):
+        ### TEMP: For now, verify that no duplicates can occur
+        self._collection.ensure_index('screen_name', unique=True)
+        
         return self._addDocument(user, objId='user_id')
     
     def getAccount(self, userID):

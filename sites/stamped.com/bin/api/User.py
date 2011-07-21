@@ -27,12 +27,12 @@ class User(AObject):
             'locked': bool
         },
         'stats': {
-            'total_stamps': int,
-            'total_following': int,
-            'total_followers': int,
-            'total_todos': int,
-            'total_credit_received': int,
-            'total_credit_given': int
+            'num_stamps': int,
+            'num_following': int,
+            'num_followers': int,
+            'num_todos': int,
+            'num_credit_received': int,
+            'num_credit_given': int
         },
         'timestamp': {
             'created': datetime,
@@ -78,18 +78,18 @@ class User(AObject):
             
         if 'stats' in self:
             valid &= isinstance(self.stats, dict) 
-            if 'total_stamps' in self.stats:
-                valid &= isinstance(self.stats['total_stamps'], int)
-            if 'total_following' in self.stats:
-                valid &= isinstance(self.stats['total_following'], int)
-            if 'total_followers' in self.stats:
-                valid &= isinstance(self.stats['total_followers'], int)
-            if 'total_todos' in self.stats:
-                valid &= isinstance(self.stats['total_todos'], int)
-            if 'total_credit_received' in self.stats:
-                valid &= isinstance(self.stats['total_credit_received'], int)
-            if 'total_credit_given' in self.stats:
-                valid &= isinstance(self.stats['total_credit_given'], int)
+            if 'num_stamps' in self.stats:
+                valid &= isinstance(self.stats['num_stamps'], int)
+            if 'num_following' in self.stats:
+                valid &= isinstance(self.stats['num_following'], int)
+            if 'num_followers' in self.stats:
+                valid &= isinstance(self.stats['num_followers'], int)
+            if 'num_todos' in self.stats:
+                valid &= isinstance(self.stats['num_todos'], int)
+            if 'num_credit_received' in self.stats:
+                valid &= isinstance(self.stats['num_credit_received'], int)
+            if 'num_credit_given' in self.stats:
+                valid &= isinstance(self.stats['num_credit_given'], int)
         
         return valid
 

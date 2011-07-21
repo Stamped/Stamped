@@ -33,12 +33,12 @@ class MongoUser(AUserDB, Mongo):
             'locked': bool
         },
         'stats': {
-            'total_stamps': int,
-            'total_following': int,
-            'total_followers': int,
-            'total_todos': int,
-            'total_credit_received': int,
-            'total_credit_given': int
+            'num_stamps': int,
+            'num_following': int,
+            'num_followers': int,
+            'num_todos': int,
+            'num_credit_received': int,
+            'num_credit_given': int
         },
         'timestamp': {
             'created': datetime,
@@ -62,15 +62,21 @@ class MongoUser(AUserDB, Mongo):
             raise KeyError("User not valid")
         return user
         
-    def lookupUsers(self, userIDs, usernames):
+    def getUserId(self, screenName):
+        user = self._collection.find_one({"screen_name": screenName})
+        if 'user_id' in user:
+            return user.user_id
+        return None
+    
+    def lookupUsers(self, userIDs, screenNames):
         query = []
         if userIDs:
             for userID in userIDs:
                 query.append(self._getObjectIdFromString(userID))
             data = self._collection.find({"_id": {"$in": query}})
-        elif usernames:
-            for username in usernames:
-                query.append(username)
+        elif screenNames:
+            for screenName in screenNames:
+                query.append(screenName)
             data = self._collection.find({"screen_name": {"$in": query}})
         else:
             return None
@@ -99,7 +105,20 @@ class MongoUser(AUserDB, Mongo):
     def checkPrivacy(self, userId):
         privacy = self._collection.find_one({"_id": self._getObjectIdFromString(userId)}, fields={"privacy": 1})['privacy']
         return privacy
-            
+        
+    def updateUserStats(self, userId, stat, value=None, increment=1):
+        key = 'stats.%s' % (stat)
+        if value != None:
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(userId)}, 
+                {'$set': {key: value}},
+                upsert=True)
+        else:
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(userId)}, 
+                {'$inc': {key: increment}},
+                upsert=True)
+        return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
     
     ### PRIVATE
         

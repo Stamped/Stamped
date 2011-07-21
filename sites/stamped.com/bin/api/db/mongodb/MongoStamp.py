@@ -16,6 +16,10 @@ from MongoUserStamps import MongoUserStamps
 from MongoInboxStamps import MongoInboxStamps
 from MongoFriendship import MongoFriendship
 from MongoComment import MongoComment
+from MongoCreditGivers import MongoCreditGivers
+from MongoCreditReceived import MongoCreditReceived
+from MongoUser import MongoUser
+from MongoFavorite import MongoFavorite
 
 class MongoStamp(AStampDB, Mongo):
         
@@ -72,20 +76,73 @@ class MongoStamp(AStampDB, Mongo):
     ### PUBLIC
     
     def addStamp(self, stamp):
+        
+        # Connect
+        _userDB = MongoUser()
+        _favoriteDB = MongoFavorite()
+        _creditGiversDB = MongoCreditGivers()
+        _creditReceivedDB = MongoCreditReceived()
     
-        ### ADDING A STAMP:
-        #   - Add the stamp data to the database
-        #   - Add a reference to the stamp in followers' inbox
-        #   - Add a reference to the stamp in the user's collection
-        #   - If stamped entity is on the to do list, mark as complete
-        #   - If users are mentioned or credit is given, add stamp to their
-        #     activity feed
-        #   - If credit is given, add comment to credited stamp(s)
-    
-        stampId = self._addDocument(stamp, 'stamp_id')
-        MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)
+        # Add the stamp data to the database
+        stampId = self._addDocument(stamp, 'stamp_id')      
+        
+        # Add a reference to the stamp in the user's collection
+        MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)  
+        
+        # Add a reference to the stamp in followers' inbox
         followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
         MongoInboxStamps().addInboxStamps(followerIds, stampId)
+        
+        # If stamped entity is on the to do list, mark as complete
+        favoriteId = _favoriteDB.getFavoriteIdForEntity(
+            stamp['user']['user_id'], stamp['entity']['entity_id'])
+        if favoriteId: 
+            _favoriteDB.completeFavorite(favoriteId)
+        
+        # If users are mentioned or credited, add stamp to their activity feed
+        ### TODO
+        
+        # Give credit
+        if 'credit' in stamp and len(stamp.credit) > 0:
+            for user in _userDB.lookupUsers(None, stamp.credit):
+                # Add to 'credit received'
+                numCredit = _creditReceivedDB.addCredit(user.user_id, stampId)
+            
+                # Add to 'credit givers'
+                numGivers = _creditGiversDB.addGiver(user.user_id, stamp['user']['user_id'])
+                
+                # Increment user's total credit received
+                _userDB.updateUserStats(user.user_id, 'num_credit', None, increment=1)
+                
+                # Update user's total credit givers 
+                _userDB.updateUserStats(user.user_id, 'num_credit_givers', numGivers)
+                
+                # Update the number of credit on the user's stamp
+                creditedStamp = Stamp(self._mongoToObj(
+                    self._collection.find_one({
+                        'user.user_id': user.user_id, 
+                        'entity.entity_id': stamp.entity['entity_id']
+                    }),
+                    'stamp_id'))
+                
+                if 'stamp_id' in creditedStamp:                
+                    self._collection.update(
+                        {'_id': self._getObjectIdFromString(creditedStamp.stamp_id)}, 
+                        {'$inc': {'num_credit': 1}, '$inc': {'num_comments': 1}},
+                        upsert=True)
+                    
+                    # Add stamp as a comment on the user's stamp
+                    comment = Comment()
+                    comment.stamp_id = creditedStamp.stamp_id
+                    comment.user = stamp.user
+                    comment.restamp_id = stampId
+                    if 'blurb' in stamp:
+                        comment.blurb = stamp.blurb
+                    if 'mentions' in stamp:
+                        comment.mentions = stamp.mentions
+                    comment.timestamp = stamp.timestamp
+                    self.addComment(comment)
+                    
         return stampId
     
     def getStamp(self, stampId):
@@ -152,4 +209,12 @@ class MongoStamp(AStampDB, Mongo):
         return False
     
     ### PRIVATE
+        
+        
+    def _removeCredit(self, stampId):
+        pass
+        
+        
+    def _getCredit(self, userId):
+        pass
         

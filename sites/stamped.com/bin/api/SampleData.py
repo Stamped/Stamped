@@ -35,7 +35,6 @@ def main():
 
 
 def createStamp(baseurl, user, title, category, comment):
-
     
     path = "entities/create.json"
     data = {
@@ -63,6 +62,8 @@ def createStamp(baseurl, user, title, category, comment):
     else:
         print 'result: %s' % path
         raise Exception
+        
+    return stampID
 
 
 def betaAccountData(baseurl):
@@ -739,97 +740,126 @@ def betaAccountData(baseurl):
         print 'result: %s' % path
         raise Exception
     """
-        
-    createStamp(baseurl=baseurl, user=kevin, title='Lost in Translation', category='Film', comment='Still love it')
-    createStamp(baseurl=baseurl, user=kevin, title='The James Hotel', category='Place', comment='Best hotel in the city')
-    createStamp(baseurl=baseurl, user=kevin, title='Employees Only', category='Place', comment='Bourbon, egg whites, and a bit of red wine, combined with some bitters and a touch of spice. Seriously amazing.')
-    createStamp(baseurl=baseurl, user=kevin, title='Avec', category='Place', comment='Chorizo-stuffed dates wrapped in bacon are still the best. Can\'t recommend this place enough')
-    createStamp(baseurl=baseurl, user=kevin, title='Lupe Fiasco', category='Music', comment='The Show Goes On')
-    createStamp(baseurl=baseurl, user=kevin, title='When Genius Failed', category='Book', comment='Really good book about LTCM and everything that went down. Scary parallels between this and what happened ten years later.')
-    createStamp(baseurl=baseurl, user=kevin, title='Winter\'s Tale', category='Book', comment='You would love this.')
-    createStamp(baseurl=baseurl, user=kevin, title='Compass', category='App', comment='I use this every time I get off the subway.')
-    createStamp(baseurl=baseurl, user=kevin, title='Deliveries', category='App', comment='Good place for tracking deliveries.')
-    createStamp(baseurl=baseurl, user=kevin, title='Rockhouse', category='Place', comment='You can jump into the ocean from a cliff.  Any questions?')
-    createStamp(baseurl=baseurl, user=robby, title='Alta ', category='Place', comment='40 types of tapas! "The whole shebang" with 9+ people. Life changing. ')
-    createStamp(baseurl=baseurl, user=robby, title='Salt', category='Place', comment='Egg dish and potato -- fantastic brunch! ')
-    createStamp(baseurl=baseurl, user=robby, title='DGBG', category='Place', comment='Frenchie burger and Thai sausage appetizer ')
-    createStamp(baseurl=baseurl, user=robby, title='Cafe Engelique', category='Place', comment='Israeli Bagal toast with hardboiled egg and pesto.')
-    createStamp(baseurl=baseurl, user=robby, title='The Breslin', category='Place', comment='The lamb burger or the entire pig feast with large groups. ')
-    createStamp(baseurl=baseurl, user=robby, title='Old Homestead Steak House', category='Place', comment='Bone in filet, creamed spinach and hashbrowns. Wow. ')
-    createStamp(baseurl=baseurl, user=robby, title='Place Griffou', category='Place', comment='Lobster fettuccine -- are you kidding me? Get this. ')
-    createStamp(baseurl=baseurl, user=robby, title='Blue Hill', category='Place', comment='Egg appetizer and whole crispy chicken.  ')
-    createStamp(baseurl=baseurl, user=robby, title='Blue Smoke ', category='Place', comment='Standard brisket -- the best BBQ in New York City')
-    createStamp(baseurl=baseurl, user=robby, title='Pearl Oyster Place', category='Place', comment='Definitively the best lobster role in NYC. Ask anyone. ')
-    createStamp(baseurl=baseurl, user=robby, title='Westville', category='Place', comment='The turkey burger is the best <$15 meal in the West Village. ')
-    createStamp(baseurl=baseurl, user=robby, title='Kuma Inn', category='Place', comment='This place has unbelievable chinese tapas food. Fantastic for dates. Any pork dish is amazing. Any dish at all is actually amazing. Just go and eat.')
-    createStamp(baseurl=baseurl, user=robby, title='Meatball Shop', category='Place', comment='Meatball smash! It\'s the meatball sandwich to write home about. ')
-    createStamp(baseurl=baseurl, user=robby, title='X-Men First Class', category='Film', comment='If you love X-Men, you\'ll love this Film. ')
-    createStamp(baseurl=baseurl, user=robby, title='The Fighter ', category='Film', comment='Honestly, my favorite Film of the year. Christian Bale was spectacular. ')
-    createStamp(baseurl=baseurl, user=robby, title='Cut the Rope', category='App', comment='Most addictive app that I\'ve played in a long time. ')
-    createStamp(baseurl=baseurl, user=robby, title='Boqueria ', category='Place', comment='Incredible high end Spanish tapas')
-    createStamp(baseurl=baseurl, user=robby, title='Joseph Leonard ', category='Place', comment='Monk fish with butter sauce and the patte plate. ')
-    createStamp(baseurl=baseurl, user=robby, title='Pulino\'s Place and Pizzeria ', category='Place', comment='Fantastic individual pizza in a scenester environment')
-    createStamp(baseurl=baseurl, user=robby, title='Ariana Afghan Kebab Place', category='Place', comment='Kabuli palow and kabobs -- great price for the place. ')
-    createStamp(baseurl=baseurl, user=robby, title='SPIN NY', category='Place', comment='Really fun place to play pingpong and drink beer. A Place and rec room in one place!')
-    createStamp(baseurl=baseurl, user=robby, title='Rickhouse', category='Place', comment='Fantastic bourbon selection from the floor to the ceiling (literally). Great for low key drinks')
-    createStamp(baseurl=baseurl, user=robby, title='Purple Cow', category='Book', comment='Great book on marketing and the need to be different.')
-    createStamp(baseurl=baseurl, user=robby, title='1898 Place', category='Place', comment='Really terrific Place in the heart of Placecelona. Great quality and design for the price. ')
-    createStamp(baseurl=baseurl, user=robby, title='Stamped', category='App', comment='This is the best app on the market. ')
-    createStamp(baseurl=baseurl, user=robby, title='The Elegant Universe', category='Book', comment='This books makes me feel smart.')
-    createStamp(baseurl=baseurl, user=jake, title='Empire Place', category='Place', comment='Great Place in uptown that\'s trendy and high quality for the price. Use the Google discount.')
-    createStamp(baseurl=baseurl, user=jake, title='Tong Kiang ', category='Place', comment='One of my 2 favorite dim sum places in NYC. It changed everything. ')
-    createStamp(baseurl=baseurl, user=jake, title='Yank Sing', category='Place', comment='My other of 2 favorite dim sum places in NYC. Higher end place than @Tong Kiang.')
-    createStamp(baseurl=baseurl, user=jake, title='Pacific Catch', category='Place', comment='Fantastic fish tacos -- but really small beware. Go if you\'ve never been. ')
-    createStamp(baseurl=baseurl, user=jake, title='A16', category='Place', comment='Best Italian place in SF. Love the Prosciutto pizza, but all are good.  ')
-    createStamp(baseurl=baseurl, user=jake, title='Bourbon and Branch', category='Place', comment='Exclusive and low key speak easy in SF. Great bourbon and mixed drink selection. ')
-    createStamp(baseurl=baseurl, user=jake, title='Diablo Royale', category='Place', comment='Skirt steak tacos -- if only the place was not so packed!')
-    createStamp(baseurl=baseurl, user=jake, title='675 Placet', category='Place', comment='Love this low key and trendy Place during the week (too crowded on the weekend).')
-    createStamp(baseurl=baseurl, user=jake, title='Hurt Locker', category='Film', comment='Suffocatingly intense, but one of the best Films of the year. ')
-    createStamp(baseurl=baseurl, user=jake, title='Milk (The Film)', category='Film', comment='One of my top 3 favorite Films of all time. Touching storytelling. ')
-    createStamp(baseurl=baseurl, user=jake, title='Slanted Door', category='Place', comment='Fantastic dungeness crab pasta. ')
-    createStamp(baseurl=baseurl, user=jake, title='Pizza Delphina ', category='Place', comment='Incredible Neapolitan style pizzas. Go to Ritual coffee nextdoor after.  ')
-    createStamp(baseurl=baseurl, user=jake, title='Liveview', category='App', comment='Great way to share mocks with hovering art directors')
-    createStamp(baseurl=baseurl, user=travis, title='Tilth', category='Place', comment='Favorite healthy breakfast spot in Seattle.')
-    createStamp(baseurl=baseurl, user=travis, title='Transformers 3', category='Film', comment='Amazing graphics coupled with a surprisingly decent storyline.')
+      
     createStamp(baseurl=baseurl, user=travis, title='Frankenstein', category='Book', comment='Absolute favorite book of all time -- nothing like the film depictions.')
-    createStamp(baseurl=baseurl, user=travis, title='Waterfront Seafood Grill', category='Place', comment='Great location for an upscale seafood date.')
-    createStamp(baseurl=baseurl, user=travis, title='Phantogram', category='Music', comment='Softer electronica with a perfect blend of harder beats mixed in.')
-    createStamp(baseurl=baseurl, user=travis, title='Glitch Mob', category='Music', comment='Favorite dubstep band, hands down.')
-    createStamp(baseurl=baseurl, user=travis, title='Vokab Kompany', category='Music', comment=' Best source for chill Socal rap.')
-    createStamp(baseurl=baseurl, user=travis, title='Bathtub Gin Co', category='Place', comment='Swanky speakeasy where quality gin runs like water.')
-    createStamp(baseurl=baseurl, user=travis, title='Al Forno', category='Place', comment='Amazing wood-burning oven Italian food with an atmosphere to match.')
-    createStamp(baseurl=baseurl, user=travis, title='Cha-Cha', category='Place', comment='Chill / cheap Mexican Place in Capitol Hill.')
-    createStamp(baseurl=baseurl, user=travis, title='The Safehouse', category='Place', comment='Amazing non-descript secret agent-styled Place & Place. Favorite Place in Wisconsin!')
     createStamp(baseurl=baseurl, user=travis, title='Tiny Wings', category='App', comment='I love this game.')
-    createStamp(baseurl=baseurl, user=travis, title='Backgammon NJ', category='App', comment='Best Backgammon app for the iPhone, though I swear the AI cheats...')
+    createStamp(baseurl=baseurl, user=robby, title='Meatball Shop', category='Place', comment='Meatball smash! It\'s the meatball sandwich to write home about. ')
+    createStamp(baseurl=baseurl, user=travis, title='Transformers 3', category='Film', comment='Amazing graphics coupled with a surprisingly decent storyline.')
+    createStamp(baseurl=baseurl, user=travis, title='The Safehouse', category='Place', comment='Amazing non-descript secret agent-styled Place & Place. Favorite Place in Wisconsin!')
+    createStamp(baseurl=baseurl, user=robby, title='Salt', category='Place', comment='Egg dish and potato -- fantastic brunch! ')
+    createStamp(baseurl=baseurl, user=robby, title='Westville', category='Place', comment='The turkey burger is the best <$15 meal in the West Village. ')
     createStamp(baseurl=baseurl, user=travis, title='Temptation Resort', category='Place', comment='Favorite all-inclusive resort in Cancun')
+    createStamp(baseurl=baseurl, user=robby, title='Blue Smoke ', category='Place', comment='Standard brisket -- the best BBQ in New York City')
+    createStamp(baseurl=baseurl, user=robby, title='Boqueria ', category='Place', comment='Incredible high end Spanish tapas')
+    createStamp(baseurl=baseurl, user=robby, title='Pearl Oyster Place', category='Place', comment='Definitively the best lobster role in NYC. Ask anyone. ')
+    createStamp(baseurl=baseurl, user=robby, title='Cut the Rope', category='App', comment='Most addictive app that I\'ve played in a long time. ')
+    createStamp(baseurl=baseurl, user=kevin, title='Avec', category='Place', comment='Chorizo-stuffed dates wrapped in bacon are still the best. Can\'t recommend this place enough')
+    createStamp(baseurl=baseurl, user=robby, title='SPIN NY', category='Place', comment='Really fun place to play pingpong and drink beer. A Place and rec room in one place!')
+    createStamp(baseurl=baseurl, user=jake, title='Liveview', category='App', comment='Great way to share mocks with hovering art directors')
+    createStamp(baseurl=baseurl, user=jake, title='Diablo Royale', category='Place', comment='Skirt steak tacos -- if only the place was not so packed!')
+    createStamp(baseurl=baseurl, user=bart, title='The Departed', category='Film', comment='Makes Boston really cool.')
+    createStamp(baseurl=baseurl, user=kevin, title='Lost in Translation', category='Film', comment='Still love it')
+    createStamp(baseurl=baseurl, user=travis, title='Waterfront Seafood Grill', category='Place', comment='Great location for an upscale seafood date.')
+    createStamp(baseurl=baseurl, user=robby, title='Purple Cow', category='Book', comment='Great book on marketing and the need to be different.')
+    createStamp(baseurl=baseurl, user=jake, title='675 Placet', category='Place', comment='Love this low key and trendy Place during the week (too crowded on the weekend).')
+    createStamp(baseurl=baseurl, user=travis, title='Vokab Kompany', category='Music', comment=' Best source for chill Socal rap.')
     createStamp(baseurl=baseurl, user=travis, title='Place Solamar', category='Place', comment='Favorite Place in downtown San Diego')
     createStamp(baseurl=baseurl, user=ed, title='The Road', category='Book', comment='Depressed for days after reading it. Seriously good.')
-    createStamp(baseurl=baseurl, user=ed, title='Freedom', category='Book', comment='Worthy follow-up to The Corrections.  ')
-    createStamp(baseurl=baseurl, user=bart, title='Camera Obscura', category='Music', comment='Really great band for upbeat, indie-pop music. Listen to it all the time when I am going for a walk.')
-    createStamp(baseurl=baseurl, user=bart, title='Old Pro', category='Place', comment='Burger is delicious.')
-    createStamp(baseurl=baseurl, user=bart, title='Pacific Catch', category='Place', comment='Poke bowl is so good and so cheap for what you get.')
-    createStamp(baseurl=baseurl, user=bart, title='Vol De Nuit', category='Place', comment='Hidden beer garden in the village. Great spot for a date or a hangout.')
-    createStamp(baseurl=baseurl, user=bart, title='Brooklyn Bowl', category='Place', comment='Fried chicken is surprisingly incredible.  Oh, and you can bowl too. ')
-    createStamp(baseurl=baseurl, user=bart, title='Winning the war, losing the peace', category='Book', comment='Best, most informative book on the Iraq war I\'ve ever read.')
-    createStamp(baseurl=baseurl, user=bart, title='The Tipsy Pig', category='Place', comment='Mac and cheese and burger.  Incredible.')
-    createStamp(baseurl=baseurl, user=bart, title='Nick\'s Crispy Tacos', category='Place', comment='Get guacemole on them.  They smother it.')
-    createStamp(baseurl=baseurl, user=bart, title='The Last Waltz', category='Music', comment='Great album and great DVD.  One of the best bands ever.')
-    createStamp(baseurl=baseurl, user=bart, title='Place Vitale', category='Place', comment='Best value in SF.  Place is delicious too.')
-    createStamp(baseurl=baseurl, user=bart, title='The Departed', category='Film', comment='Makes Boston really cool.')
-    createStamp(baseurl=baseurl, user=bart, title='Just Friends', category='Film', comment='It\'s not going to win an Oscar, but if a girl has ever put you in the friend-zone, you should watch this.')
-    createStamp(baseurl=baseurl, user=bart, title='The Big Short', category='Book', comment='Fascinating insight into the financial crisis from a totally different perspective.')
+    createStamp(baseurl=baseurl, user=jake, title='Hurt Locker', category='Film', comment='Suffocatingly intense, but one of the best Films of the year. ')
+    createStamp(baseurl=baseurl, user=bart, title='Instagram', category='App', comment='Fun, simple way to share photos with friends.')
+    createStamp(baseurl=baseurl, user=robby, title='Pulino\'s Place and Pizzeria ', category='Place', comment='Fantastic individual pizza in a scenester environment')
     createStamp(baseurl=baseurl, user=bart, title='The New New Thing', category='Book', comment=' ')
-    createStamp(baseurl=baseurl, user=bart, title='Four Seasons Boston', category='Place', comment='If you want to spend a lot of money, this Place is extremely nice.  Gorgeous pool overlooking the park.')
+    createStamp(baseurl=baseurl, user=jake, title='Bourbon and Branch', category='Place', comment='Exclusive and low key speak easy in SF. Great bourbon and mixed drink selection. ')
+    createStamp(baseurl=baseurl, user=kevin, title='Rockhouse', category='Place', comment='You can jump into the ocean from a cliff.  Any questions?')
     createStamp(baseurl=baseurl, user=bart, title='Buried Secrets', category='Book', comment='Great thriller for vacation read.  Not beautiful literature but very exciting.')
+    createStamp(baseurl=baseurl, user=kevin, title='Compass', category='App', comment='I use this every time I get off the subway.')
     createStamp(baseurl=baseurl, user=bart, title='Paranoia', category='Book', comment='Joseph Finder knows how to write a page-turner. A rare thriller that is also sort of about technology')
     createStamp(baseurl=baseurl, user=bart, title='Rework', category='Book', comment='This is my business bible. These guys are contrarian for sure, but have lots of unique insights.')
-    createStamp(baseurl=baseurl, user=bart, title='Instagram', category='App', comment='Fun, simple way to share photos with friends.')
+    createStamp(baseurl=baseurl, user=bart, title='Pacific Catch', category='Place', comment='Poke bowl is so good and so cheap for what you get.')
+    createStamp(baseurl=baseurl, user=robby, title='The Fighter ', category='Film', comment='Honestly, my favorite Film of the year. Christian Bale was spectacular. ')
     createStamp(baseurl=baseurl, user=bart, title='Shutters', category='Place', comment='Such beautiful rooms and right on the beach.  Great place to go with a girlfriend.')
-    createStamp(baseurl=baseurl, user=bart, title='Tickle Pink Inn', category='Place', comment='1.5 hr drive from SF and a different world.  Free wine and cheese at 4:30 is enough for a meal.')
+    createStamp(baseurl=baseurl, user=robby, title='Place Griffou', category='Place', comment='Lobster fettuccine -- are you kidding me? Get this. ')
+    createStamp(baseurl=baseurl, user=robby, title='X-Men First Class', category='Film', comment='If you love X-Men, you\'ll love this Film. ')
+    createStamp(baseurl=baseurl, user=robby, title='1898 Place', category='Place', comment='Really terrific Place in the heart of Placecelona. Great quality and design for the price. ')
+    createStamp(baseurl=baseurl, user=bart, title='Brooklyn Bowl', category='Place', comment='Fried chicken is surprisingly incredible.  Oh, and you can bowl too. ')
+    createStamp(baseurl=baseurl, user=bart, title='Camera Obscura', category='Music', comment='Really great band for upbeat, indie-pop music. Listen to it all the time when I am going for a walk.')
+    createStamp(baseurl=baseurl, user=travis, title='Backgammon NJ', category='App', comment='Best Backgammon app for the iPhone, though I swear the AI cheats...')
+    createStamp(baseurl=baseurl, user=bart, title='Vol De Nuit', category='Place', comment='Hidden beer garden in the village. Great spot for a date or a hangout.')
+    createStamp(baseurl=baseurl, user=travis, title='Al Forno', category='Place', comment='Amazing wood-burning oven Italian food with an atmosphere to match.')
+    createStamp(baseurl=baseurl, user=travis, title='Glitch Mob', category='Music', comment='Favorite dubstep band, hands down.')
+    createStamp(baseurl=baseurl, user=kevin, title='Lupe Fiasco', category='Music', comment='The Show Goes On')
     createStamp(baseurl=baseurl, user=bart, title='Funny People', category='Film', comment='One of my favorite Films.  Funny but also serious.  Apatow\'s best.')
-    createStamp(baseurl=baseurl, user=bart, title='Timer', category='Film', comment='Indie Film that makes really interesting points about relationships.  Not incredible but very thought-provoking.')       
-            
+    createStamp(baseurl=baseurl, user=travis, title='Cha-Cha', category='Place', comment='Chill / cheap Mexican Place in Capitol Hill.')
+    createStamp(baseurl=baseurl, user=kevin, title='Deliveries', category='App', comment='Good place for tracking deliveries.')
+    createStamp(baseurl=baseurl, user=bart, title='Place Vitale', category='Place', comment='Best value in SF.  Place is delicious too.')
+    createStamp(baseurl=baseurl, user=travis, title='Tilth', category='Place', comment='Favorite healthy breakfast spot in Seattle.')
+    createStamp(baseurl=baseurl, user=jake, title='Yank Sing', category='Place', comment='My other of 2 favorite dim sum places in NYC. Higher end place than @Tong Kiang.')
+    createStamp(baseurl=baseurl, user=robby, title='Cafe Engelique', category='Place', comment='Israeli Bagal toast with hardboiled egg and pesto.')
+    createStamp(baseurl=baseurl, user=robby, title='Old Homestead Steak House', category='Place', comment='Bone in filet, creamed spinach and hashbrowns. Wow. ')
+    createStamp(baseurl=baseurl, user=jake, title='A16', category='Place', comment='Best Italian place in SF. Love the Prosciutto pizza, but all are good.  ')
+    createStamp(baseurl=baseurl, user=robby, title='Alta ', category='Place', comment='40 types of tapas! "The whole shebang" with 9+ people. Life changing. ')
+    createStamp(baseurl=baseurl, user=robby, title='Joseph Leonard ', category='Place', comment='Monk fish with butter sauce and the patte plate. ')
+    createStamp(baseurl=baseurl, user=kevin, title='Employees Only', category='Place', comment='Bourbon, egg whites, and a bit of red wine, combined with some bitters and a touch of spice. Seriously amazing.')
+    createStamp(baseurl=baseurl, user=robby, title='Kuma Inn', category='Place', comment='This place has unbelievable chinese tapas food. Fantastic for dates. Any pork dish is amazing. Any dish at all is actually amazing. Just go and eat.')
+    createStamp(baseurl=baseurl, user=bart, title='The Big Short', category='Book', comment='Fascinating insight into the financial crisis from a totally different perspective.')
+    createStamp(baseurl=baseurl, user=kevin, title='When Genius Failed', category='Book', comment='Really good book about LTCM and everything that went down. Scary parallels between this and what happened ten years later.')
+    createStamp(baseurl=baseurl, user=jake, title='Tong Kiang ', category='Place', comment='One of my 2 favorite dim sum places in NYC. It changed everything. ')
+    createStamp(baseurl=baseurl, user=bart, title='Nick\'s Crispy Tacos', category='Place', comment='Get guacemole on them.  They smother it.')
+    createStamp(baseurl=baseurl, user=bart, title='Winning the war, losing the peace', category='Book', comment='Best, most informative book on the Iraq war I\'ve ever read.')
+    createStamp(baseurl=baseurl, user=travis, title='Bathtub Gin Co', category='Place', comment='Swanky speakeasy where quality gin runs like water.')
+    createStamp(baseurl=baseurl, user=bart, title='Old Pro', category='Place', comment='Burger is delicious.')
+    createStamp(baseurl=baseurl, user=jake, title='Slanted Door', category='Place', comment='Fantastic dungeness crab pasta. ')
+    createStamp(baseurl=baseurl, user=jake, title='Pizza Delphina ', category='Place', comment='Incredible Neapolitan style pizzas. Go to Ritual coffee nextdoor after.  ')
+    createStamp(baseurl=baseurl, user=jake, title='Milk (The Film)', category='Film', comment='One of my top 3 favorite Films of all time. Touching storytelling. ')
+    createStamp(baseurl=baseurl, user=bart, title='Just Friends', category='Film', comment='It\'s not going to win an Oscar, but if a girl has ever put you in the friend-zone, you should watch this.')
+    createStamp(baseurl=baseurl, user=bart, title='Tickle Pink Inn', category='Place', comment='1.5 hr drive from SF and a different world.  Free wine and cheese at 4:30 is enough for a meal.')
+    createStamp(baseurl=baseurl, user=robby, title='Blue Hill', category='Place', comment='Egg appetizer and whole crispy chicken.  ')
+    createStamp(baseurl=baseurl, user=kevin, title='The James Hotel', category='Place', comment='Best hotel in the city')
+    createStamp(baseurl=baseurl, user=robby, title='Ariana Afghan Kebab Place', category='Place', comment='Kabuli palow and kabobs -- great price for the place. ')
+    createStamp(baseurl=baseurl, user=jake, title='Pacific Catch', category='Place', comment='Fantastic fish tacos -- but really small beware. Go if you\'ve never been. ')
+    createStamp(baseurl=baseurl, user=robby, title='Stamped', category='App', comment='This is the best app on the market. ')
+    createStamp(baseurl=baseurl, user=robby, title='The Breslin', category='Place', comment='The lamb burger or the entire pig feast with large groups. ')
+    createStamp(baseurl=baseurl, user=ed, title='Freedom', category='Book', comment='Worthy follow-up to The Corrections.  ')
+    createStamp(baseurl=baseurl, user=bart, title='Four Seasons Boston', category='Place', comment='If you want to spend a lot of money, this Place is extremely nice.  Gorgeous pool overlooking the park.')
+    createStamp(baseurl=baseurl, user=travis, title='Phantogram', category='Music', comment='Softer electronica with a perfect blend of harder beats mixed in.')
+    createStamp(baseurl=baseurl, user=robby, title='DGBG', category='Place', comment='Frenchie burger and Thai sausage appetizer ')
+    createStamp(baseurl=baseurl, user=robby, title='Rickhouse', category='Place', comment='Fantastic bourbon selection from the floor to the ceiling (literally). Great for low key drinks')
+    createStamp(baseurl=baseurl, user=jake, title='Empire Place', category='Place', comment='Great Place in uptown that\'s trendy and high quality for the price. Use the Google discount.')
+    createStamp(baseurl=baseurl, user=bart, title='The Last Waltz', category='Music', comment='Great album and great DVD.  One of the best bands ever.')
+    createStamp(baseurl=baseurl, user=kevin, title='Winter\'s Tale', category='Book', comment='You would love this.')
+    stampID = createStamp(baseurl=baseurl, user=bart, title='Timer', category='Film', comment='Indie Film that makes really interesting points about relationships.  Not incredible but very thought-provoking.')       
+    createStamp(baseurl=baseurl, user=robby, title='The Elegant Universe', category='Book', comment='This books makes me feel smart.')
+    createStamp(baseurl=baseurl, user=bart, title='The Tipsy Pig', category='Place', comment='Mac and cheese and burger.  Incredible.')
+
+
+    path = "comments/create.json"
+    data = {
+        "authenticated_user_id": ed,
+        "stamp_id": stampID,
+        "blurb": "If it's not incredible, why are you stamping it? You're using this product all wrong!"
+    }
+    commentID = testPOST(baseurl, path, data)['comment_id']
+    if len(commentID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+
+    path = "comments/create.json"
+    data = {
+        "authenticated_user_id": bart,
+        "stamp_id": stampID,
+        "blurb": "Yeah, my bad..."
+    }
+    commentID = testPOST(baseurl, path, data)['comment_id']
+    if len(commentID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
         
 
 # where all the magic starts
