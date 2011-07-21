@@ -254,20 +254,24 @@ The id of the stamp commented on.</p>
 <p><strong>blurb</strong> <em>required</em>
 A brief text field containing the comment. This is currently limited to 512 characters.</p>
 
-<p><strong>mentions</strong> <em>optional</em>
-User information for any users that are mentioned in the comment. Any users mentioned must also be referenced in the text of the blurb in the format &#8220;@screen_name&#8221;. Multiple screen names must be separated by commas.</p>
-
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>POST https://api.stamped.com/1/comments/create.json
-authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700000a&amp;blurb=That+looks+awesome.</code></pre>
+authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700000a&amp;blurb=That+looks+awesome.+Thanks+%40robby!</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "blurb": "That looks awesome.", 
+    "blurb": "That looks awesome. Thanks @robby!", 
     "comment_id": "4e259ca532a7ba6cd700000b", 
-    "mentions": null, 
+    "mentions": [
+        {
+            "display_name": "Robby S.", 
+            "indices": [27,33], 
+            "screen_name": "robby", 
+            "user_id": "4e2854ba32a7ba9d96000008"
+        }
+    ], 
     "restamp_id": null, 
     "stamp_id": "4e259ca532a7ba6cd700000a", 
     "last_modified": "2011-07-19 15:03:01.843073", 

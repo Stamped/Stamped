@@ -759,11 +759,6 @@ class StampedAPI(AStampedAPI):
         if params.image != None:
             stamp.image = params.image
             
-        if params.mentions != None:
-            stamp.mentions = []
-            for userID in params.mentions.split(','):
-                stamp.mentions.append(userID)
-            
         if params.credit != None:
             stamp.credit = []
             for userID in params.credit.split(','):
@@ -776,8 +771,11 @@ class StampedAPI(AStampedAPI):
         if not stamp.isValid:
             raise InvalidArgument('Invalid input')
         
+        stampId = self._stampDB.addStamp(stamp)
+        stamp = self._stampDB.getStamp(stampId)
+        
         result = {}
-        result['stamp_id'] = self._stampDB.addStamp(stamp)
+        result['stamp_id'] = stamp['stamp_id']
         result['entity'] = stamp['entity']
         result['user'] = stamp['user']
         
@@ -818,12 +816,6 @@ class StampedAPI(AStampedAPI):
         if params.image != None: 
             stamp.image = params.image
             
-        if params.mentions != None:
-            if not stamp.mentions:
-                stamp.mentions = []
-            for userID in params.mentions.split(','):
-                stamp.mentions.append(userID)
-            
         if params.credit != None:
             if not stamp.credit:
                 stamp.credit = []
@@ -836,9 +828,12 @@ class StampedAPI(AStampedAPI):
 
         if not stamp.isValid:
             raise InvalidArgument('Invalid input')
+        
+        stampId = self._stampDB.updateStamp(stamp)
+        stamp = self._stampDB.getStamp(stampId)
             
         result = {}
-        result['stamp_id'] = self._stampDB.updateStamp(stamp)
+        result['stamp_id'] = stamp['stamp_id']
         result['entity'] = stamp['entity']
         result['user'] = stamp['user']
         
@@ -934,10 +929,6 @@ class StampedAPI(AStampedAPI):
         
         if params.blurb != None:
             comment.blurb = params.blurb
-        if params.mentions != None:
-            comment.mentions = []
-            for userID in params.mentions.split(','):
-                comment.mentions.append(userID)
                 
         comment.timestamp = {
             'created': datetime.utcnow()
@@ -946,8 +937,11 @@ class StampedAPI(AStampedAPI):
         if not comment.isValid:
             raise InvalidArgument('Invalid input')
         
+        commentId = self._stampDB.addComment(comment)
+        comment = self._stampDB.getComment(commentId)
+        
         result = {}
-        result['comment_id'] = self._stampDB.addComment(comment)
+        result['comment_id'] = comment['comment_id']
         result['stamp_id'] = comment['stamp_id']
         result['user'] = comment['user']
         result['blurb'] = comment['blurb']

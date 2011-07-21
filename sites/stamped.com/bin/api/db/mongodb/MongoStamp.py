@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import re
 from threading import Lock
 from datetime import datetime
 
@@ -82,7 +83,13 @@ class MongoStamp(AStampDB, Mongo):
         _favoriteDB = MongoFavorite()
         _creditGiversDB = MongoCreditGivers()
         _creditReceivedDB = MongoCreditReceived()
-    
+        
+        # Extract mentions
+        if 'blurb' in stamp:
+            mentions = self._extractMentions(stamp['blurb'])
+            if len(mentions) > 0:
+                stamp['mentions'] = mentions
+            
         # Add the stamp data to the database
         stampId = self._addDocument(stamp, 'stamp_id')      
         
@@ -190,12 +197,27 @@ class MongoStamp(AStampDB, Mongo):
         return True
         
     def addComment(self, comment):
+        
+        # Extract mentions
+        if 'blurb' in comment:
+            mentions = self._extractMentions(comment['blurb'])
+            if len(mentions) > 0:
+                comment['mentions'] = mentions
+        
+        # Add comment
         commentId = MongoComment().addComment(comment)
+                
+        # If mentions exist, add to activity
+        ### TODO
+
         self.incrementStatsForStamp(comment['stamp_id'], 'num_comments', 1)
         return commentId
         
     def getComments(self, stampId):
         return MongoComment().getComments(stampId)
+        
+    def getComment(self, commentId):
+        return MongoComment().getComment(commentId)
     
     def removeComment(self, commentId):
         _commentDB = MongoComment()
@@ -210,6 +232,43 @@ class MongoStamp(AStampDB, Mongo):
         return False
     
     ### PRIVATE
+    
+    def _extractMentions(self, text):
+        
+        # Connect
+        _userDB = MongoUser()
+        
+        # Define patterns
+        user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
+        reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
+        
+        mentions = [] 
+        
+        # Check if string match exists at beginning. Should combine with regex 
+        # below once I figure out how :)
+        reply = reply_regex.match(text)
+        if reply:
+            data = {}
+            data['indices'] = [(reply.start()), reply.end()]
+            data['screen_name'] = reply.group(0)[1:]
+            user = _userDB.lookupUsers(None, data['screen_name'])
+            if isinstance(user, list) and len(user) == 1:
+                data['user_id'] = user_id(0)['user_id']
+                data['display_name'] = user_id(0)['display_name']
+            mentions.append(data)
+            
+        # Run through and grab mentions
+        for user in user_regex.finditer(text):
+            data = {}
+            data['indices'] = [(user.start()+1), user.end()]
+            data['screen_name'] = user.group(0)[2:]
+            user = _userDB.lookupUsers(None, [data['screen_name']])
+            if isinstance(user, list) and len(user) == 1:
+                data['user_id'] = user[0]['user_id']
+                data['display_name'] = user[0]['display_name']
+            mentions.append(data)
+        
+        return mentions
         
         
     def _removeCredit(self, stampId):

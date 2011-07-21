@@ -360,8 +360,7 @@ def addStamp():
         ("entity_id",             ResourceArgument(required=True, expectedType=basestring)), 
         ("blurb",                 ResourceArgument(expectedType=basestring)), 
         ("image",                 ResourceArgument(expectedType=basestring)), 
-        ("mentions",              ResourceArgument(expectedType=basestring)), 
-        ("credit",                ResourceArgument(expectedType=basestring)), 
+        ("credit",                ResourceArgument(expectedType=basestring))
     ])
     return handlePOSTRequest(request, stampedAPI.addStamp, schema)
 
@@ -373,8 +372,7 @@ def updateStamp():
         ("stamp_id",              ResourceArgument(required=True, expectedType=basestring)), 
         ("blurb",                 ResourceArgument(expectedType=basestring)), 
         ("image",                 ResourceArgument(expectedType=basestring)), 
-        ("mentions",              ResourceArgument(expectedType=basestring)), 
-        ("credit",                ResourceArgument(expectedType=basestring)), 
+        ("credit",                ResourceArgument(expectedType=basestring))
     ])
     return handlePOSTRequest(request, stampedAPI.updateStamp, schema)
 
