@@ -24,7 +24,7 @@ class Mongo():
     def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
         try:
             config_path = os.path.abspath(__file__)
-            for i in xrange(6):
+            for i in xrange(7):
                 config_path = os.path.dirname(config_path)
             config_path = os.path.join(config_path, "conf/stamped.conf")
             self._config = getPythonConfigFile(config_path, True)
@@ -38,6 +38,9 @@ class Mongo():
                 }
             })
             print self._config
+        
+        if not 'mongodb' in self._config:
+            raise Fail("invalid configuration file")
         
         self._mapping = mapping
         self.user = self._getenv_user()
