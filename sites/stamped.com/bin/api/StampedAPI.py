@@ -46,8 +46,8 @@ class StampedAPI(AStampedAPI):
         and manipulating all Stamped backend databases.
     """
     
-    def __init__(self):
-        AStampedAPI.__init__(self)
+    def __init__(self, desc):
+        AStampedAPI.__init__(self, desc)
         self._validated = False
     
     def _validate(self):
@@ -229,10 +229,9 @@ class StampedAPI(AStampedAPI):
             return True
         else:
             return False
-                    
+    
     def resetPassword(self, params):
         raise NotImplementedError
-        
     
     # ##### #
     # Users #
@@ -491,61 +490,91 @@ class StampedAPI(AStampedAPI):
     # ######### #
     
     def addFavorite(self, params):
-        # TODO: construct a favorite object from erID, entityID, stampID)
-        raise NotImplementedError
         favorite = Favorite()
         
-        user = self.getUser(params.userID)
-        favorite.user = {
-            'user_id': user.id,
-            'user_name': user.screen_name
-        }
+        user = self._userDB.getUser(params.authenticated_user_id)
+        favorite.user_id = user.user_id
         
-        entity = self.getEntity(params.entityID)
-        favorite.entity = {
-            'entity_id': entity.id,
-            'title': entity.title,
-            'category': entity.category,
-            'subtitle': entity.subtitle
-        }
-        if entity.coordinates:
-            favorite.entity['coordinates'] = entity.details['place']['coordinates']
+        entity = self._entityDB.getEntity(params.entity_id)
+        favorite.entity = {}
+        favorite.entity['entity_id'] = entity.entity_id
+        favorite.entity['title'] = entity.title
+        favorite.entity['category'] = entity.category
+        favorite.entity['subtitle'] = entity.subtitle
+        if 'details' in entity and 'place' in entity.details and 'coordinates' in entity.details['place']:
+            favorite.entity['coordinates'] = {}
+            favorite.entity['coordinates']['lat'] = entity.details['place']['coordinates']['lat']
+            favorite.entity['coordinates']['lng'] = entity.details['place']['coordinates']['lng']
         
-        if stampID:
-            stamp = self.getStamp(params.stampID)
-            favorite.stamp = {
-                'stamp_id': stamp.id,
-                'stamp_blurb': stamp.blurb, 
-                'stamp_timestamp': stamp.timestamp,
-                'stamp_user_id': stamp.user['user_id'],
-                'stamp_user_name': stamp.user['user_name'],
-                'stamp_user_img': stamp.user['user_img']
-            }
+        if params.stamp_id != None:
+            stamp = self._stampDB.getStamp(params.stamp_id)
+            favorite.stamp = {}
+            favorite.stamp['stamp_id'] = stamp.stamp_id
+            favorite.stamp['display_name'] = stamp.user['display_name']
+                
+        favorite.timestamp = {
+            'created': datetime.utcnow()
+        }   
         
-        favorite.timestamp = datetime.utcnow()
+        favorite.complete = False
         
         if not favorite.isValid:
             raise InvalidArgument('Invalid input')
+        
+        result = {}
+        result['favorite_id'] = self._favoriteDB.addFavorite(favorite)
+        result['user_id'] = favorite.user_id
+        result['entity'] = favorite.entity
+        if 'stamp' in favorite:
+            result['stamp'] = favorite.stamp
+        else:
+            result['stamp'] = None
             
-        return self._favoriteDB.addFavorite(favorite)
+        result['timestamp'] = {}
+        if 'created' in favorite.timestamp:
+            result['timestamp']['created'] = str(favorite.timestamp['created'])
+            
+        result['complete'] = favorite.complete
+        
+        return result
     
-    def getFavorite(self, userID, favoriteID):
-        ### TODO: Verify userID has permission to access
-        return self._favoriteDB.getFavorite(favoriteID)
+    def removeFavorite(self, params):
+        if self._favoriteDB.removeFavorite(params.favorite_id):
+            return True
+        return False
     
-    def removeFavorite(self, userID, favoriteID):
-        ### TODO: Verify userID has permission to access
-        return self._favoriteDB.removeFavorite(favoriteID)
-    
-    def completeFavorite(self, userID, favoriteID):
-        ### TODO: Verify userID has permission to access
-        return self._favoriteDB.completeFavorite(favoriteID)
-    
-    def getFavoriteIDs(self, userID):
-        return self._favoriteDB.getFavoriteIDs(userID)
-    
-    def getFavorites(self, userID):
-        return self._favoriteDB.getFavoriteIds(userID)
+    def getFavorites(self, userID):        
+        favorites = self._favoriteDB.getFavorites(userID)
+        
+        result = []
+        for favorite in favorites:
+            data = {}
+            data['favorite_id'] = favorite.favorite_id
+            data['user_id'] = favorite.user_id
+            data['entity'] = favorite.entity
+            if 'stamp' in favorite:
+                data['stamp'] = favorite.stamp
+            else:
+                data['stamp'] = None
+                
+            data['timestamp'] = {}
+            if 'created' in favorite.timestamp:
+                data['timestamp']['created'] = str(favorite.timestamp['created'])
+            else:
+                data['timestamp']['created'] = None
+            if 'modified' in favorite.timestamp:
+                data['timestamp']['modified'] = str(favorite.timestamp['modified'])
+            else:
+                data['timestamp']['modified'] = None
+                
+            if 'complete' in favorite:
+                data['complete'] = favorite.complete
+            else:
+                data['complete'] = False
+            
+            result.append(data)
+        
+        return result
     
     # ######## #
     # Entities #
@@ -1005,7 +1034,6 @@ class StampedAPI(AStampedAPI):
             result.append(data)
         
         return result
-        
     
     # ########### #
     # Collections #
@@ -1120,94 +1148,13 @@ class StampedAPI(AStampedAPI):
     def getUserMentions(self, userID, limit=None):
         return self._collectionDB.getUserMentions(userID, limit)
     
-    # ######### #
-    # Favorites #
-    # ######### #
+    # ########### #
+    # Private API #
+    # ########### #
     
-    def addFavorite(self, params):
-        favorite = Favorite()
-        
-        user = self._userDB.getUser(params.authenticated_user_id)
-        favorite.user_id = user.user_id
-        
-        entity = self._entityDB.getEntity(params.entity_id)
-        favorite.entity = {}
-        favorite.entity['entity_id'] = entity.entity_id
-        favorite.entity['title'] = entity.title
-        favorite.entity['category'] = entity.category
-        favorite.entity['subtitle'] = entity.subtitle
-        if 'details' in entity and 'place' in entity.details and 'coordinates' in entity.details['place']:
-            favorite.entity['coordinates'] = {}
-            favorite.entity['coordinates']['lat'] = entity.details['place']['coordinates']['lat']
-            favorite.entity['coordinates']['lng'] = entity.details['place']['coordinates']['lng']
-        
-        if params.stamp_id != None:
-            stamp = self._stampDB.getStamp(params.stamp_id)
-            favorite.stamp = {}
-            favorite.stamp['stamp_id'] = stamp.stamp_id
-            favorite.stamp['display_name'] = stamp.user['display_name']
-                
-        favorite.timestamp = {
-            'created': datetime.utcnow()
-        }   
-        
-        favorite.complete = False
-        
-        if not favorite.isValid:
-            raise InvalidArgument('Invalid input')
-        
-        result = {}
-        result['favorite_id'] = self._favoriteDB.addFavorite(favorite)
-        result['user_id'] = favorite.user_id
-        result['entity'] = favorite.entity
-        if 'stamp' in favorite:
-            result['stamp'] = favorite.stamp
-        else:
-            result['stamp'] = None
-            
-        result['timestamp'] = {}
-        if 'created' in favorite.timestamp:
-            result['timestamp']['created'] = str(favorite.timestamp['created'])
-            
-        result['complete'] = favorite.complete
-        
-        return result
+    def _addEntity(self, entities):
+        self._entityDB.addEntity(entity)
     
-    def removeFavorite(self, params):
-        if self._favoriteDB.removeFavorite(params.favorite_id):
-            return True
-        return False
-    
-    def getFavorites(self, userID):        
-        favorites = self._favoriteDB.getFavorites(userID)
-            
-        result = []
-        for favorite in favorites:
-            data = {}
-            data['favorite_id'] = favorite.favorite_id
-            data['user_id'] = favorite.user_id
-            data['entity'] = favorite.entity
-            if 'stamp' in favorite:
-                data['stamp'] = favorite.stamp
-            else:
-                data['stamp'] = None
-                
-            data['timestamp'] = {}
-            if 'created' in favorite.timestamp:
-                data['timestamp']['created'] = str(favorite.timestamp['created'])
-            else:
-                data['timestamp']['created'] = None
-            if 'modified' in favorite.timestamp:
-                data['timestamp']['modified'] = str(favorite.timestamp['modified'])
-            else:
-                data['timestamp']['modified'] = None
-                
-            if 'complete' in favorite:
-                data['complete'] = favorite.complete
-            else:
-                data['complete'] = False
-            
-            result.append(data)
-        
-        return result
+    def _addEntities(self, entities):
+        self._entityDB.addEntities(entities)
 

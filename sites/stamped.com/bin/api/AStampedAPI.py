@@ -6,12 +6,16 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from abc import abstractmethod
+from AEntitySink import AEntitySink
 
-class AStampedAPI(object):
+class AStampedAPI(AEntitySink):
     """
         Defines the internal API for accessing and manipulating all Stamped 
         backend databases.
     """
+    
+    def __init__(self, desc):
+        AEntitySink.__init__(self, desc)
     
     # ######## #
     # Accounts #
@@ -19,197 +23,215 @@ class AStampedAPI(object):
     
     @abstractmethod
     def addAccount(self, acct):
-        pass
+        raise NotImplementedError
     
     @abstractmethod
-    def getAccount(userID):
-        pass
+    def getAccount(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def updateAccount(user):
-        pass
+    def updateAccount(self, user):
+        raise NotImplementedError
     
     @abstractmethod
-    def removeAccount(userID):
-        pass
+    def removeAccount(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def flagAccount(userID):
-        pass
+    def flagAccount(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def unflagAccount(userID):
-        pass
+    def unflagAccount(self, userID):
+        raise NotImplementedError
     
     # ##### #
     # Users #
     # ##### #
     
     @abstractmethod
-    def getUser(userID):
-        pass
+    def getUser(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getUsers(userIDs):
-        pass
+    def getUsers(self, userIDs):
+        raise NotImplementedError
     
     @abstractmethod
-    def getUserByName(username):
-        pass
+    def getUserByName(self, username):
+        raise NotImplementedError
     
     @abstractmethod
-    def getUsersByNames(usernames):
-        pass
+    def getUsersByNames(self, usernames):
+        raise NotImplementedError
     
     @abstractmethod
-    def searchUsers(query, limit=20):
-        pass
+    def searchUsers(self, query, limit=20):
+        raise NotImplementedError
     
     @abstractmethod
-    def getPrivacy(userID):
-        pass
+    def getPrivacy(self, userID):
+        raise NotImplementedError
     
     # ############# #
     # Relationships #
     # ############# #
     
     @abstractmethod
-    def addFriendship(relationship):
-        pass
+    def addFriendship(self, relationship):
+        raise NotImplementedError
     
     @abstractmethod
-    def checkFriendship(relationship):
-        pass
+    def checkFriendship(self, relationship):
+        raise NotImplementedError
     
     @abstractmethod
-    def removeFriendship(relationship):
-        pass
+    def removeFriendship(self, relationship):
+        raise NotImplementedError
     
     @abstractmethod
-    def getFriends(userID):
-        pass
+    def getFriends(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getFollowers(userID):
-        pass
+    def getFollowers(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def approveFriendship(relationship):
-        pass
+    def approveFriendship(self, relationship):
+        raise NotImplementedError
     
     @abstractmethod
-    def addBlock(relationship):
-        pass
+    def addBlock(self, relationship):
+        raise NotImplementedError
     
     @abstractmethod
-    def checkBlock(relationship):
-        pass
+    def checkBlock(self, relationship):
+        raise NotImplementedError
     
     @abstractmethod
-    def removeBlock(relationship):
-        pass
+    def removeBlock(self, relationship):
+        raise NotImplementedError
     
     @abstractmethod
-    def getBlocks(userID):
-        pass
+    def getBlocks(self, userID):
+        raise NotImplementedError
     
     # ######### #
     # Favorites #
     # ######### #
     
     @abstractmethod
-    def addFavorite(userID, entityID, stampID):
-        pass
+    def addFavorite(self, userID, entityID, stampID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getFavorite(userID, favoriteID):
-        pass
+    def getFavorite(self, userID, favoriteID):
+        raise NotImplementedError
     
     @abstractmethod
-    def removeFavorite(userID, favoriteID):
-        pass
+    def removeFavorite(self, userID, favoriteID):
+        raise NotImplementedError
     
     @abstractmethod
-    def completeFavorite(userID, favoriteID):
-        pass
+    def completeFavorite(self, userID, favoriteID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getFavoriteIDs(userID):
-        pass
+    def getFavoriteIDs(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getFavorites(userID):
-        pass
+    def getFavorites(self, userID):
+        raise NotImplementedError
     
     # ######## #
     # Entities #
     # ######## #
     
     @abstractmethod
-    def addEntity(entity):
-        pass
+    def addEntity(self, params):
+        raise NotImplementedError
     
     @abstractmethod
-    def getEntity(entityID):
-        pass
+    def getEntity(self, entityID):
+        raise NotImplementedError
     
     @abstractmethod
-    def updateEntity(entity):
-        pass
+    def updateEntity(self, entity):
+        raise NotImplementedError
     
     @abstractmethod
-    def removeEntity(entityID):
-        pass
+    def removeEntity(self, entityID):
+        raise NotImplementedError
     
     @abstractmethod
-    def searchEntities(query, limit=20):
-        pass
+    def searchEntities(self, query, limit=20):
+        raise NotImplementedError
     
     # ###### #
     # Stamps #
     # ###### #
     
     @abstractmethod
-    def addStamp(stamp):
-        pass
+    def addStamp(self, stamp):
+        raise NotImplementedError
     
     @abstractmethod
-    def getStamp(stampID):
-        pass
+    def getStamp(self, stampID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getStamps(stampIDs):
-        pass
+    def getStamps(self, stampIDs):
+        raise NotImplementedError
     
     @abstractmethod
-    def updateStamp(stamp):
-        pass
+    def updateStamp(self, stamp):
+        raise NotImplementedError
     
     @abstractmethod
-    def removeStamp(stampID):
-        pass
+    def removeStamp(self, stampID):
+        raise NotImplementedError
     
     # ########### #
     # Collections #
     # ########### #
     
     @abstractmethod
-    def getInboxStampIDs(userID, limit=None):
-        pass
+    def getInboxStampIDs(self, userID, limit=None):
+        raise NotImplementedError
     
     @abstractmethod
-    def getInboxStamps(userID, limit=None):
-        pass
+    def getInboxStamps(self, userID, limit=None):
+        raise NotImplementedError
     
     @abstractmethod
-    def getUserStampIDs(userID):
-        pass
+    def getUserStampIDs(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getUserStamps(userID):
-        pass
+    def getUserStamps(self, userID):
+        raise NotImplementedError
     
     @abstractmethod
-    def getUserMentions(userID):
-        pass
+    def getUserMentions(self, userID):
+        raise NotImplementedError
+    
+    # ########### #
+    # Private API #
+    # ########### #
+    
+    def _processItem(self, item):
+        return self._addEntity(item)
+    
+    def _processItems(self, items):
+        return self._addEntities(items)
+    
+    @abstractmethod
+    def _addEntity(self, entity):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def _addEntities(self, entities):
+        raise NotImplementedError
 

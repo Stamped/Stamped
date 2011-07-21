@@ -11,6 +11,8 @@ from gevent.pool import Pool
 from api.AEntitySource import AExternalDumpEntitySource
 from api.Entity import Entity
 
+__all__ = [ "FactualUSRestaurantsDump" ]
+
 class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     """
         Factual US Restaurants importer

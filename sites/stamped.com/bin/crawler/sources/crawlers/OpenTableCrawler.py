@@ -11,6 +11,8 @@ import Globals, utils
 from api.AEntitySource import AExternalSiteEntitySource
 from threading import Lock
 
+__all__ = [ "OpenTableCrawler" ]
+
 class OpenTableCrawler(AExternalSiteEntitySource):
     """
         OpenTable-specific crawling logic

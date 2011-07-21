@@ -23,7 +23,7 @@ class MongoStampedAPI(StampedAPI):
     """
     
     def __init__(self):
-        StampedAPI.__init__(self)
+        StampedAPI.__init__(self, "MongoStampedAPI")
         
         self._accountDB    = MongoAccount()
         self._entityDB     = MongoEntity()

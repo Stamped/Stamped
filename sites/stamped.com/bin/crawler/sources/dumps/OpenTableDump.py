@@ -13,6 +13,8 @@ from gevent.pool import Pool
 from api.AEntitySource import AExternalDumpEntitySource
 from api.Entity import Entity
 
+__all__ = [ "OpenTableDump" ]
+
 class OpenTableDump(AExternalDumpEntitySource):
     """
         OpenTable XLS dump importer

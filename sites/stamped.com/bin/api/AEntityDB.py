@@ -13,7 +13,6 @@ class AEntityDB(AEntitySink):
     
     def __init__(self, desc):
         AEntitySink.__init__(self, desc)
-        self._desc = desc
     
     def _processItem(self, item):
         return self.addEntity(item)
@@ -28,11 +27,11 @@ class AEntityDB(AEntitySink):
     @abstractmethod
     def getEntity(self, entityID):
         raise NotImplementedError
-        
+    
     @abstractmethod
     def updateEntity(self, entity):
         raise NotImplementedError
-        
+    
     @abstractmethod
     def removeEntity(self, entity):
         raise NotImplementedError
@@ -40,7 +39,7 @@ class AEntityDB(AEntitySink):
     @abstractmethod
     def addEntities(self, entities):
         raise NotImplementedError
-        
+    
     @abstractmethod
     def matchEntities(self, query, limit=20):
         raise NotImplementedError

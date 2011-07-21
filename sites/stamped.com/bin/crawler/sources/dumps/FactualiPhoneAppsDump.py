@@ -12,6 +12,8 @@ from gevent.pool import Pool
 from api.AEntitySource import AExternalDumpEntitySource
 from api.Entity import Entity
 
+__all__ = [ "FactualiPhoneAppsDump" ]
+
 class FactualiPhoneAppsDump(AExternalDumpEntitySource):
     """
         Factual iPhoneApps data importer

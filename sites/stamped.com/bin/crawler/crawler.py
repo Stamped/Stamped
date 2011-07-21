@@ -17,14 +17,11 @@ from optparse import OptionParser
 from threading import *
 
 # import specific data sources
-from sources.crawlers.OpenTableCrawler import OpenTableCrawler
-from sources.dumps.OpenTableDump import OpenTableDump
-from sources.dumps.FactualiPhoneAppsDump import FactualiPhoneAppsDump
-from sources.dumps.FactualUSPlacesDump import FactualUSPlacesDump
-from sources.dumps.FactualUSRestaurantsDump import FactualUSRestaurantsDump
+import sources
 
 # import all databases
 import api.db
+from api.MongoStampedAPI import MongoStampedAPI
 
 #-----------------------------------------------------------
 
@@ -102,14 +99,6 @@ def parseCommandLine():
         action="store_true", dest="googlePlaces", 
         help="cross-reference place entities with the google places api")
     
-    parser.add_option("-d", "--db", 
-        type = 'choice', 
-        action = 'store', 
-        dest = 'sink', 
-        choices = ['mongodb', ], 
-        default = 'mongodb', 
-        help="sets the destination database to persist entities to")
-    
     (options, args) = parser.parse_args()
     Globals.options = options
     
@@ -130,15 +119,7 @@ def parseCommandLine():
             else:
                 options.sources.append(source)
     
-    if options.sink:
-        sink = EntitySinks.instantiateSink(options.sink)
-        
-        if sink is None:
-            print "Error: unrecognized db '%s'" % options.sink
-            parser.print_help()
-            return None
-        else:
-            options.sink = sink
+    options.sink = MongoStampedAPI()
     
     return options
 
