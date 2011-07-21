@@ -504,6 +504,11 @@ def entitiesDoc():
 def commentsDoc():
     f = open('api/docs/Comments.html')
     return f.read()
+    
+@app.route(REST_API_PREFIX + 'favorites')
+def favoritesDoc():
+    f = open('api/docs/Favorites.html')
+    return f.read()
 
 # ######## #
 # Mainline #

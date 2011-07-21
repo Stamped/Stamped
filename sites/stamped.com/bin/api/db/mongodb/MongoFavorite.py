@@ -74,6 +74,10 @@ class MongoFavorite(AFavoriteDB, Mongo):
                 {'$set': {'complete': complete}},
                 safe=True)
             )
+            
+    def getFavoriteIdForEntity(self, userId, entityId):
+        return self._collection.find_one(
+            {'user_id': userId, 'entity.entity_id': entityId})
     
     def getFavoriteIDs(self, userId):
         return MongoUserFavorites().getUserFavoriteIds(userId)

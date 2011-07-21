@@ -37,7 +37,7 @@ def main():
 #     
 #     entityTest(baseurl)
 # 
-#     stampTest(baseurl)
+    stampTest(baseurl)
 #     
 #     friendshipTest(baseurl)
 # 
@@ -411,17 +411,24 @@ def stampTest(baseurl):
     print    
     print '      STAMP'
     
-    
     path = "account/create.json"
     data = {
-        "first_name": "Kevin",
-        "last_name": "Palms", 
-        "email": "kevin@stamped.com", 
+        "first_name": "User",
+        "last_name": "A", 
+        "email": "usera@stamped.com", 
         "password": "******",
-        "screen_name": "kpalms"
+        "screen_name": "UserA"
     }
-    userID = testPOST(baseurl, path, data)['user_id']
-    if len(userID) == 24:
+    userA = testPOST(baseurl, path, data)['user_id']
+    data = {
+        "first_name": "User",
+        "last_name": "B", 
+        "email": "userb@stamped.com", 
+        "password": "******",
+        "screen_name": "UserB"
+    }
+    userB = testPOST(baseurl, path, data)['user_id']
+    if len(userA) == 24 and len(userB) == 24:
         print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path
@@ -431,7 +438,7 @@ def stampTest(baseurl):
     
     path = "entities/create.json"
     data = {
-        "authenticated_user_id": userID,
+        "authenticated_user_id": userA,
         "title": "Little Owl",
         "desc": "American food in the West Village", 
         "category": "Restaurant",
@@ -448,7 +455,7 @@ def stampTest(baseurl):
     
     path = "stamps/create.json"
     data = {
-        "authenticated_user_id": userID,
+        "authenticated_user_id": userA,
         "entity_id": entityID,
         "blurb": "Favorite restaurant in the Village.", 
         "image": "image.png",
@@ -461,11 +468,28 @@ def stampTest(baseurl):
         print 'result: %s' % path
         print stampID
         raise Exception
+        
+    
+    path = "stamps/create.json"
+    data = {
+        "authenticated_user_id": userB,
+        "entity_id": entityID,
+        "blurb": "Favorite restaurant in the Village.", 
+        "image": "image.png",
+        "credit": "UserA"
+    }
+    restampID = testPOST(baseurl, path, data)['stamp_id']
+    if len(restampID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print stampID
+        raise Exception
                 
     
     path = "stamps/update.json"
     data = {
-        "authenticated_user_id": userID,
+        "authenticated_user_id": userA,
         "stamp_id": stampID,
         "image": "image2.png"
     }
@@ -480,7 +504,7 @@ def stampTest(baseurl):
     
     path = "stamps/show.json"
     data = {
-        "authenticated_user_id": userID,
+        "authenticated_user_id": userA,
         "stamp_id": stampID
     }
     result = testGET(baseurl, path, data)
@@ -494,7 +518,21 @@ def stampTest(baseurl):
     
     path = "stamps/remove.json"
     data = {
-        "authenticated_user_id": userID,
+        "authenticated_user_id": userA,
+        "stamp_id": restampID
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "stamps/remove.json"
+    data = {
+        "authenticated_user_id": userA,
         "stamp_id": stampID
     }
     result = testPOST(baseurl, path, data)
@@ -508,7 +546,7 @@ def stampTest(baseurl):
         
     path = "entities/remove.json"
     data = {
-        "authenticated_user_id": userID,
+        "authenticated_user_id": userA,
         "entity_id": entityID
     }
     result = testPOST(baseurl, path, data)
@@ -521,9 +559,11 @@ def stampTest(baseurl):
         
         
     path = "account/remove.json"
-    data = { "authenticated_user_id": userID }
-    result = testPOST(baseurl, path, data)
-    if result:
+    data = {"authenticated_user_id": userA}
+    resultA = testPOST(baseurl, path, data)
+    data = {"authenticated_user_id": userB}
+    resultB = testPOST(baseurl, path, data)
+    if resultA and resultB:
         print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path
