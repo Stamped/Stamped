@@ -110,8 +110,6 @@ class AWSDeploymentStack(ADeploymentStack):
             'keys/test-keypair'
         ]
         
-        params_str = self._encode_params(config)
-        
         instances = []
         for instance in webServerInstances:
             instances.append(instance)
@@ -122,7 +120,7 @@ class AWSDeploymentStack(ADeploymentStack):
             with settings(host_string=instance['public_dns_name']):
                 with cd("/stamped"):
                     with prefix('source bin/activate'):
-                        sudo('python /stamped/bootstrap/bin/update.py "%s"' % params_str)
+                        sudo('python /stamped/bootstrap/bin/update.py')
     
     def delete(self):
         self.local('cfn-delete-stack %s --force' % (self.name, ))

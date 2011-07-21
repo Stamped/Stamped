@@ -29,7 +29,7 @@ def main():
     print '      BEGIN'
     
     baseurl = "http://0.0.0.0:5000/api/v1"
-    baseurl = "http://192.168.0.10:5000/api/v1"
+    #baseurl = "http://192.168.0.10:5000/api/v1"
     
     betaAccountData(baseurl)
 
