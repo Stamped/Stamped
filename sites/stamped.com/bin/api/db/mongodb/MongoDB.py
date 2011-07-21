@@ -23,7 +23,10 @@ class Mongo():
     
     def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
         try:
-            config_path = getenv('STAMPED_CONF_PATH')
+            config_path = os.path.abspath(__file__)
+            for i in xrange(6):
+                config_path = os.path.dirname(config_path)
+            config_path = os.path.join(config_path, "conf/stamped.conf")
             self._config = getPythonConfigFile(config_path, True)
         except:
             ### DELETE (eventually)
