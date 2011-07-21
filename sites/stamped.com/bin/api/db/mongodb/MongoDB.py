@@ -23,27 +23,21 @@ class Mongo():
     DESC    = 'MongoDB:%s' % (DB)
     
     def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
+        self._config = AttributeDict()
+        
         try:
             config_path = os.path.abspath(__file__)
-            for i in xrange(7):
+            for i in xrange(8):
                 config_path = os.path.dirname(config_path)
             config_path = os.path.join(config_path, "conf/stamped.conf")
             self._config = getPythonConfigFile(config_path, True)
-            print self.config_path
             print self._config
         except:
-            ### DELETE (eventually)
-            self._config = AttributeDict({
-                'mongodb' : {
-                    'host' : 'ec2-50-19-194-148.compute-1.amazonaws.com', 
-                    'port' : 27017
-                }
-            })
-            print self._config
-            raise Fail("no config file")
+            raise Fail("Error: invalid configuration file")
+            raise
         
         if not 'mongodb' in self._config:
-            raise Fail("invalid configuration file")
+            raise Fail("Error: invalid configuration file")
         
         self._mapping = mapping
         self.user = self._getenv_user()
