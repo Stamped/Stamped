@@ -52,13 +52,8 @@ class StampedAPI(AStampedAPI):
         self._validated = False
     
     def _validate(self):
-        assert hasattr(self, '_accountDB')
+        assert hasattr(self, '_accountDB'     and isinstance(self._accountDB, AAccountDB)
         
-        print self._accountDB
-        print isinstance(self._accountDB, AAccountDB)
-        from db.mongodb.MongoDB import Mongo
-        print isinstance(self._accountDB, Mongo)
-        assert isinstance(self._accountDB, AAccountDB)
         assert hasattr(self, '_entityDB')     and isinstance(self._entityDB, AEntityDB)
         assert hasattr(self, '_userDB')       and isinstance(self._userDB, AUserDB)
         assert hasattr(self, '_stampDB')      and isinstance(self._stampDB, AStampDB)

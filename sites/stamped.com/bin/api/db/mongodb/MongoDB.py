@@ -30,6 +30,7 @@ class Mongo():
             for i in xrange(8):
                 config_path = os.path.dirname(config_path)
             config_path = os.path.join(config_path, "conf/stamped.conf")
+            print config_path
             self._config = getPythonConfigFile(config_path, jsonPickled=True)
             print self._config
         except:
