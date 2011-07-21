@@ -28,6 +28,7 @@ class Mongo():
                 config_path = os.path.dirname(config_path)
             config_path = os.path.join(config_path, "conf/stamped.conf")
             self._config = getPythonConfigFile(config_path, True)
+            print self.config_path
             print self._config
         except:
             ### DELETE (eventually)
