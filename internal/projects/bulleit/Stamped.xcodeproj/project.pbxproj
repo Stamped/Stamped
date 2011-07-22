@@ -715,6 +715,9 @@
 /* Begin PBXProject section */
 		7EC0176813C3754300ABE6E2 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = 7EC0176B13C3754300ABE6E2 /* Build configuration list for PBXProject "Stamped" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -1055,7 +1058,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;

@@ -349,8 +349,9 @@ static const CGFloat kTitleMaxWidth = 210.0;
     customView_.userName = stamp.user.displayName;
     customView_.comment = stamp.blurb;
     customView_.numComments = [stamp.numComments unsignedIntegerValue];
-    self.accessoryType = ([stamp.numComments unsignedIntValue] > 0) ?
-        UITableViewCellAccessoryNone : UITableViewCellAccessoryDisclosureIndicator;
+    //self.accessoryType = ([stamp.numComments unsignedIntValue] > 0) ?
+    //    UITableViewCellAccessoryNone : UITableViewCellAccessoryDisclosureIndicator;
+    //[self.accessoryView setNeedsDisplay];
   }
 }
 
