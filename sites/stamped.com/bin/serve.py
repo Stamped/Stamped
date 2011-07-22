@@ -544,8 +544,8 @@ def friendshipsDoc():
 
 @app.route(REST_API_PREFIX + 'collections')
 def collectionsDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Collections.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Collections.html'))
         ret = f.read()
         f.close()
         return ret
