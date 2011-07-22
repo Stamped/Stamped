@@ -51,7 +51,8 @@ class AEntitySink(Greenlet, IASyncConsumer):
                 stop = True
                 break
             
-            items.append(item)
+            if item is not None:
+                items.append(item)
             
             # retrieve as many items in the input queue at once to process  
             # multiple items at a time if possible
@@ -62,7 +63,8 @@ class AEntitySink(Greenlet, IASyncConsumer):
                     stop = True
                     break
                 
-                items.append(item)
+                if item is not None:
+                    items.append(item)
             
             if len(items) > 1:
                 self._processItems(items)
