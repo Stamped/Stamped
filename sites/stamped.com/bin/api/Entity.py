@@ -76,7 +76,7 @@ class Entity(ASchemaObject):
                 'publisher': basestring, 
                 'releaseDate': basestring, 
                 'price': basestring, 
-                'category': basestring, 
+                'appCategory': basestring, 
                 'language': basestring, 
                 'rating': basestring, 
                 'popularity': basestring, 
@@ -128,10 +128,13 @@ class Entity(ASchemaObject):
             valid &= isinstance(self.entity_id, basestring) 
         
         valid &= 'title' in self and isinstance(self.title, basestring)
-        valid &= 'subtitle' in self and isinstance(self.subtitle, basestring)
         valid &= 'category' in self and isinstance(self.category, basestring)
         
-                
+        if not 'subtitle' in self:
+            self.subtitle = self.category
+        
+        valid &= 'subtitle' in self and isinstance(self.subtitle, basestring)
+        
 #         if 'website' in self:
 #             valid &= isinstance(self.website, basestring)
 #         if 'bio' in self:

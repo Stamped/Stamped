@@ -37,7 +37,7 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         'Publisher' : 'publisher', 
         'Release_Date' : 'releaseDate', 
         'Price' : 'price', 
-        'Category' : 'category', 
+        'Category' : 'appCategory', 
         'Language' : 'language', 
         'Rating' : 'rating', 
         'Popularity' : 'popularity', 
@@ -93,6 +93,8 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         #utils.log("[%s] parsing entity %d" % (self.NAME, count))
         
         entity = Entity()
+        entity.category = "app"
+        
         entity.factual = {
             'table' : 'iPhone_Apps.csv'
         }

@@ -113,6 +113,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
         #utils.log("[%s] parsing entity %d" % (self.NAME, count))
         
         entity = Entity()
+        entity.category = "restaurant"
         entity.factual = {
             'table' : 'US_Restaurants_V2.csv'
         }
