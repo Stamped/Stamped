@@ -24,7 +24,6 @@ static NSString* kDataBaseURL = @"http://192.168.0.10:5000/api/v1";
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  // RKLogConfigureByName("RestKit/ObjectMapping", RKLogLevelDebug);
   [RKRequestQueue sharedQueue].showsNetworkActivityIndicatorWhenBusy = YES;
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
 
@@ -67,7 +66,7 @@ static NSString* kDataBaseURL = @"http://192.168.0.10:5000/api/v1";
                                           @"restamp_id", @"restampID",
                                           @"stamp_id", @"stampID",
                                           @"last_modified", @"lastModified", nil];
-  [commentMapping mapRelationship:@"user" withObjectMapping:stampMapping];
+  [commentMapping mapRelationship:@"user" withObjectMapping:userMapping];
   // Example date string: 2011-07-19 20:49:42.037000
   NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
 	[stampMapping.dateFormatStrings addObject:dateFormat];
@@ -76,7 +75,7 @@ static NSString* kDataBaseURL = @"http://192.168.0.10:5000/api/v1";
   [objectManager.mappingProvider setObjectMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setObjectMapping:stampMapping forKeyPath:@"Stamp"];
   [objectManager.mappingProvider setObjectMapping:entityMapping forKeyPath:@"Entity"];
-
+  [objectManager.mappingProvider setObjectMapping:commentMapping forKeyPath:@"Comment"];
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];

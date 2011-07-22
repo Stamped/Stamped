@@ -49,7 +49,7 @@
   layer.contentsGravity = kCAGravityResizeAspect;
   layer.frame = self.frame;
   layer.borderColor = [UIColor whiteColor].CGColor;
-  layer.borderWidth = 2.0;
+  layer.borderWidth = CGRectGetWidth(self.frame) > 35.0 ? 2.0 : 1.0;
   layer.shadowOpacity = 0.5;
   layer.shadowOffset = CGSizeMake(0, 0.5);
   layer.shadowRadius = 1.0;

@@ -10,8 +10,10 @@
 
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/CoreData/CoreData.h>
 
 #import "EntityDetailViewController.h"
+#import "Comment.h"
 #import "FilmDetailViewController.h"
 #import "PlaceDetailViewController.h"
 #import "BookDetailViewController.h"
@@ -21,9 +23,11 @@
 #import "User.h"
 #import "Util.h"
 #import "StampedAppDelegate.h"
+#import "StampDetailCommentView.h"
 #import "UserImageView.h"
 
 static const CGFloat kMainCommentFrameMinHeight = 75.0;
+static const CGFloat kKeyboardHeight = 216.0;
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
@@ -32,6 +36,10 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
 - (void)setUpCommentsView;
 - (void)handleTap:(UITapGestureRecognizer*)sender;
 - (void)handleEntityTap:(UITapGestureRecognizer*)sender;
+- (void)renderComments;
+- (void)addComment:(Comment*)comment;
+- (void)loadCommentsFromServer;
+- (void)loadCommentsFromDataStore;
 @end
 
 @implementation StampDetailViewController
@@ -48,6 +56,8 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
 
+@synthesize commentsArray = commentsArray_;
+
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:@"StampDetailViewController" bundle:nil];
   if (self) {
@@ -58,7 +68,8 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
 
 - (void)dealloc {
   [stamp_ release];
-
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  self.commentsArray = nil;
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
@@ -78,6 +89,10 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
 }
 
 #pragma mark - View lifecycle
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
@@ -104,10 +119,15 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
   
   [self setUpMainContentView];
   [self setUpCommentsView];
+  
+  //[self loadCommentsFromDataStore];
+  [self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  self.commentsArray = nil;
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
@@ -232,6 +252,7 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
   [commentLabel release];
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
   CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
   CGFloat r1, g1, b1, r2, g2, b2;
   [Util splitHexString:stamp_.user.primaryColor toRed:&r1 green:&g1 blue:&b1];
@@ -299,6 +320,112 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+#pragma mark - Comments.
+
+- (void)loadCommentsFromServer {
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* commentMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Comment"];
+  [objectManager loadObjectsAtResourcePath:[@"/comments/show.json?stamp_id=" stringByAppendingString:stamp_.stampID]
+                             objectMapping:commentMapping
+                                  delegate:self];
+}
+
+- (void)loadCommentsFromDataStore {
+  /*self.commentsArray = nil;
+  NSFetchRequest* request = [Comment fetchRequest];
+	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"lastModified" ascending:YES];
+	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+	self.commentsArray = [Comment objectsWithFetchRequest:request];
+*/
+
+}
+
+- (void)renderComments {
+  for (Comment* c in self.commentsArray) {
+    [self addComment:c];
+  }
+}
+
+- (void)addComment:(Comment*)comment {
+  StampDetailCommentView* commentView = [[StampDetailCommentView alloc] initWithComment:comment];
+
+  CGRect frame = commentView.frame;
+  CGFloat yPos = 0.0;
+  frame.size.width = CGRectGetWidth(activityView_.frame);
+  for (UIView* view in commentsView_.subviews) {
+    if ([view isKindOfClass:[StampDetailCommentView class]])
+      yPos += CGRectGetHeight(view.frame);
+  }
+  frame.origin.y = yPos;
+  commentView.frame = frame;
+  [commentsView_ addSubview:commentView];
+  [commentView release];
+
+  frame = commentsView_.frame;
+  frame.size.height += CGRectGetHeight(commentView.frame);
+  frame.origin.y -= CGRectGetHeight(commentView.frame);
+  commentsView_.frame = frame;
+  
+  frame = activityView_.frame;
+  frame.size.height += CGRectGetHeight(commentView.frame);
+  activityView_.frame = frame;
+  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + kKeyboardHeight);
+}
+
+#pragma mark - UITextFieldDelegate Methods.
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  [scrollView_ setContentOffset:CGPointMake(0, CGRectGetMaxY(activityView_.frame) - (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight))
+                       animated:YES];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  if (textField != addCommentField_)
+    return YES;
+
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* commentMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Comment"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/comments/create.json" delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = commentMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+      addCommentField_.text, @"blurb",
+      @"4e2792f732a7ba6a560004b1", @"authenticated_user_id",
+      stamp_.stampID, @"stamp_id", nil];
+  [objectLoader send];
+  addCommentField_.enabled = NO;
+  return NO;
+}
+
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+	if ([objectLoader.resourcePath isEqualToString:@"/comments/create.json"]) {
+    [self addComment:[objects objectAtIndex:0]];
+    addCommentField_.enabled = YES;
+    addCommentField_.text = nil;
+    return;
+  }
+
+  self.commentsArray = nil;
+  self.commentsArray = objects;
+  [self renderComments];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+	// TODO: Not working right now.
+  
+  addCommentField_.enabled = YES;
+  [addCommentField_ becomeFirstResponder];
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                   message:[error localizedDescription] 
+                                                  delegate:nil 
+                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
+	[alert show];
+	NSLog(@"Hit error: %@", error);
 }
 
 @end

@@ -6,14 +6,16 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
 @class UserImageView;
 @class Stamp;
 
-@interface StampDetailViewController : UIViewController {
+@interface StampDetailViewController : UIViewController<UITextFieldDelegate, RKObjectLoaderDelegate> {
  @private
   Stamp* stamp_;
+  NSArray* commentsArray_;
 }
 
 - (id)initWithStamp:(Stamp*)stamp;
@@ -31,7 +33,7 @@
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
 
-
+@property (nonatomic, copy) NSArray* commentsArray;
 
 
 @end
