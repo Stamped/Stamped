@@ -1147,7 +1147,7 @@ class StampedAPI(AStampedAPI):
     # Private API #
     # ########### #
     
-    def _addEntity(self, entities):
+    def _addEntity(self, entity):
         self._entityDB.addEntity(entity)
     
     def _addEntities(self, entities):
