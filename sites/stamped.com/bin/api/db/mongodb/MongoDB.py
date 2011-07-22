@@ -5,9 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals, utils
 import bson, copy, os, pymongo
-
-import Globals
 from errors import Fail
 from api.AEntityDB import AEntityDB
 from utils import AttributeDict, getenv, getPythonConfigFile
@@ -38,7 +37,13 @@ class Mongo():
             raise
         
         if not 'mongodb' in self._config:
-            raise Fail("Error: invalid configuration file")
+            utils.log("Error: invalid configuration file; defaulting to localhost:27017")
+            self._config = {
+                "mongodb" : {
+                    "host" : "localhost", 
+                    "port" : 27017, 
+                }
+            }
         
         self._mapping = mapping
         self.user = self._getenv_user()
