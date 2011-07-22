@@ -101,8 +101,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         with settings(host_string=webServerInstances[0]['public_dns_name']):
             with cd("/stamped"):
-                with prefix('source bin/activate'):
-                    sudo('python /stamped/bootstrap/bin/init.py "%s"' % params_str)
+                sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % params_str, pty=False)
     
     def update(self):
         webServerInstances, dbInstances = self.getInstances()
@@ -120,8 +119,7 @@ class AWSDeploymentStack(ADeploymentStack):
         for instance in instances:
             with settings(host_string=instance['public_dns_name']):
                 with cd("/stamped"):
-                    with prefix('source bin/activate'):
-                        sudo('python /stamped/bootstrap/bin/update.py')
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/update.py', pty=False)
     
     def delete(self):
         self.local('cfn-delete-stack %s --force' % (self.name, ))
