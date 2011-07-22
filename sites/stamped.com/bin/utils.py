@@ -6,7 +6,6 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import json, os, sys, pickle, threading, time, traceback, urllib2
-from errors import *
 from subprocess import Popen, PIPE
 from functools import wraps
 from BeautifulSoup import BeautifulSoup
@@ -59,11 +58,9 @@ def _formatLog(s):
     except:
         return "[%s] __error__ printout" % (threading.currentThread().getName(), )
 
-def write(s, n):
-    if n is None:
-        n = "t"
-    f = open(n, "w")
-    f.write(s)
+def write(filename, content):
+    f = open(filename, "w")
+    f.write(content)
     f.close()
 
 def printException():
@@ -104,7 +101,7 @@ def getenv(var, default=None):
         if default:
             return default
         else:
-            raise Fail("error: environment variable '%s' not set!" % var)
+            raise Exception("error: environment variable '%s' not set!" % var)
     
     return value
 

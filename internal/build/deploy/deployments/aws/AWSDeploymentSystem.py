@@ -36,7 +36,7 @@ class AWSDeploymentSystem(DeploymentSystem):
         
         # find all stacks which haven't been deleted and add them to the initial 
         # set of stacks that this AWSDeploymentSystem knows about.
-        (output, status) = shell(r'cfn-list-stacks | grep -v "DELETE_COMPLETE" | sed "s/STACK *[a-zA-Z0-9:.\/-]*[ \s]*\([A-Za-z0-9]*\) .*/\1/g"', self.env)
+        (output, status) = shell(r'cfn-list-stacks | grep -v "DELETE_COMPLETE" | sed "s/STACK *[a-zA-Z0-9:.\/-]*[ \t]*\([A-Za-z0-9]*\) .*/\1/g"', self.env)
         
         if status == 0:
             stacks = output.split("\n")

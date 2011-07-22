@@ -33,11 +33,12 @@ class AWSDeploymentStack(ADeploymentStack):
             instance['aws_access_key_secret'] = AWS_SECRET_KEY
     
     def create(self):
+        print "1) " + self.name
         params_str = pickle.dumps(self.instances)
         build_template_path = os.path.join(self.env.CLOUDFORMATION_ROOT, "build.py")
         
         self.local('python %s "%s" > %s' % (build_template_path, params_str, self.env.CLOUDFORMATION_TEMPLATE_FILE), show_cmd=False)
-        self.local('cfn-create-stack %s --template-file %s' % (self.name, self.env.CLOUDFORMATION_TEMPLATE_FILE))
+        self.local('cfn-create-stack "%s" --template-file %s' % (self.name, self.env.CLOUDFORMATION_TEMPLATE_FILE))
     
     def getInstances(self):
         webServerInstances = []

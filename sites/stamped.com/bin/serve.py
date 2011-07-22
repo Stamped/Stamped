@@ -55,9 +55,15 @@ def handlePOSTRequest(request, stampedAPIFunc, schema):
     try:
         parsedInput = parseRequestForm(schema, request.form)
     except (InvalidArgument, Fail) as e:
-        return str(e), 400
-        
-    return transformOutput(request, stampedAPIFunc(parsedInput))
+        msg = str(e)
+        utils.log(msg)
+        return msg, 400
+    
+    try:
+        return transformOutput(request, stampedAPIFunc(parsedInput))
+    except Exception as e:
+        msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        return msg, 500
 
 def handleGETRequest(request, stampedAPIFunc, args):
     funcArgs = [ ]
@@ -70,12 +76,22 @@ def handleGETRequest(request, stampedAPIFunc, args):
             funcArg = request.args[arg]
             funcArgs.append(funcArg)
             #vars()['arg%d' % index]
+        except KeyError as e:
+            msg = "Error: Required argument '%s' to API function '%s' not found" % (arg, utils.getFuncName(1))
+            utils.log(msg)
+            return msg, 400
         except:
-            print 'Mismatched Argument'
-    #         except KeyError as e:
-    #             return "Required argument '%s' to API function '%s' not found" % (arg, utils.getFuncName(1)), 400
-
-    return transformOutput(request, stampedAPIFunc(*funcArgs))
+            msg = "Error parsing argument '%s' to API function '%s'" % (arg, utils.getFuncName(1))
+            utils.log(msg)
+            return msg, 400
+    
+    try:
+        return transformOutput(request, stampedAPIFunc(*funcArgs))
+    except Exception as e:
+        msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        utils.log(msg)
+        utils.printException()
+        return msg, 500
 
 # ######## #
 # Accounts #
@@ -513,6 +529,6 @@ def favoritesDoc():
 # ######## #
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True) 
-    #app.run(host='0.0.0.0') 
+    app.run(host='0.0.0.0', debug=True)
+    #app.run(host='0.0.0.0')
 

@@ -32,6 +32,9 @@ class DeploymentSystem(ADeploymentSystem):
                 
                 stacks.append(stackName)
         
+        if 0 == len(stacks):
+            utils.log("Warning: no stacks exist matching the name '%s'" % stackNameRegex)
+        
         return stacks
     
     def create_stack(self, *args):
