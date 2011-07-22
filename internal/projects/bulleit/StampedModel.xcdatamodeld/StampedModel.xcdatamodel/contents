@@ -48,7 +48,7 @@
     </entity>
     <elements>
         <element name="Comment" positionX="162" positionY="45" width="128" height="135"/>
-        <element name="Coordinate" positionX="315" positionY="189" width="128" height="90"/>
+        <element name="Coordinate" positionX="358" positionY="171" width="128" height="90"/>
         <element name="Entity" positionX="556" positionY="216" width="128" height="135"/>
         <element name="Stamp" positionX="216" positionY="324" width="128" height="150"/>
         <element name="User" positionX="-45" positionY="63" width="128" height="240"/>

@@ -14,6 +14,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "Entity.h"
+#import "STBadgeView.h"
 #import "Stamp.h"
 #import "User.h"
 #import "UserImageView.h"
@@ -38,9 +39,10 @@ static const CGFloat kTitleMaxWidth = 210.0;
   UIImageView* typeImageView_;
   UILabel* userNameLabel_;
   UILabel* commentLabel_;
-  CATextLayer* titleLayer_;
+  STBadgeView* badgeView_;
 
   // NOT managed. Must manage ownership.
+  CATextLayer* titleLayer_;
   UIColor* defaultTitleColor_;
   UIColor* defaultSubstringColor_;
   UIColor* whiteColor_;
@@ -54,6 +56,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
 // This is magic with UITableViewCell. No need to set this explicitly.
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 @property (nonatomic, assign) BOOL selected;
+@property (nonatomic, assign) NSUInteger numComments;
 @property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, copy) NSString* title;
 @property (nonatomic, retain) UIImage* userImage;
@@ -74,6 +77,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
 
 @synthesize highlighted = highlighted_;
 @synthesize selected = selected_;
+@synthesize numComments = numComments_;
 @synthesize stampImage = stampImage_;
 @synthesize title = title_;
 @synthesize userImage = userImage_;
@@ -118,6 +122,11 @@ static const CGFloat kTitleMaxWidth = 210.0;
     [self addSubview:commentLabel_];
     [commentLabel_ release];
 
+    badgeView_ = [[STBadgeView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.bounds) - 10 - 17, 30, 17, 17)];
+    [self addSubview:badgeView_];
+    badgeView_.hidden = YES;
+    [badgeView_ release];
+    
     titleLayer_ = [[CATextLayer alloc] init];
     titleLayer_.truncationMode = kCATruncationEnd;
     titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
@@ -134,8 +143,6 @@ static const CGFloat kTitleMaxWidth = 210.0;
         nil];
     titleLayer_.actions = actions;
     [actions release];
-    [self.layer addSublayer:titleLayer_];
-    [titleLayer_ release];
     
     titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
     CFIndex numSettings = 1;
@@ -161,6 +168,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
   [defaultSubstringColor_ release];
   [whiteColor_ release];
   [titleAttributes_ release];
+  [titleLayer_ release];
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
   [super dealloc];
@@ -184,8 +192,9 @@ static const CGFloat kTitleMaxWidth = 210.0;
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
-  titleLayer_.foregroundColor = titleColor.CGColor;  
+  titleLayer_.foregroundColor = titleColor.CGColor;
   [CATransaction commit];
+  [self setNeedsDisplayInRect:titleLayer_.frame];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
@@ -193,10 +202,18 @@ static const CGFloat kTitleMaxWidth = 210.0;
   [self invertColors:selected];
 }
 
-- (void)drawRect:(CGRect)rect {
-  [self invertColors:(highlighted_ || selected_)];
+- (void)setHighlighted:(BOOL)highlighted {
+  highlighted_ = highlighted;
+  [self invertColors:highlighted];
+}
 
+- (void)drawRect:(CGRect)rect {
   [super drawRect:rect];
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+  CGContextSaveGState(ctx);
+  CGContextTranslateCTM(ctx, titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
+  [titleLayer_ drawInContext:ctx];
+  CGContextRestoreGState(ctx);
   [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
 }
 
@@ -264,6 +281,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
                                 kStampSize);
   [self setNeedsDisplayInRect:oldFrame];
   [self setNeedsDisplayInRect:stampImageFrame_];
+  [self setNeedsDisplayInRect:titleLayer_.frame];
 }
 
 - (void)setUserName:(NSString*)userName {
@@ -282,6 +300,12 @@ static const CGFloat kTitleMaxWidth = 210.0;
                                lineBreakMode:UILineBreakModeTailTruncation];
   commentLabel_.text = comment_;
   commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3, 57, stringSize.width, stringSize.height);
+}
+
+- (void)setNumComments:(NSUInteger)numComments {
+  numComments_ = numComments;
+  badgeView_.hidden = (numComments == 0);
+  badgeView_.text = [NSString stringWithFormat:@"%u", numComments];
 }
 
 @end
@@ -324,6 +348,9 @@ static const CGFloat kTitleMaxWidth = 210.0;
     customView_.typeImage = stamp.categoryImage;
     customView_.userName = stamp.user.displayName;
     customView_.comment = stamp.blurb;
+    customView_.numComments = [stamp.numComments unsignedIntegerValue];
+    self.accessoryType = ([stamp.numComments unsignedIntValue] > 0) ?
+        UITableViewCellAccessoryNone : UITableViewCellAccessoryDisclosureIndicator;
   }
 }
 

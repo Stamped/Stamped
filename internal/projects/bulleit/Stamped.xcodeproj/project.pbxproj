@@ -38,6 +38,7 @@
 		7E2CED1313C7A2F30068D576 /* cat_icon_music@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CED0F13C7A2F30068D576 /* cat_icon_music@2x.png */; };
 		7E2CED1413C7A2F30068D576 /* cat_icon_place@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2CED1013C7A2F30068D576 /* cat_icon_place@2x.png */; };
 		7E3B6D7A13D7509600FBE958 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3B6D7913D7509600FBE958 /* Util.m */; };
+		7E512FC613D9F3B400547A20 /* STBadgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E512FC513D9F3B400547A20 /* STBadgeView.m */; };
 		7E514A8A13C9735800EEC598 /* book_detail_fillter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A8913C9735800EEC598 /* book_detail_fillter@2x.png */; };
 		7E514A8D13C977E800EEC598 /* place_detail_filler@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A8C13C977E800EEC598 /* place_detail_filler@2x.png */; };
 		7E514A9913C97A9700EEC598 /* MusicDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E514A9713C97A9700EEC598 /* MusicDetailViewController.m */; };
@@ -46,6 +47,7 @@
 		7E514AA713C9827000EEC598 /* FilmDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E514AA513C9827000EEC598 /* FilmDetailViewController.m */; };
 		7E514AA813C9827000EEC598 /* FilmDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */; };
 		7E514AAA13C9851800EEC598 /* film_detail_filler@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */; };
+		7E5DF6CC13DA0D2A00B63039 /* badge_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5DF6CB13DA0D2A00B63039 /* badge_background@2x.png */; };
 		7E5FEED913D0C497008BCA48 /* nav_bar_ripple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */; };
 		7E5FEEDA13D0C497008BCA48 /* nav_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED813D0C497008BCA48 /* nav_bar@2x.png */; };
 		7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */; };
@@ -239,6 +241,8 @@
 		7E2CED1013C7A2F30068D576 /* cat_icon_place@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_place@2x.png"; sourceTree = "<group>"; };
 		7E3B6D7813D7509600FBE958 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		7E3B6D7913D7509600FBE958 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
+		7E512FC413D9F3B400547A20 /* STBadgeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STBadgeView.h; sourceTree = "<group>"; };
+		7E512FC513D9F3B400547A20 /* STBadgeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STBadgeView.m; sourceTree = "<group>"; };
 		7E514A8913C9735800EEC598 /* book_detail_fillter@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "book_detail_fillter@2x.png"; sourceTree = "<group>"; };
 		7E514A8C13C977E800EEC598 /* place_detail_filler@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "place_detail_filler@2x.png"; sourceTree = "<group>"; };
 		7E514A9613C97A9700EEC598 /* MusicDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicDetailViewController.h; sourceTree = "<group>"; };
@@ -249,6 +253,7 @@
 		7E514AA513C9827000EEC598 /* FilmDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FilmDetailViewController.m; sourceTree = "<group>"; };
 		7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FilmDetailViewController.xib; sourceTree = "<group>"; };
 		7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "film_detail_filler@2x.png"; sourceTree = "<group>"; };
+		7E5DF6CB13DA0D2A00B63039 /* badge_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "badge_background@2x.png"; sourceTree = "<group>"; };
 		7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_ripple@2x.png"; sourceTree = "<group>"; };
 		7E5FEED813D0C497008BCA48 /* nav_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar@2x.png"; sourceTree = "<group>"; };
 		7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailCommentView.h; sourceTree = "<group>"; };
@@ -561,6 +566,7 @@
 				7E7612B413C95BBD0023CCC4 /* Entity Details */,
 				7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */,
 				7E1D92E913D632DE0022412D /* stamp_shape_textured@2x.png */,
+				7E5DF6CB13DA0D2A00B63039 /* badge_background@2x.png */,
 				7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */,
 				7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */,
 				7EFE8F7813C3C96D00324F34 /* toolbar_must_do@2x.png */,
@@ -644,6 +650,8 @@
 				7E668C2613D8B25300E79E14 /* Stamp Detail */,
 				7E22679713D4D90F00657A66 /* AccountManager.h */,
 				7E22679813D4D90F00657A66 /* AccountManager.m */,
+				7E512FC413D9F3B400547A20 /* STBadgeView.h */,
+				7E512FC513D9F3B400547A20 /* STBadgeView.m */,
 				7EF5138B13D240B60028B612 /* STTabBar.h */,
 				7EF5138C13D240B60028B612 /* STTabBar.m */,
 				7E22679213D4964700657A66 /* LoginOrSignUpViewController.h */,
@@ -867,6 +875,7 @@
 				7E22679D13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png in Resources */,
 				7E22679E13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png in Resources */,
 				7E1D92EA13D632DE0022412D /* stamp_shape_textured@2x.png in Resources */,
+				7E5DF6CC13DA0D2A00B63039 /* badge_background@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -927,6 +936,7 @@
 				7EBCBE8413D77C08009FCECF /* Entity.m in Sources */,
 				7EBCBE8713D78896009FCECF /* Comment.m in Sources */,
 				7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */,
+				7E512FC613D9F3B400547A20 /* STBadgeView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
