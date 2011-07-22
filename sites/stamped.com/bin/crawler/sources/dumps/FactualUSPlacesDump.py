@@ -24,7 +24,7 @@ class FactualUSPlacesDump(AExternalDumpEntitySource):
     
     _map = {
         'Factual ID' : 'fid', 
-        'name' : 'name', 
+        'name' : 'title', 
         'tel' : 'phone', 
         'fax' : 'fax', 
         'website' : 'site', 
@@ -43,7 +43,7 @@ class FactualUSPlacesDump(AExternalDumpEntitySource):
         
         cat = set()
         for row in reader:
-            #utils.log('Parsing %s' % row['name'])
+            #utils.log('Parsing %s' % row['title'])
             utils.log(row)
             
             if row['category'] == '1':

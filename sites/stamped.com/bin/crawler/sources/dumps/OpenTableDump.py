@@ -60,7 +60,7 @@ class OpenTableDump(AExternalDumpEntitySource):
         row = sheet.row_values(index)
         
         entity = Entity()
-        entity.name = row[1]
+        entity.title = row[1]
         entity.address = row[3] + ', ' + \
                          row[4] + ', ' + \
                          row[5] + ' ' + \

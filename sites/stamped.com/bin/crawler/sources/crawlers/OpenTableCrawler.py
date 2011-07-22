@@ -95,7 +95,7 @@ class OpenTableCrawler(AExternalSiteEntitySource):
     
     def _parseEntity(self, row):
         return {
-            'name' : row.find("a").renderContents().strip(), 
+            'title' : row.find("a").renderContents().strip(), 
             'desc' : row.find("div").renderContents().strip(), 
             'rid'  : row.get("rid")
         }

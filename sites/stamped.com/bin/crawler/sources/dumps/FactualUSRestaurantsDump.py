@@ -30,7 +30,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     
     _map = {
         'Factual ID' : 'fid', 
-        'name' : 'name', 
+        'name' : 'title', 
         'tel' : 'phone', 
         'fax' : 'fax', 
         'website' : 'site', 

@@ -14,9 +14,9 @@ __BASE_URL = "http://www.opentable.com/"
 
 def parseEntity(entity):
     """Attempts to find and append OpenTable details to the given entity."""
-    #utils.log("[OpenTable] parsing '%s'" % entity.name)
+    #utils.log("[OpenTable] parsing '%s'" % entity.title)
     
-    def encodeName(name):
+    def encodeTitle(title):
         toReplace = {
             "'" : "", 
             "+" : "and", 
@@ -36,20 +36,20 @@ def parseEntity(entity):
             
             return text
         
-        name  = __replaceAll(name.strip().lower(), toReplace)
-        words = name.split()
+        title  = __replaceAll(title.strip().lower(), toReplace)
+        words = title.split()
         
         return string.joinfields(words, '-').strip()
     
-    name = entity.name
-    nickname = entity.openTable['reserveURL']
+    title = entity.title
+    nicktitle = entity.openTable['reserveURL']
     
-    encodedName = encodeName(name)
+    encodedTitle = encodeTitle(title)
     
     urls = [
-        __BASE_URL + encodedName, 
-        __BASE_URL + nickname, 
-        __BASE_URL + 'reserve/' + nickname
+        __BASE_URL + encodedTitle, 
+        __BASE_URL + nicktitle, 
+        __BASE_URL + 'reserve/' + nicktitle
     ]
     
     index = 0
@@ -82,13 +82,13 @@ def parseEntity(entity):
     
     if url is None:
         utils.log("[OpenTable] Error retrieving detailed page for '%s' => '%s' ('%s')" % \
-                (name, encodedName, nickname))
+                (title, encodedTitle, nicktitle))
         return None
     
     try:
         #elem = soup.find("h2", {"class" : "RestaurantProfileNameHeader2"})
         #if elem is not None:
-        #    entity.name = elem.renderContents().strip()
+        #    entity.title = elem.renderContents().strip()
         
         elem = soup.find("span", {"id" : re.compile("RestaurantProfile.*Description")})
         if elem is not None:
@@ -161,7 +161,7 @@ entities = dump.getAll()
 opentable = OpenTable()
 
 for e1 in entities:
-    e2 = opentable.parseEntity(e1['name'], e1['sources'][0]['reserveURL'])
+    e2 = opentable.parseEntity(e1['title'], e1['sources'][0]['reserveURL'])
     if e2 is None:
         print "ERROR: " + str(e1)
 """

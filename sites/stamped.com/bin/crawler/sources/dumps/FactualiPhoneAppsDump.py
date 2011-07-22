@@ -30,7 +30,7 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
     TYPES = set([ 'iPhoneApp' ])
     
     _map = {
-        'Name' : 'name', 
+        'Name' : 'title', 
         'Developer' : 'developer', 
         'Developer_URL' : 'developerURL', 
         'Developer_support_URL' : 'developerSupportURL', 
