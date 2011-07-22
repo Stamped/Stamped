@@ -366,7 +366,7 @@ def removeEntity():
 
 @app.route(REST_API_PREFIX + 'entities/search.json', methods=['GET'])
 def searchEntities():
-    return handleGETRequest(request, stampedAPI.searchEntities, [ 'q', 'limit' ])
+    return handleGETRequest(request, stampedAPI.searchEntities, [ 'q' ])
 
 # ###### #
 # Stamps #
