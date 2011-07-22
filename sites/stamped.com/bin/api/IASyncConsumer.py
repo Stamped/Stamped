@@ -21,6 +21,6 @@ class IASyncConsumer():
     def put_nowait(self, item):
         self.put(item, block=False, timeout=None)
     
-    def close():
+    def close(self):
         pass
 
