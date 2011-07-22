@@ -65,6 +65,7 @@ def handlePOSTRequest(request, stampedAPIFunc, schema):
         return transformOutput(request, stampedAPIFunc(parsedInput))
     except Exception as e:
         msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        utils.log(msg)
         return msg, 500
 
 def handleGETRequest(request, stampedAPIFunc, args):
@@ -483,48 +484,111 @@ def hello():
     
 @app.route(REST_API_PREFIX)
 def indexDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Index.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Index.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'stamps')
 def stampsDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Stamps.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Stamps.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'accounts')
 def accountsDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Accounts.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Accounts.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'users')
 def usersDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Users.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Users.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'friendships')
 def friendshipsDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Friendships.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Friendships.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'collections')
 def collectionsDoc():
     f = open(os.path.join(ROOT, 'api/docs/Collections.html'))
     return f.read()
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'entities')
 def entitiesDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Entities.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Entities.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'comments')
 def commentsDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Comments.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Comments.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 @app.route(REST_API_PREFIX + 'favorites')
 def favoritesDoc():
-    f = open(os.path.join(ROOT, 'api/docs/Favorites.html'))
-    return f.read()
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Favorites.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
 
 # ######## #
 # Mainline #
