@@ -144,7 +144,8 @@ class ASchemaObject(object):
             return False
         
         if not _unionDict(data, self._schema, self._data):
-            raise KeyError("Error %s ---- %s ---- %s" % (data, self._schema, self._data))
+            raise KeyError("Error (%s) %s ---- %s ---- %s" % \
+                           (self.__class__.__name__, data, self._schema, self._data))
         
         return
 
