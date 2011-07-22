@@ -110,19 +110,22 @@ class Mongo():
         if obj.isValid == False:
             # print obj
             raise KeyError("Object not valid")
+        
         data = copy.copy(obj.getDataAsDict())
+        
         if '_id' in data:
             if isinstance(data['_id'], basestring):
                 data['_id'] = self._getObjectIdFromString(data['_id'])
+        
         if objId in data:
             data['_id'] = self._getObjectIdFromString(data[objId])
             del(data[objId])
-        return self._mapDataToSchema(data, self.SCHEMA)
         
+        return self._mapDataToSchema(data, self.SCHEMA)
+    
     def _objsToMongo(self, objs, objId='id'):
         return map(self._objToMongo, objs, objId)
-        
-        
+    
     def _mapDataToSchema(self, data, schema):
         
         def _unionDict(source, schema, dest):
@@ -192,10 +195,9 @@ class Mongo():
             raise KeyError("Error: %s" % str(data))
 
         return result
-        
-        
+    
     ### RELATIONSHIP MANAGEMENT
-        
+    
     def _getOverflowBucket(self, objId):
         overflow = self._collection.find_one({'_id': objId}, fields={'overflow': 1})
 
@@ -205,8 +207,7 @@ class Mongo():
             # Do something to manage overflow conditions?
             # Grabs the most recent bucket to use and appends that to the id. This is our new key!
             return '%s%s' % (objId, overflow['overflow'][-1])
-        
-        
+    
     ### GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document, objId='id'):
@@ -214,12 +215,12 @@ class Mongo():
     
     def _addDocuments(self, documents, objId='id'):
         return self._collection.insert(self._objsToMongo(documents, objId))
-        
+    
     def _getDocumentFromId(self, documentId, objId='id'):
         #print 'documentId: ', documentId
         document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)), objId)
         return document
-        
+    
     def _getDocumentsFromIds(self, documentIds, objId='id'):
         ids = []
         for documentId in documentIds:
@@ -229,10 +230,10 @@ class Mongo():
         for document in documents:
             result.append(self._mongoToObj(document, objId))
         return result
-        
+    
     def _updateDocument(self, document, objId='id'):
         return self._getStringFromObjectId(self._collection.save(self._objToMongo(document, objId), safe=True))
-        
+    
     def _removeDocument(self, keyId):
         # Confused here. Supposed to return None on success, so I guess it's working,
         # but should probably test more.
@@ -240,16 +241,15 @@ class Mongo():
             return False
         else:
             return True
-        
     
     ### GENERIC RELATIONSHIP FUNCTIONS
-        
+    
     def _createRelationship(self, keyId, refId):
         self._collection.update({'_id': self._getOverflowBucket(keyId)}, 
                                 {'$addToSet': {'ref_ids': refId}},
                                 upsert=True)
         return True
-            
+    
     def _removeRelationship(self, keyId, refId):
         doc = self._collection.find_one({'_id': keyId})
         
@@ -299,7 +299,7 @@ class Mongo():
             
         else:
             return False
-            
+    
     def _getRelationships(self, keyId, limit=None):
         doc = self._collection.find_one({'_id': keyId})
         

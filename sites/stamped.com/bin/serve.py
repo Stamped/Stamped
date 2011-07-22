@@ -5,7 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import init, flask, json, utils
+import init
+import os, flask, json, utils
 from flask import request, Response, Flask
 
 from api.MongoStampedAPI import MongoStampedAPI
@@ -19,6 +20,7 @@ from resource import *
 
 REST_API_VERSION = "v1"
 REST_API_PREFIX  = "/api/%s/" % REST_API_VERSION
+ROOT = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__)
 stampedAPI = MongoStampedAPI() 
@@ -479,49 +481,49 @@ def getFavorites():
 def hello():
     return "This is where stamped.com will go -- huzzah!"
     
-@app.route(REST_API_PREFIX )
+@app.route(REST_API_PREFIX)
 def indexDoc():
-    f = open('api/docs/Index.html')
+    f = open(os.path.join(ROOT, 'api/docs/Index.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'stamps')
 def stampsDoc():
-    f = open('api/docs/Stamps.html')
+    f = open(os.path.join(ROOT, 'api/docs/Stamps.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'accounts')
 def accountsDoc():
-    f = open('api/docs/Accounts.html')
+    f = open(os.path.join(ROOT, 'api/docs/Accounts.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'users')
 def usersDoc():
-    f = open('api/docs/Users.html')
+    f = open(os.path.join(ROOT, 'api/docs/Users.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'friendships')
 def friendshipsDoc():
-    f = open('api/docs/Friendships.html')
+    f = open(os.path.join(ROOT, 'api/docs/Friendships.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'collections')
 def collectionsDoc():
-    f = open('api/docs/Collections.html')
+    f = open(os.path.join(ROOT, 'api/docs/Collections.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'entities')
 def entitiesDoc():
-    f = open('api/docs/Entities.html')
+    f = open(os.path.join(ROOT, 'api/docs/Entities.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'comments')
 def commentsDoc():
-    f = open('api/docs/Comments.html')
+    f = open(os.path.join(ROOT, 'api/docs/Comments.html'))
     return f.read()
-    
+
 @app.route(REST_API_PREFIX + 'favorites')
 def favoritesDoc():
-    f = open('api/docs/Favorites.html')
+    f = open(os.path.join(ROOT, 'api/docs/Favorites.html'))
     return f.read()
 
 # ######## #

@@ -141,16 +141,16 @@ class MongoEntity(AEntityDB, Mongo):
         if entity.isValid == False:
             raise KeyError("Entity not valid")
         return entity
-        
+    
     def updateEntity(self, entity):
         self._updateDocument(entity, 'entity_id')
-        
+    
     def removeEntity(self, entityID):
         return self._removeDocument(entityID)
     
     def addEntities(self, entities):
         return self._addDocuments(entities, 'entity_id')
-        
+    
     def matchEntities(self, query, limit=20):
         # Using a simple regex here. Need to rank results at some point...
         query = '^%s' % query
@@ -158,7 +158,6 @@ class MongoEntity(AEntityDB, Mongo):
         for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
             result.append(Entity(self._mongoToObj(entity, 'entity_id')))
         return result
-            
     
     ### PRIVATE
-        
+
