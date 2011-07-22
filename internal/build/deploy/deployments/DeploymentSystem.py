@@ -38,66 +38,75 @@ class DeploymentSystem(ADeploymentSystem):
         return stacks
     
     def create_stack(self, *args):
-        for stackName in args:
-            if stackName in self._stacks:
-                utils.log("Warning: deleting duplicate stack '%s' before create can occur" % stackName)
-                self.delete_stack(stackName)
-            
-            stack = self.stack_class(stackName, self)
-            stack.create()
-            
-            self._stacks[stackName] = stack
+        stackName = args[0]
+        
+        if stackName in self._stacks:
+            utils.log("Warning: deleting duplicate stack '%s' before create can occur" % stackName)
+            self.delete_stack(stackName)
+        
+        stack = self.stack_class(stackName, self)
+        stack.create(args[1:])
+        
+        self._stacks[stackName] = stack
     
     def delete_stack(self, *args):
-        for stackNameRegex in args:
-            stacks = self._get_matching_stacks(stackNameRegex)
-            
-            for stackName in stacks:
-                if stackName in self._stacks:
-                    stack = self._stacks[stackName]
-                    stack.delete()
-                    
-                    del self._stacks[stackName]
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            if stackName in self._stacks:
+                stack = self._stacks[stackName]
+                stack.delete([args[1:])
+                
+                del self._stacks[stackName]
     
     def describe_stack(self, *args):
-        for stackNameRegex in args:
-            stacks = self._get_matching_stacks(stackNameRegex)
-            
-            for stackName in stacks:
-                stack = self._stacks[stackName]
-                stack.describe()
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.describe(args[1:])
     
     def describe_stack_events(self, *args):
-        for stackNameRegex in args:
-            stacks = self._get_matching_stacks(stackNameRegex)
-            
-            for stackName in stacks:
-                stack = self._stacks[stackName]
-                stack.describe_events()
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.describe_events(args[1:])
     
     def connect(self, *args):
-        for stackNameRegex in args:
-            stacks = self._get_matching_stacks(stackNameRegex)
-            
-            for stackName in stacks:
-                stack = self._stacks[stackName]
-                stack.connect()
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.connect(args[1:])
     
     def init_stack(self, *args):
-        for stackNameRegex in args:
-            stacks = self._get_matching_stacks(stackNameRegex)
-            
-            for stackName in stacks:
-                stack = self._stacks[stackName]
-                stack.init()
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.init(args[1:])
     
     def update_stack(self, *args):
-        for stackNameRegex in args:
-            stacks = self._get_matching_stacks(stackNameRegex)
-            
-            for stackName in stacks:
-                stack = self._stacks[stackName]
-                stack.update()
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.update(args[1:])
+    
+    def crawl(self, *args):
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.update()
     
     def list_stacks(self, stackNameRegex=None, stackStatus=None):
         if stackNameRegex is not None:

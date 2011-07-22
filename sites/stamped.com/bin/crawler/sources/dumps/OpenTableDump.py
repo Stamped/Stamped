@@ -77,7 +77,9 @@ class OpenTableDump(AExternalDumpEntitySource):
         
         # don't make external calls to opentable in test mode
         if not Globals.options.test:
-            OpenTableParser.parseEntity(entity)
+            result = OpenTableParser.parseEntity(entity)
+            if result is None:
+                return
         
         if entity is not None:
             self._output.put(entity)

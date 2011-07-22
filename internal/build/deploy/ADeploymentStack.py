@@ -41,6 +41,10 @@ class ADeploymentStack(object):
     def update(self):
         pass
     
+    @abstractmethod
+    def crawl(self, *args):
+        pass
+    
     def local(self, cmd, env=None, show_cmd=True):
         if show_cmd:
             print "[%s-local] %s" % (self, cmd, )

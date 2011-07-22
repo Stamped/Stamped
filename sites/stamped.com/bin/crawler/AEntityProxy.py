@@ -43,7 +43,8 @@ class AEntityProxy(AEntitySink, AEntitySource):
         if item is not StopIteration:
             item = self._transform(item)
         
-        self._output.put(item)
+        if item is not None:
+            self._output.put(item)
     
     def _processItems(self, items):
         for item in items:

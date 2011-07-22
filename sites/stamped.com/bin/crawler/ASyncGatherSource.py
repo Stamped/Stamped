@@ -95,19 +95,20 @@ class ASyncGatherSource(AEntityProxy):
         
         if source is not None:
             #utils.log("[ASyncGatherSource] next %s" % (str(source), ))
-            item = source.next()
-            
-            if item is StopIteration:
-                self._sources = self._sources[1:]
+            while True:
+                item = source.next()
                 
-                source = self.getSource()
-                if source is not None:
-                    #utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
-                    source.startProducing()
-                
-                return self.next()
-            else:
-                return item
+                if item is StopIteration:
+                    self._sources = self._sources[1:]
+                    
+                    source = self.getSource()
+                    if source is not None:
+                        #utils.log("[ASyncGatherSource] start pulling from source %s" % str(source))
+                        source.startProducing()
+                    
+                    return self.next()
+                elif item is not None:
+                    return item
         else:
             return StopIteration
     

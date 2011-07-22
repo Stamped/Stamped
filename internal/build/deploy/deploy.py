@@ -40,6 +40,8 @@ available_commands = {
     
     'update' : 'update_stack', 
     'update_stack' : 'update_stack', 
+    
+    'crawl' : 'crawl', 
 }
 
 def parseCommandLine():

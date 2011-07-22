@@ -162,4 +162,17 @@ class AWSDeploymentStack(ADeploymentStack):
         
         print "WebServer instance in stack %s has been initialized! Attempting to connect via ssh..." % (self.name, )
         os.system('connect.sh %s %s' % (self.name, "WebServer"))
+    
+    def crawl(self, *args):
+        webServerInstances, dbInstances = self.getInstances()
+        env.user = 'ubuntu'
+        env.key_filename = [
+            'keys/test-keypair'
+        ]
+        
+        # TODO: run with non-root priveleges
+        with settings(host_string=webServerInstances[0]['public_dns_name']):
+            with cd("/stamped"):
+                sudo('. bin/activate && python /stamped/stamped/sites/stamped.com/bin/crawler/crawler.py', pty=False)
+
 

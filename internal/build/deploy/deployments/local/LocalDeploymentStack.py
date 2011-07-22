@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import config, json, os, pickle, utils
+import config, json, os, pickle, string, utils
 from ADeploymentStack import ADeploymentStack
 from errors import Fail
 
@@ -110,4 +110,12 @@ class LocalDeploymentStack(ADeploymentStack):
         cmd = "cd %s" % self.path
         utils.log(cmd)
         os.system(cmd)
+    
+    def crawl(self, *args):
+        for instance in self.instances:
+            if 'webServer' in instance.roles:
+                instance_path = self._get_instance_path(instance)
+                instance_crawler_path = os.path.join(instance_path, 'stamped/sites/stamped.com/bin/crawler/crawler.py')
+                
+                self.local('python %s %s' % (instance_crawler_path, string.joinfields(args, ' ')))
 
