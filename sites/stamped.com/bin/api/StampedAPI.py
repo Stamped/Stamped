@@ -737,7 +737,7 @@ class StampedAPI(AStampedAPI):
             return False
         
     def searchEntities(self, query, limit=20):
-        entities = self._entityDB.matchEntities(query, limit)
+        entities = self._entityDB.matchEntities(query)
         result = []
         
         for entity in entities:
