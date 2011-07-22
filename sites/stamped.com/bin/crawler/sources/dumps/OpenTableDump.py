@@ -79,7 +79,8 @@ class OpenTableDump(AExternalDumpEntitySource):
         if not Globals.options.test:
             OpenTableParser.parseEntity(entity)
         
-        self._output.put(entity)
+        if entity is not None:
+            self._output.put(entity)
 
 """
 dump = OpenTableDump()
