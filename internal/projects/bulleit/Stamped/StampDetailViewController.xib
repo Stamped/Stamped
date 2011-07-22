@@ -242,7 +242,7 @@
 											<bool key="EncodedWithXMLCoder">YES</bool>
 											<object class="IBUITextField" id="487917368">
 												<reference key="NSNextResponder" ref="271529655"/>
-												<int key="NSvFlags">292</int>
+												<int key="NSvFlags">268</int>
 												<string key="NSFrame">{{50, 11}, {250, 31}}</string>
 												<reference key="NSSuperview" ref="271529655"/>
 												<reference key="NSWindow"/>
@@ -271,7 +271,7 @@
 											</object>
 											<object class="IBUIView" id="113200431">
 												<reference key="NSNextResponder" ref="271529655"/>
-												<int key="NSvFlags">292</int>
+												<int key="NSvFlags">265</int>
 												<string key="NSFrame">{{10, 10}, {31, 31}}</string>
 												<reference key="NSSuperview" ref="271529655"/>
 												<reference key="NSWindow"/>
@@ -590,9 +590,17 @@
 						<string key="label">handleCommentButtonTap:</string>
 						<reference key="source" ref="755608833"/>
 						<reference key="destination" ref="372490531"/>
-						<int key="IBEventType">1</int>
+						<int key="IBEventType">7</int>
 					</object>
-					<int key="connectionID">53</int>
+					<int key="connectionID">54</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="487917368"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">55</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -898,7 +906,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">53</int>
+			<int key="maxID">55</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1029,6 +1037,10 @@
 		</object>
 		<int key="IBDocument.localizationMode">0</int>
 		<string key="IBDocument.TargetRuntimeIdentifier">IBCocoaTouchFramework</string>
+		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDependencyDefaults">
+			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaTouchPlugin.iPhoneOS</string>
+			<real value="1280" key="NS.object.0"/>
+		</object>
 		<object class="NSMutableDictionary" key="IBDocument.PluginDeclaredDevelopmentDependencies">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaTouchPlugin.InterfaceBuilder3</string>
 			<integer value="3000" key="NS.object.0"/>

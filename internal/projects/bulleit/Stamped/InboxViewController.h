@@ -6,8 +6,8 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import <RestKit/RestKit.h>
+#import <UIKit/UIKit.h>
 
 @interface InboxViewController : UITableViewController<UIScrollViewDelegate, RKObjectLoaderDelegate> {
  @private

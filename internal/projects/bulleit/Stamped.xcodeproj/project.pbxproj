@@ -48,6 +48,7 @@
 		7E514AAA13C9851800EEC598 /* film_detail_filler@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */; };
 		7E5FEED913D0C497008BCA48 /* nav_bar_ripple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */; };
 		7E5FEEDA13D0C497008BCA48 /* nav_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED813D0C497008BCA48 /* nav_bar@2x.png */; };
+		7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */; };
 		7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */; };
 		7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */; };
 		7E76129A13C9344D0023CCC4 /* cat_icon_app@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129913C9344D0023CCC4 /* cat_icon_app@2x.png */; };
@@ -250,6 +251,8 @@
 		7E514AA913C9851800EEC598 /* film_detail_filler@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "film_detail_filler@2x.png"; sourceTree = "<group>"; };
 		7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_ripple@2x.png"; sourceTree = "<group>"; };
 		7E5FEED813D0C497008BCA48 /* nav_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar@2x.png"; sourceTree = "<group>"; };
+		7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailCommentView.h; sourceTree = "<group>"; };
+		7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailCommentView.m; sourceTree = "<group>"; };
 		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
 		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
 		7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlaceDetailViewController.xib; sourceTree = "<group>"; };
@@ -410,6 +413,11 @@
 		7E514AA213C9824D00EEC598 /* Entity Detail */ = {
 			isa = PBXGroup;
 			children = (
+				7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */,
+				7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */,
+				7E7612BF13C96B380023CCC4 /* BookDetailViewController.xib */,
+				7E514A9813C97A9700EEC598 /* MusicDetailViewController.xib */,
+				7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */,
 				7EF1105613C906A90059F9BD /* EntityDetailViewController.h */,
 				7EF1105713C906A90059F9BD /* EntityDetailViewController.m */,
 				7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */,
@@ -422,6 +430,18 @@
 				7E514AA513C9827000EEC598 /* FilmDetailViewController.m */,
 			);
 			name = "Entity Detail";
+			sourceTree = "<group>";
+		};
+		7E668C2613D8B25300E79E14 /* Stamp Detail */ = {
+			isa = PBXGroup;
+			children = (
+				7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */,
+				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
+				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
+				7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */,
+				7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */,
+			);
+			name = "Stamp Detail";
 			sourceTree = "<group>";
 		};
 		7E76129F13C940500023CCC4 /* Logos */ = {
@@ -593,6 +613,7 @@
 		7EE7E35C13CCB2D600FA3B3A /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
+				7EFE8F2713C39FA100324F34 /* InboxViewController.xib */,
 				7EFE8F2513C39FA100324F34 /* InboxViewController.h */,
 				7EFE8F2613C39FA100324F34 /* InboxViewController.m */,
 				7EE7E35813CCB2A800FA3B3A /* InboxTableViewCell.h */,
@@ -605,16 +626,9 @@
 			isa = PBXGroup;
 			children = (
 				7E22679413D4964700657A66 /* LoginOrSignUpViewController.xib */,
-				7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */,
 				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
 				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
-				7EFE8F2713C39FA100324F34 /* InboxViewController.xib */,
-				7EF1105813C906A90059F9BD /* EntityDetailViewController.xib */,
-				7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */,
-				7E7612BF13C96B380023CCC4 /* BookDetailViewController.xib */,
-				7E514A9813C97A9700EEC598 /* MusicDetailViewController.xib */,
-				7E514AA613C9827000EEC598 /* FilmDetailViewController.xib */,
 			);
 			name = Interface;
 			sourceTree = "<group>";
@@ -627,8 +641,7 @@
 				7E2267D813D52FF500657A66 /* Model */,
 				7E514AA213C9824D00EEC598 /* Entity Detail */,
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
-				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
-				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
+				7E668C2613D8B25300E79E14 /* Stamp Detail */,
 				7E22679713D4D90F00657A66 /* AccountManager.h */,
 				7E22679813D4D90F00657A66 /* AccountManager.m */,
 				7EF5138B13D240B60028B612 /* STTabBar.h */,
@@ -913,6 +926,7 @@
 				7E2BEBEF13D7757300A116D2 /* ImageToDataTransformer.m in Sources */,
 				7EBCBE8413D77C08009FCECF /* Entity.m in Sources */,
 				7EBCBE8713D78896009FCECF /* Comment.m in Sources */,
+				7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
