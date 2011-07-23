@@ -88,18 +88,16 @@ class Mongo():
         except:
             return False
         return False
-        
-        
+    
     def _encodeBSON(self, obj):
         return bson.BSON.encode(obj)
-        
+    
     def _getStringFromObjectId(self, objId):
         return str(bson.objectid.ObjectId(objId))
-        
+    
     def _getObjectIdFromString(self, string):
         return bson.objectid.ObjectId(string)
-        
-        
+    
     def _mongoToObj(self, data, objId='id'):
 #         print '_mongoToObj: ', data
         data[objId] = self._getStringFromObjectId(data['_id'])
