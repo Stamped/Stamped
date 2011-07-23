@@ -177,17 +177,14 @@ class MongoStamp(AStampDB, Mongo):
             followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
             MongoInboxStamps().addInboxStamps(followerIds, stamp['id'])
     
-    def getStamps(self, stampIds, output='object'):
-        stamps = self._getDocumentsFromIds(stampIds, 'stamp_id')
+    def getStamps(self, stampIds, since=None, before=None):
+        stamps = self._getDocumentsFromIds(stampIds, objId='stamp_id', since=since, before=before)
         result = []
         for stamp in stamps:
             stamp = Stamp(stamp)
             if stamp.isValid == False:
                 raise KeyError("Stamp not valid")
-            if output == 'data' or output == 'dict':
-                result.append(stamp.getDataAsDict())
-            else:
-                result.append(stamp)
+            result.append(stamp)
         return result
         
     def incrementStatsForStamp(self, stampId, stat, increment=1):

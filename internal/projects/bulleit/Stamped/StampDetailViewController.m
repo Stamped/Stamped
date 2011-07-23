@@ -121,7 +121,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   [self setUpCommentsView];
   
   //[self loadCommentsFromDataStore];
-  [self loadCommentsFromServer];
+  //[self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {

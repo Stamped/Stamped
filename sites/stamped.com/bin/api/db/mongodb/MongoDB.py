@@ -45,6 +45,13 @@ class Mongo():
                 }
             }
         
+#         self._config = AttributeDict({
+#             "mongodb" : {
+#                 "host": 'ec2-50-19-194-148.compute-1.amazonaws.com',
+#                 "port": 27017
+#             }
+#         })
+        
         self._mapping = mapping
         self.user = self._getenv_user()
         self._desc = self.DESC
@@ -219,11 +226,19 @@ class Mongo():
         document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)), objId)
         return document
     
-    def _getDocumentsFromIds(self, documentIds, objId='id'):
+    def _getDocumentsFromIds(self, documentIds, objId='id', since=None, before=None):
         ids = []
         for documentId in documentIds:
             ids.append(self._getObjectIdFromString(documentId))
-        documents = self._collection.find({'_id': {'$in': ids}})
+        params = {'_id': {'$in': ids}}
+        if since != None and isinstance(since, datetime) and before != None and isinstance(before, datetime):
+            params['timestamp.created'] = {'$gte': since, '$lte': before}
+        elif since != None and isinstance(since, datetime):
+            params['timestamp.created'] = {'$gte': since}
+        elif before != None and isinstance(before, datetime):
+            params['timestamp.created'] = {'$lte': before}
+
+        documents = self._collection.find(params)
         result = []
         for document in documents:
             result.append(self._mongoToObj(document, objId))
