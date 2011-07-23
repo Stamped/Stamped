@@ -1040,8 +1040,34 @@ class StampedAPI(AStampedAPI):
     def getUserStampIDs(self, userID, limit=None):
         return self._collectionDB.getUserStampIDs(userID, limit)
     
-    def getInboxStamps(self, userID, limit=None):
-        stamps = self._collectionDB.getInboxStamps(userID, limit)
+    def getInboxStamps(self, params):
+        # Limit results to 20
+        limit = 20
+        if params.limit != None:
+            try:
+                limit = int(params.limit)
+                if limit > 20:
+                    limit = 20
+            except:
+                limit = limit
+        
+        # Limit slice of data returned
+        since = None
+        if params.since != None:
+            try: 
+                since = datetime.utcfromtimestamp(int(params.since)-2)
+            except:
+                since = since
+        
+        before = None
+        if params.before != None:
+            try: 
+                before = datetime.utcfromtimestamp(int(params.before)+2)
+            except:
+                before = before
+                       
+        
+        stamps = self._collectionDB.getInboxStamps(params.authenticated_user_id, since=since, before=before, limit=limit)
         result = []
         
         for stamp in stamps:

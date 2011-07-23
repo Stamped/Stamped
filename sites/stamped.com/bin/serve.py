@@ -68,6 +68,21 @@ def handlePOSTRequest(request, stampedAPIFunc, schema):
         utils.log(msg)
         return msg, 500
 
+def handleRequest(data, stampedAPIFunc, schema):
+    try:
+        parsedInput = parseRequestForm(schema, data)
+    except (InvalidArgument, Fail) as e:
+        msg = str(e)
+        utils.log(msg)
+        return msg, 400
+    
+    try:
+        return transformOutput(request, stampedAPIFunc(parsedInput))
+    except Exception as e:
+        msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        utils.log(msg)
+        return msg, 500
+
 def handleGETRequest(request, stampedAPIFunc, args):
     funcArgs = [ ]
     
@@ -439,7 +454,13 @@ def getComments():
 
 @app.route(REST_API_PREFIX + 'collections/inbox.json', methods=['GET'])
 def getInboxStamps():
-    return handleGETRequest(request, stampedAPI.getInboxStamps, [ 'authenticated_user_id' ])
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("limit",                 ResourceArgument(expectedType=basestring)), 
+        ("since",                 ResourceArgument(expectedType=basestring)), 
+        ("before",                ResourceArgument(expectedType=basestring))
+    ])
+    return handleRequest(request.args, stampedAPI.getInboxStamps, schema)
 
 @app.route(REST_API_PREFIX + 'collections/user.json', methods=['GET'])
 def getUserStamps():

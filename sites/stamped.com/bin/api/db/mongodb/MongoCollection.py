@@ -32,11 +32,11 @@ class MongoCollection(ACollectionDB):
         
     ### PUBLIC
     
-    def getInboxStampIDs(self, userId, limit=None):
-        return MongoInboxStamps().getInboxStampIds(userId, limit)
+    def getInboxStampIDs(self, userId, since=None, limit=None):
+        return MongoInboxStamps().getInboxStampIds(userId, since, limit)
     
-    def getInboxStamps(self, userId, limit=None, output='object'):
-        return MongoStamp().getStamps(self.getInboxStampIDs(userId, limit), output)
+    def getInboxStamps(self, userId, since=None, before=None, limit=None):
+        return MongoStamp().getStamps(self.getInboxStampIDs(userId, limit=limit), since=since, before=before)
     
     def getUserStampIDs(self, userId, limit=None):
         return MongoUserStamps().getUserStampIds(userId)

@@ -48,7 +48,7 @@ class MongoInboxStamps(Mongo):
     def removeInboxStamp(self, userId, stampId):
         return self._removeRelationship(keyId=userId, refId=stampId)
             
-    def getInboxStampIds(self, userId, limit=None):
+    def getInboxStampIds(self, userId, since=None, limit=None):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId, limit)
         
