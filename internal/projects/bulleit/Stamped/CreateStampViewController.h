@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CreateStampViewController : UITableViewController<UITextInputDelegate>
+@interface CreateStampViewController : UITableViewController<UITextFieldDelegate>
 
 @property (nonatomic, retain) IBOutlet UITextField* searchField;
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;

@@ -26,8 +26,6 @@ typedef enum {
 @property (nonatomic, retain) NSString* blurb;
 @property (nonatomic, retain) NSDate* lastModified;
 @property (nonatomic, retain) NSNumber* numComments;
-@property (nonatomic, retain) UIImage* categoryImage;
-
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) Entity* entityObject;
 

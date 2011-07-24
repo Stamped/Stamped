@@ -121,7 +121,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   [self setUpCommentsView];
   
   //[self loadCommentsFromDataStore];
-  //[self loadCommentsFromServer];
+  [self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {
@@ -166,7 +166,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
-  typeIconLayer.contents = (id)stamp_.categoryImage.CGImage;
+  typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
   typeIconLayer.frame = CGRectMake(15, 48, 12, 12);
   [topHeaderCell_.layer addSublayer:typeIconLayer];
   [typeIconLayer release];
@@ -313,7 +313,7 @@ static const CGFloat kKeyboardHeight = 216.0;
       break;
   }
   // Pass the selected object to the new view controller.
-  StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
 }
@@ -327,7 +327,9 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)loadCommentsFromServer {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Comment"];
-  [objectManager loadObjectsAtResourcePath:[@"/comments/show.json?stamp_id=" stringByAppendingString:stamp_.stampID]
+  NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&authenticated_user_id=%@",
+      stamp_.stampID, @"4e28ef4c6da2353e50000006"];
+  [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:commentMapping
                                   delegate:self];
 }
@@ -393,10 +395,9 @@ static const CGFloat kKeyboardHeight = 216.0;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       addCommentField_.text, @"blurb",
-      @"4e2792f732a7ba6a560004b1", @"authenticated_user_id",
+      @"4e28ef4c6da2353e50000006", @"authenticated_user_id",
       stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
-  addCommentField_.enabled = NO;
   return NO;
 }
 
@@ -405,8 +406,8 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath isEqualToString:@"/comments/create.json"]) {
     [self addComment:[objects objectAtIndex:0]];
-    addCommentField_.enabled = YES;
     addCommentField_.text = nil;
+    [addCommentField_ resignFirstResponder];
     return;
   }
 
@@ -416,9 +417,6 @@ static const CGFloat kKeyboardHeight = 216.0;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	// TODO: Not working right now.
-  
-  addCommentField_.enabled = YES;
   [addCommentField_ becomeFirstResponder];
   UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
                                                    message:[error localizedDescription] 

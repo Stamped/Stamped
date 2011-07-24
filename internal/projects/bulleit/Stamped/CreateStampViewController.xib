@@ -112,7 +112,7 @@
 							<object class="IBUIButton" id="701797646">
 								<reference key="NSNextResponder" ref="709319091"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{255, 6}, {57, 31}}</string>
+								<string key="NSFrame">{{257, 6}, {57, 31}}</string>
 								<reference key="NSSuperview" ref="709319091"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
@@ -182,12 +182,15 @@
 				<bool key="IBUIOpaque">NO</bool>
 				<bool key="IBUIClipsSubviews">YES</bool>
 				<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
-				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
+				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics">
+					<int key="IBUIStatusBarStyle">2</int>
+				</object>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 				<bool key="IBUIBouncesZoom">NO</bool>
+				<int key="IBUISeparatorStyle">1</int>
 				<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
 				<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
-				<float key="IBUIRowHeight">44</float>
+				<float key="IBUIRowHeight">63</float>
 				<float key="IBUISectionHeaderHeight">22</float>
 				<float key="IBUISectionFooterHeight">22</float>
 				<reference key="IBUITableHeaderView" ref="709319091"/>
@@ -300,11 +303,13 @@
 						<int key="objectID">30</int>
 						<reference key="object" ref="672323501"/>
 						<reference key="parent" ref="709319091"/>
+						<string key="objectName">Background Image</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">31</int>
 						<reference key="object" ref="780588220"/>
 						<reference key="parent" ref="709319091"/>
+						<string key="objectName">Search Text Field</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">32</int>

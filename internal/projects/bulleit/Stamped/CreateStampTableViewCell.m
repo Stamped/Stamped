@@ -10,13 +10,50 @@
 
 #import "Entity.h"
 
-@interface CreateStampCellView : UIView {
- @private
-  
-}
+@interface CreateStampCellView : UIView
+
+// This is magic with UITableViewCell. No need to set this explicitly.
+@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
+@property (nonatomic, retain) UIImageView* categoryImageView;
+@property (nonatomic, retain) UILabel* titleLabel;
+@property (nonatomic, retain) UILabel* subtitleLabel;
 @end
 
 @implementation CreateStampCellView
+
+@synthesize highlighted = highlighted_;
+@synthesize categoryImageView = categoryImageView_;
+@synthesize titleLabel = titleLabel_;
+@synthesize subtitleLabel = subtitleLabel_;
+
+- (id)initWithFrame:(CGRect)frame {
+  self = [super initWithFrame:frame];
+  if (self) {
+    self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 27, 33)];
+    self.categoryImageView.contentMode = UIViewContentModeBottomRight;
+    [self addSubview:self.categoryImageView];
+    
+    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
+    self.titleLabel.backgroundColor = [UIColor clearColor];
+    self.titleLabel.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
+    self.titleLabel.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+    [self addSubview:self.titleLabel];
+    
+    self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 35, 241, 20)];
+    self.subtitleLabel.backgroundColor = [UIColor clearColor];
+    self.subtitleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:12];
+    self.subtitleLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+    [self addSubview:self.subtitleLabel];
+  }
+  return self;
+}
+
+- (void)dealloc {
+  self.categoryImageView = nil;
+  self.titleLabel = nil;
+  self.subtitleLabel = nil;
+  [super dealloc];
+}
 
 @end
 
@@ -40,6 +77,16 @@
 - (void)dealloc {
   self.entityObject = nil;
   [super dealloc];
+}
+
+- (void)setEntityObject:(Entity*)entityObject {
+  if (entityObject != entityObject_) {
+    [entityObject_ release];
+    entityObject_ = [entityObject retain];
+    customView_.titleLabel.text = entityObject.title;
+    customView_.subtitleLabel.text = entityObject.subtitle;
+    customView_.categoryImageView.image = entityObject.categoryImage;
+  }
 }
 
 @end
