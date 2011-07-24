@@ -10,12 +10,12 @@
 
 #import "InboxViewController.h"
 #import "ActivityViewController.h"
+#import "CreateStampViewController.h"
 
 @implementation RootTabBarViewController
 
 @synthesize viewControllers = viewControllers_;
 @synthesize selectedViewController = selectedViewController_;
-@synthesize addStampButton = addStampButton_;
 @synthesize tabBar = tabBar_;
 @synthesize stampsTabBarItem = stampsTabBarItem_;
 @synthesize activityTabBarItem = activityTabBarItem_;
@@ -26,7 +26,6 @@
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
-  self.addStampButton = nil;
   self.stampsTabBarItem = nil;
   self.activityTabBarItem = nil;
   self.mustDoTabBarItem = nil;
@@ -71,7 +70,6 @@
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
-  self.addStampButton = nil;
   self.stampsTabBarItem = nil;
   self.activityTabBarItem = nil;
   self.mustDoTabBarItem = nil;
@@ -100,6 +98,13 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (IBAction)createStamp:(id)sender {
+  CreateStampViewController* createStampViewController =
+      [[CreateStampViewController alloc] initWithNibName:@"CreateStampViewController" bundle:nil];
+  [self presentModalViewController:createStampViewController animated:YES];
+  [createStampViewController release];
 }
 
 #pragma mark - UITabBarDelegate Methods
