@@ -53,9 +53,16 @@ def parseRequestForm(schema, form):
         utils.printException()
         raise
 
-def handlePOSTRequest(request, stampedAPIFunc, schema):
+def handleRequest(request, stampedAPIFunc, schema):
+    if request.method == 'POST':
+        data = request.form
+    elif request.method == 'GET': 
+        data = request.args
+    else:
+        return "Method not supported", 501
+        
     try:
-        parsedInput = parseRequestForm(schema, request.form)
+        parsedInput = parseRequestForm(schema, data)
     except (InvalidArgument, Fail) as e:
         msg = str(e)
         utils.log(msg)
@@ -68,9 +75,9 @@ def handlePOSTRequest(request, stampedAPIFunc, schema):
         utils.log(msg)
         return msg, 500
 
-def handleRequest(data, stampedAPIFunc, schema):
+def handlePOSTRequest(request, stampedAPIFunc, schema):
     try:
-        parsedInput = parseRequestForm(schema, data)
+        parsedInput = parseRequestForm(schema, request.form)
     except (InvalidArgument, Fail) as e:
         msg = str(e)
         utils.log(msg)
@@ -460,11 +467,18 @@ def getInboxStamps():
         ("since",                 ResourceArgument(expectedType=basestring)), 
         ("before",                ResourceArgument(expectedType=basestring))
     ])
-    return handleRequest(request.args, stampedAPI.getInboxStamps, schema)
+    return handleRequest(request, stampedAPI.getInboxStamps, schema)
 
 @app.route(REST_API_PREFIX + 'collections/user.json', methods=['GET'])
 def getUserStamps():
-    return handleGETRequest(request, stampedAPI.getUserStamps, [ 'user_id', 'authenticated_user_id' ])
+    schema = ResourceArgumentSchema([
+        ("user_id",               ResourceArgument(required=True, expectedType=basestring)), 
+        ("authenticated_user_id", ResourceArgument(expectedType=basestring)), 
+        ("limit",                 ResourceArgument(expectedType=basestring)), 
+        ("since",                 ResourceArgument(expectedType=basestring)), 
+        ("before",                ResourceArgument(expectedType=basestring))
+    ])
+    return handleRequest(request, stampedAPI.getUserStamps, schema)
 
 @app.route(REST_API_PREFIX + 'getUserMentions', methods=['GET'])
 def getUserMentions():

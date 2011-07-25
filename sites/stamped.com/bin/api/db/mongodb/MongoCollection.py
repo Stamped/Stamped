@@ -41,8 +41,8 @@ class MongoCollection(ACollectionDB):
     def getUserStampIDs(self, userId, limit=None):
         return MongoUserStamps().getUserStampIds(userId)
     
-    def getUserStamps(self, userId, limit=None, output='object'):
-        return MongoStamp().getStamps(self.getUserStampIDs(userId, limit), output)
+    def getUserStamps(self, userId, since=None, before=None, limit=None):
+        return MongoStamp().getStamps(self.getUserStampIDs(userId, limit=limit), since=since, before=before)
     
     def getMentions(self, userId, limit=None):
         raise NotImplementedError
