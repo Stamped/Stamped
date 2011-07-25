@@ -315,6 +315,7 @@
 						<int key="objectID">32</int>
 						<reference key="object" ref="701797646"/>
 						<reference key="parent" ref="709319091"/>
+						<string key="objectName">Cancel Button</string>
 					</object>
 				</object>
 			</object>
@@ -343,7 +344,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="0.0"/>
+					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
