@@ -45,7 +45,7 @@ class DeploymentSystem(ADeploymentSystem):
             self.delete_stack(stackName)
         
         stack = self.stack_class(stackName, self)
-        stack.create(args[1:])
+        stack.create()
         
         self._stacks[stackName] = stack
     
@@ -56,7 +56,7 @@ class DeploymentSystem(ADeploymentSystem):
         for stackName in stacks:
             if stackName in self._stacks:
                 stack = self._stacks[stackName]
-                stack.delete([args[1:])
+                stack.delete()
                 
                 del self._stacks[stackName]
     
@@ -66,7 +66,7 @@ class DeploymentSystem(ADeploymentSystem):
         
         for stackName in stacks:
             stack = self._stacks[stackName]
-            stack.describe(args[1:])
+            stack.describe()
     
     def describe_stack_events(self, *args):
         stackNameRegex = args[0]
@@ -74,7 +74,7 @@ class DeploymentSystem(ADeploymentSystem):
         
         for stackName in stacks:
             stack = self._stacks[stackName]
-            stack.describe_events(args[1:])
+            stack.describe_events()
     
     def connect(self, *args):
         stackNameRegex = args[0]
@@ -82,7 +82,7 @@ class DeploymentSystem(ADeploymentSystem):
         
         for stackName in stacks:
             stack = self._stacks[stackName]
-            stack.connect(args[1:])
+            stack.connect()
     
     def init_stack(self, *args):
         stackNameRegex = args[0]
@@ -90,7 +90,7 @@ class DeploymentSystem(ADeploymentSystem):
         
         for stackName in stacks:
             stack = self._stacks[stackName]
-            stack.init(args[1:])
+            stack.init()
     
     def update_stack(self, *args):
         stackNameRegex = args[0]
@@ -98,7 +98,7 @@ class DeploymentSystem(ADeploymentSystem):
         
         for stackName in stacks:
             stack = self._stacks[stackName]
-            stack.update(args[1:])
+            stack.update()
     
     def crawl(self, *args):
         stackNameRegex = args[0]

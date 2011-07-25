@@ -12,6 +12,7 @@ import EntitySinks, EntitySources
 from GooglePlacesEntityProxy import GooglePlacesEntityProxy
 from AEntityProxy import AEntityProxy
 from ASyncGatherSource import ASyncGatherSource
+from TestEntitySink import TestEntitySink
 
 from optparse import OptionParser
 from threading import *
@@ -51,11 +52,12 @@ class Crawler(Thread):
         #    sink.put(entity)
         
         sink.processQueue(gather)
-        gather.join()
         gevent.joinall(sources)
+        gather.join()
         
-        sink.join(timeout=2)
-        sink.kill()
+        sink.join()
+        #timeout=2)
+        #sink.kill()
         sink.close()
     
     def _createSourceChain(self, source):
@@ -81,6 +83,10 @@ def parseCommandLine():
     
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
+    
+    parser.add_option("-s", "--sink", default=None, type="string", 
+          action="store", dest="sink", 
+        help="where to output to (test or mongodb)")
     
     parser.add_option("-c", "--collection", default="entities", type="string", 
         action="store", dest="collection", 
@@ -119,7 +125,11 @@ def parseCommandLine():
             else:
                 options.sources.append(source)
     
-    options.sink = MongoStampedAPI()
+    if options.sink == "test":
+        options.sink = TestEntitySink()
+    else:
+        options.sink = MongoStampedAPI()
+    
     return options
 
 def main():

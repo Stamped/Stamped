@@ -287,7 +287,7 @@ def getFile(url):
             html = urllib2.urlopen(url).read()
             break
         except urllib2.HTTPError, e:
-            log("'%s' fetching url '%s'" % (str(e), url))
+            #log("'%s' fetching url '%s'" % (str(e), url))
             
             # reraise the exception if the request resulted in an HTTP client 4xx error code, 
             # since it was a problem with the url / headers and retrying most likely won't 
@@ -300,7 +300,7 @@ def getFile(url):
             if delay > maxDelay:
                 raise
         except IOError, e:
-            log("Error '%s' fetching url '%s'" % (str(e), url))
+            #log("Error '%s' fetching url '%s'" % (str(e), url))
             
             # if delay is already too large, request will likely not complete successfully, 
             # so propagate the error and return.
@@ -312,7 +312,7 @@ def getFile(url):
             raise
         
         # encountered error GETing document. delay for a bit and try again
-        log("Attempting to recover with delay of %d" % delay)
+        #log("Attempting to recover with delay of %d" % delay)
         
         # put the current thread to sleep for a bit, increase the delay, 
         # and retry the request

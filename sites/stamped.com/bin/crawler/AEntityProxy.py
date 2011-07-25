@@ -38,19 +38,24 @@ class AEntityProxy(AEntitySink, AEntitySource):
     """
     
     def _processItem(self, item):
-        #utils.log("[%s] _processItem %s" % (self.name, str(item), ))
+        #utils.log("[%s] _processItem %s" % (self.name, str(type(item)), ))
         
         if item is not StopIteration:
             item = self._transform(item)
         
-        if item is not None:
-            self._output.put(item)
+        if isinstance(item, (tuple, list, )):
+            for i in item:
+                if i is not None:
+                    self._output.put(i)
+        else:
+            if item is not None:
+                self._output.put(item)
     
     def _processItems(self, items):
         for item in items:
             self._pool.spawn(self._processItem, item)
         
-        # self._pool.join()
+        self._pool.join()
     
     def _transform(self, entity):
         return entity

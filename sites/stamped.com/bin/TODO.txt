@@ -1,0 +1,24 @@
+
+* implement activity
+* autogenerate docs and REST API from lower-level API
+* decouple API implementation from HTTP (e.g., 400 errors)
+* consistent input validation
+* consistent security strategy
+    * authentication
+    * permissions
+* consistent error handling
+    * raise errors at python level
+    * convert to appropriate HTTP error code and error message at REST level
+    * multi-level unit testing targeting lower-level API in addition to REST API
+        * ensure using the API at all levels has the same result
+* clean up StampedAPI implementation
+* support utf-8
+* second pass over API methods
+* Nth pass over API methods
+
+MongoDB
+    * evaluate async vs sync consistency options for API methods
+        * especially those with multiple collection dependencies
+        * evaluate possible race conditions and TEST them!
+        * rollback strategy
+

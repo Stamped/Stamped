@@ -18,14 +18,20 @@ class AKeyBasedAPI(object):
         self._apiKeys = apiKeys
     
     def _getAPIKey(self, offset, count):
+        index = self._getAPIIndex(offset, count)
+        if index is None:
+            return None
+        else:
+            return self._apiKeys[index]
+    
+    def _getAPIIndex(self, offset, count):
         # return a fresh API key for every call in which offset remains a 
         # random integer and count cycles from 0 to the number of API keys
         # available. once count overflows the API keys, return None.
         if self._apiKeys is None or count >= len(self._apiKeys):
             return None
         else:
-            index = (offset + count) % len(self._apiKeys)
-            return self._apiKeys[index]
+            return (offset + count) % len(self._apiKeys)
     
     def _initAPIKeyIndices(self):
         return self._initRandomStartOffset(len(self._apiKeys))
@@ -35,4 +41,7 @@ class AKeyBasedAPI(object):
         count  = 0
         
         return (offset, count)
+    
+    def _removeKey(self, index):
+        del self._apiKeys[index]
 

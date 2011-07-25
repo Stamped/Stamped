@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
+import string
 
 from optparse import OptionParser
 from difflib import SequenceMatcher
@@ -18,96 +19,110 @@ class EntityMatcher(object):
     """
     
     DEFAULT_TOLERANCE = 0.9
-    TYPES = 'restaurant|food|establishment'
+    TYPES = 'restaurant|food|bar|cafe|bakery|establishment'
+    #TYPES = [ 'restaurant', 'bar', 'cafe', 'bakery', ]
     
     def __init__(self):
-        self._googlePlaces = GooglePlaces()
+        self.googlePlaces = GooglePlaces()
         self.initWordBlacklistSets()
     
     def getEntityDetailsFromGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
-        utils.log("[EntityMatcher] cross-referencing entity '%s' with Google Places" % entity.name)
-        match = self.tryMatchEntityWithGooglePlaces(entity, tolerance)
+        #utils.log("[EntityMatcher] cross-referencing entity '%s' with Google Places" % entity.title)
+        match, numIterations, interestingResults = self.tryMatchEntityWithGooglePlaces(entity, tolerance)
         
-        if match:
-            result = match[0]
-            reference = result['reference']
-            details = self._googlePlaces.getPlaceDetails(reference)
-            
-            return details
-        
-        return None
+        return (match, numIterations, interestingResults)
+        #
+        #if match is not None:
+        #    reference = match['reference']
+        #    details = self.googlePlaces.getPlaceDetails(reference)
+        #    
+        #    return (details, numIterations, interestingResults)
+        #
+        #return (None, 0, interestingResults)
     
     def tryMatchEntityWithGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
         if (not 'lat' in entity) or (not 'lng' in entity):
             address = entity.address
-            latLng  = self._googlePlaces.addressToLatLng(address)
+            latLng  = self.googlePlaces.addressToLatLng(address)
             
             if latLng is None:
-                return None
+                return (None, 0)
             
             entity.lat = latLng[0]
             entity.lng = latLng[1]
         
         latLng = (entity.lat, entity.lng)
         
-        numComplexityLevels = 16
-        prevName = None
-        origName = entity['name'].lower()
+        if 'openTable' in entity.sources:
+            numComplexityLevels = 16
+        else:
+            numComplexityLevels = 1
+        
+        prevTitle = None
+        origTitle = entity['title'].lower()
+        interestingResults = { }
         
         # attempt to match the entity with increasing simplifications applied 
-        # to the search name, beginning with no simplification and retrying as 
+        # to the search title, beginning with no simplification and retrying as 
         # necessary until we find a match, eventually falling back to a blank 
-        # name search at the most simplified level
+        # title search at the most simplified level
         for i in xrange(numComplexityLevels):
             complexity = float(numComplexityLevels - i - 1) / (max(1, numComplexityLevels - 1))
-            name = self.getCanonicalizedName(origName, complexity, True)
-            nameToMatch = self.getCanonicalizedName(origName, complexity, False)
+            title = self.getCanonicalizedTitle(origTitle, complexity, True)
             
-            # don't attempt to find a match if this simplified name is the same 
-            # as the previous level's simplified name (e.g., because we know it 
+            # don't attempt to find a match if this simplified title is the same 
+            # as the previous level's simplified title (e.g., because we know it 
             # will return the same negative results)
-            if name != prevName:
-                #utils.log("NAME: %s, complexity: %g" % (name, complexity))
-                prevName = name
+            if title != prevTitle:
+                titleToMatch = self.getCanonicalizedTitle(origTitle, complexity, False)
+                #utils.log("NAME: %s, complexity: %g" % (title, complexity))
+                prevTitle = title
                 
-                # attempt to match the current simplified name and latLng 
-                match = self.tryMatchNameLatLngWithGooglePlaces(name, 
-                    latLng, tolerance, nameToMatch)
+                # attempt to match the current simplified title and latLng 
+                match = self.tryMatchTitleLatLngWithGooglePlaces(title, 
+                    latLng, tolerance, titleToMatch)
                 
-                if match is not None:
-                    return (match[0], ((match[1] + 0.2) * complexity / 1.2))
+                if match is None:
+                    continue
+                elif match[0] is not None:
+                    return (match[0], i, match[2])
+                else:
+                    results = match[2]
+                    for name in results:
+                        interestingResults[name] = results[name]
+                    #return (match[0], ((match[1] + 0.2) * complexity / 1.2))
         
-        return None
+        return (None, numComplexityLevels, interestingResults)
     
-    def tryMatchNameAddressWithGooglePlaces(self, 
-                                            name, 
-                                            address, 
-                                            tolerance=DEFAULT_TOLERANCE, 
-                                            nameToMatch=None):
-        params  = self._getParams(name, { 'types' : self.TYPES })
-        results = self._googlePlaces.getSearchResultsByAddress(address, params)
-        
-        if results is None:
-            # occasionally a google place search will leave out valid results 
-            # if the optional 'types' parameter is set, even though those 
-            # results conform to the given types... to get around this bug, 
-            # if a more specific query containing the desired 'types' fails 
-            # to return any results, we try once more without the 'types'.
-            params  = self._getParams(name)
-            results = self._googlePlaces.getSearchResultsByLatLng(latLng, params)
-            
-            if results is None:
-                return None
-        
-        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance, nameToMatch)
+    #def tryMatchTitleAddressWithGooglePlaces(self, 
+    #                                        title, 
+    #                                        address, 
+    #                                        tolerance=DEFAULT_TOLERANCE, 
+    #                                        titleToMatch=None):
+    #    params  = self._getParams(title, { 'types' : self.TYPES })
+    #    results = self.googlePlaces.getSearchResultsByAddress(address, params)
+    #    
+    #    if results is None:
+    #        # occasionally a google place search will leave out valid results 
+    #        # if the optional 'types' parameter is set, even though those 
+    #        # results conform to the given types... to get around this bug, 
+    #        # if a more specific query containing the desired 'types' fails 
+    #        # to return any results, we try once more without the 'types'.
+    #        params  = self._getParams(title)
+    #        results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
+    #        
+    #        if results is None:
+    #            return None
+    #    
+    #    return self.tryMatchTitleWithGooglePlacesResults(title, results, tolerance, titleToMatch)
     
-    def tryMatchNameLatLngWithGooglePlaces(self, 
-                                           name, 
+    def tryMatchTitleLatLngWithGooglePlaces(self, 
+                                           title, 
                                            latLng, 
                                            tolerance=DEFAULT_TOLERANCE, 
-                                           nameToMatch=None):
-        params  = self._getParams(name, { 'types' : self.TYPES })
-        results = self._googlePlaces.getSearchResultsByLatLng(latLng, params)
+                                           titleToMatch=None):
+        params  = self._getParams(title, { 'types' : self.TYPES })
+        results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
         
         if results is None:
             # occasionally a google place search will leave out valid results 
@@ -115,42 +130,50 @@ class EntityMatcher(object):
             # results conform to the given types... to get around this bug, 
             # if a more specific query containing the desired 'types' fails 
             # to return any results, we try once more without the 'types'.
-            params  = self._getParams(name)
-            results = self._googlePlaces.getSearchResultsByLatLng(latLng, params)
+            params  = self._getParams(title)
+            results = self.googlePlaces.getSearchResultsByLatLng(latLng, params)
             
             if results is None:
                 return None
         
-        return self.tryMatchNameWithGooglePlacesResults(name, results, tolerance, nameToMatch)
+        return self.tryMatchTitleWithGooglePlacesResults(title, results, tolerance, titleToMatch)
     
-    def tryMatchNameWithGooglePlacesResults(self, 
-                                            name, 
+    def tryMatchTitleWithGooglePlacesResults(self, 
+                                            title, 
                                             results, 
                                             tolerance=DEFAULT_TOLERANCE, 
-                                            nameToMatch=None):
+                                            titleToMatch=None):
         # perform case-insensitive, fuzzy string matching to determine the 
         # best match in the google places result set for the target entity
         bestRatio = -1
         bestMatch = None
         
+        interestingResults = { }
+        
         for result in results:
             # TODO: look into using edit distance as an alternative via:
             #       http://code.google.com/p/pylevenshtein/
-            resultName = result['name'].lower()
-            ratio = SequenceMatcher(None, nameToMatch, resultName).ratio()
+            resultTitle = result['name'].lower()
+            ratio = SequenceMatcher(None, titleToMatch, resultTitle).ratio()
             
             if ratio > bestRatio:
                 bestRatio = ratio
                 bestMatch = result
+            
+            types = result['types']
+            if 'restaurant' in types or 'bar' in types or 'cafe' in types or 'bakery' in types:
+                interestingResults[result['name']] = result
         
         # if no results matched the entity within the acceptable tolerance 
         # level, then disregard the results as irrelevant and return 
         # empty-handed
         if bestRatio <= 1.0 - tolerance:
-            return None
+            return (None, None, interestingResults)
+        
+        interestingResults[bestMatch['name']] = bestMatch
         
         # otherwise, we have a match!
-        return (bestMatch, bestRatio)
+        return (bestMatch, bestRatio, interestingResults)
     
     def initWordBlacklistSets(self):
         # remove leading words
@@ -180,13 +203,13 @@ class EntityMatcher(object):
         self.wordSpecialBlacklistSet = set()
         self.wordSpecialBlacklistSet.add("...")
     
-    def getCanonicalizedName(self, name, complexity, crippleName):
+    def getCanonicalizedTitle(self, title, complexity, crippleTitle):
         complexity = min(max(complexity, 0), 1.0)
-        name = name.lower()
+        title = title.lower()
         
-        # return the lowercase name if no simplification is to occur
+        # return the lowercase title if no simplification is to occur
         if complexity >= 1.0:
-            return name
+            return title
         
         # initialize complexity-dependent detail delimiters
         wordDetailDelimiterBlacklistSet  = set()
@@ -196,11 +219,14 @@ class EntityMatcher(object):
             wordDetailDelimiterBlacklistSet.add("on")
         
         # filter and process individual words
-        words = name.split()
+        words = title.split()
         
         prevWords = None
         while (prevWords is None or len(words) != len(prevWords)) and len(words) > 0:
             prevWords = words
+            
+            if len(words) <= 0:
+                break
             
             # remove blacklisted prefix words
             while words[0] in self.wordPrefixBlacklistSet:
@@ -257,11 +283,11 @@ class EntityMatcher(object):
             if complexity > limit:
                 break
             
-            if crippleName:
-                # note: only cripple the name once during multiple iterations
+            if crippleTitle:
+                # note: only cripple the title once during multiple iterations
                 # (by truncating either the number of words or the number of 
                 # characters within a single word)
-                crippleName = False
+                crippleTitle = False
                 
                 # depending on complexity, cap the number of remaining words such that 
                 # more simplified queries will use less words, with a base case of 
@@ -283,12 +309,11 @@ class EntityMatcher(object):
                     words    = words[0:numWords]
         
         # join the remaining words back together and strip any possible 
-        # whitespace that might've snuck in to form the resulting name
-        import string
+        # whitespace that might've snuck in to form the resulting title
         return string.joinfields(words, ' ').strip()
     
-    def _getParams(self, name, optionalParams=None):
-        params = { 'name' : name }
+    def _getParams(self, title, optionalParams=None):
+        params = { 'name' : title }
         
         if optionalParams is not None:
             for param in optionalParams:

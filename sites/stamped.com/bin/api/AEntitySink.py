@@ -40,7 +40,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
     def processQueue(self, queue):
         """Processes the given queue as many items at a time as possible between 
         blocking until StopIteration is received."""
-        #utils.log("[%s] AEntitySink.processQueue" % (self, ))
+        #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
         stop = False
         
         while not stop:
@@ -54,7 +54,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
             if item is not None:
                 items.append(item)
             
-            # retrieve as many items in the input queue at once to process  
+            # retrieve as many items in the input queue at once to process 
             # multiple items at a time if possible
             while not queue.empty():
                 item = queue.get_nowait()
@@ -66,10 +66,14 @@ class AEntitySink(Greenlet, IASyncConsumer):
                 if item is not None:
                     items.append(item)
             
+            #utils.log("[%s] %d" % (self, len(items)))
+            
             if len(items) > 1:
                 self._processItems(items)
             else:
                 self._processItem(items[0])
+        
+        #utils.log("[%s] <<< AEntitySink.processQueue" % (self, ))
     
     @abstractmethod
     def _processItem(self, item):

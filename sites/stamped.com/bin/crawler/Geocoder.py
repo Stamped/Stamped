@@ -10,6 +10,7 @@ import json, re, urllib
 
 from optparse import OptionParser
 from AKeyBasedAPI import AKeyBasedAPI
+from errors import *
 
 class AGeocoder(AKeyBasedAPI):
     """
@@ -21,6 +22,7 @@ class AGeocoder(AKeyBasedAPI):
     def __init__(self, name, apiKeys=None):
         AKeyBasedAPI.__init__(self, apiKeys)
         self._name = name
+        self._isValid = True
     
     def addressToLatLng(self, address):
         raise NotImplementedError
@@ -37,6 +39,13 @@ class AGeocoder(AKeyBasedAPI):
             return latLng
         else:
             return None
+    
+    @property
+    def isValid(self):
+        return self._isValid
+    
+    def __str__(self):
+        return "%s(%s)" % (self.__class__.__name__, self._name)
 
 class Geocoder(AGeocoder):
     """
@@ -50,24 +59,39 @@ class Geocoder(AGeocoder):
     def __init__(self):
         AGeocoder.__init__(self, "Geocoder")
         
-        self._decoders = [ 
+        self._decoders = [
             GoogleGeocoderService(), 
             BingGeocoderService(), 
             YahooGeocoderService(), 
             USGeocoderService()
         ]
     
+    @property
+    def isValid(self):
+        isValid = False
+        
+        for decoder in self._decoders:
+            isValid |= decoder.isValid
+        
+        return True
+    
     def addressToLatLng(self, address):
         latLng = None
-        index  = 0
+        index = 0
         
         while True:
-            if index < len(self._decoders):
-                decoder = self._decoders[index]
-            else:
-                return None
+            loop = True
+            while loop:
+                if index < len(self._decoders):
+                    decoder = self._decoders[index]
+                    loop = not self._decoders[index].isValid
+                    if loop:
+                        index += 1
+                else:
+                    #utils.log('[Geocoder] Error: all geocoders failed to convert address "%s"' % address)
+                    return None
             
-            utils.log('[Geocoder] Service \'%s\' : %s' % (decoder.getName(), address))
+            #utils.log('[Geocoder] Service \'%s\' : %s' % (decoder.getName(), address))
             
             latLng = decoder.addressToLatLng(address)
             if latLng is not None:
@@ -88,6 +112,9 @@ class GoogleGeocoderService(AGeocoder):
         AGeocoder.__init__(self, "Google")
     
     def addressToLatLng(self, address):
+        if not self.isValid:
+            return False
+        
         params = {
             'address' : address, 
             'sensor'  : 'false', 
@@ -102,9 +129,14 @@ class GoogleGeocoderService(AGeocoder):
             
             # extract the primary result from the json
             if response['status'] != 'OK':
-                utils.log('[GoogleGeocoderService] error converting "' + url + '"\n' + 
-                         'ErrorStatus: ' + response['status'] + '\n')
-                return None
+                if response['status'] == 'OVER_QUERY_LIMIT':
+                    utils.log("GoogleGeocoderService over quota usage")
+                    self._isValid = False
+                    return None
+                else:
+                    utils.log('[GoogleGeocoderService] error converting "' + url + '"\n' + 
+                             'ErrorStatus: ' + response['status'] + '\n')
+                    return None
             
             result   = response['results'][0]
             location = result['geometry']['location']
@@ -140,6 +172,9 @@ class BingGeocoderService(AGeocoder):
         AGeocoder.__init__(self, "Bing", self.API_KEYS)
     
     def addressToLatLng(self, address):
+        if not self.isValid:
+            return False
+        
         params = {
             'query'  : address, 
             'output' : 'json', 
@@ -150,9 +185,15 @@ class BingGeocoderService(AGeocoder):
         while True:
             try:
                 # try a different API key for each attempt
-                apiKey = self._getAPIKey(offset, count)
-                if apiKey is None:
+                apiIndex = self._getAPIIndex(offset, count)
+                if apiIndex is None:
+                    self._isValid = False
                     return None
+                
+                apiKey = self._apiKeys[apiIndex]
+                if apiKey is None:
+                    count += 1
+                    continue
                 
                 # construct the url
                 params['key'] = apiKey
@@ -160,6 +201,14 @@ class BingGeocoderService(AGeocoder):
                 
                 # GET the data and parse the response as json
                 response = json.loads(utils.getFile(url))
+                
+                status = response['statusCode']
+                if status != 200:
+                    if status != 400:
+                        self._apiKeys[apiIndex] = None
+                        continue
+                    else:
+                        return None
                 
                 # extract the primary result from the json
                 resource = (((response['resourceSets'])[0])['resources'])[0]
@@ -198,6 +247,9 @@ class YahooGeocoderService(AGeocoder):
         AGeocoder.__init__(self, "Yahoo", self.API_KEYS)
     
     def addressToLatLng(self, address):
+        if not self.isValid:
+            return None
+        
         params = {
             'location' : address, 
             'flags'    : 'J', # indicates json output format (defaults to xml)
@@ -208,23 +260,33 @@ class YahooGeocoderService(AGeocoder):
         while True:
             try:
                 # try a different API key for each attempt
-                apiKey = self._getAPIKey(offset, count)
-                if apiKey is None:
+                apiIndex = self._getAPIIndex(offset, count)
+                if apiIndex is None:
+                    #self._isValid = False
                     return None
                 
+                apiKey = self._apiKeys[apiIndex]
+                if apiKey is None:
+                    count += 1
+                    continue
+ 
                 # construct the url
                 params['appid'] = apiKey
                 url = self.BASE_URL + '?' + urllib.urlencode(params)
                 
                 # GET the data and parse the response as json
                 response  = json.loads(utils.getFile(url))
+                
                 resultSet = response['ResultSet']
                 
                 # extract the results from the json
                 if resultSet['Error'] != 0:
                     utils.log('[YahooGeocoderService] error converting "' + url + '"\n' + 
-                             'ErrorCode: ' + resultSet['Error'] + '\n' + 
+                             'ErrorCode: ' + str(resultSet['Error']) + '\n' + 
                              'ErrorMsg:  ' + resultSet['ErrorMessage'] + '\n')
+                    return None
+                
+                if not 'Results' in resultSet or 0 == len(resultSet['Results']):
                     return None
                 
                 primary = resultSet['Results'][0]
@@ -233,6 +295,8 @@ class YahooGeocoderService(AGeocoder):
                 latLng = (float(primary['latitude']), float(primary['longitude']))
                 
                 return self.getValidatedLatLng(latLng)
+            except ExceededQuotaException:
+                raise
             except:
                 utils.log('[YahooGeocoderService] error converting "' + url + '"')
                 
@@ -277,7 +341,8 @@ class USGeocoderService(AGeocoder):
             
             return self.getValidatedLatLng((lat, lng))
         except:
-            utils.log('[USGeocoderService] error converting "' + url + '"\n')
+            #utils.log('[USGeocoderService] error converting "' + url + '"\n')
+            pass
         
         return None
 
@@ -359,21 +424,24 @@ def main():
         isConverted = False
         
         for geocoder in options.geocoders:
-            latLng = geocoder.addressToLatLng(address)
-            
-            if latLng is None or latLng[0] is None or latLng[1] is None:
-                print "Service %s failed to convert address '%s'" % (geocoder.getName(), address)
-            else:
-                isConverted = True
-                result = {
-                    'Service' : geocoder.getName(), 
-                    'Address' : address, 
-                    'Latitude' : latLng[0], 
-                    'Longitude' : latLng[1], 
-                    'LatLng' : geocoder.getEncodedLatLng(latLng)
-                }
+            try:
+                latLng = geocoder.addressToLatLng(address)
                 
-                print str(result)
+                if latLng is None or latLng[0] is None or latLng[1] is None:
+                    print "Service %s failed to convert address '%s'" % (geocoder.getName(), address)
+                else:
+                    isConverted = True
+                    result = {
+                        'Service' : geocoder.getName(), 
+                        'Address' : address, 
+                        'Latitude' : latLng[0], 
+                        'Longitude' : latLng[1], 
+                        'LatLng' : geocoder.getEncodedLatLng(latLng)
+                    }
+                    
+                    print str(result)
+            except ExceededQuotaException:
+                print "%s exceeded quota usage" % str(geocoder)
         
         if isConverted:
             numConverted += 1

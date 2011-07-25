@@ -113,7 +113,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('search', params)
-        utils.log('[GooglePlaces] ' + url)
+        #utils.log('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
@@ -138,7 +138,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('details', params)
-        utils.log('[GooglePlaces] ' + url)
+        #utils.log('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json

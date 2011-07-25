@@ -175,4 +175,3 @@ class AWSDeploymentStack(ADeploymentStack):
             with cd("/stamped"):
                 sudo('. bin/activate && python /stamped/stamped/sites/stamped.com/bin/crawler/crawler.py', pty=False)
 
-
