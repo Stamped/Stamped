@@ -7,6 +7,7 @@
 //
 
 #import <RestKit/RestKit.h>
+#import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
 @class UserImageView;
@@ -16,6 +17,8 @@
  @private
   Stamp* stamp_;
   NSArray* commentsArray_;
+  // Managed by the view system.
+  CAGradientLayer* activityGradientLayer_;
 }
 
 - (id)initWithStamp:(Stamp*)stamp;

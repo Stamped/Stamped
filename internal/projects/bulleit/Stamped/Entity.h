@@ -14,6 +14,7 @@
 @interface Entity : NSManagedObject
 
 @property (nonatomic, retain) NSString* category;
+@property (nonatomic, retain) UIImage* categoryImage;
 @property (nonatomic, retain) NSString* entityID;
 @property (nonatomic, retain) NSString* subtitle;
 @property (nonatomic, retain) NSString* title;

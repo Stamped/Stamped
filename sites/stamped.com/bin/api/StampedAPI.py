@@ -122,43 +122,14 @@ class StampedAPI(AStampedAPI):
         if not account.isValid:
             raise InvalidArgument('Invalid input')
             
-        result = {}
-        result['user_id'] = self._accountDB.updateAccount(account)
-        result['first_name'] = account.first_name
-        result['last_name'] = account.last_name
-        result['email'] = account.email
-        result['screen_name'] = account.screen_name
-        result['privacy'] = account.privacy
-        result['locale'] = {}
-        if 'language' in account.locale:
-            result['locale']['language'] = account.locale['language']
-        else:
-            result['locale']['language'] = None
-        if 'time_zone' in account.locale:
-            result['locale']['time_zone'] = account.locale['time_zone']
-        else:
-            result['locale']['time_zone'] = None
-        return result
+        userId = self._accountDB.updateAccount(account)
+        account = self._accountDB.getAccount(userID)
+        
+        return self._returnAccount(account)
     
     def getAccount(self, userID):
         account = self._accountDB.getAccount(userID)
-        result = {}
-        result['user_id'] = account.user_id
-        result['first_name'] = account.first_name
-        result['last_name'] = account.last_name
-        result['email'] = account.email
-        result['screen_name'] = account.screen_name
-        result['privacy'] = account.privacy
-        result['locale'] = {}
-        if 'language' in account.locale:
-            result['locale']['language'] = account.locale['language']
-        else:
-            result['locale']['language'] = None
-        if 'time_zone' in account.locale:
-            result['locale']['time_zone'] = account.locale['time_zone']
-        else:
-            result['locale']['time_zone'] = None
-        return result
+        return self._returnAccount(account)
         
     def updateProfile(self, params):
         account = self._accountDB.getAccount(params.authenticated_user_id)
@@ -244,35 +215,7 @@ class StampedAPI(AStampedAPI):
         else:
             return 'error', 400
         
-        result = {}
-        result['user_id'] = user.user_id
-        result['first_name'] = user.first_name
-        result['last_name'] = user.last_name
-        result['screen_name'] = user.screen_name
-        result['display_name'] = user.display_name
-        result['profile_image'] = user.profile_image
-        
-        if 'bio' in user:
-            result['bio'] = user.bio
-        else:
-            result['bio'] = None
-        if 'website' in user:
-            result['website'] = user['website']
-        else:
-            result['website'] = None
-        
-        result['color_primary'] = user.color_primary
-        if 'color_secondary' in user:
-            result['color_secondary'] = user.color_secondary
-        else:
-            result['color_secondary'] = None
-        
-        result['privacy'] = user.privacy
-            
-        ### TODO: Pull in recent stamps
-        result['recent_stamps'] = None
-        
-        return result
+        return self._returnUser(user)
     
     def getUserByName(self, screenName):
         return self.getUser(None, screenName)
@@ -290,31 +233,7 @@ class StampedAPI(AStampedAPI):
         
         result = []
         for user in users:
-            data = {}
-            
-            data['user_id'] = user.user_id
-            data['first_name'] = user.first_name
-            data['last_name'] = user.last_name
-            data['screen_name'] = user.screen_name
-            data['display_name'] = user.display_name
-            data['profile_image'] = user.profile_image
-            if 'bio' in user:
-                data['bio'] = user.bio
-            else:
-                data['bio'] = None
-            if 'website' in user:
-                data['website'] = user.flags['website']
-            else:
-                data['website'] = None
-            data['color_primary'] = user.color_primary
-            if 'color_secondary' in user:
-                data['color_secondary'] = user.color_secondary
-            else:
-                data['color_secondary'] = None
-            data['privacy'] = user.privacy
-            ### TODO: Pull in recent stamps
-            data['last_stamp'] = None
-            result.append(data)
+            result.append(self._returnUser(user))
         
         return result
     
@@ -326,31 +245,7 @@ class StampedAPI(AStampedAPI):
         
         result = []
         for user in users:
-            data = {}
-            
-            data['user_id'] = user.user_id
-            data['first_name'] = user.first_name
-            data['last_name'] = user.last_name
-            data['screen_name'] = user.screen_name
-            data['display_name'] = user.display_name
-            data['profile_image'] = user.profile_image
-            if 'bio' in user:
-                data['bio'] = user.bio
-            else:
-                data['bio'] = None
-            if 'website' in user:
-                data['website'] = user.flags['website']
-            else:
-                data['website'] = None
-            data['color_primary'] = user.color_primary
-            if 'color_secondary' in user:
-                data['color_secondary'] = user.color_secondary
-            else:
-                data['color_secondary'] = None
-            data['privacy'] = user.privacy
-            ### TODO: Pull in recent stamps
-            data['last_stamp'] = None
-            result.append(data)
+            result.append(self._returnUser(user))
         
         return result
     
@@ -516,22 +411,7 @@ class StampedAPI(AStampedAPI):
         if not favorite.isValid:
             raise InvalidArgument('Invalid input')
         
-        result = {}
-        result['favorite_id'] = self._favoriteDB.addFavorite(favorite)
-        result['user_id'] = favorite.user_id
-        result['entity'] = favorite.entity
-        if 'stamp' in favorite:
-            result['stamp'] = favorite.stamp
-        else:
-            result['stamp'] = None
-            
-        result['timestamp'] = {}
-        if 'created' in favorite.timestamp:
-            result['timestamp']['created'] = str(favorite.timestamp['created'])
-            
-        result['complete'] = favorite.complete
-        
-        return result
+        return self._returnFavorite(favorite)
     
     def removeFavorite(self, params):
         if self._favoriteDB.removeFavorite(params.favorite_id):
@@ -543,31 +423,7 @@ class StampedAPI(AStampedAPI):
         
         result = []
         for favorite in favorites:
-            data = {}
-            data['favorite_id'] = favorite.favorite_id
-            data['user_id'] = favorite.user_id
-            data['entity'] = favorite.entity
-            if 'stamp' in favorite:
-                data['stamp'] = favorite.stamp
-            else:
-                data['stamp'] = None
-                
-            data['timestamp'] = {}
-            if 'created' in favorite.timestamp:
-                data['timestamp']['created'] = str(favorite.timestamp['created'])
-            else:
-                data['timestamp']['created'] = None
-            if 'modified' in favorite.timestamp:
-                data['timestamp']['modified'] = str(favorite.timestamp['modified'])
-            else:
-                data['timestamp']['modified'] = None
-                
-            if 'complete' in favorite:
-                data['complete'] = favorite.complete
-            else:
-                data['complete'] = False
-            
-            result.append(data)
+            result.append(self._returnFavorite(favorite))
         
         return result
     
@@ -606,67 +462,16 @@ class StampedAPI(AStampedAPI):
         
         if not entity.isValid:
             raise InvalidArgument('Invalid input')
-        
-        result = {}
-        result['entity_id'] = self._entityDB.addEntity(entity)
-        result['title'] = entity.title
-        result['category'] = entity.category
-        result['subtitle'] = entity.subtitle
-        
-        if 'image' in entity:
-            result['image'] = entity.image
-        else:
-            result['image'] = None
             
-        result['details'] = {}
-        if 'details' in entity and 'place' in entity.details:
-            result['details']['place'] = {}
-            if 'address' in entity.details['place']:
-                result['details']['place']['address'] = entity.details['place']['address']
-            if 'coordinates' in entity.details['place']:
-                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
+        entityId = self._entityDB.addEntity(entity)
+        entity = self._entityDB.getEntity(entityId)
         
-        if 'modified' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['modified'])
-        elif 'created' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['created'])
-        else:
-            result['last_modified'] = None
-        
-        return result
+        return self._returnEntity(entity)
     
     def getEntity(self, entityID):
         entity = self._entityDB.getEntity(entityID)
         
-        result = {}
-        result['entity_id'] = entity.entity_id
-        result['title'] = entity.title
-        result['category'] = entity.category
-        result['subtitle'] = entity.subtitle
-        if 'desc' in entity:
-            result['desc'] = entity.desc
-        
-        if 'image' in entity:
-            result['image'] = entity.image
-        else:
-            result['image'] = None
-            
-        result['details'] = {}
-        if 'details' in entity and 'place' in entity.details:
-            result['details']['place'] = {}
-            if 'address' in entity.details['place']:
-                result['details']['place']['address'] = entity.details['place']['address']
-            if 'coordinates' in entity.details['place']:
-                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
-        
-        if 'modified' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['modified'])
-        elif 'created' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['created'])
-        else:
-            result['last_modified'] = None
-        
-        return result
+        return self._returnEntity(entity)
     
     def updateEntity(self, params):
         entity = self._entityDB.getEntity(params.entity_id)
@@ -699,36 +504,11 @@ class StampedAPI(AStampedAPI):
         
         if not entity.isValid:
             raise InvalidArgument('Invalid input')
-                    
-        result = {}
-        result['entity_id'] = self._entityDB.updateEntity(entity)
-        result['title'] = entity.title
-        result['category'] = entity.category
-        result['subtitle'] = entity.subtitle
-        if 'desc' in entity:
-            result['desc'] = entity.desc
-        
-        if 'image' in entity:
-            result['image'] = entity.image
-        else:
-            result['image'] = None
             
-        result['details'] = {}
-        if 'details' in entity and 'place' in entity.details:
-            result['details']['place'] = {}
-            if 'address' in entity.details['place']:
-                result['details']['place']['address'] = entity.details['place']['address']
-            if 'coordinates' in entity.details['place']:
-                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
+        entityId = self._entityDB.updateEntity(entity)
+        entity = self._entityDB.getEntity(entityId)
         
-        if 'modified' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['modified'])
-        elif 'created' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['created'])
-        else:
-            result['last_modified'] = None
-        
-        return result
+        return self._returnEntity(entity)
     
     def removeEntity(self, params):
         if self._entityDB.removeEntity(params.entity_id):
@@ -804,39 +584,7 @@ class StampedAPI(AStampedAPI):
         stampId = self._stampDB.addStamp(stamp)
         stamp = self._stampDB.getStamp(stampId)
         
-        result = {}
-        result['stamp_id'] = stamp['stamp_id']
-        result['entity'] = stamp['entity']
-        result['user'] = stamp['user']
-        
-        if 'blurb' in stamp:
-            result['blurb'] = stamp.blurb
-        else:
-            result['blurb'] = None
-        
-        if 'image' in stamp:
-            result['image'] = stamp.image
-        else:
-            result['image'] = None
-        
-        if 'credit' in stamp:
-            result['credit'] = stamp.credit
-        else:
-            result['credit'] = None
-        
-        if 'mentions' in stamp:
-            result['mentions'] = stamp.mentions
-        else:
-            result['mentions'] = None
-                
-        if 'modified' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['modified'])
-        elif 'created' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['created'])
-        else:
-            result['last_modified'] = None
-        
-        return result
+        self._returnStamp(stamp)
             
     def updateStamp(self, params):        
         stamp = self._stampDB.getStamp(params.stamp_id)
@@ -861,35 +609,8 @@ class StampedAPI(AStampedAPI):
         
         stampId = self._stampDB.updateStamp(stamp)
         stamp = self._stampDB.getStamp(stampId)
-            
-        result = {}
-        result['stamp_id'] = stamp['stamp_id']
-        result['entity'] = stamp['entity']
-        result['user'] = stamp['user']
         
-        if 'image' in stamp:
-            result['image'] = stamp.image
-        else:
-            result['image'] = None
-        
-        if 'credit' in stamp:
-            result['credit'] = stamp.credit
-        else:
-            result['credit'] = None
-        
-        if 'mentions' in stamp:
-            result['mentions'] = stamp.mentions
-        else:
-            result['mentions'] = None
-                
-        if 'modified' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['modified'])
-        elif 'created' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['created'])
-        else:
-            result['last_modified'] = None
-        
-        return result
+        return self._returnStamp(stamp)
     
     def removeStamp(self, params):
         if self._stampDB.removeStamp(params.stamp_id, params.authenticated_user_id):
@@ -898,37 +619,8 @@ class StampedAPI(AStampedAPI):
             return False
     
     def getStamp(self, stampID):
-        stamp = self._stampDB.getStamp(stampID)
-        
-        result = {}
-        result['stamp_id'] = stamp.stamp_id
-        result['entity'] = stamp['entity']
-        result['user'] = stamp['user']
-        
-        if 'image' in stamp:
-            result['image'] = stamp.image
-        else:
-            result['image'] = None
-        
-        if 'credit' in stamp:
-            result['credit'] = stamp.credit
-        else:
-            result['credit'] = None
-        
-        if 'mentions' in stamp:
-            result['mentions'] = stamp.mentions
-        else:
-            result['mentions'] = None
-                
-        if 'modified' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['modified'])
-        elif 'created' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['created'])
-        else:
-            result['last_modified'] = None
-        
-        return result
-        
+        stamp = self._stampDB.getStamp(stampID)        
+        return self._returnStamp(stamp)
     
     def getStamps(self, stampIDs):
         stampIDs = stampIDs.split(',')
@@ -970,28 +662,7 @@ class StampedAPI(AStampedAPI):
         commentId = self._stampDB.addComment(comment)
         comment = self._stampDB.getComment(commentId)
         
-        result = {}
-        result['comment_id'] = comment['comment_id']
-        result['stamp_id'] = comment['stamp_id']
-        result['user'] = comment['user']
-        result['blurb'] = comment['blurb']
-        
-        if 'mentions' in comment:
-            result['mentions'] = comment.mentions
-        else:
-            result['mentions'] = None
-        
-        if 'restamp_id' in comment:
-            result['restamp_id'] = comment.restamp_id
-        else:
-            result['restamp_id'] = None
-                
-        if 'created' in comment.timestamp:
-            result['last_modified'] = str(comment.timestamp['created'])
-        else:
-            result['last_modified'] = None
-        
-        return result
+        return self._returnComment(comment)
     
     def removeComment(self, params):
         if self._stampDB.removeComment(params.comment_id):
@@ -1004,29 +675,7 @@ class StampedAPI(AStampedAPI):
             
         result = []
         for comment in comments:
-            data = {}
-            
-            data['comment_id'] = comment.comment_id
-            data['stamp_id'] = comment.stamp_id
-            data['user'] = comment.user
-            data['blurb'] = comment.blurb
-            
-            if 'mentions' in comment:
-                data['mentions'] = comment.mentions
-            else:
-                data['mentions'] = None
-            
-            if 'restamp_id' in comment:
-                data['restamp_id'] = comment.restamp_id
-            else:
-                data['restamp_id'] = None
-                    
-            if 'created' in comment.timestamp:
-                data['last_modified'] = str(comment.timestamp['created'])
-            else:
-                data['last_modified'] = None
-            
-            result.append(data)
+            result.append(self._returnComment(comment))
         
         return result
     
@@ -1071,98 +720,41 @@ class StampedAPI(AStampedAPI):
         result = []
         
         for stamp in stamps:
-            data = {}
-            
-            data['stamp_id'] = stamp.stamp_id
-            data['entity'] = stamp['entity']
-            data['user'] = stamp['user']
-            
-            if 'flags' in stamp:
-                data['flags'] = stamp['flags']
-            
-            if 'blurb' in stamp:
-                data['blurb'] = stamp.blurb
-            else:
-                data['blurb'] = None
-            
-            if 'image' in stamp:
-                data['image'] = stamp.image
-            else:
-                data['image'] = None
-            
-            if 'credit' in stamp:
-                data['credit'] = stamp.credit
-            else:
-                data['credit'] = None
-            
-            if 'mentions' in stamp:
-                data['mentions'] = stamp.mentions
-            else:
-                data['mentions'] = None
-                
-            if 'modified' in stamp.timestamp:
-                data['last_modified'] = str(stamp.timestamp['modified'])
-            elif 'created' in stamp.timestamp:
-                data['last_modified'] = str(stamp.timestamp['created'])
-            else:
-                data['last_modified'] = None
-                
-            if 'stats' in stamp and 'num_comments' in stamp.stats:
-                data['num_comments'] = stamp.stats['num_comments']
-            else:
-                data['num_comments'] = 0
-
-            result.append(data)
+            result.append(self._returnStamp(stamp))
         
         return result
     
-    def getUserStamps(self, userID, limit=None):        
-        stamps = self._collectionDB.getUserStamps(userID, limit)
+    def getUserStamps(self, params):
+        # Limit results to 20
+        limit = 20
+        if params.limit != None:
+            try:
+                limit = int(params.limit)
+                if limit > 20:
+                    limit = 20
+            except:
+                limit = limit
+        
+        # Limit slice of data returned
+        since = None
+        if params.since != None:
+            try: 
+                since = datetime.utcfromtimestamp(int(params.since)-2)
+            except:
+                since = since
+        
+        before = None
+        if params.before != None:
+            try: 
+                before = datetime.utcfromtimestamp(int(params.before)+2)
+            except:
+                before = before
+                
+        stamps = self._collectionDB.getUserStamps(params.user_id, since=since, before=before, limit=limit)
         result = []
         
         for stamp in stamps:
-            data = {}
-            
-            data['stamp_id'] = stamp.stamp_id
-            data['entity'] = stamp['entity']
-            data['user'] = stamp['user']
-            
-            if 'flags' in stamp:
-                data['flags'] = stamp['flags']
-            
-            if 'blurb' in stamp:
-                data['blurb'] = stamp.blurb
-            else:
-                data['blurb'] = None
-            
-            if 'image' in stamp:
-                data['image'] = stamp.image
-            else:
-                data['image'] = None
-            
-            if 'credit' in stamp:
-                data['credit'] = stamp.credit
-            else:
-                data['credit'] = None
-            
-            if 'mentions' in stamp:
-                data['mentions'] = stamp.mentions
-            else:
-                data['mentions'] = None
-                
-            if 'modified' in stamp.timestamp:
-                data['last_modified'] = str(stamp.timestamp['modified'])
-            elif 'created' in stamp.timestamp:
-                data['last_modified'] = str(stamp.timestamp['created'])
-            else:
-                data['last_modified'] = None
-                
-            if 'stats' in stamp and 'num_comments' in stamp.stats:
-                data['num_comments'] = stamp.stats['num_comments']
-            else:
-                data['num_comments'] = 0
-
-            result.append(data)
+            result.append(self._returnStamp(stamp))
         
         return result
     
@@ -1178,4 +770,209 @@ class StampedAPI(AStampedAPI):
     
     def _addEntities(self, entities):
         self._entityDB.addEntities(entities)
+        
+    # ################# #
+    # Result Formatting #
+    # ################# #
+    
+    def _returnStamp(self, stamp, user=None, entity=None, comments=None):
+        
+        result = {}
+        result['stamp_id'] = stamp['stamp_id']
+        
+        ### TODO: Explicitly define user, expand if passed full object
+        result['user'] = stamp['user']
+        
+        ### TODO: Explicitly define entity, expand if passed full object
+        result['entity'] = stamp['entity']
+        
+        ### TODO: Add comments if passed
+        
+        if 'blurb' in stamp:
+            result['blurb'] = stamp.blurb
+        else:
+            result['blurb'] = None
+        
+        if 'image' in stamp:
+            result['image'] = stamp.image
+        else:
+            result['image'] = None
+        
+        if 'credit' in stamp:
+            result['credit'] = stamp.credit
+        else:
+            result['credit'] = None
+        
+        if 'mentions' in stamp:
+            result['mentions'] = stamp.mentions
+        else:
+            result['mentions'] = None
+                
+        if 'modified' in stamp.timestamp:
+            result['last_modified'] = str(stamp.timestamp['modified'])
+        elif 'created' in stamp.timestamp:
+            result['last_modified'] = str(stamp.timestamp['created'])
+        else:
+            result['last_modified'] = None
+                
+        if 'stats' in stamp and 'num_comments' in stamp.stats:
+            result['num_comments'] = stamp.stats['num_comments']
+        else:
+            result['num_comments'] = 0
+            
+        if 'flags' in stamp:
+            result['flags'] = stamp['flags']
 
+        return result
+        
+    def _returnUser(self, user, stamp=None):
+    
+        result = {}
+        result['user_id'] = user.user_id
+        result['first_name'] = user.first_name
+        result['last_name'] = user.last_name
+        result['screen_name'] = user.screen_name
+        result['display_name'] = user.display_name
+        result['profile_image'] = user.profile_image
+        
+        if 'bio' in user:
+            result['bio'] = user.bio
+        else:
+            result['bio'] = None
+        if 'website' in user:
+            result['website'] = user['website']
+        else:
+            result['website'] = None
+        
+        result['color_primary'] = user.color_primary
+        if 'color_secondary' in user:
+            result['color_secondary'] = user.color_secondary
+        else:
+            result['color_secondary'] = None
+        
+        result['privacy'] = user.privacy
+            
+        ### TODO: expand if passed full object
+        result['last_stamp'] = None
+        
+        return result
+        
+    def _returnEntity(self, entity):
+        
+        result = {}
+        result['entity_id'] = entity.entity_id
+        result['title'] = entity.title
+        result['category'] = entity.category
+        result['subtitle'] = entity.subtitle
+        
+        if 'desc' in entity:
+            result['desc'] = entity.desc
+        else:
+            result['desc'] = None
+        
+        if 'image' in entity:
+            result['image'] = entity.image
+        else:
+            result['image'] = None
+            
+        result['details'] = {}
+        if 'details' in entity and 'place' in entity.details:
+            result['details']['place'] = {}
+            if 'address' in entity.details['place']:
+                result['details']['place']['address'] = entity.details['place']['address']
+            if 'coordinates' in entity.details['place']:
+                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
+        
+        if 'modified' in entity.timestamp:
+            result['last_modified'] = str(entity.timestamp['modified'])
+        elif 'created' in entity.timestamp:
+            result['last_modified'] = str(entity.timestamp['created'])
+        else:
+            result['last_modified'] = None
+        
+        return result
+        
+    def _returnFavorite(self, favorite, user=None, entity=None, stamp=None):
+    
+        result = {}
+        result['favorite_id'] = favorite.favorite_id
+        
+        ### TODO: Explicitly define user, expand if passed full object
+        result['user_id'] = favorite.user_id
+        
+        ### TODO: Explicitly define entity, expand if passed full object
+        result['entity'] = favorite.entity
+        
+        ### TODO: Explicitly define stamp, expand if passed full object
+        if 'stamp' in favorite:
+            result['stamp'] = favorite.stamp
+        else:
+            result['stamp'] = None
+            
+        result['timestamp'] = {}
+        if 'created' in favorite.timestamp:
+            result['timestamp']['created'] = str(favorite.timestamp['created'])
+        else:
+            result['timestamp']['created'] = None
+        if 'modified' in favorite.timestamp:
+            result['timestamp']['modified'] = str(favorite.timestamp['modified'])
+        else:
+            result['timestamp']['modified'] = None
+            
+        if 'complete' in favorite:
+            result['complete'] = favorite.complete
+        else:
+            result['complete'] = False
+        
+        return result
+        
+    def _returnComment(self, comment, user=None):
+        
+        result = {}
+        result['comment_id'] = comment['comment_id']
+        result['stamp_id'] = comment['stamp_id']
+        
+        ### TODO: Explicitly define user, expand if passed full object
+        result['user'] = comment['user']
+        
+        result['blurb'] = comment['blurb']
+        
+        if 'mentions' in comment:
+            result['mentions'] = comment.mentions
+        else:
+            result['mentions'] = None
+        
+        if 'restamp_id' in comment:
+            result['restamp_id'] = comment.restamp_id
+        else:
+            result['restamp_id'] = None
+                
+        if 'created' in comment.timestamp:
+            result['last_modified'] = str(comment.timestamp['created'])
+        else:
+            result['last_modified'] = None
+        
+        return result
+        
+    def _returnAccount(self, account):
+    
+        result = {}
+        result['user_id'] = account.user_id
+        result['first_name'] = account.first_name
+        result['last_name'] = account.last_name
+        result['email'] = account.email
+        result['screen_name'] = account.screen_name
+        result['privacy'] = account.privacy
+        
+        result['locale'] = {}
+        if 'language' in account.locale:
+            result['locale']['language'] = account.locale['language']
+        else:
+            result['locale']['language'] = None
+        if 'time_zone' in account.locale:
+            result['locale']['time_zone'] = account.locale['time_zone']
+        else:
+            result['locale']['time_zone'] = None
+            
+        return result
+        

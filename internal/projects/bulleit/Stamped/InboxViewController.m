@@ -33,10 +33,9 @@ typedef enum {
 @interface InboxViewController ()
 - (void)loadTableData;
 - (void)loadStampsFromDataStore;
-- (UITableViewCell*)cellForTableView:(UITableView*)tableView withStamp:(Stamp*)stamp;
 
 @property (nonatomic, copy) NSArray* filterButtons;
-@property (nonatomic, retain) NSArray* stampsArray;
+@property (nonatomic, copy) NSArray* stampsArray;
 @property (nonatomic, assign) UIView* filterView;
 @property (nonatomic, retain) UIButton* placesFilterButton;
 @property (nonatomic, retain) UIButton* booksFilterButton;
@@ -130,9 +129,10 @@ typedef enum {
   [self loadStampsFromDataStore];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
-  [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e2792f732a7ba6a560004b1"
+  [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e28ef4c6da2353e50000006"
                              objectMapping:stampMapping
                                   delegate:self];
+
 }
 
 - (void)loadStampsFromDataStore {
@@ -166,18 +166,14 @@ typedef enum {
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  return [self cellForTableView:tableView withStamp:[stampsArray_ objectAtIndex:indexPath.row]];
-}
-
-- (UITableViewCell*)cellForTableView:(UITableView*)tableView withStamp:(Stamp*)stamp {
   static NSString* CellIdentifier = @"StampCell";
   InboxTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  cell.stamp = stamp;
-
+  cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
+  
   return cell;
 }
 
@@ -187,13 +183,12 @@ typedef enum {
 	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 	[self loadStampsFromDataStore];
-	[self.tableView reloadData];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                   message:[error localizedDescription] 
-                                                  delegate:nil 
+                                                   message:[error localizedDescription]
+                                                  delegate:nil
                                          cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
 	[alert show];
 	NSLog(@"Hit error: %@", error);
@@ -203,6 +198,8 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
   cell.backgroundColor = [UIColor whiteColor];
+  cell.accessoryType = ([[(InboxTableViewCell*)cell stamp].numComments unsignedIntValue] > 0) ?
+      UITableViewCellAccessoryNone : UITableViewCellAccessoryDisclosureIndicator;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -210,7 +207,7 @@ typedef enum {
       [[StampDetailViewController alloc] initWithStamp:[stampsArray_ objectAtIndex:indexPath.row]];
 
   // Pass the selected object to the new view controller.
-  StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
 }

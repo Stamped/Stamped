@@ -121,7 +121,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   [self setUpCommentsView];
   
   //[self loadCommentsFromDataStore];
-  //[self loadCommentsFromServer];
+  [self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {
@@ -166,7 +166,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
-  typeIconLayer.contents = (id)stamp_.categoryImage.CGImage;
+  typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
   typeIconLayer.frame = CGRectMake(15, 48, 12, 12);
   [topHeaderCell_.layer addSublayer:typeIconLayer];
   [typeIconLayer release];
@@ -252,8 +252,9 @@ static const CGFloat kKeyboardHeight = 216.0;
   [commentLabel release];
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
-  CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
+  activityGradientLayer_ = [[CAGradientLayer alloc] init];
   CGFloat r1, g1, b1, r2, g2, b2;
   [Util splitHexString:stamp_.user.primaryColor toRed:&r1 green:&g1 blue:&b1];
   
@@ -264,14 +265,15 @@ static const CGFloat kKeyboardHeight = 216.0;
     g2 = g1;
     b2 = b1;
   }
-  gradientLayer.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
-                                                   (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
-                                                   nil];
-  gradientLayer.frame = activityView_.bounds;
-  gradientLayer.startPoint = CGPointMake(0.0, 0.0);
-  gradientLayer.endPoint = CGPointMake(1.0, 1.0);
-  [activityView_.layer insertSublayer:gradientLayer atIndex:0];
-  [gradientLayer release];
+  activityGradientLayer_.colors =
+      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
+                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
+                                nil];
+  activityGradientLayer_.frame = activityView_.bounds;
+  activityGradientLayer_.startPoint = CGPointMake(0.0, 0.0);
+  activityGradientLayer_.endPoint = CGPointMake(1.0, 1.0);
+  [activityView_.layer insertSublayer:activityGradientLayer_ atIndex:0];
+  [activityGradientLayer_ release];
 }
 
 - (void)setUpCommentsView {
@@ -313,7 +315,7 @@ static const CGFloat kKeyboardHeight = 216.0;
       break;
   }
   // Pass the selected object to the new view controller.
-  StampedAppDelegate* delegate = [[UIApplication sharedApplication] delegate];
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
 }
@@ -327,7 +329,9 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)loadCommentsFromServer {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Comment"];
-  [objectManager loadObjectsAtResourcePath:[@"/comments/show.json?stamp_id=" stringByAppendingString:stamp_.stampID]
+  NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&authenticated_user_id=%@",
+      stamp_.stampID, @"4e28ef4c6da2353e50000006"];
+  [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:commentMapping
                                   delegate:self];
 }
@@ -371,6 +375,8 @@ static const CGFloat kKeyboardHeight = 216.0;
   frame = activityView_.frame;
   frame.size.height += CGRectGetHeight(commentView.frame);
   activityView_.frame = frame;
+  activityGradientLayer_.frame = activityView_.bounds;
+  [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + kKeyboardHeight);
 }
@@ -393,10 +399,9 @@ static const CGFloat kKeyboardHeight = 216.0;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       addCommentField_.text, @"blurb",
-      @"4e2792f732a7ba6a560004b1", @"authenticated_user_id",
+      @"4e28ef4c6da2353e50000006", @"authenticated_user_id",
       stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
-  addCommentField_.enabled = NO;
   return NO;
 }
 
@@ -405,8 +410,8 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath isEqualToString:@"/comments/create.json"]) {
     [self addComment:[objects objectAtIndex:0]];
-    addCommentField_.enabled = YES;
     addCommentField_.text = nil;
+    [addCommentField_ resignFirstResponder];
     return;
   }
 
@@ -416,9 +421,6 @@ static const CGFloat kKeyboardHeight = 216.0;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	// TODO: Not working right now.
-  
-  addCommentField_.enabled = YES;
   [addCommentField_ becomeFirstResponder];
   UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
                                                    message:[error localizedDescription] 

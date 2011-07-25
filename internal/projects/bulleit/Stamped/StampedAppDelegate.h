@@ -6,9 +6,10 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-@interface StampedAppDelegate : NSObject <UIApplicationDelegate>
+@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKObjectLoaderDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;

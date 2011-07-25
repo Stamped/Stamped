@@ -12,8 +12,6 @@
 @interface InboxViewController : UITableViewController<UIScrollViewDelegate, RKObjectLoaderDelegate> {
  @private
   BOOL userDidScroll_;
-  NSArray* filterButtons_;
-  NSArray* stampsArray_;
   
   IBOutlet UIView* filterView_;
   IBOutlet UIButton* placesFilterButton_;

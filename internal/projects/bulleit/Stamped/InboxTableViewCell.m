@@ -319,7 +319,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
   self = [super initWithStyle:UITableViewCellStyleDefault
               reuseIdentifier:reuseIdentifier];
   if (self) {
-    self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    self.accessoryType = UITableViewCellAccessoryNone;
     CGRect customViewFrame = CGRectMake(0.0, 0.0, self.contentView.bounds.size.width, self.contentView.bounds.size.height);
 		customView_ = [[StampCellView alloc] initWithFrame:customViewFrame];
 		[self.contentView addSubview:customView_];
@@ -345,13 +345,10 @@ static const CGFloat kTitleMaxWidth = 210.0;
     customView_.userImage = stamp.user.profileImage;
     customView_.stampImage = stamp.user.stampImage;
     customView_.title = stamp.entityObject.title;
-    customView_.typeImage = stamp.categoryImage;
+    customView_.typeImage = stamp.entityObject.categoryImage;
     customView_.userName = stamp.user.displayName;
     customView_.comment = stamp.blurb;
     customView_.numComments = [stamp.numComments unsignedIntegerValue];
-    //self.accessoryType = ([stamp.numComments unsignedIntValue] > 0) ?
-    //    UITableViewCellAccessoryNone : UITableViewCellAccessoryDisclosureIndicator;
-    //[self.accessoryView setNeedsDisplay];
   }
 }
 

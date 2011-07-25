@@ -12,10 +12,18 @@
 
 @implementation Entity
 @dynamic category;
+@dynamic categoryImage;
 @dynamic entityID;
 @dynamic subtitle;
 @dynamic title;
 @dynamic coordinates;
 @dynamic stamp;
 
+- (void)awakeFromFetch {
+  [super awakeFromFetch];
+  if (!self.categoryImage) {
+    self.categoryImage =
+        [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
+  }
+}
 @end
