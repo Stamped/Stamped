@@ -228,7 +228,7 @@ def getPrivacy():
     ])
     return handleRequest(request, stampedAPI.getPrivacy, schema)    
 
-# ########### ##
+# ########### #
 # Friendships #
 # ########### #
 

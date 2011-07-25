@@ -11,17 +11,20 @@ from pprint import pprint
 
 # import StampedAPI from StampedAPI
 
+class apiOpener(urllib.FancyURLopener):
+    def prompt_user_passwd(self, host, realm):
+        return ('stampedtest', 'august1ftw')
+
 def testGET(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
-    result = json.load(urllib2.urlopen("%s/%s?%s" % (baseurl, path, params)))
+    result = json.load(apiOpener().open("%s/%s?%s" % (baseurl, path, params)))
     return result
-
+    
 def testPOST(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
-    result = urllib2.urlopen("%s/%s" % (baseurl, path), params)
-    #pprint(result)
+    result = apiOpener().open("%s/%s" % (baseurl, path), params)
     jsonResult = json.load(result)
     return jsonResult
 

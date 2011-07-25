@@ -10,16 +10,20 @@ import sys, thread, urllib, json
 
 # import StampedAPI from StampedAPI
 
+class apiOpener(urllib.FancyURLopener):
+    def prompt_user_passwd(self, host, realm):
+        return ('stampedtest', 'august1ftw')
+
 def testGET(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
-    result = json.load(urllib.urlopen("%s/%s?%s" % (baseurl, path, params)))
+    result = json.load(apiOpener().open("%s/%s?%s" % (baseurl, path, params)))
     return result
     
 def testPOST(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
-    result = urllib.urlopen("%s/%s" % (baseurl, path), params)
+    result = apiOpener().open("%s/%s" % (baseurl, path), params)
     jsonResult = json.load(result)
     return jsonResult
 
