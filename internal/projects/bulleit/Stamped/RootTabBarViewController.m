@@ -66,7 +66,6 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -103,8 +102,11 @@
 - (IBAction)createStamp:(id)sender {
   CreateStampViewController* createStampViewController =
       [[CreateStampViewController alloc] initWithNibName:@"CreateStampViewController" bundle:nil];
-  [self presentModalViewController:createStampViewController animated:YES];
+  UINavigationController* createStampNavController = [[UINavigationController alloc] initWithRootViewController:createStampViewController];
   [createStampViewController release];
+  createStampNavController.navigationBarHidden = YES;
+  [self presentModalViewController:createStampNavController animated:YES];
+  [createStampNavController release];
 }
 
 #pragma mark - UITabBarDelegate Methods

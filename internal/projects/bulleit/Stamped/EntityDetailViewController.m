@@ -27,8 +27,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize mainActionButton = mainActionButton_;
 @synthesize mainActionLabel = mainActionLabel_;
 
-- (id)initWithNibName:(NSString*)nibNameOrNil stamp:(Stamp*)stamp {
-  self = [self initWithNibName:nibNameOrNil bundle:nil];
+- (id)initWithStamp:(Stamp*)stamp {
+  self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     stamp_ = [stamp retain];
   }

@@ -13,7 +13,7 @@
   Stamp* stamp_;
 }
 
-- (id)initWithNibName:(NSString*)nibNameOrNil stamp:(Stamp*)stamp;
+- (id)initWithStamp:(Stamp*)stamp;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;

@@ -59,7 +59,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 @synthesize commentsArray = commentsArray_;
 
 - (id)initWithStamp:(Stamp*)stamp {
-  self = [self initWithNibName:@"StampDetailViewController" bundle:nil];
+  self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     stamp_ = [stamp retain];
   }
@@ -299,19 +299,19 @@ static const CGFloat kKeyboardHeight = 216.0;
   EntityDetailViewController* detailViewController = nil;
   switch (stamp_.category) {
     case StampCategoryPlace:
-      detailViewController = [[PlaceDetailViewController alloc] initWithNibName:@"PlaceDetailViewController" stamp:stamp_];
+      detailViewController = [[PlaceDetailViewController alloc] initWithStamp:stamp_];
       break;
     case StampCategoryBook:
-      detailViewController = [[BookDetailViewController alloc] initWithNibName:@"BookDetailViewController" stamp:stamp_];
+      detailViewController = [[BookDetailViewController alloc] initWithStamp:stamp_];
       break;
     case StampCategoryMusic:
-      detailViewController = [[MusicDetailViewController alloc] initWithNibName:@"MusicDetailViewController" stamp:stamp_];
+      detailViewController = [[MusicDetailViewController alloc] initWithStamp:stamp_];
       break;
     case StampCategoryFilm:
-      detailViewController = [[FilmDetailViewController alloc] initWithNibName:@"FilmDetailViewController" stamp:stamp_];
+      detailViewController = [[FilmDetailViewController alloc] initWithStamp:stamp_];
       break;
     default:
-      detailViewController = [[EntityDetailViewController alloc] initWithNibName:@"EntityDetailViewController" stamp:stamp_];
+      detailViewController = [[EntityDetailViewController alloc] initWithStamp:stamp_];
       break;
   }
   // Pass the selected object to the new view controller.

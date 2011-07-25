@@ -9,8 +9,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface STNavigationBar : UINavigationBar {
-    
-}
+@interface STNavigationBar : UINavigationBar
 
+@property (nonatomic, assign) BOOL hideLogo;
 @end

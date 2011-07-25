@@ -16,6 +16,8 @@
 
 @implementation STNavigationBar
 
+@synthesize hideLogo = hideLogo_;
+
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self)
@@ -37,7 +39,10 @@
   CGContextRef ctx = UIGraphicsGetCurrentContext();
   CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.85 alpha:1.0].CGColor);
   CGContextFillRect(ctx, rect);
-  [[UIImage imageNamed:@"nav_bar"] drawInRect:rect];
+  if (hideLogo_)
+    [[UIImage imageNamed:@"nav_bar_no_logo"] drawInRect:rect];
+  else
+    [[UIImage imageNamed:@"nav_bar"] drawInRect:rect];
 }
 
 - (void)initialize {
