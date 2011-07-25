@@ -252,8 +252,9 @@ static const CGFloat kKeyboardHeight = 216.0;
   [commentLabel release];
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
-  CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
+  activityGradientLayer_ = [[CAGradientLayer alloc] init];
   CGFloat r1, g1, b1, r2, g2, b2;
   [Util splitHexString:stamp_.user.primaryColor toRed:&r1 green:&g1 blue:&b1];
   
@@ -264,14 +265,15 @@ static const CGFloat kKeyboardHeight = 216.0;
     g2 = g1;
     b2 = b1;
   }
-  gradientLayer.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
-                                                   (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
-                                                   nil];
-  gradientLayer.frame = activityView_.bounds;
-  gradientLayer.startPoint = CGPointMake(0.0, 0.0);
-  gradientLayer.endPoint = CGPointMake(1.0, 1.0);
-  [activityView_.layer insertSublayer:gradientLayer atIndex:0];
-  [gradientLayer release];
+  activityGradientLayer_.colors =
+      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
+                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
+                                nil];
+  activityGradientLayer_.frame = activityView_.bounds;
+  activityGradientLayer_.startPoint = CGPointMake(0.0, 0.0);
+  activityGradientLayer_.endPoint = CGPointMake(1.0, 1.0);
+  [activityView_.layer insertSublayer:activityGradientLayer_ atIndex:0];
+  [activityGradientLayer_ release];
 }
 
 - (void)setUpCommentsView {
@@ -373,6 +375,8 @@ static const CGFloat kKeyboardHeight = 216.0;
   frame = activityView_.frame;
   frame.size.height += CGRectGetHeight(commentView.frame);
   activityView_.frame = frame;
+  activityGradientLayer_.frame = activityView_.bounds;
+  [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + kKeyboardHeight);
 }
