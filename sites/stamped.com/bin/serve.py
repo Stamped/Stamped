@@ -8,6 +8,7 @@ __license__ = "TODO"
 import init
 import os, flask, json, utils
 from flask import request, Response, Flask
+from functools import wraps
 
 from api.MongoStampedAPI import MongoStampedAPI
 from utils import AttributeDict
@@ -22,8 +23,38 @@ REST_API_VERSION = "v1"
 REST_API_PREFIX  = "/api/%s/" % REST_API_VERSION
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
+USERNAME = 'stampedtest'
+PASSWORD = 'august1ftw'
+
 app = Flask(__name__)
-stampedAPI = MongoStampedAPI() 
+stampedAPI = MongoStampedAPI()
+
+# ######################## #
+# Authentication Functions #
+# ######################## #
+
+def check_auth(username, password):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    return username == 'stampedtest' and password == 'august1ftw'
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials', 401,
+        {'WWW-Authenticate': 'Basic realm="Stamped API"'}
+    )
+
+# def requires_auth(f):
+#     @wraps(f)
+#     def decorated(*args, **kwargs):
+#         auth = request.authorization
+#         if not auth or not check_auth(auth.username, auth.password):
+#             return authenticate()
+#         return f(*args, **kwargs)
+#     return decorated
 
 # ################# #
 # Utility Functions #
@@ -54,6 +85,15 @@ def parseRequestForm(schema, form):
         raise
 
 def handleRequest(request, stampedAPIFunc, schema):
+    if 'Authorization' not in request.headers or not request.authorization:
+        return Response(
+            'Could not verify your access level for that URL.\n'
+            'You have to login with proper credentials', 401,
+            {'WWW-Authenticate': 'Basic realm="Stamped API"'}
+        )
+    if request.authorization.username != USERNAME or request.authorization.password != PASSWORD:
+        return "Error", 500
+
     if request.method == 'POST':
         data = request.form
     elif request.method == 'GET': 
@@ -584,7 +624,7 @@ def favoritesDoc():
 # Mainline #
 # ######## #
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+if __name__ == '__main__':    
+    app.run(host='0.0.0.0', debug=True, threaded=True)
     #app.run(host='0.0.0.0')
 
