@@ -221,6 +221,9 @@ The user id of the authenticating user.
 **q** _required_
 Text string to match against the entity title.
 
+**coordinates** _optional_
+Coordinates of current location to prioritize local results. Coordinates should be in the format "lat,lng".
+
 ### Sample Request ###
 	GET https://api.stamped.com/1/entities/search.json
 	q=Spotted+Pig
@@ -231,7 +234,7 @@ Text string to match against the entity title.
 			"entity_id": "4e226ea84e61754161000000",
 			"title": "Spotted Pig",
 			"category": "Restaurant",
-			"desc": "Gastropub in the West Village, NYC"
+			"subtitle": "New York, NY"
 		}
 	]
 

@@ -130,7 +130,7 @@ def accountTest(baseurl):
         
     path = "account/settings.json"
     data = {
-        "authorized_user_id": userID
+        "authenticated_user_id": userID
     }
     result = testGET(baseurl, path, data)
     if result['privacy'] == False:
@@ -306,8 +306,13 @@ def userTest(baseurl):
         
     path = "users/privacy.json"
     data = { "screen_name": "UserA" }
-    #result = testGET(baseurl, path, data)
-    print 'SKIP: %s' % path
+    privacy = testGET(baseurl, path, data)
+    if privacy == True:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print privacy
+        raise Exception
         
         
     path = "account/remove.json"

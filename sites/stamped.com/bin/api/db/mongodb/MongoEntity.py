@@ -143,7 +143,7 @@ class MongoEntity(AEntityDB, Mongo):
         return entity
     
     def updateEntity(self, entity):
-        self._updateDocument(entity, 'entity_id')
+        return self._updateDocument(entity, 'entity_id')
     
     def removeEntity(self, entityID):
         return self._removeDocument(entityID)

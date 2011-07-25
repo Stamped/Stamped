@@ -92,7 +92,7 @@ class MongoStamp(AStampDB, Mongo):
                 stamp['mentions'] = mentions
             
         # Add the stamp data to the database
-        stampId = self._addDocument(stamp, 'stamp_id')      
+        stampId = self._addDocument(stamp, 'stamp_id')
         
         # Add a reference to the stamp in the user's collection
         MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)  

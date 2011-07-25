@@ -5,11 +5,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, utils
 from abc import abstractmethod
 from datetime import datetime
 
-from errors import InvalidArgument
+from errors import *
 from AStampedAPI import AStampedAPI
 
 from AAccountDB import AAccountDB
@@ -123,12 +123,12 @@ class StampedAPI(AStampedAPI):
             raise InvalidArgument('Invalid input')
             
         userId = self._accountDB.updateAccount(account)
-        account = self._accountDB.getAccount(userID)
+        account = self._accountDB.getAccount(userId)
         
         return self._returnAccount(account)
     
-    def getAccount(self, userID):
-        account = self._accountDB.getAccount(userID)
+    def getAccount(self, params):
+        account = self._accountDB.getAccount(params.authenticated_user_id)
         return self._returnAccount(account)
         
     def updateProfile(self, params):
@@ -203,33 +203,58 @@ class StampedAPI(AStampedAPI):
     # Users #
     # ##### #
     
-    def getUser(self, userID=None, screenName=None):
-        if userID:
-            user = self._userDB.getUser(userID)
-        elif screenName:
-            user = self._userDB.lookupUsers(None, [screenName])
-            if len(user) == 0:
-                return 'error', 400
-            else:
+    def getUser(self, params):
+        # Get user by id
+        if params.user_id != None:
+            try:
+                user = self._userDB.getUser(params.user_id)
+            except (InvalidArgument, Fail) as e:
+                utils.log("Invalid user_id (%s)" % (params.user_id))
+                utils.printException()
+                raise
+        
+        # Get user by screen name
+        elif params.screen_name != None:
+            try:
+                user = self._userDB.lookupUsers(None, [params.screen_name])
                 user = user[-1]
+            except (InvalidArgument, Fail) as e:
+                utils.log("Invalid screen_name (%s)" % (params.screen_name))
+                utils.printException()
+                raise
+                
+        # Unable to get user
         else:
-            return 'error', 400
+            utils.log("Missing parameters")
+            utils.printException()
+            raise
         
         return self._returnUser(user)
     
-    def getUserByName(self, screenName):
-        return self.getUser(None, screenName)
+    def getUsers(self, params):
+        # Get users by id
+        if params.user_ids != None:
+            try:
+                users = self._userDB.lookupUsers(params.user_ids.split(','), None)
+            except (InvalidArgument, Fail) as e:
+                utils.log("Invalid user_ids (%s)" % (params.user_ids))
+                utils.printException()
+                raise
         
-    
-    def getUsers(self, userIDs=None, screenNames=None):
-        if userIDs:
-            userIDs = userIDs.split(',')
-            users = self._userDB.lookupUsers(userIDs, None)
-        elif screenNames:
-            screenNames = screenNames.split(',')
-            users = self._userDB.lookupUsers(None, screenNames)
+        # Get users by screen name
+        elif params.screen_names != None:
+            try:
+                users = self._userDB.lookupUsers(None, params.screen_names.split(','))
+            except (InvalidArgument, Fail) as e:
+                utils.log("Invalid screen_names (%s)" % (params.screen_names))
+                utils.printException()
+                raise
+                
+        # Unable to get users
         else:
-            return 'error', 400
+            utils.log("Missing parameters")
+            utils.printException()
+            raise
         
         result = []
         for user in users:
@@ -237,11 +262,9 @@ class StampedAPI(AStampedAPI):
         
         return result
     
-    def getUsersByName(self, screenNames):
-        return self.getUsers(None, screenNames)
-    
-    def searchUsers(self, query, limit=20):
-        users = self._userDB.searchUsers(query, limit)
+    def searchUsers(self, params):
+        limit = self._setLimit(params.limit, cap=20)
+        users = self._userDB.searchUsers(params.q, limit)
         
         result = []
         for user in users:
@@ -249,8 +272,33 @@ class StampedAPI(AStampedAPI):
         
         return result
     
-    def getPrivacy(self, userID):
-        if self._userDB.checkPrivacy(userID):
+    def getPrivacy(self, params):
+        # Get user by id
+        if params.user_id != None:
+            try:
+                privacy = self._userDB.checkPrivacy(params.user_id)
+            except (InvalidArgument, Fail) as e:
+                utils.log("Invalid user_id (%s)" % (params.user_id))
+                utils.printException()
+                raise
+        
+        # Get user by screen name
+        elif params.screen_name != None:
+            try:
+                userId = self._userDB.getUserId(params.screen_name)
+                privacy = self._userDB.checkPrivacy(userId)
+            except (InvalidArgument, Fail) as e:
+                utils.log("Invalid screen_name (%s)" % (params.screen_name))
+                utils.printException()
+                raise
+                
+        # Unable to get user
+        else:
+            utils.log("Missing parameters")
+            utils.printException()
+            raise
+            
+        if privacy:
             return True
         else:
             return False
@@ -311,6 +359,26 @@ class StampedAPI(AStampedAPI):
         self._friendshipDB.approveFriendship(friendship)
         return friendship
     
+    def checkFriendship(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.authenticated_user_id
+        if params.user_id != None:
+            friendship.friend_id = params.user_id
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+            
+        if self._friendshipDB.checkFriendship(friendship):
+            return True
+        else:
+            return False
+    
+    def getFriends(self, params):
+        return {'user_ids': self._friendshipDB.getFriends(params.authenticated_user_id)}
+    
+    def getFollowers(self, params):
+        return {'user_ids': self._friendshipDB.getFollowers(params.authenticated_user_id)}
+    
     def addBlock(self, params):
         friendship = Friendship()
         friendship.user_id = params.authenticated_user_id
@@ -333,6 +401,23 @@ class StampedAPI(AStampedAPI):
         
         return result
     
+    def checkBlock(self, params):
+        friendship = Friendship()
+        friendship.user_id = params.authenticated_user_id
+        if params.user_id != None:
+            friendship.friend_id = params.user_id
+        
+        if not friendship.isValid:
+            raise InvalidArgument('Invalid input')
+        
+        if self._friendshipDB.checkBlock(friendship):
+            return True
+        else:
+            return False
+    
+    def getBlocks(self, params):
+        return {'user_ids': self._friendshipDB.getBlocks(params.authenticated_user_id)}
+    
     def removeBlock(self, params):
         friendship = Friendship()
         friendship.user_id = params.authenticated_user_id
@@ -351,29 +436,6 @@ class StampedAPI(AStampedAPI):
             return True
         else:
             return False
-    
-    def checkFriendship(self, userID, friendID):
-        friendship = Friendship({'user_id': userID, 'friend_id': friendID})
-        if self._friendshipDB.checkFriendship(friendship):
-            return True
-        else:
-            return False
-    
-    def getFriends(self, userID):
-        return {'user_ids': self._friendshipDB.getFriends(userID)}
-    
-    def getFollowers(self, userID):
-        return {'user_ids': self._friendshipDB.getFollowers(userID)}
-    
-    def checkBlock(self, userID, friendID):
-        friendship = Friendship({'user_id': userID, 'friend_id': friendID})
-        if self._friendshipDB.checkBlock(friendship):
-            return True
-        else:
-            return False
-    
-    def getBlocks(self, userID):
-        return {'user_ids': self._friendshipDB.getBlocks(userID)}
     
     # ######### #
     # Favorites #
@@ -410,6 +472,9 @@ class StampedAPI(AStampedAPI):
         
         if not favorite.isValid:
             raise InvalidArgument('Invalid input')
+            
+        favoriteId = self._favoriteDB.addFavorite(favorite)
+        favorite = self._favoriteDB.getFavorite(favoriteId)
         
         return self._returnFavorite(favorite)
     
@@ -418,8 +483,8 @@ class StampedAPI(AStampedAPI):
             return True
         return False
     
-    def getFavorites(self, userID):        
-        favorites = self._favoriteDB.getFavorites(userID)
+    def getFavorites(self, params):        
+        favorites = self._favoriteDB.getFavorites(params.authenticated_user_id)
         
         result = []
         for favorite in favorites:
@@ -468,8 +533,8 @@ class StampedAPI(AStampedAPI):
         
         return self._returnEntity(entity)
     
-    def getEntity(self, entityID):
-        entity = self._entityDB.getEntity(entityID)
+    def getEntity(self, params):
+        entity = self._entityDB.getEntity(params.entity_id)
         
         return self._returnEntity(entity)
     
@@ -516,8 +581,10 @@ class StampedAPI(AStampedAPI):
         else:
             return False
         
-    def searchEntities(self, query, limit=20):
-        entities = self._entityDB.matchEntities(query, limit)
+    def searchEntities(self, params):
+        ### TODO: Customize query based on authenticated_user_id / coordinates
+    
+        entities = self._entityDB.matchEntities(params.q, limit=10)
         result = []
         
         for entity in entities:
@@ -526,10 +593,6 @@ class StampedAPI(AStampedAPI):
             data['title'] = entity.title
             data['category'] = entity.category
             data['subtitle'] = entity.subtitle
-            if 'desc' in entity:
-                data['desc'] = entity.desc
-            else:
-                data['desc'] = None
 
             result.append(data)
         
@@ -584,7 +647,7 @@ class StampedAPI(AStampedAPI):
         stampId = self._stampDB.addStamp(stamp)
         stamp = self._stampDB.getStamp(stampId)
         
-        self._returnStamp(stamp)
+        return self._returnStamp(stamp)
             
     def updateStamp(self, params):        
         stamp = self._stampDB.getStamp(params.stamp_id)
@@ -618,8 +681,9 @@ class StampedAPI(AStampedAPI):
         else:
             return False
     
-    def getStamp(self, stampID):
-        stamp = self._stampDB.getStamp(stampID)        
+    def getStamp(self, params):
+        ### TODO: Check privacy of stamp
+        stamp = self._stampDB.getStamp(params.stamp_id)        
         return self._returnStamp(stamp)
     
     def getStamps(self, stampIDs):
@@ -670,8 +734,9 @@ class StampedAPI(AStampedAPI):
         else:
             return False
     
-    def getComments(self, stampID, userID=None):        
-        comments = self._stampDB.getComments(stampID)
+    def getComments(self, params): 
+        ### TODO: Check privacy of stamp       
+        comments = self._stampDB.getComments(params.stamp_id)
             
         result = []
         for comment in comments:
@@ -683,22 +748,9 @@ class StampedAPI(AStampedAPI):
     # Collections #
     # ########### #
     
-    def getInboxStampIDs(self, userID, limit=None):
-        return self._collectionDB.getInboxStampIDs(userID, limit)
-    
-    def getUserStampIDs(self, userID, limit=None):
-        return self._collectionDB.getUserStampIDs(userID, limit)
-    
     def getInboxStamps(self, params):
         # Limit results to 20
-        limit = 20
-        if params.limit != None:
-            try:
-                limit = int(params.limit)
-                if limit > 20:
-                    limit = 20
-            except:
-                limit = limit
+        limit = self._setLimit(params.limit, cap=20)
         
         # Limit slice of data returned
         since = None
@@ -726,14 +778,7 @@ class StampedAPI(AStampedAPI):
     
     def getUserStamps(self, params):
         # Limit results to 20
-        limit = 20
-        if params.limit != None:
-            try:
-                limit = int(params.limit)
-                if limit > 20:
-                    limit = 20
-            except:
-                limit = limit
+        limit = self._setLimit(params.limit, cap=20)
         
         # Limit slice of data returned
         since = None
@@ -759,6 +804,8 @@ class StampedAPI(AStampedAPI):
         return result
     
     def getUserMentions(self, userID, limit=None):
+        ### TODO: Implement
+        raise NotImplementedError
         return self._collectionDB.getUserMentions(userID, limit)
     
     # ########### #
@@ -770,6 +817,17 @@ class StampedAPI(AStampedAPI):
     
     def _addEntities(self, entities):
         self._entityDB.addEntities(entities)
+        
+    def _setLimit(self, limit, cap=20):
+        result = cap
+        if limit != None:
+            try:
+                result = int(limit)
+                if result > cap:
+                    result = cap
+            except:
+                result = cap
+        return result
         
     # ################# #
     # Result Formatting #

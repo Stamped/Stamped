@@ -64,9 +64,9 @@ class MongoUser(AUserDB, Mongo):
         return user
         
     def getUserId(self, screenName):
-        user = self._collection.find_one({"screen_name": screenName})
+        user = self._mongoToObj(self._collection.find_one({"screen_name": screenName}), 'user_id')
         if 'user_id' in user:
-            return user.user_id
+            return user['user_id']
         return None
     
     def lookupUsers(self, userIDs, screenNames):
