@@ -55,6 +55,9 @@ def parseCommandLine():
     parser.add_option("-a", "--aws", action="store_false", dest="local", 
         default=False, help="Run all commands locally on AWS")
     
+    parser.add_option("-i", "--ip", action="store_true", dest="ip", 
+        default=False, help="Associate elastic ip address with instance (for 'init' method)")
+    
     parser.add_option("-p", "--params", action="store", dest="params", 
         default="", type="string", help="Params to pass when creating a new stack")
     

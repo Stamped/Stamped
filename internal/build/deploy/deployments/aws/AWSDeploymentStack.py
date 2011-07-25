@@ -102,6 +102,10 @@ class AWSDeploymentStack(ADeploymentStack):
         with settings(host_string=webServerInstances[0]['public_dns_name']):
             with cd("/stamped"):
                 sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % params_str, pty=False)
+        
+        if self.options.ip:
+            """ associate ip address here"""
+            pass
     
     def update(self):
         webServerInstances, dbInstances = self.getInstances()
