@@ -234,7 +234,7 @@ class Mongo():
         document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)), objId)
         return document
     
-    def _getDocumentsFromIds(self, documentIds, objId='id', since=None, before=None):
+    def _getDocumentsFromIds(self, documentIds, objId='id', since=None, before=None, sort=None, limit=20):
         ids = []
         for documentId in documentIds:
             ids.append(self._getObjectIdFromString(documentId))
@@ -245,8 +245,12 @@ class Mongo():
             params['timestamp.created'] = {'$gte': since}
         elif before != None and isinstance(before, datetime):
             params['timestamp.created'] = {'$lte': before}
-
-        documents = self._collection.find(params)
+        
+        if sort != None:
+            documents = self._collection.find(params).sort(sort, pymongo.DESCENDING).limit(limit)
+        else:
+            documents = self._collection.find(params).limit(limit)
+            
         result = []
         for document in documents:
             result.append(self._mongoToObj(document, objId))

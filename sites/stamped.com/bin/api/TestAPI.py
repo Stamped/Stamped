@@ -42,11 +42,11 @@ def main():
 #     
 #     entityTest(baseurl)
 # 
-    stampTest(baseurl)
+#     stampTest(baseurl)
 #     
 #     friendshipTest(baseurl)
 # 
-#     collectionTest(baseurl)
+    collectionTest(baseurl)
 #
 #     commentTest(baseurl)
 #
@@ -880,6 +880,23 @@ def collectionTest(baseurl):
         raise Exception
         
     
+    path = "entities/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "title": "Recette",
+        "desc": "Great food", 
+        "category": "Restaurant",
+        "coordinates": "40.714623,-74.006605"
+    }
+    entityIDb = testPOST(baseurl, path, data)['entity_id']
+    if len(entityIDb) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entityID
+        raise Exception
+        
+    
     path = "stamps/create.json"
     data = {
         "authenticated_user_id": userA,
@@ -894,6 +911,22 @@ def collectionTest(baseurl):
         print 'FAIL: %s' % path
         print stampID
         raise Exception
+        
+        
+    path = "stamps/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "entity_id": entityIDb,
+        "blurb": "Great date spot", 
+        "image": "image.png"
+    }
+    stampIDb = testPOST(baseurl, path, data)['stamp_id']
+    if len(stampIDb) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print stampID
+        raise Exception
 
 
     path = "collections/user.json"
@@ -901,7 +934,7 @@ def collectionTest(baseurl):
         "user_id": userA
     }
     result = testGET(baseurl, path, data)
-    if len(result) == 1:
+    if len(result) == 2:
         print 'PASS: %s' % path
     else:
         print 'FAIL: %s' % path
@@ -914,13 +947,12 @@ def collectionTest(baseurl):
         "authenticated_user_id": userB
     }
     result = testGET(baseurl, path, data)
-    if len(result) == 1:
+    if len(result) == 2:
         print 'PASS: %s' % path
     else:
         print 'FAIL: %s' % path
         print result
         raise Exception
-        
     
     path = "stamps/remove.json"
     data = {
@@ -935,11 +967,39 @@ def collectionTest(baseurl):
         print result
         raise Exception
         
+    
+    path = "stamps/remove.json"
+    data = {
+        "authenticated_user_id": userA,
+        "stamp_id": stampIDb
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
+        print 'DATA: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
         
     path = "entities/remove.json"
     data = {
         "authenticated_user_id": userA,
         "entity_id": entityID
+    }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "entities/remove.json"
+    data = {
+        "authenticated_user_id": userA,
+        "entity_id": entityIDb
     }
     result = testPOST(baseurl, path, data)
     if result:

@@ -177,8 +177,8 @@ class MongoStamp(AStampDB, Mongo):
             followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
             MongoInboxStamps().addInboxStamps(followerIds, stamp['id'])
     
-    def getStamps(self, stampIds, since=None, before=None):
-        stamps = self._getDocumentsFromIds(stampIds, objId='stamp_id', since=since, before=before)
+    def getStamps(self, stampIds, since=None, before=None, limit=20, sort='timestamp.created'):
+        stamps = self._getDocumentsFromIds(stampIds, objId='stamp_id', since=since, before=before, sort=sort, limit=limit)
         result = []
         for stamp in stamps:
             stamp = Stamp(stamp)

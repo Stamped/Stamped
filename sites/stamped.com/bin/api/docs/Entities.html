@@ -477,6 +477,9 @@ The user id of the authenticating user.</p>
 <p><strong>q</strong> <em>required</em>
 Text string to match against the entity title.</p>
 
+<p><strong>coordinates</strong> <em>optional</em>
+Coordinates of current location to prioritize local results. Coordinates should be in the format &#8220;lat,lng&#8221;.</p>
+
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>GET https://api.stamped.com/1/entities/search.json
@@ -489,7 +492,7 @@ q=Spotted+Pig</code></pre>
         "entity_id": "4e226ea84e61754161000000",
         "title": "Spotted Pig",
         "category": "Restaurant",
-        "desc": "Gastropub in the West Village, NYC"
+        "subtitle": "New York, NY"
     }
 ]</code></pre>
 

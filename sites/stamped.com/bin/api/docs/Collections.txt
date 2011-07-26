@@ -19,6 +19,15 @@ The user id of the requested user.
 **authenticated_user_id** _optional_
 The user id of the authenticating user. This is necessary if the requested user is locked.
 
+**limit** _optional_
+The maximum number of desired results. Values greater than the default (20) will be ignored.
+
+**since** _optional_
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of stamps to be returned. 
+
+**before** _optional_
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.
+
 ### Sample Request ###
 	GET https://api.stamped.com/1/collections/user.json
 	user_id=47cc67093475061e3d95369d
@@ -69,6 +78,15 @@ Show stamps in the authenticating user's inbox.
 
 **authenticated_user_id** _required_
 The user id of the authenticating user.
+
+**limit** _optional_
+The maximum number of desired results. Values greater than the default (20) will be ignored.
+
+**since** _optional_
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of stamps to be returned. 
+
+**before** _optional_
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.
 
 ### Sample Request ###
 	GET https://api.stamped.com/1/collections/inbox.json

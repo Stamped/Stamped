@@ -54,6 +54,7 @@ class Comment(ASchemaObject):
         valid &= 'privacy' in self.user and isinstance(self.user['privacy'], bool)
         
         valid &= 'blurb' in self and isinstance(self.blurb, basestring)
+        self.blurb = self.blurb.strip()
         
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
         valid &= 'created' in self.timestamp and isinstance(self.timestamp['created'], datetime)

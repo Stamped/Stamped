@@ -866,12 +866,10 @@ class StampedAPI(AStampedAPI):
         else:
             result['mentions'] = None
                 
-        if 'modified' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['modified'])
-        elif 'created' in stamp.timestamp:
-            result['last_modified'] = str(stamp.timestamp['created'])
+        if 'created' in stamp.timestamp:
+            result['created'] = str(stamp.timestamp['created'])
         else:
-            result['last_modified'] = None
+            result['created'] = None
                 
         if 'stats' in stamp and 'num_comments' in stamp.stats:
             result['num_comments'] = stamp.stats['num_comments']
@@ -1006,9 +1004,9 @@ class StampedAPI(AStampedAPI):
             result['restamp_id'] = None
                 
         if 'created' in comment.timestamp:
-            result['last_modified'] = str(comment.timestamp['created'])
+            result['created'] = str(comment.timestamp['created'])
         else:
-            result['last_modified'] = None
+            result['created'] = None
         
         return result
         

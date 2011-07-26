@@ -251,6 +251,15 @@ The user id of the requested user.</p>
 <p><strong>authenticated_user_id</strong> <em>optional</em>
 The user id of the authenticating user. This is necessary if the requested user is locked.</p>
 
+<p><strong>limit</strong> <em>optional</em>
+The maximum number of desired results. Values greater than the default (20) will be ignored.</p>
+
+<p><strong>since</strong> <em>optional</em>
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of stamps to be returned. </p>
+
+<p><strong>before</strong> <em>optional</em>
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.</p>
+
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>GET https://api.stamped.com/1/collections/user.json
@@ -307,6 +316,15 @@ user_id=47cc67093475061e3d95369d</code></pre>
 
 <p><strong>authenticated_user_id</strong> <em>required</em>
 The user id of the authenticating user.</p>
+
+<p><strong>limit</strong> <em>optional</em>
+The maximum number of desired results. Values greater than the default (20) will be ignored.</p>
+
+<p><strong>since</strong> <em>optional</em>
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of stamps to be returned. </p>
+
+<p><strong>before</strong> <em>optional</em>
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
