@@ -61,7 +61,7 @@
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">search_background@2x.png</string>
+									<string key="NSResourceName">shelf_background</string>
 								</object>
 							</object>
 							<object class="IBUITextField" id="780588220">
@@ -115,6 +115,7 @@
 								<string key="NSFrame">{{257, 6}, {57, 31}}</string>
 								<reference key="NSSuperview" ref="709319091"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:196</string>
 								<object class="NSColor" key="IBUIBackgroundColor">
 									<int key="NSColorSpace">3</int>
@@ -294,7 +295,7 @@
 						<int key="objectID">30</int>
 						<reference key="object" ref="672323501"/>
 						<reference key="parent" ref="709319091"/>
-						<string key="objectName">Background Image</string>
+						<string key="objectName">Shelf Background</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">31</int>
@@ -423,15 +424,15 @@
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>cancel_background@2x.png</string>
 				<string>cancel_pressed_background@2x.png</string>
-				<string>search_background@2x.png</string>
 				<string>search_field_background@2x.png</string>
+				<string>shelf_background</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{5, 58}</string>
 				<string>{5, 58}</string>
-				<string>{640, 145}</string>
 				<string>{492, 58}</string>
+				<string>{16, 16}</string>
 			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">894</string>

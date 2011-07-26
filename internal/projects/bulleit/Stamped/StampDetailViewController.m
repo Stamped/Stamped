@@ -168,16 +168,16 @@ static const CGFloat kKeyboardHeight = 216.0;
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
   typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
-  typeIconLayer.frame = CGRectMake(15, 48, 12, 12);
+  typeIconLayer.frame = CGRectMake(17, 48, 12, 12);
   [topHeaderCell_.layer addSublayer:typeIconLayer];
   [typeIconLayer release];
   
   UILabel* detailLabel =
-      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 3, 48, 258, 15)];
+      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 4, 47, 258, 15)];
   detailLabel.opaque = NO;
   detailLabel.backgroundColor = [UIColor clearColor];
   detailLabel.text = stamp_.entityObject.subtitle;
-  detailLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:11];
+  detailLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
   detailLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   [topHeaderCell_ addSubview:detailLabel];
   [detailLabel release];
@@ -223,7 +223,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   commenterNameLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   commenterNameLabel_.text = stamp_.user.displayName;
 
-  stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"HelveticaNeue" size:14]
+  stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"Helvetica" size:14]
                                forWidth:60
                           lineBreakMode:UILineBreakModeTailTruncation];
   CGRect stampedFrame = stampedLabel_.frame;
@@ -234,7 +234,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
   // TODO(andybons): Use this pattern for labels.
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  UIFont* commentFont = [UIFont fontWithName:@"HelveticaNeue" size:14];
+  UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.font = commentFont;
   commentLabel.textColor = [UIColor colorWithWhite:0.2 alpha:1.0];
   commentLabel.text = stamp_.blurb;

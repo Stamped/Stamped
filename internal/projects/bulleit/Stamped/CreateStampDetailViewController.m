@@ -21,6 +21,7 @@
 
 @implementation CreateStampDetailViewController
 
+@synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
 @synthesize detailLabel = detailLabel_;
 @synthesize reasoningLabel = reasoningLabel_;
@@ -30,6 +31,7 @@
 @synthesize ribbonedContainerView = ribbonedContainerView_;
 @synthesize reasoningTextView = reasoningTextView_;
 @synthesize doneButton = doneButton_;
+@synthesize bottomToolbar = bottomToolbar_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -41,6 +43,7 @@
 
 - (void)dealloc {
   [entityObject_ release];
+  self.scrollView = nil;
   self.titleLabel = nil;
   self.detailLabel = nil;
   self.categoryImageView = nil;
@@ -50,6 +53,7 @@
   self.reasoningTextView = nil;
   self.ribbonedContainerView = nil;
   self.doneButton = nil;
+  self.bottomToolbar = nil;
   [super dealloc];
 }
 
@@ -67,15 +71,39 @@
   navigationBar_.hideLogo = YES;
   self.userImageView.image = [AccountManager sharedManager].currentUser.profileImage;
   self.reasoningTextView.hidden = YES;
+  scrollView_.contentSize =
+      CGSizeMake(CGRectGetWidth(self.view.frame),
+                 CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationBar_.frame));
+  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
+  backgroundGradient.colors = [NSArray arrayWithObjects:
+                               (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
+                               (id)[UIColor colorWithWhite:0.93 alpha:1.0].CGColor, nil];
+  backgroundGradient.frame = self.view.bounds;
+  [self.view.layer insertSublayer:backgroundGradient atIndex:0];
+  [backgroundGradient release];
+  
+  ribbonedContainerView_.layer.shadowOpacity = 0.1;
+  ribbonedContainerView_.layer.shadowOffset = CGSizeMake(0, 1);
+  ribbonedContainerView_.layer.shadowRadius = 2;
+  ribbonedContainerView_.layer.shadowPath =
+      [UIBezierPath bezierPathWithRect:ribbonedContainerView_.bounds].CGPath;
+  
   UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
   accessoryView.backgroundColor = [UIColor colorWithWhite:0.43 alpha:1.0];
-  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
+  
+  backgroundGradient = [[CAGradientLayer alloc] init];
   backgroundGradient.frame = CGRectMake(0, 1, 320, 43);
   backgroundGradient.colors = [NSArray arrayWithObjects:
       (id)[UIColor colorWithWhite:0.19 alpha:1.0].CGColor,
       (id)[UIColor colorWithWhite:0.33 alpha:1.0].CGColor, nil];
   [accessoryView.layer addSublayer:backgroundGradient];
   [backgroundGradient release];
+  
+  bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
+  bottomToolbar_.layer.shadowOpacity = 0.2;
+  bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
+  bottomToolbar_.alpha = 0.5;
+
   self.doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
   self.doneButton.frame = CGRectMake(248, 5, 71, 36);
   UIImage* bg = [[UIImage imageNamed:@"done_button_bg"] stretchableImageWithLeftCapWidth:0 topCapHeight:0];
@@ -102,6 +130,7 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  self.scrollView = nil;
   self.titleLabel = nil;
   self.detailLabel = nil;
   self.categoryImageView = nil;
@@ -111,6 +140,7 @@
   self.reasoningTextView = nil;
   self.ribbonedContainerView = nil;
   self.doneButton = nil;
+  self.bottomToolbar = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -126,7 +156,7 @@
   [reasoningTextView_ becomeFirstResponder];
 }
 
-- (IBAction)backButtonPressed:(id)sender {
+- (IBAction)backOrCancelButtonPressed:(id)sender {
   [self.navigationController popViewControllerAnimated:YES];
 }
 

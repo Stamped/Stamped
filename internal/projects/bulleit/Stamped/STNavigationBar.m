@@ -37,7 +37,7 @@
 
 - (void)drawRect:(CGRect)rect {
   CGContextRef ctx = UIGraphicsGetCurrentContext();
-  CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.85 alpha:1.0].CGColor);
+  CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
   CGContextFillRect(ctx, rect);
   if (hideLogo_)
     [[UIImage imageNamed:@"nav_bar_no_logo"] drawInRect:rect];

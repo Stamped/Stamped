@@ -22,7 +22,7 @@
 static NSString* kTitleFontString = @"TGLight";
 static const CGFloat kTitleFontSize = 47.0;
 static NSString* kUserNameFontString = @"Helvetica-Bold";
-static NSString* kCommentFontString = @"HelveticaNeue";
+static NSString* kCommentFontString = @"Helvetica";
 static const CGFloat kSubstringFontSize = 12.0;
 static const CGFloat kUserImageHorizontalMargin = 14.0;
 static const CGFloat kUserImageSize = 41.0;

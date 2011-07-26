@@ -82,7 +82,6 @@ static AccountManager* sharedAccountManager_ = nil;
   // Check the defaults for the user ID.
   NSString* userID = [[NSUserDefaults standardUserDefaults] stringForKey:kCurrentUserIDKey];
   if (userID) {
-    NSLog(@"User id stored: %@", userID);
     NSFetchRequest* request = [User fetchRequest];
     NSPredicate* predicate = [NSPredicate predicateWithFormat:@"userID == %@", userID];
     [request setPredicate:predicate];
