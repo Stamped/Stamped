@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, gevent, utils
-import gevent, sys
+import gevent, json, math, os, sys
 
 import EntitySinks, EntitySources
 from GooglePlacesEntityProxy import GooglePlacesEntityProxy
@@ -64,9 +64,9 @@ class Crawler(Thread):
         
         return source
 
-def parseDistributedHosts(option, opt, value, parser):
-    Globals.options.distributed = True
-    Globals.options.hosts = value.split(',')
+#def parseDistributedHosts(option, opt, value, parser):
+#    Globals.options.distributed = True
+#    Globals.options.hosts = value.split(',')
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] [sources]"
@@ -82,6 +82,9 @@ def parseCommandLine():
     
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
+    
+    parser.add_option("-r", "--ratio", default=None, type="string", 
+        help="where this crawler fits in to a distributed stack")
     
     parser.add_option("-s", "--sink", default=None, type="string", 
         action="store", dest="sink", 
@@ -104,17 +107,21 @@ def parseCommandLine():
         action="store_true", dest="googlePlaces", 
         help="cross-reference place entities with the google places api")
     
-    parser.add_option("-d", "--distribute", type="string", 
-        action="callback", callback=parseDistributedHosts, 
-        help="run the crawler distributed across the given set of hosts")
+    parser.add_option("-d", "--db", default=None, type="string", 
+        action="store", dest="db", 
+        help="db to connect to for output")
+    
+    #parser.add_option("-d", "--distribute", type="string", 
+    #    action="callback", callback=parseDistributedHosts, 
+    #    help="run the crawler distributed across the given set of hosts")
     
     (options, args) = parser.parse_args()
-    if hasattr(Globals.options, 'distributed'):
-        options.distributed = Globals.options.distributed
-        options.hosts = Globals.options.hosts
-    else:
-        options.distributed = False
-        options.hosts = []
+    #if hasattr(Globals.options, 'distributed'):
+    #    options.distributed = Globals.options.distributed
+    #    options.hosts = Globals.options.hosts
+    #else:
+    #    options.distributed = False
+    #    options.hosts = []
     
     Globals.options = options
     
@@ -135,7 +142,7 @@ def parseCommandLine():
             else:
                 options.sources.append(source)
     
-    if options.count or options.distributed:
+    if options.count or options.ratio:
         count = 0
         
         for source in options.sources:
@@ -145,7 +152,34 @@ def parseCommandLine():
             print count
             sys.exit(0)
         else:
-            
+            options.count = count
+            num, den = options.ratio.split('/')
+            options.offset = math.floor((count * (num - 1)) / den)
+            options.limit  = math.ceil(count / den) + 1
+    
+    if options.db:
+        if ':' in options.db:
+            options.host, options.port = options.db.split(':')
+            options.port = int(options.port)
+        else:
+            options.host, options.port = (options.db, 27017)
+        
+        config_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        try:
+            os.mkdir(os.path.join(config_path, "conf"))
+        except:
+            pass
+        config_path = os.path.join(config_path, "conf/stamped.conf")
+        
+        conf = {
+            'mongodb' : {
+                'host' : options.host, 
+                'port' : options.port, 
+            }
+        }
+        
+        conf_str = json.dumps(conf, sort_keys=True, indent=2)
+        utils.write(config_path, conf_str)
     
     if options.sink == "test":
         options.sink = TestEntitySink()
@@ -159,8 +193,8 @@ def main():
     """
     
     options = parseCommandLine()
-    print "distributed: %s " % options.distributed
-    print "hosts: %s" % options.hosts
+    #print "distributed: %s " % options.distributed
+    #print "hosts: %s" % options.hosts
     
     Crawler(options).run()
 

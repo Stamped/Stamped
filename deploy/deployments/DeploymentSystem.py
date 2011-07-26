@@ -106,7 +106,7 @@ class DeploymentSystem(ADeploymentSystem):
         
         for stackName in stacks:
             stack = self._stacks[stackName]
-            stack.update()
+            stack.crawl()
     
     def list_stacks(self, stackNameRegex=None, stackStatus=None):
         if stackNameRegex is not None:

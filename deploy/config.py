@@ -27,14 +27,14 @@ def getInstances():
                 'port' : 27017, 
             }, 
         }, 
-        #{
-        #    'name' : 'db2', 
-        #    'roles' : [ 'db', ], 
-        #    'mongodb' : {
-        #        'replSet' : replSetName, 
-        #        'port' : 27017, 
-        #    }, 
-        #}, 
+        {
+            'name' : 'crawler0', 
+            'roles' : [ 'crawler', ], 
+        }, 
+        {
+            'name' : 'crawler1', 
+            'roles' : [ 'crawler', ], 
+        }, 
         {
             'name' : 'dev0', 
             'roles' : [ 'webServer', ], 

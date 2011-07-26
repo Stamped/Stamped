@@ -46,16 +46,7 @@ class LocalDeploymentStack(ADeploymentStack):
         self.init()
     
     def init(self):
-        dbs = filter(lambda instance: 'db' in instance['roles'], self.instances)
-        
-        members = []
-        for index in xrange(len(dbs)):
-            db = dbs[index]
-            
-            members.append({
-                '_id'  : index, 
-                'host' : 'localhost:%s' % db['mongodb']['port']
-            })
+        members = self.getDBMembers()
         
         for instance in self.instances:
             if 'replSet' in instance:
@@ -69,6 +60,18 @@ class LocalDeploymentStack(ADeploymentStack):
                 instance_init_path = os.path.join(instance_path, 'bootstrap/bin/init.py')
                 
                 self.local('python %s "%s"' % (instance_init_path, params_str))
+    
+    def getDBMembers(self):
+        dbs = filter(lambda instance: 'db' in instance['roles'], self.instances)
+        
+        members = []
+        for index in xrange(len(dbs)):
+            db = dbs[index]
+            
+            members.append({
+                '_id'  : index, 
+                'host' : 'localhost:%s' % db['mongodb']['port']
+            })
     
     def update(self):
         for instance in self.instances:
@@ -112,10 +115,15 @@ class LocalDeploymentStack(ADeploymentStack):
         os.system(cmd)
     
     def crawl(self, *args):
-        for instance in self.instances:
-            if 'webServer' in instance.roles:
-                instance_path = self._get_instance_path(instance)
-                instance_crawler_path = os.path.join(instance_path, 'stamped/sites/stamped.com/bin/crawler/crawler.py')
-                
-                self.local('python %s %s' % (instance_crawler_path, string.joinfields(args, ' ')))
+        crawlers = filter(lambda i: 'crawler' in instance['roles'], self.instances)
+        numCrawlers = len(crawlers)
+        
+        count = 1
+        for crawler in crawlers:
+            ratio = "%s/%s" % (count, numCrawlers)
+            
+            instance_path = self._get_instance_path(instance)
+            instance_crawler_path = os.path.join(instance_path, 'stamped/sites/stamped.com/bin/crawler/crawler.py')
+            
+            self.local('python %s --db --ratio %s %s' % (instance_crawler_path, ratio, string.joinfields(args, ' ')))
 

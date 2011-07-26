@@ -5,7 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils
+import Globals
+import init, utils
 import bson, copy, os, pymongo
 from errors import Fail
 from api.AEntityDB import AEntityDB
@@ -22,35 +23,7 @@ class Mongo():
     DESC    = 'MongoDB:%s' % (DB)
     
     def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
-        self._config = AttributeDict()
-        
-        try:
-            config_path = os.path.abspath(__file__)
-            for i in xrange(8):
-                config_path = os.path.dirname(config_path)
-            config_path = os.path.join(config_path, "conf/stamped.conf")
-            #print config_path
-            self._config = getPythonConfigFile(config_path, jsonPickled=True)
-            #print self._config
-        except:
-            raise Fail("Error: invalid configuration file")
-            raise
-        
-        if not 'mongodb' in self._config:
-            utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:27017")
-            self._config = AttributeDict({
-                "mongodb" : {
-                    "host" : "localhost", 
-                    "port" : 30000, 
-                }
-            })
-        
-#         self._config = AttributeDict({
-#             "mongodb" : {
-#                 "host": 'ec2-50-19-194-148.compute-1.amazonaws.com',
-#                 "port": 27017
-#             }
-#         })
+        self._initConfig()
         
         self._mapping = mapping
         self.user = self._getenv_user()
@@ -63,6 +36,41 @@ class Mongo():
         self._connection = self._connect()
         self._database = self._getDatabase()
         self._collection = self._getCollection(collection)
+    
+    def _initConfig(self):
+        self._config = AttributeDict()
+        
+        try:
+            config_path = os.path.abspath(__file__)
+            for i in xrange(4):
+                config_path = os.path.dirname(config_path)
+            config_path = os.path.join(config_path, "conf/stamped.conf")
+            self._config = getPythonConfigFile(config_path, jsonPickled=True)
+        except:
+            try:
+                config_path = os.path.abspath(__file__)
+                for i in xrange(8):
+                    config_path = os.path.dirname(config_path)
+                config_path = os.path.join(config_path, "conf/stamped.conf")
+                #print config_path
+                self._config = getPythonConfigFile(config_path, jsonPickled=True)
+                #print self._config
+            except:
+                raise Fail("Error: invalid configuration file")
+                raise
+        
+        if not 'mongodb' in self._config:
+            utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:30000")
+            self._config = AttributeDict({
+                "mongodb" : {
+                    "host" : "localhost", 
+                    "port" : 30000, 
+                }
+            })
+        
+        utils.log("%s) %s:%d" % (self.__class__.__name__, 
+                                 self._config.mongodb.host, 
+                                 self._config.mongodb.port))
     
     def _getenv_host(self):
         return str(self._config.mongodb.host)
