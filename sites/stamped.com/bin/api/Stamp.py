@@ -88,6 +88,7 @@ class Stamp(ASchemaObject):
         
         if 'blurb' in self:
             valid &= isinstance(self.blurb, basestring)
+            self.blurb = self.blurb.strip()
         if 'image' in self:
             valid &= isinstance(self.image, basestring)
         if 'mentions' in self:

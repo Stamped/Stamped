@@ -128,6 +128,8 @@ class Entity(ASchemaObject):
             valid &= isinstance(self.entity_id, basestring) 
         
         valid &= 'title' in self and isinstance(self.title, basestring)
+        self.title = self.title.strip()
+        
         valid &= 'category' in self and isinstance(self.category, basestring)
         
         if not 'subtitle' in self:

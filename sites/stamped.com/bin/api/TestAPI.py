@@ -42,53 +42,20 @@ def main():
 #     
 #     entityTest(baseurl)
 # 
-#     stampTest(baseurl)
+    stampTest(baseurl)
 #     
 #     friendshipTest(baseurl)
 # 
 #     collectionTest(baseurl)
 #
-    commentTest(baseurl)
+#     commentTest(baseurl)
 #
 #     favoriteTest(baseurl)
 
 #     regexTest()
  
     print '      COMPLETE'
-    print      
-
-
-def regexTest():
-    import re
-    
-    sampleText = []
-    sampleText.append("This is a comment with @robby and @kevin in it.")
-    sampleText.append("@robby what do you think?")
-    sampleText.append("Normal comment")
-    sampleText.append("Sending an email to robby@stamped.com")
-    sampleText.append("My handle is @sample_kevin")
-    sampleText.append("LOOK.ITS.@KEVIN.")
-    sampleText.append("Oh @reallyLongNameThatShouldBreak, really?")
-    sampleText.append("Maybe he'll finally find his keys. @peterfalk")
-    
-    user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
-    reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
-        
-    for text in sampleText:
-        print 'TEST:', text  
-        mentions = [] 
-        reply = reply_regex.match(text)
-        if reply:
-            data = {}
-            data['indices'] = [(reply.start()), reply.end()]
-            data['screen_name'] = reply.group(0)[1:]
-            mentions.append(data)
-        for user in user_regex.finditer(text):
-            data = {}
-            data['indices'] = [(user.start()+1), user.end()]
-            data['screen_name'] = user.group(0)[2:]
-            mentions.append(data)
-        print mentions
+    print 
 
 
 # ######## #
@@ -484,7 +451,7 @@ def stampTest(baseurl):
     path = "entities/create.json"
     data = {
         "authenticated_user_id": userA,
-        "title": "Little Owl",
+        "title": "Little Owl ",
         "desc": "American food in the West Village", 
         "category": "Restaurant",
         "coordinates": "40.714623,-74.006605"
