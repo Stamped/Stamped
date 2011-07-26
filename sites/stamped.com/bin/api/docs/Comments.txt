@@ -40,7 +40,7 @@ A brief text field containing the comment. This is currently limited to 512 char
 		], 
 		"restamp_id": null, 
 		"stamp_id": "4e259ca532a7ba6cd700000a", 
-		"last_modified": "2011-07-19 15:03:01.843073", 
+		"created": "2011-07-19 15:03:01.843073", 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
 			"profile__image": "user.png", 
@@ -82,7 +82,7 @@ The user id of the authenticating user. This is necessary only if the stamp is p
 			"mentions": null, 
 			"restamp_id": null, 
 			"stamp_id": "4e259ca532a7ba6cd700000a", 
-			"last_modified": "2011-07-19 15:03:01.843073", 
+			"created": "2011-07-19 15:03:01.843073", 
 			"user": {
 				"user_id": "47cc67093475061e3d95369d", 
 				"profile__image": "user.png", 
