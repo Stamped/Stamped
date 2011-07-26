@@ -44,12 +44,15 @@ class Mongo():
     def _initConfig(self):
         self._config = AttributeDict()
         
+        ### TODO: Make this more robust!
         try:
             config_path = os.path.abspath(__file__)
             for i in xrange(4):
                 config_path = os.path.dirname(config_path)
             config_path = os.path.join(config_path, "conf/stamped.conf")
             self._config = getPythonConfigFile(config_path, jsonPickled=True)
+            if not 'mongodb' in self._config:
+                raise Exception()
         except:
             try:
                 config_path = os.path.abspath(__file__)
@@ -349,4 +352,25 @@ class Mongo():
                     if limit != None and len(ids) > limit:
                         return ids[:limit]
             return ids
+    
+#     def _getRelationshipsAcrossKeys(self, keyIds, limit=None):
+#         doc = self._collection.find_one({'_id': keyId})
+#         
+#         if doc == None:
+#             return []
+#         else:
+#             ids = doc['ref_ids']
+#             if limit != None and len(ids) > limit:
+#                 return ids[:limit]
+#             if 'overflow' in doc:
+#                 # Check other buckets
+#                 buckets = []
+#                 for bucket in doc['overflow']:
+#                     buckets.append('%s%s' % (keyId, bucket))
+#                     
+#                 for moreDocs in self._collection.find({'_id': {'$in': buckets}}):
+#                     ids = ids + moreDocs['ref_ids']
+#                     if limit != None and len(ids) > limit:
+#                         return ids[:limit]
+#             return ids
 
