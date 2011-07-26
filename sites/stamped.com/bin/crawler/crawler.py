@@ -84,6 +84,7 @@ def parseCommandLine():
         help="limits the number of entities to import")
     
     parser.add_option("-r", "--ratio", default=None, type="string", 
+        action="store", dest="ratio", 
         help="where this crawler fits in to a distributed stack")
     
     parser.add_option("-s", "--sink", default=None, type="string", 
@@ -154,6 +155,8 @@ def parseCommandLine():
         else:
             options.count = count
             num, den = options.ratio.split('/')
+            num, den = int(num), int(den)
+            num, den = float(num), float(den)
             options.offset = math.floor((count * (num - 1)) / den)
             options.limit  = math.ceil(count / den) + 1
     

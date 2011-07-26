@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, CSVUtils, FactualUtils, utils
+import Globals, CSVUtils, FactualUtils, utils, os
 
 from gevent.pool import Pool
 from AEntitySource import AExternalDumpEntitySource
@@ -18,7 +18,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
         Factual US Restaurants importer
     """
     
-    DUMP_FILE_PREFIX      = "sources/dumps/data/factual/"
+    DUMP_FILE_PREFIX      = os.path.dirname(os.path.abspath(__file__)) + "/data/factual/"
     DUMP_FILE_NAME        = "US_Restaurants_V2"
     DUMP_FILE_SUFFIX      = ".csv"
     DUMP_FILE_TEST_SUFFIX = ".test"

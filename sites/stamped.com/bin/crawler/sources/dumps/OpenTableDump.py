@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import gevent, xlrd
+import gevent, os, xlrd
 import sources.OpenTableParser as OpenTableParser
 
 from gevent.pool import Pool
@@ -21,7 +21,7 @@ class OpenTableDump(AExternalDumpEntitySource):
     """
     
     # TODO: automate downloading latest dump file from the OpenTable FTP server
-    DUMP_FILE_PREFIX      = "sources/dumps/data/"
+    DUMP_FILE_PREFIX      = os.path.dirname(os.path.abspath(__file__)) + "/data/"
     DUMP_FILE_NAME        = "opentabledata"
     DUMP_FILE_SUFFIX      = ".xls"
     DUMP_FILE = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_SUFFIX

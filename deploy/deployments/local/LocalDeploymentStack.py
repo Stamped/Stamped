@@ -72,6 +72,8 @@ class LocalDeploymentStack(ADeploymentStack):
                 '_id'  : index, 
                 'host' : 'localhost:%s' % db['mongodb']['port']
             })
+        
+        return members
     
     def update(self):
         for instance in self.instances:
@@ -115,15 +117,18 @@ class LocalDeploymentStack(ADeploymentStack):
         os.system(cmd)
     
     def crawl(self, *args):
-        crawlers = filter(lambda i: 'crawler' in instance['roles'], self.instances)
+        crawlers = filter(lambda instance: 'crawler' in instance['roles'], self.instances)
         numCrawlers = len(crawlers)
+        dbs = self.getDBMembers()
+        primary = dbs[0]['host']
         
         count = 1
         for crawler in crawlers:
             ratio = "%s/%s" % (count, numCrawlers)
             
-            instance_path = self._get_instance_path(instance)
+            instance_path = self._get_instance_path(crawler)
             instance_crawler_path = os.path.join(instance_path, 'stamped/sites/stamped.com/bin/crawler/crawler.py')
             
-            self.local('python %s --db --ratio %s %s' % (instance_crawler_path, ratio, string.joinfields(args, ' ')))
+            self.local('python %s --db %s --ratio %s %s&' % (instance_crawler_path, primary, ratio, string.joinfields(args, ' ')))
+            count += 1
 

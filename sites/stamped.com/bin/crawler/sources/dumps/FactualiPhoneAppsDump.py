@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, CSVUtils, utils
-import gevent
+import gevent, os
 
 from gevent.pool import Pool
 from AEntitySource import AExternalDumpEntitySource
@@ -19,7 +19,7 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         Factual iPhoneApps data importer
     """
     
-    DUMP_FILE_PREFIX      = "sources/dumps/data/factual/"
+    DUMP_FILE_PREFIX      = os.path.dirname(os.path.abspath(__file__)) + "/data/factual/"
     DUMP_FILE_NAME        = "iPhone_Apps"
     DUMP_FILE_SUFFIX      = ".csv"
     DUMP_FILE_TEST_SUFFIX = ".test"

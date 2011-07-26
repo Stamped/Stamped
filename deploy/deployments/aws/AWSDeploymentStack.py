@@ -45,6 +45,7 @@ class AWSDeploymentStack(ADeploymentStack):
     def getInstances(self):
         webServerInstances = []
         dbInstances = []
+        crawlerInstances = []
         
         conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
         reservations = conn.get_all_instances()
@@ -61,14 +62,23 @@ class AWSDeploymentStack(ADeploymentStack):
                             'public_dns_name' : instance.public_dns_name, 
                             'instance_id' : instance.id
                         })
+                    
                     if instance.tags[stackFamilyKey].lower() == 'webserver':
                         webServerInstances.append({
                             'private_ip_address' : instance.private_ip_address, 
                             'public_dns_name' : instance.public_dns_name, 
                             'instance_id' : instance.id
                         })
+                   
+                    if instance.tags[stackFamilyKey].lower() == 'crawler':
+                        crawlerInstances.append({
+                            'private_ip_address' : instance.private_ip_address, 
+                            'public_dns_name' : instance.public_dns_name, 
+                            'instance_id' : instance.id
+                        })
+
         
-        return (webServerInstances, dbInstances)
+        return (webServerInstances, dbInstances, crawlerInstances)
     
     def init(self):
         replSet = None
@@ -80,7 +90,7 @@ class AWSDeploymentStack(ADeploymentStack):
         if replSet is None:
             raise Fail("Error: no replica set defined in config")
         
-        webServerInstances, dbInstances = self.getInstances()
+        webServerInstances, dbInstances, crawlerInstances = self.getInstances()
         
         if len(dbInstances) > 1: # Only run if multiple instances exist
             replSetMembers = []
@@ -115,7 +125,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 raise Fail("Error: failed to set elastic ip")
     
     def update(self):
-        webServerInstances, dbInstances = self.getInstances()
+        webServerInstances, dbInstances, crawlerInstances = self.getInstances()
         env.user = 'ubuntu'
         env.key_filename = [
             'keys/test-keypair'
@@ -125,6 +135,8 @@ class AWSDeploymentStack(ADeploymentStack):
         for instance in webServerInstances:
             instances.append(instance)
         for instance in dbInstances:
+            instances.append(instance)
+        for instance in crawlerInstances:
             instances.append(instance)
         
         for instance in instances:
@@ -175,14 +187,26 @@ class AWSDeploymentStack(ADeploymentStack):
         os.system('connect.sh %s %s' % (self.name, "WebServer"))
     
     def crawl(self, *args):
-        webServerInstances, dbInstances = self.getInstances()
+        webServerInstances, dbInstances, crawlerInstances = self.getInstances()
         env.user = 'ubuntu'
         env.key_filename = [
             'keys/test-keypair'
         ]
         
-        # TODO: run with non-root priveleges
-        with settings(host_string=webServerInstances[0]['public_dns_name']):
-            with cd("/stamped"):
-                sudo('. bin/activate && python /stamped/stamped/sites/stamped.com/bin/crawler/crawler.py', pty=False)
+        numCrawlers = len(crawlers)
+        count = 1
+        
+        for crawler in crawlerInstances:
+            with settings(host_string=crawler[0]['public_dns_name']):
+                with cd("/stamped"):
+                    ratio = "%s/%s" % (count, numCrawlers)
+                    crawler_path = "/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py"
+                    
+                    # TODO: GET PRIMARY
+                    host = dbInstances[i]['private_ip_address']
+                    
+                    cmd = '. bin/activate && python %s --db %s --ratio %s&' % (crawler_path, host, ratio)
+                    
+                    run(cmd, pty=False)
+                    count += 1
 
