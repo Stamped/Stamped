@@ -22,3 +22,13 @@ MongoDB
         * evaluate possible race conditions and TEST them!
         * rollback strategy
 
+Crawler
+    * FactualUSResaurants
+        * prune entities we'd not be interested in
+
+AEntityProxy
+    * Pulls from AEntitySource -> output queue
+
+AMultiprocessingEntityProxy
+    * Pulls from AEntitySource -> output queue
+

@@ -14,14 +14,22 @@ from api.IASyncProducer import IASyncProducer
 
 class AEntityProxy(AEntitySink, AEntitySource):
     
-    def __init__(self, source, name):
-        name = "%s Proxy(%s)" % (name, source.name)
-        AEntitySink.__init__(self, name, source.maxQueueSize)
-        AEntitySource.__init__(self, name, source.types, source.maxQueueSize)
+    def __init__(self, source):
+        if source is None:
+            name = "%s(None)" % (self.__class__.__name__)
+            maxQueueSize = 1
+            types = []
+        else:
+            name = "%s(%s)" % (self.__class__.__name__, source.name)
+            maxQueueSize = source.maxQueueSize
+            types = source.types
+        
+        AEntitySink.__init__(self, name, maxQueueSize)
+        AEntitySource.__init__(self, name, types, maxQueueSize)
         
         self._source = source
         self._started = False
-        self._pool = Pool(source.maxQueueSize)
+        self._pool = Pool(maxQueueSize)
     
     def _run(self):
         utils.log("[%s] pulling from source '%s'" % (self.name, self._source.name))

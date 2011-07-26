@@ -29,7 +29,7 @@ class GooglePlacesEntityProxy(AEntityProxy):
     }
     
     def __init__(self, source):
-        AEntityProxy.__init__(self, source, "GooglePlaces")
+        AEntityProxy.__init__(self, source)
         
         self._entityMatcher = EntityMatcher()
         self._seen = set()

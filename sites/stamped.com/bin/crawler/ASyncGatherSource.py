@@ -74,13 +74,10 @@ class ASyncGatherSource(IASyncProducer):
 
 class ASyncGatherSource(AEntityProxy):
     
-    def __init__(self, sources, name=None):
+    def __init__(self, sources):
         sources = list(sources)
         
-        if name is None:
-            name = "GatherSource(%d)" % (len(sources), )
-        
-        AEntityProxy.__init__(self, sources[0], name)
+        AEntityProxy.__init__(self, sources[0])
         self._sources = list(sources)
     
     def _run(self):

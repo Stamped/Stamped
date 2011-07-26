@@ -65,6 +65,7 @@ class Crawler(Thread):
         
         if self.options.googlePlaces and 'place' in source.types:
             source = GooglePlacesEntityProxy(source)
+            #source = MultiprocessingEntityProxy(source, GooglePlacesEntityProxy)
         
         return source
 

@@ -45,7 +45,7 @@ class ASchemaObject(object):
         return item in self._data
     
     def __getattr__(self, name):
-        if name == '_data':
+        if name == '_data' or name == '_schema':
             return object.__getattr__(self, name)
         
         def _get(dic):
@@ -65,7 +65,7 @@ class ASchemaObject(object):
         #print "__setattr__ %s, %s" % (name, str(value))
         value = normalize(value)
         
-        if name == '_data':
+        if name == '_data' or name == '_schema':
             object.__setattr__(self, name, value)
             return None
         
@@ -73,7 +73,7 @@ class ASchemaObject(object):
     
     def getDataAsDict(self):
         return self._data
-        
+    
     def add(self, data):
         def _unionDict(source, schema, dest):
             for k, v in source.iteritems():
@@ -152,4 +152,15 @@ class ASchemaObject(object):
     @property
     def isValid(self):
         return False
+    
+    def __getstate__(self):
+        return dict(
+            data = self._data, 
+            schema = self._schema
+        )
+    
+    def __setstate__(self, state):
+        self.__init__()
+        self._schema = state['schema']
+        self._data = state['data']
 
