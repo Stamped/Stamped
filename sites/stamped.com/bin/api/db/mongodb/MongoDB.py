@@ -33,9 +33,13 @@ class Mongo():
         self._db = db or self.DB
         self._lock = Lock()
         
-        self._connection = self._connect()
-        self._database = self._getDatabase()
-        self._collection = self._getCollection(collection)
+        try:
+            self._connection = self._connect()
+            self._database = self._getDatabase()
+            self._collection = self._getCollection(collection)
+        except:
+            raise Fail("Error: unable to connect to Mongo")
+            raise
     
     def _initConfig(self):
         self._config = AttributeDict()

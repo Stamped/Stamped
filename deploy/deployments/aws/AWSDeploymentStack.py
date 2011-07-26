@@ -184,7 +184,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 time.sleep(wait)
         
         print "WebServer instance in stack %s has been initialized! Attempting to connect via ssh..." % (self.name, )
-        os.system('connect.sh %s %s' % (self.name, "WebServer"))
+        os.system('./connect.sh %s %s' % (self.name, "WebServer"))
     
     def crawl(self, *args):
         webServerInstances, dbInstances, crawlerInstances = self.getInstances()
