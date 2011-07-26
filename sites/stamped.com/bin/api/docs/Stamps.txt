@@ -60,7 +60,8 @@ User information for any users that are named as receiving credit in the stamp. 
 			"color_secondary": "999999",
 			"screen_name": "kpalms",
 			"privacy": false
-		}
+		},
+		"comment_preview": null
 	}
 
 
@@ -130,7 +131,8 @@ User information for any users that are named as receiving credit in the stamp. 
 			"screen_name": "kpalms",
 			"privacy": false
 		},
-		"num_comments": 0
+		"num_comments": 0,
+		"comment_preview": null
 	}
 
 
@@ -209,7 +211,8 @@ The user id of the authenticating user. This is necessary for stamps that are pr
 			"screen_name": "kpalms",
 			"privacy": false
 		},
-		"num_comments": 0
+		"num_comments": 0,
+		"comment_preview": null
 	}
 
 

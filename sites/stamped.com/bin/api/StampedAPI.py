@@ -850,7 +850,7 @@ class StampedAPI(AStampedAPI):
             for comment in stamp.comment_preview:
                 result['comment_preview'].append(self._returnComment(comment))
         else:
-            result['comment_preview'] = None
+            result['comment_preview'] = []
         
         if 'blurb' in stamp:
             result['blurb'] = stamp.blurb
