@@ -100,6 +100,7 @@ class MongoStamp(AStampDB, Mongo):
         
         # Add a reference to the stamp in followers' inbox
         followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
+        followerIds.append(stamp['user']['user_id']) # Don't forget the user!
         MongoInboxStamps().addInboxStamps(followerIds, stampId)
         
         # If stamped entity is on the to do list, mark as complete
@@ -195,7 +196,7 @@ class MongoStamp(AStampDB, Mongo):
         for stamp in stamps:
             stamp = Stamp(stamp)
             stamp.comment_preview = []
-            for comment in comment:
+            for comment in comments:
                 if comment.stamp_id == stamp.stamp_id:
                     stamp.comment_preview.append(comment)
             if stamp.isValid == False:
