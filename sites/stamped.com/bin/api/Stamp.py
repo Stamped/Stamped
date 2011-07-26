@@ -36,6 +36,7 @@ class Stamp(ASchemaObject):
         'image': basestring,
         'mentions': list,
         'credit': list,
+        'comment_preview': list,
         'timestamp': {
             'created': datetime,
             'modified': datetime
@@ -95,6 +96,8 @@ class Stamp(ASchemaObject):
             valid &= isinstance(self.mentions, list)
         if 'credit' in self:
             valid &= isinstance(self.credit, list)
+        if 'comment_preview' in self:
+            valid &= isinstance(self.comment_preview, list)
         
         if 'flags' in self:
             valid &= isinstance(self.flags, dict)

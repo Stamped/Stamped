@@ -71,6 +71,9 @@ class MongoComment(ACommentDB, Mongo):
     
     def getCommentIds(self, stampId):
         return MongoStampComments().getStampCommentIds(stampId)
+        
+    def getNumberOfComments(self, stampId):
+        return len(self.getCommentIds(stampId))
     
     def getComments(self, stampId):
         comments = self._getDocumentsFromIds(self.getCommentIds(stampId), 'comment_id')
@@ -81,9 +84,17 @@ class MongoComment(ACommentDB, Mongo):
                 raise KeyError("Comment not valid")
             result.append(comment)
         return result
-        
-    def getNumberOfComments(self, stampId):
-        return len(self.getCommentIds(stampId))
+    
+    def getCommentsAcrossStamps(self, stampIds):
+        commentIds = MongoStampComments().getCommentIdsAcrossStampIds(stampIds)
+        comments = self._getDocumentsFromIds(commentIds, 'comment_id')
+        result = []
+        for comment in comments:
+            comment = Comment(comment)
+            if comment.isValid == False:
+                raise KeyError("Comment not valid")
+            result.append(comment)
+        return result
             
     
     ### PRIVATE

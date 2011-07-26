@@ -52,6 +52,7 @@ class MongoStamp(AStampDB, Mongo):
         'image': basestring,
         'mentions': list,
         'credit': list,
+        'comment_preview': list,
         'timestamp': {
             'created': datetime,
             'modified': datetime
@@ -177,14 +178,30 @@ class MongoStamp(AStampDB, Mongo):
             followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
             MongoInboxStamps().addInboxStamps(followerIds, stamp['id'])
     
-    def getStamps(self, stampIds, since=None, before=None, limit=20, sort='timestamp.created'):
-        stamps = self._getDocumentsFromIds(stampIds, objId='stamp_id', since=since, before=before, sort=sort, limit=limit)
+    def getStamps(self, stampIds, since=None, before=None, limit=20, sort='timestamp.created', withComments=False):
+        # Set variables
         result = []
+        comments = []
+        
+        # Get stamps
+        stamps = self._getDocumentsFromIds(stampIds, objId='stamp_id', since=since, 
+                                            before=before, sort=sort, limit=limit)
+        
+        # If comments are included, grab them
+        if withComments:
+            comments = MongoComment().getCommentsAcrossStamps(stampIds)
+        
+        # Build stamp object for each result
         for stamp in stamps:
             stamp = Stamp(stamp)
+            stamp.comment_preview = []
+            for comment in comment:
+                if comment.stamp_id == stamp.stamp_id:
+                    stamp.comment_preview.append(comment)
             if stamp.isValid == False:
                 raise KeyError("Stamp not valid")
             result.append(stamp)
+            
         return result
         
     def incrementStatsForStamp(self, stampId, stat, increment=1):

@@ -34,7 +34,6 @@ class MongoStampComments(Mongo):
     ### PUBLIC
     
     def addStampComment(self, stampId, commentId):
-        
         if not isinstance(stampId, basestring) or not isinstance(commentId, basestring):
             raise KeyError("ID not valid")
         self._createRelationship(keyId=stampId, refId=commentId)
@@ -51,6 +50,9 @@ class MongoStampComments(Mongo):
     def getStampCommentIds(self, stampId, limit=None):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(stampId, limit)
+        
+    def getCommentIdsAcrossStampIds(self, stampIds, limit=4):
+        return self._getRelationshipsAcrossKeys(keyIds, limit=4)
 
 
     ### PRIVATE
