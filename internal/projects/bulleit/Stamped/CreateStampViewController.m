@@ -146,7 +146,7 @@
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   Entity* entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
   CreateStampDetailViewController* detailViewController =
-      [[CreateStampDetailViewController alloc] initWithEntity:entityObject];
+      [[CreateStampDetailViewController alloc] initWithEntityObject:entityObject];
   [self.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
 }

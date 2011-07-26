@@ -10,6 +10,7 @@ from utils import log, logRaw, shell, AttributeDict
 from ADeploymentStack import ADeploymentStack
 from errors import Fail
 from boto.ec2.connection import EC2Connection
+from boto.ec2.address import Address
 
 from fabric.operations import *
 from fabric.api import *
@@ -17,6 +18,7 @@ from fabric.contrib.console import *
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'
+ELASTIC_IP_ADDRESS = '184.73.229.100'
 
 class AWSDeploymentStack(ADeploymentStack):
     def __init__(self, name, parent):
@@ -57,11 +59,13 @@ class AWSDeploymentStack(ADeploymentStack):
                         dbInstances.append({
                             'private_ip_address' : instance.private_ip_address, 
                             'public_dns_name' : instance.public_dns_name, 
+                            'instance_id' : instance.id
                         })
                     if instance.tags[stackFamilyKey].lower() == 'webserver':
                         webServerInstances.append({
                             'private_ip_address' : instance.private_ip_address, 
                             'public_dns_name' : instance.public_dns_name, 
+                            'instance_id' : instance.id
                         })
         
         return (webServerInstances, dbInstances)
@@ -105,7 +109,10 @@ class AWSDeploymentStack(ADeploymentStack):
         
         if self.options.ip:
             """ associate ip address here"""
-            pass
+            conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+            address = Address(conn, ELASTIC_IP_ADDRESS)
+            if not address.associate(webServerInstances[0]['instance_id']):
+                raise Fail("Error: failed to set elastic ip")
     
     def update(self):
         webServerInstances, dbInstances = self.getInstances()
