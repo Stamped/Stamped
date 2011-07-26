@@ -10,7 +10,7 @@ import gevent, xlrd
 import sources.OpenTableParser as OpenTableParser
 
 from gevent.pool import Pool
-from api.AEntitySource import AExternalDumpEntitySource
+from AEntitySource import AExternalDumpEntitySource
 from api.Entity import Entity
 
 __all__ = [ "OpenTableDump" ]
@@ -34,19 +34,28 @@ class OpenTableDump(AExternalDumpEntitySource):
         
         self._dumpFile = self.DUMP_FILE
     
+    def getMaxNumEntities(self):
+        book  = xlrd.open_workbook(self._dumpFile)
+        sheet = book.sheet_by_index(0)
+        return max(0, sheet.nrows - 1)
+    
     def _run(self):
         book  = xlrd.open_workbook(self._dumpFile)
         sheet = book.sheet_by_index(0)
         
-        if self.limit:
+        if Globals.options.limit:
             # add one to limit to account for the first row containing header info
-            numEntities = min(sheet.nrows, self.limit + 1)
+            numEntities = max(0, min(sheet.nrows - Globals.options.offset, Globals.options.limit + 1))
         else:
-            numEntities = sheet.nrows
+            numEntities = max(0, sheet.nrows - Globals.options.offset)
         
         pool = Pool(128)
         for i in xrange(1, numEntities):
-            pool.spawn(self._parseEntity, sheet, i, numEntities)
+            pool.spawn(self._parseEntity, sheet, Globals.options.offset + i, numEntities)
+        
+        Globals.options.offset = 0
+        if Globals.options.limit:
+            Globals.options.limit = max(0, Globals.options.limit - numEntities + 1)
         
         pool.join()
         self._output.put(StopIteration)

@@ -11,7 +11,7 @@ import json, urllib
 from optparse import OptionParser
 from Geocoder import Geocoder
 from AKeyBasedAPI import AKeyBasedAPI
-from api.AEntitySource import AExternalServiceEntitySource
+from AEntitySource import AExternalServiceEntitySource
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'

@@ -8,7 +8,7 @@ __license__ = "TODO"
 import Globals, CSVUtils, utils
 
 from gevent.pool import Pool
-from api.AEntitySource import AExternalDumpEntitySource
+from AEntitySource import AExternalDumpEntitySource
 from api.Entity import Entity
 
 __all__ = [ "FactualUSPlacesDump" ]

@@ -9,7 +9,7 @@ import Globals, utils
 
 from gevent.pool import Pool
 from api.AEntitySink import AEntitySink
-from api.AEntitySource import AEntitySource
+from AEntitySource import AEntitySource
 from api.IASyncProducer import IASyncProducer
 
 class AEntityProxy(AEntitySink, AEntitySource):

@@ -9,7 +9,7 @@ import Globals, CSVUtils, utils
 import gevent
 
 from gevent.pool import Pool
-from api.AEntitySource import AExternalDumpEntitySource
+from AEntitySource import AExternalDumpEntitySource
 from api.Entity import Entity
 
 __all__ = [ "FactualiPhoneAppsDump" ]
@@ -60,10 +60,17 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         else:
             self._dumpFile = self.DUMP_FILE
     
+    def getMaxNumEntities(self):
+        csvFile  = open(self._dumpFile, 'rb')
+        numLines = max(0, CSVUtils.getNumLines(csvFile) - 1)
+        csvFile.close()
+        
+        return numLines
+    
     def _run(self):
         csvFile  = open(self._dumpFile, 'rb')
-        numLines = max(1, CSVUtils.getNumLines(csvFile) - 1)
-        if self.limit: numLines = min(self.limit, numLines)
+        numLines = max(0, CSVUtils.getNumLines(csvFile) - 1)
+        if Globals.options.limit: numLines = max(0, min(Globals.options.limit, numLines - Globals.options.offset))
         
         utils.log("[%s] parsing %d entities from '%s'" % \
             (self.NAME, numLines, self.DUMP_FILE_NAME))
@@ -71,9 +78,14 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         reader = CSVUtils.UnicodeReader(csvFile)
         pool   = Pool(512)
         count  = 0
+        offset = 0
         
         for row in reader:
-            if self.limit and count >= self.limit:
+            if offset < Globals.options.offset:
+                offset += 1
+                continue
+            
+            if Globals.options.limit and count >= Globals.options.limit:
                 break
             
             pool.spawn(self._parseEntity, row, count)
@@ -82,6 +94,10 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
             if numLines > 100 and (count % (numLines / 100)) == 0:
                 utils.log("[%s] done parsing %s" % \
                     (self.NAME, utils.getStatusStr(count, numLines)))
+        
+        Globals.options.offset = 0
+        if Globals.options.limit:
+            Globals.options.limit = max(0, Globals.options.limit - count)
         
         pool.join()
         self._output.put(StopIteration)

@@ -29,21 +29,21 @@ class Mongo():
             for i in xrange(8):
                 config_path = os.path.dirname(config_path)
             config_path = os.path.join(config_path, "conf/stamped.conf")
-            print config_path
+            #print config_path
             self._config = getPythonConfigFile(config_path, jsonPickled=True)
-            print self._config
+            #print self._config
         except:
             raise Fail("Error: invalid configuration file")
             raise
         
         if not 'mongodb' in self._config:
-            utils.log("Error: invalid configuration file; defaulting to localhost:27017")
-            self._config = {
+            utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:27017")
+            self._config = AttributeDict({
                 "mongodb" : {
                     "host" : "localhost", 
-                    "port" : 27017, 
+                    "port" : 30000, 
                 }
-            }
+            })
         
 #         self._config = AttributeDict({
 #             "mongodb" : {

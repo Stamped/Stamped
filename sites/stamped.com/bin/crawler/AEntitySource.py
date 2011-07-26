@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import Globals, EntitySources, utils
 
-from IASyncProducer import IASyncProducer
+from api.IASyncProducer import IASyncProducer
 from gevent import Greenlet
 from gevent.queue import Queue
 from abc import abstractmethod
@@ -31,8 +31,6 @@ class AEntitySource(Greenlet, IASyncProducer):
         self._output = Queue(maxQueueSize)
         self._started = False
         self._maxQueueSize = maxQueueSize
-        
-        self.limit = None
         
         # validate the types
         for t in types:
@@ -73,6 +71,10 @@ class AEntitySource(Greenlet, IASyncProducer):
     
     @property
     def maxQueueSize(self): return self._maxQueueSize
+    
+    @abstractmethod
+    def getMaxNumEntities(self):
+        raise NotImplementedError
 
 class AExternalEntitySource(AEntitySource):
     
