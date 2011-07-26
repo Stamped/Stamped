@@ -8,6 +8,7 @@
 
 #import "StampedAppDelegate.h"
 
+#import <RestKit/RestKit.h>
 #import <RestKit/CoreData/CoreData.h>
 
 #import "Comment.h"
@@ -25,6 +26,8 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   [RKRequestQueue sharedQueue].showsNetworkActivityIndicatorWhenBusy = YES;
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
+  objectManager.client.username = @"stampedtest";
+  objectManager.client.password = @"august1ftw";
 
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
@@ -78,6 +81,7 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];
+  
   return YES;
 }
 
@@ -100,16 +104,6 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [window_ release];
   [navigationController_ release];
   [super dealloc];
-}
-
-#pragma mark - RKObjectLoaderDelegate Methods.
-
-- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  NSLog(@"loading of object failed: %@", [error localizedDescription]);
-}
-
-- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
-  NSLog(@"current user: %@", (User*)object);
 }
 
 @end

@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "AccountManager.h"
 #import "Entity.h"
 #import "STNavigationBar.h"
 #import "UserImageView.h"
@@ -64,7 +65,7 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   navigationBar_.hideLogo = YES;
-
+  self.userImageView.image = [AccountManager sharedManager].currentUser.profileImage;
   self.reasoningTextView.hidden = YES;
   UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
   accessoryView.backgroundColor = [UIColor colorWithWhite:0.43 alpha:1.0];

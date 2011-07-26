@@ -12,6 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "AccountManager.h"
 #import "EntityDetailViewController.h"
 #import "Comment.h"
 #import "FilmDetailViewController.h"
@@ -277,7 +278,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 }
 
 - (void)setUpCommentsView {
-  currentUserImageView_.image = [UIImage imageNamed:@"robby_s_user_image"];
+  currentUserImageView_.image = [AccountManager sharedManager].currentUser.profileImage;
 }
 
 - (IBAction)handleCommentButtonTap:(id)sender {
@@ -330,7 +331,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Comment"];
   NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&authenticated_user_id=%@",
-      stamp_.stampID, @"4e28ef4c6da2353e50000006"];
+      stamp_.stampID, [AccountManager sharedManager].currentUser.userID];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:commentMapping
                                   delegate:self];
@@ -399,7 +400,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       addCommentField_.text, @"blurb",
-      @"4e28ef4c6da2353e50000006", @"authenticated_user_id",
+      [AccountManager sharedManager].currentUser.userID, @"authenticated_user_id",
       stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
   return NO;

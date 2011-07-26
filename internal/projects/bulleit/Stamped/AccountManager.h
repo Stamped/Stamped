@@ -6,8 +6,22 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <RestKit/RestKit.h>
+#import <UIKit/UIKit.h>
 
-@interface AccountManager : NSObject
+#import "User.h"
+
+@protocol AccountManagerDelegate
+@required
+- (void)accountManagerDidAuthenticate;
+@end
+
+@interface AccountManager : NSObject<UITextFieldDelegate, RKObjectLoaderDelegate>
+
++ (AccountManager*)sharedManager;
+- (void)authenticate;
+
+@property (nonatomic, retain) User* currentUser;
+@property (nonatomic, assign) id<AccountManagerDelegate> delegate;
 
 @end

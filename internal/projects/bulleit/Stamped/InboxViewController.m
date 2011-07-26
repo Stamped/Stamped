@@ -12,6 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "AccountManager.h"
 #import "Entity.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
@@ -129,7 +130,9 @@ typedef enum {
   [self loadStampsFromDataStore];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
-  [objectManager loadObjectsAtResourcePath:@"/collections/inbox.json?authenticated_user_id=4e28ef4c6da2353e50000006"
+  NSString* userID = [AccountManager sharedManager].currentUser.userID;
+  NSString* resourcePath = [NSString stringWithFormat:@"/collections/inbox.json?authenticated_user_id=%@", userID];
+  [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:stampMapping
                                   delegate:self];
 
@@ -198,8 +201,6 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
   cell.backgroundColor = [UIColor whiteColor];
-  cell.accessoryType = ([[(InboxTableViewCell*)cell stamp].numComments unsignedIntValue] > 0) ?
-      UITableViewCellAccessoryNone : UITableViewCellAccessoryDisclosureIndicator;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {

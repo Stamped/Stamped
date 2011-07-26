@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface RootTabBarViewController : UIViewController <UITabBarDelegate>
+#import "AccountManager.h"
+
+@interface RootTabBarViewController : UIViewController <UITabBarDelegate, AccountManagerDelegate>
 
 @property (nonatomic, retain) NSArray* viewControllers;
 @property (nonatomic, retain) UIViewController* selectedViewController;

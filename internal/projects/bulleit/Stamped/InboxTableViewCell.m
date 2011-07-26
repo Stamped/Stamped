@@ -37,6 +37,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
   // Managed by the top-level view system.
   UserImageView* userImageView_;
   UIImageView* typeImageView_;
+  UIImageView* disclosureImageView_;
   UILabel* userNameLabel_;
   UILabel* commentLabel_;
   STBadgeView* badgeView_;
@@ -61,6 +62,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
 @property (nonatomic, copy) NSString* title;
 @property (nonatomic, retain) UIImage* userImage;
 @property (nonatomic, retain) UIImage* typeImage;
+@property (nonatomic, retain) UIImage* disclosureArrowImage;
 @property (nonatomic, copy) NSString* userName;
 @property (nonatomic, copy) NSString* comment;
 
@@ -79,6 +81,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
 @synthesize selected = selected_;
 @synthesize numComments = numComments_;
 @synthesize stampImage = stampImage_;
+@synthesize disclosureArrowImage = disclosureArrowImage_;
 @synthesize title = title_;
 @synthesize userImage = userImage_;
 @synthesize typeImage = typeImage_;
@@ -109,6 +112,13 @@ static const CGFloat kTitleMaxWidth = 210.0;
     [self addSubview:typeImageView_];
     [typeImageView_ release];
 
+    self.disclosureArrowImage = [UIImage imageNamed:@"disclosure_arrow"];
+    disclosureImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(300, 34, 8, 11)];
+    disclosureImageView_.contentMode = UIViewContentModeScaleAspectFit;
+    disclosureImageView_.image = self.disclosureArrowImage;
+    [self addSubview:disclosureImageView_];
+    [disclosureImageView_ release];
+    
     userNameLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     userNameLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     userNameLabel_.textColor = defaultSubstringColor_;
@@ -182,8 +192,10 @@ static const CGFloat kTitleMaxWidth = 210.0;
     substringColor = whiteColor_;
     titleColor = whiteColor_;
     typeImageView_.image = [self whiteMaskedImageUsingImage:typeImage_];
+    disclosureImageView_.image = [self whiteMaskedImageUsingImage:disclosureArrowImage_];
   } else {
     typeImageView_.image = typeImage_;
+    disclosureImageView_.image = disclosureArrowImage_;
   }
   
   userNameLabel_.textColor = substringColor;

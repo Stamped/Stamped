@@ -12,6 +12,10 @@
 #import "ActivityViewController.h"
 #import "CreateStampViewController.h"
 
+@interface RootTabBarViewController ()
+- (void)finishViewInit;
+@end
+
 @implementation RootTabBarViewController
 
 @synthesize viewControllers = viewControllers_;
@@ -45,22 +49,25 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
   // Do this so that there is no title shown.
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
+  [AccountManager sharedManager].delegate = self;
+  [[AccountManager sharedManager] authenticate];
+}
 
-  InboxViewController* stampsList = [[InboxViewController alloc]
-      initWithNibName:@"InboxViewController" bundle:nil];
-  ActivityViewController* activity = [[ActivityViewController alloc]
-      initWithNibName:@"ActivityViewController" bundle:nil];
-  self.viewControllers = [NSArray arrayWithObjects:stampsList, activity, nil];
-  [self.view addSubview:stampsList.view];
-  self.selectedViewController = stampsList;  
-  [stampsList release];
+- (void)finishViewInit {
+  InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
+  ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
+  self.viewControllers = [NSArray arrayWithObjects:inbox, activity, nil];
+  CGRect inboxFrame = CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
+  inbox.view.frame = inboxFrame;
+  [self.view addSubview:inbox.view];
+  self.selectedViewController = inbox;  
+  [inbox release];
   [activity release];
   if ([self.tabBar respondsToSelector:@selector(setSelectedImageTintColor:)])
     [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
-
+  
   self.tabBar.selectedItem = stampsTabBarItem_;
 }
 
@@ -109,7 +116,13 @@
   [createStampNavController release];
 }
 
-#pragma mark - UITabBarDelegate Methods
+#pragma mark - AccountManagerDelegate Methods.
+
+- (void)accountManagerDidAuthenticate {
+  [self finishViewInit];
+}
+
+#pragma mark - UITabBarDelegate Methods.
 
 - (void)tabBar:(UITabBar*)tabBar didSelectItem:(UITabBarItem*)item {
   UIViewController* newViewController = nil;
