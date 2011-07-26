@@ -36,13 +36,13 @@ class MongoCollection(ACollectionDB):
         return MongoInboxStamps().getInboxStampIds(userId, since, limit)
     
     def getInboxStamps(self, userId, since=None, before=None, limit=None):
-        return MongoStamp().getStamps(self.getInboxStampIDs(userId), since=since, before=before, limit=limit)
+        return MongoStamp().getStamps(self.getInboxStampIDs(userId), since=since, before=before, limit=limit, withComments=True)
     
     def getUserStampIDs(self, userId, limit=None):
         return MongoUserStamps().getUserStampIds(userId)
     
     def getUserStamps(self, userId, since=None, before=None, limit=None):
-        return MongoStamp().getStamps(self.getUserStampIDs(userId), since=since, before=before, limit=limit)
+        return MongoStamp().getStamps(self.getUserStampIDs(userId), since=since, before=before, limit=limit, withComments=True)
     
     def getMentions(self, userId, limit=None):
         raise NotImplementedError

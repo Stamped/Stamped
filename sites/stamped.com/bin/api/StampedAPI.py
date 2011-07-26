@@ -845,6 +845,12 @@ class StampedAPI(AStampedAPI):
         result['entity'] = stamp['entity']
         
         ### TODO: Add comments if passed
+        if 'comment_preview' in stamp and len(stamp.comment_preview) > 0:
+            result['comment_preview'] = []
+            for comment in stamp.comment_preview:
+                result['comment_preview'].append(self._returnComment(comment))
+        else:
+            result['comment_preview'] = None
         
         if 'blurb' in stamp:
             result['blurb'] = stamp.blurb

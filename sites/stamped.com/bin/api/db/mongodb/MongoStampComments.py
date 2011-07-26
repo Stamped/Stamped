@@ -52,7 +52,7 @@ class MongoStampComments(Mongo):
         return self._getRelationships(stampId, limit)
         
     def getCommentIdsAcrossStampIds(self, stampIds, limit=4):
-        return self._getRelationshipsAcrossKeys(keyIds, limit=4)
+        return self._getRelationshipsAcrossKeys(stampIds, limit=4)
 
 
     ### PRIVATE
