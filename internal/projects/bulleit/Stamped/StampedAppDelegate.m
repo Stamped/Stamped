@@ -52,23 +52,27 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [entityMapping mapAttributes:@"category", @"subtitle", @"title", nil];
   [entityMapping mapRelationship:@"coordinates" withObjectMapping:coordinateMapping];  
 
+  RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
+  commentMapping.primaryKeyAttribute = @"commentID";
+  [commentMapping mapAttributes:@"blurb", @"created", nil];
+  [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
+                                          @"restamp_id", @"restampID",
+                                          @"stamp_id", @"stampID", nil];
+  [commentMapping mapRelationship:@"user" withObjectMapping:userMapping];
+
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
   stampMapping.primaryKeyAttribute = @"stampID";
   [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
-                                        @"last_modified", @"lastModified",
+                                        @"created", @"created",
                                         @"num_comments", @"numComments", nil];
   [stampMapping mapAttributes:@"blurb", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withObjectMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withObjectMapping:userMapping];
+  [stampMapping mapKeyPath:@"comment_preview"
+            toRelationship:@"comments"
+         withObjectMapping:commentMapping];
   
-  RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
-  commentMapping.primaryKeyAttribute = @"commentID";
-  [commentMapping mapAttributes:@"blurb", nil];
-  [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
-                                          @"restamp_id", @"restampID",
-                                          @"stamp_id", @"stampID",
-                                          @"last_modified", @"lastModified", nil];
-  [commentMapping mapRelationship:@"user" withObjectMapping:userMapping];
+  
   // Example date string: 2011-07-19 20:49:42.037000
   NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
 	[stampMapping.dateFormatStrings addObject:dateFormat];

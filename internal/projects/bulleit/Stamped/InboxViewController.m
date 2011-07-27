@@ -141,7 +141,7 @@ typedef enum {
 - (void)loadStampsFromDataStore {
   self.stampsArray = nil;
 	NSFetchRequest* request = [Stamp fetchRequest];
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"lastModified" ascending:NO];
+	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
 	self.stampsArray = [Stamp objectsWithFetchRequest:request];
   [self.tableView reloadData];

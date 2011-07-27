@@ -15,7 +15,7 @@
 @dynamic commentID;
 @dynamic stampID;
 @dynamic restampID;
-@dynamic lastModified;
+@dynamic created;
 @dynamic user;
 
 @end
