@@ -48,11 +48,11 @@ def main():
 # 
 #     collectionTest(baseurl)
 #
-    commentTest(baseurl)
+#     commentTest(baseurl)
 #
 #     favoriteTest(baseurl)
-
-#     regexTest()
+#
+    activityTest(baseurl)
  
     print '      COMPLETE'
     print 
@@ -1362,6 +1362,328 @@ def favoriteTest(baseurl):
     data = { "authenticated_user_id": userID }
     result = testPOST(baseurl, path, data)
     if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    print
+
+    
+    
+# ######## #
+# Activity #
+# ######## #
+
+def activityTest(baseurl):
+
+    print    
+    print '      ACTIVITY'
+    
+    
+    path = "account/create.json"
+    data = {
+        "first_name": "Kevin",
+        "last_name": "Palms", 
+        "email": "kevin@stamped.com", 
+        "password": "******",
+        "screen_name": "kpalms"
+    }
+    userA = testPOST(baseurl, path, data)['user_id']
+    data = {
+        "first_name": "Robby",
+        "last_name": "Stein", 
+        "email": "robby@stamped.com", 
+        "password": "******",
+        "screen_name": "rmstein"
+    }
+    userB = testPOST(baseurl, path, data)['user_id']
+    if len(userA) == 24 and len(userB) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print userID
+        raise Exception
+        
+        
+    path = "account/settings.json"
+    data = {
+        "authenticated_user_id": userA,
+        "privacy": False
+    }
+    result = testPOST(baseurl, path, data)
+    data = {
+        "authenticated_user_id": userB,
+        "privacy": False
+    }
+    result = testPOST(baseurl, path, data)
+    if result['privacy'] == False:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/update_profile.json"
+    data = {
+        "authenticated_user_id": userA,
+        "bio": "My long biography goes here.",
+        "color": "333333,999999"
+    }
+    result = testPOST(baseurl, path, data)
+    data = {
+        "authenticated_user_id": userB,
+        "bio": "My long biography goes here.",
+        "color": "333333,999999"
+    }
+    result = testPOST(baseurl, path, data)
+    if result['color_primary'] == '333333':
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/update_profile_image.json"
+    data = {
+        "authenticated_user_id": userA,
+        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!
+    }
+    result = testPOST(baseurl, path, data)
+    data = {
+        "authenticated_user_id": userB,
+        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!
+    }
+    result = testPOST(baseurl, path, data)
+    if result['profile_image'] == 'https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg':
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+    
+    
+    path = "friendships/create.json"
+    data = {
+        "authenticated_user_id": userB,
+        "user_id": userA
+    }
+    result = testPOST(baseurl, path, data)    
+    if result['user_id'] == userA:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "entities/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "title": "Little Owl",
+        "desc": "American food in the West Village", 
+        "category": "Restaurant",
+        "coordinates": "40.714623,-74.006605"
+    }
+    entityID = testPOST(baseurl, path, data)['entity_id']
+    if len(entityID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entityID
+        raise Exception
+        
+    
+    path = "entities/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "title": "Recette",
+        "desc": "Great food", 
+        "category": "Restaurant",
+        "coordinates": "40.714623,-74.006605"
+    }
+    entityIDb = testPOST(baseurl, path, data)['entity_id']
+    if len(entityIDb) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print entityID
+        raise Exception
+        
+    
+    path = "stamps/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "entity_id": entityID,
+        "blurb": "Favorite restaurant in the Village.", 
+        "image": "image.png"
+    }
+    stampID = testPOST(baseurl, path, data)['stamp_id']
+    if len(stampID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print stampID
+        raise Exception
+                
+    
+    path = "comments/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "stamp_id": stampID,
+        "blurb": "That looks awesome. Well done, @rmstein.."
+    }
+    commentID = testPOST(baseurl, path, data)['comment_id']
+    if len(commentID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "stamps/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "entity_id": entityIDb,
+        "blurb": "Great date spot. Thanks @rmstein!", 
+        "image": "image.png"
+    }
+    stampIDb = testPOST(baseurl, path, data)['stamp_id']
+    if len(stampIDb) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print stampID
+        raise Exception
+        
+        
+        
+        
+        
+
+
+    path = "activity/show.json"
+    data = {
+        "authenticated_user_id": userB
+    }
+    result = testGET(baseurl, path, data)
+    print result
+    
+    
+    
+    
+    return
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    if len(result) == 2:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+
+
+    path = "collections/inbox.json"
+    data = {
+        "authenticated_user_id": userB
+    }
+    result = testGET(baseurl, path, data)
+    if len(result) == 2:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "stamps/remove.json"
+    data = {
+        "authenticated_user_id": userA,
+        "stamp_id": stampID
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
+        print 'DATA: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+    
+    path = "stamps/remove.json"
+    data = {
+        "authenticated_user_id": userA,
+        "stamp_id": stampIDb
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
+        print 'DATA: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "entities/remove.json"
+    data = {
+        "authenticated_user_id": userA,
+        "entity_id": entityID
+    }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "entities/remove.json"
+    data = {
+        "authenticated_user_id": userA,
+        "entity_id": entityIDb
+    }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+    
+    
+    path = "friendships/remove.json"
+    data = {
+        "authenticated_user_id": userB,
+        "user_id": userA
+    }
+    result = testPOST(baseurl, path, data)
+    if result == True:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/remove.json"
+    data = { "authenticated_user_id": userA }
+    resultA = testPOST(baseurl, path, data)
+    data = { "authenticated_user_id": userB }
+    resultB = testPOST(baseurl, path, data)
+    if resultA and resultB:
         print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path

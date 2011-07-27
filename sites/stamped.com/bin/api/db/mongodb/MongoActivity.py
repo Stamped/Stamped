@@ -89,7 +89,6 @@ class MongoActivity(AActivityDB, Mongo):
                 'num_credit': int
             }
         },
-        'blurb': basestring,
         'timestamp': {
             'created': datetime
         }
@@ -204,15 +203,23 @@ class MongoActivity(AActivityDB, Mongo):
         
         
     
-    def getActivity(self, userId):
-        activityData = self._getDocumentsFromIds(MongoUserActivity().getUserActivity(userId))
+    def getActivity(self, userId, since=None, before=None, limit=20):
+
+        # Get activity
+        activityIds = MongoUserActivity().getUserActivityIds(userId)
+        activityData = self._getDocumentsFromIds(
+                            activityIds, objId='activity_id', since=since, 
+                            before=before, sort='timestamp.created', limit=limit)
+        
+        # Loop through and validate
         result = []
         for activity in activityData:
             activity = Activity(activity)
             if activity.isValid == False:
                 raise KeyError("Activity not valid")
             result.append(activity)
-        return activity
+        
+        return result
         
     def removeActivity(self, activityId):
         MongoUserActivity().removeUserActivity(userId, activityId)

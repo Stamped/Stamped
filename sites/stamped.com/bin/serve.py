@@ -477,6 +477,20 @@ def getFavorites():
     ])
     return handleRequest(request, stampedAPI.getFavorites, schema)
 
+# ######## #
+# Activity #
+# ######## #
+
+@app.route(REST_API_PREFIX + 'activity/show.json', methods=['GET'])
+def getActivity():
+    schema = ResourceArgumentSchema([
+        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        ("limit",                 ResourceArgument(expectedType=basestring)), 
+        ("since",                 ResourceArgument(expectedType=basestring)), 
+        ("before",                ResourceArgument(expectedType=basestring))
+    ])
+    return handleRequest(request, stampedAPI.getActivity, schema)
+
 # ############# #
 # Miscellaneous #
 # ############# #
@@ -585,6 +599,18 @@ def commentsDoc():
 def favoritesDoc():
     try:
         f = open(os.path.join(ROOT, 'api/docs/Favorites.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
+
+@app.route(REST_API_PREFIX + 'activity')
+def activityDoc():
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Activity.html'))
         ret = f.read()
         f.close()
         return ret

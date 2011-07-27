@@ -257,9 +257,10 @@ class MongoStamp(AStampDB, Mongo):
         
         # Add comment
         commentId = MongoComment().addComment(comment)
+        comment['comment_id'] = commentId
         
         # Add activity
-        MongoActivity().addActivityForMention(recipientIds, user, stamp)
+        MongoActivity().addActivityForComment(recipientIds, user, comment, stamp)
         
         # Increment comment count on stamp
         self.incrementStatsForStamp(comment['stamp_id'], 'num_comments', 1)

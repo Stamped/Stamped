@@ -211,7 +211,7 @@ def betaAccountData(baseurl):
     path = "account/settings.json"
     data = {
         "authenticated_user_id": bart,
-        "privacy": True,
+        "privacy": False,
     }
     result = testPOST(baseurl, path, data)
     if result['privacy'] == True:

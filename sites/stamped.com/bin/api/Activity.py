@@ -82,7 +82,6 @@ class Activity(ASchemaObject):
                 'num_credit': int
             }
         },
-        'blurb': basestring,
         'timestamp': {
             'created': datetime
         }
@@ -146,10 +145,7 @@ class Activity(ASchemaObject):
         
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
         if 'created' in self.timestamp:
-            valid &= isinstance(self.timestamp['created'], datetime)  
-        
-        if 'blurb' in self:
-            valid &= isinstance(self.blurb, basestring)
+            valid &= isinstance(self.timestamp['created'], datetime)
             
         return valid
         

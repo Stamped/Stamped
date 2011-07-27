@@ -54,3 +54,6 @@
 * GET favorites/show
 * POST favorites/remove
 
+### [Activity](activity) ###
+* GET activity/show
+

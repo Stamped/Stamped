@@ -47,7 +47,7 @@ class MongoFriendship(AFriendshipDB):
             ### TODO: Log request somewhere
             return False
         
-        if MongoUser().checkPrivacy(userId):
+        if MongoUser().checkPrivacy(friendId):
             # Request approval before creating friendship
             
             ### TODO: Add to queue                    

@@ -13,6 +13,22 @@ class AActivityDB(object):
     
     def __init__(self, desc):
         self._desc = desc
+        
+    """
+    Activity is created for User in the following scenarios:
+    
+    * User is given credit (restamp)
+    * User is mentioned in a stamp
+    * User is mentioned in a comment
+    * User comments on a stamp
+    * Someone replies to User's comment
+    * Someone comments on a stamp User is mentioned in
+    * Someone comments on User's stamp
+    * Someone "favorites" User's stamp
+    * Someone directs a stamp to User (with optional comment)
+    * User achieves milestone
+    
+    """
 
     @abstractmethod    
     def addActivity(self, recipientId, activity):
@@ -42,7 +58,7 @@ class AActivityDB(object):
     def addActivityForMilestone(self, recipientId, activity):
         pass
 
-        
+    
     @abstractmethod
     def getActivity(self, userId, before=None, since=None, limit=None):
         pass
