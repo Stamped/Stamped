@@ -18,7 +18,7 @@
 @property (nonatomic, retain) NSString * commentID;
 @property (nonatomic, retain) NSString * stampID;
 @property (nonatomic, retain) NSString * restampID;
-@property (nonatomic, retain) NSDate * lastModified;
+@property (nonatomic, retain) NSDate * created;
 @property (nonatomic, retain) User *user;
 
 @end

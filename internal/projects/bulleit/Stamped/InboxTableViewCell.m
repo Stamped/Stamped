@@ -22,7 +22,7 @@
 static NSString* kTitleFontString = @"TGLight";
 static const CGFloat kTitleFontSize = 47.0;
 static NSString* kUserNameFontString = @"Helvetica-Bold";
-static NSString* kCommentFontString = @"HelveticaNeue";
+static NSString* kCommentFontString = @"Helvetica";
 static const CGFloat kSubstringFontSize = 12.0;
 static const CGFloat kUserImageHorizontalMargin = 14.0;
 static const CGFloat kUserImageSize = 41.0;
@@ -316,12 +316,16 @@ static const CGFloat kTitleMaxWidth = 210.0;
 
 - (void)setNumComments:(NSUInteger)numComments {
   numComments_ = numComments;
-  badgeView_.hidden = (numComments == 0);
+  badgeView_.hidden = (numComments_ == 0);
   badgeView_.text = [NSString stringWithFormat:@"%u", numComments];
+  [self setNeedsDisplay];
 }
 
 @end
 
+@interface InboxTableViewCell ()
+- (void)stampChanged:(NSNotification*)notification;
+@end
 
 @implementation InboxTableViewCell
 
@@ -340,7 +344,8 @@ static const CGFloat kTitleMaxWidth = 210.0;
   return self;
 }
 
-- (void)dealloc {  
+- (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.stamp = nil;
   [super dealloc];
 }
@@ -361,7 +366,17 @@ static const CGFloat kTitleMaxWidth = 210.0;
     customView_.userName = stamp.user.displayName;
     customView_.comment = stamp.blurb;
     customView_.numComments = [stamp.numComments unsignedIntegerValue];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(stampChanged:)
+                                                 name:kStampDidChangeNotification
+                                               object:stamp_];
   }
+}
+
+- (void)stampChanged:(NSNotification*)notification {
+  // Comments may have changed...
+  customView_.numComments = [stamp_.numComments unsignedIntegerValue];
 }
 
 @end

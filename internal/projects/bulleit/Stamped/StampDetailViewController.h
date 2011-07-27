@@ -16,7 +16,6 @@
 @interface StampDetailViewController : UIViewController<UITextFieldDelegate, RKObjectLoaderDelegate> {
  @private
   Stamp* stamp_;
-  NSArray* commentsArray_;
   // Managed by the view system.
   CAGradientLayer* activityGradientLayer_;
 }
@@ -35,8 +34,6 @@
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
-
-@property (nonatomic, copy) NSArray* commentsArray;
 
 
 @end

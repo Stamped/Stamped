@@ -60,7 +60,8 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
 				"color_secondary": "999999",
 				"screen_name": "kpalms",
 				"privacy": false
-			}
+			},
+			"comment_preview": null
 		}
 	]
 
@@ -117,7 +118,8 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
 				"color_secondary": "999999",
 				"screen_name": "kpalms",
 				"privacy": false
-			}
+			},
+			"comment_preview": null
 		}
 	]
 

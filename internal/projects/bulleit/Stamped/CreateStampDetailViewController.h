@@ -17,6 +17,7 @@
   Entity* entityObject_;
 }
 
+@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;
 @property (nonatomic, retain) IBOutlet UILabel* detailLabel;
 @property (nonatomic, retain) IBOutlet UILabel* reasoningLabel;
@@ -25,9 +26,10 @@
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
 @property (nonatomic, retain) IBOutlet STNavigationBar* navigationBar;
 @property (nonatomic, retain) IBOutlet UIView* ribbonedContainerView;
+@property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
 
 - (IBAction)reasoningTextPressed:(id)sender;
-- (IBAction)backButtonPressed:(id)sender;
+- (IBAction)backOrCancelButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;
 
 @end

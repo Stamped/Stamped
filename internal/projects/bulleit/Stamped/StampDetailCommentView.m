@@ -50,7 +50,7 @@
   [nameLabel release];
   
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  UIFont* commentFont = [UIFont fontWithName:@"HelveticaNeue" size:12];
+  UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:12];
   commentLabel.font = commentFont;
   commentLabel.text = comment_.blurb;
   commentLabel.textColor = [UIColor colorWithWhite:0.35 alpha:1.0];

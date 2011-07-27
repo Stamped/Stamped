@@ -33,19 +33,26 @@ class Mongo():
         self._db = db or self.DB
         self._lock = Lock()
         
-        self._connection = self._connect()
-        self._database = self._getDatabase()
-        self._collection = self._getCollection(collection)
+        try:
+            self._connection = self._connect()
+            self._database = self._getDatabase()
+            self._collection = self._getCollection(collection)
+        except:
+            raise Fail("Error: unable to connect to Mongo")
+            raise
     
     def _initConfig(self):
         self._config = AttributeDict()
         
+        ### TODO: Make this more robust!
         try:
             config_path = os.path.abspath(__file__)
             for i in xrange(4):
                 config_path = os.path.dirname(config_path)
             config_path = os.path.join(config_path, "conf/stamped.conf")
             self._config = getPythonConfigFile(config_path, jsonPickled=True)
+            if not 'mongodb' in self._config:
+                raise Exception()
         except:
             try:
                 config_path = os.path.abspath(__file__)
@@ -345,4 +352,20 @@ class Mongo():
                     if limit != None and len(ids) > limit:
                         return ids[:limit]
             return ids
+    
+    def _getRelationshipsAcrossKeys(self, keyIds, limit=4):
+        if not isinstance(keyIds, list) or not isinstance(limit, int):
+            raise Fail("Warning: Invalid input")
+        if limit > 20:
+            limit = 20
+            
+        limit = limit * -1
+        ids = []
+        documents = self._collection.find({'_id': {'$in': keyIds}})
+        for document in documents:
+            if 'overflow' in document:
+                # Pull in overflow document
+                document = self._collection.find({'_id': document['overflow'][-1]})
+            ids += document['ref_ids'][limit:]
+        return ids
 

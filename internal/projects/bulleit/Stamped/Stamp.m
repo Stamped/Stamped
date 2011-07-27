@@ -2,21 +2,26 @@
 //  Stamp.m
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/19/11.
+//  Created by Andrew Bonventre on 7/26/11.
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
 #import "Stamp.h"
-#import "User.h"
+#import "Comment.h"
 #import "Entity.h"
+#import "User.h"
+
+NSString* kStampDidChangeNotification = @"StampDidChangeNotification";
 
 @implementation Stamp
-@dynamic stampID;
+
 @dynamic blurb;
+@dynamic created;
 @dynamic numComments;
-@dynamic lastModified;
-@dynamic user;
+@dynamic stampID;
 @dynamic entityObject;
+@dynamic user;
+@dynamic comments;
 
 - (StampCategory)category {
   NSString* cat = self.entityObject.category;

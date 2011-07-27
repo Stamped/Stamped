@@ -29,7 +29,7 @@
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
-    self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 27, 33)];
+    self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 27, 32)];
     self.categoryImageView.contentMode = UIViewContentModeBottomRight;
     [self addSubview:self.categoryImageView];
     
@@ -39,9 +39,9 @@
     self.titleLabel.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
     [self addSubview:self.titleLabel];
     
-    self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 35, 241, 20)];
+    self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 34, 241, 20)];
     self.subtitleLabel.backgroundColor = [UIColor clearColor];
-    self.subtitleLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:12];
+    self.subtitleLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
     self.subtitleLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
     [self addSubview:self.subtitleLabel];
   }

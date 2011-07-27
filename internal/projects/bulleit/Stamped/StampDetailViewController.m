@@ -40,7 +40,6 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)renderComments;
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
-- (void)loadCommentsFromDataStore;
 @end
 
 @implementation StampDetailViewController
@@ -57,8 +56,6 @@ static const CGFloat kKeyboardHeight = 216.0;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
 
-@synthesize commentsArray = commentsArray_;
-
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
@@ -70,7 +67,6 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)dealloc {
   [stamp_ release];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
-  self.commentsArray = nil;
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
@@ -120,15 +116,14 @@ static const CGFloat kKeyboardHeight = 216.0;
   
   [self setUpMainContentView];
   [self setUpCommentsView];
-  
-  //[self loadCommentsFromDataStore];
-  [self loadCommentsFromServer];
+
+  [self renderComments];
+  //[self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
-  self.commentsArray = nil;
   self.topHeaderCell = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
@@ -168,16 +163,16 @@ static const CGFloat kKeyboardHeight = 216.0;
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
   typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
-  typeIconLayer.frame = CGRectMake(15, 48, 12, 12);
+  typeIconLayer.frame = CGRectMake(17, 48, 12, 12);
   [topHeaderCell_.layer addSublayer:typeIconLayer];
   [typeIconLayer release];
   
   UILabel* detailLabel =
-      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 3, 48, 258, 15)];
+      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 4, 47, 258, 15)];
   detailLabel.opaque = NO;
   detailLabel.backgroundColor = [UIColor clearColor];
   detailLabel.text = stamp_.entityObject.subtitle;
-  detailLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:11];
+  detailLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
   detailLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   [topHeaderCell_ addSubview:detailLabel];
   [detailLabel release];
@@ -223,7 +218,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   commenterNameLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   commenterNameLabel_.text = stamp_.user.displayName;
 
-  stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"HelveticaNeue" size:14]
+  stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"Helvetica" size:14]
                                forWidth:60
                           lineBreakMode:UILineBreakModeTailTruncation];
   CGRect stampedFrame = stampedLabel_.frame;
@@ -234,7 +229,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
   // TODO(andybons): Use this pattern for labels.
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  UIFont* commentFont = [UIFont fontWithName:@"HelveticaNeue" size:14];
+  UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.font = commentFont;
   commentLabel.textColor = [UIColor colorWithWhite:0.2 alpha:1.0];
   commentLabel.text = stamp_.blurb;
@@ -337,20 +332,12 @@ static const CGFloat kKeyboardHeight = 216.0;
                                   delegate:self];
 }
 
-- (void)loadCommentsFromDataStore {
-  /*self.commentsArray = nil;
-  NSFetchRequest* request = [Comment fetchRequest];
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"lastModified" ascending:YES];
-	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-	self.commentsArray = [Comment objectsWithFetchRequest:request];
-*/
-
-}
-
 - (void)renderComments {
-  for (Comment* c in self.commentsArray) {
+  NSSortDescriptor* createdDescriptor = [[NSSortDescriptor alloc] initWithKey:@"created" ascending:YES];
+  NSArray* sortDescriptors = [NSArray arrayWithObject:createdDescriptor];
+  [createdDescriptor release];
+  for (Comment* c in [stamp_.comments sortedArrayUsingDescriptors:sortDescriptors])
     [self addComment:c];
-  }
 }
 
 - (void)addComment:(Comment*)comment {
@@ -410,14 +397,18 @@ static const CGFloat kKeyboardHeight = 216.0;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath isEqualToString:@"/comments/create.json"]) {
-    [self addComment:[objects objectAtIndex:0]];
+    Comment* comment = [objects objectAtIndex:0];
+    [self addComment:comment];
+    [stamp_ addCommentsObject:comment];
+    stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] + 1];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
+                                                        object:stamp_];
+    
     addCommentField_.text = nil;
     [addCommentField_ resignFirstResponder];
     return;
   }
 
-  self.commentsArray = nil;
-  self.commentsArray = objects;
   [self renderComments];
 }
 

@@ -79,10 +79,10 @@
 								<reference key="IBUITabBar" ref="729558307"/>
 							</object>
 							<object class="IBUITabBarItem" id="473721066">
-								<string key="IBUITitle">Must Do</string>
+								<string key="IBUITitle">Todo</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">toolbar_must_do</string>
+									<string key="NSResourceName">toolbar_todo</string>
 								</object>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<reference key="IBUITabBar" ref="729558307"/>
@@ -104,6 +104,7 @@
 						<string key="NSFrame">{{127, 369}, {66, 49}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
@@ -427,9 +428,9 @@
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>toolbar_activity</string>
 				<string>toolbar_add_stamp</string>
-				<string>toolbar_must_do</string>
 				<string>toolbar_people</string>
 				<string>toolbar_stamps</string>
+				<string>toolbar_todo</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>

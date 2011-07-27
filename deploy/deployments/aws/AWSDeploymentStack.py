@@ -121,7 +121,7 @@ class AWSDeploymentStack(ADeploymentStack):
         if web_server_instances[0].state != 'running':
             raise Fail("Unable to connect to '%s'" % web_server_instances[0])
         
-        os.system('connect.sh %s %s' % (self.name, "WebServer"))
+        os.system('./connect.sh %s %s' % (self.name, "WebServer"))
     
     def crawl(self, *args):
         raise NotImplementedError
