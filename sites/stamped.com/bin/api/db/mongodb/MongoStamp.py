@@ -22,6 +22,7 @@ from MongoCreditGivers import MongoCreditGivers
 from MongoCreditReceived import MongoCreditReceived
 from MongoUser import MongoUser
 from MongoFavorite import MongoFavorite
+from MongoActivity import MongoActivity
 
 class MongoStamp(AStampDB, Mongo):
         
@@ -85,6 +86,10 @@ class MongoStamp(AStampDB, Mongo):
         _favoriteDB = MongoFavorite()
         _creditGiversDB = MongoCreditGivers()
         _creditReceivedDB = MongoCreditReceived()
+        _activityDB = MongoActivity()
+        
+        # Extract user
+        user = _userDB.getUser(stamp['user']['user_id'])
         
         # Extract mentions
         if 'blurb' in stamp:
@@ -94,9 +99,10 @@ class MongoStamp(AStampDB, Mongo):
             
         # Add the stamp data to the database
         stampId = self._addDocument(stamp, 'stamp_id')
+        stamp['stamp_id'] = stampId
         
         # Add a reference to the stamp in the user's collection
-        MongoUserStamps().addUserStamp(stamp['user']['user_id'], stampId)  
+        MongoUserStamps().addUserStamp(user.user_id, stampId)  
         
         # Add a reference to the stamp in followers' inbox
         followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
@@ -109,8 +115,14 @@ class MongoStamp(AStampDB, Mongo):
         if favoriteId: 
             _favoriteDB.completeFavorite(favoriteId)
         
-        # If users are mentioned or credited, add stamp to their activity feed
-        ### TODO
+        # If users are mentioned, add stamp to their activity feed
+        if 'mentions' in stamp:
+            recipientIds = []
+            for mention in stamp['mentions']:
+                if 'user_id' in mention:
+                    recipientIds.append(mention['user_id'])
+            if len(recipientIds) > 0:
+                _activityDB.addActivityForMention(recipientIds, user, stamp)
         
         # Give credit
         if 'credit' in stamp and len(stamp.credit) > 0:
@@ -153,6 +165,9 @@ class MongoStamp(AStampDB, Mongo):
                         comment.mentions = stamp.mentions
                     comment.timestamp = stamp.timestamp
                     self.addComment(comment)
+                    
+                    # Add to activity stream
+                    _activityDB.addActivityForRestamp([user.user_id], stamp.user, stamp)
                     
         return stampId
     
@@ -213,6 +228,10 @@ class MongoStamp(AStampDB, Mongo):
         return True
         
     def addComment(self, comment):
+    
+        # Grab data
+        user = MongoUser().getUser(comment['user']['user_id'])
+        stamp = self.getStamp(comment['stamp_id'])
         
         # Extract mentions
         if 'blurb' in comment:
@@ -220,12 +239,29 @@ class MongoStamp(AStampDB, Mongo):
             if len(mentions) > 0:
                 comment['mentions'] = mentions
         
+        # Get ids for stamp owner, mentioned users, and previous commenters
+        recipientIds = [self.getStamp(comment['stamp_id']).user['user_id']]
+        if 'mentions' in comment:
+            for mention in comment['mentions']:
+                if 'user_id' in mention:
+                    recipientIds.append(mention['user_id'])
+        ### TODO: Limit this to the last 20 comments or so...
+        for prevComment in self.getComments(comment['stamp_id']):
+            recipientIds.append(prevComment['user']['user_id'])
+        recipientDict = {}
+        for e in recipientIds:
+            recipientDict[e] = 1
+        recipientIds = recipientDict.keys()
+        if comment['user']['user_id'] in recipientIds:
+            recipientIds.remove(comment['user']['user_id'])
+        
         # Add comment
         commentId = MongoComment().addComment(comment)
-                
-        # If mentions exist, add to activity
-        ### TODO
-
+        
+        # Add activity
+        MongoActivity().addActivityForMention(recipientIds, user, stamp)
+        
+        # Increment comment count on stamp
         self.incrementStatsForStamp(comment['stamp_id'], 'num_comments', 1)
         return commentId
         
