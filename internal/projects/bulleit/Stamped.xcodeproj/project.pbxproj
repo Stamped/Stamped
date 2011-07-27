@@ -84,7 +84,6 @@
 		7E7E10A813DF14D100E44DE1 /* toolbar_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A613DF14D100E44DE1 /* toolbar_close@2x.png */; };
 		7E9EE35313DF683500F4736F /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EE35213DF683500F4736F /* Stamp.m */; };
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
-		7EBCBE8413D77C08009FCECF /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBCBE8313D77C08009FCECF /* Entity.m */; };
 		7EBCBE8713D78896009FCECF /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBCBE8613D78896009FCECF /* Comment.m */; };
 		7EBE8E2713DEFAD200D36E50 /* disclosure_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */; };
 		7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
@@ -102,6 +101,7 @@
 		7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A413C3754300ABE6E2 /* InfoPlist.strings */; };
 		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
 		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
+		7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDBF9FF13E0C57A003D73D5 /* Entity.m */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
 		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
 		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
@@ -312,8 +312,6 @@
 		7E9EE35113DF683500F4736F /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
 		7E9EE35213DF683500F4736F /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
 		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
-		7EBCBE8213D77C08009FCECF /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
-		7EBCBE8313D77C08009FCECF /* Entity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Entity.m; sourceTree = "<group>"; };
 		7EBCBE8513D78896009FCECF /* Comment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Comment.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7EBCBE8613D78896009FCECF /* Comment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Comment.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure_arrow@2x.png"; sourceTree = "<group>"; };
@@ -337,6 +335,8 @@
 		7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StampedTests-Prefix.pch"; sourceTree = "<group>"; };
 		7EC017A813C3754400ABE6E2 /* StampedTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedTests.h; sourceTree = "<group>"; };
 		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
+		7EDBF9FE13E0C57A003D73D5 /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
+		7EDBF9FF13E0C57A003D73D5 /* Entity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Entity.m; sourceTree = "<group>"; };
 		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
 		7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNavigationBar.m; sourceTree = "<group>"; };
 		7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
@@ -424,12 +424,12 @@
 		7E2267D813D52FF500657A66 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				7EDBF9FE13E0C57A003D73D5 /* Entity.h */,
+				7EDBF9FF13E0C57A003D73D5 /* Entity.m */,
 				7E9EE35113DF683500F4736F /* Stamp.h */,
 				7E9EE35213DF683500F4736F /* Stamp.m */,
 				7E1D92DA13D5F5C40022412D /* User.h */,
 				7E1D92DB13D5F5C40022412D /* User.m */,
-				7EBCBE8213D77C08009FCECF /* Entity.h */,
-				7EBCBE8313D77C08009FCECF /* Entity.m */,
 				7EBCBE8513D78896009FCECF /* Comment.h */,
 				7EBCBE8613D78896009FCECF /* Comment.m */,
 				7E2BEBED13D7757200A116D2 /* ImageToDataTransformer.h */,
@@ -717,10 +717,10 @@
 				7E3B6D7813D7509600FBE958 /* Util.h */,
 				7E3B6D7913D7509600FBE958 /* Util.m */,
 				7E2267D813D52FF500657A66 /* Model */,
-				7E42DCBE13DB64D100AF63BE /* Create Stamp */,
-				7E514AA213C9824D00EEC598 /* Entity Detail */,
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
+				7E42DCBE13DB64D100AF63BE /* Create Stamp */,
 				7E668C2613D8B25300E79E14 /* Stamp Detail */,
+				7E514AA213C9824D00EEC598 /* Entity Detail */,
 				7E22679713D4D90F00657A66 /* AccountManager.h */,
 				7E22679813D4D90F00657A66 /* AccountManager.m */,
 				7E512FC413D9F3B400547A20 /* STBadgeView.h */,
@@ -1018,7 +1018,6 @@
 				7E1D92DC13D5F5C50022412D /* User.m in Sources */,
 				7E3B6D7A13D7509600FBE958 /* Util.m in Sources */,
 				7E2BEBEF13D7757300A116D2 /* ImageToDataTransformer.m in Sources */,
-				7EBCBE8413D77C08009FCECF /* Entity.m in Sources */,
 				7EBCBE8713D78896009FCECF /* Comment.m in Sources */,
 				7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */,
 				7E512FC613D9F3B400547A20 /* STBadgeView.m in Sources */,
@@ -1026,6 +1025,7 @@
 				7E35A72E13DB9CEA008F856F /* CreateStampTableViewCell.m in Sources */,
 				7E22D6AF13DDA34100C4005E /* CreateStampDetailViewController.m in Sources */,
 				7E9EE35313DF683500F4736F /* Stamp.m in Sources */,
+				7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

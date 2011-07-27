@@ -12,6 +12,7 @@
 #import "User.h"
 
 NSString* kStampDidChangeNotification = @"StampDidChangeNotification";
+NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 
 @implementation Stamp
 

@@ -34,6 +34,7 @@ typedef enum {
 @interface InboxViewController ()
 - (void)loadTableData;
 - (void)loadStampsFromDataStore;
+- (void)stampWasCreated:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* filterButtons;
 @property (nonatomic, copy) NSArray* stampsArray;
@@ -63,6 +64,7 @@ typedef enum {
 }
 
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterButtons = nil;
   self.filterView = nil;
   self.stampsArray = nil;
@@ -84,7 +86,10 @@ typedef enum {
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(stampWasCreated:)
+                                               name:kStampWasCreatedNotification
+                                             object:nil];
   self.filterButtons =
       [NSArray arrayWithObjects:(id)placesFilterButton_,
                                 (id)booksFilterButton_,
@@ -107,6 +112,7 @@ typedef enum {
 - (void)viewDidUnload {
   [super viewDidUnload];
 
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterView = nil;
   self.filterButtons = nil;
   self.stampsArray = nil;
@@ -145,6 +151,11 @@ typedef enum {
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
 	self.stampsArray = [Stamp objectsWithFetchRequest:request];
   [self.tableView reloadData];
+}
+
+- (void)stampWasCreated:(NSNotification*)notification {
+  [self loadStampsFromDataStore];
+  self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
 }
 
 #pragma mark - Filter stuff

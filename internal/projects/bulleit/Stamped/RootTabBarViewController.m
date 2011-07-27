@@ -8,12 +8,14 @@
 
 #import "RootTabBarViewController.h"
 
+#import "Stamp.h"
 #import "InboxViewController.h"
 #import "ActivityViewController.h"
 #import "CreateStampViewController.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
+- (void)stampWasCreated:(NSNotification*)notification;
 @end
 
 @implementation RootTabBarViewController
@@ -27,6 +29,7 @@
 @synthesize peopleTabBarItem = peopleTabBarItem_;
 
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -53,6 +56,10 @@
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
   [AccountManager sharedManager].delegate = self;
   [[AccountManager sharedManager] authenticate];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(stampWasCreated:)
+                                               name:kStampWasCreatedNotification
+                                             object:nil];
 }
 
 - (void)finishViewInit {
@@ -69,11 +76,11 @@
     [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
   
   self.tabBar.selectedItem = stampsTabBarItem_;
-  [self createStamp:nil];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -115,6 +122,10 @@
   createStampNavController.navigationBarHidden = YES;
   [self presentModalViewController:createStampNavController animated:YES];
   [createStampNavController release];
+}
+
+- (void)stampWasCreated:(NSNotification*)notification {
+  [self tabBar:tabBar_ didSelectItem:stampsTabBarItem_];
 }
 
 #pragma mark - AccountManagerDelegate Methods.

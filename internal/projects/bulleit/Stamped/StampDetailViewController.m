@@ -147,18 +147,17 @@ static const CGFloat kKeyboardHeight = 216.0;
   nameLabel.text = stamp_.entityObject.title;
   nameLabel.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   nameLabel.backgroundColor = [UIColor clearColor];
-  
+  [topHeaderCell_.contentView addSubview:nameLabel];
+  [nameLabel release];
+
   // Badge stamp.
   CALayer* stampLayer = [[CALayer alloc] init];
   stampLayer.frame = CGRectMake(15 + stringSize.width - (46 / 2),
                                 11 - (46 / 2),
                                 46, 46);
   stampLayer.contents = (id)stamp_.user.stampImage.CGImage;
-  
   [topHeaderCell_.contentView.layer addSublayer:stampLayer];
   [stampLayer release];
-  [topHeaderCell_.contentView addSubview:nameLabel];
-  [nameLabel release];
   
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;

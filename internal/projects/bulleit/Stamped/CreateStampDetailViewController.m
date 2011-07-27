@@ -13,6 +13,7 @@
 #import "AccountManager.h"
 #import "Entity.h"
 #import "STNavigationBar.h"
+#import "Stamp.h"
 #import "UserImageView.h"
 #import "Util.h"
 
@@ -20,6 +21,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 @interface CreateStampDetailViewController ()
 - (void)editorDoneButtonPressed:(id)sender;
+- (void)dismissSelf;
 
 @property (nonatomic, retain) UIButton* doneButton;
 @end
@@ -37,6 +39,12 @@ static const CGFloat kMinContainerHeight = 204.0;
 @synthesize reasoningTextView = reasoningTextView_;
 @synthesize doneButton = doneButton_;
 @synthesize bottomToolbar = bottomToolbar_;
+@synthesize shelfBackground = shelfBackground_;
+@synthesize navBarContainer = navBarContainer_;
+@synthesize cancelButton = cancelButton_;
+@synthesize spinner = spinner_;
+@synthesize checkmarkButton = checkmarkButton_;
+@synthesize navBarBackButton = navBarBackButton_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -59,6 +67,12 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.ribbonedContainerView = nil;
   self.doneButton = nil;
   self.bottomToolbar = nil;
+  self.shelfBackground = nil;
+  self.navBarContainer = nil;
+  self.spinner = nil;
+  self.cancelButton = nil;
+  self.checkmarkButton = nil;
+  self.navBarBackButton = nil;
   [super dealloc];
 }
 
@@ -147,6 +161,20 @@ static const CGFloat kMinContainerHeight = 204.0;
   titleLabel_.text = entityObject_.title;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
   titleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+
+  CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
+                                            forWidth:CGRectGetWidth(titleLabel_.frame)
+                                       lineBreakMode:titleLabel_.lineBreakMode];
+  stampLayer_ = [[CALayer alloc] init];
+  stampLayer_.frame = CGRectMake(15 + stringSize.width - (46 / 2),
+                                11 - (46 / 2),
+                                46, 46);
+  stampLayer_.contents = (id)[AccountManager sharedManager].currentUser.stampImage.CGImage;
+  stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
+  stampLayer_.opacity = 0.0;
+  [scrollView_.layer insertSublayer:stampLayer_ above:titleLabel_.layer];
+  [stampLayer_ release];
+
   
   detailLabel_.text = entityObject_.subtitle;
   detailLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
@@ -169,6 +197,12 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.ribbonedContainerView = nil;
   self.doneButton = nil;
   self.bottomToolbar = nil;
+  self.shelfBackground = nil;
+  self.navBarContainer = nil;
+  self.spinner = nil;
+  self.cancelButton = nil;
+  self.checkmarkButton = nil;
+  self.navBarBackButton = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -198,8 +232,92 @@ static const CGFloat kMinContainerHeight = 204.0;
   [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (IBAction)saveStampButtonPressed:(id)sender {
+  [spinner_ startAnimating];
+  cancelButton_.enabled = NO;
+  checkmarkButton_.enabled = NO;
+  navBarBackButton_.enabled = NO;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/stamps/create.json" delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = stampMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+      reasoningTextView_.text, @"blurb",
+      [AccountManager sharedManager].currentUser.userID, @"authenticated_user_id",
+      entityObject_.entityID, @"entity_id", nil];
+  [objectLoader send];
+}
+
 - (void)editorDoneButtonPressed:(id)sender {
   [reasoningTextView_ resignFirstResponder];
+  [scrollView_ setContentOffset:CGPointZero animated:YES];
+}
+
+- (void)dismissSelf {
+  UIViewController* vc = nil;
+  if ([self.navigationController respondsToSelector:@selector(presentingViewController)])
+    vc = self.navigationController.presentingViewController;
+  else
+    vc = self.navigationController.parentViewController;
+
+  [vc dismissModalViewControllerAnimated:YES];
+}
+
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+	if (![objectLoader.resourcePath isEqualToString:@"/stamps/create.json"])
+    return;
+
+  Stamp* stamp = [objects objectAtIndex:0];
+  [entityObject_ addStampsObject:stamp];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
+                                                      object:stamp];
+  
+  [spinner_ stopAnimating];
+  CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));
+  CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
+  [UIView animateWithDuration:0.2
+                   animations:^{ 
+                     shelfBackground_.transform = topTransform;
+                     navBarContainer_.transform = topTransform;
+                     bottomToolbar_.transform = bottomTransform;
+                     checkmarkButton_.transform = bottomTransform;
+                     cancelButton_.transform = bottomTransform;
+                   }
+                   completion:^(BOOL finished) {
+                     [UIView animateWithDuration:0.3
+                                           delay:0
+                                         options:UIViewAnimationCurveEaseIn
+                                      animations:^{
+                                        stampLayer_.transform = CATransform3DIdentity;
+                                        stampLayer_.opacity = 1.0;
+                                      }
+                                      completion:^(BOOL finished) {
+                                        [self performSelector:@selector(dismissSelf)
+                                                   withObject:nil
+                                                   afterDelay:0.75];
+                                      }];
+                   }];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  [spinner_ stopAnimating];
+  cancelButton_.enabled = YES;
+  checkmarkButton_.enabled = YES;
+  navBarBackButton_.enabled = YES;
+  [UIView animateWithDuration:0.2
+                   animations:^{
+                     shelfBackground_.transform = CGAffineTransformIdentity;
+                     navBarContainer_.transform = CGAffineTransformIdentity;
+                   }];
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                   message:[error localizedDescription] 
+                                                  delegate:nil 
+                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
+	[alert show];
+	NSLog(@"Hit error: %@", error);
 }
 
 @end

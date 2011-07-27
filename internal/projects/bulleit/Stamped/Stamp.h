@@ -10,6 +10,7 @@
 #import <CoreData/CoreData.h>
 
 extern NSString* kStampDidChangeNotification;
+extern NSString* kStampWasCreatedNotification;
 
 @class Comment, Entity, User;
 
