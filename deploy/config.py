@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import utils
 
 def getInstances():
@@ -26,14 +27,6 @@ def getInstances():
                 'replSet' : replSetName, 
                 'port' : 27017, 
             }, 
-        }, 
-        {
-            'name' : 'crawler0', 
-            'roles' : [ 'crawler', ], 
-        }, 
-        {
-            'name' : 'crawler1', 
-            'roles' : [ 'crawler', ], 
         }, 
         {
             'name' : 'dev0', 

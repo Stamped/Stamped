@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import os, pickle, sys, threading, traceback
 from subprocess import Popen, PIPE
 from functools import wraps

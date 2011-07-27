@@ -5,13 +5,15 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import utils
 from abc import abstractmethod
 
 class ADeploymentStack(object):
-    def __init__(self, name, options):
+    def __init__(self, name, system):
         self.name = name
-        self.options = options
+        self.system = system
+        self.instances = []
     
     @abstractmethod
     def create(self):
@@ -19,14 +21,6 @@ class ADeploymentStack(object):
     
     @abstractmethod
     def delete(self):
-        pass
-    
-    @abstractmethod
-    def describe(self):
-        pass
-    
-    @abstractmethod
-    def describe_events(self):
         pass
     
     @abstractmethod

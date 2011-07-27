@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import config, json, os, pickle, string, utils
 from ADeploymentStack import ADeploymentStack
 from errors import Fail
@@ -31,19 +32,37 @@ class LocalDeploymentStack(ADeploymentStack):
     def create(self):
         self.delete()
         os.system('mkdir -p %s' % self.path)
-        
         for instance in self.instances:
-            instance_path = self._get_instance_path(instance)
-            os.system('mkdir -p %s' % instance_path)
-            instance_bootstrap_path = os.path.join(instance_path, 'bootstrap')
-            instance_bootstrap_init_path = os.path.join(instance_bootstrap_path, 'init.py')
-            
-            params_str = self._encode_params(instance)
-            
-            self.local('git clone git@github.com:Stamped/stamped-bootstrap.git %s' % instance_bootstrap_path)
-            self.local('python %s "%s"' % (instance_bootstrap_init_path, params_str))
+            self.createInstance(instance)
         
         self.init()
+   
+    def createInstance(self, instance):
+        instance_path = self._get_instance_path(instance)
+        os.system('mkdir -p %s' % instance_path)
+        instance_bootstrap_path = os.path.join(instance_path, 'bootstrap')
+        instance_bootstrap_init_path = os.path.join(instance_bootstrap_path, 'init.py')
+        
+        params_str = self._encode_params(instance)
+        
+        root = os.path.abspath(__file__)
+        for i in xrange(5):
+            root = os.path.dirname(root)
+        
+        dirs = os.listdir(root)
+        system_bootstrap_path = None
+        for f in dirs:
+            d = os.path.join(root, f)
+            if os.path.isdir(d) and d.lower().find('bootstrap') != -1:
+                system_bootstrap_path = d
+                break
+        
+        if system_bootstrap_path is None:
+            self.local('git clone git@github.com:Stamped/stamped-bootstrap.git %s' % instance_bootstrap_path)
+        else:
+            self.local('ln -s %s %s' % (system_bootstrap_path, instance_bootstrap_path))
+        
+        self.local('python %s "%s"' % (instance_bootstrap_init_path, params_str))
     
     def init(self):
         members = self.getDBMembers()
@@ -117,10 +136,18 @@ class LocalDeploymentStack(ADeploymentStack):
         os.system(cmd)
     
     def crawl(self, *args):
-        crawlers = filter(lambda instance: 'crawler' in instance['roles'], self.instances)
+        crawlers = []
+        for i in xrange(2):
+            crawler = {
+                'name' : 'crawler%d' % i, 
+                'roles' : [ 'crawler' ], 
+            }
+            self.createInstance(crawler)
+            crawlers.append(crawler)
+        
         numCrawlers = len(crawlers)
         dbs = self.getDBMembers()
-        primary = dbs[0]['host']
+        host = dbs[0]['host']
         
         count = 1
         for crawler in crawlers:
@@ -129,6 +156,6 @@ class LocalDeploymentStack(ADeploymentStack):
             instance_path = self._get_instance_path(crawler)
             instance_crawler_path = os.path.join(instance_path, 'stamped/sites/stamped.com/bin/crawler/crawler.py')
             
-            self.local('python %s --db %s --ratio %s %s&' % (instance_crawler_path, primary, ratio, string.joinfields(args, ' ')))
+            self.local('python %s --db %s --ratio %s %s&' % (instance_crawler_path, host, ratio, string.joinfields(args, ' ')))
             count += 1
 

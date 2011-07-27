@@ -5,3 +5,7 @@ class Fail(Exception):
 class InvalidArgument(Exception):
     pass
 
+import Globals
+class NotInitializedError(Exception):
+    pass
+

@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import os, sys, utils
 from optparse import OptionParser
 
@@ -17,12 +18,6 @@ available_commands = {
     
     'delete' : 'delete_stack', 
     'delete_stack' : 'delete_stack', 
-    
-    'describe' : 'describe_stack', 
-    'describe_stack' : 'describe_stack', 
-    
-    'describe_events' : 'describe_stack_events', 
-    'describe_stack_events' : 'describe_stack_events', 
     
     'connect' : 'connect', 
     'connect_stack' : 'connect', 

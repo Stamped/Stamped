@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import copy, getpass, os, pickle, re, utils
 from ..DeploymentSystem import DeploymentSystem
 from errors import Fail

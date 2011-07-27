@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import copy, getpass, os, pickle, re, utils
 from ADeploymentSystem import ADeploymentSystem
 from errors import Fail
@@ -59,22 +60,6 @@ class DeploymentSystem(ADeploymentSystem):
                 stack.delete()
                 
                 del self._stacks[stackName]
-    
-    def describe_stack(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.describe()
-    
-    def describe_stack_events(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.describe_events()
     
     def connect(self, *args):
         stackNameRegex = args[0]

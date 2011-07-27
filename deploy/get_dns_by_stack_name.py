@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 from boto.ec2.connection import EC2Connection
 from optparse import OptionParser
 import sys
@@ -36,20 +37,18 @@ def main():
     
     conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
     reservations = conn.get_all_instances()
-    stackNameKey = 'aws:cloudformation:stack-name'
-    tagKey = "stamped:family"
     
     for reservation in reservations:
         for instance in reservation.instances:
             #from pprint import pprint
             #pprint(instance.__dict__)
             
-            if stackNameKey in instance.tags:
-                stackName = instance.tags[stackNameKey]
+            if 'stack' in instance.tags:
+                stackName = instance.tags['stack']
                 
                 if options.stackName is None or stackName.lower() == options.stackName:
                     if not options.tag or \
-                        (tagKey in instance.tags and instance.tags[tagKey].lower() == options.tag.lower()):
+                        ('roles' in instance.tags and options.tag in instance.tags['roles'].lower())
                         print instance.public_dns_name
                         sys.exit(0)
     

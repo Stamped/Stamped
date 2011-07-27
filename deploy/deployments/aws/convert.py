@@ -5,6 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import Globals
 import os, pickle, sys
 from subprocess import Popen, PIPE
 from optparse import OptionParser
@@ -26,7 +27,7 @@ def parse(source, params):
     return template.render(params)
 
 def parse_file(src, params):
-    return parse(src.read())
+    return parse(src.read(), params)
 
 def parseCommandLine():
     usage   = "Usage: %prog [[param1=value] [param2=value]...]"
