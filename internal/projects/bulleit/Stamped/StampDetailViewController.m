@@ -156,8 +156,8 @@ static const CGFloat kKeyboardHeight = 216.0;
   stampLayer.contents = (id)stamp_.user.stampImage.CGImage;
   
   [topHeaderCell_.contentView.layer addSublayer:stampLayer];
-  [topHeaderCell_.contentView addSubview:nameLabel];
   [stampLayer release];
+  [topHeaderCell_.contentView addSubview:nameLabel];
   [nameLabel release];
   
   CALayer* typeIconLayer = [[CALayer alloc] init];

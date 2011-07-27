@@ -52,8 +52,8 @@
   ripplesLayer.contentsGravity = kCAGravityResizeAspect;
   ripplesLayer.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
   [self.layer addSublayer:ripplesLayer];
-  self.layer.masksToBounds = NO;
   [ripplesLayer release];
+  self.layer.masksToBounds = NO;
 }
 
 @end
