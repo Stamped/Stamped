@@ -6,10 +6,13 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import base64, boto, convert, json, os, utils
+import base64, boto, convert, json, os, time, utils
 from boto.ec2.instance import Instance as BotoEC2Instance
 from AInstance import AInstance
 from errors import *
+
+from fabric.operations import *
+from fabric.api import *
 
 INSTANCE_ARCHITECTURE = {
     "t1.micro"    : "64",
@@ -121,6 +124,22 @@ class AWSInstance(AInstance):
         
         self._instance = reservation.instances[0]
     
+    def _post_create(self):
+        env.user = 'ubuntu'
+        env.key_filename = [ 'keys/test-keypair' ]
+        
+        done = False
+        while not done:
+            try:
+                # TODO: make this more covert
+                with settings(host_string=self.public_dns_name):
+                    run('curl http://169.254.169.254/1.0/user-data -o user-data.sh && chmod +x user-data.sh && ./user-data.sh')#, pty=False)
+                
+                done = True
+            except SystemExit:
+                time.sleep(2)
+                pass
+    
     def start(self):
         self.update()
         self._instance.start()
@@ -164,7 +183,6 @@ class AWSInstance(AInstance):
         return security_groups
     
     def _get_user_data(self):
-        
         params = {
             'init_params' : json.dumps(self.config._dict).replace('"', "'")
         }
@@ -174,8 +192,9 @@ class AWSInstance(AInstance):
         user_data = convert.parse_file(f, params)
         f.close()
         
-        user_data64 = base64.encodestring(user_data)
-        return user_data64
+        return user_data
+        #user_data64 = base64.encodestring(user_data)
+        #return user_data64
     
     def _get_image(self):
         ami = _getAMI(INSTANCE_TYPE, INSTANCE_REGION, INSTANCE_OS, INSTANCE_EBS)

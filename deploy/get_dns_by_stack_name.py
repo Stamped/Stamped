@@ -23,6 +23,9 @@ def parseCommandLine():
     
     (options, args) = parser.parse_args()
     
+    if options.tag:
+        options.tag = options.tag.lower()
+    
     if len(args) == 0:
         options.stackName = None
     else:
@@ -47,8 +50,17 @@ def main():
                 stackName = instance.tags['stack']
                 
                 if options.stackName is None or stackName.lower() == options.stackName:
-                    if not options.tag or \
-                        ('roles' in instance.tags and options.tag in instance.tags['roles'].lower())
+                    match = True
+                    
+                    if options.tag:
+                        match = 'roles' in instance.tags
+                        
+                        if match:
+                            # TODO: possibly dangerous?
+                            roles = eval(str(instance.tags['roles']))
+                            match = options.tag in map(lambda r: r.lower(), roles)
+                    
+                    if match:
                         print instance.public_dns_name
                         sys.exit(0)
     

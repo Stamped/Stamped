@@ -43,6 +43,7 @@ class AInstance(object):
         raise NotImplementedError
     
     def create(self):
+        self._pre_create()
         utils.log("[%s] create" % self)
         
         # don't create an instance more than once
@@ -65,10 +66,18 @@ class AInstance(object):
         utils.log("[%s] instance is online! adding %d tags..." % (self, len(self.config.items())))
         for tag in self.config:
             self.add_tag(tag, self.config[tag])
+        
+        self._post_create()
+    
+    def _pre_create(self):
+        pass
     
     @abstractmethod
     def _create(self):
         raise NotImplementedError
+    
+    def _post_create(self):
+        pass
     
     @abstractmethod
     def start(self):

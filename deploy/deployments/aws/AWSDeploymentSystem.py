@@ -11,6 +11,7 @@ from ..DeploymentSystem import DeploymentSystem
 from errors import Fail
 from AWSDeploymentStack import AWSDeploymentStack
 from boto.ec2.connection import EC2Connection
+from boto.exception import EC2ResponseError
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'
@@ -33,7 +34,8 @@ class AWSDeploymentSystem(DeploymentSystem):
         ssh_rule = {
             'ip_protocol' : 'tcp', 
             'from_port'   : 22, 
-            'to_port'   : 22, 
+            'to_port'     : 22, 
+            'cidr_ip'     : '0.0.0.0/0', 
         }
         
         groups = [
@@ -46,6 +48,7 @@ class AWSDeploymentSystem(DeploymentSystem):
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 27017, 
                         'to_port'     : 27017, 
+                        'cidr_ip'     : '0.0.0.0/0', 
                     }, 
                     #{
                     #    'src_group' : 'webserver', 
@@ -64,6 +67,7 @@ class AWSDeploymentSystem(DeploymentSystem):
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 5000, 
                         'to_port'     : 5000, 
+                        'cidr_ip'     : '0.0.0.0/0', 
                     }, 
                 ], 
             }, 
@@ -87,9 +91,14 @@ class AWSDeploymentSystem(DeploymentSystem):
             name = group['name']
             sg = self._get_security_group(name)
             
+            assert sg is not None
+            
             for rule in group['rules']:
-                ret = sg.authorize(**rule)
-                assert ret
+                try:
+                    ret = sg.authorize(**rule)
+                    assert ret
+                except EC2ResponseError:
+                    pass
     
     def _init_env(self):
         self.conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
@@ -101,7 +110,7 @@ class AWSDeploymentSystem(DeploymentSystem):
         
         for reservation in reservations:
             for instance in reservation.instances:
-                if hasattr(instance, 'tags') and 'stack' in instance.tags:
+                if hasattr(instance, 'tags') and 'stack' in instance.tags and instance.state == 'running':
                     stackName = instance.tags['stack']
                     
                     if stackName in stacks:
@@ -109,8 +118,9 @@ class AWSDeploymentSystem(DeploymentSystem):
                     else:
                         stacks[stackName] = [ instance ]
         
-        utils.log("%d stacks exist" % len(stacks))
-        index = 0
+        sl = len(stacks)
+        utils.log("%d stack%s exist%s" % (sl, "s" if sl != 1 else "", "" if sl != 1 else "s"))
+        index = 1
         
         for stackName in stacks:
             utils.log("%d) %s" % (index, stackName))

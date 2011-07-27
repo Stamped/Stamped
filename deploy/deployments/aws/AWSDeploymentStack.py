@@ -25,7 +25,11 @@ class AWSDeploymentStack(ADeploymentStack):
         ADeploymentStack.__init__(self, name, system)
         
         self.commonOptions = system.commonOptions
-        self._pool = Pool(8)
+        
+        # maximum number of instances to create at one time
+        print "***WARNING*** change back to 8 once done debugging"
+        self._pool = Pool(1)
+        print "***WARNING*** change back to 8 once done debugging"
         
         if instances is None:
             instances = config.getInstances()
@@ -58,7 +62,6 @@ class AWSDeploymentStack(ADeploymentStack):
         
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
-        self.init()
     
     def init(self):
         db_instances = self.db_instances
@@ -100,9 +103,7 @@ class AWSDeploymentStack(ADeploymentStack):
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
         
         env.user = 'ubuntu'
-        env.key_filename = [
-            'keys/test-keypair'
-        ]
+        env.key_filename = [ 'keys/test-keypair' ]
         
         for instance in self.instances:
             with settings(host_string=instance.public_dns_name):

@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+# TODO: make this script idempotent!
+
 echo '>>>> Create keys for root to connect to GitHub'
 echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAvAzcTXbF0V/Pjja3b2Q9hsBQSHv8R8S6yoESb6CuR5HNzD3rIcfP9r2t3dJnVjeCZKx4JTadGXAr7ysVysGMLgbUMkngJ0bgnqkXPfLnKW07uYsrAF6Q1Gz79RSEIFfQP53p8XKpIkiRnbogM5RG2aIjJobuAsu0J8F9bGL6UfoRv1gGR0VcDbWAnp5SV8iJUBI0ULvVmdKKkFyeVHEZe2zjoplFr4b9jAUwDnNYpWobmsNoC4+1pw5fZRREJ32gCp4iYJIN5eJvylfpbhp6DtKPqrWmCEtIeVkS9pvqgVrlXMiaOPG972FuQJWiC5/iMApUlcTwCcAWkWfRTC4K1w== devbot@stamped.com" > ~/.ssh/id_rsa.pub
 echo "-----BEGIN RSA PRIVATE KEY-----" > ~/.ssh/id_rsa
@@ -36,7 +38,7 @@ chmod 600 ~/.ssh/id_rsa
 chmod 644 ~/.ssh/id_rsa.pub
 
 echo '>>>> Install git'
-apt-get -y install git-core
+sudo apt-get -y install git-core
 
 echo '>>>> Set bash to ignore errors, then run ssh so that clone command ignores validation of URL'
 set +e
@@ -44,12 +46,20 @@ ssh -o StrictHostKeyChecking=no git@github.com
 set -e
 
 echo '>>>> Clone repo'
-git clone git@github.com:Stamped/stamped-bootstrap.git /stamped/bootstrap
+
+if [ ! -d /stamped/bootstrap ]; then
+    sudo mkdir -p /stamped/bootstrap
+    sudo chmod -R 777 /stamped
+    git clone git@github.com:Stamped/stamped-bootstrap.git /stamped/bootstrap
+fi
+
+cd /stamped/bootstrap && git pull
 
 echo '>>>> Installing python-setuptools'
 sudo apt-get install python-setuptools
-cd /stamped/bootstrap && git pull
 
 echo '>>>> Running init script'
+set +e
 python /stamped/bootstrap/init.py "{{ init_params }}" &> /stamped/bootstrap/log
+set -e
 

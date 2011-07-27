@@ -1,0 +1,2 @@
+Make connect refer to individual machines via stackName.instanceName ala stack.db0 or stack.db1
+
