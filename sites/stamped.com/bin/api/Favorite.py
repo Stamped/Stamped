@@ -42,8 +42,8 @@ class Favorite(ASchemaObject):
     def isValid(self):
         valid = True
         
-        if 'id' in self:
-            valid &= isinstance(self.id, basestring) 
+        if 'favorite_id' in self:
+            valid &= isinstance(self.favorite_id, basestring) 
         
         valid &= 'entity' in self and isinstance(self.entity, dict)
         valid &= 'entity_id' in self.entity and isinstance(self.entity['entity_id'], basestring)

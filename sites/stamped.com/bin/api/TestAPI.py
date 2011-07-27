@@ -46,9 +46,9 @@ def main():
 #     
 #     friendshipTest(baseurl)
 # 
-    collectionTest(baseurl)
+#     collectionTest(baseurl)
 #
-#     commentTest(baseurl)
+    commentTest(baseurl)
 #
 #     favoriteTest(baseurl)
 
@@ -847,6 +847,46 @@ def collectionTest(baseurl):
         print 'FAIL: %s' % path
         print result
         raise Exception
+        
+        
+    path = "account/update_profile.json"
+    data = {
+        "authenticated_user_id": userA,
+        "bio": "My long biography goes here.",
+        "color": "333333,999999"
+    }
+    result = testPOST(baseurl, path, data)
+    data = {
+        "authenticated_user_id": userB,
+        "bio": "My long biography goes here.",
+        "color": "333333,999999"
+    }
+    result = testPOST(baseurl, path, data)
+    if result['color_primary'] == '333333':
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
+        
+    path = "account/update_profile_image.json"
+    data = {
+        "authenticated_user_id": userA,
+        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!
+    }
+    result = testPOST(baseurl, path, data)
+    data = {
+        "authenticated_user_id": userB,
+        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!
+    }
+    result = testPOST(baseurl, path, data)
+    if result['profile_image'] == 'https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg':
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
     
     
     path = "friendships/create.json"
@@ -917,7 +957,7 @@ def collectionTest(baseurl):
     data = {
         "authenticated_user_id": userA,
         "entity_id": entityIDb,
-        "blurb": "Great date spot", 
+        "blurb": "Great date spot. Thanks @rmstein!", 
         "image": "image.png"
     }
     stampIDb = testPOST(baseurl, path, data)['stamp_id']
@@ -953,6 +993,7 @@ def collectionTest(baseurl):
         print 'FAIL: %s' % path
         print result
         raise Exception
+        
     
     path = "stamps/remove.json"
     data = {

@@ -490,7 +490,7 @@ def betaAccountData(baseurl):
     ############
     
     path = "friendships/create.json"
-    users = [kevin, robby, bart, ed, jake, travis, bons]
+    users = [kevin, bart, robby, ed, jake, travis, bons]
     for user in users:
         for friend in users:
             if user != friend:
@@ -504,6 +504,8 @@ def betaAccountData(baseurl):
                 else:
                     print 'FAIL: %s' % path
                     raise Exception
+            else:
+                print 'SKIP'
         
     ###############
           
