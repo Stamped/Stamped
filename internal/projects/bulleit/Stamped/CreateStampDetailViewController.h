@@ -11,10 +11,12 @@
 @class Entity;
 @class STNavigationBar;
 @class UserImageView;
+@class CAGradientLayer;
 
 @interface CreateStampDetailViewController : UIViewController<UITextViewDelegate> {
  @private
   Entity* entityObject_;
+  CAGradientLayer* ribbonGradientLayer_;
 }
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
@@ -28,7 +30,6 @@
 @property (nonatomic, retain) IBOutlet UIView* ribbonedContainerView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
 
-- (IBAction)reasoningTextPressed:(id)sender;
 - (IBAction)backOrCancelButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;
 

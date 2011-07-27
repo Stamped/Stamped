@@ -18,6 +18,7 @@
 #import "Stamp.h"
 #import "User.h"
 #import "UserImageView.h"
+#import "Util.h"
 
 static NSString* kTitleFontString = @"TGLight";
 static const CGFloat kTitleFontSize = 47.0;
@@ -70,7 +71,6 @@ static const CGFloat kTitleMaxWidth = 210.0;
 
 @interface StampCellView ()
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color;
-- (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img;
 - (void)invertColors:(BOOL)inverted;
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated;
 @end
@@ -116,6 +116,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
     disclosureImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(300, 34, 8, 11)];
     disclosureImageView_.contentMode = UIViewContentModeScaleAspectFit;
     disclosureImageView_.image = self.disclosureArrowImage;
+    disclosureImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:self.disclosureArrowImage];
     [self addSubview:disclosureImageView_];
     [disclosureImageView_ release];
     
@@ -191,13 +192,8 @@ static const CGFloat kTitleMaxWidth = 210.0;
   if (inverted) {
     substringColor = whiteColor_;
     titleColor = whiteColor_;
-    typeImageView_.image = [self whiteMaskedImageUsingImage:typeImage_];
-    disclosureImageView_.image = [self whiteMaskedImageUsingImage:disclosureArrowImage_];
-  } else {
-    typeImageView_.image = typeImage_;
-    disclosureImageView_.image = disclosureArrowImage_;
   }
-  
+
   userNameLabel_.textColor = substringColor;
   commentLabel_.textColor = substringColor;
 
@@ -236,29 +232,12 @@ static const CGFloat kTitleMaxWidth = 210.0;
   return [titleAttributedString autorelease];
 }
 
-- (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img {
-  CGFloat width = img.size.width;
-  CGFloat height = img.size.height;
-
-  UIGraphicsBeginImageContextWithOptions(img.size, NO, 0.0);
-  CGContextRef context = UIGraphicsGetCurrentContext();
-
-  CGContextTranslateCTM(context, 0, height);
-  CGContextScaleCTM(context, 1.0, -1.0);
-  
-  CGContextClipToMask(context, CGRectMake(0, 0, width, height), img.CGImage);
-  CGContextSetFillColorWithColor(context, whiteColor_.CGColor);
-  CGContextFillRect(context, CGRectMake(0, 0, img.size.width, img.size.height));
-  UIImage* maskedImage = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  return maskedImage;
-}
-
 - (void)setUserImage:(UIImage*)userImage {
   if (userImage != userImage_) {
     [userImage_ release];
     userImage_ = [userImage retain];
-    userImageView_.image = userImage_;
+    if (userImage)
+      userImageView_.image = userImage;
   }
 }
 
@@ -266,7 +245,8 @@ static const CGFloat kTitleMaxWidth = 210.0;
   if (stampImage != stampImage_) {
     [stampImage_ release];
     stampImage_ = [stampImage retain];
-    [self setNeedsDisplay];
+    if (stampImage)
+      [self setNeedsDisplay];
   }
 }
 
@@ -274,7 +254,10 @@ static const CGFloat kTitleMaxWidth = 210.0;
   if (typeImage != typeImage_) {
     [typeImage_ release];
     typeImage_ = [typeImage retain];
-    typeImageView_.image = typeImage_;
+    if (typeImage) {
+      typeImageView_.image = typeImage;
+      typeImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:typeImage];
+    }
   }
 }
 
@@ -359,18 +342,20 @@ static const CGFloat kTitleMaxWidth = 210.0;
   if (stamp != stamp_) {
     [stamp_ release];
     stamp_ = [stamp retain];
-    customView_.userImage = stamp.user.profileImage;
-    customView_.stampImage = stamp.user.stampImage;
-    customView_.title = stamp.entityObject.title;
-    customView_.typeImage = stamp.entityObject.categoryImage;
-    customView_.userName = stamp.user.displayName;
-    customView_.comment = stamp.blurb;
-    customView_.numComments = [stamp.numComments unsignedIntegerValue];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(stampChanged:)
-                                                 name:kStampDidChangeNotification
-                                               object:stamp_];
+    if (stamp) {
+      customView_.userImage = stamp.user.profileImage;
+      customView_.stampImage = stamp.user.stampImage;
+      customView_.title = stamp.entityObject.title;
+      customView_.typeImage = stamp.entityObject.categoryImage;
+      customView_.userName = stamp.user.displayName;
+      customView_.comment = stamp.blurb;
+      customView_.numComments = [stamp.numComments unsignedIntegerValue];
+      [[NSNotificationCenter defaultCenter] removeObserver:self];
+      [[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(stampChanged:)
+                                                   name:kStampDidChangeNotification
+                                                 object:stamp_];
+    }
   }
 }
 

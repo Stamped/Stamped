@@ -14,8 +14,13 @@
 #import "Entity.h"
 #import "STNavigationBar.h"
 #import "UserImageView.h"
+#import "Util.h"
+
+static const CGFloat kMinContainerHeight = 204.0;
 
 @interface CreateStampDetailViewController ()
+- (void)editorDoneButtonPressed:(id)sender;
+
 @property (nonatomic, retain) UIButton* doneButton;
 @end
 
@@ -69,8 +74,8 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   navigationBar_.hideLogo = YES;
-  self.userImageView.image = [AccountManager sharedManager].currentUser.profileImage;
-  self.reasoningTextView.hidden = YES;
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  self.userImageView.image = currentUser.profileImage;
   scrollView_.contentSize =
       CGSizeMake(CGRectGetWidth(self.view.frame),
                  CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationBar_.frame));
@@ -87,6 +92,27 @@
   ribbonedContainerView_.layer.shadowRadius = 2;
   ribbonedContainerView_.layer.shadowPath =
       [UIBezierPath bezierPathWithRect:ribbonedContainerView_.bounds].CGPath;
+  
+  ribbonGradientLayer_ = [[CAGradientLayer alloc] init];
+  CGFloat r1, g1, b1, r2, g2, b2;
+  [Util splitHexString:currentUser.primaryColor toRed:&r1 green:&g1 blue:&b1];
+  
+  if (currentUser.secondaryColor) {
+    [Util splitHexString:currentUser.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+  } else {
+    r2 = r1;
+    g2 = g1;
+    b2 = b1;
+  }
+  ribbonGradientLayer_.colors =
+      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
+                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
+                                nil];
+  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+  ribbonGradientLayer_.startPoint = CGPointMake(0.0, 0.0);
+  ribbonGradientLayer_.endPoint = CGPointMake(1.0, 1.0);
+  [ribbonedContainerView_.layer insertSublayer:ribbonGradientLayer_ atIndex:0];
+  [ribbonGradientLayer_ release];
   
   UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
   accessoryView.backgroundColor = [UIColor colorWithWhite:0.43 alpha:1.0];
@@ -114,6 +140,9 @@
   [accessoryView addSubview:self.doneButton];
   self.reasoningTextView.inputAccessoryView = accessoryView;
   [accessoryView release];
+  [doneButton_ addTarget:self
+                  action:@selector(editorDoneButtonPressed:)
+        forControlEvents:UIControlEventTouchUpInside];
   
   titleLabel_.text = entityObject_.title;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
@@ -123,7 +152,6 @@
   detailLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   
   reasoningLabel_.textColor = [UIColor colorWithWhite:0.75 alpha:1.0];
-  reasoningLabel_.backgroundColor = [UIColor clearColor];
   
   categoryImageView_.image = entityObject_.categoryImage;
 }
@@ -148,16 +176,30 @@
 }
 
 - (void)textViewDidChange:(UITextView*)textView {
-  reasoningLabel_.hidden = reasoningTextView_.text.length > 0;
-}
-
-- (IBAction)reasoningTextPressed:(id)sender {
-  reasoningTextView_.hidden = NO;
-  [reasoningTextView_ becomeFirstResponder];
+  reasoningLabel_.hidden = reasoningTextView_.hasText;
+  CGSize stringSize = reasoningTextView_.contentSize;
+  CGRect frame = ribbonedContainerView_.frame;
+  frame.size.height = fmaxf(kMinContainerHeight, stringSize.height + 100);
+  [UIView animateWithDuration:0.2 animations:^{
+    ribbonedContainerView_.frame = frame;
+    ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+  }];
+  CGFloat minScrollContentHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationBar_.frame);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
+      minScrollContentHeight + CGRectGetHeight(frame) - kMinContainerHeight + 40);
+  NSUInteger curPosition = reasoningTextView_.selectedRange.location;
+  if (curPosition == reasoningTextView_.text.length) {
+    [scrollView_ setContentOffset:CGPointMake(0, scrollView_.contentSize.height - minScrollContentHeight) 
+                         animated:YES];
+  }
 }
 
 - (IBAction)backOrCancelButtonPressed:(id)sender {
   [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)editorDoneButtonPressed:(id)sender {
+  [reasoningTextView_ resignFirstResponder];
 }
 
 @end

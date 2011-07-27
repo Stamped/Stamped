@@ -69,6 +69,7 @@
     [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
   
   self.tabBar.selectedItem = stampsTabBarItem_;
+  [self createStamp:nil];
 }
 
 - (void)viewDidUnload {
