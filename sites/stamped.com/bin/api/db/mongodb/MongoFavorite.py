@@ -13,6 +13,7 @@ from api.AFavoriteDB import AFavoriteDB
 from api.Favorite import Favorite
 from MongoDB import Mongo
 from MongoUserFavorites import MongoUserFavorites
+from MongoActivity import MongoActivity
 
 class MongoFavorite(AFavoriteDB, Mongo):
         
@@ -53,8 +54,18 @@ class MongoFavorite(AFavoriteDB, Mongo):
     ### PUBLIC
     
     def addFavorite(self, favorite):
+        # Add favorite
         favoriteId = self._addDocument(favorite, 'favorite_id')
+        
+        # Add link to favorite
         MongoUserFavorites().addUserFavorite(favorite['user_id'], favoriteId)
+        
+        # Add activity if referencing a stamp
+#         if 'stamp' in favorite and 'stamp_id' in favorite.stamp:
+#             stamp = MongoStamp().getStamp(favorite.stamp['stamp_id'])
+#             user = MongoUser().getUser(favorite.user_id)
+#             MongoActivity().addActivityForFavorite([stamp.user_id], user, stamp)
+        
         return favoriteId
     
     def getFavorite(self, favoriteId):
@@ -63,8 +74,9 @@ class MongoFavorite(AFavoriteDB, Mongo):
             raise KeyError("Favorite not valid")
         return favorite
         
-    def removeFavorite(self, favoriteID):
-        return self._removeDocument(favoriteID)
+    def removeFavorite(self, favoriteId):
+        if self._removeDocument(favoriteId):
+            return True
         
     def completeFavorite(self, favoriteId, complete=True):
         if not isinstance(complete, bool):

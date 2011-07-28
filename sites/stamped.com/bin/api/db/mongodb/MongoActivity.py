@@ -20,7 +20,7 @@ class MongoActivity(AActivityDB, Mongo):
         
     SCHEMA = {
         '_id': object,
-        'genre': basestring, # comment, restamp, favorite, directed, mention, credit milestone
+        'genre': basestring, # comment, reply, restamp, favorite, directed, mention, credit milestone
         'user': {
             'user_id': basestring,
             'screen_name': basestring,
@@ -125,9 +125,28 @@ class MongoActivity(AActivityDB, Mongo):
             
         return activityId
 
-    def addActivityForComment(self, recipientIds, user, comment, stamp):
+    def addActivityForComment(self, recipientIds, user, stamp, comment):
         activity = {}
         activity['genre'] = 'comment'
+        activity['user'] = user.getDataAsDict()
+        activity['stamp'] = stamp.getDataAsDict()
+        activity['comment'] = comment.getDataAsDict()
+        activity = Activity(activity)
+        
+        activity.timestamp = { 'created': datetime.utcnow() }
+        
+        if activity.isValid == False:
+            raise KeyError("Activity not valid")
+        
+        activityId = self._addDocument(activity, 'activity_id')
+        for userId in recipientIds:
+            MongoUserActivity().addUserActivity(userId, activityId)
+            
+        return activityId
+
+    def addActivityForReply(self, recipientIds, user, stamp, comment):
+        activity = {}
+        activity['genre'] = 'reply'
         activity['user'] = user.getDataAsDict()
         activity['stamp'] = stamp.getDataAsDict()
         activity['comment'] = comment.getDataAsDict()
@@ -180,11 +199,13 @@ class MongoActivity(AActivityDB, Mongo):
             
         return activityId
 
-    def addActivityForMention(self, recipientIds, user, stamp):
+    def addActivityForMention(self, recipientIds, user, stamp, comment=None):
         activity = {}
         activity['genre'] = 'mention'
         activity['user'] = user.getDataAsDict()
         activity['stamp'] = stamp.getDataAsDict()
+        if comment != None:
+            activity['comment'] = comment.getDataAsDict()
         activity = Activity(activity)
         
         activity.timestamp = { 'created': datetime.utcnow() }

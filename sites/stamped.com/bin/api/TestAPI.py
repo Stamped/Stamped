@@ -1519,7 +1519,8 @@ def activityTest(baseurl):
     data = {
         "authenticated_user_id": userA,
         "entity_id": entityID,
-        "blurb": "Favorite restaurant in the Village.", 
+        "blurb": "Favorite restaurant in the Village. (via @rmstein)", 
+        "credit": "rmstein",
         "image": "image.png"
     }
     stampID = testPOST(baseurl, path, data)['stamp_id']
@@ -1535,7 +1536,67 @@ def activityTest(baseurl):
     data = {
         "authenticated_user_id": userA,
         "stamp_id": stampID,
-        "blurb": "That looks awesome. Well done, @rmstein.."
+        "blurb": "This was awesome. Thanks again, @rmstein.."
+    }
+    commentID = testPOST(baseurl, path, data)['comment_id']
+    if len(commentID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+                
+    
+    path = "comments/create.json"
+    data = {
+        "authenticated_user_id": userB,
+        "stamp_id": stampID,
+        "blurb": "No problem. Next time get the burger."
+    }
+    commentID = testPOST(baseurl, path, data)['comment_id']
+    if len(commentID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+                
+    
+    path = "comments/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "stamp_id": stampID,
+        "blurb": "Yeah? It's worth getting?"
+    }
+    commentID = testPOST(baseurl, path, data)['comment_id']
+    if len(commentID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+                
+    
+    path = "comments/create.json"
+    data = {
+        "authenticated_user_id": userB,
+        "stamp_id": stampID,
+        "blurb": "Definitely. Go there now, @kpalms."
+    }
+    commentID = testPOST(baseurl, path, data)['comment_id']
+    if len(commentID) == 24:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+                
+    
+    path = "comments/create.json"
+    data = {
+        "authenticated_user_id": userA,
+        "stamp_id": stampID,
+        "blurb": "Ok will do."
     }
     commentID = testPOST(baseurl, path, data)['comment_id']
     if len(commentID) == 24:
@@ -1545,26 +1606,37 @@ def activityTest(baseurl):
         print result
         raise Exception
         
+    
         
-    path = "stamps/create.json"
+        
+#     path = "stamps/create.json"
+#     data = {
+#         "authenticated_user_id": userA,
+#         "entity_id": entityIDb,
+#         "blurb": "Great date spot. Thanks @rmstein!", 
+#         "image": "image.png"
+#     }
+#     stampIDb = testPOST(baseurl, path, data)['stamp_id']
+#     if len(stampIDb) == 24:
+#         print 'DATA: %s' % path
+#     else:
+#         print 'FAIL: %s' % path
+#         print stampID
+#         raise Exception
+        
+        
+        
+        
+        
+
+
+    path = "activity/show.json"
     data = {
-        "authenticated_user_id": userA,
-        "entity_id": entityIDb,
-        "blurb": "Great date spot. Thanks @rmstein!", 
-        "image": "image.png"
+        "authenticated_user_id": userA
     }
-    stampIDb = testPOST(baseurl, path, data)['stamp_id']
-    if len(stampIDb) == 24:
-        print 'DATA: %s' % path
-    else:
-        print 'FAIL: %s' % path
-        print stampID
-        raise Exception
-        
-        
-        
-        
-        
+    result = testGET(baseurl, path, data)
+    print result
+    
 
 
     path = "activity/show.json"

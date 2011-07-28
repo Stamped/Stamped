@@ -96,6 +96,23 @@ class MongoStamp(AStampDB, Mongo):
             mentions = self._extractMentions(stamp['blurb'])
             if len(mentions) > 0:
                 stamp['mentions'] = mentions
+                
+        # Extract credit
+        if 'credit' in stamp:
+            credit = []
+            for creditedUser in _userDB.lookupUsers(None, stamp.credit):
+                data = {}
+                data['user_id'] = creditedUser['user_id']
+                data['screen_name'] = creditedUser['screen_name']
+                data['display_name'] = creditedUser['display_name']
+                #data['profile_image'] = creditedUser['profile_image']
+                #data['color_primary'] = creditedUser['color_primary']
+                #if 'color_secondary' in creditedUser:
+                #    data['color_secondary'] = creditedUser['color_secondary']
+                #data['privacy'] = creditedUser['privacy']
+                
+                credit.append(data)
+            stamp.credit = credit
             
         # Add the stamp data to the database
         stampId = self._addDocument(stamp, 'stamp_id')
@@ -115,59 +132,65 @@ class MongoStamp(AStampDB, Mongo):
         if favoriteId: 
             _favoriteDB.completeFavorite(favoriteId)
         
-        # If users are mentioned, add stamp to their activity feed
-        if 'mentions' in stamp:
-            recipientIds = []
-            for mention in stamp['mentions']:
-                if 'user_id' in mention:
-                    recipientIds.append(mention['user_id'])
-            if len(recipientIds) > 0:
-                _activityDB.addActivityForMention(recipientIds, user, stamp)
-        
         # Give credit
+        userIdsForCredit = []
         if 'credit' in stamp and len(stamp.credit) > 0:
-            for user in _userDB.lookupUsers(None, stamp.credit):
+            for creditedUser in stamp.credit:
+
                 # Add to 'credit received'
-                numCredit = _creditReceivedDB.addCredit(user.user_id, stampId)
+                numCredit = _creditReceivedDB.addCredit(creditedUser['user_id'], stampId)
             
                 # Add to 'credit givers'
-                numGivers = _creditGiversDB.addGiver(user.user_id, stamp['user']['user_id'])
+                numGivers = _creditGiversDB.addGiver(creditedUser['user_id'], user.user_id)
                 
                 # Increment user's total credit received
-                _userDB.updateUserStats(user.user_id, 'num_credit', None, increment=1)
+                _userDB.updateUserStats(creditedUser['user_id'], 'num_credit', None, increment=1)
                 
                 # Update user's total credit givers 
-                _userDB.updateUserStats(user.user_id, 'num_credit_givers', numGivers)
+                _userDB.updateUserStats(creditedUser['user_id'], 'num_credit_givers', numGivers)
                 
-                # Update the number of credit on the user's stamp
-                creditedStamp = Stamp(self._mongoToObj(
-                    self._collection.find_one({
-                        'user.user_id': user.user_id, 
+                # Append user id for activity
+                userIdsForCredit.append(creditedUser['user_id'])
+                
+                # Update the amount of credit on the user's stamp
+                creditedStamp = self._collection.find_one({
+                        'user.user_id': creditedUser['user_id'], 
                         'entity.entity_id': stamp.entity['entity_id']
-                    }),
-                    'stamp_id'))
+                    })
+                if creditedStamp:                
+                    creditedStamp = Stamp(self._mongoToObj(creditedStamp, 'stamp_id'))
                 
-                if 'stamp_id' in creditedStamp and creditedStamp.stamp_id != None:    
-                    # Just in case the credited user hasn't stamped it yet...            
-                    self._collection.update(
-                        {'_id': self._getObjectIdFromString(creditedStamp.stamp_id)}, 
-                        {'$inc': {'num_credit': 1}, '$inc': {'num_comments': 1}},
-                        upsert=True)
-                    
-                    # Add stamp as a comment on the user's stamp
-                    comment = Comment()
-                    comment.stamp_id = creditedStamp.stamp_id
-                    comment.user = stamp.user
-                    comment.restamp_id = stampId
-                    if 'blurb' in stamp:
-                        comment.blurb = stamp.blurb
-                    if 'mentions' in stamp:
-                        comment.mentions = stamp.mentions
-                    comment.timestamp = stamp.timestamp
-                    self.addComment(comment)
-                    
-                    # Add to activity stream
-                    _activityDB.addActivityForRestamp([user.user_id], stamp.user, stamp)
+                    if 'stamp_id' in creditedStamp and creditedStamp.stamp_id != None:    
+                        # Just in case the credited user hasn't stamped it yet...            
+                        self._collection.update(
+                            {'_id': self._getObjectIdFromString(creditedStamp.stamp_id)}, 
+                            {'$inc': {'num_credit': 1}, '$inc': {'num_comments': 1}},
+                            upsert=True)
+                        
+                        # Add stamp as a comment on the user's stamp
+                        comment = Comment()
+                        comment.stamp_id = creditedStamp.stamp_id
+                        comment.user = stamp.user
+                        comment.restamp_id = stampId
+                        if 'blurb' in stamp:
+                            comment.blurb = stamp.blurb
+                        if 'mentions' in stamp:
+                            comment.mentions = stamp.mentions
+                        comment.timestamp = stamp.timestamp
+                        self.addComment(comment)
+        
+        # Add activity for credited users
+        if len(userIdsForCredit) > 0:
+            _activityDB.addActivityForRestamp(userIdsForCredit, user, stamp)
+        
+        # Add activity for mentioned users
+        if 'mentions' in stamp and len(stamp.mentions) > 0:
+            userIdsForMention = []
+            for mention in stamp['mentions']:
+                if 'user_id' in mention and mention['user_id'] not in userIdsForCredit:
+                    userIdsForMention.append(mention['user_id'])
+            if len(userIdsForMention) > 0:
+                _activityDB.addActivityForMention(userIdsForMention, user, stamp)
                     
         return stampId
     
@@ -228,6 +251,9 @@ class MongoStamp(AStampDB, Mongo):
         return True
         
     def addComment(self, comment):
+        
+        # Connect
+        _activityDB = MongoActivity()
     
         # Grab data
         user = MongoUser().getUser(comment['user']['user_id'])
@@ -239,28 +265,41 @@ class MongoStamp(AStampDB, Mongo):
             if len(mentions) > 0:
                 comment['mentions'] = mentions
         
-        # Get ids for stamp owner, mentioned users, and previous commenters
-        recipientIds = [self.getStamp(comment['stamp_id']).user['user_id']]
-        if 'mentions' in comment:
-            for mention in comment['mentions']:
-                if 'user_id' in mention:
-                    recipientIds.append(mention['user_id'])
-        ### TODO: Limit this to the last 20 comments or so...
-        for prevComment in self.getComments(comment['stamp_id']):
-            recipientIds.append(prevComment['user']['user_id'])
-        recipientDict = {}
-        for e in recipientIds:
-            recipientDict[e] = 1
-        recipientIds = recipientDict.keys()
-        if comment['user']['user_id'] in recipientIds:
-            recipientIds.remove(comment['user']['user_id'])
-        
         # Add comment
         commentId = MongoComment().addComment(comment)
         comment['comment_id'] = commentId
         
-        # Add activity
-        MongoActivity().addActivityForComment(recipientIds, user, comment, stamp)
+        # Add activity for mentioned users
+        userIdsForMention = []
+        if 'mentions' in comment:
+            for mention in comment['mentions']:
+                if 'user_id' in mention:
+                    userIdsForMention.append(mention['user_id']) # mentioned users
+            if len(userIdsForMention) > 0:
+                _activityDB.addActivityForMention(userIdsForMention, user, stamp, comment)
+        
+        # Add activity for commentor and for stamp owner
+        userIdsForComment = []
+        if comment['user']['user_id'] not in userIdsForMention:
+            userIdsForComment.append(comment['user']['user_id'])
+        stampOwner = self.getStamp(comment['stamp_id']).user['user_id']
+        if stampOwner not in userIdsForMention:
+            userIdsForComment.append(stampOwner)
+        if len(userIdsForComment) > 0:
+            _activityDB.addActivityForComment(userIdsForComment, user, stamp, comment)
+                    
+        # Add activity for previous commenters
+        userIdsForReply = []
+        ### TODO: Limit this to the last 20 comments or so...
+        for prevComment in self.getComments(comment['stamp_id']):
+            userIdsForReply.append(prevComment['user']['user_id']) # prev comments
+        recipientDict = {}
+        for e in userIdsForReply:
+            if e not in userIdsForComment and e not in userIdsForMention:
+                recipientDict[e] = 1
+        userIdsForReply = recipientDict.keys()
+        if len(userIdsForReply) > 0:
+            _activityDB.addActivityForReply(userIdsForReply, user, stamp, comment)
         
         # Increment comment count on stamp
         self.incrementStatsForStamp(comment['stamp_id'], 'num_comments', 1)

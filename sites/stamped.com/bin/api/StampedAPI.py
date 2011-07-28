@@ -637,8 +637,8 @@ class StampedAPI(AStampedAPI):
             
         if params.credit != None:
             stamp.credit = []
-            for userID in params.credit.split(','):
-                stamp.credit.append(userID)
+            for screenName in params.credit.split(','):
+                stamp.credit.append(screenName)
                 
         stamp.timestamp = {
             'created': datetime.utcnow()
