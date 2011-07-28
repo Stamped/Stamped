@@ -70,12 +70,15 @@
   TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
   PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];
   self.viewControllers = [NSArray arrayWithObjects:inbox, activity, todo, people, nil];
+  [inbox release];
+  [activity release];
+  [todo release];
+  [people release];
   CGRect inboxFrame = CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
   inbox.view.frame = inboxFrame;
   [self.view addSubview:inbox.view];
   self.selectedViewController = inbox;
-  [inbox release];
-  [activity release];
+
   if ([self.tabBar respondsToSelector:@selector(setSelectedImageTintColor:)])
     [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
 

@@ -34,7 +34,7 @@
     self.categoryImageView.contentMode = UIViewContentModeBottomRight;
     [self addSubview:self.categoryImageView];
     [self.categoryImageView release];
-
+    
     self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
     self.titleLabel.backgroundColor = [UIColor clearColor];
     self.titleLabel.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
