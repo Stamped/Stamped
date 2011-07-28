@@ -12,6 +12,8 @@
 #import "InboxViewController.h"
 #import "ActivityViewController.h"
 #import "CreateStampViewController.h"
+#import "TodoViewController.h"
+#import "PeopleViewController.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
@@ -65,16 +67,18 @@
 - (void)finishViewInit {
   InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
-  self.viewControllers = [NSArray arrayWithObjects:inbox, activity, nil];
+  TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
+  PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];
+  self.viewControllers = [NSArray arrayWithObjects:inbox, activity, todo, people, nil];
   CGRect inboxFrame = CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
   inbox.view.frame = inboxFrame;
   [self.view addSubview:inbox.view];
-  self.selectedViewController = inbox;  
+  self.selectedViewController = inbox;
   [inbox release];
   [activity release];
   if ([self.tabBar respondsToSelector:@selector(setSelectedImageTintColor:)])
     [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
-  
+
   self.tabBar.selectedItem = stampsTabBarItem_;
 }
 
@@ -144,7 +148,14 @@
   } else if (item == activityTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"Activity";
+  } else if (item == mustDoTabBarItem_) {
+    newViewController = [viewControllers_ objectAtIndex:2];
+    self.navigationItem.title = @"Todo";
+  } else if (item == peopleTabBarItem_) {
+    newViewController = [viewControllers_ objectAtIndex:3];
+    self.navigationItem.title = @"People";
   }
+    
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 

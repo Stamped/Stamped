@@ -101,6 +101,13 @@
 		7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A413C3754300ABE6E2 /* InfoPlist.strings */; };
 		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
 		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
+		7ED2EF5E13E0DAFD007F1AFB /* activity_dummy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF5D13E0DAFD007F1AFB /* activity_dummy@2x.png */; };
+		7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */; };
+		7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */; };
+		7ED2EF6613E0DCC7007F1AFB /* todo_dummy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6513E0DCC7007F1AFB /* todo_dummy@2x.png */; };
+		7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */; };
+		7ED2EF6C13E0DF7F007F1AFB /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */; };
+		7ED2EF6F13E0DFF3007F1AFB /* people_dummy@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6E13E0DFF3007F1AFB /* people_dummy@2x.png */; };
 		7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDBF9FF13E0C57A003D73D5 /* Entity.m */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
 		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
@@ -335,6 +342,15 @@
 		7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StampedTests-Prefix.pch"; sourceTree = "<group>"; };
 		7EC017A813C3754400ABE6E2 /* StampedTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedTests.h; sourceTree = "<group>"; };
 		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
+		7ED2EF5D13E0DAFD007F1AFB /* activity_dummy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "activity_dummy@2x.png"; sourceTree = "<group>"; };
+		7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
+		7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
+		7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TodoViewController.xib; sourceTree = "<group>"; };
+		7ED2EF6513E0DCC7007F1AFB /* todo_dummy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "todo_dummy@2x.png"; sourceTree = "<group>"; };
+		7ED2EF6813E0DF7F007F1AFB /* PeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleViewController.h; sourceTree = "<group>"; };
+		7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleViewController.m; sourceTree = "<group>"; };
+		7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PeopleViewController.xib; sourceTree = "<group>"; };
+		7ED2EF6E13E0DFF3007F1AFB /* people_dummy@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "people_dummy@2x.png"; sourceTree = "<group>"; };
 		7EDBF9FE13E0C57A003D73D5 /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
 		7EDBF9FF13E0C57A003D73D5 /* Entity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Entity.m; sourceTree = "<group>"; };
 		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
@@ -672,6 +688,49 @@
 			name = "Stamp List Filter";
 			sourceTree = "<group>";
 		};
+		7ED2EF5C13E0DA48007F1AFB /* Activity */ = {
+			isa = PBXGroup;
+			children = (
+				7ED2EF5D13E0DAFD007F1AFB /* activity_dummy@2x.png */,
+				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
+				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
+				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
+			);
+			name = Activity;
+			sourceTree = "<group>";
+		};
+		7ED2EF5F13E0DBF8007F1AFB /* Todo */ = {
+			isa = PBXGroup;
+			children = (
+				7ED2EF6513E0DCC7007F1AFB /* todo_dummy@2x.png */,
+				7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */,
+				7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */,
+				7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */,
+			);
+			name = Todo;
+			sourceTree = "<group>";
+		};
+		7ED2EF6713E0DED5007F1AFB /* Root View */ = {
+			isa = PBXGroup;
+			children = (
+				7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */,
+				7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */,
+				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
+			);
+			name = "Root View";
+			sourceTree = "<group>";
+		};
+		7ED2EF6D13E0DF83007F1AFB /* People */ = {
+			isa = PBXGroup;
+			children = (
+				7ED2EF6E13E0DFF3007F1AFB /* people_dummy@2x.png */,
+				7ED2EF6813E0DF7F007F1AFB /* PeopleViewController.h */,
+				7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */,
+				7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */,
+			);
+			name = People;
+			sourceTree = "<group>";
+		};
 		7EE1190C13CE0C4100378139 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -704,9 +763,7 @@
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
 			isa = PBXGroup;
 			children = (
-				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
-				7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */,
 			);
 			name = Interface;
 			sourceTree = "<group>";
@@ -721,16 +778,16 @@
 				7E42DCBE13DB64D100AF63BE /* Create Stamp */,
 				7E668C2613D8B25300E79E14 /* Stamp Detail */,
 				7E514AA213C9824D00EEC598 /* Entity Detail */,
+				7ED2EF5C13E0DA48007F1AFB /* Activity */,
+				7ED2EF5F13E0DBF8007F1AFB /* Todo */,
+				7ED2EF6D13E0DF83007F1AFB /* People */,
+				7ED2EF6713E0DED5007F1AFB /* Root View */,
 				7E22679713D4D90F00657A66 /* AccountManager.h */,
 				7E22679813D4D90F00657A66 /* AccountManager.m */,
 				7E512FC413D9F3B400547A20 /* STBadgeView.h */,
 				7E512FC513D9F3B400547A20 /* STBadgeView.m */,
 				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
 				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
-				7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */,
-				7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */,
-				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
-				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
 				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
 				7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */,
@@ -964,6 +1021,11 @@
 				7E7E10A413DF14C900E44DE1 /* credit_icon@2x.png in Resources */,
 				7E7E10A713DF14D100E44DE1 /* toolbar_checkmark@2x.png in Resources */,
 				7E7E10A813DF14D100E44DE1 /* toolbar_close@2x.png in Resources */,
+				7ED2EF5E13E0DAFD007F1AFB /* activity_dummy@2x.png in Resources */,
+				7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */,
+				7ED2EF6613E0DCC7007F1AFB /* todo_dummy@2x.png in Resources */,
+				7ED2EF6C13E0DF7F007F1AFB /* PeopleViewController.xib in Resources */,
+				7ED2EF6F13E0DFF3007F1AFB /* people_dummy@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1026,6 +1088,8 @@
 				7E22D6AF13DDA34100C4005E /* CreateStampDetailViewController.m in Sources */,
 				7E9EE35313DF683500F4736F /* Stamp.m in Sources */,
 				7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */,
+				7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */,
+				7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
