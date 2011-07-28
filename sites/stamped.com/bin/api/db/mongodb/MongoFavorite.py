@@ -14,6 +14,7 @@ from api.Favorite import Favorite
 from MongoDB import Mongo
 from MongoUserFavorites import MongoUserFavorites
 from MongoActivity import MongoActivity
+from MongoUser import MongoUser
 
 class MongoFavorite(AFavoriteDB, Mongo):
         
@@ -34,7 +35,8 @@ class MongoFavorite(AFavoriteDB, Mongo):
         'user_id': basestring,
         'stamp': {
             'stamp_id': basestring,
-            'display_name': basestring
+            'display_name': basestring,
+            'user_id': basestring
         },
         'timestamp': {
             'created': datetime,
@@ -56,15 +58,15 @@ class MongoFavorite(AFavoriteDB, Mongo):
     def addFavorite(self, favorite):
         # Add favorite
         favoriteId = self._addDocument(favorite, 'favorite_id')
+        favorite['favorite_id'] = favoriteId
         
         # Add link to favorite
         MongoUserFavorites().addUserFavorite(favorite['user_id'], favoriteId)
         
-        # Add activity if referencing a stamp
-#         if 'stamp' in favorite and 'stamp_id' in favorite.stamp:
-#             stamp = MongoStamp().getStamp(favorite.stamp['stamp_id'])
-#             user = MongoUser().getUser(favorite.user_id)
-#             MongoActivity().addActivityForFavorite([stamp.user_id], user, stamp)
+        # Add activity (if referencing a stamp)
+        if 'stamp' in favorite and 'stamp_id' in favorite.stamp:
+            user = MongoUser().getUser(favorite.user_id)
+            MongoActivity().addActivityForFavorite([favorite.stamp['user_id']], user, favorite)
         
         return favoriteId
     

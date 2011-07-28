@@ -1605,6 +1605,21 @@ def activityTest(baseurl):
         print 'FAIL: %s' % path
         print result
         raise Exception
+                
+    
+    path = "favorites/create.json"
+    data = {
+        "authenticated_user_id": userB,
+        "entity_id": entityID,
+        "stamp_id": stampID
+    }
+    favoriteID = testPOST(baseurl, path, data)['favorite_id']
+    if len(favoriteID) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'result: %s' % path
+        print result
+        raise Exception
         
     
         
@@ -1635,7 +1650,7 @@ def activityTest(baseurl):
         "authenticated_user_id": userA
     }
     result = testGET(baseurl, path, data)
-    print result
+#     print result
     
 
 
@@ -1644,7 +1659,7 @@ def activityTest(baseurl):
         "authenticated_user_id": userB
     }
     result = testGET(baseurl, path, data)
-    print result
+#     print result
     
     
     

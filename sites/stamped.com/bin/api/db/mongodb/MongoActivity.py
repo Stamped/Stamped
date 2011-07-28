@@ -89,6 +89,29 @@ class MongoActivity(AActivityDB, Mongo):
                 'num_credit': int
             }
         },
+        'favorite': {
+            'favorite_id': basestring,
+            'entity': {
+                'entity_id': basestring,
+                'title': basestring,
+                'coordinates': {
+                    'lat': float, 
+                    'lng': float
+                },
+                'category': basestring,
+                'subtitle': basestring
+            },
+            'user_id': basestring,
+            'stamp': {
+                'stamp_id': basestring,
+                'display_name': basestring,
+                'user_id': basestring
+            },
+            'timestamp': {
+                'created': datetime,
+                'modified': datetime
+            },
+        },
         'timestamp': {
             'created': datetime
         }
@@ -163,11 +186,11 @@ class MongoActivity(AActivityDB, Mongo):
             
         return activityId
 
-    def addActivityForFavorite(self, recipientIds, user, stamp):
+    def addActivityForFavorite(self, recipientIds, user, favorite):
         activity = {}
         activity['genre'] = 'favorite'
         activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
+        activity['favorite'] = favorite.getDataAsDict()
         activity = Activity(activity)
         
         activity.timestamp = { 'created': datetime.utcnow() }

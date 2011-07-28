@@ -26,7 +26,8 @@ class Favorite(ASchemaObject):
         'user_id': basestring,
         'stamp': {
             'stamp_id': basestring,
-            'display_name': basestring
+            'display_name': basestring,
+            'user_id': basestring
         },
         'timestamp': {
             'created': datetime,
@@ -63,6 +64,7 @@ class Favorite(ASchemaObject):
             valid &= isinstance(self.stamp, dict) 
             valid &= 'stamp_id' in self.stamp and isinstance(self.stamp['stamp_id'], basestring)
             valid &= 'display_name' in self.stamp and isinstance(self.stamp['display_name'], basestring)
+            valid &= 'user_id' in self.stamp and isinstance(self.stamp['user_id'], basestring)
         
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
         if 'created' in self.timestamp:

@@ -82,6 +82,29 @@ class Activity(ASchemaObject):
                 'num_credit': int
             }
         },
+        'favorite': {
+            'favorite_id': basestring,
+            'entity': {
+                'entity_id': basestring,
+                'title': basestring,
+                'coordinates': {
+                    'lat': float, 
+                    'lng': float
+                },
+                'category': basestring,
+                'subtitle': basestring
+            },
+            'user_id': basestring,
+            'stamp': {
+                'stamp_id': basestring,
+                'display_name': basestring,
+                'user_id': basestring
+            },
+            'timestamp': {
+                'created': datetime,
+                'modified': datetime
+            },
+        },
         'timestamp': {
             'created': datetime
         }
@@ -141,6 +164,12 @@ class Activity(ASchemaObject):
         if 'stamp' in self:
             valid &= isinstance(self.stamp, dict) 
 #             valid &= 'stamp_id' in self.stamp and isinstance(self.stamp['stamp_id'], basestring)
+            ### TODO: Finish this list
+        
+        # Favorite
+        if 'favorite' in self:
+            valid &= isinstance(self.favorite, dict) 
+            valid &= 'favorite_id' in self.favorite and isinstance(self.favorite['favorite_id'], basestring)
             ### TODO: Finish this list
         
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)

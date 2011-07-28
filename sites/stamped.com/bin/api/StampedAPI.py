@@ -466,6 +466,7 @@ class StampedAPI(AStampedAPI):
             favorite.stamp = {}
             favorite.stamp['stamp_id'] = stamp.stamp_id
             favorite.stamp['display_name'] = stamp.user['display_name']
+            favorite.stamp['user_id'] = stamp.user['user_id']
                 
         favorite.timestamp = {
             'created': datetime.utcnow()
@@ -1090,6 +1091,12 @@ class StampedAPI(AStampedAPI):
             result['comment'] = self._returnComment(Comment(activity['comment']))
         else:
             result['comment'] = None
+        
+        ### TODO: Explicitly define favorite, expand if passed full object
+        if 'favorite' in activity:
+            result['favorite'] = self._returnFavorite(Favorite(activity['favorite']))
+        else:
+            result['favorite'] = None
                 
         if 'created' in activity.timestamp:
             result['created'] = str(activity.timestamp['created'])
