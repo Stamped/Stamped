@@ -49,6 +49,8 @@ def createStamp(baseurl, user, title, category, comment):
         "desc": "Custom entity", 
         "category": category
     }
+    if category == 'Place':
+        data['coordinates'] = '40.714623,-74.006605'
     entityID = testPOST(baseurl, path, data)['entity_id']
     if len(entityID) == 24:
         print 'PASS: %s' % path
