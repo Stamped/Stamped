@@ -356,3 +356,13 @@ def numEntitiesToStr(numEntities):
 def getStatusStr(count, maxCount):
     return "%d%% (%d / %d)" % (round((100.0 * count) / max(1, maxCount)), count, maxCount)
 
+def abstract(func):
+    def wrapper(*__args, **__kwargs):
+        raise NotImplementedError('Missing required %s() method' % func.__name__)
+    
+    wrapper.__name__ = func.__name__
+    wrapper.__dict__ = func.__dict__
+    wrapper.__doc__  = func.__doc__
+    
+    return wrapper
+
