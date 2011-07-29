@@ -45,10 +45,17 @@ class ADeploymentSystem(object):
     def crawl(self, *args):
         pass
     
+    @abstract
+    def setup_crawler_data(self, *args):
+        pass
+    
     def local(self, cmd, env=None):
         print "[%s-local] %s" % (self, cmd, )
         
         if env is None:
+            if not hasattr(self, 'env'):
+                return utils.shell3(cmd)
+            
             env = self.env
         
         return utils.shell3(cmd, env)

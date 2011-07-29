@@ -151,6 +151,15 @@ class AWSDeploymentStack(ADeploymentStack):
                     run(cmd, pty=False)
                     count += 1
     
+    def setup_crawler_data(self, *args):
+        config = {
+            'name' : 'crawler_setup0', 
+            'roles' : [ ], 
+        }
+        
+        instance = AWSInstance(self, config)
+        instance.create()
+    
     def _getInstancesByRole(self, role):
         return filter(lambda instance: role in instance.roles, self.instances)
     

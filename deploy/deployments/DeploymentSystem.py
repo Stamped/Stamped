@@ -98,6 +98,14 @@ class DeploymentSystem(ADeploymentSystem):
             stack = self._stacks[stackName]
             stack.crawl()
     
+    def setup_crawler_data(self, *args):
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.setup_crawler_data()
+    
     def list_stacks(self, stackNameRegex=None, stackStatus=None):
         if stackNameRegex is not None:
             stacks = self._get_matching_stacks(stackNameRegex)
