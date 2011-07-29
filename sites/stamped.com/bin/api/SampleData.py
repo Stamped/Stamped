@@ -35,6 +35,7 @@ def main():
     
     baseurl = "http://0.0.0.0:5000/api/v1"
     #baseurl = "http://192.168.0.10:5000/api/v1"
+    #baseurl = "http://api.stamped.com:5000/api/v1"
     
     betaAccountData(baseurl)
 
@@ -214,7 +215,7 @@ def betaAccountData(baseurl):
         "privacy": False,
     }
     result = testPOST(baseurl, path, data)
-    if result['privacy'] == True:
+    if result['privacy'] == False:
         print 'PASS: %s' % path
     else:
         print 'FAIL: %s' % path
