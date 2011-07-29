@@ -20,7 +20,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     
     SCHEMA = {
         '_id': object,
-        'genre': basestring, # comment, restamp, favorite, directed, mention, credit milestone
+        'genre': basestring, # comment, reply, restamp, favorite, directed, mention, credit milestone
         'user': {
             'user_id': basestring,
             'screen_name': basestring,
@@ -89,7 +89,29 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
                 'num_credit': int
             }
         },
-        'blurb': basestring,
+        'favorite': {
+            'favorite_id': basestring,
+            'entity': {
+                'entity_id': basestring,
+                'title': basestring,
+                'coordinates': {
+                    'lat': float, 
+                    'lng': float
+                },
+                'category': basestring,
+                'subtitle': basestring
+            },
+            'user_id': basestring,
+            'stamp': {
+                'stamp_id': basestring,
+                'display_name': basestring,
+                'user_id': basestring
+            },
+            'timestamp': {
+                'created': datetime,
+                'modified': datetime
+            },
+        },
         'timestamp': {
             'created': datetime
         }
@@ -126,7 +148,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             
         return activityId
 
-    def addActivityForComment(self, recipientIds, user, comment, stamp):
+    def addActivityForComment(self, recipientIds, user, stamp, comment):
         activity = {}
         activity['genre'] = 'comment'
         activity['user'] = user.getDataAsDict()
@@ -145,11 +167,30 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             
         return activityId
 
-    def addActivityForFavorite(self, recipientIds, user, stamp):
+    def addActivityForReply(self, recipientIds, user, stamp, comment):
+        activity = {}
+        activity['genre'] = 'reply'
+        activity['user'] = user.getDataAsDict()
+        activity['stamp'] = stamp.getDataAsDict()
+        activity['comment'] = comment.getDataAsDict()
+        activity = Activity(activity)
+        
+        activity.timestamp = { 'created': datetime.utcnow() }
+        
+        if activity.isValid == False:
+            raise KeyError("Activity not valid")
+        
+        activityId = self._addDocument(activity, 'activity_id')
+        for userId in recipientIds:
+            MongoUserActivity().addUserActivity(userId, activityId)
+            
+        return activityId
+
+    def addActivityForFavorite(self, recipientIds, user, favorite):
         activity = {}
         activity['genre'] = 'favorite'
         activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
+        activity['favorite'] = favorite.getDataAsDict()
         activity = Activity(activity)
         
         activity.timestamp = { 'created': datetime.utcnow() }
@@ -181,11 +222,13 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             
         return activityId
 
-    def addActivityForMention(self, recipientIds, user, stamp):
+    def addActivityForMention(self, recipientIds, user, stamp, comment=None):
         activity = {}
         activity['genre'] = 'mention'
         activity['user'] = user.getDataAsDict()
         activity['stamp'] = stamp.getDataAsDict()
+        if comment != None:
+            activity['comment'] = comment.getDataAsDict()
         activity = Activity(activity)
         
         activity.timestamp = { 'created': datetime.utcnow() }
@@ -202,15 +245,22 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     def addActivityForMilestone(self, recipientId, milestone):
         raise NotImplementedError
     
-    def getActivity(self, userId):
-        activityData = self._getDocumentsFromIds(self.user_activity_collection.getUserActivity(userId))
+    def getActivity(self, userId, since=None, before=None, limit=20):
+        # Get activity
+        activityIds = self.user_activity_collection.getUserActivity(userId)
+        activityData = self._getDocumentsFromIds(
+                            activityIds, objId='activity_id', since=since, 
+                            before=before, sort='timestamp.created', limit=limit)
+        
+        # Loop through and validate
         result = []
         for activity in activityData:
             activity = Activity(activity)
             if activity.isValid == False:
                 raise KeyError("Activity not valid")
             result.append(activity)
-        return activity
+        
+        return result
         
     def removeActivity(self, activityId):
         self.user_activity_collection.removeUserActivity(userId, activityId)

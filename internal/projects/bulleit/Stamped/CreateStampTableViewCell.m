@@ -9,6 +9,7 @@
 #import "CreateStampTableViewCell.h"
 
 #import "Entity.h"
+#import "Util.h"
 
 @interface CreateStampCellView : UIView
 
@@ -32,18 +33,23 @@
     self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 27, 32)];
     self.categoryImageView.contentMode = UIViewContentModeBottomRight;
     [self addSubview:self.categoryImageView];
+    [self.categoryImageView release];
     
     self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
     self.titleLabel.backgroundColor = [UIColor clearColor];
     self.titleLabel.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
     self.titleLabel.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+    self.titleLabel.highlightedTextColor = [UIColor whiteColor];
     [self addSubview:self.titleLabel];
+    [self.titleLabel release];
     
     self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 34, 241, 20)];
     self.subtitleLabel.backgroundColor = [UIColor clearColor];
     self.subtitleLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
     self.subtitleLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+    self.subtitleLabel.highlightedTextColor = [UIColor whiteColor];
     [self addSubview:self.subtitleLabel];
+    [self.subtitleLabel release];
   }
   return self;
 }
@@ -83,9 +89,14 @@
   if (entityObject != entityObject_) {
     [entityObject_ release];
     entityObject_ = [entityObject retain];
-    customView_.titleLabel.text = entityObject.title;
-    customView_.subtitleLabel.text = entityObject.subtitle;
-    customView_.categoryImageView.image = entityObject.categoryImage;
+    if (entityObject) {
+      customView_.titleLabel.text = entityObject.title;
+      customView_.subtitleLabel.text = entityObject.subtitle;
+      customView_.categoryImageView.image = entityObject.categoryImage;
+      customView_.categoryImageView.highlightedImage =
+          [Util whiteMaskedImageUsingImage:entityObject.categoryImage];
+
+    }
   }
 }
 

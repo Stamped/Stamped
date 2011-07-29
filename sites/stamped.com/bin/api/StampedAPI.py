@@ -20,6 +20,7 @@ from ACommentDB import ACommentDB
 from AFavoriteDB import AFavoriteDB
 from ACollectionDB import ACollectionDB
 from AFriendshipDB import AFriendshipDB
+from AActivityDB import AActivityDB
 
 from Account import Account
 from Entity import Entity
@@ -29,6 +30,7 @@ from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship
 from Collection import Collection
+from Activity import Activity
 
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 
@@ -60,6 +62,7 @@ class StampedAPI(AStampedAPI):
         assert hasattr(self, '_favoriteDB')   and isinstance(self._favoriteDB, AFavoriteDB)
         assert hasattr(self, '_collectionDB') and isinstance(self._collectionDB, ACollectionDB)
         assert hasattr(self, '_friendshipDB') and isinstance(self._friendshipDB, AFriendshipDB)
+        assert hasattr(self, '_activityDB')   and isinstance(self._activityDB, AActivityDB)
         
         self._validated = True
     
@@ -463,6 +466,7 @@ class StampedAPI(AStampedAPI):
             favorite.stamp = {}
             favorite.stamp['stamp_id'] = stamp.stamp_id
             favorite.stamp['display_name'] = stamp.user['display_name']
+            favorite.stamp['user_id'] = stamp.user['user_id']
                 
         favorite.timestamp = {
             'created': datetime.utcnow()
@@ -634,8 +638,8 @@ class StampedAPI(AStampedAPI):
             
         if params.credit != None:
             stamp.credit = []
-            for userID in params.credit.split(','):
-                stamp.credit.append(userID)
+            for screenName in params.credit.split(','):
+                stamp.credit.append(screenName)
                 
         stamp.timestamp = {
             'created': datetime.utcnow()
@@ -808,6 +812,36 @@ class StampedAPI(AStampedAPI):
         raise NotImplementedError
         return self._collectionDB.getUserMentions(userID, limit)
     
+    # ######## #
+    # Activity #
+    # ######## #
+    
+    def getActivity(self, params):
+        # Limit results to 20
+        limit = self._setLimit(params.limit, cap=20)
+        
+        # Limit slice of data returned
+        since = None
+        if params.since != None:
+            try: 
+                since = datetime.utcfromtimestamp(int(params.since)-2)
+            except:
+                since = since
+        
+        before = None
+        if params.before != None:
+            try: 
+                before = datetime.utcfromtimestamp(int(params.before)+2)
+            except:
+                before = before
+        
+        activity = self._activityDB.getActivity(params.authenticated_user_id, since=since, before=before, limit=limit)
+        result = []
+        for item in activity:
+            result.append(self._returnActivity(item))
+        
+        return result
+    
     # ########### #
     # Private API #
     # ########### #
@@ -834,7 +868,6 @@ class StampedAPI(AStampedAPI):
     # ################# #
     
     def _returnStamp(self, stamp, user=None, entity=None, comments=None):
-        
         result = {}
         result['stamp_id'] = stamp['stamp_id']
         
@@ -888,7 +921,6 @@ class StampedAPI(AStampedAPI):
         return result
         
     def _returnUser(self, user, stamp=None):
-    
         result = {}
         result['user_id'] = user.user_id
         result['first_name'] = user.first_name
@@ -920,7 +952,6 @@ class StampedAPI(AStampedAPI):
         return result
         
     def _returnEntity(self, entity):
-        
         result = {}
         result['entity_id'] = entity.entity_id
         result['title'] = entity.title
@@ -953,9 +984,8 @@ class StampedAPI(AStampedAPI):
             result['last_modified'] = None
         
         return result
-        
-    def _returnFavorite(self, favorite, user=None, entity=None, stamp=None):
     
+    def _returnFavorite(self, favorite, user=None, entity=None, stamp=None):
         result = {}
         result['favorite_id'] = favorite.favorite_id
         
@@ -987,9 +1017,8 @@ class StampedAPI(AStampedAPI):
             result['complete'] = False
         
         return result
-        
+    
     def _returnComment(self, comment, user=None):
-        
         result = {}
         result['comment_id'] = comment['comment_id']
         result['stamp_id'] = comment['stamp_id']
@@ -1015,9 +1044,8 @@ class StampedAPI(AStampedAPI):
             result['created'] = None
         
         return result
-        
-    def _returnAccount(self, account):
     
+    def _returnAccount(self, account):
         result = {}
         result['user_id'] = account.user_id
         result['first_name'] = account.first_name
@@ -1035,6 +1063,38 @@ class StampedAPI(AStampedAPI):
             result['locale']['time_zone'] = account.locale['time_zone']
         else:
             result['locale']['time_zone'] = None
-            
-        return result
         
+        return result
+    
+    def _returnActivity(self, activity):
+        result = {}
+        result['genre'] = activity['genre']
+        
+        ### TODO: Explicitly define user, expand if passed full object
+        result['user'] = activity['user']
+        
+        ### TODO: Explicitly define stamp, expand if passed full object
+        if 'stamp' in activity:
+            result['stamp'] = self._returnStamp(Stamp(activity['stamp']))
+        else:
+            result['stamp'] = None
+        
+        ### TODO: Explicitly define comment, expand if passed full object
+        if 'comment' in activity:
+            result['comment'] = self._returnComment(Comment(activity['comment']))
+        else:
+            result['comment'] = None
+        
+        ### TODO: Explicitly define favorite, expand if passed full object
+        if 'favorite' in activity:
+            result['favorite'] = self._returnFavorite(Favorite(activity['favorite']))
+        else:
+            result['favorite'] = None
+                
+        if 'created' in activity.timestamp:
+            result['created'] = str(activity.timestamp['created'])
+        else:
+            result['created'] = None
+
+        return result
+

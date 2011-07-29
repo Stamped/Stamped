@@ -2,7 +2,7 @@
 //  Entity.h
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/20/11.
+//  Created by Andrew Bonventre on 7/27/11.
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
@@ -19,6 +19,14 @@
 @property (nonatomic, retain) NSString* subtitle;
 @property (nonatomic, retain) NSString* title;
 @property (nonatomic, retain) NSManagedObject* coordinates;
-@property (nonatomic, retain) Stamp* stamp;
+@property (nonatomic, retain) NSSet* stamps;
+@end
+
+@interface Entity (CoreDataGeneratedAccessors)
+
+- (void)addStampsObject:(Stamp*)value;
+- (void)removeStampsObject:(Stamp*)value;
+- (void)addStamps:(NSSet*)values;
+- (void)removeStamps:(NSSet*)values;
 
 @end

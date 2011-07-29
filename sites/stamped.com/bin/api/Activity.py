@@ -82,7 +82,29 @@ class Activity(ASchemaBasedAttributeDict):
                 'num_credit': int
             }
         },
-        'blurb': basestring,
+        'favorite': {
+            'favorite_id': basestring,
+            'entity': {
+                'entity_id': basestring,
+                'title': basestring,
+                'coordinates': {
+                    'lat': float, 
+                    'lng': float
+                },
+                'category': basestring,
+                'subtitle': basestring
+            },
+            'user_id': basestring,
+            'stamp': {
+                'stamp_id': basestring,
+                'display_name': basestring,
+                'user_id': basestring
+            },
+            'timestamp': {
+                'created': datetime,
+                'modified': datetime
+            },
+        },
         'timestamp': {
             'created': datetime
         }
@@ -141,12 +163,15 @@ class Activity(ASchemaBasedAttributeDict):
 #             valid &= 'stamp_id' in self.stamp and isinstance(self.stamp['stamp_id'], basestring)
             ### TODO: Finish this list
         
+        # Favorite
+        if 'favorite' in self:
+            valid &= isinstance(self.favorite, dict) 
+            valid &= 'favorite_id' in self.favorite and isinstance(self.favorite['favorite_id'], basestring)
+            ### TODO: Finish this list
+        
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
         if 'created' in self.timestamp:
-            valid &= isinstance(self.timestamp['created'], datetime)  
-        
-        if 'blurb' in self:
-            valid &= isinstance(self.blurb, basestring)
+            valid &= isinstance(self.timestamp['created'], datetime)
             
         return valid
-        
+

@@ -1,0 +1,141 @@
+
+# ACTIVITY #
+
+
+------------------------------------------------------------------------------
+## GET activity/show ##
+
+### Description ###
+Display activity data for the authenticating user. 
+
+### Details ###
+* Requires Authentication
+
+### Parameters ###
+
+**authenticated_user_id** _required_
+The user id of the authenticating user.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/activity/show.json
+	authenticated_user_id=47cc67093475061e3d95369d
+
+### Sample Result ###
+    [
+        {
+            "comment": null, 
+            "created": "2011-07-27 16:02:15.394000", 
+            "genre": "mention", 
+            "stamp": {
+                "blurb": "Great date spot. Thanks @rmstein!", 
+                "comment_preview": [], 
+                "created": "2011-07-27 16:02:14.549000", 
+                "credit": null, 
+                "entity": {
+                    "category": "Restaurant", 
+                    "coordinates": {
+                        "lat": 40.714623000000003, 
+                        "lng": -74.006604999999993
+                    }, 
+                    "entity_id": "4e30368432a7ba613b000003", 
+                    "subtitle": "Other", 
+                    "title": "Recette"
+                }, 
+                "image": "image.png", 
+                "mentions": [
+                    {
+                        "display_name": "Robby S.", 
+                        "indices": [24, 32], 
+                        "screen_name": "rmstein", 
+                        "user_id": "4e30368332a7ba613b000001"
+                    }
+                ], 
+                "num_comments": 0, 
+                "stamp_id": "4e30368732a7ba613b000007", 
+                "user": {
+                    "color_primary": "333333", 
+                    "color_secondary": "999999", 
+                    "display_name": "Kevin P.", 
+                    "privacy": false, 
+                    "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
+                    "screen_name": "kpalms", 
+                    "user_id": "4e30368332a7ba613b000000"
+                }
+            }, 
+            "user": {
+                "color_primary": "333333", 
+                "color_secondary": "999999", 
+                "display_name": "Kevin P.", 
+                "privacy": false, 
+                "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
+                "screen_name": "kpalms", 
+                "user_id": "4e30368332a7ba613b000000"
+            }
+        }, 
+        {
+            "comment": {
+                "blurb": "That looks awesome. Well done, @rmstein..", 
+                "comment_id": "4e30368632a7ba613b000005", 
+                "created": "2011-07-27 16:02:13.509000", 
+                "mentions": [
+                    {
+                        "display_name": "Robby S.", 
+                        "indices": [31, 39], 
+                        "screen_name": "rmstein", 
+                        "user_id": "4e30368332a7ba613b000001"
+                    }
+                ], 
+                "restamp_id": null, 
+                "stamp_id": "4e30368532a7ba613b000004", 
+                "user": {
+                    "color_primary": "333333", 
+                    "color_secondary": "999999", 
+                    "display_name": "Kevin P.", 
+                    "privacy": false, 
+                    "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
+                    "screen_name": "kpalms", 
+                    "user_id": "4e30368332a7ba613b000000"
+                }
+            }, 
+            "created": "2011-07-27 16:02:14.203000", 
+            "genre": "comment", 
+            "stamp": {
+                "blurb": "Favorite restaurant in the Village.", 
+                "comment_preview": [], 
+                "created": "2011-07-27 16:02:12.658000", 
+                "credit": null, 
+                "entity": {
+                    "category": "Restaurant", 
+                    "coordinates": {
+                        "lat": 40.714623000000003, 
+                        "lng": -74.006604999999993
+                    }, 
+                    "entity_id": "4e30368432a7ba613b000002", 
+                    "subtitle": "Other", 
+                    "title": "Little Owl"
+                }, 
+                "image": "image.png", 
+                "mentions": null, 
+                "num_comments": 0, 
+                "stamp_id": "4e30368532a7ba613b000004", 
+                "user": {
+                    "color_primary": "333333", 
+                    "color_secondary": "999999", 
+                    "display_name": "Kevin P.", 
+                    "privacy": false, 
+                    "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
+                    "screen_name": "kpalms", 
+                    "user_id": "4e30368332a7ba613b000000"
+                }
+            }, 
+            "user": {
+                "color_primary": "333333", 
+                "color_secondary": "999999", 
+                "display_name": "Kevin P.", 
+                "privacy": false, 
+                "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
+                "screen_name": "kpalms", 
+                "user_id": "4e30368332a7ba613b000000"
+            }
+        }
+    ]

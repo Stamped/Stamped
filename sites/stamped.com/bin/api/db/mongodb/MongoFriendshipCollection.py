@@ -27,6 +27,22 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     ### PUBLIC
     
+    @lazyProperty
+    def block_collection(self):
+        return MongoBlock()
+    
+    @lazyProperty
+    def user_collection(self):
+        return MongoUser()
+    
+    @lazyProperty
+    def friends_collection(self):
+        return MongoBlock()
+    
+    @lazyProperty
+    def followers_collection(self):
+        return MongoFollowers()
+    
     def addFriendship(self, friendship):
         friendship = self._objToMongo(friendship)
         userId = friendship['_id']
@@ -90,22 +106,6 @@ class MongoFriendshipCollection(AFriendshipDB):
         return self.block_collection.getBlocks(userId)
     
     ### PRIVATE
-    
-    @lazyProperty
-    def block_collection(self):
-        return MongoBlock()
-    
-    @lazyProperty
-    def user_collection(self):
-        return MongoUser()
-    
-    @lazyProperty
-    def friends_collection(self):
-        return MongoBlock()
-    
-    @lazyProperty
-    def followers_collection(self):
-        return MongoFollowers()
     
     def _destroyFriendship(self, userId, friendId):
         try:

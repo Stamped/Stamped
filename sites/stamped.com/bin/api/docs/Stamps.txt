@@ -26,11 +26,11 @@ A brief text description of why the user is stamping the entity. This is current
 An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
 
 **credit** _optional_
-User information for any users that are named as receiving credit in the stamp. Multiple screen names must be separated by commas.
+The screen names for any users that should receive credit for the stamp. Multiple screen names must be separated by commas.
 
 ### Sample Request ###
 	POST https://api.stamped.com/1/stamps/create.json
-	authenticated_user_id=47cc67093475061e3d95369d&entity_id=4e226fcd4e61754161000006&blurb=Best+place+ever!&credit=4e226fcd4e61754161000007,4e226fcd4e61754161000008
+	authenticated_user_id=47cc67093475061e3d95369d&entity_id=4e226fcd4e61754161000006&blurb=Best+place+ever!&credit=rmstein,bartj245
 
 ### Sample Result ###
 	{
@@ -47,8 +47,8 @@ User information for any users that are named as receiving credit in the stamp. 
 		"stamp_id": "4e226fcd4e18474561000000", 
 		"image": "image2.png", 
 		"credit": [
-			"4e226fcd4e61754161000007", 
-			"4e226fcd4e61754161000008"
+			"rmstein", 
+			"bartj245"
 		], 
 		"created": "2011-07-17 05:14:54.128641",
 		"mentions": null,
@@ -89,7 +89,7 @@ A brief text description of why the user is stamping the entity. This is current
 An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
 
 **credit** _optional_
-User information for any users that are named as receiving credit in the stamp. Multiple screen names must be separated by commas.
+The screen names for any users that should receive credit for the stamp. Multiple screen names must be separated by commas.
 
 ### Sample Request ###
 	POST https://api.stamped.com/1/stamps/update.json
@@ -110,8 +110,8 @@ User information for any users that are named as receiving credit in the stamp. 
 		"stamp_id": "4e226fcd4e18474561000000", 
 		"image": "image2.png", 
 		"credit": [
-			"4e226fcd4e61754161000007", 
-			"4e226fcd4e61754161000008"
+			"rmstein", 
+			"bartj245"
 		], 
 		"mentions": [
 			{
@@ -197,8 +197,8 @@ The user id of the authenticating user. This is necessary for stamps that are pr
 		"stamp_id": "4e226fcd4e18474561000000", 
 		"image": "image2.png", 
 		"credit": [
-			"4e226fcd4e61754161000007", 
-			"4e226fcd4e61754161000008"
+			"rmstein", 
+			"bartj245"
 		], 
 		"created": "2011-07-17 05:14:54.128641", 
 		"mentions": null,

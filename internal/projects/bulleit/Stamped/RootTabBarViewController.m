@@ -8,12 +8,16 @@
 
 #import "RootTabBarViewController.h"
 
+#import "Stamp.h"
 #import "InboxViewController.h"
 #import "ActivityViewController.h"
 #import "CreateStampViewController.h"
+#import "TodoViewController.h"
+#import "PeopleViewController.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
+- (void)stampWasCreated:(NSNotification*)notification;
 @end
 
 @implementation RootTabBarViewController
@@ -27,6 +31,7 @@
 @synthesize peopleTabBarItem = peopleTabBarItem_;
 
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -53,26 +58,36 @@
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
   [AccountManager sharedManager].delegate = self;
   [[AccountManager sharedManager] authenticate];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(stampWasCreated:)
+                                               name:kStampWasCreatedNotification
+                                             object:nil];
 }
 
 - (void)finishViewInit {
   InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
-  self.viewControllers = [NSArray arrayWithObjects:inbox, activity, nil];
+  TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
+  PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];
+  self.viewControllers = [NSArray arrayWithObjects:inbox, activity, todo, people, nil];
+  [inbox release];
+  [activity release];
+  [todo release];
+  [people release];
   CGRect inboxFrame = CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
   inbox.view.frame = inboxFrame;
   [self.view addSubview:inbox.view];
-  self.selectedViewController = inbox;  
-  [inbox release];
-  [activity release];
+  self.selectedViewController = inbox;
+
   if ([self.tabBar respondsToSelector:@selector(setSelectedImageTintColor:)])
     [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
-  
+
   self.tabBar.selectedItem = stampsTabBarItem_;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -116,6 +131,10 @@
   [createStampNavController release];
 }
 
+- (void)stampWasCreated:(NSNotification*)notification {
+  [self tabBar:tabBar_ didSelectItem:stampsTabBarItem_];
+}
+
 #pragma mark - AccountManagerDelegate Methods.
 
 - (void)accountManagerDidAuthenticate {
@@ -132,7 +151,14 @@
   } else if (item == activityTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"Activity";
+  } else if (item == mustDoTabBarItem_) {
+    newViewController = [viewControllers_ objectAtIndex:2];
+    self.navigationItem.title = @"Todo";
+  } else if (item == peopleTabBarItem_) {
+    newViewController = [viewControllers_ objectAtIndex:3];
+    self.navigationItem.title = @"People";
   }
+    
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 

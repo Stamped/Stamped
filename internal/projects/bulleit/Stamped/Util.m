@@ -30,4 +30,22 @@
   *blue = b / 255.0f;
 }
 
++ (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img {
+  CGFloat width = img.size.width;
+  CGFloat height = img.size.height;
+  
+  UIGraphicsBeginImageContextWithOptions(img.size, NO, 0.0);
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  
+  CGContextTranslateCTM(context, 0, height);
+  CGContextScaleCTM(context, 1.0, -1.0);
+  
+  CGContextClipToMask(context, CGRectMake(0, 0, width, height), img.CGImage);
+  CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
+  CGContextFillRect(context, CGRectMake(0, 0, img.size.width, img.size.height));
+  UIImage* maskedImage = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  return maskedImage;
+}
+
 @end

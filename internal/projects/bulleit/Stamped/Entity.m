@@ -2,7 +2,7 @@
 //  Entity.m
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/20/11.
+//  Created by Andrew Bonventre on 7/27/11.
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
@@ -11,19 +11,21 @@
 
 
 @implementation Entity
+
 @dynamic category;
 @dynamic categoryImage;
 @dynamic entityID;
 @dynamic subtitle;
 @dynamic title;
 @dynamic coordinates;
-@dynamic stamp;
+@dynamic stamps;
 
 - (void)awakeFromFetch {
   [super awakeFromFetch];
   if (!self.categoryImage) {
     self.categoryImage =
-        [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
+    [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
   }
 }
+
 @end

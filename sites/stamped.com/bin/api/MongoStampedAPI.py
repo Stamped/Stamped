@@ -16,6 +16,7 @@ from db.mongodb.MongoCommentCollection import MongoCommentCollection
 from db.mongodb.MongoFavoriteCollection import MongoFavoriteCollection
 from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
+from db.mongodb.MongoActivityCollection import MongoActivityCollection
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -33,6 +34,7 @@ class MongoStampedAPI(StampedAPI):
         self._favoriteDB   = MongoFavoriteCollection()
         self._collectionDB = MongoCollectionCollection()
         self._friendshipDB = MongoFriendshipCollection()
+        self._activityDB   = MongoActivityCollection()
         
         self._validate()
 

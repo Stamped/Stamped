@@ -7,8 +7,13 @@ __license__ = "TODO"
 
 import Globals
 
+from utils import lazyProperty
+
 from AMongoCollection import AMongoCollection
 from MongoUserFavorites import MongoUserFavorites
+from MongoActivity import MongoActivity
+from MongoUser import MongoUser
+
 from api.AFavoriteDB import AFavoriteDB
 from api.Favorite import Favorite
 
@@ -29,7 +34,8 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
         'user_id': basestring,
         'stamp': {
             'stamp_id': basestring,
-            'display_name': basestring
+            'display_name': basestring,
+            'user_id': basestring
         },
         'timestamp': {
             'created': datetime,
@@ -41,14 +47,34 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     def __init__(self, setup=False):
         AMongoCollection.__init__(self, collection'favorites')
         AFavoriteDB.__init__(self)
-        
-        self._favorites = MongoUserFavorites()
     
     ### PUBLIC
     
+    @lazyProperty
+    def user_favorites_collection(self):
+        return MongoUserFavorites()
+    
+    @lazyProperty
+    def activity_collection(self):
+        return MongoActivity()
+    
+    @lazyProperty
+    def user_collection(self):
+        return MongoUser()
+    
     def addFavorite(self, favorite):
+        # Add favorite
         favoriteId = self._addDocument(favorite, 'favorite_id')
-        self._favorites.addUserFavorite(favorite['user_id'], favoriteId)
+        favorite['favorite_id'] = favoriteId
+        
+        # Add link to favorite
+        self.user_favorites_collection.addUserFavorite(favorite['user_id'], favoriteId)
+        
+        # Add activity (if referencing a stamp)
+        if 'stamp' in favorite and 'stamp_id' in favorite.stamp:
+            user = self.user_collection.getUser(favorite.user_id)
+            self.activity_collection.addActivityForFavorite([favorite.stamp['user_id']], user, favorite)
+        
         return favoriteId
     
     def getFavorite(self, favoriteId):
@@ -57,8 +83,9 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
             raise KeyError("Favorite not valid")
         return favorite
         
-    def removeFavorite(self, favoriteID):
-        return self._removeDocument(favoriteID)
+    def removeFavorite(self, favoriteId):
+        if self._removeDocument(favoriteId):
+            return True
         
     def completeFavorite(self, favoriteId, complete=True):
         if not isinstance(complete, bool):
@@ -75,7 +102,7 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
             {'user_id': userId, 'entity.entity_id': entityId})
     
     def getFavoriteIDs(self, userId):
-        return self._favorites.getUserFavoriteIds(userId)
+        return self.user_favorites_collection.getUserFavoriteIds(userId)
     
     def getFavorites(self, userId):
         favorites = self._getDocumentsFromIds(self.getFavoriteIDs(userId), 'favorite_id')
