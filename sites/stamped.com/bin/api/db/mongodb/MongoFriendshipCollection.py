@@ -32,7 +32,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     @lazyProperty
     def friends_collection(self):
-        return MongoBlockCollection()
+        return MongoFriendsCollection()
     
     @lazyProperty
     def followers_collection(self):

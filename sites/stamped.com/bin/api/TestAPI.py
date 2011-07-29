@@ -36,23 +36,23 @@ def main():
     baseurl = "http://0.0.0.0:5000/api/v1"
 #     baseurl = "http://50.19.163.247:5000/api/v1"
     
-#     accountTest(baseurl)
-#     
-#     userTest(baseurl)
-#     
-#     entityTest(baseurl)
-# 
-#     stampTest(baseurl)
-#     
-#     friendshipTest(baseurl)
-# 
-#     collectionTest(baseurl)
-#
-#     commentTest(baseurl)
-#
-#     favoriteTest(baseurl)
-#
-    activityTest(baseurl)
+    accountTest(baseurl)
+    
+    userTest(baseurl)
+    
+    entityTest(baseurl)
+
+    stampTest(baseurl)
+    
+    friendshipTest(baseurl)
+
+    collectionTest(baseurl)
+
+    commentTest(baseurl)
+
+    favoriteTest(baseurl)
+
+#     activityTest(baseurl)
  
     print '      COMPLETE'
     print 
