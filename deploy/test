@@ -73,4 +73,4 @@ while :; do
 done
 
 echo '>>>> Running init script'
-python /stamped/bootstrap/init.py '{"mongodb": {"port": 27017, "replSet": "stamped-dev-01"}, "name": "db1", "roles": ["db"], "stack": "test03"}' >& /stamped/bootstrap/log &
+python /stamped/bootstrap/init.py '{"mongodb": {"port": 27017, "replSet": "stamped-dev-01"}, "raid": {"restore": "i-d3f843b2", "diskSize": 8, "numDisks": 4}, "name": "db1", "roles": ["db"], "stack": "test03"}' >& /stamped/bootstrap/log &

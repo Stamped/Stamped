@@ -38,11 +38,10 @@ available_commands = {
     
     'crawl' : 'crawl', 
     
-<<<<<<< HEAD
     'setup_crawler_data' : 'setup_crawler_data', 
-=======
+
     'backup' : 'backup', 
->>>>>>> 84824d09a5a0903f8ee0436fae5270e9132a7588
+
 }
 
 def parseCommandLine():
@@ -58,6 +57,9 @@ def parseCommandLine():
     
     parser.add_option("-i", "--ip", action="store_true", dest="ip", 
         default=False, help="Associate elastic ip address with instance (for 'init' method)")
+    
+    parser.add_option("-r", "--restore", action="store", dest="restore", 
+        default=None, type="string", help="Instance ID to restore snapshot from")
     
     parser.add_option("-p", "--params", action="store", dest="params", 
         default="", type="string", help="Params to pass when creating a new stack")
