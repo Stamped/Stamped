@@ -37,6 +37,8 @@ available_commands = {
     'update_stack' : 'update_stack', 
     
     'crawl' : 'crawl', 
+    
+    'backup' : 'backup', 
 }
 
 def parseCommandLine():

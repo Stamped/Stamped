@@ -98,6 +98,14 @@ class DeploymentSystem(ADeploymentSystem):
             stack = self._stacks[stackName]
             stack.crawl()
     
+    def backup(self, *args):
+        stackNameRegex = args[0]
+        stacks = self._get_matching_stacks(stackNameRegex)
+        
+        for stackName in stacks:
+            stack = self._stacks[stackName]
+            stack.backup()
+    
     def list_stacks(self, stackNameRegex=None, stackStatus=None):
         if stackNameRegex is not None:
             stacks = self._get_matching_stacks(stackNameRegex)
