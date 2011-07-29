@@ -43,6 +43,10 @@ class ADeploymentStack(object):
     def setup_crawler_data(self, *args):
         pass
     
+    @abstract
+    def backup(self, *args):
+        pass
+    
     def local(self, cmd, env=None, show_cmd=True):
         if show_cmd:
             print "[%s-local] %s" % (self, cmd, )

@@ -97,6 +97,23 @@ class AWSDeploymentStack(ADeploymentStack):
             if not address.associate(web_server_instances[0]['instance_id']):
                 raise Fail("Error: failed to set elastic ip")
     
+    def backup(self):
+        db_instances = self.db_instances
+        assert len(db_instances) > 1
+        
+        replica_set_members = []
+        replica_set = None
+        
+        env.user = 'ubuntu'
+        env.key_filename = [ 'keys/test-keypair' ]
+        
+        for instance in db_instances:
+            with settings(host_string=instance.public_dns_name):
+                with cd("/stamped"):
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/ebs_backup.py', pty=False)
+        
+        
+    
     def update(self):
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
         

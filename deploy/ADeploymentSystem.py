@@ -49,6 +49,10 @@ class ADeploymentSystem(object):
     def setup_crawler_data(self, *args):
         pass
     
+    @abstract
+    def backup(self, *args):
+        pass
+    
     def local(self, cmd, env=None):
         print "[%s-local] %s" % (self, cmd, )
         

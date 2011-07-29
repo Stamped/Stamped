@@ -38,7 +38,11 @@ available_commands = {
     
     'crawl' : 'crawl', 
     
+<<<<<<< HEAD
     'setup_crawler_data' : 'setup_crawler_data', 
+=======
+    'backup' : 'backup', 
+>>>>>>> 84824d09a5a0903f8ee0436fae5270e9132a7588
 }
 
 def parseCommandLine():
