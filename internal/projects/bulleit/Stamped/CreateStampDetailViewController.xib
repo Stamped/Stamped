@@ -126,7 +126,7 @@
 							<object class="IBUIImageView" id="555494954">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{0, -64}, {320, 72}}</string>
+								<string key="NSFrame">{{0, -231}, {320, 240}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="9764505"/>
@@ -136,7 +136,7 @@
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">shelf_background</string>
+									<string key="NSResourceName">shelf_background.png</string>
 								</object>
 							</object>
 							<object class="IBUIView" id="101741781">
@@ -1313,7 +1313,7 @@
 				<string>credit_icon@2x.png</string>
 				<string>new_stamp_copy@2x.png</string>
 				<string>photo_icon@2x.png</string>
-				<string>shelf_background</string>
+				<string>shelf_background.png</string>
 				<string>stamp_detail_ripple_bottom</string>
 				<string>stamp_detail_ripple_top</string>
 				<string>toolbar_checkmark</string>
@@ -1326,7 +1326,7 @@
 				<string>{30, 20}</string>
 				<string>{217, 38}</string>
 				<string>{27, 22}</string>
-				<string>{16, 16}</string>
+				<string>{320, 240}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>

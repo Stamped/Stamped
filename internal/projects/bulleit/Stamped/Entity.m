@@ -28,4 +28,18 @@
   }
 }
 
+- (EntityCategory)entityCategory {
+  NSString* cat = self.category;
+  if ([cat isEqualToString:@"Place"]) {
+    return EntityCategoryPlace;
+  } else if ([cat isEqualToString:@"Film"]) {
+    return EntityCategoryFilm;
+  } else if ([cat isEqualToString:@"Music"]) {
+    return EntityCategoryMusic;
+  } else if ([cat isEqualToString:@"Book"]) {
+    return EntityCategoryBook;
+  }
+  return EntityCategoryOther;
+}
+
 @end

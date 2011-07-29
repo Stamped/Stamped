@@ -42,15 +42,11 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                        @"screen_name", @"screenName",
                                        nil];
   [userMapping mapAttributes:@"bio", @"website", nil];
-  
-  RKManagedObjectMapping* coordinateMapping = [RKManagedObjectMapping mappingForEntityWithName:@"Coordinate"];
-  [coordinateMapping mapAttributes:@"lat", @"lng", nil];
 
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", nil];
-  [entityMapping mapAttributes:@"category", @"subtitle", @"title", nil];
-  [entityMapping mapRelationship:@"coordinates" withObjectMapping:coordinateMapping];  
+  [entityMapping mapAttributes:@"category", @"subtitle", @"title", @"coordinates", nil];  
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   commentMapping.primaryKeyAttribute = @"commentID";

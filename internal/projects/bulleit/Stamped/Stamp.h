@@ -14,14 +14,6 @@ extern NSString* kStampWasCreatedNotification;
 
 @class Comment, Entity, User;
 
-typedef enum {
-  StampCategoryOther,
-  StampCategoryBook,
-  StampCategoryFilm,
-  StampCategoryMusic,
-  StampCategoryPlace
-} StampCategory;
-
 @interface Stamp : NSManagedObject
 
 @property (nonatomic, retain) NSString* blurb;
@@ -31,8 +23,6 @@ typedef enum {
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) NSSet* comments;
-
-@property (nonatomic, readonly) StampCategory category;
 @end
 
 @interface Stamp (CoreDataGeneratedAccessors)

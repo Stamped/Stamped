@@ -292,17 +292,17 @@ static const CGFloat kKeyboardHeight = 216.0;
 
   [addCommentField_ resignFirstResponder];
   EntityDetailViewController* detailViewController = nil;
-  switch (stamp_.category) {
-    case StampCategoryPlace:
+  switch (stamp_.entityObject.entityCategory) {
+    case EntityCategoryPlace:
       detailViewController = [[PlaceDetailViewController alloc] initWithStamp:stamp_];
       break;
-    case StampCategoryBook:
+    case EntityCategoryBook:
       detailViewController = [[BookDetailViewController alloc] initWithStamp:stamp_];
       break;
-    case StampCategoryMusic:
+    case EntityCategoryMusic:
       detailViewController = [[MusicDetailViewController alloc] initWithStamp:stamp_];
       break;
-    case StampCategoryFilm:
+    case EntityCategoryFilm:
       detailViewController = [[FilmDetailViewController alloc] initWithStamp:stamp_];
       break;
     default:

@@ -11,6 +11,14 @@
 
 @class Stamp;
 
+typedef enum {
+  EntityCategoryOther,
+  EntityCategoryBook,
+  EntityCategoryFilm,
+  EntityCategoryMusic,
+  EntityCategoryPlace
+} EntityCategory;
+
 @interface Entity : NSManagedObject
 
 @property (nonatomic, retain) NSString* category;
@@ -18,8 +26,10 @@
 @property (nonatomic, retain) NSString* entityID;
 @property (nonatomic, retain) NSString* subtitle;
 @property (nonatomic, retain) NSString* title;
-@property (nonatomic, retain) NSManagedObject* coordinates;
+@property (nonatomic, retain) NSString* coordinates;
 @property (nonatomic, retain) NSSet* stamps;
+
+@property (nonatomic, readonly) EntityCategory entityCategory;
 @end
 
 @interface Entity (CoreDataGeneratedAccessors)

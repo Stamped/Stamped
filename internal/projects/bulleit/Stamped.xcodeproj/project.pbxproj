@@ -82,6 +82,7 @@
 		7E7E10A413DF14C900E44DE1 /* credit_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A213DF14C900E44DE1 /* credit_icon@2x.png */; };
 		7E7E10A713DF14D100E44DE1 /* toolbar_checkmark@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A513DF14D100E44DE1 /* toolbar_checkmark@2x.png */; };
 		7E7E10A813DF14D100E44DE1 /* toolbar_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A613DF14D100E44DE1 /* toolbar_close@2x.png */; };
+		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
 		7E9EE35313DF683500F4736F /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EE35213DF683500F4736F /* Stamp.m */; };
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
 		7EBCBE8713D78896009FCECF /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBCBE8613D78896009FCECF /* Comment.m */; };
@@ -316,6 +317,7 @@
 		7E7E10A213DF14C900E44DE1 /* credit_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "credit_icon@2x.png"; sourceTree = "<group>"; };
 		7E7E10A513DF14D100E44DE1 /* toolbar_checkmark@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_checkmark@2x.png"; sourceTree = "<group>"; };
 		7E7E10A613DF14D100E44DE1 /* toolbar_close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_close@2x.png"; sourceTree = "<group>"; };
+		7E92C11E13E32407008D379D /* shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_background.png; sourceTree = "<group>"; };
 		7E9EE35113DF683500F4736F /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
 		7E9EE35213DF683500F4736F /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
 		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
@@ -656,6 +658,7 @@
 				7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */,
 				7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */,
 				7E7E109B13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png */,
+				7E92C11E13E32407008D379D /* shelf_background.png */,
 				7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */,
 				7E7E109C13DF0D9100E44DE1 /* nav_bar@2x.png */,
 				7E7E109F13DF0FF300E44DE1 /* toolbar_todo@2x.png */,
@@ -1026,6 +1029,7 @@
 				7ED2EF6613E0DCC7007F1AFB /* todo_dummy@2x.png in Resources */,
 				7ED2EF6C13E0DF7F007F1AFB /* PeopleViewController.xib in Resources */,
 				7ED2EF6F13E0DFF3007F1AFB /* people_dummy@2x.png in Resources */,
+				7E92C11F13E32407008D379D /* shelf_background.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
