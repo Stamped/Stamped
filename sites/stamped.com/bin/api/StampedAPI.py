@@ -873,7 +873,7 @@ class StampedAPI(AStampedAPI):
         result['user'] = stamp['user']
         
         ### TODO: Explicitly define entity, expand if passed full object
-        result['entity'] = stamp['entity']
+        result['entity'] = self._returnStamp(stamp['entity'], mini=True)
         
         ### TODO: Add comments if passed
         if 'comment_preview' in stamp and len(stamp.comment_preview) > 0:
@@ -949,37 +949,49 @@ class StampedAPI(AStampedAPI):
         
         return result
         
-    def _returnEntity(self, entity):
+    def _returnEntity(self, entity, mini=False):
         result = {}
         result['entity_id'] = entity.entity_id
         result['title'] = entity.title
         result['category'] = entity.category
         result['subtitle'] = entity.subtitle
         
-        if 'desc' in entity:
-            result['desc'] = entity.desc
-        else:
-            result['desc'] = None
-        
-        if 'image' in entity:
-            result['image'] = entity.image
-        else:
-            result['image'] = None
-            
-        result['details'] = {}
-        if 'details' in entity and 'place' in entity.details:
-            result['details']['place'] = {}
-            if 'address' in entity.details['place']:
-                result['details']['place']['address'] = entity.details['place']['address']
+        if mini == True:
             if 'coordinates' in entity.details['place']:
-                result['details']['place']['coordinates'] = entity.details['place']['coordinates']
+                result['coordinates'] = "%s,%s" % (
+                    entity.details['place']['coordinates']['lat'],
+                    entity.details['place']['coordinates']['lng']
+                )
+            else:
+                result['coordinates'] = None
         
-        if 'modified' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['modified'])
-        elif 'created' in entity.timestamp:
-            result['last_modified'] = str(entity.timestamp['created'])
         else:
-            result['last_modified'] = None
+            if 'desc' in entity:
+                result['desc'] = entity.desc
+            else:
+                result['desc'] = None
+        
+            if 'image' in entity:
+                result['image'] = entity.image
+            else:
+                result['image'] = None
+            
+            result['details'] = {}
+            if 'details' in entity and 'place' in entity.details:
+                result['details']['place'] = {}
+                if 'address' in entity.details['place']:
+                    result['details']['place']['address'] = entity.details['place']['address']
+                if 'coordinates' in entity.details['place']:
+                    result['details']['place']['coordinates'] = "%s,%s" % (
+                        entity.details['place']['coordinates']['lat'],
+                        entity.details['place']['coordinates']['lng'])
+        
+            if 'modified' in entity.timestamp:
+                result['last_modified'] = str(entity.timestamp['modified'])
+            elif 'created' in entity.timestamp:
+                result['last_modified'] = str(entity.timestamp['created'])
+            else:
+                result['last_modified'] = None
         
         return result
     
