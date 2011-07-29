@@ -6,34 +6,37 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from utils import lazyProperty
 
-# from MongoDB import Mongo
-from api.ACollectionDB import ACollectionDB
 from MongoUserStamps import MongoUserStamps
 from MongoInboxStamps import MongoInboxStamps
 from MongoStamp import MongoStamp
 
+from api.ACollectionDB import ACollectionDB
+
 class MongoCollection(ACollectionDB):
-        
+    
     SCHEMA = {
         '_id': basestring,
         'stamp_id': basestring
     }
     
-    DESC = 'Mongo Collections Wrapper'
+    def __init__(self):
+        ACollectionDB.__init__(self)
     
-    def __init__(self, setup=False):
-        ACollectionDB.__init__(self, self.DESC)
-        
-        
     ### PUBLIC
     
+    @lazyProperty
+    def inbox_stamp_collection(self):
+        return MongoInboxStamps()
+    
+    @lazyProperty
+    def stamp_collection(self):
+        return MongoInboxStamps()
+    
     def getInboxStampIDs(self, userId, since=None, limit=None):
-        return MongoInboxStamps().getInboxStampIds(userId, since, limit)
+        return self.inbox_stamp_collection.getInboxStampIds(userId, since, limit)
     
     def getInboxStamps(self, userId, since=None, before=None, limit=None):
         return MongoStamp().getStamps(self.getInboxStampIDs(userId), since=since, before=before, limit=limit, withComments=True)
@@ -47,6 +50,3 @@ class MongoCollection(ACollectionDB):
     def getMentions(self, userId, limit=None):
         raise NotImplementedError
 
-
-    ### PRIVATE
-    

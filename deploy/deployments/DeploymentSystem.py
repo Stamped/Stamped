@@ -6,10 +6,12 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import copy, getpass, os, pickle, re, utils
-from ADeploymentSystem import ADeploymentSystem
+import re, utils
+
+from utils import abstract
 from errors import Fail
-from abc import abstractmethod
+
+from ADeploymentSystem import ADeploymentSystem
 
 class DeploymentSystem(ADeploymentSystem):
     def __init__(self, name, options, stack_class):
@@ -19,12 +21,15 @@ class DeploymentSystem(ADeploymentSystem):
         self._stacks = { }
         self._init_env()
     
-    @abstractmethod
+    @abstract
     def _init_env(self):
         raise NotImplementedError
     
     def _get_matching_stacks(self, stackNameRegex, unique=False):
         stacks = [ ]
+        
+        if '.' in stackNameRegex:
+            stackNameRegex = stackNameRegex.split('.')[0]
         
         for stackName in self._stacks:
             if re.search(stackNameRegex, stackName):

@@ -1,30 +1,27 @@
 #!/usr/bin/env bash
 
-if [ "$#" -eq 2 ]
+if [ "$#" -eq 1 ]
 then
     user="ubuntu"
-    stack=$1
-    tag=$2
+    node=$1
     echo "defaulting to user $user"
-elif [ "$#" -eq 3 ]
+elif [ "$#" -eq 2 ]
 then
     user=$1
-    stack=$2
-    tag=$3
+    node=$2
 else
     echo "Description:"
-    echo "   ssh's into an active AWS instance denoted by the given stack-name"
+    echo "   ssh's into an active AWS instance denoted by the given node-name (e.g., stack-name.instance-name)"
     echo ""
     echo "Usage:"
-    echo "   $0 stack-name family-tag OR $0 user stack-name family-tag"
+    echo "   $0 node-name OR $0 user node-name"
     exit 1
 fi
 
-echo "user:  $user"
-echo "stack: $stack"
-echo "tag:   $tag"
+echo "user: $user"
+echo "node: $node"
 
-dns=`./get_dns_by_stack_name.py -t $tag $stack`
+dns=`./get_dns_by_node_name.py $node`
 echo "dns:   $dns"
 
 ssh -o StrictHostKeyChecking=no -i 'keys/test-keypair' "$user@$dns"

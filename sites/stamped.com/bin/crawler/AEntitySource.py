@@ -10,14 +10,14 @@ import Globals, EntitySources, utils
 from api.IASyncProducer import IASyncProducer
 from gevent import Greenlet
 from gevent.queue import Queue
-from abc import abstractmethod
+from utils import abstract
 
 class AEntitySource(Greenlet, IASyncProducer):
     """
         Simple asynchronous entity producer
     """
     
-    _supportedTypes = set([ 'place', 'contact', 'restaurant', 'iPhoneApp', 'book', 'movie' ])
+    _supportedTypes = set([ 'place', 'restaurant', 'iPhoneApp', 'book', 'video', 'artist', 'song', 'album' ])
     
     def __init__(self, name, types=None, maxQueueSize=None):
         Greenlet.__init__(self)
@@ -54,7 +54,7 @@ class AEntitySource(Greenlet, IASyncProducer):
             self._started = True
             self.start()
     
-    @abstractmethod
+    @abstract
     def _run(self):
         """Subclasses should override to process the pull-based loop in the 
         context of this sink's Greenlet."""
@@ -72,9 +72,12 @@ class AEntitySource(Greenlet, IASyncProducer):
     @property
     def maxQueueSize(self): return self._maxQueueSize
     
-    @abstractmethod
+    @abstract
     def getMaxNumEntities(self):
         raise NotImplementedError
+    
+    def __str__(self):
+        return self.name
 
 class AExternalEntitySource(AEntitySource):
     
@@ -103,11 +106,11 @@ class AExternalSiteEntitySource(AExternalEntitySource):
                 utils.log("Error crawling " + url + "\n")
                 utils.printException()
     
-    @abstractmethod
+    @abstract
     def getNextURL(self):
         pass
     
-    @abstractmethod
+    @abstract
     def getEntitiesFromURL(self, url, limit=None):
         pass
 

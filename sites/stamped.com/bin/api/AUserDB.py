@@ -6,27 +6,24 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
+from utils import abstract
 from User import User
 
 class AUserDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-        
-    @abstractmethod
+    @abstract
     def getUser(self, userID):
         pass
         
-    @abstractmethod
+    @abstract
     def lookupUsers(self, userIDs, usernames):
         pass
         
-    @abstractmethod
+    @abstract
     def searchUsers(self, searchQuery, searchLimit=20):
         pass
         
-    @abstractmethod
+    @abstract
     def checkPrivacy(self, userId):
         pass
         

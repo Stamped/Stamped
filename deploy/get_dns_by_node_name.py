@@ -14,12 +14,12 @@ AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'
 
 def parseCommandLine():
-    usage   = "Usage: %prog [options] stack-name"
+    usage   = "Usage: %prog [options] node-name"
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
     parser.add_option("-t", "--tag", action="store", dest="tag", type="string", 
-        default=None, help="Specify a tag to find on an instance within the given stack-name")
+        default=None, help="Specify a role tag to filter instances by")
     
     (options, args) = parser.parse_args()
     
@@ -28,8 +28,14 @@ def parseCommandLine():
     
     if len(args) == 0:
         options.stackName = None
+        options.nodeName  = None
     else:
-        options.stackName = args[0].lower()
+        name = args[0].lower()
+        
+        if '.' in name:
+            options.stackName, options.nodeName = name.split('.')
+        else:
+            options.stackName, options.nodeName = name, None
     
     return options
 
@@ -46,23 +52,28 @@ def main():
             #from pprint import pprint
             #pprint(instance.__dict__)
             
+            if instance.state != 'running':
+                continue
+            
             if 'stack' in instance.tags:
                 stackName = instance.tags['stack']
                 
                 if options.stackName is None or stackName.lower() == options.stackName:
-                    match = True
-                    
-                    if options.tag:
-                        match = 'roles' in instance.tags
+                    if not options.nodeName or \
+                        ('name' in instance.tags and instance.tags['name'].lower() == options.nodeName):
+                        match = True
                         
-                        if match:
-                            # TODO: possibly dangerous?
-                            roles = eval(str(instance.tags['roles']))
-                            match = options.tag in map(lambda r: r.lower(), roles)
-                    
-                    if match:
-                        print instance.public_dns_name
-                        sys.exit(0)
+                        if options.tag:
+                            match = 'roles' in instance.tags
+                            
+                            if match:
+                                # TODO: possibly dangerous?
+                                roles = eval(str(instance.tags['roles']))
+                                match = options.tag in map(lambda r: r.lower(), roles)
+                        
+                        if match and len(instance.public_dns_name) > 0:
+                            print instance.public_dns_name
+                            sys.exit(0)
     
     print "error: unable to find instance matching stack-name '%s'" % options.stackName
     sys.exit(1)

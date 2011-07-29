@@ -6,35 +6,22 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from AMongoCollection import AMongoCollection
 
-from MongoDB import Mongo
-# from api.AFriendshipDB import AFriendshipDB
-# from api.Friendship import Friendship
-
-class MongoUserActivity(Mongo):
-        
-    COLLECTION = 'useractivity'
-        
+class MongoUserActivityCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'activity_id': basestring
     }
     
     def __init__(self, setup=False):
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+        AMongoCollection.__init__(self, collection='useractivity')
+    
     ### PUBLIC
     
     def addUserActivity(self, userId, activityId):
-        
         if not isinstance(userId, basestring) or not isinstance(activityId, basestring):
             raise KeyError("ID not valid")
         
@@ -48,6 +35,3 @@ class MongoUserActivity(Mongo):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId)
 
-
-    ### PRIVATE
-    

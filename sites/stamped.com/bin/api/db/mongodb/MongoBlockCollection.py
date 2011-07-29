@@ -6,28 +6,20 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from threading import Lock
-from datetime import datetime
 
-from MongoDB import Mongo
+from AMongoCollection import AMongoCollection
 
-class MongoBlock(Mongo):
-        
-    COLLECTION = 'blocks'
-        
+class MongoBlockCollection(AMongoCollection):
+    
     SCHEMA = {
         'user_id': basestring,
         'blocked_id': basestring,
         'timestamp': basestring
     }
     
-    def __init__(self, setup=False):
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='blocks')
+    
     ### PUBLIC
     
     def addBlock(self, userId, friendId):
@@ -42,15 +34,4 @@ class MongoBlock(Mongo):
             
     def getBlocks(self, userId):
         return self._getRelationships(userId)
-        
-        
-    ### PRIVATE
-        
-#     def _objToMongo(self, obj):
-#         if obj.isValid == False:
-#             print obj
-#             raise KeyError('Object not valid')
-#         data = {}
-#         data['user_id'] = obj.user_id
-#         data['blocked_id'] = obj.blocked_user_id
-#         return data
+

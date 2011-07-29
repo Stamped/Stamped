@@ -6,27 +6,18 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-from threading import Lock
-from datetime import datetime
+from AMongoCollection import AMongoCollection
 
-from MongoDB import Mongo
-
-class MongoCreditGivers(Mongo):
-        
-    COLLECTION = 'creditgivers'
-        
+class MongoCreditGiversCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'user_id': basestring
     }
     
-    def __init__(self, setup=False):
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='creditgivers')
+    
     ### PUBLIC
     
     def addGiver(self, userId, giverId):
@@ -42,5 +33,3 @@ class MongoCreditGivers(Mongo):
     def numGivers(self, userId):
         return len(self.getGivers(userId))
 
-
-    ### PRIVATE

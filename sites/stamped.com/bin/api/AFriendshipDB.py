@@ -6,51 +6,47 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
+from utils import abstract
 from Friendship import Friendship
 
 class AFriendshipDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-    
     def addFriendship(self, friendship):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def checkFriendship(self, friendship):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def removeFriendship(self, friendship):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getFriends(self, userId):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getFollowers(self, userId):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def approveFriendship(self, friendship):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def addBlock(self, friendship):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def checkBlock(self, friendship):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def removeBlock(self, friendship):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getBlocks(self, userId):
         pass
-        
-    
+

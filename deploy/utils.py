@@ -257,3 +257,13 @@ class OrderedDict(dict, MutableMapping):
             return all(p==q for p, q in  _zip_longest(self.items(), other.items()))
         return dict.__eq__(self, other)
 
+def abstract(func):
+    def wrapper(*__args, **__kwargs):
+        raise NotImplementedError('Missing required %s() method' % func.__name__)
+    
+    wrapper.__name__ = func.__name__
+    wrapper.__dict__ = func.__dict__
+    wrapper.__doc__  = func.__doc__
+    
+    return wrapper
+

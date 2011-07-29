@@ -6,18 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from threading import Lock
-from datetime import datetime
-import pymongo
 
-from MongoDB import Mongo
+from datetime import datetime
+from AMongoCollection import AMongoCollection
 from api.AAccountDB import AAccountDB
 from api.Account import Account
 
-class MongoAccount(AAccountDB, Mongo):
-        
-    COLLECTION = 'users'
-        
+class MongoAccountCollection(AMongoCollection, AAccountDB):
+    
     SCHEMA = {
         '_id': object,
         'first_name': basestring,
@@ -61,11 +57,8 @@ class MongoAccount(AAccountDB, Mongo):
     }
     
     def __init__(self):
-        AAccountDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
+        AMongoCollection.__init__(self, 'users')
+        AAccountDB.__init__(self)
     
     ### PUBLIC
     
@@ -81,18 +74,14 @@ class MongoAccount(AAccountDB, Mongo):
             print str(user)
             raise KeyError("User not valid")
         return user
-        
+    
     def updateAccount(self, user):
         return self._updateDocument(user, objId='user_id')
-        
+    
     def removeAccount(self, userID):
         return self._removeDocument(userID)
-        return True
-        
-    def flagUser(self, user):
-        ### TODO
-        print 'TODO'
-            
     
-    ### PRIVATE
-        
+    def flagUser(self, user):
+        # TODO
+        raise NotImplementedError("TODO")
+

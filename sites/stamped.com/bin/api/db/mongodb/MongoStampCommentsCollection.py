@@ -6,31 +6,19 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from AMongoCollection import AMongoCollection
 
-from MongoDB import Mongo
-# from api.AFriendshipDB import AFriendshipDB
-# from api.Friendship import Friendship
-
-class MongoStampComments(Mongo):
-        
-    COLLECTION = 'stampcomments'
-        
+class MongoStampCommentsCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'comment_id': basestring
     }
     
     def __init__(self, setup=False):
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+        AMongoCollection.__init__(self, collection='stampcomments')
+    
     ### PUBLIC
     
     def addStampComment(self, stampId, commentId):
@@ -54,6 +42,3 @@ class MongoStampComments(Mongo):
     def getCommentIdsAcrossStampIds(self, stampIds, limit=4):
         return self._getRelationshipsAcrossKeys(stampIds, limit=4)
 
-
-    ### PRIVATE
-    

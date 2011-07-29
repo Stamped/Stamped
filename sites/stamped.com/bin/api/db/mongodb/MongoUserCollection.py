@@ -6,17 +6,13 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from threading import Lock
-from datetime import datetime
 
+from AMongoCollection import AMongoCollection
 from api.AUserDB import AUserDB
 from api.User import User
-from MongoDB import Mongo
 
-class MongoUser(AUserDB, Mongo):
-        
-    COLLECTION = 'users'
-        
+class MongoUserCollection(AMongoCollection, AUserDB):
+    
     SCHEMA = {
         '_id': object,
         'first_name': basestring,
@@ -48,13 +44,9 @@ class MongoUser(AUserDB, Mongo):
     }
     
     def __init__(self, setup=False):
-        AUserDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+        AMongoCollection.__init__(self, collection='users')
+        AUserDB.__init__(self)
+    
     ### PUBLIC
     
     def getUser(self, userId):
@@ -119,7 +111,6 @@ class MongoUser(AUserDB, Mongo):
                 {'_id': self._getObjectIdFromString(userId)}, 
                 {'$inc': {key: increment}},
                 upsert=True)
-        return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
-    
-    ### PRIVATE
         
+        return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
+

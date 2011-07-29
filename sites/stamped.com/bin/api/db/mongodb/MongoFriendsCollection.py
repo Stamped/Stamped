@@ -6,31 +6,20 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from AMongoCollection import AMongoCollection
 
-from MongoDB import Mongo
-
-class MongoFriends(Mongo):
-        
-    COLLECTION = 'friends'
-        
+class MongoFriendsCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'friend_id': basestring,
         'timestamp': basestring
     }
     
-    def __init__(self, setup=False):
-#         AFriendshipDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='friends')
+    
     ### PUBLIC
     
     def addFriend(self, userId, friendId):
@@ -46,6 +35,3 @@ class MongoFriends(Mongo):
     def getFriends(self, userId):
         return self._getRelationships(userId)
 
-
-    ### PRIVATE
-    

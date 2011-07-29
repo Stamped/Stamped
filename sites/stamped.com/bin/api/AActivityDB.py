@@ -6,48 +6,44 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
 from Activity import Activity
+from utils import abstract
 
 class AActivityDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-
-    @abstractmethod    
+    @abstract    
     def addActivity(self, recipientId, activity):
         pass
-
-    @abstractmethod    
+    
+    @abstract    
     def addActivityForRestamp(self, recipientIds, user, stamp):
         pass
-
-    @abstractmethod    
+    
+    @abstract    
     def addActivityForComment(self, recipientIds, user, comment, stamp):
         pass
-
-    @abstractmethod    
+    
+    @abstract    
     def addActivityForFavorite(self, recipientIds, user, stamp):
         pass
-
-    @abstractmethod    
+    
+    @abstract    
     def addActivityForDirected(self, recipientIds, user, stamp):
         pass
-        
-    @abstractmethod  
+    
+    @abstract  
     def addActivityForMention(self, recipientIds, user, stamp):
         pass
-
-    @abstractmethod    
+    
+    @abstract    
     def addActivityForMilestone(self, recipientId, activity):
         pass
-
-        
-    @abstractmethod
+    
+    @abstract
     def getActivity(self, userId, before=None, since=None, limit=None):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def removeActivity(self, activityId):
         pass
-        
+

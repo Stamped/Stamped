@@ -1,2 +1,23 @@
 import Globals
 
+import MongoAccountCollection
+import MongoActivityCollection
+import MongoBlockCollection
+import MongoCollectionCollection
+import MongoCommentCollection
+import MongoCreditGiversCollection
+import MongoCreditReceivedCollection
+import MongoDirectedStampedCollection
+import MongoEntityCollection
+import MongoFavoriteCollection
+import MongoFollowersCollection
+import MongoFriendsCollection
+import MongoFriendshipCollection
+import MongoInboxStampsCollection
+import MongoStampCollection
+import MongoStampCommentsCollection
+import MongoUserActivityCollection
+import MongoUserCollection
+import MongoUserFavoritesCollection
+import MongoUserStampsCollection
+

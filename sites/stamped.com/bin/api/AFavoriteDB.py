@@ -6,35 +6,32 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
+from utils import abstract
 from Favorite import Favorite
 
 class AFavoriteDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-
-    @abstractmethod    
+    @abstract    
     def addFavorite(self, favorite):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getFavorite(self, favoriteId):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def removeFavorite(self, favorite):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def completeFavorite(self, favoriteId, complete=True):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getFavoriteIDs(self, userId):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getFavorites(self, userId):
         pass
-        
+

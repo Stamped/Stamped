@@ -6,17 +6,11 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from AMongoCollection import AMongoCollection
 
-from MongoDB import Mongo
-
-class MongoFollowers(Mongo):
-        
-    COLLECTION = 'followers'
-        
+class MongoFollowersCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'friend_id': basestring,
@@ -24,13 +18,8 @@ class MongoFollowers(Mongo):
     }
     
     def __init__(self, setup=False):
-#         AFriendshipDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+        AMongoCollection.__init__(self, collection='followers')
+    
     ### PUBLIC
     
     def addFollower(self, userId, followerId):
@@ -46,5 +35,3 @@ class MongoFollowers(Mongo):
     def getFollowers(self, userId):
         return self._getRelationships(userId)
 
-
-    ### PRIVATE

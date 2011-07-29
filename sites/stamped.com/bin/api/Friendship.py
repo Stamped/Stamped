@@ -6,19 +6,16 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from ASchemaObject import ASchemaObject
+from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
-class Friendship(ASchemaObject):
-
+class Friendship(ASchemaBasedAttributeDict):
+    
     _schema = {
         'user_id': basestring,
         'friend_id': basestring,
         'timestamp': basestring
     }
     
-    def __init__(self, data=None):
-        self._data = data or { }
-        
     @property
     def isValid(self):
         valid = True
@@ -30,4 +27,4 @@ class Friendship(ASchemaObject):
             valid &= isinstance(self.timestamp, basestring)
         
         return valid
-        
+

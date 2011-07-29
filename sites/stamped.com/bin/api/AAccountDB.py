@@ -6,31 +6,28 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
 from Account import Account
+from utils import abstract
 
 class AAccountDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-        
-    @abstractmethod
+    @abstract
     def addAccount(self, user):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getAccount(self, userId):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def updateAccount(self, user):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def removeAccount(self, user):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def flagAccount(self, user):
         pass
 

@@ -6,27 +6,19 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-from threading import Lock
-from datetime import datetime
 
-from MongoDB import Mongo
+from AMongoCollection import AMongoCollection
 
-class MongoCreditReceived(Mongo):
-        
-    COLLECTION = 'creditreceived'
-        
+class MongoCreditReceivedCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'stamp_id': basestring
     }
     
-    def __init__(self, setup=False):
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='creditreceived')
+    
     ### PUBLIC
     
     def addCredit(self, userId, stampId):
@@ -42,5 +34,3 @@ class MongoCreditReceived(Mongo):
     def numCredit(self, userId):
         return len(self.getCredit(userId))
 
-
-    ### PRIVATE

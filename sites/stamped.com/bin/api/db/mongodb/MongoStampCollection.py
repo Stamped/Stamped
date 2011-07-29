@@ -7,13 +7,10 @@ __license__ = "TODO"
 
 import Globals
 import re
-from threading import Lock
-from datetime import datetime
 
-from api.AStampDB import AStampDB
-from api.Stamp import Stamp
-from api.Comment import Comment
-from MongoDB import Mongo
+from utils import lazyProperty
+
+from AMongoCollection import AMongoCollection
 from MongoUserStamps import MongoUserStamps
 from MongoInboxStamps import MongoInboxStamps
 from MongoFriendship import MongoFriendship
@@ -22,12 +19,14 @@ from MongoCreditGivers import MongoCreditGivers
 from MongoCreditReceived import MongoCreditReceived
 from MongoUser import MongoUser
 from MongoFavorite import MongoFavorite
-from MongoActivity import MongoActivity
+from MongoActivityCollection import MongoActivityCollection
 
-class MongoStamp(AStampDB, Mongo):
-        
-    COLLECTION = 'stamps'
-        
+from api.AStampDB import AStampDB
+from api.Stamp import Stamp
+from api.Comment import Comment
+
+class MongoStampCollection(AMongoCollection, AStampDB):
+    
     SCHEMA = {
         '_id': object,
         'entity': {
@@ -69,27 +68,51 @@ class MongoStamp(AStampDB, Mongo):
         }
     }
     
-    def __init__(self, setup=False):
-        AStampDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='stamps')
+        AStampDB.__init__(self)
+    
     ### PUBLIC
     
+    @lazyProperty
+    def user_collection(self):
+        return MongoUser()
+    
+    @lazyProperty
+    def favorite_collection(self):
+        return MongoFavorite()
+    
+    @lazyProperty
+    def credit_givers_collection(self):
+        return MongoCreditGivers()
+    
+    @lazyProperty
+    def credit_received_collection(self):
+        return MongoCreditReceived()
+    
+    @lazyProperty
+    def activity_collection(self):
+        return MongoActivityCollection()
+    
+    @lazyProperty
+    def comment_collection(self):
+        return MongoComment()
+    
+    @lazyProperty
+    def user_stamps_collection(self):
+        return MongoUserStamps()
+    
+    @lazyProperty
+    def inbox_stamps_collection(self):
+        return MongoInboxStamps()
+    
+    @lazyProperty
+    def friendship_collection(self):
+        return MongoFriendship()
+    
     def addStamp(self, stamp):
-        
-        # Connect
-        _userDB = MongoUser()
-        _favoriteDB = MongoFavorite()
-        _creditGiversDB = MongoCreditGivers()
-        _creditReceivedDB = MongoCreditReceived()
-        _activityDB = MongoActivity()
-        
         # Extract user
-        user = _userDB.getUser(stamp['user']['user_id'])
+        user = self.user_collection.getUser(stamp['user']['user_id'])
         
         # Extract mentions
         if 'blurb' in stamp:
@@ -102,18 +125,18 @@ class MongoStamp(AStampDB, Mongo):
         stamp['stamp_id'] = stampId
         
         # Add a reference to the stamp in the user's collection
-        MongoUserStamps().addUserStamp(user.user_id, stampId)  
+        self.user_stamps_collection.addUserStamp(user.user_id, stampId)  
         
         # Add a reference to the stamp in followers' inbox
-        followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
+        followerIds = self.friendship_collection.getFollowers(stamp['user']['user_id'])
         followerIds.append(stamp['user']['user_id']) # Don't forget the user!
-        MongoInboxStamps().addInboxStamps(followerIds, stampId)
+        self.inbox_stamps_collection.addInboxStamps(followerIds, stampId)
         
         # If stamped entity is on the to do list, mark as complete
-        favoriteId = _favoriteDB.getFavoriteIdForEntity(
+        favoriteId = self.favorite_collection.getFavoriteIdForEntity(
             stamp['user']['user_id'], stamp['entity']['entity_id'])
         if favoriteId: 
-            _favoriteDB.completeFavorite(favoriteId)
+            self.favorite_collection.completeFavorite(favoriteId)
         
         # If users are mentioned, add stamp to their activity feed
         if 'mentions' in stamp:
@@ -122,22 +145,22 @@ class MongoStamp(AStampDB, Mongo):
                 if 'user_id' in mention:
                     recipientIds.append(mention['user_id'])
             if len(recipientIds) > 0:
-                _activityDB.addActivityForMention(recipientIds, user, stamp)
+                self.activity_collection.addActivityForMention(recipientIds, user, stamp)
         
         # Give credit
         if 'credit' in stamp and len(stamp.credit) > 0:
-            for user in _userDB.lookupUsers(None, stamp.credit):
+            for user in self.user_collection.lookupUsers(None, stamp.credit):
                 # Add to 'credit received'
-                numCredit = _creditReceivedDB.addCredit(user.user_id, stampId)
+                numCredit = self.credit_received_collection.addCredit(user.user_id, stampId)
             
                 # Add to 'credit givers'
-                numGivers = _creditGiversDB.addGiver(user.user_id, stamp['user']['user_id'])
+                numGivers = self.credit_givers_collection.addGiver(user.user_id, stamp['user']['user_id'])
                 
                 # Increment user's total credit received
-                _userDB.updateUserStats(user.user_id, 'num_credit', None, increment=1)
+                self.user_collection.updateUserStats(user.user_id, 'num_credit', None, increment=1)
                 
                 # Update user's total credit givers 
-                _userDB.updateUserStats(user.user_id, 'num_credit_givers', numGivers)
+                self.user_collection.updateUserStats(user.user_id, 'num_credit_givers', numGivers)
                 
                 # Update the number of credit on the user's stamp
                 creditedStamp = Stamp(self._mongoToObj(
@@ -167,7 +190,7 @@ class MongoStamp(AStampDB, Mongo):
                     self.addComment(comment)
                     
                     # Add to activity stream
-                    _activityDB.addActivityForRestamp([user.user_id], stamp.user, stamp)
+                    self.activity_collection.addActivityForRestamp([user.user_id], stamp.user, stamp)
                     
         return stampId
     
@@ -181,7 +204,7 @@ class MongoStamp(AStampDB, Mongo):
         return self._updateDocument(stamp, 'stamp_id')
         
     def removeStamp(self, stampId, userId):
-        MongoUserStamps().removeUserStamp(userId, stampId)
+        self.user_stamps_collection.removeUserStamp(userId, stampId)
         ### TODO: Add removal from ox, etc.
         return self._removeDocument(stampId)
     
@@ -190,9 +213,9 @@ class MongoStamp(AStampDB, Mongo):
         for stampId in self._addDocuments(stamps):
             stampIds.append(self._getStringFromObjectId(stampId))
         for stamp in self.getStamps(stampIds):
-            MongoUserStamps().addUserStamp(stamp['user']['user_id'], stamp['id'])
-            followerIds = MongoFriendship().getFollowers(stamp['user']['user_id'])
-            MongoInboxStamps().addInboxStamps(followerIds, stamp['id'])
+            self.user_stamps_collection.addUserStamp(stamp['user']['user_id'], stamp['id'])
+            followerIds = self.friendship_collection.getFollowers(stamp['user']['user_id'])
+            self.inbox_stamps_collection.addInboxStamps(followerIds, stamp['id'])
     
     def getStamps(self, stampIds, since=None, before=None, limit=20, sort='timestamp.created', withComments=False):
         # Set variables
@@ -205,7 +228,7 @@ class MongoStamp(AStampDB, Mongo):
         
         # If comments are included, grab them
         if withComments:
-            comments = MongoComment().getCommentsAcrossStamps(stampIds)
+            comments = self.comment_collection.getCommentsAcrossStamps(stampIds)
         
         # Build stamp object for each result
         for stamp in stamps:
@@ -228,9 +251,8 @@ class MongoStamp(AStampDB, Mongo):
         return True
         
     def addComment(self, comment):
-    
         # Grab data
-        user = MongoUser().getUser(comment['user']['user_id'])
+        user = self.user_collection.getUser(comment['user']['user_id'])
         stamp = self.getStamp(comment['stamp_id'])
         
         # Extract mentions
@@ -256,40 +278,37 @@ class MongoStamp(AStampDB, Mongo):
             recipientIds.remove(comment['user']['user_id'])
         
         # Add comment
-        commentId = MongoComment().addComment(comment)
+        commentId = self.comment_collection.addComment(comment)
         
         # Add activity
-        MongoActivity().addActivityForMention(recipientIds, user, stamp)
+        self.activity_collection.addActivityForMention(recipientIds, user, stamp)
         
         # Increment comment count on stamp
         self.incrementStatsForStamp(comment['stamp_id'], 'num_comments', 1)
         return commentId
         
     def getComments(self, stampId):
-        return MongoComment().getComments(stampId)
+        return self.comment_collection.getComments(stampId)
         
     def getComment(self, commentId):
-        return MongoComment().getComment(commentId)
+        return self.comment_collection.getComment(commentId)
     
     def removeComment(self, commentId):
-        _commentDB = MongoComment()
-        comment = _commentDB.getComment(commentId)
-        if _commentDB.removeComment(commentId):
-            numComments = _commentDB.getNumberOfComments(comment.stamp_id)
+        comment = self.comment_collection.getComment(commentId)
+        
+        if self.comment_collection.removeComment(commentId):
+            numComments = self.comment_collection.getNumberOfComments(comment.stamp_id)
             self._collection.update(
                 {'_id': self._getObjectIdFromString(comment.stamp_id)}, 
                 {'$set': {'num_comments': numComments}},
                 upsert=True)
             return True
+        
         return False
     
     ### PRIVATE
     
     def _extractMentions(self, text):
-        
-        # Connect
-        _userDB = MongoUser()
-        
         # Define patterns
         user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
@@ -303,7 +322,7 @@ class MongoStamp(AStampDB, Mongo):
             data = {}
             data['indices'] = [(reply.start()), reply.end()]
             data['screen_name'] = reply.group(0)[1:]
-            user = _userDB.lookupUsers(None, data['screen_name'])
+            user = self.user_collection.lookupUsers(None, data['screen_name'])
             if isinstance(user, list) and len(user) == 1:
                 data['user_id'] = user_id(0)['user_id']
                 data['display_name'] = user_id(0)['display_name']
@@ -314,19 +333,11 @@ class MongoStamp(AStampDB, Mongo):
             data = {}
             data['indices'] = [(user.start()+1), user.end()]
             data['screen_name'] = user.group(0)[2:]
-            user = _userDB.lookupUsers(None, [data['screen_name']])
+            user = self.user_collection.lookupUsers(None, [data['screen_name']])
             if isinstance(user, list) and len(user) == 1:
                 data['user_id'] = user[0]['user_id']
                 data['display_name'] = user[0]['display_name']
             mentions.append(data)
         
         return mentions
-        
-        
-    def _removeCredit(self, stampId):
-        pass
-        
-        
-    def _getCredit(self, userId):
-        pass
-        
+

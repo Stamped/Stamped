@@ -6,17 +6,141 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
+import copy, utils
+"""
+class ASchemaBasedAttributeDict(object):
+    
+    _schema = {}
+    
+    def __init__(self, d=None, schema=None):
+        if d:
+            super(ASchemaBasedAttributeDict, self).__setattr__("_dict", d)
+        if schema:
+            self._schema = schema
+    
+    #def __init__(self, *args, **kwargs):
+    #    d = kwargs
+    #    if args:
+    #        d = args[0]
+    #    
+    #    super(ASchemaBasedAttributeDict, self).__setattr__("_dict", d)
+    
+    @property
+    def isValid(self):
+        return False
+    
+    def __setattr__(self, name, value):
+        self[name] = value
+    
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("'%s' object has no attribute '%s'" % (self.__class__.__name__, name))
+    
+    def __setitem__(self, name, value):
+        if name == '_dict' or name == '_schema':
+            return super(ASchemaBasedAttributeDict, self).__setitem__(self, name, value)
+        
+        if name not in self._schema:
+            raise AttributeError("'%s' received unknown attribute '%s'" % (self.__class__.__name__, name))
+        
+        schemaVal = self._schema[name]
+        
+        if isinstance(schemaVal, type):
+            schemaValType = schemaVal
+        else:
+            schemaValType = type(schemaVal)
+        
+        # basic type checking
+        if not isinstance(value, schemaValType):
+            isValid = True
+            
+            # basic implicit type conversion s.t. if you pass in, for example, 
+            # "23.4" for longitude as a string, it'll automatically cast to 
+            # the required float format.
+            try:
+                if schemaValType == basestring:
+                    value = str(value)
+                elif schemaValType == float:
+                    value = float(value)
+                elif schemaValType == int:
+                    value = int(value)
+                else:
+                    isValid = False
+            except ValueError:
+                isValid = False
+            
+            if not isValid:
+                raise AttributeError("Set error; key '%s' found '%s', expected '%s'" % \
+                    (name, str(type(value)), str(schemaVal)))
+        
+        self._dict[name] = self._convert_value(value, schemaVal)
+    
+    def __getitem__(self, name):
+        if name == '_dict' or name == '_schema':
+            return super(ASchemaBasedAttributeDict, self).__getitem__(self, name)
+        
+        if name not in self._schema:
+            raise AttributeError("'%s' received unknown attribute '%s'" % (self.__class__.__name__, name))
+        
+        schemaVal = self._schema[name]
+        
+        if name not in self._dict:
+            self[name] = ASchemaBasedAttributeDict(schemaVal)
+        return self._convert_value(self._dict[name], self._schema[name])
+    
+    def _convert_value(self, value, schema):
+        if isinstance(value, dict) and not isinstance(value, ASchemaBasedAttributeDict):
+            return ASchemaBasedAttributeDict(value, schema)
+        
+        return value
+    
+    def copy(self):
+        return self.__class__(self._dict.copy(), copy.copy(self._schema))
+    
+    def update(self, *args, **kwargs):
+        self._dict.update(*args, **kwargs)
+    
+    def items(self):
+        return self._dict.items()
+    
+    def values(self):
+        return self._dict.values()
+    
+    def keys(self):
+        return self._dict.keys()
+    
+    def pop(self, *args, **kwargs):
+        return self._dict.pop(*args, **kwargs)
+    
+    def get(self, *args, **kwargs):
+        return self._dict.get(*args, **kwargs)
+    
+    def __repr__(self):
+        return self._dict.__repr__()
+    
+    def __unicode__(self):
+        return self._dict.__unicode__()
+    
+    def __str__(self):
+        return self._dict.__str__()
+    
+    def __iter__(self):
+        return self._dict.__iter__()
+    
+    def __getstate__(self):
+        return self._dict
+    
+    def __setstate__(self, state):
+        super(ASchemaBasedAttributeDict, self).__setattr__("_dict", state)
 
-def removeNonAscii(s):
-    return "".join(ch for ch in s if ord(ch) < 128)
+"""
 
-def normalize(s):
-    if isinstance(s, unicode):
-        return removeNonAscii(s.encode("utf-8"))
-    else:
-        return s
-
-class ASchemaObject(object):
+class ASchemaBasedAttributeDict(object):
     
     _schema = {}
     
@@ -63,7 +187,7 @@ class ASchemaObject(object):
     
     def __setattr__(self, name, value):
         #print "__setattr__ %s, %s" % (name, str(value))
-        value = normalize(value)
+        value = utils.normalize(value)
         
         if name == '_data' or name == '_schema':
             object.__setattr__(self, name, value)
@@ -108,14 +232,16 @@ class ASchemaObject(object):
                             v = float(v)
                         elif schemaValType == int:
                             v = int(v)
+                        elif schemaValType == bool:
+                            v = bool(int(v))
                         else:
                             isValid = False
                     except ValueError:
                         isValid = False
                     
                     if not isValid:
-                        raise KeyError("Add error; key '%s' found '%s', expected '%s'" % \
-                            (k, str(type(v)), str(schemaVal)))
+                        raise KeyError("Add error; key '%s' found '%s', expected '%s' (value %s)" % \
+                            (k, str(type(v)), str(schemaVal), v))
                 
                 if isinstance(v, dict):
                     if k not in dest:
@@ -148,7 +274,7 @@ class ASchemaObject(object):
                            (self.__class__.__name__, data, self._schema, self._data))
         
         return
-
+    
     @property
     def isValid(self):
         return False

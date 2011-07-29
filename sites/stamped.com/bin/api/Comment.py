@@ -6,10 +6,10 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from ASchemaObject import ASchemaObject
+from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 from datetime import datetime
 
-class Comment(ASchemaObject):
+class Comment(ASchemaBasedAttributeDict):
 
     _schema = {
         'comment_id': basestring,
@@ -31,9 +31,6 @@ class Comment(ASchemaObject):
         }
     }
     
-    def __init__(self, data=None):
-        self._data = data or { }
-        
     @property
     def isValid(self):
         valid = True

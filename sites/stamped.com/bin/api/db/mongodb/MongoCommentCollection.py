@@ -6,17 +6,13 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from threading import Lock
-from datetime import datetime
 
 from api.ACommentDB import ACommentDB
 from api.Comment import Comment
-from MongoDB import Mongo
+from AMongoCollection import AMongoCollection
 from MongoStampComments import MongoStampComments
 
-class MongoComment(ACommentDB, Mongo):
-        
-    COLLECTION = 'comments'
+class MongoCommentCollection(AMongoCollection, ACommentDB):
         
     SCHEMA = {
         '_id': object,
@@ -38,14 +34,10 @@ class MongoComment(ACommentDB, Mongo):
         }
     }
     
-    def __init__(self, setup=False):
-        ACommentDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='comments')
+        ACommentDB.__init__(self)
+    
     ### PUBLIC
     
     def addComment(self, comment):
@@ -64,7 +56,6 @@ class MongoComment(ACommentDB, Mongo):
     def removeComment(self, commentID):
         self._removeDocument(commentID)
         return True
-        
     
     # Can comments be updated? If a comment then *no*, but if it's a restamp 
     # then *maybe*. Discuss on product side before implementing here.
@@ -95,8 +86,4 @@ class MongoComment(ACommentDB, Mongo):
                 raise KeyError("Comment not valid")
             result.append(comment)
         return result
-            
-    
-    ### PRIVATE
-            
-    
+

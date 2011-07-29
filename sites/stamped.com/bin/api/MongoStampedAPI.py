@@ -6,17 +6,16 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
 from StampedAPI import StampedAPI
 
-from db.mongodb.MongoAccount import MongoAccount
-from db.mongodb.MongoEntity import MongoEntity
-from db.mongodb.MongoUser import MongoUser
-from db.mongodb.MongoStamp import MongoStamp
-from db.mongodb.MongoComment import MongoComment
-from db.mongodb.MongoFavorite import MongoFavorite
-from db.mongodb.MongoCollection import MongoCollection
-from db.mongodb.MongoFriendship import MongoFriendship
+from db.mongodb.MongoAccountCollection import MongoAccountCollection
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoUserCollection import MongoUserCollection
+from db.mongodb.MongoStampCollection import MongoStampCollection
+from db.mongodb.MongoCommentCollection import MongoCommentCollection
+from db.mongodb.MongoFavoriteCollection import MongoFavoriteCollection
+from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
+from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -26,14 +25,14 @@ class MongoStampedAPI(StampedAPI):
     def __init__(self):
         StampedAPI.__init__(self, "MongoStampedAPI")
         
-        self._accountDB    = MongoAccount()
-        self._entityDB     = MongoEntity()
-        self._userDB       = MongoUser()
-        self._stampDB      = MongoStamp()
-        self._commentDB    = MongoComment()
-        self._favoriteDB   = MongoFavorite()
-        self._collectionDB = MongoCollection()
-        self._friendshipDB = MongoFriendship()
+        self._accountDB    = MongoAccountCollection()
+        self._entityDB     = MongoEntityCollection()
+        self._userDB       = MongoUserCollection()
+        self._stampDB      = MongoStampCollection()
+        self._commentDB    = MongoCommentCollection()
+        self._favoriteDB   = MongoFavoriteCollection()
+        self._collectionDB = MongoCollectionCollection()
+        self._friendshipDB = MongoFriendshipCollection()
         
         self._validate()
 

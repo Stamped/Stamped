@@ -6,35 +6,32 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
+from utils import abstract
 from Stamp import Stamp
 
 class AStampDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-    
-    @abstractmethod
+    @abstract
     def addStamp(self, stamp):
         pass
         
-    @abstractmethod
+    @abstract
     def getStamp(self, stampId):
         pass
         
-    @abstractmethod
+    @abstract
     def updateStamp(self, stamp):
         pass
         
-    @abstractmethod
+    @abstract
     def removeStamp(self, stamp):
         pass
         
-    @abstractmethod
+    @abstract
     def addStamps(self, stamps):
         pass
         
-    @abstractmethod
+    @abstract
     def getStamps(self, stampIds):
         pass
     

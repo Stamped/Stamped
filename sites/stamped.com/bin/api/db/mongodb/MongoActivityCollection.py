@@ -6,18 +6,18 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from threading import Lock
+
 from datetime import datetime
+from utils import lazyProperty
+
+from AMongoCollection import AMongoCollection
+from MongoUserActivity import MongoUserActivity
 
 from api.AActivityDB import AActivityDB
 from api.Activity import Activity
-from MongoDB import Mongo
-from MongoUserActivity import MongoUserActivity
 
-class MongoActivity(AActivityDB, Mongo):
-        
-    COLLECTION = 'activity'
-        
+class MongoActivityCollection(AMongoCollection, AActivityDB):
+    
     SCHEMA = {
         '_id': object,
         'genre': basestring, # comment, restamp, favorite, directed, mention, credit milestone
@@ -95,16 +95,16 @@ class MongoActivity(AActivityDB, Mongo):
         }
     }
     
-    def __init__(self, setup=False):
-        AActivityDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='activity')
+        AActivityDB.__init__(self)
+    
     ### PUBLIC
-  
+    
+    @lazyProperty
+    def user_activity_collection(self):
+        return MongoUserActivity()
+    
     def addActivity(self, recipientId, activity):
         raise NotImplementedError
 
@@ -122,7 +122,7 @@ class MongoActivity(AActivityDB, Mongo):
         
         activityId = self._addDocument(activity, 'activity_id')
         for userId in recipientIds:
-            MongoUserActivity().addUserActivity(userId, activityId)
+            self.user_activity_collection.addUserActivity(userId, activityId)
             
         return activityId
 
@@ -141,7 +141,7 @@ class MongoActivity(AActivityDB, Mongo):
         
         activityId = self._addDocument(activity, 'activity_id')
         for userId in recipientIds:
-            MongoUserActivity().addUserActivity(userId, activityId)
+            self.user_activity_collection.addUserActivity(userId, activityId)
             
         return activityId
 
@@ -159,7 +159,7 @@ class MongoActivity(AActivityDB, Mongo):
         
         activityId = self._addDocument(activity, 'activity_id')
         for userId in recipientIds:
-            MongoUserActivity().addUserActivity(userId, activityId)
+            self.user_activity_collection.addUserActivity(userId, activityId)
             
         return activityId
 
@@ -177,7 +177,7 @@ class MongoActivity(AActivityDB, Mongo):
         
         activityId = self._addDocument(activity, 'activity_id')
         for userId in recipientIds:
-            MongoUserActivity().addUserActivity(userId, activityId)
+            self.user_activity_collection.addUserActivity(userId, activityId)
             
         return activityId
 
@@ -195,17 +195,15 @@ class MongoActivity(AActivityDB, Mongo):
         
         activityId = self._addDocument(activity, 'activity_id')
         for userId in recipientIds:
-            MongoUserActivity().addUserActivity(userId, activityId)
+            self.user_activity_collection.addUserActivity(userId, activityId)
             
         return activityId
 
     def addActivityForMilestone(self, recipientId, milestone):
         raise NotImplementedError
-        
-        
     
     def getActivity(self, userId):
-        activityData = self._getDocumentsFromIds(MongoUserActivity().getUserActivity(userId))
+        activityData = self._getDocumentsFromIds(self.user_activity_collection.getUserActivity(userId))
         result = []
         for activity in activityData:
             activity = Activity(activity)
@@ -215,9 +213,6 @@ class MongoActivity(AActivityDB, Mongo):
         return activity
         
     def removeActivity(self, activityId):
-        MongoUserActivity().removeUserActivity(userId, activityId)
+        self.user_activity_collection.removeUserActivity(userId, activityId)
         return self._removeDocument(activityId)
-    
-    
-    ### PRIVATE
-    
+

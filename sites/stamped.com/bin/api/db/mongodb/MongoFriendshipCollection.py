@@ -6,72 +6,63 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from utils import lazyProperty
 
-from api.AFriendshipDB import AFriendshipDB
-from api.Friendship import Friendship
-from MongoDB import Mongo
+from AMongoCollection import AMongoCollection
 from MongoUser import MongoUser
 from MongoFriends import MongoFriends
 from MongoFollowers import MongoFollowers
 from MongoBlock import MongoBlock
 
-class MongoFriendship(AFriendshipDB):
-        
+from api.AFriendshipDB import AFriendshipDB
+from api.Friendship import Friendship
+
+class MongoFriendshipCollection(AFriendshipDB):
+    
     SCHEMA = {
         '_id': basestring,
         'friend_id': basestring
     }
     
-    DESC = 'Mongo Friendship Wrapper'
-    
-    def __init__(self, setup=False):
-        AFriendshipDB.__init__(self, self.DESC)
-        
-        
     ### PUBLIC
     
     def addFriendship(self, friendship):
-    
         friendship = self._objToMongo(friendship)
         userId = friendship['_id']
         friendId = friendship['friend_id']
         
-        # Check if friendship already exists (???)
+        # TODO: Check if friendship already exists (???)
         
         # If block exists, don't surface friend request; otherwise add to queue
-        if MongoBlock().checkBlock(userId, friendId):
+        if self.block_collection.checkBlock(userId, friendId):
             ### TODO: Log request somewhere
             return False
         
-        if MongoUser().checkPrivacy(userId):
+        if self.user_collection.checkPrivacy(userId):
             # Request approval before creating friendship
             
             ### TODO: Add to queue                    
             return False
-            
         else:
             # Create friendship
-            MongoFriends().addFriend(userId=userId, friendId=friendId)
-            MongoFollowers().addFollower(userId=friendId, followerId=userId)
+            self.friends_collection.addFriend(userId=userId, friendId=friendId)
+            self.followers_collection.addFollower(userId=friendId, followerId=userId)
             return True
-            
+    
     def checkFriendship(self, friendship):
         friendship = self._objToMongo(friendship)
-        return MongoFriends().checkFriend(userId=friendship['_id'], friendId=friendship['friend_id'])
+        return self.friends_collection.checkFriend(userId=friendship['_id'], friendId=friendship['friend_id'])
             
     def removeFriendship(self, friendship):
         friendship = self._objToMongo(friendship)
         return self._destroyFriendship(userId=friendship['_id'], friendId=friendship['friend_id'])
             
     def getFriends(self, userId):
-        return MongoFriends().getFriends(userId)
+        return self.friends_collection.getFriends(userId)
             
     def getFollowers(self, userId):
-        return MongoFollowers().getFollowers(userId)
+        return self.followers_collection.getFollowers(userId)
 
     def approveFriendship(self, friendship):
         ### TODO
@@ -80,7 +71,7 @@ class MongoFriendship(AFriendshipDB):
     def addBlock(self, friendship):
         friendship = self._objToMongo(friendship)
         try:
-            MongoBlock().addBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
+            self.block_collection.addBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
             self._destroyFriendship(userId=friendship['_id'], friendId=friendship['friend_id'])
             self._destroyFriendship(userId=friendship['friend_id'], friendId=friendship['_id'])
             return True
@@ -89,22 +80,37 @@ class MongoFriendship(AFriendshipDB):
     
     def checkBlock(self, friendship):
         friendship = self._objToMongo(friendship)
-        return MongoBlock().checkBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
+        return self.block_collection.checkBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
             
     def removeBlock(self, friendship):
         friendship = self._objToMongo(friendship)
-        return MongoBlock().removeBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
+        return self.block_collection.removeBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
             
     def getBlocks(self, userId):
-        return MongoBlock().getBlocks(userId)
+        return self.block_collection.getBlocks(userId)
     
-            
     ### PRIVATE
+    
+    @lazyProperty
+    def block_collection(self):
+        return MongoBlock()
+    
+    @lazyProperty
+    def user_collection(self):
+        return MongoUser()
+    
+    @lazyProperty
+    def friends_collection(self):
+        return MongoBlock()
+    
+    @lazyProperty
+    def followers_collection(self):
+        return MongoFollowers()
     
     def _destroyFriendship(self, userId, friendId):
         try:
-            MongoFriends().removeFriend(userId=userId, friendId=friendId)
-            MongoFollowers().removeFollower(userId=friendId, followerId=userId)
+            self.friends_collection.removeFriend(userId=userId, friendId=friendId)
+            self.followers_collection.removeFollower(userId=friendId, followerId=userId)
             return True
         except:
             return False
@@ -113,6 +119,7 @@ class MongoFriendship(AFriendshipDB):
         if obj.isValid == False:
             print obj
             raise KeyError('Object not valid')
+        
         data = {}
         data['_id'] = obj.user_id
         data['friend_id'] = obj.friend_id

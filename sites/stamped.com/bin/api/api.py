@@ -10,7 +10,7 @@ import sys, thread
 # import MySQLdb
 
 # from mysql.MySQL import MySQL
-from parse import OptionParser
+from optparse import OptionParser
 
 from Entity import Entity
 from User import User
@@ -40,7 +40,7 @@ from mongodb.MongoFriendship import MongoFriendship
 from mongodb.MongoCollection import MongoCollection
 from mongodb.MongoFavorite import MongoFavorite
 from mongodb.MongoComment import MongoComment
-from mongodb.MongoAccount import MongoAccount
+from mongodb.MongoAccountCollection import MongoAccountCollection
 
 
 def _setup():
@@ -81,7 +81,7 @@ def main():
     collectionDB = MongoCollection()
     favoriteDB = MongoFavorite()
     commentDB = MongoComment()
-    accountDB = MongoAccount()
+    accountDB = MongoAccountCollection()
 
     print
 
@@ -351,6 +351,4 @@ def main():
 # where all the magic starts
 if __name__ == '__main__':
     main()
-
-
 

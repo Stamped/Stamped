@@ -6,15 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-
-from abc import abstractmethod
+from utils import abstract
 
 class IASyncConsumer():
     """
         Interface for an asynchronous, push-based consumer.
     """
     
-    @abstractmethod
+    @abstract
     def put(self, item, block=True, timeout=None):
         pass
     

@@ -6,37 +6,25 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from AMongoCollection import AMongoCollection
 
-from MongoDB import Mongo
-# from api.AFriendshipDB import AFriendshipDB
-# from api.Friendship import Friendship
-
-class MongoInboxStamps(Mongo):
-        
-    COLLECTION = 'inboxstamps'
-        
+class MongoInboxStampsCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'stamp_id': basestring
     }
     
-    def __init__(self, setup=False):
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='inboxstamps')
+    
     ### PUBLIC
     
     def addInboxStamp(self, userId, stampId):
-        
         if not isinstance(userId, basestring) or not isinstance(stampId, basestring):
             raise KeyError("ID not valid")
+        
         self._createRelationship(keyId=userId, refId=stampId)
         return True
         
@@ -55,6 +43,3 @@ class MongoInboxStamps(Mongo):
     def checkInboxStamp(self, userID, stampID):
         return self._checkRelationship(keyId=userId, refId=stampId)
 
-
-    ### PRIVATE
-    

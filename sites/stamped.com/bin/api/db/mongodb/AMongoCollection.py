@@ -6,39 +6,31 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import init, utils
-import bson, copy, os, pymongo
+import bson, copy, os, pymongo, utils
+
 from errors import Fail
-from api.AEntityDB import AEntityDB
-from utils import AttributeDict, getenv, getPythonConfigFile
-from threading import Lock
+from utils import AttributeDict, getPythonConfigFile
 from datetime import datetime
 
-class Mongo():
-    #USER    = 'root'
-    #PASS    = None
-    #HOST    = 'ec2-50-19-194-148.compute-1.amazonaws.com'
-    #PORT    = 27017
-    DB      = 'stamped_test'
-    DESC    = 'MongoDB:%s' % (DB)
+class AMongoCollection():
+    DB   = 'stamped_test'
+    DESC = 'MongoCollection:%s' % (DB)
     
-    def __init__(self, collection, mapping=None, setup=False, host=None, port=None, db=None):
+    def __init__(self, collection):
         self._initConfig()
         
-        self._mapping = mapping
-        self.user = self._getenv_user()
+        self._user = self._getenv_user()
         self._desc = self.DESC
-        self._host = host or self._getenv_host()
-        self._port = port or self._getenv_port()
-        self._db = db or self.DB
-        self._lock = Lock()
+        self._host = self._getenv_host()
+        self._port = self._getenv_port()
+        self._db = self.DB
         
         try:
             self._connection = self._connect()
-            self._database = self._getDatabase()
+            self._database   = self._getDatabase()
             self._collection = self._getCollection(collection)
         except:
-            raise Fail("Error: unable to connect to Mongo")
+            utils.log("Error: unable to connect to Mongo")
             raise
     
     def _initConfig(self):
@@ -147,7 +139,6 @@ class Mongo():
         return map(self._objToMongo, objs, objId)
     
     def _mapDataToSchema(self, data, schema):
-        
         def _unionDict(source, schema, dest):
             for k, v in source.iteritems():
                 _unionItem(k, v, schema, dest)
@@ -213,7 +204,7 @@ class Mongo():
         result = {}
         if not _unionDict(data, schema, result):
             raise KeyError("Error: %s" % str(data))
-
+        
         return result
     
     ### RELATIONSHIP MANAGEMENT

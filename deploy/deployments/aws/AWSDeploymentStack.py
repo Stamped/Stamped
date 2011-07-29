@@ -27,9 +27,7 @@ class AWSDeploymentStack(ADeploymentStack):
         self.commonOptions = system.commonOptions
         
         # maximum number of instances to create at one time
-        print "***WARNING*** change back to 8 once done debugging"
-        self._pool = Pool(1)
-        print "***WARNING*** change back to 8 once done debugging"
+        self._pool = Pool(8)
         
         if instances is None:
             instances = config.getInstances()
@@ -71,7 +69,7 @@ class AWSDeploymentStack(ADeploymentStack):
         replica_set = None
         
         for instance in db_instances:
-            replica_set = instance.config['mongodb']['replSet']
+            replica_set = instance.config.mongodb.replSet
             replica_set_members.append({
                 "_id": len(replica_set_members), 
                 "host": instance.private_ip_address
@@ -119,10 +117,15 @@ class AWSDeploymentStack(ADeploymentStack):
     
     def connect(self):
         web_server_instances = self.web_server_instances
-        if web_server_instances[0].state != 'running':
+        assert len(web_server_instances) > 0
+        
+        web_server = web_server_instances[0]
+        if web_server.state != 'running':
             raise Fail("Unable to connect to '%s'" % web_server_instances[0])
         
-        os.system('./connect.sh %s %s' % (self.name, "WebServer"))
+        cmd = './connect.sh %s.%s' % (self.name, web_server.name)
+        utils.log(cmd)
+        os.system(cmd)
     
     def crawl(self, *args):
         raise NotImplementedError

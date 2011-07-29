@@ -119,7 +119,7 @@ class AWSDeploymentSystem(DeploymentSystem):
                         stacks[stackName] = [ instance ]
         
         sl = len(stacks)
-        utils.log("%d stack%s exist%s" % (sl, "s" if sl != 1 else "", "" if sl != 1 else "s"))
+        utils.log("found %d stack%s:" % (sl, "s" if sl != 1 else ""))
         index = 1
         
         for stackName in stacks:
@@ -128,12 +128,4 @@ class AWSDeploymentSystem(DeploymentSystem):
             
             instances = stacks[stackName]
             self._stacks[stackName] = AWSDeploymentStack(stackName, self, instances)
-    
-    def list_stacks(self, stackNameRegex=None, stackStatus=None):
-        DeploymentSystem.list_stacks(self, stackNameRegex, stackStatus)
-        
-        #if stackStatus is not None:
-        #    self.local('cfn-list-stacks --stack-status %s %s' % (stackStatus, self.commonOptions))
-        #else:
-        #    self.local('cfn-list-stacks %s' % (self.commonOptions, ))
 

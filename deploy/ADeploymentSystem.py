@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import Globals
 import utils
-from abc import abstractmethod
+from utils import abstract
 
 class ADeploymentSystem(object):
     def __init__(self, name, options):
@@ -17,31 +17,31 @@ class ADeploymentSystem(object):
     def shutdown(self):
         pass
     
-    @abstractmethod
+    @abstract
     def create_stack(self, *args):
         pass
     
-    @abstractmethod
+    @abstract
     def delete_stack(self, *args):
         pass
     
-    @abstractmethod
+    @abstract
     def connect(self, *args):
         pass
     
-    @abstractmethod
+    @abstract
     def list_stacks(self, *args, **kwargs):
         pass
     
-    @abstractmethod
+    @abstract
     def init_stack(self, *args):
         pass
     
-    @abstractmethod
+    @abstract
     def update_stack(self, *args):
         pass
     
-    @abstractmethod
+    @abstract
     def crawl(self, *args):
         pass
     

@@ -6,18 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from threading import Lock
-from datetime import datetime
 
+from AMongoCollection import AMongoCollection
+from MongoUserFavorites import MongoUserFavorites
 from api.AFavoriteDB import AFavoriteDB
 from api.Favorite import Favorite
-from MongoDB import Mongo
-from MongoUserFavorites import MongoUserFavorites
 
-class MongoFavorite(AFavoriteDB, Mongo):
-        
-    COLLECTION = 'favorites'
-        
+class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
+    
     SCHEMA = {
         '_id': object,
         'entity': {
@@ -43,18 +39,16 @@ class MongoFavorite(AFavoriteDB, Mongo):
     }
     
     def __init__(self, setup=False):
-        AFavoriteDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
+        AMongoCollection.__init__(self, collection'favorites')
+        AFavoriteDB.__init__(self)
         
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+        self._favorites = MongoUserFavorites()
+    
     ### PUBLIC
     
     def addFavorite(self, favorite):
         favoriteId = self._addDocument(favorite, 'favorite_id')
-        MongoUserFavorites().addUserFavorite(favorite['user_id'], favoriteId)
+        self._favorites.addUserFavorite(favorite['user_id'], favoriteId)
         return favoriteId
     
     def getFavorite(self, favoriteId):
@@ -81,7 +75,7 @@ class MongoFavorite(AFavoriteDB, Mongo):
             {'user_id': userId, 'entity.entity_id': entityId})
     
     def getFavoriteIDs(self, userId):
-        return MongoUserFavorites().getUserFavoriteIds(userId)
+        return self._favorites.getUserFavoriteIds(userId)
     
     def getFavorites(self, userId):
         favorites = self._getDocumentsFromIds(self.getFavoriteIDs(userId), 'favorite_id')
@@ -92,7 +86,4 @@ class MongoFavorite(AFavoriteDB, Mongo):
                 raise KeyError("Favorite not valid")
             result.append(favorite)
         return result
-            
-    
-    ### PRIVATE
-    
+

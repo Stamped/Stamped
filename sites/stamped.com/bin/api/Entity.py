@@ -6,10 +6,10 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from ASchemaObject import ASchemaObject
+from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
-class Entity(ASchemaObject):
-
+class Entity(ASchemaBasedAttributeDict):
+    
     _schema = {
         'entity_id': basestring, 
         'title': basestring, 
@@ -48,7 +48,7 @@ class Entity(ASchemaObject):
             'restaurant': {
                 'diningStyle': basestring, 
                 'cuisine': basestring, 
-                'price': basestring, 
+                #'price': basestring, 
                 'payment': basestring, 
                 'dressCode': basestring, 
                 'acceptsReservations': basestring, 
@@ -75,7 +75,6 @@ class Entity(ASchemaObject):
                 'developerSupportURL': basestring, 
                 'publisher': basestring, 
                 'releaseDate': basestring, 
-                'price': basestring, 
                 'appCategory': basestring, 
                 'language': basestring, 
                 'rating': basestring, 
@@ -93,8 +92,50 @@ class Entity(ASchemaObject):
             'book': {
                 # TODO
             }, 
-            'movie': {
-                # TODO
+            'video': {
+                # TODO: modify types
+                'studio_name': basestring, 
+                'network_name': basestring, 
+                'short_description': basestring, 
+                'long_description': basestring, 
+                'episode_production_number': basestring, 
+                #'price' : {
+                #    'retail_price' : basestring, 
+                #    'currency_code' : basestring, 
+                #    'storefront_id' : basestring, 
+                #    'availability_date' : basestring, 
+                #    'sd_price' : basestring, 
+                #    'hq_price' : basestring, 
+                #    'lc_rental_price' : basestring, 
+                #    'sd_rental_price' : basestring, 
+                #    'hd_rental_price' : basestring, 
+                #}, 
+            }, 
+            'artist' : {
+                'albums' : list, 
+            }, 
+            'song': {
+                'preview_url': basestring, 
+                'preview_length': basestring, 
+            }, 
+            'album' : {
+                'label_studio'   : basestring, 
+                'is_compilation' : bool, 
+            }, 
+            'media' : {
+                'title_version': basestring, 
+                'search_terms': basestring, 
+                'parental_advisory_id': basestring, 
+                'artist_display_name': basestring, 
+                'collection_display_name': basestring, 
+                'original_release_date': basestring, 
+                'itunes_release_date': basestring, 
+                'track_length': basestring, 
+                'copyright': basestring, 
+                'p_line': basestring, 
+                'content_provider_name': basestring, 
+                'media_type_id': basestring, 
+                'artwork_url': basestring, 
             }, 
         }, 
         'sources': {
@@ -113,12 +154,24 @@ class Entity(ASchemaObject):
             'factual': {
                 'fid': basestring, 
                 'table': basestring, 
-            }
+            }, 
+            'apple' : {
+                'aid' : basestring, 
+                'export_date' : basestring, 
+                'is_actual_artist' : bool, 
+                'view_url' : basestring, 
+                'artist_type_id' : basestring, 
+                'match' : {
+                    'upc' : basestring, 
+                    'isrc' : basestring, 
+                    'grid' : basestring, 
+                    'amg_video_id' : basestring, 
+                    'amg_track_id' : basestring, 
+                    'isan' : basestring, 
+                }, 
+            }, 
         }
     }
-    
-    def __init__(self, data=None):
-        self._data = data or { }
     
     @property
     def isValid(self):

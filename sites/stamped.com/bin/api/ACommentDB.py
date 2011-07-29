@@ -6,31 +6,28 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
 from Comment import Comment
+from utils import abstract
 
 class ACommentDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-
-    @abstractmethod
+    @abstract
     def addComment(self, comment):
         pass
         
-    @abstractmethod
+    @abstract
     def getComment(self, commentId):
         pass
         
-    @abstractmethod
+    @abstract
     def removeComment(self, comment):  
         pass
         
-    @abstractmethod
+    @abstract
     def getCommentIds(self, stampId):
         pass
         
-    @abstractmethod    
+    @abstract    
     def getComments(self, stampId):
         pass
         

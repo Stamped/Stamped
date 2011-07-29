@@ -7,12 +7,10 @@ __license__ = "TODO"
 
 import Globals
 import time, utils
-from abc import ABCMeta, abstractmethod
 from errors import *
+from utils import abstract
 
 class AInstance(object):
-    __metaclass__ = ABCMeta
-    
     def __init__(self, stack, config):
         self.stack = stack
         self.config = utils.AttributeDict(config)
@@ -53,9 +51,9 @@ class AInstance(object):
         self._create()
         
         # wait for the instance to start up
-        utils.log("[%s] waiting to come online (this may take a few minutes)..." % self)
+        utils.log("[%s] waiting for instance to come online (this may take a few minutes)..." % self)
         while self.state == 'pending':
-            time.sleep(1)
+            time.sleep(2)
             self.update()
         
         if self.state != 'running':
@@ -63,7 +61,7 @@ class AInstance(object):
                        (self.name, self.state))
         
         # add all tags
-        utils.log("[%s] instance is online! adding %d tags..." % (self, len(self.config.items())))
+        utils.log("[%s] instance is online; adding %d tags..." % (self, len(self.config.items())))
         for tag in self.config:
             self.add_tag(tag, self.config[tag])
         
@@ -72,38 +70,38 @@ class AInstance(object):
     def _pre_create(self):
         pass
     
-    @abstractmethod
+    @abstract
     def _create(self):
         raise NotImplementedError
     
     def _post_create(self):
         pass
     
-    @abstractmethod
+    @abstract
     def start(self):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def stop(self, force=False):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def terminate(self):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def reboot(self):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def update(self, validate=False):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def add_tag(self, key, value=None):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def remove_tag(self, key, value=None):
         raise NotImplementedError
     
@@ -111,7 +109,7 @@ class AInstance(object):
         self.config['stack'] = self.stack.name
     
     def __str__(self):
-        name = "%s(%s)" % (self.__class__.__name__, self.name)
+        name = "%s(%s.%s)" % (self.__class__.__name__, self.stack.name, self.name)
         
         if self.state == 'running':
             try:

@@ -6,35 +6,29 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
-
-from MongoDB import Mongo
+from AMongoCollection import AMongoCollection
 from MongoUser import MongoUser
 from MongoInboxStamps import MongoInboxStamps
 from MongoFriends import MongoFriends
 from MongoBlock import MongoBlock
-# from api.AFriendshipDB import AFriendshipDB
-# from api.Friendship import Friendship
 
-class MongoDirectedStamps(Mongo):
-        
-    COLLECTION = 'directedstamps'
-        
+####### TODO
+# How to do this? Edge case is where two distinct users have sent one recipient the same
+# directed stamp. No easy way to delete references to the stamp in the inbox, because you
+# have to check to see if any other users have sent it before deleting stamps from 
+# intended user. COME BACK TO.
+
+class MongoDirectedStampsCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'stamp_id': basestring
     }
     
     def __init__(self, setup=False):
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+        AMongoCollection.__init__(self, collection='directedstamps')
+    
     ### PUBLIC
     
     def addDirectedStamp(self, userId, stampId, recipientScreenNames, message=None):
@@ -135,13 +129,3 @@ class MongoDirectedStamps(Mongo):
         ### TODO: Add limit? Add timestamp to slice?
         return False
 
-
-    ### PRIVATE
-    
-
-
-####### NOTES
-# How to do this? Edge case is where two distinct users have sent one recipient the same
-# directed stamp. No easy way to delete references to the stamp in the inbox, because you
-# have to check to see if any other users have sent it before deleting stamps from 
-# intended user. COME BACK TO.

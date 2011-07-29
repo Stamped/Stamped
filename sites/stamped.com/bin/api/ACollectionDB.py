@@ -6,31 +6,27 @@ __copyright__ = "Copyright (c) 2011 Stamped, Inc."
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
-from Collection import Collection
+from utils import abstract
 
 class ACollectionDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-    
-    @abstractmethod
+    @abstract
     def getInboxStampIDs(self, userId, limit=None):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getInboxStamps(self, userId, limit=None):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getUserStampIDs(self, userId, limit=None):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getUserStamps(self, userId, limit=None):
         pass
-        
-    @abstractmethod
+    
+    @abstract
     def getMentions(self, userId, limit=None):
         pass
-    
+

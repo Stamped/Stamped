@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
+from utils import abstract
 from AEntitySink import AEntitySink
 
 class AStampedAPI(AEntitySink):
@@ -22,35 +22,35 @@ class AStampedAPI(AEntitySink):
     # Accounts #
     # ######## #
     
-    @abstractmethod
+    @abstract
     def addAccount(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def updateAccount(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getAccount(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def updateProfile(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def updateProfileImage(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def verifyAccountCredentials(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeAccount(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def resetPassword(self, params):
         raise NotImplementedError
     
@@ -58,23 +58,23 @@ class AStampedAPI(AEntitySink):
     # Users #
     # ##### #
     
-    @abstractmethod
+    @abstract
     def getUser(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getUsers(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getUsersByName(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def searchUsers(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getPrivacy(self, params):
         raise NotImplementedError
     
@@ -82,43 +82,43 @@ class AStampedAPI(AEntitySink):
     # Relationships #
     # ############# #
     
-    @abstractmethod
+    @abstract
     def addFriendship(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeFriendship(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def approveFriendship(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def addBlock(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeBlock(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def checkFriendship(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getFriends(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getFollowers(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def checkBlock(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getBlocks(self, params):
         raise NotImplementedError
     
@@ -126,15 +126,15 @@ class AStampedAPI(AEntitySink):
     # Favorites #
     # ######### #
     
-    @abstractmethod
+    @abstract
     def addFavorite(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeFavorite(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getFavorites(self, params):
         raise NotImplementedError
     
@@ -142,23 +142,23 @@ class AStampedAPI(AEntitySink):
     # Entities #
     # ######## #
     
-    @abstractmethod
+    @abstract
     def addEntity(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getEntity(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def updateEntity(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeEntity(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def searchEntities(self, params):
         raise NotImplementedError
     
@@ -166,23 +166,23 @@ class AStampedAPI(AEntitySink):
     # Stamps #
     # ###### #
     
-    @abstractmethod
+    @abstract
     def addStamp(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getStamp(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getStamps(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def updateStamp(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeStamp(self, params):
         raise NotImplementedError
     
@@ -190,15 +190,15 @@ class AStampedAPI(AEntitySink):
     # Comments #
     # ######## #
     
-    @abstractmethod
+    @abstract
     def addComment(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeComment(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getComments(self, params):
         raise NotImplementedError
     
@@ -206,23 +206,23 @@ class AStampedAPI(AEntitySink):
     # Collections #
     # ########### #
     
-    @abstractmethod
+    @abstract
     def getInboxStampIDs(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getInboxStamps(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getUserStampIDs(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getUserStamps(self, params):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getUserMentions(self, params):
         raise NotImplementedError
     
@@ -236,11 +236,11 @@ class AStampedAPI(AEntitySink):
     def _processItems(self, items):
         return self._addEntities(items)
     
-    @abstractmethod
+    @abstract
     def _addEntity(self, entity):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def _addEntities(self, entities):
         raise NotImplementedError
 

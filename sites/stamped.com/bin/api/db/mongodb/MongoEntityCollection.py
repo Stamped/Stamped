@@ -6,17 +6,13 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from threading import Lock
-from datetime import datetime
 
-from MongoDB import Mongo
+from AMongoCollection import AMongoCollection
 from api.AEntityDB import AEntityDB
 from api.Entity import Entity
 
-class MongoEntity(AEntityDB, Mongo):
-        
-    COLLECTION = 'entities'
-        
+class MongoEntityCollection(AMongoCollection, AEntityDB):
+    
     SCHEMA = {
         '_id': object, 
         'title': basestring, 
@@ -125,11 +121,8 @@ class MongoEntity(AEntityDB, Mongo):
     }
     
     def __init__(self):
-        AEntityDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
+        AMongoCollection.__init__(self, collection='entities')
+        AEntityDB.__init__(self)
     
     ### PUBLIC
     
@@ -158,6 +151,4 @@ class MongoEntity(AEntityDB, Mongo):
         for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
             result.append(Entity(self._mongoToObj(entity, 'entity_id')))
         return result
-    
-    ### PRIVATE
 

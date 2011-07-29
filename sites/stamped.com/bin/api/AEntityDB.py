@@ -6,14 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from abc import abstractmethod
+from utils import abstract
 from Entity import Entity
 from AEntitySink import AEntitySink
 
 class AEntityDB(AEntitySink):
     
-    def __init__(self, desc):
-        AEntitySink.__init__(self, desc)
+    def __init__(self):
+        AEntitySink.__init__(self, "Entity DB")
     
     def _processItem(self, item):
         return self.addEntity(item)
@@ -21,27 +21,27 @@ class AEntityDB(AEntitySink):
     def _processItems(self, items):
         return self.addEntities(items)
     
-    @abstractmethod
+    @abstract
     def addEntity(self, entity):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def getEntity(self, entityID):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def updateEntity(self, entity):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def removeEntity(self, entity):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def addEntities(self, entities):
         raise NotImplementedError
     
-    @abstractmethod
+    @abstract
     def matchEntities(self, query, limit=20):
         raise NotImplementedError
 

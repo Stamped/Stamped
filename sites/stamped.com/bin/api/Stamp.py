@@ -6,10 +6,10 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from ASchemaObject import ASchemaObject
+from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 from datetime import datetime
 
-class Stamp(ASchemaObject):
+class Stamp(ASchemaBasedAttributeDict):
 
     _schema = {
         'stamp_id': basestring,
@@ -52,9 +52,6 @@ class Stamp(ASchemaObject):
         }
     }
     
-    def __init__(self, data=None):
-        self._data = data or { }
-        
     @property
     def isValid(self):
         valid = True
@@ -116,4 +113,4 @@ class Stamp(ASchemaObject):
                 valid &= isinstance(self.stats['num_credit'], int)
         
         return valid
-        
+

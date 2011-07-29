@@ -10,9 +10,6 @@ from Mention import Mention
 
 class AMentionDB(object):
     
-    def __init__(self, desc):
-        self._desc = desc
-    
     def addMention(self, mention):
         raise NotImplementedError
     
@@ -30,10 +27,4 @@ class AMentionDB(object):
     
     def removeMentions(self, mentionIDs):
         return map(self.removeMention, mentionIDs)
-    
-    def __len__(self):
-        raise NotImplementedError
-    
-    def __str__(self):
-        return self._desc
 

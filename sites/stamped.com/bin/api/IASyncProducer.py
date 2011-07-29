@@ -7,32 +7,30 @@ __license__ = "TODO"
 
 import Globals, utils
 
-from abc import abstractmethod
-
 class IASyncProducer():
     """
         Interface for an asynchronous, pull-based producer.
     """
     
-    @abstractmethod
+    @abstract
     def get(self, block = True, timeout=None):
         pass
     
     def get_nowait(self):
         return self.get(block=False, timeout=None)
     
-    @abstractmethod
+    @abstract
     def empty(self):
         pass
     
-    @abstractmethod
+    @abstract
     def next(self):
         pass
     
     def __iter__(self):
         return self
     
-    @abstractmethod
+    @abstract
     def startProducing(self):
         pass
 

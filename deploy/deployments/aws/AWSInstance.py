@@ -71,6 +71,21 @@ class AWSInstance(AInstance):
         if isinstance(configOrInstance, BotoEC2Instance):
             self._instance = configOrInstance
             config = self._instance.tags
+            
+            def _fix_config(cfg):
+                for elem in cfg:
+                    val = cfg[elem]
+                    
+                    if isinstance(val, basestring):
+                        try:
+                            val = eval(val)
+                            val = _fix_config(val)
+                            cfg[elem] = val
+                        except Exception:
+                            pass
+                return cfg
+            
+            config = _fix_config(config)
         else:
             self._instance = None
             config = configOrInstance
@@ -125,20 +140,36 @@ class AWSInstance(AInstance):
         self._instance = reservation.instances[0]
     
     def _post_create(self):
+        utils.log("[%s] waiting for ssh service to come online (this may take a few minutes)..." % self)
+        
+        # TODO: hook this up to pinging other ports which need to be initialized
+        while True:
+            try:
+                import socket
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((self.public_dns_name, 22))
+                s.close()
+                break
+            except socket.error:
+                time.sleep(2)
+                pass
+        
+        utils.log("[%s] ssh service is online" % self)
+        
+        """
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
         
         done = False
         while not done:
             try:
-                # TODO: make this more covert
-                with settings(host_string=self.public_dns_name):
-                    run('curl http://169.254.169.254/1.0/user-data -o user-data.sh && chmod +x user-data.sh && ./user-data.sh')#, pty=False)
-                
+                with settings(host_string=self.public_dns_name, user='ubuntu'):
+                    sudo('curl http://169.254.169.254/1.0/user-data -o user-data.sh && chmod +x user-data.sh && ./user-data.sh')
                 done = True
             except SystemExit:
                 time.sleep(2)
                 pass
+        """
     
     def start(self):
         self.update()
@@ -184,13 +215,18 @@ class AWSInstance(AInstance):
     
     def _get_user_data(self):
         params = {
-            'init_params' : json.dumps(self.config._dict).replace('"', "'")
+            # TODO: look at replacement of quotes
+            'init_params' : json.dumps(self.config._dict)
         }
         
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "userdata.sh")
         f = open(path, 'r')
         user_data = convert.parse_file(f, params)
         f.close()
+        
+        f2 = open('test', 'w')
+        f2.write(user_data)
+        f2.close()
         
         return user_data
         #user_data64 = base64.encodestring(user_data)

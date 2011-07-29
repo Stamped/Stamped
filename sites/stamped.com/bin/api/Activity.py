@@ -7,9 +7,9 @@ __license__ = "TODO"
 
 import Globals
 from datetime import datetime
-from ASchemaObject import ASchemaObject
+from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
-class Activity(ASchemaObject):
+class Activity(ASchemaBasedAttributeDict):
     
     _schema = {
         'activity_id': basestring,
@@ -88,9 +88,6 @@ class Activity(ASchemaObject):
         }
     }
     
-    def __init__(self, data=None):
-        self._data = data or { }
-        
     @property
     def isValid(self):
         valid = True

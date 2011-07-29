@@ -269,7 +269,7 @@ class OrderedDict(dict, MutableMapping):
             return all(p==q for p, q in  _zip_longest(self.items(), other.items()))
         return dict.__eq__(self, other)
 
-def getFile(url):
+def getFile(url, opener=None):
     """
         Wrapper around urllib2.urlopen(url).read(), which attempts to increase 
         the success rate by sidestepping server-side issues and usage limits by
@@ -282,9 +282,12 @@ def getFile(url):
     delay = 0.5
     html = None
     
+    if opener is None:
+        opener = urllib2.urlopen
+    
     while True:
         try:
-            html = urllib2.urlopen(url).read()
+            html = opener(url).read()
             break
         except urllib2.HTTPError, e:
             #log("'%s' fetching url '%s'" % (str(e), url))
@@ -322,8 +325,8 @@ def getFile(url):
     # return the successfully parsed html
     return html
 
-def getSoup(url):
-    return BeautifulSoup(getFile(url))
+def getSoup(url, opener=None):
+    return BeautifulSoup(getFile(url, opener))
 
 def createEnum(*sequential, **named):
     return dict(zip(sequential, range(len(sequential))), **named)

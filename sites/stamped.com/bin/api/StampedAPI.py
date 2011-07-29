@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from abc import abstractmethod
+from utils import abstract
 from datetime import datetime
 
 from errors import *

@@ -7,9 +7,9 @@ __license__ = "TODO"
 
 import Globals
 from datetime import datetime
-from ASchemaObject import ASchemaObject
+from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
-class Favorite(ASchemaObject):
+class Favorite(ASchemaBasedAttributeDict):
 
     _schema = {
         'favorite_id': basestring,
@@ -35,9 +35,6 @@ class Favorite(ASchemaObject):
         'complete': bool
     }
     
-    def __init__(self, data=None):
-        self._data = data or { }
-        
     @property
     def isValid(self):
         valid = True
@@ -74,4 +71,4 @@ class Favorite(ASchemaObject):
             valid &= isinstance(self.complete, bool)
             
         return valid
-        
+

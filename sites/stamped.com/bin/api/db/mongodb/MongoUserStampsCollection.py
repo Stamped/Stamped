@@ -6,36 +6,22 @@ __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
 import Globals
-import copy
 
-from threading import Lock
-from datetime import datetime
+from AMongoCollection import AMongoCollection
 
-from MongoDB import Mongo
-# from api.AFriendshipDB import AFriendshipDB
-# from api.Friendship import Friendship
-
-class MongoUserStamps(Mongo):
-        
-    COLLECTION = 'userstamps'
-        
+class MongoUserStampsCollection(AMongoCollection):
+    
     SCHEMA = {
         '_id': basestring,
         'stamp_id': basestring
     }
     
-    def __init__(self, setup=False):
-#         AFriendshipDB.__init__(self, self.DESC)
-        Mongo.__init__(self, collection=self.COLLECTION)
-        
-        self.db = self._getDatabase()
-        self._lock = Lock()
-        
-        
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='userstamps')
+    
     ### PUBLIC
     
     def addUserStamp(self, userId, stampId):
-        
         if not isinstance(userId, basestring) or not isinstance(stampId, basestring):
             raise KeyError("ID not valid")
         
@@ -49,6 +35,3 @@ class MongoUserStamps(Mongo):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId, limit)
 
-
-    ### PRIVATE
-    

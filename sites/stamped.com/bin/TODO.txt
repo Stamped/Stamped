@@ -15,6 +15,7 @@
 * support utf-8
 * second pass over API methods
 * Nth pass over API methods
+* reassess naming conventions for mongo-specific versus mongo-agnostic glue classes
 
 MongoDB
     * evaluate async vs sync consistency options for API methods
@@ -22,13 +23,15 @@ MongoDB
         * evaluate possible race conditions and TEST them!
         * rollback strategy
 
-Crawler
-    * FactualUSResaurants
-        * prune entities we'd not be interested in
-
 AEntityProxy
     * Pulls from AEntitySource -> output queue
 
 AMultiprocessingEntityProxy
     * Pulls from AEntitySource -> output queue
+
+ASchemaObject:
+    * convert to using extended AttributeDict
+    * remove unique name constraint!
+Entity:
+    * consistent categories for entities
 

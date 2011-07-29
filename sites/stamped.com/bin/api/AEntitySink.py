@@ -6,11 +6,11 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
+from utils import abstract
 
 from IASyncConsumer import IASyncConsumer
 from gevent.queue import Queue
 from gevent import Greenlet
-from abc import abstractmethod
 
 class AEntitySink(Greenlet, IASyncConsumer):
     """
@@ -31,7 +31,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
         """Inserts an item into this sink's queue only if it would be non-blocking"""
         self._input.put_nowait(item)
     
-    @abstractmethod
+    @abstract
     def _run(self):
         """Subclasses should override to process the pull-based loop in the 
         context of this sink's Greenlet."""
@@ -75,12 +75,12 @@ class AEntitySink(Greenlet, IASyncConsumer):
         
         #utils.log("[%s] <<< AEntitySink.processQueue" % (self, ))
     
-    @abstractmethod
+    @abstract
     def _processItem(self, item):
         """Consumes one item."""
         pass
     
-    @abstractmethod
+    @abstract
     def _processItems(self, items):
         """Consumes all of the items."""
         pass

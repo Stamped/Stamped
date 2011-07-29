@@ -38,7 +38,13 @@ chmod 600 ~/.ssh/id_rsa
 chmod 644 ~/.ssh/id_rsa.pub
 
 echo '>>>> Install git'
-sudo apt-get -y install git-core
+while :; do
+    if apt-get -y install git-core; then
+        break
+    else
+        sleep 1
+    fi
+done
 
 echo '>>>> Set bash to ignore errors, then run ssh so that clone command ignores validation of URL'
 set +e
@@ -47,19 +53,25 @@ set -e
 
 echo '>>>> Clone repo'
 
-if [ ! -d /stamped/bootstrap ]; then
-    sudo mkdir -p /stamped/bootstrap
-    sudo chmod -R 777 /stamped
+if [ ! -d /stamped ]; then
+    mkdir -p /stamped
+    #sudo chown -R ubuntu /stamped
+    #sudo chmod -R 770 /stamped
     git clone git@github.com:Stamped/stamped-bootstrap.git /stamped/bootstrap
 fi
 
-cd /stamped/bootstrap && git pull
+cd /stamped/bootstrap
+git pull
 
 echo '>>>> Installing python-setuptools'
-sudo apt-get install python-setuptools
+while :; do
+    if apt-get -y install python-setuptools; then
+        break
+    else
+        sleep 1
+    fi
+done
 
 echo '>>>> Running init script'
-set +e
-python /stamped/bootstrap/init.py "{{ init_params }}" &> /stamped/bootstrap/log
-set -e
+python /stamped/bootstrap/init.py '{{ init_params }}' >& /stamped/bootstrap/log &
 
