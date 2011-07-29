@@ -11,7 +11,7 @@ from datetime import datetime
 from utils import lazyProperty
 
 from AMongoCollection import AMongoCollection
-from MongoUserActivity import MongoUserActivity
+from MongoUserActivityCollection import MongoUserActivityCollection
 
 from api.AActivityDB import AActivityDB
 from api.Activity import Activity
@@ -125,7 +125,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     
     @lazyProperty
     def user_activity_collection(self):
-        return MongoUserActivity()
+        return MongoUserActivityCollection()
     
     def addActivity(self, recipientId, activity):
         raise NotImplementedError
@@ -182,7 +182,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         
         activityId = self._addDocument(activity, 'activity_id')
         for userId in recipientIds:
-            MongoUserActivity().addUserActivity(userId, activityId)
+            MongoUserActivityCollection().addUserActivity(userId, activityId)
             
         return activityId
 

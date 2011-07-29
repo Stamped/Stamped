@@ -10,38 +10,33 @@ import Globals
 from utils import lazyProperty
 
 from AMongoCollection import AMongoCollection
-from MongoUser import MongoUser
-from MongoFriends import MongoFriends
-from MongoFollowers import MongoFollowers
-from MongoBlock import MongoBlock
+from MongoUserCollection import MongoUserCollection
+from MongoFriendsCollection import MongoFriendsCollection
+from MongoFollowersCollection import MongoFollowersCollection
+from MongoBlockCollection import MongoBlockCollection
 
 from api.AFriendshipDB import AFriendshipDB
 from api.Friendship import Friendship
 
 class MongoFriendshipCollection(AFriendshipDB):
     
-    SCHEMA = {
-        '_id': basestring,
-        'friend_id': basestring
-    }
-    
     ### PUBLIC
     
     @lazyProperty
     def block_collection(self):
-        return MongoBlock()
+        return MongoBlockCollection()
     
     @lazyProperty
     def user_collection(self):
-        return MongoUser()
+        return MongoUserCollection()
     
     @lazyProperty
     def friends_collection(self):
-        return MongoBlock()
+        return MongoBlockCollection()
     
     @lazyProperty
     def followers_collection(self):
-        return MongoFollowers()
+        return MongoFollowersCollection()
     
     def addFriendship(self, friendship):
         friendship = self._objToMongo(friendship)

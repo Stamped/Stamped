@@ -8,17 +8,18 @@ __license__ = "TODO"
 import Globals
 import re
 
+from datetime import datetime
 from utils import lazyProperty
 
 from AMongoCollection import AMongoCollection
-from MongoUserStamps import MongoUserStamps
-from MongoInboxStamps import MongoInboxStamps
-from MongoFriendship import MongoFriendship
-from MongoComment import MongoComment
-from MongoCreditGivers import MongoCreditGivers
-from MongoCreditReceived import MongoCreditReceived
-from MongoUser import MongoUser
-from MongoFavorite import MongoFavorite
+from MongoUserStampsCollection import MongoUserStampsCollection
+from MongoInboxStampsCollection import MongoInboxStampsCollection
+from MongoFriendshipCollection import MongoFriendshipCollection
+from MongoCommentCollection import MongoCommentCollection
+from MongoCreditGiversCollection import MongoCreditGiversCollection
+from MongoCreditReceivedCollection import MongoCreditReceivedCollection
+from MongoUserCollection import MongoUserCollection
+from MongoFavoriteCollection import MongoFavoriteCollection
 from MongoActivityCollection import MongoActivityCollection
 
 from api.AStampDB import AStampDB
@@ -76,19 +77,19 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     
     @lazyProperty
     def user_collection(self):
-        return MongoUser()
+        return MongoUserCollection()
     
     @lazyProperty
     def favorite_collection(self):
-        return MongoFavorite()
+        return MongoFavoriteCollection()
     
     @lazyProperty
     def credit_givers_collection(self):
-        return MongoCreditGivers()
+        return MongoCreditGiversCollection()
     
     @lazyProperty
     def credit_received_collection(self):
-        return MongoCreditReceived()
+        return MongoCreditReceivedCollection()
     
     @lazyProperty
     def activity_collection(self):
@@ -96,19 +97,19 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     
     @lazyProperty
     def comment_collection(self):
-        return MongoComment()
+        return MongoCommentCollection()
     
     @lazyProperty
     def user_stamps_collection(self):
-        return MongoUserStamps()
+        return MongoUserStampsCollection()
     
     @lazyProperty
     def inbox_stamps_collection(self):
-        return MongoInboxStamps()
+        return MongoInboxStampsCollection()
     
     @lazyProperty
     def friendship_collection(self):
-        return MongoFriendship()
+        return MongoFriendshipCollection()
     
     @lazyProperty
     def activity_collection(self):
@@ -288,7 +289,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 comment['mentions'] = mentions
         
         # Add comment
-        commentId = MongoComment().addComment(comment)
+        commentId = MongoCommentCollection().addComment(comment)
         comment['comment_id'] = commentId
         
         # Add activity for mentioned users

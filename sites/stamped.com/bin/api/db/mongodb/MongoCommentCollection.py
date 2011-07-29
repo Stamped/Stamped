@@ -7,10 +7,14 @@ __license__ = "TODO"
 
 import Globals
 
+from datetime import datetime
+from utils import lazyProperty
+
+from AMongoCollection import AMongoCollection
+from MongoStampCommentsCollection import MongoStampCommentsCollection
+
 from api.ACommentDB import ACommentDB
 from api.Comment import Comment
-from AMongoCollection import AMongoCollection
-from MongoStampComments import MongoStampComments
 
 class MongoCommentCollection(AMongoCollection, ACommentDB):
         
@@ -40,10 +44,14 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     
     ### PUBLIC
     
+    @lazyProperty
+    def stamp_comments_collection(self):
+        return MongoStampCommentsCollection()
+    
     def addComment(self, comment):
         ### TODO: Make sure that the user can publish comment (public stamp and not blocked)
         commentId = self._addDocument(comment, 'comment_id')
-        MongoStampComments().addStampComment(comment['stamp_id'], commentId)
+        self.stamp_comments_collection.addStampComment(comment['stamp_id'], commentId)
         ### TODO: Add to activity feed
         return commentId
     
@@ -61,7 +69,7 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     # then *maybe*. Discuss on product side before implementing here.
     
     def getCommentIds(self, stampId):
-        return MongoStampComments().getStampCommentIds(stampId)
+        return self.stamp_comments_collection.getStampCommentIds(stampId)
         
     def getNumberOfComments(self, stampId):
         return len(self.getCommentIds(stampId))
@@ -77,7 +85,7 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         return result
     
     def getCommentsAcrossStamps(self, stampIds):
-        commentIds = MongoStampComments().getCommentIdsAcrossStampIds(stampIds)
+        commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds)
         comments = self._getDocumentsFromIds(commentIds, 'comment_id')
         result = []
         for comment in comments:

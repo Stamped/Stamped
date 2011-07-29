@@ -7,11 +7,13 @@ __license__ = 'TODO'
 
 import Globals
 
+from utils import lazyProperty
+
 from AMongoCollection import AMongoCollection
-from MongoUser import MongoUser
-from MongoInboxStamps import MongoInboxStamps
-from MongoFriends import MongoFriends
-from MongoBlock import MongoBlock
+from MongoUserCollection import MongoUserCollection
+from MongoInboxStampsCollection import MongoInboxStampsCollection
+from MongoFriendsCollection import MongoFriendsCollection
+from MongoBlockCollection import MongoBlockCollection
 
 ####### TODO
 # How to do this? Edge case is where two distinct users have sent one recipient the same
@@ -30,6 +32,22 @@ class MongoDirectedStampsCollection(AMongoCollection):
         AMongoCollection.__init__(self, collection='directedstamps')
     
     ### PUBLIC
+    
+    @lazyProperty
+    def user_collection(self):
+        return MongoUserCollection()
+    
+    @lazyProperty
+    def inbox_stamps_collection(self):
+        return MongoInboxStampsCollection()
+    
+    @lazyProperty
+    def friends_collection(self):
+        return MongoFriendsCollection()
+    
+    @lazyProperty
+    def block_collection(self):
+        return MongoBlockCollection()
     
     def addDirectedStamp(self, userId, stampId, recipientScreenNames, message=None):
         """
@@ -53,17 +71,11 @@ class MongoDirectedStampsCollection(AMongoCollection):
         if not isinstance(message, basestring):
             raise KeyError("Input not valid")
             
-        # Set up other database connections
-        _userDB = MongoUser()
-        _inboxStampsDB = MongoInboxStamps()
-        _friendsDB = MongoFriends()
-        _blockDB = MongoBlock()
-        
         # Grab display name for sender
-        user = _userDB.getUser(userId)
+        user = self.user_collection.getUser(userId)
         
         # Grab user id and display name for all recipients
-        recipients = _userDB.lookupUsers(None, recipientScreenNames)
+        recipients = self.user_collection.lookupUsers(None, recipientScreenNames)
         
         # Build directed comment data
         data = {}
@@ -90,7 +102,7 @@ class MongoDirectedStampsCollection(AMongoCollection):
                 
             # Check to see if the sender is blocked by the recipient.
             # If so, no further action should be taken in this loop.
-            if _blockDB.checkBlock(recipient.user_id, user.user_id):
+            if self.block_collection.checkBlock(recipient.user_id, user.user_id):
                 continue
                 
             # Add to recipient's activity
@@ -98,9 +110,9 @@ class MongoDirectedStampsCollection(AMongoCollection):
             
             # Check if recipient is following user; if so, and if stamp is not
             # already in recipient's inbox, add to recipient's inbox
-            if _friendsDB.checkFriend(recipient.user_id, user.user_id):
-                if not _inboxStampsDB.checkInboxStamp(recipient.user_id, stampId):
-                    _inboxStampsDB.addInboxStamp(recipient.user_id, stampId)
+            if self.friends_collection.checkFriend(recipient.user_id, user.user_id):
+                if not self.inbox_stamps_collection.checkInboxStamp(recipient.user_id, stampId):
+                    self.inbox_stamps_collection.addInboxStamp(recipient.user_id, stampId)
         
         return True
             

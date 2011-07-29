@@ -1,7 +1,7 @@
 
 import Globals
 from crawler import EntitySinks
-from db.mongodb.MongoEntity import MongoEntity
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
 
-EntitySinks.registerSink("mongodb", MongoEntity)
+EntitySinks.registerSink("mongodb", MongoEntityCollection)
 

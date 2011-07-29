@@ -7,12 +7,13 @@ __license__ = "TODO"
 
 import Globals
 
+from datetime import datetime
 from utils import lazyProperty
 
 from AMongoCollection import AMongoCollection
-from MongoUserFavorites import MongoUserFavorites
-from MongoActivity import MongoActivity
-from MongoUser import MongoUser
+from MongoUserFavoritesCollection import MongoUserFavoritesCollection
+from MongoActivityCollection import MongoActivityCollection
+from MongoUserCollection import MongoUserCollection
 
 from api.AFavoriteDB import AFavoriteDB
 from api.Favorite import Favorite
@@ -45,14 +46,14 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     }
     
     def __init__(self, setup=False):
-        AMongoCollection.__init__(self, collection'favorites')
+        AMongoCollection.__init__(self, collection='favorites')
         AFavoriteDB.__init__(self)
     
     ### PUBLIC
     
     @lazyProperty
     def user_favorites_collection(self):
-        return MongoUserFavorites()
+        return MongoUserFavoritesCollection()
     
     @lazyProperty
     def activity_collection(self):
@@ -60,7 +61,7 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     
     @lazyProperty
     def user_collection(self):
-        return MongoUser()
+        return MongoUserCollection()
     
     def addFavorite(self, favorite):
         # Add favorite
@@ -84,9 +85,8 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
         return favorite
         
     def removeFavorite(self, favoriteId):
-        if self._removeDocument(favoriteId):
-            return True
-        
+        return self._removeDocument(favoriteId)
+    
     def completeFavorite(self, favoriteId, complete=True):
         if not isinstance(complete, bool):
             raise TypeError("Not a bool!")

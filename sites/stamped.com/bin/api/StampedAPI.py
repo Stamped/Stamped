@@ -6,10 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from utils import abstract
 from datetime import datetime
-
 from errors import *
+
 from AStampedAPI import AStampedAPI
 
 from AAccountDB import AAccountDB
@@ -29,7 +28,6 @@ from Stamp import Stamp
 from Comment import Comment
 from Favorite import Favorite
 from Friendship import Friendship
-from Collection import Collection
 from Activity import Activity
 
 # TODO: input validation and output formatting
