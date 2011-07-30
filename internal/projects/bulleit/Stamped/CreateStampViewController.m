@@ -1,37 +1,80 @@
 //
-//  CreateStampViewController.m
+//  CreateStampDetailViewController.m
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/23/11.
+//  Created by Andrew Bonventre on 7/25/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "CreateStampViewController.h"
+#import "CreateStampDetailViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
-#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
-#import "CreateStampDetailViewController.h"
-#import "CreateStampTableViewCell.h"
 #import "Entity.h"
+#import "STNavigationBar.h"
+#import "Stamp.h"
+#import "UserImageView.h"
+#import "Util.h"
 
-@interface CreateStampViewController ()
-- (void)loadEntitiesFromDataStore;
-- (void)searchDataStoreFor:(NSString*)searchText;
-- (void)textFieldDidChange:(id)sender;
+static const CGFloat kMinContainerHeight = 204.0;
 
-@property (nonatomic, copy) NSArray* entitiesArray;
-@property (nonatomic, copy) NSArray* filteredEntitiesArray;
+@interface CreateStampDetailViewController ()
+- (void)editorDoneButtonPressed:(id)sender;
+- (void)dismissSelf;
+
+@property (nonatomic, retain) UIButton* doneButton;
 @end
 
-@implementation CreateStampViewController
+@implementation CreateStampDetailViewController
 
-@synthesize entitiesArray = entitiesArray_;
-@synthesize filteredEntitiesArray = filteredEntitiesArray_;
-@synthesize searchField = searchField_;
+@synthesize scrollView = scrollView_;
+@synthesize titleLabel = titleLabel_;
+@synthesize detailLabel = detailLabel_;
+@synthesize reasoningLabel = reasoningLabel_;
+@synthesize categoryImageView = categoryImageView_;
+@synthesize navigationBar = navigationBar_;
+@synthesize userImageView = userImageView_;
+@synthesize ribbonedContainerView = ribbonedContainerView_;
+@synthesize reasoningTextView = reasoningTextView_;
+@synthesize doneButton = doneButton_;
+@synthesize bottomToolbar = bottomToolbar_;
+@synthesize shelfBackground = shelfBackground_;
+@synthesize navBarContainer = navBarContainer_;
 @synthesize cancelButton = cancelButton_;
+@synthesize spinner = spinner_;
+@synthesize checkmarkButton = checkmarkButton_;
+@synthesize navBarBackButton = navBarBackButton_;
 
+- (id)initWithEntityObject:(Entity*)entityObject {
+  self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
+  if (self) {
+    entityObject_ = [entityObject retain];
+  }
+  return self;
+}
+
+- (void)dealloc {
+  [entityObject_ release];
+  self.scrollView = nil;
+  self.titleLabel = nil;
+  self.detailLabel = nil;
+  self.categoryImageView = nil;
+  self.navigationBar = nil;
+  self.reasoningLabel = nil;
+  self.userImageView = nil;
+  self.reasoningTextView = nil;
+  self.ribbonedContainerView = nil;
+  self.doneButton = nil;
+  self.bottomToolbar = nil;
+  self.shelfBackground = nil;
+  self.navBarContainer = nil;
+  self.spinner = nil;
+  self.cancelButton = nil;
+  self.checkmarkButton = nil;
+  self.navBarBackButton = nil;
+  [super dealloc];
+}
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -40,165 +83,241 @@
   // Release any cached data, images, etc that aren't in use.
 }
 
-- (void)dealloc {
-  self.searchField = nil;
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
-  [super dealloc];
-}
-
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.view.backgroundColor = [UIColor colorWithWhite:0.972 alpha:1.0];
-  self.cancelButton.layer.masksToBounds = YES;
-  self.cancelButton.layer.borderColor = [UIColor colorWithWhite:0.6 alpha:0.8].CGColor;
-  self.cancelButton.layer.borderWidth = 1.0;
-  self.cancelButton.layer.cornerRadius = 5.0;
-  self.cancelButton.layer.shadowOpacity = 1.0;
+  navigationBar_.hideLogo = YES;
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  self.userImageView.image = currentUser.profileImage;
+  scrollView_.contentSize =
+      CGSizeMake(CGRectGetWidth(self.view.frame),
+                 CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationBar_.frame));
+  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
+  backgroundGradient.colors = [NSArray arrayWithObjects:
+                               (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
+                               (id)[UIColor colorWithWhite:0.93 alpha:1.0].CGColor, nil];
+  backgroundGradient.frame = self.view.bounds;
+  [self.view.layer insertSublayer:backgroundGradient atIndex:0];
+  [backgroundGradient release];
+  
+  ribbonedContainerView_.layer.shadowOpacity = 0.1;
+  ribbonedContainerView_.layer.shadowOffset = CGSizeMake(0, 1);
+  ribbonedContainerView_.layer.shadowRadius = 2;
+  ribbonedContainerView_.layer.shadowPath =
+      [UIBezierPath bezierPathWithRect:ribbonedContainerView_.bounds].CGPath;
+  
+  ribbonGradientLayer_ = [[CAGradientLayer alloc] init];
+  CGFloat r1, g1, b1, r2, g2, b2;
+  [Util splitHexString:currentUser.primaryColor toRed:&r1 green:&g1 blue:&b1];
+  
+  if (currentUser.secondaryColor) {
+    [Util splitHexString:currentUser.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+  } else {
+    r2 = r1;
+    g2 = g1;
+    b2 = b1;
+  }
+  ribbonGradientLayer_.colors =
+      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
+                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
+                                nil];
+  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+  ribbonGradientLayer_.startPoint = CGPointMake(0.0, 0.0);
+  ribbonGradientLayer_.endPoint = CGPointMake(1.0, 1.0);
+  [ribbonedContainerView_.layer insertSublayer:ribbonGradientLayer_ atIndex:0];
+  [ribbonGradientLayer_ release];
+  
+  UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+  accessoryView.backgroundColor = [UIColor colorWithWhite:0.43 alpha:1.0];
+  
+  backgroundGradient = [[CAGradientLayer alloc] init];
+  backgroundGradient.frame = CGRectMake(0, 1, 320, 43);
+  backgroundGradient.colors = [NSArray arrayWithObjects:
+      (id)[UIColor colorWithWhite:0.19 alpha:1.0].CGColor,
+      (id)[UIColor colorWithWhite:0.33 alpha:1.0].CGColor, nil];
+  [accessoryView.layer addSublayer:backgroundGradient];
+  [backgroundGradient release];
+  
+  bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
+  bottomToolbar_.layer.shadowOpacity = 0.2;
+  bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
+  bottomToolbar_.alpha = 0.5;
 
-  self.searchField.leftViewMode = UITextFieldViewModeAlways;
-  UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 32, CGRectGetHeight(self.searchField.frame))];
-  UIImageView* searchIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_icon"]];
-  searchIcon.frame = CGRectOffset(searchIcon.frame, 10, 8);
-  searchIcon.contentMode = UIViewContentModeCenter;
-  [leftView addSubview:searchIcon];
-  [searchIcon release];
-  self.searchField.leftView = leftView;
-  [leftView release];
-  self.searchField.contentMode = UIViewContentModeScaleAspectFit;
-  [self loadEntitiesFromDataStore];
-  [self.searchField addTarget:self
-                       action:@selector(textFieldDidChange:)
-             forControlEvents:UIControlEventEditingChanged];
+  self.doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  self.doneButton.frame = CGRectMake(248, 5, 71, 36);
+  UIImage* bg = [[UIImage imageNamed:@"done_button_bg"] stretchableImageWithLeftCapWidth:0 topCapHeight:0];
+  [self.doneButton setImage:bg forState:UIControlStateNormal];
+  self.doneButton.contentMode = UIViewContentModeScaleToFill;
+  self.doneButton.layer.masksToBounds = YES;
+  self.doneButton.layer.cornerRadius = 5;
+  [accessoryView addSubview:self.doneButton];
+  self.reasoningTextView.inputAccessoryView = accessoryView;
+  [accessoryView release];
+  [doneButton_ addTarget:self
+                  action:@selector(editorDoneButtonPressed:)
+        forControlEvents:UIControlEventTouchUpInside];
+  
+  titleLabel_.text = entityObject_.title;
+  titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
+  titleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+
+  CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
+                                            forWidth:CGRectGetWidth(titleLabel_.frame)
+                                       lineBreakMode:titleLabel_.lineBreakMode];
+  stampLayer_ = [[CALayer alloc] init];
+  stampLayer_.frame = CGRectMake(15 + stringSize.width - (46 / 2),
+                                11 - (46 / 2),
+                                46, 46);
+  stampLayer_.contents = (id)[AccountManager sharedManager].currentUser.stampImage.CGImage;
+  stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
+  stampLayer_.opacity = 0.0;
+  [scrollView_.layer insertSublayer:stampLayer_ above:titleLabel_.layer];
+  [stampLayer_ release];
+
+  
+  detailLabel_.text = entityObject_.subtitle;
+  detailLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  
+  reasoningLabel_.textColor = [UIColor colorWithWhite:0.75 alpha:1.0];
+  
+  categoryImageView_.image = entityObject_.categoryImage;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  self.searchField = nil;
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-  [self.searchField becomeFirstResponder];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];
+  self.scrollView = nil;
+  self.titleLabel = nil;
+  self.detailLabel = nil;
+  self.categoryImageView = nil;
+  self.navigationBar = nil;
+  self.reasoningLabel = nil;
+  self.userImageView = nil;
+  self.reasoningTextView = nil;
+  self.ribbonedContainerView = nil;
+  self.doneButton = nil;
+  self.bottomToolbar = nil;
+  self.shelfBackground = nil;
+  self.navBarContainer = nil;
+  self.spinner = nil;
+  self.cancelButton = nil;
+  self.checkmarkButton = nil;
+  self.navBarBackButton = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (IBAction)cancelButtonTapped:(id)sender {
-  if ([self respondsToSelector:@selector(presentingViewController)])
-    [self.presentingViewController dismissModalViewControllerAnimated:YES];
-  else
-    [self.parentViewController dismissModalViewControllerAnimated:YES];
-}
-
-#pragma mark - Core Data Shiz.
-
-- (void)loadEntitiesFromDataStore {
-  self.entitiesArray = nil;
-  self.entitiesArray = [Entity objectsWithFetchRequest:[Entity fetchRequest]];
-}
-
-#pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
-
-- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  // Return the number of rows in the section.
-  return [filteredEntitiesArray_ count];
-}
-
-- (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString* CellIdentifier = @"EntityCell";
-  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-  if (cell == nil) {
-    cell = [[[CreateStampTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+- (void)textViewDidChange:(UITextView*)textView {
+  reasoningLabel_.hidden = reasoningTextView_.hasText;
+  CGSize stringSize = reasoningTextView_.contentSize;
+  CGRect frame = ribbonedContainerView_.frame;
+  frame.size.height = fmaxf(kMinContainerHeight, stringSize.height + 100);
+  [UIView animateWithDuration:0.2 animations:^{
+    ribbonedContainerView_.frame = frame;
+    ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+  }];
+  CGFloat minScrollContentHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationBar_.frame);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
+      minScrollContentHeight + CGRectGetHeight(frame) - kMinContainerHeight + 40);
+  NSUInteger curPosition = reasoningTextView_.selectedRange.location;
+  if (curPosition == reasoningTextView_.text.length) {
+    [scrollView_ setContentOffset:CGPointMake(0, scrollView_.contentSize.height - minScrollContentHeight) 
+                         animated:YES];
   }
-  
-  [(CreateStampTableViewCell*)cell setEntityObject:((Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row])];
-  
-  return cell;
 }
 
-#pragma mark - UITextFieldDelegate Methods.
+- (IBAction)backOrCancelButtonPressed:(id)sender {
+  [self.navigationController popViewControllerAnimated:YES];
+}
 
-- (BOOL)textFieldShouldReturn:(UITextField*)textField {
-  if (textField != searchField_)
-    return YES;
-  
+- (IBAction)saveStampButtonPressed:(id)sender {
+  [spinner_ startAnimating];
+  cancelButton_.enabled = NO;
+  checkmarkButton_.enabled = NO;
+  navBarBackButton_.enabled = NO;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* entityMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Entity"];
-  NSString* searchPath = [NSString stringWithFormat:@"/entities/search.json?authenticated_user_id=%@&q=%@",
-      [AccountManager sharedManager].currentUser.userID, searchField_.text];
-  [objectManager loadObjectsAtResourcePath:searchPath
-                             objectMapping:entityMapping
-                                  delegate:self];
-  [searchField_ resignFirstResponder];
-  return NO;
+  RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/stamps/create.json" delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = stampMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+      reasoningTextView_.text, @"blurb",
+      [AccountManager sharedManager].currentUser.userID, @"authenticated_user_id",
+      entityObject_.entityID, @"entity_id", nil];
+  [objectLoader send];
+}
+
+- (void)editorDoneButtonPressed:(id)sender {
+  [reasoningTextView_ resignFirstResponder];
+  [scrollView_ setContentOffset:CGPointZero animated:YES];
+}
+
+- (void)dismissSelf {
+  UIViewController* vc = nil;
+  if ([self.navigationController respondsToSelector:@selector(presentingViewController)])
+    vc = self.navigationController.presentingViewController;
+  else
+    vc = self.navigationController.parentViewController;
+
+  [vc dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-	[self loadEntitiesFromDataStore];
-  [self searchDataStoreFor:self.searchField.text];
+	if (![objectLoader.resourcePath isEqualToString:@"/stamps/create.json"])
+    return;
+
+  Stamp* stamp = [objects objectAtIndex:0];
+  [entityObject_ addStampsObject:stamp];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
+                                                      object:stamp];
+  
+  [spinner_ stopAnimating];
+  CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));
+  CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
+  [UIView animateWithDuration:0.2
+                   animations:^{ 
+                     shelfBackground_.transform = topTransform;
+                     navBarContainer_.transform = topTransform;
+                     bottomToolbar_.transform = bottomTransform;
+                     checkmarkButton_.transform = bottomTransform;
+                     cancelButton_.transform = bottomTransform;
+                   }
+                   completion:^(BOOL finished) {
+                     [UIView animateWithDuration:0.3
+                                           delay:0
+                                         options:UIViewAnimationCurveEaseIn
+                                      animations:^{
+                                        stampLayer_.transform = CATransform3DIdentity;
+                                        stampLayer_.opacity = 1.0;
+                                      }
+                                      completion:^(BOOL finished) {
+                                        [self performSelector:@selector(dismissSelf)
+                                                   withObject:nil
+                                                   afterDelay:0.75];
+                                      }];
+                   }];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                   message:[error localizedDescription]
-                                                  delegate:nil
+  [spinner_ stopAnimating];
+  cancelButton_.enabled = YES;
+  checkmarkButton_.enabled = YES;
+  navBarBackButton_.enabled = YES;
+  [UIView animateWithDuration:0.2
+                   animations:^{
+                     shelfBackground_.transform = CGAffineTransformIdentity;
+                     navBarContainer_.transform = CGAffineTransformIdentity;
+                   }];
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                   message:[error localizedDescription] 
+                                                  delegate:nil 
                                          cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
 	[alert show];
 	NSLog(@"Hit error: %@", error);
-  [searchField_ becomeFirstResponder];
-}
-
-#pragma mark - UITableViewDelegate Methods.
-
-- (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
-  cell.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
-}
-
-- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Entity* entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
-  CreateStampDetailViewController* detailViewController =
-      [[CreateStampDetailViewController alloc] initWithEntityObject:entityObject];
-  [self.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
-}
-
-- (void)searchDataStoreFor:(NSString*)searchText {
-  NSPredicate* searchPredicate = [NSPredicate predicateWithFormat:@"title contains[cd] %@", searchText];
-  self.filteredEntitiesArray = nil;
-  self.filteredEntitiesArray = [self.entitiesArray filteredArrayUsingPredicate:searchPredicate];
-  [self.tableView reloadData];
-}
-
-- (void)textFieldDidChange:(id)sender {
-  if (sender == self.searchField)
-    [self searchDataStoreFor:self.searchField.text];
 }
 
 @end

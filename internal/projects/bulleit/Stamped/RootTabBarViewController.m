@@ -11,7 +11,7 @@
 #import "Stamp.h"
 #import "InboxViewController.h"
 #import "ActivityViewController.h"
-#import "CreateStampViewController.h"
+#import "SearchEntitiesViewController.h"
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
 
@@ -22,6 +22,7 @@
 
 @implementation RootTabBarViewController
 
+@synthesize searchStampsNavigationController = searchStampsNavigationController_;
 @synthesize viewControllers = viewControllers_;
 @synthesize selectedViewController = selectedViewController_;
 @synthesize tabBar = tabBar_;
@@ -32,6 +33,7 @@
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -88,6 +90,7 @@
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
@@ -122,13 +125,8 @@
 }
 
 - (IBAction)createStamp:(id)sender {
-  CreateStampViewController* createStampViewController =
-      [[CreateStampViewController alloc] initWithNibName:@"CreateStampViewController" bundle:nil];
-  UINavigationController* createStampNavController = [[UINavigationController alloc] initWithRootViewController:createStampViewController];
-  [createStampViewController release];
-  createStampNavController.navigationBarHidden = YES;
-  [self presentModalViewController:createStampNavController animated:YES];
-  [createStampNavController release];
+  [self.searchStampsNavigationController setNavigationBarHidden:YES];
+  [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {
