@@ -770,7 +770,11 @@ class StampedAPI(AStampedAPI):
                 before = before
                        
         
-        stamps = self._collectionDB.getInboxStamps(params.authenticated_user_id, since=since, before=before, limit=limit)
+        stamps = self._collectionDB.getInboxStamps(
+                    params.authenticated_user_id, 
+                    since=since, 
+                    before=before, 
+                    limit=limit)
         result = []
         
         for stamp in stamps:
@@ -797,7 +801,11 @@ class StampedAPI(AStampedAPI):
             except:
                 before = before
                 
-        stamps = self._collectionDB.getUserStamps(params.user_id, since=since, before=before, limit=limit)
+        stamps = self._collectionDB.getUserStamps(
+                    params.user_id, 
+                    since=since, 
+                    before=before, 
+                    limit=limit)
         result = []
         
         for stamp in stamps:
