@@ -1,22 +1,22 @@
 //
-//  CreateStampViewController.m
+//  SearchEntitiesViewController.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/23/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "CreateStampViewController.h"
+#import "SearchEntitiesViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
-#import "CreateStampDetailViewController.h"
+#import "CreateStampViewController.h"
 #import "CreateStampTableViewCell.h"
 #import "Entity.h"
 
-@interface CreateStampViewController ()
+@interface SearchEntitiesViewController ()
 - (void)loadEntitiesFromDataStore;
 - (void)searchDataStoreFor:(NSString*)searchText;
 - (void)textFieldDidChange:(id)sender;
@@ -25,7 +25,7 @@
 @property (nonatomic, copy) NSArray* filteredEntitiesArray;
 @end
 
-@implementation CreateStampViewController
+@implementation SearchEntitiesViewController
 
 @synthesize entitiesArray = entitiesArray_;
 @synthesize filteredEntitiesArray = filteredEntitiesArray_;
@@ -83,6 +83,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self.navigationController setNavigationBarHidden:YES];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -183,9 +184,10 @@
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   Entity* entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
-  CreateStampDetailViewController* detailViewController =
-      [[CreateStampDetailViewController alloc] initWithEntityObject:entityObject];
+  CreateStampViewController* detailViewController =
+      [[CreateStampViewController alloc] initWithEntityObject:entityObject];
   [self.navigationController pushViewController:detailViewController animated:YES];
+  [self.navigationController setNavigationBarHidden:NO animated:YES];
   [detailViewController release];
 }
 

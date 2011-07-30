@@ -1,5 +1,5 @@
 //
-//  CreateStampDetailViewController.h
+//  CreateStampViewController.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/25/11.
@@ -10,11 +10,10 @@
 #import <UIKit/UIKit.h>
 
 @class Entity;
-@class STNavigationBar;
 @class UserImageView;
 @class CAGradientLayer;
 
-@interface CreateStampDetailViewController : UIViewController<UITextViewDelegate, RKObjectLoaderDelegate> {
+@interface CreateStampViewController : UIViewController<UITextViewDelegate, RKObjectLoaderDelegate> {
  @private
   Entity* entityObject_;
   CAGradientLayer* ribbonGradientLayer_;
@@ -28,15 +27,12 @@
 @property (nonatomic, retain) IBOutlet UITextView* reasoningTextView;
 @property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
-@property (nonatomic, retain) IBOutlet STNavigationBar* navigationBar;
 @property (nonatomic, retain) IBOutlet UIView* ribbonedContainerView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
 @property (nonatomic, retain) IBOutlet UIImageView* shelfBackground;
-@property (nonatomic, retain) IBOutlet UIView* navBarContainer;
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* spinner;
 @property (nonatomic, retain) IBOutlet UIButton* checkmarkButton;
-@property (nonatomic, retain) IBOutlet UIButton* navBarBackButton;
 
 
 - (IBAction)backOrCancelButtonPressed:(id)sender;

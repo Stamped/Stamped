@@ -1,5 +1,5 @@
 //
-//  CreateStampViewController.h
+//  SearchEntitiesViewController.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/23/11.
@@ -9,7 +9,8 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-@interface CreateStampViewController : UITableViewController <RKObjectLoaderDelegate, UITextFieldDelegate>
+@interface SearchEntitiesViewController : UITableViewController <RKObjectLoaderDelegate,
+                                                               UITextFieldDelegate>
 
 @property (nonatomic, retain) IBOutlet UITextField* searchField;
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;

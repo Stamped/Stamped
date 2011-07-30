@@ -1,12 +1,12 @@
 //
-//  CreateStampDetailViewController.m
+//  CreateStampViewController.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/25/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "CreateStampDetailViewController.h"
+#import "CreateStampViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
 
@@ -19,32 +19,29 @@
 
 static const CGFloat kMinContainerHeight = 204.0;
 
-@interface CreateStampDetailViewController ()
+@interface CreateStampViewController ()
 - (void)editorDoneButtonPressed:(id)sender;
 - (void)dismissSelf;
 
 @property (nonatomic, retain) UIButton* doneButton;
 @end
 
-@implementation CreateStampDetailViewController
+@implementation CreateStampViewController
 
 @synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
 @synthesize detailLabel = detailLabel_;
 @synthesize reasoningLabel = reasoningLabel_;
 @synthesize categoryImageView = categoryImageView_;
-@synthesize navigationBar = navigationBar_;
 @synthesize userImageView = userImageView_;
 @synthesize ribbonedContainerView = ribbonedContainerView_;
 @synthesize reasoningTextView = reasoningTextView_;
 @synthesize doneButton = doneButton_;
 @synthesize bottomToolbar = bottomToolbar_;
 @synthesize shelfBackground = shelfBackground_;
-@synthesize navBarContainer = navBarContainer_;
 @synthesize cancelButton = cancelButton_;
 @synthesize spinner = spinner_;
 @synthesize checkmarkButton = checkmarkButton_;
-@synthesize navBarBackButton = navBarBackButton_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -60,7 +57,6 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.titleLabel = nil;
   self.detailLabel = nil;
   self.categoryImageView = nil;
-  self.navigationBar = nil;
   self.reasoningLabel = nil;
   self.userImageView = nil;
   self.reasoningTextView = nil;
@@ -68,11 +64,9 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.doneButton = nil;
   self.bottomToolbar = nil;
   self.shelfBackground = nil;
-  self.navBarContainer = nil;
   self.spinner = nil;
   self.cancelButton = nil;
   self.checkmarkButton = nil;
-  self.navBarBackButton = nil;
   [super dealloc];
 }
 
@@ -87,12 +81,9 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  navigationBar_.hideLogo = YES;
   User* currentUser = [AccountManager sharedManager].currentUser;
   self.userImageView.image = currentUser.profileImage;
-  scrollView_.contentSize =
-      CGSizeMake(CGRectGetWidth(self.view.frame),
-                 CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationBar_.frame));
+  scrollView_.contentSize = self.view.bounds.size;
   CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
   backgroundGradient.colors = [NSArray arrayWithObjects:
                                (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
@@ -190,7 +181,6 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.titleLabel = nil;
   self.detailLabel = nil;
   self.categoryImageView = nil;
-  self.navigationBar = nil;
   self.reasoningLabel = nil;
   self.userImageView = nil;
   self.reasoningTextView = nil;
@@ -198,11 +188,9 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.doneButton = nil;
   self.bottomToolbar = nil;
   self.shelfBackground = nil;
-  self.navBarContainer = nil;
   self.spinner = nil;
   self.cancelButton = nil;
   self.checkmarkButton = nil;
-  self.navBarBackButton = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -217,14 +205,13 @@ static const CGFloat kMinContainerHeight = 204.0;
   [UIView animateWithDuration:0.2 animations:^{
     ribbonedContainerView_.frame = frame;
     ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+    scrollView_.contentInset = UIEdgeInsetsMake(0, 0, 40, 0);
   }];
-  CGFloat minScrollContentHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(navigationBar_.frame);
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
-      minScrollContentHeight + CGRectGetHeight(frame) - kMinContainerHeight + 40);
+      CGRectGetHeight(self.view.frame) + (CGRectGetHeight(frame) - kMinContainerHeight));
   NSUInteger curPosition = reasoningTextView_.selectedRange.location;
   if (curPosition == reasoningTextView_.text.length) {
-    [scrollView_ setContentOffset:CGPointMake(0, scrollView_.contentSize.height - minScrollContentHeight) 
-                         animated:YES];
+    [scrollView_ setContentOffset:CGPointMake(0, (CGRectGetHeight(frame) - kMinContainerHeight) + 40) animated:YES];
   }
 }
 
@@ -236,7 +223,6 @@ static const CGFloat kMinContainerHeight = 204.0;
   [spinner_ startAnimating];
   cancelButton_.enabled = NO;
   checkmarkButton_.enabled = NO;
-  navBarBackButton_.enabled = NO;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/stamps/create.json" delegate:self];
@@ -251,6 +237,9 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 - (void)editorDoneButtonPressed:(id)sender {
   [reasoningTextView_ resignFirstResponder];
+  [UIView animateWithDuration:0.2 animations:^{
+    scrollView_.contentInset = UIEdgeInsetsZero;
+  }];
   [scrollView_ setContentOffset:CGPointZero animated:YES];
 }
 
@@ -260,8 +249,11 @@ static const CGFloat kMinContainerHeight = 204.0;
     vc = self.navigationController.presentingViewController;
   else
     vc = self.navigationController.parentViewController;
-
-  [vc dismissModalViewControllerAnimated:YES];
+  if (vc && vc.modalViewController) {
+    [vc dismissModalViewControllerAnimated:YES];
+  } else {
+    [self.navigationController popToRootViewControllerAnimated:YES];
+  }
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
@@ -281,7 +273,6 @@ static const CGFloat kMinContainerHeight = 204.0;
   [UIView animateWithDuration:0.2
                    animations:^{ 
                      shelfBackground_.transform = topTransform;
-                     navBarContainer_.transform = topTransform;
                      bottomToolbar_.transform = bottomTransform;
                      checkmarkButton_.transform = bottomTransform;
                      cancelButton_.transform = bottomTransform;
@@ -306,11 +297,9 @@ static const CGFloat kMinContainerHeight = 204.0;
   [spinner_ stopAnimating];
   cancelButton_.enabled = YES;
   checkmarkButton_.enabled = YES;
-  navBarBackButton_.enabled = YES;
   [UIView animateWithDuration:0.2
                    animations:^{
                      shelfBackground_.transform = CGAffineTransformIdentity;
-                     navBarContainer_.transform = CGAffineTransformIdentity;
                    }];
   UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
                                                    message:[error localizedDescription] 
