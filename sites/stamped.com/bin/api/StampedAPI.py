@@ -998,9 +998,9 @@ class StampedAPI(AStampedAPI):
                         
                         
             # Affiliate Data
-            if 'source' in entity:
-                if 'openTable' in entity.source:
-                    result['opentable_url'] = entity.source['openTable']['reserveURL']
+            if 'sources' in entity:
+                if 'openTable' in entity.sources:
+                    result['opentable_url'] = entity.sources['openTable']['reserveURL']
                     
         
             if 'modified' in entity.timestamp:
