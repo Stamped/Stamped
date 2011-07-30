@@ -11,12 +11,14 @@
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "AccountManager.h"
 #import "CreateStampDetailViewController.h"
 #import "CreateStampTableViewCell.h"
 #import "Entity.h"
 
 @interface CreateStampViewController ()
 - (void)loadEntitiesFromDataStore;
+- (void)searchDataStoreFor:(NSString*)searchText;
 - (void)textFieldDidChange:(id)sender;
 
 @property (nonatomic, copy) NSArray* entitiesArray;
@@ -137,6 +139,42 @@
   return cell;
 }
 
+#pragma mark - UITextFieldDelegate Methods.
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  if (textField != searchField_)
+    return YES;
+  
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* entityMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Entity"];
+  NSString* searchPath = [NSString stringWithFormat:@"/entities/search.json?authenticated_user_id=%@&q=%@",
+      [AccountManager sharedManager].currentUser.userID, searchField_.text];
+  [objectManager loadObjectsAtResourcePath:searchPath
+                             objectMapping:entityMapping
+                                  delegate:self];
+  [searchField_ resignFirstResponder];
+  return NO;
+}
+
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	[self loadEntitiesFromDataStore];
+  [self searchDataStoreFor:self.searchField.text];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                   message:[error localizedDescription]
+                                                  delegate:nil
+                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
+	[alert show];
+	NSLog(@"Hit error: %@", error);
+  [searchField_ becomeFirstResponder];
+}
+
 #pragma mark - UITableViewDelegate Methods.
 
 - (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -151,14 +189,16 @@
   [detailViewController release];
 }
 
+- (void)searchDataStoreFor:(NSString*)searchText {
+  NSPredicate* searchPredicate = [NSPredicate predicateWithFormat:@"title contains[cd] %@", searchText];
+  self.filteredEntitiesArray = nil;
+  self.filteredEntitiesArray = [self.entitiesArray filteredArrayUsingPredicate:searchPredicate];
+  [self.tableView reloadData];
+}
+
 - (void)textFieldDidChange:(id)sender {
-  if (sender == self.searchField) {
-    NSPredicate* searchPredicate =
-        [NSPredicate predicateWithFormat:@"title contains[cd] %@", self.searchField.text];
-    self.filteredEntitiesArray = nil;
-    self.filteredEntitiesArray = [self.entitiesArray filteredArrayUsingPredicate:searchPredicate];
-    [self.tableView reloadData];
-  }
+  if (sender == self.searchField)
+    [self searchDataStoreFor:self.searchField.text];
 }
 
 @end
