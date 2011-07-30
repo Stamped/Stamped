@@ -970,8 +970,6 @@ class StampedAPI(AStampedAPI):
                     entity['coordinates']['lat'],
                     entity['coordinates']['lng']
                 )
-            else:
-                result['coordinates'] = None
         
         else:
             if 'desc' in entity:
@@ -984,15 +982,26 @@ class StampedAPI(AStampedAPI):
             else:
                 result['image'] = None
             
-            result['details'] = {}
+            # "Place" Details
             if 'details' in entity and 'place' in entity.details:
-                result['details']['place'] = {}
                 if 'address' in entity.details['place']:
-                    result['details']['place']['address'] = entity.details['place']['address']
+                    result['address'] = entity.details['place']['address']
                 if 'coordinates' in entity.details['place']:
-                    result['details']['place']['coordinates'] = "%s,%s" % (
+                    result['coordinates'] = "%s,%s" % (
                         entity.details['place']['coordinates']['lat'],
                         entity.details['place']['coordinates']['lng'])
+            
+            # "Contact" Details
+            if 'contact' in entity and 'contact' in entity.details:
+                if 'phone' in entity.details['contact']:
+                    result['phone'] = entity.details['contact']['phone']
+                        
+                        
+            # Affiliate Data
+            if 'source' in entity:
+                if 'openTable' in entity.source:
+                    result['opentable_url'] = entity.source['openTable']['reserveURL']
+                    
         
             if 'modified' in entity.timestamp:
                 result['last_modified'] = str(entity.timestamp['modified'])
