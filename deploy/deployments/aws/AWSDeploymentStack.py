@@ -175,7 +175,7 @@ class AWSDeploymentStack(ADeploymentStack):
             
             for i in xrange(crawler['numInstances']):
                 config = {
-                    'crawler' : 'crawler%d' % index, 
+                    'name'  : 'crawler%d' % index, 
                     'roles' : [ 'crawler' ], 
                     #'instance_type' : 'm1.small', 
                 }
@@ -185,7 +185,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 if not 'instances' in crawler:
                     crawler['instances'] = []
                 
-                crawler.instances.append(instance)
+                crawler['instances'].append(instance)
                 self._pool.spawn(instance.create)
         
         self._pool.join()
@@ -198,14 +198,14 @@ class AWSDeploymentStack(ADeploymentStack):
         host = db_instances[0].private_ip_address
         
         for crawler in crawlers:
-            numCrawlers = crawler['numInstances'] * crawl['numProcesses']
+            numCrawlers = crawler['numInstances'] * crawler['numProcesses']
             index = 0
             
             for instance in crawler['instances']:
                 with settings(host_string=instance.public_dns_name):
                     with cd("/stamped"):
-                        for i in xrange('numProcesses'):
-                            if crawler['mapSourceToProcess']:
+                        for i in xrange(crawler['numProcesses']):
+                            if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
                                 sources = [ crawler['sources'][i], ]
                                 ratio = "%s/%s" % (1, 1)
                             else:
@@ -218,7 +218,8 @@ class AWSDeploymentStack(ADeploymentStack):
                             # DEBUG
                             cmd = '. bin/activate && python %s --db %s -t -l 20 %s &' % (crawler_path, host, sources)
                             
-                            run(cmd, pty=False)
+                            utils.log(cmd)
+                            #run(cmd, pty=False)
     
     def setup_crawler_data(self, *args):
         config = {

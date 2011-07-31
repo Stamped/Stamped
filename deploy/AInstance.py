@@ -106,6 +106,9 @@ class AInstance(object):
         raise NotImplementedError
     
     def _init_config(self):
+        assert 'name'  in self.config
+        assert 'roles' in self.config
+        
         self.config['stack'] = self.stack.name
     
     def __str__(self):

@@ -240,15 +240,17 @@ class AWSInstance(AInstance):
         ami = _getAMI(instance_type, INSTANCE_REGION, INSTANCE_OS, INSTANCE_EBS)
         return self.conn.get_image(ami)
     
-    def __getattr__(self, name):
-        if name in self.__dict__:
-            return self.__dict__[name]
-        else:
-            return self[name]
+    #def __getattr__(self, name):
+    #    if name in self.__dict__:
+    #        return self.__dict__[name]
+    #    else:
+    #        return self[name]
     
-    def __getitem__(self, name):
-        if self._instance:
-            return self._instance.__dict__[name]
-        else:
-            raise NotInitializedError()
+    #def __getitem__(self, name):
+    #    if name in self.__dict__:
+    #        return self.__dict__[name]
+    #    elif self._instance:
+    #        return self._instance.__dict__[name]
+    #    else:
+    #        raise NotInitializedError()
 
