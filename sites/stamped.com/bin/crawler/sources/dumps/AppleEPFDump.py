@@ -47,7 +47,8 @@ class AppleEPFDistro(Singleton):
                 ret = self.conn.attach_volume(self._volume, self._instance_id, volume_dir)
                 assert ret
             except EC2ResponseError:
-                raise Fail("unable to mount apple data volume '%s' on instance '%s'" % (self._volume, self._instance_id))
+                utils.log("unable to mount apple data volume '%s' on instance '%s'" % (self._volume, self._instance_id))
+                raise
             
             while volume.status != u'in-use':
                 time.sleep(2)
