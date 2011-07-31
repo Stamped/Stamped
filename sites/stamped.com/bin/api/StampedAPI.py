@@ -992,11 +992,22 @@ class StampedAPI(AStampedAPI):
                     result['coordinates'] = "%s,%s" % (
                         entity.details['place']['coordinates']['lat'],
                         entity.details['place']['coordinates']['lng'])
+                if 'neighborhood' in entity.details['place']:
+                    result['neighborhood'] = entity.details['place']['neighborhood']
             
             # "Contact" Details
-            if 'contact' in entity and 'contact' in entity.details:
+            if 'details' in entity and 'contact' in entity.details:
                 if 'phone' in entity.details['contact']:
                     result['phone'] = entity.details['contact']['phone']
+                if 'site' in entity.details['contact']:
+                    result['site'] = entity.details['contact']['site']
+                if 'hoursOfOperation' in entity.details['contact']:
+                    result['hours'] = entity.details['contact']['hoursOfOperation']
+            
+            # "Restaurant" Details
+            if 'details' in entity and 'restaurant' in entity.details:
+                if 'cuisine' in entity.details['restaurant']:
+                    result['cuisine'] = entity.details['restaurant']['cuisine']
                         
                         
             # Affiliate Data
