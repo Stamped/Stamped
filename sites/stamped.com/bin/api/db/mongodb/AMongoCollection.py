@@ -14,14 +14,12 @@ from datetime import datetime
 from pymongo.errors import AutoReconnect
 
 class AMongoCollection():
-    DB   = 'stamped_test'
-    DESC = 'MongoCollection:%s' % (DB)
+    DB = 'stamped_test'
     
     def __init__(self, collection):
         self._initConfig()
         
         self._user = self._getenv_user()
-        self._desc = self.DESC
         self._host = self._getenv_host()
         self._port = self._getenv_port()
         self._db = self.DB
@@ -87,9 +85,9 @@ class AMongoCollection():
     def _connect(self):
         while True:
             try:
+                utils.log("%s) connecting to %s:%d" % (self, self._host, self._port))
                 return pymongo.Connection(self._host, self._port, slave_okay=True)
             except AutoReconnect:
-                utils.log("%s) %s:%d" % (self, self._host, self._port))
                 time.sleep(2)
     
     def _getDatabase(self):
