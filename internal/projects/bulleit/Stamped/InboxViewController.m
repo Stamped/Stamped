@@ -32,11 +32,14 @@ typedef enum {
 } StampsListFilterType;
 
 @interface InboxViewController ()
-- (void)loadTableData;
 - (void)loadStampsFromDataStore;
+- (void)loadStampsFromNetwork;
 - (void)stampWasCreated:(NSNotification*)notification;
+- (void)rotateSpinner;
+- (void)setIsLoading:(BOOL)loading;
 
 @property (nonatomic, copy) NSArray* filterButtons;
+@property (nonatomic, copy) NSArray* filteredStampsArray;
 @property (nonatomic, copy) NSArray* stampsArray;
 @property (nonatomic, assign) UIView* filterView;
 @property (nonatomic, retain) UIButton* placesFilterButton;
@@ -49,6 +52,7 @@ typedef enum {
 
 @synthesize filterButtons = filterButtons_;
 @synthesize filterView = filterView_;
+@synthesize filteredStampsArray = filteredStampsArray_;
 @synthesize stampsArray = stampsArray_;
 @synthesize placesFilterButton = placesFilterButton_;
 @synthesize booksFilterButton = booksFilterButton_;
@@ -67,6 +71,7 @@ typedef enum {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterButtons = nil;
   self.filterView = nil;
+  self.filteredStampsArray = nil;
   self.stampsArray = nil;
   self.placesFilterButton = nil;
   self.booksFilterButton = nil;
@@ -97,16 +102,8 @@ typedef enum {
                                 (id)musicFilterButton_, nil];
   
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
-  // Setup filter view's gradient.
-  CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
-  gradientLayer.colors = [NSArray arrayWithObjects:
-                          (id)[UIColor colorWithWhite:0.95 alpha:1.0].CGColor,
-                          (id)[UIColor colorWithWhite:0.889 alpha:1.0].CGColor, nil];
-  gradientLayer.frame = self.filterView.frame;
-  // Gotta make sure the gradient is under the buttons.
-  [self.filterView.layer insertSublayer:gradientLayer atIndex:0];
-  [gradientLayer release];
-  [self loadTableData];
+  [self loadStampsFromDataStore];
+  [self loadStampsFromNetwork];
 }
 
 - (void)viewDidUnload {
@@ -115,6 +112,7 @@ typedef enum {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterView = nil;
   self.filterButtons = nil;
+  self.filteredStampsArray = nil;
   self.stampsArray = nil;
   self.placesFilterButton = nil;
   self.booksFilterButton = nil;
@@ -132,8 +130,16 @@ typedef enum {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)loadTableData {
-  [self loadStampsFromDataStore];
+- (void)loadStampsFromDataStore {
+  self.stampsArray = nil;
+	NSFetchRequest* request = [Stamp fetchRequest];
+	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+	self.stampsArray = [Stamp objectsWithFetchRequest:request];
+  [self filterButtonPushed:nil];
+}
+
+- (void)loadStampsFromNetwork {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
   NSString* userID = [AccountManager sharedManager].currentUser.userID;
@@ -141,16 +147,6 @@ typedef enum {
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:stampMapping
                                   delegate:self];
-
-}
-
-- (void)loadStampsFromDataStore {
-  self.stampsArray = nil;
-	NSFetchRequest* request = [Stamp fetchRequest];
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-	self.stampsArray = [Stamp objectsWithFetchRequest:request];
-  [self.tableView reloadData];
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {
@@ -161,11 +157,93 @@ typedef enum {
 #pragma mark - Filter stuff
 
 - (IBAction)filterButtonPushed:(id)sender {
+  filteredStampsArray_ = nil;
+
   UIButton* selectedButton = (UIButton*)sender;
   for (UIButton* button in self.filterButtons)
     button.selected = (button == selectedButton && !button.selected);
 
-  //[self loadTableData];
+  if (selectedButton && !selectedButton.selected) {
+    self.filteredStampsArray = stampsArray_;
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0]
+                  withRowAnimation:UITableViewRowAnimationMiddle];
+    return;
+  } else if (!selectedButton) {
+    // Initial load from datastore.
+    self.filteredStampsArray = stampsArray_;
+    [self.tableView reloadData];
+  }
+
+  NSString* filterString = nil;
+  if (selectedButton == placesFilterButton_) {
+    filterString = @"Place";
+  } else if (selectedButton == booksFilterButton_) {
+    filterString = @"Book";
+  } else if (selectedButton == filmsFilterButton_) {
+    filterString = @"Film";
+  } else if (selectedButton == musicFilterButton_) {
+    filterString = @"Music";
+  }
+  if (filterString) {
+    NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"entityObject.category == %@", filterString];
+    self.filteredStampsArray = [stampsArray_ filteredArrayUsingPredicate:filterPredicate];
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0]
+                  withRowAnimation:UITableViewRowAnimationMiddle];
+  }
+}
+
+- (void)setIsLoading:(BOOL)loading {
+  if (isLoading_ == loading)
+    return;
+
+  isLoading_ = loading;
+  shouldReload_ = NO;
+
+  if (!loading) {
+    [reloadLabel_.layer removeAllAnimations];
+    reloadLabel_.text = @"Pull my finger. \ue231";
+    reloadLabel_.layer.transform = CATransform3DIdentity;
+    [UIView animateWithDuration:0.2
+                          delay:0 
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                       self.tableView.contentInset = UIEdgeInsetsZero;
+                     }
+                     completion:nil];
+    return;
+  }
+  
+  [UIView animateWithDuration:0.2
+                        delay:0 
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     self.tableView.contentInset = UIEdgeInsetsMake(70, 0, 0, 0);
+                   }
+                   completion:nil];
+
+  [self rotateSpinner];
+}
+
+- (void)rotateSpinner {
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanFalse forKey:kCATransactionDisableActions];
+  [CATransaction setValue:[NSNumber numberWithFloat:2.0] forKey:kCATransactionAnimationDuration];
+  
+  CABasicAnimation* animation;
+  animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+  animation.fromValue = [NSNumber numberWithFloat:0.0];
+  animation.toValue = [NSNumber numberWithFloat:M_PI * 2];
+  animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+  animation.delegate = self;
+  [reloadLabel_.layer addAnimation:animation forKey:@"rotationAnimation"];
+  [CATransaction commit];
+}
+
+#pragma mark - CAAnimationDelegate methods.
+
+- (void)animationDidStop:(CAAnimation*)anim finished:(BOOL)flag {
+  if (isLoading_)
+    [self rotateSpinner];
 }
 
 #pragma mark - Table view data source
@@ -176,7 +254,7 @@ typedef enum {
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   // Return the number of rows in the section.
-  return [stampsArray_ count];
+  return [filteredStampsArray_ count];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -186,7 +264,7 @@ typedef enum {
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
+  cell.stamp = (Stamp*)[filteredStampsArray_ objectAtIndex:indexPath.row];
   
   return cell;
 }
@@ -197,6 +275,7 @@ typedef enum {
 	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 	[self loadStampsFromDataStore];
+  [self setIsLoading:NO];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -206,6 +285,7 @@ typedef enum {
                                          cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
 	[alert show];
 	NSLog(@"Hit error: %@", error);
+  [self setIsLoading:NO];
 }
 
 #pragma mark - Table view delegate
@@ -216,7 +296,7 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   StampDetailViewController* detailViewController =
-      [[StampDetailViewController alloc] initWithStamp:[stampsArray_ objectAtIndex:indexPath.row]];
+      [[StampDetailViewController alloc] initWithStamp:[filteredStampsArray_ objectAtIndex:indexPath.row]];
 
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -228,6 +308,18 @@ typedef enum {
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   userDidScroll_ = YES;
+  if (isLoading_)
+    return;
+
+  shouldReload_ = scrollView.contentOffset.y < -65.0;
+  reloadLabel_.text = shouldReload_ ? @"\ue05a" : @"Pull my finger. \ue231";
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
+  if (shouldReload_) {
+    [self setIsLoading:YES];
+    [self loadStampsFromNetwork];
+  }
 }
 
 @end

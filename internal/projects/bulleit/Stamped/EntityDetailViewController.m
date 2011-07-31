@@ -27,10 +27,10 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize mainActionButton = mainActionButton_;
 @synthesize mainActionLabel = mainActionLabel_;
 
-- (id)initWithStamp:(Stamp*)stamp {
+- (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
-    stamp_ = [stamp retain];
+    entityObject_ = [entity retain];
   }
   return self;
 }
@@ -41,7 +41,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainActionLabel = nil;
   self.mainActionButton = nil;
   self.scrollView = nil;
-  [stamp_ release];
+  [entityObject_ release];
   [super dealloc];
 }
 
@@ -64,7 +64,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   backgroundGradient.frame = self.view.bounds;
   [self.view.layer insertSublayer:backgroundGradient atIndex:0];
   [backgroundGradient release];
-  titleLabel_.text = stamp_.entityObject.title;
+  titleLabel_.text = entityObject_.title;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   descriptionLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];

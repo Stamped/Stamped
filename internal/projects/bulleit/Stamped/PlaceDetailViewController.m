@@ -11,13 +11,33 @@
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
-@interface PlaceAnnotation : NSObject<MKAnnotation>
+@interface PlaceAnnotation : NSObject<MKAnnotation> {
+ @private
+  CLLocationDegrees latitude_;
+  CLLocationDegrees longitude_;
+}
+
+- (id)initWithLatitude:(CLLocationDegrees)latitude
+             longitude:(CLLocationDegrees)longitude;
+
 @end
 
 @implementation PlaceAnnotation
-- (CLLocationCoordinate2D)coordinate {
-  return CLLocationCoordinate2DMake(40.741964, -74.004793); 
+
+- (id)initWithLatitude:(CLLocationDegrees)latitude
+             longitude:(CLLocationDegrees)longitude {
+  self = [super init];
+  if (self) {
+    latitude_ = latitude;
+    longitude_ = longitude;
+  }
+  return self;
 }
+
+- (CLLocationCoordinate2D)coordinate {
+  return CLLocationCoordinate2DMake(latitude_, longitude_); 
+}
+
 @end
 
 @interface PlaceDetailViewController ()
@@ -26,15 +46,22 @@
 
 @implementation PlaceDetailViewController
 
+@synthesize mainActionsView = mainActionsView_;
+@synthesize mainContentView = mainContentView_;
 @synthesize callActionButton = callActionButton_;
 @synthesize callActionLabel = callActionLabel_;
 @synthesize mapView = mapView_;
+@synthesize hidesMainActions = hidesMainActions_;  // Scalar.
 
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width, 571);
+  hidesMainActions_ = YES;
+  if (hidesMainActions_) {
+    mainContentView_.frame = CGRectOffset(mainContentView_.frame, 0, -CGRectGetHeight(mainActionsView_.frame));
+    self.mainActionsView.hidden = YES;
+  }
   callActionButton_.layer.masksToBounds = YES;
   callActionButton_.layer.cornerRadius = 2.0;
   callActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
@@ -49,7 +76,8 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  PlaceAnnotation* annotation = [[PlaceAnnotation alloc] init];
+  PlaceAnnotation* annotation = [[PlaceAnnotation alloc] initWithLatitude:40.741964
+                                                                longitude:-74.004793];
   [self.mapView addAnnotation:annotation];
   [annotation release];
 }
@@ -68,6 +96,8 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  self.mainContentView = nil;
+  self.mainActionsView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
@@ -75,6 +105,8 @@
 }
 
 - (void)dealloc {
+  self.mainContentView = nil;
+  self.mainActionsView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
@@ -95,17 +127,17 @@
 
 - (void)confirmCall {
   UIAlertView* alert = [[UIAlertView alloc] init];
-	[alert setTitle:@"(212) 989 6699"];
+	[alert setTitle:@"(212) 741 5279"];
 	[alert setDelegate:self];
-	[alert addButtonWithTitle:@"Call"];
 	[alert addButtonWithTitle:@"Cancel"];
+	[alert addButtonWithTitle:@"Call"];
 	[alert show];
 	[alert release];
 }
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if (buttonIndex == 0)
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"tel://212-989-6699"]];
+	if (buttonIndex == 1)
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"tel://212-741-5279"]];
 }
 
 @end

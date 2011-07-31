@@ -13,6 +13,7 @@
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
+#import "CreateStampViewController.h"
 #import "EntityDetailViewController.h"
 #import "Comment.h"
 #import "FilmDetailViewController.h"
@@ -23,7 +24,6 @@
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
-#import "StampedAppDelegate.h"
 #import "StampDetailCommentView.h"
 #import "UserImageView.h"
 
@@ -44,7 +44,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
 @implementation StampDetailViewController
 
-@synthesize topHeaderCell = topHeaderCell_;
+@synthesize headerView = headerView_;
 @synthesize mainCommentContainer = mainCommentContainer_;
 @synthesize scrollView = scrollView_;
 @synthesize addCommentField = addCommentField_;
@@ -67,7 +67,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)dealloc {
   [stamp_ release];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
-  self.topHeaderCell = nil;
+  self.headerView = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -124,7 +124,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
-  self.topHeaderCell = nil;
+  self.headerView = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -142,44 +142,44 @@ static const CGFloat kKeyboardHeight = 216.0;
                                                      forWidth:280
                                                 lineBreakMode:UILineBreakModeTailTruncation];
   
-  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 11, stringSize.width, stringSize.height)];
+  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 15, stringSize.width, stringSize.height)];
   nameLabel.font = [UIFont fontWithName:fontString size:fontSize];
   nameLabel.text = stamp_.entityObject.title;
   nameLabel.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   nameLabel.backgroundColor = [UIColor clearColor];
-  [topHeaderCell_.contentView addSubview:nameLabel];
+  [headerView_ addSubview:nameLabel];
   [nameLabel release];
 
   // Badge stamp.
   CALayer* stampLayer = [[CALayer alloc] init];
   stampLayer.frame = CGRectMake(15 + stringSize.width - (46 / 2),
-                                11 - (46 / 2),
+                                17 - (46 / 2),
                                 46, 46);
   stampLayer.contents = (id)stamp_.user.stampImage.CGImage;
-  [topHeaderCell_.contentView.layer addSublayer:stampLayer];
+  [headerView_.layer addSublayer:stampLayer];
   [stampLayer release];
   
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
   typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
-  typeIconLayer.frame = CGRectMake(17, 48, 12, 12);
-  [topHeaderCell_.layer addSublayer:typeIconLayer];
+  typeIconLayer.frame = CGRectMake(17, 50, 12, 12);
+  [headerView_.layer addSublayer:typeIconLayer];
   [typeIconLayer release];
   
   UILabel* detailLabel =
-      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 4, 47, 258, 15)];
+      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 4, 49, 258, 15)];
   detailLabel.opaque = NO;
   detailLabel.backgroundColor = [UIColor clearColor];
   detailLabel.text = stamp_.entityObject.subtitle;
   detailLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
   detailLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  [topHeaderCell_ addSubview:detailLabel];
+  [headerView_ addSubview:detailLabel];
   [detailLabel release];
 
   UITapGestureRecognizer* gestureRecognizer =
       [[UITapGestureRecognizer alloc] initWithTarget:self 
                                               action:@selector(handleEntityTap:)];
-  [topHeaderCell_ addGestureRecognizer:gestureRecognizer];
+  [headerView_ addGestureRecognizer:gestureRecognizer];
   [gestureRecognizer release];
 }
 
@@ -279,6 +279,13 @@ static const CGFloat kKeyboardHeight = 216.0;
   [addCommentField_ becomeFirstResponder];
 }
 
+- (IBAction)handleRestampButtonTap:(id)sender {
+  CreateStampViewController* createViewController =
+      [[CreateStampViewController alloc] initWithEntityObject:stamp_.entityObject];
+  [self.navigationController pushViewController:createViewController animated:YES];
+  [createViewController release];
+}
+
 - (void)handleTap:(UITapGestureRecognizer*)sender {
   if (sender.state != UIGestureRecognizerStateEnded)
     return;
@@ -292,26 +299,25 @@ static const CGFloat kKeyboardHeight = 216.0;
 
   [addCommentField_ resignFirstResponder];
   EntityDetailViewController* detailViewController = nil;
-  switch (stamp_.category) {
-    case StampCategoryPlace:
-      detailViewController = [[PlaceDetailViewController alloc] initWithStamp:stamp_];
+  switch (stamp_.entityObject.entityCategory) {
+    case EntityCategoryPlace:
+      detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
-    case StampCategoryBook:
-      detailViewController = [[BookDetailViewController alloc] initWithStamp:stamp_];
+    case EntityCategoryBook:
+      detailViewController = [[BookDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
-    case StampCategoryMusic:
-      detailViewController = [[MusicDetailViewController alloc] initWithStamp:stamp_];
+    case EntityCategoryMusic:
+      detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
-    case StampCategoryFilm:
-      detailViewController = [[FilmDetailViewController alloc] initWithStamp:stamp_];
+    case EntityCategoryFilm:
+      detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
     default:
-      detailViewController = [[EntityDetailViewController alloc] initWithStamp:stamp_];
+      detailViewController = [[EntityDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
   }
   // Pass the selected object to the new view controller.
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [self.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
 }
 

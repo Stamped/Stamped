@@ -57,7 +57,7 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     
     @lazyProperty
     def activity_collection(self):
-        return MongoActivity()
+        return MongoActivityCollection()
     
     @lazyProperty
     def user_collection(self):

@@ -86,7 +86,7 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     
     def getCommentsAcrossStamps(self, stampIds):
         commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds)
-        comments = self._getDocumentsFromIds(commentIds, 'comment_id')
+        comments = self._getDocumentsFromIds(commentIds, 'comment_id', limit=len(commentIds))
         result = []
         for comment in comments:
             comment = Comment(comment)

@@ -22,9 +22,10 @@
 
 - (id)initWithStamp:(Stamp*)stamp;
 - (IBAction)handleCommentButtonTap:(id)sender;
+- (IBAction)handleRestampButtonTap:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, retain) IBOutlet UITableViewCell* topHeaderCell;
+@property (nonatomic, retain) IBOutlet UIView* headerView;
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
 @property (nonatomic, retain) IBOutlet UITextField* addCommentField;
 @property (nonatomic, retain) IBOutlet UIView* commentsView;

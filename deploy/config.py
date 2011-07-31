@@ -19,6 +19,10 @@ def getInstances():
                 'replSet' : replSetName, 
                 'port' : 27017, 
             }, 
+            'raid' : {
+                'diskSize': 8,
+                'numDisks': 4,
+            },
         }, 
         {
             'name' : 'db1', 
@@ -26,6 +30,10 @@ def getInstances():
             'mongodb' : {
                 'replSet' : replSetName, 
                 'port' : 27017, 
+            }, 
+            'raid' : {
+                'diskSize': 8,
+                'numDisks': 4,
             }, 
         }, 
         {
