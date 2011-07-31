@@ -39,10 +39,7 @@ available_commands = {
     'crawl' : 'crawl', 
     
     'setup_crawler_data' : 'setup_crawler_data', 
-<<<<<<< HEAD
-    'backup' : 'backup', 
-=======
-
+    
     'backup' : 'backup', 
 
 >>>>>>> 3aff00b679dd93a550a1f143c2579745371ce9c5
