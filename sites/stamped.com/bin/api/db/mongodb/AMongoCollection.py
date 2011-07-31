@@ -85,13 +85,13 @@ class AMongoCollection():
     
     def _connect(self):
         return pymongo.Connection(self._host, self._port)
-        
+    
     def _getDatabase(self):
         return self._connection[self._db]
-        
+    
     def _getCollection(self, collection):
         return self._database[collection]
-        
+    
     def _endRequest(self):
         self._connection.end_request()
     

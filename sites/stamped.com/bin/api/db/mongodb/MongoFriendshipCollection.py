@@ -32,7 +32,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     @lazyProperty
     def friends_collection(self):
-        return MongoBlockCollection()
+        return MongoFriendsCollection()
     
     @lazyProperty
     def followers_collection(self):
@@ -78,6 +78,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     def approveFriendship(self, friendship):
         ### TODO
         print 'TODO'
+        raise NotImplementedError
     
     def addBlock(self, friendship):
         friendship = self._objToMongo(friendship)

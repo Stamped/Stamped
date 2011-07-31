@@ -55,7 +55,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if user.isValid == False:
             raise KeyError("User not valid")
         return user
-        
+    
     def getUserId(self, screenName):
         user = self._mongoToObj(self._collection.find_one({"screen_name": screenName}), 'user_id')
         if 'user_id' in user:
@@ -91,15 +91,16 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             del(userData['_id'])
             result.append(User(userData))
         return result
-        
+    
     def flagUser(self, user):
         ### TODO
         print 'TODO'
-        
+        raise NotImplementedError
+    
     def checkPrivacy(self, userId):
         privacy = self._collection.find_one({"_id": self._getObjectIdFromString(userId)}, fields={"privacy": 1})['privacy']
         return privacy
-        
+    
     def updateUserStats(self, userId, stat, value=None, increment=1):
         key = 'stats.%s' % (stat)
         if value != None:

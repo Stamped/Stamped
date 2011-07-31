@@ -6,17 +6,17 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import config, json, pickle, os, utils
+import config, json, pickle, os, string, utils
 from ADeploymentStack import ADeploymentStack
 from AWSInstance import AWSInstance
 from errors import Fail
 from boto.ec2.connection import EC2Connection
 from boto.ec2.address import Address
+from boto.exception import EC2ResponseError
 
 from gevent.pool import Pool
 from fabric.operations import *
 from fabric.api import *
-from fabric.contrib.console import *
 
 ELASTIC_IP_ADDRESS = '184.73.229.100'
 
@@ -145,37 +145,173 @@ class AWSDeploymentStack(ADeploymentStack):
         os.system(cmd)
     
     def crawl(self, *args):
-        raise NotImplementedError
-        # TODO
+        crawlers = [
+            {
+                'sources' : [ 'apple_artists', 'apple_albums', 'apple_videos', ], 
+                'numInstances' : 1, 
+                'mapSourceToProcess' : True, 
+            }, 
+            #{
+            #    'sources' : [ 'opentable', ], 
+            #    'numInstances' : 4, 
+            #    'numProcesses' : 2, 
+            #}, 
+            #{
+            #    'sources' : [ 'factualusrestaurants', ], 
+            #    'numInstances' : 16, 
+            #    'numProcesses' : 2, 
+            #}, 
+        ]
         
-        numCrawlers = len(crawlers)
-        count = 1
+        instances = []
+        index = 0
         
+        for crawler in crawlers:
+            if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
+                crawler['numProcesses'] = len(crawler['sources'])
+            
+            for i in xrange(crawler['numInstances']):
+                config = {
+                    'crawler' : 'crawler%d' % index, 
+                    'roles' : [ 'crawler' ], 
+                    #'instance_type' : 'm1.small', 
+                }
+                
+                instance = AWSInstance(self, config)
+                index += 1
+                if not 'instances' in crawler:
+                    crawler['instances'] = []
+                
+                crawler.instances.append(instance)
+                self._pool.spawn(instance.create)
+        
+        self._pool.join()
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
         
-        for crawler in crawler_instances:
-            with settings(host_string=crawler[0].public_dns_name):
-                with cd("/stamped"):
-                    ratio = "%s/%s" % (count, numCrawlers)
-                    crawler_path = "/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py"
-                    
-                    # TODO: GET PRIMARY
-                    host = db_instances[i].private_ip_address
-                    
-                    cmd = '. bin/activate && python %s --db %s --ratio %s&' % (crawler_path, host, ratio)
-                    
-                    run(cmd, pty=False)
-                    count += 1
+        db_instances = self.db_instances
+        assert len(db_instances) > 1
+        
+        host = db_instances[0].private_ip_address
+        
+        for crawler in crawlers:
+            numCrawlers = crawler['numInstances'] * crawl['numProcesses']
+            index = 0
+            
+            for instance in crawler['instances']:
+                with settings(host_string=instance.public_dns_name):
+                    with cd("/stamped"):
+                        for i in xrange('numProcesses'):
+                            if crawler['mapSourceToProcess']:
+                                sources = [ crawler['sources'][i], ]
+                                ratio = "%s/%s" % (1, 1)
+                            else:
+                                sources = crawler['sources']
+                                ratio = "%s/%s" % (index, numCrawlers)
+                                index += 1
+                            
+                            sources = string.joinfields(sources, ' ')
+                            #cmd = '. bin/activate && python %s --db %s --ratio %s %s&' % (crawler_path, host, ratio, sources)
+                            # DEBUG
+                            cmd = '. bin/activate && python %s --db %s -t -l 20 %s &' % (crawler_path, host, sources)
+                            
+                            run(cmd, pty=False)
     
     def setup_crawler_data(self, *args):
         config = {
             'name' : 'crawler_setup0', 
             'roles' : [ ], 
+            'instance_type' : 'm1.small', 
         }
         
         instance = AWSInstance(self, config)
         instance.create()
+        
+        files = [
+            "artist", 
+            "collection", 
+            "collection_type", 
+            #"song", 
+            "video", 
+        ]
+
+        volume_dir = "/dev/sdh5"
+        mount_dir = "/mnt/crawlerdata"
+        
+        env.user = 'ubuntu'
+        env.key_filename = [ 'keys/test-keypair' ]
+        
+        with settings(host_string=instance.public_dns_name):
+            utils.log("creating volume and attaching to instance %s..." % instance.id)
+            volume = self.conn.create_volume(8, instance.placement)
+            try:
+                #with settings(warn_only=True):
+                #    sudo("umount %s" % volume_dir)
+                
+                volume.attach(instance.id, volume_dir)
+            except EC2ResponseError:
+                volumes = self.conn.get_all_volumes()
+                
+                for v in volumes:
+                    if v.status == u'in-use' and \
+                       v.attach_data.instance_id == instance.id and \
+                       v.attach_data.device == volume_dir:
+                        with settings(warn_only=True):
+                            sudo("umount %s" % volume_dir)
+                        
+                        v.detach(force=True)
+                        
+                        while v.status != u'available':
+                            time.sleep(2)
+                            v.update()
+                
+                while not volume.attach(instance.id, volume_dir):
+                    time.sleep(5)
+            
+            while volume.status != u'in-use':
+                time.sleep(2)
+                volume.update()
+            
+            cmds = [
+                'mkdir -p %s' % mount_dir, 
+                'sync', 
+                'mkfs -t ext3 %s' % volume_dir, 
+                'mount -t ext3 %s %s' % (volume_dir, mount_dir), 
+            ]
+            
+            # initialize and mount volume
+            for cmd in cmds:
+                sudo(cmd)
+            
+            def _put_file(filename):
+                zipped = filename + ".gz"
+                if os.path.exists(zipped):
+                    filename = zipped
+                
+                utils.log("uploading file '%s'" % filename)
+                #remote_path = os.path.join(os.path.join(mount_dir, "data/apple"), name)
+                put(local_path=filename, remote_path=mount_dir, use_sudo=True)
+            
+            pool = Pool(64)
+            
+            # copy all files over to volume
+            epf_base = "/Users/fisch0920/dev/stamped/sites/stamped.com/bin/crawler/sources/dumps/data/apple"
+            for name in files:
+                filename = os.path.join(epf_base, name)
+                pool.spawn(_put_file, filename)
+            
+            pool.join()
+            utils.log("upload successful; unmounting and detaching volume...")
+            
+            # unmount and detach volume
+            sudo("umount %s" % mount_dir)
+            volume.detach()
+            
+            while volume.status != u'available':
+                time.sleep(2)
+                volume.update()
+            
+            utils.log("volume: %s" % volume.id)
     
     def _getInstancesByRole(self, role):
         return filter(lambda instance: role in instance.roles, self.instances)

@@ -118,12 +118,12 @@ class AWSDeploymentSystem(DeploymentSystem):
                     else:
                         stacks[stackName] = [ instance ]
         
-        sl = len(stacks)
-        utils.log("found %d stack%s:" % (sl, "s" if sl != 1 else ""))
+        #sl = len(stacks)
+        #utils.log("found %d stack%s:" % (sl, "s" if sl != 1 else ""))
         index = 1
         
         for stackName in stacks:
-            utils.log("%d) %s" % (index, stackName))
+            #utils.log("%d) %s" % (index, stackName))
             index += 1
             
             instances = stacks[stackName]

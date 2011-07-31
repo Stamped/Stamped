@@ -52,15 +52,15 @@ class StampedAPI(AStampedAPI):
         self._validated = False
     
     def _validate(self):
-        assert hasattr(self, '_accountDB')    and isinstance(self._accountDB, AAccountDB)
-        assert hasattr(self, '_entityDB')     and isinstance(self._entityDB, AEntityDB)
-        assert hasattr(self, '_userDB')       and isinstance(self._userDB, AUserDB)
-        assert hasattr(self, '_stampDB')      and isinstance(self._stampDB, AStampDB)
-        assert hasattr(self, '_commentDB')    and isinstance(self._commentDB, ACommentDB)
-        assert hasattr(self, '_favoriteDB')   and isinstance(self._favoriteDB, AFavoriteDB)
-        assert hasattr(self, '_collectionDB') and isinstance(self._collectionDB, ACollectionDB)
-        assert hasattr(self, '_friendshipDB') and isinstance(self._friendshipDB, AFriendshipDB)
-        assert hasattr(self, '_activityDB')   and isinstance(self._activityDB, AActivityDB)
+        #assert hasattr(self, '_accountDB')    and isinstance(self._accountDB, AAccountDB)
+        #assert hasattr(self, '_entityDB')     and isinstance(self._entityDB, AEntityDB)
+        #assert hasattr(self, '_userDB')       and isinstance(self._userDB, AUserDB)
+        #assert hasattr(self, '_stampDB')      and isinstance(self._stampDB, AStampDB)
+        #assert hasattr(self, '_commentDB')    and isinstance(self._commentDB, ACommentDB)
+        #assert hasattr(self, '_favoriteDB')   and isinstance(self._favoriteDB, AFavoriteDB)
+        #assert hasattr(self, '_collectionDB') and isinstance(self._collectionDB, ACollectionDB)
+        #assert hasattr(self, '_friendshipDB') and isinstance(self._friendshipDB, AFriendshipDB)
+        #assert hasattr(self, '_activityDB')   and isinstance(self._activityDB, AActivityDB)
         
         self._validated = True
     
@@ -131,7 +131,7 @@ class StampedAPI(AStampedAPI):
     def getAccount(self, params):
         account = self._accountDB.getAccount(params.authenticated_user_id)
         return self._returnAccount(account)
-        
+    
     def updateProfile(self, params):
         account = self._accountDB.getAccount(params.authenticated_user_id)
         
@@ -171,7 +171,7 @@ class StampedAPI(AStampedAPI):
         else:
             result['color_secondary'] = None
         return result
-        
+    
     def updateProfileImage(self, params):
         ### TODO: Grab image and do something with it. Currently just sets as url.
         
@@ -187,7 +187,7 @@ class StampedAPI(AStampedAPI):
         result['profile_image'] = account.profile_image
         return result
         raise NotImplementedError
-        
+    
     def verifyAccountCredentials(self, userID):
         return True
     
@@ -582,7 +582,7 @@ class StampedAPI(AStampedAPI):
             return True
         else:
             return False
-        
+    
     def searchEntities(self, params):
         ### TODO: Customize query based on authenticated_user_id / coordinates
     
@@ -845,11 +845,13 @@ class StampedAPI(AStampedAPI):
     # ########### #
     
     def _addEntity(self, entity):
+        utils.log("'%s' adding 1 entity" % (self, ))
         self._entityDB.addEntity(entity)
     
     def _addEntities(self, entities):
+        utils.log("'%s' adding %d entities" % (self, utils.count(entities)))
         self._entityDB.addEntities(entities)
-        
+    
     def _setLimit(self, limit, cap=20):
         result = cap
         if limit != None:
@@ -860,7 +862,7 @@ class StampedAPI(AStampedAPI):
             except:
                 result = cap
         return result
-        
+    
     # ################# #
     # Result Formatting #
     # ################# #
@@ -917,7 +919,7 @@ class StampedAPI(AStampedAPI):
             result['flags'] = stamp['flags']
 
         return result
-        
+    
     def _returnUser(self, user, stamp=None):
         result = {}
         result['user_id'] = user.user_id
@@ -948,7 +950,7 @@ class StampedAPI(AStampedAPI):
         result['last_stamp'] = None
         
         return result
-        
+    
     def _returnEntity(self, entity):
         result = {}
         result['entity_id'] = entity.entity_id

@@ -6,24 +6,78 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import CSVUtils, epf, gevent, os, re, urllib
+import CSVUtils, epf, gevent, gzip, os, re, urllib
 
 from gevent.pool import Pool
+from utils import lazyProperty, Singleton
 from AEntitySource import AExternalDumpEntitySource
 from ASyncGatherSource import ASyncGatherSource
 from api.Entity import Entity
+
+from boto.ec2.connection import EC2Connection
+from boto.exception import EC2ResponseError
+from errors import Fail
 
 __all__ = [ "AppleEPFDump" ]
 
 APPLE_EPF_USER = "St4mp3d"
 APPLE_EPF_PSWD = "f16b8ea6534b1970c466a71c41fa9c9c"
 
-BASE = os.path.dirname(os.path.abspath(__file__))
-APPLE_DATA_DIR = os.path.join(os.path.join(BASE, "data"), "apple")
+AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
+AWS_SECRET_KEY = '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'
 
 class AppleEPFOpener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
         return (APPLE_EPF_USER, APPLE_EPF_PSWD)
+
+class AppleEPFDistro(Singleton):
+    @lazyProperty
+    def apple_data_dir(self):
+        if self.ec2:
+            self._volume = 'vol-8cbb5ce6'
+            self._insance_id = utils.shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')[0]
+            
+            self.conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+            volume_dir = "/dev/sdh5"
+            mount_dir  = "/mnt/crawlerdata"
+            
+            utils.shell("sudo mkdir -p %s" % mount_dir)
+            
+            try:
+                ret = self.conn.attach_volume(self._volume, self._instance, volume_dir)
+                assert ret
+            except EC2ResponseError:
+                raise Fail("unable to mount apple data volume '%s' on instance '%s'" % (self._volume, self._instance_id))
+            
+            while volume.status != u'in-use':
+                time.sleep(2)
+                volume.update()
+            
+            ret = utils.shell('mount -t ext3 %s %s' % (volume_dir, mount_dir))[1]
+            assert 0 == ret
+            
+            return mount_dir
+        else:
+            base = os.path.dirname(os.path.abspath(__file__))
+            
+            apple_dir = os.path.join(os.path.join(BASE, "data"), "apple")
+            assert os.path.exists(apple_dir)
+    
+    def cleanup(self):
+        if self.ec2:
+            # unmount and detach volume
+            sudo("umount %s" % self.apple_data_dir)
+            # TODO: detach volume
+            #volume.detach()
+    
+    @lazyProperty
+    def ec2(self):
+        if not os.path.exists("/proc/xen"):
+            return False
+        if os.path.exists("/etc/ec2_version"):
+            return True
+        
+        return False
 
 class AppleEPFDumps(ASyncGatherSource):
     """
@@ -53,7 +107,7 @@ class AppleEPFDumps(ASyncGatherSource):
         links = soup.findAll('a', {'href' : re.compile(r"[^.]*.tbz$")})
         assert len(links) == 4
         
-        utils.shell("mkdir -p %s" % APPLE_DATA_DIR)
+        utils.shell("mkdir -p %s" % self.apple_data_dir)
         
         for link in links:
             suffix = link.get("href")
@@ -65,18 +119,19 @@ class AppleEPFDumps(ASyncGatherSource):
     def _init_feed(self, url, suffix):
         utils.log(url)
         utils.log(suffix)
-        output = os.path.join(APPLE_DATA_DIR, suffix)
+        output = os.path.join(self.apple_data_dir, suffix)
         
         cmd = "curl --user %s:%s %s -o %s" % (APPLE_EPF_USER, APPLE_EPF_PSWD, url, output)
         utils.log(cmd)
         utils.shell(cmd)
         
-        cmd = "cd %s && tar -xvf %s" % (APPLE_DATA_DIR, suffix)
+        # TODO: use python tar utility to not extract anything!
+        cmd = "cd %s && tar -xvf %s" % (self.apple_data_dir, suffix)
         utils.log(cmd)
         utils.shell(cmd)
         
         unpacked = suffix[:-4]
-        cmd = "cd %s && mkdir -p archive && mv %s archive && mv -f %s/* ./" % (APPLE_DATA_DIR, suffix, unpacked)
+        cmd = "cd %s && mkdir -p archive && mv %s archive && mv -f %s/* ./" % (self.apple_data_dir, suffix, unpacked)
         utils.log(cmd)
         utils.shell(cmd)
     
@@ -89,15 +144,25 @@ class AppleEPFDumps(ASyncGatherSource):
 class AAppleEPFDump(AExternalDumpEntitySource):
     
     def __init__(self, name, entityMap, types, filename):
-        AExternalDumpEntitySource.__init__(self, name, types, 512)
-        self._filename = filename
+        AExternalDumpEntitySource.__init__(self, name, types, 2048)
+        self._filename  = filename
         self._columnMap = entityMap
+        
+        self._distro = AppleEPFDistro.getInstance()
     
     def _open_file(self):
-        filename = os.path.join(APPLE_DATA_DIR, self._filename)
-        f = open(filename, 'r+b')
-        numLines = max(0, CSVUtils.getNumLines(f) - 8)
+        filename = os.path.join(self._distro.apple_data_dir, self._filename)
+        zipped = filename + ".gz"
         
+        if os.path.exists(zipped):
+            filename = zipped
+        
+        if filename.endswith(".gz"):
+            f = gzip.open(filename, 'rb')
+        else:
+            f = open(filename, 'r+b')
+        
+        numLines = max(0, CSVUtils.getNumLines(f) - 8)
         return f, numLines, filename
     
     def getMaxNumEntities(self):
@@ -111,7 +176,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         utils.log("[%s] parsing ~%d entities from '%s'" % (self, numLines, self._filename))
         
         table_format = epf.parse_table_format(f, filename)
-        pool   = Pool(512)
+        pool   = Pool(2048)
         count  = 0
         offset = 0
         
@@ -173,11 +238,22 @@ class AppleEPFArtistDump(AAppleEPFDump):
         'artist_id'         : 'aid', 
         'is_actual_artist'  : 'is_actual_artist', 
         'view_url'          : 'view_url', 
-        'artist_type_id'    : 'artist_type_id', 
+        'artist_type_id'    : None, 
     }
     
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Artists", self._map, [ "artist" ], "artist")
+        
+        g = AppleEPFArtistType()
+        g.start()
+        g.join()
+        self.artist_type_id = g.artist_types['Artist']
+    
+    def _filter(self, row, table_format):
+        artist_type_id = row[table_format.cols.artist_type_id.index]
+        
+        # only retain song artists
+        return artist_type_id == self.artist_type_id
 
 class AppleEPFSongDump(AAppleEPFDump):
     
@@ -202,16 +278,6 @@ class AppleEPFSongDump(AAppleEPFDump):
     
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Songs", self._map, [ "song" ], "song")
-
-class AppleEPFCollectionType(AAppleEPFDump):
-    
-    def __init__(self):
-        AAppleEPFDump.__init__(self, "Apple EPF Albums", None, [ ], "collection_type")
-        self.collection_types = { }
-    
-    def _parseRow(self, row, table_format):
-        name = row[table_format.cols.name.index]
-        self.collection_types[name] = row[table_format.cols.collection_type_id.index]
 
 class AppleEPFAlbumDump(AAppleEPFDump):
     
@@ -245,14 +311,10 @@ class AppleEPFAlbumDump(AAppleEPFDump):
         self.album_type_id = g.collection_types['Album']
     
     def _filter(self, row, table_format):
-        # TODO: figure out why some albums are malformed
-        try:
-            collection_type_id = row[table_format.cols.collection_type_id.index]
-            
-            # only retain album collections
-            return collection_type_id == self.album_type_id
-        except IndexError:
-            return False
+        collection_type_id = row[table_format.cols.collection_type_id.index]
+        
+        # only retain album collections
+        return collection_type_id == self.album_type_id
 
 class AppleEPFVideoDump(AAppleEPFDump):
     
@@ -282,10 +344,41 @@ class AppleEPFVideoDump(AAppleEPFDump):
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Videos", self._map, [ "video" ], "video")
 
+class AppleEPFCollectionType(AAppleEPFDump):
+    
+    def __init__(self):
+        AAppleEPFDump.__init__(self, "Apple EPF Collection Types", None, [ ], "collection_type")
+        self.collection_types = { }
+    
+    def _parseRow(self, row, table_format):
+        name = row[table_format.cols.name.index]
+        self.collection_types[name] = row[table_format.cols.collection_type_id.index]
+
+class AppleEPFArtistType(AAppleEPFDump):
+    
+    def __init__(self):
+        AAppleEPFDump.__init__(self, "Apple EPF Artist Types", None, [ ], "artist_type")
+        self.artist_types = { }
+    
+    def _parseRow(self, row, table_format):
+        name = row[table_format.cols.name.index]
+        self.artist_types[name] = row[table_format.cols.artist_type_id.index]
+
+class AppleEPFMediaType(AAppleEPFDump):
+    
+    def __init__(self):
+        AAppleEPFDump.__init__(self, "Apple EPF Media Types", None, [ ], "media_type")
+        self.media_types = { }
+    
+    def _parseRow(self, row, table_format):
+        name = row[table_format.cols.name.index]
+        self.media_types[name] = row[table_format.cols.media_type_id.index]
+
 import EntitySources
+
 #EntitySources.registerSource('apple', AppleEPFDumps)
 EntitySources.registerSource('apple_artists', AppleEPFArtistDump)
-EntitySources.registerSource('apple_songs', AppleEPFSongDump)
-EntitySources.registerSource('apple_albums', AppleEPFAlbumDump)
-EntitySources.registerSource('apple_videos', AppleEPFVideoDump)
+#EntitySources.registerSource('apple_songs',   AppleEPFSongDump)
+EntitySources.registerSource('apple_albums',  AppleEPFAlbumDump)
+EntitySources.registerSource('apple_videos',  AppleEPFVideoDump)
 

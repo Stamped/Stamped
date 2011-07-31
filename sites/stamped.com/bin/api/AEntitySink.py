@@ -31,7 +31,6 @@ class AEntitySink(Greenlet, IASyncConsumer):
         """Inserts an item into this sink's queue only if it would be non-blocking"""
         self._input.put_nowait(item)
     
-    @abstract
     def _run(self):
         """Subclasses should override to process the pull-based loop in the 
         context of this sink's Greenlet."""

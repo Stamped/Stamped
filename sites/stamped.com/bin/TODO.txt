@@ -1,5 +1,4 @@
 
-* implement activity
 * autogenerate docs and REST API from lower-level API
 * decouple API implementation from HTTP (e.g., 400 errors)
 * consistent input validation
@@ -15,6 +14,8 @@
 * support utf-8
 * second pass over API methods
 * Nth pass over API methods
+* remove schema duplication in mongo-specific and mongo-agnostic classes
+    * incorporate validation into the schema itself for required / optional / type-checking, etc.
 * reassess naming conventions for mongo-specific versus mongo-agnostic glue classes
 
 MongoDB
@@ -23,15 +24,12 @@ MongoDB
         * evaluate possible race conditions and TEST them!
         * rollback strategy
 
-AEntityProxy
-    * Pulls from AEntitySource -> output queue
-
-AMultiprocessingEntityProxy
-    * Pulls from AEntitySource -> output queue
-
 ASchemaObject:
     * convert to using extended AttributeDict
-    * remove unique name constraint!
+    * remove unique name constraint?
 Entity:
     * consistent categories for entities
+
+* Create and mount volume
+* Create SQL database as initial crawler process which facilitates subsequent epf detail lookups
 

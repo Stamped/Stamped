@@ -6,6 +6,8 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
+
+from utils import lazyProperty
 from StampedAPI import StampedAPI
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
@@ -26,15 +28,51 @@ class MongoStampedAPI(StampedAPI):
     def __init__(self):
         StampedAPI.__init__(self, "MongoStampedAPI")
         
-        self._accountDB    = MongoAccountCollection()
-        self._entityDB     = MongoEntityCollection()
-        self._userDB       = MongoUserCollection()
-        self._stampDB      = MongoStampCollection()
-        self._commentDB    = MongoCommentCollection()
-        self._favoriteDB   = MongoFavoriteCollection()
-        self._collectionDB = MongoCollectionCollection()
-        self._friendshipDB = MongoFriendshipCollection()
-        self._activityDB   = MongoActivityCollection()
+        #self._accountDB    = MongoAccountCollection()
+        #self._entityDB     = MongoEntityCollection()
+        #self._userDB       = MongoUserCollection()
+        #self._stampDB      = MongoStampCollection()
+        #self._commentDB    = MongoCommentCollection()
+        #self._favoriteDB   = MongoFavoriteCollection()
+        #self._collectionDB = MongoCollectionCollection()
+        #self._friendshipDB = MongoFriendshipCollection()
+        #self._activityDB   = MongoActivityCollection()
         
-        self._validate()
+        #self._validate()
+    
+    @lazyProperty
+    def _accountDB(self):
+        return MongoAccountCollection()
+
+    @lazyProperty
+    def _entityDB(self):
+        return MongoEntityCollection()
+
+    @lazyProperty
+    def _userDB(self):
+        return MongoUserCollection()
+
+    @lazyProperty
+    def _stampDB(self):
+        return MongoStampCollection()
+
+    @lazyProperty
+    def _commentDB(self):
+        return MongoCommentCollection()
+
+    @lazyProperty
+    def _favoriteDB(self):
+        return MongoFavoriteCollection()
+
+    @lazyProperty
+    def _collectionDB(self):
+        return MongoCollectionCollection()
+
+    @lazyProperty
+    def _friendshipDB(self):
+        return MongoFriendshipCollection()
+
+    @lazyProperty
+    def _activityDB(self):
+        return MongoActivityCollection()
 

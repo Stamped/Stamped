@@ -125,12 +125,16 @@ class AWSInstance(AInstance):
     def _create(self):
         assert self.state is None
         
-        image = self._get_image()
+        if 'instance_type' in self.config:
+            instance_type = self.config.instance_type
+        else:
+            instance_type = INSTANCE_TYPE
+        
+        image = self._get_image(instance_type)
         
         security_groups = self._get_security_groups()
         user_data = self._get_user_data()
         key_name = KEY_NAME
-        instance_type = INSTANCE_TYPE
         
         reservation = image.run(key_name=key_name, 
                                 instance_type=instance_type, 
@@ -232,7 +236,19 @@ class AWSInstance(AInstance):
         #user_data64 = base64.encodestring(user_data)
         #return user_data64
     
-    def _get_image(self):
-        ami = _getAMI(INSTANCE_TYPE, INSTANCE_REGION, INSTANCE_OS, INSTANCE_EBS)
+    def _get_image(self, instance_type):
+        ami = _getAMI(instance_type, INSTANCE_REGION, INSTANCE_OS, INSTANCE_EBS)
         return self.conn.get_image(ami)
+    
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        else:
+            return self[name]
+    
+    def __getitem__(self, name):
+        if self._instance:
+            return self._instance.__dict__[name]
+        else:
+            raise NotInitializedError()
 

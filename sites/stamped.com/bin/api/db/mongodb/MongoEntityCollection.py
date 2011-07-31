@@ -14,7 +14,7 @@ from api.Entity import Entity
 class MongoEntityCollection(AMongoCollection, AEntityDB):
     
     SCHEMA = {
-        '_id': object, 
+        '_id': basestring, 
         'title': basestring, 
         'subtitle': basestring,
         'desc': basestring, 
@@ -51,7 +51,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             'restaurant': {
                 'diningStyle': basestring, 
                 'cuisine': basestring, 
-                'price': basestring, 
+                #'price': basestring, 
                 'payment': basestring, 
                 'dressCode': basestring, 
                 'acceptsReservations': basestring, 
@@ -78,8 +78,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
                 'developerSupportURL': basestring, 
                 'publisher': basestring, 
                 'releaseDate': basestring, 
-                'price': basestring, 
-                'category': basestring, 
+                'appCategory': basestring, 
                 'language': basestring, 
                 'rating': basestring, 
                 'popularity': basestring, 
@@ -96,8 +95,50 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             'book': {
                 # TODO
             }, 
-            'movie': {
-                # TODO
+            'video': {
+                # TODO: modify types
+                'studio_name': basestring, 
+                'network_name': basestring, 
+                'short_description': basestring, 
+                'long_description': basestring, 
+                'episode_production_number': basestring, 
+                #'price' : {
+                #    'retail_price' : basestring, 
+                #    'currency_code' : basestring, 
+                #    'storefront_id' : basestring, 
+                #    'availability_date' : basestring, 
+                #    'sd_price' : basestring, 
+                #    'hq_price' : basestring, 
+                #    'lc_rental_price' : basestring, 
+                #    'sd_rental_price' : basestring, 
+                #    'hd_rental_price' : basestring, 
+                #}, 
+            }, 
+            'artist' : {
+                'albums' : list, 
+            }, 
+            'song': {
+                'preview_url': basestring, 
+                'preview_length': basestring, 
+            }, 
+            'album' : {
+                'label_studio'   : basestring, 
+                'is_compilation' : bool, 
+            }, 
+            'media' : {
+                'title_version': basestring, 
+                'search_terms': basestring, 
+                'parental_advisory_id': basestring, 
+                'artist_display_name': basestring, 
+                'collection_display_name': basestring, 
+                'original_release_date': basestring, 
+                'itunes_release_date': basestring, 
+                'track_length': basestring, 
+                'copyright': basestring, 
+                'p_line': basestring, 
+                'content_provider_name': basestring, 
+                'media_type_id': basestring, 
+                'artwork_url': basestring, 
             }, 
         }, 
         'sources': {
@@ -116,7 +157,21 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             'factual': {
                 'fid': basestring, 
                 'table': basestring, 
-            }
+            }, 
+            'apple' : {
+                'aid' : basestring, 
+                'export_date' : basestring, 
+                'is_actual_artist' : bool, 
+                'view_url' : basestring, 
+                'match' : {
+                    'upc' : basestring, 
+                    'isrc' : basestring, 
+                    'grid' : basestring, 
+                    'amg_video_id' : basestring, 
+                    'amg_track_id' : basestring, 
+                    'isan' : basestring, 
+                }, 
+            }, 
         }
     }
     

@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, gevent, utils
+import Globals, utils
 import gevent, json, math, os, sys
 
 import EntitySinks, EntitySources
@@ -41,20 +41,18 @@ class Crawler(Thread):
     
     def run(self):
         sources = map(self._createSourceChain, self.options.sources)
+        
         sink = self.options.sink
-        
         sink.start()
-        gather = ASyncGatherSource(sources)
         
+        gather = ASyncGatherSource(sources)
         gather.startProducing()
+        
         sink.processQueue(gather)
         
         gevent.joinall(sources)
         gather.join()
-        
         sink.join()
-        #timeout=2)
-        #sink.kill()
         sink.close()
     
     def _createSourceChain(self, source):
@@ -201,7 +199,6 @@ def main():
     
     Crawler(options).run()
 
-# where all the magic starts
 if __name__ == '__main__':
     main()
 
