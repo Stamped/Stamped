@@ -17,6 +17,7 @@ from boto.exception import EC2ResponseError
 from gevent.pool import Pool
 from fabric.operations import *
 from fabric.api import *
+import fabric.contrib.files
 
 ELASTIC_IP_ADDRESS = '184.73.229.100'
 
@@ -261,7 +262,9 @@ class AWSDeploymentStack(ADeploymentStack):
         
         with settings(host_string=instance.public_dns_name):
             utils.log("creating volume and attaching to instance %s..." % instance._instance.id)
-            volume = self.conn.create_volume(8, instance._instance.placement)
+            #volume = self.conn.create_volume(8, instance._instance.placement)
+            volume = self.conn.get_all_volumes(volume_ids=['vol-8cbb5ce6', ])[0]
+            
             try:
                 #with settings(warn_only=True):
                 #    sudo("umount %s" % volume_dir)
@@ -293,7 +296,7 @@ class AWSDeploymentStack(ADeploymentStack):
             cmds = [
                 'mkdir -p %s' % mount_dir, 
                 'sync', 
-                'mkfs -t ext3 %s' % volume_dir, 
+                #'mkfs -t ext3 %s' % volume_dir, 
                 'mount -t ext3 %s %s' % (volume_dir, mount_dir), 
             ]
             
@@ -306,10 +309,14 @@ class AWSDeploymentStack(ADeploymentStack):
                 if os.path.exists(zipped):
                     filename = zipped
                 
-                utils.log("uploading file '%s'" % filename)
                 #remote_path = os.path.join(os.path.join(mount_dir, "data/apple"), name)
-                utils.scp(filename, instance.public_dns_name, env.user, mount_dir)
-                #put(local_path=filename, remote_path=mount_dir, use_sudo=True)
+                
+                if not files.exists(os.path.join(mount_dir, os.path.basename(filename)), use_sudo=True):
+                    utils.log("uploading file '%s'" % filename)
+                    utils.scp(filename, instance.public_dns_name, env.user, mount_dir)
+                    #put(local_path=filename, remote_path=mount_dir, use_sudo=True)
+                else:
+                    utils.log("remote file '%s' already exists" % filename)
             
             pool = Pool(64)
             
