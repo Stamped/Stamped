@@ -247,7 +247,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     
     def getActivity(self, userId, since=None, before=None, limit=20):
         # Get activity
-        activityIds = self.user_activity_collection.getUserActivity(userId)
+        activityIds = self.user_activity_collection.getUserActivityIds(userId)
         activityData = self._getDocumentsFromIds(
                             activityIds, objId='activity_id', since=since, 
                             before=before, sort='timestamp.created', limit=limit)
