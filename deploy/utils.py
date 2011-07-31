@@ -36,6 +36,9 @@ def shell3(cmd, customEnv=None):
     
     return status
 
+def scp(source, host, user, dest):
+    return Popen('scp %s %s@%s:%s' % (source, host, user, dest), shell=True).wait()
+
 def lazy_property(undecorated):
     name = '_' + undecorated.__name__
     @property

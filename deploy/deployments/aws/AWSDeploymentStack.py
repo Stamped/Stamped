@@ -231,7 +231,7 @@ class AWSDeploymentStack(ADeploymentStack):
                             #cmd = '. bin/activate && python %s --db %s -t -l 20 %s &' % (crawler_path, host, sources)
                             
                             #utils.log(cmd)
-                            sudo(cmd, pty=False)
+                            sudo(cmd)
     
     def setup_crawler_data(self, *args):
         config = {
@@ -245,8 +245,10 @@ class AWSDeploymentStack(ADeploymentStack):
         
         files = [
             "artist", 
+            "artist_type", 
             "collection", 
             "collection_type", 
+            "media_type", 
             #"song", 
             "video", 
         ]
@@ -258,19 +260,19 @@ class AWSDeploymentStack(ADeploymentStack):
         env.key_filename = [ 'keys/test-keypair' ]
         
         with settings(host_string=instance.public_dns_name):
-            utils.log("creating volume and attaching to instance %s..." % instance.id)
-            volume = self.conn.create_volume(8, instance.placement)
+            utils.log("creating volume and attaching to instance %s..." % instance._instance.id)
+            volume = self.conn.create_volume(8, instance._instance.placement)
             try:
                 #with settings(warn_only=True):
                 #    sudo("umount %s" % volume_dir)
                 
-                volume.attach(instance.id, volume_dir)
+                volume.attach(instance._instance.id, volume_dir)
             except EC2ResponseError:
                 volumes = self.conn.get_all_volumes()
                 
                 for v in volumes:
                     if v.status == u'in-use' and \
-                       v.attach_data.instance_id == instance.id and \
+                       v.attach_data.instance_id == instance._instance.id and \
                        v.attach_data.device == volume_dir:
                         with settings(warn_only=True):
                             sudo("umount %s" % volume_dir)
@@ -281,7 +283,7 @@ class AWSDeploymentStack(ADeploymentStack):
                             time.sleep(2)
                             v.update()
                 
-                while not volume.attach(instance.id, volume_dir):
+                while not volume.attach(instance._instance.id, volume_dir):
                     time.sleep(5)
             
             while volume.status != u'in-use':
@@ -306,7 +308,8 @@ class AWSDeploymentStack(ADeploymentStack):
                 
                 utils.log("uploading file '%s'" % filename)
                 #remote_path = os.path.join(os.path.join(mount_dir, "data/apple"), name)
-                put(local_path=filename, remote_path=mount_dir, use_sudo=True)
+                utils.scp(filename, instance.public_dns_name, env.user, mount_dir)
+                #put(local_path=filename, remote_path=mount_dir, use_sudo=True)
             
             pool = Pool(64)
             
