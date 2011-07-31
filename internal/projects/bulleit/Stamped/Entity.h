@@ -21,13 +21,18 @@ typedef enum {
 
 @interface Entity : NSManagedObject
 
+- (NSString*)localizedPhoneNumber;
+
+@property (nonatomic, retain) NSString* address;
 @property (nonatomic, retain) NSString* category;
 @property (nonatomic, retain) UIImage* categoryImage;
 @property (nonatomic, retain) NSString* entityID;
+@property (nonatomic, retain) NSString* openTableURL;
 @property (nonatomic, retain) NSString* subtitle;
 @property (nonatomic, retain) NSString* title;
 @property (nonatomic, retain) NSString* coordinates;
 @property (nonatomic, retain) NSSet* stamps;
+@property (nonatomic, retain) NSNumber* phone;
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @end

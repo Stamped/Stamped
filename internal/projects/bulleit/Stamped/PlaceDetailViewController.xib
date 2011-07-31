@@ -16,6 +16,7 @@
 			<string>IBUIImageView</string>
 			<string>IBUILabel</string>
 			<string>IBProxyObject</string>
+			<string>IBUIActivityIndicatorView</string>
 			<string>IBMKMapView</string>
 			<string>IBUIScrollView</string>
 			<string>IBUIButton</string>
@@ -43,6 +44,17 @@
 				<int key="NSvFlags">274</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
+					<object class="IBUIActivityIndicatorView" id="302310724">
+						<reference key="NSNextResponder" ref="191373211"/>
+						<int key="NSvFlags">-2147483356</int>
+						<string key="NSFrame">{{150, 198}, {20, 20}}</string>
+						<reference key="NSSuperview" ref="191373211"/>
+						<reference key="NSWindow"/>
+						<string key="NSReuseIdentifierKey">_NS:948</string>
+						<bool key="IBUIOpaque">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<int key="IBUIStyle">2</int>
+					</object>
 					<object class="IBUIScrollView" id="1016267558">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">274</int>
@@ -143,14 +155,10 @@
 								<int key="IBUIContentMode">1</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<object class="NSCustomResource" key="IBUIImage">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">cat_icon_place@2x.png</string>
-								</object>
 							</object>
 							<object class="IBUIView" id="728574616">
 								<reference key="NSNextResponder" ref="1016267558"/>
-								<int key="NSvFlags">292</int>
+								<int key="NSvFlags">-2147483356</int>
 								<object class="NSMutableArray" key="NSSubviews">
 									<bool key="EncodedWithXMLCoder">YES</bool>
 									<object class="IBUIButton" id="726550632">
@@ -334,7 +342,7 @@
 							</object>
 							<object class="IBUIView" id="384818212">
 								<reference key="NSNextResponder" ref="1016267558"/>
-								<int key="NSvFlags">292</int>
+								<int key="NSvFlags">-2147483356</int>
 								<object class="NSMutableArray" key="NSSubviews">
 									<bool key="EncodedWithXMLCoder">YES</bool>
 									<object class="IBMKMapView" id="1009651925">
@@ -523,6 +531,22 @@
 					</object>
 					<int key="connectionID">35</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">categoryImageView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="513274970"/>
+					</object>
+					<int key="connectionID">36</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">loadingView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="302310724"/>
+					</object>
+					<int key="connectionID">38</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -541,6 +565,7 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="1016267558"/>
+							<reference ref="302310724"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -666,6 +691,11 @@
 						<reference key="parent" ref="384818212"/>
 						<string key="objectName">Map Inner Shadow</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">37</int>
+						<reference key="object" ref="302310724"/>
+						<reference key="parent" ref="191373211"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -689,6 +719,7 @@
 					<string>28.IBPluginDependency</string>
 					<string>30.IBPluginDependency</string>
 					<string>34.IBPluginDependency</string>
+					<string>37.IBPluginDependency</string>
 					<string>4.IBPluginDependency</string>
 					<string>4.IBUserGuides</string>
 					<string>5.IBPluginDependency</string>
@@ -715,6 +746,7 @@
 							<int key="affinity">0</int>
 						</object>
 					</object>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -757,7 +789,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">35</int>
+			<int key="maxID">38</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -769,17 +801,23 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>categoryImageView</string>
 							<string>descriptionLabel</string>
+							<string>loadingView</string>
 							<string>mainActionButton</string>
 							<string>mainActionLabel</string>
+							<string>mainActionsView</string>
 							<string>scrollView</string>
 							<string>titleLabel</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>UIImageView</string>
 							<string>UILabel</string>
+							<string>UIActivityIndicatorView</string>
 							<string>UIButton</string>
 							<string>UILabel</string>
+							<string>UIView</string>
 							<string>UIScrollView</string>
 							<string>UILabel</string>
 						</object>
@@ -788,17 +826,28 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>categoryImageView</string>
 							<string>descriptionLabel</string>
+							<string>loadingView</string>
 							<string>mainActionButton</string>
 							<string>mainActionLabel</string>
+							<string>mainActionsView</string>
 							<string>scrollView</string>
 							<string>titleLabel</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBToOneOutletInfo">
+								<string key="name">categoryImageView</string>
+								<string key="candidateClassName">UIImageView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
 								<string key="name">descriptionLabel</string>
 								<string key="candidateClassName">UILabel</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">loadingView</string>
+								<string key="candidateClassName">UIActivityIndicatorView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">mainActionButton</string>
@@ -807,6 +856,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">mainActionLabel</string>
 								<string key="candidateClassName">UILabel</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">mainActionsView</string>
+								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">scrollView</string>
@@ -864,7 +917,6 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>callActionButton</string>
 							<string>callActionLabel</string>
-							<string>mainActionsView</string>
 							<string>mainContentView</string>
 							<string>mapView</string>
 						</object>
@@ -872,7 +924,6 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UIButton</string>
 							<string>UILabel</string>
-							<string>UIView</string>
 							<string>UIView</string>
 							<string>MKMapView</string>
 						</object>
@@ -883,7 +934,6 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>callActionButton</string>
 							<string>callActionLabel</string>
-							<string>mainActionsView</string>
 							<string>mainContentView</string>
 							<string>mapView</string>
 						</object>
@@ -896,10 +946,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">callActionLabel</string>
 								<string key="candidateClassName">UILabel</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">mainActionsView</string>
-								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">mainContentView</string>
@@ -935,7 +981,6 @@
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>call_action_button_bg@2x.png</string>
-				<string>cat_icon_place@2x.png</string>
 				<string>logo_opentable.png</string>
 				<string>main_action_button_bg@2x.png</string>
 				<string>map_inner_shadow.png</string>
@@ -944,7 +989,6 @@
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{23, 50}</string>
-				<string>{22, 33}</string>
 				<string>{16, 16}</string>
 				<string>{11, 50}</string>
 				<string>{16, 16}</string>
