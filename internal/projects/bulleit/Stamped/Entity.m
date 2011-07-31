@@ -12,13 +12,16 @@
 
 @implementation Entity
 
+@dynamic address;
 @dynamic category;
 @dynamic categoryImage;
 @dynamic entityID;
+@dynamic openTableURL;
 @dynamic subtitle;
 @dynamic title;
 @dynamic coordinates;
 @dynamic stamps;
+@dynamic phone;
 
 - (void)awakeFromFetch {
   [super awakeFromFetch];
@@ -40,6 +43,27 @@
     return EntityCategoryBook;
   }
   return EntityCategoryOther;
+}
+
+- (NSString*)localizedPhoneNumber {
+  if (![self.phone boolValue])
+    return nil;
+
+  NSString* localeString = [[NSLocale currentLocale] localeIdentifier];
+  NSString* formattedNum = @"";
+  NSRange range;
+  range.length = 3;
+  range.location = 3;
+  // Returns the phone number 2032225200 as (203) 222-5200
+  if([localeString isEqualToString:@"en_US"]) {
+    NSString* areaCode = [[self.phone stringValue] substringToIndex:3];
+    NSString* phone1 = [[self.phone stringValue] substringWithRange:range];
+    NSString* phone2 = [[self.phone stringValue] substringFromIndex:6];
+    
+    formattedNum = [NSString stringWithFormat:@"(%@) %@-%@", areaCode, phone1, phone2];
+  }
+  
+  return formattedNum;
 }
 
 @end

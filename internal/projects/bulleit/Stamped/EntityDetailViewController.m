@@ -16,7 +16,8 @@
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 @interface EntityDetailViewController ()
-
+- (void)loadEntityDataFromServer;
+- (void)showContents;
 @end
 
 @implementation EntityDetailViewController
@@ -24,13 +25,17 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
 @synthesize descriptionLabel = descriptionLabel_;
+@synthesize mainActionsView = mainActionsView_;
 @synthesize mainActionButton = mainActionButton_;
 @synthesize mainActionLabel = mainActionLabel_;
+@synthesize categoryImageView = categoryImageView_;
+@synthesize loadingView = loadingView_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     entityObject_ = [entity retain];
+    [self loadEntityDataFromServer];
   }
   return self;
 }
@@ -41,6 +46,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainActionLabel = nil;
   self.mainActionButton = nil;
   self.scrollView = nil;
+  self.categoryImageView = nil;
+  self.mainActionsView = nil;
+  self.loadingView = nil;
   [entityObject_ release];
   [super dealloc];
 }
@@ -50,6 +58,22 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [super didReceiveMemoryWarning];
   
   // Release any cached data, images, etc that aren't in use.
+}
+
+- (void)loadEntityDataFromServer {
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* entityMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Entity"];
+  NSString* resourcePath =
+      [NSString stringWithFormat:@"/entities/show.json?entity_id=%@", entityObject_.entityID];
+  [objectManager loadObjectsAtResourcePath:resourcePath
+                             objectMapping:entityMapping
+                                  delegate:self];
+  [self view];
+  [self.loadingView startAnimating];
+}
+
+- (void)showContents {
+  // Default does nothing. Override in subclasses.
 }
 
 #pragma mark - View lifecycle
@@ -67,6 +91,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   titleLabel_.text = entityObject_.title;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
+  categoryImageView_.image = entityObject_.categoryImage;
+  descriptionLabel_.text = nil;
   descriptionLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
   mainActionButton_.layer.masksToBounds = YES;
   mainActionButton_.layer.cornerRadius = 2.0;
@@ -79,10 +105,42 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.descriptionLabel = nil;
   self.mainActionLabel = nil;
   self.mainActionButton = nil;
+  self.scrollView = nil;
+  self.categoryImageView = nil;
+  self.mainActionsView = nil;
+  self.loadingView = nil;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  viewIsVisible_ = YES;
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
+  viewIsVisible_ = NO;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
+  dataLoaded_ = YES;
+  [self showContents];
+  [self.loadingView stopAnimating];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                   message:[error localizedDescription] 
+                                                  delegate:nil 
+                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
+	[alert show];
+	NSLog(@"Hit error: %@", error);
+  [self.loadingView stopAnimating];
 }
 
 @end

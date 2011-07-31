@@ -1,5 +1,5 @@
 //
-//  FilmDetailViewController.h
+//  GenericItemDetailViewController.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/10/11.
@@ -8,8 +8,6 @@
 
 #import "EntityDetailViewController.h"
 
-@interface FilmDetailViewController : EntityDetailViewController
-
-- (IBAction)mainActionButtonPressed:(id)sender;
+@interface GenericItemDetailViewController : EntityDetailViewController
 
 @end

@@ -1,14 +1,14 @@
 //
-//  MusicDetailViewController.m
+//  GenericItemDetailViewController.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/10/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "MusicDetailViewController.h"
+#import "GenericItemDetailViewController.h"
 
-@implementation MusicDetailViewController
+@implementation GenericItemDetailViewController
 
 #pragma mark - View lifecycle
 

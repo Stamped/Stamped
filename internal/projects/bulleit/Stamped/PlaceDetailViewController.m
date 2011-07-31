@@ -11,6 +11,8 @@
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "Entity.h"
+
 @interface PlaceAnnotation : NSObject<MKAnnotation> {
  @private
   CLLocationDegrees latitude_;
@@ -19,7 +21,6 @@
 
 - (id)initWithLatitude:(CLLocationDegrees)latitude
              longitude:(CLLocationDegrees)longitude;
-
 @end
 
 @implementation PlaceAnnotation
@@ -35,51 +36,72 @@
 }
 
 - (CLLocationCoordinate2D)coordinate {
-  return CLLocationCoordinate2DMake(latitude_, longitude_); 
+  return CLLocationCoordinate2DMake(latitude_, longitude_);
 }
 
 @end
 
 @interface PlaceDetailViewController ()
 - (void)confirmCall;
+- (void)addAnnotation;
 @end
 
 @implementation PlaceDetailViewController
 
-@synthesize mainActionsView = mainActionsView_;
 @synthesize mainContentView = mainContentView_;
 @synthesize callActionButton = callActionButton_;
 @synthesize callActionLabel = callActionLabel_;
 @synthesize mapView = mapView_;
-@synthesize hidesMainActions = hidesMainActions_;  // Scalar.
 
 #pragma mark - View lifecycle
 
-- (void)viewDidLoad {
-  [super viewDidLoad];
-  hidesMainActions_ = YES;
-  if (hidesMainActions_) {
-    mainContentView_.frame = CGRectOffset(mainContentView_.frame, 0, -CGRectGetHeight(mainActionsView_.frame));
-    self.mainActionsView.hidden = YES;
+- (void)showContents {
+  self.descriptionLabel.text = [entityObject_.address stringByReplacingOccurrencesOfString:@", "
+                                                                                withString:@"\n"];
+  self.mainActionsView.hidden = entityObject_.openTableURL == nil;
+  if (self.mainActionsView.hidden) {
+    mainContentView_.frame = CGRectOffset(mainContentView_.frame, 0,
+                                          -CGRectGetHeight(self.mainActionsView.frame));
   }
   callActionButton_.layer.masksToBounds = YES;
   callActionButton_.layer.cornerRadius = 2.0;
   callActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
-  self.descriptionLabel.text = @"75 9th Avenue\nNew York, NY 10011";
+  callActionLabel_.text = [entityObject_ localizedPhoneNumber];
+  if (!entityObject_.coordinates)
+    return;
 
-  CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(40.741964, -74.004793);
+  NSArray* coordinates = [entityObject_.coordinates componentsSeparatedByString:@","]; 
+  latitude_ = [(NSString*)[coordinates objectAtIndex:0] floatValue];
+  longitude_ = [(NSString*)[coordinates objectAtIndex:1] floatValue];
+  CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(latitude_, longitude_);
   CGFloat latlLongSpan = 400.0f / 111000.0f;
   MKCoordinateSpan mapSpan = MKCoordinateSpanMake(latlLongSpan, latlLongSpan);
   MKCoordinateRegion region = MKCoordinateRegionMake(mapCoord, mapSpan);
+  self.mainContentView.hidden = NO;
   [self.mapView setRegion:region animated:YES];
+
+  if (viewIsVisible_ && !annotation_)
+    [self addAnnotation];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  PlaceAnnotation* annotation = [[PlaceAnnotation alloc] initWithLatitude:40.741964
-                                                                longitude:-74.004793];
-  [self.mapView addAnnotation:annotation];
-  [annotation release];
+  if (dataLoaded_ && !annotation_)
+    [self addAnnotation];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
+  if (annotation_) {
+    [self.mapView removeAnnotation:annotation_];
+    annotation_ = nil;
+  }
+}
+
+- (void)addAnnotation {
+  annotation_ = [[PlaceAnnotation alloc] initWithLatitude:latitude_ longitude:longitude_];
+  [self.mapView addAnnotation:annotation_];
+  [annotation_ release];
 }
 
 #pragma mark - MKMapViewDelegate Methods
@@ -97,7 +119,6 @@
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.mainContentView = nil;
-  self.mainActionsView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
@@ -106,7 +127,6 @@
 
 - (void)dealloc {
   self.mainContentView = nil;
-  self.mainActionsView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
   self.mapView.delegate = nil;
@@ -117,17 +137,16 @@
 #pragma mark - Actions
 
 - (IBAction)reservationButtonPressed:(id)sender {
-  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://www.opentable.com/opentables.aspx?t=rest&r=5002"]];
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:entityObject_.openTableURL]];
 }
 
 - (IBAction)callButtonPressed:(id)sender {
   [self confirmCall];
-  
 }
 
 - (void)confirmCall {
   UIAlertView* alert = [[UIAlertView alloc] init];
-	[alert setTitle:@"(212) 741 5279"];
+	[alert setTitle:[entityObject_ localizedPhoneNumber]];
 	[alert setDelegate:self];
 	[alert addButtonWithTitle:@"Cancel"];
 	[alert addButtonWithTitle:@"Call"];
@@ -136,8 +155,9 @@
 }
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if (buttonIndex == 1)
-		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"tel://212-741-5279"]];
+	if (buttonIndex == 1) {
+    NSString* telURL = [NSString stringWithFormat:@"tel://%i", entityObject_.phone];
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
+  }
 }
-
 @end

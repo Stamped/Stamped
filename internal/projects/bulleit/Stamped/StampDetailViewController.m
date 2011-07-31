@@ -16,10 +16,8 @@
 #import "CreateStampViewController.h"
 #import "EntityDetailViewController.h"
 #import "Comment.h"
-#import "FilmDetailViewController.h"
 #import "PlaceDetailViewController.h"
-#import "BookDetailViewController.h"
-#import "MusicDetailViewController.h"
+#import "GenericItemDetailViewController.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
@@ -40,6 +38,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 - (void)renderComments;
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
+- (void)preloadEntityView;
 @end
 
 @implementation StampDetailViewController
@@ -60,12 +59,14 @@ static const CGFloat kKeyboardHeight = 216.0;
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     stamp_ = [stamp retain];
+    [self preloadEntityView];
   }
   return self;
 }
 
 - (void)dealloc {
   [stamp_ release];
+  [detailViewController_ release];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.headerView = nil;
   self.bottomToolbar = nil;
@@ -286,6 +287,20 @@ static const CGFloat kKeyboardHeight = 216.0;
   [createViewController release];
 }
 
+- (void)preloadEntityView {
+  if (detailViewController_)
+    return;
+
+  switch (stamp_.entityObject.entityCategory) {
+    case EntityCategoryPlace:
+      detailViewController_ = [[PlaceDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
+      break;
+    default:
+      detailViewController_ = [[GenericItemDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
+      break;
+  }
+}
+
 - (void)handleTap:(UITapGestureRecognizer*)sender {
   if (sender.state != UIGestureRecognizerStateEnded)
     return;
@@ -298,27 +313,8 @@ static const CGFloat kKeyboardHeight = 216.0;
     return;
 
   [addCommentField_ resignFirstResponder];
-  EntityDetailViewController* detailViewController = nil;
-  switch (stamp_.entityObject.entityCategory) {
-    case EntityCategoryPlace:
-      detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
-      break;
-    case EntityCategoryBook:
-      detailViewController = [[BookDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
-      break;
-    case EntityCategoryMusic:
-      detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
-      break;
-    case EntityCategoryFilm:
-      detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
-      break;
-    default:
-      detailViewController = [[EntityDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
-      break;
-  }
   // Pass the selected object to the new view controller.
-  [self.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
+  [self.navigationController pushViewController:detailViewController_ animated:YES];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

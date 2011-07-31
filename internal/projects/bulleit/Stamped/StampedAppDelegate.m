@@ -45,8 +45,10 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   entityMapping.primaryKeyAttribute = @"entityID";
-  [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", nil];
-  [entityMapping mapAttributes:@"category", @"subtitle", @"title", @"coordinates", nil];  
+  [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
+                                         @"opentable_url", @"openTableURL", nil];
+  [entityMapping mapAttributes:@"address", @"category", @"subtitle",
+                               @"title", @"coordinates", @"phone", nil];
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   commentMapping.primaryKeyAttribute = @"commentID";

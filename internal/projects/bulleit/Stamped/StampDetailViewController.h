@@ -10,14 +10,18 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
+@class EntityDetailViewController;
 @class UserImageView;
 @class Stamp;
 
-@interface StampDetailViewController : UIViewController<UITextFieldDelegate, RKObjectLoaderDelegate> {
+@interface StampDetailViewController : UIViewController<UITextFieldDelegate,
+                                                        RKObjectLoaderDelegate> {
  @private
   Stamp* stamp_;
   // Managed by the view system.
   CAGradientLayer* activityGradientLayer_;
+  // Preloaded Entity View.
+  EntityDetailViewController* detailViewController_;
 }
 
 - (id)initWithStamp:(Stamp*)stamp;
