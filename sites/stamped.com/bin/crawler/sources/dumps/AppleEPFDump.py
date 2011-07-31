@@ -46,37 +46,41 @@ class AppleEPFDistro(Singleton):
             mount_dir  = "/mnt/crawlerdata"
             
             volume = self.conn.get_all_volumes(volume_ids=[self._volume])[0]
-            if volume.status != 'available':
+            
+            if volume.status == 'in-use' and volume.attach_data.instance_id == self._instance_id and volume.attach_data.device == volume_dir:
+                pass
+            else:
+                utils.shell("sudo mkdir -p %s" % mount_dir)
+                
+                if volume.status != 'available':
+                    try:
+                        utils.log("unmounting and detaching volume '%s' from '%s'" % (self._volume, volume_dir))
+                        utils.shell('umount %s' % volume_dir)
+                        volume.detach(force=True)
+                    except EC2ResponseError:
+                        pass
+                    time.sleep(6)
+                    while volume.status != 'available':
+                        time.sleep(2)
+                        print volume.update()
+                
+                utils.log("apple data volume '%s' on instance '%s': attaching at '%s' and mounting at '%s'" % (self._volume, self._instance_id, volume_dir, mount_dir))
                 try:
-                    utils.log("unmounting and detaching volume '%s' from '%s'" % (self._volume, volume_dir))
-                    utils.shell('umount %s' % volume_dir)
-                    volume.detach(force=True)
+                    ret = self.conn.attach_volume(self._volume, self._instance_id, volume_dir)
+                    assert ret
                 except EC2ResponseError:
-                    pass
-                time.sleep(6)
-                while volume.status != 'available':
+                    utils.log("unable to mount apple data volume '%s' on instance '%s'" % (self._volume, self._instance_id))
+                    raise
+                
+                while volume.status != u'in-use':
                     time.sleep(2)
-                    print volume.update()
-            
-            utils.shell("sudo mkdir -p %s" % mount_dir)
-            
-            utils.log("apple data volume '%s' on instance '%s': attaching at '%s' and mounting at '%s'" % (self._volume, self._instance_id, volume_dir, mount_dir))
-            try:
-                ret = self.conn.attach_volume(self._volume, self._instance_id, volume_dir)
-                assert ret
-            except EC2ResponseError:
-                utils.log("unable to mount apple data volume '%s' on instance '%s'" % (self._volume, self._instance_id))
-                raise
-            
-            while volume.status != u'in-use':
-                time.sleep(2)
-                volume.update()
-            
-            mounted = False
-            time.sleep(4)
-            while not mounted:
-                mounted = 0 == utils.shell('mount -t ext3 %s %s' % (volume_dir, mount_dir))[1]
-                time.sleep(3)
+                    volume.update()
+                
+                mounted = False
+                time.sleep(4)
+                while not mounted:
+                    mounted = 0 == utils.shell('mount -t ext3 %s %s' % (volume_dir, mount_dir))[1]
+                    time.sleep(3)
             
             return mount_dir
         else:

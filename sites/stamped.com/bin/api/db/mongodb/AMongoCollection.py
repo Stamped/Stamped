@@ -21,6 +21,7 @@ class AMongoCollection():
         
         self._user = self._getenv_user()
         self._host = self._getenv_host()
+        self._desc = self.__class__.__name__
         self._port = self._getenv_port()
         self._db = self.DB
         
