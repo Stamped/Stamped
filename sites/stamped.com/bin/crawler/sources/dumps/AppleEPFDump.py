@@ -35,7 +35,7 @@ class AppleEPFDistro(Singleton):
     def apple_data_dir(self):
         if self.ec2:
             self._volume = 'vol-8cbb5ce6'
-            self._insance_id = utils.shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')[0]
+            self._instance_id = utils.shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')[0]
             
             self.conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
             volume_dir = "/dev/sdh5"
@@ -44,7 +44,7 @@ class AppleEPFDistro(Singleton):
             utils.shell("sudo mkdir -p %s" % mount_dir)
             
             try:
-                ret = self.conn.attach_volume(self._volume, self._instance, volume_dir)
+                ret = self.conn.attach_volume(self._volume, self._instance_id, volume_dir)
                 assert ret
             except EC2ResponseError:
                 raise Fail("unable to mount apple data volume '%s' on instance '%s'" % (self._volume, self._instance_id))
