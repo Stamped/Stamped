@@ -148,6 +148,10 @@ class AWSDeploymentStack(ADeploymentStack):
         os.system(cmd)
     
     def crawl(self, *args):
+        crawler_instances = self.crawler_instances
+        for instance in crawler_instances:
+            instance.terminate()
+        
         crawlers = [
             {
                 'sources' : [ 'apple_artists', 'apple_albums', 'apple_videos', ], 
@@ -177,7 +181,9 @@ class AWSDeploymentStack(ADeploymentStack):
                 config = {
                     'name'  : 'crawler%d' % index, 
                     'roles' : [ 'crawler' ], 
-                    #'instance_type' : 'm1.small', 
+                    'instance_type' : 'm1.small', 
+                    # TODO: don't hardcode this
+                    'placement' : 'us-east-1b', 
                 }
                 
                 instance = AWSInstance(self, config)
@@ -204,6 +210,9 @@ class AWSDeploymentStack(ADeploymentStack):
             for instance in crawler['instances']:
                 with settings(host_string=instance.public_dns_name):
                     with cd("/stamped"):
+                        cmd = '. bin/activate && mkdir -p /stamped/logs'
+                        sudo(cmd)
+                        
                         for i in xrange(crawler['numProcesses']):
                             if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
                                 sources = [ crawler['sources'][i], ]
@@ -211,15 +220,18 @@ class AWSDeploymentStack(ADeploymentStack):
                             else:
                                 sources = crawler['sources']
                                 ratio = "%s/%s" % (index, numCrawlers)
-                                index += 1
                             
                             sources = string.joinfields(sources, ' ')
-                            #cmd = '. bin/activate && python %s --db %s --ratio %s %s&' % (crawler_path, host, ratio, sources)
-                            # DEBUG
-                            cmd = '. bin/activate && python %s --db %s -t -l 20 %s &' % (crawler_path, host, sources)
+                            crawler_path = '/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py'
                             
-                            utils.log(cmd)
-                            #run(cmd, pty=False)
+                            cmd = '. bin/activate && python %s --db %s --ratio %s %s >& /stamped/logs/crawler%d.log&' % (crawler_path, host, ratio, sources, index)
+                            index += 1
+                            
+                            # DEBUG
+                            #cmd = '. bin/activate && python %s --db %s -t -l 20 %s &' % (crawler_path, host, sources)
+                            
+                            #utils.log(cmd)
+                            sudo(cmd, pty=False)
     
     def setup_crawler_data(self, *args):
         config = {

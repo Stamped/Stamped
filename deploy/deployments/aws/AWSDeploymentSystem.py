@@ -37,13 +37,20 @@ class AWSDeploymentSystem(DeploymentSystem):
             'to_port'     : 22, 
             'cidr_ip'     : '0.0.0.0/0', 
         }
-        
+        instance_ready_rule = {
+            'ip_protocol' : 'tcp', 
+            'from_port'   : 5001, 
+            'to_port'     : 5001, 
+            'cidr_ip'     : '0.0.0.0/0', 
+        }
+ 
         groups = [
             {
                 'name' : 'db', 
                 'desc' : 'Database security group', 
                 'rules' : [
                     ssh_rule, 
+                    instance_ready_rule, 
                     {
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 27017, 
@@ -63,6 +70,7 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'desc' : 'WebServer security group', 
                 'rules' : [
                     ssh_rule, 
+                    instance_ready_rule, 
                     {
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 5000, 
@@ -76,6 +84,7 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'desc' : 'Crawler security group', 
                 'rules' : [
                     ssh_rule, 
+                    instance_ready_rule, 
                 ], 
             }, 
         ]

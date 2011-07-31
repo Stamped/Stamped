@@ -125,6 +125,11 @@ class AWSInstance(AInstance):
     def _create(self):
         assert self.state is None
         
+        if 'placement' in self.config:
+            placement = self.config.placement
+        else:
+            placement = None
+        
         if 'instance_type' in self.config:
             instance_type = self.config.instance_type
         else:
@@ -139,14 +144,14 @@ class AWSInstance(AInstance):
         reservation = image.run(key_name=key_name, 
                                 instance_type=instance_type, 
                                 security_groups=security_groups, 
-                                user_data=user_data)
+                                user_data=user_data, 
+                                placement=placement)
         
         self._instance = reservation.instances[0]
     
     def _post_create(self):
-        utils.log("[%s] waiting for ssh service to come online (this may take a few minutes)..." % self)
         
-        # TODO: hook this up to pinging other ports which need to be initialized
+        utils.log("[%s] waiting for ssh service to come online (this may take a few minutes)..." % self)
         while True:
             try:
                 import socket
@@ -159,6 +164,21 @@ class AWSInstance(AInstance):
                 pass
         
         utils.log("[%s] ssh service is online" % self)
+        
+        utils.log("[%s] waiting for init script to finish..." % self)
+        if 'crawler' in self.roles:
+            while True:
+                try:
+                    import socket
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s.connect((self.public_dns_name, 5001))
+                    s.close()
+                    break
+                except socket.error:
+                    time.sleep(2)
+                    pass
+        
+        utils.log("[%s] init script has finished successfully" % self)
         
         """
         env.user = 'ubuntu'

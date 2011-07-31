@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import CSVUtils, epf, gevent, gzip, os, re, urllib
+import CSVUtils, epf, gevent, gzip, os, re, time, urllib
 
 from gevent.pool import Pool
 from utils import lazyProperty, Singleton
@@ -41,8 +41,22 @@ class AppleEPFDistro(Singleton):
             volume_dir = "/dev/sdh5"
             mount_dir  = "/mnt/crawlerdata"
             
+            volume = self.conn.get_all_volumes(volume_ids=[self._volume])[0]
+            if volume.status != 'available':
+                try:
+                    utils.log("unmounting and detaching volume '%s' from '%s'" % (self._volume, volume_dir))
+                    utils.shell('umount %s' % volume_dir)
+                    volume.detach(force=True)
+                except EC2ResponseError:
+                    pass
+                time.sleep(6)
+                while volume.status != 'available':
+                    time.sleep(2)
+                    print volume.update()
+            
             utils.shell("sudo mkdir -p %s" % mount_dir)
             
+            utils.log("apple data volume '%s' on instance '%s': attaching at '%s' and mounting at '%s'" % (self._volume, self._instance_id, volume_dir, mount_dir))
             try:
                 ret = self.conn.attach_volume(self._volume, self._instance_id, volume_dir)
                 assert ret
@@ -54,8 +68,11 @@ class AppleEPFDistro(Singleton):
                 time.sleep(2)
                 volume.update()
             
-            ret = utils.shell('mount -t ext3 %s %s' % (volume_dir, mount_dir))[1]
-            assert 0 == ret
+            mounted = False
+            time.sleep(4)
+            while not mounted:
+                mounted = 0 == utils.shell('mount -t ext3 %s %s' % (volume_dir, mount_dir))[1]
+                time.sleep(3)
             
             return mount_dir
         else:
@@ -158,6 +175,11 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         if os.path.exists(zipped):
             filename = zipped
         
+        utils.log("Opening Apple EPF file '%s'" % filename)
+        if not os.path.exists(filename):
+            utils.log("Apple EPF file '%s' does not exist!" % filename)
+            raise Fail("Apple EPF file '%s' does not exist!" % filename)
+        
         if filename.endswith(".gz"):
             f = gzip.open(filename, 'rb')
         else:
@@ -173,6 +195,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         return numLines
     
     def _run(self):
+        utils.log("%s run" % self)
         f, numLines, filename = self._open_file()
         utils.log("[%s] parsing ~%d entities from '%s'" % (self, numLines, self._filename))
         

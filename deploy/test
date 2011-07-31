@@ -73,8 +73,4 @@ while :; do
 done
 
 echo '>>>> Running init script'
-<<<<<<< HEAD
-python /stamped/bootstrap/init.py '{"instance_type": "m1.small", "name": "crawler_setup0", "roles": [], "stack": "fischtest"}' >& /stamped/bootstrap/log &
-=======
-python /stamped/bootstrap/init.py '{"stack": "test04", "replSet": "stamped-dev-01", "name": "dev0", "roles": ["webServer"], "port": "5000"}' >& /stamped/bootstrap/log &
->>>>>>> 3aff00b679dd93a550a1f143c2579745371ce9c5
+python /stamped/bootstrap/init.py '{"instance_type": "m1.small", "placement": "us-east-1b", "name": "crawler0", "roles": ["crawler"], "stack": "fischtest"}' >& /stamped/bootstrap/log &

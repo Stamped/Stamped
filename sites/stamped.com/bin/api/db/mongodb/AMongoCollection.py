@@ -6,11 +6,12 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import bson, copy, os, pymongo, utils
+import bson, copy, os, pymongo, time, utils
 
 from errors import Fail
 from utils import AttributeDict, getPythonConfigFile
 from datetime import datetime
+from pymongo.errors import AutoReconnect
 
 class AMongoCollection():
     DB   = 'stamped_test'
@@ -84,7 +85,12 @@ class AMongoCollection():
             return 'root'
     
     def _connect(self):
-        return pymongo.Connection(self._host, self._port)
+        while True:
+            try:
+                return pymongo.Connection(self._host, self._port, slave_okay=True)
+            except AutoReconnect:
+                utils.log("%s) %s:%d" % (self, self._host, self._port))
+                time.sleep(2)
     
     def _getDatabase(self):
         return self._connection[self._db]
