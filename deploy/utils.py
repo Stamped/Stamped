@@ -37,7 +37,9 @@ def shell3(cmd, customEnv=None):
     return status
 
 def scp(source, host, user, dest):
-    return Popen('scp %s %s@%s:%s' % (source, host, user, dest), shell=True).wait()
+    cmd = 'scp -i keys/test-keypair -o StrictHostKeyChecking=no %s %s@%s:%s' % (source, user, host, dest)
+    log(cmd)
+    return Popen(cmd, shell=True).wait()
 
 def lazy_property(undecorated):
     name = '_' + undecorated.__name__

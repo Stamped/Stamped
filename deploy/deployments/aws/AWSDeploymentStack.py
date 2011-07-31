@@ -17,7 +17,7 @@ from boto.exception import EC2ResponseError
 from gevent.pool import Pool
 from fabric.operations import *
 from fabric.api import *
-import fabric.contrib.files
+import fabric.contrib.files as fabricfiles
 
 ELASTIC_IP_ADDRESS = '184.73.229.100'
 
@@ -239,6 +239,7 @@ class AWSDeploymentStack(ADeploymentStack):
             'name' : 'crawler_setup0', 
             'roles' : [ ], 
             'instance_type' : 'm1.small', 
+            'placement' : 'us-east-1b', 
         }
         
         instance = AWSInstance(self, config)
@@ -253,7 +254,7 @@ class AWSDeploymentStack(ADeploymentStack):
             #"song", 
             "video", 
         ]
-
+        
         volume_dir = "/dev/sdh5"
         mount_dir = "/mnt/crawlerdata"
         
@@ -262,8 +263,26 @@ class AWSDeploymentStack(ADeploymentStack):
         
         with settings(host_string=instance.public_dns_name):
             utils.log("creating volume and attaching to instance %s..." % instance._instance.id)
-            #volume = self.conn.create_volume(8, instance._instance.placement)
-            volume = self.conn.get_all_volumes(volume_ids=['vol-8cbb5ce6', ])[0]
+            volume = self.conn.create_volume(8, instance._instance.placement)
+            #volume = self.conn.get_all_volumes(volume_ids=['vol-8cbb5ce6', ])[0]
+            
+            while volume.status == u'creating':
+                time.sleep(2)
+                volume.update()
+            
+            try:
+                if volume.status != 'available':
+                    i = self.conn.get_all_instances(instance_ids=[ volume.attach_data.instance_id, ])[0].instances[0]
+                    with settings(host_string=i.public_dns_name):
+                        sudo("umount %s" % volume_dir)
+                    
+                    volume.detach(force=True)
+                    time.sleep(6)
+                    while volume.status != 'available':
+                        time.sleep(2)
+                        print volume.update()
+            except EC2ResponseError:
+                pass
             
             try:
                 #with settings(warn_only=True):
@@ -275,8 +294,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 
                 for v in volumes:
                     if v.status == u'in-use' and \
-                       v.attach_data.instance_id == instance._instance.id and \
-                       v.attach_data.device == volume_dir:
+                       v.attach_data.instance_id == instance._instance.id:
                         with settings(warn_only=True):
                             sudo("umount %s" % volume_dir)
                         
@@ -296,8 +314,10 @@ class AWSDeploymentStack(ADeploymentStack):
             cmds = [
                 'mkdir -p %s' % mount_dir, 
                 'sync', 
-                #'mkfs -t ext3 %s' % volume_dir, 
+                'mkfs -t ext3 %s' % volume_dir, 
                 'mount -t ext3 %s %s' % (volume_dir, mount_dir), 
+                'chown -R %s %s' % (env.user, mount_dir, ), 
+                'chmod -R 700 %s' % (mount_dir, ), 
             ]
             
             # initialize and mount volume
@@ -311,12 +331,13 @@ class AWSDeploymentStack(ADeploymentStack):
                 
                 #remote_path = os.path.join(os.path.join(mount_dir, "data/apple"), name)
                 
-                if not files.exists(os.path.join(mount_dir, os.path.basename(filename)), use_sudo=True):
-                    utils.log("uploading file '%s'" % filename)
-                    utils.scp(filename, instance.public_dns_name, env.user, mount_dir)
-                    #put(local_path=filename, remote_path=mount_dir, use_sudo=True)
-                else:
-                    utils.log("remote file '%s' already exists" % filename)
+                utils.log("uploading file '%s'" % filename)
+                #utils.scp(filename, instance.public_dns_name, env.user, mount_dir)
+                put(local_path=filename, remote_path=mount_dir, use_sudo=True)
+                utils.log("done uploading file '%s'" % filename)
+                #if not fabricfiles.exists(os.path.join(mount_dir, os.path.basename(filename)), use_sudo=True):
+                #else:
+                #    utils.log("remote file '%s' already exists" % filename)
             
             pool = Pool(64)
             
@@ -325,6 +346,7 @@ class AWSDeploymentStack(ADeploymentStack):
             for name in files:
                 filename = os.path.join(epf_base, name)
                 pool.spawn(_put_file, filename)
+                #_put_file(filename)
             
             pool.join()
             utils.log("upload successful; unmounting and detaching volume...")
