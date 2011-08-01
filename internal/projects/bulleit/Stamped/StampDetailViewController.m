@@ -325,7 +325,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
 - (void)loadCommentsFromServer {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* commentMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Comment"];
+  RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&authenticated_user_id=%@",
       stamp_.stampID, [AccountManager sharedManager].currentUser.userID];
   [objectManager loadObjectsAtResourcePath:resourcePath
@@ -382,7 +382,7 @@ static const CGFloat kKeyboardHeight = 216.0;
     return YES;
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* commentMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Comment"];
+  RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/comments/create.json" delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = commentMapping;

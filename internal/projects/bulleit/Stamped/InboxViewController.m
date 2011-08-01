@@ -133,7 +133,7 @@ typedef enum {
 
 - (void)loadStampsFromNetwork {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* stampMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Stamp"];
+  RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   NSString* userID = [AccountManager sharedManager].currentUser.userID;
   NSString* resourcePath = [NSString stringWithFormat:@"/collections/inbox.json?authenticated_user_id=%@", userID];
   [objectManager loadObjectsAtResourcePath:resourcePath

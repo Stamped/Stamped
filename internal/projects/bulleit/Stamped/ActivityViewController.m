@@ -66,7 +66,7 @@
 
 - (void)loadEventsFromNetwork {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* eventMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"Event"];
+  RKObjectMapping* eventMapping = [objectManager.mappingProvider mappingForKeyPath:@"Event"];
   NSString* userID = [AccountManager sharedManager].currentUser.userID;
   NSString* resourcePath = [NSString stringWithFormat:@"/activity/show.json?authenticated_user_id=%@", userID];
   [objectManager loadObjectsAtResourcePath:resourcePath

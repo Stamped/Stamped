@@ -16,6 +16,7 @@
 @property (nonatomic, retain) NSDate* created;
 @property (nonatomic, retain) NSString* genre;
 @property (nonatomic, retain) Comment* comment;
+@property (nonatomic, retain) NSString* eventID;
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, retain) User* user;
 

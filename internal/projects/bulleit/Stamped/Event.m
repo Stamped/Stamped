@@ -16,6 +16,7 @@
 @dynamic created;
 @dynamic genre;
 @dynamic comment;
+@dynamic eventID;
 @dynamic stamp;
 @dynamic user;
 

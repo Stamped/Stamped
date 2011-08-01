@@ -24,6 +24,7 @@
     </entity>
     <entity name="Event" representedClassName="Event">
         <attribute name="created" optional="YES" attributeType="Date"/>
+        <attribute name="eventID" optional="YES" attributeType="String"/>
         <attribute name="genre" optional="YES" attributeType="String"/>
         <relationship name="comment" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Comment" inverseName="events" inverseEntity="Comment"/>
         <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="event" inverseEntity="Stamp"/>
@@ -59,8 +60,8 @@
     <elements>
         <element name="Comment" positionX="162" positionY="45" width="128" height="135"/>
         <element name="Entity" positionX="556" positionY="216" width="128" height="195"/>
+        <element name="Event" positionX="160" positionY="192" width="128" height="135"/>
         <element name="Stamp" positionX="216" positionY="324" width="128" height="135"/>
         <element name="User" positionX="-45" positionY="63" width="128" height="240"/>
-        <element name="Event" positionX="160" positionY="192" width="128" height="120"/>
     </elements>
 </model>

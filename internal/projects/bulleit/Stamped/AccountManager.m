@@ -119,7 +119,7 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* userMapping = [objectManager.mappingProvider objectMappingForKeyPath:@"User"];
+  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* resourcePath = [NSString stringWithFormat:@"/users/lookup.json?screen_names=%@", textField.text];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:userMapping
