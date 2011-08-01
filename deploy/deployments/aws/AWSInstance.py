@@ -149,34 +149,32 @@ class AWSInstance(AInstance):
         
         self._instance = reservation.instances[0]
     
-    def _post_create(self):
-        
-        utils.log("[%s] waiting for ssh service to come online (this may take a few minutes)..." % self)
+    def _validate_port(self, port, desc=None):
+        if desc == None:
+            desc = "port %s" % (str(port))
+        utils.log("[%s] waiting for %s to come online (this may take a few minutes)..." % (self, desc))
         while True:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.connect((self.public_dns_name, 22))
+                s.connect((self.public_dns_name, port))
                 s.close()
                 break
             except socket.error:
                 time.sleep(2)
                 pass
+        utils.log("[%s] %s is online" % (self, desc))
+    
+    def _post_create(self):
         
-        utils.log("[%s] ssh service is online" % self)
+        # Check for SSH
+        self._validate_port(22, desc="ssh service")
         
-        utils.log("[%s] waiting for init script to finish..." % self)
-        if 'crawler' in self.roles:
-            while True:
-                try:
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.connect((self.public_dns_name, 5001))
-                    s.close()
-                    break
-                except socket.error:
-                    time.sleep(2)
-                    pass
+        # Check for init to finish
+        self._validate_port(5001, desc="init script")
         
-        utils.log("[%s] init script has finished successfully" % self)
+        if 'db' in self.roles:
+            # Check for mongo to finish
+            self._validate_port(27017, desc="mongo")
         
         """
         env.user = 'ubuntu'
