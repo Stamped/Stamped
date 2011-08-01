@@ -7,6 +7,7 @@
 //
 
 #import "Comment.h"
+#import "Event.h"
 #import "User.h"
 
 
@@ -17,5 +18,6 @@
 @dynamic restampID;
 @dynamic created;
 @dynamic user;
+@dynamic event;
 
 @end

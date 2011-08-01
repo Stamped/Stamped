@@ -13,6 +13,7 @@
 
 #import "Comment.h"
 #import "Entity.h"
+#import "Event.h"
 #import "Stamp.h"
 #import "User.h"
 
@@ -70,16 +71,23 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
             toRelationship:@"comments"
          withObjectMapping:commentMapping];
   
-  
+  RKManagedObjectMapping* eventMapping = [RKManagedObjectMapping mappingForClass:[Event class]];
+  [eventMapping mapAttributes:@"created", @"genre", nil];
+  [eventMapping mapRelationship:@"comment" withObjectMapping:commentMapping];
+  [eventMapping mapRelationship:@"stamp" withObjectMapping:stampMapping];
+  [eventMapping mapRelationship:@"user" withObjectMapping:userMapping];
+
   // Example date string: 2011-07-19 20:49:42.037000
   NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
 	[stampMapping.dateFormatStrings addObject:dateFormat];
   [commentMapping.dateFormatStrings addObject:dateFormat];
+  [eventMapping.dateFormatStrings addObject:dateFormat];
   
   [objectManager.mappingProvider setObjectMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setObjectMapping:stampMapping forKeyPath:@"Stamp"];
   [objectManager.mappingProvider setObjectMapping:entityMapping forKeyPath:@"Entity"];
   [objectManager.mappingProvider setObjectMapping:commentMapping forKeyPath:@"Comment"];
+  [objectManager.mappingProvider setObjectMapping:eventMapping forKeyPath:@"Event"];
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];

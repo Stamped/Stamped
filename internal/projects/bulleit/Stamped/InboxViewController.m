@@ -59,14 +59,6 @@ typedef enum {
 @synthesize filmsFilterButton = filmsFilterButton_;
 @synthesize musicFilterButton = musicFilterButton_;
 
-- (id)initWithStyle:(UITableViewStyle)style {
-  self = [super initWithStyle:style];
-  if (self) {
-    // Custom initialization
-  }
-  return self;
-}
-
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterButtons = nil;

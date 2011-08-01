@@ -47,7 +47,7 @@
 		7E35A72513DB8647008F856F /* cancel_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72413DB8647008F856F /* cancel_background@2x.png */; };
 		7E35A72913DB895D008F856F /* search_field_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72813DB895D008F856F /* search_field_background@2x.png */; };
 		7E35A72B13DB9267008F856F /* search_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72A13DB9267008F856F /* search_icon@2x.png */; };
-		7E35A72E13DB9CEA008F856F /* CreateStampTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E35A72D13DB9CEA008F856F /* CreateStampTableViewCell.m */; };
+		7E35A72E13DB9CEA008F856F /* SearchEntitiesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E35A72D13DB9CEA008F856F /* SearchEntitiesTableViewCell.m */; };
 		7E3B6D7A13D7509600FBE958 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3B6D7913D7509600FBE958 /* Util.m */; };
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
 		7E42DCBD13DB64CA00AF63BE /* SearchEntitiesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */; };
@@ -81,6 +81,8 @@
 		7E7E10A413DF14C900E44DE1 /* credit_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A213DF14C900E44DE1 /* credit_icon@2x.png */; };
 		7E7E10A713DF14D100E44DE1 /* toolbar_checkmark@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A513DF14D100E44DE1 /* toolbar_checkmark@2x.png */; };
 		7E7E10A813DF14D100E44DE1 /* toolbar_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A613DF14D100E44DE1 /* toolbar_close@2x.png */; };
+		7E8B1DEA13E5FF9C0060646D /* ActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE813E5FF9C0060646D /* ActivityViewController.m */; };
+		7E8B1DEB13E5FF9C0060646D /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */; };
 		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
 		7E9EE35313DF683500F4736F /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EE35213DF683500F4736F /* Stamp.m */; };
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
@@ -93,14 +95,13 @@
 		7EC0178313C3754300ABE6E2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178213C3754300ABE6E2 /* main.m */; };
 		7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */; };
 		7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0178713C3754300ABE6E2 /* MainWindow.xib */; };
-		7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */; };
-		7EC0179513C3754300ABE6E2 /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */; };
 		7EC0179C13C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
 		7EC0179D13C3754300ABE6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177713C3754300ABE6E2 /* Foundation.framework */; };
 		7EC0179E13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */; };
 		7EC017A613C3754400ABE6E2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A413C3754300ABE6E2 /* InfoPlist.strings */; };
 		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
 		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
+		7EC05DB713E60D8E00B22C3F /* Event.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC05DB613E60D8E00B22C3F /* Event.m */; };
 		7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */; };
 		7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */; };
 		7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */; };
@@ -123,6 +124,8 @@
 		7EE7E35A13CCB2A800FA3B3A /* InboxTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */; };
 		7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */; };
 		7EE7E37013CD223100FA3B3A /* inbox_top_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */; };
+		7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */; };
+		7EE9022F13E62366008BCDFB /* activity_chat_badge@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE9022E13E62366008BCDFB /* activity_chat_badge@2x.png */; };
 		7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
 		7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* InboxViewController.m */; };
 		7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* InboxViewController.xib */; };
@@ -268,8 +271,8 @@
 		7E35A72413DB8647008F856F /* cancel_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cancel_background@2x.png"; sourceTree = "<group>"; };
 		7E35A72813DB895D008F856F /* search_field_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_field_background@2x.png"; sourceTree = "<group>"; };
 		7E35A72A13DB9267008F856F /* search_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_icon@2x.png"; sourceTree = "<group>"; };
-		7E35A72C13DB9CEA008F856F /* CreateStampTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateStampTableViewCell.h; sourceTree = "<group>"; };
-		7E35A72D13DB9CEA008F856F /* CreateStampTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateStampTableViewCell.m; sourceTree = "<group>"; };
+		7E35A72C13DB9CEA008F856F /* SearchEntitiesTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesTableViewCell.h; sourceTree = "<group>"; };
+		7E35A72D13DB9CEA008F856F /* SearchEntitiesTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesTableViewCell.m; sourceTree = "<group>"; };
 		7E3B6D7813D7509600FBE958 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		7E3B6D7913D7509600FBE958 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
 		7E42DCB913DB64CA00AF63BE /* SearchEntitiesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesViewController.h; sourceTree = "<group>"; };
@@ -309,6 +312,9 @@
 		7E7E10A213DF14C900E44DE1 /* credit_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "credit_icon@2x.png"; sourceTree = "<group>"; };
 		7E7E10A513DF14D100E44DE1 /* toolbar_checkmark@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_checkmark@2x.png"; sourceTree = "<group>"; };
 		7E7E10A613DF14D100E44DE1 /* toolbar_close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_close@2x.png"; sourceTree = "<group>"; };
+		7E8B1DE713E5FF9C0060646D /* ActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityViewController.h; sourceTree = "<group>"; };
+		7E8B1DE813E5FF9C0060646D /* ActivityViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityViewController.m; sourceTree = "<group>"; };
+		7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ActivityViewController.xib; sourceTree = "<group>"; };
 		7E92C11E13E32407008D379D /* shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_background.png; sourceTree = "<group>"; };
 		7E9EE35113DF683500F4736F /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
 		7E9EE35213DF683500F4736F /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
@@ -327,15 +333,14 @@
 		7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedAppDelegate.h; sourceTree = "<group>"; };
 		7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = StampedAppDelegate.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7EC0178813C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
-		7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActivityViewController.h; sourceTree = "<group>"; };
-		7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ActivityViewController.m; sourceTree = "<group>"; };
-		7EC0179413C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ActivityViewController.xib; sourceTree = "<group>"; };
 		7EC0179B13C3754300ABE6E2 /* StampedTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StampedTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EC017A313C3754300ABE6E2 /* StampedTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "StampedTests-Info.plist"; sourceTree = "<group>"; };
 		7EC017A513C3754300ABE6E2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7EC017A713C3754400ABE6E2 /* StampedTests-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StampedTests-Prefix.pch"; sourceTree = "<group>"; };
 		7EC017A813C3754400ABE6E2 /* StampedTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StampedTests.h; sourceTree = "<group>"; };
 		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
+		7EC05DB513E60D8E00B22C3F /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Event.h; sourceTree = "<group>"; };
+		7EC05DB613E60D8E00B22C3F /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Event.m; sourceTree = "<group>"; };
 		7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
 		7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
 		7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TodoViewController.xib; sourceTree = "<group>"; };
@@ -361,6 +366,9 @@
 		7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserImageView.h; sourceTree = "<group>"; };
 		7EE7E35E13CCB3D100FA3B3A /* UserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserImageView.m; sourceTree = "<group>"; };
 		7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_top_border@2x.png"; sourceTree = "<group>"; };
+		7EE9022B13E61BF0008BCDFB /* ActivityCommentTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityCommentTableViewCell.h; sourceTree = "<group>"; };
+		7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityCommentTableViewCell.m; sourceTree = "<group>"; };
+		7EE9022E13E62366008BCDFB /* activity_chat_badge@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "activity_chat_badge@2x.png"; sourceTree = "<group>"; };
 		7EF1105613C906A90059F9BD /* EntityDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntityDetailViewController.h; sourceTree = "<group>"; };
 		7EF1105713C906A90059F9BD /* EntityDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EntityDetailViewController.m; sourceTree = "<group>"; };
 		7EFE8F2513C39FA100324F34 /* InboxViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InboxViewController.h; sourceTree = "<group>"; };
@@ -419,6 +427,8 @@
 			children = (
 				7E42DCB913DB64CA00AF63BE /* SearchEntitiesViewController.h */,
 				7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */,
+				7E35A72C13DB9CEA008F856F /* SearchEntitiesTableViewCell.h */,
+				7E35A72D13DB9CEA008F856F /* SearchEntitiesTableViewCell.m */,
 				7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */,
 			);
 			name = "Search Entities";
@@ -461,6 +471,8 @@
 				7E1D92DA13D5F5C40022412D /* User.h */,
 				7E1D92DB13D5F5C40022412D /* User.m */,
 				7EBCBE8513D78896009FCECF /* Comment.h */,
+				7EC05DB513E60D8E00B22C3F /* Event.h */,
+				7EC05DB613E60D8E00B22C3F /* Event.m */,
 				7EBCBE8613D78896009FCECF /* Comment.m */,
 				7E2BEBED13D7757200A116D2 /* ImageToDataTransformer.h */,
 				7E2BEBEE13D7757300A116D2 /* ImageToDataTransformer.m */,
@@ -483,8 +495,6 @@
 		7E42DCBE13DB64D100AF63BE /* Create Stamp */ = {
 			isa = PBXGroup;
 			children = (
-				7E35A72C13DB9CEA008F856F /* CreateStampTableViewCell.h */,
-				7E35A72D13DB9CEA008F856F /* CreateStampTableViewCell.m */,
 				7E22D6AC13DDA34100C4005E /* CreateStampViewController.h */,
 				7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */,
 				7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */,
@@ -644,6 +654,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7EE9023013E6236B008BCDFB /* Activity */,
 				7E0BC47513E4A2BE008CC076 /* Search Entities */,
 				7E42DCC913DB72B700AF63BE /* Create Stamp */,
 				7E22679A13D4E94800657A66 /* Stamp Detail */,
@@ -693,9 +704,11 @@
 		7ED2EF5C13E0DA48007F1AFB /* Activity */ = {
 			isa = PBXGroup;
 			children = (
-				7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */,
-				7EC0178D13C3754300ABE6E2 /* ActivityViewController.h */,
-				7EC0178E13C3754300ABE6E2 /* ActivityViewController.m */,
+				7E8B1DE713E5FF9C0060646D /* ActivityViewController.h */,
+				7E8B1DE813E5FF9C0060646D /* ActivityViewController.m */,
+				7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */,
+				7EE9022B13E61BF0008BCDFB /* ActivityCommentTableViewCell.h */,
+				7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */,
 			);
 			name = Activity;
 			sourceTree = "<group>";
@@ -757,6 +770,14 @@
 				7EE7E35913CCB2A800FA3B3A /* InboxTableViewCell.m */,
 			);
 			name = Inbox;
+			sourceTree = "<group>";
+		};
+		7EE9023013E6236B008BCDFB /* Activity */ = {
+			isa = PBXGroup;
+			children = (
+				7EE9022E13E62366008BCDFB /* activity_chat_badge@2x.png */,
+			);
+			name = Activity;
 			sourceTree = "<group>";
 		};
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
@@ -948,7 +969,6 @@
 			files = (
 				7EC0178013C3754300ABE6E2 /* InfoPlist.strings in Resources */,
 				7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */,
-				7EC0179513C3754300ABE6E2 /* ActivityViewController.xib in Resources */,
 				7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */,
 				7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */,
 				7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */,
@@ -1024,6 +1044,8 @@
 				7E0BC48713E4A30C008CC076 /* tab_icon_share_active@2x.png in Resources */,
 				7E0BC48813E4A30C008CC076 /* tab_icon_share@2x.png in Resources */,
 				7E0BC48913E4A30C008CC076 /* tab_icon_stamped@2x.png in Resources */,
+				7E8B1DEB13E5FF9C0060646D /* ActivityViewController.xib in Resources */,
+				7EE9022F13E62366008BCDFB /* activity_chat_badge@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1061,7 +1083,6 @@
 			files = (
 				7EC0178313C3754300ABE6E2 /* main.m in Sources */,
 				7EC0178613C3754300ABE6E2 /* StampedAppDelegate.m in Sources */,
-				7EC0178F13C3754300ABE6E2 /* ActivityViewController.m in Sources */,
 				7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */,
 				7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */,
 				7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */,
@@ -1080,12 +1101,15 @@
 				7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */,
 				7E512FC613D9F3B400547A20 /* STBadgeView.m in Sources */,
 				7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */,
-				7E35A72E13DB9CEA008F856F /* CreateStampTableViewCell.m in Sources */,
+				7E35A72E13DB9CEA008F856F /* SearchEntitiesTableViewCell.m in Sources */,
 				7E22D6AF13DDA34100C4005E /* CreateStampViewController.m in Sources */,
 				7E9EE35313DF683500F4736F /* Stamp.m in Sources */,
 				7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */,
 				7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */,
 				7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */,
+				7E8B1DEA13E5FF9C0060646D /* ActivityViewController.m in Sources */,
+				7EC05DB713E60D8E00B22C3F /* Event.m in Sources */,
+				7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1127,14 +1151,6 @@
 				7EC0178813C3754300ABE6E2 /* en */,
 			);
 			name = MainWindow.xib;
-			sourceTree = "<group>";
-		};
-		7EC0179313C3754300ABE6E2 /* ActivityViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				7EC0179413C3754300ABE6E2 /* en */,
-			);
-			name = ActivityViewController.xib;
 			sourceTree = "<group>";
 		};
 		7EC017A413C3754300ABE6E2 /* InfoPlist.strings */ = {

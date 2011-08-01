@@ -27,7 +27,9 @@
 @dynamic profileImage;
 @dynamic screenName;
 @dynamic stampImage;
-@dynamic Stamps;
+@dynamic stamps;
+@dynamic events;
+@dynamic comments;
 
 - (void)generateStampImage {
   CGFloat r1, g1, b1, r2, g2, b2;

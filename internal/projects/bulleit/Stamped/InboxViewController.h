@@ -14,7 +14,7 @@
   BOOL userDidScroll_;
   BOOL shouldReload_;
   BOOL isLoading_;
-  
+
   IBOutlet UIView* filterView_;
   IBOutlet UIButton* placesFilterButton_;
   IBOutlet UIButton* booksFilterButton_;
