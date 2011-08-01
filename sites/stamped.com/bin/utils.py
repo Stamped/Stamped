@@ -45,12 +45,16 @@ def lazyProperty(undecorated):
 
 def log(s):
     print _formatLog(s)
+    sys.stdout.flush()
+    sys.stderr.flush()
 
 def logRaw(s, includeFormat=False):
     if includeFormat:
         s = _formatLog(s)
     
     sys.stdout.write(s)
+    sys.stdout.flush()
+    sys.stderr.flush()
 
 def _formatLog(s):
     try:
