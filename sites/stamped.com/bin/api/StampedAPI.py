@@ -877,7 +877,7 @@ class StampedAPI(AStampedAPI):
     # Result Formatting #
     # ################# #
     
-    def _returnStamp(self, stamp, user=None, entity=None, comments=None):
+    def _returnStamp(self, stamp, mini=False):
         result = {}
         result['stamp_id'] = stamp['stamp_id']
         
@@ -886,14 +886,6 @@ class StampedAPI(AStampedAPI):
         
         ### TODO: Explicitly define entity, expand if passed full object
         result['entity'] = self._returnEntity(stamp['entity'], mini=True)
-        
-        ### TODO: Add comments if passed
-        if 'comment_preview' in stamp and len(stamp.comment_preview) > 0:
-            result['comment_preview'] = []
-            for comment in stamp.comment_preview:
-                result['comment_preview'].append(self._returnComment(comment))
-        else:
-            result['comment_preview'] = []
         
         if 'blurb' in stamp:
             result['blurb'] = stamp.blurb
@@ -919,14 +911,25 @@ class StampedAPI(AStampedAPI):
             result['created'] = str(stamp.timestamp['created'])
         else:
             result['created'] = None
-                
-        if 'stats' in stamp and 'num_comments' in stamp.stats:
-            result['num_comments'] = stamp.stats['num_comments']
-        else:
-            result['num_comments'] = 0
             
-        if 'flags' in stamp:
-            result['flags'] = stamp['flags']
+        if mini == True:
+            pass
+            
+        else:
+            if 'comment_preview' in stamp and len(stamp.comment_preview) > 0:
+                result['comment_preview'] = []
+                for comment in stamp.comment_preview:
+                    result['comment_preview'].append(self._returnComment(comment))
+            else:
+                result['comment_preview'] = []
+                    
+            if 'stats' in stamp and 'num_comments' in stamp.stats:
+                result['num_comments'] = stamp.stats['num_comments']
+            else:
+                result['num_comments'] = 0
+                
+            if 'flags' in stamp:
+                result['flags'] = stamp['flags']
 
         return result
     
@@ -1118,7 +1121,7 @@ class StampedAPI(AStampedAPI):
         
         ### TODO: Explicitly define stamp, expand if passed full object
         if 'stamp' in activity:
-            result['stamp'] = self._returnStamp(Stamp(activity['stamp']))
+            result['stamp'] = self._returnStamp(Stamp(activity['stamp']), mini=True)
         else:
             result['stamp'] = None
         
