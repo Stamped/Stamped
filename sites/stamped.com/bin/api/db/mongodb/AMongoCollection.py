@@ -259,7 +259,10 @@ class AMongoCollection():
             while True:
                 try:
                     ret = self._collection.insert(obj, safe=True)
-                    return self._getStringFromObjectId(ret)
+                    s = self._getStringFromObjectId(ret)
+                    utils.log("[%s] successfully inserted 1 document (%s)" % (self, s))
+                    
+                    return s
                 except AutoReconnect as e:
                     num_retries += 1
                     if num_retries > max_retries:
@@ -281,15 +284,16 @@ class AMongoCollection():
             max_retries = 5
             while True:
                 try:
-                    return self._collection.insert(objs)
+                    ret = self._collection.insert(objs)
+                    utils.log("[%s] successfully inserted %d documents" % (self, len(objs)))
                 except AutoReconnect as e:
                     num_retries += 1
                     if num_retries > max_retries:
-                        msg = "%s) unable to connect to host after %d retries (%s)" % (self, max_retries, str(e))
+                        msg = "[%s] unable to connect to host after %d retries (%s)" % (self, max_retries, str(e))
                         utils.log(msg)
                         raise
                     
-                    utils.log("%s) retrying to insert %d documents to host: %s" % (self, len(objs), str(e)))
+                    utils.log("[%s] retrying to insert %d documents to host: %s" % (self, len(objs), str(e)))
                     time.sleep(1)
         else:
             return False
