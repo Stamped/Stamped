@@ -156,8 +156,8 @@ def parseCommandLine():
             num, den = options.ratio.split('/')
             num, den = int(num), int(den)
             num, den = float(num), float(den)
-            options.offset = math.floor((count * (num - 1)) / den)
-            options.limit  = math.ceil(count / den) + 1
+            options.offset = int(math.floor((count * (num - 1)) / den))
+            options.limit  = int(math.ceil(count / den) + 1)
     
     if options.db:
         if ':' in options.db:
