@@ -64,7 +64,7 @@ class OpenTableDump(AExternalDumpEntitySource):
     def _parseEntity(self, sheet, index, numEntities):
         if numEntities > 100 and ((index - 1) % (numEntities / 100)) == 0:
             utils.log("[%s] done parsing %s" % \
-                (self.NAME, utils.getStatusStr(index - 1, numEntities)))
+                (self.NAME, utils.getStatusStr(index - 1 - Globals.options.offset, numEntities)))
         
         row = sheet.row_values(index)
         

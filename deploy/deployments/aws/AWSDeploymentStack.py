@@ -26,9 +26,7 @@ class AWSDeploymentStack(ADeploymentStack):
         ADeploymentStack.__init__(self, name, system)
         
         self.commonOptions = system.commonOptions
-        
-        # maximum number of instances to create at one time
-        self._pool = Pool(8)
+        self._pool = Pool(64)
         
         if instances is None:
             instances = config.getInstances()
@@ -149,21 +147,17 @@ class AWSDeploymentStack(ADeploymentStack):
         os.system(cmd)
     
     def crawl(self, *args):
-        crawler_instances = self.crawler_instances
-        for instance in crawler_instances:
-            instance.terminate()
-        
         crawlers = [
             {
                 'sources' : [ 'apple_artists', 'apple_albums', 'apple_videos', ], 
                 'numInstances' : 1, 
-                'mapSourceToProcess' : True, 
+                'numProcesses' : 1, 
             }, 
-            #{
-            #    'sources' : [ 'opentable', ], 
-            #    'numInstances' : 4, 
-            #    'numProcesses' : 2, 
-            #}, 
+            {
+                'sources' : [ 'opentable', ], 
+                'numInstances' : 8, 
+                'numProcesses' : 4, 
+            }, 
             #{
             #    'sources' : [ 'factualusrestaurants', ], 
             #    'numInstances' : 16, 
@@ -171,31 +165,59 @@ class AWSDeploymentStack(ADeploymentStack):
             #}, 
         ]
         
-        instances = []
-        index = 0
+        #crawler_instances = self.crawler_instances
+        crawler_instances = []
+        reservations = self.conn.get_all_instances()
         
+        for reservation in reservations:
+            for instance in reservation.instances:
+                if hasattr(instance, 'tags') and 'stack' in instance.tags and instance.state == 'running':
+                    stackName = instance.tags['stack']
+                    
+                    if stackName == self.name and instance.tags['name'].startswith('crawler'):
+                        crawler_instances.append(AWSInstance(self, instance))
+        
+        num_instances = 0
         for crawler in crawlers:
-            if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
-                crawler['numProcesses'] = len(crawler['sources'])
-            
-            for i in xrange(crawler['numInstances']):
-                config = {
-                    'name'  : 'crawler%d' % index, 
-                    'roles' : [ 'crawler' ], 
-                    'instance_type' : 'm1.small', 
-                    # TODO: don't hardcode this
-                    'placement' : 'us-east-1b', 
-                }
-                
-                instance = AWSInstance(self, config)
-                index += 1
-                if not 'instances' in crawler:
-                    crawler['instances'] = []
-                
-                crawler['instances'].append(instance)
-                self._pool.spawn(instance.create)
+            num_instances += crawler['numInstances']
         
-        self._pool.join()
+        if len(crawler_instances) == num_instances:
+            for instance in crawler_instances:
+                num = int(instance.tags['name'].replace('crawler', ''))
+                if 'instances' in crawlers[num]:
+                    crawlers[num]['instances'].append(instance)
+                else:
+                    crawlers[num]['instances'] = [ instance ]
+            for crawler in crawlers:
+                from pprint import pprint
+                pprint(crawler)
+        else:
+            for instance in crawler_instances:
+                instance.terminate()
+            
+            instances = []
+            index = 0
+            
+            for crawler in crawlers:
+                for i in xrange(crawler['numInstances']):
+                    config = {
+                        'name'  : 'crawler%d' % index, 
+                        'roles' : [ 'crawler' ], 
+                        'instance_type' : 'm1.small', 
+                        # TODO: don't hardcode this
+                        'placement' : 'us-east-1b', 
+                    }
+                    
+                    instance = AWSInstance(self, config)
+                    index += 1
+                    if not 'instances' in crawler:
+                        crawler['instances'] = []
+                    
+                    crawler['instances'].append(instance)
+                    self._pool.spawn(instance.create)
+            
+            self._pool.join()
+        
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
         
@@ -205,34 +227,35 @@ class AWSDeploymentStack(ADeploymentStack):
         host = db_instances[0].private_ip_address
         
         for crawler in crawlers:
-            numCrawlers = crawler['numInstances'] * crawler['numProcesses']
+            if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
+                numProcesses = len(crawler['sources'])
+            else:
+                numProcesses = crawler['numProcesses']
+            
+            numCrawlers = crawler['numInstances'] * numProcesses
             index = 0
             
             for instance in crawler['instances']:
                 with settings(host_string=instance.public_dns_name):
-                    with cd("/stamped"):
-                        cmd = '. bin/activate && mkdir -p /stamped/logs'
-                        sudo(cmd)
+                    cmd = 'mkdir -p /stamped/logs && chmod -R 777 /stamped/logs'
+                    sudo(cmd)
+                    
+                    for i in xrange(numProcesses):
+                        if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
+                            sources = [ crawler['sources'][i], ]
+                            ratio = "%s/%s" % (1, 1)
+                        else:
+                            sources = crawler['sources']
+                            ratio = "%s/%s" % (index + 1, numCrawlers)
                         
-                        for i in xrange(crawler['numProcesses']):
-                            if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
-                                sources = [ crawler['sources'][i], ]
-                                ratio = "%s/%s" % (1, 1)
-                            else:
-                                sources = crawler['sources']
-                                ratio = "%s/%s" % (index, numCrawlers)
-                            
-                            sources = string.joinfields(sources, ' ')
-                            crawler_path = '/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py'
-                            
-                            cmd = '. bin/activate && python %s --db %s --ratio %s %s >& /stamped/logs/crawler%d.log&' % (crawler_path, host, ratio, sources, index)
-                            index += 1
-                            
-                            # DEBUG
-                            #cmd = '. bin/activate && python %s --db %s -t -l 20 %s &' % (crawler_path, host, sources)
-                            
-                            #utils.log(cmd)
-                            sudo(cmd)
+                        sources = string.joinfields(sources, ' ')
+                        crawler_path = '/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py'
+                        
+                        log = "/stamped/logs/crawler%d.log" % index
+                        cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s --db %s -g --ratio %s %s' >& %s < /dev/null &" % (crawler_path, host, ratio, sources, log)
+                        index += 1
+                        
+                        utils.runbg(instance.public_dns_name, env.user, cmd)
     
     def setup_crawler_data(self, *args):
         config = {

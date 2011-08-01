@@ -41,6 +41,12 @@ def scp(source, host, user, dest):
     log(cmd)
     return Popen(cmd, shell=True).wait()
 
+def runbg(host, user, cmd):
+    assert not '"' in cmd
+    ssh_cmd = 'ssh -i keys/test-keypair -f -o StrictHostKeyChecking=no %s@%s "%s"' % (user, host, cmd)
+    log(ssh_cmd)
+    return Popen(ssh_cmd, shell=True).wait()
+
 def lazy_property(undecorated):
     name = '_' + undecorated.__name__
     @property

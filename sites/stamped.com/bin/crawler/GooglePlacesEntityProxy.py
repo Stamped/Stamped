@@ -55,8 +55,11 @@ class GooglePlacesEntityProxy(AEntityProxy):
                 self._seen.add(match_gid)
                 
                 for key, extractFunc in self._map.iteritems():
-                    value = extractFunc(details)
-                    entity[key] = value
+                    try:
+                        value = extractFunc(details)
+                        entity[key] = value
+                    except KeyError:
+                        pass
         
         entities = [ entity ]
         

@@ -60,7 +60,7 @@ def _getAMI(instanceType, region, software='Ubuntu 10.04', ebs=True):
         return INSTANCE_AMI_UBUNTU_1004[region][INSTANCE_ARCHITECTURE[instanceType]]
     return False
 
-INSTANCE_TYPE      = 't1.micro'
+INSTANCE_TYPE      = 'm1.large' #'t1.micro'
 INSTANCE_REGION    = 'us-east-1'
 INSTANCE_OS        = 'Ubuntu 10.04'
 INSTANCE_EBS       = True
