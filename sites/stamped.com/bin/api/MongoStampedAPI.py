@@ -29,7 +29,7 @@ class MongoStampedAPI(StampedAPI):
         StampedAPI.__init__(self, "MongoStampedAPI")
         
         #self._accountDB    = MongoAccountCollection()
-        #self._entityDB     = MongoEntityCollection()
+        self._entityDB     = MongoEntityCollection()
         #self._userDB       = MongoUserCollection()
         #self._stampDB      = MongoStampCollection()
         #self._commentDB    = MongoCommentCollection()
@@ -44,9 +44,9 @@ class MongoStampedAPI(StampedAPI):
     def _accountDB(self):
         return MongoAccountCollection()
 
-    @lazyProperty
-    def _entityDB(self):
-        return MongoEntityCollection()
+    #@lazyProperty
+    #def _entityDB(self):
+    #    return MongoEntityCollection()
 
     @lazyProperty
     def _userDB(self):

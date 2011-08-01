@@ -69,6 +69,7 @@ class AMongoCollection():
         
         try:
             self._connection = self._connect()
+            utils.log("%s) connected!" % self)
             self._database   = self._getDatabase()
             self._collection = self._getCollection(collection)
         except:
