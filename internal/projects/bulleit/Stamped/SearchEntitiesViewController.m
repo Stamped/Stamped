@@ -13,7 +13,7 @@
 
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
-#import "CreateStampTableViewCell.h"
+#import "SearchEntitiesTableViewCell.h"
 #import "Entity.h"
 
 @interface SearchEntitiesViewController ()
@@ -132,10 +132,10 @@
   static NSString* CellIdentifier = @"EntityCell";
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-    cell = [[[CreateStampTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[SearchEntitiesTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
   
-  [(CreateStampTableViewCell*)cell setEntityObject:((Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row])];
+  [(SearchEntitiesTableViewCell*)cell setEntityObject:((Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row])];
   
   return cell;
 }

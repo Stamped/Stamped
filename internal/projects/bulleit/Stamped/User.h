@@ -23,7 +23,9 @@
 @property (nonatomic, retain) UIImage* profileImage;
 @property (nonatomic, retain) NSString* screenName;
 @property (nonatomic, retain) UIImage* stampImage;
-@property (nonatomic, retain) NSSet* Stamps;
+@property (nonatomic, retain) NSSet* stamps;
+@property (nonatomic, retain) NSSet* comments;
+@property (nonatomic, retain) NSSet* events;
 @end
 
 @interface User (CoreDataGeneratedAccessors)

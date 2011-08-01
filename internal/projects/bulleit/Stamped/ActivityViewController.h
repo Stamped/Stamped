@@ -2,15 +2,13 @@
 //  ActivityViewController.h
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/5/11.
+//  Created by Andrew Bonventre on 7/31/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-
-@interface ActivityViewController : UIViewController {
-    
-}
+@interface ActivityViewController : UITableViewController <RKObjectLoaderDelegate>
 
 @end

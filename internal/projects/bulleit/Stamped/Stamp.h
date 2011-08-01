@@ -12,7 +12,7 @@
 extern NSString* kStampDidChangeNotification;
 extern NSString* kStampWasCreatedNotification;
 
-@class Comment, Entity, User;
+@class Comment, Entity, User, Event;
 
 @interface Stamp : NSManagedObject
 
@@ -22,6 +22,7 @@ extern NSString* kStampWasCreatedNotification;
 @property (nonatomic, retain) NSString* stampID;
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) User* user;
+@property (nonatomic, retain) Event* event;
 @property (nonatomic, retain) NSSet* comments;
 @end
 

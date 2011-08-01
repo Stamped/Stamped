@@ -9,16 +9,17 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class User;
+@class User, Event;
 
 @interface Comment : NSManagedObject {
 @private
 }
-@property (nonatomic, retain) NSString * blurb;
-@property (nonatomic, retain) NSString * commentID;
-@property (nonatomic, retain) NSString * stampID;
-@property (nonatomic, retain) NSString * restampID;
-@property (nonatomic, retain) NSDate * created;
-@property (nonatomic, retain) User *user;
+@property (nonatomic, retain) NSString* blurb;
+@property (nonatomic, retain) NSString* commentID;
+@property (nonatomic, retain) NSString* stampID;
+@property (nonatomic, retain) NSString* restampID;
+@property (nonatomic, retain) NSDate* created;
+@property (nonatomic, retain) User* user;
+@property (nonatomic, retain) Event* event;
 
 @end

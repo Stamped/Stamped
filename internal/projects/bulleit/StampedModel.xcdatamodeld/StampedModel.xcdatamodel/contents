@@ -6,6 +6,7 @@
         <attribute name="created" optional="YES" attributeType="Date"/>
         <attribute name="restampID" optional="YES" attributeType="String"/>
         <attribute name="stampID" optional="YES" attributeType="String"/>
+        <relationship name="events" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Event" inverseName="comment" inverseEntity="Event"/>
         <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="comments" inverseEntity="Stamp"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="comments" inverseEntity="User"/>
     </entity>
@@ -21,6 +22,13 @@
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="entityObject" inverseEntity="Stamp"/>
     </entity>
+    <entity name="Event" representedClassName="Event">
+        <attribute name="created" optional="YES" attributeType="Date"/>
+        <attribute name="genre" optional="YES" attributeType="String"/>
+        <relationship name="comment" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Comment" inverseName="events" inverseEntity="Comment"/>
+        <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="event" inverseEntity="Stamp"/>
+        <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="events" inverseEntity="User"/>
+    </entity>
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="blurb" optional="YES" attributeType="String"/>
         <attribute name="created" optional="YES" attributeType="Date"/>
@@ -28,6 +36,7 @@
         <attribute name="stampID" attributeType="String"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="stamp" inverseEntity="Comment"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamps" inverseEntity="Entity"/>
+        <relationship name="event" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Event" inverseName="stamp" inverseEntity="Event"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="stamps" inverseEntity="User"/>
     </entity>
     <entity name="User" representedClassName="User">
@@ -44,6 +53,7 @@
         <attribute name="userID" attributeType="String"/>
         <attribute name="website" optional="YES" attributeType="String"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="user" inverseEntity="Comment"/>
+        <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Event" inverseName="user" inverseEntity="Event"/>
         <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="user" inverseEntity="Stamp"/>
     </entity>
     <elements>
@@ -51,5 +61,6 @@
         <element name="Entity" positionX="556" positionY="216" width="128" height="195"/>
         <element name="Stamp" positionX="216" positionY="324" width="128" height="135"/>
         <element name="User" positionX="-45" positionY="63" width="128" height="240"/>
+        <element name="Event" positionX="160" positionY="192" width="128" height="120"/>
     </elements>
 </model>

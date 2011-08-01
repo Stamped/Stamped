@@ -9,6 +9,7 @@
 #import "Stamp.h"
 #import "Comment.h"
 #import "Entity.h"
+#import "Event.h"
 #import "User.h"
 
 NSString* kStampDidChangeNotification = @"StampDidChangeNotification";
@@ -23,5 +24,6 @@ NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 @dynamic entityObject;
 @dynamic user;
 @dynamic comments;
+@dynamic event;
 
 @end

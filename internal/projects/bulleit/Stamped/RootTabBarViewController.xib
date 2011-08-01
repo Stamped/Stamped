@@ -109,7 +109,6 @@
 						<string key="NSFrame">{{127, 369}, {66, 49}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
@@ -192,7 +191,6 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUIViewController" id="188722389">
 						<object class="IBUINavigationItem" key="IBUINavigationItem" id="735546457">
-							<reference key="IBUINavigationBar"/>
 							<string key="IBUITitle"/>
 							<object class="IBUIBarButtonItem" key="IBUIBackBarButtonItem" id="660525351">
 								<string key="IBUITitle">Back</string>
@@ -202,7 +200,7 @@
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						</object>
 						<reference key="IBUIParentViewController" ref="376217252"/>
-						<string key="IBUINibName">SearchStampsViewController</string>
+						<string key="IBUINibName">SearchEntitiesViewController</string>
 						<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 							<int key="IBUIInterfaceOrientation">1</int>
 							<int key="interfaceOrientation">1</int>

@@ -1,17 +1,17 @@
 //
-//  CreateStampTableViewCell.m
+//  SearchEntitiesTableViewCell.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/23/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "CreateStampTableViewCell.h"
+#import "SearchEntitiesTableViewCell.h"
 
 #import "Entity.h"
 #import "Util.h"
 
-@interface CreateStampCellView : UIView
+@interface SearchEntitiesCellView : UIView
 
 // This is magic with UITableViewCell. No need to set this explicitly.
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
@@ -20,7 +20,7 @@
 @property (nonatomic, retain) UILabel* subtitleLabel;
 @end
 
-@implementation CreateStampCellView
+@implementation SearchEntitiesCellView
 
 @synthesize highlighted = highlighted_;
 @synthesize categoryImageView = categoryImageView_;
@@ -63,7 +63,7 @@
 
 @end
 
-@implementation CreateStampTableViewCell
+@implementation SearchEntitiesTableViewCell
 
 @synthesize entityObject = entityObject_;
 
@@ -73,7 +73,7 @@
   if (self) {
     self.accessoryType = UITableViewCellAccessoryNone;
     CGRect customViewFrame = CGRectMake(0.0, 0.0, self.contentView.bounds.size.width, self.contentView.bounds.size.height);
-		customView_ = [[CreateStampCellView alloc] initWithFrame:customViewFrame];
+		customView_ = [[SearchEntitiesCellView alloc] initWithFrame:customViewFrame];
 		[self.contentView addSubview:customView_];
     [customView_ release];
   }
