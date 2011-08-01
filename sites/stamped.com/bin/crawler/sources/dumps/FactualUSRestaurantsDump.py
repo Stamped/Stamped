@@ -73,7 +73,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     }
     
     def __init__(self):
-        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 2048)
+        AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 512)
         
         if Globals.options.test:
             self._dumpFile = self.DUMP_FILE_TEST
@@ -96,7 +96,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
             (self.NAME, numLines, self.DUMP_FILE_NAME))
         
         reader = CSVUtils.UnicodeReader(csvFile)
-        pool   = Pool(2048)
+        pool   = Pool(512)
         count  = 0
         offset = 0
         
