@@ -123,10 +123,8 @@ def parseCommandLine():
     #    options.distributed = False
     #    options.hosts = []
     
-    Globals.options = options
-    
     options.offset = 0
-    options.limit  = None
+    Globals.options = options
     
     if len(args) == 0:
         options.all = True

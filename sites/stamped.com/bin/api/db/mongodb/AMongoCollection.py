@@ -140,9 +140,7 @@ class AMongoCollection():
         return data
     
     def _objToMongo(self, obj, objId='id'):
-        if obj is None:
-            return None
-        
+        assert obj is not None
         if obj.isValid == False:
             # print obj
             raise KeyError("Object not valid")

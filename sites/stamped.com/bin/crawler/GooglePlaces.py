@@ -18,7 +18,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     FORMAT          = 'json'
     DEFAULT_RADIUS  = 500 # meters
     NAME            = 'GooglePlaces'
-    TYPES           = set([ 'place', 'contact', 'restaurant' ])
+    TYPES           = set([ 'place', 'restaurant' ])
     
     API_KEYS = [
         'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok',  # Travis
@@ -33,6 +33,9 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         AKeyBasedAPI.__init__(self, self.API_KEYS)
         
         self._geocoder = Geocoder()
+    
+    def _run(self):
+        pass
     
     def getPlaceDetails(self, reference, optionalParams=None):
         (offset, count) = self._initAPIKeyIndices()
