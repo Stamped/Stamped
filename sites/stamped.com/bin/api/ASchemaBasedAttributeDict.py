@@ -249,7 +249,7 @@ class ASchemaBasedAttributeDict(object):
                     
                     return _unionDict(v, schemaVal, dest[k])
                 else:
-                    dest[k] = v
+                    dest[k] = utils.normalize(v)
                     return True
             else:
                 for k2, v2 in schema.iteritems():

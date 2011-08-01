@@ -854,13 +854,23 @@ class StampedAPI(AStampedAPI):
     
     def _addEntity(self, entity):
         if entity is not None:
-            utils.log("'%s' adding 1 entity" % (self, ))
-            self._entityDB.addEntity(entity)
+            utils.log("[%s] adding 1 entity" % (self, ))
+            try:
+                self._entityDB.addEntity(entity)
+            except Exception as e:
+                utils.log("[%s] error adding 1 entities:" % (self, ))
+                utils.printException()
+                # don't let error propagate
     
     def _addEntities(self, entities):
         entities = filter(lambda e: e is not None, entities)
-        utils.log("'%s' adding %d entities" % (self, utils.count(entities)))
-        self._entityDB.addEntities(entities)
+        utils.log("[%s] adding %d entities" % (self, utils.count(entities)))
+        try:
+            self._entityDB.addEntities(entities)
+        except Exception as e:
+            utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
+            utils.printException()
+            # don't let error propagate
     
     def _setLimit(self, limit, cap=20):
         result = cap

@@ -290,8 +290,7 @@ class AMongoCollection():
                 except AutoReconnect as e:
                     num_retries += 1
                     if num_retries > max_retries:
-                        msg = "[%s] unable to connect to host after %d retries (%s)" % (self, max_retries, str(e))
-                        utils.log(msg)
+                        utils.log("[%s] unable to connect to host after %d retries (%s)" % (self, max_retries, str(e)))
                         raise
                     
                     utils.log("[%s] retrying to insert %d documents to host: %s" % (self, len(objs), str(e)))
