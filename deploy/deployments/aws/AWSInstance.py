@@ -170,7 +170,7 @@ class AWSInstance(AInstance):
         self._validate_port(22, desc="ssh service")
         
         # Check for init to finish
-        self._validate_port(5001, desc="init script")
+#         self._validate_port(5001, desc="init script")
         
         if 'db' in self.roles:
             # Check for mongo to finish
