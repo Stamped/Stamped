@@ -187,6 +187,14 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         filename = os.path.join(self._distro.apple_data_dir, self._filename)
         zipped = filename + ".gz"
         
+        if not os.path.exists(filename) and not os.path.exists(zipped):
+            if Globals.options.mount:
+                raise Fail("ERROR: mount failed!")
+            else:
+                while (not os.path.exists(filename)) and (not os.path.exists(zipped)):
+                    utils.log("waiting for mount to complete for file '%s'" % filename)
+                    time.sleep(4)
+        
         if os.path.exists(zipped):
             filename = zipped
         
