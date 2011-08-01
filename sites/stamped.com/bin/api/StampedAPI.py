@@ -853,10 +853,12 @@ class StampedAPI(AStampedAPI):
     # ########### #
     
     def _addEntity(self, entity):
-        utils.log("'%s' adding 1 entity" % (self, ))
-        self._entityDB.addEntity(entity)
+        if entity is not None:
+            utils.log("'%s' adding 1 entity" % (self, ))
+            self._entityDB.addEntity(entity)
     
     def _addEntities(self, entities):
+        entities = filter(lambda e: e is not None, entities)
         utils.log("'%s' adding %d entities" % (self, utils.count(entities)))
         self._entityDB.addEntities(entities)
     
