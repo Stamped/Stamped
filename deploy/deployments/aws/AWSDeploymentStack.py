@@ -153,11 +153,11 @@ class AWSDeploymentStack(ADeploymentStack):
                 'numInstances' : 1, 
                 'mapSourceToProcess' : True, 
             }, 
-            {
-                'sources' : [ 'opentable', ], 
-                'numInstances' : 16, 
-                'numProcesses' : 4, 
-            }, 
+            #{
+            #    'sources' : [ 'opentable', ], 
+            #    'numInstances' : 16, 
+            #    'numProcesses' : 4, 
+            #}, 
             #{
             #    'sources' : [ 'factualusrestaurants', ], 
             #    'numInstances' : 40, 
@@ -206,6 +206,8 @@ class AWSDeploymentStack(ADeploymentStack):
             
             instances = []
             index = 0
+            
+            utils.log("[%s] creating %d crawler instances" % (self, num_instances))
             
             # spawn and initialize a new AWS instance per crawler requirements
             for crawler in crawlers:
