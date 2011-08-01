@@ -319,7 +319,7 @@ class AMongoCollection():
             documents = self._collection.find(params).sort(sort, pymongo.DESCENDING).limit(limit)
         else:
             documents = self._collection.find(params).limit(limit)
-            
+        
         result = []
         for document in documents:
             result.append(self._mongoToObj(document, objId))
