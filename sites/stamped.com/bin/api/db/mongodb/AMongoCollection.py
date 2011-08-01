@@ -286,6 +286,7 @@ class AMongoCollection():
                 try:
                     ret = self._collection.insert(objs, safe=True)
                     utils.log("[%s] successfully inserted %d documents" % (self, len(objs)))
+                    return ret
                 except AutoReconnect as e:
                     num_retries += 1
                     if num_retries > max_retries:
