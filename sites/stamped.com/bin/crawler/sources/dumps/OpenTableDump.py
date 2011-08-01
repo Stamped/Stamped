@@ -27,7 +27,7 @@ class OpenTableDump(AExternalDumpEntitySource):
     DUMP_FILE = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_SUFFIX
     
     NAME = "OpenTable"
-    TYPES = set([ 'place', 'contact', 'restaurant' ])
+    TYPES = set([ 'place', 'restaurant' ])
     
     def __init__(self):
         AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 128)
