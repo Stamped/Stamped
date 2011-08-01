@@ -101,6 +101,7 @@ class AMongoCollection():
             return 'root'
     
     def _connect(self):
+        # TODO: have a more consistent approach to handling AutoReconnect!
         while True:
             try:
                 utils.log("%s) connecting to %s:%d" % (self, self._host, self._port))
@@ -252,7 +253,22 @@ class AMongoCollection():
     def _addDocument(self, document, objId='id'):
         obj = self._objToMongo(document, objId)
         if obj is not None:
-            return self._getStringFromObjectId(self._collection.insert(obj, safe=True))
+            # TODO: have a more consistent approach to handling AutoReconnect!
+            num_retries = 0
+            max_retries = 5
+            while True:
+                try:
+                    ret = self._collection.insert(obj, safe=True)
+                    return self._getStringFromObjectId(ret)
+                except AutoReconnect as e:
+                    num_retries += 1
+                    if num_retries > max_retries:
+                        msg = "%s) unable to connect to host after %d retries (%s)" % (self, max_retries, str(e))
+                        utils.log(msg)
+                        raise
+                    
+                    utils.log("%s) retrying to insert 1 documents to host: %s" % (self, str(e)))
+                    time.sleep(1)
         else:
             return False
     
@@ -260,7 +276,21 @@ class AMongoCollection():
         objs = self._objsToMongo(documents, objId)
         
         if len(objs) > 0:
-            return self._collection.insert(objs)
+            # TODO: have a more consistent approach to handling AutoReconnect!
+            num_retries = 0
+            max_retries = 5
+            while True:
+                try:
+                    return self._collection.insert(objs)
+                except AutoReconnect as e:
+                    num_retries += 1
+                    if num_retries > max_retries:
+                        msg = "%s) unable to connect to host after %d retries (%s)" % (self, max_retries, str(e))
+                        utils.log(msg)
+                        raise
+                    
+                    utils.log("%s) retrying to insert %d documents to host: %s" % (self, len(objs), str(e)))
+                    time.sleep(1)
         else:
             return False
     
