@@ -43,6 +43,18 @@ class AWSDeploymentSystem(DeploymentSystem):
             'to_port'     : 5001, 
             'cidr_ip'     : '0.0.0.0/0', 
         }
+        ganglia_udp_rule = {
+            'ip_protocol' : 'udp', 
+            'from_port'   : 8649, 
+            'to_port'     : 8649, 
+            'cidr_ip'     : '0.0.0.0/0', 
+        }
+        ganglia_tcp_rule = {
+            'ip_protocol' : 'tcp', 
+            'from_port'   : 8649, 
+            'to_port'     : 8649, 
+            'cidr_ip'     : '0.0.0.0/0', 
+        }
  
         groups = [
             {
@@ -51,6 +63,8 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'rules' : [
                     ssh_rule, 
                     instance_ready_rule, 
+                    ganglia_udp_rule,
+                    ganglia_tcp_rule,
                     {
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 27017, 
@@ -70,7 +84,9 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'desc' : 'WebServer security group', 
                 'rules' : [
                     ssh_rule, 
-                    instance_ready_rule, 
+                    instance_ready_rule,  
+                    ganglia_udp_rule,
+                    ganglia_tcp_rule,
                     {
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 5000, 
@@ -84,7 +100,9 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'desc' : 'Crawler security group', 
                 'rules' : [
                     ssh_rule, 
-                    instance_ready_rule, 
+                    instance_ready_rule,  
+                    ganglia_udp_rule,
+                    ganglia_tcp_rule,
                 ], 
             }, 
         ]
