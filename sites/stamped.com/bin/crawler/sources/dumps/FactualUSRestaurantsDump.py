@@ -26,7 +26,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     DUMP_FILE_TEST = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_TEST_SUFFIX + DUMP_FILE_SUFFIX
     
     NAME = "Factual US Restaurants"
-    TYPES = set([ 'place', 'contact', 'restaurant' ])
+    TYPES = set([ 'place', 'restaurant' ])
     
     _map = {
         'Factual ID' : 'fid', 
