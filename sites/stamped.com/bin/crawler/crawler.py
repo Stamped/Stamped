@@ -107,6 +107,10 @@ def parseCommandLine():
         action="store_true", dest="googlePlaces", 
         help="cross-reference place entities with the google places api")
     
+    parser.add_option("-m", "--mount", default=False, 
+        action="store_true", dest="mount", 
+        help="mount crawler data directory if necessary")
+    
     parser.add_option("-d", "--db", default=None, type="string", 
         action="store", dest="db", 
         help="db to connect to for output")
