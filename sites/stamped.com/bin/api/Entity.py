@@ -48,7 +48,7 @@ class Entity(ASchemaBasedAttributeDict):
             'restaurant': {
                 'diningStyle': basestring, 
                 'cuisine': basestring, 
-                #'price': basestring, 
+                'price': basestring, 
                 'payment': basestring, 
                 'dressCode': basestring, 
                 'acceptsReservations': basestring, 
