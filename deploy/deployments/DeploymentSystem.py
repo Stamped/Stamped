@@ -25,23 +25,19 @@ class DeploymentSystem(ADeploymentSystem):
     def _init_env(self):
         raise NotImplementedError
     
-    def _get_matching_stacks(self, stackNameRegex, unique=False):
-        stacks = [ ]
+    def _get_matching_stack(self, stackName, unique=False):
+        orig = stackName
+        if '.' in stackName:
+            stackName = stackName.split('.')[0]
         
-        if '.' in stackNameRegex:
-            stackNameRegex = stackNameRegex.split('.')[0]
+        stackName = stackName.lower()
+        for name in self._stacks:
+            if name.lower() == stackName:
+                return self._stacks[name]
         
-        for stackName in self._stacks:
-            if re.search(stackNameRegex, stackName):
-                if len(stacks) > 0 and unique:
-                    raise Fail("Error: stack name regex '%s' is not unique" % stackNameRegex)
-                
-                stacks.append(stackName)
-        
-        if 0 == len(stacks):
-            utils.log("Warning: no stacks exist matching the name '%s'" % stackNameRegex)
-        
-        return stacks
+        msg = "Error: no stack exists matching the name '%s'" % orig
+        utils.log(msg)
+        raise Fail(msg)
     
     def create_stack(self, *args):
         stackName = args[0]
@@ -56,71 +52,43 @@ class DeploymentSystem(ADeploymentSystem):
         self._stacks[stackName] = stack
     
     def delete_stack(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            if stackName in self._stacks:
-                stack = self._stacks[stackName]
-                stack.delete()
-                
-                del self._stacks[stackName]
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.delete()
+        del self._stacks[stack.name]
     
     def connect(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.connect()
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.connect()
     
     def init_stack(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.init()
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.init()
     
     def update_stack(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.update()
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.update()
     
     def crawl(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.crawl()
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.crawl()
     
     def setup_crawler_data(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.setup_crawler_data()
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.setup_crawler_data()
     
     def backup(self, *args):
-        stackNameRegex = args[0]
-        stacks = self._get_matching_stacks(stackNameRegex)
-        
-        for stackName in stacks:
-            stack = self._stacks[stackName]
-            stack.backup()
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.backup()
     
-    def list_stacks(self, stackNameRegex=None, stackStatus=None):
-        if stackNameRegex is not None:
-            stacks = self._get_matching_stacks(stackNameRegex)
-            utils.log("'%s' contains %d stacks matching '%s':" % (self, len(stacks), stackNameRegex))
-        else:
-            stacks = self._stacks
-            utils.log("'%s' contains %d stacks:" % (self, len(stacks)))
+    def list_stacks(self, stackName=None, stackStatus=None):
+        stacks = self._stacks
         
         index = 1
         for (stackName, stack) in stacks.iteritems():

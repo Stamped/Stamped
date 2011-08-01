@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import base64, boto, convert, json, os, time, utils
+import base64, boto, convert, json, os, socket, time, utils
 from boto.ec2.instance import Instance as BotoEC2Instance
 from AInstance import AInstance
 from errors import *
@@ -154,7 +154,6 @@ class AWSInstance(AInstance):
         utils.log("[%s] waiting for ssh service to come online (this may take a few minutes)..." % self)
         while True:
             try:
-                import socket
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect((self.public_dns_name, 22))
                 s.close()
@@ -169,7 +168,6 @@ class AWSInstance(AInstance):
         if 'crawler' in self.roles:
             while True:
                 try:
-                    import socket
                     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     s.connect((self.public_dns_name, 5001))
                     s.close()

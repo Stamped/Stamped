@@ -151,17 +151,17 @@ class AWSDeploymentStack(ADeploymentStack):
             {
                 'sources' : [ 'apple_artists', 'apple_albums', 'apple_videos', ], 
                 'numInstances' : 1, 
-                'numProcesses' : 1, 
+                'mapSourceToProcess' : True, 
             }, 
             {
                 'sources' : [ 'opentable', ], 
-                'numInstances' : 8, 
+                'numInstances' : 16, 
                 'numProcesses' : 4, 
             }, 
             #{
             #    'sources' : [ 'factualusrestaurants', ], 
-            #    'numInstances' : 16, 
-            #    'numProcesses' : 2, 
+            #    'numInstances' : 40, 
+            #    'numProcesses' : 8, 
             #}, 
         ]
         
@@ -169,6 +169,7 @@ class AWSDeploymentStack(ADeploymentStack):
         crawler_instances = []
         reservations = self.conn.get_all_instances()
         
+        # find all previous crawler instances
         for reservation in reservations:
             for instance in reservation.instances:
                 if hasattr(instance, 'tags') and 'stack' in instance.tags and instance.state == 'running':
@@ -177,10 +178,13 @@ class AWSDeploymentStack(ADeploymentStack):
                     if stackName == self.name and instance.tags['name'].startswith('crawler'):
                         crawler_instances.append(AWSInstance(self, instance))
         
+        # count the number of expected crawler instances per the crawlers config
         num_instances = 0
         for crawler in crawlers:
             num_instances += crawler['numInstances']
         
+        # attempt to reuse previous crawler instances that are very likely already 
+        # initialized for this crawler run, as opposed to spawning a new set
         if len(crawler_instances) == num_instances:
             for instance in crawler_instances:
                 num = int(instance.tags['name'].replace('crawler', ''))
@@ -192,12 +196,18 @@ class AWSDeploymentStack(ADeploymentStack):
                 from pprint import pprint
                 pprint(crawler)
         else:
-            for instance in crawler_instances:
-                instance.terminate()
+            # unable to reuse previous crawler instances since their 
+            # configuration doesn't match the current config. terminate all 
+            # previous crawler instances and create a new set from scratch.
+            if len(crawler_instances) > 0:
+                utils.log("[%s] terminating %d stale crawler instances" % (self, len(crawler_instances)))
+                for instance in crawler_instances:
+                    instance.terminate()
             
             instances = []
             index = 0
             
+            # spawn and initialize a new AWS instance per crawler requirements
             for crawler in crawlers:
                 for i in xrange(crawler['numInstances']):
                     config = {
@@ -216,6 +226,12 @@ class AWSDeploymentStack(ADeploymentStack):
                     crawler['instances'].append(instance)
                     self._pool.spawn(instance.create)
             
+            # wait until all crawler AWSInstances are initialized before 
+            # beginning to crawl on any of them
+            
+            # TODO: this isn't really necessary; could start crawling on 
+            # instance i once it's ready since each instance is wholly 
+            # independent of all other instances.
             self._pool.join()
         
         env.user = 'ubuntu'
@@ -226,6 +242,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         host = db_instances[0].private_ip_address
         
+        # begin m crawler processes on each of the n crawler instances
         for crawler in crawlers:
             if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
                 numProcesses = len(crawler['sources'])
@@ -237,12 +254,25 @@ class AWSDeploymentStack(ADeploymentStack):
             
             for instance in crawler['instances']:
                 with settings(host_string=instance.public_dns_name):
-                    cmd = 'mkdir -p /stamped/logs && chmod -R 777 /stamped/logs'
-                    sudo(cmd)
+                    num_retries = 5
+                    while num_retries > 0:
+                        try:
+                            cmd = 'mkdir -p /stamped/logs && chmod -R 777 /stamped/logs'
+                            sudo(cmd)
+                            break
+                        except SystemExit:
+                            num_retries -= 1
+                            time.sleep(1)
                     
                     for i in xrange(numProcesses):
+                        mount = ""
+                        
                         if 'mapSourceToProcess' in crawler and crawler['mapSourceToProcess']:
                             sources = [ crawler['sources'][i], ]
+                            if i == 0:
+                                mount = "-m"
+                            
+                            # for now, only change the source for each process, not the ratio
                             ratio = "%s/%s" % (1, 1)
                         else:
                             sources = crawler['sources']
@@ -252,10 +282,15 @@ class AWSDeploymentStack(ADeploymentStack):
                         crawler_path = '/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py'
                         
                         log = "/stamped/logs/crawler%d.log" % index
-                        cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s --db %s -g --ratio %s %s' >& %s < /dev/null &" % (crawler_path, host, ratio, sources, log)
+                        cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s --db %s -g %s --ratio %s %s' >& %s < /dev/null &" % (crawler_path, host, mount, ratio, sources, log)
                         index += 1
                         
-                        utils.runbg(instance.public_dns_name, env.user, cmd)
+                        num_retries = 5
+                        while num_retries > 0:
+                            ret = utils.runbg(instance.public_dns_name, env.user, cmd)
+                            if 0 == ret:
+                                break
+                            num_retries -= 1
     
     def setup_crawler_data(self, *args):
         config = {
@@ -265,6 +300,8 @@ class AWSDeploymentStack(ADeploymentStack):
             'placement' : 'us-east-1b', 
         }
         
+        # create temporary instance whose only purpose will be to attach and mount 
+        # the crawler data AWS volume, add data to it, and then cleanup.
         instance = AWSInstance(self, config)
         instance.create()
         
@@ -284,6 +321,7 @@ class AWSDeploymentStack(ADeploymentStack):
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
         
+        # create and attach volume to temporary instance
         with settings(host_string=instance.public_dns_name):
             utils.log("creating volume and attaching to instance %s..." % instance._instance.id)
             volume = self.conn.create_volume(8, instance._instance.placement)
