@@ -140,10 +140,15 @@ class AMongoCollection():
         return data
     
     def _objToMongo(self, obj, objId='id'):
-        assert obj is not None
+        if obj is None:
+            return None
+        
         if obj.isValid == False:
             # print obj
-            raise KeyError("Object not valid")
+            from pprint import pprint
+            utils.log("[%s] encountered error invalid object" % self)
+            pprint(obj._dict)
+            return None
         
         data = copy.copy(obj.getDataAsDict())
         
@@ -158,7 +163,7 @@ class AMongoCollection():
         return self._mapDataToSchema(data, self.SCHEMA)
     
     def _objsToMongo(self, objs, objId='id'):
-        return map(self._objToMongo, objs, objId)
+        return filter(lambda o: o is not None, map(self._objToMongo, objs, objId))
     
     def _mapDataToSchema(self, data, schema):
         def _unionDict(source, schema, dest):
