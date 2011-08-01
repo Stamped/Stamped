@@ -1108,6 +1108,7 @@ class StampedAPI(AStampedAPI):
     
     def _returnActivity(self, activity):
         result = {}
+        result['activity_id'] = activity['activity_id']
         result['genre'] = activity['genre']
         
         ### TODO: Explicitly define user, expand if passed full object
