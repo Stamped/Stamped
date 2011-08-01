@@ -165,12 +165,11 @@ class AWSInstance(AInstance):
         utils.log("[%s] %s is online" % (self, desc))
     
     def _post_create(self):
-        
         # Check for SSH
         self._validate_port(22, desc="ssh service")
         
         # Check for init to finish
-        self._validate_port(5001, desc="init script")
+        #self._validate_port(5001, desc="init script")
         
         if 'db' in self.roles:
             # Check for mongo to finish

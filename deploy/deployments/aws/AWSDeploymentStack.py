@@ -192,9 +192,9 @@ class AWSDeploymentStack(ADeploymentStack):
                     crawlers[num]['instances'].append(instance)
                 else:
                     crawlers[num]['instances'] = [ instance ]
-            for crawler in crawlers:
-                from pprint import pprint
-                pprint(crawler)
+            #for crawler in crawlers:
+            #    from pprint import pprint
+            #    pprint(crawler)
         else:
             # unable to reuse previous crawler instances since their 
             # configuration doesn't match the current config. terminate all 
