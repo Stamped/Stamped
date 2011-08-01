@@ -177,7 +177,7 @@ class AppleEPFDumps(ASyncGatherSource):
 class AAppleEPFDump(AExternalDumpEntitySource):
     
     def __init__(self, name, entityMap, types, filename):
-        AExternalDumpEntitySource.__init__(self, name, types, 2048)
+        AExternalDumpEntitySource.__init__(self, name, types, 512)
         self._filename  = filename
         self._columnMap = entityMap
         
@@ -223,7 +223,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         utils.log("[%s] parsing ~%d entities from '%s'" % (self, numLines, self._filename))
         
         table_format = epf.parse_table_format(f, filename)
-        pool   = Pool(2048)
+        pool   = Pool(512)
         count  = 0
         offset = 0
         
