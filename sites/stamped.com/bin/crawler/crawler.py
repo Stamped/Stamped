@@ -50,7 +50,7 @@ class Crawler(Thread):
         gather.startProducing()
         
         # TODO: get asynchronous mongoDB entity sink processing to work properly
-        sink.processQueue(gather, async=False)
+        sink.processQueue(gather, async=True, poolSize = 8)
         
         gevent.joinall(sources)
         gather.join()

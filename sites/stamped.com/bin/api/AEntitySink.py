@@ -37,13 +37,13 @@ class AEntitySink(Greenlet, IASyncConsumer):
         context of this sink's Greenlet."""
         pass
     
-    def processQueue(self, queue, async=True):
+    def processQueue(self, queue, async=True, poolSize=128):
         """Processes the given queue as many items at a time as possible between 
         blocking until StopIteration is received."""
         #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
         stop = False
         if async:
-            pool = Pool(128)
+            pool = Pool(poolSize)
         
         while not stop:
             items = []
