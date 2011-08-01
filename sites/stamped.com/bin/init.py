@@ -15,6 +15,9 @@ from gevent import monkey
 # patches stdlib (including socket and ssl modules) to cooperate with other greenlets
 monkey.patch_all()
 
+# patch pymongo to be gevent async compatible 
+import patch_pymongo
+
 #-----------------------------------------------------------
 
 import os, sys
