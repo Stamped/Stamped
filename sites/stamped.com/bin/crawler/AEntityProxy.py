@@ -8,6 +8,7 @@ __license__ = "TODO"
 import Globals, utils
 
 from gevent.pool import Pool
+from gevent import Greenlet
 from api.AEntitySink import AEntitySink
 from AEntitySource import AEntitySource
 from api.IASyncProducer import IASyncProducer
@@ -44,6 +45,10 @@ class AEntityProxy(AEntitySink, AEntitySource):
         self._pool.join()
         Greenlet.join(self)
     """
+    def join(self):
+        self._source.join()
+        self._pool.join()
+        Greenlet.join(self)
     
     def _processItem(self, item):
         #utils.log("[%s] _processItem %s" % (self.name, str(type(item)), ))
@@ -63,7 +68,7 @@ class AEntityProxy(AEntitySink, AEntitySource):
         for item in items:
             self._pool.spawn(self._processItem, item)
         
-        self._pool.join()
+        #self._pool.join()
     
     def _transform(self, entity):
         return entity

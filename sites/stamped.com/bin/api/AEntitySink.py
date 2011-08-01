@@ -10,6 +10,7 @@ from utils import abstract
 
 from IASyncConsumer import IASyncConsumer
 from gevent.queue import Queue
+from gevent.pool import Pool
 from gevent import Greenlet
 
 class AEntitySink(Greenlet, IASyncConsumer):
@@ -36,11 +37,13 @@ class AEntitySink(Greenlet, IASyncConsumer):
         context of this sink's Greenlet."""
         pass
     
-    def processQueue(self, queue):
+    def processQueue(self, queue, async=True):
         """Processes the given queue as many items at a time as possible between 
         blocking until StopIteration is received."""
         #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
         stop = False
+        if async:
+            pool = Pool(128)
         
         while not stop:
             items = []
@@ -68,10 +71,18 @@ class AEntitySink(Greenlet, IASyncConsumer):
             #utils.log("[%s] %d" % (self, len(items)))
             
             if len(items) > 1:
-                self._processItems(items)
+                if async:
+                    pool.spawn(self._processItems, items)
+                else:
+                    self._processItems(items)
             else:
-                self._processItem(items[0])
+                if async:
+                    pool.spawn(self._processItem, items[0])
+                else:
+                    self._processItem(items[0])
         
+        if async:
+            pool.join()
         #utils.log("[%s] <<< AEntitySink.processQueue" % (self, ))
     
     @abstract

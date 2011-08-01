@@ -91,6 +91,9 @@ class OpenTableDump(AExternalDumpEntitySource):
                 return
         
         if entity is not None:
+            #print entity.title
+            #from pprint import pprint
+            #pprint(entity.getDataAsDict())
             self._output.put(entity)
 
 """

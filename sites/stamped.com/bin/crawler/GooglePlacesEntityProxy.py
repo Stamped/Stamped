@@ -34,14 +34,32 @@ class GooglePlacesEntityProxy(AEntityProxy):
         self._entityMatcher = EntityMatcher()
         self._seen = set()
     
+    def _processItems(self, items):
+        utils.log("[%s] processing %d items" % (self, utils.count(items)))
+        AEntityProxy._processItems(self, items)
+    
     def _transform(self, entity):
+        #print entity.title
         (match, numIterations, interestingResults) = self._entityMatcher.getEntityDetailsFromGooglePlaces(entity)
         
+        match_gid = None
         if match is None:
             utils.log('FAIL: %d %s' % (numIterations, entity.title))
-            pprint(entity._data)
+            pprint(entity.getDataAsDict())
+        else:
+            reference = match['reference']
+            details = self._entityMatcher.googlePlaces.getPlaceDetails(reference)
+            
+            if details is not None:
+                match_gid = match['id']
+                self._seen.add(match_gid)
+                
+                for key, extractFunc in self._map.iteritems():
+                    value = extractFunc(details)
+                    entity[key] = value
         
-        entities = []
+        entities = [ entity ]
+        
         #print len(interestingResults)
         
         for name in interestingResults:
@@ -49,7 +67,8 @@ class GooglePlacesEntityProxy(AEntityProxy):
             gid = result['id']
             
             if gid in self._seen:
-                utils.log('DUPLICATE: %s %s' % (gid, name))
+                if gid != match_gid:
+                    utils.log('DUPLICATE: %s %s' % (gid, name))
                 continue
             
             reference = result['reference']
@@ -60,6 +79,8 @@ class GooglePlacesEntityProxy(AEntityProxy):
                 self._seen.add(gid)
             
             e2 = Entity()
+            e2.category = "restaurant"
+            
             for key, extractFunc in self._map.iteritems():
                 try:
                     value = extractFunc(details)

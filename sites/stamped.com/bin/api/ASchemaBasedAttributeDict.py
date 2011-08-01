@@ -279,14 +279,14 @@ class ASchemaBasedAttributeDict(object):
     def isValid(self):
         return False
     
-    def __getstate__(self):
-        return dict(
-            data = self._data, 
-            schema = self._schema
-        )
-    
-    def __setstate__(self, state):
-        self.__init__()
-        self._schema = state['schema']
-        self._data = state['data']
+    #def __getstate__(self):
+    #    return dict(
+    #        data = self._data, 
+    #        schema = self._schema
+    #    )
+    #
+    #def __setstate__(self, state):
+    #    self.__init__()
+    #    self._schema = state['schema']
+    #    self._data = state['data']
 

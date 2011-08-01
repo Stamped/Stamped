@@ -49,7 +49,7 @@ class Crawler(Thread):
         gather = ASyncGatherSource(sources)
         gather.startProducing()
         
-        sink.processQueue(gather)
+        sink.processQueue(gather, async=False)
         
         gevent.joinall(sources)
         gather.join()

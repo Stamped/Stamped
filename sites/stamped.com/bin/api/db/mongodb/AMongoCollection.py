@@ -104,7 +104,8 @@ class AMongoCollection():
             try:
                 utils.log("%s) connecting to %s:%d" % (self, self._host, self._port))
                 return pymongo.Connection(self._host, self._port, slave_okay=True)
-            except AutoReconnect:
+            except AutoReconnect as e:
+                utils.log("%s) retrying to connect to host: %s" % (self, str(e)))
                 time.sleep(2)
     
     def _getDatabase(self):
@@ -145,9 +146,9 @@ class AMongoCollection():
         
         if obj.isValid == False:
             # print obj
-            from pprint import pprint
             utils.log("[%s] encountered error invalid object" % self)
-            pprint(obj._dict)
+            from pprint import pprint
+            pprint(obj.getDataAsDict())
             return None
         
         data = copy.copy(obj.getDataAsDict())
@@ -249,10 +250,19 @@ class AMongoCollection():
     ### GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document, objId='id'):
-        return self._getStringFromObjectId(self._collection.insert(self._objToMongo(document, objId), safe=True))
+        obj = self._objToMongo(document, objId)
+        if obj is not None:
+            return self._getStringFromObjectId(self._collection.insert(obj, safe=True))
+        else:
+            return False
     
     def _addDocuments(self, documents, objId='id'):
-        return self._collection.insert(self._objsToMongo(documents, objId))
+        objs = self._objsToMongo(documents, objId)
+        
+        if len(objs) > 0:
+            return self._collection.insert(objs)
+        else:
+            return False
     
     def _getDocumentFromId(self, documentId, objId='id'):
         #print 'documentId: ', documentId

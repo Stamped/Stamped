@@ -46,7 +46,7 @@ class EntityMatcher(object):
             latLng  = self.googlePlaces.addressToLatLng(address)
             
             if latLng is None:
-                return (None, 0)
+                return (None, 0, [])
             
             entity.lat = latLng[0]
             entity.lng = latLng[1]
