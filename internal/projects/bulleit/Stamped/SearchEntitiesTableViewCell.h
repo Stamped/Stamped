@@ -1,5 +1,5 @@
 //
-//  CreateStampTableViewCell.h
+//  SearchEntitiesTableViewCell.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/23/11.
@@ -9,11 +9,11 @@
 #import <UIKit/UIKit.h>
 
 @class Entity;
-@class CreateStampCellView;
+@class SearchEntitiesCellView;
 
-@interface CreateStampTableViewCell : UITableViewCell {
-@private  
-  CreateStampCellView* customView_;
+@interface SearchEntitiesTableViewCell : UITableViewCell {
+ @private  
+  SearchEntitiesCellView* customView_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
