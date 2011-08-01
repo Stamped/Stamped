@@ -86,8 +86,9 @@ class AppleEPFDistro(Singleton):
         else:
             base = os.path.dirname(os.path.abspath(__file__))
             
-            apple_dir = os.path.join(os.path.join(BASE, "data"), "apple")
+            apple_dir = os.path.join(os.path.join(base, "data"), "apple")
             assert os.path.exists(apple_dir)
+            return apple_dir
     
     def cleanup(self):
         if self.ec2:

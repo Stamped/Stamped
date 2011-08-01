@@ -145,8 +145,7 @@ class AMongoCollection():
             return None
         
         if obj.isValid == False:
-            # print obj
-            utils.log("[%s] encountered error invalid object" % self)
+            utils.log("[%s] error: encountered invalid object" % self)
             from pprint import pprint
             pprint(obj.getDataAsDict())
             return None
