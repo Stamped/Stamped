@@ -83,7 +83,7 @@ def betaAccountData(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "12345",
-        "screen_name": "sample_kevin"
+        "screen_name": "kevin"
     }
     kevin = testPOST(baseurl, path, data)['user_id']
     if len(kevin) == 24:
@@ -142,7 +142,7 @@ def betaAccountData(baseurl):
         "last_name": "Stein", 
         "email": "robby@stamped.com", 
         "password": "12345",
-        "screen_name": "sample_robby"
+        "screen_name": "robby"
     }
     robby = testPOST(baseurl, path, data)['user_id']
     if len(robby) == 24:
@@ -201,7 +201,7 @@ def betaAccountData(baseurl):
         "last_name": "Stein", 
         "email": "bart@stamped.com", 
         "password": "12345",
-        "screen_name": "sample_bart"
+        "screen_name": "bart"
     }
     bart = testPOST(baseurl, path, data)['user_id']
     if len(bart) == 24:
@@ -260,7 +260,7 @@ def betaAccountData(baseurl):
         "last_name": "Kim", 
         "email": "ed@stamped.com", 
         "password": "12345",
-        "screen_name": "sample_ed"
+        "screen_name": "ed"
     }
     ed = testPOST(baseurl, path, data)['user_id']
     if len(ed) == 24:
@@ -320,7 +320,7 @@ def betaAccountData(baseurl):
         "last_name": "Zien", 
         "email": "jake@stamped.com", 
         "password": "12345",
-        "screen_name": "sample_jake"
+        "screen_name": "jake"
     }
     jake = testPOST(baseurl, path, data)['user_id']
     if len(jake) == 24:
@@ -380,7 +380,7 @@ def betaAccountData(baseurl):
         "last_name": "Fischer", 
         "email": "travis@stamped.com", 
         "password": "12345",
-        "screen_name": "sample_travis"
+        "screen_name": "travis"
     }
     travis = testPOST(baseurl, path, data)['user_id']
     if len(travis) == 24:
@@ -439,7 +439,7 @@ def betaAccountData(baseurl):
         "last_name": "Bonventre", 
         "email": "andybons@stamped.com", 
         "password": "12345",
-        "screen_name": "sample_andybons"
+        "screen_name": "andybons"
     }
     bons = testPOST(baseurl, path, data)['user_id']
     if len(bons) == 24:
@@ -490,10 +490,68 @@ def betaAccountData(baseurl):
         print result
         raise Exception
         
+    ####
+    
+    path = "account/create.json"
+    data = {
+        "first_name": "Rando",
+        "last_name": "Manchester", 
+        "email": "rando@stamped.com", 
+        "password": "12345",
+        "screen_name": "rando"
+    }
+    rando = testPOST(baseurl, path, data)['user_id']
+    if len(rando) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        raise Exception
+        
+        
+    path = "account/settings.json"
+    data = {
+        "authenticated_user_id": rando,
+        "privacy": False,
+    }
+    result = testPOST(baseurl, path, data)
+    if result['privacy'] == False:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        raise Exception
+        
+        
+    path = "account/update_profile.json"
+    data = {
+        "authenticated_user_id": rando,
+        "bio": "You don't know me but my taste is top notch. Cheers!",
+        "color": "E330B3,FF0096"
+    }
+    result = testPOST(baseurl, path, data)
+    if result['user_id'] == rando:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        raise Exception
+        
+        
+    path = "account/update_profile_image.json"
+    data = {
+        "authenticated_user_id": rando,
+        "profile_image": "http://img.fannation.com/upload/truth_rumor/photo_upload/119/452/full/Rajon-Rondo-mug.jpg" ### TEMP!!!
+    }
+    result = testPOST(baseurl, path, data)
+    if result['profile_image'] == 'http://img.fannation.com/upload/truth_rumor/photo_upload/119/452/full/Rajon-Rondo-mug.jpg':
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+        
     ############
     
     path = "friendships/create.json"
-    users = [kevin, bart, robby, ed, jake, travis, bons]
+    users = [kevin, bart, robby, ed, jake, travis, bons, rando]
     for user in users:
         for friend in users:
             if user != friend:
@@ -538,6 +596,7 @@ def betaAccountData(baseurl):
     createStamp(baseurl=baseurl, user=ed, title='The Road', category='Book', comment='Depressed for days after reading it. Seriously good.')
     createStamp(baseurl=baseurl, user=jake, title='Hurt Locker', category='Film', comment='Suffocatingly intense, but one of the best Films of the year. ')
     createStamp(baseurl=baseurl, user=bart, title='Instagram', category='App', comment='Fun, simple way to share photos with friends.')
+    createStamp(baseurl=baseurl, user=rando, title='Metropolis', category='Place', comment='I actually own this restaurant.')
     createStamp(baseurl=baseurl, user=robby, title='Pulino\'s Place and Pizzeria ', category='Place', comment='Fantastic individual pizza in a scenester environment')
     createStamp(baseurl=baseurl, user=bart, title='The New New Thing', category='Book', comment=' ')
     createStamp(baseurl=baseurl, user=jake, title='Bourbon and Branch', category='Place', comment='Exclusive and low key speak easy in SF. Great bourbon and mixed drink selection. ')
@@ -558,7 +617,7 @@ def betaAccountData(baseurl):
     createStamp(baseurl=baseurl, user=bart, title='Vol De Nuit', category='Place', comment='Hidden beer garden in the village. Great spot for a date or a hangout.')
     createStamp(baseurl=baseurl, user=travis, title='Al Forno', category='Place', comment='Amazing wood-burning oven Italian food with an atmosphere to match.')
     createStamp(baseurl=baseurl, user=travis, title='Glitch Mob', category='Music', comment='Favorite dubstep band, hands down.')
-    createStamp(baseurl=baseurl, user=kevin, title='Lupe Fiasco', category='Music', comment='The Show Goes On')
+    createStamp(baseurl=baseurl, user=kevin, title='Lupe Fiasco', category='Music', comment='Love his new album. Definitely check it out.')
     createStamp(baseurl=baseurl, user=bart, title='Funny People', category='Film', comment='One of my favorite Films.  Funny but also serious.  Apatow\'s best.')
     createStamp(baseurl=baseurl, user=travis, title='Cha-Cha', category='Place', comment='Chill / cheap Mexican Place in Capitol Hill.')
     createStamp(baseurl=baseurl, user=kevin, title='Deliveries', category='App', comment='Good place for tracking deliveries.')
@@ -574,7 +633,7 @@ def betaAccountData(baseurl):
     createStamp(baseurl=baseurl, user=robby, title='Kuma Inn', category='Place', comment='This place has unbelievable chinese tapas food. Fantastic for dates. Any pork dish is amazing. Any dish at all is actually amazing. Just go and eat.')
     createStamp(baseurl=baseurl, user=bart, title='The Big Short', category='Book', comment='Fascinating insight into the financial crisis from otally different perspective.')
     createStamp(baseurl=baseurl, user=kevin, title='When Genius Failed', category='Book', comment='Really good book about LTCM and everything that went down. Scary parallels between this and what happened ten years later.')
-    createStamp(baseurl=baseurl, user=jake, title='Tong Kiang ', category='Place', comment='One of my 2 favorite dim sum places in NYC. It changed everything. ')
+    createStamp(baseurl=baseurl, user=jake, title='Tong Kiang ', category='Place', comment='One of my 2 favorite dim sum places in NYC. It changed everything.')
     createStamp(baseurl=baseurl, user=bart, title='Nick\'s Crispy Tacos', category='Place', comment='Get guacemole on them.  They smother it.')
     createStamp(baseurl=baseurl, user=bart, title='Winning the war, losing the peace', category='Book', comment='Best, most informative book on the Iraq war I\'ve ever read.')
     createStamp(baseurl=baseurl, user=travis, title='Bathtub Gin Co', category='Place', comment='Swanky speakeasy where quality gin runs like water.')
@@ -584,14 +643,14 @@ def betaAccountData(baseurl):
     createStamp(baseurl=baseurl, user=jake, title='Milk (The Film)', category='Film', comment='One of my top 3 favorite Films of all time. Touching storytelling. ')
     createStamp(baseurl=baseurl, user=bart, title='Just Friends', category='Film', comment='It\'s not going to win an Oscar, but if a girl has ever put you in the friend-zone, you should watch this.')
     createStamp(baseurl=baseurl, user=bart, title='Tickle Pink Inn', category='Place', comment='1.5 hr drive from and a different world.  Free wine and cheese at 4:30 is enough for a meal.')
-    createStamp(baseurl=baseurl, user=robby, title='Blue Hill', category='Place', comment='Egg appetizer and whole crispy chicken.  ')
-    createStamp(baseurl=baseurl, user=kevin, title='The James Hotel', category='Place', comment='Best hotel in the city')
+    createStamp(baseurl=baseurl, user=robby, title='Blue Hill', category='Place', comment='Egg appetizer and whole crispy chicken. ')
+    createStamp(baseurl=baseurl, user=kevin, title='The James Hotel', category='Place', comment='Best hotel in the city.')
     createStamp(baseurl=baseurl, user=robby, title='Ariana Afghan Kebab Place', category='Place', comment='Kabuli palow and kabobs -- great price for the place. ')
     createStamp(baseurl=baseurl, user=jake, title='Pacific Catch', category='Place', comment='Fantastic fish tacos -- but really small beware. Go if you\'ve never been. ')
-    createStamp(baseurl=baseurl, user=robby, title='Stamped', category='App', comment='This is the best app on the market. ')
+    createStamp(baseurl=baseurl, user=robby, title='Stamped', category='App', comment='This is the best app on the market. Thanks @andybons @ed @jake @travis @bart @kevin')
     toRestamp = createStamp(baseurl=baseurl, user=robby, title='The Breslin', category='Place', comment='The lamb burger or the entire pig feast with large groups. ')
     createStamp(baseurl=baseurl, user=ed, title='Freedom', category='Book', comment='Worthy follow-up to The Corrections.  ')
-    createStamp(baseurl=baseurl, user=bart, title='Four Seasons Boston', category='Place', comment='If you want to spend a lot of money, this Place is extremely nice.  Gorgeous pool overlooking the park.')
+    createStamp(baseurl=baseurl, user=bart, title='Four Seasons Boston', category='Place', comment='If you want to spend a lot of money, this hotel is extremely nice.  Gorgeous pool overlooking the park.')
     createStamp(baseurl=baseurl, user=travis, title='Phantogram', category='Music', comment='Softer electronica with a perfect blend of harder beats mixed in.')
     createStamp(baseurl=baseurl, user=robby, title='DGBG', category='Place', comment='Frenchie burger and Thai sausage appetizer ')
     createStamp(baseurl=baseurl, user=robby, title='Rickhouse', category='Place', comment='Fantastic bourbon selection from  floor to the ceiling (literally). Great for low key drinks')
@@ -654,8 +713,8 @@ def betaAccountData(baseurl):
     data = {
         "authenticated_user_id": kevin,
         "entity_id": restamp['entity']['entity_id'],
-        "blurb": "Lamb burger rocked my world.",
-        "credit": 'sample_robby'
+        "blurb": "Lamb burger rocked my world. Thanks @robby.",
+        "credit": 'robby'
     }
     stampID = testPOST(baseurl, path, data)['stamp_id']
     if len(stampID) == 24:
