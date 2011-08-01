@@ -125,6 +125,9 @@ def parseCommandLine():
     
     Globals.options = options
     
+    options.offset = 0
+    options.limit  = None
+    
     if len(args) == 0:
         options.all = True
     

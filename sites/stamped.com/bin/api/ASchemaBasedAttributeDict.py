@@ -271,7 +271,7 @@ class ASchemaBasedAttributeDict(object):
         
         if not _unionDict(data, self._schema, self._data):
             raise KeyError("Error (%s) %s ---- %s ---- %s" % \
-                           (self.__class__.__name__, data, self._schema, self._data))
+                           (self.__class__.__name__, data, self._data))
         
         return
     
