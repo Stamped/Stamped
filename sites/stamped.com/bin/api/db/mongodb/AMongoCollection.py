@@ -9,9 +9,51 @@ import Globals
 import bson, copy, os, pymongo, time, utils
 
 from errors import Fail
-from utils import AttributeDict, getPythonConfigFile
+from utils import AttributeDict, getPythonConfigFile, Singleton
 from datetime import datetime
 from pymongo.errors import AutoReconnect
+
+class MongoDBConfig(Singleton):
+    def __init__(self):
+        self.config = AttributeDict()
+    
+    @property
+    def isValid(self):
+        return 'mongodb' in self.config and \
+               'host' in self.config.mongodb and \
+               'port' in self.config.mongodb
+    
+    def init(self):
+        ### TODO: Make this more robust!
+        try:
+            config_path = os.path.abspath(__file__)
+            for i in xrange(4):
+                config_path = os.path.dirname(config_path)
+            config_path = os.path.join(config_path, "conf/stamped.conf")
+            self.config = getPythonConfigFile(config_path, jsonPickled=True)
+            if not 'mongodb' in self.config:
+                raise Exception()
+        except:
+            try:
+                config_path = os.path.abspath(__file__)
+                for i in xrange(8):
+                    config_path = os.path.dirname(config_path)
+                config_path = os.path.join(config_path, "conf/stamped.conf")
+                #print config_path
+                self.config = getPythonConfigFile(config_path, jsonPickled=True)
+                #print self.config
+            except:
+                raise Fail("Error: invalid configuration file")
+                raise
+        
+        if not 'mongodb' in self.config:
+            utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:30000")
+            self.config = AttributeDict({
+                "mongodb" : {
+                    "host" : "localhost", 
+                    "port" : 30000, 
+                }
+            })
 
 class AMongoCollection():
     DB = 'stamped_test'
@@ -34,38 +76,12 @@ class AMongoCollection():
             raise
     
     def _initConfig(self):
-        self._config = AttributeDict()
+        cfg = MongoDBConfig.getInstance()
+        if not cfg.isValid:
+            cfg.init()
+        assert cfg.isValid
         
-        ### TODO: Make this more robust!
-        try:
-            config_path = os.path.abspath(__file__)
-            for i in xrange(4):
-                config_path = os.path.dirname(config_path)
-            config_path = os.path.join(config_path, "conf/stamped.conf")
-            self._config = getPythonConfigFile(config_path, jsonPickled=True)
-            if not 'mongodb' in self._config:
-                raise Exception()
-        except:
-            try:
-                config_path = os.path.abspath(__file__)
-                for i in xrange(8):
-                    config_path = os.path.dirname(config_path)
-                config_path = os.path.join(config_path, "conf/stamped.conf")
-                #print config_path
-                self._config = getPythonConfigFile(config_path, jsonPickled=True)
-                #print self._config
-            except:
-                raise Fail("Error: invalid configuration file")
-                raise
-        
-        if not 'mongodb' in self._config:
-            utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:30000")
-            self._config = AttributeDict({
-                "mongodb" : {
-                    "host" : "localhost", 
-                    "port" : 30000, 
-                }
-            })
+        self._config = cfg.config
         
         utils.log("%s) %s:%d" % (self.__class__.__name__, 
                                  self._config.mongodb.host, 

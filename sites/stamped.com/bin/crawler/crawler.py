@@ -13,6 +13,7 @@ from GooglePlacesEntityProxy import GooglePlacesEntityProxy
 from AEntityProxy import AEntityProxy
 from ASyncGatherSource import ASyncGatherSource
 from TestEntitySink import TestEntitySink
+from api.db.mongodb.AMongoCollection import MongoDBConfig
 
 from optparse import OptionParser
 from threading import Thread
@@ -179,8 +180,11 @@ def parseCommandLine():
             }
         }
         
-        conf_str = json.dumps(conf, sort_keys=True, indent=2)
-        utils.write(config_path, conf_str)
+        cfg = MongoDBConfig.getInstance()
+        cfg.config = utils.AttributeDict(conf)
+        
+        #conf_str = json.dumps(conf, sort_keys=True, indent=2)
+        #utils.write(config_path, conf_str)
     
     if options.sink == "test":
         options.sink = TestEntitySink()
