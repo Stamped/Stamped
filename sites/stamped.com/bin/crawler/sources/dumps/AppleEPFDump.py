@@ -472,6 +472,8 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         for col in table_format.cols:
             primary = ""
             if col in table_format.primary_keys:
+                # TODO: handle the common case of multiple primary keys, which sqlite3 does not support
+                # TODO: defining the primary key here as opposed to after insertion is much slower!!!!!
                 primary = " PRIMARY KEY"
             
             col_type = table_format.cols[col]['type']
@@ -503,6 +505,9 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         utils.log("[%s] finished parsing %d rows" % (self, count))
     
     def _parseRow(self, row, table_format):
+        if not self._filter(row, table_format):
+            return
+        
         args = []
         for col in table_format.cols:
             value = row[table_format.cols[col].index]
