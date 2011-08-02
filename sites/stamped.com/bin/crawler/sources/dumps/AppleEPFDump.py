@@ -293,7 +293,7 @@ class AppleEPFArtistDump(AAppleEPFDump):
         g = AppleEPFArtistType()
         g.start()
         g.join()
-        self.artist_type_id = g.artist_types['Artist']
+        self.artist_type_id = g.results['Artist']
     
     def _filter(self, row, table_format):
         artist_type_id = row[table_format.cols.artist_type_id.index]
@@ -351,10 +351,10 @@ class AppleEPFAlbumDump(AAppleEPFDump):
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Albums", self._map, [ "album" ], "collection")
         
-        g = AppleEPFCollectionType()
+        g = AppleEPFCollectionType.getInstance()
         g.start()
         g.join()
-        self.album_type_id = g.collection_types['Album']
+        self.album_type_id = g.results['Album']
     
     def _filter(self, row, table_format):
         collection_type_id = row[table_format.cols.collection_type_id.index]
@@ -385,40 +385,59 @@ class AppleEPFVideoDump(AAppleEPFDump):
         'p_line'                    : 'p_line', 
         'short_description'         : 'short_description', 
         'episode_production_number' : 'episode_production_number', 
+        'media_type_id'             : None, 
     }
     
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Videos", self._map, [ "video" ], "video")
+        
+        g = AppleEPFMediaType()
+        g.start()
+        g.join()
+        self.movie_type_id = g.results['Movies']
+    
+    def _filter(self, row, table_format):
+        media_type_id = row[table_format.cols.media_type_id.index]
+        return media_type_id == self.movie_type_id
 
 class AppleEPFCollectionType(AAppleEPFDump):
-    
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Collection Types", None, [ ], "collection_type")
-        self.collection_types = { }
+        self.results = { }
     
     def _parseRow(self, row, table_format):
         name = row[table_format.cols.name.index]
-        self.collection_types[name] = row[table_format.cols.collection_type_id.index]
+        self.results[name] = row[table_format.cols.collection_type_id.index]
 
 class AppleEPFArtistType(AAppleEPFDump):
-    
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Artist Types", None, [ ], "artist_type")
-        self.artist_types = { }
+        self.results = { }
     
     def _parseRow(self, row, table_format):
         name = row[table_format.cols.name.index]
-        self.artist_types[name] = row[table_format.cols.artist_type_id.index]
+        self.results[name] = row[table_format.cols.artist_type_id.index]
 
 class AppleEPFMediaType(AAppleEPFDump):
-    
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Media Types", None, [ ], "media_type")
-        self.media_types = { }
+        self.results = { }
     
     def _parseRow(self, row, table_format):
         name = row[table_format.cols.name.index]
-        self.media_types[name] = row[table_format.cols.media_type_id.index]
+        self.results[name] = row[table_format.cols.media_type_id.index]
+
+class AppleEPFStorefrontDump(AAppleEPFDump):
+    def __init__(self):
+        AAppleEPFDump.__init__(self, "Apple EPF Storefronts", None, [ ], "storefront")
+        self.results = { }
+    
+    def _parseRow(self, row, table_format):
+        country_code = row[table_format.cols.country_code.index]
+        self.results[country_code] = {
+            'storefront_id' : row[table_format.cols.storefront_id.index], 
+            'name' : row[table_format.cols.name.index], 
+        }
 
 import EntitySources
 
