@@ -51,7 +51,6 @@
 								<string key="NSFrame">{{0, -231}, {320, 240}}</string>
 								<reference key="NSSuperview" ref="30529713"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:363</string>
 								<int key="IBUIContentMode">4</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -100,7 +99,6 @@
 				<bool key="IBUIBouncesZoom">NO</bool>
 				<int key="IBUISeparatorStyle">1</int>
 				<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
-				<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
 				<float key="IBUIRowHeight">63</float>
 				<float key="IBUISectionHeaderHeight">22</float>
 				<float key="IBUISectionFooterHeight">22</float>

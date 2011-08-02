@@ -42,6 +42,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 @synthesize cancelButton = cancelButton_;
 @synthesize spinner = spinner_;
 @synthesize checkmarkButton = checkmarkButton_;
+@synthesize creditTextField = creditTextField_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -51,8 +52,17 @@ static const CGFloat kMinContainerHeight = 204.0;
   return self;
 }
 
+- (id)initWithEntityObject:(Entity*)entityObject creditedTo:(User*)user {
+  self = [self initWithEntityObject:entityObject];
+  if (self) {
+    creditedUser_ = [user retain];
+  }
+  return self;
+}
+
 - (void)dealloc {
   [entityObject_ release];
+  [creditedUser_ release];
   self.scrollView = nil;
   self.titleLabel = nil;
   self.detailLabel = nil;
@@ -67,6 +77,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.spinner = nil;
   self.cancelButton = nil;
   self.checkmarkButton = nil;
+  self.creditTextField = nil;
   [super dealloc];
 }
 
@@ -165,14 +176,15 @@ static const CGFloat kMinContainerHeight = 204.0;
   stampLayer_.opacity = 0.0;
   [scrollView_.layer insertSublayer:stampLayer_ above:titleLabel_.layer];
   [stampLayer_ release];
-
   
   detailLabel_.text = entityObject_.subtitle;
   detailLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  
+
   reasoningLabel_.textColor = [UIColor colorWithWhite:0.75 alpha:1.0];
-  
   categoryImageView_.image = entityObject_.categoryImage;
+
+  if (creditedUser_)
+    creditTextField_.text = creditedUser_.screenName;
 }
 
 - (void)viewDidUnload {
@@ -191,13 +203,19 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.spinner = nil;
   self.cancelButton = nil;
   self.checkmarkButton = nil;
+  self.creditTextField = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+#pragma mark - UITextViewDelegate Methods.
+
 - (void)textViewDidChange:(UITextView*)textView {
+  if (textView != reasoningTextView_)
+    return;
+
   reasoningLabel_.hidden = reasoningTextView_.hasText;
   CGSize stringSize = reasoningTextView_.contentSize;
   CGRect frame = ribbonedContainerView_.frame;
@@ -215,6 +233,38 @@ static const CGFloat kMinContainerHeight = 204.0;
   }
 }
 
+#pragma mark - UITextFieldDelegate Methods.
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  if (textField != creditTextField_)
+    return;
+  
+  [UIView animateWithDuration:0.2 animations:^{
+    self.scrollView.contentInset =
+      UIEdgeInsetsMake(0, 0, CGRectGetMaxY(ribbonedContainerView_.frame) - 50, 0);
+    [self.scrollView setContentOffset:CGPointMake(0, CGRectGetMaxY(ribbonedContainerView_.frame) - 50) animated:YES];
+  }];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  if (textField != creditTextField_)
+    return;
+  [UIView animateWithDuration:0.2 animations:^{
+    self.scrollView.contentInset = UIEdgeInsetsZero;
+  }];
+  [self.scrollView setContentOffset:CGPointZero animated:YES];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  if (textField != creditTextField_)
+    return YES;
+  
+  [textField resignFirstResponder];
+  return NO;
+}
+
+#pragma mark - Actions.
+
 - (IBAction)backOrCancelButtonPressed:(id)sender {
   [self.navigationController popViewControllerAnimated:YES];
 }
@@ -228,8 +278,10 @@ static const CGFloat kMinContainerHeight = 204.0;
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/stamps/create.json" delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = stampMapping;
+  NSString* credit = [creditTextField_.text stringByReplacingOccurrencesOfString:@" " withString:@""];
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       reasoningTextView_.text, @"blurb",
+      credit, @"credit",
       [AccountManager sharedManager].currentUser.userID, @"authenticated_user_id",
       entityObject_.entityID, @"entity_id", nil];
   [objectLoader send];

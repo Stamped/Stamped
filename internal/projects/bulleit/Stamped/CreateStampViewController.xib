@@ -17,6 +17,7 @@
 			<string>IBUILabel</string>
 			<string>IBProxyObject</string>
 			<string>IBUIActivityIndicatorView</string>
+			<string>IBUITextField</string>
 			<string>IBUITextView</string>
 			<string>IBUIScrollView</string>
 			<string>IBUIButton</string>
@@ -321,7 +322,7 @@
 										<string key="NSFrame">{{34, 164}, {70, 17}}</string>
 										<reference key="NSSuperview" ref="101741781"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="464865782"/>
+										<reference key="NSNextKeyView" ref="312603011"/>
 										<string key="NSReuseIdentifierKey">_NS:129</string>
 										<bool key="IBUIOpaque">NO</bool>
 										<bool key="IBUIClipsSubviews">YES</bool>
@@ -338,6 +339,35 @@
 										<float key="IBUIMinimumFontSize">10</float>
 										<reference key="IBUIFontDescription" ref="782984772"/>
 										<reference key="IBUIFont" ref="461654039"/>
+									</object>
+									<object class="IBUITextField" id="312603011">
+										<reference key="NSNextResponder" ref="101741781"/>
+										<int key="NSvFlags">292</int>
+										<string key="NSFrame">{{84, 157}, {226, 31}}</string>
+										<reference key="NSSuperview" ref="101741781"/>
+										<reference key="NSWindow"/>
+										<reference key="NSNextKeyView" ref="464865782"/>
+										<string key="NSReuseIdentifierKey">_NS:217</string>
+										<bool key="IBUIOpaque">NO</bool>
+										<bool key="IBUIClipsSubviews">YES</bool>
+										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+										<int key="IBUIContentVerticalAlignment">0</int>
+										<string key="IBUIText"/>
+										<object class="NSColor" key="IBUITextColor">
+											<int key="NSColorSpace">3</int>
+											<bytes key="NSWhite">MAA</bytes>
+											<reference key="NSCustomColorSpace" ref="614199035"/>
+										</object>
+										<bool key="IBUIAdjustsFontSizeToFit">YES</bool>
+										<float key="IBUIMinimumFontSize">12</float>
+										<object class="IBUITextInputTraits" key="IBUITextInputTraits">
+											<int key="IBUIAutocorrectionType">1</int>
+											<int key="IBUIKeyboardAppearance">1</int>
+											<int key="IBUIReturnKeyType">9</int>
+											<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+										</object>
+										<reference key="IBUIFontDescription" ref="481751809"/>
+										<reference key="IBUIFont" ref="532721506"/>
 									</object>
 									<object class="IBUIImageView" id="977492604">
 										<reference key="NSNextResponder" ref="101741781"/>
@@ -659,6 +689,22 @@
 					</object>
 					<int key="connectionID">98</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="312603011"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">101</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">creditTextField</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="312603011"/>
+					</object>
+					<int key="connectionID">102</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -762,6 +808,7 @@
 							<reference ref="464865782"/>
 							<reference ref="483849353"/>
 							<reference ref="234167628"/>
+							<reference ref="312603011"/>
 						</object>
 						<reference key="parent" ref="870662028"/>
 						<string key="objectName">Ribboned Container</string>
@@ -868,6 +915,12 @@
 						<reference key="object" ref="20863377"/>
 						<reference key="parent" ref="191373211"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">100</int>
+						<reference key="object" ref="312603011"/>
+						<reference key="parent" ref="101741781"/>
+						<string key="objectName">Credit Text Field</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -880,6 +933,7 @@
 					<string>-2.IBPluginDependency</string>
 					<string>1.IBPluginDependency</string>
 					<string>10.IBPluginDependency</string>
+					<string>100.IBPluginDependency</string>
 					<string>36.IBPluginDependency</string>
 					<string>36.IBUserGuides</string>
 					<string>37.IBPluginDependency</string>
@@ -911,6 +965,7 @@
 					<string>CreateStampViewController</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>UIResponder</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -955,7 +1010,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">99</int>
+			<int key="maxID">102</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1003,6 +1058,7 @@
 							<string>cancelButton</string>
 							<string>categoryImageView</string>
 							<string>checkmarkButton</string>
+							<string>creditTextField</string>
 							<string>detailLabel</string>
 							<string>reasoningLabel</string>
 							<string>reasoningTextView</string>
@@ -1019,6 +1075,7 @@
 							<string>UIButton</string>
 							<string>UIImageView</string>
 							<string>UIButton</string>
+							<string>UITextField</string>
 							<string>UILabel</string>
 							<string>UILabel</string>
 							<string>UITextView</string>
@@ -1038,6 +1095,7 @@
 							<string>cancelButton</string>
 							<string>categoryImageView</string>
 							<string>checkmarkButton</string>
+							<string>creditTextField</string>
 							<string>detailLabel</string>
 							<string>reasoningLabel</string>
 							<string>reasoningTextView</string>
@@ -1065,6 +1123,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">checkmarkButton</string>
 								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">creditTextField</string>
+								<string key="candidateClassName">UITextField</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">detailLabel</string>

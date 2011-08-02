@@ -76,6 +76,7 @@
   [activity release];
   [todo release];
   [people release];
+  // TODO(andybons): Investigate this.
   CGRect inboxFrame = CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
   inbox.view.frame = inboxFrame;
   [self.view addSubview:inbox.view];
@@ -85,6 +86,8 @@
     [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
 
   self.tabBar.selectedItem = stampsTabBarItem_;
+  // Preload the other views...
+  [activity view];
 }
 
 - (void)viewDidUnload {

@@ -12,12 +12,16 @@
 @class Entity;
 @class UserImageView;
 @class CAGradientLayer;
+@class User;
 
-@interface CreateStampViewController : UIViewController<UITextViewDelegate, RKObjectLoaderDelegate> {
+@interface CreateStampViewController : UIViewController<UITextFieldDelegate,
+                                                        UITextViewDelegate,
+                                                        RKObjectLoaderDelegate> {
  @private
   Entity* entityObject_;
   CAGradientLayer* ribbonGradientLayer_;
   CALayer* stampLayer_;
+  User* creditedUser_;
 }
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
@@ -33,10 +37,12 @@
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* spinner;
 @property (nonatomic, retain) IBOutlet UIButton* checkmarkButton;
+@property (nonatomic, retain) IBOutlet UITextField* creditTextField;
 
 
 - (IBAction)backOrCancelButtonPressed:(id)sender;
 - (IBAction)saveStampButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;
+- (id)initWithEntityObject:(Entity*)entityObject creditedTo:(User*)user;
 
 @end

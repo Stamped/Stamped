@@ -282,7 +282,8 @@ static const CGFloat kKeyboardHeight = 216.0;
 
 - (IBAction)handleRestampButtonTap:(id)sender {
   CreateStampViewController* createViewController =
-      [[CreateStampViewController alloc] initWithEntityObject:stamp_.entityObject];
+      [[CreateStampViewController alloc] initWithEntityObject:stamp_.entityObject
+                                                   creditedTo:stamp_.user];
   [self.navigationController pushViewController:createViewController animated:YES];
   [createViewController release];
 }
