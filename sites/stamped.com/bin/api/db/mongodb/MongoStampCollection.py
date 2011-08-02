@@ -365,7 +365,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             data = {}
             data['indices'] = [(reply.start()), reply.end()]
             data['screen_name'] = reply.group(0)[1:]
-            user = self.user_collection.lookupUsers(None, data['screen_name'])
+            user = self.user_collection.lookupUsers(None, [data['screen_name']])
             if isinstance(user, list) and len(user) == 1:
                 data['user_id'] = user[0]['user_id']
                 data['display_name'] = user[0]['display_name']
