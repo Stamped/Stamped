@@ -18,26 +18,33 @@
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
+#import "Util.h"
 
 static const CGFloat kBadgeSize = 21.0;
 
 @interface ActivityCommentCellView : UIView
-  
+- (void)invertColors:(BOOL)inverted;
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated;
+
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
+@property (nonatomic, assign) BOOL selected;
 @property (nonatomic, readonly) UserImageView* userImageView;
 @property (nonatomic, readonly) UILabel* mainLabel;
 @property (nonatomic, readonly) UIImageView* badgeImageView;
-@property (nonatomic, retain) CATextLayer* textLayer;
+@property (nonatomic, readonly) UIImageView* disclosureArrowImageView;
+@property (nonatomic, readonly) CATextLayer* headerTextLayer;
 @property (nonatomic, readonly) UILabel* textLabel;
 @end
 
 @implementation ActivityCommentCellView
 
 @synthesize highlighted = highlighted_;
+@synthesize selected = selected_;
 @synthesize userImageView = userImageView_;
 @synthesize mainLabel = mainLabel_;
 @synthesize badgeImageView = badgeImageView_;
-@synthesize textLayer = textLayer_;
+@synthesize disclosureArrowImageView = disclosureArrowImageView_;
+@synthesize headerTextLayer = headerTextLayer_;
 @synthesize textLabel = textLabel_;
 
 - (id)initWithFrame:(CGRect)frame {
@@ -56,33 +63,61 @@ static const CGFloat kBadgeSize = 21.0;
     [self addSubview:badgeImageView_];
     [badgeImageView_ release];
     
-    self.textLayer = [[CATextLayer alloc] init];
-    self.textLayer.truncationMode = kCATruncationEnd;
-    self.textLayer.contentsScale = [[UIScreen mainScreen] scale];
-    self.textLayer.fontSize = 12.0;
-    self.textLayer.foregroundColor = [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
-    self.textLayer.frame = CGRectMake(70, 13, 220, 16);
+    headerTextLayer_ = [[CATextLayer alloc] init];
+    headerTextLayer_.truncationMode = kCATruncationEnd;
+    headerTextLayer_.contentsScale = [[UIScreen mainScreen] scale];
+    headerTextLayer_.fontSize = 12.0;
+    headerTextLayer_.foregroundColor = [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
+    headerTextLayer_.frame = CGRectMake(70, 13, 210, 16);
     NSDictionary* actions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
-    self.textLayer.actions = actions;
+    headerTextLayer_.actions = actions;
     [actions release];
-    [self.layer addSublayer:self.textLayer];
-    [self.textLayer release];
+    [self.layer addSublayer:headerTextLayer_];
+    [headerTextLayer_ release];
     
-    textLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 27, 220, 20)];
+    textLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 27, 210, 20)];
     textLabel_.numberOfLines = 0;
     textLabel_.backgroundColor = [UIColor clearColor];
     textLabel_.textColor = [UIColor colorWithWhite:0.15 alpha:1.0];
+    textLabel_.highlightedTextColor = [UIColor whiteColor];
     textLabel_.lineBreakMode = UILineBreakModeWordWrap;
     textLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
     [self addSubview:textLabel_];
     [textLabel_ release];
+    
+    UIImage* disclosureImage = [UIImage imageNamed:@"disclosure_arrow"];
+    disclosureArrowImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(290, 24, 8, 11)];
+    disclosureArrowImageView_.contentMode = UIViewContentModeCenter;
+    disclosureArrowImageView_.image = disclosureImage;
+    disclosureArrowImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureImage];
+    [self addSubview:disclosureArrowImageView_];
+    [disclosureArrowImageView_ release];
   }
   return self;
 }
 
-- (void)dealloc {
-  self.textLayer = nil;
-  [super dealloc];
+- (void)invertColors:(BOOL)inverted {
+  NSMutableAttributedString* headerAttributedString =
+      [[NSMutableAttributedString alloc] initWithAttributedString:headerTextLayer_.string];
+  CGColorRef color = inverted ? [UIColor whiteColor].CGColor :
+      [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
+  [headerAttributedString setAttributes:
+   [NSDictionary dictionaryWithObject:(id)color 
+                               forKey:(id)kCTForegroundColorAttributeName] 
+                                  range:NSMakeRange(0, headerAttributedString.length)];
+  headerTextLayer_.string = headerAttributedString;
+  [headerAttributedString release];
+  [self setNeedsDisplayInRect:headerTextLayer_.frame];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+  selected_ = selected;
+  [self invertColors:selected];
+}
+
+- (void)setHighlighted:(BOOL)highlighted {
+  highlighted_ = highlighted;
+  [self invertColors:highlighted];
 }
 
 @end
@@ -103,6 +138,11 @@ static const CGFloat kBadgeSize = 21.0;
     [customView_ release];
   }
   return self;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+  [super setSelected:selected animated:animated];
+  [customView_ setSelected:selected animated:animated];
 }
 
 - (void)setEvent:(Event*)event {
@@ -159,13 +199,13 @@ static const CGFloat kBadgeSize = 21.0;
   CFRelease(font);
   CFRelease(style);
   
-  customView_.textLayer.string = string;
+  customView_.headerTextLayer.string = string;
   [customView_ setNeedsDisplay];
   [string release];
   
   customView_.textLabel.text = event.comment.blurb;
   CGSize stringSize = [event.comment.blurb sizeWithFont:customView_.textLabel.font
-                                      constrainedToSize:CGSizeMake(230, MAXFLOAT)
+                                      constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                           lineBreakMode:UILineBreakModeWordWrap];
   CGRect textFrame = customView_.textLabel.frame;
   textFrame.size = stringSize;

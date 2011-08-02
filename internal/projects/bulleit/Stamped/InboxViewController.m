@@ -193,7 +193,7 @@ typedef enum {
 
   if (!loading) {
     [reloadLabel_.layer removeAllAnimations];
-    reloadLabel_.text = @"Pull my finger. \ue231";
+    reloadLabel_.text = @"Pull my finger. \ue22f";
     reloadLabel_.layer.transform = CATransform3DIdentity;
     [UIView animateWithDuration:0.2
                           delay:0 
@@ -304,7 +304,7 @@ typedef enum {
     return;
 
   shouldReload_ = scrollView.contentOffset.y < -65.0;
-  reloadLabel_.text = shouldReload_ ? @"\ue05a" : @"Pull my finger. \ue231";
+  reloadLabel_.text = shouldReload_ ? @"\ue05a" : @"Pull my finger. \ue22f";
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {

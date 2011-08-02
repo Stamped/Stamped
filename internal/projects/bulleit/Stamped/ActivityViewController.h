@@ -9,6 +9,12 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-@interface ActivityViewController : UITableViewController <RKObjectLoaderDelegate>
+@interface ActivityViewController : UITableViewController <UIScrollViewDelegate, RKObjectLoaderDelegate> {
+ @private
+  BOOL shouldReload_;
+  BOOL isLoading_;
+}
+
+@property (nonatomic, retain) IBOutlet UILabel* reloadLabel;
 
 @end

@@ -26,6 +26,7 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   [RKRequestQueue sharedQueue].showsNetworkActivityIndicatorWhenBusy = YES;
+  [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.client.username = @"stampedtest";
   objectManager.client.password = @"august1ftw";
