@@ -156,7 +156,7 @@ class AWSDeploymentStack(ADeploymentStack):
             #{
             #    'sources' : [ 'opentable', ], 
             #    'numInstances' : 16, 
-            #    'numProcesses' : 4, 
+            #    'numProcesses' : 8, 
             #}, 
             #{
             #    'sources' : [ 'factualusrestaurants', ], 
@@ -305,7 +305,7 @@ class AWSDeploymentStack(ADeploymentStack):
         # create temporary instance whose only purpose will be to attach and mount 
         # the crawler data AWS volume, add data to it, and then cleanup.
         instance = AWSInstance(self, config)
-        instance.create()
+        instance.create(block=False)
         
         files = [
             "artist", 

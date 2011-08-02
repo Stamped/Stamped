@@ -40,15 +40,15 @@ class AInstance(object):
     def state(self):
         raise NotImplementedError
     
-    def create(self):
-        self._pre_create()
+    def create(self, block=True):
+        self._pre_create(block)
         utils.log("[%s] create" % self)
         
         # don't create an instance more than once
         assert self.state is None
         
         # initialize the underlying instance
-        self._create()
+        self._create(block)
         
         # wait for the instance to start up
         utils.log("[%s] waiting for instance to come online (this may take a few minutes)..." % self)
@@ -65,16 +65,16 @@ class AInstance(object):
         for tag in self.config:
             self.add_tag(tag, self.config[tag])
         
-        self._post_create()
+        self._post_create(block)
     
-    def _pre_create(self):
+    def _pre_create(self, block):
         pass
     
     @abstract
-    def _create(self):
+    def _create(self, block):
         raise NotImplementedError
     
-    def _post_create(self):
+    def _post_create(self, block):
         pass
     
     @abstract

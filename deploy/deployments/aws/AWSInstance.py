@@ -122,7 +122,7 @@ class AWSInstance(AInstance):
     def conn(self):
         return self.stack.conn
     
-    def _create(self):
+    def _create(self, block):
         assert self.state is None
         
         if 'placement' in self.config:
@@ -164,16 +164,17 @@ class AWSInstance(AInstance):
                 pass
         utils.log("[%s] %s is online" % (self, desc))
     
-    def _post_create(self):
+    def _post_create(self, block):
         # Check for SSH
         self._validate_port(22, desc="ssh service")
         
-        # Check for init to finish
-        #self._validate_port(5001, desc="init script")
-        
-        if 'db' in self.roles:
-            # Check for mongo to finish
-            self._validate_port(27017, desc="mongo")
+        if block:
+            # Check for init to finish
+            self._validate_port(8649, desc="init script / ganglia")
+            
+            if 'db' in self.roles:
+                # Check for mongo to finish
+                self._validate_port(27017, desc="mongo")
         
         """
         env.user = 'ubuntu'

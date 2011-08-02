@@ -37,12 +37,6 @@ class AWSDeploymentSystem(DeploymentSystem):
             'to_port'     : 22, 
             'cidr_ip'     : '0.0.0.0/0', 
         }
-        instance_ready_rule = {
-            'ip_protocol' : 'tcp', 
-            'from_port'   : 5001, 
-            'to_port'     : 5001, 
-            'cidr_ip'     : '0.0.0.0/0', 
-        }
         ganglia_udp_rule = {
             'ip_protocol' : 'udp', 
             'from_port'   : 8649, 
@@ -55,16 +49,18 @@ class AWSDeploymentSystem(DeploymentSystem):
             'to_port'     : 8649, 
             'cidr_ip'     : '0.0.0.0/0', 
         }
- 
+        
+        common_rules = [
+            ssh_rule, 
+            ganglia_udp_rule, 
+            ganglia_tcp_rule, 
+        ]
+        
         groups = [
             {
                 'name' : 'db', 
                 'desc' : 'Database security group', 
                 'rules' : [
-                    ssh_rule, 
-                    instance_ready_rule, 
-                    ganglia_udp_rule,
-                    ganglia_tcp_rule,
                     {
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 27017, 
@@ -83,10 +79,6 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'name' : 'webserver', 
                 'desc' : 'WebServer security group', 
                 'rules' : [
-                    ssh_rule, 
-                    instance_ready_rule,  
-                    ganglia_udp_rule,
-                    ganglia_tcp_rule,
                     {
                         'ip_protocol' : 'tcp', 
                         'from_port'   : 5000, 
@@ -99,10 +91,6 @@ class AWSDeploymentSystem(DeploymentSystem):
                 'name' : 'crawler', 
                 'desc' : 'Crawler security group', 
                 'rules' : [
-                    ssh_rule, 
-                    instance_ready_rule,  
-                    ganglia_udp_rule,
-                    ganglia_tcp_rule,
                 ], 
             }, 
         ]
@@ -113,6 +101,8 @@ class AWSDeploymentSystem(DeploymentSystem):
             
             if sg is None:
                 self.conn.create_security_group(name, group['desc'])
+            
+            group['rules'].extend(common_rules)
         
         for group in groups:
             name = group['name']

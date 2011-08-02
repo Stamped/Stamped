@@ -40,7 +40,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
     def processQueue(self, queue, async=True, poolSize=128):
         """Processes the given queue as many items at a time as possible between 
         blocking until StopIteration is received."""
-        utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
+        #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
         stop = 0
         if async:
             pool = Pool(poolSize)
@@ -67,7 +67,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
                 if item is not None:
                     items.append(item)
             
-            utils.log("[%s] %d" % (self, len(items)))
+            #utils.log("[%s] %d" % (self, len(items)))
             
             numItems = len(items)
             if numItems > 1:
@@ -91,7 +91,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
         
         if async:
             pool.join()
-        utils.log("[%s] <<< AEntitySink.processQueue" % (self, ))
+        #utils.log("[%s] <<< AEntitySink.processQueue" % (self, ))
     
     @abstract
     def _processItem(self, item):

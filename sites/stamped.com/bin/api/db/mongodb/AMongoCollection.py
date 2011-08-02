@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import bson, copy, os, pymongo, time, utils
+import bson, copy, math, os, pymongo, time, utils
 
 from errors import Fail
 from utils import AttributeDict, getPythonConfigFile, Singleton
@@ -103,12 +103,20 @@ class AMongoCollection():
     def _connect(self):
         # TODO: have a more consistent approach to handling AutoReconnect!
         while True:
+            delay = 1
+            max_delay = 16
+            
             try:
                 utils.log("%s) connecting to %s:%d" % (self, self._host, self._port))
                 return pymongo.Connection(self._host, self._port, slave_okay=True)
+                #, network_timeout=5)
             except AutoReconnect as e:
+                if delay > max_delay:
+                    raise
+                
                 utils.log("%s) retrying to connect to host: %s" % (self, str(e)))
-                time.sleep(2)
+                time.sleep(delay)
+                delay *= 2
     
     def _getDatabase(self):
         return self._connection[self._db]
@@ -256,6 +264,7 @@ class AMongoCollection():
             # TODO: have a more consistent approach to handling AutoReconnect!
             num_retries = 0
             max_retries = 5
+            
             while True:
                 try:
                     ret = self._collection.insert(obj, safe=True)
@@ -270,33 +279,48 @@ class AMongoCollection():
                         utils.log(msg)
                         raise
                     
-                    utils.log("%s) retrying to insert 1 documents to host: %s" % (self, str(e)))
+                    utils.log("%s) retrying to insert 1 document to host: %s" % (self, str(e)))
                     time.sleep(1)
         else:
             return False
     
     def _addDocuments(self, documents, objId='id'):
         objs = self._objsToMongo(documents, objId)
+        max_batch_size = 64
         
-        if len(objs) > 0:
-            # TODO: have a more consistent approach to handling AutoReconnect!
-            num_retries = 0
-            max_retries = 5
-            while True:
+        # TODO: have a more consistent approach to handling AutoReconnect!
+        def _insert(objects, level):
+            count = len(objects)
+            
+            if count <= 0:
+                return False
+            
+            if count > max_batch_size:
+                num = int(math.ceil(float(count) / float(max_batch_size)))
+                for i in xrange(num):
+                    offset = i * max_batch_size
+                    sub_objects = objects[offset : offset + max_batch_size]
+                    _insert(sub_objects, level)
+            else:
                 try:
-                    ret = self._collection.insert(objs, safe=True)
-                    utils.log("[%s] successfully inserted %d documents" % (self, len(objs)))
+                    utils.log("[%s] inserting %d documents..." % (self, count))
+                    ret = self._collection.insert(objects, safe=True)
+                    utils.log("[%s] successfully inserted %d documents" % (self, count))
                     return ret
                 except AutoReconnect as e:
-                    num_retries += 1
-                    if num_retries > max_retries:
+                    if level >= 6 or count <= 1:
                         utils.log("[%s] unable to connect to host after %d retries (%s)" % (self, max_retries, str(e)))
                         raise
                     
-                    utils.log("[%s] retrying to insert %d documents to host: %s" % (self, len(objs), str(e)))
-                    time.sleep(1)
-        else:
-            return False
+                    utils.log("[%s] inserting %d documents failed... trying smaller batch" % (self, count))
+                    
+                    time.sleep(0.01)
+                    _insert(objects[:mid], level + 1)
+                    _insert(objects[mid:], level + 1)
+            
+            return True
+        
+        return _insert(objs, 0)
     
     def _getDocumentFromId(self, documentId, objId='id'):
         #print 'documentId: ', documentId
