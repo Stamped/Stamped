@@ -5,8 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, CSVUtils, utils
-import gevent, os
+import Globals
+import CSVUtils, utils
+import os, time
 
 from gevent.pool import Pool
 from AEntitySource import AExternalDumpEntitySource
@@ -94,6 +95,7 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
             if numLines > 100 and (count % (numLines / 100)) == 0:
                 utils.log("[%s] done parsing %s" % \
                     (self.NAME, utils.getStatusStr(count, numLines)))
+                time.sleep(0.1)
         
         Globals.options.offset = 0
         if Globals.options.limit:

@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import gevent, os, xlrd
+import gevent, os, time, xlrd
 import sources.OpenTableParser as OpenTableParser
 
 from gevent.pool import Pool
@@ -65,6 +65,7 @@ class OpenTableDump(AExternalDumpEntitySource):
         if numEntities > 100 and ((index - 1) % (numEntities / 100)) == 0:
             utils.log("[%s] done parsing %s" % \
                 (self.NAME, utils.getStatusStr(index - 1 - Globals.options.offset, numEntities)))
+            time.sleep(0.1)
         
         row = sheet.row_values(index)
         

@@ -60,13 +60,8 @@ class Crawler(Thread):
     def _createSourceChain(self, source):
         if self.options.googlePlaces and 'place' in source.types:
             source = GooglePlacesEntityProxy(source)
-            #source = MultiprocessingEntityProxy(source, GooglePlacesEntityProxy)
         
         return source
-
-#def parseDistributedHosts(option, opt, value, parser):
-#    Globals.options.distributed = True
-#    Globals.options.hosts = value.split(',')
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] [sources]"

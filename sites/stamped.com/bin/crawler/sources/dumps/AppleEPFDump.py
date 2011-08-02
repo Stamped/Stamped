@@ -239,9 +239,9 @@ class AAppleEPFDump(AExternalDumpEntitySource):
             count += 1
             
             if numLines > 100 and (count % (numLines / 100)) == 0:
-                time.sleep(0.1)
                 utils.log("[%s] done parsing %s" % \
                     (self, utils.getStatusStr(count, numLines)))
+                time.sleep(0.1)
         
         pool.join()
         self._output.put(StopIteration)
