@@ -16,17 +16,23 @@
 #import "ActivityCreditTableViewCell.h"
 #import "Comment.h"
 #import "Event.h"
+#import "Entity.h"
+#import "Stamp.h"
+#import "StampDetailViewController.h"
+#import "StampedAppDelegate.h"
 
 @interface ActivityViewController ()
 - (void)loadEventsFromDataStore;
 - (void)loadEventsFromNetwork;
-
+- (void)rotateSpinner;
+- (void)setIsLoading:(BOOL)loading;
 @property (nonatomic, copy) NSArray* eventsArray;
 @end
 
 @implementation ActivityViewController
 
 @synthesize eventsArray = eventsArray_;
+@synthesize reloadLabel = reloadLabel_;
 
 - (void)didReceiveMemoryWarning {
     // Releases the view if it doesn't have a superview.
@@ -38,13 +44,13 @@
 #pragma mark - View lifecycle
 
 - (void)dealloc {
+  self.reloadLabel = nil;
   self.eventsArray = nil;
   [super dealloc];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.tableView.allowsSelection = NO;
   [self loadEventsFromDataStore];
   [self loadEventsFromNetwork];
 }
@@ -123,7 +129,7 @@
       [event.genre isEqualToString:@"reply"] ||
       [event.genre isEqualToString:@"mention"]) {
     CGSize stringSize = [event.comment.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
-                                        constrainedToSize:CGSizeMake(230, MAXFLOAT)
+                                        constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                             lineBreakMode:UILineBreakModeWordWrap];
     return fmaxf(60.0, stringSize.height + 40);
   }
@@ -131,17 +137,27 @@
   return 63.0;
 }
 
+- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  Event* event = [eventsArray_ objectAtIndex:indexPath.row];
+  if (!event)
+    return;
+
+  StampDetailViewController* detailViewController =
+      [[StampDetailViewController alloc] initWithStamp:event.stamp];
+
+  // Pass the selected object to the new view controller.
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
+}
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
+  [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
-  for (Event* e in objects) {
-    if (!e.stamp)
-      NSLog(@"Event's stamp is null: %@", e);
-  }
 	[self loadEventsFromDataStore];
+  [self setIsLoading:NO];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -151,7 +167,81 @@
                                          cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
 	[alert show];
 	NSLog(@"Hit error: %@", error);
-  //[self setIsLoading:NO];
+  [self setIsLoading:NO];
 }
+
+#pragma mark - Pull to reload UI stuff.
+
+- (void)setIsLoading:(BOOL)loading {
+  if (isLoading_ == loading)
+    return;
+  
+  isLoading_ = loading;
+  shouldReload_ = NO;
+  
+  if (!loading) {
+    [reloadLabel_.layer removeAllAnimations];
+    reloadLabel_.text = @"Pull my finger. \ue22f";
+    reloadLabel_.layer.transform = CATransform3DIdentity;
+    [UIView animateWithDuration:0.2
+                          delay:0 
+                        options:UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                       self.tableView.contentInset = UIEdgeInsetsZero;
+                     }
+                     completion:nil];
+    return;
+  }
+  
+  [UIView animateWithDuration:0.2
+                        delay:0 
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     self.tableView.contentInset = UIEdgeInsetsMake(70, 0, 0, 0);
+                   }
+                   completion:nil];
+  
+  [self rotateSpinner];
+}
+
+- (void)rotateSpinner {
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanFalse forKey:kCATransactionDisableActions];
+  [CATransaction setValue:[NSNumber numberWithFloat:2.0] forKey:kCATransactionAnimationDuration];
+  
+  CABasicAnimation* animation;
+  animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
+  animation.fromValue = [NSNumber numberWithFloat:0.0];
+  animation.toValue = [NSNumber numberWithFloat:M_PI * 2];
+  animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+  animation.delegate = self;
+  [reloadLabel_.layer addAnimation:animation forKey:@"rotationAnimation"];
+  [CATransaction commit];
+}
+
+#pragma mark - CAAnimationDelegate methods.
+
+- (void)animationDidStop:(CAAnimation*)anim finished:(BOOL)flag {
+  if (isLoading_)
+    [self rotateSpinner];
+}
+
+#pragma mark - UIScrollView delegate methods
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  if (isLoading_)
+    return;
+  
+  shouldReload_ = scrollView.contentOffset.y < -55.0;
+  reloadLabel_.text = shouldReload_ ? @"\ue05a" : @"Pull my finger. \ue22f";
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
+  if (shouldReload_) {
+    [self setIsLoading:YES];
+    [self loadEventsFromNetwork];
+  }
+}
+
 
 @end
