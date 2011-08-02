@@ -204,7 +204,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                         if 'mentions' in stamp:
                             comment.mentions = stamp.mentions
                         comment.timestamp = stamp.timestamp
-                        self.addComment(comment)
+                        self.addComment(comment, activity=False)
         
         # Add activity for credited users
         if len(userIdsForCredit) > 0:
@@ -277,7 +277,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                                 upsert=True)
         return True
         
-    def addComment(self, comment):
+    def addComment(self, comment, activity=True):
         # Grab data
         user = self.user_collection.getUser(comment['user']['user_id'])
         stamp = self.getStamp(comment['stamp_id'])
@@ -293,37 +293,38 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         comment['comment_id'] = commentId
         
         # Add activity for mentioned users
-        userIdsForMention = []
-        if 'mentions' in comment:
-            for mention in comment['mentions']:
-                if 'user_id' in mention:
-                    userIdsForMention.append(mention['user_id']) # mentioned users
-            if len(userIdsForMention) > 0:
-                self.activity_collection.addActivityForMention(userIdsForMention, user, stamp, comment)
+        if activity == True:
+            userIdsForMention = []
+            if 'mentions' in comment:
+                for mention in comment['mentions']:
+                    if 'user_id' in mention:
+                        userIdsForMention.append(mention['user_id']) # mentioned users
+                if len(userIdsForMention) > 0:
+                    self.activity_collection.addActivityForMention(userIdsForMention, user, stamp, comment)
+            
+            # Add activity for commentor and for stamp owner
+            userIdsForComment = []
+            if comment['user']['user_id'] not in userIdsForMention:
+                userIdsForComment.append(comment['user']['user_id'])
+            stampOwner = self.getStamp(comment['stamp_id']).user['user_id']
+            if stampOwner not in userIdsForMention:
+                userIdsForComment.append(stampOwner)
+            if len(userIdsForComment) > 0:
+                self.activity_collection.addActivityForComment(userIdsForComment, user, stamp, comment)
+            
+            # Add activity for previous commenters
+            userIdsForReply = []
+            ### TODO: Limit this to the last 20 comments or so...
+            for prevComment in self.getComments(comment['stamp_id']):
+                userIdsForReply.append(prevComment['user']['user_id']) # prev comments
+            recipientDict = {}
         
-        # Add activity for commentor and for stamp owner
-        userIdsForComment = []
-        if comment['user']['user_id'] not in userIdsForMention:
-            userIdsForComment.append(comment['user']['user_id'])
-        stampOwner = self.getStamp(comment['stamp_id']).user['user_id']
-        if stampOwner not in userIdsForMention:
-            userIdsForComment.append(stampOwner)
-        if len(userIdsForComment) > 0:
-            self.activity_collection.addActivityForComment(userIdsForComment, user, stamp, comment)
-        
-        # Add activity for previous commenters
-        userIdsForReply = []
-        ### TODO: Limit this to the last 20 comments or so...
-        for prevComment in self.getComments(comment['stamp_id']):
-            userIdsForReply.append(prevComment['user']['user_id']) # prev comments
-        recipientDict = {}
-        
-        for e in userIdsForReply:
-            if e not in userIdsForComment and e not in userIdsForMention:
-                recipientDict[e] = 1
-        userIdsForReply = recipientDict.keys()
-        if len(userIdsForReply) > 0:
-            self.activity_collection.addActivityForReply(userIdsForReply, user, stamp, comment)
+            for e in userIdsForReply:
+                if e not in userIdsForComment and e not in userIdsForMention:
+                    recipientDict[e] = 1
+            userIdsForReply = recipientDict.keys()
+            if len(userIdsForReply) > 0:
+                self.activity_collection.addActivityForReply(userIdsForReply, user, stamp, comment)
         
         # Increment comment count on stamp
         self.incrementStatsForStamp(comment['stamp_id'], 'num_comments', 1)
