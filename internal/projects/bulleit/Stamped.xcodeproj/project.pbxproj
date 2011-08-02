@@ -62,6 +62,8 @@
 		7E5DF6CC13DA0D2A00B63039 /* badge_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5DF6CB13DA0D2A00B63039 /* badge_background@2x.png */; };
 		7E5FEED913D0C497008BCA48 /* nav_bar_ripple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */; };
 		7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */; };
+		7E69021713E7451400B09802 /* activity_mention_badge@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E69021613E7451400B09802 /* activity_mention_badge@2x.png */; };
+		7E69021A13E76A4100B09802 /* ActivityCreditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E69021913E76A4100B09802 /* ActivityCreditTableViewCell.m */; };
 		7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */; };
 		7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */; };
 		7E76129A13C9344D0023CCC4 /* cat_icon_app@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129913C9344D0023CCC4 /* cat_icon_app@2x.png */; };
@@ -299,6 +301,9 @@
 		7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_ripple@2x.png"; sourceTree = "<group>"; };
 		7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailCommentView.h; sourceTree = "<group>"; };
 		7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailCommentView.m; sourceTree = "<group>"; };
+		7E69021613E7451400B09802 /* activity_mention_badge@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "activity_mention_badge@2x.png"; sourceTree = "<group>"; };
+		7E69021813E76A4100B09802 /* ActivityCreditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityCreditTableViewCell.h; sourceTree = "<group>"; };
+		7E69021913E76A4100B09802 /* ActivityCreditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityCreditTableViewCell.m; sourceTree = "<group>"; };
 		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
 		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
 		7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlaceDetailViewController.xib; sourceTree = "<group>"; };
@@ -716,6 +721,8 @@
 				7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */,
 				7EE9022B13E61BF0008BCDFB /* ActivityCommentTableViewCell.h */,
 				7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */,
+				7E69021813E76A4100B09802 /* ActivityCreditTableViewCell.h */,
+				7E69021913E76A4100B09802 /* ActivityCreditTableViewCell.m */,
 			);
 			name = Activity;
 			sourceTree = "<group>";
@@ -784,6 +791,7 @@
 			isa = PBXGroup;
 			children = (
 				7EE9022E13E62366008BCDFB /* activity_chat_badge@2x.png */,
+				7E69021613E7451400B09802 /* activity_mention_badge@2x.png */,
 			);
 			name = Activity;
 			sourceTree = "<group>";
@@ -1062,6 +1070,7 @@
 				7E0BC48913E4A30C008CC076 /* tab_icon_stamped@2x.png in Resources */,
 				7E8B1DEB13E5FF9C0060646D /* ActivityViewController.xib in Resources */,
 				7EE9022F13E62366008BCDFB /* activity_chat_badge@2x.png in Resources */,
+				7E69021713E7451400B09802 /* activity_mention_badge@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1126,6 +1135,7 @@
 				7E8B1DEA13E5FF9C0060646D /* ActivityViewController.m in Sources */,
 				7EC05DB713E60D8E00B22C3F /* Event.m in Sources */,
 				7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */,
+				7E69021A13E76A4100B09802 /* ActivityCreditTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -27,7 +27,7 @@
         <attribute name="eventID" optional="YES" attributeType="String"/>
         <attribute name="genre" optional="YES" attributeType="String"/>
         <relationship name="comment" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Comment" inverseName="events" inverseEntity="Comment"/>
-        <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="event" inverseEntity="Stamp"/>
+        <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="events" inverseEntity="Stamp"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="events" inverseEntity="User"/>
     </entity>
     <entity name="Stamp" representedClassName="Stamp">
@@ -37,7 +37,7 @@
         <attribute name="stampID" attributeType="String"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="stamp" inverseEntity="Comment"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamps" inverseEntity="Entity"/>
-        <relationship name="event" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Event" inverseName="stamp" inverseEntity="Event"/>
+        <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Event" inverseName="stamp" inverseEntity="Event"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="stamps" inverseEntity="User"/>
     </entity>
     <entity name="User" representedClassName="User">
@@ -61,7 +61,7 @@
         <element name="Comment" positionX="162" positionY="45" width="128" height="135"/>
         <element name="Entity" positionX="556" positionY="216" width="128" height="195"/>
         <element name="Event" positionX="160" positionY="192" width="128" height="135"/>
-        <element name="Stamp" positionX="216" positionY="324" width="128" height="135"/>
+        <element name="Stamp" positionX="216" positionY="324" width="128" height="165"/>
         <element name="User" positionX="-45" positionY="63" width="128" height="240"/>
     </elements>
 </model>

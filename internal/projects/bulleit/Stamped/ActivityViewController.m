@@ -13,6 +13,8 @@
 
 #import "AccountManager.h"
 #import "ActivityCommentTableViewCell.h"
+#import "ActivityCreditTableViewCell.h"
+#import "Comment.h"
 #import "Event.h"
 
 @interface ActivityViewController ()
@@ -42,6 +44,7 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  self.tableView.allowsSelection = NO;
   [self loadEventsFromDataStore];
   [self loadEventsFromNetwork];
 }
@@ -85,15 +88,22 @@
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString* CellIdentifier = @"CommentCell";
-  
-  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  Event* event = [eventsArray_ objectAtIndex:indexPath.row];
+  NSString* reuseIdentifier = @"CommentIdentifier";
+  if ([event.genre isEqualToString:@"restamp"])
+    reuseIdentifier = @"RestampIdentifier";
+
+  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
   if (cell == nil) {
-    cell = [[[ActivityCommentTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+    if ([reuseIdentifier isEqualToString:@"RestampIdentifier"]) {
+      cell = [[[ActivityCreditTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+    } else {
+      cell = [[[ActivityCommentTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+    }
   }
-  
-  [(ActivityCommentTableViewCell*)cell setEvent:[eventsArray_ objectAtIndex:indexPath.row]];
-  
+  if ([cell respondsToSelector:@selector(setEvent:)])
+    [(id)cell setEvent:event];
+
   return cell;
 }
 
@@ -107,22 +117,30 @@
   }
 }
 
-- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  // Navigation logic may go here. Create and push another view controller.
-  /*
-   <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-   // ...
-   // Pass the selected object to the new view controller.
-   [self.navigationController pushViewController:detailViewController animated:YES];
-   [detailViewController release];
-   */
+- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
+  Event* event = [eventsArray_ objectAtIndex:indexPath.row];
+  if ([event.genre isEqualToString:@"comment"] ||
+      [event.genre isEqualToString:@"reply"] ||
+      [event.genre isEqualToString:@"mention"]) {
+    CGSize stringSize = [event.comment.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
+                                        constrainedToSize:CGSizeMake(230, MAXFLOAT)
+                                            lineBreakMode:UILineBreakModeWordWrap];
+    return fmaxf(60.0, stringSize.height + 40);
+  }
+
+  return 63.0;
 }
+
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
+  for (Event* e in objects) {
+    if (!e.stamp)
+      NSLog(@"Event's stamp is null: %@", e);
+  }
 	[self loadEventsFromDataStore];
 }
 

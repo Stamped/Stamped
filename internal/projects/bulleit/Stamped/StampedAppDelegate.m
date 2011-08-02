@@ -32,7 +32,6 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
-  userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
                                        @"first_name", @"firstName",
                                        @"last_name", @"lastName",
@@ -42,39 +41,38 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                        @"profile_image", @"profileImageURL",
                                        @"screen_name", @"screenName",
                                        nil];
+  userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapAttributes:@"bio", @"website", nil];
 
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
-  entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
                                          @"opentable_url", @"openTableURL", nil];
+  entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapAttributes:@"address", @"category", @"subtitle",
                                @"title", @"coordinates", @"phone", nil];
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
-  commentMapping.primaryKeyAttribute = @"commentID";
   [commentMapping mapAttributes:@"blurb", @"created", nil];
   [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
                                           @"restamp_id", @"restampID",
                                           @"stamp_id", @"stampID", nil];
+  commentMapping.primaryKeyAttribute = @"commentID";
   [commentMapping mapRelationship:@"user" withMapping:userMapping];
 
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
-  stampMapping.primaryKeyAttribute = @"stampID";
   [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
                                         @"created", @"created",
                                         @"num_comments", @"numComments", nil];
+  stampMapping.primaryKeyAttribute = @"stampID";
   [stampMapping mapAttributes:@"blurb", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
-  [stampMapping mapKeyPath:@"comment_preview"
-            toRelationship:@"comments"
-         withMapping:commentMapping];
+  [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];
   
   RKManagedObjectMapping* eventMapping = [RKManagedObjectMapping mappingForClass:[Event class]];
-  eventMapping.primaryKeyAttribute = @"eventID";
   [eventMapping mapAttributes:@"created", @"genre", nil];
   [eventMapping mapKeyPath:@"activity_id" toAttribute:@"eventID"];
+  eventMapping.primaryKeyAttribute = @"eventID";
   [eventMapping mapRelationship:@"comment" withMapping:commentMapping];
   [eventMapping mapRelationship:@"stamp" withMapping:stampMapping];
   [eventMapping mapRelationship:@"user" withMapping:userMapping];
