@@ -315,6 +315,7 @@ class AMongoCollection():
                     utils.log("[%s] inserting %d documents failed... trying smaller batch" % (self, count))
                     
                     time.sleep(0.01)
+                    mid = count / 2
                     _insert(objects[:mid], level + 1)
                     _insert(objects[mid:], level + 1)
             
