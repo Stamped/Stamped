@@ -14,7 +14,6 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "Entity.h"
-#import "STBadgeView.h"
 #import "Stamp.h"
 #import "User.h"
 #import "UserImageView.h"
@@ -39,12 +38,12 @@ static const CGFloat kTitleMaxWidth = 210.0;
   UserImageView* userImageView_;
   UIImageView* typeImageView_;
   UIImageView* disclosureImageView_;
-  UILabel* userNameLabel_;
-  UILabel* commentLabel_;
-  STBadgeView* badgeView_;
 
   // NOT managed. Must manage ownership.
   CATextLayer* titleLayer_;
+  UILabel* badgeLabel_;
+  UILabel* userNameLabel_;
+  UILabel* commentLabel_;
   UIColor* defaultTitleColor_;
   UIColor* defaultSubstringColor_;
   UIColor* whiteColor_;
@@ -124,19 +123,16 @@ static const CGFloat kTitleMaxWidth = 210.0;
     userNameLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     userNameLabel_.textColor = defaultSubstringColor_;
     userNameLabel_.font = [UIFont fontWithName:kUserNameFontString size:kSubstringFontSize];
-    [self addSubview:userNameLabel_];
-    [userNameLabel_ release];
     
     commentLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     commentLabel_.font = [UIFont fontWithName:kCommentFontString size:kSubstringFontSize];
     commentLabel_.textColor = defaultSubstringColor_;
-    [self addSubview:commentLabel_];
-    [commentLabel_ release];
 
-    badgeView_ = [[STBadgeView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.bounds) - 10 - 17, 30, 17, 17)];
-    [self addSubview:badgeView_];
-    badgeView_.hidden = YES;
-    [badgeView_ release];
+    CGRect badgeFrame = CGRectMake(CGRectGetMaxX(self.bounds) - 10 - 17, 30, 17, 17);
+    badgeLabel_ = [[UILabel alloc] initWithFrame:badgeFrame];
+    badgeLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
+    badgeLabel_.textAlignment = UITextAlignmentCenter;
+    badgeLabel_.textColor = [UIColor whiteColor];
     
     titleLayer_ = [[CATextLayer alloc] init];
     titleLayer_.truncationMode = kCATruncationEnd;
@@ -144,17 +140,6 @@ static const CGFloat kTitleMaxWidth = 210.0;
     titleLayer_.foregroundColor = defaultTitleColor_.CGColor;
     titleLayer_.fontSize = 24.0;
     titleLayer_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding + 2.0, kTitleMaxWidth, kTitleFontSize);
-    // Disable implicit animations for this layer.
-    NSMutableDictionary* actions = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
-        [NSNull null], @"onOrderIn",
-        [NSNull null], @"onOrderOut",
-        [NSNull null], @"sublayers",
-        [NSNull null], @"contents",
-        [NSNull null], @"bounds",
-        nil];
-    titleLayer_.actions = actions;
-    [actions release];
-    
     titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
     CFIndex numSettings = 1;
     CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
@@ -180,6 +165,9 @@ static const CGFloat kTitleMaxWidth = 210.0;
   [whiteColor_ release];
   [titleAttributes_ release];
   [titleLayer_ release];
+  [badgeLabel_ release];
+  [userNameLabel_ release];
+  [commentLabel_ release];
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
   [super dealloc];
@@ -188,21 +176,23 @@ static const CGFloat kTitleMaxWidth = 210.0;
 - (void)invertColors:(BOOL)inverted {
   UIColor* titleColor = defaultTitleColor_;
   UIColor* substringColor = defaultSubstringColor_;
-  
+  UIColor* badgeTextColor = whiteColor_;
   if (inverted) {
     substringColor = whiteColor_;
     titleColor = whiteColor_;
+    badgeTextColor = [UIColor blueColor];
   }
 
   userNameLabel_.textColor = substringColor;
   commentLabel_.textColor = substringColor;
+  badgeLabel_.textColor = badgeTextColor;
 
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
   titleLayer_.foregroundColor = titleColor.CGColor;
   [CATransaction commit];
-  [self setNeedsDisplayInRect:titleLayer_.frame];
+  [self setNeedsDisplay];
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
@@ -222,6 +212,15 @@ static const CGFloat kTitleMaxWidth = 210.0;
   CGContextTranslateCTM(ctx, titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
   [titleLayer_ drawInContext:ctx];
   CGContextRestoreGState(ctx);
+  if (!badgeLabel_.hidden) {
+    UIBezierPath* badgePath = [UIBezierPath bezierPathWithRoundedRect:badgeLabel_.frame cornerRadius:2.0];
+    UIColor* fillColor = highlighted_ ? [UIColor whiteColor] : [UIColor lightGrayColor]; 
+    [fillColor setFill];
+    [badgePath fill];
+    [badgeLabel_ drawTextInRect:badgeLabel_.frame];
+  }
+  [userNameLabel_ drawTextInRect:userNameLabel_.frame];
+  [commentLabel_ drawTextInRect:commentLabel_.frame];
   [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
 }
 
@@ -286,9 +285,13 @@ static const CGFloat kTitleMaxWidth = 210.0;
                                 lineBreakMode:UILineBreakModeTailTruncation];
   userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 16, 57, stringSize.width, stringSize.height);
   userNameLabel_.text = userName_;
+  [self setNeedsDisplayInRect:userNameLabel_.frame];
 }
 
 - (void)setComment:(NSString*)comment {
+  if ([comment length] > 0)
+    comment = [NSString stringWithFormat:@"\"%@\"", comment];
+
   comment_ = comment;
   CGSize stringSize = [comment_ sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
                                     forWidth:kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 14
@@ -299,9 +302,10 @@ static const CGFloat kTitleMaxWidth = 210.0;
 
 - (void)setNumComments:(NSUInteger)numComments {
   numComments_ = numComments;
-  badgeView_.hidden = (numComments_ == 0);
-  badgeView_.text = [NSString stringWithFormat:@"%u", numComments];
-  [self setNeedsDisplay];
+  badgeLabel_.hidden = (numComments_ == 0);
+  disclosureImageView_.hidden = !badgeLabel_.hidden;
+  badgeLabel_.text = [NSString stringWithFormat:@"%u", numComments];
+  [self setNeedsDisplayInRect:badgeLabel_.frame];
 }
 
 @end

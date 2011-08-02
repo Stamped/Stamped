@@ -52,7 +52,6 @@
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
 		7E42DCBD13DB64CA00AF63BE /* SearchEntitiesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */; };
 		7E42DCC813DB72B300AF63BE /* shelf_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */; };
-		7E512FC613D9F3B400547A20 /* STBadgeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E512FC513D9F3B400547A20 /* STBadgeView.m */; };
 		7E514A8A13C9735800EEC598 /* book_detail_fillter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A8913C9735800EEC598 /* book_detail_fillter@2x.png */; };
 		7E514A8D13C977E800EEC598 /* place_detail_filler@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A8C13C977E800EEC598 /* place_detail_filler@2x.png */; };
 		7E514A9913C97A9700EEC598 /* GenericItemDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E514A9713C97A9700EEC598 /* GenericItemDetailViewController.m */; };
@@ -288,8 +287,6 @@
 		7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesViewController.m; sourceTree = "<group>"; };
 		7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchEntitiesViewController.xib; sourceTree = "<group>"; };
 		7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shelf_background@2x.png"; sourceTree = "<group>"; };
-		7E512FC413D9F3B400547A20 /* STBadgeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STBadgeView.h; sourceTree = "<group>"; };
-		7E512FC513D9F3B400547A20 /* STBadgeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STBadgeView.m; sourceTree = "<group>"; };
 		7E514A8913C9735800EEC598 /* book_detail_fillter@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "book_detail_fillter@2x.png"; sourceTree = "<group>"; };
 		7E514A8C13C977E800EEC598 /* place_detail_filler@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "place_detail_filler@2x.png"; sourceTree = "<group>"; };
 		7E514A9613C97A9700EEC598 /* GenericItemDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericItemDetailViewController.h; sourceTree = "<group>"; };
@@ -821,8 +818,6 @@
 				7ED2EF6713E0DED5007F1AFB /* Root View */,
 				7E22679713D4D90F00657A66 /* AccountManager.h */,
 				7E22679813D4D90F00657A66 /* AccountManager.m */,
-				7E512FC413D9F3B400547A20 /* STBadgeView.h */,
-				7E512FC513D9F3B400547A20 /* STBadgeView.m */,
 				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
 				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
@@ -1124,7 +1119,6 @@
 				7E2BEBEF13D7757300A116D2 /* ImageToDataTransformer.m in Sources */,
 				7EBCBE8713D78896009FCECF /* Comment.m in Sources */,
 				7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */,
-				7E512FC613D9F3B400547A20 /* STBadgeView.m in Sources */,
 				7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */,
 				7E35A72E13DB9CEA008F856F /* SearchEntitiesTableViewCell.m in Sources */,
 				7E22D6AF13DDA34100C4005E /* CreateStampViewController.m in Sources */,

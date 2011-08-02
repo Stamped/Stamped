@@ -59,7 +59,6 @@ static const CGFloat kKeyboardHeight = 216.0;
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     stamp_ = [stamp retain];
-    [self preloadEntityView];
   }
   return self;
 }
@@ -89,7 +88,13 @@ static const CGFloat kKeyboardHeight = 216.0;
 #pragma mark - View lifecycle
 
 - (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [self preloadEntityView];
 }
 
 - (void)viewDidLoad {
