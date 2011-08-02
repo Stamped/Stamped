@@ -36,9 +36,6 @@ class AppleEPFDistro(Singleton):
         if self.ec2:
             self._volume = 'vol-52db3938'
             #'vol-80ba5bea'
-            #self._volume = 'vol-8cbb5ce6'
-            # TODO: use updated volume
-            #'vol-04b95f6e'
             
             self._instance_id = utils.shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')[0]
             

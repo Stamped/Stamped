@@ -20,6 +20,7 @@ class ASyncGatherSource(AEntityProxy):
         for source in self._sources:
             source.startProducing()
             self.processQueue(source)
+            source.join()
         
         self._output.put(StopIteration)
     

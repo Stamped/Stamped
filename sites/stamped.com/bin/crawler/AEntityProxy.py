@@ -37,14 +37,9 @@ class AEntityProxy(AEntitySink, AEntitySource):
         
         self._source.startProducing()
         self.processQueue(self._source._output)
+        self._source.join()
         self._output.put(StopIteration)
     
-    """ TODO: verify that overriding join is necessary
-    def join(self):
-        self._source.join()
-        self._pool.join()
-        Greenlet.join(self)
-    """
     def join(self):
         self._source.join()
         self._pool.join()
@@ -68,6 +63,7 @@ class AEntityProxy(AEntitySink, AEntitySource):
         for item in items:
             self._pool.spawn(self._processItem, item)
         
+        # TODO: understand *exactly* why this is necessary here!
         #self._pool.join()
     
     def _transform(self, entity):

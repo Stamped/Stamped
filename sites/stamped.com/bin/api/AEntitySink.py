@@ -40,21 +40,20 @@ class AEntitySink(Greenlet, IASyncConsumer):
     def processQueue(self, queue, async=True, poolSize=128):
         """Processes the given queue as many items at a time as possible between 
         blocking until StopIteration is received."""
-        #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
-        stop = False
+        utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
+        stop = 0
         if async:
             pool = Pool(poolSize)
         
-        while not stop:
+        while True:
             items = []
             
-            item = queue.get()
-            if item is StopIteration:
-                stop = True
-                break
-            
-            if item is not None:
-                items.append(item)
+            if stop == 0:
+                item = queue.get()
+                if item is StopIteration:
+                    stop = 1
+                elif item is not None:
+                    items.append(item)
             
             # retrieve as many items in the input queue at once to process 
             # multiple items at a time if possible
@@ -62,28 +61,37 @@ class AEntitySink(Greenlet, IASyncConsumer):
                 item = queue.get_nowait()
                 
                 if item is StopIteration:
-                    stop = True
+                    stop = 1
                     break
                 
                 if item is not None:
                     items.append(item)
             
-            #utils.log("[%s] %d" % (self, len(items)))
+            utils.log("[%s] %d" % (self, len(items)))
             
-            if len(items) > 1:
+            numItems = len(items)
+            if numItems > 1:
                 if async:
                     pool.spawn(self._processItems, items)
                 else:
                     self._processItems(items)
-            else:
+            elif numItems == 1:
                 if async:
                     pool.spawn(self._processItem, items[0])
                 else:
                     self._processItem(items[0])
+            
+            if stop == 2:
+                break
+            
+            if stop == 1:
+                if hasattr(queue, 'join'):
+                    queue.join()
+                stop = 2
         
         if async:
             pool.join()
-        #utils.log("[%s] <<< AEntitySink.processQueue" % (self, ))
+        utils.log("[%s] <<< AEntitySink.processQueue" % (self, ))
     
     @abstract
     def _processItem(self, item):
