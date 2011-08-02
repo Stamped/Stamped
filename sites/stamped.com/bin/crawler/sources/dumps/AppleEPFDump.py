@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import CSVUtils, epf, gevent, gzip, os, re, time, urllib
+import CSVUtils, epf, gevent, gzip, os, re, sqlite3, string, time, urllib
 
 from gevent.pool import Pool
 from utils import lazyProperty, Singleton
@@ -242,6 +242,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
                 time.sleep(0.1)
         
         pool.join()
+        f.close()
         self._output.put(StopIteration)
         utils.log("[%s] finished parsing %d entities" % (self, count))
     
@@ -439,6 +440,81 @@ class AppleEPFStorefrontDump(AAppleEPFDump):
             'name' : row[table_format.cols.name.index], 
         }
 
+class AppleEPFRelationalDB(AAppleEPFDump):
+    def __init__(self, name, filename):
+        AAppleEPFDump.__init__(self, name, None, [ ], filename)
+        self._init_sqlite3(filename)
+    
+    def _init_sqlite3(self, filename):
+        self.dbpath = "%s.db" % filename
+        self.table  = "stamped"
+        self.conn   = sqlite3.connect(self.dbpath)
+        self.db     = self.conn.cursor()
+    
+    def close(self):
+        if self.db is not None:
+            self.db.close()
+            self.db = None
+    
+    def execute(self, cmd):
+        utils.log(cmd)
+        self.db.execute(cmd)
+    
+    def _run(self):
+        utils.log("%s run" % self)
+        f, numLines, filename = self._open_file()
+        utils.log("[%s] parsing ~%d rows from '%s'" % (self, numLines, self._filename))
+        
+        table_format = epf.parse_table_format(f, filename)
+        
+        # initialize sqlite3
+        cols = []
+        for col in table_format.cols:
+            primary = ""
+            if col in table_format.primary_keys:
+                primary = " PRIMARY KEY"
+            
+            col_type = table_format.cols[col]['type']
+            text = "%s %s%s" % (col, col_type, primary)
+            cols.append(text)
+        
+        args = string.joinfields(cols, ', ')
+        try:
+            self.execute("DROP TABLE %s" % (self.table, ))
+        except sqlite3.OperationalError:
+            pass
+        
+        self.execute("CREATE TABLE %s (%s)" % (self.table, args))
+        
+        values_str = '(%s)' % (string.joinfields(('?' for col in table_format.cols), ','), )
+        self._cmd = 'insert into %s values %s' % (self.table, values_str)
+        
+        count = 0
+        for row in epf.parse_rows(f, table_format):
+            self._parseRow(row, table_format)
+            count += 1
+            
+            if numLines > 100 and (count % (numLines / 100)) == 0:
+                utils.log("[%s] done parsing %s" % \
+                    (self, utils.getStatusStr(count, numLines)))
+        
+        f.close()
+        self._output.put(StopIteration)
+        utils.log("[%s] finished parsing %d rows" % (self, count))
+    
+    def _parseRow(self, row, table_format):
+        args = []
+        for col in table_format.cols:
+            value = row[table_format.cols[col].index]
+            args.append(value)
+        
+        self.db.execute(self._cmd, tuple(args))
+        self.conn.commit()
+
+class AppleEPFGenreRelationalDB(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Genres", "genre")
+
 import EntitySources
 
 #EntitySources.registerSource('apple', AppleEPFDumps)
@@ -446,4 +522,5 @@ EntitySources.registerSource('apple_artists', AppleEPFArtistDump)
 #EntitySources.registerSource('apple_songs',   AppleEPFSongDump)
 EntitySources.registerSource('apple_albums',  AppleEPFAlbumDump)
 EntitySources.registerSource('apple_videos',  AppleEPFVideoDump)
+#EntitySources.registerSource('apple_genres',  AppleEPFGenreRelationalDB)
 
