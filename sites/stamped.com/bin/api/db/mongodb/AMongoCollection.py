@@ -309,7 +309,7 @@ class AMongoCollection():
                     return ret
                 except AutoReconnect as e:
                     if level >= 6 or count <= 1:
-                        utils.log("[%s] unable to connect to host after %d retries (%s)" % (self, max_retries, str(e)))
+                        utils.log("[%s] unable to insert %d entities (%s)" % (self, count, str(e)))
                         raise
                     
                     utils.log("[%s] inserting %d documents failed... trying smaller batch" % (self, count))

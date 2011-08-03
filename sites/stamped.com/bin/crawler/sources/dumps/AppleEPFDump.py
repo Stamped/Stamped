@@ -224,6 +224,8 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         pool   = Pool(512)
         count  = 0
         offset = 0
+        self.numFiltered = 0
+        #self.filtered = []
         
         for row in epf.parse_rows(f, table_format):
             if offset < Globals.options.offset:
@@ -244,10 +246,15 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         pool.join()
         f.close()
         self._output.put(StopIteration)
-        utils.log("[%s] finished parsing %d entities" % (self, count))
+        
+        utils.log("[%s] finished parsing %d entities (filtered %d)" % (self, count, self.numFiltered))
+        #for n in self.filtered:
+        #    utils.log("FILTERED: %s" % n)
     
     def _parseRow(self, row, table_format):
         if not self._filter(row, table_format):
+            self.numFiltered += 1
+            #self.filtered.append(row[table_format.cols.name.index])
             return
         
         entity = Entity()
@@ -283,10 +290,36 @@ class AppleEPFArtistDump(AAppleEPFDump):
         'name'              : 'title', 
         'export_date'       : 'export_date', 
         'artist_id'         : 'aid', 
-        'is_actual_artist'  : 'is_actual_artist', 
+        'is_actual_artist'  : None, 
         'view_url'          : 'view_url', 
         'artist_type_id'    : None, 
     }
+    
+    _blacklist_characters = set([
+        '/', 
+        ';', 
+        ',', 
+        '&', 
+    ])
+    
+    _blacklist_strings = [
+        'ft.',  
+        'feat.',  
+        'Feat.',  
+        'feat',  
+        'featuring',  
+        'Featuring',  
+        '.com',  
+        ' present ',  
+        ' Present ',  
+        ' and ', # TODO: will this produce too many false positives?
+        'attributed', 
+        'Attributed', 
+        'Tribute', 
+        'tribute ', 
+        'tributes ', 
+        'niversity', 
+    ]
     
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Artists", self._map, [ "artist" ], "artist")
@@ -298,9 +331,77 @@ class AppleEPFArtistDump(AAppleEPFDump):
     
     def _filter(self, row, table_format):
         artist_type_id = row[table_format.cols.artist_type_id.index]
+        is_actual_artist = row[table_format.cols.is_actual_artist.index]
         
-        # only retain song artists
-        return artist_type_id == self.artist_type_id
+        """
+        Blacklist:
+            tribute bands
+            
+            feat: 
+                Miri Ben Ari feat. Joe Budden & Mr. Maygreen
+                Yusef, Malik Feat. Kanye West
+                Kanye West featuring Lupe Fiasco
+                Pharrell feat Kanye West
+                LOVESCANDAL/ feat TINA
+                Kanye West ft. Fonzworth Bentley & Twista
+                Kanye West  Featuring Dwele
+            
+             multiple artists:
+                Kanye West; John Stephens; Dexter Mills
+                Cyssero / Kanye West / Neyo
+                David Bennent, Georg Nigl, Franck Ollu, Ensemble Modern, Deutscher Kammerchor
+                Kanye West,Milton Mascimento,Dexter Mills
+                Kanye West and Deric"D-Dot"Angelettie
+                Maelstrom aka DJ Emok & NDSA
+                Malik Yusef, Kanye West & Adam Levine
+                Xen Nightz & Kanye West
+                K.Goss/K.Rhodes/B.N.Chapman
+                Revil/Lemarque/Turner/Parsons
+            
+            misc:
+                University of Texas Wind Ensemble
+                The Len Browsn Society
+                ReachMyFile.com
+                P. Diddy for Bad Boy Entertainment, Inc.
+                V\xc3\xa1radi Roma Caf\xc3\xa9
+                L\xc3\xa1szl\xc3\xb3 Kom\xc3\xa1r
+                Zolt\xc3\xa1n Cs\xc3\xa1nyi
+                Lindstr\xc3\xb8m
+                K\xc3\xa5re Korneliussen
+                present Karla Brown
+                Dino and Terry Present Karla Brown
+                \xe3\x83\xa9\xe3\x82\xa6\xe3\x83\xa9\xe3\x83\xbb\xe3\x82\xa2\xe3\x83\xab\xe3\x83\x93\xe3\x83\xbc\xe3\x83\x8e
+                M\xc3\xa9lodie Zhao
+                W,O,W,Machine
+                Fain \xc2\x96 Brown
+                Edgar Froese \xc2\x96 Jerome Froese
+                H\xc3\xbclya S\xc3\xbcer
+                \xe4\xba\x95\xe4\xb8\x8a \xe3\x81\x8b\xe3\x81\xa4\xe3\x81\x8a
+                remove anything that appears in ALL CAPS
+        
+        Transformations:
+            BORIS P. BRANSBY WILLIAMS => Boris P. Bransby Williams
+        
+        Whitelist:
+            24/8
+            Mookie Knobbs and the Agitators
+        """
+        
+        if not is_actual_artist or artist_type_id != self.artist_type_id:
+            return False
+        
+        name = row[table_format.cols.name.index]
+        
+        for letter in name:
+            # only accept primary ascii characters
+            if letter in self._blacklist_characters or letter < ' ' or letter > 'z':
+                return False
+        
+        for s in self._blacklist_strings:
+            if s in name:
+                return False
+        
+        return True
 
 class AppleEPFSongDump(AAppleEPFDump):
     

@@ -40,12 +40,24 @@ class GooglePlacesEntityProxy(AEntityProxy):
     
     def _transform(self, entity):
         #print entity.title
+        
+        try:
+            address = entity.address
+        except KeyError:
+            try:
+                latLng = (entity.lat, entity.lng)
+            except KeyError:
+                # entity is not a place, so don't try to cross-reference it with google
+                print entity.getDataAsDict()
+                return entity
+        
         (match, numIterations, interestingResults) = self._entityMatcher.getEntityDetailsFromGooglePlaces(entity)
         
         match_gid = None
         if match is None:
             utils.log('FAIL: %d %s' % (numIterations, entity.title))
             pprint(entity.getDataAsDict())
+            return []
         else:
             reference = match['reference']
             details = self._entityMatcher.googlePlaces.getPlaceDetails(reference)

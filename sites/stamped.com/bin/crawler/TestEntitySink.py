@@ -19,8 +19,7 @@ class TestEntitySink(AEntitySink):
         #from pprint import pprint
         #pprint(item._data)
         
-        if 'place' in item['details'] and Globals.options.googlePlaces:
-            assert 'googlePlaces' in item.sources
+        if 'googlePlaces' in item.sources and Globals.options.googlePlaces:
             utils.log("%s) %s" % (item.title, item.sources['googlePlaces']['gid']))
         else:
             utils.log("%s" % (item.title, ))

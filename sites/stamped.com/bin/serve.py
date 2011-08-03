@@ -79,6 +79,7 @@ def handleRequest(request, stampedAPIFunc, schema):
     except (InvalidArgument, Fail) as e:
         msg = str(e)
         utils.log(msg)
+        utils.printException()
         return msg, 400
     
     try:
@@ -86,6 +87,7 @@ def handleRequest(request, stampedAPIFunc, schema):
     except Exception as e:
         msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
         utils.log(msg)
+        utils.printException()
         return msg, 500
 
 # ######## #

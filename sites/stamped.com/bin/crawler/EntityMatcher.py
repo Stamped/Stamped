@@ -19,8 +19,8 @@ class EntityMatcher(object):
     """
     
     DEFAULT_TOLERANCE = 0.9
-    TYPES = 'restaurant|food|bar|cafe|bakery|establishment'
-    #TYPES = [ 'restaurant', 'bar', 'cafe', 'bakery', ]
+    TYPES = 'restaurant|food|bar|cafe|establishment'
+    #TYPES = 'restaurant|food|bar|cafe|bakery|establishment'
     
     def __init__(self):
         self.googlePlaces = GooglePlaces()
@@ -41,7 +41,9 @@ class EntityMatcher(object):
         #return (None, 0, interestingResults)
     
     def tryMatchEntityWithGooglePlaces(self, entity, tolerance=DEFAULT_TOLERANCE):
-        if (not 'lat' in entity) or (not 'lng' in entity):
+        try:
+            latLng = (entity.lat, entity.lng)
+        except KeyError:
             address = entity.address
             latLng  = self.googlePlaces.addressToLatLng(address)
             
@@ -50,8 +52,7 @@ class EntityMatcher(object):
             
             entity.lat = latLng[0]
             entity.lng = latLng[1]
-        
-        latLng = (entity.lat, entity.lng)
+            latLng = (entity.lat, entity.lng)
         
         if 'openTable' in entity.sources:
             numComplexityLevels = 16
