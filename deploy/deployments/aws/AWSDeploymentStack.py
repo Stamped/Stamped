@@ -96,7 +96,7 @@ class AWSDeploymentStack(ADeploymentStack):
             """ associate ip address here"""
             address = Address(self.conn, ELASTIC_IP_ADDRESS)
             
-            if not address.associate(web_server_instances[0]['instance_id']):
+            if not address.associate(web_server_instances[0].instance_id):
                 raise Fail("Error: failed to set elastic ip")
     
     def backup(self):
@@ -113,8 +113,6 @@ class AWSDeploymentStack(ADeploymentStack):
             with settings(host_string=instance.public_dns_name):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/ebs_backup.py', pty=False)
-        
-        
     
     def update(self):
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
@@ -155,7 +153,7 @@ class AWSDeploymentStack(ADeploymentStack):
             }, 
             #{
             #    'sources' : [ 'opentable', ], 
-            #    'numInstances' : 16, 
+            #    'numInstances' : 8, 
             #    'numProcesses' : 8, 
             #}, 
             #{

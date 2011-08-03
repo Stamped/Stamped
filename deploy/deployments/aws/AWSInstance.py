@@ -119,6 +119,13 @@ class AWSInstance(AInstance):
             return None
     
     @property
+    def instance_id(self):
+        if self._instance:
+            return self._instance.id
+        else:
+            return None
+    
+    @property
     def conn(self):
         return self.stack.conn
     

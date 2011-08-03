@@ -40,6 +40,10 @@ class AInstance(object):
     def state(self):
         raise NotImplementedError
     
+    @property
+    def instance_id(self):
+        raise NotImplementedError
+    
     def create(self, block=True):
         self._pre_create(block)
         utils.log("[%s] create" % self)
