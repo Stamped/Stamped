@@ -453,7 +453,7 @@ class AppleEPFAlbumDump(AAppleEPFDump):
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Albums", self._map, [ "album" ], "collection")
         
-        g = AppleEPFCollectionType.getInstance()
+        g = AppleEPFCollectionType()
         g.start()
         g.join()
         self.album_type_id = g.results['Album']
