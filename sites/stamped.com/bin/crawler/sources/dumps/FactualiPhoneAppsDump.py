@@ -28,7 +28,7 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
     DUMP_FILE_TEST = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_TEST_SUFFIX + DUMP_FILE_SUFFIX
     
     NAME = "Factual iPhone Apps"
-    TYPES = set([ 'iPhoneApp' ])
+    TYPES = set([ 'app' ])
     
     _map = {
         'Name' : 'title', 
@@ -111,7 +111,7 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         #utils.log("[%s] parsing entity %d" % (self.NAME, count))
         
         entity = Entity()
-        entity.category = "app"
+        entity.subcategory = "app"
         
         entity.factual = {
             'table' : 'iPhone_Apps.csv'

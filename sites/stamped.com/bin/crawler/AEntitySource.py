@@ -17,7 +17,7 @@ class AEntitySource(Greenlet, IASyncProducer):
         Simple asynchronous entity producer
     """
     
-    _supportedTypes = set([ 'place', 'restaurant', 'iPhoneApp', 'book', 'video', 'artist', 'song', 'album' ])
+    _supportedTypes = set([ 'restaurant', 'book', 'movie', 'artist', 'song', 'album', 'app' ])
     
     def __init__(self, name, types=None, maxQueueSize=None):
         Greenlet.__init__(self)

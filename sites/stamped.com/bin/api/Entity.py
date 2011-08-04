@@ -17,6 +17,7 @@ class Entity(ASchemaBasedAttributeDict):
         'desc': basestring, 
         'locale': basestring, 
         'category': basestring,
+        'subcategory': basestring,
         'image': basestring, 
         'timestamp': {
             'created' : basestring, 
@@ -169,6 +170,7 @@ class Entity(ASchemaBasedAttributeDict):
                     'isan' : basestring, 
                 }, 
             }, 
+            'nymag' : { }, 
         }
     }
     

@@ -1,2 +1,4 @@
+
 import OpenTableCrawler
+import NYMagCrawler
 

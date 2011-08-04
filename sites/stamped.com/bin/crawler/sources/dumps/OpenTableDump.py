@@ -27,7 +27,7 @@ class OpenTableDump(AExternalDumpEntitySource):
     DUMP_FILE = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_SUFFIX
     
     NAME = "OpenTable"
-    TYPES = set([ 'place', 'restaurant' ])
+    TYPES = set([ 'restaurant' ])
     
     def __init__(self):
         AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 128)
@@ -70,7 +70,7 @@ class OpenTableDump(AExternalDumpEntitySource):
         row = sheet.row_values(index)
         
         entity = Entity()
-        entity.category = "restaurant"
+        entity.subcategory = "restaurant"
         entity.title = row[1]
         entity.address = row[3] + ', ' + \
                          row[4] + ', ' + \

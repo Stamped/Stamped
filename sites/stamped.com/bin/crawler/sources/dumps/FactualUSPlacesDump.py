@@ -20,7 +20,7 @@ class FactualUSPlacesDump(AExternalDumpEntitySource):
     
     DUMP_FILE = "sources/dumps/data/factual/test.csv"
     NAME = "Factual US POI and Businesses"
-    TYPES = set([ 'place', 'restaurant' ])
+    TYPES = set([ 'restaurant' ])
     
     _map = {
         'Factual ID' : 'fid', 

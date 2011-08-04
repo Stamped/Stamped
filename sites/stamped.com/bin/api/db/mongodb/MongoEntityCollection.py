@@ -172,6 +172,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
                     'isan' : basestring, 
                 }, 
             }, 
+            'nymag' : { }, 
         }
     }
     

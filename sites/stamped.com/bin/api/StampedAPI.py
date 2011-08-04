@@ -585,7 +585,7 @@ class StampedAPI(AStampedAPI):
     
     def searchEntities(self, params):
         ### TODO: Customize query based on authenticated_user_id / coordinates
-    
+        
         entities = self._entityDB.matchEntities(params.q, limit=10)
         result = []
         
@@ -595,7 +595,7 @@ class StampedAPI(AStampedAPI):
             data['title'] = entity.title
             data['category'] = entity.category
             data['subtitle'] = entity.subtitle
-
+            
             result.append(data)
         
         return result

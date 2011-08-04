@@ -28,7 +28,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     DUMP_FILE_TEST = DUMP_FILE_PREFIX + DUMP_FILE_NAME + DUMP_FILE_TEST_SUFFIX + DUMP_FILE_SUFFIX
     
     NAME = "Factual US Restaurants"
-    TYPES = set([ 'place', 'restaurant' ])
+    TYPES = set([ 'restaurant' ])
     
     _map = {
         'Factual ID' : 'fid', 
@@ -159,7 +159,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
         #    self.seen[name] = 1
         
         entity = Entity()
-        entity.category = "restaurant"
+        entity.subcategory = "restaurant"
         entity.factual = {
             'table' : 'US_Restaurants_V2.csv'
         }

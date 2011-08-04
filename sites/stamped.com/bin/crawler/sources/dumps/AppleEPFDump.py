@@ -258,7 +258,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
             return
         
         entity = Entity()
-        entity.category = self._types[0]
+        entity.subcategory = self._types[0]
         
         # TODO: extract albums
         entity.albums = []
@@ -491,7 +491,7 @@ class AppleEPFVideoDump(AAppleEPFDump):
     }
     
     def __init__(self):
-        AAppleEPFDump.__init__(self, "Apple EPF Videos", self._map, [ "video" ], "video")
+        AAppleEPFDump.__init__(self, "Apple EPF Videos", self._map, [ "movie" ], "video")
         
         g = AppleEPFMediaType()
         g.start()
