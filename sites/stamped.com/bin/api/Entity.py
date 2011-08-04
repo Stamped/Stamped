@@ -8,6 +8,17 @@ __license__ = "TODO"
 import Globals
 from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
+categories = set([ 'food', 'music', 'film', 'book', 'other' ])
+subcategories = {
+    'restaurant' : 'food', 
+    'book' : 'book', 
+    'movie', 'film', 
+    'artist' : 'music', 
+    'song' : 'music', 
+    'album' : 'music', 
+    'app' : 'other', 
+}
+
 class Entity(ASchemaBasedAttributeDict):
     
     _schema = {
@@ -184,7 +195,17 @@ class Entity(ASchemaBasedAttributeDict):
         valid &= 'title' in self and isinstance(self.title, basestring)
         self.title = self.title.strip()
         
+        valid &= 'subcategory' in self and isinstance(self.subcategory, basestring)
+        valid &= self.subcategory in subcategories
+        expected_category = subcategories[self.category]
+        
+        if 'category' in self:
+            valid &= (self.category == expected_category)
+        else:
+            self.category = expected_category
+        
         valid &= 'category' in self and isinstance(self.category, basestring)
+        valid &= self.category in categories
         
         if not 'subtitle' in self:
             self.subtitle = self.category

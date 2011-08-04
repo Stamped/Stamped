@@ -11,13 +11,12 @@ from api.IASyncProducer import IASyncProducer
 from gevent import Greenlet
 from gevent.queue import Queue
 from utils import abstract
+import api.Entity
 
 class AEntitySource(Greenlet, IASyncProducer):
     """
         Simple asynchronous entity producer
     """
-    
-    _supportedTypes = set([ 'restaurant', 'book', 'movie', 'artist', 'song', 'album', 'app' ])
     
     def __init__(self, name, types=None, maxQueueSize=None):
         Greenlet.__init__(self)
@@ -34,7 +33,7 @@ class AEntitySource(Greenlet, IASyncProducer):
         
         # validate the types
         for t in types:
-            if not t in self._supportedTypes:
+            if not t in Entity.subcategories:
                 raise AttributeError("Source category '%s' not supported" % t)
     
     def get(self, block=True, timeout=None):
@@ -60,7 +59,7 @@ class AEntitySource(Greenlet, IASyncProducer):
         context of this sink's Greenlet."""
         pass
         #utils.log("")
-        #utils.log("Importing entities from rce '%s'" % self.name)
+        #utils.log("Importing entities from source '%s'" % self.name)
         #utils.log("")
     
     @property
