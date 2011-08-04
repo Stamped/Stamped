@@ -35,7 +35,7 @@ def main():
     
     baseurl = "http://0.0.0.0:5000/api/v1"
 #     baseurl = "http://50.19.163.247:5000/api/v1"
-    
+#     
     accountTest(baseurl)
     
     userTest(baseurl)
@@ -43,15 +43,15 @@ def main():
     entityTest(baseurl)
 
     stampTest(baseurl)
-    
+#     
     friendshipTest(baseurl)
-
+# 
     collectionTest(baseurl)
-
-    commentTest(baseurl)
-
-    favoriteTest(baseurl)
-
+# 
+#     commentTest(baseurl)
+# 
+#     favoriteTest(baseurl)
+# 
 #     activityTest(baseurl)
  
     print '      COMPLETE'
@@ -152,8 +152,8 @@ def accountTest(baseurl):
         print 'FAIL: %s' % path
         print result
         raise Exception
-        
-        
+            
+    
     path = "account/reset_password.json"
     data = {
         "authenticated_user_id": userID

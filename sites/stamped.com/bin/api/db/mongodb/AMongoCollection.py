@@ -6,22 +6,32 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import bson, copy, math, os, pymongo, time, utils
+import bson, copy, math, os, pymongo, time, utils, atexit
 
 from errors import Fail
-from utils import AttributeDict, getPythonConfigFile, Singleton
+from utils import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
 from datetime import datetime
 from pymongo.errors import AutoReconnect
+from ProxyMongoCollection import ProxyMongoCollection
 
 class MongoDBConfig(Singleton):
     def __init__(self):
         self.config = AttributeDict()
+        self.init()
+        self.connection = self._connection()
+        
+        def disconnect():
+            ### TODO: Add disconnect from MongoDB
+            self.connection.disconnect()
+            pass
+        
+        atexit.register(disconnect)
     
     @property
     def isValid(self):
         return 'mongodb' in self.config and \
-               'host' in self.config.mongodb and \
-               'port' in self.config.mongodb
+                  'host' in self.config.mongodb and \
+                  'port' in self.config.mongodb
     
     def init(self):
         ### TODO: Make this more robust!
@@ -48,33 +58,66 @@ class MongoDBConfig(Singleton):
         
         if not 'mongodb' in self.config:
             utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:30000")
+            #self.config = AttributeDict({
+            #    "mongodb" : {
+            #        "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
+            #        "port" : 27017, 
+            #    }
+            #})
             self.config = AttributeDict({
-                "mongodb" : {
-                    "host" : "localhost", 
-                    "port" : 30000, 
-                }
+               "mongodb" : {
+                   "host" : "localhost", 
+                   "port" : 30000, 
+               }
             })
 
-class AMongoCollection():
+    @property
+    def host(self):
+        return str(self.config.mongodb.host)
+    
+    @property
+    def port(self):
+        return int(self.config.mongodb.port)
+    
+    @property
+    def user(self):
+        if 'user' in self.config.mongodb:
+            return str(self.config.mongodb.user)
+        else:
+            return 'root'
+    
+    def _connection(self):
+        # TODO: have a more consistent approach to handling AutoReconnect!
+        utils.log("(%s) Creating MongoDB connection!" % self)
+
+        delay = 1
+        max_delay = 16
+            
+        while True:            
+            try:
+                utils.log("(%s) connecting to %s:%d" % (self, self.host, self.port))
+                return pymongo.Connection(self.host, self.port, slave_okay=True)
+                #, network_timeout=5)
+            except AutoReconnect as e:
+                if delay > max_delay:
+                    raise
+                
+                utils.log("(%s) retrying to connect to host: %s" % (self, str(e)))
+                utils.log("delay: %s" % delay)
+                time.sleep(delay)
+                delay *= 2
+
+
+class AMongoCollection(object):
     DB = 'stamped_test'
     
     def __init__(self, collection):
         self._initConfig()
         
-        self._user = self._getenv_user()
-        self._host = self._getenv_host()
         self._desc = self.__class__.__name__
-        self._port = self._getenv_port()
         self._db = self.DB
-        
-        try:
-            self._connection = self._connect()
-            utils.log("%s) connected!" % self)
-            self._database   = self._getDatabase()
-            self._collection = self._getCollection(collection)
-        except:
-            utils.log("Error: unable to connect to Mongo")
-            raise
+        self._collection = ProxyMongoCollection(self._connection, self._db, collection)
+
     
     def _initConfig(self):
         cfg = MongoDBConfig.getInstance()
@@ -83,46 +126,15 @@ class AMongoCollection():
         assert cfg.isValid
         
         self._config = cfg.config
+        self._user = cfg.user
+        self._host = cfg.host
+        self._port = cfg.port
         
-        utils.log("%s) %s:%d" % (self.__class__.__name__, 
+        self._connection = cfg.connection
+        
+        utils.log("(%s) %s:%d" % (self.__class__.__name__, 
                                  self._config.mongodb.host, 
                                  self._config.mongodb.port))
-    
-    def _getenv_host(self):
-        return str(self._config.mongodb.host)
-    
-    def _getenv_port(self):
-        return int(self._config.mongodb.port)
-    
-    def _getenv_user(self):
-        if 'user' in self._config.mongodb:
-            return str(self._config.mongodb.user)
-        else:
-            return 'root'
-    
-    def _connect(self):
-        # TODO: have a more consistent approach to handling AutoReconnect!
-        while True:
-            delay = 1
-            max_delay = 16
-            
-            try:
-                utils.log("%s) connecting to %s:%d" % (self, self._host, self._port))
-                return pymongo.Connection(self._host, self._port, slave_okay=True)
-                #, network_timeout=5)
-            except AutoReconnect as e:
-                if delay > max_delay:
-                    raise
-                
-                utils.log("%s) retrying to connect to host: %s" % (self, str(e)))
-                time.sleep(delay)
-                delay *= 2
-    
-    def _getDatabase(self):
-        return self._connection[self._db]
-    
-    def _getCollection(self, collection):
-        return self._database[collection]
     
     def _endRequest(self):
         self._connection.end_request()
@@ -145,7 +157,6 @@ class AMongoCollection():
         return bson.objectid.ObjectId(string)
     
     def _mongoToObj(self, data, objId='id'):
-#         print '_mongoToObj: ', data
         data[objId] = self._getStringFromObjectId(data['_id'])
         del(data['_id'])
         return data
@@ -166,9 +177,11 @@ class AMongoCollection():
             if isinstance(data['_id'], basestring):
                 data['_id'] = self._getObjectIdFromString(data['_id'])
         
-        if objId in data:
+        elif objId in data:
             data['_id'] = self._getObjectIdFromString(data[objId])
             del(data[objId])
+            
+        #utils.log("Data: %s" % data)
         
         return self._mapDataToSchema(data, self.SCHEMA)
     
@@ -182,7 +195,13 @@ class AMongoCollection():
             return dest
         
         def _unionItem(k, v, schema, dest):
-            if k in schema:
+            # _id should not be converted to a basestring! 
+            if k == '_id':
+                ### TODO: Make this more robust!
+                dest[k] = v
+                return dest
+                
+            elif k in schema:
                 schemaVal = schema[k]
                 
                 if isinstance(schemaVal, type):
@@ -259,79 +278,30 @@ class AMongoCollection():
     ### GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document, objId='id'):
-        obj = self._objToMongo(document, objId)
-        if obj is not None:
-            # TODO: have a more consistent approach to handling AutoReconnect!
-            num_retries = 0
-            max_retries = 5
-            
-            while True:
-                try:
-                    ret = self._collection.insert(obj, safe=True)
-                    s = self._getStringFromObjectId(ret)
-                    utils.log("[%s] successfully inserted 1 document (%s)" % (self, s))
-                    
-                    return s
-                except AutoReconnect as e:
-                    num_retries += 1
-                    if num_retries > max_retries:
-                        msg = "%s) unable to connect to host after %d retries (%s)" % (self, max_retries, str(e))
-                        utils.log(msg)
-                        raise
-                    
-                    utils.log("%s) retrying to insert 1 document to host: %s" % (self, str(e)))
-                    time.sleep(1)
-        else:
-            return False
+        try:
+            obj = self._objToMongo(document, objId)
+            ret = self._collection.insert_one(obj, safe=True)
+            return self._getStringFromObjectId(ret)
+        except:
+            raise Fail("(%s) Unable to add document" % self) 
     
     def _addDocuments(self, documents, objId='id'):
-        objs = self._objsToMongo(documents, objId)
-        max_batch_size = 64
-        
-        # TODO: have a more consistent approach to handling AutoReconnect!
-        def _insert(objects, level):
-            count = len(objects)
-            
-            if count <= 0:
-                return False
-            
-            if count > max_batch_size:
-                num = int(math.ceil(float(count) / float(max_batch_size)))
-                for i in xrange(num):
-                    offset = i * max_batch_size
-                    sub_objects = objects[offset : offset + max_batch_size]
-                    _insert(sub_objects, level)
-            else:
-                try:
-                    utils.log("[%s] inserting %d documents..." % (self, count))
-                    ret = self._collection.insert(objects, safe=True)
-                    utils.log("[%s] successfully inserted %d documents" % (self, count))
-                    return ret
-                except AutoReconnect as e:
-                    if level >= 6 or count <= 1:
-                        utils.log("[%s] unable to insert %d entities (%s)" % (self, count, str(e)))
-                        raise
-                    
-                    utils.log("[%s] inserting %d documents failed... trying smaller batch" % (self, count))
-                    
-                    time.sleep(0.01)
-                    mid = count / 2
-                    _insert(objects[:mid], level + 1)
-                    _insert(objects[mid:], level + 1)
-            
+        try:
+            objs = self._objsToMongo(documents, objId)
+            self._collection.insert_one(obj, safe=True)
             return True
-        
-        return _insert(objs, 0)
+        except:
+            raise Fail("(%s) Unable to add documents" % self) 
     
     def _getDocumentFromId(self, documentId, objId='id'):
-        #print 'documentId: ', documentId
-        document = self._mongoToObj(self._collection.find_one(self._getObjectIdFromString(documentId)), objId)
-        return document
+        doc = self._collection.find_one(self._getObjectIdFromString(documentId))
+        ret = self._mongoToObj(doc, objId)
+        return ret
     
     def _getDocumentsFromIds(self, documentIds, objId='id', since=None, before=None, sort=None, limit=20):
         ids = []
         for documentId in documentIds:
-            ids.append(self._getObjectIdFromString(documentId))
+            ids.append(self._getObjectIdFromString(documentId)) 
         params = {'_id': {'$in': ids}}
         if since != None and isinstance(since, datetime) and before != None and isinstance(before, datetime):
             params['timestamp.created'] = {'$gte': since, '$lte': before}
@@ -351,7 +321,9 @@ class AMongoCollection():
         return result
     
     def _updateDocument(self, document, objId='id'):
-        return self._getStringFromObjectId(self._collection.save(self._objToMongo(document, objId), safe=True))
+        obj = self._objToMongo(document, objId)
+        docId = self._collection.save(obj, safe=True)
+        return self._getStringFromObjectId(docId)
     
     def _removeDocument(self, keyId):
         # Confused here. Supposed to return None on success, so I guess it's working,
