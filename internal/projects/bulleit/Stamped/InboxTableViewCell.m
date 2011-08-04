@@ -209,36 +209,49 @@ static const CGFloat kTitleMaxWidth = 210.0;
     [badgePath fill];
     [badgeLabel_ drawTextInRect:badgeLabel_.frame];
   }
+
+  [userNameLabel_ drawTextInRect:userNameLabel_.frame];
+  [commentLabel_ drawTextInRect:commentLabel_.frame];
+  [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
   CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding, kUserImageSize, kUserImageSize);
   Stamp* s = nil;
   for (NSUInteger i = MIN(3, [stamps_ count]); i > 0; --i) {
     s = [stamps_ objectAtIndex:i - 1];
-    CGContextSaveGState(ctx);
-      CGContextTranslateCTM(ctx,
-          -CGRectGetMidX(userImgFrame),
-          CGRectGetMidY(self.frame) - CGRectGetMidY(userImgFrame));
-      CGContextRotateCTM(ctx, 0.08 * (i - 1));
-      CGRect drawFrame = CGRectMake(CGRectGetMidX(userImgFrame),
-                                    -CGRectGetMidY(self.frame) + CGRectGetMidY(userImgFrame),
-                                    CGRectGetWidth(userImgFrame),
-                                    CGRectGetHeight(userImgFrame));
-  //    CGContextTranslateCTM(ctx,
-  //        CGRectGetMidX(userImgFrame),
-   //       -CGRectGetMidHeight(self.frame) + CGRectGetMidY(userImgFrame));
-      /*
+    UIImage* img = s.user.profileImage;
+    if (i == 1) {
+      CGContextRef ctx = UIGraphicsGetCurrentContext();
       CGContextSaveGState(ctx);
-        UIBezierPath* path = [UIBezierPath bezierPathWithRect:userImgFrame];
-        [[UIColor whiteColor] setFill];
-        CGContextSetShadow(ctx, CGSizeMake(0, 0), 3.0);
-        [path fill];
-      CGContextRestoreGState(ctx);*/
-
-      [s.user.profileImage drawInRect:CGRectInset(drawFrame, 2, 2)];
-    CGContextRestoreGState(ctx);
+      CGContextSetShadow(ctx, CGSizeMake(0, 0), 3.0);
+      [[UIColor whiteColor] setFill];
+      UIBezierPath* path = [UIBezierPath bezierPathWithRect:userImgFrame];
+      [path fill];
+      CGContextRestoreGState(ctx);
+      [img drawInRect:CGRectInset(userImgFrame, 2, 2)];
+      return;
+    }
+    CGFloat width = kUserImageSize;
+    CGFloat height = kUserImageSize;
+    CGSize rotatedSize = CGRectInset(userImgFrame, -5, -5).size;
+    UIGraphicsBeginImageContextWithOptions(rotatedSize, NO, 0.0);
+    CGContextRef imgContext = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(imgContext, rotatedSize.width * 0.5, rotatedSize.height * 0.5);
+    CGContextRotateCTM(imgContext, 0.08 * (i - 1));
+    CGContextScaleCTM(imgContext, 1.0, -1.0);
+    CGRect imgFrame = CGRectMake(-width / 2, -height / 2, width, height);
+    CGContextSaveGState(imgContext);
+    UIBezierPath* path = [UIBezierPath bezierPathWithRect:imgFrame];
+    CGContextSetFillColorWithColor(imgContext, [UIColor whiteColor].CGColor);
+    CGContextSetShadow(imgContext, CGSizeMake(0, 0), 3.0);
+    CGContextAddPath(imgContext, path.CGPath);
+    CGContextClosePath(imgContext);
+    CGContextFillPath(imgContext);
+    CGContextRestoreGState(imgContext);
+    CGContextDrawImage(imgContext, CGRectInset(imgFrame, 2, 2), img.CGImage);
+    
+    UIImage* rotatedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    [rotatedImage drawInRect:CGRectOffset(CGRectInset(userImgFrame, -5, -5), 0, 2 * (i - 1))];
   }
-  [userNameLabel_ drawTextInRect:userNameLabel_.frame];
-  [commentLabel_ drawTextInRect:commentLabel_.frame];
-  [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
 }
 
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
