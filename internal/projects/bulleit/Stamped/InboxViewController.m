@@ -39,8 +39,8 @@ typedef enum {
 - (void)setIsLoading:(BOOL)loading;
 
 @property (nonatomic, copy) NSArray* filterButtons;
-@property (nonatomic, copy) NSArray* filteredStampsArray;
-@property (nonatomic, copy) NSArray* stampsArray;
+@property (nonatomic, copy) NSArray* entitiesArray;
+@property (nonatomic, copy) NSArray* filteredEntitiesArray;
 @property (nonatomic, assign) UIView* filterView;
 @property (nonatomic, retain) UIButton* placesFilterButton;
 @property (nonatomic, retain) UIButton* booksFilterButton;
@@ -50,10 +50,10 @@ typedef enum {
 
 @implementation InboxViewController
 
+@synthesize entitiesArray = entitiesArray_;
+@synthesize filteredEntitiesArray = filteredEntitiesArray_;
 @synthesize filterButtons = filterButtons_;
 @synthesize filterView = filterView_;
-@synthesize filteredStampsArray = filteredStampsArray_;
-@synthesize stampsArray = stampsArray_;
 @synthesize placesFilterButton = placesFilterButton_;
 @synthesize booksFilterButton = booksFilterButton_;
 @synthesize filmsFilterButton = filmsFilterButton_;
@@ -63,12 +63,12 @@ typedef enum {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterButtons = nil;
   self.filterView = nil;
-  self.filteredStampsArray = nil;
-  self.stampsArray = nil;
   self.placesFilterButton = nil;
   self.booksFilterButton = nil;
   self.filmsFilterButton = nil;
   self.musicFilterButton = nil;
+  self.entitiesArray = nil;
+  self.filteredEntitiesArray = nil;
   [super dealloc];
 }
 
@@ -102,10 +102,10 @@ typedef enum {
   [super viewDidUnload];
 
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  self.entitiesArray = nil;
+  self.filteredEntitiesArray = nil;
   self.filterView = nil;
   self.filterButtons = nil;
-  self.filteredStampsArray = nil;
-  self.stampsArray = nil;
   self.placesFilterButton = nil;
   self.booksFilterButton = nil;
   self.filmsFilterButton = nil;
@@ -123,11 +123,16 @@ typedef enum {
 }
 
 - (void)loadStampsFromDataStore {
-  self.stampsArray = nil;
+  self.entitiesArray = nil;
 	NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-	self.stampsArray = [Stamp objectsWithFetchRequest:request];
+	NSArray* results = [Stamp objectsWithFetchRequest:request];
+
+  results = [results valueForKeyPath:@"@distinctUnionOfObjects.entityObject"];
+  descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
+  self.entitiesArray = [results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+  
   [self filterButtonPushed:nil];
 }
 
@@ -149,20 +154,20 @@ typedef enum {
 #pragma mark - Filter stuff
 
 - (IBAction)filterButtonPushed:(id)sender {
-  filteredStampsArray_ = nil;
+  filteredEntitiesArray_ = nil;
 
   UIButton* selectedButton = (UIButton*)sender;
   for (UIButton* button in self.filterButtons)
     button.selected = (button == selectedButton && !button.selected);
 
   if (selectedButton && !selectedButton.selected) {
-    self.filteredStampsArray = stampsArray_;
+    self.filteredEntitiesArray = entitiesArray_;
     [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0]
                   withRowAnimation:UITableViewRowAnimationMiddle];
     return;
   } else if (!selectedButton) {
     // Initial load from datastore.
-    self.filteredStampsArray = stampsArray_;
+    self.filteredEntitiesArray = entitiesArray_;
     [self.tableView reloadData];
   }
 
@@ -178,7 +183,7 @@ typedef enum {
   }
   if (filterString) {
     NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"entityObject.category == %@", filterString];
-    self.filteredStampsArray = [stampsArray_ filteredArrayUsingPredicate:filterPredicate];
+    self.filteredEntitiesArray = [entitiesArray_ filteredArrayUsingPredicate:filterPredicate];
     [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0]
                   withRowAnimation:UITableViewRowAnimationMiddle];
   }
@@ -246,7 +251,7 @@ typedef enum {
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   // Return the number of rows in the section.
-  return [filteredStampsArray_ count];
+  return [filteredEntitiesArray_ count];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -256,7 +261,7 @@ typedef enum {
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  cell.stamp = (Stamp*)[filteredStampsArray_ objectAtIndex:indexPath.row];
+  cell.entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
   
   return cell;
 }
@@ -287,8 +292,9 @@ typedef enum {
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  Entity* entity = [filteredEntitiesArray_ objectAtIndex:indexPath.row];
   StampDetailViewController* detailViewController =
-      [[StampDetailViewController alloc] initWithStamp:[filteredStampsArray_ objectAtIndex:indexPath.row]];
+      [[StampDetailViewController alloc] initWithStamp:[entity.stamps anyObject]];
 
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];

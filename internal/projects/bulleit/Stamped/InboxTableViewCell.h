@@ -8,16 +8,16 @@
 
 #import <UIKit/UIKit.h>
 
-@class StampCellView;
-@class Stamp;
+@class InboxCellView;
+@class Entity;
 
 @interface InboxTableViewCell : UITableViewCell {
  @private  
-  StampCellView* customView_;
+  InboxCellView* customView_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
-@property (nonatomic, retain) Stamp* stamp;
+@property (nonatomic, retain) Entity* entityObject;
 
 @end
