@@ -42,7 +42,7 @@ class NYMagCrawler(AExternalEntitySource):
         
         try:
             next_page = soup.find("ul", {"class" : re.compile("nextpages|morepages")}).find("li", {"class" : "next"}).find("a").get("href")
-            if len(next_page) > 5:
+            if next_page != '':
                 pool.spawn(self._parseResultsPage, pool, next_page)
         except AttributeError:
             # crawling of pages is done
@@ -54,7 +54,7 @@ class NYMagCrawler(AExternalEntitySource):
         for result in results:
             link = result.find("dt").find("a")
             href = link.get("href")
-            name = link.getText()
+            name = link.getText().strip()
             
             detail = pool.spawn(self._parseDetailPage, name, href)
     

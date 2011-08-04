@@ -12,6 +12,19 @@ from optparse import OptionParser
 from difflib import SequenceMatcher
 from GooglePlaces import GooglePlaces
 
+
+
+# TODO: don't use Google Places as cross-referencing engine
+# sort by name first, merge obvious duplicates
+#    this sort could be accomplished implicitly by mongo via find({"title" : re.compile("^a")}, {"category" : "food"}) for a in a...z
+# Instead, use combination of fuzzy string matching and lat/lng proximity to compare any two entities
+# possibly add entities to 2-dimensional kd-tree
+# for each sample:
+#    find n nearest samples
+#    if name is fuzzy matched, duple
+
+
+
 class EntityMatcher(object):
     """
         Utility class which attempts to cross-reference entities from various 

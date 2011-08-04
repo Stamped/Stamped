@@ -11,7 +11,7 @@ from api.IASyncProducer import IASyncProducer
 from gevent import Greenlet
 from gevent.queue import Queue
 from utils import abstract
-import api.Entity
+import Entity
 
 class AEntitySource(Greenlet, IASyncProducer):
     """

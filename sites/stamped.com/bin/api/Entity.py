@@ -12,7 +12,7 @@ categories = set([ 'food', 'music', 'film', 'book', 'other' ])
 subcategories = {
     'restaurant' : 'food', 
     'book' : 'book', 
-    'movie', 'film', 
+    'movie' : 'film', 
     'artist' : 'music', 
     'song' : 'music', 
     'album' : 'music', 
