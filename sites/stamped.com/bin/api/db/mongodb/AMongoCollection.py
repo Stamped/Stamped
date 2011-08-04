@@ -12,7 +12,7 @@ from errors import Fail
 from utils import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
 from datetime import datetime
 from pymongo.errors import AutoReconnect
-from ProxyMongoCollection import ProxyMongoCollection
+from MongoCollectionProxy import MongoCollectionProxy
 
 class MongoDBConfig(Singleton):
     def __init__(self):
@@ -58,12 +58,12 @@ class MongoDBConfig(Singleton):
         
         if not 'mongodb' in self.config:
             utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:30000")
-            #self.config = AttributeDict({
-            #    "mongodb" : {
-            #        "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
-            #        "port" : 27017, 
-            #    }
-            #})
+#             self.config = AttributeDict({
+#                 "mongodb" : {
+#                     "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
+#                     "port" : 27017, 
+#                 }
+#             })
             self.config = AttributeDict({
                "mongodb" : {
                    "host" : "localhost", 
@@ -116,7 +116,7 @@ class AMongoCollection(object):
         
         self._desc = self.__class__.__name__
         self._db = self.DB
-        self._collection = ProxyMongoCollection(self._connection, self._db, collection)
+        self._collection = MongoCollectionProxy(self._connection, self._db, collection)
 
     
     def _initConfig(self):
@@ -132,9 +132,10 @@ class AMongoCollection(object):
         
         self._connection = cfg.connection
         
-        utils.log("(%s) %s:%d" % (self.__class__.__name__, 
-                                 self._config.mongodb.host, 
-                                 self._config.mongodb.port))
+        utils.log("Init %s -- %s:%d" % (
+                                self.__class__.__name__, 
+                                self._config.mongodb.host, 
+                                self._config.mongodb.port))
     
     def _endRequest(self):
         self._connection.end_request()

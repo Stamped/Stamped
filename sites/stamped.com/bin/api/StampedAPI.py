@@ -37,7 +37,7 @@ from Activity import Activity
 #    * ensuring that a given ID is "valid"
 #    * ensuring that a given relationship is "valid"
 #    * ensuring that for methods which accept a user ID and should be 
-#      considered "priveleged", then the request is coming from roperly 
+#      considered "priveleged", then the request is coming from properly 
 #      authenticated user. e.g., either an administrator or the user who is 
 #      currently logged into the application.
 
@@ -63,6 +63,13 @@ class StampedAPI(AStampedAPI):
         #assert hasattr(self, '_activityDB')   and isinstance(self._activityDB, AActivityDB)
         
         self._validated = True
+        
+    def _requiresAuth(self, params):
+        if 'authenticated_user_id' in params and params.authenticated_user_id != None:
+            return True
+        raise Fail("Requires authentication")
+        
+    
     
     @property
     def isValid(self):
@@ -91,8 +98,8 @@ class StampedAPI(AStampedAPI):
         account.profile_image = None   
         account.privacy = True
         
-        if account.isValid == False:
-            raise InvalidArgument('Invalid input')
+        if not account.isValid:
+            raise Fail('Account data is invalid')
         
         result = {}
         result['user_id'] = self._accountDB.addAccount(account)
