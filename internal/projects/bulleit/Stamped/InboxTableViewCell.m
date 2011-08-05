@@ -16,8 +16,9 @@
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
-#import "UserImageView.h"
 #import "Util.h"
+#import "StampDetailViewController.h"
+#import "StampedAppDelegate.h"
 
 NSString* kInboxTableDidScrollNotification = @"InboxTableDidScrollNotification";
 
@@ -33,7 +34,7 @@ static const CGFloat kTypeIconSize = 12.0;
 static const CGFloat kSubstringMaxWidth = 218.0;
 static const CGFloat kStampSize = 18.0;
 static const CGFloat kTitleMaxWidth = 210.0;
-static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
+static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 @interface InboxCellView : UIView {
  @private
@@ -220,10 +221,11 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 
   CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding, kUserImageSize, kUserImageSize);
   Stamp* s = nil;
-  for (NSUInteger i = MIN(3, [stamps_ count]); i > 0; --i) {
-    s = [stamps_ objectAtIndex:i - 1];
+  NSUInteger stampsCount = [stamps_ count];
+  for (NSUInteger i = MAX(0, (NSInteger)stampsCount - 3); i < stampsCount; ++i) {
+    s = [stamps_ objectAtIndex:i];
     UIImage* img = s.user.profileImage;
-    if (i == 1) {
+    if (i == stampsCount - 1) {
       CGContextRef ctx = UIGraphicsGetCurrentContext();
       CGContextSaveGState(ctx);
       CGContextSetShadow(ctx, CGSizeMake(0, 0), 3.0);
@@ -255,7 +257,7 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
     
     UIImage* rotatedImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    [rotatedImage drawInRect:CGRectOffset(CGRectInset(userImgFrame, -5, -5), 0, 3 * (i - 1))];
+    [rotatedImage drawInRect:CGRectOffset(CGRectInset(userImgFrame, -5, -5), 0, 4 * ((stampsCount - 1) - i))];
   }
 }
 
@@ -352,6 +354,8 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 - (void)collapseStack;
 - (void)collapseButtonTapped:(id)sender;
 - (void)inboxTableDidScroll:(NSNotification*)notification;
+- (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
+- (void)userImageTapped:(UITapGestureRecognizer*)recognizer;
 @end
 
 @implementation InboxTableViewCell
@@ -429,6 +433,9 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 #pragma mark - Touch Events.
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (stackExpanded_)
+    return;
+  
   UITouch* touch = [touches anyObject];
   if (customView_.stamps.count > 1 &&
       CGRectContainsPoint(CGRectMake(0, 0, 63, 63), [touch locationInView:customView_])) {
@@ -438,20 +445,29 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (stackExpanded_)
+    return;
+
   [super touchesCancelled:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
   UITouch* touch = [touches anyObject];
+  if (stackExpanded_)
+    return;
+  
   if (customView_.stamps.count > 1 &&
       CGRectContainsPoint(CGRectMake(0, 0, 63, 63), [touch locationInView:customView_])) {
     [self expandStack];
-    return;  // Eat the touch event.
+    return;
   }
   [super touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (stackExpanded_)
+    return;
+
   [super touchesMoved:touches withEvent:event];
 }
 
@@ -459,34 +475,42 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
   [self collapseStack];
 }
 
+- (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index {
+  NSUInteger stampsCount = entityObject_.stamps.count;
+  CGAffineTransform transform = CGAffineTransformIdentity;
+  if (index >= MAX((NSInteger)stampsCount - 3, 0) && index < stampsCount - 1) {
+    transform = CGAffineTransformRotate(
+        CGAffineTransformMakeTranslation(0, 4 * ((stampsCount - 1) - index)),
+        kImageRotations[index % 4]);
+  }
+  return transform;
+}
+
 - (void)collapseStack {
   if (stackExpanded_ == NO)
     return;
 
-  [UIView animateWithDuration:0.25 animations:^{
+  [UIView animateWithDuration:0.25
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
     customView_.transform = CGAffineTransformIdentity;
     stacksBackgroundView_.alpha = 0;
     stackCollapseButton_.alpha = 0;
-    NSUInteger stampsCount = [entityObject_.stamps count];
-    NSUInteger i = stampsCount - 1;
+    NSUInteger i = 0;
     for (UIView* view in self.contentView.subviews) {
-      if (![view isMemberOfClass:[UIImageView class]])
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
         continue;
-      if (i > 0 && i < 3) {
-        CGAffineTransform transform = CGAffineTransformRotate(
-            CGAffineTransformMakeTranslation(0, 3 * i), kImageRotations[(i + 1) % 4]);
-        view.transform = transform;
-      } else {
-        view.transform = CGAffineTransformIdentity;
-      }
-      --i;
+      
+      view.transform = [self transformForUserImageAtIndex:i];
+      ++i;
     }
   } completion:^(BOOL finished) {
     customView_.hidePhotos = NO;
     self.selectionStyle = UITableViewCellSelectionStyleBlue;
     stackExpanded_ = NO;
     for (UIView* view in self.contentView.subviews) {
-      if (![view isMemberOfClass:[UIImageView class]])
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
         continue;
       [view removeFromSuperview];
     }
@@ -509,14 +533,15 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
                                    kUserImageSize);
   NSUInteger stampsCount = [entityObject_.stamps count];
   Stamp* s = nil;
-  for (NSUInteger i = stampsCount; i > 0; --i) {
-    s = [customView_.stamps objectAtIndex:i - 1];
-    UIImageView* userImageView =
-        [[UIImageView alloc] initWithFrame:CGRectInset(userImgFrame, -2, -2)];
-    userImageView.contentMode = UIViewContentModeCenter;
-    userImageView.layer.shadowOffset = CGSizeZero;
-    userImageView.layer.shadowOpacity = 0.5;
-    userImageView.layer.shadowRadius = 1.0;
+  for (NSUInteger i = 0; i < stampsCount; ++i) {
+    s = [customView_.stamps objectAtIndex:i];
+    UIButton* userImageButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    userImageButton.frame = CGRectInset(userImgFrame, -2, -2);
+
+    userImageButton.contentMode = UIViewContentModeCenter;
+    userImageButton.layer.shadowOffset = CGSizeZero;
+    userImageButton.layer.shadowOpacity = 0.5;
+    userImageButton.layer.shadowRadius = 1.0;
     CGFloat width = kUserImageSize + 4;
     CGFloat height = kUserImageSize + 4;
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, height), NO, 0.0);
@@ -541,15 +566,13 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
     CGContextDrawImage(imgContext, CGRectInset(imgFrame, 4, 4), s.user.profileImage.CGImage);
     UIImage* userImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    userImageView.image = userImage;
-    s = [customView_.stamps objectAtIndex:i - 1];
-    if (i > 1 && i < 4) {
-      CGAffineTransform transform = CGAffineTransformRotate(
-          CGAffineTransformMakeTranslation(0, 3 * (i - 1)), kImageRotations[i % 4]);
-      userImageView.transform = transform;
-    }
-    [self.contentView addSubview:userImageView];
-    [userImageView release];
+    [userImageButton setImage:userImage forState:UIControlStateNormal];
+    [userImageButton addTarget:self
+                        action:@selector(userImageTapped:)
+              forControlEvents:UIControlEventTouchUpInside];
+    userImageButton.transform = [self transformForUserImageAtIndex:i];
+    userImageButton.tag = i;
+    [self.contentView addSubview:userImageButton];
   }
   customView_.hidePhotos = YES;
   [UIView animateWithDuration:0.25 animations:^{
@@ -559,17 +582,28 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
     stacksBackgroundView_.alpha = 1.0;
     stackCollapseButton_.alpha = 1.0;
     
-    NSUInteger i = stampsCount - 1;
+    NSUInteger i = 0;
     for (UIView* view in self.contentView.subviews) {
-      if (![view isMemberOfClass:[UIImageView class]])
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
         continue;
       
-      view.transform = CGAffineTransformMakeTranslation(55 + (48 * i), 0);
-      --i;
+      view.transform = CGAffineTransformMakeTranslation(55 + (48 * ((stampsCount - 1) - i)), 0);
+      ++i;
     }
   } completion:^(BOOL finished) {
     [self.contentView setNeedsDisplay];
   }];
+}
+
+- (void)userImageTapped:(UIButton*)sender {
+  Stamp* stamp = [customView_.stamps objectAtIndex:sender.tag];
+
+  StampDetailViewController* detailViewController =
+      [[StampDetailViewController alloc] initWithStamp:stamp];
+
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
 }
 
 
