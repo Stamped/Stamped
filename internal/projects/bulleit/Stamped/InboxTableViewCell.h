@@ -11,9 +11,14 @@
 @class InboxCellView;
 @class Entity;
 
+extern NSString* kInboxTableDidScrollNotification;
+
 @interface InboxTableViewCell : UITableViewCell {
  @private  
   InboxCellView* customView_;
+  UIView* stacksBackgroundView_;
+  BOOL stackExpanded_;
+  UIButton* stackCollapseButton_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;

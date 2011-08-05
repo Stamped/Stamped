@@ -306,6 +306,8 @@ typedef enum {
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   userDidScroll_ = YES;
+  [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
+                                                      object:scrollView];
   if (isLoading_)
     return;
 

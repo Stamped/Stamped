@@ -16,7 +16,10 @@
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
+#import "UserImageView.h"
 #import "Util.h"
+
+NSString* kInboxTableDidScrollNotification = @"InboxTableDidScrollNotification";
 
 static NSString* kTitleFontString = @"TGLight";
 static const CGFloat kTitleFontSize = 47.0;
@@ -30,6 +33,7 @@ static const CGFloat kTypeIconSize = 12.0;
 static const CGFloat kSubstringMaxWidth = 218.0;
 static const CGFloat kStampSize = 18.0;
 static const CGFloat kTitleMaxWidth = 210.0;
+static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 
 @interface InboxCellView : UIView {
  @private
@@ -49,12 +53,12 @@ static const CGFloat kTitleMaxWidth = 210.0;
   NSMutableDictionary* titleAttributes_;
   CGRect stampImageFrame_;
   CGFloat userImageRightMargin_;
-  NSArray* transformsArray_;
 }
 
 // This is magic with UITableViewCell. No need to set this explicitly.
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 @property (nonatomic, assign) BOOL selected;
+@property (nonatomic, assign) BOOL hidePhotos;
 @property (nonatomic, assign) NSUInteger numComments;
 @property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, copy) NSString* title;
@@ -79,6 +83,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
 @synthesize title = title_;
 @synthesize typeImage = typeImage_;
 @synthesize stamps = stamps_;
+@synthesize hidePhotos = hidePhotos_;
 
 
 - (id)initWithFrame:(CGRect)frame {
@@ -87,8 +92,6 @@ static const CGFloat kTitleMaxWidth = 210.0;
     self.opaque = YES;
     self.backgroundColor = [UIColor whiteColor];
     self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-
-    transformsArray_ = [[NSArray alloc] initWithObjects:nil, nil];
     
     defaultTitleColor_ = [[UIColor alloc] initWithWhite:0.37 alpha:1.0];
     defaultSubstringColor_ = [[UIColor alloc] initWithWhite:0.6 alpha:1.0];
@@ -157,7 +160,6 @@ static const CGFloat kTitleMaxWidth = 210.0;
   [badgeLabel_ release];
   [userNameLabel_ release];
   [commentLabel_ release];
-  [transformsArray_ release];
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
   [super dealloc];
@@ -213,6 +215,9 @@ static const CGFloat kTitleMaxWidth = 210.0;
   [userNameLabel_ drawTextInRect:userNameLabel_.frame];
   [commentLabel_ drawTextInRect:commentLabel_.frame];
   [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
+  if (hidePhotos_)
+    return;
+
   CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding, kUserImageSize, kUserImageSize);
   Stamp* s = nil;
   for (NSUInteger i = MIN(3, [stamps_ count]); i > 0; --i) {
@@ -235,7 +240,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
     UIGraphicsBeginImageContextWithOptions(rotatedSize, NO, 0.0);
     CGContextRef imgContext = UIGraphicsGetCurrentContext();
     CGContextTranslateCTM(imgContext, rotatedSize.width * 0.5, rotatedSize.height * 0.5);
-    CGContextRotateCTM(imgContext, 0.08 * (i - 1));
+    CGContextRotateCTM(imgContext, kImageRotations[i % 4]);
     CGContextScaleCTM(imgContext, 1.0, -1.0);
     CGRect imgFrame = CGRectMake(-width / 2, -height / 2, width, height);
     CGContextSaveGState(imgContext);
@@ -250,7 +255,7 @@ static const CGFloat kTitleMaxWidth = 210.0;
     
     UIImage* rotatedImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    [rotatedImage drawInRect:CGRectOffset(CGRectInset(userImgFrame, -5, -5), 0, 2 * (i - 1))];
+    [rotatedImage drawInRect:CGRectOffset(CGRectInset(userImgFrame, -5, -5), 0, 3 * (i - 1))];
   }
 }
 
@@ -342,6 +347,13 @@ static const CGFloat kTitleMaxWidth = 210.0;
 
 @end
 
+@interface InboxTableViewCell ()
+- (void)expandStack;
+- (void)collapseStack;
+- (void)collapseButtonTapped:(id)sender;
+- (void)inboxTableDidScroll:(NSNotification*)notification;
+@end
+
 @implementation InboxTableViewCell
 
 @synthesize entityObject = entityObject_;
@@ -356,11 +368,30 @@ static const CGFloat kTitleMaxWidth = 210.0;
 		customView_ = [[InboxCellView alloc] initWithFrame:customViewFrame];
 		[self.contentView addSubview:customView_];
     [customView_ release];
+
+    stacksBackgroundView_ = [[UIView alloc] initWithFrame:customViewFrame];
+    stacksBackgroundView_.autoresizingMask = UIViewAutoresizingFlexibleWidth |
+                                             UIViewAutoresizingFlexibleHeight;
+    stacksBackgroundView_.backgroundColor = [UIColor colorWithWhite:0.93 alpha:1.0];
+    stacksBackgroundView_.alpha = 0.0;
+    [self.contentView addSubview:stacksBackgroundView_];
+    [stacksBackgroundView_ release];
+    
+    stackCollapseButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+    stackCollapseButton_.frame = CGRectMake(11, 7, 46, 46);
+    [stackCollapseButton_ setImage:[UIImage imageNamed:@"stacks_back_button"]
+                          forState:UIControlStateNormal];
+    stackCollapseButton_.alpha = 0.0;
+    [stackCollapseButton_ addTarget:self
+                             action:@selector(collapseButtonTapped:)
+                   forControlEvents:UIControlEventTouchUpInside];
+    [self.contentView addSubview:stackCollapseButton_];
   }
   return self;
 }
 
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.entityObject = nil;
   [super dealloc];
 }
@@ -380,10 +411,166 @@ static const CGFloat kTitleMaxWidth = 210.0;
       NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
       customView_.stamps =
           [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+      [[NSNotificationCenter defaultCenter] removeObserver:self];
+      if (customView_.stamps.count > 1) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(inboxTableDidScroll:)
+                                                     name:kInboxTableDidScrollNotification
+                                                   object:nil];
+      }
     }
   }
 }
 
+- (void)inboxTableDidScroll:(NSNotification*)notification {
+  [self collapseStack];
+}
+
+#pragma mark - Touch Events.
+
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  UITouch* touch = [touches anyObject];
+  if (customView_.stamps.count > 1 &&
+      CGRectContainsPoint(CGRectMake(0, 0, 63, 63), [touch locationInView:customView_])) {
+    return;  // Eat the touch event.
+  }
+  [super touchesBegan:touches withEvent:event];
+}
+
+- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
+  [super touchesCancelled:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+  UITouch* touch = [touches anyObject];
+  if (customView_.stamps.count > 1 &&
+      CGRectContainsPoint(CGRectMake(0, 0, 63, 63), [touch locationInView:customView_])) {
+    [self expandStack];
+    return;  // Eat the touch event.
+  }
+  [super touchesEnded:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+  [super touchesMoved:touches withEvent:event];
+}
+
+- (void)collapseButtonTapped:(id)sender {
+  [self collapseStack];
+}
+
+- (void)collapseStack {
+  if (stackExpanded_ == NO)
+    return;
+
+  [UIView animateWithDuration:0.25 animations:^{
+    customView_.transform = CGAffineTransformIdentity;
+    stacksBackgroundView_.alpha = 0;
+    stackCollapseButton_.alpha = 0;
+    NSUInteger stampsCount = [entityObject_.stamps count];
+    NSUInteger i = stampsCount - 1;
+    for (UIView* view in self.contentView.subviews) {
+      if (![view isMemberOfClass:[UIImageView class]])
+        continue;
+      if (i > 0 && i < 3) {
+        CGAffineTransform transform = CGAffineTransformRotate(
+            CGAffineTransformMakeTranslation(0, 3 * i), kImageRotations[(i + 1) % 4]);
+        view.transform = transform;
+      } else {
+        view.transform = CGAffineTransformIdentity;
+      }
+      --i;
+    }
+  } completion:^(BOOL finished) {
+    customView_.hidePhotos = NO;
+    self.selectionStyle = UITableViewCellSelectionStyleBlue;
+    stackExpanded_ = NO;
+    for (UIView* view in self.contentView.subviews) {
+      if (![view isMemberOfClass:[UIImageView class]])
+        continue;
+      [view removeFromSuperview];
+    }
+    [customView_ setNeedsDisplay];
+    [self.contentView setNeedsDisplay];
+    [stackCollapseButton_ setNeedsDisplay];
+  }];
+}
+
+- (void)expandStack {
+  if (stackExpanded_)
+    return;
+
+  [self setSelected:NO animated:NO];
+  stackExpanded_ = YES;
+  self.selectionStyle = UITableViewCellSelectionStyleNone;
+  CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin,
+                                   kCellTopPadding,
+                                   kUserImageSize,
+                                   kUserImageSize);
+  NSUInteger stampsCount = [entityObject_.stamps count];
+  Stamp* s = nil;
+  for (NSUInteger i = stampsCount; i > 0; --i) {
+    s = [customView_.stamps objectAtIndex:i - 1];
+    UIImageView* userImageView =
+        [[UIImageView alloc] initWithFrame:CGRectInset(userImgFrame, -2, -2)];
+    userImageView.contentMode = UIViewContentModeCenter;
+    userImageView.layer.shadowOffset = CGSizeZero;
+    userImageView.layer.shadowOpacity = 0.5;
+    userImageView.layer.shadowRadius = 1.0;
+    CGFloat width = kUserImageSize + 4;
+    CGFloat height = kUserImageSize + 4;
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, height), NO, 0.0);
+    CGContextRef imgContext = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(imgContext, 0, height);
+    CGContextScaleCTM(imgContext, 1.0, -1.0);
+    CGRect imgFrame = CGRectMake(0, 0, width, height);
+    CGContextSaveGState(imgContext);
+    UIBezierPath* clearBorderPath = [UIBezierPath bezierPathWithRect:imgFrame];
+    CGContextSetFillColorWithColor(imgContext, [UIColor clearColor].CGColor);
+    CGContextAddPath(imgContext, clearBorderPath.CGPath);
+    CGContextClosePath(imgContext);
+    CGContextFillPath(imgContext);
+    CGContextRestoreGState(imgContext);
+    CGContextSaveGState(imgContext);
+    UIBezierPath* path = [UIBezierPath bezierPathWithRect:CGRectInset(imgFrame, 2, 2)];
+    CGContextSetFillColorWithColor(imgContext, [UIColor whiteColor].CGColor);
+    CGContextAddPath(imgContext, path.CGPath);
+    CGContextClosePath(imgContext);
+    CGContextFillPath(imgContext);
+    CGContextRestoreGState(imgContext);
+    CGContextDrawImage(imgContext, CGRectInset(imgFrame, 4, 4), s.user.profileImage.CGImage);
+    UIImage* userImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    userImageView.image = userImage;
+    s = [customView_.stamps objectAtIndex:i - 1];
+    if (i > 1 && i < 4) {
+      CGAffineTransform transform = CGAffineTransformRotate(
+          CGAffineTransformMakeTranslation(0, 3 * (i - 1)), kImageRotations[i % 4]);
+      userImageView.transform = transform;
+    }
+    [self.contentView addSubview:userImageView];
+    [userImageView release];
+  }
+  customView_.hidePhotos = YES;
+  [UIView animateWithDuration:0.25 animations:^{
+    CGAffineTransform rightTransform =
+      CGAffineTransformMakeTranslation(CGRectGetWidth(self.contentView.frame), 0);
+    customView_.transform = rightTransform;
+    stacksBackgroundView_.alpha = 1.0;
+    stackCollapseButton_.alpha = 1.0;
+    
+    NSUInteger i = stampsCount - 1;
+    for (UIView* view in self.contentView.subviews) {
+      if (![view isMemberOfClass:[UIImageView class]])
+        continue;
+      
+      view.transform = CGAffineTransformMakeTranslation(55 + (48 * i), 0);
+      --i;
+    }
+  } completion:^(BOOL finished) {
+    [self.contentView setNeedsDisplay];
+  }];
+}
 
 
 @end

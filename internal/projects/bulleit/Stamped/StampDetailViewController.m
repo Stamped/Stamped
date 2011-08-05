@@ -94,7 +94,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self preloadEntityView];
+  //[self preloadEntityView];
 }
 
 - (void)viewDidLoad {
