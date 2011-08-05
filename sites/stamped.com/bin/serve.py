@@ -65,6 +65,7 @@ def handleRequest(request, stampedAPIFunc, schema):
             {'WWW-Authenticate': 'Basic realm="Stamped API"'}
         )
     if request.authorization.username != USERNAME or request.authorization.password != PASSWORD:
+        utils.log("Invalid access: %s" % request)
         return "Error", 500
 
     if request.method == 'POST':
@@ -73,6 +74,8 @@ def handleRequest(request, stampedAPIFunc, schema):
         data = request.args
     else:
         return "Method not supported", 501
+        
+    utils.log("Request: %s %s" % (request.base_url, data))
         
     try:
         parsedInput = parseRequestForm(schema, data)
@@ -298,7 +301,8 @@ def addEntity():
         ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("title",                 ResourceArgument(required=True, expectedType=basestring)), 
         ("desc",                  ResourceArgument(required=True, expectedType=basestring)), 
-        ("category",              ResourceArgument(required=True, expectedType=basestring)), 
+        ("category",              ResourceArgument(required=True, expectedType=basestring)),
+        ("subcategory",           ResourceArgument(required=True, expectedType=basestring)), 
         ("image",                 ResourceArgument(expectedType=basestring)), 
         ("address",               ResourceArgument(expectedType=basestring)), 
         ("coordinates",           ResourceArgument(expectedType=basestring))

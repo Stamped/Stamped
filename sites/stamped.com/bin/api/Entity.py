@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, utils
 from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
 categories = set([ 'food', 'music', 'film', 'book', 'other' ])
@@ -17,6 +17,7 @@ subcategories = {
     'song' : 'music', 
     'album' : 'music', 
     'app' : 'other', 
+    'other' : 'other',
 }
 
 class Entity(ASchemaBasedAttributeDict):
@@ -194,26 +195,28 @@ class Entity(ASchemaBasedAttributeDict):
         
         if 'entity_id' in self:
             valid &= isinstance(self.entity_id, basestring) 
+            utils.logs.debug('isValid: %s (entity.entity_id)' % valid)
         
         valid &= 'title' in self and isinstance(self.title, basestring)
         self.title = self.title.strip()
+        utils.logs.debug('isValid: %s (entity.title)' % valid)
         
         valid &= 'subcategory' in self and isinstance(self.subcategory, basestring)
+        utils.logs.debug('isValid: %s (entity.category)' % valid)
         valid &= self.subcategory in subcategories
-        expected_category = subcategories[self.category]
-        
-        if 'category' in self:
-            valid &= (self.category == expected_category)
-        else:
-            self.category = expected_category
+        utils.logs.debug('isValid: %s (entity.subcategory)' % valid)
         
         valid &= 'category' in self and isinstance(self.category, basestring)
-        valid &= self.category in categories
+        utils.logs.debug('isValid: %s (entity.category)' % valid)
+        valid &= self.category in categories 
+        utils.logs.debug('isValid: %s (entity.category)' % valid)
+        valid &= self.category == subcategories[self.subcategory]
+        utils.logs.debug('isValid: %s (entity.category)' % valid)
         
         if not 'subtitle' in self:
             self.subtitle = self.category
-        
         valid &= 'subtitle' in self and isinstance(self.subtitle, basestring)
+        utils.logs.debug('isValid: %s (entity.subtitle)' % valid)
         
 #         if 'website' in self:
 #             valid &= isinstance(self.website, basestring)
