@@ -301,7 +301,8 @@ def addEntity():
         ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("title",                 ResourceArgument(required=True, expectedType=basestring)), 
         ("desc",                  ResourceArgument(required=True, expectedType=basestring)), 
-        ("category",              ResourceArgument(required=True, expectedType=basestring)), 
+        ("category",              ResourceArgument(required=True, expectedType=basestring)),
+        ("subcategory",           ResourceArgument(required=True, expectedType=basestring)), 
         ("image",                 ResourceArgument(expectedType=basestring)), 
         ("address",               ResourceArgument(expectedType=basestring)), 
         ("coordinates",           ResourceArgument(expectedType=basestring))

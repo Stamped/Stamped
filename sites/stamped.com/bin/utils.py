@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import json, os, sys, pickle, threading, time, traceback, urllib2
+import json, os, sys, pickle, threading, time, traceback, urllib2, logging
 from subprocess import Popen, PIPE
 from functools import wraps
 from BeautifulSoup import BeautifulSoup
@@ -55,6 +55,13 @@ def logRaw(s, includeFormat=False):
     sys.stdout.write(s)
     sys.stdout.flush()
     sys.stderr.flush()
+    
+# Logging
+logs = logging.getLogger('api')
+logs.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+logs.addHandler(ch)
 
 def _formatLog(s):
     try:

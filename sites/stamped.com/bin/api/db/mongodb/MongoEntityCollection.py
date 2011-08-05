@@ -20,6 +20,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         'desc': basestring, 
         'locale': basestring, 
         'category': basestring,
+        'subcategory': basestring,
         'image': basestring, 
         'timestamp': {
             'created' : basestring, 

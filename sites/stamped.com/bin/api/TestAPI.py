@@ -333,7 +333,8 @@ def entityTest(baseurl):
         "authenticated_user_id": userID,
         "title": "Little Owl",
         "desc": "American food in the West Village", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityID = testPOST(baseurl, path, data)['entity_id']
@@ -453,7 +454,8 @@ def stampTest(baseurl):
         "authenticated_user_id": userA,
         "title": "Little Owl ",
         "desc": "American food in the West Village", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityID = testPOST(baseurl, path, data)['entity_id']
@@ -908,7 +910,8 @@ def collectionTest(baseurl):
         "authenticated_user_id": userA,
         "title": "Little Owl",
         "desc": "American food in the West Village", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityID = testPOST(baseurl, path, data)['entity_id']
@@ -925,7 +928,8 @@ def collectionTest(baseurl):
         "authenticated_user_id": userA,
         "title": "Recette",
         "desc": "Great food", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityIDb = testPOST(baseurl, path, data)['entity_id']
@@ -1114,7 +1118,8 @@ def commentTest(baseurl):
         "authenticated_user_id": userID,
         "title": "Little Owl",
         "desc": "American food in the West Village", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityID = testPOST(baseurl, path, data)['entity_id']
@@ -1260,7 +1265,8 @@ def favoriteTest(baseurl):
         "authenticated_user_id": userID,
         "title": "Little Owl",
         "desc": "American food in the West Village", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityID = testPOST(baseurl, path, data)['entity_id']
@@ -1486,7 +1492,8 @@ def activityTest(baseurl):
         "authenticated_user_id": userA,
         "title": "Little Owl",
         "desc": "American food in the West Village", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityID = testPOST(baseurl, path, data)['entity_id']
@@ -1503,7 +1510,8 @@ def activityTest(baseurl):
         "authenticated_user_id": userA,
         "title": "Recette",
         "desc": "Great food", 
-        "category": "Restaurant",
+        "category": "food",
+        "subcategory": "restaurant",
         "coordinates": "40.714623,-74.006605"
     }
     entityIDb = testPOST(baseurl, path, data)['entity_id']

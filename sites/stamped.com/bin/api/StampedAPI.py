@@ -80,6 +80,7 @@ class StampedAPI(AStampedAPI):
     # ######## #
     
     def addAccount(self, params):
+        utils.logs.info("Add account")
         ### TODO: Add validation to ensure no duplicate screen_names
         account = Account()
         account.first_name = params.first_name
@@ -511,6 +512,7 @@ class StampedAPI(AStampedAPI):
         entity.subtitle = 'Other'
         entity.desc = params.desc
         entity.category = params.category
+        entity.subcategory = params.subcategory
         
         if params.image != None:
             entity.image = params.image
@@ -996,6 +998,8 @@ class StampedAPI(AStampedAPI):
                 )
         
         else:
+            result['subcategory'] = entity['subcategory']
+            
             if 'desc' in entity:
                 result['desc'] = entity.desc
             else:
