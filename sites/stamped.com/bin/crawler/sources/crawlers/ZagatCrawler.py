@@ -17,7 +17,7 @@ __all__ = [ "ZagatCrawler" ]
 class ZagatCrawler(AExternalEntitySource):
     """ 
         Entity crawler which exhaustively outputs all of the (high quality) 
-        Zagat-rated restaurants on Zagat.com.
+        Zagat-rated restaurants from Zagat.com.
     """
     
     TYPES = set([ 'restaurant' ])
