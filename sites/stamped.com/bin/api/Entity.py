@@ -181,6 +181,9 @@ class Entity(ASchemaBasedAttributeDict):
                     'isan' : basestring, 
                 }, 
             }, 
+            'zagat' : {
+                'zurl' : basestring, 
+            }, 
             'nymag' : { }, 
         }
     }

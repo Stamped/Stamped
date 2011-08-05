@@ -5,10 +5,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import json, os, sys, pickle, threading, time, traceback, urllib2
+import httplib, json, os, sys, pickle, threading, time, traceback, urllib2, gzip
 from subprocess import Popen, PIPE
 from functools import wraps
 from BeautifulSoup import BeautifulSoup
+from StringIO import StringIO
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -285,13 +286,29 @@ def getFile(url, opener=None):
     maxDelay = 64
     delay = 0.5
     html = None
+    request = None
     
     if opener is None:
-        opener = urllib2.urlopen
+        opener  = urllib2.urlopen
+        request = urllib2.Request(url)
+        request.add_header('Accept-encoding', 'gzip')
+    
+    if request is None:
+        request = url
     
     while True:
         try:
-            html = opener(url).read()
+            
+            response = urllib2.urlopen(request)
+            html = response.read()
+            
+            if response.info().get('Content-Encoding') == 'gzip':
+                #html = zlib.decompress(html)
+                buf = StringIO(html)
+                f = gzip.GzipFile(fileobj=buf)
+                html = f.read()
+                buf.close()
+            
             break
         except urllib2.HTTPError, e:
             #log("'%s' fetching url '%s'" % (str(e), url))
@@ -306,7 +323,7 @@ def getFile(url, opener=None):
             # so propagate the error and return.
             if delay > maxDelay:
                 raise
-        except IOError, e:
+        except IOError, httplib.BadStatusLine:
             #log("Error '%s' fetching url '%s'" % (str(e), url))
             
             # if delay is already too large, request will likely not complete successfully, 
