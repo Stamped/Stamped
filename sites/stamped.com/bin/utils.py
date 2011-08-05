@@ -298,17 +298,8 @@ def getFile(url, opener=None):
     
     while True:
         try:
-            
             response = urllib2.urlopen(request)
             html = response.read()
-            
-            if response.info().get('Content-Encoding') == 'gzip':
-                #html = zlib.decompress(html)
-                buf = StringIO(html)
-                f = gzip.GzipFile(fileobj=buf)
-                html = f.read()
-                buf.close()
-            
             break
         except urllib2.HTTPError, e:
             #log("'%s' fetching url '%s'" % (str(e), url))
@@ -342,6 +333,13 @@ def getFile(url, opener=None):
         # and retry the request
         time.sleep(delay)
         delay *= 2
+    
+    if response.info().get('Content-Encoding') == 'gzip':
+        #html = zlib.decompress(html)
+        buf = StringIO(html)
+        f = gzip.GzipFile(fileobj=buf)
+        html = f.read()
+        buf.close()
     
     # return the successfully parsed html
     return html
