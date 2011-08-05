@@ -19,6 +19,7 @@ extern NSString* kInboxTableDidScrollNotification;
   UIView* stacksBackgroundView_;
   BOOL stackExpanded_;
   UIButton* stackCollapseButton_;
+  UIScrollView* userImageScrollView_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;

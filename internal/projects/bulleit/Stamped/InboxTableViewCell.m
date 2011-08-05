@@ -355,7 +355,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 - (void)collapseButtonTapped:(id)sender;
 - (void)inboxTableDidScroll:(NSNotification*)notification;
 - (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
-- (void)userImageTapped:(UITapGestureRecognizer*)recognizer;
+- (void)userImageTapped:(id)sender;
 @end
 
 @implementation InboxTableViewCell
@@ -390,6 +390,12 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                              action:@selector(collapseButtonTapped:)
                    forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:stackCollapseButton_];
+    userImageScrollView_ = [[UIScrollView alloc] initWithFrame:CGRectMake(60, 0, 249, 63)];
+    userImageScrollView_.pagingEnabled = YES;
+    userImageScrollView_.backgroundColor = [UIColor clearColor];
+    userImageScrollView_.hidden = YES;
+    [self.contentView addSubview:userImageScrollView_];
+    [userImageScrollView_ release];
   }
   return self;
 }
@@ -427,7 +433,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)inboxTableDidScroll:(NSNotification*)notification {
-  [self collapseStack];
+  [self collapseButtonTapped:nil];
 }
 
 #pragma mark - Touch Events.
@@ -490,6 +496,17 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   if (stackExpanded_ == NO)
     return;
 
+  userImageScrollView_.contentOffset = CGPointZero;
+  userImageScrollView_.hidden = YES;
+  NSUInteger i = 0;
+  for (UIView* view in userImageScrollView_.subviews) {
+    if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
+      continue;
+    
+    [self.contentView addSubview:view];
+    view.transform = CGAffineTransformTranslate(view.transform, 60, 0);
+    ++i;
+  }
   [UIView animateWithDuration:0.25
                         delay:0
                       options:UIViewAnimationOptionAllowUserInteraction
@@ -524,8 +541,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   if (stackExpanded_)
     return;
 
-  [self setSelected:NO animated:NO];
   stackExpanded_ = YES;
+  userImageScrollView_.hidden = NO;
   self.selectionStyle = UITableViewCellSelectionStyleNone;
   CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin,
                                    kCellTopPadding,
@@ -542,6 +559,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     userImageButton.layer.shadowOffset = CGSizeZero;
     userImageButton.layer.shadowOpacity = 0.5;
     userImageButton.layer.shadowRadius = 1.0;
+    userImageButton.layer.shadowPath = [UIBezierPath bezierPathWithRect:
+        CGRectMake(2, 2, CGRectGetWidth(userImgFrame), CGRectGetHeight(userImgFrame))].CGPath;
     CGFloat width = kUserImageSize + 4;
     CGFloat height = kUserImageSize + 4;
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, height), NO, 0.0);
@@ -587,16 +606,37 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
       if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
         continue;
       
-      view.transform = CGAffineTransformMakeTranslation(55 + (48 * ((stampsCount - 1) - i)), 0);
+      NSInteger xPos = 55 + (48 * ((stampsCount - 1) - i));
+      view.transform = CGAffineTransformMakeTranslation(xPos, 0);
+      if (stampsCount > 5 && (stampsCount - 1 - i) > 4)
+        view.alpha = 0.0;
+
       ++i;
     }
   } completion:^(BOOL finished) {
+    NSUInteger i = 0;
+    for (UIView* view in self.contentView.subviews) {
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
+        continue;
+
+      [userImageScrollView_ addSubview:view];
+      view.transform = CGAffineTransformTranslate(view.transform, -60, 0);
+      if (stampsCount > 5 && (stampsCount - 1 - i) > 4)
+        view.alpha = 1.0;
+
+      ++i;
+    }
+    CGRect scrollBounds = userImageScrollView_.bounds;
+    NSUInteger numPages = ceil(stampsCount / 5.0);
+    userImageScrollView_.contentSize =
+        CGSizeMake(numPages * CGRectGetWidth(scrollBounds), CGRectGetHeight(scrollBounds));
     [self.contentView setNeedsDisplay];
   }];
 }
 
-- (void)userImageTapped:(UIButton*)sender {
-  Stamp* stamp = [customView_.stamps objectAtIndex:sender.tag];
+- (void)userImageTapped:(id)sender {
+  UIButton* button = sender;
+  Stamp* stamp = [customView_.stamps objectAtIndex:button.tag];
 
   StampDetailViewController* detailViewController =
       [[StampDetailViewController alloc] initWithStamp:stamp];
