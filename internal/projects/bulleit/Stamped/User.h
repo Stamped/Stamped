@@ -20,6 +20,7 @@
 @property (nonatomic, retain) NSString* website;
 @property (nonatomic, retain) NSString* secondaryColor;
 @property (nonatomic, retain) NSString* profileImageURL;
+@property (nonatomic, retain) UIImage* mediumProfileImage;
 @property (nonatomic, retain) UIImage* profileImage;
 @property (nonatomic, retain) NSString* screenName;
 @property (nonatomic, retain) UIImage* stampImage;
