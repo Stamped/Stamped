@@ -182,7 +182,7 @@ typedef enum {
     filterString = @"Music";
   }
   if (filterString) {
-    NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"entityObject.category == %@", filterString];
+    NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"category == %@", filterString];
     self.filteredEntitiesArray = [entitiesArray_ filteredArrayUsingPredicate:filterPredicate];
     [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0]
                   withRowAnimation:UITableViewRowAnimationMiddle];
@@ -293,8 +293,15 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   Entity* entity = [filteredEntitiesArray_ objectAtIndex:indexPath.row];
-  StampDetailViewController* detailViewController =
-      [[StampDetailViewController alloc] initWithStamp:[entity.stamps anyObject]];
+  Stamp* stamp = nil;
+  if (entity.stamps.count > 0) {
+    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+    NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    stamp = [sortedStamps lastObject];
+  } else {
+    stamp = [entity.stamps anyObject];
+  }
+  StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
 
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -306,6 +313,8 @@ typedef enum {
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   userDidScroll_ = YES;
+  [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
+                                                      object:scrollView];
   if (isLoading_)
     return;
 

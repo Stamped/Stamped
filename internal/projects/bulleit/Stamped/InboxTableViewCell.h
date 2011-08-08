@@ -10,10 +10,18 @@
 
 @class InboxCellView;
 @class Entity;
+@class PageDotsView;
 
-@interface InboxTableViewCell : UITableViewCell {
+extern NSString* kInboxTableDidScrollNotification;
+
+@interface InboxTableViewCell : UITableViewCell <UIScrollViewDelegate> {
  @private  
   InboxCellView* customView_;
+  UIView* stacksBackgroundView_;
+  BOOL stackExpanded_;
+  UIButton* stackCollapseButton_;
+  UIScrollView* userImageScrollView_;
+  PageDotsView* pageDotsView_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;

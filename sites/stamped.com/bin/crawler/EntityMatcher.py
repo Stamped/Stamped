@@ -16,13 +16,28 @@ from GooglePlaces import GooglePlaces
 
 # TODO: don't use Google Places as cross-referencing engine
 # sort by name first, merge obvious duplicates
-#    this sort could be accomplished implicitly by mongo via find({"title" : re.compile("^a")}, {"category" : "food"}) for a in a...z
+#    this sort could be accomplished implicitly by mongo via find({"title" : {$regex : "^a"}}, {"category" : "food"}) for a in a...z
 # Instead, use combination of fuzzy string matching and lat/lng proximity to compare any two entities
 # possibly add entities to 2-dimensional kd-tree
 # for each sample:
 #    find n nearest samples
-#    if name is fuzzy matched, duple
+#    if name is fuzzy matched, dupe
+# compress chains during this process?
 
+# Algorithm:
+#    * prerequisites good python ANN or kNN library
+#       * could use mongo's built-in geolocation
+#       * would require storing places in a separate collection searchable via lat/lng
+#       * would require all places to contain valid lat/lng
+#    
+#    RemoveDuplicates(n sources containing n_m entities respectively):
+#       insert entities into kd-tree
+#       for each entity, get k=ANN nearest neighbors:
+#           hit = False
+#           for k nearest neighbors:
+#               if neighbor fuzzily matches entity, merge them and set hit = True
+#           if hit:
+#               repeat ANN until no hits?
 
 
 class EntityMatcher(object):
@@ -239,11 +254,8 @@ class EntityMatcher(object):
         while (prevWords is None or len(words) != len(prevWords)) and len(words) > 0:
             prevWords = words
             
-            if len(words) <= 0:
-                break
-            
             # remove blacklisted prefix words
-            while words[0] in self.wordPrefixBlacklistSet:
+            while len(words) > 0 and words[0] in self.wordPrefixBlacklistSet:
                 words = words[1:]
             
             if complexity < 0.9:

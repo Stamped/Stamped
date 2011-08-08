@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import init
-import os, flask, json, utils
+import os, flask, json, utils, random, time, hashlib
 from flask import request, Response, Flask
 from functools import wraps
 
@@ -33,17 +33,22 @@ stampedAPI = MongoStampedAPI()
 # Utility Functions #
 # ################# #
 
+def _generateLogId():
+    m = hashlib.md5(str(time.time()))
+    m.update(str(random.random()))
+    return str(m.hexdigest())
+
+
 def encodeType(obj):
     if '_dict' in obj:
         return obj._dict
     else:
         return obj.__dict__
 
-def transformOutput(request, d):
+def transformOutput(request, d, logId=None):
     output_json = json.dumps(d, sort_keys=True, indent=None if request.is_xhr else 2, default=encodeType)
     output = Response(output_json, mimetype='application/json')
-    
-    print 'Output: ', output_json
+    utils.logs.info("%s | Transform output: \"%s\"" % (logId, output_json))
     return output
 
 def parseRequestForm(schema, form):
@@ -58,13 +63,18 @@ def parseRequestForm(schema, form):
         raise
 
 def handleRequest(request, stampedAPIFunc, schema):
+    logId = _generateLogId()
+    utils.logs.info("%s | Begin request" % logId)
+    
     if 'Authorization' not in request.headers or not request.authorization:
+        utils.logs.info("%s | End request: requires authorization" % logId)
         return Response(
             'Could not verify your access level for that URL.\n'
             'You have to login with proper credentials', 401,
             {'WWW-Authenticate': 'Basic realm="Stamped API"'}
         )
     if request.authorization.username != USERNAME or request.authorization.password != PASSWORD:
+        utils.logs.info("%s | End request: invalid authorization: %s" % (logId, request))
         return "Error", 500
 
     if request.method == 'POST':
@@ -72,7 +82,11 @@ def handleRequest(request, stampedAPIFunc, schema):
     elif request.method == 'GET': 
         data = request.args
     else:
+        utils.logs.info("%s | End request: method not supported: %s" % (logId, request.method))
         return "Method not supported", 501
+        
+    utils.logs.info("%s | Incoming request url: %s" % (logId, request.base_url))
+    utils.logs.info("%s | Incoming request data: %s" % (logId, data))
         
     try:
         parsedInput = parseRequestForm(schema, data)
@@ -81,9 +95,13 @@ def handleRequest(request, stampedAPIFunc, schema):
         utils.log(msg)
         utils.printException()
         return msg, 400
+        
+    utils.logs.info("%s | Parsed request: %s" % (logId, parsedInput))
     
     try:
-        return transformOutput(request, stampedAPIFunc(parsedInput))
+        ret = transformOutput(request, stampedAPIFunc(parsedInput), logId=logId)
+        utils.logs.info("%s | End request: success" % logId)
+        return ret
     except Exception as e:
         msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
         utils.log(msg)
@@ -298,7 +316,8 @@ def addEntity():
         ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("title",                 ResourceArgument(required=True, expectedType=basestring)), 
         ("desc",                  ResourceArgument(required=True, expectedType=basestring)), 
-        ("category",              ResourceArgument(required=True, expectedType=basestring)), 
+        ("category",              ResourceArgument(required=True, expectedType=basestring)),
+        ("subcategory",           ResourceArgument(required=True, expectedType=basestring)), 
         ("image",                 ResourceArgument(expectedType=basestring)), 
         ("address",               ResourceArgument(expectedType=basestring)), 
         ("coordinates",           ResourceArgument(expectedType=basestring))
