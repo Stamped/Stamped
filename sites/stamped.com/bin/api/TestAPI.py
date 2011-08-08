@@ -36,15 +36,15 @@ def main():
     baseurl = "http://0.0.0.0:5000/api/v1"
 #     baseurl = "http://50.19.163.247:5000/api/v1"
 #     
-    accountTest(baseurl)
-    
-    userTest(baseurl)
-    
-    entityTest(baseurl)
-
-    stampTest(baseurl)
+#     accountTest(baseurl)
 #     
-    friendshipTest(baseurl)
+#     userTest(baseurl)
+#     
+#     entityTest(baseurl)
+# 
+#     stampTest(baseurl)
+#     
+#     friendshipTest(baseurl)
 # 
     collectionTest(baseurl)
 # 

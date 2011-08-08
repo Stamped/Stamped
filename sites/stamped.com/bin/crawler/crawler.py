@@ -9,7 +9,7 @@ import Globals, utils
 import gevent, json, math, os, sys
 
 import EntitySinks, EntitySources
-from GooglePlacesEntityProxy import GooglePlacesEntityProxy
+from GeocoderEntityProxy import GeocoderEntityProxy
 from AEntityProxy import AEntityProxy
 from ASyncGatherSource import ASyncGatherSource
 from TestEntitySink import TestEntitySink
@@ -59,8 +59,8 @@ class Crawler(Thread):
         sink.close()
     
     def _createSourceChain(self, source):
-        if self.options.googlePlaces and 'place' in source.types:
-            source = GooglePlacesEntityProxy(source)
+        if self.options.geocode:
+            source = GeocoderEntityProxy(source)
         
         return source
 
@@ -100,9 +100,9 @@ def parseCommandLine():
         help="update the existing collection as opposed to dropping it and " + 
         "overwriting any previous contents (the default)")
     
-    parser.add_option("-g", "--googlePlaces", default=False, 
-        action="store_true", dest="googlePlaces", 
-        help="cross-reference place entities with the google places api")
+    parser.add_option("-g", "--geocode", default=False, 
+        action="store_true", dest="geocode", 
+        help="Geocode places to ensure all places have a valid lat/lng associated with them.")
     
     parser.add_option("-m", "--mount", default=False, 
         action="store_true", dest="mount", 

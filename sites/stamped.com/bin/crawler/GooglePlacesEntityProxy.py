@@ -48,7 +48,6 @@ class GooglePlacesEntityProxy(AEntityProxy):
                 latLng = (entity.lat, entity.lng)
             except KeyError:
                 # entity is not a place, so don't try to cross-reference it with google
-                print entity.getDataAsDict()
                 return entity
         
         (match, numIterations, interestingResults) = self._entityMatcher.getEntityDetailsFromGooglePlaces(entity)

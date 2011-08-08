@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
+from utils import OrderedDict
 from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
 categories = set([ 'food', 'music', 'film', 'book', 'other' ])
@@ -35,13 +36,16 @@ class Entity(ASchemaBasedAttributeDict):
             'created' : basestring, 
             'modified': basestring, 
         }, 
+        # TODO: at some point, we're going to switch to using the 'spherical' search 
+        # model of MongoDB, in which case, the order of lng/lat will need to be precise, 
+        # and a normal python dict won't be enough to enforce this constraing.
+        'coordinates': {
+            'lng' : float, 
+            'lat' : float, 
+        }, 
         'details': {
             'place': {
                 'address': basestring, 
-                'coordinates': {
-                    'lng': float, 
-                    'lat': float, 
-                }, 
                 'types': list, 
                 'vicinity': basestring, 
                 'neighborhood': basestring, 
@@ -188,7 +192,8 @@ class Entity(ASchemaBasedAttributeDict):
             'urbanspoon' : {
                 'uurl' : basestring, 
             }, 
-            'nymag' : { }, 
+            'nymag' : { },
+            'sfmag' : { }, 
         }
     }
     

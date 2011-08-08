@@ -16,8 +16,10 @@
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
-#import "UserImageView.h"
 #import "Util.h"
+#import "MediumUserImageView.h"
+#import "StampDetailViewController.h"
+#import "StampedAppDelegate.h"
 
 NSString* kInboxTableDidScrollNotification = @"InboxTableDidScrollNotification";
 
@@ -27,25 +29,28 @@ static NSString* kUserNameFontString = @"Helvetica-Bold";
 static NSString* kCommentFontString = @"Helvetica";
 static const CGFloat kSubstringFontSize = 12.0;
 static const CGFloat kUserImageHorizontalMargin = 14.0;
-static const CGFloat kUserImageSize = 39.0;
+static const CGFloat kUserImageSize = 41.0;
 static const CGFloat kCellTopPadding = 10.0;
 static const CGFloat kTypeIconSize = 12.0;
 static const CGFloat kSubstringMaxWidth = 218.0;
 static const CGFloat kStampSize = 18.0;
 static const CGFloat kTitleMaxWidth = 210.0;
-static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
+static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 @interface InboxCellView : UIView {
  @private
   // Managed by the top-level view system.
   UIImageView* typeImageView_;
   UIImageView* disclosureImageView_;
+  UILabel* userNameLabel_;
+  UILabel* commentLabel_;
+  UILabel* badgeLabel_;
+  MediumUserImageView* topUserImageView_;
+  MediumUserImageView* middleUserImageView_;
+  MediumUserImageView* bottomUserImageView_;
 
   // NOT managed. Must manage ownership.
   CATextLayer* titleLayer_;
-  UILabel* badgeLabel_;
-  UILabel* userNameLabel_;
-  UILabel* commentLabel_;
   UIColor* defaultTitleColor_;
   UIColor* defaultSubstringColor_;
   CTFontRef titleFont_;
@@ -54,6 +59,8 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
   CGRect stampImageFrame_;
   CGFloat userImageRightMargin_;
 }
+
+- (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
 
 // This is magic with UITableViewCell. No need to set this explicitly.
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
@@ -114,17 +121,26 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
     userNameLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     userNameLabel_.lineBreakMode = UILineBreakModeTailTruncation;
     userNameLabel_.textColor = defaultSubstringColor_;
+    userNameLabel_.highlightedTextColor = [UIColor whiteColor];
     userNameLabel_.font = [UIFont fontWithName:kUserNameFontString size:kSubstringFontSize];
+    [self addSubview:userNameLabel_];
+    [userNameLabel_ release];
     
     commentLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     commentLabel_.font = [UIFont fontWithName:kCommentFontString size:kSubstringFontSize];
     commentLabel_.textColor = defaultSubstringColor_;
+    commentLabel_.highlightedTextColor = [UIColor whiteColor];
+    [self addSubview:commentLabel_];
+    [commentLabel_ release];
 
     CGRect badgeFrame = CGRectMake(CGRectGetMaxX(self.bounds) - 10 - 17, 30, 17, 17);
     badgeLabel_ = [[UILabel alloc] initWithFrame:badgeFrame];
     badgeLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
     badgeLabel_.textAlignment = UITextAlignmentCenter;
     badgeLabel_.textColor = [UIColor whiteColor];
+    badgeLabel_.highlightedTextColor = [UIColor blueColor];
+    [self addSubview:badgeLabel_];
+    [badgeLabel_ release];
     
     titleLayer_ = [[CATextLayer alloc] init];
     titleLayer_.truncationMode = kCATruncationEnd;
@@ -144,6 +160,16 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
         (id)defaultTitleColor_.CGColor, (id)kCTForegroundColorAttributeName,
         (id)titleStyle_, (id)kCTParagraphStyleAttributeName,
         (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName, nil];
+    CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding - 1, kUserImageSize, kUserImageSize);
+    bottomUserImageView_ = [[MediumUserImageView alloc] initWithFrame:userImgFrame];
+    [self addSubview:bottomUserImageView_];
+    [bottomUserImageView_ release];
+    middleUserImageView_ = [[MediumUserImageView alloc] initWithFrame:userImgFrame];
+    [self addSubview:middleUserImageView_];
+    [middleUserImageView_ release];
+    topUserImageView_ = [[MediumUserImageView alloc] initWithFrame:userImgFrame];
+    [self addSubview:topUserImageView_];
+    [topUserImageView_ release];
   }
   return self;
 }
@@ -157,9 +183,6 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
   [defaultSubstringColor_ release];
   [titleAttributes_ release];
   [titleLayer_ release];
-  [badgeLabel_ release];
-  [userNameLabel_ release];
-  [commentLabel_ release];
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
   [super dealloc];
@@ -167,17 +190,8 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 
 - (void)invertColors:(BOOL)inverted {
   UIColor* titleColor = defaultTitleColor_;
-  UIColor* substringColor = defaultSubstringColor_;
-  UIColor* badgeTextColor = [UIColor whiteColor];
-  if (inverted) {
-    substringColor = [UIColor whiteColor];
+  if (inverted)
     titleColor = [UIColor whiteColor];
-    badgeTextColor = [UIColor blueColor];
-  }
-
-  userNameLabel_.textColor = substringColor;
-  commentLabel_.textColor = substringColor;
-  badgeLabel_.textColor = badgeTextColor;
 
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
@@ -185,6 +199,17 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
   titleLayer_.foregroundColor = titleColor.CGColor;
   [CATransaction commit];
   [self setNeedsDisplay];
+}
+
+- (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index {
+  NSUInteger stampsCount = stamps_.count;
+  CGAffineTransform transform = CGAffineTransformIdentity;
+  if (index >= MAX((NSInteger)stampsCount - 3, 0) && index < stampsCount - 1) {
+    transform = CGAffineTransformRotate(
+        CGAffineTransformMakeTranslation(0, 4 * ((stampsCount - 1) - index)),
+        kImageRotations[index % 4]);
+  }
+  return transform;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
@@ -212,51 +237,7 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
     [badgeLabel_ drawTextInRect:badgeLabel_.frame];
   }
 
-  [userNameLabel_ drawTextInRect:userNameLabel_.frame];
-  [commentLabel_ drawTextInRect:commentLabel_.frame];
   [stampImage_ drawInRect:stampImageFrame_ blendMode:kCGBlendModeMultiply alpha:1.0];
-  if (hidePhotos_)
-    return;
-
-  CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding, kUserImageSize, kUserImageSize);
-  Stamp* s = nil;
-  for (NSUInteger i = MIN(3, [stamps_ count]); i > 0; --i) {
-    s = [stamps_ objectAtIndex:i - 1];
-    UIImage* img = s.user.profileImage;
-    if (i == 1) {
-      CGContextRef ctx = UIGraphicsGetCurrentContext();
-      CGContextSaveGState(ctx);
-      CGContextSetShadow(ctx, CGSizeMake(0, 0), 3.0);
-      [[UIColor whiteColor] setFill];
-      UIBezierPath* path = [UIBezierPath bezierPathWithRect:userImgFrame];
-      [path fill];
-      CGContextRestoreGState(ctx);
-      [img drawInRect:CGRectInset(userImgFrame, 2, 2)];
-      return;
-    }
-    CGFloat width = kUserImageSize;
-    CGFloat height = kUserImageSize;
-    CGSize rotatedSize = CGRectInset(userImgFrame, -5, -5).size;
-    UIGraphicsBeginImageContextWithOptions(rotatedSize, NO, 0.0);
-    CGContextRef imgContext = UIGraphicsGetCurrentContext();
-    CGContextTranslateCTM(imgContext, rotatedSize.width * 0.5, rotatedSize.height * 0.5);
-    CGContextRotateCTM(imgContext, kImageRotations[i % 4]);
-    CGContextScaleCTM(imgContext, 1.0, -1.0);
-    CGRect imgFrame = CGRectMake(-width / 2, -height / 2, width, height);
-    CGContextSaveGState(imgContext);
-    UIBezierPath* path = [UIBezierPath bezierPathWithRect:imgFrame];
-    CGContextSetFillColorWithColor(imgContext, [UIColor whiteColor].CGColor);
-    CGContextSetShadow(imgContext, CGSizeMake(0, 0), 3.0);
-    CGContextAddPath(imgContext, path.CGPath);
-    CGContextClosePath(imgContext);
-    CGContextFillPath(imgContext);
-    CGContextRestoreGState(imgContext);
-    CGContextDrawImage(imgContext, CGRectInset(imgFrame, 2, 2), img.CGImage);
-    
-    UIImage* rotatedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    [rotatedImage drawInRect:CGRectOffset(CGRectInset(userImgFrame, -5, -5), 0, 3 * (i - 1))];
-  }
 }
 
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
@@ -306,37 +287,76 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 }
 
 - (void)setStamps:(NSArray*)stamps {
-  if (stamps_ != stamps) {
-    stamps_ = [stamps copy];
-    Stamp* stamp = [stamps objectAtIndex:0];
-    self.stampImage = stamp.user.stampImage;
-    NSString* userName = stamp.user.displayName;
-    CGSize stringSize = [userName sizeWithFont:[UIFont fontWithName:kUserNameFontString size:kSubstringFontSize]
-                                       forWidth:kSubstringMaxWidth
-                                  lineBreakMode:UILineBreakModeTailTruncation];
-    userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 16, 57, stringSize.width, stringSize.height);
-    userNameLabel_.text = userName;
+  if (stamps_ == stamps)
+    return;
 
-    NSString* comment = stamp.blurb;
-    if ([comment length] > 0)
-      comment = [NSString stringWithFormat:@"\u201c%@\u201d", comment];
+  stamps_ = [stamps copy];
+  Stamp* stamp = [stamps lastObject];
+  self.stampImage = stamp.user.stampImage;
+  NSString* userName = stamp.user.displayName;
+  CGSize stringSize = [userName sizeWithFont:[UIFont fontWithName:kUserNameFontString size:kSubstringFontSize]
+                                     forWidth:kSubstringMaxWidth
+                                lineBreakMode:UILineBreakModeTailTruncation];
+  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 16, 57, stringSize.width, stringSize.height);
+  userNameLabel_.text = userName;
+  topUserImageView_.image = stamp.user.mediumProfileImage;
 
-    stringSize = [comment sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
-                              forWidth:kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 14
-                         lineBreakMode:UILineBreakModeTailTruncation];
-    commentLabel_.text = comment;
-    commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3, 57, stringSize.width, stringSize.height);
+  NSString* comment = stamp.blurb;
+  if ([comment length] > 0)
+    comment = [NSString stringWithFormat:@"\u201c%@\u201d", comment];
 
-    self.numComments = [stamp.numComments unsignedIntegerValue];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    for (Stamp* s in stamps) {
-      [[NSNotificationCenter defaultCenter] addObserver:self
-                                               selector:@selector(stampChanged:)
-                                                   name:kStampDidChangeNotification
-                                                 object:s];
-    }
-    [self setNeedsDisplay];
+  stringSize = [comment sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
+                            forWidth:kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 14
+                       lineBreakMode:UILineBreakModeTailTruncation];
+  commentLabel_.text = comment;
+  commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3, 57, stringSize.width, stringSize.height);
+
+  self.numComments = [stamp.numComments unsignedIntegerValue];
+
+  self.hidePhotos = NO;
+  
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  for (Stamp* s in stamps) {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(stampChanged:)
+                                                 name:kStampDidChangeNotification
+                                               object:s];
   }
+}
+
+- (void)setHidePhotos:(BOOL)hidePhotos {
+  hidePhotos_ = hidePhotos;
+  if (hidePhotos) {
+    topUserImageView_.hidden = YES;
+    middleUserImageView_.hidden = YES;
+    bottomUserImageView_.hidden = YES;
+    return;
+  }
+  
+  NSUInteger i = 0;
+  Stamp* stamp = nil;
+  if (stamps_.count == 1) {
+    bottomUserImageView_.hidden = YES;
+    middleUserImageView_.hidden = YES;
+  }
+  if (stamps_.count > 1) {
+    bottomUserImageView_.hidden = stamps_.count == 2;
+    i = stamps_.count - 2;
+    stamp = [stamps_ objectAtIndex:i];
+    middleUserImageView_.hidden = NO;
+    middleUserImageView_.image = stamp.user.mediumProfileImage;
+    middleUserImageView_.transform = [self transformForUserImageAtIndex:i];
+  }
+  if (stamps_.count > 2) {
+    i = stamps_.count - 3;
+    stamp = [stamps_ objectAtIndex:i];
+    bottomUserImageView_.hidden = NO;
+    bottomUserImageView_.image = stamp.user.mediumProfileImage;
+    bottomUserImageView_.transform = [self transformForUserImageAtIndex:i];
+  }
+  stamp = [stamps_ lastObject];
+  topUserImageView_.image = stamp.user.mediumProfileImage;
+  topUserImageView_.hidden = NO;
 }
 
 - (void)stampChanged:(NSNotification*)notification {
@@ -347,11 +367,64 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 
 @end
 
+
+@interface PageDotsView : UIView
+@property (nonatomic, assign) NSUInteger numDots;
+@property (nonatomic, assign) NSUInteger selectedPage;
+@property (nonatomic, assign) BOOL enabled;
+@end
+
+@implementation PageDotsView
+
+@synthesize numDots = numDots_;
+@synthesize selectedPage = selectedPage_;
+@synthesize enabled = enabled_;
+
+- (id)initWithFrame:(CGRect)frame {
+  self = [super initWithFrame:frame];
+  if (self) {
+    self.backgroundColor = [UIColor clearColor];
+  }
+  return self;
+}
+
+- (void)drawRect:(CGRect)rect {
+  if (numDots_ == 0)
+    return;
+
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+  CGRect dotFrame = CGRectMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds), 3, 3);
+  NSInteger n = -1;
+  CGColorRef selectedColor = [UIColor colorWithWhite:0.35 alpha:1.0].CGColor;
+  CGColorRef defaultColor = [UIColor colorWithWhite:0.75 alpha:1.0].CGColor;
+  for (NSUInteger i = 0; i < numDots_; ++i) {
+    NSInteger offset = i > 0 ? 6 * (-1 * n) : 0;
+    offset += (numDots_ % 2) == 0 ? 3 : 0;
+    NSInteger pageNum = 1;
+    if (numDots_ == 2) {
+      pageNum = offset < 0 ? 1 : 2;
+    } else if (numDots_ == 3) {
+      pageNum = offset > 0 ? 3 : offset == 0 ? 2 : 1;
+    }
+    if (enabled_ && pageNum == selectedPage_) {
+      CGContextSetFillColorWithColor(ctx, selectedColor);
+    } else {
+      CGContextSetFillColorWithColor(ctx, defaultColor);
+    }
+    CGContextFillEllipseInRect(ctx, CGRectOffset(dotFrame, offset, 0));
+    n *= -1;
+  }
+}
+
+@end
+
+
 @interface InboxTableViewCell ()
 - (void)expandStack;
 - (void)collapseStack;
 - (void)collapseButtonTapped:(id)sender;
 - (void)inboxTableDidScroll:(NSNotification*)notification;
+- (void)userImageTapped:(id)sender;
 @end
 
 @implementation InboxTableViewCell
@@ -386,6 +459,19 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
                              action:@selector(collapseButtonTapped:)
                    forControlEvents:UIControlEventTouchUpInside];
     [self.contentView addSubview:stackCollapseButton_];
+    userImageScrollView_ = [[UIScrollView alloc] initWithFrame:CGRectMake(60, 0, 249, 63)];
+    userImageScrollView_.pagingEnabled = YES;
+    userImageScrollView_.backgroundColor = [UIColor clearColor];
+    userImageScrollView_.hidden = YES;
+    userImageScrollView_.delegate = self;
+    userImageScrollView_.showsHorizontalScrollIndicator = NO;
+    [self.contentView addSubview:userImageScrollView_];
+    [userImageScrollView_ release];
+    
+    pageDotsView_ = [[PageDotsView alloc] initWithFrame:CGRectMake(22, 61, 20, 6)];
+    pageDotsView_.numDots = 1;
+    [self.contentView addSubview:pageDotsView_];
+    [pageDotsView_ release];
   }
   return self;
 }
@@ -393,6 +479,7 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.entityObject = nil;
+  userImageScrollView_.delegate = nil;
   [super dealloc];
 }
 
@@ -405,30 +492,40 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
   if (entityObject != entityObject_) {
     [entityObject_ release];
     entityObject_ = [entityObject retain];
-    if (entityObject) {
-      customView_.title = entityObject.title;
-      customView_.typeImage = entityObject.categoryImage;
-      NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-      customView_.stamps =
-          [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-      [[NSNotificationCenter defaultCenter] removeObserver:self];
-      if (customView_.stamps.count > 1) {
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(inboxTableDidScroll:)
-                                                     name:kInboxTableDidScrollNotification
-                                                   object:nil];
-      }
+  }
+
+  if (entityObject) {
+    [self collapseStack];
+    customView_.title = entityObject.title;
+    customView_.typeImage = entityObject.categoryImage;
+    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+    customView_.stamps =
+        [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    if (customView_.stamps.count > 1) {
+      [[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(inboxTableDidScroll:)
+                                                   name:kInboxTableDidScrollNotification
+                                                 object:nil];
+      pageDotsView_.numDots = MIN(3, ceil(customView_.stamps.count / 5.0));
+    } else {
+      pageDotsView_.numDots = 0;
     }
+    [pageDotsView_ setNeedsDisplay];
+    [self setNeedsDisplay];
   }
 }
 
 - (void)inboxTableDidScroll:(NSNotification*)notification {
-  [self collapseStack];
+  [self collapseButtonTapped:nil];
 }
 
 #pragma mark - Touch Events.
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (stackExpanded_)
+    return;
+  
   UITouch* touch = [touches anyObject];
   if (customView_.stamps.count > 1 &&
       CGRectContainsPoint(CGRectMake(0, 0, 63, 63), [touch locationInView:customView_])) {
@@ -438,20 +535,29 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (stackExpanded_)
+    return;
+
   [super touchesCancelled:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
   UITouch* touch = [touches anyObject];
+  if (stackExpanded_)
+    return;
+  
   if (customView_.stamps.count > 1 &&
       CGRectContainsPoint(CGRectMake(0, 0, 63, 63), [touch locationInView:customView_])) {
     [self expandStack];
-    return;  // Eat the touch event.
+    return;
   }
   [super touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+  if (stackExpanded_)
+    return;
+
   [super touchesMoved:touches withEvent:event];
 }
 
@@ -463,30 +569,48 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
   if (stackExpanded_ == NO)
     return;
 
-  [UIView animateWithDuration:0.25 animations:^{
+  userImageScrollView_.contentOffset = CGPointZero;
+  userImageScrollView_.hidden = YES;
+  NSUInteger i = 0;
+  for (UIView* view in userImageScrollView_.subviews) {
+    if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
+      continue;
+    
+    [self.contentView addSubview:view];
+    view.transform = CGAffineTransformTranslate(view.transform, 60, 0);
+    ++i;
+  }
+  NSUInteger stampsCount = [entityObject_.stamps count];
+  [UIView animateWithDuration:0.25
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
     customView_.transform = CGAffineTransformIdentity;
     stacksBackgroundView_.alpha = 0;
     stackCollapseButton_.alpha = 0;
-    NSUInteger stampsCount = [entityObject_.stamps count];
-    NSUInteger i = stampsCount - 1;
+    pageDotsView_.transform = CGAffineTransformMakeTranslation(50, 0);
+    pageDotsView_.transform = CGAffineTransformIdentity;
+
+    NSUInteger i = 0;
     for (UIView* view in self.contentView.subviews) {
-      if (![view isMemberOfClass:[UIImageView class]])
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
         continue;
-      if (i > 0 && i < 3) {
-        CGAffineTransform transform = CGAffineTransformRotate(
-            CGAffineTransformMakeTranslation(0, 3 * i), kImageRotations[(i + 1) % 4]);
-        view.transform = transform;
-      } else {
-        view.transform = CGAffineTransformIdentity;
-      }
-      --i;
+      
+      view.transform = [customView_ transformForUserImageAtIndex:i];
+      if (stampsCount > 3 && (stampsCount - 1 - i) > 2)
+        view.alpha = 0.0;
+
+      ++i;
     }
   } completion:^(BOOL finished) {
     customView_.hidePhotos = NO;
+    pageDotsView_.enabled = NO;
+    [pageDotsView_ setNeedsDisplay];
+
     self.selectionStyle = UITableViewCellSelectionStyleBlue;
     stackExpanded_ = NO;
     for (UIView* view in self.contentView.subviews) {
-      if (![view isMemberOfClass:[UIImageView class]])
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
         continue;
       [view removeFromSuperview];
     }
@@ -500,77 +624,103 @@ static const CGFloat kImageRotations[] = {0.08, -0.09, 0.09, -0.08};
   if (stackExpanded_)
     return;
 
-  [self setSelected:NO animated:NO];
   stackExpanded_ = YES;
+  userImageScrollView_.hidden = NO;
   self.selectionStyle = UITableViewCellSelectionStyleNone;
   CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin,
-                                   kCellTopPadding,
+                                   kCellTopPadding - 1,
                                    kUserImageSize,
                                    kUserImageSize);
-  NSUInteger stampsCount = [entityObject_.stamps count];
+  NSUInteger stampsCount = [customView_.stamps count];
   Stamp* s = nil;
-  for (NSUInteger i = stampsCount; i > 0; --i) {
-    s = [customView_.stamps objectAtIndex:i - 1];
-    UIImageView* userImageView =
-        [[UIImageView alloc] initWithFrame:CGRectInset(userImgFrame, -2, -2)];
-    userImageView.contentMode = UIViewContentModeCenter;
-    userImageView.layer.shadowOffset = CGSizeZero;
-    userImageView.layer.shadowOpacity = 0.5;
-    userImageView.layer.shadowRadius = 1.0;
-    CGFloat width = kUserImageSize + 4;
-    CGFloat height = kUserImageSize + 4;
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, height), NO, 0.0);
-    CGContextRef imgContext = UIGraphicsGetCurrentContext();
-    CGContextTranslateCTM(imgContext, 0, height);
-    CGContextScaleCTM(imgContext, 1.0, -1.0);
-    CGRect imgFrame = CGRectMake(0, 0, width, height);
-    CGContextSaveGState(imgContext);
-    UIBezierPath* clearBorderPath = [UIBezierPath bezierPathWithRect:imgFrame];
-    CGContextSetFillColorWithColor(imgContext, [UIColor clearColor].CGColor);
-    CGContextAddPath(imgContext, clearBorderPath.CGPath);
-    CGContextClosePath(imgContext);
-    CGContextFillPath(imgContext);
-    CGContextRestoreGState(imgContext);
-    CGContextSaveGState(imgContext);
-    UIBezierPath* path = [UIBezierPath bezierPathWithRect:CGRectInset(imgFrame, 2, 2)];
-    CGContextSetFillColorWithColor(imgContext, [UIColor whiteColor].CGColor);
-    CGContextAddPath(imgContext, path.CGPath);
-    CGContextClosePath(imgContext);
-    CGContextFillPath(imgContext);
-    CGContextRestoreGState(imgContext);
-    CGContextDrawImage(imgContext, CGRectInset(imgFrame, 4, 4), s.user.profileImage.CGImage);
-    UIImage* userImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    userImageView.image = userImage;
-    s = [customView_.stamps objectAtIndex:i - 1];
-    if (i > 1 && i < 4) {
-      CGAffineTransform transform = CGAffineTransformRotate(
-          CGAffineTransformMakeTranslation(0, 3 * (i - 1)), kImageRotations[i % 4]);
-      userImageView.transform = transform;
-    }
-    [self.contentView addSubview:userImageView];
-    [userImageView release];
+  for (NSUInteger i = 0; i < stampsCount; ++i) {
+    s = [customView_.stamps objectAtIndex:i];
+    UIButton* userImageButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    userImageButton.frame = CGRectInset(userImgFrame, -2, -2);
+
+    userImageButton.contentMode = UIViewContentModeCenter;
+    userImageButton.layer.shadowOffset = CGSizeZero;
+    userImageButton.layer.shadowOpacity = 0.4;
+    userImageButton.layer.shadowRadius = 1.0;
+    userImageButton.layer.shadowPath = [UIBezierPath bezierPathWithRect:
+        CGRectMake(2, 2, CGRectGetWidth(userImgFrame), CGRectGetHeight(userImgFrame))].CGPath;
+    
+    [userImageButton setImage:s.user.mediumProfileImage forState:UIControlStateNormal];
+    [userImageButton addTarget:self
+                        action:@selector(userImageTapped:)
+              forControlEvents:UIControlEventTouchUpInside];
+    userImageButton.transform = [customView_ transformForUserImageAtIndex:i];
+    userImageButton.tag = i;
+    [self.contentView addSubview:userImageButton];
   }
   customView_.hidePhotos = YES;
+  [customView_ setNeedsDisplay];
   [UIView animateWithDuration:0.25 animations:^{
     CGAffineTransform rightTransform =
       CGAffineTransformMakeTranslation(CGRectGetWidth(self.contentView.frame), 0);
     customView_.transform = rightTransform;
     stacksBackgroundView_.alpha = 1.0;
     stackCollapseButton_.alpha = 1.0;
+    pageDotsView_.transform = CGAffineTransformMakeTranslation(151, 0);
     
-    NSUInteger i = stampsCount - 1;
+    NSUInteger i = 0;
     for (UIView* view in self.contentView.subviews) {
-      if (![view isMemberOfClass:[UIImageView class]])
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
         continue;
       
-      view.transform = CGAffineTransformMakeTranslation(55 + (48 * i), 0);
-      --i;
+      NSInteger xPos = 55 + (48 * ((stampsCount - 1) - i));
+      view.transform = CGAffineTransformMakeTranslation(xPos, 0);
+      if (stampsCount > 5 && (stampsCount - 1 - i) > 4)
+        view.alpha = 0.0;
+
+      ++i;
     }
   } completion:^(BOOL finished) {
+    NSUInteger i = 0;
+    NSUInteger numPages = ceil(stampsCount / 5.0);
+    NSUInteger pageNum = numPages;
+    for (UIView* view in self.contentView.subviews) {
+      if (![view isMemberOfClass:[UIButton class]] || view == stackCollapseButton_)
+        continue;
+
+      [userImageScrollView_ addSubview:view];
+      NSUInteger count = stampsCount - i;
+      if (count != stampsCount && count % 5 == 0)
+        --pageNum;
+      
+      view.transform = CGAffineTransformTranslate(view.transform, -60 + (9 * ((NSInteger)pageNum - 1)), 0);
+      if (stampsCount > 5 && count > 5)
+        view.alpha = 1.0;
+
+      ++i;
+    }
+    pageDotsView_.enabled = YES;
+    pageDotsView_.selectedPage = 1;
+    [pageDotsView_ setNeedsDisplay];
+    CGRect scrollBounds = userImageScrollView_.bounds;
+    userImageScrollView_.contentSize =
+        CGSizeMake(numPages * CGRectGetWidth(scrollBounds), CGRectGetHeight(scrollBounds));
     [self.contentView setNeedsDisplay];
   }];
 }
 
+- (void)userImageTapped:(id)sender {
+  UIButton* button = sender;
+  Stamp* stamp = [customView_.stamps objectAtIndex:button.tag];
 
+  StampDetailViewController* detailViewController =
+      [[StampDetailViewController alloc] initWithStamp:stamp];
+
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
+}
+
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
+  pageDotsView_.selectedPage = (scrollView.contentOffset.x / CGRectGetWidth(scrollView.bounds)) + 1;
+  [pageDotsView_ setNeedsDisplay];
+}
 @end

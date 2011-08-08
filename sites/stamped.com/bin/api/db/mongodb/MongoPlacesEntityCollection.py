@@ -5,9 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, utils
 
 from AMongoCollection import AMongoCollection
+from utils import OrderedDict
 from api.APlacesEntityDB import APlacesEntityDB
 from api.Entity import Entity
 
@@ -26,13 +27,16 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
             'created' : basestring, 
             'modified': basestring, 
         }, 
+        # TODO: at some point, we're going to switch to using the 'spherical' search 
+        # model of MongoDB, in which case, the order of lng/lat will need to be precise, 
+        # and a normal python dict won't be enough to enforce this constraing.
+        'coordinates': {
+            'lng' : float, 
+            'lat' : float, 
+        }, 
         'details': {
             'place': {
                 'address': basestring, 
-                'coordinates': {
-                    'lng': float, 
-                    'lat': float, 
-                }, 
                 'types': list, 
                 'vicinity': basestring, 
                 'neighborhood': basestring, 
@@ -98,6 +102,7 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
                 'uurl' : basestring, 
             }, 
             'nymag' : { }, 
+            'sfmag' : { }, 
         }
     }
     

@@ -18,23 +18,25 @@ class AEntitySource(Greenlet, IASyncProducer):
         Simple asynchronous entity producer
     """
     
-    def __init__(self, name, types=None, maxQueueSize=None):
+    def __init__(self, name, types, maxQueueSize=None):
         Greenlet.__init__(self)
         
         self._name = name
         self._id = EntitySources.getSourceID(name)
-        if types is None:
-            types = set()
         
-        self._types = types
         self._output = Queue(maxQueueSize)
         self._started = False
         self._maxQueueSize = maxQueueSize
         
+        self.subcategories = types
+        self.categories = set()
+        
         # validate the types
         for t in types:
             if not t in Entity.subcategories:
-                raise AttributeError("Source category '%s' not supported" % t)
+                raise AttributeError("Source subcategory '%s' not supported" % t)
+            
+            self.categories.add(Entity.subcategories[t])
     
     def get(self, block=True, timeout=None):
         return self._output.get(block, timeout)
@@ -66,9 +68,6 @@ class AEntitySource(Greenlet, IASyncProducer):
     def name(self): return self._name
     
     @property
-    def types(self): return self._types
-    
-    @property
     def maxQueueSize(self): return self._maxQueueSize
     
     @abstract
@@ -80,7 +79,7 @@ class AEntitySource(Greenlet, IASyncProducer):
 
 class AExternalEntitySource(AEntitySource):
     
-    def __init__(self, name, types=None, maxQueueSize=None):
+    def __init__(self, name, types, maxQueueSize=None):
         AEntitySource.__init__(self, name, types, maxQueueSize)
 
 class AExternalSiteEntitySource(AExternalEntitySource):
@@ -88,7 +87,7 @@ class AExternalSiteEntitySource(AExternalEntitySource):
         An external site which may be crawled as a source of entity data.
     """
     
-    def __init__(self, name, types=None, maxQueueSize=None):
+    def __init__(self, name, types, maxQueueSize=None):
         AExternalEntitySource.__init__(self, name, types, maxQueueSize)
     
     def importAll(self, sink, limit=None):
@@ -118,7 +117,7 @@ class AExternalServiceEntitySource(AExternalEntitySource):
         An external service which may be queried as a source of entity data.
     """
     
-    def __init__(self, name, types=None, maxQueueSize=None):
+    def __init__(self, name, types, maxQueueSize=None):
         AExternalEntitySource.__init__(self, name, types, maxQueueSize)
     
 class AExternalDumpEntitySource(AExternalEntitySource):
@@ -127,7 +126,7 @@ class AExternalDumpEntitySource(AExternalEntitySource):
         (e.g., compressed bulk datafile).
     """
     
-    def __init__(self, name, types=None, maxQueueSize=None):
+    def __init__(self, name, types, maxQueueSize=None):
         AExternalEntitySource.__init__(self, name, types, maxQueueSize)
 
 class AUserSource(AEntitySource):
@@ -135,6 +134,6 @@ class AUserSource(AEntitySource):
         User-entered / manual data source.
     """
     
-    def __init__(self, name, types=None, maxQueueSize=None):
+    def __init__(self, name, types, maxQueueSize=None):
         AEntitySource.__init__(self, name, types, maxQueueSize)
 

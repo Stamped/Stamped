@@ -17,13 +17,13 @@ from MongoCollectionProxy import MongoCollectionProxy
 class MongoDBConfig(Singleton):
     def __init__(self):
         self.config = AttributeDict()
-        self.init()
-        self.connection = self._connection()
+        self._connection = None
         
         def disconnect():
             ### TODO: Add disconnect from MongoDB
-            self.connection.disconnect()
-            pass
+            if self._connection is not None:
+                self._connection.disconnect()
+                self._connection = None
         
         atexit.register(disconnect)
     
@@ -70,7 +70,7 @@ class MongoDBConfig(Singleton):
                    "port" : 30000, 
                }
             })
-
+    
     @property
     def host(self):
         return str(self.config.mongodb.host)
@@ -86,58 +86,46 @@ class MongoDBConfig(Singleton):
         else:
             return 'root'
     
-    def _connection(self):
+    @property
+    def connection(self):
+        if self._connection:
+            return self._connection
+        
         # TODO: have a more consistent approach to handling AutoReconnect!
-        utils.log("(%s) Creating MongoDB connection!" % self)
+        utils.log("[%s] Creating MongoDB connection!" % self)
 
         delay = 1
         max_delay = 16
             
         while True:            
             try:
-                utils.log("(%s) connecting to %s:%d" % (self, self.host, self.port))
-                return pymongo.Connection(self.host, self.port, slave_okay=True)
-                #, network_timeout=5)
+                utils.log("[%s] connecting to %s:%d" % (self, self.host, self.port))
+                self._connection = pymongo.Connection(self.host, self.port, slave_okay=True)
+                return self._connection
             except AutoReconnect as e:
                 if delay > max_delay:
                     raise
                 
-                utils.log("(%s) retrying to connect to host: %s" % (self, str(e)))
+                utils.log("[%s] retrying to connect to host: %s" % (self, str(e)))
                 utils.log("delay: %s" % delay)
                 time.sleep(delay)
                 delay *= 2
-
+    
+    def __str__(self):
+        return self.__class__.__name__
 
 class AMongoCollection(object):
-    DB = 'stamped_test'
     
     def __init__(self, collection):
-        self._initConfig()
-        
         self._desc = self.__class__.__name__
-        self._db = self.DB
-        self._collection = MongoCollectionProxy(self._connection, self._db, collection)
+        
+        self._init_collection('stamped', collection)
     
-    def _initConfig(self):
+    def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
-        if not cfg.isValid:
-            cfg.init()
-        assert cfg.isValid
+        self._collection = MongoCollectionProxy(self, cfg.connection, db, collection)
         
-        self._config = cfg.config
-        self._user = cfg.user
-        self._host = cfg.host
-        self._port = cfg.port
-        
-        self._connection = cfg.connection
-        
-        utils.log("Init %s -- %s:%d" % (
-                                self.__class__.__name__, 
-                                self._config.mongodb.host, 
-                                self._config.mongodb.port))
-    
-    def _endRequest(self):
-        self._connection.end_request()
+        utils.log("[%s] connected to mongodb at %s:%d" % (self, cfg.host, cfg.port))
     
     def _validateUpdate(self, result):
         try:
@@ -200,7 +188,6 @@ class AMongoCollection(object):
                 ### TODO: Make this more robust!
                 dest[k] = v
                 return dest
-                
             elif k in schema:
                 schemaVal = schema[k]
                 
@@ -420,5 +407,6 @@ class AMongoCollection(object):
                 # Pull in overflow document
                 document = self._collection.find({'_id': document['overflow'][-1]})
             ids += document['ref_ids'][limit:]
+        
         return ids
 

@@ -166,7 +166,17 @@ class ASchemaBasedAttributeDict(object):
         return str(self._dict)
     
     def __contains__(self, item):
-        return item in self._data
+        def _contains(_item, data):
+            if _item in data:
+                return True
+            
+            for k, v in data.iteritems():
+                if isinstance(v, dict) and _contains(_item, v):
+                    return True
+            
+            return False
+        
+        return _contains(item, self._data)
     
     def __getattr__(self, name):
         if name == '_data' or name == '_schema':
@@ -175,13 +185,15 @@ class ASchemaBasedAttributeDict(object):
         def _get(dic):
             if name in dic:
                 return dic[name]
-            else:
-                for k, v in dic.iteritems():
-                    if isinstance(v, dict):
-                        retVal = _get(v)
-                        if retVal:
-                            return retVal
-            return None
+            
+            for k, v in dic.iteritems():
+                if isinstance(v, dict):
+                    try:
+                        return _get(v)
+                    except KeyError:
+                        pass
+            
+            raise KeyError(name)
         
         return _get(self._data)
     

@@ -23,7 +23,7 @@ class AEntityProxy(AEntitySink, AEntitySource):
         else:
             name = "%s(%s)" % (self.__class__.__name__, source.name)
             maxQueueSize = source.maxQueueSize
-            types = source.types
+            types = source.subcategories
         
         AEntitySink.__init__(self, name, maxQueueSize)
         AEntitySource.__init__(self, name, types, maxQueueSize)

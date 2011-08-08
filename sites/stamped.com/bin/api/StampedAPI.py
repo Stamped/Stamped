@@ -885,7 +885,7 @@ class StampedAPI(AStampedAPI):
         
         try:
             if 'place' in entities[0]:
-                self._placesEntityDB.addEntity(entity)
+                self._placesEntityDB.addEntities(entities)
             else:
                 self._entityDB.addEntities(entities)
         except Exception as e:
