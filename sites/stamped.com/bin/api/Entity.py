@@ -181,8 +181,9 @@ class Entity(ASchemaBasedAttributeDict):
                     'isan' : basestring, 
                 }, 
             }, 
-            'nymag' : { }, 
-        }
+            'nymag' : { },
+            'sfmag' : { }, 
+        }  
     }
     
     @property
