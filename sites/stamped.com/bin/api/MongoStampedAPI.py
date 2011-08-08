@@ -12,6 +12,7 @@ from StampedAPI import StampedAPI
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoPlacesEntityCollection import MongoPlacesEntityCollection
 from db.mongodb.MongoUserCollection import MongoUserCollection
 from db.mongodb.MongoStampCollection import MongoStampCollection
 from db.mongodb.MongoCommentCollection import MongoCommentCollection
@@ -28,15 +29,16 @@ class MongoStampedAPI(StampedAPI):
     def __init__(self):
         StampedAPI.__init__(self, "MongoStampedAPI")
         
-        #self._accountDB    = MongoAccountCollection()
-        self._entityDB     = MongoEntityCollection()
-        #self._userDB       = MongoUserCollection()
-        #self._stampDB      = MongoStampCollection()
-        #self._commentDB    = MongoCommentCollection()
-        #self._favoriteDB   = MongoFavoriteCollection()
-        #self._collectionDB = MongoCollectionCollection()
-        #self._friendshipDB = MongoFriendshipCollection()
-        #self._activityDB   = MongoActivityCollection()
+        #self._accountDB      = MongoAccountCollection()
+        self._entityDB       = MongoEntityCollection()
+        self._placesEntityDB = MongoPlacesEntityCollection()
+        #self._userDB         = MongoUserCollection()
+        #self._stampDB        = MongoStampCollection()
+        #self._commentDB      = MongoCommentCollection()
+        #self._favoriteDB     = MongoFavoriteCollection()
+        #self._collectionDB   = MongoCollectionCollection()
+        #self._friendshipDB   = MongoFriendshipCollection()
+        #self._activityDB     = MongoActivityCollection()
         
         #self._validate()
     

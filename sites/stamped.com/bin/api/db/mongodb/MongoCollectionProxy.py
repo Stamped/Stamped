@@ -12,7 +12,6 @@ from errors import Fail
 from datetime import datetime
 from pymongo.errors import AutoReconnect
 
-
 class MongoCollectionProxy(object):
     def __init__(self, connection, database, collection):
         try:
@@ -52,7 +51,7 @@ class MongoCollectionProxy(object):
             
     def insert(self, docs, manipulate=True, safe=False, check_keys=True, **kwargs):
         max_batch_size = 64
-        max_retries = 5
+        max_retries = 7
         
         # TODO: have a more consistent approach to handling AutoReconnect!
         def _insert(objects, level):
@@ -60,7 +59,7 @@ class MongoCollectionProxy(object):
             count = len(objects)
             
             if count <= 0:
-                raise Fail("(%s) invalid docs" % objects)
+                return
             
             if count > max_batch_size:
                 num = int(math.ceil(float(count) / float(max_batch_size)))
@@ -167,5 +166,9 @@ class MongoCollectionProxy(object):
                     raise
                 utils.log("%s) retrying delete" % (self))
                 time.sleep(1)
-
+        
         raise Fail("(%s) invalid input" % (self))
+    
+    def __str__(self):
+        return self.__class__.__name__
+

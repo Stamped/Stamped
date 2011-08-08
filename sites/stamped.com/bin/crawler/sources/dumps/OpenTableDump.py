@@ -87,22 +87,16 @@ class OpenTableDump(AExternalDumpEntitySource):
         
         # don't make external calls to opentable in test mode
         if not Globals.options.test:
-            result = OpenTableParser.parseEntity(entity)
-            if result is None:
-                return
+            #result = OpenTableParser.parseEntity(entity)
+            #if result is None:
+            #    return
+            pass
         
         if entity is not None:
             #print entity.title
             #from pprint import pprint
             #pprint(entity.getDataAsDict())
             self._output.put(entity)
-
-"""
-dump = OpenTableDump()
-entities = dump.importAll(None)
-for e in entities:
-    print str(e._data)
-"""
 
 import EntitySources
 EntitySources.registerSource('opentable', OpenTableDump)

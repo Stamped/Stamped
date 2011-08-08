@@ -13,6 +13,7 @@ from AStampedAPI import AStampedAPI
 
 from AAccountDB import AAccountDB
 from AEntityDB import AEntityDB
+from APlacesEntityDB import APlacesEntityDB
 from AUserDB import AUserDB
 from AStampDB import AStampDB
 from ACommentDB import ACommentDB
@@ -865,7 +866,10 @@ class StampedAPI(AStampedAPI):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))
             try:
-                self._entityDB.addEntity(entity)
+                if 'place' in entity:
+                    self._placesEntityDB.addEntity(entity)
+                else:
+                    self._entityDB.addEntity(entity)
             except Exception as e:
                 utils.log("[%s] error adding 1 entities:" % (self, ))
                 utils.printException()
@@ -873,9 +877,17 @@ class StampedAPI(AStampedAPI):
     
     def _addEntities(self, entities):
         entities = filter(lambda e: e is not None, entities)
-        utils.log("[%s] adding %d entities" % (self, utils.count(entities)))
+        numEntities = utils.count(entities)
+        if numEntities <= 0:
+            return
+        
+        utils.log("[%s] adding %d entities" % (self, numEntities))
+        
         try:
-            self._entityDB.addEntities(entities)
+            if 'place' in entities[0]:
+                self._placesEntityDB.addEntity(entity)
+            else:
+                self._entityDB.addEntities(entities)
         except Exception as e:
             utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
             utils.printException()

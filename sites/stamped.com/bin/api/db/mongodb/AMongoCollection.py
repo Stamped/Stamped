@@ -117,7 +117,6 @@ class AMongoCollection(object):
         self._desc = self.__class__.__name__
         self._db = self.DB
         self._collection = MongoCollectionProxy(self._connection, self._db, collection)
-
     
     def _initConfig(self):
         cfg = MongoDBConfig.getInstance()
@@ -279,20 +278,14 @@ class AMongoCollection(object):
     ### GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document, objId='id'):
-        try:
-            obj = self._objToMongo(document, objId)
-            ret = self._collection.insert_one(obj, safe=True)
-            return self._getStringFromObjectId(ret)
-        except:
-            raise Fail("(%s) Unable to add document" % self) 
+        obj = self._objToMongo(document, objId)
+        ret = self._collection.insert_one(obj, safe=True)
+        return self._getStringFromObjectId(ret)
     
     def _addDocuments(self, documents, objId='id'):
-        try:
-            objs = self._objsToMongo(documents, objId)
-            self._collection.insert_one(obj, safe=True)
-            return True
-        except:
-            raise Fail("(%s) Unable to add documents" % self) 
+        objs = self._objsToMongo(documents, objId)
+        self._collection.insert(objs, safe=True)
+        return True
     
     def _getDocumentFromId(self, documentId, objId='id'):
         doc = self._collection.find_one(self._getObjectIdFromString(documentId))

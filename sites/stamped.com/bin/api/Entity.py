@@ -39,8 +39,8 @@ class Entity(ASchemaBasedAttributeDict):
             'place': {
                 'address': basestring, 
                 'coordinates': {
+                    'lng': float, 
                     'lat': float, 
-                    'lng': float
                 }, 
                 'types': list, 
                 'vicinity': basestring, 
@@ -185,6 +185,9 @@ class Entity(ASchemaBasedAttributeDict):
             'zagat' : {
                 'zurl' : basestring, 
             }, 
+            'urbanspoon' : {
+                'uurl' : basestring, 
+            }, 
             'nymag' : { }, 
         }
     }
@@ -195,28 +198,31 @@ class Entity(ASchemaBasedAttributeDict):
         
         if 'entity_id' in self:
             valid &= isinstance(self.entity_id, basestring) 
-            utils.logs.debug('isValid: %s (entity.entity_id)' % valid)
+            #utils.logs.debug('isValid: %s (entity.entity_id)' % valid)
         
         valid &= 'title' in self and isinstance(self.title, basestring)
         self.title = self.title.strip()
-        utils.logs.debug('isValid: %s (entity.title)' % valid)
+        #utils.logs.debug('isValid: %s (entity.title)' % valid)
         
         valid &= 'subcategory' in self and isinstance(self.subcategory, basestring)
-        utils.logs.debug('isValid: %s (entity.category)' % valid)
+        #utils.logs.debug('isValid: %s (entity.category)' % valid)
         valid &= self.subcategory in subcategories
-        utils.logs.debug('isValid: %s (entity.subcategory)' % valid)
+        #utils.logs.debug('isValid: %s (entity.subcategory)' % valid)
+        
+        if not 'category' in self:
+            self.category = subcategories[self.subcategory]
         
         valid &= 'category' in self and isinstance(self.category, basestring)
-        utils.logs.debug('isValid: %s (entity.category)' % valid)
+        #utils.logs.debug('isValid: %s (entity.category)' % valid)
         valid &= self.category in categories 
-        utils.logs.debug('isValid: %s (entity.category)' % valid)
+        #utils.logs.debug('isValid: %s (entity.category)' % valid)
         valid &= self.category == subcategories[self.subcategory]
-        utils.logs.debug('isValid: %s (entity.category)' % valid)
+        #utils.logs.debug('isValid: %s (entity.category)' % valid)
         
         if not 'subtitle' in self:
             self.subtitle = self.category
         valid &= 'subtitle' in self and isinstance(self.subtitle, basestring)
-        utils.logs.debug('isValid: %s (entity.subtitle)' % valid)
+        #utils.logs.debug('isValid: %s (entity.subtitle)' % valid)
         
 #         if 'website' in self:
 #             valid &= isinstance(self.website, basestring)
