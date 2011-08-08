@@ -24,7 +24,6 @@ class MongoCollectionProxy(object):
             raise
     
     def find(self, spec=None, **kwargs):
-        # TODO: have a more consistent approach to handling AutoReconnect!
         num_retries = 0
         max_retries = 5
         
@@ -35,26 +34,38 @@ class MongoCollectionProxy(object):
             except AutoReconnect as e:
                 num_retries += 1
                 if num_retries > max_retries:
-                    msg = "%s) unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
+                    msg = "[%s] unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
                     utils.log(msg)
                     raise
-                utils.log("%s) retrying query" % (self))
-                time.sleep(1)
                 
-        raise Fail("(%s) invalid input" % (self))
+                utils.log("[%s] retrying query" % (self, ))
+                time.sleep(1)
     
     def find_one(self, spec_or_id=None, **kwargs):
         if spec_or_id is not None and not isinstance(spec_or_id, dict):
-            spec_or_id = {"_id": spec_or_id}
-        for result in self.find(spec_or_id, **kwargs):
-            return result
-        return None
-            
+            spec_or_id = { "_id": spec_or_id }
+        
+        num_retries = 0
+        max_retries = 5
+        
+        while True:
+            try:
+                ret = self._collection.find_one(spec_or_id, **kwargs)
+                return ret
+            except AutoReconnect as e:
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "[%s] unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
+                    utils.log(msg)
+                    raise
+                
+                utils.log("[%s] retrying query" % (self, ))
+                time.sleep(1)
+    
     def insert(self, docs, manipulate=True, safe=False, check_keys=True, **kwargs):
         max_batch_size = 64
         max_retries = 7
         
-        # TODO: have a more consistent approach to handling AutoReconnect!
         def _insert(objects, level):
             ret = []
             count = len(objects)
@@ -103,13 +114,11 @@ class MongoCollectionProxy(object):
             except AutoReconnect as e:
                 num_retries += 1
                 if num_retries > max_retries:
-                    msg = "%s) unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
+                    msg = "[%s] unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
                     utils.log(msg)
                     raise
-                utils.log("%s) retrying delete" % (self))
+                utils.log("[%s] retrying delete" % (self._parent, ))
                 time.sleep(1)
-        
-        raise Fail("(%s) invalid input" % (self))
         
     def update(self, spec, document, upsert=False, manipulate=False,
                safe=False, multi=False, **kwargs):
@@ -123,14 +132,12 @@ class MongoCollectionProxy(object):
             except AutoReconnect as e:
                 num_retries += 1
                 if num_retries > max_retries:
-                    msg = "%s) unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
+                    msg = "[%s] unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
                     utils.log(msg)
                     raise
-                utils.log("%s) retrying delete" % (self))
+                utils.log("[%s] retrying delete" % (self._parent, ))
                 time.sleep(1)
-        
-        raise Fail("(%s) invalid input" % (self))
-            
+    
     def remove(self, spec_or_id=None, safe=False, **kwargs):
         num_retries = 0
         max_retries = 5
@@ -145,11 +152,9 @@ class MongoCollectionProxy(object):
                     msg = "%s) unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
                     utils.log(msg)
                     raise
-                utils.log("%s) retrying delete" % (self))
+                utils.log("%s) retrying delete" % (self._parent, ))
                 time.sleep(1)
-
-        raise Fail("(%s) invalid input" % (self))
-        
+    
     def ensure_index(self, key_or_list, deprecated_unique=None,
                      ttl=300, **kwargs):
         num_retries = 0
@@ -162,13 +167,11 @@ class MongoCollectionProxy(object):
             except AutoReconnect as e:
                 num_retries += 1
                 if num_retries > max_retries:
-                    msg = "%s) unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
+                    msg = "[%s] unable to connect to host after %d retries (%s)" % (self._parent, max_retries, str(e))
                     utils.log(msg)
                     raise
-                utils.log("%s) retrying delete" % (self))
+                utils.log("[%s] retrying delete" % (self._parent, ))
                 time.sleep(1)
-        
-        raise Fail("(%s) invalid input" % (self))
     
     def __str__(self):
         return self.__class__.__name__
