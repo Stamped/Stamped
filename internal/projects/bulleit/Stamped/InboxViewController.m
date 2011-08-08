@@ -35,8 +35,6 @@ typedef enum {
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
 - (void)stampWasCreated:(NSNotification*)notification;
-- (void)rotateSpinner;
-- (void)setIsLoading:(BOOL)loading;
 
 @property (nonatomic, copy) NSArray* filterButtons;
 @property (nonatomic, copy) NSArray* entitiesArray;
@@ -60,6 +58,7 @@ typedef enum {
 @synthesize musicFilterButton = musicFilterButton_;
 
 - (void)dealloc {
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterButtons = nil;
   self.filterView = nil;
@@ -70,13 +69,6 @@ typedef enum {
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
   [super dealloc];
-}
-
-- (void)didReceiveMemoryWarning {
-  // Releases the view if it doesn't have a superview.
-  [super didReceiveMemoryWarning];
-
-  // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -100,7 +92,7 @@ typedef enum {
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
@@ -162,8 +154,7 @@ typedef enum {
 
   if (selectedButton && !selectedButton.selected) {
     self.filteredEntitiesArray = entitiesArray_;
-    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0]
-                  withRowAnimation:UITableViewRowAnimationMiddle];
+    [self.tableView reloadData];
     return;
   } else if (!selectedButton) {
     // Initial load from datastore.
@@ -184,63 +175,8 @@ typedef enum {
   if (filterString) {
     NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"category == %@", filterString];
     self.filteredEntitiesArray = [entitiesArray_ filteredArrayUsingPredicate:filterPredicate];
-    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0]
-                  withRowAnimation:UITableViewRowAnimationMiddle];
+    [self.tableView reloadData];
   }
-}
-
-- (void)setIsLoading:(BOOL)loading {
-  if (isLoading_ == loading)
-    return;
-
-  isLoading_ = loading;
-  shouldReload_ = NO;
-
-  if (!loading) {
-    [reloadLabel_.layer removeAllAnimations];
-    reloadLabel_.text = @"Pull my finger. \ue22f";
-    reloadLabel_.layer.transform = CATransform3DIdentity;
-    [UIView animateWithDuration:0.2
-                          delay:0 
-                        options:UIViewAnimationOptionBeginFromCurrentState
-                     animations:^{
-                       self.tableView.contentInset = UIEdgeInsetsZero;
-                     }
-                     completion:nil];
-    return;
-  }
-  
-  [UIView animateWithDuration:0.2
-                        delay:0 
-                      options:UIViewAnimationOptionBeginFromCurrentState
-                   animations:^{
-                     self.tableView.contentInset = UIEdgeInsetsMake(70, 0, 0, 0);
-                   }
-                   completion:nil];
-
-  [self rotateSpinner];
-}
-
-- (void)rotateSpinner {
-  [CATransaction begin];
-  [CATransaction setValue:(id)kCFBooleanFalse forKey:kCATransactionDisableActions];
-  [CATransaction setValue:[NSNumber numberWithFloat:2.0] forKey:kCATransactionAnimationDuration];
-  
-  CABasicAnimation* animation;
-  animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-  animation.fromValue = [NSNumber numberWithFloat:0.0];
-  animation.toValue = [NSNumber numberWithFloat:M_PI * 2];
-  animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
-  animation.delegate = self;
-  [reloadLabel_.layer addAnimation:animation forKey:@"rotationAnimation"];
-  [CATransaction commit];
-}
-
-#pragma mark - CAAnimationDelegate methods.
-
-- (void)animationDidStop:(CAAnimation*)anim finished:(BOOL)flag {
-  if (isLoading_)
-    [self rotateSpinner];
 }
 
 #pragma mark - Table view data source
@@ -309,24 +245,23 @@ typedef enum {
   [detailViewController release];
 }
 
+#pragma mark - STReloadableTableView methods.
+
+- (void)userPulledToReload {
+  [self loadStampsFromNetwork];
+}
+
 #pragma mark - UIScrollView delegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   userDidScroll_ = YES;
   [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
                                                       object:scrollView];
-  if (isLoading_)
-    return;
-
-  shouldReload_ = scrollView.contentOffset.y < -65.0;
-  reloadLabel_.text = shouldReload_ ? @"\ue05a" : @"Pull my finger. \ue22f";
+  [super scrollViewDidScroll:scrollView];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
-  if (shouldReload_) {
-    [self setIsLoading:YES];
-    [self loadStampsFromNetwork];
-  }
+  [super scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
 }
 
 @end

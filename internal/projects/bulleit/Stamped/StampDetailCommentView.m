@@ -32,7 +32,7 @@
 
 - (void)initViews {
   UserImageView* userImage = [[UserImageView alloc] initWithFrame:CGRectMake(10, 8, 31, 31)];
-  userImage.image = comment_.user.profileImage;
+  userImage.imageURL = comment_.user.profileImageURL;
   [self addSubview:userImage];
   [userImage release];
   CGFloat minHeight = CGRectGetMaxY(userImage.frame) + 8;

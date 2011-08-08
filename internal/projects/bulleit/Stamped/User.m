@@ -10,11 +10,10 @@
 
 #import "Util.h"
 
-static const CGFloat kMediumUserImageSize = 41.0;
+const CGFloat kMediumUserImageSize = 41.0;
 
 @interface User ()
 - (void)generateStampImage;
-- (void)generateMediumProfileImage;
 @end
 
 @implementation User
@@ -27,8 +26,6 @@ static const CGFloat kMediumUserImageSize = 41.0;
 @dynamic website;
 @dynamic secondaryColor;
 @dynamic profileImageURL;
-@dynamic mediumProfileImage;
-@dynamic profileImage;
 @dynamic screenName;
 @dynamic stampImage;
 @dynamic stamps;
@@ -70,43 +67,10 @@ static const CGFloat kMediumUserImageSize = 41.0;
   UIGraphicsEndImageContext();
 }
 
-- (void)generateMediumProfileImage {
-  CGFloat width = kMediumUserImageSize + 4;
-  CGFloat height = kMediumUserImageSize + 4;
-  UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, height), NO, 0.0);
-  CGContextRef imgContext = UIGraphicsGetCurrentContext();
-  CGContextTranslateCTM(imgContext, 0, height);
-  CGContextScaleCTM(imgContext, 1.0, -1.0);
-  CGRect imgFrame = CGRectMake(0, 0, width, height);
-  CGContextSaveGState(imgContext);
-  UIBezierPath* clearBorderPath = [UIBezierPath bezierPathWithRect:imgFrame];
-  CGContextSetFillColorWithColor(imgContext, [UIColor clearColor].CGColor);
-  CGContextAddPath(imgContext, clearBorderPath.CGPath);
-  CGContextClosePath(imgContext);
-  CGContextFillPath(imgContext);
-  CGContextRestoreGState(imgContext);
-  CGContextSaveGState(imgContext);
-  UIBezierPath* path = [UIBezierPath bezierPathWithRect:CGRectInset(imgFrame, 2, 2)];
-  CGContextSetFillColorWithColor(imgContext, [UIColor whiteColor].CGColor);
-  CGContextAddPath(imgContext, path.CGPath);
-  CGContextClosePath(imgContext);
-  CGContextFillPath(imgContext);
-  CGContextRestoreGState(imgContext);
-  CGContextDrawImage(imgContext, CGRectInset(imgFrame, 4, 4), self.profileImage.CGImage);
-  UIImage* userImage = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  self.mediumProfileImage = userImage;
-}
-
 - (void)awakeFromFetch {
   [super awakeFromFetch];
   if (!self.stampImage)
     [self generateStampImage];
-  if (!self.profileImage) {
-    NSData* imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:self.profileImageURL]];
-    self.profileImage = [UIImage imageWithData:imageData];
-    [self generateMediumProfileImage];
-  }
 }
 
 @end

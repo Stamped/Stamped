@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+extern const CGFloat kMediumUserImageSize;
+
 @interface User : NSManagedObject
 
 @property (nonatomic, retain) NSString* bio;
@@ -20,8 +22,6 @@
 @property (nonatomic, retain) NSString* website;
 @property (nonatomic, retain) NSString* secondaryColor;
 @property (nonatomic, retain) NSString* profileImageURL;
-@property (nonatomic, retain) UIImage* mediumProfileImage;
-@property (nonatomic, retain) UIImage* profileImage;
 @property (nonatomic, retain) NSString* screenName;
 @property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, retain) NSSet* stamps;

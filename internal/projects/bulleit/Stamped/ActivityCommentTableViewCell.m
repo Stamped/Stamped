@@ -53,6 +53,7 @@ static const CGFloat kBadgeSize = 21.0;
     self.autoresizingMask = (UIViewAutoresizingFlexibleWidth |
                              UIViewAutoresizingFlexibleHeight);
     userImageView_ = [[UserImageView alloc] initWithFrame:CGRectMake(15, 10, 33, 33)];
+    userImageView_.backgroundColor = [UIColor whiteColor];
     [self addSubview:userImageView_];
     [userImageView_ release];
     CGRect badgeFrame = CGRectMake(CGRectGetMaxX(userImageView_.frame) - kBadgeSize + 10,
@@ -154,7 +155,7 @@ static const CGFloat kBadgeSize = 21.0;
   if (!event)
     return;
 
-  customView_.userImageView.image = event.user.profileImage;
+  customView_.userImageView.imageURL = event.user.profileImageURL;
   if ([event.genre isEqualToString:@"mention"]) {
     customView_.badgeImageView.image = [UIImage imageNamed:@"activity_mention_badge"];
   } else {

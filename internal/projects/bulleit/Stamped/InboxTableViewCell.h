@@ -12,7 +12,7 @@
 @class Entity;
 @class PageDotsView;
 
-extern NSString* kInboxTableDidScrollNotification;
+extern NSString* const kInboxTableDidScrollNotification;
 
 @interface InboxTableViewCell : UITableViewCell <UIScrollViewDelegate> {
  @private  

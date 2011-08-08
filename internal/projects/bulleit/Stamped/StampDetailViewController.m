@@ -30,7 +30,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
-- (void)setUpToolbarAndBackground;
+- (void)setUpToolbar;
 - (void)setUpMainContentView;
 - (void)setUpCommentsView;
 - (void)handleTap:(UITapGestureRecognizer*)sender;
@@ -94,7 +94,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  //[self preloadEntityView];
+  [self preloadEntityView];
 }
 
 - (void)viewDidLoad {
@@ -106,7 +106,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 
   scrollView_.contentSize = self.view.bounds.size;
   
-  [self setUpToolbarAndBackground];
+  [self setUpToolbar];
   [self setUpHeader];
 
   activityView_.layer.shadowOpacity = 0.1;
@@ -189,7 +189,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   [gestureRecognizer release];
 }
 
-- (void)setUpToolbarAndBackground {
+- (void)setUpToolbar {
   CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
   toolbarGradient.colors = [NSArray arrayWithObjects:
                             (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
@@ -197,21 +197,15 @@ static const CGFloat kKeyboardHeight = 216.0;
   toolbarGradient.frame = bottomToolbar_.bounds;
   [bottomToolbar_.layer addSublayer:toolbarGradient];
   [toolbarGradient release];
-  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
-  backgroundGradient.colors = [NSArray arrayWithObjects:
-                               (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
-                               (id)[UIColor colorWithWhite:0.93 alpha:1.0].CGColor, nil];
-  backgroundGradient.frame = self.view.bounds;
-  [self.view.layer insertSublayer:backgroundGradient atIndex:0];
-  [backgroundGradient release];
+
   bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
   bottomToolbar_.layer.shadowOpacity = 0.2;
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
-  bottomToolbar_.alpha = 0.5;
+  bottomToolbar_.alpha = 0.75;
 }
 
 - (void)setUpMainContentView {
-  commenterImageView_.image = stamp_.user.profileImage;
+  commenterImageView_.imageURL = stamp_.user.profileImageURL;
 
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
   CGSize stringSize = [stamp_.user.displayName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
@@ -278,7 +272,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 }
 
 - (void)setUpCommentsView {
-  currentUserImageView_.image = [AccountManager sharedManager].currentUser.profileImage;
+  currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
 }
 
 - (IBAction)handleCommentButtonTap:(id)sender {
@@ -298,7 +292,7 @@ static const CGFloat kKeyboardHeight = 216.0;
     return;
 
   switch (stamp_.entityObject.entityCategory) {
-    case EntityCategoryPlace:
+    case EntityCategoryFood:
       detailViewController_ = [[PlaceDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
     default:

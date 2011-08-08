@@ -65,7 +65,7 @@
     [self.layer addSublayer:headerTextLayer_];
     [headerTextLayer_ release];
     
-    entityTitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 25, 220, 40)];
+    entityTitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 25, 200, 40)];
     entityTitleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
     entityTitleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
     entityTitleLabel_.highlightedTextColor = [UIColor whiteColor];
@@ -152,7 +152,7 @@
   if (!event)
     return;
 
-  customView_.userImageView.image = event.user.profileImage;
+  customView_.userImageView.imageURL = event.user.profileImageURL;
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
@@ -171,6 +171,7 @@
   CFRelease(font);
   CFRelease(style);
   customView_.headerTextLayer.string = string;
+  [string release];
   NSString* title = event.stamp.entityObject.title;
   customView_.entityTitleLabel.text = title;
   User* currentUser = [[AccountManager sharedManager] currentUser];
@@ -178,7 +179,7 @@
   customView_.secondStampLayer.contents = (id)event.user.stampImage.CGImage;
 
   CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27]
-                                forWidth:220
+                                forWidth:200
                            lineBreakMode:UILineBreakModeTailTruncation];
   CGRect stampFrame = customView_.firstStampLayer.frame;
   stampFrame.origin.x = CGRectGetMinX(customView_.headerTextLayer.frame) +

@@ -24,27 +24,17 @@
 @interface ActivityViewController ()
 - (void)loadEventsFromDataStore;
 - (void)loadEventsFromNetwork;
-- (void)rotateSpinner;
-- (void)setIsLoading:(BOOL)loading;
 @property (nonatomic, copy) NSArray* eventsArray;
 @end
 
 @implementation ActivityViewController
 
 @synthesize eventsArray = eventsArray_;
-@synthesize reloadLabel = reloadLabel_;
-
-- (void)didReceiveMemoryWarning {
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
-}
 
 #pragma mark - View lifecycle
 
 - (void)dealloc {
-  self.reloadLabel = nil;
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.eventsArray = nil;
   [super dealloc];
 }
@@ -57,11 +47,8 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.eventsArray = nil;
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 - (void)loadEventsFromDataStore {
@@ -170,77 +157,20 @@
   [self setIsLoading:NO];
 }
 
-#pragma mark - Pull to reload UI stuff.
+#pragma mark - STReloadableTableView methods.
 
-- (void)setIsLoading:(BOOL)loading {
-  if (isLoading_ == loading)
-    return;
-  
-  isLoading_ = loading;
-  shouldReload_ = NO;
-  
-  if (!loading) {
-    [reloadLabel_.layer removeAllAnimations];
-    reloadLabel_.text = @"Pull my finger. \ue22f";
-    reloadLabel_.layer.transform = CATransform3DIdentity;
-    [UIView animateWithDuration:0.2
-                          delay:0 
-                        options:UIViewAnimationOptionBeginFromCurrentState
-                     animations:^{
-                       self.tableView.contentInset = UIEdgeInsetsZero;
-                     }
-                     completion:nil];
-    return;
-  }
-  
-  [UIView animateWithDuration:0.2
-                        delay:0 
-                      options:UIViewAnimationOptionBeginFromCurrentState
-                   animations:^{
-                     self.tableView.contentInset = UIEdgeInsetsMake(70, 0, 0, 0);
-                   }
-                   completion:nil];
-  
-  [self rotateSpinner];
-}
-
-- (void)rotateSpinner {
-  [CATransaction begin];
-  [CATransaction setValue:(id)kCFBooleanFalse forKey:kCATransactionDisableActions];
-  [CATransaction setValue:[NSNumber numberWithFloat:2.0] forKey:kCATransactionAnimationDuration];
-  
-  CABasicAnimation* animation;
-  animation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-  animation.fromValue = [NSNumber numberWithFloat:0.0];
-  animation.toValue = [NSNumber numberWithFloat:M_PI * 2];
-  animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
-  animation.delegate = self;
-  [reloadLabel_.layer addAnimation:animation forKey:@"rotationAnimation"];
-  [CATransaction commit];
-}
-
-#pragma mark - CAAnimationDelegate methods.
-
-- (void)animationDidStop:(CAAnimation*)anim finished:(BOOL)flag {
-  if (isLoading_)
-    [self rotateSpinner];
+- (void)userPulledToReload {
+  [self loadEventsFromNetwork];
 }
 
 #pragma mark - UIScrollView delegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-  if (isLoading_)
-    return;
-  
-  shouldReload_ = scrollView.contentOffset.y < -55.0;
-  reloadLabel_.text = shouldReload_ ? @"\ue05a" : @"Pull my finger. \ue22f";
+  [super scrollViewDidScroll:scrollView];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
-  if (shouldReload_) {
-    [self setIsLoading:YES];
-    [self loadEventsFromNetwork];
-  }
+  [super scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
 }
 
 

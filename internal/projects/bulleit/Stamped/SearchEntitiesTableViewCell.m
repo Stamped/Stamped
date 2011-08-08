@@ -15,9 +15,9 @@
 
 // This is magic with UITableViewCell. No need to set this explicitly.
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
-@property (nonatomic, retain) UIImageView* categoryImageView;
-@property (nonatomic, retain) UILabel* titleLabel;
-@property (nonatomic, retain) UILabel* subtitleLabel;
+@property (nonatomic, readonly) UIImageView* categoryImageView;
+@property (nonatomic, readonly) UILabel* titleLabel;
+@property (nonatomic, readonly) UILabel* subtitleLabel;
 @end
 
 @implementation SearchEntitiesCellView
@@ -30,35 +30,28 @@
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
-    self.categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 27, 32)];
-    self.categoryImageView.contentMode = UIViewContentModeBottomRight;
-    [self addSubview:self.categoryImageView];
-    [self.categoryImageView release];
+    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 27, 32)];
+    categoryImageView_.contentMode = UIViewContentModeBottomRight;
+    [self addSubview:categoryImageView_];
+    [categoryImageView_ release];
     
-    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
-    self.titleLabel.backgroundColor = [UIColor clearColor];
-    self.titleLabel.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
-    self.titleLabel.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
-    self.titleLabel.highlightedTextColor = [UIColor whiteColor];
-    [self addSubview:self.titleLabel];
-    [self.titleLabel release];
+    titleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
+    titleLabel_.backgroundColor = [UIColor clearColor];
+    titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
+    titleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+    titleLabel_.highlightedTextColor = [UIColor whiteColor];
+    [self addSubview:titleLabel_];
+    [titleLabel_ release];
     
-    self.subtitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(36, 34, 241, 20)];
-    self.subtitleLabel.backgroundColor = [UIColor clearColor];
-    self.subtitleLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
-    self.subtitleLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-    self.subtitleLabel.highlightedTextColor = [UIColor whiteColor];
-    [self addSubview:self.subtitleLabel];
-    [self.subtitleLabel release];
+    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 34, 241, 20)];
+    subtitleLabel_.backgroundColor = [UIColor clearColor];
+    subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
+    subtitleLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+    subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
+    [self addSubview:subtitleLabel_];
+    [subtitleLabel_ release];
   }
   return self;
-}
-
-- (void)dealloc {
-  self.categoryImageView = nil;
-  self.titleLabel = nil;
-  self.subtitleLabel = nil;
-  [super dealloc];
 }
 
 @end

@@ -10,13 +10,16 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "UserImageDownloadManager.h"
+
 @interface UserImageView ()
 - (void)initialize;
+- (void)imageChanged:(NSNotification*)notification;
 @end
 
 @implementation UserImageView
 
-@synthesize image = image_;
+@synthesize imageURL = imageURL_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -35,7 +38,7 @@
 }
 
 - (void)dealloc {
-  self.image = nil;
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
 
@@ -45,22 +48,37 @@
 }
 
 - (void)initialize {
+  self.backgroundColor = [UIColor whiteColor];
+  CGFloat borderWidth = CGRectGetWidth(self.frame) > 35.0 ? 2.0 : 1.0;
+  imageView_ = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, borderWidth, borderWidth)];
+  [self addSubview:imageView_];
+  [imageView_ release];
   CALayer* layer = self.layer;
   layer.contentsGravity = kCAGravityResizeAspect;
   layer.frame = self.frame;
-  layer.borderColor = [UIColor whiteColor].CGColor;
-  layer.borderWidth = CGRectGetWidth(self.frame) > 35.0 ? 2.0 : 1.0;
   layer.shadowOpacity = 0.5;
   layer.shadowOffset = CGSizeMake(0, 0.5);
   layer.shadowRadius = 1.0;
-  layer.shadowPath = [UIBezierPath bezierPathWithRect:layer.bounds].CGPath;
+  layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+  [[NSNotificationCenter defaultCenter] addObserver:self 
+                                           selector:@selector(imageChanged:)
+                                               name:kUserImageLoadedNotification
+                                             object:nil];
 }
 
-- (void)setImage:(UIImage*)image {
-  if (image != image_) {
-    [image_ release];
-    image_ = [image retain];
-    self.layer.contents = (id)image.CGImage;
+- (void)setImageURL:(NSString*)imageURL {
+  imageURL_ = [imageURL copy];
+  if (imageURL_) {
+    imageView_.image =
+        [[UserImageDownloadManager sharedManager] profileImageAtURL:imageURL_];
+  }
+  [self setNeedsDisplay];
+}
+
+- (void)imageChanged:(NSNotification*)notification {
+  NSString* url = notification.object;
+  if ([imageURL_ isEqualToString:url]) {
+    self.imageURL = url;
   }
 }
 

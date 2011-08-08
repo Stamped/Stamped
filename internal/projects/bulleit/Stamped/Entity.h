@@ -13,10 +13,10 @@
 
 typedef enum {
   EntityCategoryOther,
-  EntityCategoryBook,
+  EntityCategoryBooks,
   EntityCategoryFilm,
   EntityCategoryMusic,
-  EntityCategoryPlace
+  EntityCategoryFood
 } EntityCategory;
 
 @interface Entity : NSManagedObject

@@ -9,7 +9,6 @@
 #import "Entity.h"
 #import "Stamp.h"
 
-
 @implementation Entity
 
 @dynamic address;
@@ -27,20 +26,20 @@
   [super awakeFromFetch];
   if (!self.categoryImage) {
     self.categoryImage =
-    [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
+        [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
   }
 }
 
 - (EntityCategory)entityCategory {
   NSString* cat = self.category;
-  if ([cat isEqualToString:@"Place"]) {
-    return EntityCategoryPlace;
-  } else if ([cat isEqualToString:@"Film"]) {
+  if ([cat isEqualToString:@"food"]) {
+    return EntityCategoryFood;
+  } else if ([cat isEqualToString:@"film"]) {
     return EntityCategoryFilm;
-  } else if ([cat isEqualToString:@"Music"]) {
+  } else if ([cat isEqualToString:@"music"]) {
     return EntityCategoryMusic;
-  } else if ([cat isEqualToString:@"Book"]) {
-    return EntityCategoryBook;
+  } else if ([cat isEqualToString:@"books"]) {
+    return EntityCategoryBooks;
   }
   return EntityCategoryOther;
 }

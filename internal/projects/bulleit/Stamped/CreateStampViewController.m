@@ -93,7 +93,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 - (void)viewDidLoad {
   [super viewDidLoad];
   User* currentUser = [AccountManager sharedManager].currentUser;
-  self.userImageView.image = currentUser.profileImage;
+  self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
   CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
   backgroundGradient.colors = [NSArray arrayWithObjects:

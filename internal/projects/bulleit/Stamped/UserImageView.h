@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UserImageView : UIView
-
-@property (nonatomic, retain) UIImage* image;
-
+@interface UserImageView : UIView {
+ @private
+  UIImageView* imageView_;
+}
+@property (nonatomic, copy) NSString* imageURL;
 @end

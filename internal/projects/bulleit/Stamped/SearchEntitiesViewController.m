@@ -150,6 +150,7 @@
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
   NSString* searchPath = [NSString stringWithFormat:@"/entities/search.json?authenticated_user_id=%@&q=%@",
       [AccountManager sharedManager].currentUser.userID, searchField_.text];
+  searchPath = [searchPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
   [objectManager loadObjectsAtResourcePath:searchPath
                              objectMapping:entityMapping
                                   delegate:self];
