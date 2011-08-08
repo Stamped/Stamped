@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, auth
 from datetime import datetime
 
 from AMongoCollection import AMongoCollection
@@ -85,4 +85,11 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def flagUser(self, user):
         # TODO
         raise NotImplementedError("TODO")
+
+    def verifyAccountCredentials(self, screen_name, password):
+        try:
+            user = self._collection.find_one({'screen_name': screen_name})
+            return auth.comparePasswordToHash(password, user['password'])
+        except:
+            return False
 

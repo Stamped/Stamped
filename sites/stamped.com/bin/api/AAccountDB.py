@@ -31,3 +31,7 @@ class AAccountDB(object):
     def flagAccount(self, user):
         pass
 
+    @abstract
+    def verifyAccountCredentials(self, screen_name, password):
+        pass
+        

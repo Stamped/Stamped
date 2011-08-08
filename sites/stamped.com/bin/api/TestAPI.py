@@ -812,18 +812,22 @@ def collectionTest(baseurl):
         "first_name": "Kevin",
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
-        "password": "******",
+        "password": "12345",
         "screen_name": "kpalms"
     }
-    userA = testPOST(baseurl, path, data)['user_id']
+    result = testPOST(baseurl, path, data)
+    userA = result['user']['user_id']
+    tokenA = result['token']
     data = {
         "first_name": "Robby",
         "last_name": "Stein", 
         "email": "robby@stamped.com", 
-        "password": "******",
+        "password": "12345",
         "screen_name": "rmstein"
     }
-    userB = testPOST(baseurl, path, data)['user_id']
+    result = testPOST(baseurl, path, data)
+    userB = result['user']['user_id']
+    tokenB = result['token']
     if len(userA) == 24 and len(userB) == 24:
         print 'DATA: %s' % path
     else:
@@ -834,12 +838,12 @@ def collectionTest(baseurl):
         
     path = "account/settings.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "privacy": False
     }
     result = testPOST(baseurl, path, data)
     data = {
-        "authenticated_user_id": userB,
+        "oauth_token": tokenB['access_token'],
         "privacy": False
     }
     result = testPOST(baseurl, path, data)
@@ -853,18 +857,18 @@ def collectionTest(baseurl):
         
     path = "account/update_profile.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "bio": "My long biography goes here.",
         "color": "333333,999999"
     }
     result = testPOST(baseurl, path, data)
     data = {
-        "authenticated_user_id": userB,
+        "oauth_token": tokenB['access_token'],
         "bio": "My long biography goes here.",
-        "color": "333333,999999"
+        "color": "222222,dd00dd"
     }
     result = testPOST(baseurl, path, data)
-    if result['color_primary'] == '333333':
+    if result['color_primary'] == '222222':
         print 'PASS: %s' % path
     else:
         print 'FAIL: %s' % path
@@ -874,12 +878,12 @@ def collectionTest(baseurl):
         
     path = "account/update_profile_image.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!
     }
     result = testPOST(baseurl, path, data)
     data = {
-        "authenticated_user_id": userB,
+        "oauth_token": tokenB['access_token'],
         "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!
     }
     result = testPOST(baseurl, path, data)
@@ -893,7 +897,7 @@ def collectionTest(baseurl):
     
     path = "friendships/create.json"
     data = {
-        "authenticated_user_id": userB,
+        "oauth_token": tokenB['access_token'],
         "user_id": userA
     }
     result = testPOST(baseurl, path, data)    
@@ -907,7 +911,7 @@ def collectionTest(baseurl):
     
     path = "entities/create.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "title": "Little Owl",
         "desc": "American food in the West Village", 
         "category": "food",
@@ -925,7 +929,7 @@ def collectionTest(baseurl):
     
     path = "entities/create.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "title": "Recette",
         "desc": "Great food", 
         "category": "food",
@@ -943,7 +947,7 @@ def collectionTest(baseurl):
     
     path = "stamps/create.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "entity_id": entityID,
         "blurb": "Favorite restaurant in the Village.", 
         "image": "image.png"
@@ -959,7 +963,7 @@ def collectionTest(baseurl):
         
     path = "stamps/create.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "entity_id": entityIDb,
         "blurb": "Great date spot. Thanks @rmstein!", 
         "image": "image.png"
@@ -975,6 +979,7 @@ def collectionTest(baseurl):
 
     path = "collections/user.json"
     data = {
+        "oauth_token": tokenA['access_token'],
         "user_id": userA
     }
     result = testGET(baseurl, path, data)
@@ -988,7 +993,7 @@ def collectionTest(baseurl):
 
     path = "collections/inbox.json"
     data = {
-        "authenticated_user_id": userB
+        "oauth_token": tokenB['access_token'],
     }
     result = testGET(baseurl, path, data)
     if len(result) == 2:
@@ -1001,7 +1006,7 @@ def collectionTest(baseurl):
     
     path = "stamps/remove.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "stamp_id": stampID
     }
     result = testPOST(baseurl, path, data)
@@ -1015,7 +1020,7 @@ def collectionTest(baseurl):
     
     path = "stamps/remove.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "stamp_id": stampIDb
     }
     result = testPOST(baseurl, path, data)
@@ -1029,7 +1034,7 @@ def collectionTest(baseurl):
         
     path = "entities/remove.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "entity_id": entityID
     }
     result = testPOST(baseurl, path, data)
@@ -1043,7 +1048,7 @@ def collectionTest(baseurl):
         
     path = "entities/remove.json"
     data = {
-        "authenticated_user_id": userA,
+        "oauth_token": tokenA['access_token'],
         "entity_id": entityIDb
     }
     result = testPOST(baseurl, path, data)
@@ -1057,7 +1062,7 @@ def collectionTest(baseurl):
     
     path = "friendships/remove.json"
     data = {
-        "authenticated_user_id": userB,
+        "oauth_token": tokenB['access_token'],
         "user_id": userA
     }
     result = testPOST(baseurl, path, data)
@@ -1070,9 +1075,9 @@ def collectionTest(baseurl):
         
         
     path = "account/remove.json"
-    data = { "authenticated_user_id": userA }
+    data = { "oauth_token": tokenA['access_token'] }
     resultA = testPOST(baseurl, path, data)
-    data = { "authenticated_user_id": userB }
+    data = { "oauth_token": tokenB['access_token'] }
     resultB = testPOST(baseurl, path, data)
     if resultA and resultB:
         print 'DATA: %s' % path

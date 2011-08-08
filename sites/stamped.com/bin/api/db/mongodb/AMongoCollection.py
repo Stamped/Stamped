@@ -59,12 +59,12 @@ class MongoDBConfig(Singleton):
         
         if not 'mongodb' in self.config:
             utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:30000")
-#             self.config = AttributeDict({
-#                 "mongodb" : {
-#                     "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
-#                     "port" : 27017, 
-#                 }
-#             })
+            # self.config = AttributeDict({
+            #     "mongodb" : {
+            #         "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
+            #         "port" : 27017, 
+            #     }
+            # })
             self.config = AttributeDict({
                "mongodb" : {
                    "host" : "localhost", 
@@ -140,10 +140,16 @@ class AMongoCollection(object):
         return bson.BSON.encode(obj)
     
     def _getStringFromObjectId(self, objId):
+        utils.logs.debug("%s | Get String from ObjectID" % self)
         return str(bson.objectid.ObjectId(objId))
     
     def _getObjectIdFromString(self, string):
-        return bson.objectid.ObjectId(string)
+        utils.logs.debug("%s | Get ObjectID from String" % self)
+        try:
+            return bson.objectid.ObjectId(string)
+        except:
+            utils.logs.warn("%s | Invalid ObjectID" % self)
+            raise Fail("Invalid ObjectID")
     
     def _mongoToObj(self, data, objId='id'):
         assert data is not None
@@ -153,25 +159,31 @@ class AMongoCollection(object):
         return data
     
     def _objToMongo(self, obj, objId='id'):
+        utils.logs.debug("%s | Object to Mongo | Begin" % self)
         if obj is None:
+            utils.logs.debug("%s | Object to Mongo | Nothing passed" % self)
             return None
         
         if obj.isValid == False:
+            utils.logs.warn("%s | Object to Mongo | Invalid object" % self)
             utils.log("[%s] error: encountered invalid object" % self)
             pprint(obj.getDataAsDict())
             return None
         
+        utils.logs.debug("%s | Object to Mongo | Copy data" % self)
         data = copy.copy(obj.getDataAsDict())
         
         if '_id' in data:
             if isinstance(data['_id'], basestring):
+                utils.logs.debug("%s | Object to Mongo | _id to ObjectID" % self)
                 data['_id'] = self._getObjectIdFromString(data['_id'])
         elif objId in data:
-            _id = data[objId]
+            utils.logs.debug("%s | Object to Mongo | Convert _id" % self)
+            data['_id'] = self._getObjectIdFromString(data[objId])
+            utils.logs.debug("%s | Object to Mongo | Delete prev id" % self)
             del(data[objId])
-            data['_id'] = self._getObjectIdFromString(_id)
-        
-        #pprint(data)
+
+        utils.logs.debug("%s | Object to Mongo | Finish" % self)
         return self._mapDataToSchema(data, self.SCHEMA)
     
     def _objsToMongo(self, objs, objId='id'):
@@ -266,11 +278,14 @@ class AMongoCollection(object):
     ### GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document, objId='id'):
-        obj = self._objToMongo(document, objId)
-        #pprint(obj)
-        #manipulate = not '_id' in obj
-        ret = self._collection.insert_one(obj, safe=True)
-        return self._getStringFromObjectId(ret)
+        try:
+            utils.logs.debug("%s | Add Document | Begin" % self)
+            obj = self._objToMongo(document, objId)
+            utils.logs.debug("%s | Add Document | Object: %s" % (self, obj))
+            ret = self._collection.insert_one(obj, safe=True)
+            return self._getStringFromObjectId(ret)
+        except:
+            raise Fail("(%s) Unable to add document" % self) 
     
     def _addDocuments(self, documents, objId='id'):
         objs = self._objsToMongo(documents, objId)

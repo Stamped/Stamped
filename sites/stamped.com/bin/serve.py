@@ -11,6 +11,7 @@ from flask import request, Response, Flask
 from functools import wraps
 
 from api.MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAuth import MongoStampedAuth
 from utils import AttributeDict
 from errors import *
 from resource import *
@@ -28,6 +29,7 @@ PASSWORD = 'august1ftw'
 
 app = Flask(__name__)
 stampedAPI = MongoStampedAPI()
+stampedAuth = MongoStampedAuth()
 
 # ################# #
 # Utility Functions #
@@ -45,15 +47,18 @@ def encodeType(obj):
     else:
         return obj.__dict__
 
-def transformOutput(request, d, logId=None):
+def transformOutput(request, d, logPath=None):
     output_json = json.dumps(d, sort_keys=True, indent=None if request.is_xhr else 2, default=encodeType)
     output = Response(output_json, mimetype='application/json')
-    utils.logs.info("%s | Transform output: \"%s\"" % (logId, output_json))
+    utils.logs.info("%s | Transform output: \"%s\"" % (logPath, output_json))
     return output
 
-def parseRequestForm(schema, form):
+def parseRequestForm(schema, form, addOAuthToken=True):
     apiFuncName = utils.getFuncName(2)
-    
+    if addOAuthToken:
+        schema["oauth_token"] = ResourceArgument(required=True, expectedType=basestring)
+        utils.log("%s" % schema)
+
     try:
         return Resource.parse(apiFuncName, schema, form)
     except (InvalidArgument, Fail) as e:
@@ -62,48 +67,131 @@ def parseRequestForm(schema, form):
         utils.printException()
         raise
 
-def handleRequest(request, stampedAPIFunc, schema):
-    logId = _generateLogId()
-    utils.logs.info("%s | Begin request" % logId)
-    
-    if 'Authorization' not in request.headers or not request.authorization:
-        utils.logs.info("%s | End request: requires authorization" % logId)
-        return Response(
-            'Could not verify your access level for that URL.\n'
-            'You have to login with proper credentials', 401,
-            {'WWW-Authenticate': 'Basic realm="Stamped API"'}
-        )
-    if request.authorization.username != USERNAME or request.authorization.password != PASSWORD:
-        utils.logs.info("%s | End request: invalid authorization: %s" % (logId, request))
-        return "Error", 500
+def newAccountException(data, schema, clientId, logPath=None):
+    utils.logs.info("%s | New account exception" % logPath)
 
-    if request.method == 'POST':
-        data = request.form
-    elif request.method == 'GET': 
-        data = request.args
-    else:
-        utils.logs.info("%s | End request: method not supported: %s" % (logId, request.method))
-        return "Method not supported", 501
-        
-    utils.logs.info("%s | Incoming request url: %s" % (logId, request.base_url))
-    utils.logs.info("%s | Incoming request data: %s" % (logId, data))
-        
+    ### Parse to Fields
     try:
-        parsedInput = parseRequestForm(schema, data)
+        parsedInput = parseRequestForm(schema, data, addOAuthToken=False)
     except (InvalidArgument, Fail) as e:
         msg = str(e)
         utils.log(msg)
         utils.printException()
         return msg, 400
         
-    utils.logs.info("%s | Parsed request: %s" % (logId, parsedInput))
-    
+    utils.logs.info("%s | Parsed request: %s" % (logPath, parsedInput))
+
+    ### Add Account
     try:
-        ret = transformOutput(request, stampedAPIFunc(parsedInput), logId=logId)
-        utils.logs.info("%s | End request: success" % logId)
+        account = stampedAPI.addAccount(parsedInput)
+    except Exception as e:
+        msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        utils.log(msg)
+        utils.printException()
+        return msg, 500
+
+    utils.logs.info("%s | Account added" % logPath)
+    
+    ### Generate Refresh Token & Access Token
+    token = stampedAuth.addRefreshToken({
+        'client_id': clientId,
+        'authenticated_user_id': account['user_id']
+    })
+
+    utils.logs.info("%s | Token created" % logPath)
+
+    ### Format Output
+    result = {
+        'user': account,
+        'token': token
+    }
+    
+    ### Return to Client
+    try:
+        ret = transformOutput(request, result, logPath=logPath)
+        utils.logs.info("%s | End request: success" % logPath)
         return ret
     except Exception as e:
         msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        utils.log(msg)
+        utils.printException()
+        return msg, 500
+
+def handleRequest(request, stampedAPIFunc, schema):
+    logPath = _generateLogId()
+    utils.logs.info("%s | Begin request" % logPath)
+    
+    ### Check Client Credentials
+    if 'Authorization' not in request.headers or not request.authorization:
+        utils.logs.info("%s | End request: requires authorization" % logPath)
+        return Response(
+            'Could not verify your access level for that URL.\n'
+            'You have to login with proper credentials', 401,
+            {'WWW-Authenticate': 'Basic realm="Stamped API"'}
+        )
+    if not stampedAuth.verifyClientCredentials(
+        request.authorization.username, 
+        request.authorization.password):
+        utils.logs.info("%s | End request: invalid authorization: %s" % 
+            (logPath, request))
+        return "Error", 500
+
+    ### Parse Request
+    if request.method == 'POST':
+        unparsedInput = request.form
+    elif request.method == 'GET': 
+        unparsedInput = request.args
+    else:
+        utils.logs.info("%s | End request: Invalid method")
+        return "Error", 500
+        
+    utils.logs.info("%s | Request url: %s" % (logPath, request.base_url))
+    utils.logs.info("%s | Request data: %s" % (logPath, unparsedInput))
+
+    ### EXCEPTION: "Create Account" does not require valid OAuth token
+    if stampedAPIFunc == stampedAPI.addAccount:
+        return newAccountException(unparsedInput, schema, 
+            request.authorization.username, logPath)
+        
+    ### Parse to Fields
+    try:
+        parsedInput = parseRequestForm(schema, unparsedInput)
+    except (InvalidArgument, Fail) as e:
+        msg = str(e)
+        utils.log(msg)
+        utils.printException()
+        return msg, 400
+        
+    utils.logs.info("%s | Parsed request: %s" % (logPath, parsedInput))
+
+    ### Require OAuth token to be included
+    if 'oauth_token' not in parsedInput:
+        utils.logs.info("%s | End request: OAuth token not included" % logPath)
+        return "Error", 500
+
+    ### Validate OAuth Access Token
+    authenticated_user_id = stampedAuth.verifyAccessToken(parsedInput, logPath=logPath)
+    if authenticated_user_id == None:
+        utils.logs.info("%s | End request: Invalid OAuth token" % logPath)
+        return "Error", 500
+    
+    ### Convert OAuth Token to User ID
+    utils.logs.info("%s | Authenticated user id: %s" % 
+        (logPath, authenticated_user_id))
+    parsedInput.pop('oauth_token')
+    parsedInput['authenticated_user_id'] = authenticated_user_id
+
+    utils.logs.debug("%s | Final data set: %s" % (logPath, parsedInput))
+    
+    ### Run API Function / Return to Client
+    try:
+        result = stampedAPIFunc(parsedInput)
+        ret = transformOutput(request, result, logPath=logPath)
+        utils.logs.info("%s | End request: success" % logPath)
+        return ret
+    except Exception as e:
+        msg = "Internal error processing API function '%s' (%s)" % (
+            utils.getFuncName(1), str(e))
         utils.log(msg)
         utils.printException()
         return msg, 500
@@ -131,7 +219,7 @@ def updateAccount():
     elif request.method == 'GET':
         fn = stampedAPI.getAccount
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("email",                 ResourceArgument(expectedType=basestring)), 
         ("password",              ResourceArgument(expectedType=basestring)), 
         ("screen_name",           ResourceArgument(expectedType=basestring)), 
@@ -144,7 +232,7 @@ def updateAccount():
 @app.route(REST_API_PREFIX + 'account/update_profile.json', methods=['POST'])
 def updateProfile():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("first_name",            ResourceArgument(expectedType=basestring)), 
         ("last_name",             ResourceArgument(expectedType=basestring)), 
         ("bio",                   ResourceArgument(expectedType=basestring)), 
@@ -156,7 +244,7 @@ def updateProfile():
 @app.route(REST_API_PREFIX + 'account/update_profile_image.json', methods=['POST'])
 def updateProfileImage():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("profile_image",         ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.updateProfileImage, schema)
@@ -164,21 +252,21 @@ def updateProfileImage():
 @app.route(REST_API_PREFIX + 'account/verify_credentials.json', methods=['GET'])
 def verifyAccountCredentials():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.verifyAccountCredentials, schema)
 
 @app.route(REST_API_PREFIX + 'account/remove.json', methods=['POST'])
 def removeAccount():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.removeAccount, schema)
 
 @app.route(REST_API_PREFIX + 'account/reset_password.json', methods=['POST'])
 def resetPassword():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.resetPassword, schema)
 
@@ -191,7 +279,7 @@ def getUser():
     schema = ResourceArgumentSchema([
         ("user_id",               ResourceArgument(expectedType=basestring)), 
         ("screen_name",           ResourceArgument(expectedType=basestring)), 
-        ("authenticated_user_id", ResourceArgument(expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getUser, schema)
 
@@ -200,7 +288,7 @@ def getUsers():
     schema = ResourceArgumentSchema([
         ("user_ids",              ResourceArgument(expectedType=basestring)), 
         ("screen_names",          ResourceArgument(expectedType=basestring)), 
-        ("authenticated_user_id", ResourceArgument(expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getUsers, schema)
 
@@ -208,7 +296,7 @@ def getUsers():
 def searchUsers():
     schema = ResourceArgumentSchema([
         ("q",                     ResourceArgument(required=True, expectedType=basestring)), 
-        ("authenticated_user_id", ResourceArgument(expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(expectedType=basestring)), 
         ("limit",                 ResourceArgument(expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.searchUsers, schema)
@@ -228,7 +316,7 @@ def getPrivacy():
 @app.route(REST_API_PREFIX + 'friendships/create.json', methods=['POST'])
 def addFriendship():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("user_id",               ResourceArgument(expectedType=basestring)), 
         ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
@@ -237,7 +325,7 @@ def addFriendship():
 @app.route(REST_API_PREFIX + 'friendships/remove.json', methods=['POST'])
 def removeFriendship():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("user_id",               ResourceArgument(expectedType=basestring)), 
         ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
@@ -254,7 +342,7 @@ def approveFriendship():
 @app.route(REST_API_PREFIX + 'friendships/check.json', methods=['GET'])
 def checkFriendship():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("user_id",               ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.checkFriendship, schema)
@@ -262,21 +350,21 @@ def checkFriendship():
 @app.route(REST_API_PREFIX + 'friendships/friends.json', methods=['GET'])
 def getFriends():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getFriends, schema)
 
 @app.route(REST_API_PREFIX + 'friendships/followers.json', methods=['GET'])
 def getFollowers():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getFollowers, schema)
 
 @app.route(REST_API_PREFIX + 'friendships/blocks/create.json', methods=['POST'])
 def addBlock():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("user_id",               ResourceArgument(expectedType=basestring)), 
         ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
@@ -285,7 +373,7 @@ def addBlock():
 @app.route(REST_API_PREFIX + 'friendships/blocks/check.json', methods=['GET'])
 def checkBlock():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("user_id",               ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.checkBlock, schema)
@@ -293,14 +381,14 @@ def checkBlock():
 @app.route(REST_API_PREFIX + 'friendships/blocking.json', methods=['GET'])
 def getBlocks():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getBlocks, schema)
 
 @app.route(REST_API_PREFIX + 'friendships/blocks/remove.json', methods=['POST'])
 def removeBlock():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("user_id",               ResourceArgument(expectedType=basestring)), 
         ("screen_name",           ResourceArgument(expectedType=basestring))
     ])
@@ -313,7 +401,7 @@ def removeBlock():
 @app.route(REST_API_PREFIX + 'entities/create.json', methods=['POST'])
 def addEntity():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("title",                 ResourceArgument(required=True, expectedType=basestring)), 
         ("desc",                  ResourceArgument(required=True, expectedType=basestring)), 
         ("category",              ResourceArgument(required=True, expectedType=basestring)),
@@ -328,14 +416,14 @@ def addEntity():
 def getEntity():
     schema = ResourceArgumentSchema([
         ("entity_id",             ResourceArgument(required=True, expectedType=basestring)),
-        ("authenticated_user_id", ResourceArgument(expectedType=basestring)) 
+        #("authenticated_user_id", ResourceArgument(expectedType=basestring)) 
     ])
     return handleRequest(request, stampedAPI.getEntity, schema)
 
 @app.route(REST_API_PREFIX + 'entities/update.json', methods=['POST'])
 def updateEntity():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("entity_id",             ResourceArgument(required=True, expectedType=basestring)), 
         ("title",                 ResourceArgument(expectedType=basestring)), 
         ("desc",                  ResourceArgument(expectedType=basestring)), 
@@ -349,7 +437,7 @@ def updateEntity():
 @app.route(REST_API_PREFIX + 'entities/remove.json', methods=['POST'])
 def removeEntity():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("entity_id",             ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.removeEntity, schema)
@@ -357,7 +445,7 @@ def removeEntity():
 @app.route(REST_API_PREFIX + 'entities/search.json', methods=['GET'])
 def searchEntities():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)),
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)),
         ("q",                     ResourceArgument(required=True, expectedType=basestring)),
         ("coordinates",           ResourceArgument(expectedType=basestring))
     ])
@@ -370,7 +458,7 @@ def searchEntities():
 @app.route(REST_API_PREFIX + 'stamps/create.json', methods=['POST'])
 def addStamp():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("entity_id",             ResourceArgument(required=True, expectedType=basestring)), 
         ("blurb",                 ResourceArgument(expectedType=basestring)), 
         ("image",                 ResourceArgument(expectedType=basestring)), 
@@ -381,7 +469,7 @@ def addStamp():
 @app.route(REST_API_PREFIX + 'stamps/update.json', methods=['POST'])
 def updateStamp():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("stamp_id",              ResourceArgument(required=True, expectedType=basestring)), 
         ("blurb",                 ResourceArgument(expectedType=basestring)), 
         ("image",                 ResourceArgument(expectedType=basestring)), 
@@ -393,14 +481,14 @@ def updateStamp():
 def getStamp():
     schema = ResourceArgumentSchema([ 
         ("stamp_id",              ResourceArgument(required=True, expectedType=basestring)),
-        ("authenticated_user_id", ResourceArgument(expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getStamp, schema)
 
 @app.route(REST_API_PREFIX + 'stamps/remove.json', methods=['POST'])
 def removeStamp():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("stamp_id",              ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.removeStamp, schema)
@@ -412,7 +500,7 @@ def removeStamp():
 @app.route(REST_API_PREFIX + 'comments/create.json', methods=['POST'])
 def addComment():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("stamp_id",              ResourceArgument(required=True, expectedType=basestring)), 
         ("blurb",                 ResourceArgument(required=True, expectedType=basestring)), 
         ("mentions",              ResourceArgument(expectedType=basestring))
@@ -422,7 +510,7 @@ def addComment():
 @app.route(REST_API_PREFIX + 'comments/remove.json', methods=['POST'])
 def removeComment():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("comment_id",            ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.removeComment, schema)
@@ -431,7 +519,7 @@ def removeComment():
 def getComments():
     schema = ResourceArgumentSchema([
         ("stamp_id",              ResourceArgument(required=True, expectedType=basestring)),
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)) 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)) 
     ])
     return handleRequest(request, stampedAPI.getComments, schema)
 
@@ -442,7 +530,7 @@ def getComments():
 @app.route(REST_API_PREFIX + 'collections/inbox.json', methods=['GET'])
 def getInboxStamps():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("limit",                 ResourceArgument(expectedType=basestring)), 
         ("since",                 ResourceArgument(expectedType=basestring)), 
         ("before",                ResourceArgument(expectedType=basestring))
@@ -453,7 +541,7 @@ def getInboxStamps():
 def getUserStamps():
     schema = ResourceArgumentSchema([
         ("user_id",               ResourceArgument(required=True, expectedType=basestring)), 
-        ("authenticated_user_id", ResourceArgument(expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(expectedType=basestring)), 
         ("limit",                 ResourceArgument(expectedType=basestring)), 
         ("since",                 ResourceArgument(expectedType=basestring)), 
         ("before",                ResourceArgument(expectedType=basestring))
@@ -465,7 +553,7 @@ def getUserMentions():
     ### TODO: Implement stampedAPI.getUserMentions
     schema = ResourceArgumentSchema([
         ("user_id",               ResourceArgument(required=True, expectedType=basestring)), 
-        ("authenticated_user_id", ResourceArgument(expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(expectedType=basestring)), 
         ("limit",                 ResourceArgument(expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getUserMentions, schema)
@@ -477,7 +565,7 @@ def getUserMentions():
 @app.route(REST_API_PREFIX + 'favorites/create.json', methods=['POST'])
 def addFavorite():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("entity_id",             ResourceArgument(required=True, expectedType=basestring)), 
         ("stamp_id",              ResourceArgument(expectedType=basestring))
     ])
@@ -486,7 +574,7 @@ def addFavorite():
 @app.route(REST_API_PREFIX + 'favorites/remove.json', methods=['POST'])
 def removeFavorite():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("favorite_id",           ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.removeFavorite, schema)
@@ -494,7 +582,7 @@ def removeFavorite():
 @app.route(REST_API_PREFIX + 'favorites/show.json', methods=['GET'])
 def getFavorites():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.getFavorites, schema)
 
@@ -505,7 +593,7 @@ def getFavorites():
 @app.route(REST_API_PREFIX + 'activity/show.json', methods=['GET'])
 def getActivity():
     schema = ResourceArgumentSchema([
-        ("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
+        #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring)), 
         ("limit",                 ResourceArgument(expectedType=basestring)), 
         ("since",                 ResourceArgument(expectedType=basestring)), 
         ("before",                ResourceArgument(expectedType=basestring))
