@@ -1018,6 +1018,8 @@ class StampedAPI(AStampedAPI):
         
         from pprint import pprint
         pprint(entity.getDataAsDict())
+        utils.log("RETURN_ENTITY")
+        
         if mini == True:
             if 'coordinates' in entity:
                 result['coordinates'] = "%s,%s" % (
