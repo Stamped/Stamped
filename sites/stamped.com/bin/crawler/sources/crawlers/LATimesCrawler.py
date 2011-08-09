@@ -19,7 +19,7 @@ class LATimesCrawler(AExternalEntitySource):
     TYPES = set([ 'restaurant' ])
     
     def __init__(self):
-        AExternalEntitySource.__init__(self, "SFMag", self.TYPES, 512)
+        AExternalEntitySource.__init__(self, "LATimes", self.TYPES, 512)
         self._seen = set()
     
     def _run(self):
@@ -79,6 +79,12 @@ class LATimesCrawler(AExternalEntitySource):
             except AttributeError:
                 utils.log("[%s] error parsing %s (%s)" % (self, addr, href))
                 return
+            
+            if addr == '':
+                continue 
+                
+            if 'CLOSED' in name:
+                continue
             
             if (name, addr) in self._seen:
                 continue
