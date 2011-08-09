@@ -33,8 +33,6 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
     
     def getEntity(self, entityId):
         entity = Entity(self._getDocumentFromId(entityId, 'entity_id'))
-        if entity.isValid == False:
-            raise KeyError("Entity not valid")
         return entity
     
     def updateEntity(self, entity):
