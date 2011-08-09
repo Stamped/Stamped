@@ -22,6 +22,9 @@ class LATimesCrawler(AExternalEntitySource):
         AExternalEntitySource.__init__(self, "LATimes", self.TYPES, 512)
         self._seen = set()
     
+    def getMaxNumEntities(self):
+        return 15000 # return an approximation for now
+    
     def _run(self):
         utils.log("[%s] parsing site" % (self, ))
         

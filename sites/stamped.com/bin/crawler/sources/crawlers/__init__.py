@@ -6,4 +6,3 @@ import SFMagCrawler
 import ZagatCrawler
 import LATimesCrawler
 
-
