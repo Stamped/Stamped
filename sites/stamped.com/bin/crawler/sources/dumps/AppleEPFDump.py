@@ -258,7 +258,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
             return
         
         entity = Entity()
-        entity.subcategory = self._types[0]
+        entity.subcategory = self.subcategories[0]
         
         # TODO: extract albums
         entity.albums = []

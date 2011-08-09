@@ -21,6 +21,9 @@ class SFMagCrawler(AExternalEntitySource):
     def __init__(self):
         AExternalEntitySource.__init__(self, "SFMag", self.TYPES, 512)
     
+    def getMaxNumEntities(self):
+        return 250 # return an approximation for now
+    
     def _run(self):
         utils.log("[%s] parsing site" % (self, ))
         

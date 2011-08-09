@@ -26,6 +26,9 @@ class ZagatCrawler(AExternalEntitySource):
         AExternalEntitySource.__init__(self, "Zagat", self.TYPES, 512)
         self.base = 'http://www.zagat.com'
     
+    def getMaxNumEntities(self):
+        return 9000 # return an approximation for now
+    
     def _run(self):
         utils.log("[%s] parsing site" % (self, ))
         

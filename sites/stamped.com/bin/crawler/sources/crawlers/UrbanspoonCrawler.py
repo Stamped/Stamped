@@ -26,6 +26,9 @@ class UrbanspoonCrawler(AExternalEntitySource):
         AExternalEntitySource.__init__(self, "Urbanspoon", self.TYPES, 512)
         self.base = 'http://www.urbanspoon.com'
     
+    def getMaxNumEntities(self):
+        return 8000 # return an approximation for now
+    
     def _run(self):
         utils.log("[%s] parsing site" % (self, ))
         
