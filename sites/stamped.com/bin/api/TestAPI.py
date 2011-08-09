@@ -23,7 +23,10 @@ def testGET(baseurl, path, data):
 def testPOST(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
-    result = apiOpener().open("%s/%s" % (baseurl, path), params)
+    try:
+        result = apiOpener().open("%s/%s" % (baseurl, path), params)
+    except IOError as e:
+        return e
     try:
         jsonResult = json.load(result)
         return jsonResult
@@ -47,9 +50,9 @@ def main():
 # 
 #     stampTest(baseurl)
 #     
-#     friendshipTest(baseurl)
+    friendshipTest(baseurl)
 # 
-    collectionTest(baseurl)
+    # collectionTest(baseurl)
 # 
 #     commentTest(baseurl)
 # 
@@ -812,6 +815,8 @@ def collectionTest(baseurl):
     
     path = "account/create.json"
     data = {
+        "client_id": "stampedtest",
+        "client_secret": "august1ftw",
         "first_name": "Kevin",
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
@@ -822,6 +827,8 @@ def collectionTest(baseurl):
     userA = result['user']['user_id']
     tokenA = result['token']
     data = {
+        "client_id": "stampedtest",
+        "client_secret": "august1ftw",
         "first_name": "Robby",
         "last_name": "Stein", 
         "email": "robby@stamped.com", 
@@ -839,8 +846,10 @@ def collectionTest(baseurl):
         raise Exception
 
     
-    path = "account/login.json"
+    path = "oauth2/login.json"
     data = {
+        "client_id": "stampedtest",
+        "client_secret": "august1ftw",
         "screen_name": "kpalms",
         "password": "12345"
     }
@@ -853,22 +862,26 @@ def collectionTest(baseurl):
         raise Exception
     
 
-    path = "account/login.json"
+    path = "oauth2/login.json"
     data = {
+        "client_id": "stampedtest",
+        "client_secret": "august1ftw",
         "screen_name": "rmstein",
         "password": "123456789"
     }
     result = testPOST(baseurl, path, data)
-    if result == "Unable to parse data into JSON":
+    if result[1] == 401:
         print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path
         print result
         raise Exception
-
+    
     
     path = "oauth2/token.json"
     data = {
+        "client_id": "stampedtest",
+        "client_secret": "august1ftw",
         "refresh_token": tokenB['refresh_token'],
         "grant_type": "refresh_token"
     }

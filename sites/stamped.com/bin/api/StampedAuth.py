@@ -59,13 +59,42 @@ class StampedAuth(AStampedAuth):
     # Users #
     # ##### #
     
-    def verifyUserCredentials(self, params, **kwargs):
+    def verifyUserCredentials(self, params):
         logPath = "verifyUserCredentials"
-        if 'logPath' in kwargs:
-            logPath = "%s | %s" % (kwargs['logPath'], logPath)
 
-        utils.logs.info("%s | Verify username/password: %s" % (logPath, params['screen_name']))
-        return self._accountDB.verifyAccountCredentials(params['screen_name'], params['password'])
+        utils.logs.info("Begin authentication request")
+
+        ### Login
+        authenticated_user_id = self._accountDB.verifyAccountCredentials(
+            params['screen_name'], 
+            params['password'])
+        if authenticated_user_id == None:
+            msg = "Invalid user credentials"
+            utils.logs.warn(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+
+        utils.logs.info("Login successful")
+        
+        """
+        IMPORTANT!!!!!
+
+        Right now we're returning a refresh token upon login. This will have to 
+        change ultimately, but it's an okay assumption for now that every login
+        will be from the iPhone. Once that changes we'll have to modify this.
+
+        Also, we'll ultimately need a way to deprecate unused refresh tokens. Not
+        sure how we'll implement that yet....
+        """
+
+        ### Generate Refresh Token & Access Token
+        token = self.addRefreshToken({
+            'client_id': params.client_id,
+            'authenticated_user_id': authenticated_user_id
+        })
+
+        utils.logs.info("Token created")
+
+        return token
 
     # ############## #
     # Refresh Tokens #
@@ -93,7 +122,8 @@ class StampedAuth(AStampedAuth):
                 break
             except:
                 if attempt >= max_attempts:
-                    raise Fail("Unable to add token")
+                    ## Add logging here
+                    raise
                 attempt += 1
 
         utils.logs.info("%s | Refresh token created" % (logPath))
@@ -112,18 +142,36 @@ class StampedAuth(AStampedAuth):
         }
         return ret
     
-    def verifyRefreshToken(self, params, **kwargs):
+    def verifyRefreshToken(self, params):
         logPath = "verifyRefreshToken"
-        if 'logPath' in kwargs:
-            logPath = "%s | %s" % (kwargs['logPath'], logPath)
 
-        utils.logs.info("%s | Verify refresh token: %s" % (logPath, params['refresh_token']))
+        ### Verify Grant Type
+        if params['grant_type'] != 'refresh_token':
+            msg = "Invalid grant type"
+            utils.logs.warn(msg)
+            raise StampedHTTPError("invalid_request", 400, msg)
+
+        ### Verify Refresh Token
         try:
             token = self._refreshTokenDB.getRefreshToken(params['refresh_token'])
-            utils.logs.info("Token received")
-            return token.authenticated_user_id
         except:
-            return None
+            raise
+
+        if token.authenticated_user_id == None:
+            msg = "Invalid refresh token"
+            utils.logs.warn(msg)
+            raise StampedHTTPError("invalid_token", 401, msg)
+
+        ### Generate Access Token
+        token = self.addAccessToken({
+            'client_id': params.client_id,
+            'refresh_token': params.refresh_token,
+            'authenticated_user_id': token.authenticated_user_id
+        })
+
+        utils.logs.info("Token created")
+
+        return token
     
     def removeRefreshToken(self, params):
         raise NotImplementedError
@@ -159,7 +207,8 @@ class StampedAuth(AStampedAuth):
                 break
             except:
                 if attempt >= max_attempts:
-                    raise Fail("Unable to add token")
+                    ## Add logging
+                    raise 
                 attempt += 1
 
         ret = {
