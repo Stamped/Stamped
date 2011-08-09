@@ -925,7 +925,7 @@ class StampedAPI(AStampedAPI):
         result['user'] = stamp['user']
         
         ### TODO: Explicitly define entity, expand if passed full object
-        result['entity'] = self._returnEntity(stamp['entity'], mini=True)
+        result['entity'] = self._returnEntity(Entity(stamp['entity']), mini=True)
         
         if 'blurb' in stamp:
             result['blurb'] = stamp.blurb
