@@ -1045,7 +1045,7 @@ class StampedAPI(AStampedAPI):
             if 'neighborhood' in entity:
                 result['neighborhood'] = entity.neighborhood
             
-            if 'coordinates' in entity.details['place']:
+            if 'coordinates' in entity:
                 result['coordinates'] = "%s,%s" % (entity.lat, entity.lng)
             
             # "Contact" Details
