@@ -66,7 +66,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
   NSString* resourcePath =
       [NSString stringWithFormat:@"/entities/show.json?entity_id=%@", entityObject_.entityID];
-  NSLog(@"resource: %@", resourcePath);
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:entityMapping
                                   delegate:self];
