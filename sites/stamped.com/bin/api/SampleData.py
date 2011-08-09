@@ -569,7 +569,7 @@ def betaAccountData(baseurl):
                 print 'SKIP'
         
     ###############
-          
+    """
     createStamp(baseurl=baseurl, user=travis, title='Frankenstein', category='Book', comment='Absolute favorite book of all time -- nothing like the film depictions.')
     createStamp(baseurl=baseurl, user=travis, title='Tiny Wings', category='App', comment='I love this game.')
     createStamp(baseurl=baseurl, user=robby, title='Meatball Shop', category='Place', comment='Meatball smash! It\'s the meatball sandwich to write home about. ')
@@ -722,7 +722,7 @@ def betaAccountData(baseurl):
     else:
         print 'result: %s' % path
         raise Exception
-        
+    """
         
 
 # where all the magic starts

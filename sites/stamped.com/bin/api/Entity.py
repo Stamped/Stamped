@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
+from datetime import datetime
 from utils import OrderedDict
 from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 
@@ -33,8 +34,8 @@ class Entity(ASchemaBasedAttributeDict):
         'subcategory': basestring,
         'image': basestring, 
         'timestamp': {
-            'created' : basestring, 
-            'modified': basestring, 
+            'created' : datetime, 
+            'modified': datetime, 
         }, 
         # TODO: at some point, we're going to switch to using the 'spherical' search 
         # model of MongoDB, in which case, the order of lng/lat will need to be precise, 

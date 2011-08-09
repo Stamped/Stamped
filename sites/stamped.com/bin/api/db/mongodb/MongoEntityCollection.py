@@ -7,6 +7,7 @@ __license__ = "TODO"
 
 import Globals
 
+from datetime import datetime
 from AMongoCollection import AMongoCollection
 from api.AEntityDB import AEntityDB
 from api.Entity import Entity
@@ -23,8 +24,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         'subcategory': basestring,
         'image': basestring, 
         'timestamp': {
-            'created' : basestring, 
-            'modified': basestring, 
+            'created' : datetime, 
+            'modified': datetime, 
         }, 
         'details': {
             'place': {
