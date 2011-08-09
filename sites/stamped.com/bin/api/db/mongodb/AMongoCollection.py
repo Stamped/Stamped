@@ -19,6 +19,7 @@ class MongoDBConfig(Singleton):
     def __init__(self):
         self.config = AttributeDict()
         self._connection = None
+        self.init()
         
         def disconnect():
             ### TODO: Add disconnect from MongoDB
@@ -289,6 +290,7 @@ class AMongoCollection(object):
             obj = self._objToMongo(document, objId)
             utils.logs.debug("%s | Add Document | Object: %s" % (self, obj))
             ret = self._collection.insert_one(obj, safe=True)
+            utils.logs.debug("%s | Add Document | Document Added" % self)
             return self._getStringFromObjectId(ret)
         except:
             raise Fail("(%s) Unable to add document" % self) 
