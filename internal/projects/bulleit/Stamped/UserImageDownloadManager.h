@@ -18,6 +18,8 @@ extern NSString* const kMediumUserImageLoadedNotification;
 @interface UserImageDownloadManager : NSObject <UserImageDownloaderDelegate> {
  @private
   NSMutableDictionary* downloads_;
+  NSMutableDictionary* mediumImageCache_;
+  NSMutableDictionary* imageCache_;
 }
 
 + (UserImageDownloadManager*)sharedManager;
