@@ -1058,7 +1058,7 @@ class StampedAPI(AStampedAPI):
             
             # Affiliate Data
             if 'openTable' in entity:
-                result['opentable_url'] = entity.reserveURL
+                result['opentable_url'] = "http://www.opentable.com/reserve/%s&ref=9166" % (entity.reserveURL)
             
             if 'timestamp' in entity:
                 if 'modified' in entity.timestamp:
