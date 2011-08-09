@@ -56,7 +56,7 @@ def logRaw(s, includeFormat=False):
     sys.stdout.write(s)
     sys.stdout.flush()
     sys.stderr.flush()
-    
+
 # Logging
 logs = logging.getLogger('api')
 logs.setLevel(logging.DEBUG)

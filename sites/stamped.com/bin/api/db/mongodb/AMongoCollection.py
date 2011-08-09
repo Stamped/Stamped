@@ -101,10 +101,10 @@ class MongoDBConfig(Singleton):
         
         # TODO: have a more consistent approach to handling AutoReconnect!
         utils.log("[%s] Creating MongoDB connection" % self)
-
+        
         delay = 1
         max_delay = 16
-            
+        
         while True:            
             try:
                 utils.log("[%s] connecting to %s:%d" % (self, self.host, self.port))
