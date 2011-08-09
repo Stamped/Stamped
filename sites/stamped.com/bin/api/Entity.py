@@ -193,7 +193,8 @@ class Entity(ASchemaBasedAttributeDict):
                 'uurl' : basestring, 
             }, 
             'nymag' : { },
-            'sfmag' : { }, 
+            'sfmag' : { },
+            'latimes' : { }, 
         }
     }
     
