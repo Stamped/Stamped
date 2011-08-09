@@ -74,7 +74,7 @@ class EntityDeduper(Greenlet):
         entity0 = Entity(self.db0._mongoToObj(current,  'entity_id'))
         
         earthRadius = 3963.192 # miles
-        maxDistance = 100.0 / earthRadius # convert to radians
+        maxDistance = 50.0 / earthRadius # convert to radians
         
         # TODO: verify lat / lng versus lng / lat
         q = SON({"$near" : [entity0.lat, entity0.lng]})
