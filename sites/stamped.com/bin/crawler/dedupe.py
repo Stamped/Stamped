@@ -143,6 +143,8 @@ def main():
                     utils.log("   %d) removing %s" % (i + 1, match.title))
                     db0.removeEntity(match.entity_id)
                     db1.removeEntity(match.entity_id)
+                
+                db1.updateEntity(keep)
     
     utils.log("found a total of %d duplicates (processed %d)" % (numDuplicates, numEntities))
 
