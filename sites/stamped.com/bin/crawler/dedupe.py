@@ -30,9 +30,6 @@ def parseCommandLine():
         action="store", dest="db", 
         help="db to connect to for output")
     
-    parser.add_option("-l", "--limit", default=None, type="int", 
-        help="limits the number of entities to import")
-    
     (options, args) = parser.parse_args()
     
     if options.db:
@@ -128,6 +125,7 @@ def main():
                 
                 numDuplicates += numMatches
                 
+                # look through and delete all duplicates
                 for i in xrange(numMatches):
                     match = matches[i]
                     
@@ -138,6 +136,8 @@ def main():
                             elif isinstance(v, dict):
                                 _addDict(v, dest)
                     
+                    # add any fields from this version of the duplicate to the version 
+                    # that we're keeping if they don't already exist
                     _addDict(match.getDataAsDict(), keep)
                     
                     utils.log("   %d) removing %s" % (i + 1, match.title))

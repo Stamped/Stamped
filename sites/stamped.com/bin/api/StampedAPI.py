@@ -869,7 +869,7 @@ class StampedAPI(AStampedAPI):
                 entity_id = self._entityDB.addEntity(entity)
                 
                 if 'place' in entity:
-                    entity._id = entity_id
+                    entity.entity_id = entity_id
                     self._placesEntityDB.addEntity(entity)
             except Exception as e:
                 utils.log("[%s] error adding 1 entities:" % (self, ))

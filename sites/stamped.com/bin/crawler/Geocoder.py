@@ -161,11 +161,18 @@ class BingGeocoderService(AGeocoder):
     
     API_KEYS = [
         # http://www.bingmapsportal.com
+        # fisch0920
         'Av4b8Qag0v37rTVVXvnW5lLWASAu23UoZaIlRvlCGmAo3uVQpoZ_PYV4pOSAP2X-', 
         'Aj9gK4omLJOx0k8DaB1IAIEbxyDWSCqX3RcyHNwSi9JApwyH_IDPY-vX25ZcfhT3', 
         'AvAbfTexxi0yqXc5_jGXEWQo4lOFYEg8BGlbVQaYrQ8eD3n3A4BLK5hDDEPJmV4K', 
         'AjRt_gjwhN8do7Qfpdd4seGmIphm-yjnT6sCSaw3kq7WdwHjnh-Pi1J4RmGVTxFU', 
         'ApaKod0M073qzBAEsyePgwrz4m6CVsmpWEOwPJiWR45qm9U8b0ypPp1IyzK7IMzF', 
+        # fisch09202
+        'AhnmEmOJgjBANPQI5iaV9rcySH8YizDQAwVbDiuO5WxUFcbxxwNSbd5wYVkL21bz', 
+        'AkaGlNCaf-hac53qrbaqFLw-FEjFUSUfX0GjcBdwyI0xbCv6dltyXvo91Y6TskmY', 
+        'AmSDMaSSykwPgh9uD-wuK5sqpnjm9FidB_7gdo3mBOfVLeRHSfMmST1ZP81rPFdZ', 
+        'Ak2jWnk1TM9zUBEEnm4WdyaFUj4JHCKvmViqjQHBnnwlm7bo0zSF4jlN19UBeFuc', 
+        'AqS61Bh-P1Xy5n0BMSLpdWd2Warsy3ilFcrofCuWVsLllOKHDsYPLCD56IMnlYe3', 
     ]
     
     def __init__(self):
@@ -241,6 +248,10 @@ class YahooGeocoderService(AGeocoder):
         '02dded0de677c823c1a55d595b34dc060e6ec134', 
         'fa22a2913484737761258707411ae062c74f01c1', 
         '299e8883e4b3495df615b7fa2c416bc4cddf22b2', 
+        'f174496b5adb0a5f642c068ff8afdddf5f24f889', 
+        '6d2b7fd860e2675c039eca27b422cf048c583105', 
+        'b91274e18118bf79ddbd63228e8ef4b661fa0741', 
+        '90dccb1eedfb4406ceff382071aae08f2ba09daf', 
     ]
     
     def __init__(self):
@@ -295,8 +306,6 @@ class YahooGeocoderService(AGeocoder):
                 latLng = (float(primary['latitude']), float(primary['longitude']))
                 
                 return self.getValidatedLatLng(latLng)
-            except ExceededQuotaException:
-                raise
             except:
                 utils.log('[YahooGeocoderService] error converting "' + url + '"')
                 
@@ -424,24 +433,21 @@ def main():
         isConverted = False
         
         for geocoder in options.geocoders:
-            try:
-                latLng = geocoder.addressToLatLng(address)
+            latLng = geocoder.addressToLatLng(address)
+            
+            if latLng is None or latLng[0] is None or latLng[1] is None:
+                print "Service %s failed to convert address '%s'" % (geocoder.getName(), address)
+            else:
+                isConverted = True
+                result = {
+                    'Service' : geocoder.getName(), 
+                    'Address' : address, 
+                    'Latitude' : latLng[0], 
+                    'Longitude' : latLng[1], 
+                    'LatLng' : geocoder.getEncodedLatLng(latLng)
+                }
                 
-                if latLng is None or latLng[0] is None or latLng[1] is None:
-                    print "Service %s failed to convert address '%s'" % (geocoder.getName(), address)
-                else:
-                    isConverted = True
-                    result = {
-                        'Service' : geocoder.getName(), 
-                        'Address' : address, 
-                        'Latitude' : latLng[0], 
-                        'Longitude' : latLng[1], 
-                        'LatLng' : geocoder.getEncodedLatLng(latLng)
-                    }
-                    
-                    print str(result)
-            except ExceededQuotaException:
-                print "%s exceeded quota usage" % str(geocoder)
+                print str(result)
         
         if isConverted:
             numConverted += 1

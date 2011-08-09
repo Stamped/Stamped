@@ -151,14 +151,19 @@ class AWSDeploymentStack(ADeploymentStack):
                 'numInstances' : 1, 
                 'mapSourceToProcess' : True, 
             }, 
-            #{
-            #    'sources' : [ 'opentable', ], 
-            #    'numInstances' : 8, 
-            #    'numProcesses' : 8, 
-            #}, 
+            {
+                'sources' : [ 'opentable', ], 
+                'numInstances' : 2, 
+                'numProcesses' : 4, 
+            }, 
+            {
+                'sources' : [ 'nymag', 'sfmag', 'zagat', ], 
+                'numInstances' : 1, 
+                'mapSourceToProcess' : True, 
+            }, 
             #{
             #    'sources' : [ 'factualusrestaurants', ], 
-            #    'numInstances' : 40, 
+            #    'numInstances' : 12, 
             #    'numProcesses' : 8, 
             #}, 
         ]
@@ -185,11 +190,18 @@ class AWSDeploymentStack(ADeploymentStack):
         # initialized for this crawler run, as opposed to spawning a new set
         if len(crawler_instances) == num_instances:
             for instance in crawler_instances:
-                num = int(instance.tags['name'].replace('crawler', ''))
-                if 'instances' in crawlers[num]:
-                    crawlers[num]['instances'].append(instance)
+                num  = int(instance.tags['name'].replace('crawler', ''))
+                inum = 0
+                while True:
+                    num -= crawlers[inum]['numInstances']
+                    if num < 0:
+                        break
+                    inum += 1
+                
+                if 'instances' in crawlers[inum]:
+                    crawlers[inum]['instances'].append(instance)
                 else:
-                    crawlers[num]['instances'] = [ instance ]
+                    crawlers[inum]['instances'] = [ instance ]
             #for crawler in crawlers:
             #    from pprint import pprint
             #    pprint(crawler)
