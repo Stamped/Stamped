@@ -8,6 +8,7 @@ __license__ = "TODO"
 import Globals
 import bson, copy, math, os, pymongo, time, utils, atexit
 
+from pprint import pprint
 from errors import Fail
 from utils import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
 from datetime import datetime
@@ -145,6 +146,8 @@ class AMongoCollection(object):
         return bson.objectid.ObjectId(string)
     
     def _mongoToObj(self, data, objId='id'):
+        assert data is not None
+        
         data[objId] = self._getStringFromObjectId(data['_id'])
         del(data['_id'])
         return data
@@ -155,7 +158,6 @@ class AMongoCollection(object):
         
         if obj.isValid == False:
             utils.log("[%s] error: encountered invalid object" % self)
-            from pprint import pprint
             pprint(obj.getDataAsDict())
             return None
         
@@ -164,17 +166,17 @@ class AMongoCollection(object):
         if '_id' in data:
             if isinstance(data['_id'], basestring):
                 data['_id'] = self._getObjectIdFromString(data['_id'])
-        
         elif objId in data:
-            data['_id'] = self._getObjectIdFromString(data[objId])
+            _id = data[objId]
             del(data[objId])
-            
-        #utils.log("Data: %s" % data)
+            data['_id'] = self._getObjectIdFromString(_id)
         
+        #pprint(data)
         return self._mapDataToSchema(data, self.SCHEMA)
     
     def _objsToMongo(self, objs, objId='id'):
-        return filter(lambda o: o is not None, map(self._objToMongo, objs, objId))
+        objs = map(lambda o: self._objToMongo(o, objId), objs)
+        return filter(lambda o: o is not None, objs)
     
     def _mapDataToSchema(self, data, schema):
         def _unionDict(source, schema, dest):
@@ -183,9 +185,8 @@ class AMongoCollection(object):
             return dest
         
         def _unionItem(k, v, schema, dest):
-            # _id should not be converted to a basestring! 
+            # _id should not be converted to a basestring!
             if k == '_id':
-                ### TODO: Make this more robust!
                 dest[k] = v
                 return dest
             elif k in schema:
@@ -266,13 +267,17 @@ class AMongoCollection(object):
     
     def _addDocument(self, document, objId='id'):
         obj = self._objToMongo(document, objId)
+        #pprint(obj)
+        #manipulate = not '_id' in obj
         ret = self._collection.insert_one(obj, safe=True)
         return self._getStringFromObjectId(ret)
     
     def _addDocuments(self, documents, objId='id'):
         objs = self._objsToMongo(documents, objId)
-        self._collection.insert(objs, safe=True)
-        return True
+        #pprint(objs[0])
+        #manipulate = not '_id' in objs[0]
+        ret  = self._collection.insert(objs, safe=True)
+        return map(self._getStringFromObjectId, ret)
     
     def _getDocumentFromId(self, documentId, objId='id'):
         doc = self._collection.find_one(self._getObjectIdFromString(documentId))

@@ -13,6 +13,7 @@ from db.mongodb.AMongoCollection import MongoDBConfig
 from pymongo import GEO2D
 from pymongo.son import SON
 
+from gevent.pool import Pool
 from optparse import OptionParser
 from EntityMatcher2 import EntityMatcher2
 from Entity import Entity
@@ -53,17 +54,25 @@ def parseCommandLine():
     
     return (options, args)
 
+def _gen_entities(db1, docs):
+    for doc in docs:
+        d = db1._collection.find_one({ '_id' : doc['_id'] })
+        assert d is not None
+        yield Entity(db1._mongoToObj(d, 'entity_id'))
+
 def main():
     options, args = parseCommandLine()
     
     matcher = EntityMatcher2()
     api = MongoStampedAPI()
-    db = api._placesEntityDB
+    
+    db0 = api._placesEntityDB
+    db1 = api._entityDB
     
     results = []
     last = None
     
-    db._collection.ensure_index([("coordinates", GEO2D)])
+    db0._collection.ensure_index([("coordinates", GEO2D)])
     numDuplicates = 0
     numEntities = 0
     
@@ -73,29 +82,34 @@ def main():
         else:
             query = {'_id' : { "$gt" : last }}
         
-        current = db._collection.find_one(query)
+        current = db0._collection.find_one(query)
         if current is None:
             break
         
         numEntities += 1
         last = bson.objectid.ObjectId(current['_id'])
         
-        entity = Entity(db._mongoToObj(current, 'entity_id'))
+        current1 = db1._collection.find_one({ '_id' : current['_id'] })
+        assert current1 is not None
+        
+        entity1 = Entity(db1._mongoToObj(current1, 'entity_id'))
+        entity0 = Entity(db0._mongoToObj(current,  'entity_id'))
         
         earthRadius = 3963.192 # miles
         maxDistance = 5.0 / earthRadius # convert to radians
         
         # TODO: verify lat / lng versus lng / lat
-        q = SON({"$near" : [entity.lat, entity.lng]})
+        q = SON({"$near" : [entity0.lat, entity0.lng]})
         q.update({"$maxDistance" : maxDistance })
         
-        docs     = db._collection.find({"coordinates" : q})
-        entities = (Entity(db._mongoToObj(doc, 'entity_id')) for doc in docs)
-        matches  = list(matcher.genMatchingEntities(entity, entities))
+        docs     = db0._collection.find({"coordinates" : q})
+        entities = _gen_entities(db1, docs)
+        matches  = list(matcher.genMatchingEntities(entity1, entities))
         
         if len(matches) > 0:
-            matches.insert(0, entity)
+            matches.insert(0, entity1)
             
+            # determine which one of the duplicates to keep
             keep = None
             for i in xrange(len(matches)):
                 match = matches[i]
@@ -103,20 +117,34 @@ def main():
                     keep = matches.pop(i)
                     break
             
-            if keep is not None:
+            if keep is None:
                 keep = matches.pop(0)
             
+            matches = filter(lambda m: m.entity_id != keep.entity_id, matches)
             numMatches = len(matches)
+            
             if numMatches > 0:
-                print "%s) found %d duplicates" % (keep.title, numMatches)
+                utils.log("%s) found %d duplicate%s" % (keep.title, numMatches, '' if 0 == numMatches else 's'))
+                
                 numDuplicates += numMatches
                 
                 for i in xrange(numMatches):
                     match = matches[i]
-                    print "   %d) removing %s" % (i + 1, match.title)
-                    db._removeDocument(match.entity_id)
+                    
+                    def _addDict(src, dest):
+                        for k, v in src.iteritems():
+                            if not k in dest:
+                                dest[k] = v
+                            elif isinstance(v, dict):
+                                _addDict(v, dest)
+                    
+                    _addDict(match.getDataAsDict(), keep)
+                    
+                    utils.log("   %d) removing %s" % (i + 1, match.title))
+                    db0.removeEntity(match.entity_id)
+                    db1.removeEntity(match.entity_id)
     
-    print "found a total of %d duplicates (processed %d)" % (numDuplicates, numEntities)
+    utils.log("found a total of %d duplicates (processed %d)" % (numDuplicates, numEntities))
 
 if __name__ == '__main__':
     main()

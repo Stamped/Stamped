@@ -596,7 +596,7 @@ class StampedAPI(AStampedAPI):
     def searchEntities(self, params):
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
-        entities = self._entityDB.matchEntities(params.q, limit=10)
+        entities = self._entityDB.searchEntities(params.q, limit=10)
         result = []
         
         for entity in entities:
@@ -866,10 +866,11 @@ class StampedAPI(AStampedAPI):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))
             try:
+                entity_id = self._entityDB.addEntity(entity)
+                
                 if 'place' in entity:
+                    entity._id = entity_id
                     self._placesEntityDB.addEntity(entity)
-                else:
-                    self._entityDB.addEntity(entity)
             except Exception as e:
                 utils.log("[%s] error adding 1 entities:" % (self, ))
                 utils.printException()
@@ -884,10 +885,18 @@ class StampedAPI(AStampedAPI):
         utils.log("[%s] adding %d entities" % (self, numEntities))
         
         try:
-            if 'place' in entities[0]:
-                self._placesEntityDB.addEntities(entities)
-            else:
-                self._entityDB.addEntities(entities)
+            entity_ids = self._entityDB.addEntities(entities)
+            assert len(entity_ids) == len(entities)
+            place_entities = []
+            
+            for i in xrange(len(entities)):
+                entity = entities[i]
+                if 'place' in entity:
+                    entity.entity_id = entity_ids[i]
+                    place_entities.append(entity)
+            
+            if len(place_entities) > 0:
+                self._placesEntityDB.addEntities(place_entities)
         except Exception as e:
             utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
             utils.printException()

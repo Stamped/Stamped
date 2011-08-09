@@ -42,6 +42,6 @@ class APlacesEntityDB(AEntitySink):
         raise NotImplementedError
     
     @abstract
-    def matchEntities(self, query, limit=20):
+    def searchEntities(self, query, limit=20):
         raise NotImplementedError
 
