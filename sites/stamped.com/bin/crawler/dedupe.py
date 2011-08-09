@@ -13,6 +13,7 @@ from db.mongodb.AMongoCollection import MongoDBConfig
 from pymongo import GEO2D
 from pymongo.son import SON
 
+from gevent import Greenlet
 from gevent.pool import Pool
 from optparse import OptionParser
 from EntityMatcher2 import EntityMatcher2
@@ -20,6 +21,110 @@ from Entity import Entity
 from pprint import pprint
 
 #-----------------------------------------------------------
+
+class EntityDeduper(Greenlet):
+    def __init__(self, options):
+        Greenlet.__init__(self)
+        
+        self.options = options
+        self.matcher = EntityMatcher2()
+        self.api = MongoStampedAPI()
+        self.db0 = self.api._placesEntityDB
+        self.db1 = self.api._entityDB
+    
+    def _run(self):
+        results = []
+        last = None
+        
+        self.db0._collection.ensure_index([("coordinates", GEO2D)])
+        self.numDuplicates = 0
+        self.numEntities = 0
+        pool = Pool(512)
+        
+        while True:
+            if last is None:
+                query = None
+            else:
+                query = {'_id' : { "$gt" : last }}
+            
+            current = self.db0._collection.find_one(query)
+            if current is None:
+                break
+            
+            self.numEntities += 1
+            last = bson.objectid.ObjectId(current['_id'])
+            pool.spawn(self._dedupe_one, current)
+        
+        pool.join()
+        utils.log("found a total of %d duplicates (processed %d)" % (self.numDuplicates, self.numEntities))
+    
+    def _dedupe_one(self, current):
+        current1 = self.db1._collection.find_one({ '_id' : current['_id'] })
+        if current1 is None:
+            return
+        
+        entity1 = Entity(self.db1._mongoToObj(current1, 'entity_id'))
+        entity0 = Entity(self.db0._mongoToObj(current,  'entity_id'))
+        
+        earthRadius = 3963.192 # miles
+        maxDistance = 5.0 / earthRadius # convert to radians
+        
+        # TODO: verify lat / lng versus lng / lat
+        q = SON({"$near" : [entity0.lat, entity0.lng]})
+        q.update({"$maxDistance" : maxDistance })
+        
+        docs     = self.db0._collection.find({"coordinates" : q})
+        entities = self._gen_entities(docs)
+        matches  = list(self.matcher.genMatchingEntities(entity1, entities))
+        
+        if len(matches) > 0:
+            matches.insert(0, entity1)
+            
+            # determine which one of the duplicates to keep
+            keep = None
+            for i in xrange(len(matches)):
+                match = matches[i]
+                if 'openTable' in match:
+                    keep = matches.pop(i)
+                    break
+            
+            if keep is None:
+                keep = matches.pop(0)
+            
+            matches = filter(lambda m: m.entity_id != keep.entity_id, matches)
+            numMatches = len(matches)
+            
+            if numMatches > 0:
+                utils.log("%s) found %d duplicate%s" % (keep.title, numMatches, '' if 0 == numMatches else 's'))
+                
+                self.numDuplicates += numMatches
+                
+                # look through and delete all duplicates
+                for i in xrange(numMatches):
+                    match = matches[i]
+                    
+                    def _addDict(src, dest):
+                        for k, v in src.iteritems():
+                            if not k in dest:
+                                dest[k] = v
+                            elif isinstance(v, dict):
+                                _addDict(v, dest)
+                    
+                    # add any fields from this version of the duplicate to the version 
+                    # that we're keeping if they don't already exist
+                    _addDict(match.getDataAsDict(), keep)
+                    
+                    utils.log("   %d) removing %s" % (i + 1, match.title))
+                    self.db0.removeEntity(match.entity_id)
+                    self.db1.removeEntity(match.entity_id)
+                
+                self.db1.updateEntity(keep)
+    
+    def _gen_entities(self, docs):
+        for doc in docs:
+            d = self.db1._collection.find_one({ '_id' : doc['_id'] })
+            if d is not None:
+                yield Entity(self.db1._mongoToObj(d, 'entity_id'))
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -51,102 +156,12 @@ def parseCommandLine():
     
     return (options, args)
 
-def _gen_entities(db1, docs):
-    for doc in docs:
-        d = db1._collection.find_one({ '_id' : doc['_id'] })
-        assert d is not None
-        yield Entity(db1._mongoToObj(d, 'entity_id'))
-
 def main():
     options, args = parseCommandLine()
     
-    matcher = EntityMatcher2()
-    api = MongoStampedAPI()
-    
-    db0 = api._placesEntityDB
-    db1 = api._entityDB
-    
-    results = []
-    last = None
-    
-    db0._collection.ensure_index([("coordinates", GEO2D)])
-    numDuplicates = 0
-    numEntities = 0
-    
-    while True:
-        if last is None:
-            query = None
-        else:
-            query = {'_id' : { "$gt" : last }}
-        
-        current = db0._collection.find_one(query)
-        if current is None:
-            break
-        
-        numEntities += 1
-        last = bson.objectid.ObjectId(current['_id'])
-        
-        current1 = db1._collection.find_one({ '_id' : current['_id'] })
-        assert current1 is not None
-        
-        entity1 = Entity(db1._mongoToObj(current1, 'entity_id'))
-        entity0 = Entity(db0._mongoToObj(current,  'entity_id'))
-        
-        earthRadius = 3963.192 # miles
-        maxDistance = 5.0 / earthRadius # convert to radians
-        
-        # TODO: verify lat / lng versus lng / lat
-        q = SON({"$near" : [entity0.lat, entity0.lng]})
-        q.update({"$maxDistance" : maxDistance })
-        
-        docs     = db0._collection.find({"coordinates" : q})
-        entities = _gen_entities(db1, docs)
-        matches  = list(matcher.genMatchingEntities(entity1, entities))
-        
-        if len(matches) > 0:
-            matches.insert(0, entity1)
-            
-            # determine which one of the duplicates to keep
-            keep = None
-            for i in xrange(len(matches)):
-                match = matches[i]
-                if 'openTable' in match:
-                    keep = matches.pop(i)
-                    break
-            
-            if keep is None:
-                keep = matches.pop(0)
-            
-            matches = filter(lambda m: m.entity_id != keep.entity_id, matches)
-            numMatches = len(matches)
-            
-            if numMatches > 0:
-                utils.log("%s) found %d duplicate%s" % (keep.title, numMatches, '' if 0 == numMatches else 's'))
-                
-                numDuplicates += numMatches
-                
-                # look through and delete all duplicates
-                for i in xrange(numMatches):
-                    match = matches[i]
-                    
-                    def _addDict(src, dest):
-                        for k, v in src.iteritems():
-                            if not k in dest:
-                                dest[k] = v
-                            elif isinstance(v, dict):
-                                _addDict(v, dest)
-                    
-                    # add any fields from this version of the duplicate to the version 
-                    # that we're keeping if they don't already exist
-                    _addDict(match.getDataAsDict(), keep)
-                    
-                    utils.log("   %d) removing %s" % (i + 1, match.title))
-                    db0.removeEntity(match.entity_id)
-                    db1.removeEntity(match.entity_id)
-                
-                db1.updateEntity(keep)
-    
-    utils.log("found a total of %d duplicates (processed %d)" % (numDuplicates, numEntities))
+    deduper = EntityDeduper(options)
+    deduper.start()
+    deduper.join()
 
 if __name__ == '__main__':
     main()
