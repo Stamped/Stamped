@@ -1016,6 +1016,8 @@ class StampedAPI(AStampedAPI):
             e2 = self._placesEntityDB.getEntity(entity_id)
             entity.coordinates = e2.coordinates
         
+        from pprint import pprint
+        pprint(entity.getDataAsDict())
         if mini == True:
             if 'coordinates' in entity:
                 result['coordinates'] = "%s,%s" % (
