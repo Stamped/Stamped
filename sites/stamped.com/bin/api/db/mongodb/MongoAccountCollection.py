@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, auth
+import Globals, auth, utils
 from datetime import datetime
 
 from AMongoCollection import AMongoCollection
@@ -66,6 +66,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def addAccount(self, user):
         ### TEMP: For now, verify that no duplicates can occur
         self._collection.ensure_index('screen_name', unique=True)
+        user['password'] = auth.generatePasswordHash(user['password'])
         
         return self._addDocument(user, objId='user_id')
     
@@ -87,9 +88,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         raise NotImplementedError("TODO")
 
     def verifyAccountCredentials(self, screen_name, password):
+        utils.logs.debug("verifyAccountCredentials: %s:%s" % (screen_name, password))
         try:
             user = self._collection.find_one({'screen_name': screen_name})
-            return auth.comparePasswordToHash(password, user['password'])
+            utils.logs.debug("User data: %s" % (user))
+            if auth.comparePasswordToHash(password, user['password']):
+                return user['_id']
+            return None
         except:
-            return False
+            return None
 

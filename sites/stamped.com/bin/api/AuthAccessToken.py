@@ -14,6 +14,7 @@ class AuthAccessToken(ASchemaBasedAttributeDict):
     _schema = {
         'token_id': basestring,
         'client_id': basestring,
+        'refresh_token': basestring,
         'authenticated_user_id': basestring,
         'expires': datetime,
         'timestamp': {
@@ -30,6 +31,9 @@ class AuthAccessToken(ASchemaBasedAttributeDict):
 
         valid &= 'client_id' in self and isinstance(self.client_id, basestring)
         utils.logs.debug('isValid: %s (token.client_id)' % valid)
+
+        valid &= 'refresh_token' in self and isinstance(self.refresh_token, basestring)
+        utils.logs.debug('isValid: %s (token.refresh_token)' % valid)
 
         valid &= 'authenticated_user_id' in self and isinstance(self.authenticated_user_id, basestring)
         utils.logs.debug('isValid: %s (token.authenticated_user_id)' % valid)

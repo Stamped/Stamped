@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import datetime, time, random, hashlib
+import utils
 
 def generatePasswordHash(password):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVXYZ0123456789abcdefghijklmnopqrstuvwxyz'
@@ -22,7 +23,7 @@ def comparePasswordToHash(password, passwordHash):
         h = hashlib.md5()
         h.update(salt)
         h.update(password)
-        if salt + h.hexdigest == passwordHash:
+        if salt + h.hexdigest() == passwordHash:
             return True
         return False
     except:

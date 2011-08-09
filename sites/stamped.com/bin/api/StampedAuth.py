@@ -64,17 +64,22 @@ class StampedAuth(AStampedAuth):
         if 'logPath' in kwargs:
             logPath = "%s | %s" % (kwargs['logPath'], logPath)
 
-        utils.logs.info("Verify username/password: %s" % params['screen_name'])
+        utils.logs.info("%s | Verify username/password: %s" % (logPath, params['screen_name']))
         return self._accountDB.verifyAccountCredentials(params['screen_name'], params['password'])
 
     # ############## #
     # Refresh Tokens #
     # ############## #
     
-    def addRefreshToken(self, params):
+    def addRefreshToken(self, params, **kwargs):
+        logPath = "verifyRefreshToken"
+        if 'logPath' in kwargs:
+            logPath = "%s | %s" % (kwargs['logPath'], logPath)
+
         attempt = 1
         max_attempts = 5
             
+        utils.logs.info("%s | Add refresh token" % (logPath))
         while True:
             try:
                 refreshToken = AuthRefreshToken()
@@ -82,18 +87,28 @@ class StampedAuth(AStampedAuth):
                 refreshToken.client_id = params['client_id']
                 refreshToken.authenticated_user_id = params['authenticated_user_id']
                 refreshToken.timestamp = { 'created': datetime.datetime.utcnow() }
+                utils.logs.debug("%s | Refresh Token: %s" % (logPath, refreshToken.getDataAsDict()))
+
                 self._refreshTokenDB.addRefreshToken(refreshToken)
                 break
             except:
                 if attempt >= max_attempts:
-                    raise
+                    raise Fail("Unable to add token")
                 attempt += 1
-        
-        accessToken = self.addAccessToken(refreshToken)
+
+        utils.logs.info("%s | Refresh token created" % (logPath))
+
+        accessTokenParams = {
+            'client_id': refreshToken['client_id'],
+            'refresh_token': refreshToken['token_id'],
+            'authenticated_user_id': refreshToken['authenticated_user_id']
+        }
+        accessToken = self.addAccessToken(accessTokenParams, logPath=logPath)
+
         ret = {
-            'access_token': accessToken.token_id,
-            'expires_in': 3920,
-            'refresh_token': refreshToken.token_id
+            'access_token': accessToken['access_token'],
+            'expires_in': accessToken['expires_in'],
+            'refresh_token': refreshToken['token_id']
         }
         return ret
     
@@ -102,15 +117,11 @@ class StampedAuth(AStampedAuth):
         if 'logPath' in kwargs:
             logPath = "%s | %s" % (kwargs['logPath'], logPath)
 
-        utils.logs.info("Verify access token: %s" % params['oauth_token'])
+        utils.logs.info("%s | Verify refresh token: %s" % (logPath, params['refresh_token']))
         try:
-            token = self._accessTokenDB.getAccessToken(params['oauth_token'])
+            token = self._refreshTokenDB.getRefreshToken(params['refresh_token'])
             utils.logs.info("Token received")
             return token.authenticated_user_id
-            if token['expires'] < datetime.datetime.utcnow():
-                return token.authenticated_user_id
-            self._accessTokenDB.removeAccessToken(params.oauth_token)
-            return None
         except:
             return None
     
@@ -121,25 +132,41 @@ class StampedAuth(AStampedAuth):
     # Access Tokens #
     # ############# #
     
-    def addAccessToken(self, params):
+    def addAccessToken(self, params, **kwargs):
+        logPath = "verifyRefreshToken"
+        if 'logPath' in kwargs:
+            logPath = "%s | %s" % (kwargs['logPath'], logPath)
+
         attempt = 1
         max_attempts = 5
+        expire = 3920
             
+        utils.logs.info("%s | Add access token" % (logPath))
         while True:
             try:
-                token = AuthAccessToken()
-                token.token_id = self._generateToken(22)
-                token.client_id = params['client_id']
-                token.authenticated_user_id = params['authenticated_user_id']
                 rightNow = datetime.datetime.utcnow()
-                token.expires = rightNow + datetime.timedelta(seconds=3940)
-                token.timestamp = { 'created': rightNow }
-                self._accessTokenDB.addAccessToken(token)
-                return token
+
+                accessToken = AuthAccessToken()
+                accessToken.token_id = self._generateToken(22)
+                accessToken.client_id = params['client_id']
+                accessToken.refresh_token = params['refresh_token']
+                accessToken.authenticated_user_id = params['authenticated_user_id']
+                accessToken.expires = rightNow + datetime.timedelta(seconds=expire)
+                accessToken.timestamp = { 'created': rightNow }
+                utils.logs.debug("%s | Access Token: %s" % (logPath, accessToken.getDataAsDict()))
+                
+                self._accessTokenDB.addAccessToken(accessToken)
+                break
             except:
                 if attempt >= max_attempts:
-                    raise
+                    raise Fail("Unable to add token")
                 attempt += 1
+
+        ret = {
+            'access_token': accessToken.token_id,
+            'expires_in': expire
+        }
+        return ret
     
     def verifyAccessToken(self, params, **kwargs):
         logPath = "verifyRefreshToken"
@@ -151,6 +178,7 @@ class StampedAuth(AStampedAuth):
             token = self._accessTokenDB.getAccessToken(params['oauth_token'])
             utils.logs.info("%s | Access token matched" % logPath)
             utils.logs.debug("%s | Access token data: %s" % (logPath, token.getDataAsDict()))
+
             if token['expires'] > datetime.datetime.utcnow():
                 utils.logs.info("%s | Valid access token; returning user_id" % logPath)
                 return token.authenticated_user_id

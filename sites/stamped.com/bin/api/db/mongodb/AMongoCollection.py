@@ -65,6 +65,12 @@ class MongoDBConfig(Singleton):
             #         "port" : 27017, 
             #     }
             # })
+            # self.config = AttributeDict({
+            #    "mongodb" : {
+            #        "host" : "localhost", 
+            #        "port" : 27017, 
+            #    }
+            # })
             self.config = AttributeDict({
                "mongodb" : {
                    "host" : "localhost", 

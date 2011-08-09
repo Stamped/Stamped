@@ -24,8 +24,11 @@ def testPOST(baseurl, path, data):
     params = urllib.urlencode(data)
 #     print params
     result = apiOpener().open("%s/%s" % (baseurl, path), params)
-    jsonResult = json.load(result)
-    return jsonResult
+    try:
+        jsonResult = json.load(result)
+        return jsonResult
+    except:
+        return "Unable to parse data into JSON"
 
 
 def main():
@@ -834,6 +837,48 @@ def collectionTest(baseurl):
         print 'FAIL: %s' % path
         print userID
         raise Exception
+
+    
+    path = "account/login.json"
+    data = {
+        "screen_name": "kpalms",
+        "password": "12345"
+    }
+    tokenA = testPOST(baseurl, path, data)
+    if len(tokenA['access_token']) == 22:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print tokenA
+        raise Exception
+    
+
+    path = "account/login.json"
+    data = {
+        "screen_name": "rmstein",
+        "password": "123456789"
+    }
+    result = testPOST(baseurl, path, data)
+    if result == "Unable to parse data into JSON":
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+
+    
+    path = "oauth2/token.json"
+    data = {
+        "refresh_token": tokenB['refresh_token'],
+        "grant_type": "refresh_token"
+    }
+    tokenB = testPOST(baseurl, path, data)
+    if len(tokenB['access_token']) == 22:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print tokenA
+        raise Exception
         
         
     path = "account/settings.json"
@@ -869,7 +914,7 @@ def collectionTest(baseurl):
     }
     result = testPOST(baseurl, path, data)
     if result['color_primary'] == '222222':
-        print 'PASS: %s' % path
+        print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path
         print result
@@ -888,7 +933,7 @@ def collectionTest(baseurl):
     }
     result = testPOST(baseurl, path, data)
     if result['profile_image'] == 'https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg':
-        print 'PASS: %s' % path
+        print 'DATA: %s' % path
     else:
         print 'FAIL: %s' % path
         print result

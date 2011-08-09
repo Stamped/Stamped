@@ -24,9 +24,6 @@ REST_API_VERSION = "v1"
 REST_API_PREFIX  = "/api/%s/" % REST_API_VERSION
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
-USERNAME = 'stampedtest'
-PASSWORD = 'august1ftw'
-
 app = Flask(__name__)
 stampedAPI = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()
@@ -53,34 +50,80 @@ def transformOutput(request, d, logPath=None):
     utils.logs.info("%s | Transform output: \"%s\"" % (logPath, output_json))
     return output
 
-def parseRequestForm(schema, form, addOAuthToken=True):
-    apiFuncName = utils.getFuncName(2)
-    if addOAuthToken:
+def parseRequestForm(request, schema, requireOAuthToken=True, **kwargs):
+    logPath = "parseRequestForm"
+    if 'logPath' in kwargs:
+        logPath = "%s | %s" % (kwargs['logPath'], logPath)
+
+    ### Parse Request
+    if request.method == 'POST':
+        unparsedInput = request.form
+    elif request.method == 'GET': 
+        unparsedInput = request.args
+    else:
+        utils.logs.warn("%s | End request: Invalid method")
+        raise
+        
+    utils.logs.debug("%s | Request url: %s" % (logPath, request.base_url))
+    utils.logs.debug("%s | Request data: %s" % (logPath, unparsedInput))
+
+    if requireOAuthToken:
         schema["oauth_token"] = ResourceArgument(required=True, expectedType=basestring)
-        utils.log("%s" % schema)
+        utils.logs.info("%s | Require OAuth Token" % (logPath))
 
     try:
-        return Resource.parse(apiFuncName, schema, form)
+        parsedInput = Resource.parse('N/A', schema, unparsedInput)
     except (InvalidArgument, Fail) as e:
-        utils.log("API function '%s' failed to parse input '%s' against schema '%s'" % \
-            (apiFuncName, str(request.form), str(schema)))
+        utils.log("API function failed to parse input '%s' against schema '%s'" % \
+            (str(unparsedInput), str(schema)))
         utils.printException()
         raise
 
-def newAccountException(data, schema, clientId, logPath=None):
-    utils.logs.info("%s | New account exception" % logPath)
+    utils.logs.info("%s | Parsed request" % (logPath))
+    utils.logs.debug("%s | Parsed request data: %s" % (logPath, parsedInput))
 
-    ### Parse to Fields
+    return parsedInput
+
+def verifyClientCredentials(request, **kwargs):
+    logPath = "verifyClientCredentials"
+    if 'logPath' in kwargs:
+        logPath = "%s | %s" % (kwargs['logPath'], logPath)
+
+    if 'Authorization' not in request.headers or not request.authorization:
+        utils.logs.info("%s | Requires authorization" % logPath)
+        return Response(
+            'Could not verify your access level for that URL.\n'
+            'You have to login with proper credentials', 401,
+            {'WWW-Authenticate': 'Basic realm="Stamped API"'}
+        )
+    if not stampedAuth.verifyClientCredentials(
+        request.authorization.username, 
+        request.authorization.password):
+        utils.logs.info("%s | Invalid authorization: %s" % 
+            (logPath, request))
+        return "Error", 401
+
+    return True
+
+def handleAddAccountRequest(request, schema):
+    logPath = _generateLogId()
+    utils.logs.info("%s | Begin add account request" % logPath)
+    
+    ### Check Client Credentials
+    checkClient = verifyClientCredentials(request, logPath=logPath)
+    if checkClient != True:
+        utils.logs.info("%s | End request: Fail" % logPath)
+        return checkClient
+
+    ### Parse Request
     try:
-        parsedInput = parseRequestForm(schema, data, addOAuthToken=False)
+        parsedInput = parseRequestForm(request, schema, requireOAuthToken=False)
     except (InvalidArgument, Fail) as e:
         msg = str(e)
         utils.log(msg)
         utils.printException()
         return msg, 400
         
-    utils.logs.info("%s | Parsed request: %s" % (logPath, parsedInput))
-
     ### Add Account
     try:
         account = stampedAPI.addAccount(parsedInput)
@@ -94,7 +137,7 @@ def newAccountException(data, schema, clientId, logPath=None):
     
     ### Generate Refresh Token & Access Token
     token = stampedAuth.addRefreshToken({
-        'client_id': clientId,
+        'client_id': request.authorization.username,
         'authenticated_user_id': account['user_id']
     })
 
@@ -117,52 +160,132 @@ def newAccountException(data, schema, clientId, logPath=None):
         utils.printException()
         return msg, 500
 
-def handleRequest(request, stampedAPIFunc, schema):
+def handleLoginRequest(request, schema):
     logPath = _generateLogId()
-    utils.logs.info("%s | Begin request" % logPath)
+    utils.logs.info("%s | Begin authentication request" % logPath)
     
     ### Check Client Credentials
-    if 'Authorization' not in request.headers or not request.authorization:
-        utils.logs.info("%s | End request: requires authorization" % logPath)
-        return Response(
-            'Could not verify your access level for that URL.\n'
-            'You have to login with proper credentials', 401,
-            {'WWW-Authenticate': 'Basic realm="Stamped API"'}
-        )
-    if not stampedAuth.verifyClientCredentials(
-        request.authorization.username, 
-        request.authorization.password):
-        utils.logs.info("%s | End request: invalid authorization: %s" % 
-            (logPath, request))
-        return "Error", 500
+    checkClient = verifyClientCredentials(request, logPath=logPath)
+    if checkClient != True:
+        utils.logs.info("%s | End request: Fail" % logPath)
+        return checkClient
 
     ### Parse Request
-    if request.method == 'POST':
-        unparsedInput = request.form
-    elif request.method == 'GET': 
-        unparsedInput = request.args
-    else:
-        utils.logs.info("%s | End request: Invalid method")
-        return "Error", 500
-        
-    utils.logs.info("%s | Request url: %s" % (logPath, request.base_url))
-    utils.logs.info("%s | Request data: %s" % (logPath, unparsedInput))
-
-    ### EXCEPTION: "Create Account" does not require valid OAuth token
-    if stampedAPIFunc == stampedAPI.addAccount:
-        return newAccountException(unparsedInput, schema, 
-            request.authorization.username, logPath)
-        
-    ### Parse to Fields
     try:
-        parsedInput = parseRequestForm(schema, unparsedInput)
+        parsedInput = parseRequestForm(request, schema, requireOAuthToken=False)
     except (InvalidArgument, Fail) as e:
         msg = str(e)
         utils.log(msg)
         utils.printException()
         return msg, 400
-        
-    utils.logs.info("%s | Parsed request: %s" % (logPath, parsedInput))
+
+    ### Login
+    userId = stampedAuth.verifyUserCredentials(parsedInput, logPath=logPath)
+    if userId == None:
+        utils.logs.warn("%s | Invalid user credentials" % logPath)
+        return "Invalid user credentials", 500
+
+    utils.logs.info("%s | Login successful" % logPath)
+    
+    """
+    IMPORTANT!!!!!
+
+    Right now we're returning a refresh token upon login. This will have to 
+    change ultimately, but it's an okay assumption for now that every login
+    will be from the iPhone. Once that changes we'll have to modify this.
+
+    Also, we'll ultimately need a way to deprecate unused refresh tokens. Not
+    sure how we'll implement that yet....
+    """
+
+    ### Generate Refresh Token & Access Token
+    token = stampedAuth.addRefreshToken({
+        'client_id': request.authorization.username,
+        'authenticated_user_id': userId
+    }, logPath=logPath)
+
+    utils.logs.info("%s | Token created" % logPath)
+    
+    ### Return to Client
+    try:
+        ret = transformOutput(request, token, logPath=logPath)
+        utils.logs.info("%s | End request: success" % logPath)
+        return ret
+    except Exception as e:
+        msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        utils.log(msg)
+        utils.printException()
+        return msg, 500
+
+def handleTokenRequest(request, schema):
+    logPath = _generateLogId()
+    utils.logs.info("%s | Begin token request" % logPath)
+    
+    ### Check Client Credentials
+    checkClient = verifyClientCredentials(request, logPath=logPath)
+    if checkClient != True:
+        utils.logs.info("%s | End request: Fail" % logPath)
+        return checkClient
+
+    ### Parse Request
+    try:
+        parsedInput = parseRequestForm(request, schema, requireOAuthToken=False)
+    except (InvalidArgument, Fail) as e:
+        msg = str(e)
+        utils.log(msg)
+        utils.printException()
+        return msg, 400
+
+    ### Verify Grant Type
+    if parsedInput['grant_type'] != 'refresh_token':
+        return "Error", 500
+
+    ### Verify Refresh Token
+    authenticated_user_id = stampedAuth.verifyRefreshToken({
+        'refresh_token': parsedInput['refresh_token']
+    }, logPath=logPath)
+    if authenticated_user_id == None:
+        utils.logs.info("%s | End request: Invalid refresh token" % logPath)
+        return "Error", 401
+
+    ### Generate Access Token
+    token = stampedAuth.addAccessToken({
+        'client_id': request.authorization.username,
+        'refresh_token': parsedInput.refresh_token,
+        'authenticated_user_id': authenticated_user_id
+    }, logPath=logPath)
+
+    utils.logs.info("%s | Token created" % logPath)
+    
+    ### Return to Client
+    try:
+        ret = transformOutput(request, token, logPath=logPath)
+        utils.logs.info("%s | End request: success" % logPath)
+        return ret
+    except Exception as e:
+        msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
+        utils.log(msg)
+        utils.printException()
+        return msg, 500
+
+def handleRequest(request, stampedAPIFunc, schema):
+    logPath = _generateLogId()
+    utils.logs.info("%s | Begin request" % logPath)
+    
+    ### Check Client Credentials
+    valid = verifyClientCredentials(request, logPath=logPath)
+    if valid != True:
+        utils.logs.info("%s | End request: Fail" % logPath)
+        return valid
+
+    ### Parse Request
+    try:
+        parsedInput = parseRequestForm(request, schema, requireOAuthToken=True)
+    except (InvalidArgument, Fail) as e:
+        msg = str(e)
+        utils.log(msg)
+        utils.printException()
+        return msg, 400
 
     ### Require OAuth token to be included
     if 'oauth_token' not in parsedInput:
@@ -173,7 +296,7 @@ def handleRequest(request, stampedAPIFunc, schema):
     authenticated_user_id = stampedAuth.verifyAccessToken(parsedInput, logPath=logPath)
     if authenticated_user_id == None:
         utils.logs.info("%s | End request: Invalid OAuth token" % logPath)
-        return "Error", 500
+        return "Error", 401
     
     ### Convert OAuth Token to User ID
     utils.logs.info("%s | Authenticated user id: %s" % 
@@ -187,7 +310,7 @@ def handleRequest(request, stampedAPIFunc, schema):
     try:
         result = stampedAPIFunc(parsedInput)
         ret = transformOutput(request, result, logPath=logPath)
-        utils.logs.info("%s | End request: success" % logPath)
+        utils.logs.info("%s | End request: Success" % logPath)
         return ret
     except Exception as e:
         msg = "Internal error processing API function '%s' (%s)" % (
@@ -195,6 +318,18 @@ def handleRequest(request, stampedAPIFunc, schema):
         utils.log(msg)
         utils.printException()
         return msg, 500
+
+# ####### #
+# OAuth 2 #
+# ####### #
+
+@app.route(REST_API_PREFIX + 'oauth2/token.json', methods=['POST'])
+def refreshToken():
+    schema = ResourceArgumentSchema([
+        ("refresh_token",         ResourceArgument(required=True, expectedType=basestring)),
+        ("grant_type",            ResourceArgument(required=True, expectedType=basestring))
+    ])
+    return handleTokenRequest(request, schema)
 
 # ######## #
 # Accounts #
@@ -209,7 +344,7 @@ def addAccount():
         ("password",              ResourceArgument(required=True, expectedType=basestring)), 
         ("screen_name",           ResourceArgument(required=True, expectedType=basestring))
     ])
-    return handleRequest(request, stampedAPI.addAccount, schema)
+    return handleAddAccountRequest(request, schema)
 
 @app.route(REST_API_PREFIX + 'account/settings.json', methods=['POST', 'GET'])
 def updateAccount():
@@ -269,6 +404,14 @@ def resetPassword():
         #("authenticated_user_id", ResourceArgument(required=True, expectedType=basestring))
     ])
     return handleRequest(request, stampedAPI.resetPassword, schema)
+
+@app.route(REST_API_PREFIX + 'account/login.json', methods=['POST'])
+def resetPassword():
+    schema = ResourceArgumentSchema([
+        ("screen_name",           ResourceArgument(required=True, expectedType=basestring)),
+        ("password",              ResourceArgument(required=True, expectedType=basestring))
+    ])
+    return handleLoginRequest(request, schema)
 
 # ##### #
 # Users #

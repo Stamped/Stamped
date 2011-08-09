@@ -20,6 +20,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
     SCHEMA = {
         '_id': basestring,
         'client_id': basestring,
+        'refresh_token': basestring,
         'authenticated_user_id': basestring,
         'expires': datetime,
         'timestamp': {
