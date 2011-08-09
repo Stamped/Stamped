@@ -107,6 +107,8 @@
 		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
 		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
 		7EC05DB713E60D8E00B22C3F /* Event.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC05DB613E60D8E00B22C3F /* Event.m */; };
+		7EC7A9D313F1DE3800048944 /* sort_icon_search_0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */; };
+		7EC7A9D413F1DE3800048944 /* sort_icon_search_1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */; };
 		7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */; };
 		7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */; };
 		7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */; };
@@ -362,6 +364,8 @@
 		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
 		7EC05DB513E60D8E00B22C3F /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Event.h; sourceTree = "<group>"; };
 		7EC05DB613E60D8E00B22C3F /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Event.m; sourceTree = "<group>"; };
+		7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_0@2x.png"; sourceTree = "<group>"; };
+		7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_1@2x.png"; sourceTree = "<group>"; };
 		7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
 		7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
 		7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TodoViewController.xib; sourceTree = "<group>"; };
@@ -716,6 +720,8 @@
 				7E303F8113F0BE2300C1F794 /* sort_icon_food_1@2x.png */,
 				7E303F8213F0BE2300C1F794 /* sort_icon_music_0@2x.png */,
 				7E303F8313F0BE2300C1F794 /* sort_icon_music_1@2x.png */,
+				7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */,
+				7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */,
 				7E303F8413F0BE2300C1F794 /* sort_icon_other_0@2x.png */,
 				7E303F8513F0BE2300C1F794 /* sort_icon_other_1@2x.png */,
 			);
@@ -1086,6 +1092,8 @@
 				7E303F8D13F0BE2300C1F794 /* sort_icon_music_1@2x.png in Resources */,
 				7E303F8E13F0BE2300C1F794 /* sort_icon_other_0@2x.png in Resources */,
 				7E303F8F13F0BE2300C1F794 /* sort_icon_other_1@2x.png in Resources */,
+				7EC7A9D313F1DE3800048944 /* sort_icon_search_0@2x.png in Resources */,
+				7EC7A9D413F1DE3800048944 /* sort_icon_search_1@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1266,7 +1274,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -1287,7 +1295,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
