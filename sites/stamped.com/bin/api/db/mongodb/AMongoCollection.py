@@ -99,7 +99,7 @@ class MongoDBConfig(Singleton):
             return self._connection
         
         # TODO: have a more consistent approach to handling AutoReconnect!
-        utils.log("[%s] Creating MongoDB connection!" % self)
+        utils.log("[%s] Creating MongoDB connection" % self)
 
         delay = 1
         max_delay = 16
@@ -146,11 +146,11 @@ class AMongoCollection(object):
         return bson.BSON.encode(obj)
     
     def _getStringFromObjectId(self, objId):
-        utils.logs.debug("%s | Get String from ObjectID" % self)
+        #utils.logs.debug("%s | Get String from ObjectID" % self)
         return str(bson.objectid.ObjectId(objId))
     
     def _getObjectIdFromString(self, string):
-        utils.logs.debug("%s | Get ObjectID from String" % self)
+        #utils.logs.debug("%s | Get ObjectID from String" % self)
         try:
             return bson.objectid.ObjectId(string)
         except:
@@ -176,20 +176,20 @@ class AMongoCollection(object):
             pprint(obj.getDataAsDict())
             return None
         
-        utils.logs.debug("%s | Object to Mongo | Copy data" % self)
+        #utils.logs.debug("%s | Object to Mongo | Copy data" % self)
         data = copy.copy(obj.getDataAsDict())
         
         if '_id' in data:
             if isinstance(data['_id'], basestring):
-                utils.logs.debug("%s | Object to Mongo | _id to ObjectID" % self)
+                #utils.logs.debug("%s | Object to Mongo | _id to ObjectID" % self)
                 data['_id'] = self._getObjectIdFromString(data['_id'])
         elif objId in data:
-            utils.logs.debug("%s | Object to Mongo | Convert _id" % self)
+            #utils.logs.debug("%s | Object to Mongo | Convert _id" % self)
             data['_id'] = self._getObjectIdFromString(data[objId])
-            utils.logs.debug("%s | Object to Mongo | Delete prev id" % self)
+            #utils.logs.debug("%s | Object to Mongo | Delete prev id" % self)
             del(data[objId])
-
-        utils.logs.debug("%s | Object to Mongo | Finish" % self)
+        
+        #utils.logs.debug("%s | Object to Mongo | Finish" % self)
         return self._mapDataToSchema(data, self.SCHEMA)
     
     def _objsToMongo(self, objs, objId='id'):
@@ -285,9 +285,9 @@ class AMongoCollection(object):
     
     def _addDocument(self, document, objId='id'):
         try:
-            utils.logs.debug("%s | Add Document | Begin" % self)
+            #utils.logs.debug("%s | Add Document | Begin" % self)
             obj = self._objToMongo(document, objId)
-            utils.logs.debug("%s | Add Document | Object: %s" % (self, obj))
+            #utils.logs.debug("%s | Add Document | Object: %s" % (self, obj))
             ret = self._collection.insert_one(obj, safe=True)
             return self._getStringFromObjectId(ret)
         except:
