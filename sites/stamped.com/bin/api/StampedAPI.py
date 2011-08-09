@@ -1011,13 +1011,17 @@ class StampedAPI(AStampedAPI):
         result['category'] = entity['category']
         result['subtitle'] = entity['subtitle']
         
+        if 'place' in entity:
+            entity_id = entity['entity_id']
+            e2 = self._placesEntityDB.getEntity(entity_id)
+            entity.coordinates = e2.coordinates
+        
         if mini == True:
             if 'coordinates' in entity:
                 result['coordinates'] = "%s,%s" % (
                     entity['coordinates']['lat'],
                     entity['coordinates']['lng']
                 )
-        
         else:
             result['subcategory'] = entity['subcategory']
             
@@ -1061,14 +1065,14 @@ class StampedAPI(AStampedAPI):
             if 'sources' in entity:
                 if 'openTable' in entity.sources:
                     result['opentable_url'] = entity.sources['openTable']['reserveURL']
-                    
-        
-            if 'modified' in entity.timestamp:
-                result['last_modified'] = str(entity.timestamp['modified'])
-            elif 'created' in entity.timestamp:
-                result['last_modified'] = str(entity.timestamp['created'])
-            else:
-                result['last_modified'] = None
+            
+            if 'timestamp' in entity:
+                if 'modified' in entity.timestamp:
+                    result['last_modified'] = str(entity.timestamp['modified'])
+                elif 'created' in entity.timestamp:
+                    result['last_modified'] = str(entity.timestamp['created'])
+                else:
+                    result['last_modified'] = None
         
         return result
     
