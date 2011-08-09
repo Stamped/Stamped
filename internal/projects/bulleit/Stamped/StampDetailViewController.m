@@ -54,6 +54,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 @synthesize commenterImageView = commenterImageView_;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
+@synthesize loadingView = loadingView_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -76,6 +77,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
+  self.loadingView = nil;
   [super dealloc];
 }
 
@@ -123,8 +125,8 @@ static const CGFloat kKeyboardHeight = 216.0;
   [self setUpMainContentView];
   [self setUpCommentsView];
 
-  [self renderComments];
-  //[self loadCommentsFromServer];
+  //[self renderComments];
+  [self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {
@@ -139,6 +141,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
+  self.loadingView = nil;
 }
 
 - (void)setUpHeader {
@@ -324,6 +327,10 @@ static const CGFloat kKeyboardHeight = 216.0;
 #pragma mark - Comments.
 
 - (void)loadCommentsFromServer {
+  addCommentField_.hidden = YES;
+  currentUserImageView_.hidden = YES;
+  [loadingView_ startAnimating];
+  
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&authenticated_user_id=%@",
@@ -360,27 +367,39 @@ static const CGFloat kKeyboardHeight = 216.0;
   frame.size.height += CGRectGetHeight(commentView.frame);
   frame.origin.y -= CGRectGetHeight(commentView.frame);
   commentsView_.frame = frame;
-  
+
   frame = activityView_.frame;
   frame.size.height += CGRectGetHeight(commentView.frame);
   activityView_.frame = frame;
   activityGradientLayer_.frame = activityView_.bounds;
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + kKeyboardHeight);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + 60);
 }
 
 #pragma mark - UITextFieldDelegate Methods.
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-  [scrollView_ setContentOffset:CGPointMake(0, CGRectGetMaxY(activityView_.frame) - (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight))
-                       animated:YES];
+  [UIView animateWithDuration:0.2 animations:^{
+    scrollView_.contentInset = UIEdgeInsetsMake(0, 0, kKeyboardHeight - 60, 0);
+    scrollView_.contentOffset = CGPointMake(0, CGRectGetMaxY(activityView_.frame) - (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight));
+  }];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  [UIView animateWithDuration:0.2 animations:^{
+    scrollView_.contentInset = UIEdgeInsetsZero;
+  }];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   if (textField != addCommentField_)
     return YES;
 
+  addCommentField_.hidden = YES;
+  currentUserImageView_.hidden = YES;
+  [loadingView_ startAnimating];
+  [addCommentField_ resignFirstResponder];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/comments/create.json" delegate:self];
@@ -391,12 +410,17 @@ static const CGFloat kKeyboardHeight = 216.0;
       [AccountManager sharedManager].currentUser.userID, @"authenticated_user_id",
       stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
+ 
   return NO;
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  [loadingView_ stopAnimating];
+  addCommentField_.hidden = NO;
+  currentUserImageView_.hidden = NO;
+
 	if ([objectLoader.resourcePath isEqualToString:@"/comments/create.json"]) {
     Comment* comment = [objects objectAtIndex:0];
     [self addComment:comment];
@@ -406,14 +430,16 @@ static const CGFloat kKeyboardHeight = 216.0;
                                                         object:stamp_];
     
     addCommentField_.text = nil;
-    [addCommentField_ resignFirstResponder];
     return;
   }
-
+  stamp_.comments = [NSSet setWithArray:objects];
   [self renderComments];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  [loadingView_ stopAnimating];
+  addCommentField_.hidden = NO;
+  currentUserImageView_.hidden = NO;
   [addCommentField_ becomeFirstResponder];
   UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
                                                    message:[error localizedDescription] 

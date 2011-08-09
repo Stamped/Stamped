@@ -14,13 +14,14 @@
 @interface InboxViewController : STReloadableTableViewController <UIScrollViewDelegate, RKObjectLoaderDelegate> {
  @private
   BOOL userDidScroll_;
-  
-  IBOutlet UIView* filterView_;
-  IBOutlet UIButton* placesFilterButton_;
-  IBOutlet UIButton* booksFilterButton_;
-  IBOutlet UIButton* filmsFilterButton_;
-  IBOutlet UIButton* musicFilterButton_;
 }
+
+@property (nonatomic, assign) IBOutlet UIView* filterView;
+@property (nonatomic, retain) IBOutlet UIButton* foodFilterButton;
+@property (nonatomic, retain) IBOutlet UIButton* booksFilterButton;
+@property (nonatomic, retain) IBOutlet UIButton* filmFilterButton;
+@property (nonatomic, retain) IBOutlet UIButton* musicFilterButton;
+@property (nonatomic, retain) IBOutlet UIButton* otherFilterButton;
 
 - (IBAction)filterButtonPushed:(id)sender;
 

@@ -39,6 +39,7 @@
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 
 
 @end

@@ -18,6 +18,7 @@
 			<string>IBUIViewController</string>
 			<string>IBUILabel</string>
 			<string>IBUITextField</string>
+			<string>IBUIActivityIndicatorView</string>
 			<string>IBUIScrollView</string>
 			<string>IBUIButton</string>
 		</object>
@@ -47,7 +48,7 @@
 					<object class="IBUIImageView" id="807260245">
 						<reference key="NSNextResponder" ref="880728759"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrameSize">{320, 420}</string>
+						<string key="NSFrame">{{0, -64}, {320, 480}}</string>
 						<reference key="NSSuperview" ref="880728759"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="490942180"/>
@@ -268,7 +269,7 @@
 												<string key="NSFrame">{{50, 11}, {250, 31}}</string>
 												<reference key="NSSuperview" ref="271529655"/>
 												<reference key="NSWindow"/>
-												<reference key="NSNextKeyView" ref="661979840"/>
+												<reference key="NSNextKeyView" ref="770054237"/>
 												<bool key="IBUIClipsSubviews">YES</bool>
 												<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 												<int key="IBUIContentVerticalAlignment">0</int>
@@ -308,6 +309,18 @@
 													<reference key="NSCustomColorSpace" ref="66764138"/>
 												</object>
 												<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+											</object>
+											<object class="IBUIActivityIndicatorView" id="770054237">
+												<reference key="NSNextResponder" ref="271529655"/>
+												<int key="NSvFlags">-2147483380</int>
+												<string key="NSFrame">{{145, 16}, {20, 20}}</string>
+												<reference key="NSSuperview" ref="271529655"/>
+												<reference key="NSWindow"/>
+												<reference key="NSNextKeyView" ref="661979840"/>
+												<string key="NSReuseIdentifierKey">_NS:980</string>
+												<bool key="IBUIOpaque">NO</bool>
+												<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+												<int key="IBUIStyle">2</int>
 											</object>
 										</object>
 										<string key="NSFrame">{{0, 112}, {310, 53}}</string>
@@ -632,6 +645,14 @@
 					<int key="connectionID">58</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">loadingView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="770054237"/>
+					</object>
+					<int key="connectionID">63</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">handleRestampButtonTap:</string>
 						<reference key="source" ref="600580011"/>
@@ -761,6 +782,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="487917368"/>
 							<reference ref="113200431"/>
+							<reference ref="770054237"/>
 						</object>
 						<reference key="parent" ref="749710472"/>
 						<string key="objectName">Comments View</string>
@@ -870,6 +892,12 @@
 						<reference key="object" ref="807260245"/>
 						<reference key="parent" ref="880728759"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">62</int>
+						<reference key="object" ref="770054237"/>
+						<reference key="parent" ref="271529655"/>
+						<string key="objectName">Loading Indicator</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -915,6 +943,7 @@
 					<string>57.IBPluginDependency</string>
 					<string>59.IBPluginDependency</string>
 					<string>61.IBPluginDependency</string>
+					<string>62.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -983,6 +1012,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -997,7 +1027,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">61</int>
+			<int key="maxID">63</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1049,6 +1079,7 @@
 							<string>commentsView</string>
 							<string>currentUserImageView</string>
 							<string>headerView</string>
+							<string>loadingView</string>
 							<string>mainCommentContainer</string>
 							<string>scrollView</string>
 							<string>stampedLabel</string>
@@ -1063,6 +1094,7 @@
 							<string>UIView</string>
 							<string>UserImageView</string>
 							<string>UIView</string>
+							<string>UIActivityIndicatorView</string>
 							<string>UIView</string>
 							<string>UIScrollView</string>
 							<string>UILabel</string>
@@ -1080,6 +1112,7 @@
 							<string>commentsView</string>
 							<string>currentUserImageView</string>
 							<string>headerView</string>
+							<string>loadingView</string>
 							<string>mainCommentContainer</string>
 							<string>scrollView</string>
 							<string>stampedLabel</string>
@@ -1117,6 +1150,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">headerView</string>
 								<string key="candidateClassName">UIView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">loadingView</string>
+								<string key="candidateClassName">UIActivityIndicatorView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">mainCommentContainer</string>
@@ -1180,7 +1217,7 @@
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{16, 16}</string>
-				<string>{320, 412}</string>
+				<string>{320, 480}</string>
 				<string>{320, 240}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>

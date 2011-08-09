@@ -39,11 +39,6 @@ typedef enum {
 @property (nonatomic, copy) NSArray* filterButtons;
 @property (nonatomic, copy) NSArray* entitiesArray;
 @property (nonatomic, copy) NSArray* filteredEntitiesArray;
-@property (nonatomic, assign) UIView* filterView;
-@property (nonatomic, retain) UIButton* placesFilterButton;
-@property (nonatomic, retain) UIButton* booksFilterButton;
-@property (nonatomic, retain) UIButton* filmsFilterButton;
-@property (nonatomic, retain) UIButton* musicFilterButton;
 @end
 
 @implementation InboxViewController
@@ -52,20 +47,22 @@ typedef enum {
 @synthesize filteredEntitiesArray = filteredEntitiesArray_;
 @synthesize filterButtons = filterButtons_;
 @synthesize filterView = filterView_;
-@synthesize placesFilterButton = placesFilterButton_;
+@synthesize foodFilterButton = foodFilterButton_;
 @synthesize booksFilterButton = booksFilterButton_;
-@synthesize filmsFilterButton = filmsFilterButton_;
+@synthesize filmFilterButton = filmFilterButton_;
 @synthesize musicFilterButton = musicFilterButton_;
+@synthesize otherFilterButton = otherFilterButton_;
 
 - (void)dealloc {
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterButtons = nil;
   self.filterView = nil;
-  self.placesFilterButton = nil;
+  self.foodFilterButton = nil;
   self.booksFilterButton = nil;
-  self.filmsFilterButton = nil;
+  self.filmFilterButton = nil;
   self.musicFilterButton = nil;
+  self.otherFilterButton = nil;
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
   [super dealloc];
@@ -80,10 +77,11 @@ typedef enum {
                                                name:kStampWasCreatedNotification
                                              object:nil];
   self.filterButtons =
-      [NSArray arrayWithObjects:(id)placesFilterButton_,
+      [NSArray arrayWithObjects:(id)foodFilterButton_,
                                 (id)booksFilterButton_,
-                                (id)filmsFilterButton_,
-                                (id)musicFilterButton_, nil];
+                                (id)filmFilterButton_,
+                                (id)musicFilterButton_,
+                                (id)otherFilterButton_, nil];
   
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
   [self loadStampsFromDataStore];
@@ -98,10 +96,11 @@ typedef enum {
   self.filteredEntitiesArray = nil;
   self.filterView = nil;
   self.filterButtons = nil;
-  self.placesFilterButton = nil;
+  self.foodFilterButton = nil;
   self.booksFilterButton = nil;
-  self.filmsFilterButton = nil;
+  self.filmFilterButton = nil;
   self.musicFilterButton = nil;
+  self.otherFilterButton = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -163,14 +162,16 @@ typedef enum {
   }
 
   NSString* filterString = nil;
-  if (selectedButton == placesFilterButton_) {
-    filterString = @"Place";
+  if (selectedButton == foodFilterButton_) {
+    filterString = @"food";
   } else if (selectedButton == booksFilterButton_) {
-    filterString = @"Book";
-  } else if (selectedButton == filmsFilterButton_) {
-    filterString = @"Film";
+    filterString = @"books";
+  } else if (selectedButton == filmFilterButton_) {
+    filterString = @"film";
   } else if (selectedButton == musicFilterButton_) {
-    filterString = @"Music";
+    filterString = @"music";
+  } else if (selectedButton == otherFilterButton_) {
+    filterString = @"other";
   }
   if (filterString) {
     NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"category == %@", filterString];
