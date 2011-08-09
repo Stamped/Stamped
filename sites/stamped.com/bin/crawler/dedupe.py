@@ -40,6 +40,7 @@ class EntityDeduper(Greenlet):
         self.numDuplicates = 0
         self.numEntities = 0
         pool = Pool(512)
+        self.dead_entities = set()
         
         while True:
             if last is None:
@@ -53,21 +54,27 @@ class EntityDeduper(Greenlet):
             
             self.numEntities += 1
             last = bson.objectid.ObjectId(current['_id'])
-            pool.spawn(self._dedupe_one, current)
+            #pool.spawn(self._dedupe_one, current)
+            self._dedupe_one(current)
         
         pool.join()
         utils.log("found a total of %d duplicates (processed %d)" % (self.numDuplicates, self.numEntities))
     
     def _dedupe_one(self, current):
+        if current['_id'] in self.dead_entities:
+            # this entity has been asynchronously removed
+            return
+        
         current1 = self.db1._collection.find_one({ '_id' : current['_id'] })
         if current1 is None:
+            # this entity has been asynchronously removed
             return
         
         entity1 = Entity(self.db1._mongoToObj(current1, 'entity_id'))
         entity0 = Entity(self.db0._mongoToObj(current,  'entity_id'))
         
         earthRadius = 3963.192 # miles
-        maxDistance = 5.0 / earthRadius # convert to radians
+        maxDistance = 100.0 / earthRadius # convert to radians
         
         # TODO: verify lat / lng versus lng / lat
         q = SON({"$near" : [entity0.lat, entity0.lng]})
@@ -76,6 +83,10 @@ class EntityDeduper(Greenlet):
         docs     = self.db0._collection.find({"coordinates" : q})
         entities = self._gen_entities(docs)
         matches  = list(self.matcher.genMatchingEntities(entity1, entities))
+        
+        if entity0.entity_id in self.dead_entities:
+            # this entity has been asynchronously removed
+            return
         
         if len(matches) > 0:
             matches.insert(0, entity1)
@@ -94,8 +105,11 @@ class EntityDeduper(Greenlet):
             matches = filter(lambda m: m.entity_id != keep.entity_id, matches)
             numMatches = len(matches)
             
+            for match in matches:
+                self.dead_entities.add(match.entity_id)
+            
             if numMatches > 0:
-                utils.log("%s) found %d duplicate%s" % (keep.title, numMatches, '' if 0 == numMatches else 's'))
+                utils.log("%s) found %d duplicate%s" % (keep.title, numMatches, '' if 1 == numMatches else 's'))
                 
                 self.numDuplicates += numMatches
                 
@@ -115,8 +129,8 @@ class EntityDeduper(Greenlet):
                     _addDict(match.getDataAsDict(), keep)
                     
                     utils.log("   %d) removing %s" % (i + 1, match.title))
-                    self.db0.removeEntity(match.entity_id)
                     self.db1.removeEntity(match.entity_id)
+                    self.db0.removeEntity(match.entity_id)
                 
                 self.db1.updateEntity(keep)
     
