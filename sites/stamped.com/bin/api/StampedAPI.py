@@ -1040,35 +1040,29 @@ class StampedAPI(AStampedAPI):
                 result['image'] = None
             
             # "Place" Details
-            if 'details' in entity and 'place' in entity.details:
-                if 'address' in entity.details['place']:
-                    result['address'] = entity.details['place']['address']
-                if 'coordinates' in entity.details['place']:
-                    result['coordinates'] = "%s,%s" % (
-                        entity.details['place']['coordinates']['lat'],
-                        entity.details['place']['coordinates']['lng'])
-                if 'neighborhood' in entity.details['place']:
-                    result['neighborhood'] = entity.details['place']['neighborhood']
+            if 'address' in entity:
+                result['address'] = entity.address
+            if 'neighborhood' in entity:
+                result['neighborhood'] = entity.neighborhood
+            
+            if 'coordinates' in entity.details['place']:
+                result['coordinates'] = "%s,%s" % (entity.lat, entity.lng)
             
             # "Contact" Details
-            if 'details' in entity and 'contact' in entity.details:
-                if 'phone' in entity.details['contact']:
-                    result['phone'] = entity.details['contact']['phone']
-                if 'site' in entity.details['contact']:
-                    result['site'] = entity.details['contact']['site']
-                if 'hoursOfOperation' in entity.details['contact']:
-                    result['hours'] = entity.details['contact']['hoursOfOperation']
+            if 'phone' in entity:
+                result['phone'] = entity.phone
+            if 'site' in entity:
+                result['site'] = entity.site
+            if 'hoursOfOperation' in entity:
+                result['hours'] = entity.hoursOfOperation
             
             # "Restaurant" Details
-            if 'details' in entity and 'restaurant' in entity.details:
-                if 'cuisine' in entity.details['restaurant']:
-                    result['cuisine'] = entity.details['restaurant']['cuisine']
-                        
-                        
+            if 'cuisine' in entity:
+                result['cuisine'] = entity.cuisine
+            
             # Affiliate Data
-            if 'sources' in entity:
-                if 'openTable' in entity.sources:
-                    result['opentable_url'] = entity.sources['openTable']['reserveURL']
+            if 'openTable' in entity:
+                result['opentable_url'] = entity.reserveURL
             
             if 'timestamp' in entity:
                 if 'modified' in entity.timestamp:
