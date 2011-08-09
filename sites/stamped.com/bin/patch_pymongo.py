@@ -22,16 +22,38 @@ _CONNECT_TIMEOUT = 20.0
 class _Pool(object):
     """A simple connection pool patched to work with gevent."""
     
-    def __init__(self, socket_factory, pool_size):
+    def __init__(self, pool_size, network_timeout):
         self.pool_size = pool_size
-        self.socket_factory = socket_factory
-        self.network_timeout = None
+        self.network_timeout = network_timeout
         self.sockets = []
         self.active_sockets = { }
     
-    def socket(self):
+    def connect(self, host, port):
+        """
+            Connect to Mongo and return a new (connected) socket.
+        """
+        try:
+            # Prefer IPv4. If there is demand for an option
+            # to specify one or the other we can add it later.
+            s = socket.socket(socket.AF_INET)
+            s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            s.settimeout(self.network_timeout or _CONNECT_TIMEOUT)
+            s.connect((host, port))
+            s.settimeout(self.network_timeout)
+            return s
+        except socket.gaierror:
+            # If that fails try IPv6
+            s = socket.socket(socket.AF_INET6)
+            s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            s.settimeout(self.network_timeout or _CONNECT_TIMEOUT)
+            s.connect((host, port))
+            s.settimeout(self.network_timeout)
+            return s
+    
+    def get_socket(self, host, port):
         sock_id = get_ident()
         #utils.log(sock_id)
+        cached = True
         
         try:
             sock = self.active_sockets[sock_id]
@@ -39,11 +61,12 @@ class _Pool(object):
             try:
                 sock = self.sockets.pop()
             except IndexError:
-                sock = self.socket_factory()
+                sock = self.connect(host, port)
+                cached = False
             
             self.active_sockets[sock_id] = sock
         
-        return sock
+        return (sock, cached)
     
     def return_socket(self):
         sock = self.active_sockets.pop(get_ident(), None)
