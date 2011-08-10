@@ -166,7 +166,7 @@ class AMongoCollection(object):
         return data
     
     def _objToMongo(self, obj, objId='id'):
-        utils.logs.debug("%s | Object to Mongo | Begin" % self)
+        #utils.logs.debug("%s | Object to Mongo | Begin" % self)
         if obj is None:
             utils.logs.debug("%s | Object to Mongo | Nothing passed" % self)
             return None

@@ -27,6 +27,14 @@ def parseCommandLine():
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
     
+    parser.add_option("-c", "--category", default=None, type="string", 
+        action="store", dest="category", 
+        help="filters results by a given category")
+    
+    parser.add_option("-s", "--subcategory", default=None, type="string", 
+        action="store", dest="subcategory", 
+        help="filters results by a given subcategory")
+    
     (options, args) = parser.parse_args()
     
     if len(args) <= 0:
@@ -58,8 +66,9 @@ def main():
     api = MongoStampedAPI()
     #api._entityDB.matchEntities(params.q, limit=10)
     entityDB = api._entityDB
+    #placesDB = api._placesEntityDB
     
-    query = '^%s' % args[0]
+    query = '%s' % args[0]
     
     results = []
     db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}})
@@ -70,14 +79,21 @@ def main():
         e = Entity(entityDB._mongoToObj(entity, 'entity_id'))
         results.append(e)
     
+    if options.category is not None:
+        results = filter(lambda e: e.category == options.category, results)
+    if options.subcategory is not None:
+        results = filter(lambda e: e.subcategory == options.subcategory, results)
+    
     if len(results) <= 0:
         sys.exit(1)
     
     for entity in results:
+        pprint(entity.getDataAsDict())
+        continue
         data = { }
         data['title'] = entity.title
-        data['category'] = entity.category
-        #data['subtitle'] = entity.subtitle
+        #data['category'] = entity.category
+        data['subcategory'] = entity.subtitle
         pprint(data)
     
     print "%d results found" % len(results)

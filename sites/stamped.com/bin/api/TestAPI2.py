@@ -2106,8 +2106,8 @@ class StampedAPStampTests(AStampedAPITestCase):
             "coordinates": "40.714623,-74.006605"
         }
         
-        entityID = self.handlePOST(path, data)['entity_id']
-        self.assertValidKey(entityID)
+        self.entityID = self.handlePOST(path, data)['entity_id']
+        self.assertValidKey(self.entityID)
         
     def test_create_show_update(self):
         path = "stamps/create.json"
