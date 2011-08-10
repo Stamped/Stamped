@@ -226,7 +226,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         
         query = input_query
         query = query.replace(' ', '[ \t-]')
-        query = query.replace(u"'", u"['\u2018\u2019]")
         
         results = []
         hard_limit = 100

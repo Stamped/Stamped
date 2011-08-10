@@ -83,8 +83,7 @@ def main():
     
     input_query = args[0]
     query = u"%s" % input_query
-    query = query.replace(u' ', u'[ \t-]')
-    query = query.replace(u"'", u"['\u2018\u2019]")
+    query = query.replace(' ', '[ \t-]')
     utils.log(query)
     
     results = []
