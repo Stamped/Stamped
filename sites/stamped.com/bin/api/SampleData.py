@@ -37,7 +37,8 @@ def main():
     #baseurl = "http://192.168.0.10:5000/api/v1"
     #baseurl = "http://api.stamped.com:5000/api/v1"
     
-    betaAccountData(baseurl)
+    # betaAccountData(baseurl)
+    betaAccountDataOAuth(baseurl)
 
 
 def createStamp(baseurl, user, title, category, comment):
@@ -72,6 +73,230 @@ def createStamp(baseurl, user, title, category, comment):
         raise Exception
         
     return stampID
+
+def createUser(baseurl, userData):
+
+    print 'CREATE USER: %s %s' % (userData['first_name'], userData['last_name'])
+    
+    path = "account/create.json"
+    data = {
+        "client_id": "stampedtest",
+        "client_secret": "august1ftw",
+        "first_name": userData['first_name'],
+        "last_name": userData['last_name'], 
+        "email": userData['email'], 
+        "password": userData['password'],
+        "screen_name": userData['screen_name']
+    }
+    result = testPOST(baseurl, path, data)
+    user = result['user']
+    token = result['token']
+    if len(user['user_id']) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        raise Exception
+        
+        
+    path = "account/settings.json"
+    data = {
+        "oauth_token": token['access_token'],
+        "privacy": userData['privacy'],
+    }
+    result = testPOST(baseurl, path, data)
+    if result['privacy'] == userData['privacy']:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        raise Exception
+        
+        
+    path = "account/update_profile.json"
+    data = {
+        "oauth_token": token['access_token'],
+        "bio": userData['bio'],
+        "color": userData['color']
+    }
+    result = testPOST(baseurl, path, data)
+    if result['user_id'] == user['user_id']:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        raise Exception
+        
+        
+    path = "account/update_profile_image.json"
+    data = {
+        "oauth_token": token['access_token'],
+        "profile_image": userData['profile_image']
+    }
+    result = testPOST(baseurl, path, data)
+    if result['profile_image'] == userData['profile_image']:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+    
+    print 
+
+    return user, token
+
+
+def betaAccountDataOAuth(baseurl):
+    users = []
+
+    userData = {
+        "first_name": "Kevin",
+        "last_name": "Palms", 
+        "email": "kevin@stamped.com", 
+        "password": "12345",
+        "screen_name": "kevin",
+        "privacy": False,
+        "bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+        "color": "33B6DA,006C89",
+        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!        
+    }
+    users.append(createUser(baseurl, userData))
+
+
+    userData = {   
+        "first_name": "Robby",
+        "last_name": "Stein", 
+        "email": "robby@stamped.com", 
+        "password": "12345",
+        "screen_name": "robby",
+        "privacy": False,
+        "bio": "Starting something new in NYC. Former Google product manager.",
+        "color": "1673FF,92C516",
+        "profile_image": "https://si0.twimg.com/profile_images/1381824457/robby_profile_squarer_reasonably_small.png" ### TEMP!!!
+    }
+    users.append(createUser(baseurl, userData))
+
+
+    userData = {
+        "first_name": "Bart",
+        "last_name": "Stein", 
+        "email": "bart@stamped.com", 
+        "password": "12345",
+        "screen_name": "bart",
+        "privacy": False,
+        "bio": "Co-Founder of a new startup in NYC. Formerly at Google Creative Lab.",
+        "color": "5597AA,002F49",
+        "profile_image": "https://si0.twimg.com/profile_images/1275778019/bart_photo_reasonably_small.jpg" ### TEMP!!!
+    }
+    users.append(createUser(baseurl, userData))
+
+
+    userData = {
+        "first_name": "Ed",
+        "last_name": "Kim", 
+        "email": "ed@stamped.com", 
+        "password": "12345",
+        "screen_name": "ed",
+        "privacy": False,
+        "bio": "Product Designer at new NYC start-up. Formerly at Google and Apple.",
+        "website": "http://weartoday.tumblr.com",
+        "color": "E10019,FF5B5B",
+        "profile_image": "https://si0.twimg.com/profile_images/1195985261/edacorn_sq2_reasonably_small.jpg" ### TEMP!!!
+    }
+    users.append(createUser(baseurl, userData))
+
+
+    userData = {
+        "first_name": "Jake",
+        "last_name": "Zien", 
+        "email": "jake@stamped.com", 
+        "password": "12345",
+        "screen_name": "jake",
+        "privacy": False,
+        "bio": "Designer and programmer with a particular focus on building awesome interfaces. Working at a startup that, with any luck, you'll hear about later this year.",
+        "website": "http://www.jakezien.com",
+        "color": "CC2929,5DD9D1",
+        "profile_image": "https://si0.twimg.com/profile_images/1296522588/hypercube_reasonably_small.png" ### TEMP!!!
+    }
+    users.append(createUser(baseurl, userData))
+        
+    
+    userData = {
+        "first_name": "Travis",
+        "last_name": "Fischer", 
+        "email": "travis@stamped.com", 
+        "password": "12345",
+        "screen_name": "travis",
+        "privacy": False,
+        "bio": "Lead engineer at NYC Startup; formerly worked at Microsoft and Pixar.",
+        "color": "FF6000",
+        "profile_image": "https://si0.twimg.com/profile_images/1420965568/fb_reasonably_small.jpg" ### TEMP!!!
+    }
+    users.append(createUser(baseurl, userData))
+
+
+    userData = {
+        "first_name": "Andy",
+        "last_name": "Bonventre", 
+        "email": "andybons@stamped.com", 
+        "password": "12345",
+        "screen_name": "andybons",
+        "privacy": False,
+        "bio": "Head of mobile awesomeness at NYC startup. Formerly at the Google. Went to Tufts. It was not my safety school.",
+        "website": "http://about.me/andybons",
+        "color": "14A800,5DD960",
+        "profile_image": "https://si0.twimg.com/profile_images/1443373911/image_reasonably_small.jpg" ### TEMP!!!
+    }
+    users.append(createUser(baseurl, userData))
+
+
+    userData = {
+        "first_name": "Rando",
+        "last_name": "Manchester", 
+        "email": "rando@stamped.com", 
+        "password": "12345",
+        "screen_name": "rando",
+        "privacy": False,
+        "bio": "You don't know me but my taste is top notch. Cheers!",
+        "color": "E330B3,FF0096",
+        "profile_image": "http://img.fannation.com/upload/truth_rumor/photo_upload/119/452/full/Rajon-Rondo-mug.jpg" ### TEMP!!!
+    }
+    users.append(createUser(baseurl, userData))
+
+    print users
+
+    path = "friendships/create.json"
+    for user, token in users:
+        for friend, friendToken in users:
+            if user['user_id'] != friend['user_id']:
+                data = {
+                    "oauth_token": token['access_token'],
+                    "user_id": friend['user_id']
+                }
+                result = testPOST(baseurl, path, data)    
+                if result['user_id'] == friend['user_id']:
+                    print 'PASS: %s' % path
+                else:
+                    print 'FAIL: %s' % path
+                    raise Exception
+            else:
+                print 'SKIP'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def betaAccountData(baseurl):
