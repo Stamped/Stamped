@@ -5,4 +5,5 @@ import UrbanspoonCrawler
 import SFMagCrawler
 import ZagatCrawler
 import LATimesCrawler
+import BostonMagCrawler
 

@@ -1,0 +1,122 @@
+#!/usr/bin/python
+
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
+import Globals, utils
+import os, re, time, urllib2
+
+from gevent.pool import Pool
+from AEntitySource import AExternalEntitySource
+from api.Entity import Entity
+
+__all__ = [ "BostonMagCrawler" ]
+
+class BostonMagCrawler(AExternalEntitySource):
+    
+    TYPES = set([ 'restaurant' ])
+    
+    def __init__(self):
+        AExternalEntitySource.__init__(self, "BostonMag", self.TYPES, 512)
+        self._seen = set()
+    
+    def _run(self):
+        utils.log("[%s] parsing site" % (self, ))
+        
+        pool = Pool(512)
+        seed = 'http://www.bostonmagazine.com/restaurants/find_restaurant/index.html'
+        
+        for l in self._parseDirectoryPage(pool, seed):
+            pool.spawn(self._parseResultsPage, pool, l)
+            
+        pool.join()
+        self._output.put(StopIteration)
+    
+    def _parseDirectoryPage(self,pool,href):
+    
+        try: 
+            soup = utils.getSoup(href)
+        except urllib2.HTTPError:
+            utils.log("[%s] error parsing page %s" % (self, href))
+            return
+        
+        try: 
+            results = soup.find('span', { 'class' : 'header' }).findNext('div').findAll('a')
+            
+        except AttributeError:
+            utils.log("[%s] error parsing %s (%s)" % (self, results, href))
+            
+        root = 'http://www.bostonmagazine.com'
+        
+        href_list = []
+        
+        for r in results: 
+            link = "{0}{1}".format(root, r.get('href'))
+            href_list.append(link)
+        
+        return href_list
+    
+    def _parseResultsPage(self, pool, href):
+        try:
+            soup = utils.getSoup(href)
+        except urllib2.HTTPError:
+            utils.log("[%s] error parsing page %s" % (self, href))
+            return
+        
+        results = soup.find('div', { 'id' : 'searchResults' }).findAll('td', { 'class' : 'start' })
+        
+        for result in results:
+            try:
+                name = result.find('a').getText().strip()
+            except AttributeError:
+                utils.log("[%s] error parsing %s (%s)" % (self, name, href))
+                return
+            
+            try:
+                addr = '{0}, {1}'.format(result.find('a').nextSibling, result.find('br').nextSibling)
+            except AttributeError:
+                utils.log("[%s] error parsing %s (%s)" % (self, addr, href))
+                return
+            
+            if addr == '':
+                continue 
+                
+            if 'CLOSED' in name:
+                continue
+            
+            if (name, addr) in self._seen:
+                continue
+            
+            self._seen.add((name, addr))
+            
+            entity = Entity()
+            entity.subcategory = "restaurant"
+            entity.title   = name
+            entity.address = addr
+            entity.sources = {
+                'bostonmag' : { }
+            }    
+            
+            self._output.put(entity)
+        
+        #try the next page
+        
+        next_page_ending = soup.find('div', { 'class' : 'right_align' }).findAll('a')
+        
+        next_page = ''
+    
+        for n in next_page_ending: 
+            if 'Next' in str(n):
+                next_page = href.replace(href[href.find('?'):], n.get('href'))
+            else:
+                pass
+                                    
+        if next_page != '':
+            pool.spawn(self._parseResultsPage, pool, next_page)
+                
+
+import EntitySources
+EntitySources.registerSource('bostonmag', BostonMagCrawler)
+

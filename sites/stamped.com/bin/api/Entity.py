@@ -195,7 +195,8 @@ class Entity(ASchemaBasedAttributeDict):
             }, 
             'nymag' : { },
             'sfmag' : { },
-            'latimes' : { }, 
+            'latimes' : { },
+            'bostonmag' : { }, 
         }
     }
     
