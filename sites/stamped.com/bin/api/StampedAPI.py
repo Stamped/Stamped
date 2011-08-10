@@ -262,7 +262,8 @@ class StampedAPI(AStampedAPI):
             utils.printException()
             raise
         
-        return self._returnUser(user)
+        # return self._returnUser(user)
+        return user.output('http')
     
     def getUsers(self, params):
         #logs.info("Begin")
@@ -292,7 +293,7 @@ class StampedAPI(AStampedAPI):
         
         result = []
         for user in users:
-            result.append(self._returnUser(user))
+            result.append(user.output('http'))
         
         return result
     
@@ -303,7 +304,7 @@ class StampedAPI(AStampedAPI):
         
         result = []
         for user in users:
-            result.append(self._returnUser(user))
+            result.append(user.output('http'))
         
         return result
     
@@ -595,10 +596,11 @@ class StampedAPI(AStampedAPI):
             raise InvalidArgument('Invalid input')
             
         entityId = self._entityDB.addEntity(entity)
-        entity = self._entityDB.getEntity(entityId)
 
         if 'place' in entity:
             self._placesEntityDB.addEntity(entity)
+
+        entity = self._entityDB.getEntity(entityId)
 
         return self._returnEntity(entity)
     
@@ -1129,7 +1131,7 @@ class StampedAPI(AStampedAPI):
         
         if 'place' in entity:
             entity_id = entity['entity_id']
-            utils.logs.info("Entity: %s" % entity.getDataAsDict())
+            logs.debug("Entity: %s" % entity.getDataAsDict())
             e2 = self._placesEntityDB.getEntity(entity_id)
             entity['coordinates'] = e2.coordinates
         

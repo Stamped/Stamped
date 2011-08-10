@@ -57,13 +57,6 @@ def logRaw(s, includeFormat=False):
     sys.stdout.flush()
     sys.stderr.flush()
 
-# Logging
-logs = logging.getLogger('api')
-logs.setLevel(logging.WARNING)
-ch = logging.StreamHandler()
-ch.setLevel(logging.WARNING)
-logs.addHandler(ch)
-
 def _formatLog(s):
     try:
         return "[%s] %s" % (threading.currentThread().getName(), normalize(s))

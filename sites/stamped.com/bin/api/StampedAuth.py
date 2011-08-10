@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils, time, hashlib, random, base64, struct, datetime, logs
+import Globals, utils, time, hashlib, random, base64, struct, datetime, logs, auth
 from errors import *
 
 from AStampedAuth import AStampedAuth
@@ -105,7 +105,7 @@ class StampedAuth(AStampedAuth):
         while True:
             try:
                 refreshToken = AuthRefreshToken()
-                refreshToken.token_id = self._generateToken(43)
+                refreshToken.token_id = auth.generateToken(43)
                 refreshToken.client_id = params['client_id']
                 refreshToken.authenticated_user_id = params['authenticated_user_id']
                 refreshToken.timestamp = { 'created': datetime.datetime.utcnow() }
@@ -181,7 +181,7 @@ class StampedAuth(AStampedAuth):
                 rightNow = datetime.datetime.utcnow()
 
                 accessToken = AuthAccessToken()
-                accessToken.token_id = self._generateToken(22)
+                accessToken.token_id = auth.generateToken(22)
                 accessToken.client_id = params['client_id']
                 accessToken.refresh_token = params['refresh_token']
                 accessToken.authenticated_user_id = params['authenticated_user_id']
