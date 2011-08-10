@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE
 from functools import wraps
 from BeautifulSoup import BeautifulSoup
 from StringIO import StringIO
+import htmlentitydefs
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -368,10 +369,35 @@ def removeNonAscii(s):
     return "".join(ch for ch in s if ord(ch) < 128)
 
 def normalize(s):
-    if isinstance(s, unicode):
-        return removeNonAscii(s.encode("utf-8"))
-    else:
-        return s
+    if isinstance(s, basestring):
+        try:
+            # replace html escape sequences with their unicode equivalents
+            # TODO: handle &#xxxx;
+            if '&' in s and ';' in s:
+                for name in htmlentitydefs.name2codepoint:
+                    escape_seq = '&%s;' % name
+                    
+                    while True:
+                        l = s.find(escape_seq)
+                        if l < 0:
+                            break
+                        
+                        if name == 'lsquo' or name == 'rsquo':
+                            # simplify unicode single quotes to use the ascii apostrophe character
+                            val = "'"
+                        else:
+                            val = unichr(htmlentitydefs.name2codepoint[name])
+                        
+                        s = u"%s%s%s" % (s[:l], val, s[l+len(escape_seq):])
+                return s
+            elif isinstance(s, unicode):
+                return removeNonAscii(s.encode("utf-8"))
+            else:
+                return s
+        except Exception as e:
+            utils.printException()
+            utils.log(e)
+            return s
 
 def numEntitiesToStr(numEntities):
     if numEntities == 1:

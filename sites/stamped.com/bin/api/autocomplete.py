@@ -62,6 +62,16 @@ def parseCommandLine():
     
     return (options, args)
 
+subcategory_indices = {
+    'restaurant' : 0, 
+    'book' : 3, 
+    'movie' : 2, 
+    'artist' : 1, 
+    'song' : 8, 
+    'album' : 7, 
+    'app' : 9, 
+    'other' : 10,
+}
 
 def main():
     options, args = parseCommandLine()
@@ -72,8 +82,9 @@ def main():
     #placesDB = api._placesEntityDB
     
     input_query = args[0]
-    query = "%s" % input_query
-    query = query.replace(' ', '[ \t-]')
+    query = u"%s" % input_query
+    query = query.replace(u' ', u'[ \t-]')
+    query = query.replace(u"'", u"['\u2018\u2019]")
     utils.log(query)
     
     results = []
@@ -106,12 +117,13 @@ def main():
     results = sorted(results)
     for result in results:
         ratio, _, entity = result
-        #pprint(entity.getDataAsDict())
-        #continue
+        pprint(entity.getDataAsDict())
+        continue
         data = { }
         data['title'] = utils.normalize(entity.title)
         #data['category'] = entity.category
         data['subcategory'] = utils.normalize(entity.subcategory)
+        data['addr'] = utils.normalize(entity.address)
         pprint(data)
     
     print "%d results found" % len(results)

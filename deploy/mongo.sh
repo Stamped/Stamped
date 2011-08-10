@@ -5,7 +5,7 @@ then
     node=$1
 else
     echo "Description:"
-    echo "   runs mongo on the given db0"
+    echo "   runs mongo on the given db"
     echo ""
     echo "Usage:"
     echo "   $0 node-name"
