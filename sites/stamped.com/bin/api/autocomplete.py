@@ -103,7 +103,8 @@ def main():
     if len(results) <= 0:
         sys.exit(1)
     
-    is_junk = lambda x: x in " \t-"
+    is_junk = " \t-".__contains__
+    #lambda x: x in " \t-"
     
     for i in xrange(len(results)):
         entity = results[i]

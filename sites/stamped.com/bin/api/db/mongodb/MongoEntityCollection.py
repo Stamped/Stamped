@@ -221,24 +221,23 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         db_results = self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(hard_limit)
         
         for result in db_results:
-            entity = Entity(entityDB._mongoToObj(result, 'entity_id'))
+            entity = Entity(self._mongoToObj(result, 'entity_id'))
             results.append(entity)
         
-        if len(results) <= 0:
-            return []
-        
-        is_junk = lambda x: x in " \t-"
-        
-        for i in xrange(len(results)):
-            entity = results[i]
-            ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title).ratio()
-            subcategory_index = subcategory_indices[entity.subcategory]
+        if len(results) > 1:
+            is_junk = " \t-".__contains__
+            #lambda x: x in " \t-"
             
-            results[i] = (ratio, subcategory_index, entity)
-        
-        results = sorted(results)
-        results = results[0:min(len(results), limit)]
-        results = map(lambda r: r[2], results)
+            for i in xrange(len(results)):
+                entity = results[i]
+                ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title).ratio()
+                subcategory_index = subcategory_indices[entity.subcategory]
+                
+                results[i] = (ratio, subcategory_index, entity)
+            
+            results = sorted(results)
+            results = results[0:min(len(results), limit)]
+            results = map(lambda r: r[2], results)
         
         return results
 
