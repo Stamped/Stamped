@@ -203,10 +203,21 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 }
 
 - (UIImage*)mediumProfileImageAtURL:(NSString*)imageURL {
-  UIImage* img =
-      [UIImage imageWithContentsOfFile:[self mediumImagePathWithImageURL:imageURL]];
-  if (img)
+  // Check the cache first.
+  UIImage* img = nil;
+  if (mediumImageCache_)
+    img = [mediumImageCache_ objectForKey:imageURL];
+  
+  if (!img)
+    img = [UIImage imageWithContentsOfFile:[self mediumImagePathWithImageURL:imageURL]];
+
+  if (img) {
+    if (!mediumImageCache_)
+      mediumImageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
+    
+    [mediumImageCache_ setObject:img forKey:imageURL];
     return img;
+  }
 
   [self downloadImageAtURL:imageURL];
 
@@ -217,9 +228,20 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 }
 
 - (UIImage*)profileImageAtURL:(NSString*)imageURL {
-  UIImage* img = [UIImage imageWithContentsOfFile:[self imagePathWithImageURL:imageURL]];
-  if (img)
+  UIImage* img = nil;
+  if (imageCache_)
+    img = [imageCache_ objectForKey:imageURL];
+  
+  if (!img)
+    img = [UIImage imageWithContentsOfFile:[self imagePathWithImageURL:imageURL]];
+  
+  if (img) {
+    if (!imageCache_)
+      imageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
+    
+    [imageCache_ setObject:img forKey:imageURL];
     return img;
+  }
   
   [self downloadImageAtURL:imageURL];
 
@@ -239,11 +261,20 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   [UIImagePNGRepresentation(scaledImage)
        writeToFile:[self mediumImagePathWithImageURL:imageURL] 
         atomically:YES];
+  if (!mediumImageCache_)
+    mediumImageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
+
+  [mediumImageCache_ setObject:scaledImage forKey:imageURL];
   [[NSNotificationCenter defaultCenter]
       postNotificationName:kMediumUserImageLoadedNotification object:imageURL];
+
   [UIImagePNGRepresentation(image)
       writeToFile:[self imagePathWithImageURL:imageURL] 
        atomically:YES];
+  if (!imageCache_)
+    imageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
+  
+  [imageCache_ setObject:image forKey:imageURL];
   [[NSNotificationCenter defaultCenter]
       postNotificationName:kUserImageLoadedNotification object:imageURL];
   [downloads_ removeObjectForKey:imageURL];
