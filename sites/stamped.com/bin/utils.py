@@ -59,16 +59,16 @@ def logRaw(s, includeFormat=False):
 
 # Logging
 logs = logging.getLogger('api')
-logs.setLevel(logging.DEBUG)
+logs.setLevel(logging.WARNING)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.WARNING)
 logs.addHandler(ch)
 
 def _formatLog(s):
     try:
-        return "[%s:%s] %s" % (os.getpid(), threading.currentThread().getName(), normalize(s))
+        return "[%s] %s" % (threading.currentThread().getName(), normalize(s))
     except:
-        return "[%s:%s] __error__ printout" % (os.getpid(), threading.currentThread().getName(), )
+        return "[%s] __error__ printout" % (threading.currentThread().getName(), )
 
 def write(filename, content):
     f = open(filename, "w")
