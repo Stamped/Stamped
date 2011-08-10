@@ -62,16 +62,6 @@ def parseCommandLine():
     
     return (options, args)
 
-subcategory_indices = {
-    'restaurant' : 0, 
-    'book' : 3, 
-    'movie' : 2, 
-    'artist' : 1, 
-    'song' : 8, 
-    'album' : 7, 
-    'app' : 9, 
-    'other' : 10,
-}
 
 def main():
     options, args = parseCommandLine()

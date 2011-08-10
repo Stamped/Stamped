@@ -13,6 +13,17 @@ from api.AEntityDB import AEntityDB
 from api.Entity import Entity
 from difflib import SequenceMatcher
 
+subcategory_indices = {
+    'restaurant' : 0, 
+    'book' : 3, 
+    'movie' : 2, 
+    'artist' : 1, 
+    'song' : 8, 
+    'album' : 7, 
+    'app' : 9, 
+    'other' : 10,
+}
+
 class MongoEntityCollection(AMongoCollection, AEntityDB):
     
     SCHEMA = {
