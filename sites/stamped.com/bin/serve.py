@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import init
-import os, flask, json, utils, random, time, hashlib
+import os, flask, json, utils, random, time, hashlib, logs
 from flask import request, Response, Flask
 from functools import wraps
 
@@ -44,16 +44,13 @@ def encodeType(obj):
     else:
         return obj.__dict__
 
-def transformOutput(request, d, logPath=None):
+def transformOutput(request, d):
     output_json = json.dumps(d, sort_keys=True, indent=None if request.is_xhr else 2, default=encodeType)
     output = Response(output_json, mimetype='application/json')
-    utils.logs.info("%s | Transform output: \"%s\"" % (logPath, output_json))
+    logs.debug("Transform output: \"%s\"" % output_json)
     return output
 
 def parseRequestForm(request, schema, requireOAuthToken=True, **kwargs):
-    logPath = "parseRequestForm"
-    if 'logPath' in kwargs:
-        logPath = "%s | %s" % (kwargs['logPath'], logPath)
 
     ### Parse Request
     if request.method == 'POST':
@@ -61,15 +58,15 @@ def parseRequestForm(request, schema, requireOAuthToken=True, **kwargs):
     elif request.method == 'GET': 
         unparsedInput = request.args
     else:
-        utils.logs.warn("%s | End request: Invalid method")
+        logs.warning("End request: Invalid method")
         raise
         
-    utils.logs.debug("%s | Request url: %s" % (logPath, request.base_url))
-    utils.logs.debug("%s | Request data: %s" % (logPath, unparsedInput))
+    logs.debug("Request url: %s" % request.base_url)
+    logs.debug("Request data: %s" % unparsedInput)
 
     if requireOAuthToken:
         schema["oauth_token"] = ResourceArgument(required=True, expectedType=basestring)
-        utils.logs.info("%s | Require OAuth Token" % (logPath))
+        logs.debug("Require OAuth Token")
 
     try:
         parsedInput = Resource.parse('N/A', schema, unparsedInput)
@@ -79,31 +76,22 @@ def parseRequestForm(request, schema, requireOAuthToken=True, **kwargs):
         utils.printException()
         raise
 
-    utils.logs.info("%s | Parsed request" % (logPath))
-    utils.logs.debug("%s | Parsed request data: %s" % (logPath, parsedInput))
+    logs.debug("Parsed request data: %s" % parsedInput)
 
     return parsedInput
 
-def verifyClientCredentials(data, **kwargs):
-    logPath = "verifyClientCredentials"
-    if 'logPath' in kwargs:
-        logPath = "%s | %s" % (kwargs['logPath'], logPath)
-
+def verifyClientCredentials(data):
     if not stampedAuth.verifyClientCredentials( \
         data.client_id, data.client_secret):
-        utils.logs.info("%s | Invalid authorization: %s" % 
-            (logPath, request))
+        logs.info("Invalid authorization: %s" % request)
         raise StampedHTTPError("Error", 401) 
 
     return True
 
 def verifyBasicAuth(request, **kwargs):
-    logPath = "verifyBasicAuth"
-    if 'logPath' in kwargs:
-        logPath = "%s | %s" % (kwargs['logPath'], logPath)
 
     if 'Authorization' not in request.headers or not request.authorization:
-        utils.logs.info("%s | Requires authorization" % logPath)
+        logs.info("Requires authorization")
         return Response(
             'Could not verify your access level for that URL.\n'
             'You have to login with proper credentials', 401,
@@ -111,25 +99,20 @@ def verifyBasicAuth(request, **kwargs):
         )
     if request.authorization.username != 'stampedtest' \
         or request.authorization.password != 'august1ftw':
-        utils.logs.info("%s | End request: Invalid authorization: %s" % (logPath, request))
+        logs.info("End request: Invalid authorization: %s" % (request))
         return "Error", 401
 
     return True
 
 def handleAddAccountRequest(data):
-    logPath = _generateLogId()
-    utils.logs.info("%s | Begin add account request" % logPath)
-        
     ### Add Account
     try:
         account = stampedAPI.addAccount(data)
-    except Exception as e:
-        msg = "Internal error processing API function '%s' (%s)" % (utils.getFuncName(1), str(e))
-        utils.log(msg)
-        utils.printException()
-        return msg, 500
+    except:
+        logs.warning("Fail")
+        raise
 
-    utils.logs.info("%s | Account added" % logPath)
+    logs.debug("Account added")
     
     ### Generate Refresh Token & Access Token
     token = stampedAuth.addRefreshToken({
@@ -137,7 +120,7 @@ def handleAddAccountRequest(data):
         'authenticated_user_id': account['user_id']
     })
 
-    utils.logs.info("%s | Token created" % logPath)
+    logs.debug("Token created")
 
     ### Format Output
     result = {
@@ -149,13 +132,13 @@ def handleAddAccountRequest(data):
 
 def handleRequestNew(request, stampedAPIFunc, schema):
     try:
-        logPath = _generateLogId()
-        utils.logs.info("%s | Begin request" % logPath)
+        logs.refresh()
+        logs.info("Begin request")
         
         ### TEMP: Check Basic Auth
-        valid = verifyBasicAuth(request, logPath=logPath)
+        valid = verifyBasicAuth(request)
         if valid != True:
-            utils.logs.info("%s | End request: Fail" % logPath)
+            logs.info("End request: Fail")
             return valid
 
         ### Check if OAuth Token Required
@@ -174,52 +157,43 @@ def handleRequestNew(request, stampedAPIFunc, schema):
             # return msg, 400
             raise StampedHTTPError("invalid_request", 400, e)
 
-        ### EXCEPTIONS: No OAuth Token
+        ### EXCEPTION: No OAuth Token
         if requireOAuthToken == False:
             # Check for valid client credentials
-            checkClient = verifyClientCredentials(parsedInput, logPath=logPath)
-            if checkClient != True:
-                utils.logs.info("%s | End request: Fail" % logPath)
-                return checkClient
-            
-            # Run each command
-            if stampedAPIFunc == stampedAPI.addAccount:
-                result = handleAddAccountRequest(parsedInput)
-            elif stampedAPIFunc == stampedAuth.verifyUserCredentials:
-                #result = handleLoginRequest(parsedInput)
-                result = stampedAuth.verifyUserCredentials(parsedInput)
-            elif stampedAPIFunc == stampedAuth.verifyRefreshToken:
-                # result = handleTokenRequest(parsedInput)
-                result = stampedAuth.verifyRefreshToken(parsedInput)
-
-        ### OAuth Token
+            logs.debug("Does not require OAuth Token")
+            stampedAuth.verifyClientCredentials(parsedInput)
         else:
             ### Require OAuth token to be included
             if 'oauth_token' not in parsedInput:
-                utils.logs.info("%s | End request: OAuth token not included" % logPath)
-                return "Error", 500
+                msg = "Access token not included"
+                logs.warning(msg)
+                raise StampedHTTPError("invalid_request", 401, msg)
 
             ### Validate OAuth Access Token
-            authenticated_user_id = stampedAuth.verifyAccessToken(parsedInput, logPath=logPath)
+            authenticated_user_id = stampedAuth.verifyAccessToken(parsedInput)
             if authenticated_user_id == None:
-                utils.logs.info("%s | End request: Invalid OAuth token" % logPath)
-                return "Error", 401
+                msg = "Invalid access token"
+                logs.warning(msg)
+                raise StampedHTTPError("invalid_token", 401, msg)
             
             ### Convert OAuth Token to User ID
-            utils.logs.info("%s | Authenticated user id: %s" % 
-                (logPath, authenticated_user_id))
             parsedInput.pop('oauth_token')
             parsedInput['authenticated_user_id'] = authenticated_user_id
 
-            utils.logs.debug("%s | Final data set: %s" % (logPath, parsedInput))
+            logs.debug("Final data set: %s" % (parsedInput))
 
-            ### Generate result
+        ### Generate Result
+        if stampedAPIFunc == stampedAPI.addAccount:
+            # Exception -- requires both StampedAuth and StampedAPI. We should
+            # try to get rid of this.
+            result = handleAddAccountRequest(parsedInput)
+        else:
             result = stampedAPIFunc(parsedInput)
         
         ### Return to Client
         try:
-            ret = transformOutput(request, result, logPath=logPath)
-            utils.logs.info("%s | End request: Success" % logPath)
+            ret = transformOutput(request, result)
+            logs.info("End request: Success")
             return ret
         except Exception as e:
             msg = "Internal error processing API function '%s' (%s)" % (
@@ -228,18 +202,18 @@ def handleRequestNew(request, stampedAPIFunc, schema):
             utils.printException()
             return msg, 500
     except StampedHTTPError as e:
-        utils.logs.warn("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+        logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
         return e.msg, e.code
+    except Exception as e:
+        logs.warning("500 Error: %s" % e)
+        return "Internal error", 500
 
 def handleRequest(request, stampedAPIFunc, schema):
     try:
-        logPath = _generateLogId()
-        utils.logs.info("%s | Begin request" % logPath)
-        
         ### TEMP: Check Basic Auth
-        valid = verifyBasicAuth(request, logPath=logPath)
+        valid = verifyBasicAuth(request)
         if valid != True:
-            utils.logs.info("%s | End request: Fail" % logPath)
+            logs.info("End request: Fail")
             return valid
 
         requireOAuthToken = False
@@ -254,15 +228,15 @@ def handleRequest(request, stampedAPIFunc, schema):
             # return msg, 400
             raise StampedHTTPError("invalid_request", 400, e)
 
-        utils.logs.debug("%s | Final data set: %s" % (logPath, parsedInput))
+        logs.debug("Final data set: %s" % parsedInput)
 
         ### Generate result
         result = stampedAPIFunc(parsedInput)
         
         ### Return to Client
         try:
-            ret = transformOutput(request, result, logPath=logPath)
-            utils.logs.info("%s | End request: Success" % logPath)
+            ret = transformOutput(request, result)
+            logs.info("End request: Success")
             return ret
         except Exception as e:
             msg = "Internal error processing API function '%s' (%s)" % (
@@ -271,7 +245,7 @@ def handleRequest(request, stampedAPIFunc, schema):
             utils.printException()
             return msg, 500
     except StampedHTTPError as e:
-        utils.logs.warn("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+        logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
         return e.msg, e.code
 
 # ####### #

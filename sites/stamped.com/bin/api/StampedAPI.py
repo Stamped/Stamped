@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils
+import Globals, utils, logs
 from datetime import datetime
 from errors import *
 
@@ -79,9 +79,18 @@ class StampedAPI(AStampedAPI):
     # ######## #
     # Accounts #
     # ######## #
+    """
+       #                                                    
+      # #    ####   ####   ####  #    # #    # #####  ####  
+     #   #  #    # #    # #    # #    # ##   #   #   #      
+    #     # #      #      #    # #    # # #  #   #    ####  
+    ####### #      #      #    # #    # #  # #   #        # 
+    #     # #    # #    # #    # #    # #   ##   #   #    # 
+    #     #  ####   ####   ####   ####  #    #   #    ####  
+    """
     
     def addAccount(self, params):
-        utils.logs.info("Add account")
+        logs.info("Begin")
         ### TODO: Add validation to ensure no duplicate screen_names
         account = Account()
         account.first_name = params.first_name
@@ -113,6 +122,7 @@ class StampedAPI(AStampedAPI):
         return result
     
     def updateAccount(self, params):
+        logs.info("Begin")
         account = self._accountDB.getAccount(params.authenticated_user_id)
         
         if params.email != None:
@@ -138,10 +148,12 @@ class StampedAPI(AStampedAPI):
         return self._returnAccount(account)
     
     def getAccount(self, params):
+        logs.info("Begin")
         account = self._accountDB.getAccount(params.authenticated_user_id)
         return self._returnAccount(account)
     
     def updateProfile(self, params):
+        logs.info("Begin")
         account = self._accountDB.getAccount(params.authenticated_user_id)
         
         if params.first_name != None:
@@ -182,6 +194,7 @@ class StampedAPI(AStampedAPI):
         return result
     
     def updateProfileImage(self, params):
+        logs.info("Begin")
         ### TODO: Grab image and do something with it. Currently just sets as url.
         
         account = self._accountDB.getAccount(params.authenticated_user_id)
@@ -201,6 +214,7 @@ class StampedAPI(AStampedAPI):
         return True
     
     def removeAccount(self, params):
+        logs.info("Begin")
         if self._accountDB.removeAccount(params.authenticated_user_id):
             return True
         else:
@@ -212,8 +226,18 @@ class StampedAPI(AStampedAPI):
     # ##### #
     # Users #
     # ##### #
+    """
+    #     #                             
+    #     #  ####  ###### #####   ####  
+    #     # #      #      #    # #      
+    #     #  ####  #####  #    #  ####  
+    #     #      # #      #####       # 
+    #     # #    # #      #   #  #    # 
+     #####   ####  ###### #    #  ####  
+    """
     
     def getUser(self, params):
+        logs.info("Begin")
         # Get user by id
         if params.user_id != None:
             try:
@@ -242,6 +266,7 @@ class StampedAPI(AStampedAPI):
         return self._returnUser(user)
     
     def getUsers(self, params):
+        logs.info("Begin")
         # Get users by id
         if params.user_ids != None:
             try:
@@ -273,6 +298,7 @@ class StampedAPI(AStampedAPI):
         return result
     
     def searchUsers(self, params):
+        logs.info("Begin")
         limit = self._setLimit(params.limit, cap=20)
         users = self._userDB.searchUsers(params.q, limit)
         
@@ -283,6 +309,7 @@ class StampedAPI(AStampedAPI):
         return result
     
     def getPrivacy(self, params):
+        logs.info("Begin")
         # Get user by id
         if params.user_id != None:
             try:
@@ -316,6 +343,15 @@ class StampedAPI(AStampedAPI):
     # ############# #
     # Relationships #
     # ############# #
+    """
+    #######                                      
+    #       #####  # ###### #    # #####   ####  
+    #       #    # # #      ##   # #    # #      
+    #####   #    # # #####  # #  # #    #  ####  
+    #       #####  # #      #  # # #    #      # 
+    #       #   #  # #      #   ## #    # #    # 
+    #       #    # # ###### #    # #####   ####  
+    """
     
     def addFriendship(self, params):
         friendship = Friendship()
@@ -450,6 +486,15 @@ class StampedAPI(AStampedAPI):
     # ######### #
     # Favorites #
     # ######### #
+    """
+    #######                             
+    #         ##   #    # ######  ####  
+    #        #  #  #    # #      #      
+    #####   #    # #    # #####   ####  
+    #       ###### #    # #           # 
+    #       #    #  #  #  #      #    # 
+    #       #    #   ##   ######  ####  
+    """
     
     def addFavorite(self, params):
         favorite = Favorite()
@@ -506,8 +551,18 @@ class StampedAPI(AStampedAPI):
     # ######## #
     # Entities #
     # ######## #
+    """
+    #######                                      
+    #       #    # ##### # ##### # ######  ####  
+    #       ##   #   #   #   #   # #      #      
+    #####   # #  #   #   #   #   # #####   ####  
+    #       #  # #   #   #   #   # #           # 
+    #       #   ##   #   #   #   # #      #    # 
+    ####### #    #   #   #   #   # ######  ####  
+    """
     
     def addEntity(self, params):
+        logs.info("Begin")
         entity = Entity()
         entity.title = params.title
         entity.subtitle = 'Other'
@@ -518,18 +573,18 @@ class StampedAPI(AStampedAPI):
         if params.image != None:
             entity.image = params.image
             
-        if params.address != None or params.coordinates != None:
+        if params.address != None:
             entity.details = {
                 'place': {}
             }
             if params.address != None:
                 entity.details['place']['address'] = params.address
-            if params.coordinates != None:
-                coordinates = params.coordinates.split(',')
-                entity.details['place']['coordinates'] = {
-                    'lat': coordinates[0],
-                    'lng': coordinates[1]
-                }
+        if params.coordinates != None:
+            coordinates = params.coordinates.split(',')
+            entity['coordinates'] = {
+                'lat': coordinates[0],
+                'lng': coordinates[1]
+            }
             
         entity.timestamp = {
             'created': datetime.utcnow()
@@ -542,15 +597,20 @@ class StampedAPI(AStampedAPI):
             
         entityId = self._entityDB.addEntity(entity)
         entity = self._entityDB.getEntity(entityId)
-        
+
+        if 'place' in entity:
+            self._placesEntityDB.addEntity(entity)
+
         return self._returnEntity(entity)
     
     def getEntity(self, params):
+        logs.info("Begin")
         entity = self._entityDB.getEntity(params.entity_id)
         
         return self._returnEntity(entity)
     
     def updateEntity(self, params):
+        logs.info("Begin")
         entity = self._entityDB.getEntity(params.entity_id)
         
         if params.title != None:
@@ -561,7 +621,7 @@ class StampedAPI(AStampedAPI):
             entity.category = params.category
             
         if params.image != None:
-            entity.image = params.image            
+            entity.image = params.image
             
         if params.address != None or params.coordinates != None:
             if 'details' not in entity:
@@ -588,12 +648,14 @@ class StampedAPI(AStampedAPI):
         return self._returnEntity(entity)
     
     def removeEntity(self, params):
+        logs.info("Begin")
         if self._entityDB.removeEntity(params.entity_id):
             return True
         else:
             return False
     
     def searchEntities(self, params):
+        logs.info("Begin")
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
         entities = self._entityDB.searchEntities(params.q, limit=10)
@@ -613,7 +675,16 @@ class StampedAPI(AStampedAPI):
     # ###### #
     # Stamps #
     # ###### #
-    
+    """
+     #####                                    
+    #     # #####   ##   #    # #####   ####  
+    #         #    #  #  ##  ## #    # #      
+     #####    #   #    # # ## # #    #  ####  
+          #   #   ###### #    # #####       # 
+    #     #   #   #    # #    # #      #    # 
+     #####    #   #    # #    # #       ####  
+    """
+
     def addStamp(self, params):        
         stamp = Stamp()
         
@@ -708,6 +779,15 @@ class StampedAPI(AStampedAPI):
     # ######## #
     # Comments #
     # ######## #
+    """
+     #####                                                  
+    #     #  ####  #    # #    # ###### #    # #####  ####  
+    #       #    # ##  ## ##  ## #      ##   #   #   #      
+    #       #    # # ## # # ## # #####  # #  #   #    ####  
+    #       #    # #    # #    # #      #  # #   #        # 
+    #     # #    # #    # #    # #      #   ##   #   #    # 
+     #####   ####  #    # #    # ###### #    #   #    ####  
+    """
     
     def addComment(self, params):
         comment = Comment()
@@ -759,6 +839,15 @@ class StampedAPI(AStampedAPI):
     # ########### #
     # Collections #
     # ########### #
+    """
+     #####                                                                  
+    #     #  ####  #      #      ######  ####  ##### #  ####  #    #  ####  
+    #       #    # #      #      #      #    #   #   # #    # ##   # #      
+    #       #    # #      #      #####  #        #   # #    # # #  #  ####  
+    #       #    # #      #      #      #        #   # #    # #  # #      # 
+    #     # #    # #      #      #      #    #   #   # #    # #   ## #    # 
+     #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
+    """
     
     def getInboxStamps(self, params):
         # Limit results to 20
@@ -831,6 +920,15 @@ class StampedAPI(AStampedAPI):
     # ######## #
     # Activity #
     # ######## #
+    """
+       #                                        
+      # #    ####  ##### # #    # # ##### #   # 
+     #   #  #    #   #   # #    # #   #    # #  
+    #     # #        #   # #    # #   #     #   
+    ####### #        #   # #    # #   #     #   
+    #     # #    #   #   #  #  #  #   #     #   
+    #     #  ####    #   #   ##   #   #     #   
+    """
     
     def getActivity(self, params):
         # Limit results to 20
@@ -851,7 +949,8 @@ class StampedAPI(AStampedAPI):
             except:
                 before = before
         
-        activity = self._activityDB.getActivity(params.authenticated_user_id, since=since, before=before, limit=limit)
+        activity = self._activityDB.getActivity(params.authenticated_user_id, \
+            since=since, before=before, limit=limit)
         result = []
         for item in activity:
             result.append(self._returnActivity(item))
@@ -861,6 +960,15 @@ class StampedAPI(AStampedAPI):
     # ########### #
     # Private API #
     # ########### #
+    """
+    ######                                      
+    #     # #####  # #    #   ##   ##### ###### 
+    #     # #    # # #    #  #  #    #   #      
+    ######  #    # # #    # #    #   #   #####  
+    #       #####  # #    # ######   #   #      
+    #       #   #  #  #  #  #    #   #   #      
+    #       #    # #   ##   #    #   #   ###### 
+    """
     
     def _addEntity(self, entity):
         if entity is not None:
@@ -916,6 +1024,15 @@ class StampedAPI(AStampedAPI):
     # ################# #
     # Result Formatting #
     # ################# #
+    """
+    #######                                                         
+    #        ####  #####  #    #   ##   ##### ##### # #    #  ####  
+    #       #    # #    # ##  ##  #  #    #     #   # ##   # #    # 
+    #####   #    # #    # # ## # #    #   #     #   # # #  # #      
+    #       #    # #####  #    # ######   #     #   # #  # # #  ### 
+    #       #    # #   #  #    # #    #   #     #   # #   ## #    # 
+    #        ####  #    # #    # #    #   #     #   # #    #  ####  
+    """
     
     def _returnStamp(self, stamp, mini=False):
         result = {}
@@ -1013,8 +1130,9 @@ class StampedAPI(AStampedAPI):
         
         if 'place' in entity:
             entity_id = entity['entity_id']
+            utils.logs.info("Entity: %s" % entity.getDataAsDict())
             e2 = self._placesEntityDB.getEntity(entity_id)
-            entity.coordinates = e2.coordinates
+            entity['coordinates'] = e2.coordinates
         
         if mini == True:
             if 'coordinates' in entity:

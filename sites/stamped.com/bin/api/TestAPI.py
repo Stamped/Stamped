@@ -49,11 +49,11 @@ def main():
 #     entityTest(baseurl)
 # 
     stampTest(baseurl)
-#     
-    friendshipTest(baseurl)
-# 
+
+    # friendshipTest(baseurl)
+ 
     # collectionTest(baseurl)
-# 
+
 #     commentTest(baseurl)
 # 
 #     favoriteTest(baseurl)

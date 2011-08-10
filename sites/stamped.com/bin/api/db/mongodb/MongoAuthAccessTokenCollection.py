@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import datetime, copy
-import Globals, utils
+import Globals, utils, logs
 
 from errors import Fail
 
@@ -31,12 +31,12 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
     def __init__(self):
         AMongoCollection.__init__(self, collection='auth_accesstokens')
         AAuthAccessTokenDB.__init__(self)
-        
 
     def addAccessToken(self, token):
         if token.isValid == False:
+            logs.warning("Invalid token")
             raise KeyError("Token not valid")
-        utils.log("Token: %s" % token.token_id)
+        logs.debug("Token: %s" % token.token_id)
         # ret = self._addDocument(token, 'token_id')
 
         try:
@@ -51,22 +51,19 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
             raise Fail("%s | Unable to add token" % self) 
 
     def getAccessToken(self, tokenId):
-        utils.logs.debug("getAccessToken | Begin")
-
         doc = self._collection.find_one(tokenId)
-        utils.logs.debug("getAccessToken | Object retrieved")
+        logs.debug("Object retrieved")
         doc['token_id'] = doc['_id']
         del(doc['_id'])
-        utils.logs.debug("getAccessToken | Id adjusted")
+        logs.debug("Id adjusted")
 
         token = AuthAccessToken(doc)
-        utils.logs.debug("getAccessToken | Token converted")
+        logs.debug("Token converted")
 
         if token.isValid == False:
-            utils.logs.debug("getAccessToken | Error: Token not valid")
+            logs.warning("Error: Token not valid")
             raise KeyError("Token not valid")
 
-        utils.logs.debug("getAccessToken | Finish")
         return token
 
     def removeAccessToken(self, tokenId):

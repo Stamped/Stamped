@@ -27,22 +27,22 @@ class AuthAccessToken(ASchemaBasedAttributeDict):
         valid = True
         
         valid &= 'token_id' in self and isinstance(self.token_id, basestring)
-        utils.logs.debug('isValid: %s (token.token_id)' % valid)
+        # utils.logs.debug('isValid: %s (token.token_id)' % valid)
 
         valid &= 'client_id' in self and isinstance(self.client_id, basestring)
-        utils.logs.debug('isValid: %s (token.client_id)' % valid)
+        # utils.logs.debug('isValid: %s (token.client_id)' % valid)
 
         valid &= 'refresh_token' in self and isinstance(self.refresh_token, basestring)
-        utils.logs.debug('isValid: %s (token.refresh_token)' % valid)
+        # utils.logs.debug('isValid: %s (token.refresh_token)' % valid)
 
         valid &= 'authenticated_user_id' in self and isinstance(self.authenticated_user_id, basestring)
-        utils.logs.debug('isValid: %s (token.authenticated_user_id)' % valid)
+        # utils.logs.debug('isValid: %s (token.authenticated_user_id)' % valid)
 
         valid &= 'expires' in self and isinstance(self.expires, datetime)
-        utils.logs.debug('isValid: %s (token.expires)' % valid)
+        # utils.logs.debug('isValid: %s (token.expires)' % valid)
         
         valid &= 'timestamp' in self and isinstance(self.timestamp, dict)
         valid &= 'created' in self.timestamp and isinstance(self.timestamp['created'], datetime)
-        utils.logs.debug('isValid: %s (token.timestamp)' % valid)
+        # utils.logs.debug('isValid: %s (token.timestamp)' % valid)
         
         return valid

@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import bson, copy, math, os, pymongo, time, utils, atexit
+import bson, copy, math, os, pymongo, time, utils, atexit, logs
 
 from pprint import pprint
 from errors import Fail
@@ -59,7 +59,7 @@ class MongoDBConfig(Singleton):
                 raise
         
         if not 'mongodb' in self.config:
-            utils.log("[Mongo] Warning: invalid configuration file; defaulting to localhost:30000")
+            logs.info("Invalid config file; defaulting to localhost:30000")
             # self.config = AttributeDict({
             #     "mongodb" : {
             #         "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
@@ -100,22 +100,22 @@ class MongoDBConfig(Singleton):
             return self._connection
         
         # TODO: have a more consistent approach to handling AutoReconnect!
-        utils.log("[%s] Creating MongoDB connection" % self)
+        logs.debug("Creating connection")
         
         delay = 1
         max_delay = 16
         
         while True:            
             try:
-                utils.log("[%s] connecting to %s:%d" % (self, self.host, self.port))
+                logs.info("Connecting to MongoDB: %s:%d" % (self.host, self.port))
                 self._connection = pymongo.Connection(self.host, self.port, slave_okay=True)
                 return self._connection
             except AutoReconnect as e:
                 if delay > max_delay:
                     raise
                 
-                utils.log("[%s] retrying to connect to host: %s" % (self, str(e)))
-                utils.log("delay: %s" % delay)
+                logs.warning("Retrying to connect to host: %s" % (str(e)))
+                logs.warning("Delay: %s" % delay)
                 time.sleep(delay)
                 delay *= 2
     
@@ -133,7 +133,7 @@ class AMongoCollection(object):
         cfg = MongoDBConfig.getInstance()
         self._collection = MongoCollectionProxy(self, cfg.connection, db, collection)
         
-        utils.log("[%s] connected to mongodb at %s:%d" % (self, cfg.host, cfg.port))
+        logs.info("Connected to MongoDB collection: %s" % collection)
     
     def _validateUpdate(self, result):
         try:
@@ -155,7 +155,7 @@ class AMongoCollection(object):
         try:
             return bson.objectid.ObjectId(string)
         except:
-            utils.logs.warn("%s | Invalid ObjectID" % self)
+            logs.warning("Invalid ObjectID")
             raise Fail("Invalid ObjectID")
     
     def _mongoToObj(self, data, objId='id'):
@@ -166,31 +166,23 @@ class AMongoCollection(object):
         return data
     
     def _objToMongo(self, obj, objId='id'):
-        #utils.logs.debug("%s | Object to Mongo | Begin" % self)
         if obj is None:
-            utils.logs.debug("%s | Object to Mongo | Nothing passed" % self)
+            logs.warning("No object passed")
             return None
         
         if obj.isValid == False:
-            utils.logs.warn("%s | Object to Mongo | Invalid object" % self)
-            utils.log("[%s] error: encountered invalid object" % self)
-            pprint(obj.getDataAsDict())
+            logs.warning("Invalid object: %s" % obj.getDataAsDict())
             return None
         
-        #utils.logs.debug("%s | Object to Mongo | Copy data" % self)
         data = copy.copy(obj.getDataAsDict())
         
         if '_id' in data:
             if isinstance(data['_id'], basestring):
-                #utils.logs.debug("%s | Object to Mongo | _id to ObjectID" % self)
                 data['_id'] = self._getObjectIdFromString(data['_id'])
         elif objId in data:
-            #utils.logs.debug("%s | Object to Mongo | Convert _id" % self)
             data['_id'] = self._getObjectIdFromString(data[objId])
-            #utils.logs.debug("%s | Object to Mongo | Delete prev id" % self)
             del(data[objId])
         
-        #utils.logs.debug("%s | Object to Mongo | Finish" % self)
         return self._mapDataToSchema(data, self.SCHEMA)
     
     def _objsToMongo(self, objs, objId='id'):
@@ -292,8 +284,9 @@ class AMongoCollection(object):
             ret = self._collection.insert_one(obj, safe=True)
             utils.logs.debug("%s | Add Document | Document Added" % self)
             return self._getStringFromObjectId(ret)
-        except:
-            raise Fail("(%s) Unable to add document" % self) 
+        except Exception as e:
+            logs.warning("Unable to add document: %s" % e)
+            raise #Fail("(%s) Unable to add document" % self) 
     
     def _addDocuments(self, documents, objId='id'):
         objs = self._objsToMongo(documents, objId)
