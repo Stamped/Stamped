@@ -13,6 +13,8 @@ from Entity import Entity
 from pprint import pprint
 import sys
 
+from difflib import SequenceMatcher
+
 #-----------------------------------------------------------
 
 def parseCommandLine():
@@ -60,6 +62,17 @@ def parseCommandLine():
     
     return (options, args)
 
+subcategory_indices = {
+    'restaurant' : 0, 
+    'book' : 3, 
+    'movie' : 2, 
+    'artist' : 1, 
+    'song' : 8, 
+    'album' : 7, 
+    'app' : 9, 
+    'other' : 10,
+}
+
 def main():
     options, args = parseCommandLine()
     
@@ -68,7 +81,10 @@ def main():
     entityDB = api._entityDB
     #placesDB = api._placesEntityDB
     
-    query = '%s' % args[0]
+    input_query = args[0]
+    query = "%s" % input_query
+    query = query.replace(' ', '[ \t-]')
+    utils.log(query)
     
     results = []
     db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}})
@@ -87,13 +103,24 @@ def main():
     if len(results) <= 0:
         sys.exit(1)
     
-    for entity in results:
-        pprint(entity.getDataAsDict())
-        continue
+    is_junk = lambda x: x in " \t-"
+    
+    for i in xrange(len(results)):
+        entity = results[i]
+        ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title).ratio()
+        subcategory_index = subcategory_indices[entity.subcategory]
+        
+        results[i] = (ratio, subcategory_index, entity)
+    
+    results = sorted(results)
+    for result in results:
+        ratio, _, entity = result
+        #pprint(entity.getDataAsDict())
+        #continue
         data = { }
-        data['title'] = entity.title
+        data['title'] = utils.normalize(entity.title)
         #data['category'] = entity.category
-        data['subcategory'] = entity.subtitle
+        data['subcategory'] = utils.normalize(entity.subcategory)
         pprint(data)
     
     print "%d results found" % len(results)

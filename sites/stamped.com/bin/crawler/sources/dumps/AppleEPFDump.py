@@ -304,9 +304,11 @@ class AppleEPFArtistDump(AAppleEPFDump):
     
     _blacklist_strings = [
         'ft.',  
+        'Ft.',  
         'feat.',  
         'Feat.',  
         'feat',  
+        'Feat',  
         'featuring',  
         'Featuring',  
         '.com',  
@@ -319,6 +321,10 @@ class AppleEPFArtistDump(AAppleEPFDump):
         'tribute ', 
         'tributes ', 
         'niversity', 
+    ]
+    
+    _blacklist_suffixes = [
+        ' instrumental'
     ]
     
     def __init__(self):
@@ -399,6 +405,10 @@ class AppleEPFArtistDump(AAppleEPFDump):
         
         for s in self._blacklist_strings:
             if s in name:
+                return False
+        
+        for s in self._blacklist_suffixes:
+            if name.endswith(s):
                 return False
         
         return True

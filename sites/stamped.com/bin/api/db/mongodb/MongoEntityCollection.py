@@ -11,6 +11,7 @@ from datetime import datetime
 from AMongoCollection import AMongoCollection
 from api.AEntityDB import AEntityDB
 from api.Entity import Entity
+from difflib import SequenceMatcher
 
 class MongoEntityCollection(AMongoCollection, AEntityDB):
     
@@ -205,11 +206,39 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
     def addEntities(self, entities):
         return self._addDocuments(entities, 'entity_id')
     
-    def searchEntities(self, query, limit=20):
+    def searchEntities(self, input_query, limit=20):
         # Using a simple regex here. Need to rank results at some point...
-        query = '^%s' % query
-        result = []
-        for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
-            result.append(Entity(self._mongoToObj(entity, 'entity_id')))
-        return result
+        #query = '^%s' % query
+        #result = []
+        #for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
+        #    result.append(Entity(self._mongoToObj(entity, 'entity_id')))
+        
+        query = input_query
+        query = query.replace(' ', '[ \t-]')
+        
+        results = []
+        hard_limit = 100
+        db_results = self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(hard_limit)
+        
+        for result in db_results:
+            entity = Entity(entityDB._mongoToObj(result, 'entity_id'))
+            results.append(entity)
+        
+        if len(results) <= 0:
+            return []
+        
+        is_junk = lambda x: x in " \t-"
+        
+        for i in xrange(len(results)):
+            entity = results[i]
+            ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title).ratio()
+            subcategory_index = subcategory_indices[entity.subcategory]
+            
+            results[i] = (ratio, subcategory_index, entity)
+        
+        results = sorted(results)
+        results = results[0:min(len(results), limit)]
+        results = map(lambda r: r[2], results)
+        
+        return results
 
