@@ -29,6 +29,10 @@ def parseCommandLine():
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
     
+    parser.add_option("-v", "--verbose", default=False, 
+        action="store_true", 
+        help="turn verbosity on")
+    
     parser.add_option("-c", "--category", default=None, type="string", 
         action="store", dest="category", 
         help="filters results by a given category")
@@ -83,8 +87,13 @@ def main():
     
     input_query = args[0]
     query = u"%s" % input_query
-    query = query.replace(' ', '[ \t-]')
-    utils.log(query)
+    query = query.strip()
+    query = query.replace('(', '\(')
+    query = query.replace(')', '\)')
+    query = query.replace('.', '\.')
+    query = query.replace(' ', '[ \t-]?')
+    query = query.replace('-', '-?')
+    utils.log("query: %s" % query)
     
     results = []
     db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}})
@@ -116,14 +125,16 @@ def main():
     results = sorted(results)
     for result in results:
         ratio, _, entity = result
-        pprint(entity.getDataAsDict())
-        continue
-        data = { }
-        data['title'] = utils.normalize(entity.title)
-        #data['category'] = entity.category
-        data['subcategory'] = utils.normalize(entity.subcategory)
-        data['addr'] = utils.normalize(entity.address)
-        pprint(data)
+        if options.verbose:
+            pprint(entity.getDataAsDict())
+        else:
+            data = { }
+            data['title'] = utils.normalize(entity.title)
+            #data['category'] = entity.category
+            data['subcategory'] = utils.normalize(entity.subcategory)
+            if 'address' in entity:
+                data['addr'] = utils.normalize(entity.address)
+            pprint(data)
     
     print "%d results found" % len(results)
 

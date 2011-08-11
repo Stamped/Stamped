@@ -59,7 +59,7 @@ class EntityMatcher2(object):
         
         for i in xrange(numComplexityLevels):
             complexity = float(numComplexityLevels - i - 1) / (max(1, numComplexityLevels - 1))
-            title = self.getCanonicalizedTitle(origTitle, complexity, True)
+            title = self.getCanonicalizedTitle(origTitle, complexity, False)
             if len(title) < 1:
                 break
             

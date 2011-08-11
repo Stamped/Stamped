@@ -20,6 +20,11 @@ from EntityMatcher2 import EntityMatcher2
 from Entity import Entity
 from pprint import pprint
 
+
+# TODO: only remove / update at end
+#   # then all readonly requests until end when you could have a bulk remove
+
+
 #-----------------------------------------------------------
 
 class EntityDeduper(Greenlet):
@@ -39,7 +44,7 @@ class EntityDeduper(Greenlet):
         self.db0._collection.ensure_index([("coordinates", GEO2D)])
         self.numDuplicates = 0
         self.numEntities = 0
-        pool = Pool(512)
+        pool = Pool(2)
         self.dead_entities = set()
         
         while True:
@@ -92,47 +97,54 @@ class EntityDeduper(Greenlet):
             matches.insert(0, entity1)
             
             # determine which one of the duplicates to keep
-            keep = None
+            shortest = matches[0]
+            lshortest = len(matches[0].title)
+            ishortest = 0
+            
             for i in xrange(len(matches)):
                 match = matches[i]
-                if 'openTable' in match:
-                    keep = matches.pop(i)
-                    break
+                lmatch = len(match.title)
+                
+                if lmatch < lshortest or (lmatch == lshortest and 'openTable' in match):
+                    shortest = match
+                    lshortest = lmatch
+                    ishortest = i
             
-            if keep is None:
-                keep = matches.pop(0)
+            keep = matches.pop(ishortest)
             
             matches = filter(lambda m: m.entity_id != keep.entity_id, matches)
             numMatches = len(matches)
             
-            for match in matches:
-                self.dead_entities.add(match.entity_id)
-            
             if numMatches > 0:
                 utils.log("%s) found %d duplicate%s" % (keep.title, numMatches, '' if 1 == numMatches else 's'))
                 
-                self.numDuplicates += numMatches
-                
-                # look through and delete all duplicates
                 for i in xrange(numMatches):
                     match = matches[i]
-                    
-                    def _addDict(src, dest):
-                        for k, v in src.iteritems():
-                            if not k in dest:
-                                dest[k] = v
-                            elif isinstance(v, dict):
-                                _addDict(v, dest)
-                    
-                    # add any fields from this version of the duplicate to the version 
-                    # that we're keeping if they don't already exist
-                    _addDict(match.getDataAsDict(), keep)
-                    
+                    self.dead_entities.add(match.entity_id)
                     utils.log("   %d) removing %s" % (i + 1, match.title))
-                    self.db1.removeEntity(match.entity_id)
-                    self.db0.removeEntity(match.entity_id)
                 
-                self.db1.updateEntity(keep)
+                self.numDuplicates += numMatches
+                
+                if not self.options.noop:
+                    # look through and delete all duplicates
+                    for i in xrange(numMatches):
+                        match = matches[i]
+                        
+                        def _addDict(src, dest):
+                            for k, v in src.iteritems():
+                                if not k in dest:
+                                    dest[k] = v
+                                elif isinstance(v, dict):
+                                    _addDict(v, dest)
+                        
+                        # add any fields from this version of the duplicate to the version 
+                        # that we're keeping if they don't already exist
+                        _addDict(match.getDataAsDict(), keep)
+                        
+                        self.db1.removeEntity(match.entity_id)
+                        self.db0.removeEntity(match.entity_id)
+                    
+                    self.db1.updateEntity(keep)
     
     def _gen_entities(self, docs):
         for doc in docs:
@@ -148,6 +160,10 @@ def parseCommandLine():
     parser.add_option("-d", "--db", default=None, type="string", 
         action="store", dest="db", 
         help="db to connect to for output")
+    
+    parser.add_option("-n", "--noop", default=False, 
+        action="store_true", dest="noop", 
+        help="just run the dedupper without actually modifying anything")
     
     (options, args) = parser.parse_args()
     

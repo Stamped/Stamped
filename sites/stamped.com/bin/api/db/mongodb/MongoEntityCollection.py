@@ -225,7 +225,12 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         #    result.append(Entity(self._mongoToObj(entity, 'entity_id')))
         
         query = input_query
-        query = query.replace(' ', '[ \t-]')
+        query = query.strip()
+        query = query.replace('(', '\(?')
+        query = query.replace(')', '\)?')
+        query = query.replace('.', '\.?')
+        query = query.replace(' ', '[ \t-]?')
+        query = query.replace('-', '-?')
         
         results = []
         hard_limit = 100

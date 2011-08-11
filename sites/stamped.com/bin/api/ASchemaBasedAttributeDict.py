@@ -13,8 +13,8 @@ class ASchemaBasedAttributeDict(object):
     _schema = {}
     
     def __init__(self, data=None):
+        assert data is None or isinstance(data, dict)
         self._data = data or { }
-        assert isinstance(data, dict)
     
     def __getitem__(self, key):
         return self._data[key]
@@ -68,11 +68,10 @@ class ASchemaBasedAttributeDict(object):
     
     def __setattr__(self, name, value):
         #print "__setattr__ %s, %s" % (name, str(value))
-        value = utils.normalize(value)
-        
         if name == '_data' or name == '_schema':
-            object.__setattr__(self, name, value)
-            return None
+            return object.__setattr__(self, name, value)
+        
+        value = utils.normalize(value)
         
         return self.add({ name : value })
     
@@ -89,7 +88,7 @@ class ASchemaBasedAttributeDict(object):
             return True
         
         def _unionItem(k, v, schema, dest):
-            #print "_union %s %s %s" % (type(source), type(schema), type(dest))
+            #print "_union %s %s %s %s" % (type(k), type(v), type(schema), type(dest))
             
             if k in schema:
                 schemaVal = schema[k]

@@ -22,15 +22,20 @@ class NYMagCrawler(AExternalEntitySource):
         AExternalEntitySource.__init__(self, "NYMag", self.TYPES, 512)
     
     def getMaxNumEntities(self):
-        return 8000 # return an approximation for now
+        return 7000 # return an approximation for now
     
     def _run(self):
         utils.log("[%s] parsing site" % (self, ))
         
         pool = Pool(512)
-        seed = 'http://nymag.com/srch?t=restaurant&No=0&N=265+69'
         
-        self._parseResultsPage(pool, seed)
+        seeds = [
+            'http://nymag.com/srch?t=restaurant', 
+            'http://nymag.com/srch?t=bar', 
+        ]
+        
+        for seed in seeds:
+            pool.spawn(self._parseResultsPage, pool, seed)
         
         pool.join()
         self._output.put(StopIteration)
@@ -102,9 +107,7 @@ class NYMagCrawler(AExternalEntitySource):
         entity.subcategory = "restaurant"
         entity.title   = name
         entity.address = addr
-        entity.sources = {
-            'nymag' : { }
-        }
+        entity.nymag = { }
         
         self._output.put(entity)
 

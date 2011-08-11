@@ -38,7 +38,6 @@ class BostonMagCrawler(AExternalEntitySource):
         self._output.put(StopIteration)
     
     def _parseDirectoryPage(self,pool,href):
-    
         try: 
             soup = utils.getSoup(href)
         except urllib2.HTTPError:
@@ -47,10 +46,9 @@ class BostonMagCrawler(AExternalEntitySource):
         
         try: 
             results = soup.find('span', { 'class' : 'header' }).findNext('div').findAll('a')
-            
         except AttributeError:
             utils.log("[%s] error parsing %s (%s)" % (self, results, href))
-            
+        
         root = 'http://www.bostonmagazine.com'
         
         href_list = []
@@ -85,7 +83,7 @@ class BostonMagCrawler(AExternalEntitySource):
             
             if addr == '':
                 continue 
-                
+            
             if 'CLOSED' in name:
                 continue
             
@@ -100,25 +98,22 @@ class BostonMagCrawler(AExternalEntitySource):
             entity.address = addr
             entity.sources = {
                 'bostonmag' : { }
-            }    
+            }
             
             self._output.put(entity)
         
-        #try the next page
-        
+        # try the next page
         next_page_ending = soup.find('div', { 'class' : 'right_align' }).findAll('a')
-        
         next_page = ''
-    
+        
         for n in next_page_ending: 
             if 'Next' in str(n):
                 next_page = href.replace(href[href.find('?'):], n.get('href'))
             else:
                 pass
-                                    
+        
         if next_page != '':
             pool.spawn(self._parseResultsPage, pool, next_page)
-                
 
 import EntitySources
 EntitySources.registerSource('bostonmag', BostonMagCrawler)
