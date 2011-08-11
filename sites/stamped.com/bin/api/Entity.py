@@ -13,6 +13,7 @@ from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 categories = set([ 'food', 'music', 'film', 'book', 'other' ])
 subcategories = {
     'restaurant' : 'food', 
+    'bar' : 'food', 
     'book' : 'book', 
     'movie' : 'film', 
     'artist' : 'music', 

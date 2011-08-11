@@ -16,7 +16,7 @@ __all__ = [ "NYMagCrawler" ]
 
 class NYMagCrawler(AExternalEntitySource):
     
-    TYPES = set([ 'restaurant' ])
+    TYPES = set([ 'restaurant', 'bar' ])
     
     def __init__(self):
         AExternalEntitySource.__init__(self, "NYMag", self.TYPES, 512)
@@ -29,18 +29,21 @@ class NYMagCrawler(AExternalEntitySource):
         
         pool = Pool(512)
         
-        seeds = [
-            'http://nymag.com/srch?t=restaurant', 
-            'http://nymag.com/srch?t=bar', 
+        base = 'http://nymag.com/srch?t='
+        
+        categories = [
+            'restaurant', 
+            'bar'
         ]
         
-        for seed in seeds:
-            pool.spawn(self._parseResultsPage, pool, seed)
+        for category in categories:
+            url  = "%s%s" % (base, category)
+            pool.spawn(self._parseResultsPage, pool, url, category)
         
         pool.join()
         self._output.put(StopIteration)
     
-    def _parseResultsPage(self, pool, href):
+    def _parseResultsPage(self, pool, href, subcategory):
         try:
             soup = utils.getSoup(href)
         except urllib2.HTTPError:
@@ -51,7 +54,7 @@ class NYMagCrawler(AExternalEntitySource):
         try:
             next_page = soup.find("ul", {"class" : re.compile("nextpages|morepages")}).find("li", {"class" : "next"}).find("a").get("href")
             if next_page != '':
-                pool.spawn(self._parseResultsPage, pool, next_page)
+                pool.spawn(self._parseResultsPage, pool, next_page, subcategory)
         except AttributeError:
             # crawling of pages is done
             #utils.log("Done crawling: %s" % href)
@@ -64,9 +67,9 @@ class NYMagCrawler(AExternalEntitySource):
             href = link.get("href")
             name = link.getText().strip()
             
-            detail = pool.spawn(self._parseDetailPage, name, href)
+            detail = pool.spawn(self._parseDetailPage, name, href, subcategory)
     
-    def _parseDetailPage(self, name, href):
+    def _parseDetailPage(self, name, href, subcategory):
         try:
             soup = utils.getSoup(href)
         except urllib2.HTTPError:
@@ -104,7 +107,7 @@ class NYMagCrawler(AExternalEntitySource):
                 return
         
         entity = Entity()
-        entity.subcategory = "restaurant"
+        entity.subcategory = subcategory
         entity.title   = name
         entity.address = addr
         entity.nymag = { }

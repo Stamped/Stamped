@@ -60,9 +60,9 @@ def logRaw(s, includeFormat=False):
 
 def _formatLog(s):
     try:
-        return "[%s:%s] %s" % (threading.currentThread().getName(), getFuncName(2), normalize(s))
+        return "[%s] %s" % (threading.currentThread().getName(), normalize(s))
     except:
-        return "[%s:%s] __error__ printout" % (threading.currentThread().getName(), getFuncName(2), )
+        return "[%s] __error__ printout" % (threading.currentThread().getName(), )
 
 def write(filename, content):
     f = open(filename, "w")

@@ -188,6 +188,7 @@ class BingGeocoderService(AGeocoder):
         }
         
         (offset, count) = self._initAPIKeyIndices()
+        url = None
         
         while True:
             try:

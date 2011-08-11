@@ -68,6 +68,7 @@ def parseCommandLine():
 
 subcategory_indices = {
     'restaurant' : 0, 
+    'bar' : 0, 
     'book' : 3, 
     'movie' : 2, 
     'artist' : 1, 

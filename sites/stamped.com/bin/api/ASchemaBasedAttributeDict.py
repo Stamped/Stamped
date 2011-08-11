@@ -29,10 +29,10 @@ class ASchemaBasedAttributeDict(object):
         return len(self._data)
     
     def __repr__(self):
-        return str(self._dict)
+        return str(self._data)
     
     def __str__(self):
-        return str(self._dict)
+        return str(self._data)
     
     def __contains__(self, item):
         def _contains(_item, data):
