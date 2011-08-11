@@ -227,11 +227,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         
         query = input_query
         query = query.strip()
+        query = query.replace('[', '\[?')
+        query = query.replace(']', '\]?')
         query = query.replace('(', '\(?')
         query = query.replace(')', '\)?')
         query = query.replace('.', '\.?')
         query = query.replace(' ', '[ \t-]?')
         query = query.replace('-', '-?')
+        query = query.replace("'", "'?")
         
         results = []
         hard_limit = 100

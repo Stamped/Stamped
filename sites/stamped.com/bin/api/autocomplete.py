@@ -89,11 +89,14 @@ def main():
     input_query = args[0]
     query = u"%s" % input_query
     query = query.strip()
+    query = query.replace('[', '\[?')
+    query = query.replace(']', '\]?')
     query = query.replace('(', '\(')
     query = query.replace(')', '\)')
     query = query.replace('.', '\.')
-    query = query.replace(' ', '[ \t-]?')
+    query = query.replace(' ', '[ \t-_]?')
     query = query.replace('-', '-?')
+    query = query.replace("'", "'?")
     utils.log("query: %s" % query)
     
     results = []
