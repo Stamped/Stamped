@@ -119,6 +119,7 @@ class GoogleGeocoderService(AGeocoder):
             'address' : address, 
             'sensor'  : 'false', 
         }
+        url = ""
         
         try:
             # construct the url
@@ -188,7 +189,7 @@ class BingGeocoderService(AGeocoder):
         }
         
         (offset, count) = self._initAPIKeyIndices()
-        url = None
+        url = ""
         
         while True:
             try:
@@ -268,6 +269,7 @@ class YahooGeocoderService(AGeocoder):
         }
         
         (offset, count) = self._initAPIKeyIndices()
+        url = ""
         
         while True:
             try:
