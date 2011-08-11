@@ -8,8 +8,6 @@ __license__ = "TODO"
 import copy
 from datetime import datetime
 
-from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
-
 class Schema(object):
     
     def __init__(self, data=None, required=False):
@@ -89,6 +87,18 @@ class Schema(object):
         self._data = data
         self.validate()
 
+    def export(self, format=None):
+        if str(format).lower() in ['flat', 'http']:
+            return self._exportFlat()
+        else:
+            return self.getDataAsDict()
+
+    def getDataAsDict(self):
+        return self._data
+
+    def _exportFlat(self):
+        raise NotImplementedError
+
     def setSchema(self):
         raise NotImplementedError
 
@@ -100,7 +110,7 @@ class Schema(object):
         data = copy.copy(self._data)
         # print 'Validating   | %s' % self
         # print 'Data         | %s' % data
-        # print 'Elements     | %s' % self.elements.keys()
+        # print 'Elements     | %s' % self._elements.keys()
 
         for k, v in self._elements.iteritems():
             item = data.pop(k, None)
@@ -152,7 +162,6 @@ class SchemaElement(object):
         self._value = None
         self.requiredType = requiredType
         self.required = kwargs.pop('required', False)
-        self.primary_key = False
         
     def __str__(self):
         return str(self._value)
@@ -252,19 +261,27 @@ class StampSchema(Schema):
         self.flags              = StampFlagsSchema()
         self.stats              = StampStatsSchema()
 
+    def _exportFlat(self):
+        ret = {}
+        ret['stamp_id']         = self.stamp_id.value
+        ret['entity']           = self.entity.value
+        ret['user']             = self.user.value
+        ret['blurb']            = self.blurb.value
+        ret['image']            = self.image.value
+        ret['mentions']         = self.mentions.value
+        ret['credit']           = self.credit.value
+        ret['comment_preview']  = self.comment_preview.value
+        ret['created']          = self.timestamp.created.value
+        ret['flags']            = self.flags.locked.value
+        ret['num_comments']     = self.stats.num_comments.value
+
+        ret['entity']['coordinates'] = '%s,%s' % (
+            self.entity.coordinates.lat,
+            self.entity.coordinates.lng)
+
+        return ret
 
 
-class Stamp(ASchemaBasedAttributeDict):
-    def __init__(self, data=None):
-        ASchemaBasedAttributeDict.__init__(self)
-        self._data = self.importData(data)
-
-    def importData(self, data=None):
-        if data == None:
-            return None
-        self._schema = StampSchema(data)
-        self._schema.validate()
-        return data
 
 ### Example implementation
 stampData = {
@@ -272,10 +289,10 @@ stampData = {
     'entity': {
         'entity_id': '567890',
         'title': 'Little Owl',
-        # 'coordinates': {
-        #     'lat': 123, 
-        #     'lng': 456
-        # },
+        'coordinates': {
+            'lat': 123, 
+            'lng': 456
+        },
         'category': 'food',
         'subtitle': 'New York, NY'
     },
@@ -313,7 +330,7 @@ testStamp = StampSchema(stampData)
 # print stamp.entity
 # print stamp.coordinates
 stamp = StampSchema()
-stamp.stamp_id = '4321'
+# stamp.stamp_id = '4321'
 stamp = StampSchema(stampData)
 # stamp.validate()
 # print stamp
@@ -344,6 +361,14 @@ del(stamp.user['color_secondary'])
 del(stamp.user.color_secondary)
 
 print "Stamp.user length:               %s" % len(stamp.user)
+
+print
+print #stamp.timestamp.modified
+
+print stamp.export(format='flat')
+print stamp.export(format='flat')['entity']
+print stamp.export(format='flat')['entity']['coordinates']
+print stamp.export(format='flat')['mentions'][0]
 
 #print stamp.entity.entity_id
 
