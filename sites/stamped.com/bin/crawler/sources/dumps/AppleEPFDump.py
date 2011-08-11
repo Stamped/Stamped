@@ -580,12 +580,15 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         
         # initialize sqlite3
         cols = []
+        found_primary = True
+        
         for col in table_format.cols:
             primary = ""
-            if col in table_format.primary_keys:
+            if not found_primary and col in table_format.primary_keys:
                 # TODO: handle the common case of multiple primary keys, which sqlite3 does not support
                 # TODO: defining the primary key here as opposed to after insertion is much slower!!!!!
                 primary = " PRIMARY KEY"
+                found_primary = True
             
             col_type = table_format.cols[col]['type']
             text = "%s %s%s" % (col, col_type, primary)
@@ -653,5 +656,6 @@ EntitySources.registerSource('apple_artists', AppleEPFArtistDump)
 #EntitySources.registerSource('apple_songs',   AppleEPFSongDump)
 EntitySources.registerSource('apple_albums',  AppleEPFAlbumDump)
 EntitySources.registerSource('apple_videos',  AppleEPFVideoDump)
-#EntitySources.registerSource('apple_genres',  AppleEPFGenreRelationalDB)
+EntitySources.registerSource('apple_genres',  AppleEPFGenreRelationalDB)
+EntitySources.registerSource('apple_video_price',  AppleEPFVideoPriceRelationalDB)
 
