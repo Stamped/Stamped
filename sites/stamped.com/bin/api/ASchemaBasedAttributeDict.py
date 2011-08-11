@@ -146,6 +146,7 @@ class ASchemaBasedAttributeDict(object):
     
     def __init__(self, data=None):
         self._data = data or { }
+        assert isinstance(data, dict)
     
     def __getitem__(self, key):
         return self._data[key]
