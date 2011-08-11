@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import datetime, copy
-import Globals, utils
+import Globals, utils, logs
 
 from errors import Fail
 
@@ -35,7 +35,7 @@ class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
     def addRefreshToken(self, token):
         if token.isValid == False:
             raise KeyError("Token not valid")
-        utils.log("Token: %s" % token.token_id)
+        logs.debug("Token: %s" % token.token_id)
         # ret = self._addDocument(token, 'token_id')
 
         try:
@@ -47,26 +47,22 @@ class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
             ret = self._collection.insert_one(data, safe=True)
             return ret
         except:
-            raise Fail("%s | Unable to add token" % self) 
+            raise Fail("Unable to add token" % self) 
 
     def getRefreshToken(self, tokenId, logPath=None):
-        logPath = "%s | getRefreshToken" % logPath
-        utils.logs.debug("%s | Begin" % logPath)
-
         doc = self._collection.find_one(tokenId)
-        utils.logs.debug("%s | Object retrieved" % logPath)
+        logs.debug("Object retrieved")
         doc['token_id'] = doc['_id']
         del(doc['_id'])
-        utils.logs.debug("%s | Id adjusted" % logPath)
+        logs.debug("Id adjusted")
 
         token = AuthRefreshToken(doc)
-        utils.logs.debug("%s | Token converted" % logPath)
+        logs.debug("Token converted")
 
         if token.isValid == False:
-            utils.logs.debug("%s | Error: Token not valid" % logPath)
+            logs.warning("Error: Token not valid")
             raise KeyError("Token not valid")
 
-        utils.logs.debug("%s | Finish" % logPath)
         return token
 
     def removeRefreshToken(self, tokenId):

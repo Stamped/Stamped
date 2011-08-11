@@ -40,7 +40,8 @@ def main():
     print '      BEGIN'
     
     baseurl = "http://0.0.0.0:5000/api/v1"
-#     baseurl = "http://50.19.163.247:5000/api/v1"
+    # baseurl = "http://50.19.163.247:5000/api/v1"
+    # baseurl = "http://ec2-107-20-53-207.compute-1.amazonaws.com:5000/api/v1"
 #     
 #     accountTest(baseurl)
 #     
@@ -48,20 +49,139 @@ def main():
 #     
 #     entityTest(baseurl)
 # 
-    stampTest(baseurl)
+    # stampTest(baseurl)
 
     # friendshipTest(baseurl)
  
-    # collectionTest(baseurl)
+    # collectionTest(baseurl)         # OAuth ready!
 
 #     commentTest(baseurl)
 # 
 #     favoriteTest(baseurl)
 # 
 #     activityTest(baseurl)
+
+    oauthTest(baseurl)              # OAuth ready!
  
     print '      COMPLETE'
     print 
+
+# ####### #
+# OAuth 2 #
+# ####### #
+
+def oauthTest(baseurl):
+
+    print    
+    print '      OAUTH 2.0'
+
+    CLIENT_ID = "stampedtest"
+    CLIENT_SECRET = "august1ftw"
+    
+    path = "account/create.json"
+    data = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "first_name": "Kevin",
+        "last_name": "Palms", 
+        "email": "kevin@stamped.com", 
+        "password": "12345",
+        "screen_name": "kevin"
+    }
+    result = testPOST(baseurl, path, data)
+    user = result['user']
+    token = result['token']
+    if len(user['user_id']) == 24:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print user
+        raise Exception
+        
+    path = "account/settings.json"
+    data = {
+        "oauth_token": token['access_token']
+    }
+    result = testGET(baseurl, path, data)
+    if result['privacy']:
+        print 'PASS: OAuth Token Verified'
+    else:
+        print 'FAIL: OAuth Token Failed'
+        print result
+        raise Exception
+
+    
+    path = "oauth2/login.json"
+    data = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "screen_name": "kevin",
+        "password": "12345"
+    }
+    token = testPOST(baseurl, path, data)
+    if len(token['access_token']) == 22:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print token
+        raise Exception
+        
+    path = "account/settings.json"
+    data = {
+        "oauth_token": token['access_token']
+    }
+    result = testGET(baseurl, path, data)
+    if result['privacy']:
+        print 'PASS: OAuth Token Verified'
+    else:
+        print 'FAIL: OAuth Token Failed'
+        print result
+        raise Exception
+    
+
+    
+    path = "oauth2/token.json"
+    data = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "refresh_token": token['refresh_token'],
+        "grant_type": "refresh_token"
+    }
+    token = testPOST(baseurl, path, data)
+    if len(token['access_token']) == 22:
+        print 'PASS: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print tokenA
+        raise Exception
+        
+    path = "account/settings.json"
+    data = {
+        "oauth_token": token['access_token']
+    }
+    result = testGET(baseurl, path, data)
+    if result['privacy']:
+        print 'PASS: OAuth Token Verified'
+    else:
+        print 'FAIL: OAuth Token Failed'
+        print result
+        raise Exception
+
+        
+    path = "account/remove.json"
+    data = {
+        "oauth_token": token['access_token']
+    }
+    result = testPOST(baseurl, path, data)
+    if result:
+        print 'DATA: %s' % path
+    else:
+        print 'FAIL: %s' % path
+        print result
+        raise Exception
+
+
+    print
 
 
 # ######## #
@@ -79,7 +199,7 @@ def accountTest(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "******",
-        "screen_name": "kpalms"
+        "screen_name": "kevin"
     }
     userID = testPOST(baseurl, path, data)['user_id']
     if len(userID) == 24:
@@ -323,7 +443,7 @@ def entityTest(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "******",
-        "screen_name": "kpalms"
+        "screen_name": "kevin"
     }
     userID = testPOST(baseurl, path, data)['user_id']
     if len(userID) == 24:
@@ -610,7 +730,7 @@ def friendshipTest(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "******",
-        "screen_name": "kpalms"
+        "screen_name": "kevin"
     }
     userA = testPOST(baseurl, path, data)['user_id']
     data = {
@@ -821,7 +941,7 @@ def collectionTest(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "12345",
-        "screen_name": "kpalms"
+        "screen_name": "kevin"
     }
     result = testPOST(baseurl, path, data)
     userA = result['user']['user_id']
@@ -850,7 +970,7 @@ def collectionTest(baseurl):
     data = {
         "client_id": "stampedtest",
         "client_secret": "august1ftw",
-        "screen_name": "kpalms",
+        "screen_name": "kevin",
         "password": "12345"
     }
     tokenA = testPOST(baseurl, path, data)
@@ -1165,7 +1285,7 @@ def commentTest(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "******",
-        "screen_name": "kpalms"
+        "screen_name": "kevin"
     }
     userID = testPOST(baseurl, path, data)['user_id']
     if len(userID) == 24:
@@ -1312,7 +1432,7 @@ def favoriteTest(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "******",
-        "screen_name": "kpalms"
+        "screen_name": "kevin"
     }
     userID = testPOST(baseurl, path, data)['user_id']
     if len(userID) == 24:
@@ -1458,7 +1578,7 @@ def activityTest(baseurl):
         "last_name": "Palms", 
         "email": "kevin@stamped.com", 
         "password": "******",
-        "screen_name": "kpalms"
+        "screen_name": "kevin"
     }
     userA = testPOST(baseurl, path, data)['user_id']
     data = {

@@ -90,7 +90,7 @@ class StampedAPI(AStampedAPI):
     """
     
     def addAccount(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         ### TODO: Add validation to ensure no duplicate screen_names
         account = Account()
         account.first_name = params.first_name
@@ -122,7 +122,6 @@ class StampedAPI(AStampedAPI):
         return result
     
     def updateAccount(self, params):
-        logs.info("Begin")
         account = self._accountDB.getAccount(params.authenticated_user_id)
         
         if params.email != None:
@@ -148,12 +147,12 @@ class StampedAPI(AStampedAPI):
         return self._returnAccount(account)
     
     def getAccount(self, params):
-        logs.info("Begin")
+
         account = self._accountDB.getAccount(params.authenticated_user_id)
         return self._returnAccount(account)
     
     def updateProfile(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         account = self._accountDB.getAccount(params.authenticated_user_id)
         
         if params.first_name != None:
@@ -194,7 +193,7 @@ class StampedAPI(AStampedAPI):
         return result
     
     def updateProfileImage(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         ### TODO: Grab image and do something with it. Currently just sets as url.
         
         account = self._accountDB.getAccount(params.authenticated_user_id)
@@ -214,7 +213,7 @@ class StampedAPI(AStampedAPI):
         return True
     
     def removeAccount(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         if self._accountDB.removeAccount(params.authenticated_user_id):
             return True
         else:
@@ -237,7 +236,7 @@ class StampedAPI(AStampedAPI):
     """
     
     def getUser(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         # Get user by id
         if params.user_id != None:
             try:
@@ -263,10 +262,11 @@ class StampedAPI(AStampedAPI):
             utils.printException()
             raise
         
-        return self._returnUser(user)
+        # return self._returnUser(user)
+        return user.output('http')
     
     def getUsers(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         # Get users by id
         if params.user_ids != None:
             try:
@@ -293,23 +293,23 @@ class StampedAPI(AStampedAPI):
         
         result = []
         for user in users:
-            result.append(self._returnUser(user))
+            result.append(user.output('http'))
         
         return result
     
     def searchUsers(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         limit = self._setLimit(params.limit, cap=20)
         users = self._userDB.searchUsers(params.q, limit)
         
         result = []
         for user in users:
-            result.append(self._returnUser(user))
+            result.append(user.output('http'))
         
         return result
     
     def getPrivacy(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         # Get user by id
         if params.user_id != None:
             try:
@@ -562,7 +562,7 @@ class StampedAPI(AStampedAPI):
     """
     
     def addEntity(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         entity = Entity()
         entity.title = params.title
         entity.subtitle = 'Other'
@@ -596,21 +596,22 @@ class StampedAPI(AStampedAPI):
             raise InvalidArgument('Invalid input')
             
         entityId = self._entityDB.addEntity(entity)
-        entity = self._entityDB.getEntity(entityId)
 
         if 'place' in entity:
             self._placesEntityDB.addEntity(entity)
 
+        entity = self._entityDB.getEntity(entityId)
+
         return self._returnEntity(entity)
     
     def getEntity(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         entity = self._entityDB.getEntity(params.entity_id)
         
         return self._returnEntity(entity)
     
     def updateEntity(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         entity = self._entityDB.getEntity(params.entity_id)
         
         if params.title != None:
@@ -648,14 +649,14 @@ class StampedAPI(AStampedAPI):
         return self._returnEntity(entity)
     
     def removeEntity(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         if self._entityDB.removeEntity(params.entity_id):
             return True
         else:
             return False
     
     def searchEntities(self, params):
-        logs.info("Begin")
+        #logs.info("Begin")
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
         entities = self._entityDB.searchEntities(params.q, limit=10)
@@ -1130,7 +1131,7 @@ class StampedAPI(AStampedAPI):
         
         if 'place' in entity:
             entity_id = entity['entity_id']
-            utils.logs.info("Entity: %s" % entity.getDataAsDict())
+            logs.debug("Entity: %s" % entity.getDataAsDict())
             e2 = self._placesEntityDB.getEntity(entity_id)
             entity['coordinates'] = e2.coordinates
         

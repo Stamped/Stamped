@@ -5,10 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import datetime, time, random, hashlib
+import datetime, time, random, hashlib, string
 import utils
 
-def generatePasswordHash(password):
+def convertPasswordForStorage(password):
     chars = 'ABCDEFGHIJKLMNOPQRSTUVXYZ0123456789abcdefghijklmnopqrstuvwxyz'
     salt = ''.join(random.choice(chars) for i in range(6))
     h = hashlib.md5()
@@ -17,14 +17,18 @@ def generatePasswordHash(password):
     ret = salt + h.hexdigest()
     return ret
 
-def comparePasswordToHash(password, passwordHash):
+def comparePasswordToStored(password, stored):
     try:
-        salt = passwordHash[:6]
+        salt = stored[:6]
         h = hashlib.md5()
         h.update(salt)
         h.update(password)
-        if salt + h.hexdigest() == passwordHash:
+        if salt + h.hexdigest() == stored:
             return True
         return False
     except:
         return False
+    
+def generateToken(length):
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choice(chars) for x in xrange(length))

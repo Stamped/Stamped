@@ -66,18 +66,18 @@ class MongoDBConfig(Singleton):
             #         "port" : 27017, 
             #     }
             # })
-            # self.config = AttributeDict({
-            #    "mongodb" : {
-            #        "host" : "localhost", 
-            #        "port" : 27017, 
-            #    }
-            # })
             self.config = AttributeDict({
                "mongodb" : {
                    "host" : "localhost", 
-                   "port" : 30000, 
+                   "port" : 27017, 
                }
             })
+            # self.config = AttributeDict({
+            #    "mongodb" : {
+            #        "host" : "localhost", 
+            #        "port" : 30000, 
+            #    }
+            # })
     
     @property
     def host(self):
@@ -147,11 +147,11 @@ class AMongoCollection(object):
         return bson.BSON.encode(obj)
     
     def _getStringFromObjectId(self, objId):
-        #utils.logs.debug("%s | Get String from ObjectID" % self)
+        #logs.debug("%s | Get String from ObjectID" % self)
         return str(bson.objectid.ObjectId(objId))
     
     def _getObjectIdFromString(self, string):
-        #utils.logs.debug("%s | Get ObjectID from String" % self)
+        #logs.debug("%s | Get ObjectID from String" % self)
         try:
             return bson.objectid.ObjectId(string)
         except:
@@ -278,11 +278,11 @@ class AMongoCollection(object):
     
     def _addDocument(self, document, objId='id'):
         try:
-            #utils.logs.debug("%s | Add Document | Begin" % self)
+            #logs.debug("%s | Add Document | Begin" % self)
             obj = self._objToMongo(document, objId)
-            #utils.logs.debug("%s | Add Document | Object: %s" % (self, obj))
+            #logs.debug("%s | Add Document | Object: %s" % (self, obj))
             ret = self._collection.insert_one(obj, safe=True)
-            utils.logs.debug("%s | Add Document | Document Added" % self)
+            #logs.debug("%s | Add Document | Document Added" % self)
             return self._getStringFromObjectId(ret)
         except Exception as e:
             logs.warning("Unable to add document: %s" % e)

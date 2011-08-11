@@ -91,3 +91,35 @@ class User(ASchemaBasedAttributeDict):
         
         return valid
 
+    def _formatHTTP(self, **kwargs):
+
+        output = {}
+        output['user_id'] = self.user_id
+        output['first_name'] = self.first_name
+        output['last_name'] = self.last_name
+        output['screen_name'] = self.screen_name
+        output['display_name'] = self.display_name
+        output['profile_image'] = self.profile_image
+        
+        if 'bio' in self:
+            output['bio'] = self.bio
+        else:
+            output['bio'] = None
+        if 'website' in self:
+            output['website'] = self['website']
+        else:
+            output['website'] = None
+        
+        output['color_primary'] = self.color_primary
+        if 'color_secondary' in self:
+            output['color_secondary'] = self.color_secondary
+        else:
+            output['color_secondary'] = None
+        
+        output['privacy'] = self.privacy
+            
+        # if 'stamp' in kwargs:
+        ### TODO: Allow us to pass other things here!
+        output['last_stamp'] = None
+        
+        return output
