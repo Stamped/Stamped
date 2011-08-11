@@ -8,27 +8,86 @@ __license__ = "TODO"
 import copy
 from datetime import datetime
 
+from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
+
 class Schema(object):
     
     def __init__(self, data=None, required=False):
-        self._data = data or { }
-        self.elements = {}
-        self.required = required
+        self._elements = {}
+        self._required = required
 
         self.setSchema()
+        self.importData(data)
+
 
     def __setattr__(self, name, value):
         # value = utils.normalize(value)
-        
-        if name == '_data' or name == 'elements' or name == 'required':
+        if name[:1] == '_':
             object.__setattr__(self, name, value)
             return None
+        elif isinstance(value, SchemaElement) or isinstance(value, Schema):
+            try:
+                self._elements[name] = value
+                return True
+            except:
+                raise
+        else:
+            try:
+                # print 'Set element: (%s, %s)' % (name, value)
+                self._elements[name].setElement(name, value)
+                return True
+            except:
+                print "Error: (%s, %s)" % (name, value)
+                raise
+    
+    def __setitem__(self, key, value):
+        self.__setattr__(key, value)
+    
+    def __delattr__(self, key):
+        self.__setattr__(key, None)
+    
+    def __delitem__(self, key):
+        self.__setattr__(key, None)
+    
+    def __getattr__(self, name):
+        # print "NAME: %s" % name
+        if name[:1] == '_':
+            return object.__getattr__(self, name)
         
-        try:
-            self.elements[name] = value
-            return True
-        except:
-            raise
+        def _getattr():
+            # print "Elements: %s" % self._elements
+            if name in self._elements:
+                # print "Found: %s" % name # % self._elements[name].value
+                return self._elements[name]
+            
+            raise KeyError(name)
+        
+        return _getattr()
+    
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+
+    def __str__(self):
+        return str(self.value)
+    
+    def __len__(self):
+        return len(self._elements)
+    
+    @property
+    def value(self):
+        ret = {}
+        for k, v in self._elements.iteritems():
+            ret[k] = str(v)
+        return ret
+
+    def importData(self, data):
+        if data == None:
+            self._data = {}
+            return
+        if not isinstance(data, dict):
+            raise TypeError
+        self._data = data
+        self.validate()
 
     def setSchema(self):
         raise NotImplementedError
@@ -43,18 +102,18 @@ class Schema(object):
         # print 'Data         | %s' % data
         # print 'Elements     | %s' % self.elements.keys()
 
-        for k, v in self.elements.iteritems():
+        for k, v in self._elements.iteritems():
             item = data.pop(k, None)
             # print 'Current run  | %s :: %s' % (k, item)
 
             # Value
             if isinstance(v, SchemaElement):
-                v.validateElement(k, item)
+                v.setElement(k, item)
             
             # Dictionary
             elif isinstance(v, Schema):
                 if item == None:
-                    if v.required == True:
+                    if v._required == True:
                         msg = "Missing nested directory (%s)" % k
                         print msg
                         raise Exception(msg)
@@ -90,38 +149,54 @@ class SchemaElement(object):
 
     def __init__(self, requiredType, **kwargs):
         self.data = {}
+        self._value = None
         self.requiredType = requiredType
-        self.required = False
+        self.required = kwargs.pop('required', False)
         self.primary_key = False
+        
+    def __str__(self):
+        return str(self._value)
 
-        if 'required' in kwargs:
-            self.required = kwargs['required']
+    def __len__(self):
+        if self._value == None:
+            return 0
+        return len(self._value)
 
-    def validateElement(self, element, val=None):
-        if val == None:
+    @property
+    def value(self):
+        return self._value
+        
+    def setElement(self, name, value=None):
+        # print 'Begin: %s %s' % (element, val)
+        if value == None:
             if self.required == True:
-                msg = "Required field empty (%s)" % element
+                msg = "Required field empty (%s)" % name
                 print msg
                 raise Exception(msg)
+            self._value = value
             return
+
+        if isinstance(value, dict):
+            msg = "Cannot set dictionary as value (%s)" % name
+            print msg
+            raise TypeError(msg)
         
-        if not isinstance(val, self.requiredType):
+        if not isinstance(value, self.requiredType):
             try:
                 if self.requiredType == basestring:
-                    val = str(val)
+                    value = str(value)
                 elif self.requiredType == float:
-                    val = float(val)
+                    value = float(value)
                 elif self.requiredType == int:
-                    val = int(val)
-                if not isinstance(val, self.requiredType):
-                    msg = "Incorrect type (%s)" % element
-                    print msg
-                    raise KeyError(msg)
+                    value = int(value)
+                if not isinstance(value, self.requiredType):
+                    raise
             except:
-                msg = "Incorrect type (%s)" % element
+                msg = "Incorrect type (%s)" % name
                 print msg
                 raise KeyError(msg)
         
+        self._value = value
 
 
 class EntityMiniSchema(Schema):
@@ -179,22 +254,33 @@ class StampSchema(Schema):
 
 
 
+class Stamp(ASchemaBasedAttributeDict):
+    def __init__(self, data=None):
+        ASchemaBasedAttributeDict.__init__(self)
+        self._data = self.importData(data)
+
+    def importData(self, data=None):
+        if data == None:
+            return None
+        self._schema = StampSchema(data)
+        self._schema.validate()
+        return data
 
 ### Example implementation
-stamp = {
+stampData = {
     'stamp_id': '12345',
     'entity': {
         'entity_id': '567890',
         'title': 'Little Owl',
-        'coordinates': {
-            'lat': 123, 
-            'lng': 456
-        },
+        # 'coordinates': {
+        #     'lat': 123, 
+        #     'lng': 456
+        # },
         'category': 'food',
         'subtitle': 'New York, NY'
     },
     'user': {
-        'user_id': '4321',
+        'user_id': '432111111',
         'screen_name': 'kevin',
         'display_name': 'Kevin P.',
         'profile_image': 'http://img.stamped.com/kevin',
@@ -213,8 +299,57 @@ stamp = {
     },
 }
 
-Stamp = StampSchema(stamp)
-print "Is valid: %s" % Stamp.isValid
+print 
+print 'START'
+
+testStamp = StampSchema(stampData)
+# print "Is valid: %s" % testStamp.isValid
+# print
+
+# stamp = Stamp(stampData)
+# print stamp.user['display_name']
+# stamp.user['screen_name'] = None
+# del(stamp.entity['coordinates']['lat'])
+# print stamp.entity
+# print stamp.coordinates
+stamp = StampSchema()
+stamp.stamp_id = '4321'
+stamp = StampSchema(stampData)
+# stamp.validate()
+# print stamp
+#stamp.entity['title'] = 'The Little Owl'
+# print stamp._elements
+# print "Old: ", stamp._elements['stamp_id']._value
+# print "New: ", stamp.stamp_id
+
+print "Stamp['user']['user_id']:        %s" % stamp['user']['user_id']
+
+
+stamp.stamp_id = '4321'
+stamp.user.user_id = 'asdf'
+stamp.entity.coordinates.lat = '123'
+
+print "Stamp.user:                      %s" % stamp.user
+print "Stamp.user.user_id:              %s" % stamp.user.user_id
+
+print "Stamp.entity:                    %s" % stamp.entity
+print "Stamp.entity.title:              %s" % stamp.entity.title
+print "Stamp.entity.coordinates:        %s" % stamp.entity.coordinates
+print "Stamp.entity.coordinates.lat:    %s" % stamp.entity.coordinates.lat
+
+print "Stamp.timestamp:                 %s" % stamp.timestamp
+print "Stamp.timestamp.created:         %s" % stamp.timestamp.created
+
+del(stamp.user['color_secondary'])
+del(stamp.user.color_secondary)
+
+print "Stamp.user length:               %s" % len(stamp.user)
+
+#print stamp.entity.entity_id
+
+#print stamp._elements['entity']._elements['title']._value
+
+
 
 
 
