@@ -569,7 +569,7 @@ class AppleEPFRelationalDB(AAppleEPFDump):
     
     def execute(self, cmd):
         utils.log(cmd)
-        self.db.execute(cmd)
+        return self.db.execute(cmd)
     
     def _run(self):
         utils.log("%s run" % self)
@@ -630,6 +630,21 @@ class AppleEPFRelationalDB(AAppleEPFDump):
 class AppleEPFGenreRelationalDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Genres", "genre")
+
+class AppleEPFVideoPriceRelationalDB(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Video Prices", "video_price")
+        
+        g = AppleEPFStorefrontDump()
+        g.start()
+        g.join()
+        self.us_storefront_id = g.results['USA']['storefront_id']
+    
+    def _filter(self, row, table_format):
+        storefront_id = row[table_format.cols.storefront_id.index]
+        
+        # only retain us video prices
+        return storefront_id == self.us_storefront_id
 
 import EntitySources
 

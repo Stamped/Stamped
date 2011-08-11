@@ -6,14 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
+import pymongo, sys
+
 from MongoStampedAPI import MongoStampedAPI
 from db.mongodb.AMongoCollection import MongoDBConfig
 from optparse import OptionParser
 from Entity import Entity
-from pprint import pprint
-import sys
-
 from difflib import SequenceMatcher
+from pprint import pprint
 
 #-----------------------------------------------------------
 
@@ -85,6 +85,8 @@ def main():
     #api._entityDB.matchEntities(params.q, limit=10)
     entityDB = api._entityDB
     #placesDB = api._placesEntityDB
+    
+    entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
     
     input_query = args[0]
     query = u"%s" % input_query
