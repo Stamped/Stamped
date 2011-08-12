@@ -202,7 +202,7 @@ class Schema(SchemaElement):
     def value(self):
         ret = {}
         for k, v in self._elements.iteritems():
-            ret[k] = str(v)
+            ret[k] = v.value
         return ret
 
     def validate(self):
@@ -365,7 +365,7 @@ class StampSchema(Schema):
         self.flags              = StampFlagsSchema()
         self.stats              = StampStatsSchema()
 
-    def _exportFlat(self):
+    def _exportFlatOld(self):
         ret = {}
         ret['stamp_id']         = self.stamp_id.value
         ret['entity']           = self.entity.value
@@ -382,6 +382,22 @@ class StampSchema(Schema):
         ret['entity']['coordinates'] = '%s,%s' % (
             self.entity.coordinates.lat,
             self.entity.coordinates.lng)
+
+        return ret
+
+    def _exportFlat(self):
+        ret = self.value
+
+        ret['created']          = self.timestamp.created.value
+        ret['flags']            = self.flags.locked.value
+        ret['num_comments']     = self.stats.num_comments.value
+        
+        ret['entity']['coordinates'] = '%s,%s' % (
+            self.entity.coordinates.lat,
+            self.entity.coordinates.lng)
+
+        del(ret['timestamp'])
+        del(ret['stats'])
 
         return ret
 
@@ -481,6 +497,8 @@ print stamp.exportData(format='flat')['entity']
 print stamp.exportData(format='flat')['entity']['coordinates']
 print stamp.exportData(format='flat')['credit'][0]
 
+print
+print
 #print stamp.entity.entity_id
 
 if 'entity' in stamp:

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 __author__ = "Stamped (dev@stamped.com)"
 __version__ = "1.0"
@@ -9,6 +10,34 @@ import copy, os, unittest
 from datetime import datetime
 from Schemas import *
 from schema import *
+
+
+
+class SimpleSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.integer            = SchemaElement(int, default=100)
+        self.float              = SchemaElement(float)
+        self.long               = SchemaElement(long)
+        self.required           = SchemaElement(basestring, required=True)
+        self.bool               = SchemaElement(bool)
+        self.datetime           = SchemaElement(datetime)
+
+class InnerSchema(Schema):
+    def setSchema(self):
+        self.item               = SchemaElement(basestring)
+        self.required           = SchemaElement(basestring, required=True)
+        self.basestring         = SchemaElement(basestring)
+
+class NestedSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.inner              = InnerSchema()
+
+class ListSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.items              = SchemaList(InnerSchema())
 
 
 class ASchemaTestCase(unittest.TestCase):
@@ -24,40 +53,59 @@ class ASchemaTestCase(unittest.TestCase):
     def assertLength(self, a, size):
         self.assertTrue(len(a) == size)
 
-    class SimpleSchema(Schema):
-        def setSchema(self):
-            self.basestring         = SchemaElement(basestring)
-            self.integer            = SchemaElement(int)
-            self.float              = SchemaElement(float)
-            self.required           = SchemaElement(basestring, required=True)
+    ### DEFAULT VARIABLES
 
 
-    def sampleDataPoints(self):
-        return [
-            self.sampleString, 
-            self.sampleInt, 
-            self.sampleFloat, 
-            self.sampleList, 
-            self.sampleDict
-        ]
+    sampleString                = 'abc'
+    sampleInt                   = 123
+    sampleIntB                  = '123'
+    sampleFloat                 = 123.45
+    sampleFloatB                = '123.45'
+    sampleLong                  = 2L
+    sampleList                  = [1, 2, 3]
+    sampleDict                  = {'a': 1, 'b': 2}
+    sampleTuple                 = (1, 2, 3, 'abc')
+    sampleBool                  = True
+    sampleBool2                 = 'True'
+    sampleBool3                 = 1
+    sampleBool4                 = 1L
+    sampleNone                  = None
+    sampleDatetime              = datetime.utcnow()
+    sampleUTF8                  = '๓๙ใ1฿'
+
 
 class SimpleSchemaTest(ASchemaTestCase):
 
     def setUp(self):
 
-        self.sampleString           = 'abc'
-        self.sampleInt              = 123
-        self.sampleFloat            = 123.45
-        self.sampleList             = [1, 2, 3]
-        self.sampleDict             = {'a': 1, 'b': 2}
+        """
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool,
+            self.sampleBool2,
+            self.sampleNone,
+            self.sampleDatetime,
+        ]
+        """
 
-        sampleData = {
+        self.sampleData = {
             'basestring':   self.sampleString,
             'integer':      self.sampleInt,
             'float':        self.sampleFloat,
-            'required':     self.sampleString
+            'required':     self.sampleString,
+            'long':         self.sampleLong,
+            'bool':         self.sampleBool,
+            'datetime':     self.sampleDatetime,
         }
-        self.schema = self.SimpleSchema(sampleData)
+        self.schema = SimpleSchema(self.sampleData)
 
     def tearDown(self):
         pass
@@ -66,31 +114,62 @@ class SimpleSchemaTest(ASchemaTestCase):
         self.assertEqual(self.sampleString, self.schema.basestring.value)
         self.assertEqual(self.sampleInt, self.schema.integer.value)
         self.assertEqual(self.sampleFloat, self.schema.float.value)
-        self.assertEqual(self.sampleString, self.schema.required.value)
+        self.assertEqual(self.sampleLong, self.schema.long.value)
+        self.assertEqual(self.sampleBool, self.schema.bool.value)
+        self.assertEqual(self.sampleDatetime, self.schema.datetime.value)
 
         self.assertEqual(self.sampleString, self.schema['basestring'].value)
         self.assertEqual(self.sampleInt, self.schema['integer'].value)
         self.assertEqual(self.sampleFloat, self.schema['float'].value)
-        self.assertEqual(self.sampleString, self.schema['required'].value)
+        self.assertEqual(self.sampleLong, self.schema['long'].value)
+        self.assertEqual(self.sampleBool, self.schema['bool'].value)
+        self.assertEqual(self.sampleDatetime, self.schema['datetime'].value)
 
         self.assertIsInstance(self.schema.basestring, SchemaElement)
         self.assertIsInstance(self.schema.integer, SchemaElement)
         self.assertIsInstance(self.schema.float, SchemaElement)
-        self.assertIsInstance(self.schema.required, SchemaElement)
+        self.assertIsInstance(self.schema.long, SchemaElement)
+        self.assertIsInstance(self.schema.bool, SchemaElement)
+        self.assertIsInstance(self.schema.datetime, SchemaElement)
+
+        self.assertIsInstance(self.schema.basestring.value, basestring)
+        self.assertIsInstance(self.schema.integer.value, int)
+        self.assertIsInstance(self.schema.float.value, float)
+        self.assertIsInstance(self.schema.long.value, long)
+        self.assertIsInstance(self.schema.bool.value, bool)
+        self.assertIsInstance(self.schema.datetime.value, datetime)
 
     def test_contain(self):
         self.assertIn('basestring', self.schema)
         self.assertIn('integer', self.schema)
         self.assertIn('float', self.schema)
         self.assertIn('required', self.schema)
+        self.assertIn('long', self.schema)
+        self.assertIn('bool', self.schema)
+        self.assertIn('datetime', self.schema)
 
     def test_valid_float(self):
-        values = ['123', 123, '123.45', 123.45]
+        values = [
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleBool,
+            self.sampleNone,
+        ]
         for i in values:
             self.schema.float = i
 
     def test_invalid_float(self):
-        values = ['a', ['1'], {'a': 1}]
+        values = [
+            self.sampleString,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool2,
+            self.sampleDatetime,
+        ]
         for i in values:
             try:
                 self.schema.float = i
@@ -100,12 +179,27 @@ class SimpleSchemaTest(ASchemaTestCase):
             self.assertTrue(ret)
 
     def test_valid_int(self):
-        values = ['123', 123, 123.45]
+        values = [
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleLong,
+            self.sampleBool,
+            self.sampleNone,
+        ]
         for i in values:
             self.schema.integer = i
 
     def test_invalid_int(self):
-        values = ['a', ['1'], {'a': 1}, '123.45']
+        values = [
+            self.sampleString,
+            self.sampleFloatB,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool2,
+            self.sampleDatetime,
+        ]
         for i in values:
             try:
                 self.schema.integer = i
@@ -114,9 +208,323 @@ class SimpleSchemaTest(ASchemaTestCase):
                 ret = True
             self.assertTrue(ret)
 
+    def test_valid_string(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleBool,
+            self.sampleBool2,
+            self.sampleDatetime,
+            self.sampleNone,
+            self.sampleTuple, ## Is this expected behavior??
+            self.sampleUTF8,
+        ]
+        for i in values:
+            self.schema.basestring = i
+            # self.assertEqual(self.schema.basestring.value, i)
+
+    def test_invalid_string(self):
+        values = [
+            self.sampleList,
+            self.sampleDict,
+        ]
+        for i in values:
+            try:
+                self.schema.basestring = i
+                ret = False
+            except:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_valid_long(self):
+        values = [
+            self.sampleLong,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.long = i
+
+    def test_invalid_long(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool,
+            self.sampleBool2,
+            self.sampleDatetime,
+        ]
+        for i in values:
+            try:
+                self.schema.long = i
+                ret = False
+            except:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_valid_bool(self):
+        values = [
+            self.sampleBool,
+            self.sampleBool2,
+            self.sampleBool3,
+            self.sampleBool4,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.bool = i
+
+    def test_invalid_bool(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleDatetime,
+        ]
+        for i in values:
+            try:
+                self.schema.bool = i
+                ret = False
+            except:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_valid_datetime(self):
+        values = [
+            self.sampleDatetime,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.datetime = i
+
+    def test_invalid_datetime(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool,
+            self.sampleBool2,
+        ]
+        for i in values:
+            try:
+                self.schema.datetime = i
+                ret = False
+            except:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_required(self):
+        try:
+            self.schema.required = None
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_iter(self):
+        for i in self.schema:
+            pass
+
+    def test_len(self):
+        self.assertEqual(len(self.schema), len(self.sampleData))
+
+    def test_del(self):
+        self.assertEqual(self.schema.basestring.value, self.sampleString)
+        del(self.schema.basestring)
+        self.assertEqual(self.schema.basestring.value, None)
+        self.assertIn('basestring', self.schema)
+
+    def test_default(self):
+        self.assertEqual(self.schema.integer.value, self.sampleInt)
+        del(self.schema.integer)
+        self.assertEqual(self.schema.integer.value, 100)
+        self.assertIn('integer', self.schema)
+
+
+
+
+
+class NestedSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'inner': {
+                'item':         self.sampleString,
+                'required':     self.sampleString,
+                'basestring':   self.sampleString,
+            },
+        }
+        self.schema = NestedSchema(self.sampleData)
+
+    def test_retrieve(self):
+        self.assertEqual(self.sampleString, self.schema.basestring.value)
+        self.assertEqual(self.sampleString, self.schema.inner.item.value)
+
+        self.assertEqual(self.sampleString, self.schema['basestring'].value)
+        self.assertEqual(self.sampleString, self.schema['inner']['item'].value)
+
+        self.assertIsInstance(self.schema.basestring, SchemaElement)
+        self.assertIsInstance(self.schema.inner.item, SchemaElement)
+        self.assertIsInstance(self.schema.inner, Schema)
+
+        self.assertIsInstance(self.schema.basestring.value, basestring)
+        self.assertIsInstance(self.schema.inner.item.value, basestring)
+        self.assertIsInstance(self.schema.inner.value, dict)
+
+        self.assertEqual(self.sampleData, self.schema.value)
+
+    def test_contain_valid(self):
+        self.assertIn('inner', self.schema)
+        self.assertIn('item', self.schema)
+
+    def test_contain_invalid(self):
+        try:
+            'basestring' in self.schema
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_iter(self):
+        for i in self.schema:
+            pass
+
+    def test_len(self):
+        self.assertEqual(len(self.schema), len(self.sampleData))
+
+    def test_del(self):
+        self.assertEqual(self.schema.inner.item.value, self.sampleString)
+        del(self.schema.inner.item)
+        self.assertEqual(self.schema.inner.item.value, None)
+        self.assertIn('item', self.schema)
+
+    def test_required(self):
+        try:
+            self.schema.inner.required = None
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+
+
+class ListSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'items': [
+                {
+                    'item':         self.sampleString,
+                    'required':     self.sampleString,
+                    'basestring':   self.sampleString,
+                },
+                {
+                    'item':         self.sampleString,
+                    'required':     self.sampleString,
+                    'basestring':   self.sampleString,
+                },
+            ],
+        }
+        self.schema = ListSchema(self.sampleData)
+
+    def test_retrieve(self):
+        self.assertEqual(self.sampleString, self.schema.basestring.value)
+        self.assertEqual(self.sampleString, self.schema.items[0].item.value)
+
+        self.assertEqual(self.sampleString, self.schema['basestring'].value)
+        self.assertEqual(self.sampleString, self.schema.items[0].item.value)
+
+        self.assertIsInstance(self.schema.basestring, SchemaElement)
+        self.assertIsInstance(self.schema.items, SchemaList)
+
+        self.assertIsInstance(self.schema.basestring.value, basestring)
+        self.assertIsInstance(self.schema.items.value, list)
+
+        self.assertEqual(self.sampleData, self.schema.value)
+        self.assertEqual(self.sampleData['items'], self.schema.items.value)
+
+    def test_contain(self):
+        self.assertIn('basestring', self.schema)
+        self.assertIn('items', self.schema)
+        self.assertFalse('item' in self.schema) # Shouldn't look in items within a list!
+
+    def test_iter(self):
+        for i in self.schema:
+            pass
+
+        for i in self.schema.items:
+            self.assertIsInstance(i, SchemaElement)
+
+    def test_len(self):
+        self.assertEqual(len(self.schema), len(self.sampleData))
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items']))
+
+    def test_add(self):
+        self.schema.items.append(self.sampleData['items'][0])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])+1)
+
+        self.schema.items.insert(0, self.sampleData['items'][0])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])+2)
+
+        self.schema.items.extend(self.sampleData['items'][:2])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])+4)
+
+    def test_del(self):
+        del(self.schema.items[-1])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])-1)
+        self.assertIn('items', self.schema)
+
+    def test_remove(self):
+        self.schema.items.remove(self.schema.items[0])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])-1)
+        self.assertIn('items', self.schema)
+
+    def test_pop(self):
+        self.schema.items.pop()
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])-1)
+        self.assertIn('items', self.schema)
+
+    def test_index(self):
+        self.schema.items.index(self.schema.items[0])
+
+    def test_count(self):
+        ###################### THINK ABOUT
+        self.assertEqual(self.schema.items.count(self.schema.items[0]), len(self.sampleData['items']))
+
+    def test_sort(self):
+        self.schema.items.sort()
+
+    def test_sort(self):
+        self.schema.items.reverse()
+
+
 
 if __name__ == '__main__':
     unittest.main()
+
 
 """
 

@@ -13,8 +13,11 @@ class SchemaElement(object):
 
     def __init__(self, requiredType, **kwargs):
         self._data = None
-        self._requiredType = requiredType
+        self._requiredType = self._validateRequiredType(requiredType)
         self._required = kwargs.pop('required', False)
+        self._default = kwargs.pop('default', None)
+        if self._default != None:
+            self.setElement('N/A', self._default)
         
     def __str__(self):
         return str(self.value)
@@ -28,17 +31,35 @@ class SchemaElement(object):
     def value(self):
         return self._data
 
+    def _validateRequiredType(self, requiredType):
+        validTypes = [
+            basestring,
+            bool,
+            int,
+            long,
+            float,
+            dict,
+            list,
+            datetime,
+        ]
+        if requiredType in validTypes:
+            return requiredType
+        raise TypeError("Invalid type requested")
+
     def validate(self, name='N/A'):
         return self.setElement(name, self._data)
         
     def setElement(self, name, value=None):
         if value == None:
-            if self._required == True:
-                msg = "Required field empty (%s)" % name
-                print msg
-                raise Exception(msg)
-            self._data = value
-            return
+            if self._default != None:
+                value = self._default
+            else:
+                if self._required == True:
+                    msg = "Required field empty (%s)" % name
+                    print msg
+                    raise Exception(msg)
+                self._data = value
+                return
         
         if not isinstance(value, self._requiredType):
             try:
@@ -46,6 +67,16 @@ class SchemaElement(object):
                     msg = "Cannot set dictionary as value (%s)" % name
                     print msg
                     raise TypeError(msg)
+                elif isinstance(value, list):
+                    msg = "Cannot set list as value (%s)" % name
+                    print msg
+                    raise TypeError(msg)
+                elif self._requiredType == bool:
+                    b = str(value).lower()
+                    if b == 'true' or b == '1':
+                        value = True
+                    elif b == 'false' or b == '0':
+                        value = False
                 elif self._requiredType == basestring:
                     value = str(value)
                 elif self._requiredType == float:
@@ -69,7 +100,69 @@ class SchemaList(SchemaElement):
         self._data = []
 
     def __len__(self):
-        return len(self._elements)
+        return len(self._data)
+    
+    def __getitem__(self, key):
+        return self._data[key]
+
+    def __setitem__(self, key, item):
+        self._data[key] = self._import(item)
+        self.validate()
+    
+    def __delitem__(self, key):
+        del(self._data[key])
+        self.validate()
+
+    def _import(self, item):
+        element = self._element
+        if isinstance(item, SchemaElement):
+            return item
+        elif isinstance(element, Schema) or isinstance(element, SchemaList):
+            newSchemaItem = copy.deepcopy(element)
+            newSchemaItem.importData(item)
+            return newSchemaItem
+
+        elif isinstance(element, SchemaElement):
+            newSchemaElement = copy.deepcopy(element)
+            newSchemaElement.setElement('e', item)
+            return newSchemaItem
+
+        else:
+            msg = "Cannot set item (invalid element)"
+            print msg
+            raise Exception(msg)
+
+    # List functions
+
+    def append(self, item):
+        self._data.append(self._import(item))
+
+    def insert(self, position, item):
+        self._data.insert(position, self._import(item))
+
+    def extend(self, items):
+        data = []
+        for item in items:
+            data.append(self._import(item))
+        self._data.extend(data)
+
+    def remove(self, item):
+        return self._data.remove(self._import(item))
+    
+    def pop(self, i=-1):
+        return self._data.pop(i)
+
+    def index(self, item):
+        return self._data.index(self._import(item))
+
+    def count(self, item):
+        return self._data.count(self._import(item))
+
+    def sort(self):
+        self._data.sort()
+    
+    def reverse(self):
+        self._data.reverse()
 
     @property
     def value(self):
@@ -90,36 +183,16 @@ class SchemaList(SchemaElement):
             raise Exception("Invalid element in list")
         element = self._element
 
-        # Dictionary
-        if isinstance(element, Schema):
-            for item in data:
-                newSchema = copy.deepcopy(element)
-                newSchema.importData(item)
-                self._data.append(newSchema)
-
-        # List
-        elif isinstance(element, SchemaList):
-            for item in data:
-                newSchemaList = copy.deepcopy(element)
-                newSchemaList.importData(item)
-                self._data.append(newSchemaList)
-
-        # Value
-        elif isinstance(element, SchemaElement):
-            for item in data:
-                newSchemaElement = copy.deepcopy(element)
-                newSchemaElement.setElement('e', item)
-                self._data.append(newSchemaElement)
-        
-        else:
-            msg = "Unrecognized element in schema"
-            print msg
-            raise Exception(msg)
+        for item in data:
+            self.append(item)
 
     def validate(self):
+        if len(self._data) == 0 and self._required == True:
+            raise Exception("Required")
+        print '!!!!!!!!!!!!!!!!!', self._data
         for item in self._data:
             if not isinstance(item, SchemaElement):
-                msg = "Incorrect type (%s)" % name
+                msg = "Incorrect type (%s)" % item
                 print msg
                 raise TypeError(msg)
             item.validate()
@@ -177,6 +250,9 @@ class Schema(SchemaElement):
     def __len__(self):
         return len(self._elements)
 
+    def __iter__(self):
+        return self.value.__iter__()
+
     def __contains__(self, item):
         def _contains(_item, data):
             output = 0
@@ -198,30 +274,19 @@ class Schema(SchemaElement):
     def value(self):
         ret = {}
         for k, v in self._elements.iteritems():
-            ret[k] = str(v)
+            ret[k] = v.value
         return ret
 
     def validate(self):
+        if len(self._elements) == 0 and self._required == True:
+            msg = "Required Schema is missing"
+            print msg
+            raise Exception(msg)
+
         for k, v in self._elements.iteritems():
             
             # Dictionary
-            if isinstance(v, Schema):
-                if item == None:
-                    if v._required == True:
-                        msg = "Missing nested directory (%s)" % k
-                        print msg
-                        raise Exception(msg)
-                else:
-                    v.validate()
-
-            # List
-            elif isinstance(v, SchemaList):
-                if item == None:
-                    if v._required == True:
-                        msg = "Missing list (%s)" % k
-                        print msg
-                        raise Exception(msg)
-                else:
+            if isinstance(v, Schema) or isinstance(v, SchemaList):
                     v.validate()
 
             # Value
