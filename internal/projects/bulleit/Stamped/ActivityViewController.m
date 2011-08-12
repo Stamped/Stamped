@@ -61,10 +61,14 @@
 }
 
 - (void)loadEventsFromNetwork {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* eventMapping = [objectManager.mappingProvider mappingForKeyPath:@"Event"];
-  NSString* userID = [AccountManager sharedManager].currentUser.userID;
-  NSString* resourcePath = [NSString stringWithFormat:@"/activity/show.json?authenticated_user_id=%@", userID];
+  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
+  NSString* resourcePath =
+      [NSString stringWithFormat:@"/activity/show.json?oauth_token=%@", authToken];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:eventMapping
                                   delegate:self];
@@ -148,11 +152,6 @@
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                   message:[error localizedDescription]
-                                                  delegate:nil
-                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-	[alert show];
 	NSLog(@"Hit error: %@", error);
   [self setIsLoading:NO];
 }
@@ -160,6 +159,7 @@
 #pragma mark - STReloadableTableView methods.
 
 - (void)userPulledToReload {
+  [super userPulledToReload];
   [self loadEventsFromNetwork];
 }
 

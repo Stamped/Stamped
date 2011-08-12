@@ -9,6 +9,7 @@
 #import "STReloadableTableViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/RestKit.h>
 
 static NSString* kPullDownText = @"Pull down to refresh...";
 static NSString* kReleaseText = @"Release to refresh...";
@@ -101,7 +102,10 @@ static NSString* kLoadingText = @"Loading...";
 }
 
 // To be implemented by subclasses.
-- (void)userPulledToReload {}
+- (void)userPulledToReload {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    [self setIsLoading:NO];
+}
 
 #pragma mark - UIScrollView delegate methods
 

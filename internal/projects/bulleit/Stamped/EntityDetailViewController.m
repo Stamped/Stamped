@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "AccountManager.h"
 #import "Entity.h"
 #import "Stamp.h"
 
@@ -62,10 +63,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)loadEntityDataFromServer {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
   NSString* resourcePath =
-      [NSString stringWithFormat:@"/entities/show.json?entity_id=%@", entityObject_.entityID];
+      [NSString stringWithFormat:@"/entities/show.json?entity_id=%@&oauth_token=%@",
+          entityObject_.entityID, [AccountManager sharedManager].authToken.accessToken];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:entityMapping
                                   delegate:self];

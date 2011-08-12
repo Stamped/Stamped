@@ -148,8 +148,8 @@
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
-  NSString* searchPath = [NSString stringWithFormat:@"/entities/search.json?authenticated_user_id=%@&q=%@",
-      [AccountManager sharedManager].currentUser.userID, searchField_.text];
+  NSString* searchPath = [NSString stringWithFormat:@"/entities/search.json?oauth_token=%@&q=%@",
+      [AccountManager sharedManager].authToken.accessToken, searchField_.text];
   searchPath = [searchPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
   [objectManager loadObjectsAtResourcePath:searchPath
                              objectMapping:entityMapping
@@ -168,11 +168,6 @@
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                   message:[error localizedDescription]
-                                                  delegate:nil
-                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-	[alert show];
 	NSLog(@"Hit error: %@", error);
   [searchField_ becomeFirstResponder];
 }

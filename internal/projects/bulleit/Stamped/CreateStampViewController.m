@@ -282,7 +282,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       reasoningTextView_.text, @"blurb",
       credit, @"credit",
-      [AccountManager sharedManager].currentUser.userID, @"authenticated_user_id",
+      [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
       entityObject_.entityID, @"entity_id", nil];
   [objectLoader send];
 }
@@ -353,11 +353,6 @@ static const CGFloat kMinContainerHeight = 204.0;
                    animations:^{
                      shelfBackground_.transform = CGAffineTransformIdentity;
                    }];
-  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                   message:[error localizedDescription] 
-                                                  delegate:nil 
-                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-	[alert show];
 	NSLog(@"Hit error: %@", error);
 }
 

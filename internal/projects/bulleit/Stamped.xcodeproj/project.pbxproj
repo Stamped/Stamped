@@ -107,12 +107,15 @@
 		7EC017A913C3754400ABE6E2 /* StampedTests.h in Resources */ = {isa = PBXBuildFile; fileRef = 7EC017A813C3754400ABE6E2 /* StampedTests.h */; };
 		7EC017AB13C3754400ABE6E2 /* StampedTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC017AA13C3754400ABE6E2 /* StampedTests.m */; };
 		7EC05DB713E60D8E00B22C3F /* Event.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC05DB613E60D8E00B22C3F /* Event.m */; };
+		7EC1C65013F456FE0070CE6D /* KeyChainItemWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC1C64F13F456FE0070CE6D /* KeyChainItemWrapper.m */; };
+		7EC1C65213F459B50070CE6D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC1C65113F459B50070CE6D /* Security.framework */; };
 		7EC7A9D313F1DE3800048944 /* sort_icon_search_0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */; };
 		7EC7A9D413F1DE3800048944 /* sort_icon_search_1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */; };
 		7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */; };
 		7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */; };
 		7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */; };
 		7ED2EF6C13E0DF7F007F1AFB /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */; };
+		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
 		7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDBF9FF13E0C57A003D73D5 /* Entity.m */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
 		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
@@ -364,6 +367,9 @@
 		7EC017AA13C3754400ABE6E2 /* StampedTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StampedTests.m; sourceTree = "<group>"; };
 		7EC05DB513E60D8E00B22C3F /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Event.h; sourceTree = "<group>"; };
 		7EC05DB613E60D8E00B22C3F /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Event.m; sourceTree = "<group>"; };
+		7EC1C64E13F456FE0070CE6D /* KeyChainItemWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyChainItemWrapper.h; sourceTree = "<group>"; };
+		7EC1C64F13F456FE0070CE6D /* KeyChainItemWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeyChainItemWrapper.m; sourceTree = "<group>"; };
+		7EC1C65113F459B50070CE6D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_0@2x.png"; sourceTree = "<group>"; };
 		7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_1@2x.png"; sourceTree = "<group>"; };
 		7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
@@ -372,6 +378,8 @@
 		7ED2EF6813E0DF7F007F1AFB /* PeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleViewController.h; sourceTree = "<group>"; };
 		7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleViewController.m; sourceTree = "<group>"; };
 		7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PeopleViewController.xib; sourceTree = "<group>"; };
+		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
+		7EDA5FF413F5705300F23B13 /* OAuthToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAuthToken.m; sourceTree = "<group>"; };
 		7EDBF9FE13E0C57A003D73D5 /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
 		7EDBF9FF13E0C57A003D73D5 /* Entity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Entity.m; sourceTree = "<group>"; };
 		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
@@ -415,6 +423,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EC1C65213F459B50070CE6D /* Security.framework in Frameworks */,
 				7EE1193F13CE0C8500378139 /* CFNetwork.framework in Frameworks */,
 				7EE1194013CE0C8500378139 /* CoreData.framework in Frameworks */,
 				7EE1194113CE0C8500378139 /* MobileCoreServices.framework in Frameworks */,
@@ -592,6 +601,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				7EC1C65113F459B50070CE6D /* Security.framework */,
 				7EE1193B13CE0C8500378139 /* CFNetwork.framework */,
 				7EE1193C13CE0C8500378139 /* CoreData.framework */,
 				7EE1193D13CE0C8500378139 /* MobileCoreServices.framework */,
@@ -772,6 +782,19 @@
 			name = People;
 			sourceTree = "<group>";
 		};
+		7EDA5FF213F56D7F00F23B13 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				7E22679713D4D90F00657A66 /* AccountManager.h */,
+				7E22679813D4D90F00657A66 /* AccountManager.m */,
+				7EC1C64E13F456FE0070CE6D /* KeyChainItemWrapper.h */,
+				7EC1C64F13F456FE0070CE6D /* KeyChainItemWrapper.m */,
+				7EDA5FF313F5705300F23B13 /* OAuthToken.h */,
+				7EDA5FF413F5705300F23B13 /* OAuthToken.m */,
+			);
+			name = Authentication;
+			sourceTree = "<group>";
+		};
 		7EE1190C13CE0C4100378139 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -834,8 +857,7 @@
 				7ED2EF5F13E0DBF8007F1AFB /* Todo */,
 				7ED2EF6D13E0DF83007F1AFB /* People */,
 				7ED2EF6713E0DED5007F1AFB /* Root View */,
-				7E22679713D4D90F00657A66 /* AccountManager.h */,
-				7E22679813D4D90F00657A66 /* AccountManager.m */,
+				7EDA5FF213F56D7F00F23B13 /* Authentication */,
 				7E42FDE813EF3A64007B3C26 /* STReloadableTableViewController.h */,
 				7E42FDE913EF3A64007B3C26 /* STReloadableTableViewController.m */,
 				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
@@ -1162,6 +1184,8 @@
 				7E42FDEA13EF3A64007B3C26 /* STReloadableTableViewController.m in Sources */,
 				7E146FEE13EF543B00B954C6 /* UserImageDownloadManager.m in Sources */,
 				7E146FF113F07A7500B954C6 /* MediumUserImageButton.m in Sources */,
+				7EC1C65013F456FE0070CE6D /* KeyChainItemWrapper.m in Sources */,
+				7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1274,7 +1298,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -1295,7 +1319,7 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_VERSION = "";
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";

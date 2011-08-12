@@ -16,8 +16,9 @@
 #import "Event.h"
 #import "Stamp.h"
 #import "User.h"
+#import "OAuthToken.h"
 
-static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
+static NSString* kDataBaseURL = @"http://ec2-107-20-53-207.compute-1.amazonaws.com:5000/api/v1";
 
 @implementation StampedAppDelegate
 
@@ -77,6 +78,11 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [eventMapping mapRelationship:@"comment" withMapping:commentMapping];
   [eventMapping mapRelationship:@"stamp" withMapping:stampMapping];
   [eventMapping mapRelationship:@"user" withMapping:userMapping];
+  
+  RKObjectMapping* oauthMapping = [RKObjectMapping mappingForClass:[OAuthToken class]];
+  [oauthMapping mapKeyPathsToAttributes:@"access_token", @"accessToken",
+                                        @"refresh_token", @"refreshToken",
+                                        @"expires_in", @"lifetimeSecs", nil];
 
   // Example date string: 2011-07-19 20:49:42.037000
   NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
@@ -89,6 +95,7 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [objectManager.mappingProvider setMapping:entityMapping forKeyPath:@"Entity"];
   [objectManager.mappingProvider setMapping:commentMapping forKeyPath:@"Comment"];
   [objectManager.mappingProvider setMapping:eventMapping forKeyPath:@"Event"];
+  [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];

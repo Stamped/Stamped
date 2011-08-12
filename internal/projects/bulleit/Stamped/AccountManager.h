@@ -10,18 +10,33 @@
 #import <UIKit/UIKit.h>
 
 #import "User.h"
+#import "OAuthToken.h"
 
 @protocol AccountManagerDelegate
 @required
 - (void)accountManagerDidAuthenticate;
 @end
 
-@interface AccountManager : NSObject<UITextFieldDelegate, RKObjectLoaderDelegate>
+@class KeychainItemWrapper;
+
+@interface AccountManager : NSObject<RKObjectLoaderDelegate, UIAlertViewDelegate> {
+ @private
+  KeychainItemWrapper* passwordKeychainItem_;
+  KeychainItemWrapper* accessTokenKeychainItem_;
+  KeychainItemWrapper* refreshTokenKeychainItem_;
+  UITextField* usernameField_;
+  UITextField* passwordField_;
+  NSTimer* oauthRefreshTimer_;
+  BOOL firstRun_;
+  NSUInteger numRetries_;
+}
 
 + (AccountManager*)sharedManager;
 - (void)authenticate;
 
+@property (nonatomic, retain) UIAlertView* alertView; 
 @property (nonatomic, retain) User* currentUser;
+@property (nonatomic, retain) OAuthToken* authToken;
 @property (nonatomic, assign) id<AccountManagerDelegate> delegate;
 
 @end

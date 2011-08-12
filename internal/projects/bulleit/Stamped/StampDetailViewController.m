@@ -327,14 +327,17 @@ static const CGFloat kKeyboardHeight = 216.0;
 #pragma mark - Comments.
 
 - (void)loadCommentsFromServer {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
+
   addCommentField_.hidden = YES;
   currentUserImageView_.hidden = YES;
   [loadingView_ startAnimating];
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
-  NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&authenticated_user_id=%@",
-      stamp_.stampID, [AccountManager sharedManager].currentUser.userID];
+  NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&oauth_token=%@",
+      stamp_.stampID, [AccountManager sharedManager].authToken.accessToken];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:commentMapping
                                   delegate:self];
@@ -407,7 +410,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       addCommentField_.text, @"blurb",
-      [AccountManager sharedManager].currentUser.userID, @"authenticated_user_id",
+      [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
       stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
  
@@ -441,11 +444,6 @@ static const CGFloat kKeyboardHeight = 216.0;
   addCommentField_.hidden = NO;
   currentUserImageView_.hidden = NO;
   [addCommentField_ becomeFirstResponder];
-  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                   message:[error localizedDescription] 
-                                                  delegate:nil 
-                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-	[alert show];
 	NSLog(@"Hit error: %@", error);
 }
 

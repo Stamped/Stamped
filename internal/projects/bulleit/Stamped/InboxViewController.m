@@ -128,10 +128,14 @@ typedef enum {
 }
 
 - (void)loadStampsFromNetwork {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  NSString* userID = [AccountManager sharedManager].currentUser.userID;
-  NSString* resourcePath = [NSString stringWithFormat:@"/collections/inbox.json?authenticated_user_id=%@", userID];
+  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
+  NSString* resourcePath =
+      [NSString stringWithFormat:@"/collections/inbox.json?oauth_token=%@", authToken];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:stampMapping
                                   delegate:self];
@@ -213,11 +217,6 @@ typedef enum {
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                   message:[error localizedDescription]
-                                                  delegate:nil
-                                         cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-	[alert show];
 	NSLog(@"Hit error: %@", error);
   [self setIsLoading:NO];
 }
@@ -249,6 +248,7 @@ typedef enum {
 #pragma mark - STReloadableTableView methods.
 
 - (void)userPulledToReload {
+  [super userPulledToReload];
   [self loadStampsFromNetwork];
 }
 
