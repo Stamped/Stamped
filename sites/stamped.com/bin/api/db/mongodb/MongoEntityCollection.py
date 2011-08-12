@@ -225,17 +225,20 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         #for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
         #    result.append(Entity(self._mongoToObj(entity, 'entity_id')))
         
+        input_query = input_query.lower()
         query = input_query
         query = query.strip()
-        query = query.replace('[', '\[?')
         query = query.replace(']', '\]?')
-        query = query.replace('(', '\(?')
-        query = query.replace(')', '\)?')
-        query = query.replace('.', '\.?')
-        query = query.replace(' ', '[ \t-]?')
+        query = query.replace('(', '\(')
+        query = query.replace(')', '\)')
+        query = query.replace('|', '\|')
+        query = query.replace(' and ', ' (and|&)? ')
+        query = query.replace('.', '\.')
+        query = query.replace('&', ' & ')
         query = query.replace('-', '-?')
+        query = query.replace(' ', '[ \t-_]?')
         query = query.replace("'", "'?")
-        
+ 
         results = []
         hard_limit = 100
         db_results = self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(hard_limit)
@@ -250,7 +253,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             
             for i in xrange(len(results)):
                 entity = results[i]
-                ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title).ratio()
+                ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title.lower()).ratio()
                 subcategory_index = subcategory_indices[entity.subcategory]
                 
                 results[i] = (ratio, subcategory_index, entity)
