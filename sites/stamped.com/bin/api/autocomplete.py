@@ -93,18 +93,29 @@ def main():
     query = query.strip()
     query = query.replace('[', '\[?')
     query = query.replace(']', '\]?')
-    query = query.replace('(', '\(')
-    query = query.replace(')', '\)')
+    query = query.replace('(', '\(?')
+    query = query.replace(')', '\)?')
     query = query.replace('|', '\|')
     query = query.replace(' and ', ' (and|&)? ')
-    query = query.replace('.', '\.')
+    query = query.replace('.', '\.?')
     query = query.replace('&', ' & ')
     query = query.replace('-', '-?')
-    query = query.replace(' ', '[ \t-_]?')
+    query = query.replace(' ', '[ \t-_]*')
     query = query.replace("'", "'?")
     utils.log("query: %s" % query)
     
     results = []
+    
+    
+    # TODO: what are the other regex options available?
+    # TODO: take into account number of sources for ranking purposes
+    #       possibly quantify each source
+    # TODO: take into account iTunes popularity
+        # need to ensure that popular artists will appear at the top
+        # to what degree should this should trump other ranking rules?
+    # TODO: look into academic resources / papers which may be useful for ranking
+    
+    
     db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}})
     #if options.limit is not None and options.limit >= 0:
     #    db_results = db_results.limit(options.limit)

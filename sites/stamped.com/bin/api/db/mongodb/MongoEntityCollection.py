@@ -219,12 +219,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         return self._addDocuments(entities, 'entity_id')
     
     def searchEntities(self, input_query, limit=20):
-        # Using a simple regex here. Need to rank results at some point...
-        #query = '^%s' % query
-        #result = []
-        #for entity in self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(limit):
-        #    result.append(Entity(self._mongoToObj(entity, 'entity_id')))
-        
         input_query = input_query.lower()
         query = input_query
         query = query.strip()
@@ -233,12 +227,12 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         query = query.replace(')', '\)')
         query = query.replace('|', '\|')
         query = query.replace(' and ', ' (and|&)? ')
-        query = query.replace('.', '\.')
+        query = query.replace('.', '\.?')
         query = query.replace('&', ' & ')
         query = query.replace('-', '-?')
-        query = query.replace(' ', '[ \t-_]?')
+        query = query.replace(' ', '[ \t-_]*')
         query = query.replace("'", "'?")
- 
+        
         results = []
         hard_limit = 100
         db_results = self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(hard_limit)

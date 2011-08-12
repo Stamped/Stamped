@@ -433,6 +433,7 @@ class AppleEPFArtistDump(AAppleEPFDump):
             if name.endswith(s):
                 return False
         
+        """
         artist_id = row[table_format.cols.artist_id.index]
         
         # query for all albums by this artist
@@ -451,7 +452,6 @@ class AppleEPFArtistDump(AAppleEPFDump):
                     popular = True
         
         # query for all songs by this artist
-        """
         songs = self.artist_to_songs.get_rows('artist_id', artist_id)
         
         if len(songs) > 0:
@@ -461,9 +461,9 @@ class AppleEPFArtistDump(AAppleEPFDump):
                 
                 if pop is not None:
                     popular = True
-        """
         
         return popular
+        """
         
         return True
 
