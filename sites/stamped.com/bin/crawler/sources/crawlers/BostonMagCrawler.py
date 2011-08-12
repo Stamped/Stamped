@@ -69,17 +69,34 @@ class BostonMagCrawler(AExternalEntitySource):
         results = soup.find('div', { 'id' : 'searchResults' }).findAll('td', { 'class' : 'start' })
         
         for result in results:
+            
             try:
                 name = result.find('a').getText().strip()
             except AttributeError:
                 utils.log("[%s] error parsing %s (%s)" % (self, name, href))
                 return
+                
+            x = 0 
             
-            try:
-                addr = '{0}, {1}'.format(result.find('a').nextSibling, result.find('br').nextSibling)
-            except AttributeError:
-                utils.log("[%s] error parsing %s (%s)" % (self, addr, href))
-                return
+            for r in result.findAll('br'):
+                x+=1
+            
+            if x == 3: 
+                try:
+                    addr = '{0}, {1}'.format(result.find('a').nextSibling.strip(), result.find('br').nextSibling.strip())
+                except Exception:
+                    utils.log("[%s] error parsing %s (%s)" % (self, addr, href))
+                    return
+                    
+            elif x == 4:
+                try:
+                    addr = '{0}, {1}'.format(result.contents[3].strip(), result.contents[5].strip())
+                except Exception:
+                    utils.log("[%s] error parsing %s (%s)" % (self, addr, href))
+                    return 
+                    
+            else: 
+                addr = ''
             
             if addr == '':
                 continue 

@@ -60,7 +60,7 @@ def logRaw(s, includeFormat=False):
 
 def _formatLog(s):
     try:
-        return "[%s] %s" % (threading.currentThread().getName(), normalize(s))
+        return "[%s] %s" % (threading.currentThread().getName(), normalize2(s))
     except:
         return "[%s] __error__ printout" % (threading.currentThread().getName(), )
 
@@ -360,6 +360,48 @@ def count(container):
 
 def removeNonAscii(s):
     return "".join(ch for ch in s if ord(ch) < 128)
+
+def normalize2(s):
+    try:
+        if isinstance(s, basestring):
+            # replace html escape sequences with their unicode equivalents
+            if '&' in s and ';' in s:
+                for name in htmlentitydefs.name2codepoint:
+                    escape_seq = '&%s;' % name
+                    
+                    while True:
+                        l = s.find(escape_seq)
+                        if l < 0:
+                            break
+                        
+                        if name == 'lsquo' or name == 'rsquo':
+                            # simplify unicode single quotes to use the ascii apostrophe character
+                            val = "'"
+                        else:
+                            val = unichr(htmlentitydefs.name2codepoint[name])
+                        
+                        s = u"%s%s%s" % (s[:l], val, s[l+len(escape_seq):])
+            
+            # handle &#xxxx;
+            escape_seq = '&#'
+            while True:
+                l = s.find(escape_seq)
+                if l < 0:
+                    break
+                
+                m = s.find(';', l)
+                if m < 0 or m <= l + 2:
+                    break
+                
+                val = unichr(int(s[l + 2 : m]))
+                s = u"%s%s%s" % (s[:l], val, s[m + 1:])
+        if isinstance(s, unicode):
+            s = removeNonAscii(s.encode("utf-8"))
+    except Exception as e:
+        utils.printException()
+        utils.log(e)
+    
+    return s
 
 def normalize(s):
     try:

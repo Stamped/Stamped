@@ -76,6 +76,7 @@ class Geocoder(AGeocoder):
         return True
     
     def addressToLatLng(self, address):
+        address = utils.removeNonAscii(address)
         latLng = None
         index = 0
         
