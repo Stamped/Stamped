@@ -298,7 +298,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 - (void)dismissSelf {
   UIViewController* vc = nil;
   if ([self.navigationController respondsToSelector:@selector(presentingViewController)])
-    vc = self.navigationController.presentingViewController;
+    vc = [self.navigationController presentingViewController];
   else
     vc = self.navigationController.parentViewController;
   if (vc && vc.modalViewController) {

@@ -18,7 +18,7 @@ static UIImage* cachedPlaceHolder_ = nil;
 NSString* const kUserImageLoadedNotification = @"kUserImageLoadedNotification";
 NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNotification";
 
-@interface UserImageDownloader : NSObject <NSURLConnectionDelegate>
+@interface UserImageDownloader : NSObject
 
 - (void)start;
 - (void)cancel;

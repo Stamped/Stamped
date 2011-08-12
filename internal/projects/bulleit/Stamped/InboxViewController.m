@@ -197,7 +197,7 @@ typedef enum {
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   static NSString* CellIdentifier = @"StampCell";
-  InboxTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  InboxTableViewCell* cell = (InboxTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];

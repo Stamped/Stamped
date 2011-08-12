@@ -77,10 +77,6 @@ static AccountManager* sharedAccountManager_ = nil;
   self = [super init];
   if (self) {
     firstRun_ = YES;
-    [passwordKeychainItem_ resetKeychainItem];
-    [accessTokenKeychainItem_ resetKeychainItem];
-    [refreshTokenKeychainItem_ resetKeychainItem];
-
     passwordKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kPasswordKeychainItemID];
     accessTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kAccessTokenKeychainItemID];
     refreshTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kRefreshTokenKeychainItemID];
