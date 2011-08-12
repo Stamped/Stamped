@@ -88,23 +88,26 @@ def main():
     
     entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
     
-    input_query = args[0]
+    input_query = args[0].lower()
     query = u"%s" % input_query
     query = query.strip()
     query = query.replace('[', '\[?')
     query = query.replace(']', '\]?')
     query = query.replace('(', '\(')
     query = query.replace(')', '\)')
+    query = query.replace('|', '\|')
+    query = query.replace(' and ', ' (and|&)? ')
     query = query.replace('.', '\.')
-    query = query.replace(' ', '[ \t-_]?')
+    query = query.replace('&', ' & ')
     query = query.replace('-', '-?')
+    query = query.replace(' ', '[ \t-_]?')
     query = query.replace("'", "'?")
     utils.log("query: %s" % query)
     
     results = []
     db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}})
-    if options.limit is not None and options.limit >= 0:
-        db_results = db_results.limit(options.limit)
+    #if options.limit is not None and options.limit >= 0:
+    #    db_results = db_results.limit(options.limit)
     
     for entity in db_results:
         e = Entity(entityDB._mongoToObj(entity, 'entity_id'))
@@ -123,12 +126,15 @@ def main():
     
     for i in xrange(len(results)):
         entity = results[i]
-        ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title).ratio()
+        ratio  = 1.0 - SequenceMatcher(is_junk, input_query, entity.title.lower()).ratio()
         subcategory_index = subcategory_indices[entity.subcategory]
         
         results[i] = (ratio, subcategory_index, entity)
     
     results = sorted(results)
+    if options.limit is not None and options.limit >= 0:
+        results = results[0:min(len(results), options.limit)]
+    
     for result in results:
         ratio, _, entity = result
         if options.verbose:

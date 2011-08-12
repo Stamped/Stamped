@@ -9,7 +9,7 @@ import Globals, utils
 from utils import abstract
 
 from IASyncConsumer import IASyncConsumer
-from gevent.queue import Queue
+from gevent.queue import Queue, Empty
 from gevent.pool import Pool
 from gevent import Greenlet
 
@@ -49,7 +49,12 @@ class AEntitySink(Greenlet, IASyncConsumer):
             items = []
             
             if stop == 0:
-                item = queue.get()
+                try:
+                    item = queue.get(timeout=60)
+                except Empty:
+                    utils.log("[%s] ERROR: timeout in queue.get (%s)" % (self, queue))
+                    break
+                
                 if item is StopIteration:
                     stop = 1
                 elif item is not None:

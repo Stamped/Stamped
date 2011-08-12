@@ -216,7 +216,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         return numLines
     
     def _run(self):
-        utils.log("%s run" % self)
+        utils.log("[%s] initializing" % self)
         f, numLines, filename = self._open_file()
         utils.log("[%s] parsing ~%d entities from '%s'" % (self, numLines, self._filename))
         
@@ -330,10 +330,32 @@ class AppleEPFArtistDump(AAppleEPFDump):
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Artists", self._map, [ "artist" ], "artist")
         
-        g = AppleEPFArtistType()
-        g.start()
-        g.join()
-        self.artist_type_id = g.results['Artist']
+        artist_type = AppleEPFArtistType()
+        artist_type.start()
+        
+        self.artist_to_albums = AppleEPFArtistsToAlbumsRelationalDB()
+        self.artist_to_albums.start()
+        
+        #self.artist_to_songs = AppleEPFArtistsToSongsRelationalDB()
+        #self.artist_to_songs.start()
+        
+        self.album_popularity_per_genre = AppleEPFAlbumPopularityPerGenreRelationalDB()
+        self.album_popularity_per_genre.start()
+        
+        #self.song_popularity_per_genre = AppleEPFSongPopularityPerGenreRelationalDB()
+        #self.song_popularity_per_genre.start()
+        
+        self.genres = AppleEPFGenreRelationalDB()
+        self.genres.start()
+        
+        artist_type.join()
+        self.artist_to_albums.join()
+        #self.artist_to_songs.join()
+        self.album_popularity_per_genre.join()
+        #self.song_popularity_per_genre.join()
+        self.genres.join()
+        
+        self.artist_type_id = artist_type.results['Artist']
     
     def _filter(self, row, table_format):
         artist_type_id = row[table_format.cols.artist_type_id.index]
@@ -410,6 +432,38 @@ class AppleEPFArtistDump(AAppleEPFDump):
         for s in self._blacklist_suffixes:
             if name.endswith(s):
                 return False
+        
+        artist_id = row[table_format.cols.artist_id.index]
+        
+        # query for all albums by this artist
+        albums = self.artist_to_albums.get_rows('artist_id', artist_id)
+        
+        # filter out albums where this artist is not the primary artist
+        albums = filter(lambda a: a['is_primary_artist'], albums)
+        
+        popular = False
+        if len(albums) > 0:
+            for album in albums:
+                album_id = album['collection_id']
+                pop = self.album_popularity_per_genre.get_row('album_id', album_id)
+                
+                if pop is not None:
+                    popular = True
+        
+        # query for all songs by this artist
+        """
+        songs = self.artist_to_songs.get_rows('artist_id', artist_id)
+        
+        if len(songs) > 0:
+            for song in songs:
+                song_id = song['song_id']
+                pop = self.song_popularity_per_genre.get_row('song_id', song_id)
+                
+                if pop is not None:
+                    popular = True
+        """
+        
+        return popular
         
         return True
 
@@ -503,14 +557,33 @@ class AppleEPFVideoDump(AAppleEPFDump):
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Videos", self._map, [ "movie" ], "video")
         
-        g = AppleEPFMediaType()
-        g.start()
-        g.join()
-        self.movie_type_id = g.results['Movies']
+        media_type = AppleEPFMediaType()
+        media_type.start()
+        
+        self.video_prices = AppleEPFVideoPriceRelationalDB()
+        self.video_prices.start()
+        
+        media_type.join()
+        self.video_prices.join()
+        
+        self.movie_type_id = media_type.results['Movies']
     
     def _filter(self, row, table_format):
         media_type_id = row[table_format.cols.media_type_id.index]
-        return media_type_id == self.movie_type_id
+        
+        # only keep videos which are movies
+        if media_type_id != self.movie_type_id:
+            return False
+        
+        video_id = row[table_format.cols.video_id.index]
+        
+        # only keep videos which are available for purchase in the US storefront
+        price_info = self.video_prices.get_row('video_id', video_id)
+        
+        if price_info is None:
+            return False
+        
+        return True
 
 class AppleEPFCollectionType(AAppleEPFDump):
     def __init__(self):
@@ -539,24 +612,13 @@ class AppleEPFMediaType(AAppleEPFDump):
         name = row[table_format.cols.name.index]
         self.results[name] = row[table_format.cols.media_type_id.index]
 
-class AppleEPFStorefrontDump(AAppleEPFDump):
-    def __init__(self):
-        AAppleEPFDump.__init__(self, "Apple EPF Storefronts", None, [ ], "storefront")
-        self.results = { }
-    
-    def _parseRow(self, row, table_format):
-        country_code = row[table_format.cols.country_code.index]
-        self.results[country_code] = {
-            'storefront_id' : row[table_format.cols.storefront_id.index], 
-            'name' : row[table_format.cols.name.index], 
-        }
-
 class AppleEPFRelationalDB(AAppleEPFDump):
     def __init__(self, name, filename):
         AAppleEPFDump.__init__(self, name, None, [ ], filename)
         self._init_sqlite3(filename)
     
     def _init_sqlite3(self, filename):
+        # initialize sqlite connection
         self.dbpath = "%s.db" % filename
         self.table  = "stamped"
         self.conn   = sqlite3.connect(self.dbpath)
@@ -567,52 +629,80 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             self.db.close()
             self.db = None
     
-    def execute(self, cmd):
-        utils.log(cmd)
-        return self.db.execute(cmd)
+    def execute(self, cmd, verbose=True):
+        if verbose:
+            utils.log(cmd)
+        
+        try:
+            return self.db.execute(cmd)
+        except sqlite3.OperationalError:
+            utils.log('error running cmd "%s"' % (cmd, ))
+            raise
     
     def _run(self):
-        utils.log("%s run" % self)
+        utils.log("[%s] initializing" % self)
         f, numLines, filename = self._open_file()
-        utils.log("[%s] parsing ~%d rows from '%s'" % (self, numLines, self._filename))
         
         table_format = epf.parse_table_format(f, filename)
+        self.table_format = table_format
         
-        # initialize sqlite3
-        cols = []
-        found_primary = True
+        stale = False
         
-        for col in table_format.cols:
-            primary = ""
-            if not found_primary and col in table_format.primary_keys:
-                # TODO: handle the common case of multiple primary keys, which sqlite3 does not support
-                # TODO: defining the primary key here as opposed to after insertion is much slower!!!!!
-                primary = " PRIMARY KEY"
-                found_primary = True
-            
-            col_type = table_format.cols[col]['type']
-            text = "%s %s%s" % (col, col_type, primary)
-            cols.append(text)
-        
-        args = string.joinfields(cols, ', ')
+        # determine whether or not the sqlite table already exists and attempt 
+        # to determine if it's up-to-date s.t. we won't recalculate it if it'd 
+        # be unnecessary.
         try:
-            self.execute("DROP TABLE %s" % (self.table, ))
-        except sqlite3.OperationalError:
+            row0  = self.execute('SELECT * from %s' % (self.table, )).fetchone()
+            count = self.execute('SELECT COUNT(*) from %s' % (self.table, )).fetchone()[0]
+            
+            if count > numLines:
+                stale = True
+            if len(row0) != len(dict(table_format.cols)):
+                stale = True
+        except Exception:
+            stale = True
             pass
         
-        self.execute("CREATE TABLE %s (%s)" % (self.table, args))
-        
-        values_str = '(%s)' % (string.joinfields(('?' for col in table_format.cols), ','), )
-        self._cmd = 'insert into %s values %s' % (self.table, values_str)
-        
-        count = 0
-        for row in epf.parse_rows(f, table_format):
-            self._parseRow(row, table_format)
-            count += 1
+        if not stale:
+            # sqlite table is usable as-is
+            utils.log("[%s] table %s doesn't need to be recomputed" % (self, self.table))
+        else:
+            utils.log("[%s] parsing ~%d rows from '%s'" % (self, numLines, self._filename))
+            # initialize sqlite table
+            cols = []
+            found_primary = True
             
-            if numLines > 100 and (count % (numLines / 100)) == 0:
-                utils.log("[%s] done parsing %s" % \
-                    (self, utils.getStatusStr(count, numLines)))
+            for col in table_format.cols:
+                primary = ""
+                if not found_primary and col in table_format.primary_keys:
+                    # TODO: handle the common case of multiple primary keys, which sqlite3 does not support
+                    # TODO: defining the primary key here as opposed to after insertion is much slower!
+                    primary = " PRIMARY KEY"
+                    found_primary = True
+                
+                col_type = table_format.cols[col]['type']
+                text = "%s %s%s" % (col, col_type, primary)
+                cols.append(text)
+            
+            args = string.joinfields(cols, ', ')
+            try:
+                self.execute("DROP TABLE %s" % (self.table, ))
+            except sqlite3.OperationalError:
+                pass
+            
+            self.execute("CREATE TABLE %s (%s)" % (self.table, args))
+            
+            values_str = '(%s)' % (string.joinfields(('?' for col in table_format.cols), ','), )
+            self._cmd = 'insert into %s values %s' % (self.table, values_str)
+            
+            count = 0
+            for row in epf.parse_rows(f, table_format):
+                self._parseRow(row, table_format)
+                count += 1
+                
+                if numLines > 100 and (count % (numLines / 100)) == 0:
+                    utils.log("[%s] done parsing %s" % \
+                        (self, utils.getStatusStr(count, numLines)))
         
         f.close()
         self._output.put(StopIteration)
@@ -629,6 +719,40 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         
         self.db.execute(self._cmd, tuple(args))
         self.conn.commit()
+    
+    def _get_cmd_results(self, k, v):
+        if isinstance(v, basestring):
+            v = "'%s'" % v
+        
+        cmd = 'SELECT * from %s where %s=%s' % (self.table, k, v)
+        return self.execute(cmd, verbose=False)
+    
+    def _format_result(self, result):
+        if result is not None:
+            ret = { }
+            cols = self.table_format.cols
+            for col in cols:
+                index = cols[col].index
+                ret[col] = result[index]
+            
+            result = ret
+        
+        return result
+    
+    def get_row(self, k, v):
+        result = self._get_cmd_results(k, v).fetchone()
+        
+        return self._format_result(result)
+    
+    def get_rows(self, k, v):
+        results = self._get_cmd_results(k, v).fetchmany()
+        
+        if results is None:
+            return []
+        for i in xrange(len(results)):
+            results[i] = self._format_result(results[i])
+        
+        return results
 
 class AppleEPFGenreRelationalDB(AppleEPFRelationalDB):
     def __init__(self):
@@ -641,12 +765,54 @@ class AppleEPFVideoPriceRelationalDB(AppleEPFRelationalDB):
         g = AppleEPFStorefrontDump()
         g.start()
         g.join()
-        self.us_storefront_id = g.results['USA']['storefront_id']
+        self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
     
     def _filter(self, row, table_format):
         storefront_id = row[table_format.cols.storefront_id.index]
         
         # only retain us video prices
+        return storefront_id == self.us_storefront_id
+
+class AppleEPFStorefrontDump(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Storefronts", "storefront")
+
+class AppleEPFArtistsToAlbumsRelationalDB(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Artists to Albums", "artist_collection")
+
+class AppleEPFArtistsToSongsRelationalDB(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Artists to Songs", "artist_song")
+
+class AppleEPFAlbumPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Album Popularity per Genre", "album_popularity_per_genre")
+        
+        g = AppleEPFStorefrontDump()
+        g.start()
+        g.join()
+        self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
+    
+    def _filter(self, row, table_format):
+        storefront_id = row[table_format.cols.storefront_id.index]
+        
+        # only retain us popularity metrics
+        return storefront_id == self.us_storefront_id
+
+class AppleEPFSongPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Song Popularity per Genre", "song_popularity_per_genre")
+        
+        g = AppleEPFStorefrontDump()
+        g.start()
+        g.join()
+        self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
+    
+    def _filter(self, row, table_format):
+        storefront_id = row[table_format.cols.storefront_id.index]
+        
+        # only retain us popularity metrics
         return storefront_id == self.us_storefront_id
 
 import EntitySources
@@ -656,6 +822,4 @@ EntitySources.registerSource('apple_artists', AppleEPFArtistDump)
 #EntitySources.registerSource('apple_songs',   AppleEPFSongDump)
 EntitySources.registerSource('apple_albums',  AppleEPFAlbumDump)
 EntitySources.registerSource('apple_videos',  AppleEPFVideoDump)
-EntitySources.registerSource('apple_genres',  AppleEPFGenreRelationalDB)
-EntitySources.registerSource('apple_video_price',  AppleEPFVideoPriceRelationalDB)
 
