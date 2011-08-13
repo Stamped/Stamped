@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import gevent, os, time, xlrd
+import feedparser, gevent, os, re
 
 from gevent.pool import Pool
 from AEntitySource import AExternalDumpEntitySource
@@ -24,35 +24,72 @@ class FandangoFeed(AExternalDumpEntitySource):
     
     def __init__(self):
         AExternalDumpEntitySource.__init__(self, self.NAME, self.TYPES, 128)
+        self.seen = set()
     
     def getMaxNumEntities(self):
         return 100 # approximation for now
     
     def _run(self):
+        feeds = [
+            #'http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=3387661&a=12170', 
+            #'http://www.fandango.com/rss/openingthisweekmobile.rss?pid=3387661&a=12169', 
+            'http://www.fandango.com/rss/top10boxofficemobile.rss?pid=3387661&a=12168', 
+        ]
         
         pool = Pool(128)
         
+        for url in feeds:
+            pool.spawn(self._parse_feed, pool, url)
+        
         pool.join()
         self._output.put(StopIteration)
-        utils.log("[%s] finished parsing %d entities" % (self.NAME, numEntities - 1))
+        utils.log("[%s] finished parsing %d feeds" % (self, len(feeds)))
     
-    def _parseEntity(self, sheet, index, numEntities):
-        if numEntities > 100 and ((index - 1) % (numEntities / 100)) == 0:
-            utils.log("[%s] done parsing %s" % \
-                (self, utils.getStatusStr(index - 1 - Globals.options.offset, numEntities)))
-            time.sleep(0.1)
+    def _parse_feed(self, pool, url):
+        utils.log("[%s] parsing feed %s" % (self, url))
         
-        row = sheet.row_values(index)
+        data = feedparser.parse(url)
+        id_r = re.compile('.*\/([0-9]*)$')
+        title_r = re.compile('^([0-9][0-9]?). (.*) \$[0-9.M]*')
         
-        entity = Entity()
-        entity.subcategory = "movie"
-        entity.title = row[1]
+        for entry in data.entries:
+            if entry.title == 'More Movies':
+                continue
+            
+            title = entry.title
+            
+            title_match = title_r.match(title)
+            fandango_rank = None
+            
+            if title_match:
+                title_match_groups = title_match.groups()
+                fandango_rank = title_match_groups[0]
+                title = title_match_groups[1]
+            
+            titlel = title.lower()
+            if titlel in self.seen:
+                continue
+            
+            self.seen.add(titlel)
+            
+            entity = Entity()
+            entity.subcategory = "movie"
+            entity.title = title
+            
+            entity.desc = entry.summary
+            fid_match = id_r.match(entry.id)
+            assert fid_match is not None
+            
+            entity.fid = fid_match.groups()[0]
+            
+            for link in entry.links:
+                if 'image' in link.type:
+                    entity.image = link.href
+                    break
+            
+            self._output.put(entity)
         
-        entity.fandango = {
-            # TODO
-        }
-        
-        self._output.put(entity)
+        utils.log("[%s] done parsing feed '%s' (%s)" % (self, data.feed.title, url))
 
 import EntitySources
 EntitySources.registerSource('fandango', FandangoFeed)

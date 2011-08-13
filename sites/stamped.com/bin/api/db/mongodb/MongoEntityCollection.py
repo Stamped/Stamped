@@ -191,6 +191,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             }, 
             'nymag' : { }, 
             'sfmag' : { }, 
+            'latimes' : { },
+            'bostonmag' : { }, 
+            'fandango' : {
+                "fid" : basestring, 
+            }, 
         }
     }
     

@@ -547,6 +547,12 @@ class AppleEPFAlbumDump(AAppleEPFDump):
         'collection_type_id'        : None, 
     }
     
+    _blacklist_strings = [
+        'araoke', 
+        '- Single', 
+        '- single', 
+    ]
+    
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Albums", self._map, [ "album" ], "collection")
         
@@ -583,6 +589,11 @@ class AppleEPFAlbumDump(AAppleEPFDump):
         #artist_display_name = row[table_format.cols.artist_display_name.index]
         #if len(artist_display_name) <= 0:
         #    return False
+        
+        name = row[table_format.cols.name.index]
+        for s in self._blacklist_strings:
+            if s in name:
+                return False
         
         collection_id = int(row[table_format.cols.collection_id.index])
         

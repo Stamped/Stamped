@@ -172,6 +172,8 @@ def main():
                 # e.g., for apple, would use aid
                 # e.g., for googlePlaces, would use gid
                 # e.g., for openTable, would use rid
+            # TODO: need to have a way to find duplicate entities within a category from multiple sources
+                # e.g., for film we have to match movies from apple and fandango
         # TODO: merge process of deduping and incremental crawling
     
     # TODO: test iTunes album popularity in autocomplete

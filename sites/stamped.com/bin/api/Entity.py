@@ -214,7 +214,9 @@ class Entity(ASchemaBasedAttributeDict):
             'sfmag' : { },
             'latimes' : { },
             'bostonmag' : { }, 
-            'fandango' : { }, 
+            'fandango' : {
+                "fid" : basestring, 
+            }, 
         }
     }
     
