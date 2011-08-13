@@ -123,9 +123,7 @@ def main():
     
     entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
     
-    input_query = args[0].lower()
-    query = u"%s" % input_query
-    query = query.strip()
+    input_query = args[0].strip().lower()
     query = query.replace('[', '\[?')
     query = query.replace(']', '\]?')
     query = query.replace('(', '\(?')
@@ -219,7 +217,7 @@ def main():
         source_weight       = 0.2
         quality_weight      = 1.0
         
-        # TODO: revisit and iterate on this simple linear weighting approach
+        # TODO: revisit and iterate on this simple linear ranking formula
         aggregate_value     = title_value * title_weight + \
                               subcategory_value * subcategory_weight + \
                               source_value * source_weight + \

@@ -570,13 +570,14 @@ class AppleEPFAlbumDump(AAppleEPFDump):
             
             return False
         
-        artist_display_name = row[table_format.cols.artist_display_name.index]
-        if len(artist_display_name) <= 0:
-            return False
+        # note: this filter seems to produce too many false positives
+        #artist_display_name = row[table_format.cols.artist_display_name.index]
+        #if len(artist_display_name) <= 0:
+        #    return False
         
         collection_id = int(row[table_format.cols.collection_id.index])
         
-        # only keep albums which are available for purchase in the US storefront
+        # only retain albums which are available for purchase in the US storefront
         price_info = self.album_prices.get_row('collection_id', collection_id)
         
         if price_info is None:
@@ -638,7 +639,7 @@ class AppleEPFVideoDump(AAppleEPFDump):
         
         video_id = int(row[table_format.cols.video_id.index])
         
-        # only keep videos which are available for purchase in the US storefront
+        # only retain videos which are available for purchase in the US storefront
         price_info = self.video_prices.get_row('video_id', video_id)
         
         if price_info is None:
