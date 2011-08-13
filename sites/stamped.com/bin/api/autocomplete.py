@@ -146,6 +146,7 @@ def main():
     # TODO: high level
         # get recent movies
             # look into Fandango API
+            # utilize feedparser (http://www.feedparser.org/docs/)
         # how to approach sorting?
             # text match assuming prefix versus full text match
             # proximity (TODO)
