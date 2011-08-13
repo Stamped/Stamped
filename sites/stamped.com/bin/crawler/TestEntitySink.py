@@ -18,6 +18,7 @@ class TestEntitySink(AEntitySink):
         assert isinstance(item, Entity)
         #from pprint import pprint
         #pprint(item.getDataAsDict())
+        #return
         
         if 'googlePlaces' in item.sources and Globals.options.googlePlaces:
             utils.log("%s) %s" % (item.title, item.sources['googlePlaces']['gid']))

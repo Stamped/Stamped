@@ -50,7 +50,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
             
             if stop == 0:
                 try:
-                    item = queue.get(timeout=60)
+                    item = queue.get(timeout=600)
                 except Empty:
                     utils.log("[%s] ERROR: timeout in queue.get (%s)" % (self, queue))
                     break

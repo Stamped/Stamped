@@ -179,6 +179,7 @@ class Entity(ASchemaBasedAttributeDict):
                 'export_date' : basestring, 
                 'is_actual_artist' : bool, 
                 'view_url' : basestring, 
+                'popularity' : int, 
                 'match' : {
                     'upc' : basestring, 
                     'isrc' : basestring, 
