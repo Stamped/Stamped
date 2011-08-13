@@ -118,6 +118,16 @@ class Entity(ASchemaBasedAttributeDict):
                 'short_description': basestring, 
                 'long_description': basestring, 
                 'episode_production_number': basestring, 
+                
+                'v_retail_price' : basestring, 
+                'v_currency_code' : basestring, 
+                'v_availability_date' : basestring, 
+                'v_sd_price' : basestring, 
+                'v_hq_price' : basestring, 
+                'v_lc_rental_price' : basestring, 
+                'v_sd_rental_price' : basestring, 
+                'v_hd_rental_price' : basestring, 
+                
                 #'price' : {
                 #    'retail_price' : basestring, 
                 #    'currency_code' : basestring, 
@@ -140,6 +150,11 @@ class Entity(ASchemaBasedAttributeDict):
             'album' : {
                 'label_studio'   : basestring, 
                 'is_compilation' : bool, 
+                
+                'a_retail_price' : basestring, 
+                'a_hq_price' : basestring, 
+                'a_currency_code' : basestring, 
+                'a_availability_date' : basestring, 
             }, 
             'media' : {
                 'title_version': basestring, 

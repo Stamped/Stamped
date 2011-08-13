@@ -252,9 +252,16 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         #    utils.log("FILTERED: %s" % n)
     
     def _parseRow(self, row, table_format):
-        filter_result = self._filter(row, table_format)
+        try:
+            retain_result = self._filter(row, table_format)
+        except ValueError:
+            #utils.printException()
+            # sometime malformed rows will cause problems with the filters. we 
+            # want to ignore these rows anyway, so just ignore the error and 
+            # filter this row out.
+            retain_result = False
         
-        if not filter_result:
+        if not retain_result:
             self.numFiltered += 1
             #self.filtered.append(row[table_format.cols.name.index])
             return
@@ -265,8 +272,8 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         # TODO: extract albums
         entity.albums = []
         
-        if isinstance(filter_result, dict):
-            for col, value in filter_result.iteritems():
+        if isinstance(retain_result, dict):
+            for col, value in retain_result.iteritems():
                 if value is not None:
                     entity[col] = value
         
@@ -543,16 +550,44 @@ class AppleEPFAlbumDump(AAppleEPFDump):
     def __init__(self):
         AAppleEPFDump.__init__(self, "Apple EPF Albums", self._map, [ "album" ], "collection")
         
-        g = AppleEPFCollectionType()
-        g.start()
-        g.join()
-        self.album_type_id = int(g.results['Album'])
+        collection_type = AppleEPFCollectionType()
+        collection_type.start()
+        
+        self.album_prices = AppleEPFAlbumPriceRelationalDB()
+        self.album_prices.start()
+        
+        collection_type.join()
+        self.album_prices.join()
+        
+        self.album_type_id = int(collection_type.results['Album'])
     
     def _filter(self, row, table_format):
         collection_type_id = int(row[table_format.cols.collection_type_id.index])
         
         # only retain album collections
-        return collection_type_id == self.album_type_id
+        if collection_type_id != self.album_type_id:
+            #print "%s (%s) vs %s (%s)" % (collection_type_id, type(collection_type_id), self.album_type_id, type(self.album_type_id))
+            
+            return False
+        
+        artist_display_name = row[table_format.cols.artist_display_name.index]
+        if len(artist_display_name) <= 0:
+            return False
+        
+        collection_id = int(row[table_format.cols.collection_id.index])
+        
+        # only keep albums which are available for purchase in the US storefront
+        price_info = self.album_prices.get_row('collection_id', collection_id)
+        
+        if price_info is None:
+            return False
+        
+        return {
+            'a_retail_price' : price_info['retail_price'], 
+            'a_hq_price' : price_info['hq_price'], 
+            'a_currency_code' : price_info['currency_code'], 
+            'a_availability_date' : price_info['availability_date'], 
+        }
 
 class AppleEPFVideoDump(AAppleEPFDump):
     
@@ -609,7 +644,16 @@ class AppleEPFVideoDump(AAppleEPFDump):
         if price_info is None:
             return False
         
-        return True
+        return {
+            'v_retail_price' : price_info['retail_price'], 
+            'v_currency_code' : price_info['currency_code'], 
+            'v_availability_date' : price_info['availability_date'], 
+            'v_sd_price' : price_info['sd_price'], 
+            'v_hq_price' : price_info['hq_price'], 
+            'v_lc_rental_price' : price_info['lc_rental_price'], 
+            'v_sd_rental_price' : price_info['sd_rental_price'], 
+            'v_hd_rental_price' : price_info['hd_rental_price'], 
+        }
 
 class AppleEPFCollectionType(AAppleEPFDump):
     def __init__(self):
@@ -648,6 +692,8 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         # initialize sqlite connection
         self.dbpath = "%s.db" % filename
         self.table  = "stamped"
+        #self.dbpath = "apple_epf.db"
+        #self.table  = filename
         self.conn   = sqlite3.connect(self.dbpath)
         self.db     = self.conn.cursor()
     
@@ -675,6 +721,8 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         self.table_format = table_format
         
         stale = False
+        self._buffer = []
+        self._buffer_threshold = 1024
         
         # determine whether or not the sqlite table already exists and attempt 
         # to determine if it's up-to-date s.t. we won't recalculate it if it'd 
@@ -700,8 +748,8 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             # initialize sqlite table
             cols = []
             
-            # currently disabling primary key
-            found_primary = True
+            # currently disabling primary keys for most tables
+            found_primary = (len(table_format.primary_keys) == 1)
             
             for col in table_format.cols:
                 cols.append('')
@@ -740,6 +788,8 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                     utils.log("[%s] done parsing %s" % \
                         (self, utils.getStatusStr(count, numLines)))
             
+            self._try_flush_buffer()
+            
             if self.index:
                 self.execute("CREATE INDEX %s on %s (%s)" % (self.index, self.table, self.index), verbose=True)
             
@@ -749,13 +799,31 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         self._output.put(StopIteration)
     
     def _parseRow(self, row, table_format):
-        filter_result = self._filter(row, table_format)
+        try:
+            retain_result = self._filter(row, table_format)
+        except ValueError:
+            #utils.printException()
+            # sometime malformed rows will cause problems with the filters. we 
+            # want to ignore these rows anyway, so just ignore the error and 
+            # filter this row out.
+            retain_result = False
         
-        if not filter_result:
+        if not retain_result:
             return
         
-        self.db.execute(self._cmd, tuple(row))
+        self._buffer.append(tuple(row))
+        self._try_flush_buffer()
+    
+    def _try_flush_buffer(self):
+        if len(self._buffer) < self._buffer_threshold:
+            return
+        
+        # TODO: use self.db.execute_many
+        for row in self._buffer:
+            self.db.execute(self._cmd, row)
+        
         self.conn.commit()
+        self._buffer = []
     
     def _get_cmd_results(self, k, v):
         if isinstance(v, basestring):
@@ -809,7 +877,24 @@ class AppleEPFVideoPriceRelationalDB(AppleEPFRelationalDB):
     def _filter(self, row, table_format):
         storefront_id = int(row[table_format.cols.storefront_id.index])
         
-        # only retain us video prices
+        # only retain us prices
+        return storefront_id == self.us_storefront_id
+
+class AppleEPFAlbumPriceRelationalDB(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Album Prices", 
+                                      filename="collection_price", 
+                                      index="collection_id")
+        
+        g = AppleEPFStorefrontDump()
+        g.start()
+        g.join()
+        self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
+    
+    def _filter(self, row, table_format):
+        storefront_id = int(row[table_format.cols.storefront_id.index])
+        
+        # only retain us prices
         return storefront_id == self.us_storefront_id
 
 class AppleEPFStorefrontDump(AppleEPFRelationalDB):
