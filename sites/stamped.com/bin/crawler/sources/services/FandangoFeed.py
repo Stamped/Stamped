@@ -31,8 +31,8 @@ class FandangoFeed(AExternalDumpEntitySource):
     
     def _run(self):
         feeds = [
-            #'http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=3387661&a=12170', 
-            #'http://www.fandango.com/rss/openingthisweekmobile.rss?pid=3387661&a=12169', 
+            'http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=3387661&a=12170', 
+            'http://www.fandango.com/rss/openingthisweekmobile.rss?pid=3387661&a=12169', 
             'http://www.fandango.com/rss/top10boxofficemobile.rss?pid=3387661&a=12168', 
         ]
         
@@ -56,6 +56,15 @@ class FandangoFeed(AExternalDumpEntitySource):
             if entry.title == 'More Movies':
                 continue
             
+            fid_match = id_r.match(entry.id)
+            assert fid_match is not None
+            fid = fid_match.groups()[0]
+            
+            if fid in self.seen:
+                continue
+            
+            self.seen.add(fid)
+            
             title = entry.title
             
             title_match = title_r.match(title)
@@ -66,21 +75,12 @@ class FandangoFeed(AExternalDumpEntitySource):
                 fandango_rank = title_match_groups[0]
                 title = title_match_groups[1]
             
-            titlel = title.lower()
-            if titlel in self.seen:
-                continue
-            
-            self.seen.add(titlel)
-            
             entity = Entity()
             entity.subcategory = "movie"
             entity.title = title
             
             entity.desc = entry.summary
-            fid_match = id_r.match(entry.id)
-            assert fid_match is not None
-            
-            entity.fid = fid_match.groups()[0]
+            entity.fid = fid
             
             for link in entry.links:
                 if 'image' in link.type:
