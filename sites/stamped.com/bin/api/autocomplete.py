@@ -173,6 +173,14 @@ def main():
                 # e.g., for openTable, would use rid
         # TODO: merge process of deduping and incremental crawling
     
+    # TODO: test iTunes album popularity in autocomplete
+        # need to ensure that popular artists will appear at the top
+        # to what degree should this should trump other ranking rules?
+    
+    # TODO: searchEntities should take into account whether or not 
+        # it's an autocompletion (e.g., prefix vs. full match) 
+        # and treat certain weights and regexes differently
+    
     # TODO: (DONE) add pricing info to movies and albums
     # TODO: (DONE) filter albums the same way we're filtering movies by retaining 
         # only those which have a valid us storefront price
@@ -181,13 +189,6 @@ def main():
     # TODO: (DONE) buffer output of AppleEPFRelationalDB
     # TODO: (DONE) change AppleEPFRelationalDB to output to a single db file spread over multiple tables
     # TODO: (DONE) what are the other regex options available?
-    # TODO: test iTunes album popularity in autocomplete
-        # need to ensure that popular artists will appear at the top
-        # to what degree should this should trump other ranking rules?
-    
-    # TODO: searchEntities should take into account whether or not 
-        # it's an autocompletion (e.g., prefix vs. full match) 
-        # and treat certain weights and regexes differently
     
     db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(250)
     

@@ -553,21 +553,30 @@ class AppleEPFAlbumDump(AAppleEPFDump):
         collection_type = AppleEPFCollectionType()
         collection_type.start()
         
+        media_type = AppleEPFMediaType()
+        media_type.start()
+        
         self.album_prices = AppleEPFAlbumPriceRelationalDB()
         self.album_prices.start()
         
         collection_type.join()
+        media_type.join()
         self.album_prices.join()
         
         self.album_type_id = int(collection_type.results['Album'])
+        self.music_type_id = int(media_type.results['Music'])
     
     def _filter(self, row, table_format):
         collection_type_id = int(row[table_format.cols.collection_type_id.index])
         
         # only retain album collections
         if collection_type_id != self.album_type_id:
-            #print "%s (%s) vs %s (%s)" % (collection_type_id, type(collection_type_id), self.album_type_id, type(self.album_type_id))
-            
+            return False
+        
+        media_type_id = int(row[table_format.cols.media_type_id.index])
+        
+        # only retain music collections
+        if media_type_id != self.music_type_id:
             return False
         
         # note: this filter seems to produce too many false positives
