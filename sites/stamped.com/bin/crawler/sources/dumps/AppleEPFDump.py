@@ -327,6 +327,8 @@ class AppleEPFArtistDump(AAppleEPFDump):
         'tribute ', 
         'tributes ', 
         'niversity', 
+        'Ringtones', 
+        'araoke', 
     ]
     
     _blacklist_suffixes = [

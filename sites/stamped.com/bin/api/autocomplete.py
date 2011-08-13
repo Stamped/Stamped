@@ -131,12 +131,16 @@ def main():
     query = query.replace('(', '\(?')
     query = query.replace(')', '\)?')
     query = query.replace('|', '\|')
-    query = query.replace(' and ', ' (and|&)? ')
     query = query.replace('.', '\.?')
+    query = query.replace(':', ':?')
     query = query.replace('&', ' & ')
+    query = query.replace(' and ', ' (and|&)? ')
     query = query.replace('-', '-?')
     query = query.replace(' ', '[ \t-_]?')
     query = query.replace("'", "'?")
+    query = query.replace("$", "[$st]?")
+    query = query.replace("5", "[5s]?")
+    query = query.replace("!", "[!li]?")
     utils.log("query: %s" % query)
     
     results = []
@@ -171,8 +175,8 @@ def main():
         # need to ensure that popular artists will appear at the top
         # to what degree should this should trump other ranking rules?
     
-    # need to add ability for AppleEFPDump._filter to add info to the row
-    # will support pricing, albums, songs, and popularity
+    # TODO: add pricing info to movies and albums
+    # TODO: filter albums the same way we're filtering movies
     
     db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(250)
     
