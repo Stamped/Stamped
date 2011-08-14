@@ -21,7 +21,7 @@ static NSString* const kClientSecret = @"august1ftw";
 static NSString* const kLoginPath = @"/oauth2/login.json";
 static NSString* const kRefreshPath = @"/oauth2/token.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
-static const NSUInteger kMaxAuthRetries = 10;
+static const NSUInteger kMaxAuthRetries = 3;
 static AccountManager* sharedAccountManager_ = nil;
 
 @interface AccountManager ()
@@ -30,7 +30,6 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)sendUserInfoRequest;
 - (void)showAuthAlert;
 - (void)refreshTimerFired:(NSTimer*)theTimer;
-- (void)reachabilityDidChange:(NSNotification*)notification;
 @end
 
 @implementation AccountManager
@@ -80,21 +79,12 @@ static AccountManager* sharedAccountManager_ = nil;
     passwordKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kPasswordKeychainItemID];
     accessTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kAccessTokenKeychainItemID];
     refreshTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kRefreshTokenKeychainItemID];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self 
-                                             selector:@selector(reachabilityDidChange:)
-                                                 name:RKReachabilityStateChangedNotification 
-                                               object:nil];
   }
   return self;
 }
 
-- (void)reachabilityDidChange:(NSNotification*)notification {
-  RKReachabilityObserver* observer = (RKReachabilityObserver*)[notification object];
-  RKReachabilityNetworkStatus status = [observer networkStatus];
-  if ((status == RKReachabilityReachableViaWiFi || status == RKReachabilityReachableViaWWAN) && firstRun_) {
-    [self authenticate];
-  }
+- (void)refreshToken {
+  [self sendTokenRefreshRequest];
 }
 
 - (void)showAuthAlert {
@@ -154,19 +144,14 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  NSLog(@"Error: %@", error);
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    NSLog(@"Login path failed.");
-    if (numRetries_++ < kMaxAuthRetries) {
-      [self performSelector:@selector(sendLoginRequest)
-                 withObject:self
-                 afterDelay:1.0];
+    if (![objectLoader.response isUnauthorized] && numRetries_++ < kMaxAuthRetries) {
+      [self sendLoginRequest];
       return;
     }
     [self showAuthAlert];
     return;
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
-    NSLog(@"refresh path failed.");
     [self sendLoginRequest];
   }
 }
@@ -181,21 +166,23 @@ static AccountManager* sharedAccountManager_ = nil;
   
   OAuthToken* token = object;
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    NSLog(@"Got refresh token: %@", token.refreshToken);
     [refreshTokenKeychainItem_ setObject:@"RefreshToken" forKey:(id)kSecAttrAccount];
     [refreshTokenKeychainItem_ setObject:token.refreshToken forKey:(id)kSecValueData];
     self.authToken = token;
   }
-  NSLog(@"got access token: %@", token.accessToken);
   [refreshTokenKeychainItem_ setObject:@"AccessToken" forKey:(id)kSecAttrAccount];
   [accessTokenKeychainItem_ setObject:token.accessToken forKey:(id)kSecValueData];
   self.authToken.accessToken = token.accessToken;
 
+  if (oauthRefreshTimer_) {
+    [oauthRefreshTimer_ invalidate];
+    oauthRefreshTimer_ = nil;
+  }
   oauthRefreshTimer_ = [NSTimer scheduledTimerWithTimeInterval:token.lifetimeSecs
-                                                        target:self 
+                                                        target:self
                                                       selector:@selector(refreshTimerFired:)
-                                                      userInfo:nil 
-                                                       repeats:NO];
+                                                      userInfo:nil
+                                                       repeats:YES];
   if (firstRun_) {
     [self.delegate accountManagerDidAuthenticate];
     firstRun_ = NO;
@@ -208,7 +195,6 @@ static AccountManager* sharedAccountManager_ = nil;
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
-  NSLog(@"sending login request");
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* oauthMapping = [objectManager.mappingProvider mappingForKeyPath:@"OAuthToken"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kLoginPath
@@ -217,7 +203,6 @@ static AccountManager* sharedAccountManager_ = nil;
   objectLoader.objectMapping = oauthMapping;
   NSString* username = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
   NSString* password = [passwordKeychainItem_ objectForKey:(id)kSecValueData];
-  NSLog(@"Username: %@, password: %@", username, password);
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       username, @"screen_name",
       password, @"password",
@@ -230,7 +215,6 @@ static AccountManager* sharedAccountManager_ = nil;
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
-  NSLog(@"sending token refresh request.");
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* oauthMapping = [objectManager.mappingProvider mappingForKeyPath:@"OAuthToken"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kRefreshPath 
@@ -249,20 +233,20 @@ static AccountManager* sharedAccountManager_ = nil;
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
-  NSLog(@"sending user info request...");
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* username = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
-  NSString* resourcePath = [NSString stringWithFormat:@"/users/lookup.json?screen_names=%@&oauth_token=%@", username, self.authToken.accessToken];
-  [objectManager loadObjectsAtResourcePath:resourcePath
+  NSDictionary* params =
+      [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username,
+                                                 @"oauth_token", self.authToken.accessToken,
+                                                 nil];
+  [objectManager loadObjectsAtResourcePath:[kUserLookupPath appendQueryParams:params]
                              objectMapping:userMapping
                                   delegate:self];
 }
 
 - (void)refreshTimerFired:(NSTimer*)theTimer {
-  NSLog(@"timer fired.");
   [self sendTokenRefreshRequest];
-  oauthRefreshTimer_ = nil;
 }
 
 #pragma mark - UIAlertViewDelegate methods.

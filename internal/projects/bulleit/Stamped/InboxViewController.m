@@ -134,8 +134,7 @@ typedef enum {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSString* resourcePath =
-      [NSString stringWithFormat:@"/collections/inbox.json?oauth_token=%@", authToken];
+  NSString* resourcePath = [@"/collections/inbox.json" appendQueryParams:[NSDictionary dictionaryWithObject:authToken forKey:@"oauth_token"]];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:stampMapping
                                   delegate:self];
@@ -210,7 +209,7 @@ typedef enum {
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
+	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"InboxLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 	[self loadStampsFromDataStore];
   [self setIsLoading:NO];
@@ -218,6 +217,12 @@ typedef enum {
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
+  if ([objectLoader.response isUnauthorized]) {
+    [[AccountManager sharedManager] refreshToken];
+    [self loadStampsFromNetwork];
+    return;
+  }
+
   [self setIsLoading:NO];
 }
 

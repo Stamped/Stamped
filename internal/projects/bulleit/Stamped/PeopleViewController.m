@@ -7,6 +7,7 @@
 //
 
 #import "PeopleViewController.h"
+#import <RestKit/RestKit.h>
 
 @implementation PeopleViewController
 
@@ -35,9 +36,9 @@
     // Do any additional setup after loading the view from its nib.
 }
 
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
+- (void)viewDidUnload {
+  [super viewDidUnload];
+  //[[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }

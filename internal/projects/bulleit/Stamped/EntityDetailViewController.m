@@ -68,9 +68,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
-  NSString* resourcePath =
-      [NSString stringWithFormat:@"/entities/show.json?entity_id=%@&oauth_token=%@",
-          entityObject_.entityID, [AccountManager sharedManager].authToken.accessToken];
+  NSString* resourcePath = [@"/entities/show.json" appendQueryParams:
+      [NSDictionary dictionaryWithObjectsAndKeys:entityObject_.entityID, @"entity_id",
+          [AccountManager sharedManager].authToken.accessToken, @"oauth_token",nil]];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:entityMapping
                                   delegate:self];
@@ -143,6 +143,11 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
+  if ([objectLoader.response isUnauthorized]) {
+    [[AccountManager sharedManager] refreshToken];
+    [self loadEntityDataFromServer];
+    return;
+  }
   [self.loadingView stopAnimating];
 }
 

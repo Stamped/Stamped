@@ -59,6 +59,7 @@
   // Do this so that there is no title shown.
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
   [AccountManager sharedManager].delegate = self;
+  [[AccountManager sharedManager] authenticate];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
@@ -92,6 +93,7 @@
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [AccountManager sharedManager].delegate = nil;
   self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
   self.viewControllers = nil;

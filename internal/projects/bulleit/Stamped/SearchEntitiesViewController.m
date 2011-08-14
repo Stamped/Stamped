@@ -76,6 +76,7 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.searchField = nil;
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
@@ -169,6 +170,9 @@
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
+  if ([objectLoader.response isUnauthorized])
+    [[AccountManager sharedManager] refreshToken];
+
   [searchField_ becomeFirstResponder];
 }
 

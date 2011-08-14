@@ -33,6 +33,7 @@
 
 + (AccountManager*)sharedManager;
 - (void)authenticate;
+- (void)refreshToken;
 
 @property (nonatomic, retain) UIAlertView* alertView; 
 @property (nonatomic, retain) User* currentUser;

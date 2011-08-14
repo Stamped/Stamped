@@ -145,7 +145,7 @@
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
+  [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"ActivityLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
 	[self loadEventsFromDataStore];
   [self setIsLoading:NO];
@@ -153,6 +153,11 @@
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
+  if ([objectLoader.response isUnauthorized]) {
+    [[AccountManager sharedManager] refreshToken];
+    [self loadEventsFromNetwork];
+    return;
+  }
   [self setIsLoading:NO];
 }
 

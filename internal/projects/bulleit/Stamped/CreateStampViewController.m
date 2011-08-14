@@ -189,6 +189,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.scrollView = nil;
   self.titleLabel = nil;
   self.detailLabel = nil;
@@ -346,6 +347,9 @@ static const CGFloat kMinContainerHeight = 204.0;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  if ([objectLoader.response isUnauthorized])
+    [[AccountManager sharedManager] refreshToken];
+
   [spinner_ stopAnimating];
   cancelButton_.enabled = YES;
   checkmarkButton_.enabled = YES;

@@ -336,8 +336,8 @@ static const CGFloat kKeyboardHeight = 216.0;
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
-  NSString* resourcePath = [NSString stringWithFormat:@"/comments/show.json?stamp_id=%@&oauth_token=%@",
-      stamp_.stampID, [AccountManager sharedManager].authToken.accessToken];
+  NSString* resourcePath = [@"/comments/show.json" appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:stamp_.stampID, @"stamp_id",
+          [AccountManager sharedManager].authToken.accessToken, @"oauth_token", nil]];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:commentMapping
                                   delegate:self];
@@ -440,11 +440,14 @@ static const CGFloat kKeyboardHeight = 216.0;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+	NSLog(@"Hit error: %@", error);
+  if ([objectLoader.response isUnauthorized])
+    [[AccountManager sharedManager] refreshToken];
+
   [loadingView_ stopAnimating];
   addCommentField_.hidden = NO;
   currentUserImageView_.hidden = NO;
   [addCommentField_ becomeFirstResponder];
-	NSLog(@"Hit error: %@", error);
 }
 
 @end
