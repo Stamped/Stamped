@@ -21,6 +21,7 @@ static NSString* const kClientSecret = @"august1ftw";
 static NSString* const kLoginPath = @"/oauth2/login.json";
 static NSString* const kRefreshPath = @"/oauth2/token.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
+static NSString* const kTokenExpirationUserDefaultsKey = @"TokenExpirationDate";
 static const NSUInteger kMaxAuthRetries = 3;
 static AccountManager* sharedAccountManager_ = nil;
 
@@ -135,8 +136,19 @@ static AccountManager* sharedAccountManager_ = nil;
     self.authToken = [[[OAuthToken alloc] init] autorelease];
     self.authToken.accessToken = accessToken;
     self.authToken.refreshToken = refreshToken;
+    NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
+    NSTimeInterval timeUntilTokenRefresh = [tokenExpirationDate timeIntervalSinceNow];
+    if (timeUntilTokenRefresh <= 0) {
+      [self sendTokenRefreshRequest];
+      return;
+    }
+    oauthRefreshTimer_ = [NSTimer scheduledTimerWithTimeInterval:timeUntilTokenRefresh
+                                                          target:self
+                                                        selector:@selector(refreshTimerFired:)
+                                                        userInfo:nil
+                                                         repeats:YES];
+    [self sendUserInfoRequest];
     [self.delegate accountManagerDidAuthenticate];
-    [self sendTokenRefreshRequest];
     firstRun_ = NO;
   }
 }
@@ -174,6 +186,10 @@ static AccountManager* sharedAccountManager_ = nil;
   [accessTokenKeychainItem_ setObject:token.accessToken forKey:(id)kSecValueData];
   self.authToken.accessToken = token.accessToken;
 
+  [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifetimeSecs]
+                                            forKey:kTokenExpirationUserDefaultsKey];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  
   if (oauthRefreshTimer_) {
     [oauthRefreshTimer_ invalidate];
     oauthRefreshTimer_ = nil;
