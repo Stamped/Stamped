@@ -6,9 +6,46 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 from datetime import datetime
+from Schemas import *
 
+class Account(AccountSchema):
+
+    def exportFlat(self):
+        export = [
+            'user_id',
+            'first_name',
+            'last_name',
+            'email',
+            'screen_name',
+            'privacy',
+            ]
+        return self.exportFields(export)
+
+    def exportProfile(self):
+        export = [
+            'user_id',
+            'first_name',
+            'last_name',
+            'display_name',
+            'bio',
+            'website',
+            'color_primary',
+            'color_secondary',
+        ]
+        return self.exportFields(export)
+
+    def exportProfileImage(self):
+        export = [
+            'user_id',
+            'profile_image',
+        ]
+        return self.exportFields(export)
+
+    def setDisplayName(self):
+        pass
+
+"""
 class Account(ASchemaBasedAttributeDict):
 
     _schema = {
@@ -120,4 +157,4 @@ class Account(ASchemaBasedAttributeDict):
         #valid &= 'timestamp' in self and isinstance(self.timestamp, basestring)
         
         return valid
-
+"""

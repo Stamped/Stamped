@@ -26,10 +26,33 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
         AMongoCollection.__init__(self, collection='places')
         APlacesEntityDB.__init__(self)
     
+
+    ### TODO: Rework this (hacking it right now)
+
+    def _convertToMongo(self, entity):
+        document = entity
+        if 'entity_id' in document:
+            document['_id'] = self._getObjectIdFromString(document['entity_id'])
+            del(document['entity_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['entity_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return document
+    
     ### PUBLIC
     
     def addEntity(self, entity):
-        return self._addDocument(entity, 'entity_id')
+        document = self._convertToMongo(entity)
+        document = self._addMongoDocument(document)
+        entity = self._convertFromMongo(document)
+
+        return entity
+    
+    # def addEntity(self, entity):
+    #     return self._addDocument(entity, 'entity_id')
     
     def getEntity(self, entityId):
         entity = Entity(self._getDocumentFromId(entityId, 'entity_id'))

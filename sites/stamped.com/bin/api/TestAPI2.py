@@ -83,12 +83,37 @@ class AStampedAPITestCase(unittest.TestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
 
+
+    def createFriendship(self, token, friend):
+        path = "friendships/create.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "user_id": friend['user_id']
+        }
+        friend = self.handlePOST(path, data)
+
+        self.assertIn('user_id', friend)
+        self.assertValidKey(friend['user_id'])
+
+        return friend
+
+    def deleteFriendship(self, token, friend):
+        path = "friendships/remove.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "user_id": friend['user_id']
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
+
     def createEntity(self, token, data=None):
         path = "entities/create.json"
         if data == None:
             data = {
                 "oauth_token": token['access_token'],
                 "title": "Good Food",
+                "subtitle": "Peoria, IL",
                 "desc": "American food in America", 
                 "category": "food",
                 "subcategory": "restaurant",
@@ -97,9 +122,7 @@ class AStampedAPITestCase(unittest.TestCase):
             }
         if "oauth_token" not in data:
             data['oauth_token'] = token['access_token']
-        response = self.handlePOST(path, data)
-        self.assertIn('entity', response)
-        entity = response['entity']
+        entity = self.handlePOST(path, data)
         self.assertValidKey(entity['entity_id'])
 
         return entity
@@ -118,149 +141,295 @@ class AStampedAPITestCase(unittest.TestCase):
 # ACCOUNT #
 # ####### #
 
-class StampedAPIAccountTest(AStampedAPITestCase):
-    def setUp(self):
-        (self.user, self.token) = self.createAccount()
-        self.privacy = True
+# class StampedAPIAccountTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.user, self.token) = self.createAccount()
+#         self.privacy = False
 
-    def tearDown(self):
-        self.deleteAccount(self.token)
+#     def tearDown(self):
+#         self.deleteAccount(self.token)
 
-class StampedAPIAccountSettings(StampedAPIAccountTest):
-    def test_post(self):
-        path = "account/settings.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "screen_name": "kevin",
-            "privacy": False,
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['privacy'], False)
-        self.privacy = result['privacy']
+# class StampedAPIAccountSettings(StampedAPIAccountTest):
+#     def test_post(self):
+#         path = "account/settings.json"
+#         data = {
+#             "oauth_token": self.token['access_token'],
+#             "screen_name": "kevin",
+#             "privacy": False,
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['privacy'], False)
+#         self.privacy = result['privacy']
 
-    def test_get(self):
-        path = "account/settings.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['privacy'], self.privacy)
+#     def test_get(self):
+#         path = "account/settings.json"
+#         data = {
+#             "oauth_token": self.token['access_token'],
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(result['privacy'], self.privacy)
 
-class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
-    def test_update_profile(self):
-        path = "account/update_profile.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "bio": "My long biography goes here.",
-            "color": "333333,999999"
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['color_primary'], '333333')
-        self.assertEqual(result['color_secondary'], '999999')
+# class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
+#     def test_update_profile(self):
+#         path = "account/update_profile.json"
+#         data = {
+#             "oauth_token": self.token['access_token'],
+#             "bio": "My long biography goes here.",
+#             "color": "333333,999999"
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['color_primary'], '333333')
+#         self.assertEqual(result['color_secondary'], '999999')
 
-class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
-    def test_update_profile_image(self):
-        # TODO: this url is temporary!
-        url = 'https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg'
+# class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
+#     def test_update_profile_image(self):
+#         # TODO: this url is temporary!
+#         url = 'https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg'
         
-        path = "account/update_profile_image.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "profile_image": url, 
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['profile_image'], url)
+#         path = "account/update_profile_image.json"
+#         data = {
+#             "oauth_token": self.token['access_token'],
+#             "profile_image": url, 
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['profile_image'], url)
 
 
 # #### #
 # USER #
 # #### #
 
-class StampedAPIUserTest(AStampedAPITestCase):
-    def setUp(self):
-        (self.userA, self.tokenA) = self.createAccount('UserA')
-        (self.userB, self.tokenB) = self.createAccount('UserB')
-        self.screen_names = ['UserA', 'UserB']
+# class StampedAPIUserTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.userA, self.tokenA) = self.createAccount('UserA')
+#         (self.userB, self.tokenB) = self.createAccount('UserB')
+#         self.screen_names = ['UserA', 'UserB']
 
-    def tearDown(self):
-        self.deleteAccount(self.tokenA)
-        self.deleteAccount(self.tokenB)
+#     def tearDown(self):
+#         self.deleteAccount(self.tokenA)
+#         self.deleteAccount(self.tokenB)
 
-class StampedAPIUsersShow(StampedAPIUserTest):
-    def test_show_user_id(self):
-        path = "users/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "user_id": self.userA['user_id']
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['screen_name'], self.userA['screen_name'])
+# class StampedAPIUsersShow(StampedAPIUserTest):
+#     def test_show_user_id(self):
+#         path = "users/show.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userA['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(result['screen_name'], self.userA['screen_name'])
 
-    def test_show_screen_name(self):
-        path = "users/show.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "screen_name": self.userA['screen_name']
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['user_id'], self.userA['user_id'])
+#     def test_show_screen_name(self):
+#         path = "users/show.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "screen_name": self.userA['screen_name']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(result['user_id'], self.userA['user_id'])
 
-class StampedAPIUsersLookup(StampedAPIUserTest):
-    def test_lookup_user_ids(self):
-        path = "users/lookup.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "user_ids": "%s,%s" % (
-                self.userA['user_id'],
-                self.userB['user_id']
-            )
-        }
-        result = self.handleGET(path, data)
-        self.assertLength(result, 2)
-        for user in result:
-                self.assertIn(user['screen_name'], self.screen_names)
+# class StampedAPIUsersLookup(StampedAPIUserTest):
+#     def test_lookup_user_ids(self):
+#         path = "users/lookup.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_ids": "%s,%s" % (
+#                 self.userA['user_id'],
+#                 self.userB['user_id']
+#             )
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertLength(result, 2)
+#         for user in result:
+#             self.assertIn(user['screen_name'], self.screen_names)
 
-    def test_lookup_screen_names(self):
-        path = "users/lookup.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "screen_names": "%s,%s" % (
-                self.userA['screen_name'],
-                self.userB['screen_name']
-            )
-        }
-        result = self.handleGET(path, data)
-        self.assertTrue(len(result) >= 2)
+#     def test_lookup_screen_names(self):
+#         path = "users/lookup.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "screen_names": "%s,%s" % (
+#                 self.userA['screen_name'],
+#                 self.userB['screen_name']
+#             )
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertTrue(len(result) >= 2)
 
-class StampedAPIUsersSearch(StampedAPIUserTest):
-    def test_search(self):
-        path = "users/search.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "q": "%s" % self.userA['screen_name'][:3]
-        }
-        result = self.handleGET(path, data)
-        self.assertTrue(len(result) >= 1)
+# class StampedAPIUsersSearch(StampedAPIUserTest):
+#     def test_search(self):
+#         path = "users/search.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "q": "%s" % self.userA['screen_name'][:3]
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertTrue(len(result) >= 1)
 
-class StampedAPIUsersPrivacy(StampedAPIUserTest):
-    def test_privacy_user_id(self):
-        path = "users/privacy.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "user_id": self.userB['user_id']
-        }
-        result = self.handleGET(path, data)
-        self.assertTrue(result)
+# class StampedAPIUsersPrivacy(StampedAPIUserTest):
+#     def test_privacy_user_id(self):
+#         path = "users/privacy.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userB['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertTrue(result == False)
 
-    def test_privacy_screen_name(self):
-        path = "users/privacy.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "screen_name": self.userB['screen_name']
-        }
-        result = self.handleGET(path, data)
-        self.assertTrue(result)
-    
+#     def test_privacy_screen_name(self):
+#         path = "users/privacy.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "screen_name": self.userB['screen_name']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertTrue(result == False)
+
+#     def test_privacy_not_found(self):
+#         path = "users/privacy.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "screen_name": 'unknownUserName'
+#         }
+#         try:
+#             result = self.handleGET(path, data)
+#             ret = False
+#         except:
+#             ret = True
+#         self.assertTrue(ret)
+
+
+# ########## #
+# FRIENDSHIP #
+# ########## #
+
+# class StampedAPIFriendshipTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.userA, self.tokenA) = self.createAccount('UserA')
+#         (self.userB, self.tokenB) = self.createAccount('UserB')
+#         self.createFriendship(self.tokenA, self.userB)
+
+#     def tearDown(self):
+#         self.deleteFriendship(self.tokenA, self.userB)
+#         self.deleteAccount(self.tokenA)
+#         self.deleteAccount(self.tokenB)
+
+# class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
+#     def test_check_friendship_success(self):
+#         path = "friendships/check.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userB['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertTrue(result)
+
+#     def test_check_friendship_fail(self):
+#         path = "friendships/check.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#             "user_id": self.userA['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertFalse(result)
+
+# class StampedAPIFriends(StampedAPIFriendshipTest):
+#     def test_show_friends(self):
+#         path = "friendships/friends.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userA['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result['user_ids']), 1)
+
+# class StampedAPIFollowers(StampedAPIFriendshipTest):
+#     def test_show_followers(self):
+#         path = "friendships/followers.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userB['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result['user_ids']), 1)
+
+#     def REWRITE_ME(self):
+#         path = "friendships/approve.json"
+#         data = {
+#             "authenticated_user_id": userA
+#         }
+#         print 'SKIP: %s' % path
+            
+            
+#         path = "friendships/pending.json"
+#         data = {
+#             "authenticated_user_id": userA,
+#             "user_id": userB
+#         }
+#         print 'SKIP: %s' % path
+
+
+# ###### #
+# BLOCKS #
+# ###### #
+
+# class StampedAPIBlockTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.userA, self.tokenA) = self.createAccount('UserA')
+#         (self.userB, self.tokenB) = self.createAccount('UserB')
+#         self.createFriendship(self.tokenA, self.userB)
+
+#         path = "friendships/blocks/create.json"
+#         data = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userB['user_id']
+#         }
+#         friend = self.handlePOST(path, data)
+
+#         self.assertIn('user_id', friend)
+#         self.assertValidKey(friend['user_id'])
+
+#     def tearDown(self):
+#         path = "friendships/blocks/remove.json"
+#         data = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userB['user_id']
+#         }
+#         friend = self.handlePOST(path, data)
+
+#         self.assertIn('user_id', friend)
+#         self.assertValidKey(friend['user_id'])
+
+#         self.deleteFriendship(self.tokenA, self.userB)
+#         self.deleteAccount(self.tokenA)
+#         self.deleteAccount(self.tokenB)
+
+# class StampedAPICheckBlocks(StampedAPIBlockTest):
+#     def test_check_block(self):
+#         path = "friendships/blocks/check.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userB['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertTrue(result)
+
+#     def test_check_block_fail(self):
+#         path = "friendships/blocks/check.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#             "user_id": self.userA['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertFalse(result)
+
+# class StampedAPIBlocking(StampedAPIBlockTest):
+#     def test_show_blocks(self):
+#         path = "friendships/blocking.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result['user_ids']), 1)
 
 # ###### #
 # ENTITY #
@@ -272,18 +441,30 @@ class StampedAPIEntityTest(AStampedAPITestCase):
         self.entity = self.createEntity(self.token)
 
     def tearDown(self):
-        self.deleteEntity(self.token)
+        self.deleteEntity(self.token, self.entity['entity_id'])
         self.deleteAccount(self.token)
 
-# class StampedAPIEntitiesShow(StampedAPIEntityTest):
-#     def test_show(self):
-#         path = "entities/show.json"
-#         data = { 
-#             "oauth_token": self.token['access_token'],
-#             "entity_id": entity['entity_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['title'], entity['title'])
+class StampedAPIEntitiesShow(StampedAPIEntityTest):
+    def test_show(self):
+        path = "entities/show.json"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['title'], self.entity['title'])
+
+class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
+    def test_update(self):
+        path = "entities/update.json"
+        desc = "Gastropub in the West Village, NYC"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id'],
+            "desc": desc
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['desc'], desc)
 
 """
 

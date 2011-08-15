@@ -15,73 +15,46 @@ from api.Account import Account
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     
-    SCHEMA = {
-        '_id': object,
-        'first_name': basestring,
-        'last_name': basestring,
-        'email': basestring,
-        'password': basestring,
-        'screen_name': basestring,
-        'display_name': basestring,
-        'profile_image': basestring,
-        'color_primary': basestring,
-        'color_secondary': basestring,
-        'bio': basestring,
-        'website': basestring,
-        'privacy': bool,
-        'locale': {
-            'language': basestring,
-            'time_zone': basestring
-        },
-        'linked_accounts': {
-            'itunes': basestring
-        },
-        'devices': {
-            'ios_device_tokens': list
-        },
-        'flags': {
-            'flagged': bool,
-            'locked': bool
-        },
-        'stats': {
-            'total_stamps': int,
-            'total_following': int,
-            'total_followers': int,
-            'total_todos': int,
-            'total_credit_received': int,
-            'total_credit_given': int
-        },
-        'timestamp': {
-            'created': datetime,
-            'modified': datetime
-        }
-    }
-    
     def __init__(self):
         AMongoCollection.__init__(self, 'users')
         AAccountDB.__init__(self)
     
+    def _convertToMongo(self, account):
+        document = account.exportSparse()
+        if 'user_id' in document:
+            document['_id'] = self._getObjectIdFromString(document['user_id'])
+            del(document['user_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['user_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return Account(document)
+    
     ### PUBLIC
     
     def addAccount(self, user):
-        ### TEMP: For now, verify that no duplicates can occur
+        ### TEMP: For now, verify that no duplicates can occur via index
         self._collection.ensure_index('screen_name', unique=True)
-        user['password'] = auth.convertPasswordForStorage(user['password'])
-        
-        return self._addDocument(user, objId='user_id')
+
+        document = self._convertToMongo(user)
+        document = self._addMongoDocument(document)
+        return self._convertFromMongo(document)
     
-    def getAccount(self, userID):
-        user = Account(self._getDocumentFromId(userID, objId='user_id'))
-        if user.isValid == False:
-            print str(user)
-            raise KeyError("User not valid")
-        return user
+    def getAccount(self, userId):
+        documentId = self._getObjectIdFromString(userId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
     
     def updateAccount(self, user):
-        return self._updateDocument(user, objId='user_id')
+        document = self._convertToMongo(user)
+        document = self._updateMongoDocument(document)
+        return self._convertFromMongo(document)
     
-    def removeAccount(self, userID):
-        return self._removeDocument(userID)
+    def removeAccount(self, userId):
+        documentId = self._getObjectIdFromString(userId)
+        return self._removeMongoDocument(documentId)
     
     def flagUser(self, user):
         # TODO

@@ -14,92 +14,74 @@ from api.User import User
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     
-    SCHEMA = {
-        '_id': object,
-        'first_name': basestring,
-        'last_name': basestring,
-        'screen_name': basestring,
-        'display_name': basestring,
-        'profile_image': basestring,
-        'color_primary': basestring,
-        'color_secondary': basestring,
-        'bio': basestring,
-        'website': basestring,
-        'privacy': bool,
-        'flags': {
-            'flagged': bool,
-            'locked': bool
-        },
-        'stats': {
-            'num_stamps': int,
-            'num_following': int,
-            'num_followers': int,
-            'num_todos': int,
-            'num_credit_received': int,
-            'num_credit_given': int
-        },
-        'timestamp': {
-            'created': datetime,
-            'modified': datetime
-        }
-    }
-    
     def __init__(self, setup=False):
         AMongoCollection.__init__(self, collection='users')
         AUserDB.__init__(self)
     
+    def _convertToMongo(self, user):
+        document = user.exportSparse()
+        if 'user_id' in document:
+            document['_id'] = self._getObjectIdFromString(document['user_id'])
+            del(document['user_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['user_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return User(document, discardExcess=True)
+    
     ### PUBLIC
     
     def getUser(self, userId):
-        user = User(self._getDocumentFromId(userId, 'user_id'))
-        if user.isValid == False:
-            raise KeyError("User not valid")
-        return user
+        documentId = self._getObjectIdFromString(userId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
     
-    def getUserId(self, screenName):
-        user = self._mongoToObj(self._collection.find_one({"screen_name": screenName}), 'user_id')
-        if 'user_id' in user:
-            return user['user_id']
-        return None
+    def getUserByScreenName(self, screenName):
+        document = self._collection.find_one({"screen_name": screenName})
+        return self._convertFromMongo(document)
+
+    def checkScreenNameExists(self, screenName):
+        try:
+            self.getUserByScreenName(screenName)
+            return True
+        except:
+            return False
     
-    def lookupUsers(self, userIDs, screenNames):
-        query = []
-        if userIDs:
+    def lookupUsers(self, userIDs, screenNames, limit=0):
+        queryUserIDs = []
+        if isinstance(userIDs, list):
             for userID in userIDs:
-                query.append(self._getObjectIdFromString(userID))
-            data = self._collection.find({"_id": {"$in": query}})
-        elif screenNames:
-            for screenName in screenNames:
-                query.append(screenName)
-            data = self._collection.find({"screen_name": {"$in": query}})
-        else:
-            return None
+                queryUserIDs.append(self._getObjectIdFromString(userID))
+        
+        queryScreenNames = []
+        if isinstance(screenNames, list):
+            queryScreenNames = screenNames
+
+        data = self._collection.find({"$or": [
+            {"_id": {"$in": queryUserIDs}}, 
+            {"screen_name": {"$in": queryScreenNames}}
+            ]}).limit(limit)
             
         result = []
-        for userData in data:
-            userData['user_id'] = self._getStringFromObjectId(userData['_id'])
-            del(userData['_id'])
-            result.append(User(userData))
+        for item in data:
+            result.append(self._convertFromMongo(item))
         return result
 
-    def searchUsers(self, searchQuery, searchLimit=20):
-        # Using a simple regex here. Need to rank results at some point...
-        searchQuery = '^%s' % searchQuery
+    def searchUsers(self, query, limit=0):
+        ### TODO: Using a simple regex here. Need to rank results at some point...
+        query = {"screen_name": {"$regex": '^%s' % query, "$options": "i"}}
+        data = self._collection.find(query).limit(limit)
+
         result = []
-        for userData in self._collection.find({"screen_name": {"$regex": searchQuery, "$options": "i"}}).limit(searchLimit):
-            userData['user_id'] = self._getStringFromObjectId(userData['_id'])
-            del(userData['_id'])
-            result.append(User(userData))
+        for item in data:
+            result.append(self._convertFromMongo(item))
         return result
     
     def flagUser(self, user):
         ### TODO
-        print 'TODO'
         raise NotImplementedError
-    
-    def checkPrivacy(self, userId):
-        privacy = self._collection.find_one({"_id": self._getObjectIdFromString(userId)}, fields={"privacy": 1})['privacy']
-        return privacy
     
     def updateUserStats(self, userId, stat, value=None, increment=1):
         key = 'stats.%s' % (stat)

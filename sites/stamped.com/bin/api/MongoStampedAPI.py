@@ -26,8 +26,8 @@ class MongoStampedAPI(StampedAPI):
         Implementation of Stamped API atop MongoDB.
     """
     
-    def __init__(self):
-        StampedAPI.__init__(self, "MongoStampedAPI")
+    def __init__(self, **kwargs):
+        StampedAPI.__init__(self, "MongoStampedAPI", **kwargs)
         
         #self._accountDB      = MongoAccountCollection()
         self._entityDB       = MongoEntityCollection()

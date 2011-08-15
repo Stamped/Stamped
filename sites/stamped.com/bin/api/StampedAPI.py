@@ -8,6 +8,7 @@ __license__ = "TODO"
 import Globals, utils, logs
 from datetime import datetime
 from errors import *
+from auth import convertPasswordForStorage
 
 from AStampedAPI import AStampedAPI
 
@@ -23,7 +24,7 @@ from AFriendshipDB import AFriendshipDB
 from AActivityDB import AActivityDB
 
 from Account import Account
-from Entity import Entity
+from Entity import *
 from User import User
 from Stamp import Stamp
 from Comment import Comment
@@ -48,37 +49,16 @@ class StampedAPI(AStampedAPI):
         and manipulating all Stamped backend databases.
     """
     
-    def __init__(self, desc):
+    def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
         self._validated = False
+        self.output = kwargs.pop('output', False)
     
     def _validate(self):
-        #assert hasattr(self, '_accountDB')    and isinstance(self._accountDB, AAccountDB)
-        #assert hasattr(self, '_entityDB')     and isinstance(self._entityDB, AEntityDB)
-        #assert hasattr(self, '_userDB')       and isinstance(self._userDB, AUserDB)
-        #assert hasattr(self, '_stampDB')      and isinstance(self._stampDB, AStampDB)
-        #assert hasattr(self, '_commentDB')    and isinstance(self._commentDB, ACommentDB)
-        #assert hasattr(self, '_favoriteDB')   and isinstance(self._favoriteDB, AFavoriteDB)
-        #assert hasattr(self, '_collectionDB') and isinstance(self._collectionDB, ACollectionDB)
-        #assert hasattr(self, '_friendshipDB') and isinstance(self._friendshipDB, AFriendshipDB)
-        #assert hasattr(self, '_activityDB')   and isinstance(self._activityDB, AActivityDB)
         
         self._validated = True
-        
-    def _requiresAuth(self, params):
-        if 'authenticated_user_id' in params and params.authenticated_user_id != None:
-            return True
-        raise Fail("Requires authentication")
-        
     
     
-    @property
-    def isValid(self):
-        return self._validated
-    
-    # ######## #
-    # Accounts #
-    # ######## #
     """
        #                                                    
       # #    ####   ####   ####  #    # #    # #####  ####  
@@ -89,142 +69,74 @@ class StampedAPI(AStampedAPI):
     #     #  ####   ####   ####   ####  #    #   #    ####  
     """
     
-    def addAccount(self, params):
-        #logs.info("Begin")
-        ### TODO: Add validation to ensure no duplicate screen_names
-        account = Account()
-        account.first_name = params.first_name
-        account.last_name = params.last_name
-        account.email = params.email
-        account.password = params.password
-        account.screen_name = params.screen_name
-        account.display_name = "%s %s." % (params.first_name, params.last_name[0])
-        
-        account.locale = {
-            'language': 'en',
-            'time_zone': None
-        }
-        
-        account.color_primary = None
-        account.profile_image = None   
-        account.privacy = True
-        
-        if not account.isValid:
-            raise Fail('Account data is invalid')
-        
-        result = {}
-        result['user_id'] = self._accountDB.addAccount(account)
-        result['first_name'] = account.first_name
-        result['last_name'] = account.last_name
-        result['email'] = account.email
-        result['screen_name'] = account.screen_name
-        result['display_name'] = account.display_name
-        return result
-    
-    def updateAccount(self, params):
-        account = self._accountDB.getAccount(params.authenticated_user_id)
-        
-        if params.email != None:
-            account.email = params.email
-        if params.password != None:
-            account.password = params.password
-        if params.screen_name != None:
-            account.screen_name = params.screen_name
-        if params.privacy != None:
-            account.privacy = params.privacy
-        
-        if params.language != None:
-            account.locale['language'] = params.language
-        if params.time_zone != None:
-            account.locale['time_zone'] = params.time_zone
-        
-        if not account.isValid:
-            raise InvalidArgument('Invalid input')
-            
-        userId = self._accountDB.updateAccount(account)
-        account = self._accountDB.getAccount(userId)
-        
-        return self._returnAccount(account)
-    
-    def getAccount(self, params):
+    def addAccount(self, data, auth):
 
-        account = self._accountDB.getAccount(params.authenticated_user_id)
-        return self._returnAccount(account)
-    
-    def updateProfile(self, params):
-        #logs.info("Begin")
-        account = self._accountDB.getAccount(params.authenticated_user_id)
-        
-        if params.first_name != None:
-            account.first_name = params.first_name
-        if params.last_name != None:
-            account.last_name = params.last_name
-        if params.bio != None:
-            account.bio = params.bio
-        if params.website != None:
-            account.website = params.website
-        if params.color != None:
-            color = params.color.split(',')
-            account.color_primary = color[0]
-            if len(color) == 2:
-                account.color_secondary = color[1]
-        
-        if not account.isValid:
-            raise InvalidArgument('Invalid input')
-            
-        result = {}
-        result['user_id'] = self._accountDB.updateAccount(account)
-        result['first_name'] = account.first_name
-        result['last_name'] = account.last_name
-        result['display_name'] = account.display_name
-        if 'bio' in account:
-            result['bio'] = account.bio
-        else:
-            result['bio'] = None
-        if 'website' in account:
-            result['website'] = account.website
-        else:
-            result['website'] = None
-        result['color_primary'] = account.color_primary
-        if 'color_secondary' in account:
-            result['color_secondary'] = account.color_secondary
-        else:
-            result['color_secondary'] = None
+        display_name = "%s %s." % (data['first_name'], data['last_name'][0])
+        data['display_name'] = display_name
+
+        account = Account(data)
+        account.password = convertPasswordForStorage(account['password'])
+        account.timestamp.created = datetime.utcnow()
+
+        if self._userDB.checkScreenNameExists(account.screen_name):
+            raise Exception("Screen name is already taken")
+
+        result = self._accountDB.addAccount(account)
+
+        if self.output == 'http':
+            return result.exportFlat()
         return result
     
-    def updateProfileImage(self, params):
-        #logs.info("Begin")
+    def updateAccount(self, data, auth):
+        account = self._accountDB.getAccount(auth['authenticated_user_id'])
+        account.importData(data)
+            
+        self._accountDB.updateAccount(account)
+
+        if self.output == 'http':
+            return account.exportFlat()
+        return account
+    
+    def getAccount(self, data, auth):
+        account = self._accountDB.getAccount(auth['authenticated_user_id'])
+        
+        if self.output == 'http':
+            return account.exportFlat()
+        return account
+    
+    def updateProfile(self, data, auth):
+        account = self._accountDB.getAccount(auth['authenticated_user_id'])
+        account.importData(data)
+            
+        self._accountDB.updateAccount(account)
+        
+        if self.output == 'http':
+            return account.exportProfile()
+        return account
+    
+    def updateProfileImage(self, data, auth):
         ### TODO: Grab image and do something with it. Currently just sets as url.
         
-        account = self._accountDB.getAccount(params.authenticated_user_id)
-        if params.profile_image != None:
-            account.profile_image = params.profile_image
-        
-        if not account.isValid:
-            raise InvalidArgument('Invalid input')
+        account = self._accountDB.getAccount(auth['authenticated_user_id'])
+        account.importData(data)
             
-        result = {}
-        result['user_id'] = self._accountDB.updateAccount(account)
-        result['profile_image'] = account.profile_image
-        return result
+        self._accountDB.updateAccount(account)
+        
+        if self.output == 'http':
+            return account.exportProfileImage()
+        return account
         raise NotImplementedError
     
-    def verifyAccountCredentials(self, userID):
-        return True
+    def removeAccount(self, data, auth):
+        return self._accountDB.removeAccount(auth['authenticated_user_id'])
     
-    def removeAccount(self, params):
-        #logs.info("Begin")
-        if self._accountDB.removeAccount(params.authenticated_user_id):
-            return True
-        else:
-            return False
+    def verifyAccountCredentials(self, data, auth):
+        raise NotImplementedError
     
     def resetPassword(self, params):
         raise NotImplementedError
     
-    # ##### #
-    # Users #
-    # ##### #
+
     """
     #     #                             
     #     #  ####  ###### #####   ####  
@@ -234,115 +146,70 @@ class StampedAPI(AStampedAPI):
     #     # #    # #      #   #  #    # 
      #####   ####  ###### #    #  ####  
     """
+
+    ### PRIVATE
+
+    def _returnUser(self, user):
+        if self.output == 'http':
+            return user.exportFlat()
+        return user
+
+    def _returnUsers(self, users):
+        if self.output == 'http':
+            result = []
+            for user in users:
+                result.append(user.exportFlat())
+            return result
+        return users
+
+    def _getUserFromIdOrScreenName(self, data):
+        user_id         = data.pop('user_id', None)
+        screen_name     = data.pop('screen_name', None)
+
+        if user_id == None and screen_name == None:
+            raise Exception("Required field missing")
+
+        if user_id != None:
+            return self._userDB.getUser(user_id)
+        return self._userDB.getUserByScreenName(screen_name)
+
+    ### PUBLIC
     
-    def getUser(self, params):
-        #logs.info("Begin")
-        # Get user by id
-        if params.user_id != None:
-            try:
-                user = self._userDB.getUser(params.user_id)
-            except (InvalidArgument, Fail) as e:
-                utils.log("Invalid user_id (%s)" % (params.user_id))
-                utils.printException()
-                raise
+    def getUser(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
         
-        # Get user by screen name
-        elif params.screen_name != None:
-            try:
-                user = self._userDB.lookupUsers(None, [params.screen_name])
-                user = user[-1]
-            except (InvalidArgument, Fail) as e:
-                utils.log("Invalid screen_name (%s)" % (params.screen_name))
-                utils.printException()
-                raise
-                
-        # Unable to get user
-        else:
-            utils.log("Missing parameters")
-            utils.printException()
-            raise
+        if user.privacy == True:
+            authenticated_user_id = data.pop('authenticated_user_id', None)
+            if authenticated_user_id == None:
+                raise Exception("You must be logged in to view this account")
+            #self._friendshipDB.checkFriendship
         
-        # return self._returnUser(user)
-        return user.output('http')
+        return self._returnUser(user)
     
-    def getUsers(self, params):
-        #logs.info("Begin")
-        # Get users by id
-        if params.user_ids != None:
-            try:
-                users = self._userDB.lookupUsers(params.user_ids.split(','), None)
-            except (InvalidArgument, Fail) as e:
-                utils.log("Invalid user_ids (%s)" % (params.user_ids))
-                utils.printException()
-                raise
-        
-        # Get users by screen name
-        elif params.screen_names != None:
-            try:
-                users = self._userDB.lookupUsers(None, params.screen_names.split(','))
-            except (InvalidArgument, Fail) as e:
-                utils.log("Invalid screen_names (%s)" % (params.screen_names))
-                utils.printException()
-                raise
-                
-        # Unable to get users
-        else:
-            utils.log("Missing parameters")
-            utils.printException()
-            raise
-        
-        result = []
-        for user in users:
-            result.append(user.output('http'))
-        
-        return result
+    def getUsers(self, data, auth):
+        user_ids        = data.pop('user_ids', None)
+        screen_names    = data.pop('screen_names', None)
+
+        users = self._userDB.lookupUsers(user_ids, screen_names, limit=100)
+
+        return self._returnUsers(users)
     
-    def searchUsers(self, params):
-        #logs.info("Begin")
-        limit = self._setLimit(params.limit, cap=20)
-        users = self._userDB.searchUsers(params.q, limit)
+    def searchUsers(self, data, auth):
+        limit = data.pop('user_ids', 20)
+        limit = self._setLimit(limit, cap=20)
         
-        result = []
-        for user in users:
-            result.append(user.output('http'))
-        
-        return result
+        users = self._userDB.searchUsers(data['q'], limit)
+
+        return self._returnUsers(users)
     
-    def getPrivacy(self, params):
-        #logs.info("Begin")
-        # Get user by id
-        if params.user_id != None:
-            try:
-                privacy = self._userDB.checkPrivacy(params.user_id)
-            except (InvalidArgument, Fail) as e:
-                utils.log("Invalid user_id (%s)" % (params.user_id))
-                utils.printException()
-                raise
+    def getPrivacy(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
         
-        # Get user by screen name
-        elif params.screen_name != None:
-            try:
-                userId = self._userDB.getUserId(params.screen_name)
-                privacy = self._userDB.checkPrivacy(userId)
-            except (InvalidArgument, Fail) as e:
-                utils.log("Invalid screen_name (%s)" % (params.screen_name))
-                utils.printException()
-                raise
-                
-        # Unable to get user
-        else:
-            utils.log("Missing parameters")
-            utils.printException()
-            raise
-            
-        if privacy:
+        if user.privacy == True:
             return True
-        else:
-            return False
+        return False
+
     
-    # ############# #
-    # Relationships #
-    # ############# #
     """
     #######                                      
     #       #####  # ###### #    # #####   ####  
@@ -353,139 +220,154 @@ class StampedAPI(AStampedAPI):
     #       #    # # ###### #    # #####   ####  
     """
     
-    def addFriendship(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.authenticated_user_id
-        
-        if params.user_id != None:
-            friendship.friend_id = params.user_id
-        elif params.screen_name != None:
+    def addFriendship(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
+
+        friendship = Friendship({
+            'user_id':      auth['authenticated_user_id'],
+            'friend_id':    user['user_id']
+        })
+
+        # Check if friendship already exists
+        if self._friendshipDB.checkFriendship(friendship) == True:
+            logs.info("Friendship exists")
+            return self._returnUser(user)
+
+        # Check if authenticating user is being blocked
+        if self._friendshipDB.checkBlock(friendship) == True:
+            logs.info("Block exists")
+            raise Exception
+
+        # Check if friend has private account
+        if user.privacy == True:
+            ### TODO: Create queue for friendship requests
             raise NotImplementedError
-        else:
-            return 'error', 400
-        
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
-        
+
+        # Create friendship
         self._friendshipDB.addFriendship(friendship)
         
         result = {}
         result['user_id'] = friendship.friend_id
         result['screen_name'] = self._userDB.getUser(friendship.friend_id)['screen_name']
         
-        return result
+        return self._returnUser(user)
     
-    def removeFriendship(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.authenticated_user_id
-        
-        if params.user_id != None:
-            friendship.friend_id = params.user_id
-        elif params.screen_name != None:
-            raise NotImplementedError
-        else:
-            return 'error', 400
-        
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
+    def removeFriendship(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
+
+        friendship = Friendship({
+            'user_id':      auth['authenticated_user_id'],
+            'friend_id':    user['user_id']
+        })
+
+        # Check if friendship doesn't exist
+        if self._friendshipDB.checkFriendship(friendship) == False:
+            logs.info("Friendship does not exist")
+            return self._returnUser(user)
             
-        if self._friendshipDB.removeFriendship(friendship):
-            return True
-        else:
-            return False
+        self._friendshipDB.removeFriendship(friendship)
+
+        return self._returnUser(user)
     
-    def approveFriendship(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.user_id
-        friendship.friend_id = params.friend_id
-        
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
-            
-        self._friendshipDB.approveFriendship(friendship)
-        return friendship
+    def approveFriendship(self, data, auth):
+        raise NotImplementedError
     
-    def checkFriendship(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.authenticated_user_id
-        if params.user_id != None:
-            friendship.friend_id = params.user_id
-        
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
-            
+    def checkFriendship(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
+
+        friendship = Friendship({
+            'user_id':      auth['authenticated_user_id'],
+            'friend_id':    user['user_id']
+        })
+
         if self._friendshipDB.checkFriendship(friendship):
             return True
-        else:
-            return False
+        return False
     
-    def getFriends(self, params):
-        return {'user_ids': self._friendshipDB.getFriends(params.authenticated_user_id)}
-    
-    def getFollowers(self, params):
-        return {'user_ids': self._friendshipDB.getFollowers(params.authenticated_user_id)}
-    
-    def addBlock(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.authenticated_user_id
-        
-        if params.user_id != None:
-            friendship.friend_id = params.user_id
-        elif params.screen_name != None:
-            raise NotImplementedError
-        else:
-            return 'error', 400
-        
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
-        
-        self._friendshipDB.addBlock(friendship)
-        
-        result = {}
-        result['user_id'] = friendship.friend_id
-        result['screen_name'] = self._userDB.getUser(friendship.friend_id)['screen_name']
-        
+    def getFriends(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
+
+        # Note: This function returns data even if user is private
+
+        friends = self._friendshipDB.getFriends(user['user_id'])
+
+        result = {'user_ids': friends}
         return result
     
-    def checkBlock(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.authenticated_user_id
-        if params.user_id != None:
-            friendship.friend_id = params.user_id
+    def getFollowers(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
+
+        # Note: This function returns data even if user is private
+
+        followers = self._friendshipDB.getFollowers(user['user_id'])
+
+        result = {'user_ids': followers}
+        return result
+    
+    def addBlock(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
         
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
+        friendship = Friendship({
+            'user_id':      auth['authenticated_user_id'],
+            'friend_id':    user['user_id']
+        })
+
+        reverseFriendship = Friendship({
+            'user_id':      user['user_id'],
+            'friend_id':    auth['authenticated_user_id'],
+        })
+
+        # Check if block already exists
+        if self._friendshipDB.checkBlock(friendship) == True:
+            logs.info("Block exists")
+            return self._returnUser(user)
+
+        # Add block
+        self._friendshipDB.addBlock(friendship)
+
+        # Destroy friendships
+        self._friendshipDB.removeFriendship(friendship)
+        self._friendshipDB.removeFriendship(reverseFriendship)
+
+        return self._returnUser(user)
+    
+    def checkBlock(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
         
+        friendship = Friendship({
+            'user_id':      auth['authenticated_user_id'],
+            'friend_id':    user['user_id']
+        })
+
         if self._friendshipDB.checkBlock(friendship):
             return True
-        else:
-            return False
+        return False
     
-    def getBlocks(self, params):
-        return {'user_ids': self._friendshipDB.getBlocks(params.authenticated_user_id)}
+    def getBlocks(self, data, auth):
+
+        blocks = self._friendshipDB.getBlocks(auth['authenticated_user_id'])
+
+        result = {'user_ids': blocks}
+        return result
     
-    def removeBlock(self, params):
-        friendship = Friendship()
-        friendship.user_id = params.authenticated_user_id
-        
-        if params.user_id != None:
-            friendship.friend_id = params.user_id
-        elif params.screen_name != None:
-            raise NotImplementedError
-        else:
-            return 'error', 400
-        
-        if not friendship.isValid:
-            raise InvalidArgument('Invalid input')
+    def removeBlock(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
+
+        friendship = Friendship({
+            'user_id':      auth['authenticated_user_id'],
+            'friend_id':    user['user_id']
+        })
+
+        # Check if block already exists
+        if self._friendshipDB.checkBlock(friendship) == False:
+            logs.info("Block does not exist")
+            return self._returnUser(user)
             
-        if self._friendshipDB.removeBlock(friendship):
-            return True
-        else:
-            return False
+        self._friendshipDB.removeBlock(friendship)
+
+        return self._returnUser(user)
+
     
-    # ######### #
-    # Favorites #
-    # ######### #
     """
     #######                             
     #         ##   #    # ######  ####  
@@ -548,9 +430,7 @@ class StampedAPI(AStampedAPI):
         
         return result
     
-    # ######## #
-    # Entities #
-    # ######## #
+
     """
     #######                                      
     #       #    # ##### # ##### # ######  ####  
@@ -561,102 +441,70 @@ class StampedAPI(AStampedAPI):
     ####### #    #   #   #   #   # ######  ####  
     """
     
-    def addEntity(self, params):
-        #logs.info("Begin")
-        entity = Entity()
-        entity.title = params.title
-        entity.subtitle = 'Other'
-        entity.desc = params.desc
-        entity.category = params.category
-        entity.subcategory = params.subcategory
-        
-        if params.image != None:
-            entity.image = params.image
-            
-        if params.address != None:
-            entity.details = {
-                'place': {}
-            }
-            if params.address != None:
-                entity.details['place']['address'] = params.address
-        if params.coordinates != None:
-            coordinates = params.coordinates.split(',')
-            entity['coordinates'] = {
-                'lat': coordinates[0],
-                'lng': coordinates[1]
-            }
-            
-        entity.timestamp = {
-            'created': datetime.utcnow()
-        }
-        
-        ### TODO: Log data of user who created it
-        
-        if not entity.isValid:
-            raise InvalidArgument('Invalid input')
-            
-        entityId = self._entityDB.addEntity(entity)
+    def addEntity(self, data, auth):
+        # First try to import as a full entity
+        try:
+            entity = Entity(data)
+        except:
+            # If that fails, try to import as a flat entity
+            try:
+                entity = EntityFlat(data).convertToEntity()
+            except:
+                raise
 
-        if 'place' in entity:
-            self._placesEntityDB.addEntity(entity)
+        entity.timestamp.created = datetime.utcnow()
+        if 'authenticated_user_id' in auth:
+            entity.sources.userGenerated.user_id = auth['authenticated_user_id']
 
-        entity = self._entityDB.getEntity(entityId)
+        result = self._entityDB.addEntity(entity)
 
-        return self._returnEntity(entity)
+        if self.output == 'http':
+            return result.exportFlat()
+        return result
     
-    def getEntity(self, params):
-        #logs.info("Begin")
-        entity = self._entityDB.getEntity(params.entity_id)
+    def getEntity(self, data, auth):
+        entity = self._entityDB.getEntity(data['entity_id'])
         
-        return self._returnEntity(entity)
+        ### TODO: Check if user has access to this entity
+
+        if self.output == 'http':
+            return entity.exportFlat()
+        return entity
     
-    def updateEntity(self, params):
-        #logs.info("Begin")
-        entity = self._entityDB.getEntity(params.entity_id)
+    def updateEntity(self, data, auth):
+        entity = self._entityDB.getEntity(data['entity_id'])
         
-        if params.title != None:
-            entity.title = params.title
-        if params.desc != None:
-            entity.desc = params.desc
-        if params.category != None:
-            entity.category = params.category
-            
-        if params.image != None:
-            entity.image = params.image
-            
-        if params.address != None or params.coordinates != None:
-            if 'details' not in entity:
-                entity.details = {}
-            if 'place' not in entity.details:
-                entity.details['place'] = {}
-            if params.address != None:
-                entity.details['place']['address'] = params.address
-            if params.coordinates != None:
-                coordinates = params.coordinates.split(',')
-                entity.details['place']['coordinates'] = {
-                    'lat': coordinates[0],
-                    'lng': coordinates[1]
-                }
-                
-        entity.timestamp['modified'] = datetime.utcnow()
+        ### TODO: Check if user has access to this entity
+
+        # First try to import as a full entity
+        try:
+            for k, v in data.iteritems():
+                entity[k] = v
+        except:
+            # If that fails, try to import as a flat entity
+            try:
+                entityFlat = EntityFlat(entity.exportFlat())
+                for k, v in data.iteritems():
+                    entityFlat[k] = v
+                entity.importData(entityFlat.convertToEntity.exportSparse())
+            except:
+                raise
         
-        if not entity.isValid:
-            raise InvalidArgument('Invalid input')
-            
-        entityId = self._entityDB.updateEntity(entity)
-        entity = self._entityDB.getEntity(entityId)
-        
-        return self._returnEntity(entity)
+        entity.timestamp.modified = datetime.utcnow()
+
+        self._entityDB.updateEntity(entity)
+
+        if self.output == 'http':
+            return entity.exportFlat()
+        return entity
     
-    def removeEntity(self, params):
-        #logs.info("Begin")
-        if self._entityDB.removeEntity(params.entity_id):
+    def removeEntity(self, data, auth):
+        ### TODO: Verify user has permission to delete
+        if self._entityDB.removeEntity(data['entity_id']):
             return True
-        else:
-            return False
+        return False
     
     def searchEntities(self, params):
-        #logs.info("Begin")
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
         entities = self._entityDB.searchEntities(params.q, limit=10)
@@ -673,9 +521,7 @@ class StampedAPI(AStampedAPI):
         
         return result
     
-    # ###### #
-    # Stamps #
-    # ###### #
+
     """
      #####                                    
     #     # #####   ##   #    # #####   ####  
@@ -777,9 +623,7 @@ class StampedAPI(AStampedAPI):
             stamps.append(stamp.getDataAsDict())
         return stamps
     
-    # ######## #
-    # Comments #
-    # ######## #
+
     """
      #####                                                  
     #     #  ####  #    # #    # ###### #    # #####  ####  
@@ -837,9 +681,7 @@ class StampedAPI(AStampedAPI):
         
         return result
     
-    # ########### #
-    # Collections #
-    # ########### #
+
     """
      #####                                                                  
     #     #  ####  #      #      ######  ####  ##### #  ####  #    #  ####  
@@ -918,9 +760,7 @@ class StampedAPI(AStampedAPI):
         raise NotImplementedError
         return self._collectionDB.getUserMentions(userID, limit)
     
-    # ######## #
-    # Activity #
-    # ######## #
+
     """
        #                                        
       # #    ####  ##### # #    # # ##### #   # 

@@ -39,6 +39,18 @@ class ListSchema(Schema):
         self.basestring         = SchemaElement(basestring)
         self.items              = SchemaList(InnerSchema())
 
+class ListCommaSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.items              = SchemaList(SchemaElement(basestring), delimiter=',')
+
+class SparseSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.empty              = SchemaElement(basestring)
+        self.none               = SchemaElement(basestring)
+        self.default            = SchemaElement(basestring, default='abc')
+
 
 class ASchemaTestCase(unittest.TestCase):
     pass
@@ -111,33 +123,26 @@ class SimpleSchemaTest(ASchemaTestCase):
         pass
 
     def test_retrieve(self):
-        self.assertEqual(self.sampleString, self.schema.basestring.value)
-        self.assertEqual(self.sampleInt, self.schema.integer.value)
-        self.assertEqual(self.sampleFloat, self.schema.float.value)
-        self.assertEqual(self.sampleLong, self.schema.long.value)
-        self.assertEqual(self.sampleBool, self.schema.bool.value)
-        self.assertEqual(self.sampleDatetime, self.schema.datetime.value)
+        self.assertEqual(self.sampleString, self.schema.basestring)
+        self.assertEqual(self.sampleInt, self.schema.integer)
+        self.assertEqual(self.sampleFloat, self.schema.float)
+        self.assertEqual(self.sampleLong, self.schema.long)
+        self.assertEqual(self.sampleBool, self.schema.bool)
+        self.assertEqual(self.sampleDatetime, self.schema.datetime)
 
-        self.assertEqual(self.sampleString, self.schema['basestring'].value)
-        self.assertEqual(self.sampleInt, self.schema['integer'].value)
-        self.assertEqual(self.sampleFloat, self.schema['float'].value)
-        self.assertEqual(self.sampleLong, self.schema['long'].value)
-        self.assertEqual(self.sampleBool, self.schema['bool'].value)
-        self.assertEqual(self.sampleDatetime, self.schema['datetime'].value)
+        self.assertEqual(self.sampleString, self.schema['basestring'])
+        self.assertEqual(self.sampleInt, self.schema['integer'])
+        self.assertEqual(self.sampleFloat, self.schema['float'])
+        self.assertEqual(self.sampleLong, self.schema['long'])
+        self.assertEqual(self.sampleBool, self.schema['bool'])
+        self.assertEqual(self.sampleDatetime, self.schema['datetime'])
 
-        self.assertIsInstance(self.schema.basestring, SchemaElement)
-        self.assertIsInstance(self.schema.integer, SchemaElement)
-        self.assertIsInstance(self.schema.float, SchemaElement)
-        self.assertIsInstance(self.schema.long, SchemaElement)
-        self.assertIsInstance(self.schema.bool, SchemaElement)
-        self.assertIsInstance(self.schema.datetime, SchemaElement)
-
-        self.assertIsInstance(self.schema.basestring.value, basestring)
-        self.assertIsInstance(self.schema.integer.value, int)
-        self.assertIsInstance(self.schema.float.value, float)
-        self.assertIsInstance(self.schema.long.value, long)
-        self.assertIsInstance(self.schema.bool.value, bool)
-        self.assertIsInstance(self.schema.datetime.value, datetime)
+        self.assertIsInstance(self.schema.basestring, basestring)
+        self.assertIsInstance(self.schema.integer, int)
+        self.assertIsInstance(self.schema.float, float)
+        self.assertIsInstance(self.schema.long, long)
+        self.assertIsInstance(self.schema.bool, bool)
+        self.assertIsInstance(self.schema.datetime, datetime)
 
     def test_contain(self):
         self.assertIn('basestring', self.schema)
@@ -348,15 +353,15 @@ class SimpleSchemaTest(ASchemaTestCase):
         self.assertEqual(len(self.schema), len(self.sampleData))
 
     def test_del(self):
-        self.assertEqual(self.schema.basestring.value, self.sampleString)
+        self.assertEqual(self.schema.basestring, self.sampleString)
         del(self.schema.basestring)
-        self.assertEqual(self.schema.basestring.value, None)
+        self.assertEqual(self.schema.basestring, None)
         self.assertIn('basestring', self.schema)
 
     def test_default(self):
-        self.assertEqual(self.schema.integer.value, self.sampleInt)
+        self.assertEqual(self.schema.integer, self.sampleInt)
         del(self.schema.integer)
-        self.assertEqual(self.schema.integer.value, 100)
+        self.assertEqual(self.schema.integer, 100)
         self.assertIn('integer', self.schema)
 
 
@@ -378,21 +383,22 @@ class NestedSchemaTest(ASchemaTestCase):
         self.schema = NestedSchema(self.sampleData)
 
     def test_retrieve(self):
-        self.assertEqual(self.sampleString, self.schema.basestring.value)
-        self.assertEqual(self.sampleString, self.schema.inner.item.value)
+        self.assertEqual(self.sampleString, self.schema.basestring)
+        self.assertEqual(self.sampleString, self.schema.inner.item)
 
-        self.assertEqual(self.sampleString, self.schema['basestring'].value)
-        self.assertEqual(self.sampleString, self.schema['inner']['item'].value)
+        self.assertEqual(self.sampleString, self.schema['basestring'])
+        self.assertEqual(self.sampleString, self.schema['inner']['item'])
 
-        self.assertIsInstance(self.schema.basestring, SchemaElement)
-        self.assertIsInstance(self.schema.inner.item, SchemaElement)
+        self.assertIsInstance(self.schema.basestring, basestring)
+        self.assertIsInstance(self.schema.inner.item, basestring)
         self.assertIsInstance(self.schema.inner, Schema)
-
-        self.assertIsInstance(self.schema.basestring.value, basestring)
-        self.assertIsInstance(self.schema.inner.item.value, basestring)
         self.assertIsInstance(self.schema.inner.value, dict)
 
         self.assertEqual(self.sampleData, self.schema.value)
+
+        self.assertEqual(
+            self.sampleData['inner']['item'], 
+            self.schema.exportFields(['inner.item']).values()[0])
 
     def test_contain_valid(self):
         self.assertIn('inner', self.schema)
@@ -407,16 +413,23 @@ class NestedSchemaTest(ASchemaTestCase):
         self.assertTrue(ret)
 
     def test_iter(self):
+        n = 0
         for i in self.schema:
-            pass
+            n += 1
+        self.assertEqual(n, len(self.sampleData))
+        n = 0
+
+        for i in self.schema.inner:
+            n += 1
+        self.assertEqual(n, len(self.sampleData['inner']))
 
     def test_len(self):
         self.assertEqual(len(self.schema), len(self.sampleData))
 
     def test_del(self):
-        self.assertEqual(self.schema.inner.item.value, self.sampleString)
+        self.assertEqual(self.schema.inner.item, self.sampleString)
         del(self.schema.inner.item)
-        self.assertEqual(self.schema.inner.item.value, None)
+        self.assertEqual(self.schema.inner.item, None)
         self.assertIn('item', self.schema)
 
     def test_required(self):
@@ -426,6 +439,35 @@ class NestedSchemaTest(ASchemaTestCase):
         except:
             ret = True
         self.assertTrue(ret)
+
+
+
+
+
+class SparseSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'none':             None,
+        }
+        self.schema = SparseSchema(self.sampleData)
+
+    def test_sparse(self):
+        self.assertEqual(
+            self.sampleData['basestring'], 
+            self.schema.exportSparse()['basestring']
+            )
+        self.assertEqual(
+            self.sampleData['none'], 
+            self.schema.exportSparse()['none']
+            )
+        self.assertEqual(
+            'abc', 
+            self.schema.exportSparse()['default']
+            )
+        self.assertTrue('empty' not in self.schema.exportSparse())
 
 
 
@@ -451,16 +493,14 @@ class ListSchemaTest(ASchemaTestCase):
         self.schema = ListSchema(self.sampleData)
 
     def test_retrieve(self):
-        self.assertEqual(self.sampleString, self.schema.basestring.value)
-        self.assertEqual(self.sampleString, self.schema.items[0].item.value)
+        self.assertEqual(self.sampleString, self.schema.basestring)
+        self.assertEqual(self.sampleString, self.schema.items[0].item)
 
-        self.assertEqual(self.sampleString, self.schema['basestring'].value)
-        self.assertEqual(self.sampleString, self.schema.items[0].item.value)
+        self.assertEqual(self.sampleString, self.schema['basestring'])
+        self.assertEqual(self.sampleString, self.schema.items[0].item)
 
-        self.assertIsInstance(self.schema.basestring, SchemaElement)
+        self.assertIsInstance(self.schema.basestring, basestring)
         self.assertIsInstance(self.schema.items, SchemaList)
-
-        self.assertIsInstance(self.schema.basestring.value, basestring)
         self.assertIsInstance(self.schema.items.value, list)
 
         self.assertEqual(self.sampleData, self.schema.value)
@@ -511,14 +551,42 @@ class ListSchemaTest(ASchemaTestCase):
         self.schema.items.index(self.schema.items[0])
 
     def test_count(self):
-        ###################### THINK ABOUT
-        self.assertEqual(self.schema.items.count(self.schema.items[0]), len(self.sampleData['items']))
+        self.assertEqual(
+            self.schema.items.count(self.schema.items[0]), 
+            self.sampleData['items'].count(self.sampleData['items'][0])
+            )
 
     def test_sort(self):
         self.schema.items.sort()
 
     def test_sort(self):
         self.schema.items.reverse()
+
+
+
+
+class ListCommaSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'items':            '1,2,3'
+        }
+        self.schema = ListCommaSchema(self.sampleData)
+
+    def test_retrieve(self):
+        print '!!!!!!!!!!!', self.schema
+
+        self.assertIsInstance(self.schema.items.value, list)
+
+        self.assertEqual(
+            len(self.sampleData['items'].split(',')), 
+            len(self.schema.items)
+            )
+
+
+        
 
 
 

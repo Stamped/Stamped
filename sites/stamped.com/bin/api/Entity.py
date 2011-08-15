@@ -7,8 +7,9 @@ __license__ = "TODO"
 
 import Globals, utils, logs
 from datetime import datetime
-from utils import OrderedDict
-from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
+# from utils import OrderedDict
+# from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
+from Schemas import *
 
 categories = set([ 'food', 'music', 'film', 'book', 'other' ])
 subcategories = {
@@ -23,6 +24,53 @@ subcategories = {
     'other' : 'other',
 }
 
+class Entity(EntitySchema):
+
+    def exportFlat(self):
+        export = [
+            'entity_id',
+            'title',
+            'subtitle',
+            'category',
+            'subcategory',
+            'desc',
+            'image',
+            'timestamp.created',
+            'details.place.address',
+            ]
+        data = self.exportFields(export)
+        data['created'] = str(data['timestamp.created'])
+        del(data['timestamp.created'])
+        data['address'] = str(data['details.place.address'])
+        return data
+
+    def exportPlace(self):
+        export = [
+            'entity_id',
+            'coordinates',
+        ]
+        return self.exportFields(export)
+
+class EntityFlat(EntityFlatSchema):
+
+    def convertToEntity(self):
+        data = self.value
+        if 'coordinates' in data and not isinstance(data['coordinates'], dict):
+            coordinates = data['coordinates'].split(',')
+            del(data['coordinates'])
+            data['coordinates'] = {
+                'lat': coordinates[0],
+                'lng': coordinates[1]
+            }
+        if 'address' in data:
+            data['details'] = {
+                'place': { 'address': data['address'] }
+            }
+            del(data['address'])
+        print data
+        return Entity(data)
+
+"""
 class Entity(ASchemaBasedAttributeDict):
     
     _schema = {
@@ -291,3 +339,4 @@ class Entity(ASchemaBasedAttributeDict):
         
         return valid
 
+"""

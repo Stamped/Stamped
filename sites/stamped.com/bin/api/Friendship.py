@@ -6,7 +6,19 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
+from Schemas import *
+
+class Friendship(FriendshipSchema):
+
+    def exportFlat(self):
+        export = [
+            'user_id',
+            'friend_id',
+            ]
+        return self.exportFields(export)
+
+    
+"""
 
 class Friendship(ASchemaBasedAttributeDict):
     
@@ -28,3 +40,4 @@ class Friendship(ASchemaBasedAttributeDict):
         
         return valid
 
+"""

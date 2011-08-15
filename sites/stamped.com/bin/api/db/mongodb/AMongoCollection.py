@@ -175,6 +175,7 @@ class AMongoCollection(object):
             return None
         
         data = copy.copy(obj.getDataAsDict())
+        # data = copy.copy(obj)
         
         if '_id' in data:
             if isinstance(data['_id'], basestring):
@@ -274,7 +275,37 @@ class AMongoCollection(object):
             # Grabs the most recent bucket to use and appends that to the id. This is our new key!
             return '%s%s' % (objId, overflow['overflow'][-1])
     
+
     ### GENERIC CRUD FUNCTIONS
+    
+    def _addMongoDocument(self, document):
+        try:
+            document['_id'] = self._collection.insert_one(document, safe=True)
+            return document
+        except Exception as e:
+            logs.warning("Unable to add document: %s" % e)
+            raise
+    
+    def _getMongoDocumentFromId(self, documentId):
+        document = self._collection.find_one(documentId)
+        if document == None:
+            logs.warning("Unable to find document (id = %s)" % documentId)
+            raise Exception("Document not found")
+        return document
+    
+    def _updateMongoDocument(self, document):
+        document['_id'] = self._collection.save(document, safe=True)
+        return document
+    
+    def _removeMongoDocument(self, documentId):
+        # Confused here. Supposed to return None on success, so I guess it's working,
+        # but should probably test more.
+        if self._collection.remove({'_id': documentId}):
+            return False
+        else:
+            return True
+
+    ### OLD GENERIC CRUD FUNCTIONS
     
     def _addDocument(self, document, objId='id'):
         try:
