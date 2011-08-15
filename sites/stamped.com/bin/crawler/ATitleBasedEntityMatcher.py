@@ -6,43 +6,20 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import string
+from utils import abstract
 
-from optparse import OptionParser
-from difflib import SequenceMatcher
-from GooglePlaces import GooglePlaces
-
-class EntityMatcher(object):
-    """
-        Utility class which attempts to determine whether or not a given entity 
-    matches other entities.
-    """
-    
-    DEFAULT_TOLERANCE = 0.9
-    
-    def __init__(self):
-        self.initWordBlacklistSets()
-    
-    def genEntityDetail(self, entity):
-        numComplexityLevels = 4
+class ATitleBasedEntityMatcher(AEntityMatcher):
+    def __init__(self, stamped_api):
+        AEntityMatcher.__init__(self, stamped_api)
         
-        prevTitle = None
-        origTitle = entity['title'].lower()
-        
-        for i in xrange(numComplexityLevels):
-            complexity = float(numComplexityLevels - i - 1) / (max(1, numComplexityLevels - 1))
-            title = self.getCanonicalizedTitle(origTitle, complexity, False)
-            if len(title) < 1:
-                break
-            
-            yield title
+        self.initWordBlacklists()
     
-    def genMatchingEntities(self, entity, entities, tolerance=DEFAULT_TOLERANCE):
-        base_detail  = list(self.genEntityDetail(entity))
+    def getMatchingDuplicates(self, entity, candidate_entities):
+        base_detail  = list(self._genEntityDetail(entity))
         lbase_detail = len(base_detail)
         
-        for candidate in entities:
-            candidate_detail = self.genEntityDetail(candidate)
+        for candidate in candidate_entities:
+            candidate_detail = self._genEntityDetail(candidate)
             level = 0
             match = False
             
@@ -58,14 +35,14 @@ class EntityMatcher(object):
                 
                 if ratio <= 0:
                     break
-                if ratio >= 0.95:
+                if ratio >= 0.9:
                     match = True
                     break
             
             if match:
                 yield candidate
     
-    def initWordBlacklistSets(self):
+    def initWordBlacklists(self):
         # remove leading words
         self.wordPrefixBlacklistSet = set()
         self.wordPrefixBlacklistSet.add("the")
@@ -93,7 +70,7 @@ class EntityMatcher(object):
         self.wordSpecialBlacklistSet = set()
         self.wordSpecialBlacklistSet.add("...")
     
-    def getCanonicalizedTitle(self, title, complexity, crippleTitle):
+    def _getCanonicalizedTitle(self, title, complexity, crippleTitle):
         complexity = min(max(complexity, 0), 1.0)
         title = title.lower()
         
@@ -198,4 +175,54 @@ class EntityMatcher(object):
         # join the remaining words back together and strip any possible 
         # whitespace that might've snuck in to form the resulting title
         return string.joinfields(words, ' ').strip()
+    
+    def _genEntityDetail(self, entity, numComplexityLevels = 4):
+        origTitle = entity['title'].lower()
+        
+        for i in xrange(numComplexityLevels):
+            complexity = float(numComplexityLevels - i - 1) / (max(1, numComplexityLevels - 1))
+            title = self._getCanonicalizedTitle(origTitle, complexity, False)
+            if len(title) < 1:
+                break
+            
+            yield title
+
+# ------------------------------------------------------------------------------
+
+class ATitleSourceBasedEntityMatcher(ATitleBasedEntityMatcher):
+    def __init__(self, stamped_api, source):
+        ATitleBasedEntityMatcher.__init__(self, stamped_api)
+        
+        self.source = source
+    
+    def getDuplicateCandidates(self, entity):
+        results = self._entityDB.find({ self.source, { "$exists" : True }})
+        
+        return self._mongoToObj(results)
+
+# ------------------------------------------------------------------------------
+
+class ZagatEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.zagat')
+
+class UrbanspoonEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.urbanspoon')
+
+class NYMagEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.nymag')
+
+class SFMagEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.sfmag')
+
+class LATimesEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.latimes')
+
+class BostonMagEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.bostonmag')
 

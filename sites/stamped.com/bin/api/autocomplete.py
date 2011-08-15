@@ -144,9 +144,6 @@ def main():
     results = []
     
     # TODO: high level
-        # get recent movies
-            # look into Fandango API
-            # utilize feedparser (http://www.feedparser.org/docs/)
         # how to approach sorting?
             # text match assuming prefix versus full text match
             # proximity (TODO)
@@ -184,10 +181,15 @@ def main():
         # it's an autocompletion (e.g., prefix vs. full match) 
         # and treat certain weights and regexes differently
     
+    # TODO: add valid affiliate urls to fandangofeed
+    # TODO: merge autocomplete.py with MongoEntityCollection.searchEntities
+    
+    # TODO: add -f option to crawler to either force overwrite of preexisting data or disregard previous records?
+    
+    # TODO: (DONE) add fandango source
     # TODO: (DONE) add pricing info to movies and albums
     # TODO: (DONE) filter albums the same way we're filtering movies by retaining 
         # only those which have a valid us storefront price
-    
     # TODO: (DONE) add indexing to AppleEPFRelationalDB
     # TODO: (DONE) buffer output of AppleEPFRelationalDB
     # TODO: (DONE) change AppleEPFRelationalDB to output to a single db file spread over multiple tables

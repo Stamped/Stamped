@@ -16,7 +16,7 @@ from pymongo.son import SON
 from gevent import Greenlet
 from gevent.pool import Pool
 from optparse import OptionParser
-from EntityMatcher2 import EntityMatcher2
+from EntityMatcher import EntityMatcher
 from Entity import Entity
 from pprint import pprint
 
@@ -32,7 +32,7 @@ class EntityDeduper(Greenlet):
         Greenlet.__init__(self)
         
         self.options = options
-        self.matcher = EntityMatcher2()
+        self.matcher = EntityMatcher()
         self.api = MongoStampedAPI()
         self.db0 = self.api._placesEntityDB
         self.db1 = self.api._entityDB

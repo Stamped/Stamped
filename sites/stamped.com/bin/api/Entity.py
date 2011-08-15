@@ -186,7 +186,7 @@ class Entity(ASchemaBasedAttributeDict):
                 'neighborhoodName': basestring, 
             }, 
             'factual': {
-                'fid': basestring, 
+                'faid': basestring, 
                 'table': basestring, 
             }, 
             'apple' : {
