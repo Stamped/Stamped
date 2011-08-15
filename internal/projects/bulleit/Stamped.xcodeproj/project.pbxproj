@@ -89,6 +89,7 @@
 		7E8B1DEB13E5FF9C0060646D /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */; };
 		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
 		7E9EE35313DF683500F4736F /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EE35213DF683500F4736F /* Stamp.m */; };
+		7E9F80EB13F88FA4003D7185 /* UIColor+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */; };
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
 		7EB4782813EE2DBE00DA12CB /* MediumUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */; };
 		7EBCBE8713D78896009FCECF /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBCBE8613D78896009FCECF /* Comment.m */; };
@@ -113,8 +114,6 @@
 		7EC7A9D413F1DE3800048944 /* sort_icon_search_1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */; };
 		7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */; };
 		7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */; };
-		7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */; };
-		7ED2EF6C13E0DF7F007F1AFB /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
 		7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDBF9FF13E0C57A003D73D5 /* Entity.m */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
@@ -137,6 +136,8 @@
 		7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE9022C13E61BF0008BCDFB /* ActivityCommentTableViewCell.m */; };
 		7EE9022F13E62366008BCDFB /* activity_chat_badge@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE9022E13E62366008BCDFB /* activity_chat_badge@2x.png */; };
 		7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EF1105713C906A90059F9BD /* EntityDetailViewController.m */; };
+		7EFDC9A213F865C600589E11 /* PeopleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A013F865C600589E11 /* PeopleViewController.m */; };
+		7EFDC9A313F865C600589E11 /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A113F865C600589E11 /* PeopleViewController.xib */; };
 		7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* InboxViewController.m */; };
 		7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* InboxViewController.xib */; };
 		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
@@ -342,6 +343,8 @@
 		7E92C11E13E32407008D379D /* shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_background.png; sourceTree = "<group>"; };
 		7E9EE35113DF683500F4736F /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
 		7E9EE35213DF683500F4736F /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
+		7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+Stamped.h"; sourceTree = "<group>"; };
+		7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Stamped.m"; sourceTree = "<group>"; };
 		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
 		7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediumUserImageView.h; sourceTree = "<group>"; };
 		7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediumUserImageView.m; sourceTree = "<group>"; };
@@ -375,9 +378,6 @@
 		7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
 		7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
 		7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TodoViewController.xib; sourceTree = "<group>"; };
-		7ED2EF6813E0DF7F007F1AFB /* PeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleViewController.h; sourceTree = "<group>"; };
-		7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleViewController.m; sourceTree = "<group>"; };
-		7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PeopleViewController.xib; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
 		7EDA5FF413F5705300F23B13 /* OAuthToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAuthToken.m; sourceTree = "<group>"; };
 		7EDBF9FE13E0C57A003D73D5 /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
@@ -404,6 +404,9 @@
 		7EE9022E13E62366008BCDFB /* activity_chat_badge@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "activity_chat_badge@2x.png"; sourceTree = "<group>"; };
 		7EF1105613C906A90059F9BD /* EntityDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EntityDetailViewController.h; sourceTree = "<group>"; };
 		7EF1105713C906A90059F9BD /* EntityDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EntityDetailViewController.m; sourceTree = "<group>"; };
+		7EFDC99F13F865C600589E11 /* PeopleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleViewController.h; sourceTree = "<group>"; };
+		7EFDC9A013F865C600589E11 /* PeopleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PeopleViewController.m; sourceTree = "<group>"; };
+		7EFDC9A113F865C600589E11 /* PeopleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PeopleViewController.xib; sourceTree = "<group>"; };
 		7EFE8F2513C39FA100324F34 /* InboxViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = InboxViewController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7EFE8F2613C39FA100324F34 /* InboxViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = InboxViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7EFE8F2713C39FA100324F34 /* InboxViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = InboxViewController.xib; sourceTree = "<group>"; };
@@ -598,6 +601,13 @@
 			name = "Entity Details";
 			sourceTree = "<group>";
 		};
+		7E7A674B13F8989200DFD516 /* People */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = People;
+			sourceTree = "<group>";
+		};
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
@@ -685,6 +695,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7E7A674B13F8989200DFD516 /* People */,
 				7EE9023013E6236B008BCDFB /* Activity */,
 				7E0BC47513E4A2BE008CC076 /* Search Entities */,
 				7E42DCC913DB72B700AF63BE /* Create Stamp */,
@@ -775,9 +786,9 @@
 		7ED2EF6D13E0DF83007F1AFB /* People */ = {
 			isa = PBXGroup;
 			children = (
-				7ED2EF6813E0DF7F007F1AFB /* PeopleViewController.h */,
-				7ED2EF6913E0DF7F007F1AFB /* PeopleViewController.m */,
-				7ED2EF6A13E0DF7F007F1AFB /* PeopleViewController.xib */,
+				7EFDC99F13F865C600589E11 /* PeopleViewController.h */,
+				7EFDC9A013F865C600589E11 /* PeopleViewController.m */,
+				7EFDC9A113F865C600589E11 /* PeopleViewController.xib */,
 			);
 			name = People;
 			sourceTree = "<group>";
@@ -847,6 +858,8 @@
 			children = (
 				7E3B6D7813D7509600FBE958 /* Util.h */,
 				7E3B6D7913D7509600FBE958 /* Util.m */,
+				7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */,
+				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E2267D813D52FF500657A66 /* Model */,
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
 				7E0BC47413E4A07F008CC076 /* Search Entities */,
@@ -1083,7 +1096,6 @@
 				7E7E10A713DF14D100E44DE1 /* toolbar_checkmark@2x.png in Resources */,
 				7E7E10A813DF14D100E44DE1 /* toolbar_close@2x.png in Resources */,
 				7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */,
-				7ED2EF6C13E0DF7F007F1AFB /* PeopleViewController.xib in Resources */,
 				7E92C11F13E32407008D379D /* shelf_background.png in Resources */,
 				7E0BC48013E4A30C008CC076 /* tab_icon_comment_active@2x.png in Resources */,
 				7E0BC48113E4A30C008CC076 /* tab_icon_comment@2x.png in Resources */,
@@ -1116,6 +1128,7 @@
 				7E303F8F13F0BE2300C1F794 /* sort_icon_other_1@2x.png in Resources */,
 				7EC7A9D313F1DE3800048944 /* sort_icon_search_0@2x.png in Resources */,
 				7EC7A9D413F1DE3800048944 /* sort_icon_search_1@2x.png in Resources */,
+				7EFDC9A313F865C600589E11 /* PeopleViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1175,7 +1188,6 @@
 				7E9EE35313DF683500F4736F /* Stamp.m in Sources */,
 				7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */,
 				7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */,
-				7ED2EF6B13E0DF7F007F1AFB /* PeopleViewController.m in Sources */,
 				7E8B1DEA13E5FF9C0060646D /* ActivityViewController.m in Sources */,
 				7EC05DB713E60D8E00B22C3F /* Event.m in Sources */,
 				7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */,
@@ -1186,6 +1198,8 @@
 				7E146FF113F07A7500B954C6 /* MediumUserImageButton.m in Sources */,
 				7EC1C65013F456FE0070CE6D /* KeyChainItemWrapper.m in Sources */,
 				7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */,
+				7EFDC9A213F865C600589E11 /* PeopleViewController.m in Sources */,
+				7E9F80EB13F88FA4003D7185 /* UIColor+Stamped.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
