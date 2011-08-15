@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils, logs
+import Globals, utils, logs, re
 from datetime import datetime
 from errors import *
 from auth import convertPasswordForStorage
@@ -93,6 +93,8 @@ class StampedAPI(AStampedAPI):
             
         self._accountDB.updateAccount(account)
 
+        ### TODO: Update account settings across denormalized db (e.g. Stamps)
+
         if self.output == 'http':
             return account.exportFlat()
         return account
@@ -109,6 +111,8 @@ class StampedAPI(AStampedAPI):
         account.importData(data)
             
         self._accountDB.updateAccount(account)
+
+        ### TODO: Update profile settings across denormalized db (e.g. Stamps)
         
         if self.output == 'http':
             return account.exportProfile()
@@ -440,21 +444,17 @@ class StampedAPI(AStampedAPI):
     #       #   ##   #   #   #   # #      #    # 
     ####### #    #   #   #   #   # ######  ####  
     """
+
+    def addFlatEntity(self, data, auth):
+        entity = FlatEntity(data).convertToEntity().exportSparse()
+        return self.addEntity(entity, auth)
     
     def addEntity(self, data, auth):
-        # First try to import as a full entity
-        try:
-            entity = Entity(data)
-        except:
-            # If that fails, try to import as a flat entity
-            try:
-                entity = EntityFlat(data).convertToEntity()
-            except:
-                raise
+        entity = Entity(data)
 
-        entity.timestamp.created = datetime.utcnow()
+        entity.setTimestampCreated()
         if 'authenticated_user_id' in auth:
-            entity.sources.userGenerated.user_id = auth['authenticated_user_id']
+            entity.setUserGenerated(auth['authenticated_user_id'])
 
         result = self._entityDB.addEntity(entity)
 
@@ -471,26 +471,29 @@ class StampedAPI(AStampedAPI):
             return entity.exportFlat()
         return entity
     
+    def updateFlatEntity(self, data, auth):
+        entity = self._entityDB.getEntity(data['entity_id'])
+
+        flatEntity = FlatEntity(entity.exportFlat(), discardExcess=True)
+        for k, v in data.iteritems():
+            flatEntity[k] = v
+        data = flatEntity.convertToEntity().exportSparse()
+
+        return self.updateEntity(data, auth)
+
     def updateEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
         
-        ### TODO: Check if user has access to this entity
+        # Check if user has access to this entity
+        if entity.getUserGenerated() != auth['authenticated_user_id'] \
+            or entity.getUserGenerated() == None:
+            raise Exception("Insufficient privilages to update entity")
 
-        # First try to import as a full entity
-        try:
-            for k, v in data.iteritems():
-                entity[k] = v
-        except:
-            # If that fails, try to import as a flat entity
-            try:
-                entityFlat = EntityFlat(entity.exportFlat())
-                for k, v in data.iteritems():
-                    entityFlat[k] = v
-                entity.importData(entityFlat.convertToEntity.exportSparse())
-            except:
-                raise
+        # Try to import as a full entity
+        for k, v in data.iteritems():
+            entity[k] = v
         
-        entity.timestamp.modified = datetime.utcnow()
+        entity.setTimestampModified()
 
         self._entityDB.updateEntity(entity)
 
@@ -499,26 +502,26 @@ class StampedAPI(AStampedAPI):
         return entity
     
     def removeEntity(self, data, auth):
-        ### TODO: Verify user has permission to delete
+        entity = self._entityDB.getEntity(data['entity_id'])
+
+        # Verify user has permission to delete
+        if entity.getUserGenerated() != auth['authenticated_user_id'] \
+            or entity.getUserGenerated() == None:
+            raise Exception("Insufficient privilages to update entity")
+
         if self._entityDB.removeEntity(data['entity_id']):
             return True
         return False
     
-    def searchEntities(self, params):
+    def searchEntities(self, data, auth):
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
-        entities = self._entityDB.searchEntities(params.q, limit=10)
-        result = []
-        
+        entities = self._entityDB.searchEntities(data['q'], limit=10)
+
+        result = []        
         for entity in entities:
-            data = {}
-            data['entity_id'] = entity.entity_id
-            data['title'] = entity.title
-            data['category'] = entity.category
-            data['subtitle'] = entity.subtitle
-            
-            result.append(data)
-        
+            result.append(entity.exportAutosuggest())
+
         return result
     
 
@@ -532,96 +535,329 @@ class StampedAPI(AStampedAPI):
      #####    #   #    # #    # #       ####  
     """
 
-    def addStamp(self, params):        
-        stamp = Stamp()
+    def _extractMentions(self, text):
+        # Define patterns
+        user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
+        reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         
-        user = self._userDB.getUser(params.authenticated_user_id)
-        stamp.user = {}
-        stamp.user['user_id'] = user.user_id
-        stamp.user['screen_name'] = user.screen_name
-        stamp.user['display_name'] = user.display_name
-        stamp.user['profile_image'] = user.profile_image
-        stamp.user['color_primary'] = user.color_primary
-        if 'color_secondary' in user:
-            stamp.user['color_secondary'] = user.color_secondary
-        stamp.user['privacy'] = user.privacy
+        mentions = [] 
         
-        entity = self._entityDB.getEntity(params.entity_id)
-        stamp.entity = {}
-        stamp.entity['entity_id'] = entity.entity_id
-        stamp.entity['title'] = entity.title
-        stamp.entity['category'] = entity.category
-        stamp.entity['subtitle'] = entity.subtitle
-        if 'details' in entity and 'place' in entity.details and 'coordinates' in entity.details['place']:
-            stamp.entity['coordinates'] = {}
-            stamp.entity['coordinates']['lat'] = entity.details['place']['coordinates']['lat']
-            stamp.entity['coordinates']['lng'] = entity.details['place']['coordinates']['lng']
-        
-        if params.blurb != None:
-            stamp.blurb = params.blurb
-        if params.image != None:
-            stamp.image = params.image
+        # Check if string match exists at beginning. Should combine with regex 
+        # below once I figure out how :)
+        reply = reply_regex.match(text)
+        if reply:
+            data = {}
+            data['indices'] = [(reply.start()), reply.end()]
+            data['screen_name'] = reply.group(0)[1:]
+            try:
+                user = self._userDB.getUserByScreenName(data['screen_name'])
+                data['user_id'] = user.user_id
+                data['display_name'] = user.display_name
+            except:
+                logs.warning("User not found (%s)" % data['screen_name'])
+            mentions.append(data)
             
-        if params.credit != None:
-            stamp.credit = []
-            for screenName in params.credit.split(','):
-                stamp.credit.append(screenName)
-                
-        stamp.timestamp = {
-            'created': datetime.utcnow()
-        }
+        # Run through and grab mentions
+        for user in user_regex.finditer(text):
+            data = {}
+            data['indices'] = [(user.start()+1), user.end()]
+            data['screen_name'] = user.group(0)[2:]
+            try:
+                user = self._userDB.getUserByScreenName(data['screen_name'])
+                data['user_id'] = user.user_id
+                data['display_name'] = user.display_name
+            except:
+                logs.warning("User not found (%s)" % data['screen_name'])
+            mentions.append(data)
+        
+        if len(mentions) > 0:
+            return mentions
+        return None
+        # return mentions
 
-        if not stamp.isValid:
-            raise InvalidArgument('Invalid input')
-        
-        stampId = self._stampDB.addStamp(stamp)
-        stamp = self._stampDB.getStamp(stampId)
-        
-        return self._returnStamp(stamp)
+    def addStamp(self, data, auth):
+        user    = self._userDB.getUser(auth['authenticated_user_id'])
+        entity  = self._entityDB.getEntity(data['entity_id'])
+
+        blurb   = data.pop('blurb', None)
+        credit  = data.pop('credit', None)
+        image   = data.pop('image', None)
+
+        # Extract mentions
+        mentions = None
+        if blurb != None:
+            mentions = self._extractMentions(blurb)
+                
+        # Extract credit
+        if credit != None:
+            ret = []
+            for creditedUser in self._userDB.lookupUsers(None, credit):
+                ret.append(creditedUser.exportTiny())
+            ### TODO: How do we handle credited users that have not yet joined?
+            ### TODO: Expand with stamp details (potentially)
+            credit = ret
+
+        # Build stamp
+        stamp = Stamp({
+            'user': user.exportMini(),
+            'entity': entity.exportMini(),
+            'blurb': blurb,
+            'credit': credit,
+            'image': image,
+            'mentions': mentions,
+        })
+        stamp.setTimestampCreated()
             
-    def updateStamp(self, params):        
-        stamp = self._stampDB.getStamp(params.stamp_id)
+        # Add the stamp data to the database
+        stamp = self._stampDB.addStamp(stamp)
+
+        # Add a reference to the stamp in the user's collection
+        self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
-        if params.blurb != None:
-            stamp.blurb = params.blurb
-        if params.image != None: 
-            stamp.image = params.image
+        # Add a reference to the stamp in followers' inbox
+        followers = self._friendshipDB.getFollowers(user['user_id'])
+        followers.append(user.user_id)
+        self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
+        
+        # If stamped entity is on the to do list, mark as complete
+        ### TODO: Reimplement after adding Comments
+        """
+        favorite = self._favoriteDB.getFavoriteIdForEntity( \
+            user.user_id, entity.entity_id)
+        if favorite.favorite_id != None: 
+            self._favoriteDB.completeFavorite(favorite.favorite_id)
+        """
+        
+        # Give credit
+        creditedUserIds = []
+        if credit != None and len(credit) > 0:
+            for creditedUser in credit:
+                userId = creditedUser['user_id']
+
+                # Assign credit
+                creditedStamp = self._stampDB.giveCredit(
+                                    userId, 
+                                    stamp.stamp_id,
+                                    user.user_id,
+                                    entity.entity_id)
+                
+                ### TODO: Reimplement after adding Comments
+                """
+                # Add restamp as comment (if prior stamp exists)
+                if creditedStamp.stamp_id != None:
+                    comment = Comment({
+                        'stamp_id': creditedStamp['stamp_id'],
+                        'user': user,
+                        'restamp_id': stamp.stamp_id,
+                        'blurb': blurb,
+                        'mentions': mentions,
+                    })
+                    comment.setTimestampGenerated()
+                    self._commentDB.addComment(comment, activity=False)
+                """
+
+                # Update credited user stats
+                self._userDB.updateUserStats(userId, 'num_credit', \
+                    None, increment=1)
+                # if user.user_id not in self._userDB.creditGivers(userId):
+                #     self._userDB.addCreditGiver(userId, user.user_id)
+                #     self._userDB.updateUserStats(userId, 'num_credit_givers', \
+                #         None, increment=1)
+
+                # Append user_id for activity
+                creditedUserIds.append(creditedUser['user_id'])
+
+        
+        ### TODO: Reimplement after adding Activity
+        """
+        # Add activity for credited users
+        if len(creditedUserIds) > 0:
+            self._activityDB.addActivityForRestamp(creditedUserIds, \
+                user, stamp)
+        
+        # Add activity for mentioned users
+        if mentions != None and len(mentions) > 0:
+            mentionedUserIds = []
+            for mention in mentions:
+                if 'user_id' in mention \
+                    and mention['user_id'] not in creditedUserIds:
+                    mentionedUserIds.append(mention['user_id'])
+            if len(mentionedUserIds) > 0:
+                self.activity_collection.addActivityForMention( \
+                    mentionedUserIds, user, stamp)
+        """
+        
+        if self.output == 'http':
+            return stamp.exportFlat()
+        return stamp
+
             
-        if params.credit != None:
-            if not stamp.credit:
+    def updateStamp(self, data, auth):        
+        stamp   = self._stampDB.getStamp(data['stamp_id'])
+
+        blurb   = data.pop('blurb', stamp.blurb)
+        credit  = data.pop('credit', None)
+        image   = data.pop('image', stamp.image)
+
+        # Extract mentions
+        mentions = stamp.mentions
+        if blurb != None:
+            mentions = self._extractMentions(blurb)
+                
+        # Extract credit
+        if credit != None:
+            ret = []
+            for creditedUser in self._userDB.lookupUsers(None, credit):
+                ret.append(creditedUser.exportTiny())
+            ### TODO: How do we handle credited users that have not yet joined?
+            ### TODO: Expand with stamp details (potentially)
+            credit = ret
+        
+        # Compare
+        if blurb != stamp.blurb:
+            stamp.blurb = blurb
+
+        if image != stamp.image:
+            ### TODO: Actually upload the image....
+            stamp.image = image
+
+        mentionedUsers = []
+        ### TODO: Verify that this works as expected
+        if mentions != stamp.mentions:
+            if mentions != None:
+                for mention in mentions:
+                    if mention not in stamp.mentions:
+                        mentionedUsers.append(mention)
+            logs.debug("MENTIONS: %s" % mentions)
+            stamp.mentions = mentions
+        logs.debug("SO FAR SO GOOD")
+        
+        creditedUsers = []
+        ### TODO: Verify that this works as expected
+        if credit != stamp.credit:
+            if credit == None:
                 stamp.credit = []
-            for userID in params.credit.split(','):
-                stamp.credit.append(userID)
-                
-        if 'timestamp' not in stamp:
-            stamp['timestamp'] = {}
-        stamp.timestamp['modified'] = datetime.utcnow()
+            else:
+                for creditedUser in credit:
+                    if creditedUser not in stamp.credit:
+                        creditedUsers.append(creditedUser)
+                stamp.credit = credit
 
-        if not stamp.isValid:
-            raise InvalidArgument('Invalid input')
+        stamp.setTimestampModified()
+            
+        # Update the stamp data in the database
+        stamp = self._stampDB.updateStamp(stamp)
+
+        # Give credit
+        creditedUserIds = []
+        if len(creditedUsers) > 0:
+            for creditedUser in creditedUsers:
+                userId = creditedUser['user_id']
+
+                # Assign credit
+                creditedStamp = self._stampDB.giveCredit(
+                                    userId, 
+                                    stamp.stamp_id,
+                                    user.user_id,
+                                    entity.entity_id)
+                
+                ### TODO: Reimplement after adding Comments
+                """
+                # Add restamp as comment (if prior stamp exists)
+                if creditedStamp.stamp_id != None:
+                    comment = Comment({
+                        'stamp_id': creditedStamp['stamp_id'],
+                        'user': user,
+                        'restamp_id': stamp.stamp_id,
+                        'blurb': blurb,
+                        'mentions': mentions,
+                    })
+                    comment.setTimestampGenerated()
+                    self._commentDB.addComment(comment, activity=False)
+                """
+
+                # Update credited user stats
+                self._userDB.updateUserStats(userId, 'num_credit', \
+                    None, increment=1)
+                if user.user_id not in self._userDB.creditGivers(userId):
+                    self._userDB.addCreditGiver(userId, user.user_id)
+                    self._userDB.updateUserStats(userId, 'num_credit_givers', \
+                        None, increment=1)
+
+                # Append user_id for activity
+                creditedUserIds.append(creditedUser['user_id'])
+
         
-        stampId = self._stampDB.updateStamp(stamp)
-        stamp = self._stampDB.getStamp(stampId)
+        # Add activity for credited users
+        if len(creditedUserIds) > 0:
+            self._activityDB.addActivityForRestamp(creditedUserIds, \
+                user, stamp)
         
-        return self._returnStamp(stamp)
+        # Add activity for mentioned users
+        if len(mentionedUsers) > 0:
+            mentionedUserIds = []
+            for mentionedUser in mentionedUsers:
+                if 'user_id' in mentionedUser \
+                    and mentionedUser['user_id'] not in creditedUserIds:
+                    mentionedUserIds.append(mentionedUser['user_id'])
+            if len(mentionedUserIds) > 0:
+                self.activity_collection.addActivityForMention( \
+                    mentionedUserIds, user, stamp)
+        
+        if self.output == 'http':
+            return stamp.exportFlat()
+        return stamp
     
-    def removeStamp(self, params):
-        if self._stampDB.removeStamp(params.stamp_id, params.authenticated_user_id):
-            return True
-        else:
-            return False
+    def removeStamp(self, data, auth):
+        stamp = self._stampDB.getStamp(data['stamp_id'])
+
+        # Verify user has permission to delete
+        if stamp.getOwnerId() != auth['authenticated_user_id']:
+            raise Exception("Insufficient privilages to remove Stamp")
+
+        # Remove stamp
+        self._stampDB.removeStamp(stamp.stamp_id)
+
+        # Remove from user collection
+        self._stampDB.removeUserStampReference(auth['authenticated_user_id'], \
+                                                stamp.stamp_id)
+        
+        # Remove from followers' inbox collections
+        followers = self._friendshipDB.getFollowers( \
+            auth['authenticated_user_id'])
+        followers.append(auth['authenticated_user_id'])
+        # Note: this only removes the stamp from people who follow the user.
+        # If we allow for an "opt in" method of users adding individual
+        # stamps to their inbox, we'll have to account for that here.
+        self._stampDB.removeInboxStampReference(followers, stamp.stamp_id)
+
+        ### TODO: Remove from activity? To do? Anything else?
+
+        return True
+        
+    def getStamp(self, data, auth):
+        stamp = self._stampDB.getStamp(data['stamp_id'])
+
+        # Check privacy of stamp
+        if stamp.getStampPrivacy() == True:
+            friendship = Friendship({
+                'user_id':      stamp.getOwnerId(),
+                'friend_id':    auth['authenticated_user_id'],
+            })
+
+            if not self._friendshipDB.checkFriendship(friendship):
+                raise Exception("Insufficient privilages to view Stamp")
+      
+        if self.output == 'http':
+            return stamp.exportFlat()
+        return stamp
     
-    def getStamp(self, params):
-        ### TODO: Check privacy of stamp
-        stamp = self._stampDB.getStamp(params.stamp_id)        
-        return self._returnStamp(stamp)
-    
-    def getStamps(self, stampIDs):
-        stampIDs = stampIDs.split(',')
-        stamps = []
-        for stamp in self._stampDB.getStamps(stampIDs):
-            stamps.append(stamp.getDataAsDict())
-        return stamps
+    # def getStamps(self, stampIDs):
+    #     stampIDs = stampIDs.split(',')
+    #     stamps = []
+    #     for stamp in self._stampDB.getStamps(stampIDs):
+    #         stamps.append(stamp.getDataAsDict())
+    #     return stamps
     
 
     """

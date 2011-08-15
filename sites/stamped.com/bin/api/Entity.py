@@ -26,6 +26,21 @@ subcategories = {
 
 class Entity(EntitySchema):
 
+    # Set
+    def setTimestampCreated(self):
+        self.timestamp.created = datetime.utcnow()
+
+    def setTimestampModified(self):
+        self.timestamp.modified = datetime.utcnow()
+
+    def setUserGenerated(self, user_id):
+        self.sources.userGenerated.user_id = user_id
+
+    # Get
+    def getUserGenerated(self):
+        return self.sources.userGenerated.user_id
+
+    # Export
     def exportFlat(self):
         export = [
             'entity_id',
@@ -44,18 +59,37 @@ class Entity(EntitySchema):
         data['address'] = str(data['details.place.address'])
         return data
 
-    def exportPlace(self):
+    def exportMini(self):
         export = [
             'entity_id',
+            'title',
+            'subtitle',
+            'category',
+            'subcategory',
             'coordinates',
-        ]
+            ]
+        data = self.exportFields(export)
+        # if data['coordinates'] != None:
+        #     data['coordinates'] = "%s,%s" % (
+        #         data['coordinates']['lat'],
+        #         data['coordinates']['lng']
+        #     )
+        return data
+
+    def exportPlace(self):
+        export = ['entity_id', 'coordinates']
         return self.exportFields(export)
 
-class EntityFlat(EntityFlatSchema):
+    def exportAutosuggest(self):
+        export = ['entity_id', 'title', 'subtitle', 'category']
+        return self.exportFields(export)
+
+class FlatEntity(EntityFlatSchema):
 
     def convertToEntity(self):
         data = self.value
-        if 'coordinates' in data and not isinstance(data['coordinates'], dict):
+        if 'coordinates' in data and data['coordinates'] != None \
+            and not isinstance(data['coordinates'], dict):
             coordinates = data['coordinates'].split(',')
             del(data['coordinates'])
             data['coordinates'] = {

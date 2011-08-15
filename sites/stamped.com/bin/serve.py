@@ -479,7 +479,7 @@ def addEntity():
             self.desc               = SchemaElement(basestring)
             self.address            = SchemaElement(basestring)
             self.coordinates        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.addEntity)
+    return handleRequest(RequestSchema(), request, stampedAPI.addFlatEntity)
 
 @app.route(REST_API_PREFIX + 'entities/show.json', methods=['GET'])
 def getEntity():
@@ -500,7 +500,7 @@ def updateEntity():
             self.desc               = SchemaElement(basestring)
             self.address            = SchemaElement(basestring)
             self.coordinates        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.updateEntity)
+    return handleRequest(RequestSchema(), request, stampedAPI.updateFlatEntity)
 
 @app.route(REST_API_PREFIX + 'entities/remove.json', methods=['POST'])
 def removeEntity():

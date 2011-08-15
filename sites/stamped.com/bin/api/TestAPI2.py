@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__ = "Stamped (dev@stamped.com)"
 __version__ = "1.0"
@@ -132,6 +133,31 @@ class AStampedAPITestCase(unittest.TestCase):
         data = { 
             "oauth_token": token['access_token'],
             "entity_id": entityId
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
+    
+    def createStamp(self, token, entityId, data=None):
+        path = "stamps/create.json"
+        if data == None:
+            data = {
+                "oauth_token": token['access_token'],
+                "entity_id": entityId,
+                "blurb": "Best restaurant in America",
+            }
+        if "oauth_token" not in data:
+            data['oauth_token'] = token['access_token']
+        stamp = self.handlePOST(path, data)
+        self.assertValidKey(stamp['stamp_id'])
+
+        return stamp
+
+    def deleteStamp(self, token, stampId):
+        path = "stamps/remove.json"
+        data = { 
+            "oauth_token": token['access_token'],
+            "stamp_id": stampId
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
@@ -435,113 +461,170 @@ class AStampedAPITestCase(unittest.TestCase):
 # ENTITY #
 # ###### #
 
-class StampedAPIEntityTest(AStampedAPITestCase):
+# class StampedAPIEntityTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.user, self.token) = self.createAccount()
+#         self.entity = self.createEntity(self.token)
+
+#     def tearDown(self):
+#         self.deleteEntity(self.token, self.entity['entity_id'])
+#         self.deleteAccount(self.token)
+
+# class StampedAPIEntitiesShow(StampedAPIEntityTest):
+#     def test_show(self):
+#         path = "entities/show.json"
+#         data = { 
+#             "oauth_token": self.token['access_token'],
+#             "entity_id": self.entity['entity_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(result['title'], self.entity['title'])
+
+# class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
+#     def test_update(self):
+#         path = "entities/update.json"
+#         desc = "Gastropub in the West Village, NYC"
+#         data = { 
+#             "oauth_token": self.token['access_token'],
+#             "entity_id": self.entity['entity_id'],
+#             "desc": desc
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['desc'], desc)
+
+# class StampedAPIEntitiesSearch(StampedAPIEntityTest):
+#     def test_search(self):
+#         path = "entities/search.json"
+#         data = { 
+#             "oauth_token": self.token['access_token'],
+#             "q": self.entity['title'][3:]
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
+
+# class StampedAPIEntitiesUTF8(StampedAPIEntityTest):
+#     def test_utf8_update(self):
+#         path = "entities/update.json"
+#         desc = "๓๙ใ1฿"
+#         data = { 
+#             "oauth_token": self.token['access_token'],
+#             "entity_id": self.entity['entity_id'],
+#             "desc": desc
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['desc'], desc.decode('utf-8'))
+
+
+# ##### #
+# STAMP #
+# ##### #
+
+# class StampedAPIStampTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.userA, self.tokenA) = self.createAccount('UserA')
+#         (self.userB, self.tokenB) = self.createAccount('UserB')
+#         self.createFriendship(self.tokenB, self.userA)
+#         self.entity = self.createEntity(self.tokenA)
+#         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
+
+#     def tearDown(self):
+#         self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, self.entity['entity_id'])
+#         self.deleteFriendship(self.tokenB, self.userA)
+#         self.deleteAccount(self.tokenA)
+#         self.deleteAccount(self.tokenB)
+
+# class StampedAPIStampsShow(StampedAPIStampTest):
+#     def test_show(self):
+#         path = "stamps/show.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(result['blurb'], self.stamp['blurb'])
+
+# class StampedAPIStampsUpdate(StampedAPIStampTest):
+#     def test_show(self):
+#         path = "stamps/update.json"
+#         blurb = "Really, really delicious."
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "stamp_id": self.stamp['stamp_id'],
+#             "blurb": blurb
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['blurb'], blurb)
+
+
+
+class StampedAPIStampCreditTest(AStampedAPITestCase):
     def setUp(self):
-        (self.user, self.token) = self.createAccount()
-        self.entity = self.createEntity(self.token)
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": self.entity['entity_id'],
+            "blurb": "Great spot. Thanks @%s! --@%s" % \
+                (self.userB['screen_name'], self.userA['screen_name']),
+            "credit": self.userB['screen_name']
+        }
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], self.stampData)
 
     def tearDown(self):
-        self.deleteEntity(self.token, self.entity['entity_id'])
-        self.deleteAccount(self.token)
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-class StampedAPIEntitiesShow(StampedAPIEntityTest):
+class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
     def test_show(self):
-        path = "entities/show.json"
+        path = "stamps/show.json"
         data = { 
-            "oauth_token": self.token['access_token'],
-            "entity_id": self.entity['entity_id']
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
-        self.assertEqual(result['title'], self.entity['title'])
+        self.assertEqual(result['blurb'], self.stamp['blurb'])
+        self.assertEqual(
+            result['credit'][0]['screen_name'], 
+            self.stampData['credit']
+            )
 
-class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
-    def test_update(self):
-        path = "entities/update.json"
-        desc = "Gastropub in the West Village, NYC"
+class StampedAPIStampsCreditUpdate(StampedAPIStampCreditTest):
+    def test_no_mentions(self):
+        path = "stamps/update.json"
+        blurb = "Really, really delicious."
         data = { 
-            "oauth_token": self.token['access_token'],
-            "entity_id": self.entity['entity_id'],
-            "desc": desc
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "blurb": blurb
         }
         result = self.handlePOST(path, data)
-        self.assertEqual(result['desc'], desc)
+        self.assertEqual(result['blurb'], blurb)
+        self.assertTrue(len(result['mentions']) == 0)
+
+    def test_one_mention(self):
+        path = "stamps/update.json"
+        blurb = "Really delicious. Thanks @%s!" % self.userB['screen_name']
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "blurb": blurb
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['blurb'], blurb)
+        self.assertTrue(len(result['mentions']) == 1)
+
+
+
+#     def tearDown(self):
 
 """
 
-class StampedAPIEntityTests(AStampedAPITestCase):
-    def __init__(self, baseurl):
-        AStampedAPITestCase.__init__(self, baseurl)
-    
-    def setUp(self):
-        path = "account/create.json"
-        data = {
-            "first_name": "Kevin",
-            "last_name": "Palms", 
-            "email": "kevin@stamped.com", 
-            "password": "******",
-            "screen_name": "kpalms"
-        }
-        
-        response = self.handlePOST(path, data)
-        self.userID = response['user_id']
-        self.assertValidKey(self.userID)
-    
-    def test_create_show_update(self):
-        path = "entities/create.json"
-        desc = "American food in the West Village"
-        data = {
-            "authenticated_user_id": self.userID,
-            "title": "Little Owl",
-            "desc": desc, 
-            "category": "Restaurant",
-            "coordinates": "40.714623,-74.006605"
-        }
-        
-        entityID = self.handlePOST(path, data)['entity_id']
-        self.assertValidKey(entityID)
-        
-        path = "entities/show.json"
-        data = { "entity_id": entityID }
-        
-        entity = self.handleGET(path, data)
-        self.assertEqual(entity['desc'], desc)
-        
-        desc2 = "Gastropub in the West Village, NYC"
-        path = "entities/update.json"
-        data = {
-            "authenticated_user_id": self.userID,
-            "entity_id": entityID,
-            "desc": desc2, 
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(entity['desc'], desc2)
-    
-    def test_search(self):
-        path = "entities/search.json"
-        data = {
-            "authenticated_user_id": self.userID,
-            "q": "Litt"
-        }
-        
-        entities = self.handleGET(path, data)
-        self.assertTrue(len(entities) > 0)
-    
-    def test_remove(self):
-        path = "entities/remove.json"
-        data = {
-            "authenticated_user_id": self.userID,
-            "entity_id": entityID
-        }
-        
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-    
-    def tearDown(self):
-        path = "account/remove.json"
-        data = { "authenticated_user_id": self.userID }
-        
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
 
 class StampedAPStampTests(AStampedAPITestCase):
     def __init__(self, baseurl):

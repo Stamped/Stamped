@@ -76,8 +76,8 @@ class UserMiniSchema(Schema):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring, required=True)
-        self.color_primary      = SchemaElement(basestring, required=True)
+        self.profile_image      = SchemaElement(basestring)
+        self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
 
@@ -139,6 +139,32 @@ class FriendshipSchema(Schema):
         self.timestamp          = TimestampSchema()
 
 
+# ###### #
+# Stamps #
+# ###### #
+
+class StampSchema(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring)
+        self.entity             = EntityMiniSchema(required=True)
+        self.user               = UserMiniSchema(required=True)
+        self.blurb              = SchemaElement(basestring)
+        self.image              = SchemaElement(basestring)
+        self.mentions           = SchemaList(MentionSchema())
+        self.credit             = SchemaList(UserTinySchema())
+        self.comment_preview    = SchemaElement(list)
+        self.timestamp          = TimestampSchema()
+        self.flags              = FlagsSchema()
+        self.stats              = StampStatsSchema()
+
+class MentionSchema(Schema):
+    def setSchema(self):
+        self.screen_name        = SchemaElement(basestring, required=True)
+        self.display_name       = SchemaElement(basestring)
+        self.user_id            = SchemaElement(basestring)
+        self.indices            = SchemaList(SchemaElement(int))
+
+
 # ######## #
 # Entities #
 # ######## #
@@ -165,6 +191,7 @@ class EntityMiniSchema(Schema):
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring, required=True)
         self.category           = SchemaElement(basestring, required=True)
+        self.subcategory        = SchemaElement(basestring, required=True)
         self.coordinates        = CoordinatesSchema()
 
 class EntityFlatSchema(Schema):
@@ -410,26 +437,5 @@ class UserGeneratedSchema(Schema):
         self.user_id            = SchemaElement(basestring, required=True)
 
 
-
-
-
-
-# ###### #
-# Stamps #
-# ###### #
-
-class StampSchema(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.entity             = EntityMiniSchema(required=True)
-        self.user               = UserMiniSchema(required=True)
-        self.blurb              = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
-        self.mentions           = SchemaList(SchemaElement(basestring, required=True))
-        self.credit             = SchemaList(UserTinySchema())
-        self.comment_preview    = SchemaElement(list)
-        self.timestamp          = TimestampSchema(required=True)
-        self.flags              = StampFlagsSchema()
-        self.stats              = StampStatsSchema()
 
 

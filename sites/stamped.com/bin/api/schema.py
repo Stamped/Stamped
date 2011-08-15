@@ -187,11 +187,11 @@ class SchemaList(SchemaElement):
         return ret
 
     def importData(self, data):
+        self._data = []
         if data == None or len(data) == 0:
             return
         if self._delimiter != None and isinstance(data, basestring):
             data = data.split(self._delimiter)
-            print data
         if not isinstance(data, list):
             raise TypeError
 
@@ -215,6 +215,12 @@ class SchemaList(SchemaElement):
                 print msg
                 raise TypeError(msg)
             item.validate()
+
+    def setElement(self, name, value):
+        if value == None:
+            self._data = []
+            return
+        self.importData(value)
 
 class Schema(SchemaElement):
     

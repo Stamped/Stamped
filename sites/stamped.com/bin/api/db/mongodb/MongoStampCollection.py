@@ -73,31 +73,20 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         AMongoCollection.__init__(self, collection='stamps')
         AStampDB.__init__(self)
     
+    def _convertToMongo(self, stamp):
+        document = stamp.exportSparse()
+        if 'stamp_id' in document:
+            document['_id'] = self._getObjectIdFromString(document['stamp_id'])
+            del(document['stamp_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['stamp_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return Stamp(document)
+    
     ### PUBLIC
-    
-    @lazyProperty
-    def user_collection(self):
-        return MongoUserCollection()
-    
-    @lazyProperty
-    def favorite_collection(self):
-        return MongoFavoriteCollection()
-    
-    @lazyProperty
-    def credit_givers_collection(self):
-        return MongoCreditGiversCollection()
-    
-    @lazyProperty
-    def credit_received_collection(self):
-        return MongoCreditReceivedCollection()
-    
-    @lazyProperty
-    def activity_collection(self):
-        return MongoActivityCollection()
-    
-    @lazyProperty
-    def comment_collection(self):
-        return MongoCommentCollection()
     
     @lazyProperty
     def user_stamps_collection(self):
@@ -108,132 +97,99 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         return MongoInboxStampsCollection()
     
     @lazyProperty
+    def credit_givers_collection(self):
+        return MongoCreditGiversCollection()
+    
+    @lazyProperty
+    def credit_received_collection(self):
+        return MongoCreditReceivedCollection()
+
+    
+    def addStamp(self, stamp):
+        # Add the stamp data to the database
+        document = self._convertToMongo(stamp)
+        document = self._addMongoDocument(document)
+        stamp = self._convertFromMongo(document)
+
+        return stamp
+    
+    def getStamp(self, stampId):
+        documentId = self._getObjectIdFromString(stampId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
+    
+    def updateStamp(self, stamp):
+        document = self._convertToMongo(stamp)
+        document = self._updateMongoDocument(document)
+        return self._convertFromMongo(document)
+    
+    def removeStamp(self, stampId):
+        documentId = self._getObjectIdFromString(stampId)
+        return self._removeMongoDocument(documentId)
+        
+    def addUserStampReference(self, userId, stampId):
+        # Add a reference to the stamp in the user's collection
+        self.user_stamps_collection.addUserStamp(userId, stampId) 
+        
+    def removeUserStampReference(self, userId, stampId):
+        # Remove a reference to the stamp in the user's collection
+        self.user_stamps_collection.removeUserStamp(userId, stampId) 
+
+    def addInboxStampReference(self, userIds, stampId):
+        # Add a reference to the stamp in followers' inbox
+        self.inbox_stamps_collection.addInboxStamps(userIds, stampId)
+
+    def removeInboxStampReference(self, userIds, stampId):
+        # Remove a reference to the stamp in followers' inbox
+        self.inbox_stamps_collection.removeInboxStamps(userIds, stampId)
+
+
+    def giveCredit(self, creditedUserId, stampId, userId, entityId):
+        # Add to 'credit received'
+        ### TODO: Does this belong here?
+        self.credit_received_collection.addCredit(creditedUserId, stampId)
+    
+        # Add to 'credit givers'
+        ### TODO: Does this belong here?
+        self.credit_givers_collection.addGiver(creditedUserId, userId)
+
+        # Update the amount of credit on the user's stamp
+        try:
+            creditedStamp = self._collection.find_one({
+                'user.user_id': creditedUserId, 
+                'entity.entity_id': entityId,
+            })
+        except:
+            creditedStamp = None
+
+        return creditedStamp
+
+
+    @lazyProperty
+    def user_collection(self):
+        return MongoUserCollection()
+    
+    @lazyProperty
+    def favorite_collection(self):
+        return MongoFavoriteCollection()
+    
+    @lazyProperty
+    def activity_collection(self):
+        return MongoActivityCollection()
+    
+    @lazyProperty
+    def comment_collection(self):
+        return MongoCommentCollection()
+    
+    @lazyProperty
     def friendship_collection(self):
         return MongoFriendshipCollection()
     
     @lazyProperty
     def activity_collection(self):
         return MongoActivityCollection()
-    
-    def addStamp(self, stamp):
-        # Extract user
-        user = self.user_collection.getUser(stamp['user']['user_id'])
+
         
-        # Extract mentions
-        if 'blurb' in stamp:
-            mentions = self._extractMentions(stamp['blurb'])
-            if len(mentions) > 0:
-                stamp['mentions'] = mentions
-                
-        # Extract credit
-        if 'credit' in stamp:
-            credit = []
-            for creditedUser in self.user_collection.lookupUsers(None, stamp.credit):
-                data = {}
-                data['user_id'] = creditedUser['user_id']
-                data['screen_name'] = creditedUser['screen_name']
-                data['display_name'] = creditedUser['display_name']
-                #data['profile_image'] = creditedUser['profile_image']
-                #data['color_primary'] = creditedUser['color_primary']
-                #if 'color_secondary' in creditedUser:
-                #    data['color_secondary'] = creditedUser['color_secondary']
-                #data['privacy'] = creditedUser['privacy']
-                
-                credit.append(data)
-            stamp.credit = credit
-            
-        # Add the stamp data to the database
-        stampId = self._addDocument(stamp, 'stamp_id')
-        stamp['stamp_id'] = stampId
-        
-        # Add a reference to the stamp in the user's collection
-        self.user_stamps_collection.addUserStamp(user.user_id, stampId)  
-        
-        # Add a reference to the stamp in followers' inbox
-        followerIds = self.friendship_collection.getFollowers(stamp['user']['user_id'])
-        followerIds.append(stamp['user']['user_id']) # Don't forget the user!
-        self.inbox_stamps_collection.addInboxStamps(followerIds, stampId)
-        
-        # If stamped entity is on the to do list, mark as complete
-        favoriteId = self.favorite_collection.getFavoriteIdForEntity(
-            stamp['user']['user_id'], stamp['entity']['entity_id'])
-        if favoriteId: 
-            self.favorite_collection.completeFavorite(favoriteId)
-        
-        # Give credit
-        userIdsForCredit = []
-        if 'credit' in stamp and len(stamp.credit) > 0:
-            for creditedUser in stamp.credit:
-                # Add to 'credit received'
-                numCredit = self.credit_received_collection.addCredit(creditedUser['user_id'], stampId)
-            
-                # Add to 'credit givers'
-                numGivers = self.credit_givers_collection.addGiver(creditedUser['user_id'], user.user_id)
-                
-                # Increment user's total credit received
-                self.user_collection.updateUserStats(creditedUser['user_id'], 'num_credit', None, increment=1)
-                
-                # Update user's total credit givers 
-                self.user_collection.updateUserStats(creditedUser['user_id'], 'num_credit_givers', numGivers)
-                
-                # Append user id for activity
-                userIdsForCredit.append(creditedUser['user_id'])
-                
-                # Update the amount of credit on the user's stamp
-                creditedStamp = self._collection.find_one({
-                        'user.user_id': creditedUser['user_id'], 
-                        'entity.entity_id': stamp.entity['entity_id']
-                    })
-                if creditedStamp:                
-                    creditedStamp = Stamp(self._mongoToObj(creditedStamp, 'stamp_id'))
-                    
-                    if 'stamp_id' in creditedStamp and creditedStamp.stamp_id != None:    
-                        # Just in case the credited user hasn't stamped it yet...            
-                        self._collection.update(
-                            {'_id': self._getObjectIdFromString(creditedStamp.stamp_id)}, 
-                            {'$inc': {'num_credit': 1}, '$inc': {'num_comments': 1}},
-                            upsert=True)
-                        
-                        # Add stamp as a comment on the user's stamp
-                        comment = Comment()
-                        comment.stamp_id = creditedStamp.stamp_id
-                        comment.user = stamp.user
-                        comment.restamp_id = stampId
-                        if 'blurb' in stamp:
-                            comment.blurb = stamp.blurb
-                        if 'mentions' in stamp:
-                            comment.mentions = stamp.mentions
-                        comment.timestamp = stamp.timestamp
-                        self.addComment(comment, activity=False)
-        
-        # Add activity for credited users
-        if len(userIdsForCredit) > 0:
-            self.activity_collection.addActivityForRestamp(userIdsForCredit, user, stamp)
-        
-        # Add activity for mentioned users
-        if 'mentions' in stamp and len(stamp.mentions) > 0:
-            userIdsForMention = []
-            for mention in stamp['mentions']:
-                if 'user_id' in mention and mention['user_id'] not in userIdsForCredit:
-                    userIdsForMention.append(mention['user_id'])
-            if len(userIdsForMention) > 0:
-                self.activity_collection.addActivityForMention(userIdsForMention, user, stamp)
-        
-        return stampId
-    
-    def getStamp(self, stampId):
-        stamp = Stamp(self._getDocumentFromId(stampId, 'stamp_id'))
-        if stamp.isValid == False:
-            raise KeyError("Stamp not valid")
-        return stamp
-        
-    def updateStamp(self, stamp):
-        return self._updateDocument(stamp, 'stamp_id')
-        
-    def removeStamp(self, stampId, userId):
-        self.user_stamps_collection.removeUserStamp(userId, stampId)
-        ### TODO: Add removal from ox, etc.
-        return self._removeDocument(stampId)
     
     def addStamps(self, stamps):
         stampIds = [] 
@@ -244,14 +200,16 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             followerIds = self.friendship_collection.getFollowers(stamp['user']['user_id'])
             self.inbox_stamps_collection.addInboxStamps(followerIds, stamp['id'])
     
-    def getStamps(self, stampIds, since=None, before=None, limit=20, sort='timestamp.created', withComments=False):
+    def getStamps(self, stampIds, since=None, before=None, limit=20, \
+        sort='timestamp.created', withComments=False):
         # Set variables
         result = []
         comments = []
         
         # Get stamps
-        stamps = self._getDocumentsFromIds(stampIds, objId='stamp_id', since=since, 
-                                            before=before, sort=sort, limit=limit)
+        stamps = self._getDocumentsFromIds(stampIds, objId='stamp_id', \
+                                            since=since, before=before, \
+                                            sort=sort, limit=limit)
         
         # If comments are included, grab them
         if withComments:
