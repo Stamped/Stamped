@@ -43,15 +43,14 @@ class ChicagoMagCrawler(AExternalEntitySource):
             utils.log("[%s] error parsing page %s" % (self, href))
             return
         
-        results = soup.find('td', { 'id' : 'search-results' }).findAll('tr', { 'class' : 'premium' })
+        results = soup.find('td', { 'id' : 'search-results' }).findAll('tr')
         
         for result in results:
             
             try:
                 name = result.find('td', { 'class' : 'business-name' }).find('a').getText().strip()
-            except AttributeError:
-                utils.log("[%s] error parsing %s (%s)" % (self, name, href))
-                return
+            except Exception:
+                continue
 
             try:
                 result.find('td', { 'class' : 'contact' }).find('br').previousSibling.strip()
