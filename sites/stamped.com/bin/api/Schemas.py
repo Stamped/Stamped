@@ -95,7 +95,7 @@ class UserTinySchema(Schema):
 class FlagsSchema(Schema):
     def setSchema(self):
         self.flagged            = SchemaElement(bool)
-        self.locked             = SchemaElement(bool, default=True)
+        self.locked             = SchemaElement(bool)
 
 
 # ##### #
@@ -108,8 +108,8 @@ class UserStatsSchema(Schema):
         self.num_following      = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
         self.num_todos          = SchemaElement(int)
-        self.num_cred_received  = SchemaElement(int)
-        self.num_cred_given     = SchemaElement(int)
+        self.num_credit         = SchemaElement(int)
+        self.num_credit_given   = SchemaElement(int)
 
 class StampStatsSchema(Schema):
     def setSchema(self):

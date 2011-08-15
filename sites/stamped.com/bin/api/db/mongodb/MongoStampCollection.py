@@ -144,20 +144,20 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         self.inbox_stamps_collection.removeInboxStamps(userIds, stampId)
 
 
-    def giveCredit(self, creditedUserId, stampId, userId, entityId):
+    def giveCredit(self, creditedUserId, stamp):
         # Add to 'credit received'
         ### TODO: Does this belong here?
-        self.credit_received_collection.addCredit(creditedUserId, stampId)
+        self.credit_received_collection.addCredit(creditedUserId, stamp.stamp_id)
     
         # Add to 'credit givers'
         ### TODO: Does this belong here?
-        self.credit_givers_collection.addGiver(creditedUserId, userId)
+        self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
 
         # Update the amount of credit on the user's stamp
         try:
             creditedStamp = self._collection.find_one({
                 'user.user_id': creditedUserId, 
-                'entity.entity_id': entityId,
+                'entity.entity_id': stamp.entity.entity_id,
             })
         except:
             creditedStamp = None

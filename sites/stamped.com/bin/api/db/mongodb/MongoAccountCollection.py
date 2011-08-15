@@ -24,6 +24,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if 'user_id' in document:
             document['_id'] = self._getObjectIdFromString(document['user_id'])
             del(document['user_id'])
+        if 'screen_name' in document:
+            document['screen_name'] = str(document['screen_name']).lower()
         return document
 
     def _convertFromMongo(self, document):

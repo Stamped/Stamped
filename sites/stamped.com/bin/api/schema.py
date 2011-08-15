@@ -17,6 +17,7 @@ class SchemaElement(object):
         self._requiredType = self._validateRequiredType(requiredType)
         self._required = kwargs.pop('required', False)
         self._default = kwargs.pop('default', None)
+        self._case = kwargs.pop('case', None)
         if self._default != None:
             self.setElement('N/A', self._default)
         

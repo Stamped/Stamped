@@ -635,11 +635,7 @@ class StampedAPI(AStampedAPI):
                 userId = creditedUser['user_id']
 
                 # Assign credit
-                creditedStamp = self._stampDB.giveCredit(
-                                    userId, 
-                                    stamp.stamp_id,
-                                    user.user_id,
-                                    entity.entity_id)
+                creditedStamp = self._stampDB.giveCredit(userId, stamp)
                 
                 ### TODO: Reimplement after adding Comments
                 """
@@ -725,12 +721,13 @@ class StampedAPI(AStampedAPI):
         ### TODO: Verify that this works as expected
         if mentions != stamp.mentions:
             if mentions != None:
+                previouslyMentioned = []
+                for mention in stamp.mentions:
+                    previouslyMentioned.append(mention.screen_name)
                 for mention in mentions:
-                    if mention not in stamp.mentions:
+                    if mention['screen_name'] not in previouslyMentioned:
                         mentionedUsers.append(mention)
-            logs.debug("MENTIONS: %s" % mentions)
             stamp.mentions = mentions
-        logs.debug("SO FAR SO GOOD")
         
         creditedUsers = []
         ### TODO: Verify that this works as expected
@@ -738,8 +735,11 @@ class StampedAPI(AStampedAPI):
             if credit == None:
                 stamp.credit = []
             else:
+                previouslyCredited = []
+                for creditedUser in stamp.credit:
+                    previouslyCredited.append(creditedUser.user_id)
                 for creditedUser in credit:
-                    if creditedUser not in stamp.credit:
+                    if creditedUser['user_id'] not in previouslyCredited:
                         creditedUsers.append(creditedUser)
                 stamp.credit = credit
 
@@ -755,11 +755,7 @@ class StampedAPI(AStampedAPI):
                 userId = creditedUser['user_id']
 
                 # Assign credit
-                creditedStamp = self._stampDB.giveCredit(
-                                    userId, 
-                                    stamp.stamp_id,
-                                    user.user_id,
-                                    entity.entity_id)
+                creditedStamp = self._stampDB.giveCredit(userId, stamp)
                 
                 ### TODO: Reimplement after adding Comments
                 """
@@ -779,15 +775,16 @@ class StampedAPI(AStampedAPI):
                 # Update credited user stats
                 self._userDB.updateUserStats(userId, 'num_credit', \
                     None, increment=1)
-                if user.user_id not in self._userDB.creditGivers(userId):
-                    self._userDB.addCreditGiver(userId, user.user_id)
-                    self._userDB.updateUserStats(userId, 'num_credit_givers', \
-                        None, increment=1)
+                # if auth['authenticated_user_id'] not in self._userDB.creditGivers(userId):
+                #     self._userDB.addCreditGiver(userId, user.user_id)
+                #     self._userDB.updateUserStats(userId, 'num_credit_givers', \
+                #         None, increment=1)
 
                 # Append user_id for activity
                 creditedUserIds.append(creditedUser['user_id'])
 
-        
+        ### TODO: Reimplement after adding Activity
+        """
         # Add activity for credited users
         if len(creditedUserIds) > 0:
             self._activityDB.addActivityForRestamp(creditedUserIds, \
@@ -803,7 +800,8 @@ class StampedAPI(AStampedAPI):
             if len(mentionedUserIds) > 0:
                 self.activity_collection.addActivityForMention( \
                     mentionedUserIds, user, stamp)
-        
+        """
+
         if self.output == 'http':
             return stamp.exportFlat()
         return stamp

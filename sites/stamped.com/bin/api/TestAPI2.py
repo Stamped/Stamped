@@ -558,7 +558,7 @@ class AStampedAPITestCase(unittest.TestCase):
 
 
 
-class StampedAPIStampCreditTest(AStampedAPITestCase):
+class StampedAPIStampMentionsTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
@@ -567,8 +567,7 @@ class StampedAPIStampCreditTest(AStampedAPITestCase):
         self.stampData = {
             "oauth_token": self.tokenA['access_token'],
             "entity_id": self.entity['entity_id'],
-            "blurb": "Great spot. Thanks @%s! --@%s" % \
-                (self.userB['screen_name'], self.userA['screen_name']),
+            "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
             "credit": self.userB['screen_name']
         }
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], self.stampData)
@@ -580,7 +579,7 @@ class StampedAPIStampCreditTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
+class StampedAPIStampsMentionsShow(StampedAPIStampMentionsTest):
     def test_show(self):
         path = "stamps/show.json"
         data = { 
@@ -593,8 +592,9 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
             result['credit'][0]['screen_name'], 
             self.stampData['credit']
             )
+        self.assertTrue(len(result['mentions']) == 1)
 
-class StampedAPIStampsCreditUpdate(StampedAPIStampCreditTest):
+class StampedAPIStampsMentionsUpdate(StampedAPIStampMentionsTest):
     def test_no_mentions(self):
         path = "stamps/update.json"
         blurb = "Really, really delicious."
@@ -607,9 +607,10 @@ class StampedAPIStampsCreditUpdate(StampedAPIStampCreditTest):
         self.assertEqual(result['blurb'], blurb)
         self.assertTrue(len(result['mentions']) == 0)
 
-    def test_one_mention(self):
+    def test_two_mentions(self):
         path = "stamps/update.json"
-        blurb = "Really delicious. Thanks @%s!" % self.userB['screen_name']
+        blurb = "Thanks again @%s! --@%s" % \
+                (self.userB['screen_name'], self.userA['screen_name'])
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id'],
@@ -617,7 +618,31 @@ class StampedAPIStampsCreditUpdate(StampedAPIStampCreditTest):
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['blurb'], blurb)
-        self.assertTrue(len(result['mentions']) == 1)
+        self.assertTrue(len(result['mentions']) == 2)
+
+class StampedAPIStampsCreditUpdate(StampedAPIStampMentionsTest):
+    def test_no_credit(self):
+        path = "stamps/update.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "credit": None
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result['credit']) == 0)
+
+    def test_two_credits(self):
+        path = "stamps/update.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "credit": "%s,%s" % (
+                self.userA['screen_name'],
+                self.userB['screen_name']
+            )
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result['credit']) == 2)
 
 
 
