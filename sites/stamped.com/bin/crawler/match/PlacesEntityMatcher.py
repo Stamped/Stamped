@@ -9,6 +9,7 @@ import Globals, utils
 from errors import *
 
 from ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
+from Entity import Entity
 
 from pymongo import GEO2D
 from pymongo.son import SON
@@ -27,7 +28,7 @@ class PlacesEntityMatcher(ATitleBasedEntityMatcher):
             raise Fail('invalid entity')
         
         # TODO: verify lat / lng versus lng / lat
-        q = SON({"$near" : [entity.lat, entity.lng]})
+        q = SON({"$near" : [entity.lng, entity.lat]})
         q.update({"$maxDistance" : self.distance })
         
         docs     = self._placesDB._collection.find({"coordinates" : q})
@@ -37,8 +38,4 @@ class PlacesEntityMatcher(ATitleBasedEntityMatcher):
     
     def _gen_entities(self, docs):
         return (Entity(self._placesDB._mongoToObj(doc, 'entity_id')) for doc in docs)
-        #for doc in docs:
-        #    doc2 = self._entityDB._collection.find_one({ '_id' : doc['_id'] })
-        #    if doc2 is not None:
-        #        yield self._placesDB._mongoToObj(doc2)
 

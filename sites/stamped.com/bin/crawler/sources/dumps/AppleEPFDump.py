@@ -34,8 +34,8 @@ class AppleEPFDistro(Singleton):
     @lazyProperty
     def apple_data_dir(self):
         if self.ec2:
-            self._volume = 'vol-52db3938'
-            #'vol-80ba5bea'
+            #self._volume = 'vol-52db3938'
+            self._volume = 'vol-ccf832a6'
             
             self._instance_id = utils.shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')[0]
             

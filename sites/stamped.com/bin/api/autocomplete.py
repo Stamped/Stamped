@@ -169,7 +169,9 @@ def _get_distance_value(distance):
         return 0
     
     value = 1.0 / math.log1p(1 + distance)
-    return max(min(value, 100), 0)
+    value = max(min(value, 100), 0)
+    value = value ** 2
+    return value
 
 def _gen_entities(entityDB, docs):
     return 
@@ -203,34 +205,33 @@ def main():
     query = query.replace("!", "[!li]?")
     utils.log("query: %s" % query)
     
-    results = []
+    entity_query = {"title": {"$regex": query, "$options": "i"}}
+    db_results = entityDB._collection.find(entity_query).limit(250)
     
-    db_results = entityDB._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(250)
+    results = []
+    results_set = set()
     
     if options.location:
         # NOTE: geoNear uses lng/lat and coordinates *must* be stored in lng/lat order in underlying collection
         # TODO: enforce this constraint when storing into mongo
         
         earthRadius = 3959.0 # miles
-        ret = placesDB._collection.command(SON([('geoNear', 'places'), ('near', [options.location[1], options.location[0]]), ('num', 10), ('distanceMultiplier', earthRadius), ('sphere', True)]))
-        #from pprint import pprint
-        #pprint(ret)
+        q = SON([('geoNear', 'places'), ('near', [options.location[1], options.location[0]]), ('num', 10), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
         
-        entities = list((Entity(entityDB._mongoToObj(doc['obj'], 'entity_id')), doc['dis']) for doc in ret['results'])
+        ret = placesDB._collection.command(q)
         
-        #q = SON({"$near" : [options.location[0], options.location[1]]})
-        #docs = list(placesDB._collection.find({"coordinates" : q}).limit(10))
-        #
-        #entities = []
-        #for i in xrange(len(docs)):
-        #    doc = docs[i]
-        #    entities.append((Entity(entityDB._mongoToObj(doc, 'entity_id')), i))
-        
-        results.extend(entities)
+        for doc in ret['results']:
+            entity = Entity(entityDB._mongoToObj(doc['obj'], 'entity_id'))
+            result = (entity, doc['dis'])
+            
+            results.append(result)
+            results_set.add(entity.entity_id)
     
     for entity in db_results:
         e = Entity(entityDB._mongoToObj(entity, 'entity_id'))
-        #results.append((e, -1))
+        
+        if e.entity_id not in results_set:
+            results.append((e, -1))
     
     if options.category is not None:
         results = filter(lambda e: e[0].category == options.category, results)
@@ -265,6 +266,18 @@ def main():
                               source_value * source_weight + \
                               quality_value * quality_weight + \
                               distance_value * distance_weight
+        
+        data = {}
+        data['title']  = entity.title
+        data['titlev'] = title_value
+        data['subcatv'] = subcategory_value
+        data['sourcev'] = source_value
+        data['qualityv'] = quality_value
+        data['distancev'] = distance_value
+        data['totalv'] = aggregate_value
+        
+        #from pprint import pprint
+        #pprint(data)
         
         return aggregate_value
     
