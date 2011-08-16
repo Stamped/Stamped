@@ -31,6 +31,7 @@ class AppleEPFOpener(urllib.FancyURLopener):
         return (APPLE_EPF_USER, APPLE_EPF_PSWD)
 
 class AppleEPFDistro(Singleton):
+    @property
     def apple_data_dir(self):
         if not hasattr(self, 'lock'):
             self.lock = True
@@ -818,7 +819,7 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                     utils.log("[%s] done parsing %s" % \
                         (self, utils.getStatusStr(count, numLines)))
             
-            self._try_flush_buffer()
+            self._try_flush_buffer(force=True)
             
             if self.index:
                 self.execute("CREATE INDEX %s on %s (%s)" % (self.index, self.table, self.index), verbose=True)
@@ -844,8 +845,8 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         self._buffer.append(tuple(row))
         self._try_flush_buffer()
     
-    def _try_flush_buffer(self):
-        if len(self._buffer) < self._buffer_threshold:
+    def _try_flush_buffer(self, force=False):
+        if force or len(self._buffer) < self._buffer_threshold:
             return
         
         # TODO: use self.db.execute_many
