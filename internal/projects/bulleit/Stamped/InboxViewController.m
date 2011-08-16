@@ -9,6 +9,7 @@
 #import "InboxViewController.h"
 
 #import <CoreText/CoreText.h>
+#import <MapKit/MapKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
@@ -17,6 +18,7 @@
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 #import "Stamp.h"
+#import "STNavigationBar.h"
 #import "InboxTableViewCell.h"
 #import "UserImageView.h"
 
@@ -35,6 +37,8 @@ typedef enum {
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
 - (void)stampWasCreated:(NSNotification*)notification;
+- (void)mapButtonWasPressed:(NSNotification*)notification;
+- (void)listButtonWasPressed:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* filterButtons;
 @property (nonatomic, copy) NSArray* entitiesArray;
@@ -43,6 +47,7 @@ typedef enum {
 
 @implementation InboxViewController
 
+@synthesize mapView = mapView_;
 @synthesize entitiesArray = entitiesArray_;
 @synthesize filteredEntitiesArray = filteredEntitiesArray_;
 @synthesize filterButtons = filterButtons_;
@@ -68,6 +73,14 @@ typedef enum {
   [super dealloc];
 }
 
+- (void)mapButtonWasPressed:(NSNotification*)notification {
+  [UIView animateWithDuration:0.5 animations:^{ mapView_.alpha = 1.0; }];
+}
+
+- (void)listButtonWasPressed:(NSNotification*)notification {
+  [UIView animateWithDuration:0.5 animations:^{ mapView_.alpha = 0.0; }];
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -76,6 +89,19 @@ typedef enum {
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(mapButtonWasPressed:)
+                                               name:kMapViewButtonPressedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(listButtonWasPressed:)
+                                               name:kListViewButtonPressedNotification
+                                             object:nil];
+  mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
+  mapView_.alpha = 0.0;
+  [self.view addSubview:mapView_];
+  [mapView_ release];
+
   self.filterButtons =
       [NSArray arrayWithObjects:(id)foodFilterButton_,
                                 (id)booksFilterButton_,
@@ -107,6 +133,23 @@ typedef enum {
   [super viewWillAppear:animated];
   if (!userDidScroll_)
     self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  if (foodFilterButton_.selected) {
+    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+    STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+    [navBar setButtonFlipped:YES animated:animated];
+  }
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+  if (foodFilterButton_.selected) {
+    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+    STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+    [navBar setButtonFlipped:NO animated:NO];
+  }  
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -149,6 +192,10 @@ typedef enum {
 
 - (IBAction)filterButtonPushed:(id)sender {
   filteredEntitiesArray_ = nil;
+  // In case the nav bar map button needs to be flipped.
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+  [navBar setButtonFlipped:NO animated:NO];
 
   UIButton* selectedButton = (UIButton*)sender;
   for (UIButton* button in self.filterButtons)
@@ -167,6 +214,7 @@ typedef enum {
   NSString* filterString = nil;
   if (selectedButton == foodFilterButton_) {
     filterString = @"food";
+    [navBar setButtonFlipped:YES animated:YES];
   } else if (selectedButton == booksFilterButton_) {
     filterString = @"books";
   } else if (selectedButton == filmFilterButton_) {

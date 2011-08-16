@@ -12,6 +12,8 @@
 #import "User.h"
 #import "OAuthToken.h"
 
+extern NSString* const kCurrentUserHasUpdatedNotification;
+
 @protocol AccountManagerDelegate
 @required
 - (void)accountManagerDidAuthenticate;
@@ -28,7 +30,6 @@
   UITextField* passwordField_;
   NSTimer* oauthRefreshTimer_;
   BOOL firstRun_;
-  NSUInteger numRetries_;
 }
 
 + (AccountManager*)sharedManager;
@@ -39,5 +40,6 @@
 @property (nonatomic, retain) User* currentUser;
 @property (nonatomic, retain) OAuthToken* authToken;
 @property (nonatomic, assign) id<AccountManagerDelegate> delegate;
+@property (nonatomic, readonly) BOOL authenticated;
 
 @end

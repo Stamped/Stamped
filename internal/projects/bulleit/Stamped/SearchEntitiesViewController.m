@@ -14,7 +14,10 @@
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
 #import "SearchEntitiesTableViewCell.h"
+#import "STSearchField.h"
 #import "Entity.h"
+
+static NSString* const kSearchPath = @"/entities/search.json";
 
 @interface SearchEntitiesViewController ()
 - (void)loadEntitiesFromDataStore;
@@ -23,6 +26,7 @@
 
 @property (nonatomic, copy) NSArray* entitiesArray;
 @property (nonatomic, copy) NSArray* filteredEntitiesArray;
+@property (nonatomic, retain) CLLocationManager* locationManager;
 @end
 
 @implementation SearchEntitiesViewController
@@ -31,6 +35,7 @@
 @synthesize filteredEntitiesArray = filteredEntitiesArray_;
 @synthesize searchField = searchField_;
 @synthesize cancelButton = cancelButton_;
+@synthesize locationManager = locationManager_;
 
 
 - (void)didReceiveMemoryWarning {
@@ -44,6 +49,9 @@
   self.searchField = nil;
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
+  self.entitiesArray = nil;
+  self.locationManager.delegate = nil;
+  self.locationManager = nil;
   [super dealloc];
 }
 
@@ -58,20 +66,12 @@
   self.cancelButton.layer.cornerRadius = 5.0;
   self.cancelButton.layer.shadowOpacity = 1.0;
 
-  self.searchField.leftViewMode = UITextFieldViewModeAlways;
-  UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 32, CGRectGetHeight(self.searchField.frame))];
-  UIImageView* searchIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_icon"]];
-  searchIcon.frame = CGRectOffset(searchIcon.frame, 10, 8);
-  searchIcon.contentMode = UIViewContentModeCenter;
-  [leftView addSubview:searchIcon];
-  [searchIcon release];
-  self.searchField.leftView = leftView;
-  [leftView release];
-  self.searchField.contentMode = UIViewContentModeScaleAspectFit;
   [self loadEntitiesFromDataStore];
   [self.searchField addTarget:self
                        action:@selector(textFieldDidChange:)
              forControlEvents:UIControlEventEditingChanged];
+
+  self.locationManager = [[CLLocationManager alloc] init];
 }
 
 - (void)viewDidUnload {
@@ -80,10 +80,13 @@
   self.searchField = nil;
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
+  self.entitiesArray = nil;
+  self.locationManager = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self.locationManager startUpdatingLocation];
   [self.navigationController setNavigationBarHidden:YES];
 }
 
@@ -94,6 +97,7 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
+  [self.locationManager stopUpdatingLocation];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -149,10 +153,15 @@
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
-  NSString* searchPath = [NSString stringWithFormat:@"/entities/search.json?oauth_token=%@&q=%@",
-      [AccountManager sharedManager].authToken.accessToken, searchField_.text];
-  searchPath = [searchPath stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-  [objectManager loadObjectsAtResourcePath:searchPath
+  NSMutableDictionary* params =
+      [NSMutableDictionary dictionaryWithKeysAndObjects:@"oauth_token",
+          [AccountManager sharedManager].authToken.accessToken, @"q", searchField_.text, nil];
+  if (self.locationManager.location) {
+    CLLocationCoordinate2D coordinate = self.locationManager.location.coordinate;
+    NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
+    [params setObject:coordString forKey:@"coordinates"];
+  }
+  [objectManager loadObjectsAtResourcePath:[kSearchPath appendQueryParams:params]
                              objectMapping:entityMapping
                                   delegate:self];
   [searchField_ resignFirstResponder];
@@ -162,10 +171,11 @@
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"LastUpdatedAt"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-	[self loadEntitiesFromDataStore];
-  [self searchDataStoreFor:self.searchField.text];
+	self.entitiesArray = nil;
+  self.entitiesArray = objects;
+  self.filteredEntitiesArray = nil;
+  self.filteredEntitiesArray = objects;
+  [self.tableView reloadData];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {

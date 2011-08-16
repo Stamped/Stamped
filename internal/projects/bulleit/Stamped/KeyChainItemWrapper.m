@@ -125,7 +125,7 @@
   } else {
     // No previous item found; add the new one.
     result = SecItemAdd((CFDictionaryRef)[self dictionaryToSecItemFormat:keychainItemData_], NULL);
-		NSAssert(result == noErr, @"Couldn't add the Keychain Item. Error code %d", result);
+		NSAssert(result == noErr, @"Couldn't add the Keychain Item.");
   }
 }
 

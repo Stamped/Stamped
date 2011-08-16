@@ -14,9 +14,11 @@
 #import "SearchEntitiesViewController.h"
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
+#import "STNavigationBar.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
+- (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
 @end
 
@@ -58,12 +60,16 @@
   [super viewDidLoad];
   // Do this so that there is no title shown.
   self.navigationItem.titleView = [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
-  [AccountManager sharedManager].delegate = self;
-  [[AccountManager sharedManager] authenticate];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
                                              object:nil];
+  [AccountManager sharedManager].delegate = self;
+  if ([AccountManager sharedManager].authenticated) {
+    [self finishViewInit];
+  } else {
+    [[AccountManager sharedManager] authenticate];
+  }
 }
 
 - (void)finishViewInit {
@@ -76,18 +82,20 @@
   [activity release];
   [todo release];
   [people release];
-  // TODO(andybons): Investigate this.
-  CGRect inboxFrame = CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
-  inbox.view.frame = inboxFrame;
-  [self.view addSubview:inbox.view];
-  self.selectedViewController = inbox;
 
-  if ([self.tabBar respondsToSelector:@selector(setSelectedImageTintColor:)])
-    [self.tabBar setSelectedImageTintColor:[UIColor colorWithWhite:0.9 alpha:1.0]];
+  // This will load all views.
+  [self ensureCorrectHeightOfViewControllers];
+  if (!self.tabBar.selectedItem) {
+    self.tabBar.selectedItem = stampsTabBarItem_;
+    [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
+  }
+}
 
-  self.tabBar.selectedItem = stampsTabBarItem_;
-  // Preload the other views...
-  [activity view];
+- (void)ensureCorrectHeightOfViewControllers {
+  for (UIViewController* controller in self.viewControllers) {
+    controller.view.frame =
+        CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
+  }
 }
 
 - (void)viewDidUnload {
@@ -135,7 +143,7 @@
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {
-  [self tabBar:tabBar_ didSelectItem:stampsTabBarItem_];
+  self.tabBar.selectedItem = stampsTabBarItem_;
 }
 
 #pragma mark - AccountManagerDelegate Methods.
@@ -169,6 +177,7 @@
   [self.selectedViewController.view removeFromSuperview];
   [self.selectedViewController viewDidDisappear:NO];
   [newViewController viewWillAppear:NO];
+  [self ensureCorrectHeightOfViewControllers];
   [self.view addSubview:newViewController.view];
   [newViewController viewDidAppear:NO];
   self.selectedViewController = newViewController;
