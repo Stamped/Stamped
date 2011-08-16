@@ -31,12 +31,13 @@ class AppleEPFOpener(urllib.FancyURLopener):
         return (APPLE_EPF_USER, APPLE_EPF_PSWD)
 
 class AppleEPFDistro(Singleton):
-    @lazyProperty
     def apple_data_dir(self):
         if not hasattr(self, 'lock'):
             self.lock = True
         else:
-            while self.lock:
+            while True:
+                if hasattr(self, '_apple_data_dir'):
+                    return self._apple_data_dir
                 time.sleep(5)
         
         if self.ec2:
@@ -92,15 +93,15 @@ class AppleEPFDistro(Singleton):
                         mounted = 0 == utils.shell('mount -t ext3 %s %s' % (volume_dir, mount_dir))[1]
                         time.sleep(3)
             
-            self.lock = False
-            return mount_dir
+            self._apple_data_dir = mount_dir
         else:
             base = os.path.dirname(os.path.abspath(__file__))
             
             apple_dir = os.path.join(os.path.join(base, "data"), "apple")
             assert os.path.exists(apple_dir)
-            self.lock = False
-            return apple_dir
+            self._apple_data_dir = apple_dir
+        
+        return self._apple_data_dir
     
     def cleanup(self):
         if self.ec2:
