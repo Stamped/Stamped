@@ -9,10 +9,16 @@
 #import "PeopleViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+
+static NSString* const kFriendsPath = @"/friendships/friends";
+static NSString* const kFollowersPath = @"/friendships/friends";
+static const NSInteger kFriendsSection = 0;
+static const NSInteger kFollowersSection = 1;
 
 @interface SectionHeaderView : UIView
 @property (nonatomic, readonly) UILabel* leftLabel;
@@ -71,9 +77,11 @@
 
 @interface PeopleViewController ()
 - (void)currentUserUpdated:(NSNotification*)notification;
+- (void)loadFriendsFromNetwork;
+- (void)loadFriendsFromDataStore;
 
 @property (nonatomic, copy) NSArray* followers;
-@property (nonatomic, copy) NSArray* following;
+@property (nonatomic, copy) NSArray* friends;
 @end
 
 @implementation PeopleViewController
@@ -84,7 +92,7 @@
 @synthesize userScreenNameLabel = userScreenNameLabel_;
 @synthesize addFriendsButton = addFriendsButton_;
 @synthesize followers = followers_;
-@synthesize following = following_;
+@synthesize friends = friends_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -103,6 +111,7 @@
   
   userScreenNameLabel_.textColor = [UIColor lightGrayColor];
   userFullNameLabel_.textColor = [UIColor stampedBlackColor];
+  [self loadFriendsFromNetwork];
 }
 
 - (void)viewDidUnload {
@@ -143,6 +152,32 @@
   userFullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", currentUser.firstName, currentUser.lastName];
 }
 
+- (void)loadFriendsFromNetwork {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
+  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
+  NSDictionary* params = [NSDictionary dictionaryWithObject:authToken forKey:@"oauth_token"];
+  [[RKClient sharedClient] get:kFriendsPath
+                   queryParams:params
+                      delegate:self];
+}
+
+- (void)loadFriendsFromDataStore {
+  
+}
+
+#pragma mark - RKRequestDelegate Methods.
+
+- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  NSLog(@"Problem loading stuff. Error: %@", [error localizedDescription]);
+}
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  //NSError* error;
+  //id json = [response parsedBody:error];
+  NSLog(@"json response: %@", response.bodyAsString);
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
@@ -178,7 +213,8 @@
   SectionHeaderView* view = [[SectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)];
   view.backgroundColor = [UIColor blueColor];
   view.leftLabel.text = section == 0 ? @"Following" : @"Followers";
-  view.rightLabel.text = @"19459";
+  view.rightLabel.text =
+      [NSString stringWithFormat:@"%u", section == kFriendsSection ? [friends_ count] : [followers_ count]];
   return view;
 }
 

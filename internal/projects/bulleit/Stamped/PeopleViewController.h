@@ -6,13 +6,14 @@
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
 #import "STReloadableTableViewController.h"
 
 @class UserImageView;
 
-@interface PeopleViewController : STReloadableTableViewController
+@interface PeopleViewController : STReloadableTableViewController <RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UserImageView* currentUserView;
 @property (nonatomic, retain) IBOutlet UIImageView* userStampImageView;

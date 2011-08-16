@@ -89,6 +89,9 @@
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
+  
+  self.tabBar.selectedItem = peopleTabBarItem_;
+  [self tabBar:self.tabBar didSelectItem:peopleTabBarItem_];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
