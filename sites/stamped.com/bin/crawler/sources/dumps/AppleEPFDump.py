@@ -780,7 +780,8 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             cols = []
             
             # currently disabling primary keys for most tables
-            found_primary = (len(table_format.primary_keys) == 1)
+            found_primary = True
+            #(len(table_format.primary_keys) == 1)
             
             for col in table_format.cols:
                 cols.append('')

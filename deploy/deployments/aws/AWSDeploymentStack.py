@@ -147,26 +147,57 @@ class AWSDeploymentStack(ADeploymentStack):
     def crawl(self, *args):
         crawlers = [
             {
-                'sources' : [ 'apple_artists', 'apple_albums', 'apple_videos', ], 
+                'sources' : [ 
+                    'apple_artists', 
+                    #'apple_albums', 
+                    'apple_videos', 
+                ], 
                 'numInstances' : 1, 
                 'mapSourceToProcess' : True, 
             }, 
-            {
-                'sources' : [ 'opentable', ], 
-                'numInstances' : 2, 
-                'numProcesses' : 4, 
-            }, 
-            {
-                'sources' : [ 'nymag', 'sfmag', 'zagat', ], 
-                'numInstances' : 1, 
-                'mapSourceToProcess' : True, 
-            }, 
-            #{
-            #    'sources' : [ 'factualusrestaurants', ], 
-            #    'numInstances' : 12, 
-            #    'numProcesses' : 8, 
-            #}, 
         ]
+        """
+            {
+                'sources' : [ 
+                    'opentable', 
+                ], 
+                'numInstances' : 2, 
+                'numProcesses' : 8, 
+            }, 
+            {
+                'sources' : [ 
+                    'zagat', 
+                    'sfmag', 
+                ], 
+                'numInstances' : 1, 
+                'mapSourceToProcess' : True, 
+            }, 
+            {
+                'sources' : [ 
+                    'nymag', 
+                    'bostonmag', 
+                ], 
+                'numInstances' : 1, 
+                'mapSourceToProcess' : True, 
+            }, 
+            {
+                'sources' : [ 
+                    'nymag', 
+                    'bostonmag', 
+                ], 
+                'numInstances' : 1, 
+                'mapSourceToProcess' : True, 
+            }, 
+            {
+                'sources' : [ 
+                    'phillymag', 
+                    'chicagomag', 
+                ], 
+                'numInstances' : 1, 
+                'mapSourceToProcess' : True, 
+            }, 
+        ]
+        """
         
         #crawler_instances = self.crawler_instances
         crawler_instances = []
@@ -318,13 +349,19 @@ class AWSDeploymentStack(ADeploymentStack):
         instance.create(block=False)
         
         files = [
+            "album_popularity_per_genre", 
+            "artist_collection", 
             "artist", 
             "artist_type", 
             "collection", 
             "collection_type", 
+            "genre", 
             "media_type", 
             #"song", 
+            "role", 
+            "storefront", 
             "video", 
+            "video_price", 
         ]
         
         volume_dir = "/dev/sdh5"
@@ -412,7 +449,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 #else:
                 #    utils.log("remote file '%s' already exists" % filename)
             
-            pool = Pool(64)
+            pool = Pool(2)
             
             # copy all files over to volume
             epf_base = "/Users/fisch0920/dev/stamped/sites/stamped.com/bin/crawler/sources/dumps/data/apple"
