@@ -45,7 +45,7 @@ def transformOutput(request, d):
     logs.debug("Transform output: \"%s\"" % output_json)
     return output
 
-def newParseRequestForm(schema, request, **kwargs):
+def parseRequestForm(schema, request, **kwargs):
 
     ### Parse Request
     if request.method == 'POST':
@@ -104,23 +104,6 @@ def verifyClientCredentials(data):
 
     return True
 
-def verifyBasicAuth(request, **kwargs):
-    return True
-    ##### REMOVE
-    if 'Authorization' not in request.headers or not request.authorization:
-        logs.info("Requires authorization")
-        return Response(
-            'Could not verify your access level for that URL.\n'
-            'You have to login with proper credentials', 401,
-            {'WWW-Authenticate': 'Basic realm="Stamped API"'}
-        )
-    if request.authorization.username != 'stampedtest' \
-        or request.authorization.password != 'august1ftw':
-        logs.info("End request: Invalid authorization: %s" % (request))
-        return "Error", 401
-
-    return True
-
 def handleAddAccountRequest(data, auth):
     ### Add Account
     try:
@@ -156,7 +139,7 @@ def handleRequest(schema, request, stampedAPIFunc, requireOAuthToken=True):
 
         ### Parse Request
         try:
-            data, auth = newParseRequestForm(schema, request)
+            data, auth = parseRequestForm(schema, request)
         except (InvalidArgument, Fail) as e:
             msg = str(e)
             logs.warning(msg)
@@ -211,46 +194,6 @@ def handleRequest(schema, request, stampedAPIFunc, requireOAuthToken=True):
     except Exception as e:
         logs.warning("500 Error: %s" % e)
         return "Internal error", 500
-
-def handleRequestDeprecated(request, stampedAPIFunc, schema):
-    try:
-        ### TEMP: Check Basic Auth
-        valid = verifyBasicAuth(request)
-        if valid != True:
-            logs.info("End request: Fail")
-            return valid
-
-        requireOAuthToken = False
-
-        ### Parse Request
-        try:
-            parsedInput = parseRequestForm(request, schema, requireOAuthToken=requireOAuthToken)
-        except (InvalidArgument, Fail) as e:
-            msg = str(e)
-            utils.log(msg)
-            utils.printException()
-            # return msg, 400
-            raise StampedHTTPError("invalid_request", 400, e)
-
-        logs.debug("Final data set: %s" % parsedInput)
-
-        ### Generate result
-        result = stampedAPIFunc(parsedInput)
-        
-        ### Return to Client
-        try:
-            ret = transformOutput(request, result)
-            logs.info("End request: Success")
-            return ret
-        except Exception as e:
-            msg = "Internal error processing API function '%s' (%s)" % (
-                utils.getFuncName(1), str(e))
-            utils.log(msg)
-            utils.printException()
-            return msg, 500
-    except StampedHTTPError as e:
-        logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
-        return e.msg, e.code
 
 # ####### #
 # OAuth 2 #
@@ -799,120 +742,3 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, threaded=False)
     #app.run(host='0.0.0.0')
 
-
-######## DEPRECATED
-
-def _generateLogId():
-    m = hashlib.md5(str(time.time()))
-    m.update(str(random.random()))
-    return str(m.hexdigest())
-
-
-def handleRequestOld(request, stampedAPIFunc, schema):
-    try:
-        logs.refresh()
-        logs.info("Begin request")
-
-        ### Check if OAuth Token Required
-        requireOAuthToken = True
-        if stampedAPIFunc in [stampedAPI.addAccount, \
-            stampedAuth.verifyUserCredentials, stampedAuth.verifyRefreshToken]:
-            requireOAuthToken = False
-
-        ### Parse Request
-        try:
-            parsedInput = parseRequestForm(request, schema, requireOAuthToken=requireOAuthToken)
-        except (InvalidArgument, Fail) as e:
-            msg = str(e)
-            utils.log(msg)
-            utils.printException()
-            # return msg, 400
-            raise StampedHTTPError("invalid_request", 400, e)
-
-        ### EXCEPTION: No OAuth Token
-        if requireOAuthToken == False:
-            # Check for valid client credentials
-            logs.debug("Does not require OAuth Token")
-            stampedAuth.verifyClientCredentials(parsedInput)
-        else:
-            ### Require OAuth token to be included
-            if 'oauth_token' not in parsedInput:
-                msg = "Access token not included"
-                logs.warning(msg)
-                raise StampedHTTPError("invalid_request", 401, msg)
-
-            ### Validate OAuth Access Token
-            authenticated_user_id = stampedAuth.verifyAccessToken(parsedInput)
-            if authenticated_user_id == None:
-                msg = "Invalid access token"
-                logs.warning(msg)
-                raise StampedHTTPError("invalid_token", 401, msg)
-            
-            ### Convert OAuth Token to User ID
-            parsedInput.pop('oauth_token')
-            parsedInput['authenticated_user_id'] = authenticated_user_id
-
-            logs.debug("Final data set: %s" % (parsedInput))
-
-        ### Generate Result
-        logs.info("Begin: %s" % stampedAPIFunc.__name__)
-        if stampedAPIFunc == stampedAPI.addAccount:
-            # Exception -- requires both StampedAuth and StampedAPI. We should
-            # try to get rid of this.
-            result = handleAddAccountRequest(parsedInput)
-        else:
-            parsedInput = parsedInput._dict
-            if 'authenticated_user_id' in parsedInput:
-                authenticated_user_id = parsedInput['authenticated_user_id']
-                del(parsedInput['authenticated_user_id'])
-                result = stampedAPIFunc(parsedInput, authenticated_user_id)
-            else:
-                result = stampedAPIFunc(parsedInput)
-        
-        ### Return to Client
-        try:
-            ret = transformOutput(request, result)
-            logs.info("End request: Success")
-            return ret
-        except Exception as e:
-            msg = "Internal error processing API function '%s' (%s)" % (
-                utils.getFuncName(1), str(e))
-            utils.log(msg)
-            utils.printException()
-            return msg, 500
-    except StampedHTTPError as e:
-        logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
-        return e.msg, e.code
-    except Exception as e:
-        logs.warning("500 Error: %s" % e)
-        return "Internal error", 500
-
-def parseRequestForm(request, schema, requireOAuthToken=True, **kwargs):
-
-    ### Parse Request
-    if request.method == 'POST':
-        unparsedInput = request.form
-    elif request.method == 'GET': 
-        unparsedInput = request.args
-    else:
-        logs.warning("End request: Invalid method")
-        raise
-        
-    logs.debug("Request url: %s" % request.base_url)
-    logs.debug("Request data: %s" % unparsedInput)
-
-    if requireOAuthToken:
-        schema["oauth_token"] = ResourceArgument(required=True, expectedType=basestring)
-        logs.debug("Require OAuth Token")
-
-    try:
-        parsedInput = Resource.parse('N/A', schema, unparsedInput)
-    except (InvalidArgument, Fail) as e:
-        utils.log("API function failed to parse input '%s' against schema '%s'" % \
-            (str(unparsedInput), str(schema)))
-        utils.printException()
-        raise
-
-    logs.debug("Parsed request data: %s" % parsedInput)
-
-    return parsedInput
