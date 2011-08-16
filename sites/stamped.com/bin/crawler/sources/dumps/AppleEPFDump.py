@@ -846,7 +846,7 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         self._try_flush_buffer()
     
     def _try_flush_buffer(self, force=False):
-        if force or len(self._buffer) < self._buffer_threshold:
+        if not force and len(self._buffer) < self._buffer_threshold:
             return
         
         # TODO: use self.db.execute_many
