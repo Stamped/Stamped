@@ -18,7 +18,7 @@
 #import "User.h"
 #import "OAuthToken.h"
 
-static NSString* kDataBaseURL = @"http://ec2-107-20-53-207.compute-1.amazonaws.com:5000/api/v1";
+static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
 @implementation StampedAppDelegate
 

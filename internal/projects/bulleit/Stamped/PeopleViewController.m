@@ -8,9 +8,73 @@
 
 #import "PeopleViewController.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 #import "AccountManager.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+
+@interface SectionHeaderView : UIView
+@property (nonatomic, readonly) UILabel* leftLabel;
+@property (nonatomic, readonly) UILabel* rightLabel;
+@end
+
+@implementation SectionHeaderView
+
+@synthesize leftLabel = leftLabel_;
+@synthesize rightLabel = rightLabel_;
+
+- (id)initWithFrame:(CGRect)frame {
+  self = [super initWithFrame:frame];
+  if (self) {
+    CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
+    gradientLayer.frame = frame;
+    gradientLayer.colors =
+        [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.88 alpha:1.0].CGColor,
+                                  (id)[UIColor colorWithWhite:0.95 alpha:1.0].CGColor, nil];
+    [self.layer addSublayer:gradientLayer];
+    [gradientLayer release];
+    
+    leftLabel_ = [[UILabel alloc] initWithFrame:CGRectOffset(frame, 9, 0)];
+    leftLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+    leftLabel_.shadowColor = [UIColor whiteColor];
+    leftLabel_.shadowOffset = CGSizeMake(0, 1);
+    leftLabel_.textColor = [UIColor stampedGrayColor];
+    leftLabel_.backgroundColor = [UIColor clearColor];
+    [self addSubview:leftLabel_];
+    [leftLabel_ release];
+    
+    rightLabel_ = [[UILabel alloc] initWithFrame:CGRectOffset(frame, -9, 0)];
+    rightLabel_.textAlignment = UITextAlignmentRight;
+    rightLabel_.textColor = [UIColor stampedGrayColor];
+    rightLabel_.shadowColor = [UIColor whiteColor];
+    rightLabel_.shadowOffset = CGSizeMake(0, 1);
+    rightLabel_.backgroundColor = [UIColor clearColor];
+    rightLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
+    [self addSubview:rightLabel_];
+    [rightLabel_ release];
+    
+    UIView* bottomBorder = [[UIView alloc] initWithFrame:frame];
+    bottomBorder.backgroundColor = [UIColor colorWithWhite:0.88 alpha:1.0];
+    CGRect bottomBorderFrame = frame;
+    bottomBorderFrame.size.height = 1;
+    bottomBorderFrame.origin.y = CGRectGetHeight(frame) - 1;
+    bottomBorder.frame = bottomBorderFrame;
+    [self addSubview:bottomBorder];
+    [bottomBorder release];
+    
+  }
+  return self;
+}
+
+@end
+
+@interface PeopleViewController ()
+- (void)currentUserUpdated:(NSNotification*)notification;
+
+@property (nonatomic, copy) NSArray* followers;
+@property (nonatomic, copy) NSArray* following;
+@end
 
 @implementation PeopleViewController
 
@@ -19,14 +83,8 @@
 @synthesize userFullNameLabel = userFullNameLabel_;
 @synthesize userScreenNameLabel = userScreenNameLabel_;
 @synthesize addFriendsButton = addFriendsButton_;
-
-- (id)initWithStyle:(UITableViewStyle)style {
-  self = [super initWithStyle:style];
-  if (self) {
-    // Custom initialization
-  }
-  return self;
-}
+@synthesize followers = followers_;
+@synthesize following = following_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -38,13 +96,12 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
-  User* currentUser = [AccountManager sharedManager].currentUser;
-  currentUserView_.imageURL = currentUser.profileImageURL;
-  userStampImageView_.image = currentUser.stampImage;
-  userScreenNameLabel_.text = currentUser.screenName;
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(currentUserUpdated:)
+                                               name:kCurrentUserHasUpdatedNotification
+                                             object:[AccountManager sharedManager]];
+  
   userScreenNameLabel_.textColor = [UIColor lightGrayColor];
-  userFullNameLabel_.text =  [[NSArray arrayWithObjects:currentUser.firstName, currentUser.lastName, nil] componentsJoinedByString:@" "];
   userFullNameLabel_.textColor = [UIColor stampedBlackColor];
 }
 
@@ -78,32 +135,52 @@
   [self setIsLoading:NO];
 }
 
+- (void)currentUserUpdated:(NSNotification*)notification {
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  currentUserView_.imageURL = currentUser.profileImageURL;
+  userStampImageView_.image = currentUser.stampImage;
+  userScreenNameLabel_.text = currentUser.screenName;
+  userFullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", currentUser.firstName, currentUser.lastName];
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  // Return the number of sections.
-  return 1;
+  // Two. Followers and following.
+  return 2;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   // Return the number of rows in the section.
-  return 0;
+  return 50;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString *CellIdentifier = @"Cell";
+  static NSString* CellIdentifier = @"Cell";
   
-  UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-      cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
   }
-  
+
   // Configure the cell...
-  
+
   return cell;
 }
 
 #pragma mark - Table view delegate
+
+- (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
+  return 25;
+}
+
+- (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
+  SectionHeaderView* view = [[SectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)];
+  view.backgroundColor = [UIColor blueColor];
+  view.leftLabel.text = section == 0 ? @"Following" : @"Followers";
+  view.rightLabel.text = @"19459";
+  return view;
+}
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   // Navigation logic may go here. Create and push another view controller.

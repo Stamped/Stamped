@@ -150,7 +150,6 @@
 								<string key="NSFrame">{{292, 37}, {11, 11}}</string>
 								<reference key="NSSuperview" ref="563354220"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:366</string>
 								<int key="IBUIContentMode">4</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -161,7 +160,7 @@
 								</object>
 							</object>
 						</object>
-						<string key="NSFrameSize">{320, 97}</string>
+						<string key="NSFrameSize">{320, 81}</string>
 						<reference key="NSSuperview" ref="873029372"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="301396522"/>

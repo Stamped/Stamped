@@ -13,6 +13,8 @@
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
 
+NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
+
 static NSString* const kPasswordKeychainItemID = @"Password";
 static NSString* const kAccessTokenKeychainItemID = @"AccessToken";
 static NSString* const kRefreshTokenKeychainItemID = @"RefreshToken";
@@ -22,7 +24,6 @@ static NSString* const kLoginPath = @"/oauth2/login.json";
 static NSString* const kRefreshPath = @"/oauth2/token.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
 static NSString* const kTokenExpirationUserDefaultsKey = @"TokenExpirationDate";
-static const NSUInteger kMaxAuthRetries = 3;
 static AccountManager* sharedAccountManager_ = nil;
 
 @interface AccountManager ()
@@ -39,6 +40,7 @@ static AccountManager* sharedAccountManager_ = nil;
 @synthesize currentUser = currentUser_;
 @synthesize delegate = delegate_;
 @synthesize alertView = alertView_;
+@synthesize authenticated = authenticated_;
 
 + (AccountManager*)sharedManager {
   if (sharedAccountManager_ == nil)
@@ -89,11 +91,12 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)showAuthAlert {
+  [[RKRequestQueue sharedQueue] cancelAllRequests];
   UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:nil
-                                                     message:@"\n\n\n"
-                                                    delegate:self
-                                           cancelButtonTitle:@"Cancel"
-                                           otherButtonTitles:@"Go", nil];
+                                                      message:@"\n\n\n"
+                                                     delegate:self
+                                            cancelButtonTitle:@"Cancel"
+                                            otherButtonTitles:@"Go", nil];
   usernameField_ = [[UITextField alloc] initWithFrame:CGRectMake(16, 20, 252, 25)];
   usernameField_.placeholder = @"username";
   usernameField_.borderStyle = UITextBorderStyleRoundedRect;
@@ -126,6 +129,12 @@ static AccountManager* sharedAccountManager_ = nil;
     [self showAuthAlert];
     return;
   }
+  NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
+  // Fresh install.
+  if (!tokenExpirationDate) {
+    [self showAuthAlert];
+    return;
+  }
   NSString* accessToken = [accessTokenKeychainItem_ objectForKey:(id)kSecValueData];
   NSString* refreshToken = [refreshTokenKeychainItem_ objectForKey:(id)kSecValueData];
   if (!(accessToken && refreshToken)) {
@@ -136,7 +145,7 @@ static AccountManager* sharedAccountManager_ = nil;
     self.authToken = [[[OAuthToken alloc] init] autorelease];
     self.authToken.accessToken = accessToken;
     self.authToken.refreshToken = refreshToken;
-    NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
+
     NSTimeInterval timeUntilTokenRefresh = [tokenExpirationDate timeIntervalSinceNow];
     if (timeUntilTokenRefresh <= 0) {
       [self sendTokenRefreshRequest];
@@ -148,7 +157,9 @@ static AccountManager* sharedAccountManager_ = nil;
                                                         userInfo:nil
                                                          repeats:YES];
     [self sendUserInfoRequest];
+    authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
+    self.alertView = nil;
     firstRun_ = NO;
   }
 }
@@ -157,10 +168,6 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    if (![objectLoader.response isUnauthorized] && numRetries_++ < kMaxAuthRetries) {
-      [self sendLoginRequest];
-      return;
-    }
     [self showAuthAlert];
     return;
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
@@ -169,10 +176,10 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
-  numRetries_ = 0;
-
   if ([object isKindOfClass:[User class]]) {
     self.currentUser = (User*)object;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
+                                                        object:self];
     return;
   }
   
@@ -200,6 +207,7 @@ static AccountManager* sharedAccountManager_ = nil;
                                                       userInfo:nil
                                                        repeats:YES];
   if (firstRun_) {
+    authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
     firstRun_ = NO;
   }
@@ -268,12 +276,13 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - UIAlertViewDelegate methods.
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-  [passwordKeychainItem_ setObject:usernameField_.text forKey:(id)kSecAttrAccount];
-  [passwordKeychainItem_ setObject:passwordField_.text forKey:(id)kSecValueData];
-  usernameField_ = nil;
-  passwordField_ = nil;
-  [self sendLoginRequest];
-  self.alertView = nil;
+  if (usernameField_.text.length > 0 && passwordField_.text.length > 0) {
+    [passwordKeychainItem_ setObject:usernameField_.text forKey:(id)kSecAttrAccount];
+    [passwordKeychainItem_ setObject:passwordField_.text forKey:(id)kSecValueData];
+    [self sendLoginRequest];
+  } else {
+    [self showAuthAlert];
+  }
 }
 
 

@@ -12,34 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "Entity.h"
-
-@interface PlaceAnnotation : NSObject<MKAnnotation> {
- @private
-  CLLocationDegrees latitude_;
-  CLLocationDegrees longitude_;
-}
-
-- (id)initWithLatitude:(CLLocationDegrees)latitude
-             longitude:(CLLocationDegrees)longitude;
-@end
-
-@implementation PlaceAnnotation
-
-- (id)initWithLatitude:(CLLocationDegrees)latitude
-             longitude:(CLLocationDegrees)longitude {
-  self = [super init];
-  if (self) {
-    latitude_ = latitude;
-    longitude_ = longitude;
-  }
-  return self;
-}
-
-- (CLLocationCoordinate2D)coordinate {
-  return CLLocationCoordinate2DMake(latitude_, longitude_);
-}
-
-@end
+#import "STPlaceAnnotation.h"
 
 @interface PlaceDetailViewController ()
 - (void)confirmCall;
@@ -74,8 +47,7 @@
   latitude_ = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   longitude_ = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(latitude_, longitude_);
-  CGFloat latlLongSpan = 400.0f / 111000.0f;
-  MKCoordinateSpan mapSpan = MKCoordinateSpanMake(latlLongSpan, latlLongSpan);
+  MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
   MKCoordinateRegion region = MKCoordinateRegionMake(mapCoord, mapSpan);
   self.mainContentView.hidden = NO;
   [self.mapView setRegion:region animated:YES];
@@ -99,7 +71,7 @@
 }
 
 - (void)addAnnotation {
-  annotation_ = [[PlaceAnnotation alloc] initWithLatitude:latitude_ longitude:longitude_];
+  annotation_ = [[STPlaceAnnotation alloc] initWithLatitude:latitude_ longitude:longitude_];
   [self.mapView addAnnotation:annotation_];
   [annotation_ release];
 }
@@ -107,7 +79,7 @@
 #pragma mark - MKMapViewDelegate Methods
 
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
-  if (![annotation isKindOfClass:[PlaceAnnotation class]])
+  if (![annotation isKindOfClass:[STPlaceAnnotation class]])
     return nil;
 
   MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];

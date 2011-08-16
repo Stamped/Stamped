@@ -11,11 +11,14 @@
 
 #import "STReloadableTableViewController.h"
 
+@class MKMapView;
+
 @interface InboxViewController : STReloadableTableViewController <UIScrollViewDelegate, RKObjectLoaderDelegate> {
  @private
   BOOL userDidScroll_;
 }
 
+@property (nonatomic, readonly) MKMapView* mapView;
 @property (nonatomic, assign) IBOutlet UIView* filterView;
 @property (nonatomic, retain) IBOutlet UIButton* foodFilterButton;
 @property (nonatomic, retain) IBOutlet UIButton* booksFilterButton;

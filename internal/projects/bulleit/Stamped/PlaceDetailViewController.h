@@ -10,11 +10,11 @@
 
 #import <MapKit/MapKit.h>
 
-@class PlaceAnnotation;
+@class STPlaceAnnotation;
 
 @interface PlaceDetailViewController : EntityDetailViewController <MKMapViewDelegate> {
  @private
-  PlaceAnnotation* annotation_;
+  STPlaceAnnotation* annotation_;
   CLLocationDegrees latitude_;
   CLLocationDegrees longitude_;
 }
