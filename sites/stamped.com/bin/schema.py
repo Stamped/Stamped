@@ -1,0 +1,713 @@
+#!/usr/bin/python
+
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
+import copy, logs
+from datetime import datetime
+from errors import *
+
+"""
+The goal of the Schema class is to create a wrapper that allows for certain 
+constraints to easily be applied to a structured set of data, ensuring that 
+anything within the wrapper is valid and complete. Additionally, it is designed 
+to allow for easy reformatting of data, with the hope of centralizing any 
+transformations in order to minimize variations across structures. 
+
+The class is built out of SchemaElement blocks. Each SchemaElement can be set 
+to a specific value; it will then guarantee that the value meets any constrains 
+placed on it. 
+
+These constraints include:
+
+* Type          The type that the value can be. This currently includes 
+                basestring, bool, int, long, float, and datetime. It does not 
+                include dict or list unless set by a Schema or SchemaList, 
+                respectively. Note that this constraint is mandatory and must
+                be set.
+
+* Required      Require that the value be set (i.e. is not None).
+
+* Default       Set the default value. This also ensures that the value is 
+                never None, i.e. the value is always set to default instead 
+                of None. 
+
+* Case          Set a specific case for the value. Accepted values are "upper", 
+                "lower", and "mixed". If "lower", for example, the lowercase 
+                value of the string will be stored. Note that this only applies 
+                to basestring types only.
+
+* Format        Set a specific format for the value. Current accepted values 
+                are "email", "url", and "screen_name". This will guarantee that 
+                the value matches specific custom constraints (e.g. is a valid 
+                email address, has URL-safe characters, etc.).
+                NOTE: NOT YET IMPLEMENTED
+
+* MaxLength     Set a maximum length for the value. Valid for strings only.
+
+* MinLength     Set a minimum length for the value. Valid for strings only.
+
+* MaxValue      Set a maximum value for the value. Valid for numbers only.
+
+* MinValue      Set a minimum value for the value. Valid for numbers only.
+
+Additionally, a SchemaElement has the following attributes and functions:
+
+* value         Returns the value of the element.
+
+* isSet         Returns a boolean denoting if the value has been set or not.
+                This is primarily used when you want to know if a None value 
+                is overwriting a previous value or if it is still the default.
+
+* validate      Check to see if any problems exist within the element. This 
+                does not need to be called manually, and is called after a
+                new value is set.
+
+* setElement    Set the value of the element.
+
+Note that a SchemaElement by iteslf cannot be directly compared to a normal
+object with the same value. For example, if 'element' is a SchemaElement with
+the value set to "abc", then:
+
+    element != str("abc")
+
+However, the element can easily be converted into its value:
+
+    str(element) == str("abc")
+
+    element.value == str("abc")
+
+Additionally, if the element is contained within a Schema or SchemaList and is
+derived that way, it will automatically return the value and not the 
+SchemaElement:
+
+    schema['element'] == str("abc")
+
+Given that SchemaElements are only intended to be used within an additional 
+wrapper (Schemas and SchemaLists), however, this should not be a common 
+situation.
+
+"""
+
+class SchemaElement(object):
+
+    def __init__(self, requiredType, **kwargs):
+        self._name          = None
+        self._data          = None
+        self._isSet         = False
+        self._requiredType  = self._setType(requiredType)
+        self._required      = kwargs.pop('required', False)
+        self._default       = kwargs.pop('default', None)
+        self._case          = self._setCase(kwargs.pop('case', None))
+        # self._format        = kwargs.pop('format', None)
+        self._maxLength     = self._setInt(kwargs.pop('maxLength', None))
+        self._minLength     = self._setInt(kwargs.pop('minLength', None))
+        self._maxValue      = self._setInt(kwargs.pop('maxValue', None))
+        self._minValue      = self._setInt(kwargs.pop('minValue', None))
+
+        if self._default != None:
+            self.setElement('[default]', self._default)
+        
+    def __str__(self):
+        return str(self.value)
+
+    def __len__(self):
+        if self._data == None:
+            return 0
+        return len(self._data)
+
+    # Properties
+
+    @property
+    def value(self):
+        return self._data
+
+    @property
+    def isSet(self):
+        return self._isSet
+
+    # Private Functions
+
+    def _setType(self, requiredType):
+        allowed = [basestring, bool, int, long, float, dict, list, datetime]
+        if requiredType in allowed:
+            return requiredType
+        msg = "Invalid Type (%s)" % requiredType
+        logs.warning(msg)
+        raise SchemaTypeError(msg)
+
+    def _setInt(self, number):
+        if number == None:
+            return None
+        return int(number)
+
+    def _setCase(self, case):
+        if case in ['upper', 'lower', 'mixed']:
+            return case
+        return None
+
+    # Public Functions
+
+    def validate(self):
+        if self._data == None and self._required == True:
+            msg = "Required field empty (%s)" % self._name
+            logs.warning(msg)
+            raise SchemaValidationError(msg)
+
+        if self._data != None and not isinstance(self._data, self._requiredType):
+            msg = "Incorrect type (%s)" % self._name
+            logs.warning(msg)
+            raise SchemaKeyError(msg)
+
+        return True
+        
+    def setElement(self, name, value):
+        try:
+            msg = "Set Element Failed (%s)" % name
+
+            if value == None and self._default != None:
+                value = self._default
+
+            # Type checking
+            if value != None and not isinstance(value, self._requiredType):
+
+                if isinstance(value, dict):
+                    msg = "Cannot set dictionary as value (%s)" % name
+                    logs.warning(msg)
+                    raise SchemaTypeError(msg)
+
+                elif isinstance(value, list):
+                    msg = "Cannot set list as value (%s)" % name
+                    logs.warning(msg)
+                    raise SchemaTypeError(msg)
+
+                elif self._requiredType == bool:
+                    b = str(value).lower()
+                    if b == 'true' or b == '1':
+                        value = True
+                    elif b == 'false' or b == '0':
+                        value = False
+
+                elif self._requiredType == basestring:
+                    value = str(value)
+                elif self._requiredType == float:
+                    value = float(value)
+                elif self._requiredType == int:
+                    value = int(value)
+
+                if not isinstance(value, self._requiredType):
+                    msg = "Incorrect type (%s)" % name
+                    logs.warning(msg)
+                    raise SchemaKeyError(msg)
+
+            # Min/Max Length
+            if self._maxLength and len(value) > self._maxLength:
+                msg = "Length is too long (%s)" % name
+                raise
+
+            elif self._minLength and len(value) < self._minLength:
+                msg = "Length is too short (%s)" % name
+                raise
+
+            # Min/Max Value
+            if self._maxValue and value > self._maxValue:
+                msg = "Value is too high (%s)" % name
+                raise
+
+            elif self._minValue and value < self._minValue:
+                msg = "Value is too low (%s)" % name
+                raise
+
+            # Case
+            if self._case:
+                if self._case == 'upper':
+                    value = str(value).upper()
+                elif self._case == 'lower':
+                    value = str(value).lower()
+            
+            self._name = name
+            self._data = value
+            self._isSet = True
+            self.validate()
+
+        except:
+            logs.warning(msg)
+            raise SchemaValidationError(msg)
+
+
+"""
+A SchemaList is a special type of SchemaElement that contains multiple 
+SchemaElements of the same type. It is, not surprisingly, designed to mimic
+a standard Python list in functionality. Like a normal list, it can hold any
+number of values; however, unlike a normal list, it cannot hold different 
+types of elements (e.g. it cannot have both a basestring and a float). 
+
+A SchemaList has all of the typical Python list functions:
+
+* append
+* insert
+* extend
+* remove
+* pop
+* index
+* count
+* sort
+* reverse
+
+It also includes:
+
+* value         Returns the value of the element. This includes the values of
+                any child elements, e.g. all inner SchemaElements are returned
+                with the value.
+
+* isSet         Inherited from SchemaElement.
+
+* validate      Check to see if any problems exist within the list. This is
+                called automatically whenever the list is modified. 
+
+* setElement    Inherited from SchemaElement. Sets the SchemaList to a given
+                list.
+
+* importData    Bulk import data. This can also be called during instantiation,
+                e.g. a = SchemaList(data). Unlike setElement, this appends the
+                data onto the list and does not overwrite any existing data.
+
+Finally, a SchemaList can take an additional parameter for parsing data during
+import. This is the "delimiter", and allows you to pass a formatted string and
+have the SchemaList automatically parse the variable into the list elements.
+
+Note that a SchemaList by itself cannot be directly compared to a normal list.
+Instead, the contents of the SchemaList should be compared to the contents of
+the normal list. This can most easily be accomplished by comparing the value 
+of the SchemaList to the list:
+
+    schemaList != [1, 2, 3]
+
+    schemaList.value == [1, 2, 3]
+
+"""
+
+class SchemaList(SchemaElement):
+    
+    def __init__(self, element, **kwargs):
+        SchemaElement.__init__(self, dict, **kwargs)
+        self._element       = element
+        self._data          = []
+        self._delimiter     = kwargs.pop('delimiter', None)
+
+    def __len__(self):
+        return len(self._data)
+    
+    def __getitem__(self, key):
+        return self._data[key]
+
+    def __setitem__(self, key, item):
+        self._data[key] = self._import(item)
+        self.validate()
+    
+    def __delitem__(self, key):
+        del(self._data[key])
+        self.validate()
+
+    # Properties
+
+    @property
+    def value(self):
+        ret = []
+        for item in self._data:
+            ret.append(item.value)
+        return ret
+
+    # Private Functions
+
+    def _import(self, item):
+        element = self._element
+        if isinstance(item, SchemaElement):
+            return item
+
+        elif isinstance(element, Schema) or isinstance(element, SchemaList):
+            newSchemaItem = copy.deepcopy(element)
+            newSchemaItem.importData(item)
+            return newSchemaItem
+
+        elif isinstance(element, SchemaElement):
+            newSchemaElement = copy.deepcopy(element)
+            newSchemaElement.setElement('e', item)
+            return newSchemaElement
+
+        else:
+            msg = "Invalid List Element (%s)" % element
+            logs.warning(msg)
+            raise SchemaTypeError(msg)
+
+    # List Functions
+
+    def append(self, item):
+        self._data.append(self._import(item))
+
+    def insert(self, position, item):
+        self._data.insert(position, self._import(item))
+
+    def extend(self, items):
+        data = []
+        for item in items:
+            data.append(self._import(item))
+        self._data.extend(data)
+
+    def remove(self, item):
+        return self._data.remove(self._import(item))
+    
+    def pop(self, i=-1):
+        return self._data.pop(i).value
+
+    def index(self, item):
+        if isinstance(item, SchemaElement):
+            item = item.value
+        return self.value.index(item)
+
+    def count(self, item):
+        if isinstance(item, SchemaElement):
+            item = item.value
+        return self.value.count(item)
+
+    def sort(self):
+        self._data.sort()
+    
+    def reverse(self):
+        self._data.reverse()
+
+    # Public Functions
+
+    def importData(self, data):
+        # Make sure there's something to import
+        if data == None or len(data) == 0:
+            return
+
+        # Use delimiter if set and if data not already a list
+        if self._delimiter != None and isinstance(data, basestring):
+            try:
+                data = data.split(self._delimiter)
+            except:
+                msg = "Invalid Delimiter for Data (%s)" % data
+                logs.warning(msg)
+                raise SchemaValidationError(msg)
+
+        # Ensure that data is a valid list
+        if not isinstance(data, list):
+            msg = "Incorrect List Input (%s)" % data
+            logs.warning(msg)
+            raise SchemaTypeError(msg)
+
+        data = copy.copy(data)
+
+        # Ensure that element is set properly
+        if not isinstance(self._element, SchemaElement):
+            msg = "Invalid List Element (%s)" % self._element
+            logs.warning(msg)
+            raise SchemaTypeError(msg)
+        element = self._element
+
+        # Append data
+        for item in data:
+            self.append(item)
+
+        self._isSet = True
+
+    def validate(self):
+        if len(self._data) == 0 and self._required == True:
+            msg = "Required List Empty (%s)" % self._name
+            logs.warning(msg)
+            raise SchemaValidationError(msg)
+
+        for item in self._data:
+            if not isinstance(item, SchemaElement):
+                msg = "Invalid List Element (%s)" % self._element
+                logs.warning(msg)
+                raise SchemaTypeError(msg)
+            item.validate()
+
+    def setElement(self, name, value):
+        self._data = []
+        self._name = name
+        self.importData(value)
+
+
+"""
+A Schema is a second variety of the SchemaElement class that contains multiple 
+SchemaElements in a dictionary-style format. Similar to how a SchemaList mimics
+a Python list, a Schema mimics a generic Python dictionary. 
+
+By definition, a Schema will have a SchemaElement set as the value of every
+sub-key. Although chaining can occur (e.g. a Schema within a Schema), the sub-
+value must be a SchemaElement. (It can also be a SchemaList, but there too, the
+value of every item in the SchemaList must be a SchemaElement). 
+
+To query a Schema, classic dictionary notation can be used:
+
+    schema['item'] == 1
+
+    schema['items']['item'] == 'abc'
+
+Dot notation can also be used:
+
+    schema.item == 1
+
+    schema.items.item == 'abc'
+
+If a raw SchemaElement is returned, it will always be returned as the value 
+(instead of the object). Conversely, if a Schema or a SchemaList is returned,
+it will be the object and not the value. To obtain the value you can access 
+the value property:
+
+    schema != {'a': 1}
+
+    schema.value == {'a': 1}
+
+The following attributes and functions are available to a Schema:
+
+* value         Returns the value of the element. This includes the values of
+                any child elements, e.g. all inner Schemas and SchemaElements
+                are returned as their values.
+
+* validate      Check to see if any problems exist within the list. This is
+                called automatically whenever the Schema is modified.
+
+* setElement    Set the Schema to use a specific set of data.
+
+* importData    Bulk import data. This can also be called during instantiation,
+                e.g. a = Schema(data). Note that this attempts to _merge_ the
+                data and not completely replace it; if an element is set within
+                the Schema that is not overwritten by the new data, it will 
+                remain. To overwrite all existing data, use setElement().
+
+* exportFields  Export an explicitly defined list of fields. This allows for
+                the user to specify certain fields that they want to use in
+                order to construct a new Schema or a specific dictionary.
+
+* exportSparse  Export only fields that have been set (i.e. where isSet==True). 
+                This allows for the user to export only data that has been
+                incrementally changed. It is primarily useful for updates.
+
+* setSchema     This function must be implemented and called on any sub-classes
+                of the Schema. This is used to define the elements of the
+                Schema.
+
+* getDataAsDict Deprecated - use value instead.
+
+Finally, when importing new data into a Schema, you can pass it the parameter
+"discardExcess=True". This will override the default behavior for unrecognized
+fields in data import, and will discard them instead of failing. This is useful
+when not all fields are expected to match, but should not be used as a first
+resort.
+
+"""
+
+class Schema(SchemaElement):
+    
+    def __init__(self, data=None, **kwargs):
+        SchemaElement.__init__(self, dict, **kwargs)
+        self._elements      = {}
+        self._discardExcess = kwargs.pop('discardExcess', False)
+
+        self.setSchema()
+        self.importData(data)
+
+    def __setattr__(self, name, value):
+        if name[:1] == '_':
+            object.__setattr__(self, name, value)
+
+        elif isinstance(value, SchemaElement):
+            try:
+                self._elements[name] = value
+            except:
+                msg = "Cannot Add Element (%s)" % name
+                logs.warning(msg)
+                raise SchemaKeyError(msg)
+        
+        else:
+            try:
+                self._elements[name].setElement(name, value)
+            except:
+                msg = "Cannot Set Element (%s)" % name
+                logs.warning(msg)
+                raise SchemaKeyError(msg)
+    
+    def __setitem__(self, key, value):
+        self.__setattr__(key, value)
+    
+    def __delattr__(self, key):
+        self.__setattr__(key, None)
+    
+    def __delitem__(self, key):
+        self.__setattr__(key, None)
+    
+    def __getattr__(self, name):
+        if name[:1] == '_':
+            return SchemaElement.__getattr__(self, name)
+        
+        if name in self._elements:
+            if isinstance(self._elements[name], Schema) \
+                or isinstance(self._elements[name], SchemaList):
+                return self._elements[name]
+            return self._elements[name].value
+        
+        msg = "Cannot Get Element (%s)" % name
+        logs.warning(msg)
+        raise SchemaKeyError(msg)
+        
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+    
+    def __len__(self):
+        return len(self._elements)
+
+    def __iter__(self):
+        return self.value.__iter__()
+
+    def __contains__(self, item):
+        def _contains(_item, data):
+            output = 0
+            if _item in data and data[_item]._isSet == True:
+                output += 1
+            for k, v in data.iteritems():
+                if isinstance(v, Schema):
+                    if _item in v:
+                        output += 1
+            return output
+        
+        if _contains(item, self._elements) == 1:
+            return True
+        if _contains(item, self._elements) == 0:
+            return False
+        msg = "Multiple Keys Exist (%s)" % item
+        logs.warning(msg)
+        raise SchemaKeyError(msg)
+
+    # Properties
+
+    @property
+    def value(self):
+        ret = {}
+        for k, v in self._elements.iteritems():
+            ret[k] = v.value
+        return ret
+
+    # Private Functions
+
+    def _importData(self, data, clear=True):
+
+        if not isinstance(data, dict) and data != None:
+            msg = "Invalid Type (%s)" % data
+            logs.warning(msg)
+            raise SchemaTypeError(msg)
+
+        ret = {}
+        data = copy.copy(data)
+
+        for k, v in self._elements.iteritems():
+            item = None
+            isSet = False
+            if data != None and k in data:
+                item = data.pop(k)
+                isSet = True
+            
+            # Dictionary
+            if isinstance(v, Schema) or isinstance(v, SchemaList):
+                if item == None:
+                    if v._required == True:
+                        msg = "Missing Nested Element (%s)" % k
+                        logs.warning(msg)
+                        raise SchemaValidationError(msg)
+                if clear:
+                    v.setElement(k, item)
+                else:
+                    v.importData(item)
+
+            # Value
+            elif isinstance(v, SchemaElement):
+                if isSet:
+                    v.setElement(k, item)
+                elif clear:
+                    v.setElement(k, None)
+                else:
+                    v.validate()
+            
+            else:
+                msg = "Unrecognized Element (%s)" % k
+                logs.warning(msg)
+                raise SchemaTypeError(msg)
+
+        if len(data) > 0 and self._discardExcess == False:
+            msg = "Unknown Field: %s" % data
+            logs.warning(msg)
+            raise SchemaValidationError(msg)
+        
+        self._isSet = True
+
+    # Public Functions
+
+    def validate(self):
+        if len(self._elements) == 0 and self._required == True:
+            msg = "Required Schema Empty (%s)" % self._name
+            logs.warning(msg)
+            raise SchemaValidationError(msg)
+
+        for k, v in self._elements.iteritems():
+            if isinstance(v, SchemaElement):
+                v.validate()
+            else:
+                msg = "Unrecognized Element (%s)" % self._name
+                logs.warning(msg)
+                raise SchemaValidationError(msg)
+
+    def setElement(self, name, data):
+        self._name = name
+        self._importData(data, clear=True)
+
+    def importData(self, data):
+        if data == None or len(data) == 0:
+            return
+        self._importData(data, clear=False)
+
+    def exportFields(self, fields):
+        ret = {}
+        for field in fields:
+            result = self
+            path = field.split('.')
+            for level in path:
+                result = result[level]
+            if isinstance(result, Schema) or isinstance(result, SchemaList):
+                ret[field] = result.value
+            else:
+                ret[field] = result
+        return ret
+
+    def exportSparse(self):
+        ret = {}
+        for k, v in self._elements.iteritems():
+            if isinstance(v, Schema):
+                data = v.exportSparse()
+                if len(data) > 0:
+                    ret[k] = data
+            elif isinstance(v, SchemaList):
+                if len(v) > 0:
+                    ret[k] = v.value
+            elif isinstance(v, SchemaElement):
+                if v.isSet == True:
+                    ret[k] = v.value
+            else:
+                msg = "Unrecognized Element (%s)" % k
+                logs.warning(msg)
+                raise SchemaTypeError(msg)
+        return ret
+
+    def setSchema(self):
+        raise NotImplementedError
+
+    # DEPRECATED
+
+    def getDataAsDict(self):
+        return self.exportData()
+

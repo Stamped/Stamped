@@ -6,9 +6,13 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, os, unittest
+import copy, os, sys, unittest
+
+base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, base)
+
 from datetime import datetime
-from Schemas import *
+# from Schemas import *
 from schema import *
 
 
@@ -440,6 +444,16 @@ class NestedSchemaTest(ASchemaTestCase):
             ret = True
         self.assertTrue(ret)
 
+    def test_set_element(self):
+        self.schema.setElement('schema', {'inner': {'required': self.sampleString}})
+        self.assertTrue(self.schema.basestring == None)
+        self.assertTrue(self.schema.inner.item == None)
+
+    def test_import(self):
+        self.schema.importData({'inner': {'required': self.sampleString}})
+        self.assertTrue(self.schema.basestring != None)
+        self.assertTrue(self.schema.inner.item != None)
+
 
 
 
@@ -576,7 +590,6 @@ class ListCommaSchemaTest(ASchemaTestCase):
         self.schema = ListCommaSchema(self.sampleData)
 
     def test_retrieve(self):
-        print '!!!!!!!!!!!', self.schema
 
         self.assertIsInstance(self.schema.items.value, list)
 
@@ -586,8 +599,42 @@ class ListCommaSchemaTest(ASchemaTestCase):
             )
 
 
-        
 
+class ContainsSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':   self.sampleString,
+            'integer':      self.sampleInt,
+            'float':        self.sampleFloat,
+            'required':     self.sampleString,
+        }
+        self.schema = SimpleSchema(self.sampleData)
+
+    def tearDown(self):
+        pass
+
+    def test_contain(self):
+        self.assertIn('basestring', self.schema)
+        self.assertIn('integer', self.schema)
+        self.assertIn('float', self.schema)
+        self.assertIn('required', self.schema)
+        
+    def test_not_set(self):
+        try:
+            self.assertIn('long', self.schema)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+        try:
+            self.assertIn('madeupstring', self.schema)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
 
 
 if __name__ == '__main__':
