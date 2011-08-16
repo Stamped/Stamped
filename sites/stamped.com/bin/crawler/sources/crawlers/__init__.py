@@ -7,4 +7,5 @@ import ZagatCrawler
 import LATimesCrawler
 import BostonMagCrawler
 import ChicagoMagCrawler
+import PhillyMagCrawler
 
