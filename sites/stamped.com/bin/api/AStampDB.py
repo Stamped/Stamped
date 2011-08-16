@@ -34,4 +34,4 @@ class AStampDB(object):
     @abstract
     def getStamps(self, stampIds):
         pass
-    
+

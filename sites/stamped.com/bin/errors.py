@@ -11,3 +11,7 @@ class StampedHTTPError(Exception):
 		self.code = code
 		self.msg = msg
 		self.desc = desc
+
+class InvalidState(Exception):
+    pass
+

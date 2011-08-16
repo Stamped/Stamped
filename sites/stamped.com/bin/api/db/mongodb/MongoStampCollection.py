@@ -72,6 +72,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     def __init__(self):
         AMongoCollection.__init__(self, collection='stamps')
         AStampDB.__init__(self)
+        
+        # Define patterns
+        self.user_regex  = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
+        self.reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
     
     ### PUBLIC
     
@@ -352,15 +356,11 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     ### PRIVATE
     
     def _extractMentions(self, text):
-        # Define patterns
-        user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
-        reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
-        
         mentions = [] 
         
         # Check if string match exists at beginning. Should combine with regex 
         # below once I figure out how :)
-        reply = reply_regex.match(text)
+        reply = self.reply_regex.match(text)
         if reply:
             data = {}
             data['indices'] = [(reply.start()), reply.end()]
@@ -372,7 +372,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             mentions.append(data)
             
         # Run through and grab mentions
-        for user in user_regex.finditer(text):
+        for user in self.user_regex.finditer(text):
             data = {}
             data['indices'] = [(user.start()+1), user.end()]
             data['screen_name'] = user.group(0)[2:]

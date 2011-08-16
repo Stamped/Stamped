@@ -49,6 +49,8 @@ class OpenTableDump(AExternalDumpEntitySource):
         else:
             numEntities = max(0, sheet.nrows - Globals.options.offset)
         
+        utils.log("[%s] parsing %d entities" % (self, numEntities - 1))
+        
         pool = Pool(128)
         for i in xrange(1, numEntities):
             pool.spawn(self._parseEntity, sheet, Globals.options.offset + i, numEntities)
@@ -59,7 +61,7 @@ class OpenTableDump(AExternalDumpEntitySource):
         
         pool.join()
         self._output.put(StopIteration)
-        utils.log("[%s] finished parsing %d entities" % (self.NAME, numEntities - 1))
+        utils.log("[%s] finished parsing %d entities" % (self, numEntities - 1))
     
     def _parseEntity(self, sheet, index, numEntities):
         if numEntities > 100 and ((index - 1) % (numEntities / 100)) == 0:

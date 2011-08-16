@@ -140,7 +140,7 @@ class StampedAPI(AStampedAPI):
         
         if not account.isValid:
             raise InvalidArgument('Invalid input')
-            
+        
         userId = self._accountDB.updateAccount(account)
         account = self._accountDB.getAccount(userId)
         

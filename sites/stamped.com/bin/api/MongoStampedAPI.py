@@ -29,18 +29,8 @@ class MongoStampedAPI(StampedAPI):
     def __init__(self):
         StampedAPI.__init__(self, "MongoStampedAPI")
         
-        #self._accountDB      = MongoAccountCollection()
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
-        #self._userDB         = MongoUserCollection()
-        #self._stampDB        = MongoStampCollection()
-        #self._commentDB      = MongoCommentCollection()
-        #self._favoriteDB     = MongoFavoriteCollection()
-        #self._collectionDB   = MongoCollectionCollection()
-        #self._friendshipDB   = MongoFriendshipCollection()
-        #self._activityDB     = MongoActivityCollection()
-        
-        #self._validate()
     
     @lazyProperty
     def _accountDB(self):

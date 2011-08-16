@@ -94,6 +94,8 @@ class EntityDeduper(Greenlet):
             return
         
         if len(matches) > 0:
+            # TODO: is there any way that entity1 is already in matches, and 
+            # it will be removed as well as kept?
             matches.insert(0, entity1)
             
             # determine which one of the duplicates to keep

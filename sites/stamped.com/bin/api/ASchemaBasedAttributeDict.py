@@ -17,7 +17,7 @@ class ASchemaBasedAttributeDict(object):
         self._data = data or { }
     
     def __getitem__(self, key):
-        return self._data[key]
+        return self.__getattr__(key)
     
     def __setitem__(self, key, value):
         self.add({key : value})

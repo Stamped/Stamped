@@ -1,0 +1,43 @@
+#!/usr/bin/python
+
+__author__ = "Stamped (dev@stamped.com)"
+__version__ = "1.0"
+__copyright__ = "Copyright (c) 2011 Stamped.com"
+__license__ = "TODO"
+
+import Globals, utils
+from ATitleBasedEntityMatcher import ATitleSourceBasedEntityMatcher
+
+__all__ = [
+    "ZagatEntityMatcher", 
+    "UrbanspoonEntityMatcher", 
+    "NYMagEntityMatcher", 
+    "SFMagEntityMatcher", 
+    "LATimesEntityMatcher", 
+    "BostonMagEntityMatcher", 
+]
+
+class ZagatEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api, options):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.zagat')
+
+class UrbanspoonEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api, options):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.urbanspoon')
+
+class NYMagEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api, options):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.nymag')
+
+class SFMagEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api, options):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.sfmag')
+
+class LATimesEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api, options):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.latimes')
+
+class BostonMagEntityMatcher(ATitleSourceBasedEntityMatcher):
+    def __init__(self, stamped_api, options):
+        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.bostonmag')
+

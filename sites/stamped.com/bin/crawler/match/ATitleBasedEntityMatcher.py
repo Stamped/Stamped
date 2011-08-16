@@ -6,11 +6,19 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from utils import abstract
+import string
+
+from AEntityMatcher import AEntityMatcher
+from difflib import SequenceMatcher
+
+__all__ = [
+    "ATitleBasedEntityMatcher", 
+    "ATitleSourceBasedEntityMatcher", 
+]
 
 class ATitleBasedEntityMatcher(AEntityMatcher):
-    def __init__(self, stamped_api):
-        AEntityMatcher.__init__(self, stamped_api)
+    def __init__(self, stamped_api, options):
+        AEntityMatcher.__init__(self, stamped_api, options)
         
         self.initWordBlacklists()
     
@@ -190,39 +198,13 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
 # ------------------------------------------------------------------------------
 
 class ATitleSourceBasedEntityMatcher(ATitleBasedEntityMatcher):
-    def __init__(self, stamped_api, source):
-        ATitleBasedEntityMatcher.__init__(self, stamped_api)
+    def __init__(self, stamped_api, options, source):
+        ATitleBasedEntityMatcher.__init__(self, stamped_api, options)
         
         self.source = source
     
     def getDuplicateCandidates(self, entity):
-        results = self._entityDB.find({ self.source, { "$exists" : True }})
+        results = self._entityDB._collection.find({ self.source : { "$exists" : True }})
         
         return self._mongoToObj(results)
-
-# ------------------------------------------------------------------------------
-
-class ZagatEntityMatcher(ATitleSourceBasedEntityMatcher):
-    def __init__(self, stamped_api):
-        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.zagat')
-
-class UrbanspoonEntityMatcher(ATitleSourceBasedEntityMatcher):
-    def __init__(self, stamped_api):
-        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.urbanspoon')
-
-class NYMagEntityMatcher(ATitleSourceBasedEntityMatcher):
-    def __init__(self, stamped_api):
-        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.nymag')
-
-class SFMagEntityMatcher(ATitleSourceBasedEntityMatcher):
-    def __init__(self, stamped_api):
-        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.sfmag')
-
-class LATimesEntityMatcher(ATitleSourceBasedEntityMatcher):
-    def __init__(self, stamped_api):
-        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.latimes')
-
-class BostonMagEntityMatcher(ATitleSourceBasedEntityMatcher):
-    def __init__(self, stamped_api):
-        ATitleSourceBasedEntityMatcher.__init__(self, stamped_api, 'sources.bostonmag')
 
