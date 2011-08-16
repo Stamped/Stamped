@@ -55,6 +55,7 @@ class EntityMatcher(AEntityMatcher):
         if 'fandango' in entity:
             return self._fandango_matcher
         
+        print type(entity)
         from pprint import pprint
         pprint(entity)
         

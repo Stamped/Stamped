@@ -40,6 +40,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             'created' : datetime, 
             'modified': datetime, 
         }, 
+        'coordinates': {
+            'lng' : float, 
+            'lat' : float, 
+        }, 
         'details': {
             'place': {
                 'address': basestring, 

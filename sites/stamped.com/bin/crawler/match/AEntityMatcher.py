@@ -31,7 +31,7 @@ class AEntityMatcher(object):
         return self.stamped_api._entityDB
     
     @property
-    def _placesEntityDB(self):
+    def _placesDB(self):
         return self.stamped_api._placesEntityDB
     
     @property
@@ -40,13 +40,12 @@ class AEntityMatcher(object):
     
     def dedupeOne(self, mongo_entity, isPlace):
         try:
-            entity  = self._mongoToObj(self._entityDB._collection.find_one({ '_id' : mongo_entity['_id'] }))
             if isPlace:
-                entity0 = self._mongoToObj(mongo_entity)
-                entity.lat = entity0.lat
-                entity.lng = entity0.lng
+                entity = Entity(self._placesDB._mongoToObj(mongo_entity, 'entity_id'))
+            else:
+                entity = self._mongoToObj(mongo_entity)
             
-            dupes0  = self.getDuplicates(entity)
+            dupes0 = self.getDuplicates(entity)
             
             if len(dupes0) <= 1:
                 return
@@ -78,7 +77,7 @@ class AEntityMatcher(object):
             
             if not self.options.noop:
                 self._entityDB.removeEntity(entity_id)
-                self._placesEntityDB.removeEntity(entity_id)
+                self._placesDB.removeEntity(entity_id)
         except InvalidState:
             pass
     
@@ -176,7 +175,7 @@ class AEntityMatcher(object):
             _addDict(entity.getDataAsDict(), keep)
             
             self._entityDB.removeEntity(entity.entity_id)
-            self._placesEntityDB.removeEntity(entity.entity_id)
+            self._placesDB.removeEntity(entity.entity_id)
         
         self._entityDB.updateEntity(keep)
     

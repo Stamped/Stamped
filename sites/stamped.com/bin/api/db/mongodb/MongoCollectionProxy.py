@@ -42,6 +42,25 @@ class MongoCollectionProxy(object):
                 utils.log("[%s] retrying query" % (self, ))
                 time.sleep(1)
     
+    def command(self, cmd):
+        num_retries = 0
+        max_retries = 5
+        
+        while True:
+            try:
+                ret = self._database.command(cmd)
+                return ret
+            except AutoReconnect as e:
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "%s) unable to connect after %d retries (%s)" % \
+                        (self, max_retries, str(e))
+                    utils.log(msg)
+                    raise
+                
+                utils.log("[%s] retrying command" % (self, ))
+                time.sleep(1)
+    
     def find_one(self, spec_or_id=None, **kwargs):
         if spec_or_id is not None and not isinstance(spec_or_id, dict):
             spec_or_id = { "_id": spec_or_id }
