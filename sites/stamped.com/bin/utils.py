@@ -494,6 +494,14 @@ def getInstance(name):
     
     return None
 
+def is_ec2():
+    if not os.path.exists("/proc/xen"):
+        return False
+    if os.path.exists("/etc/ec2_version"):
+        return True
+    
+    return False
+
 def init_db_config(conf):
     if ':' in conf:
         host, port = conf.split(':')
@@ -504,7 +512,10 @@ def init_db_config(conf):
         if '.' in conf and not conf.endswith('.com'):
             instance = getInstance(conf)
             if instance:
-                host = instance.public_dns_name
+                if is_ec2():
+                    host = instance.private_dns_name
+                else:
+                    host = instance.public_dns_name
     
     config = {
         'mongodb' : {

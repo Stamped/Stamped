@@ -113,12 +113,7 @@ class AppleEPFDistro(Singleton):
     
     @lazyProperty
     def ec2(self):
-        if not os.path.exists("/proc/xen"):
-            return False
-        if os.path.exists("/etc/ec2_version"):
-            return True
-        
-        return False
+        return utils.is_ec2()
 
 class AppleEPFDumps(ASyncGatherSource):
     """
