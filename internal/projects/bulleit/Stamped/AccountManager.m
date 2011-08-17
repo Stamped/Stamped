@@ -122,9 +122,9 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)authenticate {
-  NSString* userID = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
-  if (userID.length > 0) {
-    self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
+  NSString* screenName = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
+  if (screenName.length > 0) {
+    self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
   } else {
     [self showAuthAlert];
     return;

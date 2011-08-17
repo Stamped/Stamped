@@ -12,6 +12,7 @@
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
+#import "PeopleTableViewCell.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
 
@@ -109,7 +110,7 @@ static const NSInteger kFollowersSection = 1;
                                                name:kCurrentUserHasUpdatedNotification
                                              object:[AccountManager sharedManager]];
   
-  userScreenNameLabel_.textColor = [UIColor lightGrayColor];
+  userScreenNameLabel_.textColor = [UIColor stampedLightGrayColor];
   userFullNameLabel_.textColor = [UIColor stampedBlackColor];
   [self loadFriendsFromNetwork];
 }
@@ -173,8 +174,6 @@ static const NSInteger kFollowersSection = 1;
 }
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  //NSError* error;
-  //id json = [response parsedBody:error];
   NSLog(@"json response: %@", response.bodyAsString);
 }
 
@@ -193,12 +192,12 @@ static const NSInteger kFollowersSection = 1;
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   static NSString* CellIdentifier = @"Cell";
   
-  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  PeopleTableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
 
-  // Configure the cell...
+  cell.user = [AccountManager sharedManager].currentUser;
 
   return cell;
 }
