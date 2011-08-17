@@ -468,10 +468,13 @@ def abstract(func):
 def getInstance(name):
     name = name.lower()
     
-    if '.' in name:
-        inputStackName, inputNodeName = name.split('.')
-    else:
-        inputStackName, inputNodeName = name, None
+    try:
+        if '.' in name:
+            inputStackName, inputNodeName = name.split('.')
+        else:
+            inputStackName, inputNodeName = name, None
+    except ValueError:
+        return None
     
     AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
     AWS_SECRET_KEY    = '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'
