@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import init
 import os, flask, json, utils, random, time, hashlib, logs
-from flask import request, Response, Flask
+from flask import request, render_template, Response, Flask
 from functools import wraps
 
 from api.MongoStampedAPI import MongoStampedAPI
@@ -803,6 +803,15 @@ def activityDoc():
         ret = f.read()
         f.close()
         return ret
+    except Exception as e:
+        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
+
+@app.route(REST_API_PREFIX + 'stats')
+def statsDoc():
+    try:
+        return render_template('api/docs/stats.html')
     except Exception as e:
         msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)

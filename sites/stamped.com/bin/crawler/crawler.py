@@ -162,31 +162,7 @@ def parseCommandLine():
             options.limit  = int(math.ceil(count / den) + 1)
     
     if options.db:
-        if ':' in options.db:
-            options.host, options.port = options.db.split(':')
-            options.port = int(options.port)
-        else:
-            options.host, options.port = (options.db, 27017)
-        
-        config_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        try:
-            os.mkdir(os.path.join(config_path, "conf"))
-        except:
-            pass
-        config_path = os.path.join(config_path, "conf/stamped.conf")
-        
-        conf = {
-            'mongodb' : {
-                'host' : options.host, 
-                'port' : options.port, 
-            }
-        }
-        
-        cfg = MongoDBConfig.getInstance()
-        cfg.config = utils.AttributeDict(conf)
-        
-        #conf_str = json.dumps(conf, sort_keys=True, indent=2)
-        #utils.write(config_path, conf_str)
+        utils.init_db_config(options.db)
     
     if options.sink == "test":
         options.sink = TestEntitySink()
@@ -196,12 +172,7 @@ def parseCommandLine():
     return options
 
 def main():
-    """
-    """
-    
     options = parseCommandLine()
-    #print "distributed: %s " % options.distributed
-    #print "hosts: %s" % options.hosts
     
     Crawler(options).run()
 

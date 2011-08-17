@@ -19,7 +19,7 @@ class MongoDBConfig(Singleton):
     def __init__(self):
         self.config = AttributeDict()
         self._connection = None
-        self.init()
+        self._init()
         
         def disconnect():
             ### TODO: Add disconnect from MongoDB
@@ -35,7 +35,7 @@ class MongoDBConfig(Singleton):
                   'host' in self.config.mongodb and \
                   'port' in self.config.mongodb
     
-    def init(self):
+    def _init(self):
         ### TODO: Make this more robust!
         try:
             config_path = os.path.abspath(__file__)

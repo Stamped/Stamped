@@ -69,8 +69,6 @@ class StampedAPI(AStampedAPI):
         if 'authenticated_user_id' in params and params.authenticated_user_id != None:
             return True
         raise Fail("Requires authentication")
-        
-    
     
     @property
     def isValid(self):
@@ -1021,6 +1019,24 @@ class StampedAPI(AStampedAPI):
             except:
                 result = cap
         return result
+    
+    def getStats(self):
+        source_stats = { }
+        for source in Entity._schema['sources']:
+            count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()
+            source_stats[source] = count
+        
+        stats = {
+            'entities' : {
+                'count' : self._entityDB._collection.count(), 
+                'sources' : source_stats, 
+            }, 
+            'places' : {
+                'count' : self._placesEntityDB._collection.count(), 
+            }, 
+        }
+        
+        return stats
     
     # ################# #
     # Result Formatting #

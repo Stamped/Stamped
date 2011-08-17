@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import os, socket, thread, utils
+import os, socket, thread
 import pymongo.connection
 
 try:

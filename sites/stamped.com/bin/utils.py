@@ -111,16 +111,34 @@ def getenv(var, default=None):
     
     return value
 
+def init_db_config(conf):
+    if ':' in conf:
+        host, port = conf.split(':')
+        port = int(port)
+    else:
+        host, port = (conf, 27017)
+    
+    config = {
+        'mongodb' : {
+            'host' : host, 
+            'port' : port, 
+        }
+    }
+    
+    from db.mongodb.AMongoCollection import MongoDBConfig
+    cfg = MongoDBConfig.getInstance()
+    cfg.config = AttributeDict(config)
+
 class AttributeDict(object):
     def __init__(self, *args, **kwargs):
         d = kwargs
         if args:
             d = args[0]
         super(AttributeDict, self).__setattr__("_dict", d)
-
+    
     def __setattr__(self, name, value):
         self[name] = value
-
+    
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__[name]

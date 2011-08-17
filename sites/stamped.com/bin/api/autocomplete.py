@@ -16,14 +16,24 @@ from difflib import SequenceMatcher
 from pprint import pprint
 from pymongo.son import SON
 
+# TODO:
+    # lazy loading of external entities
+        # google places if location is turned on
+        # barnes n noble search results otherwise?
+    # image support
+        # find good python image library
+    # fast auxillary data structure for autocomplete, indexed on title?
+        # written in C++; would have to take into account alternate titles
+    # regression tester for sorting
+
 # TODO: high level
     # how to approach sorting?
         # text match assuming prefix versus full text match
-        # proximity (TODO)
+        # proximity (DONE)
         # number of sources (DONE)
         # quality of source (DONE)
         # quality signals within source
-            # iTunes rank (TODO)
+            # iTunes rank (DONE)
             # zagat-rated
             # currently on Fandango
         # social signals
@@ -34,7 +44,7 @@ from pymongo.son import SON
 
 # TODO: test iTunes album popularity in autocomplete
     # need to ensure that popular artists will appear at the top
-    # to what degree should this should trump other ranking rules?
+    # to what degree should this trump other ranking rules?
 
 # TODO: searchEntities should take into account whether or not 
     # it's an autocompletion (e.g., prefix vs. full match) 
@@ -54,11 +64,30 @@ from pymongo.son import SON
 # TODO: (DONE) change AppleEPFRelationalDB to output to a single db file spread over multiple tables
 # TODO: (DONE) what are the other regex options available?
 
-# tfischer's manhattan apartment (for proximity testing purposes): '40.797898,-73.968148'
+# travis' manhattan apartment (for proximity testing purposes): '40.797898,-73.968148'
 
 #-----------------------------------------------------------
 
 def parseCommandLine():
+    """
+        Usage: autocomplete.py [options] query
+
+        Options:
+          --version             show program's version number and exit
+          -h, --help            show this help message and exit
+          -d DB, --db=DB        db to connect to for output
+          -l LIMIT, --limit=LIMIT
+                                limits the number of entities to import
+          -a LOCATION, --a=LOCATION
+                                location
+          -f, --full            use full search
+          -v, --verbose         turn verbosity on
+          -c CATEGORY, --category=CATEGORY
+                                filters results by a given category
+          -s SUBCATEGORY, --subcategory=SUBCATEGORY
+                                filters results by a given subcategory
+    """
+    
     usage   = "Usage: %prog [options] query"
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
@@ -71,8 +100,10 @@ def parseCommandLine():
         help="limits the number of entities to import")
     
     parser.add_option("-a", "--a", default=None, type="string", 
-        action="store", dest="location", 
-        help="location")
+        action="store", dest="location", help="location")
+    
+    parser.add_option("-f", "--full", default=False, action="store_true", 
+        help="use full search")
     
     parser.add_option("-v", "--verbose", default=False, 
         action="store_true", 
@@ -93,21 +124,7 @@ def parseCommandLine():
         sys.exit(1)
     
     if options.db:
-        if ':' in options.db:
-            options.host, options.port = options.db.split(':')
-            options.port = int(options.port)
-        else:
-            options.host, options.port = (options.db, 27017)
-        
-        conf = {
-            'mongodb' : {
-                'host' : options.host, 
-                'port' : options.port, 
-            }
-        }
-        
-        cfg = MongoDBConfig.getInstance()
-        cfg.config = utils.AttributeDict(conf)
+        utils.init_db_config(options.db)
     
     if options.location:
         assert ',' in options.location
@@ -141,17 +158,29 @@ source_weights = {
     'latimes' : 80, 
     'bostonmag' : 90, 
     'fandango' : 1000, 
+    'chicagomag' : 80, 
+    'phillymag'  : 80, 
 }
 
 def _get_subcategory_value(entity):
-    weight = subcategory_weights[entity.subcategory]
+    subcat = entity.subcategory
+    
+    if subcat in subcategory_weights:
+        weight = subcategory_weights[subcat]
+    else:
+        weight = 30
+    
     return weight / 100.0
 
 def _get_source_value(entity):
     sources = entity.sources
     
-    #num_sources = len(dict(sources))
-    source_value_sum = sum(source_weights[s] for s in sources)
+    source_value_sum = 0 #sum(source_weights[s] for s in sources)
+    for source in sources:
+        if source in source_weights:
+            source_value_sum += source_weights[source]
+        else:
+            source_value_sum += 80
     
     return source_value_sum / 100.0
 
@@ -278,11 +307,14 @@ def main():
         
         return aggregate_value
     
+    # sort the results based on the _get_weight function
     results = sorted(results, key=_get_weight, reverse=True)
     
+    # optionally limit the number of results shown
     if options.limit is not None and options.limit >= 0:
         results = results[0 : min(len(results), options.limit)]
     
+    # display all results
     for result in results:
         entity = result[0]
         distance = result[1]

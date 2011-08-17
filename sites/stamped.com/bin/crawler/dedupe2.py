@@ -85,21 +85,7 @@ def parseCommandLine():
     (options, args) = parser.parse_args()
     
     if options.db:
-        if ':' in options.db:
-            options.host, options.port = options.db.split(':')
-            options.port = int(options.port)
-        else:
-            options.host, options.port = (options.db, 27017)
-        
-        conf = {
-            'mongodb' : {
-                'host' : options.host, 
-                'port' : options.port, 
-            }
-        }
-        
-        cfg = MongoDBConfig.getInstance()
-        cfg.config = utils.AttributeDict(conf)
+        utils.init_db_config(options.db)
     
     return (options, args)
 
