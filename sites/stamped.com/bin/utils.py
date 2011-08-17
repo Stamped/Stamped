@@ -481,7 +481,7 @@ def getInstance(name):
     
     for reservation in reservations:
         for instance in reservation.instances:
-            if instance.state != 'running':
+            if instance.state != 'running' or not hasattr(instance, 'tags'):
                 continue
             
             if 'stack' in instance.tags:
