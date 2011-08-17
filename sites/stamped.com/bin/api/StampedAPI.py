@@ -1030,9 +1030,18 @@ class StampedAPI(AStampedAPI):
             'entities' : {
                 'count' : self._entityDB._collection.count(), 
                 'sources' : source_stats, 
+                'places' : {
+                    'count' : self._placesEntityDB._collection.count(), 
+                }, 
             }, 
-            'places' : {
-                'count' : self._placesEntityDB._collection.count(), 
+            'users' : {
+                'count' : self._userDB._collection.count(), 
+            }, 
+            'comments' : {
+                'count' : self._commentDB._collection.count(), 
+            }, 
+            'stamps' : {
+                'count' : self._stampDB._collection.count(), 
             }, 
         }
         

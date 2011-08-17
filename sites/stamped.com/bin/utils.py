@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import gzip, httplib, json, logging, os, sys, pickle, threading, time, traceback, urllib2
+from boto.ec2.connection import EC2Connection
 from subprocess import Popen, PIPE
 from functools import wraps
 from BeautifulSoup import BeautifulSoup
@@ -110,24 +111,6 @@ def getenv(var, default=None):
             raise Exception("error: environment variable '%s' not set!" % var)
     
     return value
-
-def init_db_config(conf):
-    if ':' in conf:
-        host, port = conf.split(':')
-        port = int(port)
-    else:
-        host, port = (conf, 27017)
-    
-    config = {
-        'mongodb' : {
-            'host' : host, 
-            'port' : port, 
-        }
-    }
-    
-    from db.mongodb.AMongoCollection import MongoDBConfig
-    cfg = MongoDBConfig.getInstance()
-    cfg.config = AttributeDict(config)
 
 class AttributeDict(object):
     def __init__(self, *args, **kwargs):
@@ -481,4 +464,56 @@ def abstract(func):
     wrapper.__doc__  = func.__doc__
     
     return wrapper
+
+def getInstance(name):
+    name = name.lower()
+    
+    if '.' in name:
+        inputStackName, inputNodeName = name.split('.')
+    else:
+        inputStackName, inputNodeName = name, None
+    
+    AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
+    AWS_SECRET_KEY    = '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'
+    
+    conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+    reservations = conn.get_all_instances()
+    
+    for reservation in reservations:
+        for instance in reservation.instances:
+            if instance.state != 'running':
+                continue
+            
+            if 'stack' in instance.tags:
+                stackName = instance.tags['stack']
+                
+                if stackName is None or stackName.lower() == inputStackName:
+                    if not inputNodeName or \
+                        ('name' in instance.tags and instance.tags['name'].lower() == inputNodeName):
+                        return instance
+    
+    return None
+
+def init_db_config(conf):
+    if ':' in conf:
+        host, port = conf.split(':')
+        port = int(port)
+    else:
+        host, port = (conf, 27017)
+        
+        if '.' in conf and not conf.endswith('.com'):
+            instance = getInstance(conf)
+            if instance:
+                host = instance.public_dns_name
+    
+    config = {
+        'mongodb' : {
+            'host' : host, 
+            'port' : port, 
+        }
+    }
+    
+    from db.mongodb.AMongoCollection import MongoDBConfig
+    cfg = MongoDBConfig.getInstance()
+    cfg.config = AttributeDict(config)
 
