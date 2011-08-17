@@ -114,7 +114,7 @@ class PhillyMagCrawler(AExternalEntitySource):
             entity.title   = name
             entity.address = addr
             entity.sources = {
-                'bostonmag' : { }
+                'phillymag' : { }
             }
             
             self._output.put(entity)

@@ -185,6 +185,8 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
             'fandango' : {
                 "fid" : basestring, 
             }, 
+            'chicagomag' : { },
+            'phillymag' : { }, 
         }
     }
     

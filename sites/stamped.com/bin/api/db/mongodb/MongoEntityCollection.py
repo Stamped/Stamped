@@ -200,6 +200,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             'fandango' : {
                 "fid" : basestring, 
             }, 
+            'chicagomag' : { },
+            'phillymag' : { }, 
         }
     }
     

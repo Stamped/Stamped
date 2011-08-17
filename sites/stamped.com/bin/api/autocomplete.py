@@ -173,9 +173,6 @@ def _get_distance_value(distance):
     value = value ** 2
     return value
 
-def _gen_entities(entityDB, docs):
-    return 
-
 def main():
     options, args = parseCommandLine()
     
