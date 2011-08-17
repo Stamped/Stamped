@@ -184,6 +184,29 @@ class AStampedAPITestCase(unittest.TestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
 
+    
+    def createFavorite(self, token, entityId, stampId=None):
+        path = "favorites/create.json"
+        data = {
+            "oauth_token": token['access_token'],
+            "entity_id": entityId,
+        }
+        if stampId != None:
+            data['stamp_id'] = stampId
+        favorite = self.handlePOST(path, data)
+        self.assertValidKey(favorite['favorite_id'])
+
+        return favorite
+
+    def deleteFavorite(self, token, entityId):
+        path = "favorites/remove.json"
+        data = { 
+            "oauth_token": token['access_token'],
+            "entity_id": entityId
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
 
 # ####### #
 # ACCOUNT #
@@ -844,317 +867,138 @@ class AStampedAPITestCase(unittest.TestCase):
 # ACTIVITY #
 # ######## #
 
-class StampedAPIActivityTest(AStampedAPITestCase):
+# class StampedAPIActivityTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.userA, self.tokenA) = self.createAccount('UserA')
+#         (self.userB, self.tokenB) = self.createAccount('UserB')
+#         self.createFriendship(self.tokenB, self.userA)
+#         self.entityA = self.createEntity(self.tokenA)
+#         self.stampA = self.createStamp(self.tokenA, self.entityA['entity_id'])
+#         self.blurbA = "Great place"
+#         self.blurbB = "Glad you liked it!"
+#         self.commentA = self.createComment(self.tokenB, self.stampA['stamp_id'], self.blurbA)
+#         self.commentB = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
+#         self.entityB = self.createEntity(self.tokenA)
+#         self.entityC = self.createEntity(self.tokenA)
+#         self.stampB = self.createStamp(self.tokenA, self.entityB['entity_id'])
+#         self.stampC = self.createStamp(self.tokenA, self.entityC['entity_id'])
+
+#     def tearDown(self):
+#         self.deleteComment(self.tokenA, self.commentB['comment_id'])
+#         self.deleteComment(self.tokenB, self.commentA['comment_id'])
+#         self.deleteStamp(self.tokenA, self.stampA['stamp_id'])
+#         self.deleteStamp(self.tokenA, self.stampB['stamp_id'])
+#         self.deleteStamp(self.tokenA, self.stampC['stamp_id'])
+#         self.deleteEntity(self.tokenA, self.entityA['entity_id'])
+#         self.deleteEntity(self.tokenA, self.entityB['entity_id'])
+#         self.deleteEntity(self.tokenA, self.entityC['entity_id'])
+#         self.deleteFriendship(self.tokenB, self.userA)
+#         self.deleteAccount(self.tokenA)
+#         self.deleteAccount(self.tokenB)
+
+# class StampedAPICollectionsShow(StampedAPIActivityTest):
+#     def test_show(self):
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 2)
+
+# class StampedAPICollectionsMentions(StampedAPIActivityTest):
+#     def test_show_stamp_mention(self):
+#         entity = self.createEntity(self.tokenA)
+#         stampData = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "entity_id": entity['entity_id'],
+#             "blurb": "Thanks @%s!" % self.userB['screen_name'],
+#         }
+#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 3)
+
+#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, entity['entity_id'])
+
+# class StampedAPICollectionsCredit(StampedAPIActivityTest):
+#     def test_show_stamp_credit(self):
+#         entity = self.createEntity(self.tokenA)
+#         stampData = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "entity_id": entity['entity_id'],
+#             "blurb": "Great spot!",
+#             "credit": self.userB['screen_name'],
+#         }
+#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 3)
+
+#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, entity['entity_id'])
+
+# class StampedAPICollectionsMentionAndCredit(StampedAPIActivityTest):
+#     def test_show_stamp_mention_and_credit(self):
+#         entity = self.createEntity(self.tokenA)
+#         stampData = {
+#             "oauth_token": self.tokenA['access_token'],
+#             "entity_id": entity['entity_id'],
+#             "blurb": "Thanks @%s!" % self.userB['screen_name'],
+#             "credit": self.userB['screen_name'],
+#         }
+#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+
+#         path = "activity/show.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 3)
+#         self.assertTrue(result[0]['genre'] == 'restamp')
+
+#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
+#         self.deleteEntity(self.tokenA, entity['entity_id'])
+
+
+
+# ######### #
+# FAVORITES #
+# ######### #
+
+class StampedAPIFavoriteTest(AStampedAPITestCase):
     def setUp(self):
-        (self.userA, self.tokenA) = self.createAccount('UserA')
-        (self.userB, self.tokenB) = self.createAccount('UserB')
-        self.createFriendship(self.tokenB, self.userA)
-        self.entity = self.createEntity(self.tokenA)
-        self.stampA = self.createStamp(self.tokenA, self.entity['entity_id'])
-        self.blurbA = "Great place"
-        self.blurbB = "Glad you liked it!"
-        self.commentA = self.createComment(self.tokenB, self.stampA['stamp_id'], self.blurbA)
-        self.commentB = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-        self.stampB = self.createStamp(self.tokenA, self.entity['entity_id'])
-        self.stampC = self.createStamp(self.tokenA, self.entity['entity_id'])
+        (self.user, self.token) = self.createAccount('UserA')
+        self.entity = self.createEntity(self.token)
+        self.stamp = self.createStamp(self.token, self.entity['entity_id'])
+        self.favorite = self.createFavorite(self.token, self.entity['entity_id'])
 
     def tearDown(self):
-        self.deleteComment(self.tokenA, self.commentB['comment_id'])
-        self.deleteComment(self.tokenB, self.commentA['comment_id'])
-        self.deleteStamp(self.tokenA, self.stampA['stamp_id'])
-        self.deleteStamp(self.tokenA, self.stampB['stamp_id'])
-        self.deleteStamp(self.tokenA, self.stampC['stamp_id'])
-        self.deleteEntity(self.tokenA, self.entity['entity_id'])
-        self.deleteFriendship(self.tokenB, self.userA)
-        self.deleteAccount(self.tokenA)
-        self.deleteAccount(self.tokenB)
+        self.deleteFavorite(self.token, self.entity['entity_id'])
+        self.deleteStamp(self.token, self.stamp['stamp_id'])
+        self.deleteEntity(self.token, self.entity['entity_id'])
+        self.deleteAccount(self.token)
 
-class StampedAPICollectionsShow(StampedAPIActivityTest):
+class StampedAPIFavoritesShow(StampedAPIFavoriteTest):
     def test_show(self):
-        path = "activity/show.json"
+        path = "favorites/show.json"
         data = { 
-            "oauth_token": self.tokenA['access_token'],
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 0)
-
-class StampedAPICollectionsMentions(StampedAPIActivityTest):
-    def test_show_stamp_mention(self):
-        stampData = {
-            "oauth_token": self.tokenA['access_token'],
-            "entity_id": self.entity['entity_id'],
-            "blurb": "Thanks @%s!" % self.userB['screen_name'],
-        }
-        stamp = self.createStamp(self.tokenA, self.entity['entity_id'], stampData)
-
-        path = "activity/show.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
+            "oauth_token": self.token['access_token'],
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 1)
 
-        self.deleteStamp(self.tokenA, stamp['stamp_id'])
-
 
 """
 
-
-class StampedAPStampTests(AStampedAPITestCase):
-    def __init__(self, baseurl):
-        AStampedAPITestCase.__init__(self, baseurl)
-    
-    def setUp(self):
-        path = "account/create.json"
-        data = {
-            "first_name": "User",
-            "last_name": "A", 
-            "email": "usera@stamped.com", 
-            "password": "******",
-            "screen_name": "UserA"
-        }
-        
-        self.userA = self.handlePOST(path, data)['user_id']
-        self.assertValidKey(userA)
-        
-        data = {
-            "first_name": "User",
-            "last_name": "B", 
-            "email": "userb@stamped.com", 
-            "password": "******",
-            "screen_name": "UserB"
-        }
-        
-        self.userB = self.handlePOST(path, data)['user_id']
-        self.assertValidKey(userB)
-        
-        path = "entities/create.json"
-        data = {
-            "authenticated_user_id": userA,
-            "title": "Little Owl ",
-            "desc": "American food in the West Village", 
-            "category": "food",
-            "subcategory": "restaurant",
-            "coordinates": "40.714623,-74.006605"
-        }
-        
-        self.entityID = self.handlePOST(path, data)['entity_id']
-        self.assertValidKey(self.entityID)
-        
-    def test_create_show_update(self):
-        path = "stamps/create.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "entity_id": self.entityID,
-            "blurb": "Favorite restaurant in the Village.", 
-            "image": "image.png"
-        }
-        stampID = self.handlePOST(path, data)['stamp_id']
-        self.assertValidKey(stampID)
-        
-        path = "stamps/create.json"
-        data = {
-            "authenticated_user_id": self.userB,
-            "entity_id": self.entityID,
-            "blurb": "Favorite restaurant in the Village. Thanks, @UserA.", 
-            "image": "image.png",
-            "credit": "UserA"
-        }
-        restampID = self.handlePOST(path, data)['stamp_id']
-        self.assertValidKey(restampID)
-        
-        path = "stamps/update.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.stampID,
-            "image": "image2.png"
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['stamp_id'], stampID)
-        
-        path = "stamps/show.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.stampID
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['image'], 'image2.png')
-        
-        path = "stamps/remove.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.restampID
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-        
-        path = "stamps/remove.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.stampID
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-    
-    def tearDown(self):
-        path = "entities/remove.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "entity_id": self.entityID
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-        
-        path = "account/remove.json"
-        data = {"authenticated_user_id": userA}
-        resultA = self.handlePOST(path, data)
-        self.assertTrue(resultA)
-        
-        data = {"authenticated_user_id": userB}
-        resultB = self.handlePOST(path, data)
-        self.assertTrue(resultB)
-
-class StampedAPIFriendshipTests(AStampedAPITestCase):
-    def __init__(self, baseurl):
-        AStampedAPITestCase.__init__(self, baseurl)
-    
-    def setUp(self):
-    
-    
-    
-        TODO
-        # TODO
-        TODO
-        
-        
-        
-        
-        
-        path = "account/create.json"
-        data = {
-            "first_name": "Kevin",
-            "last_name": "Palms", 
-            "email": "kevin@stamped.com", 
-            "password": "******",
-            "screen_name": "kpalms"
-        }
-        userA = self.handlePOST(path, data)['user_id']
-        data = {
-            "first_name": "Robby",
-            "last_name": "Stein", 
-            "email": "robby@stamped.com", 
-            "password": "******",
-            "screen_name": "rmstein"
-        }
-        userB = self.handlePOST(path, data)['user_id']
-        if len(userA) == 24 and len(userB) == 24:
-            print 'DATA: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print userID
-            raise Exception
-            
-            
-        path = "account/settings.json"
-        data = {
-            "authenticated_user_id": userA,
-            "privacy": False
-        }
-        result = self.handlePOST(path, data)
-        data = {
-            "authenticated_user_id": userB,
-            "privacy": False
-        }
-        result = self.handlePOST(path, data)
-        if result['privacy'] == False:
-            print 'DATA: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print result
-            raise Exception
-        
-        
-        path = "friendships/create.json"
-        data = {
-            "authenticated_user_id": userA,
-            "user_id": userB
-        }
-        result = self.handlePOST(path, data)    
-        if result['user_id'] == userB:
-            print 'PASS: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print result
-            raise Exception
-            
-        
-        path = "friendships/check.json"
-        data = {
-            "authenticated_user_id": userA,
-            "user_id": userB
-        }
-        result = self.handleGET(path, data)
-        if result == True:
-            print 'PASS: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print result
-            raise Exception
-            
-            
-        path = "friendships/friends.json"
-        data = {
-            "authenticated_user_id": userA
-        }
-        result = self.handleGET(path, data)
-        if len(result['user_ids']) == 1:
-            print 'PASS: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print result
-            raise Exception
-            
-            
-        path = "friendships/followers.json"
-        data = {
-            "authenticated_user_id": userB
-        }
-        result = self.handleGET(path, data)
-        if len(result['user_ids']) == 1:
-            print 'PASS: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print result
-            raise Exception
-            
-            
-        path = "friendships/approve.json"
-        data = {
-            "authenticated_user_id": userA
-        }
-        print 'SKIP: %s' % path
-            
-            
-        path = "friendships/pending.json"
-        data = {
-            "authenticated_user_id": userA,
-            "user_id": userB
-        }
-        print 'SKIP: %s' % path
-        
-        
-        path = "friendships/remove.json"
-        data = {
-            "authenticated_user_id": userA,
-            "user_id": userB
-        }
-        result = self.handlePOST(path, data)
-        if result == True:
-            print 'PASS: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print result
-            raise Exception
         
         
         path = "friendships/blocks/create.json"
@@ -1211,127 +1055,7 @@ class StampedAPIFriendshipTests(AStampedAPITestCase):
             print result
             raise Exception
             
-            
-        path = "account/remove.json"
-        data = { "authenticated_user_id": userA }
-        resultA = self.handlePOST(path, data)
-        data = { "authenticated_user_id": userB }
-        resultB = self.handlePOST(path, data)
-        if resultA and resultB:
-            print 'DATA: %s' % path
-        else:
-            print 'FAIL: %s' % path
-            print result
-            raise Exception
-
-        path = "account/create.json"
-        data = {
-            "first_name": "User",
-            "last_name": "A", 
-            "email": "usera@stamped.com", 
-            "password": "******",
-            "screen_name": "UserA"
-        }
-        
-        self.userA = self.handlePOST(path, data)['user_id']
-        self.assertValidKey(userA)
-        
-        data = {
-            "first_name": "User",
-            "last_name": "B", 
-            "email": "userb@stamped.com", 
-            "password": "******",
-            "screen_name": "UserB"
-        }
-        
-        self.userB = self.handlePOST(path, data)['user_id']
-        self.assertValidKey(userB)
-        
-        path = "entities/create.json"
-        data = {
-            "authenticated_user_id": userA,
-            "title": "Little Owl ",
-            "desc": "American food in the West Village", 
-            "category": "food",
-            "subcategory": "restaurant",
-            "coordinates": "40.714623,-74.006605"
-        }
-        
-        entityID = self.handlePOST(path, data)['entity_id']
-        self.assertValidKey(entityID)
-        
-    def test_create_show_update(self):
-        path = "stamps/create.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "entity_id": self.entityID,
-            "blurb": "Favorite restaurant in the Village.", 
-            "image": "image.png"
-        }
-        stampID = self.handlePOST(path, data)['stamp_id']
-        self.assertValidKey(stampID)
-        
-        path = "stamps/create.json"
-        data = {
-            "authenticated_user_id": self.userB,
-            "entity_id": self.entityID,
-            "blurb": "Favorite restaurant in the Village. Thanks, @UserA.", 
-            "image": "image.png",
-            "credit": "UserA"
-        }
-        restampID = self.handlePOST(path, data)['stamp_id']
-        self.assertValidKey(restampID)
-        
-        path = "stamps/update.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.stampID,
-            "image": "image2.png"
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['stamp_id'], stampID)
-        
-        path = "stamps/show.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.stampID
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(result['image'], 'image2.png')
-        
-        path = "stamps/remove.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.restampID
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-        
-        path = "stamps/remove.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "stamp_id": self.stampID
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-    
-    def tearDown(self):
-        path = "entities/remove.json"
-        data = {
-            "authenticated_user_id": self.userA,
-            "entity_id": self.entityID
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-        
-        path = "account/remove.json"
-        data = {"authenticated_user_id": userA}
-        resultA = self.handlePOST(path, data)
-        self.assertTrue(resultA)
-        
-        data = {"authenticated_user_id": userB}
-        resultB = self.handlePOST(path, data)
-        self.assertTrue(resultB)
+          
 """
 
 if __name__ == '__main__':

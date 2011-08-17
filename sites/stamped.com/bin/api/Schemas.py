@@ -163,16 +163,16 @@ class FavoriteSchema(Schema):
         self.favorite_id        = SchemaElement(basestring)
         self.entity             = EntityMiniSchema(required=True)
         self.user_id            = SchemaElement(basestring, required=True)
-        self.stamp              = FavoriteStampSchema()
+        self.stamp              = StampSchema()
         self.timestamp          = TimestampSchema()
         self.complete           = SchemaElement(bool)
 
-class FavoriteStampSchema(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.blurb              = SchemaElement(basestring)
+# class FavoriteStampSchema(Schema):
+#     def setSchema(self):
+#         self.stamp_id           = SchemaElement(basestring, required=True)
+#         self.display_name       = SchemaElement(basestring, required=True)
+#         self.user_id            = SchemaElement(basestring, required=True)
+#         self.blurb              = SchemaElement(basestring)
 
 
 # ###### #

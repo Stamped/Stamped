@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, logs
 
 from datetime import datetime
 from utils import lazyProperty
@@ -17,6 +17,17 @@ from api.AActivityDB import AActivityDB
 from api.Activity import Activity
 
 class MongoActivityCollection(AMongoCollection, AActivityDB):
+    
+    """
+    Activity Types:
+    * restamp
+    * comment
+    * reply
+    * favorite
+    * directed
+    * mention
+    * milestone
+    """
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='activity')
@@ -52,9 +63,13 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         # Get activity
         activityIds = self.user_activity_collection.getUserActivityIds(userId)
 
+        logs.debug("ACTIVITY IDS: %s" % activityIds)
+
         documentIds = []
         for activityId in activityIds:
             documentIds.append(self._getObjectIdFromString(activityId))
+
+        logs.debug("DOCUMENT IDS: %s" % documentIds)
 
         # Get stamps
         documents = self._getMongoDocumentsFromIds(documentIds, **params)
@@ -72,126 +87,8 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
 
         for userId in recipientIds:
             self.user_activity_collection.addUserActivity(userId, activity.activity_id)
-
-
-
-
-    def addActivityForRestamp(self, recipientIds, user, stamp):
-        activity = {}
-        activity['genre'] = 'restamp'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity = Activity(activity)
         
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForComment(self, recipientIds, user, stamp, comment):
-        activity = {}
-        activity['genre'] = 'comment'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity['comment'] = comment.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForReply(self, recipientIds, user, stamp, comment):
-        activity = {}
-        activity['genre'] = 'reply'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity['comment'] = comment.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            MongoUserActivityCollection().addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForFavorite(self, recipientIds, user, favorite):
-        activity = {}
-        activity['genre'] = 'favorite'
-        activity['user'] = user.getDataAsDict()
-        activity['favorite'] = favorite.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForDirected(self, recipientIds, user, stamp):
-        activity = {}
-        activity['genre'] = 'directed'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForMention(self, recipientIds, user, stamp, comment=None):
-        activity = {}
-        activity['genre'] = 'mention'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        if comment != None:
-            activity['comment'] = comment.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForMilestone(self, recipientId, milestone):
-        raise NotImplementedError
-        
-    def removeActivity(self, activityId):
+    def removeActivity(self, userId, activityId):
         self.user_activity_collection.removeUserActivity(userId, activityId)
         return self._removeDocument(activityId)
 

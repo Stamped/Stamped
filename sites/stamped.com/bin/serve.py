@@ -130,6 +130,55 @@ def handleAddAccountRequest(data, auth):
     
     return result
 
+def checkAuth(request, requireOAuthToken=True):
+
+    if requireOAuthToken == True:
+        ### Parse Request for Access Token
+        try:
+            oauth_token = request.values['oauth_token']
+        except:
+            msg = "Access token not included"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_request", 401, msg)
+        
+        ### Validate OAuth Access Token
+        try:
+            authenticated_user_id = stampedAuth.verifyAccessToken(oauth_token)
+            if authenticated_user_id == None:
+                raise
+            return { 'user_id': authenticated_user_id }
+        except StampedHTTPError:
+            raise
+        except Exception:
+            msg = "Invalid access token"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_token", 401, msg)
+
+    else:
+        ### Parse Request for Client Credentials
+        try:
+            client_id       = request.values['client_id']
+            client_secret   = request.values['client_secret']
+        except:
+            msg = "Client credentials not included"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_request", 401, msg)
+
+        ### Validate Client Credentials
+        try:
+            if not stampedAuth.verifyClientCredentials( \
+                data.client_id, data.client_secret):
+                raise
+            return True
+        except:
+            msg = "Invalid client credentials"
+            logs.warning(msg)
+            raise StampedHTTPError("access_denied", 401, msg)
+
+
+
+
+
 def handleRequest(schema, request, stampedAPIFunc, requireOAuthToken=True):
     try:
         print
@@ -201,23 +250,19 @@ def handleRequest(schema, request, stampedAPIFunc, requireOAuthToken=True):
 
 @app.route(REST_API_PREFIX + 'oauth2/token.json', methods=['POST'])
 def refreshToken():
-    schema = ResourceArgumentSchema([
-        ("client_id",             ResourceArgument(required=True, expectedType=basestring)),
-        ("client_secret",         ResourceArgument(required=True, expectedType=basestring)),
-        ("refresh_token",         ResourceArgument(required=True, expectedType=basestring)),
-        ("grant_type",            ResourceArgument(required=True, expectedType=basestring))
-    ])
-    return handleRequestOld(request, stampedAuth.verifyRefreshToken, schema)
+    class RequestSchema(Schema):
+        def setSchema(self):
+            self.refresh_token      = SchemaElement(basestring, required=True)
+            self.grant_type         = SchemaElement(basestring, required=True)
+    return handleRequest(RequestSchema(), request, stampedAuth.verifyRefreshToken, requireOAuthToken=False)
 
 @app.route(REST_API_PREFIX + 'oauth2/login.json', methods=['POST'])
 def loginUser():
-    schema = ResourceArgumentSchema([
-        ("client_id",             ResourceArgument(required=True, expectedType=basestring)),
-        ("client_secret",         ResourceArgument(required=True, expectedType=basestring)),
-        ("screen_name",           ResourceArgument(required=True, expectedType=basestring)),
-        ("password",              ResourceArgument(required=True, expectedType=basestring))
-    ])
-    return handleRequestOld(request, stampedAuth.verifyUserCredentials, schema)
+    class RequestSchema(Schema):
+        def setSchema(self):
+            self.screen_name        = SchemaElement(basestring, required=True)
+            self.password           = SchemaElement(basestring, required=True)
+    return handleRequest(RequestSchema(), request, stampedAuth.verifyUserCredentials, requireOAuthToken=False)
 
 # ######## #
 # Accounts #
@@ -555,14 +600,6 @@ def getUserStamps():
 
 @app.route(REST_API_PREFIX + 'getUserMentions', methods=['GET'])
 def getUserMentions():
-    # class RequestSchema(Schema):
-    #     def setSchema(self):
-    #         self.user_id            = SchemaElement(basestring)
-    #         self.screen_name        = SchemaElement(basestring)
-    #         self.limit              = SchemaElement(int)
-    #         self.since              = SchemaElement(int)
-    #         self.before             = SchemaElement(int)
-    # return handleRequest(RequestSchema(), request, stampedAPI.getUserMentions)
     return "Not Implemented", 404
     raise NotImplementedError
 
@@ -595,14 +632,13 @@ def addFavorite():
 def removeFavorite():
     class RequestSchema(Schema):
         def setSchema(self):
-            self.favorite_id        = SchemaElement(basestring, required=True)
+            self.entity_id          = SchemaElement(basestring, required=True)
     return handleRequest(RequestSchema(), request, stampedAPI.removeFavorite)
 
 @app.route(REST_API_PREFIX + 'favorites/show.json', methods=['GET'])
 def getFavorites():
     class RequestSchema(Schema):
         def setSchema(self):
-            self.favorite_id        = SchemaElement(basestring, required=True)
             self.limit              = SchemaElement(int)
             self.since              = SchemaElement(int)
             self.before             = SchemaElement(int)

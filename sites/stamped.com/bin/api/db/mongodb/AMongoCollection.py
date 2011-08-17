@@ -147,11 +147,11 @@ class AMongoCollection(object):
         return bson.BSON.encode(obj)
     
     def _getStringFromObjectId(self, objId):
-        #logs.debug("%s | Get String from ObjectID" % self)
+        #logs.debug("Get String from ObjectID")
         return str(bson.objectid.ObjectId(objId))
     
     def _getObjectIdFromString(self, string):
-        #logs.debug("%s | Get ObjectID from String" % self)
+        #logs.debug("Get ObjectID from String")
         try:
             return bson.objectid.ObjectId(string)
         except:

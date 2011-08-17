@@ -19,7 +19,7 @@ class Favorite(FavoriteSchema):
     def exportFlat(self):
         export = [
             'favorite_id',
-            'user',
+            'user_id',
             'stamp',
             'entity',
             'complete',
@@ -29,6 +29,8 @@ class Favorite(FavoriteSchema):
 
         data['created'] = str(data['timestamp.created'])
         del(data['timestamp.created'])
+
+        if data['stamp']['stamp_id'] == None:
+            data['stamp'] = None
         
         return data
-

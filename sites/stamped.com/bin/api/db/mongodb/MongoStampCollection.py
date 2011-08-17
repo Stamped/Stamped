@@ -5,8 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
-import re
+import Globals, logs, re
 
 from datetime import datetime
 from utils import lazyProperty
@@ -41,7 +40,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         return document
 
     def _convertFromMongo(self, document):
-        if '_id' in document:
+        if document != None and '_id' in document:
             document['stamp_id'] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
         return Stamp(document)
@@ -102,35 +101,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         # Remove a reference to the stamp in followers' inbox
         self.inbox_stamps_collection.removeInboxStamps(userIds, stampId)
 
-
-    def giveCredit(self, creditedUserId, stamp):
-        # Add to 'credit received'
-        ### TODO: Does this belong here?
-        self.credit_received_collection.addCredit(creditedUserId, stamp.stamp_id)
-    
-        # Add to 'credit givers'
-        ### TODO: Does this belong here?
-        self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
-
-        # Update the amount of credit on the user's stamp
-        try:
-            document = self._collection.find_one({
-                'user.user_id': creditedUserId, 
-                'entity.entity_id': stamp.entity.entity_id,
-            })
-        except:
-            document = None
-
-        return self._convertFromMongo(document)
-        
-    def incrementStatsForStamp(self, stampId, stat, increment=1):
-        key = 'stats.%s' % (stat)
-        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
-                                {'$inc': {key: increment}},
-                                upsert=True)
-        return True
-
-
     def getStamps(self, stampIds, **kwargs):
         params = {
             'since':    kwargs.pop('since', None),
@@ -152,6 +122,44 @@ class MongoStampCollection(AMongoCollection, AStampDB):
 
         return stamps
 
+    def checkStamp(self, userId, entityId):
+        try:
+            document = self._collection.find_one({
+                'user.user_id': userId, 
+                'entity.entity_id': entityId,
+            })
+            if document['_id'] != None:
+                return True
+            raise
+        except:
+            return False
+        
+    def incrementStatsForStamp(self, stampId, stat, increment=1):
+        key = 'stats.%s' % (stat)
+        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
+                                {'$inc': {key: increment}},
+                                upsert=True)
+        return True
+
+    def giveCredit(self, creditedUserId, stamp):
+        # Add to 'credit received'
+        ### TODO: Does this belong here?
+        self.credit_received_collection.addCredit(creditedUserId, stamp.stamp_id)
+    
+        # Add to 'credit givers'
+        ### TODO: Does this belong here?
+        self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
+
+        # Update the amount of credit on the user's stamp
+        try:
+            document = self._collection.find_one({
+                'user.user_id': creditedUserId, 
+                'entity.entity_id': stamp.entity.entity_id,
+            })
+        except:
+            document = None
+
+        return self._convertFromMongo(document)
 
     # @lazyProperty
     # def user_collection(self):
