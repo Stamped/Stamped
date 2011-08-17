@@ -18,108 +18,22 @@ from api.Activity import Activity
 
 class MongoActivityCollection(AMongoCollection, AActivityDB):
     
-    SCHEMA = {
-        '_id': object,
-        'genre': basestring, # comment, reply, restamp, favorite, directed, mention, credit milestone
-        'user': {
-            'user_id': basestring,
-            'screen_name': basestring,
-            'display_name': basestring,
-            'profile_image': basestring,
-            'color_primary': basestring,
-            'color_secondary': basestring,
-            'privacy': bool
-        },
-        'comment': {
-            'comment_id': basestring,
-            'stamp_id': basestring,
-            'user': {
-                'user_id': basestring,
-                'screen_name': basestring,
-                'display_name': basestring,
-                'profile_image': basestring,
-                'color_primary': basestring,
-                'color_secondary': basestring,
-                'privacy': bool
-            },
-            'restamp_id': basestring,
-            'blurb': basestring,
-            'mentions': [],
-            'timestamp': {
-                'created': datetime
-            }
-        },
-        'stamp': {
-            'stamp_id': basestring,
-            'entity': {
-                'entity_id': basestring,
-                'title': basestring,
-                'coordinates': {
-                    'lat': float, 
-                    'lng': float
-                },
-                'category': basestring,
-                'subtitle': basestring
-            },
-            'user': {
-                'user_id': basestring,
-                'screen_name': basestring,
-                'display_name': basestring,
-                'profile_image': basestring,
-                'color_primary': basestring,
-                'color_secondary': basestring,
-                'privacy': bool
-            },
-            'blurb': basestring,
-            'image': basestring,
-            'mentions': list,
-            'credit': list,
-            'comment_preview': list,
-            'timestamp': {
-                'created': datetime,
-                'modified': datetime
-            },
-            'flags': {
-                'flagged': bool,
-                'locked': bool
-            },
-            'stats': {
-                'num_comments': int,
-                'num_todos': int,
-                'num_credit': int
-            }
-        },
-        'favorite': {
-            'favorite_id': basestring,
-            'entity': {
-                'entity_id': basestring,
-                'title': basestring,
-                'coordinates': {
-                    'lat': float, 
-                    'lng': float
-                },
-                'category': basestring,
-                'subtitle': basestring
-            },
-            'user_id': basestring,
-            'stamp': {
-                'stamp_id': basestring,
-                'display_name': basestring,
-                'user_id': basestring
-            },
-            'timestamp': {
-                'created': datetime,
-                'modified': datetime
-            },
-        },
-        'timestamp': {
-            'created': datetime
-        }
-    }
-    
     def __init__(self):
         AMongoCollection.__init__(self, collection='activity')
         AActivityDB.__init__(self)
+    
+    def _convertToMongo(self, activity):
+        document = activity.exportSparse()
+        if 'activity_id' in document:
+            document['_id'] = self._getObjectIdFromString(document['activity_id'])
+            del(document['activity_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['activity_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return Activity(document)
     
     ### PUBLIC
     
@@ -127,8 +41,40 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     def user_activity_collection(self):
         return MongoUserActivityCollection()
     
-    def addActivity(self, recipientId, activity):
-        raise NotImplementedError
+    def getActivity(self, userId, **kwargs):
+        params = {
+            'since':    kwargs.pop('since', None),
+            'before':   kwargs.pop('before', None), 
+            'limit':    kwargs.pop('limit', 20),
+            'sort':     'timestamp.created',
+        }
+
+        # Get activity
+        activityIds = self.user_activity_collection.getUserActivityIds(userId)
+
+        documentIds = []
+        for activityId in activityIds:
+            documentIds.append(self._getObjectIdFromString(activityId))
+
+        # Get stamps
+        documents = self._getMongoDocumentsFromIds(documentIds, **params)
+
+        activity = []
+        for document in documents:
+            activity.append(self._convertFromMongo(document))
+
+        return activity
+
+    def addActivity(self, recipientIds, activity):
+        document = self._convertToMongo(activity)
+        document = self._addMongoDocument(document)
+        activity = self._convertFromMongo(document)
+
+        for userId in recipientIds:
+            self.user_activity_collection.addUserActivity(userId, activity.activity_id)
+
+
+
 
     def addActivityForRestamp(self, recipientIds, user, stamp):
         activity = {}
@@ -244,23 +190,6 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
 
     def addActivityForMilestone(self, recipientId, milestone):
         raise NotImplementedError
-    
-    def getActivity(self, userId, since=None, before=None, limit=20):
-        # Get activity
-        activityIds = self.user_activity_collection.getUserActivityIds(userId)
-        activityData = self._getDocumentsFromIds(
-                            activityIds, objId='activity_id', since=since, 
-                            before=before, sort='timestamp.created', limit=limit)
-        
-        # Loop through and validate
-        result = []
-        for activity in activityData:
-            activity = Activity(activity)
-            if activity.isValid == False:
-                raise KeyError("Activity not valid")
-            result.append(activity)
-        
-        return result
         
     def removeActivity(self, activityId):
         self.user_activity_collection.removeUserActivity(userId, activityId)

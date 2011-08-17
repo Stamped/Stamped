@@ -7,8 +7,6 @@ __license__ = "TODO"
 
 import Globals, utils, logs
 from datetime import datetime
-# from utils import OrderedDict
-# from ASchemaBasedAttributeDict import ASchemaBasedAttributeDict
 from Schemas import *
 
 categories = set([ 'food', 'music', 'film', 'book', 'other' ])
@@ -101,7 +99,7 @@ class FlatEntity(EntityFlatSchema):
                 'place': { 'address': data['address'] }
             }
             del(data['address'])
-        print data
+            
         return Entity(data)
 
 """

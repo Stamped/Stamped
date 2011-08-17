@@ -139,6 +139,42 @@ class FriendshipSchema(Schema):
         self.timestamp          = TimestampSchema()
 
 
+# ######## #
+# Activity #
+# ######## #
+
+class ActivitySchema(Schema):
+    def setSchema(self):
+        self.activity_id        = SchemaElement(basestring)
+        self.genre              = SchemaElement(basestring, required=True)
+        self.user               = UserMiniSchema(required=True)
+        self.comment            = CommentSchema()
+        self.stamp              = StampSchema()
+        self.favorite           = FavoriteSchema()
+        self.timestamp          = TimestampSchema()
+
+
+# ######## #
+# Favorite #
+# ######## #
+
+class FavoriteSchema(Schema):
+    def setSchema(self):
+        self.favorite_id        = SchemaElement(basestring)
+        self.entity             = EntityMiniSchema(required=True)
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.stamp              = FavoriteStampSchema()
+        self.timestamp          = TimestampSchema()
+        self.complete           = SchemaElement(bool)
+
+class FavoriteStampSchema(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.display_name       = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.blurb              = SchemaElement(basestring)
+
+
 # ###### #
 # Stamps #
 # ###### #
@@ -152,7 +188,7 @@ class StampSchema(Schema):
         self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
         self.credit             = SchemaList(UserTinySchema())
-        self.comment_preview    = SchemaElement(list)
+        self.comment_preview    = SchemaList(CommentSchema())
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
@@ -163,6 +199,21 @@ class MentionSchema(Schema):
         self.display_name       = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring)
         self.indices            = SchemaList(SchemaElement(int))
+
+
+# ######## #
+# Comments #
+# ######## #
+
+class CommentSchema(Schema):
+    def setSchema(self):
+        self.comment_id         = SchemaElement(basestring)
+        self.user               = UserMiniSchema(required=True)
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.restamp_id         = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring, required=True)
+        self.mentions           = SchemaList(MentionSchema())
+        self.timestamp          = TimestampSchema()
 
 
 # ######## #

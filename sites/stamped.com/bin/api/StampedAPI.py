@@ -53,9 +53,17 @@ class StampedAPI(AStampedAPI):
         AStampedAPI.__init__(self, desc)
         self._validated = False
         self.output = kwargs.pop('output', False)
+
+        ### TODO: Implement this!
+        # Enable / Disable Functionality
+        self._activity      = True
+        self._comments      = True
+        self._stamps        = True
+        self._friends       = True
+        self._users         = True
+        self._favorites     = True
     
     def _validate(self):
-        
         self._validated = True
     
     
@@ -186,7 +194,14 @@ class StampedAPI(AStampedAPI):
             authenticated_user_id = data.pop('authenticated_user_id', None)
             if authenticated_user_id == None:
                 raise Exception("You must be logged in to view this account")
-            #self._friendshipDB.checkFriendship
+
+            friendship = Friendship({
+                'user_id':      auth['authenticated_user_id'],
+                'friend_id':    user['user_id']
+            })
+
+            if not self._friendshipDB.checkFriendship(friendship):
+                raise Exception("You do not have permission to view this account")
         
         return self._returnUser(user)
     
@@ -232,13 +247,18 @@ class StampedAPI(AStampedAPI):
             'friend_id':    user['user_id']
         })
 
+        reverseFriendship = Friendship({
+            'user_id':      user['user_id'],
+            'friend_id':    auth['authenticated_user_id'],
+        })
+
         # Check if friendship already exists
         if self._friendshipDB.checkFriendship(friendship) == True:
             logs.info("Friendship exists")
             return self._returnUser(user)
 
         # Check if authenticating user is being blocked
-        if self._friendshipDB.checkBlock(friendship) == True:
+        if self._friendshipDB.checkBlock(reverseFriendship) == True:
             logs.info("Block exists")
             raise Exception
 
@@ -249,10 +269,8 @@ class StampedAPI(AStampedAPI):
 
         # Create friendship
         self._friendshipDB.addFriendship(friendship)
-        
-        result = {}
-        result['user_id'] = friendship.friend_id
-        result['screen_name'] = self._userDB.getUser(friendship.friend_id)['screen_name']
+
+        ### TODO: Add activity item for receipient?
         
         return self._returnUser(user)
     
@@ -620,7 +638,7 @@ class StampedAPI(AStampedAPI):
         self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
         
         # If stamped entity is on the to do list, mark as complete
-        ### TODO: Reimplement after adding Comments
+        ### TODO: Reimplement after adding Favorites
         """
         favorite = self._favoriteDB.getFavoriteIdForEntity( \
             user.user_id, entity.entity_id)
@@ -637,24 +655,31 @@ class StampedAPI(AStampedAPI):
                 # Assign credit
                 creditedStamp = self._stampDB.giveCredit(userId, stamp)
                 
-                ### TODO: Reimplement after adding Comments
-                """
                 # Add restamp as comment (if prior stamp exists)
                 if creditedStamp.stamp_id != None:
+                    # Build comment
                     comment = Comment({
-                        'stamp_id': creditedStamp['stamp_id'],
-                        'user': user,
+                        'user': user.exportMini(),
+                        'stamp_id': creditedStamp.stamp_id,
                         'restamp_id': stamp.stamp_id,
                         'blurb': blurb,
                         'mentions': mentions,
                     })
-                    comment.setTimestampGenerated()
-                    self._commentDB.addComment(comment, activity=False)
-                """
+                    comment.setTimestampCreated()
+                        
+                    # Add the comment data to the database
+                    self._commentDB.addComment(comment)
+
+                    # Note: comment is added even if user is being blocked (for
+                    # now). We should hide blocked users' comments from 
+                    # appearing on view. But we'll come back to this
+                    # regardless...
 
                 # Update credited user stats
                 self._userDB.updateUserStats(userId, 'num_credit', \
                     None, increment=1)
+
+                ### TODO: Implement this
                 # if user.user_id not in self._userDB.creditGivers(userId):
                 #     self._userDB.addCreditGiver(userId, user.user_id)
                 #     self._userDB.updateUserStats(userId, 'num_credit_givers', \
@@ -664,12 +689,16 @@ class StampedAPI(AStampedAPI):
                 creditedUserIds.append(creditedUser['user_id'])
 
         
-        ### TODO: Reimplement after adding Activity
-        """
         # Add activity for credited users
+        ### TODO: Verify user isn't being blocked
         if len(creditedUserIds) > 0:
-            self._activityDB.addActivityForRestamp(creditedUserIds, \
-                user, stamp)
+            activity = Activity({
+                'genre': 'restamp',
+                'user': user.exportMini(),
+                'stamp': stamp.value,
+            })
+            activity.setTimestampCreated()
+            self._activityDB.addActivity(creditedUserIds, activity)
         
         # Add activity for mentioned users
         if mentions != None and len(mentions) > 0:
@@ -679,9 +708,13 @@ class StampedAPI(AStampedAPI):
                     and mention['user_id'] not in creditedUserIds:
                     mentionedUserIds.append(mention['user_id'])
             if len(mentionedUserIds) > 0:
-                self.activity_collection.addActivityForMention( \
-                    mentionedUserIds, user, stamp)
-        """
+                activity = Activity({
+                    'genre': 'mention',
+                    'user': user.exportMini(),
+                    'stamp': stamp.value,
+                })
+                activity.setTimestampCreated()
+                self._activityDB.addActivity(mentionedUserIds, activity)
         
         if self.output == 'http':
             return stamp.exportFlat()
@@ -768,7 +801,7 @@ class StampedAPI(AStampedAPI):
                         'blurb': blurb,
                         'mentions': mentions,
                     })
-                    comment.setTimestampGenerated()
+                    comment.setTimestampCreated()
                     self._commentDB.addComment(comment, activity=False)
                 """
 
@@ -829,6 +862,8 @@ class StampedAPI(AStampedAPI):
         # stamps to their inbox, we'll have to account for that here.
         self._stampDB.removeInboxStampReference(followers, stamp.stamp_id)
 
+        ### TODO: If restamp, remove from credited stamps' comment list
+
         ### TODO: Remove from activity? To do? Anything else?
 
         return True
@@ -850,13 +885,6 @@ class StampedAPI(AStampedAPI):
             return stamp.exportFlat()
         return stamp
     
-    # def getStamps(self, stampIDs):
-    #     stampIDs = stampIDs.split(',')
-    #     stamps = []
-    #     for stamp in self._stampDB.getStamps(stampIDs):
-    #         stamps.append(stamp.getDataAsDict())
-    #     return stamps
-    
 
     """
      #####                                                  
@@ -867,53 +895,130 @@ class StampedAPI(AStampedAPI):
     #     # #    # #    # #    # #      #   ##   #   #    # 
      #####   ####  #    # #    # ###### #    #   #    ####  
     """
-    
-    def addComment(self, params):
-        comment = Comment()
+
+    def addComment(self, data, auth):
+        user    = self._userDB.getUser(auth['authenticated_user_id'])
+        stamp   = self._stampDB.getStamp(data['stamp_id'])
+
+        # Verify user has the ability to comment on the stamp
         
-        user = self._userDB.getUser(params.authenticated_user_id)
-        comment.user = {}
-        comment.user['user_id'] = user.user_id
-        comment.user['screen_name'] = user.screen_name
-        comment.user['display_name'] = user.display_name
-        comment.user['profile_image'] = user.profile_image
-        comment.user['color_primary'] = user.color_primary
-        if 'color_secondary' in user:
-            comment.user['color_secondary'] = user.color_secondary
-        comment.user['privacy'] = user.privacy
-        
-        comment.stamp_id = params.stamp_id
-        
-        if params.blurb != None:
-            comment.blurb = params.blurb
-                
-        comment.timestamp = {
-            'created': datetime.utcnow()
-        }
-        
-        if not comment.isValid:
-            raise InvalidArgument('Invalid input')
-        
-        commentId = self._stampDB.addComment(comment)
-        comment = self._stampDB.getComment(commentId)
-        
-        return self._returnComment(comment)
-    
-    def removeComment(self, params):
-        if self._stampDB.removeComment(params.comment_id):
-            return True
-        else:
-            return False
-    
-    def getComments(self, params): 
-        ### TODO: Check privacy of stamp       
-        comments = self._stampDB.getComments(params.stamp_id)
+        # Check if stamp is private; if so, must be a follower
+        if stamp.getStampPrivacy() == True:
+            friendship = Friendship({
+                'user_id':      stamp.getOwnerId(),
+                'friend_id':    user.user_id,
+            })
+
+            if not self._friendshipDB.checkFriendship(friendship):
+                raise Exception("Insufficient privilages to add Comment")
+
+        # Check if user is blocked by stamp owner
+        ### TODO: Unit test this reverse friendship notion
+        reverseFriendship= Friendship({
+            'user_id':      user.user_id,
+            'friend_id':    stamp.getOwnerId(),
+        })
+        if self._friendshipDB.checkBlock(reverseFriendship) == True:
+            logs.info("Block exists")
+            raise Exception
+
+        blurb   = data.pop('blurb', None)
+
+        # Extract mentions
+        mentions = None
+        if blurb != None:
+            mentions = self._extractMentions(blurb)
+
+        # Build comment
+        comment = Comment({
+            'user': user.exportMini(),
+            'stamp_id': stamp.stamp_id,
+            'blurb': blurb,
+            'mentions': mentions,
+        })
+        comment.setTimestampCreated()
             
-        result = []
-        for comment in comments:
-            result.append(self._returnComment(comment))
+        # Add the comment data to the database
+        comment = self._commentDB.addComment(comment)
+
+        """
+        # Add activity for mentioned users
+        mentionedUserIds = []
+        if mentions != None:
+            for mention in mentions:
+                if 'user_id' in mention:
+                    mentionedUserIds.append(mention['user_id']) # mentioned users
+            if len(mentionedUserIds) > 0:
+                self._activityDB.addActivityForMention(mentionedUserIds, user, stamp, comment)
         
-        return result
+        # Add activity for commentor and for stamp owner
+        commentedUserIds = []
+        if user.user_id not in mentionedUserIds:
+            commentedUserIds.append(user.user_id)
+        if stamp.user.user_id not in mentionedUserIds:
+            commentedUserIds.append(stamp.user.user_id)
+        if len(commentedUserIds) > 0:
+            self._activityDB.addActivityForComment(commentedUserIds, user, stamp, comment)
+        
+        # Add activity for previous commenters
+        repliedUsersDict = {}
+        ### TODO: Limit this to the last 20 comments or so...
+        for prevComment in self._commentsDB.getComments(stamp.stamp_id):
+            repliedUsersDict[prevComment['user']['user_id']] = 1 
+        repliedUserIds = recipientDict.keys()
+        if len(repliedUserIds) > 0:
+            self._activityDB.addActivityForReply(repliedUserIds, user, stamp, comment)
+        """
+        
+        # Increment comment count on stamp
+        self._stampDB.incrementStatsForStamp(stamp.stamp_id, 'num_comments', 1)
+
+        if self.output == 'http':
+            return comment.exportFlat()
+        return comment
+    
+    def removeComment(self, data, auth):
+        comment = self._commentDB.getComment(data['comment_id'])
+
+        # Only comment owner and stamp owner can delete comment
+        if comment.user.user_id != auth['authenticated_user_id']:
+            stamp = self._stampDB.getStamp(comment.stamp_id)
+            if stamp.user.user_id != auth['authenticated_user_id']:
+                raise Exception("Insufficient privilages to remove Comment")
+
+        # Don't allow user to delete comment for restamp notification
+        if comment.restamp_id != None:
+            raise Exception("Cannot remove 'Stamp' comment")
+
+        # Remove comment
+        self._commentDB.removeComment(comment.comment_id)
+
+        # Increment comment count on stamp
+        self._stampDB.incrementStatsForStamp(comment.stamp_id, 'num_comments', -1)
+
+        return True
+    
+    def getComments(self, data, auth): 
+        stamp = self._stampDB.getStamp(data['stamp_id'])
+
+        # Check privacy of stamp
+        if stamp.getStampPrivacy() == True:
+            friendship = Friendship({
+                'user_id':      stamp.getOwnerId(),
+                'friend_id':    auth['authenticated_user_id'],
+            })
+
+            if not self._friendshipDB.checkFriendship(friendship):
+                raise Exception("Insufficient privilages to view Stamp")
+              
+        comments = self._commentDB.getComments(stamp.stamp_id)
+            
+        if self.output == 'http':
+            result = []
+            for comment in comments:
+                result.append(comment.exportFlat())
+            return result
+        return comments
     
 
     """
@@ -925,69 +1030,108 @@ class StampedAPI(AStampedAPI):
     #     # #    # #      #      #      #    #   #   # #    # #   ## #    # 
      #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
     """
+
+    def _setSliceParams(self, data):
+        # Since
+        try: 
+            since = datetime.utcfromtimestamp(int(data.pop('since', None))-2)
+        except:
+            since = None
+        
+        # Before
+        try: 
+            before = datetime.utcfromtimestamp(int(data.pop('before', None))+2)
+        except:
+            before = None
+        
+        return since, before
     
-    def getInboxStamps(self, params):
-        # Limit results to 20
-        limit = self._setLimit(params.limit, cap=20)
-        
-        # Limit slice of data returned
-        since = None
-        if params.since != None:
-            try: 
-                since = datetime.utcfromtimestamp(int(params.since)-2)
-            except:
-                since = since
-        
-        before = None
-        if params.before != None:
-            try: 
-                before = datetime.utcfromtimestamp(int(params.before)+2)
-            except:
-                before = before
+    def _setLimit(self, limit, cap=20):
+        try:
+            if int(limit) < cap:
+                return int(limit)
+        except:
+            return cap
+    
+    def _getStampCollection(self, stampIds, data, includeComments=False):
+        quality     = data.pop('quality', 3)
+        limit       = data.pop('limit', None)
                        
+        # Set quality
+        if quality == 1:
+            stampCap    = 50
+            commentCap  = 20
+        elif quality == 2:
+            stampCap    = 30
+            commentCap  = 10
+        else:
+            stampCap    = 20
+            commentCap  = 4
         
-        stamps = self._collectionDB.getInboxStamps(
-                    params.authenticated_user_id, 
-                    since=since, 
-                    before=before, 
-                    limit=limit)
+        limit = self._setLimit(limit, cap=stampCap)
+        
+        # Limit slice of data returned
+        since, before = self._setSliceParams(data)
+
+        params = {
+            'since':    since,
+            'before':   before, 
+            'limit':    limit,
+        }
+
+        stamps = self._stampDB.getStamps(stampIds, **params)
+
         result = []
-        
-        for stamp in stamps:
-            result.append(self._returnStamp(stamp))
+
+        if includeComments == True:
+            comments = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
+
+            ### TODO: Find a more efficient way to run this
+            for stamp in stamps:
+                if self.output == 'http':
+                    stamp = stamp.exportFlat()
+
+                stamp['comment_preview'] = []
+                for comment in comments:
+                    if comment.stamp_id == stamp['stamp_id']:
+                        if self.output == 'http':
+                            comment = comment.exportFlat()
+                        stamp['comment_preview'].append(comment)
+                result.append(stamp)
+        else:
+            for stamp in stamps:
+                if self.output == 'http':
+                    stamp = stamp.exportFlat()
+                result.append(stamp)
         
         return result
     
-    def getUserStamps(self, params):
-        # Limit results to 20
-        limit = self._setLimit(params.limit, cap=20)
+    def getInboxStamps(self, data, auth):
         
-        # Limit slice of data returned
-        since = None
-        if params.since != None:
-            try: 
-                since = datetime.utcfromtimestamp(int(params.since)-2)
-            except:
-                since = since
+        stampIds = self._collectionDB.getInboxStampIds(auth['authenticated_user_id'])
+
+        return self._getStampCollection(stampIds, data, includeComments=True)
+    
+    def getUserStamps(self, data, auth):
+        user = self._getUserFromIdOrScreenName(data)
+
+        # Check privacy
+        if user.privacy == True:
+            authenticated_user_id = data.pop('authenticated_user_id', None)
+            if authenticated_user_id == None:
+                raise Exception("You must be logged in to view this account")
+
+            friendship = Friendship({
+                'user_id':      auth['authenticated_user_id'],
+                'friend_id':    user['user_id']
+            })
+
+            if not self._friendshipDB.checkFriendship(friendship):
+                raise Exception("You do not have permission to view this user")
         
-        before = None
-        if params.before != None:
-            try: 
-                before = datetime.utcfromtimestamp(int(params.before)+2)
-            except:
-                before = before
-                
-        stamps = self._collectionDB.getUserStamps(
-                    params.user_id, 
-                    since=since, 
-                    before=before, 
-                    limit=limit)
-        result = []
-        
-        for stamp in stamps:
-            result.append(self._returnStamp(stamp))
-        
-        return result
+        stampIds = self._collectionDB.getUserStampIds(user.user_id)
+
+        return self._getStampCollection(stampIds, data, includeComments=True)
     
     def getUserMentions(self, userID, limit=None):
         ### TODO: Implement
@@ -1005,36 +1149,43 @@ class StampedAPI(AStampedAPI):
     #     #  ####    #   #   ##   #   #     #   
     """
     
-    def getActivity(self, params):
-        # Limit results to 20
-        limit = self._setLimit(params.limit, cap=20)
+    def getActivity(self, data, auth):
+        quality     = data.pop('quality', 3)
+        limit       = data.pop('limit', None)
+                       
+        # Set quality
+        if quality == 1:
+            stampCap    = 50
+            commentCap  = 20
+        elif quality == 2:
+            stampCap    = 30
+            commentCap  = 10
+        else:
+            stampCap    = 20
+            commentCap  = 4
+        
+        limit = self._setLimit(limit, cap=stampCap)
         
         # Limit slice of data returned
-        since = None
-        if params.since != None:
-            try: 
-                since = datetime.utcfromtimestamp(int(params.since)-2)
-            except:
-                since = since
+        since, before = self._setSliceParams(data)
+
+        params = {
+            'since':    since,
+            'before':   before, 
+            'limit':    limit,
+        }
         
-        before = None
-        if params.before != None:
-            try: 
-                before = datetime.utcfromtimestamp(int(params.before)+2)
-            except:
-                before = before
+        activity = self._activityDB.getActivity(auth['authenticated_user_id'], \
+                                                **params)
         
-        activity = self._activityDB.getActivity(params.authenticated_user_id, \
-            since=since, before=before, limit=limit)
-        result = []
-        for item in activity:
-            result.append(self._returnActivity(item))
-        
-        return result
+        if self.output == 'http':
+            result = []
+            for item in activity:
+                result.append(item.exportFlat())
+            return result
+        return activity
     
-    # ########### #
-    # Private API #
-    # ########### #
+
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 
@@ -1085,20 +1236,7 @@ class StampedAPI(AStampedAPI):
             utils.printException()
             # don't let error propagate
     
-    def _setLimit(self, limit, cap=20):
-        result = cap
-        if limit != None:
-            try:
-                result = int(limit)
-                if result > cap:
-                    result = cap
-            except:
-                result = cap
-        return result
-    
-    # ################# #
-    # Result Formatting #
-    # ################# #
+
     """
     #######                                                         
     #        ####  #####  #    #   ##   ##### ##### # #    #  ####  

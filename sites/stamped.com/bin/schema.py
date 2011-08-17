@@ -179,7 +179,7 @@ class SchemaElement(object):
                     raise SchemaTypeError(msg)
 
                 elif isinstance(value, list):
-                    msg = "Cannot set list as value (%s)" % name
+                    msg = "Cannot set list as value (%s)" % value
                     logs.warning(msg)
                     raise SchemaTypeError(msg)
 
@@ -292,7 +292,7 @@ of the SchemaList to the list:
 class SchemaList(SchemaElement):
     
     def __init__(self, element, **kwargs):
-        SchemaElement.__init__(self, dict, **kwargs)
+        SchemaElement.__init__(self, list, **kwargs)
         self._element       = element
         self._data          = []
         self._delimiter     = kwargs.pop('delimiter', None)

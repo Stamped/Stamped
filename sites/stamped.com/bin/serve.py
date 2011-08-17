@@ -538,6 +538,7 @@ def getInboxStamps():
             self.limit              = SchemaElement(int)
             self.since              = SchemaElement(int)
             self.before             = SchemaElement(int)
+            self.quality            = SchemaElement(int)
     return handleRequest(RequestSchema(), request, stampedAPI.getInboxStamps)
 
 @app.route(REST_API_PREFIX + 'collections/user.json', methods=['GET'])
@@ -549,6 +550,7 @@ def getUserStamps():
             self.limit              = SchemaElement(int)
             self.since              = SchemaElement(int)
             self.before             = SchemaElement(int)
+            self.quality            = SchemaElement(int)
     return handleRequest(RequestSchema(), request, stampedAPI.getUserStamps)
 
 @app.route(REST_API_PREFIX + 'getUserMentions', methods=['GET'])
