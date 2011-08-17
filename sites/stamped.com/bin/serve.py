@@ -175,6 +175,16 @@ def checkAuth(request, requireOAuthToken=True):
             logs.warning(msg)
             raise StampedHTTPError("access_denied", 401, msg)
 
+def parseRequest(schema, request):
+
+    ### Parse Request
+    try:
+        data, auth = parseRequestForm(schema, request)
+    except (InvalidArgument, Fail) as e:
+        msg = str(e)
+        logs.warning(msg)
+        raise StampedHTTPError("invalid_request", 400, e)
+
 
 
 
