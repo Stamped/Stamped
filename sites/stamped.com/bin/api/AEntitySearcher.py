@@ -15,6 +15,7 @@ class AEntitySearcher(object):
                          coords=None, 
                          limit=10, 
                          category_filter=None, 
-                         subcategory_filter=None):
+                         subcategory_filter=None, 
+                         full=None):
         pass
 

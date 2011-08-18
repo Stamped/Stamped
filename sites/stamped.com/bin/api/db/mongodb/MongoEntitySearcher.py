@@ -59,7 +59,8 @@ class MongoEntitySearcher(AEntitySearcher):
                          coords=None, 
                          limit=10, 
                          category_filter=None, 
-                         subcategory_filter=None):
+                         subcategory_filter=None, 
+                         full=None):
         input_query = query.strip().lower()
         
         query = input_query

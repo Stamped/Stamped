@@ -30,7 +30,12 @@ class WashMagCrawler(AExternalEntitySource):
         
         pool = Pool(512)
         # hardcoded list of URLs for Washingtonian 'Top' lists (no directly located)
-        href = ['http://www.washingtonian.com/restaurantreviews/20/index.html','http://www.washingtonian.com/restaurantreviews/10/index.html', 'http://www.washingtonian.com/restaurantreviews/19/index.html', 'http://www.washingtonian.com/restaurantreviews/17/index.html']
+        href = [
+            'http://www.washingtonian.com/restaurantreviews/20/index.html',
+            'http://www.washingtonian.com/restaurantreviews/10/index.html', 
+            'http://www.washingtonian.com/restaurantreviews/19/index.html', 
+            'http://www.washingtonian.com/restaurantreviews/17/index.html'
+        ]
         
         for l in href:
             pool.spawn(self._parseResultsPage, pool, l)
@@ -76,7 +81,10 @@ class WashMagCrawler(AExternalEntitySource):
                 continue
 
             try:
-                addr = '{0} {1}, {2}, {3}'.format(result.find('span').getText(), result.find('span').findNext('span').getText(), result.find('span').findNext('span').findNext('span').getText(), result.find('span').findNext('span').findNext('span').findNext('span').getText())
+                addr = '{0} {1}, {2}, {3}'.format(result.find('span').getText(), 
+                                                  result.find('span').findNext('span').getText(), 
+                                                  result.find('span').findNext('span').findNext('span').getText(), 
+                                                  result.find('span').findNext('span').findNext('span').findNext('span').getText())
             except Exception:
                 addr = ''
                 utils.log("[%s] error parsing %s (%s)" % (self, addr, href))

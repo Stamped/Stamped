@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import gzip, httplib, json, logging, os, sys, pickle, threading, time, traceback, urllib2
+import gzip, httplib, json, logging, os, sys, pickle, threading, time, traceback, urllib, urllib2
 from boto.ec2.connection import EC2Connection
 from subprocess import Popen, PIPE
 from functools import wraps
@@ -303,7 +303,7 @@ def getFile(url, opener=None):
             response = urllib2.urlopen(request)
             html = response.read()
             break
-        except urllib2.HTTPError, e:
+        except (urllib.HTTPError, urllib2.HTTPError) as e:
             #log("'%s' fetching url '%s'" % (str(e), url))
             
             # reraise the exception if the request resulted in an HTTP client 4xx error code, 
@@ -324,9 +324,9 @@ def getFile(url, opener=None):
             if delay > maxDelay:
                 raise
         except Exception, e:
-            log("Unexpected Error '%s' fetching url '%s'" % (str(e), url))
-            printException()
-            raise
+            log("[utils] Unexpected Error '%s' fetching url '%s'" % (str(e), url))
+            if delay > maxDelay:
+                raise
         
         # encountered error GETing document. delay for a bit and try again
         #log("Attempting to recover with delay of %d" % delay)

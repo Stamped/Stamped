@@ -138,7 +138,8 @@ def main():
                                          coords=options.location, 
                                          limit=options.limit, 
                                          category_filter=options.category, 
-                                         subcategory_filter=options.subcategory)
+                                         subcategory_filter=options.subcategory, 
+                                         full=options.full)
     
     # display all results
     for result in results:

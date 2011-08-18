@@ -1,15 +1,11 @@
+
 __author__ = "Kirsten Jones <synedra@gmail.com>"
 __version__ = "$Rev$"
 __date_ = "$Date$"
 
-import sys
-import os.path
-import re
+import Globals, utils
+import httplib, sys, os.path, re, simplejson, time
 import oauth.oauth as oauth
-import httplib
-import time
-from xml.dom.minidom import parseString
-import simplejson
 from urlparse import urlparse
 
 HOST               = 'api.netflix.com'
@@ -44,10 +40,10 @@ class NetflixUser():
 
         return ( requestToken, oauthRequest.to_url() )
 
-    
+
     def getAccessToken(self, requestToken):
         client = self.client
-        
+
         if not isinstance(requestToken, oauth.OAuthToken):
                 requestToken = oauth.OAuthToken( requestToken['key'], requestToken['secret'] )
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(    client.consumer,
@@ -62,32 +58,32 @@ class NetflixUser():
         response = client.connection.getresponse()
         accessToken = oauth.OAuthToken.from_string(response.read())
         return accessToken
-     
+
     def getData(self):
         accessToken=self.accessToken
 
         if not isinstance(accessToken, oauth.OAuthToken):
             accessToken = oauth.OAuthToken( accessToken['key'], accessToken['secret'] )
-        
+
         requestUrl = '/users/%s' % (accessToken.key)
-        
+
         info = simplejson.loads( self.client._getResource( requestUrl, token=accessToken ) )
         self.data = info['user']
         return self.data
-        
+
     def getInfo(self,field):
         accessToken=self.accessToken
-        
+
         if not self.data:
             self.getData()
-            
+
         fields = []
         url = ''
         for link in self.data['link']:
                 fields.append(link['title'])
                 if link['title'] == field:
                     url = link['href']
-                    
+
         if not url:
             errorString = "Invalid or missing field.  Acceptable fields for this object are:\n" + "\n".join(fields)
             raise Exception(errorString)        
@@ -97,13 +93,13 @@ class NetflixUser():
             return []
         else:
             return info
-        
-     def getRatings(self, discInfo=[], urls=[]):
+
+    def getRatings(self, discInfo=[], urls=[]):
         accessToken=self.accessToken
-        
+
         if not isinstance(accessToken, oauth.OAuthToken):
             accessToken = oauth.OAuthToken( accessToken['key'], accessToken['secret'] )
-        
+
         requestUrl = '/users/%s/ratings/title' % (accessToken.key)
         if not urls:
             if isinstance(discInfo,list):
@@ -112,9 +108,9 @@ class NetflixUser():
             else:
                 urls.append(discInfo['id'])
         parameters = { 'title_refs': ','.join(urls) }
-        
+
         info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
-        
+
         ret = {}
         for title in info['ratings']['ratings_item']:
                 ratings = {
@@ -125,9 +121,9 @@ class NetflixUser():
                     ratings['user'] = title['user_rating']
                 except:
                     pass
-                
+
                 ret[ title['title']['regular'] ] = ratings
-        
+
         return ret
 
     def getRentalHistory(self,type=None,startIndex=None,maxResults=None,updatedMin=None):
@@ -147,18 +143,18 @@ class NetflixUser():
             requestUrl = '/users/%s/rental_history' % (accessToken.key)
         else:
             requestUrl = '/users/%s/rental_history/%s' % (accessToken.key,type)
-        
+
         try:
             info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters, token=accessToken ) )
         except:
             return {}
-            
+
         return info
-        
+
 class NetflixCatalog():
     def __init__(self,client):
         self.client = client
-    
+
     def searchTitles(self, term,startIndex=None,maxResults=None):
         requestUrl = '/catalog/titles'
         parameters = {'term': term}
@@ -181,18 +177,20 @@ class NetflixCatalog():
         info = simplejson.loads( self.client._getResource( requestUrl, parameters=parameters))
         print simplejson.dumps(info)
         return info['autocomplete']['autocomplete_item']
-    
+
     def getTitle(self, url):
         requestUrl = url
         info = simplejson.loads( self.client._getResource( requestUrl ))
         return info
-    
+
     def getIndex(self):
-        requestUrl = '/catalog/titles/full?v=2.0'
-        info = simplejson.loads( self.client._getResource( requestUrl))
-        print simplejson.dumps(info)
+        #requestUrl = '/catalog/titles/index'
+        requestUrl = '/catalog/titles/full'
+        res  = self.client._getResource( requestUrl)
+        return res
+        info = simplejson.loads(res)
         return info
-    
+
     def searchPeople(self, term,startIndex=None,maxResults=None):
         requestUrl = '/catalog/people'
         parameters = {'term': term, 'expand': 'filmography','max_results':'15','start_index':0}
@@ -232,7 +230,7 @@ class NetflixUserQueue:
             parameters['updated_min'] = updatedMin
         if sort and sort in ('queue_sequence','date_added','alphabetical'):
             parameters['sort'] = sort
-        
+
         requestUrl = '/users/%s/queues' % (self.user.accessToken.key)
         try:
             info = simplejson.loads(self.client._getResource( requestUrl, parameters=parameters, token=self.user.accessToken ))
@@ -240,7 +238,7 @@ class NetflixUserQueue:
             return []
         else:
             return info
-            
+
     def getAvailable(self, sort=None, startIndex=None, maxResults=None, updatedMin=None,type='disc'):
         parameters={}
         if startIndex:
@@ -284,7 +282,7 @@ class NetflixUserQueue:
         parameters={}
         if position:
             parameters['position'] = position
-            
+
         if not isinstance(accessToken, oauth.OAuthToken):
             accessToken = oauth.OAuthToken( accessToken['key'], accessToken['secret'] )
 
@@ -316,7 +314,7 @@ class NetflixUserQueue:
         print "Response is " + response
         response = simplejson.loads(response)
         titles = response["queue"]["queue_item"]
-        
+
         for disc in titles:
             discID = os.path.basename(urlparse(disc['id']).path)
             if discID == id:
@@ -325,7 +323,7 @@ class NetflixUserQueue:
         if not entryID:
             return
         firstResponse = self.client._getResource( entryID, token=accessToken, parameters=parameters )
-        
+
         response = self.client._deleteResource( entryID, token=accessToken )
         return response
 
@@ -333,7 +331,7 @@ class NetflixDisc:
     def __init__(self,discInfo,client):
         self.info = discInfo
         self.client = client
-    
+
     def getInfo(self,field):
         fields = []
         url = ''
@@ -350,7 +348,7 @@ class NetflixDisc:
             return []
         else:
             return info
-            
+
 class NetflixClient:
     def __init__(self, name, key, secret, callback='',verbose=False):
         self.connection = httplib.HTTPConnection("%s:%s" % (HOST, PORT))
@@ -358,14 +356,14 @@ class NetflixClient:
         self.verbose = verbose
         self.user = None
         self.catalog = NetflixCatalog(self)
-        
+
         self.CONSUMER_NAME=name
         self.CONSUMER_KEY=key
         self.CONSUMER_SECRET=secret
         self.CONSUMER_CALLBACK=callback
         self.consumer = oauth.OAuthConsumer(self.CONSUMER_KEY, self.CONSUMER_SECRET)
         self.signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-    
+
     def _getResource(self, url, token=None, parameters={}):
         if not re.match('http',url):
             url = "http://%s%s" % (HOST, url)
@@ -374,38 +372,45 @@ class NetflixClient:
                                 http_url=url,
                                 parameters=parameters,
                                 token=token)
-        oauthRequest.sign_request(    self.signature_method_hmac_sha1,
-                                self.consumer,
-                                token)
+        oauthRequest.sign_request(self.signature_method_hmac_sha1,
+                                  self.consumer,
+                                  token)
         if (self.verbose):
-                print oauthRequest.to_url()
+            print oauthRequest.to_url()
         self.connection.request('GET', oauthRequest.to_url())
         response = self.connection.getresponse()
+        
+        location = response.getheader('location')
+        
+        # follow the redirect if available
+        if location is not None:
+            return utils.getFile(location)
+        
         return response.read()
-    
+
     def _postResource(self, url, token=None, parameters=None):
         if not re.match('http',url):
             url = "http://%s%s" % (HOST, url)
-        
+
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(    self.consumer,
                                 http_url=url,
                                 parameters=parameters,
                                 token=token,
                                 http_method='POST')
         oauthRequest.sign_request(self.signature_method_hmac_sha1, self.consumer, token)
-        
+
         if (self.verbose):
                 print "POSTING TO" + oauthRequest.to_url()
-        
+
         headers = {'Content-Type' :'application/x-www-form-urlencoded'}
         self.connection.request('POST', url, body=oauthRequest.to_postdata(), headers=headers)
         response = self.connection.getresponse()
         return response.read()
-        
+
     def _deleteResource(self, url, token=None, parameters=None):
         if not re.match('http',url):
             url = "http://%s%s" % (HOST, url)
-        
+
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(    self.consumer,
                                 http_url=url,
                                 parameters=parameters,
@@ -419,3 +424,4 @@ class NetflixClient:
         self.connection.request('DELETE', oauthRequest.to_url())
         response = self.connection.getresponse()
         return response.read()
+

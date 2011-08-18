@@ -45,6 +45,7 @@ class ZagatCrawler(AExternalEntitySource):
         try:
             soup = utils.getSoup(href)
         except:
+            utils.printException()
             utils.log("[%s] error downloading page %s" % (self, href))
             return
         
@@ -63,6 +64,7 @@ class ZagatCrawler(AExternalEntitySource):
         try:
             soup = utils.getSoup(href)
         except:
+            utils.printException()
             utils.log("[%s] error downloading page %s" % (self, href))
             return
         
@@ -91,6 +93,7 @@ class ZagatCrawler(AExternalEntitySource):
         try:
             soup = utils.getSoup(href)
         except:
+            utils.printException()
             utils.log("[%s] error downloading page %s" % (self, href))
             return
         
@@ -107,6 +110,7 @@ class ZagatCrawler(AExternalEntitySource):
         try:
             soup = utils.getSoup(href)
         except:
+            utils.printException()
             utils.log("[%s] error downloading page %s" % (self, href))
             return
         
@@ -137,6 +141,7 @@ class ZagatCrawler(AExternalEntitySource):
         try:
             soup = utils.getSoup(href)
         except:
+            utils.printException()
             utils.log("[%s] error downloading page %s" % (self, href))
             return
         

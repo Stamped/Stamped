@@ -202,6 +202,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             }, 
             'chicagomag' : { },
             'phillymag' : { }, 
+            'washmag' : { }, 
         }
     }
     

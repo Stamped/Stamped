@@ -28,10 +28,11 @@ class MongoStampedAPI(StampedAPI):
         Implementation of Stamped API atop MongoDB.
     """
     
-    def __init__(self, db):
+    def __init__(self, db=None):
         StampedAPI.__init__(self, "MongoStampedAPI")
         
-        utils.init_db_config(db)
+        if db:
+            utils.init_db_config(db)
         
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
@@ -39,35 +40,35 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _accountDB(self):
         return MongoAccountCollection()
-
+    
     #@lazyProperty
     #def _entityDB(self):
     #    return MongoEntityCollection()
-
+    
     @lazyProperty
     def _userDB(self):
         return MongoUserCollection()
-
+    
     @lazyProperty
     def _stampDB(self):
         return MongoStampCollection()
-
+    
     @lazyProperty
     def _commentDB(self):
         return MongoCommentCollection()
-
+    
     @lazyProperty
     def _favoriteDB(self):
         return MongoFavoriteCollection()
-
+    
     @lazyProperty
     def _collectionDB(self):
         return MongoCollectionCollection()
-
+    
     @lazyProperty
     def _friendshipDB(self):
         return MongoFriendshipCollection()
-
+    
     @lazyProperty
     def _activityDB(self):
         return MongoActivityCollection()
@@ -103,5 +104,4 @@ class MongoStampedAPI(StampedAPI):
         }
         
         return stats
-    
 
