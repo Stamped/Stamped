@@ -22,7 +22,7 @@ subcategories = {
     'other' : 'other',
 }
 
-class Entity(EntitySchema):
+class Entity2(Entity):
 
     # Set
     def setTimestampCreated(self):
@@ -52,9 +52,8 @@ class Entity(EntitySchema):
             'details.place.address',
             ]
         data = self.exportFields(export)
-        data['created'] = str(data['timestamp.created'])
-        del(data['timestamp.created'])
-        data['address'] = str(data['details.place.address'])
+        data['created'] = str(data.pop('timestamp.created', None))
+        data['address'] = data.pop('details.place.address', None)
         return data
 
     def exportMini(self):
@@ -82,23 +81,5 @@ class Entity(EntitySchema):
         export = ['entity_id', 'title', 'subtitle', 'category']
         return self.exportFields(export)
 
-class FlatEntity(EntityFlatSchema):
 
-    def convertToEntity(self):
-        data = self.value
-        if 'coordinates' in data and data['coordinates'] != None \
-            and not isinstance(data['coordinates'], dict):
-            coordinates = data['coordinates'].split(',')
-            del(data['coordinates'])
-            data['coordinates'] = {
-                'lat': coordinates[0],
-                'lng': coordinates[1]
-            }
-        if 'address' in data:
-            data['details'] = {
-                'place': { 'address': data['address'] }
-            }
-            del(data['address'])
-            
-        return Entity(data)
 

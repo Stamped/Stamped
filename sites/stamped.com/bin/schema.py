@@ -148,6 +148,10 @@ class SchemaElement(object):
             return case
         return None
 
+    def _clearElement(self):
+        self._data = None
+        self._isSet = False
+
     # Public Functions
 
     def validate(self):
@@ -497,7 +501,7 @@ The following attributes and functions are available to a Schema:
 * getDataAsDict Deprecated - use value instead.
 
 Finally, when importing new data into a Schema, you can pass it the parameter
-"discardExcess=True". This will override the default behavior for unrecognized
+"overflow=True". This will override the default behavior for unrecognized
 fields in data import, and will discard them instead of failing. This is useful
 when not all fields are expected to match, but should not be used as a first
 resort.
@@ -509,7 +513,7 @@ class Schema(SchemaElement):
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
         self._elements      = {}
-        self._discardExcess = kwargs.pop('discardExcess', False)
+        self._overflow      = kwargs.pop('overflow', False)
 
         self.setSchema()
         self.importData(data)
@@ -596,7 +600,12 @@ class Schema(SchemaElement):
 
     # Private Functions
 
-    def _importData(self, data, clear=True):
+    def _importData(self, data, **kwargs):
+        # Wipe all contents if not set in data
+        clear = kwargs.pop('clear', True)
+
+        if isinstance(data, Schema):
+            data = data.exportSparse()
 
         if not isinstance(data, dict) and data != None:
             msg = "Invalid Type (%s)" % data
@@ -630,7 +639,7 @@ class Schema(SchemaElement):
                 if isSet:
                     v.setElement(k, item)
                 elif clear:
-                    v.setElement(k, None)
+                    v._clearElement()
                 else:
                     v.validate()
             
@@ -639,7 +648,7 @@ class Schema(SchemaElement):
                 logs.warning(msg)
                 raise SchemaTypeError(msg)
 
-        if len(data) > 0 and self._discardExcess == False:
+        if data != None and len(data) > 0 and self._overflow == False:
             msg = "Unknown Field: %s" % data
             logs.warning(msg)
             raise SchemaValidationError(msg)
@@ -666,10 +675,24 @@ class Schema(SchemaElement):
         self._name = name
         self._importData(data, clear=True)
 
-    def importData(self, data):
+    def importData(self, data, overflow=None):
         if data == None or len(data) == 0:
             return
-        self._importData(data, clear=False)
+        if overflow == None:
+            overflow = self._overflow
+        # Preserve state of self._overflow
+        _overflow = self._overflow
+        try:
+            self._overflow = overflow
+            self._importData(data, clear=False)
+            self._overflow = _overflow
+        except:
+            self._overflow = _overflow
+            raise
+
+    def removeElement(self, name):
+        del(self._elements[name])
+
 
     def exportFields(self, fields):
         ret = {}
@@ -695,7 +718,8 @@ class Schema(SchemaElement):
                 if len(v) > 0:
                     ret[k] = v.value
             elif isinstance(v, SchemaElement):
-                if v.isSet == True:
+                # if v.isSet == True:
+                if v.value != None:
                     ret[k] = v.value
             else:
                 msg = "Unrecognized Element (%s)" % k

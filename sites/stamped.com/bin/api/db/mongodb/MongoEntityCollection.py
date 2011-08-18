@@ -10,6 +10,8 @@ import Globals
 from datetime import datetime
 from utils import lazyProperty
 
+from Schemas import *
+
 from AMongoCollection import AMongoCollection
 from MongoPlacesEntityCollection import MongoPlacesEntityCollection
 from api.AEntityDB import AEntityDB
@@ -59,7 +61,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         entity = self._convertFromMongo(document)
 
         if entity.coordinates.lat != None:
-            self.places_collection.addEntity(entity.exportPlace())
+            self.places_collection.addEntity(entity.exportSchema(EntityPlace()).value)
 
         return entity
     

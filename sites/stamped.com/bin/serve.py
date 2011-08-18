@@ -130,60 +130,71 @@ def handleAddAccountRequest(data, auth):
     
     return result
 
-def checkAuth(request, requireOAuthToken=True):
-
-    if requireOAuthToken == True:
-        ### Parse Request for Access Token
-        try:
-            oauth_token = request.values['oauth_token']
-        except:
-            msg = "Access token not included"
-            logs.warning(msg)
-            raise StampedHTTPError("invalid_request", 401, msg)
+def checkOAuth(request):
+    ### Parse Request for Access Token
+    try:
+        oauth_token = request.values['oauth_token']
+    except:
+        msg = "Access token not included"
+        logs.warning(msg)
+        raise StampedHTTPError("invalid_request", 401, msg)
+    
+    ### Validate OAuth Access Token
+    try:
+        authenticated_user_id = stampedAuth.verifyAccessToken({'oauth_token': oauth_token}) #### TEMP! Change stampedAuth
         
-        ### Validate OAuth Access Token
-        try:
-            authenticated_user_id = stampedAuth.verifyAccessToken(oauth_token)
-            if authenticated_user_id == None:
-                raise
-            return { 'user_id': authenticated_user_id }
-        except StampedHTTPError:
+        if authenticated_user_id == None:
             raise
-        except Exception:
-            msg = "Invalid access token"
-            logs.warning(msg)
-            raise StampedHTTPError("invalid_token", 401, msg)
+        return authenticated_user_id
+    except StampedHTTPError:
+        raise
+    except Exception:
+        msg = "Invalid access token"
+        logs.warning(msg)
+        raise StampedHTTPError("invalid_token", 401, msg)
 
-    else:
-        ### Parse Request for Client Credentials
-        try:
-            client_id       = request.values['client_id']
-            client_secret   = request.values['client_secret']
-        except:
-            msg = "Client credentials not included"
-            logs.warning(msg)
-            raise StampedHTTPError("invalid_request", 401, msg)
+def checkClient(request):
+    ### Parse Request for Client Credentials
+    try:
+        client_id       = request.values['client_id']
+        client_secret   = request.values['client_secret']
+    except:
+        msg = "Client credentials not included"
+        logs.warning(msg)
+        raise StampedHTTPError("invalid_request", 401, msg)
 
-        ### Validate Client Credentials
-        try:
-            if not stampedAuth.verifyClientCredentials( \
-                data.client_id, data.client_secret):
-                raise
-            return True
-        except:
-            msg = "Invalid client credentials"
-            logs.warning(msg)
-            raise StampedHTTPError("access_denied", 401, msg)
+    ### Validate Client Credentials
+    try:
+        if not stampedAuth.verifyClientCredentials( \
+            data.client_id, data.client_secret):
+            raise
+        return True
+    except:
+        msg = "Invalid client credentials"
+        logs.warning(msg)
+        raise StampedHTTPError("access_denied", 401, msg)
 
 def parseRequest(schema, request):
-
     ### Parse Request
     try:
-        data, auth = parseRequestForm(schema, request)
+        logs.debug("Request url: %s" % request.base_url)
+        logs.debug("Request data: %s" % request.values)
+
+        data = request.values.to_dict()
+        data.pop('oauth_token', None)
+        data.pop('client_id', None)
+        data.pop('client_secret', None)
+    
+        schema.importData(data)
+
+        logs.debug("Parsed request data: %s" % schema)
+
+        return schema
+
     except (InvalidArgument, Fail) as e:
         msg = str(e)
         logs.warning(msg)
-        raise StampedHTTPError("invalid_request", 400, e)
+        raise StampedHTTPError("bad_request", 400, e)
 
 
 
@@ -316,6 +327,7 @@ def updateProfile():
             self.bio                = SchemaElement(basestring)
             self.website            = SchemaElement(basestring)
             self.color              = SchemaElement(basestring)
+            self.location           = SchemaElement(basestring) ### NEW!!!
     return handleRequest(RequestSchema(), request, stampedAPI.updateProfile)
 
 @app.route(REST_API_PREFIX + 'account/update_profile_image.json', methods=['POST'])
@@ -462,22 +474,51 @@ def removeBlock():
             self.screen_name        = SchemaElement(basestring)
     return handleRequest(RequestSchema(), request, stampedAPI.removeBlock)
 
+
 # ######## #
 # Entities #
 # ######## #
 
 @app.route(REST_API_PREFIX + 'entities/create.json', methods=['POST'])
 def addEntity():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.title              = SchemaElement(basestring, required=True)
-            self.subtitle           = SchemaElement(basestring, required=True)
-            self.category           = SchemaElement(basestring, required=True)
-            self.subcategory        = SchemaElement(basestring, required=True)
-            self.desc               = SchemaElement(basestring)
-            self.address            = SchemaElement(basestring)
-            self.coordinates        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.addFlatEntity)
+
+    try:
+        user_id = checkOAuth(request)
+        schema  = parseRequest(HTTPAddEntity(), request)
+        entity  = schema.exportSchema(Entity())
+
+        entity.sources.userGenerated.user_id = user_id
+
+        logs.info("Begin: addEntity")
+
+        entity  = stampedAPI.addEntity(entity)
+        entity  = entity.exportSchema(HTTPEntity())
+
+        ret     = transformOutput(request, entity.exportSparse())
+        logs.info("End request: Success")
+        return ret
+
+    except StampedHTTPError as e:
+        logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+        return e.msg, e.code
+    except Exception as e:
+        logs.warning("500 Error: %s" % e)
+        return "Internal error", 500
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.route(REST_API_PREFIX + 'entities/show.json', methods=['GET'])
 def getEntity():

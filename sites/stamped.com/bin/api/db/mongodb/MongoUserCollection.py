@@ -29,7 +29,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         if '_id' in document:
             document['user_id'] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
-        return User(document, discardExcess=True)
+        return User(document, overflow=True)
     
     ### PUBLIC
     

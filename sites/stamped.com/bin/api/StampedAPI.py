@@ -32,6 +32,8 @@ from Favorite import Favorite
 from Friendship import Friendship
 from Activity import Activity
 
+from Schemas import *
+
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 
 # db-specific validation should occur elsewhere. This validation includes 
@@ -405,7 +407,7 @@ class StampedAPI(AStampedAPI):
         stamp_id    = data.pop('stamp_id', None)
 
         favorite = Favorite({
-            'entity': entity.exportMini(),
+            'entity': entity.exportSchema(EntityMini()),
             'user_id': auth['authenticated_user_id'],
         })
         favorite.setTimestampCreated()
@@ -463,18 +465,11 @@ class StampedAPI(AStampedAPI):
         entity = FlatEntity(data).convertToEntity().exportSparse()
         return self.addEntity(entity, auth)
     
-    def addEntity(self, data, auth):
-        entity = Entity(data)
+    def addEntity(self, entity):
 
-        entity.setTimestampCreated()
-        if 'authenticated_user_id' in auth:
-            entity.setUserGenerated(auth['authenticated_user_id'])
+        entity = self._entityDB.addEntity(entity)
 
-        result = self._entityDB.addEntity(entity)
-
-        if self.output == 'http':
-            return result.exportFlat()
-        return result
+        return entity
     
     def getEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
@@ -488,7 +483,7 @@ class StampedAPI(AStampedAPI):
     def updateFlatEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
 
-        flatEntity = FlatEntity(entity.exportFlat(), discardExcess=True)
+        flatEntity = FlatEntity(entity.exportFlat(), overflow=True)
         for k, v in data.iteritems():
             flatEntity[k] = v
         data = flatEntity.convertToEntity().exportSparse()
@@ -519,8 +514,8 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.getEntity(data['entity_id'])
 
         # Verify user has permission to delete
-        if entity.getUserGenerated() != auth['authenticated_user_id'] \
-            or entity.getUserGenerated() == None:
+        if entity.sources.userGenerated.user_id != auth['authenticated_user_id'] \
+            or entity.sources.userGenerated.user_id == None:
             raise Exception("Insufficient privilages to update entity")
 
         if self._entityDB.removeEntity(data['entity_id']):
@@ -618,12 +613,13 @@ class StampedAPI(AStampedAPI):
         # Build stamp
         stamp = Stamp({
             'user': user.exportMini(),
-            'entity': entity.exportMini(),
+            'entity': entity.exportSchema(EntityMini()),
             'blurb': blurb,
             'credit': credit,
             'image': image,
             'mentions': mentions,
         })
+        print 'SUCCESS?????'
         stamp.setTimestampCreated()
             
         # Add the stamp data to the database

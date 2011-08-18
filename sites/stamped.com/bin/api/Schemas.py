@@ -9,6 +9,30 @@ import copy
 from datetime import datetime
 from schema import *
 
+# ####### #
+# PRIVATE #
+# ####### #
+
+def _coordinatesDictToFlat(coordinates):
+    try:
+        if not isinstance(coordinates['lat'], float) or \
+            not isinstance(coordinates['lng'], float):
+            raise
+        return '%s,%s' % (coordinates['lat'], coordinates['lng'])
+    except:
+        return None
+
+def _coordinatesFlatToDict(coordinates):
+    try:
+        coordinates = coordinates.split(',')
+        lat = float(coordinates[0])
+        lng = float(coordinates[1])
+        return {
+            'lat': lat,
+            'lng': lng
+        }
+    except:
+        return None
 
 # ####### #
 # Account #
@@ -28,6 +52,7 @@ class AccountSchema(Schema):
         self.color_secondary    = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
         self.website            = SchemaElement(basestring)
+        self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True, default=False)
         self.locale             = LocaleSchema()
         self.linked_accounts    = LinkedAccountSchema()
@@ -66,6 +91,7 @@ class UserSchema(Schema):
         self.color_secondary    = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
         self.website            = SchemaElement(basestring)
+        self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
@@ -161,7 +187,7 @@ class ActivitySchema(Schema):
 class FavoriteSchema(Schema):
     def setSchema(self):
         self.favorite_id        = SchemaElement(basestring)
-        self.entity             = EntityMiniSchema(required=True)
+        self.entity             = EntityMini(required=True)
         self.user_id            = SchemaElement(basestring, required=True)
         self.stamp              = StampSchema()
         self.timestamp          = TimestampSchema()
@@ -182,7 +208,7 @@ class FavoriteSchema(Schema):
 class StampSchema(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring)
-        self.entity             = EntityMiniSchema(required=True)
+        self.entity             = EntityMini(required=True)
         self.user               = UserMiniSchema(required=True)
         self.blurb              = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
@@ -220,7 +246,7 @@ class CommentSchema(Schema):
 # Entities #
 # ######## #
 
-class EntitySchema(Schema):
+class Entity(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
@@ -236,7 +262,36 @@ class EntitySchema(Schema):
         self.details            = EntityDetailsSchema()
         self.sources            = EntitySourcesSchema()
 
-class EntityMiniSchema(Schema):
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'HTTPEntity':
+            data                = self.value
+            coordinates         = data.pop('coordinates', None)
+
+            schema.importData(data, overflow=True)
+
+            schema.address      = self.details.place.address
+            schema.neighborhood = self.details.place.neighborhood
+            schema.phone        = self.details.contact.phone
+            schema.site         = self.details.contact.site
+            schema.hours        = self.details.contact.hoursOfOperation
+            schema.cuisine      = self.details.restaurant.cuisine
+
+            schema.coordinates  = _coordinatesDictToFlat(coordinates)
+
+            if self.sources.openTable.reserveURL != None:
+                schema.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
+                                        (self.sources.openTable.reserveURL)
+        
+        elif schema.__class__.__name__ in ('EntityMini', 'EntityPlace', \
+                                            'HTTPEntityAutosuggest'):
+            schema.importData(self.exportSparse(), overflow=True)
+
+        else:
+            raise NotImplementedError
+
+        return schema
+
+class EntityMini(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring, required=True)
@@ -245,9 +300,32 @@ class EntityMiniSchema(Schema):
         self.subcategory        = SchemaElement(basestring, required=True)
         self.coordinates        = CoordinatesSchema()
 
-class EntityFlatSchema(Schema):
+class EntityPlace(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.coordinates        = CoordinatesSchema(required=True)
+
+class HTTPEntity(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+        self.subcategory        = SchemaElement(basestring, required=True)
+        self.desc               = SchemaElement(basestring)
+        self.address            = SchemaElement(basestring)
+        self.neighborhood       = SchemaElement(basestring)
+        self.coordinates        = SchemaElement(basestring)
+        self.image              = SchemaElement(basestring)
+        self.phone              = SchemaElement(int)
+        self.site               = SchemaElement(basestring)
+        self.hours              = SchemaElement(basestring)
+        self.cuisine            = SchemaElement(basestring)
+        self.opentable_url      = SchemaElement(basestring)
+        self.last_modified      = SchemaElement(basestring)
+
+class HTTPAddEntity(Schema):
+    def setSchema(self):
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring, required=True)
         self.category           = SchemaElement(basestring, required=True)
@@ -255,6 +333,38 @@ class EntityFlatSchema(Schema):
         self.desc               = SchemaElement(basestring)
         self.address            = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+
+            schema.importData({
+                'title':        self.title,
+                'subtitle':     self.subtitle,
+                'category':     self.category,
+                'subcategory':  self.subcategory,
+                'desc':         self.desc
+            })
+
+            schema.details.place.address = self.address 
+
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+
+        else:
+            raise NotImplementedError
+
+        return schema
+
+class HTTPEntityAutosuggest(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+
+
+
+
+
 
 class CoordinatesSchema(Schema):
     def setSchema(self):
