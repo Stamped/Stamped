@@ -161,6 +161,7 @@ def main():
         
         if distance >= 0:
             data['distance'] = distance
+        
         pprint(data)
 
 if __name__ == '__main__':

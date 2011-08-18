@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import math, pymongo
+import math, pymongo, string
 
 from AEntitySearcher import AEntitySearcher
 from MongoEntityCollection import MongoEntityCollection
@@ -73,6 +73,21 @@ class MongoEntitySearcher(AEntitySearcher):
         query = query.replace('.', '\.?')
         query = query.replace(':', ':?')
         query = query.replace('&', ' & ')
+        
+        words = query.split(' ')
+        if len(words) > 1:
+            for i in xrange(len(words)):
+                word = words[i]
+                
+                if word.endswith('s'):
+                    word += '?'
+                else:
+                    word += 's?'
+                
+                #word = "(%s)?" % word
+                words[i] = word
+            query = string.joinfields(words, ' ').strip()
+        
         query = query.replace(' and ', ' (and|&)? ')
         query = query.replace('-', '-?')
         query = query.replace(' ', '[ \t-_]?')
@@ -80,7 +95,6 @@ class MongoEntitySearcher(AEntitySearcher):
         query = query.replace("$", "[$st]?")
         query = query.replace("5", "[5s]?")
         query = query.replace("!", "[!li]?")
-        #utils.log("query: %s" % query)
         
         data = {}
         data['input'] = input_query
@@ -92,7 +106,7 @@ class MongoEntitySearcher(AEntitySearcher):
         pprint(data)
         
         entity_query = {"title": {"$regex": query, "$options": "i"}}
-        db_results = self.entityDB._collection.find(entity_query).limit(250)
+        db_results = self.entityDB._collection.find(entity_query)
         
         results = []
         results_set = set()
@@ -102,7 +116,7 @@ class MongoEntitySearcher(AEntitySearcher):
             # TODO: enforce this constraint when storing into mongo
             
             earthRadius = 3959.0 # miles
-            q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('num', 10), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
+            q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
             
             ret = self.placesDB._collection.command(q)
             
@@ -141,7 +155,7 @@ class MongoEntitySearcher(AEntitySearcher):
             subcategory_weight  = 0.5
             source_weight       = 0.4
             quality_weight      = 1.0
-            distance_weight     = 1.0
+            distance_weight     = 1.5
             
             # TODO: revisit and iterate on this simple linear ranking formula
             aggregate_value     = title_value * title_weight + \
@@ -151,21 +165,26 @@ class MongoEntitySearcher(AEntitySearcher):
                                   distance_value * distance_weight
             
             data = {}
-            data['title']  = entity.title
-            data['titlev'] = title_value
-            data['subcatv'] = subcategory_value
-            data['sourcev'] = source_value
-            data['qualityv'] = quality_value
+            data['title']     = entity.title
+            data['titlev']    = title_value
+            data['subcatv']   = subcategory_value
+            data['sourcev']   = source_value
+            data['qualityv']  = quality_value
             data['distancev'] = distance_value
-            data['totalv'] = aggregate_value
+            data['distance']  = distance
+            data['totalv']    = aggregate_value
             
-            #from pprint import pprint
-            #pprint(data)
+            if distance > 0:
+                from pprint import pprint
+                pprint(data)
             
             return aggregate_value
         
         # sort the results based on the _get_weight function
         results = sorted(results, key=_get_weight, reverse=True)
+        print
+        print
+        print
         
         # optionally limit the number of results shown
         if limit is not None and limit >= 0:
@@ -178,7 +197,7 @@ class MongoEntitySearcher(AEntitySearcher):
         weight = 1.0
         
         if input_query == title:
-            weight = 3.0
+            weight = 5.0
         elif input_query in title:
             if title.startswith(input_query):
                 weight = 1.8
@@ -200,7 +219,7 @@ class MongoEntitySearcher(AEntitySearcher):
             weight = 30
         
         return weight / 100.0
-
+    
     def _get_source_value(self, entity):
         sources = entity.sources
         
@@ -212,22 +231,42 @@ class MongoEntitySearcher(AEntitySearcher):
                 source_value_sum += 80
         
         return source_value_sum / 100.0
-
+    
     def _get_quality_value(self, entity):
         value = 1.0
         
         if 'popularity' in entity:
             # popularity is in the range [1,1000]
+            #print 'POPULARITY: %d' % (entity['popularity'], )
             value *= 5 * ((2000 - int(entity['popularity'])) / 1000.0)
         
         return value
-
+    
     def _get_distance_value(self, distance):
         if distance < 0:
             return 0
         
-        value = 1.0 / math.log1p(1 + distance)
-        value = max(min(value, 100), 0)
-        value = value ** 2
+        x = (distance - 50)
+        a = -0.4
+        b = 2.8
+        c = -6.3
+        d = 4
+        
+        x2 = x * x
+        x3 = x2 * x
+        
+        # simple cubic function of distance with the aim that 
+        # distances nearby will be rated significantly higher 
+        # than distances "far" away, with distances too far 
+        # away being penalized very quickly as the distance 
+        # grows.
+        value = a * x3 + b * x2 + c * x + d
+        #value = max(-1000, min(1000, value))
+        
+        if value > 0:
+            value = math.log10(1 + value)
+        else:
+            value = -math.log10(1 - value)
+        
         return value
 
