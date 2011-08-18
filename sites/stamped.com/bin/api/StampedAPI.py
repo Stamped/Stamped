@@ -226,23 +226,23 @@ class StampedAPI(AStampedAPI):
     #       #    # # ###### #    # #####   ####  
     """
     
-    def addFriendship(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def addFriendship(self, authUserId, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
 
         friendship = Friendship({
-            'user_id':      auth['authenticated_user_id'],
+            'user_id':      authUserId,
             'friend_id':    user['user_id']
         })
 
         reverseFriendship = Friendship({
             'user_id':      user['user_id'],
-            'friend_id':    auth['authenticated_user_id'],
+            'friend_id':    authUserId,
         })
 
         # Check if friendship already exists
         if self._friendshipDB.checkFriendship(friendship) == True:
             logs.info("Friendship exists")
-            return self._returnUser(user)
+            return user
 
         # Check if authenticating user is being blocked
         if self._friendshipDB.checkBlock(reverseFriendship) == True:
@@ -259,33 +259,35 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Add activity item for receipient?
         
-        return self._returnUser(user)
+        return user
     
-    def removeFriendship(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def removeFriendship(self, authUserId, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
 
         friendship = Friendship({
-            'user_id':      auth['authenticated_user_id'],
+            'user_id':      authUserId,
             'friend_id':    user['user_id']
         })
 
         # Check if friendship doesn't exist
         if self._friendshipDB.checkFriendship(friendship) == False:
             logs.info("Friendship does not exist")
-            return self._returnUser(user)
+            return user
             
         self._friendshipDB.removeFriendship(friendship)
 
-        return self._returnUser(user)
+        ### TODO: Remove stamps from Inbox
+
+        return user
     
     def approveFriendship(self, data, auth):
         raise NotImplementedError
     
-    def checkFriendship(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def checkFriendship(self, authUserId, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
 
         friendship = Friendship({
-            'user_id':      auth['authenticated_user_id'],
+            'user_id':      authUserId,
             'friend_id':    user['user_id']
         })
 
@@ -293,43 +295,41 @@ class StampedAPI(AStampedAPI):
             return True
         return False
     
-    def getFriends(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def getFriends(self, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
 
         friends = self._friendshipDB.getFriends(user['user_id'])
 
-        result = {'user_ids': friends}
-        return result
+        return friends
     
-    def getFollowers(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def getFollowers(self, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
 
         followers = self._friendshipDB.getFollowers(user['user_id'])
 
-        result = {'user_ids': followers}
-        return result
+        return followers
     
-    def addBlock(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def addBlock(self, authUserId, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
         
         friendship = Friendship({
-            'user_id':      auth['authenticated_user_id'],
+            'user_id':      authUserId,
             'friend_id':    user['user_id']
         })
 
         reverseFriendship = Friendship({
             'user_id':      user['user_id'],
-            'friend_id':    auth['authenticated_user_id'],
+            'friend_id':    authUserId,
         })
 
         # Check if block already exists
         if self._friendshipDB.checkBlock(friendship) == True:
             logs.info("Block exists")
-            return self._returnUser(user)
+            return user
 
         # Add block
         self._friendshipDB.addBlock(friendship)
@@ -338,13 +338,13 @@ class StampedAPI(AStampedAPI):
         self._friendshipDB.removeFriendship(friendship)
         self._friendshipDB.removeFriendship(reverseFriendship)
 
-        return self._returnUser(user)
+        return user
     
-    def checkBlock(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def checkBlock(self, authUserId, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
         
         friendship = Friendship({
-            'user_id':      auth['authenticated_user_id'],
+            'user_id':      authUserId,
             'friend_id':    user['user_id']
         })
 
@@ -352,29 +352,27 @@ class StampedAPI(AStampedAPI):
             return True
         return False
     
-    def getBlocks(self, data, auth):
+    def getBlocks(self, authUserId):
+        blocks = self._friendshipDB.getBlocks(authUserId)
 
-        blocks = self._friendshipDB.getBlocks(auth['authenticated_user_id'])
-
-        result = {'user_ids': blocks}
-        return result
+        return blocks
     
-    def removeBlock(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def removeBlock(self, authUserId, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
 
         friendship = Friendship({
-            'user_id':      auth['authenticated_user_id'],
+            'user_id':      authUserId,
             'friend_id':    user['user_id']
         })
 
         # Check if block already exists
         if self._friendshipDB.checkBlock(friendship) == False:
             logs.info("Block does not exist")
-            return self._returnUser(user)
+            return user
             
         self._friendshipDB.removeBlock(friendship)
 
-        return self._returnUser(user)
+        return user
 
     
     """

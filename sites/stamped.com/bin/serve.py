@@ -493,83 +493,112 @@ def getPrivacy():
 """
 
 @app.route(REST_API_PREFIX + 'friendships/create.json', methods=['POST'])
+@handleHTTPRequest
 def addFriendship():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.addFriendship)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    user        = stampedAPI.addFriendship(authUserId, schema)
+    user        = HTTPUser().importSchema(user)
+
+    return transformOutput(request, user.exportSparse())
 
 @app.route(REST_API_PREFIX + 'friendships/remove.json', methods=['POST'])
+@handleHTTPRequest
 def removeFriendship():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.removeFriendship)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
 
-@app.route(REST_API_PREFIX + 'approveFriendship', methods=['POST'])
-def approveFriendship():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.approveFriendship)
+    user        = stampedAPI.removeFriendship(authUserId, schema)
+    user        = HTTPUser().importSchema(user)
+
+    return transformOutput(request, user.exportSparse())
 
 @app.route(REST_API_PREFIX + 'friendships/check.json', methods=['GET'])
+@handleHTTPRequest
 def checkFriendship():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.checkFriendship)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    result      = stampedAPI.checkFriendship(authUserId, schema)
+
+    return transformOutput(request, result)
 
 @app.route(REST_API_PREFIX + 'friendships/friends.json', methods=['GET'])
+@handleHTTPRequest
 def getFriends():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.getFriends)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    userIds     = stampedAPI.getFriends(schema)
+    output      = { 'user_ids': userIds }
+
+    return transformOutput(request, output)
 
 @app.route(REST_API_PREFIX + 'friendships/followers.json', methods=['GET'])
+@handleHTTPRequest
 def getFollowers():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.getFollowers)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    userIds     = stampedAPI.getFollowers(schema)
+    output      = { 'user_ids': userIds }
+
+    return transformOutput(request, output)
+
+@app.route(REST_API_PREFIX + 'friendships/approve.json', methods=['POST'])
+@handleHTTPRequest
+def approveFriendship():
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    user        = stampedAPI.approveFriendship(authUserId, schema)
+    user        = HTTPUser().importSchema(user)
+
+    return transformOutput(request, user.exportSparse())
 
 @app.route(REST_API_PREFIX + 'friendships/blocks/create.json', methods=['POST'])
+@handleHTTPRequest
 def addBlock():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.addBlock)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    user        = stampedAPI.addBlock(authUserId, schema)
+    user        = HTTPUser().importSchema(user)
+
+    return transformOutput(request, user.exportSparse())
 
 @app.route(REST_API_PREFIX + 'friendships/blocks/check.json', methods=['GET'])
+@handleHTTPRequest
 def checkBlock():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.checkBlock)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    result      = stampedAPI.checkBlock(authUserId, schema)
+
+    return transformOutput(request, result)
 
 @app.route(REST_API_PREFIX + 'friendships/blocking.json', methods=['GET'])
+@handleHTTPRequest
 def getBlocks():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            pass
-    return handleRequest(RequestSchema(), request, stampedAPI.getBlocks)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(None, request)
+
+    userIds     = stampedAPI.getBlocks(authUserId)
+    output      = { 'user_ids': userIds }
+
+    return transformOutput(request, output)
 
 @app.route(REST_API_PREFIX + 'friendships/blocks/remove.json', methods=['POST'])
+@handleHTTPRequest
 def removeBlock():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.removeBlock)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    user        = stampedAPI.removeBlock(authUserId, schema)
+    user        = HTTPUser().importSchema(user)
+
+    return transformOutput(request, user.exportSparse())
 
 
 """

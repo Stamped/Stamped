@@ -385,24 +385,24 @@ class StampedAPIFriendshipTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
-    def test_check_friendship_success(self):
-        path = "friendships/check.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "user_id": self.userB['user_id']
-        }
-        result = self.handleGET(path, data)
-        self.assertTrue(result)
+# class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
+#     def test_check_friendship_success(self):
+#         path = "friendships/check.json"
+#         data = { 
+#             "oauth_token": self.tokenA['access_token'],
+#             "user_id": self.userB['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertTrue(result)
 
-    def test_check_friendship_fail(self):
-        path = "friendships/check.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "user_id": self.userA['user_id']
-        }
-        result = self.handleGET(path, data)
-        self.assertFalse(result)
+#     def test_check_friendship_fail(self):
+#         path = "friendships/check.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#             "user_id": self.userA['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertFalse(result)
 
 # class StampedAPIFriends(StampedAPIFriendshipTest):
 #     def test_show_friends(self):
@@ -566,30 +566,30 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
 # STAMP #
 # ##### #
 
-# class StampedAPIStampTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenB, self.userA)
-#         self.entity = self.createEntity(self.tokenA)
-#         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
+class StampedAPIStampTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
 
-#     def tearDown(self):
-#         self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, self.entity['entity_id'])
-#         self.deleteFriendship(self.tokenB, self.userA)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPIStampsShow(StampedAPIStampTest):
-#     def test_show(self):
-#         path = "stamps/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['blurb'], self.stamp['blurb'])
+class StampedAPIStampsShow(StampedAPIStampTest):
+    def test_show(self):
+        path = "stamps/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['blurb'], self.stamp['blurb'])
 
 # class StampedAPIStampsUpdate(StampedAPIStampTest):
 #     def test_show(self):
