@@ -203,6 +203,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             'chicagomag' : { },
             'phillymag' : { }, 
             'washmag' : { }, 
+            'netflix' : {
+                'nid' : basestring, 
+            }, 
         }
     }
     

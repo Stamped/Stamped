@@ -14,13 +14,17 @@ from pprint import pprint
 
 # TODO:
     # lazy loading of external entities
-        # google places if location is turned on
-        # barnes n noble search results otherwise?
+        # location
+            # google places
+        # misc:
+            # amazon
+            # netflix
+            # barnes n noble
     # image support
         # find good python image library
     # fast auxillary data structure for autocomplete, indexed on title?
         # written in C++; would have to take into account alternate titles
-    # regression tester for sorting
+    # regression tester for search results
 
 # TODO: high level
     # how to approach sorting?
@@ -42,13 +46,7 @@ from pprint import pprint
     # need to ensure that popular artists will appear at the top
     # to what degree should this trump other ranking rules?
 
-# TODO: searchEntities should take into account whether or not 
-    # it's an autocompletion (e.g., prefix vs. full match) 
-    # and treat certain weights and regexes differently
-
 # TODO: add valid affiliate urls to fandangofeed
-# TODO: merge autocomplete.py with MongoEntityCollection.searchEntities
-
 # TODO: add -f option to crawler to either force overwrite of preexisting data or disregard previous records?
 
 # TODO: (DONE) add fandango source
@@ -59,6 +57,8 @@ from pprint import pprint
 # TODO: (DONE) buffer output of AppleEPFRelationalDB
 # TODO: (DONE) change AppleEPFRelationalDB to output to a single db file spread over multiple tables
 # TODO: (DONE) what are the other regex options available?
+# TODO: (DONE) searchEntities should take into account whether or not 
+# TODO: (DONE) merge autocomplete.py with MongoEntityCollection.searchEntities
 
 # travis' manhattan apartment (for proximity testing purposes): '40.797898,-73.968148'
 

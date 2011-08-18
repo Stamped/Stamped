@@ -187,6 +187,9 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
             }, 
             'chicagomag' : { },
             'phillymag' : { }, 
+            'netflix' : {
+                'nid' : basestring, 
+            }, 
         }
     }
     
