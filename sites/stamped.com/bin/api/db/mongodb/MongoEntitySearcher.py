@@ -127,13 +127,11 @@ class MongoEntitySearcher(AEntitySearcher):
         if 0 == len(results):
             return results
         
-        is_junk = " \t-".__contains__
-        
         def _get_weight(result):
             entity   = result[0]
             distance = result[1]
             
-            title_value         = SequenceMatcher(is_junk, input_query, entity.title.lower()).ratio()
+            title_value         = self._get_title_value(input_query, entity)
             subcategory_value   = self._get_subcategory_value(entity)
             source_value        = self._get_source_value(entity)
             quality_value       = self._get_quality_value(entity)
@@ -174,6 +172,24 @@ class MongoEntitySearcher(AEntitySearcher):
             results = results[0 : min(len(results), limit)]
         
         return results
+    
+    def _get_title_value(self, input_query, entity):
+        title  = entity.title.lower()
+        weight = 1.0
+        
+        if input_query == title:
+            weight = 3.0
+        elif input_query in title:
+            if title.startswith(input_query):
+                weight = 1.8
+            else:
+                weight = 1.2
+        
+        is_junk = " \t-".__contains__
+        ratio   = SequenceMatcher(is_junk, input_query, entity.title.lower()).ratio()
+        value   = ratio * weight
+        
+        return value
     
     def _get_subcategory_value(self, entity):
         subcat = entity.subcategory
