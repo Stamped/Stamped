@@ -218,7 +218,8 @@ class Entity(ASchemaBasedAttributeDict):
                 "fid" : basestring, 
             }, 
             'chicagomag' : { },
-            'phillymag' : { }, 
+            'phillymag' : { },
+            'washmag' : { }, 
         }
     }
     

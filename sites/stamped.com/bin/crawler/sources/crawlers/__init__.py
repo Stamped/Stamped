@@ -8,4 +8,5 @@ import LATimesCrawler
 import BostonMagCrawler
 import ChicagoMagCrawler
 import PhillyMagCrawler
+import WashMagCrawler
 
