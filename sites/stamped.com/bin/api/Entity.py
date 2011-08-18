@@ -219,7 +219,8 @@ class Entity(ASchemaBasedAttributeDict):
             }, 
             'chicagomag' : { },
             'phillymag' : { },
-            'washmag' : { }, 
+            'washmag' : { },
+            'sfgate' : { }, 
             'netflix' : {
                 'nid' : basestring, 
             }, 
