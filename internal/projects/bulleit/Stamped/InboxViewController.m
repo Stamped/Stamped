@@ -59,7 +59,6 @@ typedef enum {
 @synthesize otherFilterButton = otherFilterButton_;
 
 - (void)dealloc {
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.filterButtons = nil;
   self.filterView = nil;
