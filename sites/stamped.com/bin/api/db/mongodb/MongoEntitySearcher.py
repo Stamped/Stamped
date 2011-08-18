@@ -14,6 +14,7 @@ from MongoPlacesEntityCollection import MongoPlacesEntityCollection
 
 from difflib import SequenceMatcher
 from pymongo.son import SON
+from pprint import pprint
 from utils import abstract
 from Entity import Entity
 
@@ -79,7 +80,16 @@ class MongoEntitySearcher(AEntitySearcher):
         query = query.replace("$", "[$st]?")
         query = query.replace("5", "[5s]?")
         query = query.replace("!", "[!li]?")
-        utils.log("query: %s" % query)
+        #utils.log("query: %s" % query)
+        
+        data = {}
+        data['input'] = input_query
+        data['query'] = query
+        data['coords'] = coords
+        data['limit'] = limit
+        data['category'] = category_filter
+        data['subcategory'] = subcategory_filter
+        pprint(data)
         
         entity_query = {"title": {"$regex": query, "$options": "i"}}
         db_results = self.entityDB._collection.find(entity_query).limit(250)

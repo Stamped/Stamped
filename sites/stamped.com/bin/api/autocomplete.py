@@ -12,6 +12,8 @@ from db.mongodb.MongoEntitySearcher import MongoEntitySearcher
 from optparse import OptionParser
 from pprint import pprint
 
+# debug connection issues with peach
+# get proximity requests working
 # TODO:
     # lazy loading of external entities
         # location
@@ -19,11 +21,13 @@ from pprint import pprint
         # misc:
             # amazon
             # netflix
+                # still need *really* efficient python XML parser
             # barnes n noble
     # image support
         # find good python image library
     # fast auxillary data structure for autocomplete, indexed on title?
         # written in C++; would have to take into account alternate titles
+        # or possibly a smaller mongo collection, optimized for search
     # regression tester for search results
 
 # TODO: high level
@@ -34,8 +38,8 @@ from pprint import pprint
         # quality of source (DONE)
         # quality signals within source
             # iTunes rank (DONE)
-            # zagat-rated
-            # currently on Fandango
+            # zagat-rated (DONE)
+            # currently on Fandango (DONE)
         # social signals
             # friends who've stamped an entity
             # is an entity stamped in your inbox?
