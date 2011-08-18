@@ -53,7 +53,7 @@ class EntityDeduper(Greenlet):
         pool.join()
         utils.log("done parsing place duplicates")
         
-        pool = Pool(64)
+        pool = Pool(8)
         utils.log("parsing non-place duplicates")
         
         last = None

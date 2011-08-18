@@ -30,17 +30,18 @@ class NetflixAPI(AExternalServiceEntitySource):
         self._client = NetflixClient("Stamped", NETFLIX_API_KEY, NETFLIX_API_SECRET, '', False)
     
     def getMaxNumEntities(self):
-        return 100 # approximation for now
+        return 110000 # approximation for now
     
     def _run(self):
         utils.log("[%s] parsing instantly available movies" % (self, ))
         
+        self.numMoves = 0
         index = netflixClient.catalog.getIndex()
         # TODO: use index
         # TODO: use xml parser
         
         self._output.put(StopIteration)
-        utils.log("[%s] finished parsing available movies" % (self, ))
+        utils.log("[%s] finished parsing %d available movies" % (self, self.numMovies))
 
 import EntitySources
 EntitySources.registerSource('netflix', NetflixAPI)
