@@ -33,6 +33,7 @@ class EntityDeduper(Greenlet):
         numEntities = 0
         pool = Pool(2)
         
+        utils.log("parsing place duplicates")
         while True:
             if last is None:
                 query = None
@@ -46,8 +47,14 @@ class EntityDeduper(Greenlet):
             numEntities += 1
             last = bson.objectid.ObjectId(current['_id'])
             
-            #pool.spawn(self.matcher.dedupeOne, current, True)
-            self.matcher.dedupeOne(current, True)
+            pool.spawn(self.matcher.dedupeOne, current, True)
+            #self.matcher.dedupeOne(current, True)
+        
+        pool.join()
+        utils.log("done parsing place duplicates")
+        
+        pool = Pool(64)
+        utils.log("parsing non-place duplicates")
         
         last = None
         while True:
@@ -63,10 +70,11 @@ class EntityDeduper(Greenlet):
             numEntities += 1
             last = bson.objectid.ObjectId(current['_id'])
             
-            #pool.spawn(self.matcher.dedupeOne, current)
-            self.matcher.dedupeOne(current, False)
+            pool.spawn(self.matcher.dedupeOne, current)
+            #self.matcher.dedupeOne(current, False)
         
         pool.join()
+        utils.log("done parsing non-place duplicates")
         utils.log("found a total of %d duplicates (processed %d)" % (self.matcher.numDuplicates, numEntities))
 
 def parseCommandLine():
