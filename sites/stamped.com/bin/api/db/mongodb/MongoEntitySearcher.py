@@ -24,7 +24,7 @@ class MongoEntitySearcher(AEntitySearcher):
         'bar' : 90, 
         'book' : 50, 
         'movie' : 60, 
-        'artist' : 60, 
+        'artist' : 55, 
         'song' : 20, 
         'album' : 25, 
         'app' : 15, 
@@ -139,7 +139,7 @@ class MongoEntitySearcher(AEntitySearcher):
             
             title_weight        = 1.0
             subcategory_weight  = 0.5
-            source_weight       = 0.2
+            source_weight       = 0.4
             quality_weight      = 1.0
             distance_weight     = 1.0
             

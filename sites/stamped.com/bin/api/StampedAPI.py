@@ -657,7 +657,16 @@ class StampedAPI(AStampedAPI):
         #logs.info("Begin")
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
-        results = self._entitySearcher.getSearchResults(query=params.q, coords=params.coordinates, limit=10)
+        coords = params.coordinates
+        if coords is not None:
+            valid = False
+            if ',' in coords:
+                coords = coords.split(',')
+                valid = (2 == len(coords))
+            if not valid:
+                raise InvalidArgument('invalid input coordinates %s' % params.coordinates)
+        
+        results = self._entitySearcher.getSearchResults(query=params.q, coords=coords, limit=10)
         output = []
         
         for result in results:
