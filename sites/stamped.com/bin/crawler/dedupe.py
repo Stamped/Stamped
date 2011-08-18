@@ -70,7 +70,7 @@ class EntityDeduper(Greenlet):
             numEntities += 1
             last = bson.objectid.ObjectId(current['_id'])
             
-            pool.spawn(self.matcher.dedupeOne, current)
+            pool.spawn(self.matcher.dedupeOne, current, False)
             #self.matcher.dedupeOne(current, False)
         
         pool.join()
