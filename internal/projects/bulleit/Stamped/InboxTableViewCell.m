@@ -93,7 +93,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize stamps = stamps_;
 @synthesize hidePhotos = hidePhotos_;
 
-
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {

@@ -13,7 +13,7 @@
 
 @class UserImageView;
 
-@interface PeopleViewController : STReloadableTableViewController <RKRequestDelegate>
+@interface PeopleViewController : STReloadableTableViewController
 
 @property (nonatomic, retain) IBOutlet UserImageView* currentUserView;
 @property (nonatomic, retain) IBOutlet UIImageView* userStampImageView;
