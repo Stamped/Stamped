@@ -110,7 +110,6 @@ class WashMagCrawler(AExternalEntitySource):
             }
             
             self._output.put(entity)
-            print addr
         
         return 
         
