@@ -13,7 +13,6 @@ from GeocoderEntityProxy import GeocoderEntityProxy
 from AEntityProxy import AEntityProxy
 from ASyncGatherSource import ASyncGatherSource
 from TestEntitySink import TestEntitySink
-from api.db.mongodb.AMongoCollection import MongoDBConfig
 
 from optparse import OptionParser
 from threading import Thread
@@ -167,7 +166,7 @@ def parseCommandLine():
     if options.sink == "test":
         options.sink = TestEntitySink()
     else:
-        options.sink = MongoStampedAPI()
+        options.sink = MongoStampedAPI(options.db)
     
     return options
 

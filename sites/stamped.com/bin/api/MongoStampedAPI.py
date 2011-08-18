@@ -5,10 +5,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, utils
 
 from utils import lazyProperty
 from StampedAPI import StampedAPI
+from Entity import Entity
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoEntityCollection import MongoEntityCollection
@@ -20,14 +21,17 @@ from db.mongodb.MongoFavoriteCollection import MongoFavoriteCollection
 from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
+from db.mongodb.MongoEntitySearcher import MongoEntitySearcher
 
 class MongoStampedAPI(StampedAPI):
     """
         Implementation of Stamped API atop MongoDB.
     """
     
-    def __init__(self):
+    def __init__(self, db):
         StampedAPI.__init__(self, "MongoStampedAPI")
+        
+        utils.init_db_config(db)
         
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
@@ -67,4 +71,37 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _activityDB(self):
         return MongoActivityCollection()
+    
+    @lazyProperty
+    def _entitySearcher(self):
+        return MongoEntitySearcher()
+    
+    def getStats(self):
+        source_stats = { }
+        
+        for source in Entity._schema['sources']:
+            count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()
+            source_stats[source] = count
+        
+        stats = {
+            'entities' : {
+                'count' : self._entityDB._collection.count(), 
+                'sources' : source_stats, 
+                'places' : {
+                    'count' : self._placesEntityDB._collection.count(), 
+                }, 
+            }, 
+            'users' : {
+                'count' : self._userDB._collection.count(), 
+            }, 
+            'comments' : {
+                'count' : self._commentDB._collection.count(), 
+            }, 
+            'stamps' : {
+                'count' : self._stampDB._collection.count(), 
+            }, 
+        }
+        
+        return stats
+    
 

@@ -657,19 +657,22 @@ class StampedAPI(AStampedAPI):
         #logs.info("Begin")
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
-        entities = self._entityDB.searchEntities(params.q, limit=10)
-        result = []
+        results = self._entitySearcher.getSearchResults(query=params.q, coords=params.coordinates, limit=10)
+        output = []
         
-        for entity in entities:
+        for result in results:
+            entity   = result[0]
+            distance = result[1]
+            
             data = {}
             data['entity_id'] = entity.entity_id
-            data['title'] = entity.title
-            data['category'] = entity.category
-            data['subtitle'] = entity.subtitle
+            data['title']     = entity.title
+            data['category']  = entity.category
+            data['subtitle']  = entity.subtitle
             
-            result.append(data)
+            output.append(data)
         
-        return result
+        return output
     
     # ###### #
     # Stamps #
@@ -1019,33 +1022,6 @@ class StampedAPI(AStampedAPI):
             except:
                 result = cap
         return result
-    
-    def getStats(self):
-        source_stats = { }
-        for source in Entity._schema['sources']:
-            count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()
-            source_stats[source] = count
-        
-        stats = {
-            'entities' : {
-                'count' : self._entityDB._collection.count(), 
-                'sources' : source_stats, 
-                'places' : {
-                    'count' : self._placesEntityDB._collection.count(), 
-                }, 
-            }, 
-            'users' : {
-                'count' : self._userDB._collection.count(), 
-            }, 
-            'comments' : {
-                'count' : self._commentDB._collection.count(), 
-            }, 
-            'stamps' : {
-                'count' : self._stampDB._collection.count(), 
-            }, 
-        }
-        
-        return stats
     
     # ################# #
     # Result Formatting #

@@ -1,3 +1,4 @@
+
 import Globals
 
 import MongoAccountCollection
@@ -20,4 +21,7 @@ import MongoUserActivityCollection
 import MongoUserCollection
 import MongoUserFavoritesCollection
 import MongoUserStampsCollection
+import MongoEntitySearcher
+import MongoPlacesEntityCollection
+import MongoCollectionProxy
 

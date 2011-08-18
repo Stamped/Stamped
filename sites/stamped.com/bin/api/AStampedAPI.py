@@ -6,8 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from utils import abstract
+
 from AEntitySink import AEntitySink
+from utils import abstract
 
 class AStampedAPI(AEntitySink):
     """
@@ -242,5 +243,9 @@ class AStampedAPI(AEntitySink):
     
     @abstract
     def _addEntities(self, entities):
+        raise NotImplementedError
+    
+    @abstract
+    def getStats(self):
         raise NotImplementedError
 
