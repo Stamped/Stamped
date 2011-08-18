@@ -38,7 +38,7 @@ def _coordinatesFlatToDict(coordinates):
 # Account #
 # ####### #
 
-class AccountSchema(Schema):
+class Account(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring)
         self.first_name         = SchemaElement(basestring, required=True)
@@ -46,7 +46,7 @@ class AccountSchema(Schema):
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
+        self.display_name       = SchemaElement(basestring)
         self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
@@ -79,7 +79,7 @@ class LocaleSchema(Schema):
 # Users #
 # ##### #
 
-class UserSchema(Schema):
+class User(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring)
         self.first_name         = SchemaElement(basestring, required=True)
@@ -282,8 +282,11 @@ class Entity(Schema):
                 schema.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
                                         (self.sources.openTable.reserveURL)
         
-        elif schema.__class__.__name__ in ('EntityMini', 'EntityPlace', \
-                                            'HTTPEntityAutosuggest'):
+        elif schema.__class__.__name__ == 'HTTPEntityAutosuggest':
+            schema.importData(self.exportSparse(), overflow=True)
+            schema.address      = self.details.place.address
+        
+        elif schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
             schema.importData(self.exportSparse(), overflow=True)
 
         else:
@@ -305,66 +308,10 @@ class EntityPlace(Schema):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.coordinates        = CoordinatesSchema(required=True)
 
-class HTTPEntity(Schema):
+class EntitySearch(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.neighborhood       = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
-        self.phone              = SchemaElement(int)
-        self.site               = SchemaElement(basestring)
-        self.hours              = SchemaElement(basestring)
-        self.cuisine            = SchemaElement(basestring)
-        self.opentable_url      = SchemaElement(basestring)
-        self.last_modified      = SchemaElement(basestring)
-
-class HTTPAddEntity(Schema):
-    def setSchema(self):
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-
-            schema.importData({
-                'title':        self.title,
-                'subtitle':     self.subtitle,
-                'category':     self.category,
-                'subcategory':  self.subcategory,
-                'desc':         self.desc
-            })
-
-            schema.details.place.address = self.address 
-
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-
-        else:
-            raise NotImplementedError
-
-        return schema
-
-class HTTPEntityAutosuggest(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-
-
-
-
-
+        self.q                  = SchemaElement(basestring, required=True)
+        self.coordinates        = CoordinatesSchema()
 
 class CoordinatesSchema(Schema):
     def setSchema(self):

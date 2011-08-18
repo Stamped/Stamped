@@ -35,6 +35,7 @@ class AStampedAPITestCase(unittest.TestCase):
     
     def handlePOST(self, path, data):
         params = urllib.urlencode(data)
+        # print params
         result = json.load(self._opener.open("%s/%s" % (self._baseurl, path), params))
         return result
 
@@ -274,7 +275,7 @@ class AStampedAPITestCase(unittest.TestCase):
 #     def setUp(self):
 #         (self.userA, self.tokenA) = self.createAccount('UserA')
 #         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.screen_names = ['UserA', 'UserB']
+#         self.screen_names = ['usera', 'userb']
 
 #     def tearDown(self):
 #         self.deleteAccount(self.tokenA)
@@ -373,35 +374,35 @@ class AStampedAPITestCase(unittest.TestCase):
 # FRIENDSHIP #
 # ########## #
 
-# class StampedAPIFriendshipTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenA, self.userB)
+class StampedAPIFriendshipTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenA, self.userB)
 
-#     def tearDown(self):
-#         self.deleteFriendship(self.tokenA, self.userB)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteFriendship(self.tokenA, self.userB)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
-#     def test_check_friendship_success(self):
-#         path = "friendships/check.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "user_id": self.userB['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue(result)
+class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
+    def test_check_friendship_success(self):
+        path = "friendships/check.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userB['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result)
 
-#     def test_check_friendship_fail(self):
-#         path = "friendships/check.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "user_id": self.userA['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertFalse(result)
+    def test_check_friendship_fail(self):
+        path = "friendships/check.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "user_id": self.userA['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertFalse(result)
 
 # class StampedAPIFriends(StampedAPIFriendshipTest):
 #     def test_show_friends(self):
@@ -532,7 +533,8 @@ class AStampedAPITestCase(unittest.TestCase):
 #         data = { 
 #             "oauth_token": self.token['access_token'],
 #             "entity_id": self.entity['entity_id'],
-#             "desc": desc
+#             # "category": '',
+#             "desc": desc,
 #         }
 #         result = self.handlePOST(path, data)
 #         self.assertEqual(result['desc'], desc)
@@ -542,7 +544,7 @@ class AStampedAPITestCase(unittest.TestCase):
 #         path = "entities/search.json"
 #         data = { 
 #             "oauth_token": self.token['access_token'],
-#             "q": self.entity['title'][3:]
+#             "q": self.entity['title'][:3]
 #         }
 #         result = self.handleGET(path, data)
 #         self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
@@ -974,27 +976,27 @@ class AStampedAPITestCase(unittest.TestCase):
 # FAVORITES #
 # ######### #
 
-class StampedAPIFavoriteTest(AStampedAPITestCase):
-    def setUp(self):
-        (self.user, self.token) = self.createAccount('UserA')
-        self.entity = self.createEntity(self.token)
-        self.stamp = self.createStamp(self.token, self.entity['entity_id'])
-        self.favorite = self.createFavorite(self.token, self.entity['entity_id'])
+# class StampedAPIFavoriteTest(AStampedAPITestCase):
+#     def setUp(self):
+#         (self.user, self.token) = self.createAccount('UserA')
+#         self.entity = self.createEntity(self.token)
+#         self.stamp = self.createStamp(self.token, self.entity['entity_id'])
+#         self.favorite = self.createFavorite(self.token, self.entity['entity_id'])
 
-    def tearDown(self):
-        self.deleteFavorite(self.token, self.entity['entity_id'])
-        self.deleteStamp(self.token, self.stamp['stamp_id'])
-        self.deleteEntity(self.token, self.entity['entity_id'])
-        self.deleteAccount(self.token)
+#     def tearDown(self):
+#         self.deleteFavorite(self.token, self.entity['entity_id'])
+#         self.deleteStamp(self.token, self.stamp['stamp_id'])
+#         self.deleteEntity(self.token, self.entity['entity_id'])
+#         self.deleteAccount(self.token)
 
-class StampedAPIFavoritesShow(StampedAPIFavoriteTest):
-    def test_show(self):
-        path = "favorites/show.json"
-        data = { 
-            "oauth_token": self.token['access_token'],
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 1)
+# class StampedAPIFavoritesShow(StampedAPIFavoriteTest):
+#     def test_show(self):
+#         path = "favorites/show.json"
+#         data = { 
+#             "oauth_token": self.token['access_token'],
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 1)
 
 
 """

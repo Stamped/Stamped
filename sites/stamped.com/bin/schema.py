@@ -99,6 +99,7 @@ class SchemaElement(object):
         self._isSet         = False
         self._requiredType  = self._setType(requiredType)
         self._required      = kwargs.pop('required', False)
+        self._validate      = kwargs.pop('validate', True)
         self._default       = kwargs.pop('default', None)
         self._case          = self._setCase(kwargs.pop('case', None))
         # self._format        = kwargs.pop('format', None)
@@ -155,7 +156,7 @@ class SchemaElement(object):
     # Public Functions
 
     def validate(self):
-        if self._data == None and self._required == True:
+        if self._data == None and self._required == True and self._validate == True:
             msg = "Required field empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
@@ -170,6 +171,11 @@ class SchemaElement(object):
     def setElement(self, name, value):
         try:
             msg = "Set Element Failed (%s)" % name
+
+            # Convert empty strings
+            ### TODO: Do we want this functionality?
+            # if value == '':
+            #     value = None
 
             if value == None and self._default != None:
                 value = self._default
@@ -334,11 +340,13 @@ class SchemaList(SchemaElement):
         elif isinstance(element, Schema) or isinstance(element, SchemaList):
             newSchemaItem = copy.deepcopy(element)
             newSchemaItem.importData(item)
+            newSchemaItem._validate = self._validate
             return newSchemaItem
 
         elif isinstance(element, SchemaElement):
             newSchemaElement = copy.deepcopy(element)
             newSchemaElement.setElement('e', item)
+            newSchemaElement._validate = self._validate
             return newSchemaElement
 
         else:
@@ -420,7 +428,7 @@ class SchemaList(SchemaElement):
         self._isSet = True
 
     def validate(self):
-        if len(self._data) == 0 and self._required == True:
+        if len(self._data) == 0 and self._required == True and self._validate == True:
             msg = "Required List Empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
@@ -525,6 +533,7 @@ class Schema(SchemaElement):
         elif isinstance(value, SchemaElement):
             try:
                 self._elements[name] = value
+                self._elements[name]._validate = self._validate
             except:
                 msg = "Cannot Add Element (%s)" % name
                 logs.warning(msg)
@@ -624,8 +633,9 @@ class Schema(SchemaElement):
             
             # Dictionary
             if isinstance(v, Schema) or isinstance(v, SchemaList):
+                v._validate = self._validate
                 if item == None:
-                    if v._required == True:
+                    if v._required == True and v._validate == True:
                         msg = "Missing Nested Element (%s)" % k
                         logs.warning(msg)
                         raise SchemaValidationError(msg)
@@ -658,7 +668,8 @@ class Schema(SchemaElement):
     # Public Functions
 
     def validate(self):
-        if len(self._elements) == 0 and self._required == True:
+        if len(self._elements) == 0 and self._required == True \
+            and self._validate == True:
             msg = "Required Schema Empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
@@ -729,6 +740,25 @@ class Schema(SchemaElement):
 
     def setSchema(self):
         raise NotImplementedError
+
+    def importSchema(self, schema):
+        try:
+            self.importData(schema.exportSparse(), overflow=True)
+            return self
+        except:
+            msg = "Conversion failed (Define in subclass?)"
+            logs.warning(msg)
+            raise SchemaValidationError(msg)
+
+    def exportSchema(self, schema):
+        try:
+            schema.importData(self.exportSparse(), overflow=True)
+            return schema
+        except:
+            msg = "Conversion failed (Define in subclass?)"
+            logs.warning(msg)
+            raise SchemaValidationError(msg)
+
 
     # DEPRECATED
 

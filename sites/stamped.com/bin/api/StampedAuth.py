@@ -43,10 +43,10 @@ class StampedAuth(AStampedAuth):
     def addClient(self, params):
         raise NotImplementedError
     
-    def verifyClientCredentials(self, params):
-        ### TODO: remove hardcoded id / secret in plaintext!
+    def verifyClientCredentials(self, clientId, clientSecret):
+        ### TODO: remove hardcoded id / secret in plaintext!'
         try:
-            if params['client_id'] == 'stampedtest' and params['client_secret'] == 'august1ftw':
+            if clientId == 'stampedtest' and clientSecret == 'august1ftw':
                 logs.info("Client approved")
                 return True
             raise StampedHTTPError('invalid_client', 401, "Client credentials are invalid")
@@ -98,7 +98,7 @@ class StampedAuth(AStampedAuth):
     # Refresh Tokens #
     # ############## #
     
-    def addRefreshToken(self, params):
+    def addRefreshToken(self, clientId, userId):
         attempt = 1
         max_attempts = 5
             
@@ -106,8 +106,8 @@ class StampedAuth(AStampedAuth):
             try:
                 refreshToken = AuthRefreshToken()
                 refreshToken.token_id = auth.generateToken(43)
-                refreshToken.client_id = params['client_id']
-                refreshToken.authenticated_user_id = params['authenticated_user_id']
+                refreshToken.client_id = clientId
+                refreshToken.authenticated_user_id = userId
                 refreshToken.timestamp = { 'created': datetime.datetime.utcnow() }
                 logs.debug("Refresh Token: %s" % refreshToken.getDataAsDict())
 

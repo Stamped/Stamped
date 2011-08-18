@@ -78,6 +78,16 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
     def removeEntity(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
         return self._removeMongoDocument(documentId)
+
+    def removeCustomEntity(self, entityId, userId):
+        try:
+            query = {'_id': self._getObjectIdFromString(entityId), \
+                        'sources.userGenerated.user_id': userId}
+            self._collection.remove(query)
+            return True
+        except:
+            logs.warning("Cannot remove document")
+            raise Exception
         
     
     def addEntities(self, entities):

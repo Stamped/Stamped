@@ -79,70 +79,64 @@ class StampedAPI(AStampedAPI):
     #     #  ####   ####   ####   ####  #    #   #    ####  
     """
     
-    def addAccount(self, data, auth):
+    def addAccount(self, account):
 
-        display_name = "%s %s." % (data['first_name'], data['last_name'][0])
-        data['display_name'] = display_name
+        ### TODO: Check if email already exists?
 
-        account = Account(data)
-        account.password = convertPasswordForStorage(account['password'])
         account.timestamp.created = datetime.utcnow()
+        account.password = convertPasswordForStorage(account['password'])
+        account.display_name = "%s %s." % \
+                                (account.first_name, account.last_name[0])
 
-        if self._userDB.checkScreenNameExists(account.screen_name):
-            raise Exception("Screen name is already taken")
+        account = self._accountDB.addAccount(account)
 
-        result = self._accountDB.addAccount(account)
+        return account
 
-        if self.output == 'http':
-            return result.exportFlat()
-        return result
-    
-    def updateAccount(self, data, auth):
-        account = self._accountDB.getAccount(auth['authenticated_user_id'])
-        account.importData(data)
-            
+
+    def updateAccountSettings(self, authUserId, data):
+        
+        ### TODO: Reexamine how updates are done
+
+        account = self._accountDB.getAccount(authUserId)
+
+        # Import each item
+        for k, v in data.iteritems():
+            if k == 'password':
+                v = convertPasswordForStorage(v)
+            account[k] = v
+
         self._accountDB.updateAccount(account)
 
-        ### TODO: Update account settings across denormalized db (e.g. Stamps)
-
-        if self.output == 'http':
-            return account.exportFlat()
         return account
     
-    def getAccount(self, data, auth):
-        account = self._accountDB.getAccount(auth['authenticated_user_id'])
+    def getAccount(self, authUserId):
+        account = self._accountDB.getAccount(authUserId)
+        return account
+    
+    def updateProfile(self, authUserId, data):
         
-        if self.output == 'http':
-            return account.exportFlat()
-        return account
-    
-    def updateProfile(self, data, auth):
-        account = self._accountDB.getAccount(auth['authenticated_user_id'])
-        account.importData(data)
-            
+        ### TODO: Reexamine how updates are done
+
+        account = self._accountDB.getAccount(authUserId)
+
+        # Import each item
+        for k, v in data.iteritems():
+            account[k] = v
+
         self._accountDB.updateAccount(account)
 
-        ### TODO: Update profile settings across denormalized db (e.g. Stamps)
-        
-        if self.output == 'http':
-            return account.exportProfile()
         return account
     
-    def updateProfileImage(self, data, auth):
+    def updateProfileImage(self, authUserId, url):
+
         ### TODO: Grab image and do something with it. Currently just sets as url.
-        
-        account = self._accountDB.getAccount(auth['authenticated_user_id'])
-        account.importData(data)
             
-        self._accountDB.updateAccount(account)
+        self._accountDB.setProfileImageLink(authUserId, url)
         
-        if self.output == 'http':
-            return account.exportProfileImage()
-        return account
-        raise NotImplementedError
+        return url
     
-    def removeAccount(self, data, auth):
-        return self._accountDB.removeAccount(auth['authenticated_user_id'])
+    def removeAccount(self, userId):
+        return self._accountDB.removeAccount(userId)
     
     def verifyAccountCredentials(self, data, auth):
         raise NotImplementedError
@@ -163,22 +157,11 @@ class StampedAPI(AStampedAPI):
 
     ### PRIVATE
 
-    def _returnUser(self, user):
-        if self.output == 'http':
-            return user.exportFlat()
-        return user
-
-    def _returnUsers(self, users):
-        if self.output == 'http':
-            result = []
-            for user in users:
-                result.append(user.exportFlat())
-            return result
-        return users
-
-    def _getUserFromIdOrScreenName(self, data):
-        user_id         = data.pop('user_id', None)
-        screen_name     = data.pop('screen_name', None)
+    def _getUserFromIdOrScreenName(self, userRequest):
+        if isinstance(userRequest, SchemaElement):
+            userRequest = userRequest.value
+        user_id         = userRequest.pop('user_id', None)
+        screen_name     = userRequest.pop('screen_name', None)
 
         if user_id == None and screen_name == None:
             raise Exception("Required field missing")
@@ -189,42 +172,44 @@ class StampedAPI(AStampedAPI):
 
     ### PUBLIC
     
-    def getUser(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def getUser(self, userRequest, authUserId):
+        user = self._getUserFromIdOrScreenName(userRequest)
         
         if user.privacy == True:
-            authenticated_user_id = data.pop('authenticated_user_id', None)
-            if authenticated_user_id == None:
+            if authUserId == None:
                 raise Exception("You must be logged in to view this account")
 
             friendship = Friendship({
-                'user_id':      auth['authenticated_user_id'],
+                'user_id':      authUserId,
                 'friend_id':    user['user_id']
             })
 
             if not self._friendshipDB.checkFriendship(friendship):
                 raise Exception("You do not have permission to view this account")
         
-        return self._returnUser(user)
+        return user
     
-    def getUsers(self, data, auth):
-        user_ids        = data.pop('user_ids', None)
-        screen_names    = data.pop('screen_names', None)
+    def getUsers(self, userIds, screenNames, authUserId):
 
-        users = self._userDB.lookupUsers(user_ids, screen_names, limit=100)
+        ### TODO: Add check for privacy settings
+        print 'DO IT:', userIds, screenNames
 
-        return self._returnUsers(users)
+        users = self._userDB.lookupUsers(userIds, screenNames, limit=100)
+
+        return users
     
-    def searchUsers(self, data, auth):
-        limit = data.pop('user_ids', 20)
+    def searchUsers(self, query, limit, authUserId):
+
         limit = self._setLimit(limit, cap=20)
-        
-        users = self._userDB.searchUsers(data['q'], limit)
 
-        return self._returnUsers(users)
+        ### TODO: Add check for privacy settings
+        
+        users = self._userDB.searchUsers(query, limit)
+
+        return users
     
-    def getPrivacy(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def getPrivacy(self, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
         
         if user.privacy == True:
             return True
@@ -460,35 +445,40 @@ class StampedAPI(AStampedAPI):
     #       #   ##   #   #   #   # #      #    # 
     ####### #    #   #   #   #   # ######  ####  
     """
-
-    def addFlatEntity(self, data, auth):
-        entity = FlatEntity(data).convertToEntity().exportSparse()
-        return self.addEntity(entity, auth)
     
     def addEntity(self, entity):
-
+        entity.timestamp.created = datetime.utcnow()
         entity = self._entityDB.addEntity(entity)
 
         return entity
     
-    def getEntity(self, data, auth):
-        entity = self._entityDB.getEntity(data['entity_id'])
+    def getEntity(self, entityId, userId=None):
+        entity = self._entityDB.getEntity(entityId)
         
         ### TODO: Check if user has access to this entity
 
-        if self.output == 'http':
-            return entity.exportFlat()
         return entity
-    
-    def updateFlatEntity(self, data, auth):
-        entity = self._entityDB.getEntity(data['entity_id'])
 
-        flatEntity = FlatEntity(entity.exportFlat(), overflow=True)
+    def updateCustomEntity(self, entityId, data, userId):
+        
+        ### TODO: Reexamine how updates are done
+
+        entity = self._entityDB.getEntity(entityId)
+        
+        # Check if user has access to this entity
+        if entity.sources.userGenerated.user_id != userId \
+            or entity.sources.userGenerated.user_id == None:
+            raise Exception("Insufficient privilages to update entity")
+
+        # Try to import as a full entity
         for k, v in data.iteritems():
-            flatEntity[k] = v
-        data = flatEntity.convertToEntity().exportSparse()
+            entity[k] = v
+        
+        entity.timestamp.modified = datetime.utcnow()
 
-        return self.updateEntity(data, auth)
+        self._entityDB.updateEntity(entity)
+
+        return entity
 
     def updateEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
@@ -510,28 +500,18 @@ class StampedAPI(AStampedAPI):
             return entity.exportFlat()
         return entity
     
-    def removeEntity(self, data, auth):
-        entity = self._entityDB.getEntity(data['entity_id'])
-
-        # Verify user has permission to delete
-        if entity.sources.userGenerated.user_id != auth['authenticated_user_id'] \
-            or entity.sources.userGenerated.user_id == None:
-            raise Exception("Insufficient privilages to update entity")
-
-        if self._entityDB.removeEntity(data['entity_id']):
-            return True
-        return False
+    def removeEntity(self, entityId):
+        return self._entityDB.removeEntity(entityId)
     
-    def searchEntities(self, data, auth):
+    def removeCustomEntity(self, entityId, userId):
+        return self._entityDB.removeCustomEntity(entityId, userId)
+    
+    def searchEntities(self, query, coordinates=None, userId=None):
+
         ### TODO: Customize query based on authenticated_user_id / coordinates
         
-        entities = self._entityDB.searchEntities(data['q'], limit=10)
-
-        result = []        
-        for entity in entities:
-            result.append(entity.exportAutosuggest())
-
-        return result
+        entities = self._entityDB.searchEntities(query, limit=10)
+        return entities
     
 
     """
