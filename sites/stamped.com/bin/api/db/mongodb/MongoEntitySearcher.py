@@ -92,7 +92,7 @@ class MongoEntitySearcher(AEntitySearcher):
             # TODO: enforce this constraint when storing into mongo
             
             earthRadius = 3959.0 # miles
-            q = SON([('geoNear', 'places'), ('near', [coords[1], coords[0]]), ('num', 10), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
+            q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('num', 10), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
             
             ret = self.placesDB._collection.command(q)
             
