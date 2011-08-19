@@ -157,12 +157,14 @@ class SchemaElement(object):
     # Public Functions
 
     def validate(self):
-        if self._data == None and self._required == True and self._validate == True:
+        if self._data == None and self._required == True and \
+            self._validate == True:
             msg = "Required field empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
 
-        if self._data != None and not isinstance(self._data, self._requiredType):
+        if self._data != None \
+            and not isinstance(self._data, self._requiredType):
             msg = "Incorrect type (%s)" % self._name
             logs.warning(msg)
             raise SchemaKeyError(msg)
@@ -430,7 +432,8 @@ class SchemaList(SchemaElement):
         self._isSet = True
 
     def validate(self):
-        if len(self._data) == 0 and self._required == True and self._validate == True:
+        if len(self._data) == 0 and self._required == True \
+            and self._validate == True:
             msg = "Required List Empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)

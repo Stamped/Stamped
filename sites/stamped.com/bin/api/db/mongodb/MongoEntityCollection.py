@@ -112,9 +112,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         db_results = self._collection.find({"title": {"$regex": query, "$options": "i"}}).limit(hard_limit)
         
         for result in db_results:
-            entity = Entity(self._mongoToObj(result, 'entity_id'))
-            results.append(entity)
-        
+            results.append(self._convertFromMongo(result))
+
         if len(results) > 1:
             is_junk = " \t-".__contains__
             #lambda x: x in " \t-"
@@ -129,6 +128,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             results = sorted(results)
             results = results[0:min(len(results), limit)]
             results = map(lambda r: r[2], results)
-        
+
         return results
 

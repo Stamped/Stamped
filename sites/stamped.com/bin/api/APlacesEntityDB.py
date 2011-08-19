@@ -7,7 +7,6 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from Entity import Entity
 from AEntitySink import AEntitySink
 
 class APlacesEntityDB(AEntitySink):

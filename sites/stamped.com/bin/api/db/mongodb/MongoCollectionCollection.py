@@ -35,5 +35,5 @@ class MongoCollectionCollection(ACollectionDB):
     def getUserStampIds(self, userId):
         return self.user_stamps_collection.getUserStampIds(userId)
 
-    def getMentions(self, userId, limit=None):
+    def getMentions(self, userId):
         raise NotImplementedError

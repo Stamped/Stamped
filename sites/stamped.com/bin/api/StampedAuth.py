@@ -5,8 +5,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils, time, hashlib, random, base64, struct, datetime, logs, auth
+import Globals, utils, time, hashlib, random, base64, struct, logs, auth
+from datetime import datetime, timedelta
+
 from errors import *
+from Schemas import *
 
 from AStampedAuth import AStampedAuth
 
@@ -14,7 +17,6 @@ from AAccountDB import AAccountDB
 from AAuthAccessTokenDB import AAuthAccessTokenDB
 from AAuthRefreshTokenDB import AAuthRefreshTokenDB
 
-from Account import Account
 from AuthAccessToken import AuthAccessToken
 from AuthRefreshToken import AuthRefreshToken
 
@@ -49,9 +51,9 @@ class StampedAuth(AStampedAuth):
             if clientId == 'stampedtest' and clientSecret == 'august1ftw':
                 logs.info("Client approved")
                 return True
-            raise StampedHTTPError('invalid_client', 401, "Client credentials are invalid")
+            raise
         except:
-            raise StampedHTTPError('invalid_client', 401, "Client credentials are invalid")
+            raise StampedHTTPError('invalid_client', 401, "Invalid client credentials")
     
     def removeClient(self, params):
         raise NotImplementedError
@@ -60,12 +62,11 @@ class StampedAuth(AStampedAuth):
     # Users #
     # ##### #
     
-    def verifyUserCredentials(self, params):
+    def verifyUserCredentials(self, clientId, screenName, password):
 
         ### Login
-        authenticated_user_id = self._accountDB.verifyAccountCredentials(
-            params['screen_name'], 
-            params['password'])
+        authenticated_user_id = self._accountDB.verifyAccountCredentials( \
+            screenName, password)
         if authenticated_user_id == None:
             msg = "Invalid user credentials"
             logs.warning(msg)
@@ -78,17 +79,14 @@ class StampedAuth(AStampedAuth):
 
         Right now we're returning a refresh token upon login. This will have to 
         change ultimately, but it's an okay assumption for now that every login
-        will be from the iPhone. Once that changes we'll have to modify this.
+        will be from the iPhone. Once that changes we may have to modify this.
 
         Also, we'll ultimately need a way to deprecate unused refresh tokens. Not
         sure how we'll implement that yet....
         """
 
         ### Generate Refresh Token & Access Token
-        token = self.addRefreshToken({
-            'client_id': params.client_id,
-            'authenticated_user_id': authenticated_user_id
-        })
+        token = self.addRefreshToken(clientId, authenticated_user_id)
 
         logs.info("Token created")
 
@@ -108,7 +106,7 @@ class StampedAuth(AStampedAuth):
                 refreshToken.token_id = auth.generateToken(43)
                 refreshToken.client_id = clientId
                 refreshToken.authenticated_user_id = userId
-                refreshToken.timestamp = { 'created': datetime.datetime.utcnow() }
+                refreshToken.timestamp = { 'created': datetime.utcnow() }
                 logs.debug("Refresh Token: %s" % refreshToken.getDataAsDict())
 
                 self._refreshTokenDB.addRefreshToken(refreshToken)
@@ -135,16 +133,10 @@ class StampedAuth(AStampedAuth):
         }
         return ret
     
-    def verifyRefreshToken(self, params):
-        ### Verify Grant Type
-        if params['grant_type'] != 'refresh_token':
-            msg = "Invalid grant type"
-            logs.warn(msg)
-            raise StampedHTTPError("invalid_request", 400, msg)
-
+    def verifyRefreshToken(self, clientId, refreshToken):
         ### Verify Refresh Token
         try:
-            token = self._refreshTokenDB.getRefreshToken(params['refresh_token'])
+            token = self._refreshTokenDB.getRefreshToken(refreshToken)
         except:
             raise
 
@@ -155,8 +147,8 @@ class StampedAuth(AStampedAuth):
 
         ### Generate Access Token
         token = self.addAccessToken({
-            'client_id': params.client_id,
-            'refresh_token': params.refresh_token,
+            'client_id': clientId,
+            'refresh_token': refreshToken,
             'authenticated_user_id': token.authenticated_user_id
         })
 
@@ -178,14 +170,14 @@ class StampedAuth(AStampedAuth):
             
         while True:
             try:
-                rightNow = datetime.datetime.utcnow()
+                rightNow = datetime.utcnow()
 
                 accessToken = AuthAccessToken()
                 accessToken.token_id = auth.generateToken(22)
                 accessToken.client_id = params['client_id']
                 accessToken.refresh_token = params['refresh_token']
                 accessToken.authenticated_user_id = params['authenticated_user_id']
-                accessToken.expires = rightNow + datetime.timedelta(seconds=expire)
+                accessToken.expires = rightNow + timedelta(seconds=expire)
                 accessToken.timestamp = { 'created': rightNow }
                 logs.debug("Access Token: %s" % accessToken.getDataAsDict())
                 
@@ -205,46 +197,30 @@ class StampedAuth(AStampedAuth):
         logs.info("Access token created")
         return ret
     
-    def verifyAccessToken(self, params):
-        logs.debug("Verify access token: %s" % params['oauth_token'])
+    def verifyAccessToken(self, token):
+        logs.debug("Verify access token: %s" % token)
         try:
-            token = self._accessTokenDB.getAccessToken(params['oauth_token'])
+            token = self._accessTokenDB.getAccessToken(token)
             logs.debug("Access token matched")
             logs.debug("Access token data: %s" % token.getDataAsDict())
 
-            if token['expires'] > datetime.datetime.utcnow():
+            if token['expires'] > datetime.utcnow():
                 logs.info("Authenticated user id: %s" % \
                     token.authenticated_user_id)
                 return token.authenticated_user_id
             
-            logs.warn("Invalid access token... deleting")
+            logs.warning("Invalid access token... deleting")
             self._accessTokenDB.removeAccessToken(params.oauth_token)
-            return None
+            raise
         except:
-            return None
+            msg = "Invalid Access Token"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_token", 401, msg)
     
     def removeAccessToken(self, params):
         logs.info("Begin")
         return self._accessTokenDB.removeAccessToken(params.token_id)
 
-    # ####### #
-    # Private #
-    # ####### #
-
-    def _generateToken(self, length, seed='randomString'):
-        ### TODO: This needs to be beefed up!
-        def _buildToken(seed):
-            h = hashlib.md5()
-            h.update(seed)
-            h.update(str(random.random()))
-            h.update('x8c3nls93BAl4s')
-            h.update(str(time.time()))
-            h.update(str(random.random()))
-            return str(h.hexdigest())
-        result = _buildToken(seed)
-        if len(result) < length:
-            result = "%s%s" % (result, _buildToken(result))
-        return result[:length]
 
 
     

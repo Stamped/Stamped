@@ -30,13 +30,15 @@ class AStampedAPITestCase(unittest.TestCase):
 
     def handleGET(self, path, data):
         params = urllib.urlencode(data)
-        result = json.load(self._opener.open("%s/%s?%s" % (self._baseurl, path, params)))
+        result = json.load(self._opener.open("%s/%s?%s" % \
+            (self._baseurl, path, params)))
         return result
     
     def handlePOST(self, path, data):
         params = urllib.urlencode(data)
         # print params
-        result = json.load(self._opener.open("%s/%s" % (self._baseurl, path), params))
+        result = json.load(self._opener.open("%s/%s" % \
+            (self._baseurl, path), params))
         return result
 
     ### DEFAULT ASSERTIONS
@@ -213,161 +215,197 @@ class AStampedAPITestCase(unittest.TestCase):
 # ACCOUNT #
 # ####### #
 
-# class StampedAPIAccountTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.user, self.token) = self.createAccount()
-#         self.privacy = False
+class StampedAPIAccountTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.user, self.token) = self.createAccount()
+        self.privacy = False
 
-#     def tearDown(self):
-#         self.deleteAccount(self.token)
+    def tearDown(self):
+        self.deleteAccount(self.token)
 
-# class StampedAPIAccountSettings(StampedAPIAccountTest):
-#     def test_post(self):
-#         path = "account/settings.json"
-#         data = {
-#             "oauth_token": self.token['access_token'],
-#             "screen_name": "kevin",
-#             "privacy": False,
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['privacy'], False)
-#         self.privacy = result['privacy']
+class StampedAPIAccountSettings(StampedAPIAccountTest):
+    def test_post(self):
+        path = "account/settings.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "screen_name": "kevin",
+            "privacy": False,
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['privacy'], False)
+        self.privacy = result['privacy']
 
-#     def test_get(self):
-#         path = "account/settings.json"
-#         data = {
-#             "oauth_token": self.token['access_token'],
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['privacy'], self.privacy)
+    def test_get(self):
+        path = "account/settings.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['privacy'], self.privacy)
 
-# class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
-#     def test_update_profile(self):
-#         path = "account/update_profile.json"
-#         data = {
-#             "oauth_token": self.token['access_token'],
-#             "bio": "My long biography goes here.",
-#             "color": "333333,999999"
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['color_primary'], '333333')
-#         self.assertEqual(result['color_secondary'], '999999')
+class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
+    def test_update_profile(self):
+        path = "account/update_profile.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "bio": "My long biography goes here.",
+            "color": "333333,999999"
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['color_primary'], '333333')
+        self.assertEqual(result['color_secondary'], '999999')
 
-# class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
-#     def test_update_profile_image(self):
-#         # TODO: this url is temporary!
-#         url = 'https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg'
+class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
+    def test_update_profile_image(self):
+        # TODO: this url is temporary!
+        url = 'https://si0.twimg.com/profile_images/147088134/'
+        url = url + 'twitter_profile_reasonably_small.jpg'
         
-#         path = "account/update_profile_image.json"
-#         data = {
-#             "oauth_token": self.token['access_token'],
-#             "profile_image": url, 
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['profile_image'], url)
+        path = "account/update_profile_image.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "profile_image": url, 
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['profile_image'], url)
+
+# ##### #
+# OAUTH #
+# ##### #
+
+class StampedAPIOAuthTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+
+    def tearDown(self):
+        self.deleteAccount(self.tokenA)
+
+class StampedAPIOAuthLogin(StampedAPIOAuthTest):
+    def test_login(self):
+        path = "oauth2/login.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "screen_name": self.userA['screen_name'],
+            "password": "12345"
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result['access_token']) == 22)
+        self.assertTrue(len(result['refresh_token']) == 43)
+
+    def test_token(self):
+        path = "oauth2/token.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "refresh_token": self.tokenA['refresh_token'],
+            "grant_type": "refresh_token"
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result['access_token']) == 22)
 
 
 # #### #
 # USER #
 # #### #
 
-# class StampedAPIUserTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.screen_names = ['usera', 'userb']
+class StampedAPIUserTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.screen_names = ['usera', 'userb']
 
-#     def tearDown(self):
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPIUsersShow(StampedAPIUserTest):
-#     def test_show_user_id(self):
-#         path = "users/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "user_id": self.userA['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['screen_name'], self.userA['screen_name'])
+class StampedAPIUsersShow(StampedAPIUserTest):
+    def test_show_user_id(self):
+        path = "users/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userA['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['screen_name'], self.userA['screen_name'])
 
-#     def test_show_screen_name(self):
-#         path = "users/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "screen_name": self.userA['screen_name']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['user_id'], self.userA['user_id'])
+    def test_show_screen_name(self):
+        path = "users/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "screen_name": self.userA['screen_name']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['user_id'], self.userA['user_id'])
 
-# class StampedAPIUsersLookup(StampedAPIUserTest):
-#     def test_lookup_user_ids(self):
-#         path = "users/lookup.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "user_ids": "%s,%s" % (
-#                 self.userA['user_id'],
-#                 self.userB['user_id']
-#             )
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertLength(result, 2)
-#         for user in result:
-#             self.assertIn(user['screen_name'], self.screen_names)
+class StampedAPIUsersLookup(StampedAPIUserTest):
+    def test_lookup_user_ids(self):
+        path = "users/lookup.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_ids": "%s,%s" % (
+                self.userA['user_id'],
+                self.userB['user_id']
+            )
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
 
-#     def test_lookup_screen_names(self):
-#         path = "users/lookup.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "screen_names": "%s,%s" % (
-#                 self.userA['screen_name'],
-#                 self.userB['screen_name']
-#             )
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue(len(result) >= 2)
+    def test_lookup_screen_names(self):
+        path = "users/lookup.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "screen_names": "%s,%s" % (
+                self.userA['screen_name'],
+                self.userB['screen_name']
+            )
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(len(result) >= 2)
 
-# class StampedAPIUsersSearch(StampedAPIUserTest):
-#     def test_search(self):
-#         path = "users/search.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "q": "%s" % self.userA['screen_name'][:3]
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue(len(result) >= 1)
+class StampedAPIUsersSearch(StampedAPIUserTest):
+    def test_search(self):
+        path = "users/search.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": "%s" % self.userA['screen_name'][:3]
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(len(result) >= 1)
 
-# class StampedAPIUsersPrivacy(StampedAPIUserTest):
-#     def test_privacy_user_id(self):
-#         path = "users/privacy.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "user_id": self.userB['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue(result == False)
+class StampedAPIUsersPrivacy(StampedAPIUserTest):
+    def test_privacy_user_id(self):
+        path = "users/privacy.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userB['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result == False)
 
-#     def test_privacy_screen_name(self):
-#         path = "users/privacy.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "screen_name": self.userB['screen_name']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue(result == False)
+    def test_privacy_screen_name(self):
+        path = "users/privacy.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "screen_name": self.userB['screen_name']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result == False)
 
-#     def test_privacy_not_found(self):
-#         path = "users/privacy.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "screen_name": 'unknownUserName'
-#         }
-#         try:
-#             result = self.handleGET(path, data)
-#             ret = False
-#         except:
-#             ret = True
-#         self.assertTrue(ret)
+    def test_privacy_not_found(self):
+        path = "users/privacy.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "screen_name": 'unknownUserName'
+        }
+        try:
+            result = self.handleGET(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
 
 
 # ########## #
@@ -444,549 +482,572 @@ class StampedAPIFollowers(StampedAPIFriendshipTest):
 # BLOCKS #
 # ###### #
 
-# class StampedAPIBlockTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenA, self.userB)
+class StampedAPIBlockTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenA, self.userB)
 
-#         path = "friendships/blocks/create.json"
-#         data = {
-#             "oauth_token": self.tokenA['access_token'],
-#             "user_id": self.userB['user_id']
-#         }
-#         friend = self.handlePOST(path, data)
+        path = "friendships/blocks/create.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userB['user_id']
+        }
+        friend = self.handlePOST(path, data)
 
-#         self.assertIn('user_id', friend)
-#         self.assertValidKey(friend['user_id'])
+        self.assertIn('user_id', friend)
+        self.assertValidKey(friend['user_id'])
 
-#     def tearDown(self):
-#         path = "friendships/blocks/remove.json"
-#         data = {
-#             "oauth_token": self.tokenA['access_token'],
-#             "user_id": self.userB['user_id']
-#         }
-#         friend = self.handlePOST(path, data)
+    def tearDown(self):
+        path = "friendships/blocks/remove.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userB['user_id']
+        }
+        friend = self.handlePOST(path, data)
 
-#         self.assertIn('user_id', friend)
-#         self.assertValidKey(friend['user_id'])
+        self.assertIn('user_id', friend)
+        self.assertValidKey(friend['user_id'])
 
-#         self.deleteFriendship(self.tokenA, self.userB)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+        self.deleteFriendship(self.tokenA, self.userB)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPICheckBlocks(StampedAPIBlockTest):
-#     def test_check_block(self):
-#         path = "friendships/blocks/check.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "user_id": self.userB['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue(result)
+class StampedAPICheckBlocks(StampedAPIBlockTest):
+    def test_check_block(self):
+        path = "friendships/blocks/check.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userB['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result)
 
-#     def test_check_block_fail(self):
-#         path = "friendships/blocks/check.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "user_id": self.userA['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertFalse(result)
+    def test_check_block_fail(self):
+        path = "friendships/blocks/check.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "user_id": self.userA['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertFalse(result)
 
-# class StampedAPIBlocking(StampedAPIBlockTest):
-#     def test_show_blocks(self):
-#         path = "friendships/blocking.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result['user_ids']), 1)
+class StampedAPIBlocking(StampedAPIBlockTest):
+    def test_show_blocks(self):
+        path = "friendships/blocking.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result['user_ids']), 1)
 
 # ###### #
 # ENTITY #
 # ###### #
 
-# class StampedAPIEntityTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.user, self.token) = self.createAccount()
-#         self.entity = self.createEntity(self.token)
+class StampedAPIEntityTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.user, self.token) = self.createAccount()
+        self.entity = self.createEntity(self.token)
 
-#     def tearDown(self):
-#         self.deleteEntity(self.token, self.entity['entity_id'])
-#         self.deleteAccount(self.token)
+    def tearDown(self):
+        self.deleteEntity(self.token, self.entity['entity_id'])
+        self.deleteAccount(self.token)
 
-# class StampedAPIEntitiesShow(StampedAPIEntityTest):
-#     def test_show(self):
-#         path = "entities/show.json"
-#         data = { 
-#             "oauth_token": self.token['access_token'],
-#             "entity_id": self.entity['entity_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['title'], self.entity['title'])
+class StampedAPIEntitiesShow(StampedAPIEntityTest):
+    def test_show(self):
+        path = "entities/show.json"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['title'], self.entity['title'])
 
-# class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
-#     def test_update(self):
-#         path = "entities/update.json"
-#         desc = "Gastropub in the West Village, NYC"
-#         data = { 
-#             "oauth_token": self.token['access_token'],
-#             "entity_id": self.entity['entity_id'],
-#             # "category": '',
-#             "desc": desc,
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['desc'], desc)
+class StampedAPIEntitiesUpdate(StampedAPIEntityTest):
+    def test_update(self):
+        path = "entities/update.json"
+        desc = "Gastropub in the West Village, NYC"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id'],
+            # "category": '',
+            "desc": desc,
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['desc'], desc)
 
-# class StampedAPIEntitiesSearch(StampedAPIEntityTest):
-#     def test_search(self):
-#         path = "entities/search.json"
-#         data = { 
-#             "oauth_token": self.token['access_token'],
-#             "q": self.entity['title'][:3]
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
+class StampedAPIEntitiesSearch(StampedAPIEntityTest):
+    def test_search(self):
+        path = "entities/search.json"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "q": self.entity['title'][:3]
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
 
-# class StampedAPIEntitiesUTF8(StampedAPIEntityTest):
-#     def test_utf8_update(self):
-#         path = "entities/update.json"
-#         desc = "๓๙ใ1฿"
-#         data = { 
-#             "oauth_token": self.token['access_token'],
-#             "entity_id": self.entity['entity_id'],
-#             "desc": desc
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['desc'], desc.decode('utf-8'))
+class StampedAPIEntitiesUTF8(StampedAPIEntityTest):
+    def test_utf8_update(self):
+        path = "entities/update.json"
+        desc = "๓๙ใ1฿"
+        data = { 
+            "oauth_token": self.token['access_token'],
+            "entity_id": self.entity['entity_id'],
+            "desc": desc
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['desc'], desc.decode('utf-8'))
 
 
 # ##### #
 # STAMP #
 # ##### #
 
-# class StampedAPIStampTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenB, self.userA)
-#         self.entity = self.createEntity(self.tokenA)
-#         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
+class StampedAPIStampTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
 
-#     def tearDown(self):
-#         self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, self.entity['entity_id'])
-#         self.deleteFriendship(self.tokenB, self.userA)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPIStampsShow(StampedAPIStampTest):
-#     def test_show(self):
-#         path = "stamps/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['blurb'], self.stamp['blurb'])
+class StampedAPIStampsShow(StampedAPIStampTest):
+    def test_show(self):
+        path = "stamps/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['blurb'], self.stamp['blurb'])
 
-# class StampedAPIStampsUpdate(StampedAPIStampTest):
-#     def test_show(self):
-#         path = "stamps/update.json"
-#         blurb = "Really, really delicious."
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "blurb": blurb
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['blurb'], blurb)
+class StampedAPIStampsUpdate(StampedAPIStampTest):
+    def test_show(self):
+        path = "stamps/update.json"
+        blurb = "Really, really delicious."
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "blurb": blurb
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['blurb'], blurb)
 
 
 
-# class StampedAPIStampMentionsTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenB, self.userA)
-#         self.entity = self.createEntity(self.tokenA)
-#         self.stampData = {
-#             "oauth_token": self.tokenA['access_token'],
-#             "entity_id": self.entity['entity_id'],
-#             "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
-#             "credit": self.userB['screen_name']
-#         }
-#         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], self.stampData)
+class StampedAPIStampMentionsTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": self.entity['entity_id'],
+            "blurb": "Great spot. Thanks @%s!" % self.userB['screen_name'],
+            "credit": self.userB['screen_name']
+        }
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'], \
+            self.stampData)
 
-#     def tearDown(self):
-#         self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, self.entity['entity_id'])
-#         self.deleteFriendship(self.tokenB, self.userA)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPIStampsMentionsShow(StampedAPIStampMentionsTest):
-#     def test_show(self):
-#         path = "stamps/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(result['blurb'], self.stamp['blurb'])
-#         self.assertEqual(
-#             result['credit'][0]['screen_name'], 
-#             self.stampData['credit']
-#             )
-#         self.assertTrue(len(result['mentions']) == 1)
+class StampedAPIStampsMentionsShow(StampedAPIStampMentionsTest):
+    def test_show(self):
+        path = "stamps/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['blurb'], self.stamp['blurb'])
+        self.assertEqual(
+            result['credit'][0]['screen_name'], 
+            self.stampData['credit']
+            )
+        self.assertTrue(len(result['mentions']) == 1)
 
-# class StampedAPIStampsMentionsUpdate(StampedAPIStampMentionsTest):
-#     def test_no_mentions(self):
-#         path = "stamps/update.json"
-#         blurb = "Really, really delicious."
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "blurb": blurb
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['blurb'], blurb)
-#         # self.assertTrue(len(result['mentions']) == 0)
-#         self.assertTrue('mentions' not in result)
+class StampedAPIStampsMentionsUpdate(StampedAPIStampMentionsTest):
+    def test_no_mentions(self):
+        path = "stamps/update.json"
+        blurb = "Really, really delicious."
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "blurb": blurb
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['blurb'], blurb)
+        # self.assertTrue(len(result['mentions']) == 0)
+        self.assertTrue('mentions' not in result)
 
-#     def test_two_mentions(self):
-#         path = "stamps/update.json"
-#         blurb = "Thanks again @%s! --@%s" % \
-#                 (self.userB['screen_name'], self.userA['screen_name'])
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "blurb": blurb
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['blurb'], blurb)
-#         self.assertTrue(len(result['mentions']) == 2)
+    def test_two_mentions(self):
+        path = "stamps/update.json"
+        blurb = "Thanks again @%s! --@%s" % \
+                (self.userB['screen_name'], self.userA['screen_name'])
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "blurb": blurb
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['blurb'], blurb)
+        self.assertTrue(len(result['mentions']) == 2)
 
-# class StampedAPIStampsCreditUpdate(StampedAPIStampMentionsTest):
-#     def test_no_credit(self):
-#         path = "stamps/update.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "credit": None
-#         }
-#         result = self.handlePOST(path, data)
-#         # self.assertTrue(len(result['credit']) == 0)
-#         self.assertTrue('credit' not in result)
+class StampedAPIStampsCreditUpdate(StampedAPIStampMentionsTest):
+    def test_no_credit(self):
+        path = "stamps/update.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "credit": None
+        }
+        result = self.handlePOST(path, data)
+        # self.assertTrue(len(result['credit']) == 0)
+        self.assertTrue('credit' not in result)
 
-#     def test_two_credits(self):
-#         path = "stamps/update.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id'],
-#             "credit": "%s,%s" % (
-#                 self.userA['screen_name'],
-#                 self.userB['screen_name']
-#             )
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertTrue(len(result['credit']) == 2)
+    def test_two_credits(self):
+        path = "stamps/update.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id'],
+            "credit": "%s,%s" % (
+                self.userA['screen_name'],
+                self.userB['screen_name']
+            )
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result['credit']) == 2)
 
 
 # ######## #
 # COMMENTS #
 # ######## #
 
-# class StampedAPICommentTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenB, self.userA)
-#         self.entity = self.createEntity(self.tokenA)
-#         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
-#         self.blurbA = "Great place"
-#         self.blurbB = "Glad you liked it!"
-#         self.commentA = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurbA)
-#         self.commentB = self.createComment(self.tokenA, self.stamp['stamp_id'], self.blurbB)
+class StampedAPICommentTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
+        self.blurbA = "Great place"
+        self.blurbB = "Glad you liked it!"
+        self.commentA = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurbA)
+        self.commentB = self.createComment(self.tokenA, self.stamp['stamp_id'], \
+            self.blurbB)
 
-#     def tearDown(self):
-#         self.deleteComment(self.tokenA, self.commentB['comment_id'])
-#         self.deleteComment(self.tokenB, self.commentA['comment_id'])
-#         self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, self.entity['entity_id'])
-#         self.deleteFriendship(self.tokenB, self.userA)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteComment(self.tokenA, self.commentB['comment_id'])
+        self.deleteComment(self.tokenB, self.commentA['comment_id'])
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPICommentsShow(StampedAPICommentTest):
-#     def test_show(self):
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertIn(result[0]['blurb'],[self.blurbA, self.blurbB])
-#         self.assertIn(result[1]['blurb'],[self.blurbA, self.blurbB])
+class StampedAPICommentsShow(StampedAPICommentTest):
+    def test_show(self):
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertIn(result[0]['blurb'],[self.blurbA, self.blurbB])
+        self.assertIn(result[1]['blurb'],[self.blurbA, self.blurbB])
 
-# class StampedAPICommentsRemovePermissions(StampedAPICommentTest):
-#     def test_remove_fail(self):
-#         path = "comments/remove.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "comment_id": self.commentB['comment_id']
-#         }
-#         try:
-#             result = self.handlePOST(path, data)
-#             ret = False
-#         except:
-#             ret = True
-#         self.assertTrue(ret)
+class StampedAPICommentsRemovePermissions(StampedAPICommentTest):
+    def test_remove_fail(self):
+        path = "comments/remove.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "comment_id": self.commentB['comment_id']
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
 
-# class StampedAPICommentsRemoveStampOwner(StampedAPICommentTest):
-#     def test_show(self):
-#         path = "comments/remove.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "comment_id": self.commentA['comment_id']
-#         }
-#         result = self.handlePOST(path, data)
+class StampedAPICommentsRemoveStampOwner(StampedAPICommentTest):
+    def test_show(self):
+        path = "comments/remove.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "comment_id": self.commentA['comment_id']
+        }
+        result = self.handlePOST(path, data)
 
-#         # Add it back or else the test will fail...!
-#         self.commentA = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurbA)
+        # Add it back or else the test will fail...!
+        self.commentA = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurbA)
 
-# class StampedAPICommentsMentions(StampedAPICommentTest):
-#     def test_mention(self):
-#         self.blurb = "Nice job @%s!" % self.userA['screen_name']
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+class StampedAPICommentsMentions(StampedAPICommentTest):
+    def test_mention(self):
+        self.blurb = "Nice job @%s!" % self.userA['screen_name']
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertIn('mentions', result[2])
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertIn('mentions', result[2])
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-#     def test_fake_double_mention(self):
-#         self.blurb = "Nice job @%s! You rock @%s." % \
-#             (self.userA['screen_name'], self.userA['screen_name'])
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+    def test_fake_double_mention(self):
+        self.blurb = "Nice job @%s! You rock @%s." % \
+            (self.userA['screen_name'], self.userA['screen_name'])
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertIn('mentions', result[2])
-#         self.assertTrue(len(result[2]['mentions']) == 1)
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertIn('mentions', result[2])
+        self.assertTrue(len(result[2]['mentions']) == 1)
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-#     def test_double_mention(self):
-#         self.blurb = "Nice job @%s! You rock @%s." % \
-#             (self.userA['screen_name'], self.userB['screen_name'])
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+    def test_double_mention(self):
+        self.blurb = "Nice job @%s! You rock @%s." % \
+            (self.userA['screen_name'], self.userB['screen_name'])
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertIn('mentions', result[2])
-#         self.assertTrue(len(result[2]['mentions']) == 2)
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertIn('mentions', result[2])
+        self.assertTrue(len(result[2]['mentions']) == 2)
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-# class StampedAPICommentsReply(StampedAPICommentTest):
-#     def test_reply(self):
-#         self.blurb = "@%s thanks!" % self.userA['screen_name']
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+class StampedAPICommentsReply(StampedAPICommentTest):
+    def test_reply(self):
+        self.blurb = "@%s thanks!" % self.userA['screen_name']
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertIn('mentions', result[2])
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertIn('mentions', result[2])
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-#     def test_reply_upper(self):
-#         self.blurb = "@%s thanks!" % str(self.userA['screen_name']).upper()
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+    def test_reply_upper(self):
+        self.blurb = "@%s thanks!" % str(self.userA['screen_name']).upper()
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertIn('mentions', result[2])
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertIn('mentions', result[2])
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-#     def test_reply_lower(self):
-#         self.blurb = "@%s thanks!" % str(self.userA['screen_name']).lower()
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+    def test_reply_lower(self):
+        self.blurb = "@%s thanks!" % str(self.userA['screen_name']).lower()
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertIn('mentions', result[2])
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertIn('mentions', result[2])
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-#     def test_reply_empty(self):
-#         self.blurb = "@ thanks!"
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+    def test_reply_empty(self):
+        self.blurb = "@ thanks!"
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue('mentions' not in result[2])
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue('mentions' not in result[2])
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
-#     def test_reply_email(self):
-#         self.blurb = "kevin@stamped.com thanks!"
-#         self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], self.blurb)
+    def test_reply_email(self):
+        self.blurb = "kevin@stamped.com thanks!"
+        self.comment = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            self.blurb)
 
-#         path = "comments/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#             "stamp_id": self.stamp['stamp_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertTrue('mentions' not in result[2])
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue('mentions' not in result[2])
 
-#         self.deleteComment(self.tokenB, self.comment['comment_id'])
+        self.deleteComment(self.tokenB, self.comment['comment_id'])
 
 
 # ########### #
 # COLLECTIONS #
 # ########### #
 
-# class StampedAPICollectionTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenB, self.userA)
-#         self.entityA = self.createEntity(self.tokenA)
-#         self.entityB = self.createEntity(self.tokenA)
-#         self.entityC = self.createEntity(self.tokenA)
-#         self.stampA = self.createStamp(self.tokenA, self.entityA['entity_id'])
-#         self.blurbA = "Great place"
-#         self.blurbB = "Glad you liked it!"
-#         self.commentA = self.createComment(self.tokenB, self.stampA['stamp_id'], self.blurbA)
-#         self.commentB = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.stampB = self.createStamp(self.tokenA, self.entityB['entity_id'])
-#         self.stampC = self.createStamp(self.tokenA, self.entityC['entity_id'])
+class StampedAPICollectionTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entityA = self.createEntity(self.tokenA)
+        self.entityB = self.createEntity(self.tokenA)
+        self.entityC = self.createEntity(self.tokenA)
+        self.stampA = self.createStamp(self.tokenA, self.entityA['entity_id'])
+        self.blurbA = "Great place"
+        self.blurbB = "Glad you liked it!"
+        self.commentA = self.createComment(self.tokenB, self.stampA['stamp_id'], \
+            self.blurbA)
+        self.commentB = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.stampB = self.createStamp(self.tokenA, self.entityB['entity_id'])
+        self.stampC = self.createStamp(self.tokenA, self.entityC['entity_id'])
 
-#     def tearDown(self):
-#         self.deleteComment(self.tokenA, self.commentB['comment_id'])
-#         self.deleteComment(self.tokenB, self.commentA['comment_id'])
-#         self.deleteStamp(self.tokenA, self.stampA['stamp_id'])
-#         self.deleteStamp(self.tokenA, self.stampB['stamp_id'])
-#         self.deleteStamp(self.tokenA, self.stampC['stamp_id'])
-#         self.deleteEntity(self.tokenA, self.entityA['entity_id'])
-#         self.deleteEntity(self.tokenA, self.entityB['entity_id'])
-#         self.deleteEntity(self.tokenA, self.entityC['entity_id'])
-#         self.deleteFriendship(self.tokenB, self.userA)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteComment(self.tokenA, self.commentB['comment_id'])
+        self.deleteComment(self.tokenB, self.commentA['comment_id'])
+        self.deleteStamp(self.tokenA, self.stampA['stamp_id'])
+        self.deleteStamp(self.tokenA, self.stampB['stamp_id'])
+        self.deleteStamp(self.tokenA, self.stampC['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entityA['entity_id'])
+        self.deleteEntity(self.tokenA, self.entityB['entity_id'])
+        self.deleteEntity(self.tokenA, self.entityC['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPICollectionsShow(StampedAPICollectionTest):
-#     def test_inbox(self):
-#         path = "collections/inbox.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+class StampedAPICollectionsShow(StampedAPICollectionTest):
+    def test_inbox(self):
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
-#     def test_user_screen_name(self):
-#         path = "collections/user.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "screen_name": self.userA['screen_name']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+    def test_user_screen_name(self):
+        path = "collections/user.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "screen_name": self.userA['screen_name']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
-#     def test_user_user_id(self):
-#         path = "collections/user.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "user_id": self.userA['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+    def test_user_user_id(self):
+        path = "collections/user.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "user_id": self.userA['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
-# class StampedAPICollectionsQuality(StampedAPICollectionTest):
-#     def test_show(self):
+class StampedAPICollectionsQuality(StampedAPICollectionTest):
+    def test_show(self):
 
-#         self.commentC = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentD = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentE = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentF = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentG = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentH = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentI = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentJ = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.commentK = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
+        self.commentC = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentD = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentE = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentF = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentG = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentH = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentI = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentJ = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.commentK = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
 
-#         path = "collections/inbox.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "quality": 1
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertEqual(len(result[-1]['comment_preview']), 11)
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "quality": 1
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result[-1]['comment_preview']), 11)
 
-#         path = "collections/inbox.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "quality": 2
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertEqual(len(result[-1]['comment_preview']), 10)
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "quality": 2
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result[-1]['comment_preview']), 10)
 
-#         path = "collections/inbox.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "quality": 3
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertEqual(len(result[-1]['comment_preview']), 4)
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "quality": 3
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result[-1]['comment_preview']), 4)
 
-#         self.deleteComment(self.tokenA, self.commentC['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentD['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentE['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentF['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentG['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentH['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentI['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentJ['comment_id'])
-#         self.deleteComment(self.tokenA, self.commentK['comment_id'])
+        self.deleteComment(self.tokenA, self.commentC['comment_id'])
+        self.deleteComment(self.tokenA, self.commentD['comment_id'])
+        self.deleteComment(self.tokenA, self.commentE['comment_id'])
+        self.deleteComment(self.tokenA, self.commentF['comment_id'])
+        self.deleteComment(self.tokenA, self.commentG['comment_id'])
+        self.deleteComment(self.tokenA, self.commentH['comment_id'])
+        self.deleteComment(self.tokenA, self.commentI['comment_id'])
+        self.deleteComment(self.tokenA, self.commentJ['comment_id'])
+        self.deleteComment(self.tokenA, self.commentK['comment_id'])
 
 
 
@@ -1021,110 +1082,111 @@ class StampedAPIFavoritesShow(StampedAPIFavoriteTest):
 # ACTIVITY #
 # ######## #
 
-# class StampedAPIActivityTest(AStampedAPITestCase):
-#     def setUp(self):
-#         (self.userA, self.tokenA) = self.createAccount('UserA')
-#         (self.userB, self.tokenB) = self.createAccount('UserB')
-#         self.createFriendship(self.tokenB, self.userA)
-#         self.entityA = self.createEntity(self.tokenA)
-#         self.stampA = self.createStamp(self.tokenA, self.entityA['entity_id'])
-#         self.blurbA = "Great place"
-#         self.blurbB = "Glad you liked it!"
-#         self.commentA = self.createComment(self.tokenB, self.stampA['stamp_id'], self.blurbA)
-#         self.commentB = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
-#         self.entityB = self.createEntity(self.tokenA)
-#         self.entityC = self.createEntity(self.tokenA)
-#         self.stampB = self.createStamp(self.tokenA, self.entityB['entity_id'])
-#         self.stampC = self.createStamp(self.tokenA, self.entityC['entity_id'])
+class StampedAPIActivityTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entityA = self.createEntity(self.tokenA)
+        self.stampA = self.createStamp(self.tokenA, self.entityA['entity_id'])
+        self.blurbA = "Great place"
+        self.blurbB = "Glad you liked it!"
+        self.commentA = self.createComment(self.tokenB, self.stampA['stamp_id'], \
+            self.blurbA)
+        self.commentB = self.createComment(self.tokenA, self.stampA['stamp_id'], \
+            self.blurbB)
+        self.entityB = self.createEntity(self.tokenA)
+        self.entityC = self.createEntity(self.tokenA)
+        self.stampB = self.createStamp(self.tokenA, self.entityB['entity_id'])
+        self.stampC = self.createStamp(self.tokenA, self.entityC['entity_id'])
 
-#     def tearDown(self):
-#         self.deleteComment(self.tokenA, self.commentB['comment_id'])
-#         self.deleteComment(self.tokenB, self.commentA['comment_id'])
-#         self.deleteStamp(self.tokenA, self.stampA['stamp_id'])
-#         self.deleteStamp(self.tokenA, self.stampB['stamp_id'])
-#         self.deleteStamp(self.tokenA, self.stampC['stamp_id'])
-#         self.deleteEntity(self.tokenA, self.entityA['entity_id'])
-#         self.deleteEntity(self.tokenA, self.entityB['entity_id'])
-#         self.deleteEntity(self.tokenA, self.entityC['entity_id'])
-#         self.deleteFriendship(self.tokenB, self.userA)
-#         self.deleteAccount(self.tokenA)
-#         self.deleteAccount(self.tokenB)
+    def tearDown(self):
+        self.deleteComment(self.tokenA, self.commentB['comment_id'])
+        self.deleteComment(self.tokenB, self.commentA['comment_id'])
+        self.deleteStamp(self.tokenA, self.stampA['stamp_id'])
+        self.deleteStamp(self.tokenA, self.stampB['stamp_id'])
+        self.deleteStamp(self.tokenA, self.stampC['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entityA['entity_id'])
+        self.deleteEntity(self.tokenA, self.entityB['entity_id'])
+        self.deleteEntity(self.tokenA, self.entityC['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
-# class StampedAPIActivityShow(StampedAPIActivityTest):
-#     def test_show(self):
-#         path = "activity/show.json"
-#         data = { 
-#             "oauth_token": self.tokenA['access_token'],
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 1)
+class StampedAPIActivityShow(StampedAPIActivityTest):
+    def test_show(self):
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 1)
 
-# class StampedAPIActivityMentions(StampedAPIActivityTest):
-#     def test_show_stamp_mention(self):
-#         entity = self.createEntity(self.tokenA)
-#         stampData = {
-#             "oauth_token": self.tokenA['access_token'],
-#             "entity_id": entity['entity_id'],
-#             "blurb": "Thanks @%s!" % self.userB['screen_name'],
-#         }
-#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+class StampedAPIActivityMentions(StampedAPIActivityTest):
+    def test_show_stamp_mention(self):
+        entity = self.createEntity(self.tokenA)
+        stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": entity['entity_id'],
+            "blurb": "Thanks @%s!" % self.userB['screen_name'],
+        }
+        stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
 
-#         path = "activity/show.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 2)
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 2)
 
-#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, entity['entity_id'])
+        self.deleteStamp(self.tokenA, stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, entity['entity_id'])
 
-# class StampedAPIActivityCredit(StampedAPIActivityTest):
-#     def test_show_stamp_credit(self):
-#         entity = self.createEntity(self.tokenA)
-#         stampData = {
-#             "oauth_token": self.tokenA['access_token'],
-#             "entity_id": entity['entity_id'],
-#             "blurb": "Great spot!",
-#             "credit": self.userB['screen_name'],
-#         }
-#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+class StampedAPIActivityCredit(StampedAPIActivityTest):
+    def test_show_stamp_credit(self):
+        entity = self.createEntity(self.tokenA)
+        stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": entity['entity_id'],
+            "blurb": "Great spot!",
+            "credit": self.userB['screen_name'],
+        }
+        stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
 
-#         path = "activity/show.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 2)
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 2)
 
-#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, entity['entity_id'])
+        self.deleteStamp(self.tokenA, stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, entity['entity_id'])
 
-# class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
-#     def test_show_stamp_mention_and_credit(self):
-#         entity = self.createEntity(self.tokenA)
-#         stampData = {
-#             "oauth_token": self.tokenA['access_token'],
-#             "entity_id": entity['entity_id'],
-#             "blurb": "Thanks @%s!" % self.userB['screen_name'],
-#             "credit": self.userB['screen_name'],
-#         }
-#         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
+class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
+    def test_show_stamp_mention_and_credit(self):
+        entity = self.createEntity(self.tokenA)
+        stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": entity['entity_id'],
+            "blurb": "Thanks @%s!" % self.userB['screen_name'],
+            "credit": self.userB['screen_name'],
+        }
+        stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
 
-#         path = "activity/show.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 2)
-#         self.assertTrue(result[0]['genre'] == 'restamp')
+        path = "activity/show.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 2)
+        self.assertTrue(result[0]['genre'] == 'restamp')
 
-#         self.deleteStamp(self.tokenA, stamp['stamp_id'])
-#         self.deleteEntity(self.tokenA, entity['entity_id'])
+        self.deleteStamp(self.tokenA, stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, entity['entity_id'])
 
 
 """
-
         
         
         path = "friendships/blocks/create.json"

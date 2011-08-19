@@ -16,22 +16,18 @@ class AFavoriteDB(object):
         pass
     
     @abstract
-    def getFavorite(self, favoriteId):
+    def getFavorite(self, userId, entityId):
         pass
     
     @abstract
-    def removeFavorite(self, favorite):
+    def removeFavorite(self, userId, entityId):
         pass
     
     @abstract
-    def completeFavorite(self, favoriteId, complete=True):
+    def completeFavorite(self, entityId, userId, complete=True):
         pass
     
     @abstract
-    def getFavoriteIDs(self, userId):
-        pass
-    
-    @abstract
-    def getFavorites(self, userId):
+    def getFavorites(self, userId, **kwargs):
         pass
 

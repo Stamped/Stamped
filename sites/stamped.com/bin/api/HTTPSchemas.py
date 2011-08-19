@@ -35,6 +35,21 @@ def _coordinatesFlatToDict(coordinates):
     except:
         return None
 
+# ######### #
+# OAuth 2.0 #
+# ######### #
+
+class OAuthTokenRequest(Schema):
+    def setSchema(self):
+        self.refresh_token      = SchemaElement(basestring, required=True)
+        self.grant_type         = SchemaElement(basestring, required=True)
+
+class OAuthLogin(Schema):
+    def setSchema(self):
+        self.screen_name        = SchemaElement(basestring, required=True)
+        self.password           = SchemaElement(basestring, required=True)
+
+
 # ####### #
 # Account #
 # ####### #

@@ -32,42 +32,14 @@ class AActivityDB(object):
     """
     
     @abstract
-    def addActivity(self, recipientId, activity):
-        pass
-    
-    @abstract    
-    def addActivityForRestamp(self, recipientIds, user, stamp):
-        pass
-    
-    @abstract    
-    def addActivityForComment(self, recipientIds, user, stamp, comment):
-        pass
-    
-    @abstract    
-    def addActivityForReply(self, recipientIds, user, stamp, comment):
-        pass
-    
-    @abstract    
-    def addActivityForFavorite(self, recipientIds, user, stamp):
-        pass
-    
-    @abstract    
-    def addActivityForDirected(self, recipientIds, user, stamp):
-        pass
-    
-    @abstract  
-    def addActivityForMention(self, recipientIds, user, stamp, comment=None):
-        pass
-    
-    @abstract    
-    def addActivityForMilestone(self, recipientId, activity):
+    def getActivity(self, userId, **kwargs):
         pass
     
     @abstract
-    def getActivity(self, userId, before=None, since=None, limit=None):
+    def addActivity(self, recipientIds, activity):
         pass
     
     @abstract
-    def removeActivity(self, activityId):
+    def removeActivity(self, userId, activityId):
         pass
 

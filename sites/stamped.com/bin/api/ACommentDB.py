@@ -30,4 +30,7 @@ class ACommentDB(object):
     @abstract    
     def getComments(self, stampId):
         pass
-        
+    
+    @abstract  
+    def getCommentsAcrossStamps(self, stampIds, limit=4):
+        pass

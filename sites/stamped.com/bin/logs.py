@@ -9,14 +9,14 @@ import datetime, logging, threading, hashlib, random, time
 
 # Log
 log = logging.getLogger('stamped')
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 # Formatter
 formatter = logging.Formatter('%(asctime)s | %(message)s', datefmt='%H:%M:%S')
 
 # Stream handler
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 ch.setFormatter(formatter)
 
 # Add handler

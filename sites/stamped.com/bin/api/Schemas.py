@@ -10,31 +10,6 @@ from datetime import datetime
 from schema import *
 
 # ####### #
-# PRIVATE #
-# ####### #
-
-def _coordinatesDictToFlat(coordinates):
-    try:
-        if not isinstance(coordinates['lat'], float) or \
-            not isinstance(coordinates['lng'], float):
-            raise
-        return '%s,%s' % (coordinates['lat'], coordinates['lng'])
-    except:
-        return None
-
-def _coordinatesFlatToDict(coordinates):
-    try:
-        coordinates = coordinates.split(',')
-        lat = float(coordinates[0])
-        lng = float(coordinates[1])
-        return {
-            'lat': lat,
-            'lng': lng
-        }
-    except:
-        return None
-
-# ####### #
 # Account #
 # ####### #
 

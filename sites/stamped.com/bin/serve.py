@@ -27,109 +27,30 @@ REST_API_PREFIX  = "/api/%s/" % REST_API_VERSION
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__)
-stampedAPI = MongoStampedAPI(output='http')
+stampedAPI = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()
 
 # ################# #
 # Utility Functions #
 # ################# #
 
-def encodeType(obj):
-    if '_dict' in obj:
-        return obj._dict
-    else:
-        return obj.__dict__
-
-def transformOutput(request, d):
-    output_json = json.dumps(d, sort_keys=True, indent=None if request.is_xhr else 2, default=encodeType)
-    output = Response(output_json, mimetype='application/json')
-    logs.debug("Transform output: \"%s\"" % output_json)
-    return output
-
-def parseRequestForm(schema, request, **kwargs):
-
-    ### Parse Request
-    if request.method == 'POST':
-        unparsedInput = request.form
-    elif request.method == 'GET': 
-        unparsedInput = request.args
-    else:
-        logs.warning("End request: Invalid method")
-        raise
-
-    data = {}
-    auth = {}
-    for k, v in unparsedInput.iteritems():
-        if k == 'oauth_token':
-            auth['oauth_token'] = v
-        elif k == 'client_id':
-            auth['client_id'] = v
-        elif k == 'client_secret':
-            auth['client_secret'] = v
-        else:
-            data[k] = v
-        
-    logs.debug("Request url: %s" % request.base_url)
-    logs.debug("Request data: %s" % data)
-    logs.debug("Request auth: %s" % auth)
-
-    try:
-        schema.importData(data)
-    except (InvalidArgument, Fail) as e:
-        utils.log("API function failed to parse input '%s' against schema '%s'" % \
-            (str(data), str(schema)))
-        utils.printException()
-        raise
-
-    # Split color
-    ### TODO: Reconsider how to handle this
-    if 'color' in schema:
-        color = schema.color.split(',')
-
-        schema.color_primary = SchemaElement(basestring)
-        schema.color_secondary = SchemaElement(basestring)
-        schema.color_primary = color[0]
-        schema.color_secondary = color[-1]
-
-        schema.removeElement('color')
-
-    logs.debug("Parsed request data: %s" % schema)
-
-    return schema, auth
-
-def verifyClientCredentials(data):
-    if not stampedAuth.verifyClientCredentials( \
-        data.client_id, data.client_secret):
-        logs.info("Invalid authorization: %s" % request)
-        raise StampedHTTPError("Error", 401) 
-
-    return True
-
-def handleAddAccountRequest(data, auth):
-    ### Add Account
-    try:
-        account = stampedAPI.addAccount(data.exportSparse(), auth)
-    except:
-        logs.warning("Fail")
-        raise
-
-    logs.debug("Account added")
-    
-    ### Generate Refresh Token & Access Token
-    token = stampedAuth.addRefreshToken({
-        'client_id': auth['client_id'],
-        'authenticated_user_id': account['user_id']
-    })
-
-    logs.debug("Token created")
-
-    ### Format Output
-    result = {
-        'user': account,
-        'token': token
-    }
-    
-    return result
+def handleHTTPRequest(fn):
+    @wraps(fn)
+    def handleHTTPRequest():
+        try:
+            print
+            print
+            logs.info("Begin: %s" % fn.__name__)
+            ret = fn()
+            logs.info("End request: Success")
+            return ret
+        except StampedHTTPError as e:
+            logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+            return e.msg, e.code
+        except Exception as e:
+            logs.warning("500 Error: %s" % e)
+            return "Error", 500
+    return handleHTTPRequest
 
 def checkOAuth(request):
     ### Parse Request for Access Token
@@ -142,8 +63,7 @@ def checkOAuth(request):
     
     ### Validate OAuth Access Token
     try:
-        authenticated_user_id = stampedAuth.verifyAccessToken({'oauth_token': oauth_token}) #### TEMP! Change stampedAuth
-        
+        authenticated_user_id = stampedAuth.verifyAccessToken(oauth_token)
         if authenticated_user_id == None:
             raise
         return authenticated_user_id
@@ -202,113 +122,56 @@ def parseRequest(schema, request):
         logs.warning(msg)
         raise StampedHTTPError("bad_request", 400, e)
 
-def handleHTTPRequest(fn):
-    @wraps(fn)
-    def handleHTTPRequest():
-        try:
-            print
-            print
-            logs.info("Begin: %s" % fn.__name__)
-            ret = fn()
-            logs.info("End request: Success")
-            return ret
-        except StampedHTTPError as e:
-            logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
-            return e.msg, e.code
-        except Exception as e:
-            logs.warning("500 Error: %s" % e)
-            return "Internal error", 500
-    return handleHTTPRequest
+def encodeType(obj):
+    if '_dict' in obj:
+        return obj._dict
+    else:
+        return obj.__dict__
+
+def transformOutput(request, d):
+    output_json = json.dumps(d, sort_keys=True, \
+        indent=None if request.is_xhr else 2, default=encodeType)
+    output = Response(output_json, mimetype='application/json')
+    logs.debug("Transform output: \"%s\"" % output_json)
+    return output
 
 
-
-
-
-
-def handleRequest(schema, request, stampedAPIFunc, requireOAuthToken=True):
-    try:
-        print
-        print
-        logs.refresh()
-        logs.info("Begin request")
-
-        ### Parse Request
-        try:
-            data, auth = parseRequestForm(schema, request)
-        except (InvalidArgument, Fail) as e:
-            msg = str(e)
-            logs.warning(msg)
-            raise StampedHTTPError("invalid_request", 400, e)
-
-        ### EXCEPTION: No OAuth Token
-        if requireOAuthToken == False:
-            # Check for valid client credentials
-            logs.debug("Does not require OAuth Token")
-            stampedAuth.verifyClientCredentials(auth)
-        else:
-            ### Require OAuth token to be included
-            if 'oauth_token' not in auth:
-                msg = "Access token not included"
-                logs.warning(msg)
-                raise StampedHTTPError("invalid_request", 401, msg)
-
-            ### Validate OAuth Access Token
-            authenticated_user_id = stampedAuth.verifyAccessToken(auth)
-            if authenticated_user_id == None:
-                msg = "Invalid access token"
-                logs.warning(msg)
-                raise StampedHTTPError("invalid_token", 401, msg)
-            
-            auth['authenticated_user_id'] = authenticated_user_id
-
-            logs.debug("Final data set: %s" % (data))
-
-        ### Generate Result
-        logs.info("Begin: %s" % stampedAPIFunc.__name__)
-        if stampedAPIFunc == stampedAPI.addAccount:
-            # Exception -- requires both StampedAuth and StampedAPI. We should
-            # try to get rid of this.
-            result = handleAddAccountRequest(data, auth)
-        else:
-            result = stampedAPIFunc(data.exportSparse(), auth)
-            
-        ### Return to Client
-        try:
-            ret = transformOutput(request, result)
-            logs.info("End request: Success")
-            return ret
-        except Exception as e:
-            msg = "Internal error processing API function '%s' (%s)" % (
-                utils.getFuncName(1), str(e))
-            utils.log(msg)
-            utils.printException()
-            return msg, 500
-    except StampedHTTPError as e:
-        logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
-        return e.msg, e.code
-    except Exception as e:
-        logs.warning("500 Error: %s" % e)
-        return "Internal error", 500
-
-# ####### #
-# OAuth 2 #
-# ####### #
+"""
+#######    #                        
+#     #   # #   #    # ##### #    # 
+#     #  #   #  #    #   #   #    # 
+#     # #     # #    #   #   ###### 
+#     # ####### #    #   #   #    # 
+#     # #     # #    #   #   #    # 
+####### #     #  ####    #   #    # 
+"""
 
 @app.route(REST_API_PREFIX + 'oauth2/token.json', methods=['POST'])
+@handleHTTPRequest
 def refreshToken():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.refresh_token      = SchemaElement(basestring, required=True)
-            self.grant_type         = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAuth.verifyRefreshToken, requireOAuthToken=False)
+    client_id   = checkClient(request)
+    schema      = parseRequest(OAuthTokenRequest(), request)
+
+    if str(schema.grant_type).lower() != 'refresh_token':
+        msg = "Grant type incorrect"
+        logs.warning(msg)
+        raise StampedHTTPError("invalid_request", 400, msg)
+
+    token       = stampedAuth.verifyRefreshToken(client_id, schema.refresh_token)
+    
+    return transformOutput(request, token)
 
 @app.route(REST_API_PREFIX + 'oauth2/login.json', methods=['POST'])
+@handleHTTPRequest
 def loginUser():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.screen_name        = SchemaElement(basestring, required=True)
-            self.password           = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAuth.verifyUserCredentials, requireOAuthToken=False)
+    client_id   = checkClient(request)
+    schema      = parseRequest(OAuthLogin(), request)
+
+    token       = stampedAuth.verifyUserCredentials(client_id, \
+                                                    schema.screen_name, \
+                                                    schema.password)
+
+    return transformOutput(request, token)
 
 
 """
@@ -347,7 +210,7 @@ def updateAccount():
 
         ### TODO: Carve out password changes, require original password sent again?
 
-        ### TEMP: Generate list of changes. Need to do something better eventually...
+        ### TEMP: Generate list of changes. Need to do something better eventually..
         schema      = parseRequest(HTTPAccountSettings(), request)
         data        = schema.exportSparse()
 
@@ -624,7 +487,6 @@ def addEntity():
     
     entity      = stampedAPI.addEntity(entity)
     entity      = HTTPEntity().importSchema(entity)
-    print 'ENTITY: %s' % entity
 
     return transformOutput(request, entity.exportSparse())
 
@@ -682,9 +544,10 @@ def searchEntities():
     query       = schema.exportSchema(EntitySearch())
 
     result      = stampedAPI.searchEntities(query.q, query.coordinates)
+    
     autosuggest = []
     for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item)
+        item = HTTPEntityAutosuggest().importSchema(item).exportSparse()
         autosuggest.append(item)
 
     return transformOutput(request, autosuggest)
@@ -996,7 +859,7 @@ def indexDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1008,7 +871,7 @@ def stampsDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1020,7 +883,7 @@ def accountsDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1032,7 +895,7 @@ def usersDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1044,7 +907,7 @@ def friendshipsDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1056,7 +919,7 @@ def collectionsDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1068,7 +931,7 @@ def entitiesDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1080,7 +943,7 @@ def commentsDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1092,7 +955,7 @@ def favoritesDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 
@@ -1104,7 +967,7 @@ def activityDoc():
         f.close()
         return ret
     except Exception as e:
-        msg = "Internal error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
         utils.log(msg)
         return msg, 500
 

@@ -7,10 +7,11 @@ __license__ = "TODO"
 
 import Globals, utils
 
+from Schemas import *
+
 from AMongoCollection import AMongoCollection
 from utils import OrderedDict
 from api.APlacesEntityDB import APlacesEntityDB
-from api.Entity import Entity
 
 class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
     
