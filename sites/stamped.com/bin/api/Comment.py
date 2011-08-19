@@ -9,27 +9,27 @@ import Globals
 from datetime import datetime
 from Schemas import *
 
-class Comment(CommentSchema):
+# class Comment(CommentSchema):
 
-    # Set
-    def setTimestampCreated(self):
-        self.timestamp.created = datetime.utcnow()
+#     # Set
+#     def setTimestampCreated(self):
+#         self.timestamp.created = datetime.utcnow()
 
-    # Export
-    def exportFlat(self):
-        export = [
-            'comment_id',
-            'stamp_id',
-            'user',
-            'blurb',
-            'mentions',
-            'restamp_id',
-            'timestamp.created',
-            ]
-        data = self.exportFields(export)
+#     # Export
+#     def exportFlat(self):
+#         export = [
+#             'comment_id',
+#             'stamp_id',
+#             'user',
+#             'blurb',
+#             'mentions',
+#             'restamp_id',
+#             'timestamp.created',
+#             ]
+#         data = self.exportFields(export)
 
-        data['created'] = str(data['timestamp.created'])
-        del(data['timestamp.created'])
+#         data['created'] = str(data['timestamp.created'])
+#         del(data['timestamp.created'])
         
-        return data
+#         return data
         

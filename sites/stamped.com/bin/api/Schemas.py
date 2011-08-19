@@ -97,7 +97,16 @@ class User(Schema):
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema(required=True)
 
-class UserMiniSchema(Schema):
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ in ('UserMini', 'UserTiny'):
+            schema.importData(self.exportSparse(), overflow=True)
+
+        else:
+            raise NotImplementedError
+
+        return schema
+
+class UserMini(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
@@ -107,7 +116,7 @@ class UserMiniSchema(Schema):
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
 
-class UserTinySchema(Schema):
+class UserTiny(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
@@ -166,21 +175,6 @@ class FriendshipSchema(Schema):
 
 
 # ######## #
-# Activity #
-# ######## #
-
-class ActivitySchema(Schema):
-    def setSchema(self):
-        self.activity_id        = SchemaElement(basestring)
-        self.genre              = SchemaElement(basestring, required=True)
-        self.user               = UserMiniSchema(required=True)
-        self.comment            = CommentSchema()
-        self.stamp              = StampSchema()
-        self.favorite           = FavoriteSchema()
-        self.timestamp          = TimestampSchema()
-
-
-# ######## #
 # Favorite #
 # ######## #
 
@@ -189,7 +183,7 @@ class FavoriteSchema(Schema):
         self.favorite_id        = SchemaElement(basestring)
         self.entity             = EntityMini(required=True)
         self.user_id            = SchemaElement(basestring, required=True)
-        self.stamp              = StampSchema()
+        self.stamp              = Stamp()
         self.timestamp          = TimestampSchema()
         self.complete           = SchemaElement(bool)
 
@@ -205,16 +199,16 @@ class FavoriteSchema(Schema):
 # Stamps #
 # ###### #
 
-class StampSchema(Schema):
+class Stamp(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring)
         self.entity             = EntityMini(required=True)
-        self.user               = UserMiniSchema(required=True)
+        self.user               = UserMini(required=True)
         self.blurb              = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
-        self.credit             = SchemaList(UserTinySchema())
-        self.comment_preview    = SchemaList(CommentSchema())
+        self.credit             = SchemaList(UserTiny())
+        self.comment_preview    = SchemaList(Comment())
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
@@ -231,14 +225,29 @@ class MentionSchema(Schema):
 # Comments #
 # ######## #
 
-class CommentSchema(Schema):
+class Comment(Schema):
     def setSchema(self):
         self.comment_id         = SchemaElement(basestring)
-        self.user               = UserMiniSchema(required=True)
+        self.user               = UserMini(required=True)
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.restamp_id         = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring, required=True)
         self.mentions           = SchemaList(MentionSchema())
+        self.timestamp          = TimestampSchema()
+
+
+# ######## #
+# Activity #
+# ######## #
+
+class ActivitySchema(Schema):
+    def setSchema(self):
+        self.activity_id        = SchemaElement(basestring)
+        self.genre              = SchemaElement(basestring, required=True)
+        self.user               = UserMini(required=True)
+        self.comment            = Comment()
+        self.stamp              = Stamp()
+        self.favorite           = FavoriteSchema()
         self.timestamp          = TimestampSchema()
 
 

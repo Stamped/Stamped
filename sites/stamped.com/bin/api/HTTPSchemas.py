@@ -138,12 +138,6 @@ class HTTPUserMini(Schema):
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
 
-class UserTinySchema(Schema):
-    def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-
 class HTTPUserId(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring)
@@ -160,93 +154,95 @@ class HTTPUserSearch(Schema):
         self.limit              = SchemaElement(int)
 
 
-
-# ########### #
-# Friendships #
-# ########### #
-
-class FriendshipSchema(Schema):
-    def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.friend_id          = SchemaElement(basestring, required=True)
-        self.timestamp          = TimestampSchema()
-
-
-# ######## #
-# Activity #
-# ######## #
-
-class ActivitySchema(Schema):
-    def setSchema(self):
-        self.activity_id        = SchemaElement(basestring)
-        self.genre              = SchemaElement(basestring, required=True)
-        self.user               = UserMiniSchema(required=True)
-        self.comment            = CommentSchema()
-        self.stamp              = StampSchema()
-        self.favorite           = FavoriteSchema()
-        self.timestamp          = TimestampSchema()
-
-
-# ######## #
-# Favorite #
-# ######## #
-
-class FavoriteSchema(Schema):
-    def setSchema(self):
-        self.favorite_id        = SchemaElement(basestring)
-        self.entity             = EntityMini(required=True)
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.stamp              = StampSchema()
-        self.timestamp          = TimestampSchema()
-        self.complete           = SchemaElement(bool)
-
-# class FavoriteStampSchema(Schema):
-#     def setSchema(self):
-#         self.stamp_id           = SchemaElement(basestring, required=True)
-#         self.display_name       = SchemaElement(basestring, required=True)
-#         self.user_id            = SchemaElement(basestring, required=True)
-#         self.blurb              = SchemaElement(basestring)
-
-
 # ###### #
 # Stamps #
 # ###### #
 
-class StampSchema(Schema):
+class HTTPStamp(Schema):
     def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring)
-        self.entity             = EntityMini(required=True)
-        self.user               = UserMiniSchema(required=True)
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.entity             = HTTPEntity(required=True)
+        self.user               = HTTPUserMini(required=True)
         self.blurb              = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
-        self.credit             = SchemaList(UserTinySchema())
-        self.comment_preview    = SchemaList(CommentSchema())
-        self.timestamp          = TimestampSchema()
-        self.flags              = FlagsSchema()
-        self.stats              = StampStatsSchema()
+        self.credit             = SchemaList(UserTiny())
+        self.comment_preview    = SchemaList(HTTPComment())
+        self.created            = SchemaElement(basestring)
+        self.num_comments       = SchemaElement(int, default=0)
 
-class MentionSchema(Schema):
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Stamp':
+            data                = schema.exportSparse()
+            coordinates         = data['entity'].pop('coordinates', None)
+
+            self.importData(data, overflow=True)
+            self.num_comments = schema.stats.num_comments
+            self.entity.coordinates = _coordinatesDictToFlat(coordinates)
+
+        else:
+            raise NotImplementedError
+
+        return self
+
+class HTTPStampNew(Schema):
     def setSchema(self):
-        self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring)
-        self.user_id            = SchemaElement(basestring)
-        self.indices            = SchemaList(SchemaElement(int))
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.blurb              = SchemaElement(basestring)
+        self.image              = SchemaElement(basestring)
+        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
+
+class HTTPStampEdit(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.blurb              = SchemaElement(basestring)
+        self.image              = SchemaElement(basestring)
+        self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
+
+class HTTPStampId(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
 
 
 # ######## #
 # Comments #
 # ######## #
 
-class CommentSchema(Schema):
+class HTTPComment(Schema):
     def setSchema(self):
-        self.comment_id         = SchemaElement(basestring)
-        self.user               = UserMiniSchema(required=True)
+        self.comment_id         = SchemaElement(basestring, required=True)
+        self.user               = HTTPUserMini(required=True)
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.restamp_id         = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring, required=True)
         self.mentions           = SchemaList(MentionSchema())
-        self.timestamp          = TimestampSchema()
+        self.created            = SchemaElement(basestring)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Comment':
+            self.importData(schema.exportSparse(), overflow=True)
+            self.created = schema.timestamp.created
+
+        else:
+            raise NotImplementedError
+
+        return self
+
+class HTTPCommentNew(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.blurb              = SchemaElement(basestring, required=True)
+
+class HTTPCommentId(Schema):
+    def setSchema(self):
+        self.comment_id         = SchemaElement(basestring, required=True)
+
+class HTTPCommentSlice(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.limit              = SchemaElement(int)
+        self.since              = SchemaElement(int)
+        self.before             = SchemaElement(int)
 
 
 # ######## #
@@ -361,5 +357,49 @@ class HTTPEntitySearch(Schema):
             raise NotImplementedError
 
         return schema
+
+
+# ######## #
+# Favorite #
+# ######## #
+
+class HTTPFavorite(Schema):
+    def setSchema(self):
+        self.favorite_id        = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.entity             = HTTPEntity(required=True)
+        self.stamp              = HTTPStamp()
+        self.created            = SchemaElement(basestring, required=True)
+        self.complete           = SchemaElement(bool)
+
+class HTTPFavoriteNew(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.stamp_id           = SchemaElement(basestring)
+
+class HTTPFavoriteId(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+
+class HTTPSlice(Schema):
+    def setSchema(self):
+        self.limit              = SchemaElement(int)
+        self.since              = SchemaElement(int)
+        self.before             = SchemaElement(int)
+
+
+# ######## #
+# Activity #
+# ######## #
+
+class ActivitySchema(Schema):
+    def setSchema(self):
+        self.activity_id        = SchemaElement(basestring)
+        self.genre              = SchemaElement(basestring, required=True)
+        self.user               = UserMiniSchema(required=True)
+        self.comment            = CommentSchema()
+        self.stamp              = StampSchema()
+        self.favorite           = FavoriteSchema()
+        self.timestamp          = TimestampSchema()
 
 

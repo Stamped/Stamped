@@ -422,6 +422,7 @@ def resetPassword():
     ### TODO
     return "Not Implemented", 404
 
+
 """
 #     #                             
 #     #  ####  ###### #####   ####  
@@ -481,6 +482,7 @@ def getPrivacy():
     privacy     = stampedAPI.getPrivacy(schema)
 
     return transformOutput(request, privacy)
+
 
 """
 #######                                      
@@ -657,7 +659,7 @@ def updateEntity():
             'lng': data['coordinates'].split(',')[-1]
         }
     
-    entity      = stampedAPI.updateCustomEntity(schema.entity_id, data, authUserId)
+    entity      = stampedAPI.updateCustomEntity(authUserId, schema.entity_id, data)
     entity      = entity.exportSchema(HTTPEntity())
 
     return transformOutput(request, entity.exportSparse())
@@ -667,7 +669,7 @@ def updateEntity():
 def removeEntity():
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPEntityId(), request)
-    result      = stampedAPI.removeCustomEntity(schema.entity_id, authUserId)
+    result      = stampedAPI.removeCustomEntity(authUserId, schema.entity_id)
     
     return transformOutput(request, result)
 
@@ -686,76 +688,136 @@ def searchEntities():
 
     return transformOutput(request, autosuggest)
 
-# ###### #
-# Stamps #
-# ###### #
+
+"""
+ #####                                    
+#     # #####   ##   #    # #####   ####  
+#         #    #  #  ##  ## #    # #      
+ #####    #   #    # # ## # #    #  ####  
+      #   #   ###### #    # #####       # 
+#     #   #   #    # #    # #      #    # 
+ #####    #   #    # #    # #       ####  
+"""
 
 @app.route(REST_API_PREFIX + 'stamps/create.json', methods=['POST'])
+@handleHTTPRequest
 def addStamp():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.entity_id          = SchemaElement(basestring, required=True)
-            self.blurb              = SchemaElement(basestring)
-            self.image              = SchemaElement(basestring)
-            self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
-    return handleRequest(RequestSchema(), request, stampedAPI.addStamp)
+    authUserId  = checkOAuth(request)
+
+    schema      = parseRequest(HTTPStampNew(), request)
+    entityId    = schema.entity_id
+    data        = schema.exportSparse()
+    del(data['entity_id'])
+
+    stamp       = stampedAPI.addStamp(authUserId, entityId, data)
+    stamp       = HTTPStamp().importSchema(stamp)
+
+    return transformOutput(request, stamp.exportSparse())
 
 @app.route(REST_API_PREFIX + 'stamps/update.json', methods=['POST'])
+@handleHTTPRequest
 def updateStamp():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring, required=True)
-            self.blurb              = SchemaElement(basestring)
-            self.image              = SchemaElement(basestring)
-            self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
-    return handleRequest(RequestSchema(), request, stampedAPI.updateStamp)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampEdit(), request)
+
+    ### TEMP: Generate list of changes. Need to do something better eventually...
+    data        = schema.exportSparse()
+    del(data['stamp_id'])
+
+    for k, v in data.iteritems():
+        if v == '':
+            data[k] = None
+    
+    stamp       = stampedAPI.updateStamp(authUserId, schema.stamp_id, data)
+    stamp       = HTTPStamp().importSchema(stamp)
+
+    return transformOutput(request, stamp.exportSparse())
 
 @app.route(REST_API_PREFIX + 'stamps/show.json', methods=['GET'])
+@handleHTTPRequest
 def getStamp():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAPI.getStamp)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampId(), request)
+
+    stamp       = stampedAPI.getStamp(schema.stamp_id, authUserId)
+    stamp       = HTTPStamp().importSchema(stamp)
+    
+    return transformOutput(request, stamp.exportSparse())
 
 @app.route(REST_API_PREFIX + 'stamps/remove.json', methods=['POST'])
+@handleHTTPRequest
 def removeStamp():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAPI.removeStamp)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampId(), request)
 
-# ######## #
-# Comments #
-# ######## #
+    stamp       = stampedAPI.removeStamp(authUserId, schema.stamp_id)
+    stamp       = HTTPStamp().importSchema(stamp)
+    
+    return transformOutput(request, stamp.exportSparse())
+
+
+"""
+ #####                                                  
+#     #  ####  #    # #    # ###### #    # #####  ####  
+#       #    # ##  ## ##  ## #      ##   #   #   #      
+#       #    # # ## # # ## # #####  # #  #   #    ####  
+#       #    # #    # #    # #      #  # #   #        # 
+#     # #    # #    # #    # #      #   ##   #   #    # 
+ #####   ####  #    # #    # ###### #    #   #    ####  
+"""
 
 @app.route(REST_API_PREFIX + 'comments/create.json', methods=['POST'])
+@handleHTTPRequest
 def addComment():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring, required=True)
-            self.blurb              = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAPI.addComment)
+    authUserId  = checkOAuth(request)
+
+    schema      = parseRequest(HTTPCommentNew(), request)
+    stampId     = schema.stamp_id
+    blurb       = schema.blurb
+
+    comment     = stampedAPI.addComment(authUserId, stampId, blurb)
+    comment     = HTTPComment().importSchema(comment)
+
+    return transformOutput(request, comment.exportSparse())
 
 @app.route(REST_API_PREFIX + 'comments/remove.json', methods=['POST'])
+@handleHTTPRequest
 def removeComment():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.comment_id         = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAPI.removeComment)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPCommentId(), request)
+
+    comment     = stampedAPI.removeComment(authUserId, schema.comment_id)
+    comment     = HTTPComment().importSchema(comment)
+    
+    return transformOutput(request, comment.exportSparse())
 
 @app.route(REST_API_PREFIX + 'comments/show.json', methods=['GET'])
+@handleHTTPRequest
 def getComments():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.stamp_id           = SchemaElement(basestring, required=True)
-            self.limit              = SchemaElement(int)
-            self.since              = SchemaElement(int)
-            self.before             = SchemaElement(int)
-    return handleRequest(RequestSchema(), request, stampedAPI.getComments)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPCommentSlice(), request)
 
-# ########### #
-# Collections #
-# ########### #
+    data        = schema.exportSparse()
+    del(data['stamp_id'])
+
+    comments    = stampedAPI.getComments(schema.stamp_id, authUserId, **data)
+
+    result = []
+    for comment in comments:
+        result.append(HTTPComment().importSchema(comment).exportSparse())
+    
+    return transformOutput(request, result)
+
+
+"""
+ #####                                                                  
+#     #  ####  #      #      ######  ####  ##### #  ####  #    #  ####  
+#       #    # #      #      #      #    #   #   # #    # ##   # #      
+#       #    # #      #      #####  #        #   # #    # # #  #  ####  
+#       #    # #      #      #      #        #   # #    # #  # #      # 
+#     # #    # #      #      #      #    #   #   # #    # #   ## #    # 
+ #####   ####  ###### ###### ######  ####    #   #  ####  #    #  ####  
+"""
 
 @app.route(REST_API_PREFIX + 'collections/inbox.json', methods=['GET'])
 def getInboxStamps():
@@ -784,9 +846,66 @@ def getUserMentions():
     return "Not Implemented", 404
     raise NotImplementedError
 
-# ######## #
-# Activity #
-# ######## #
+
+"""
+#######                             
+#         ##   #    # ######  ####  
+#        #  #  #    # #      #      
+#####   #    # #    # #####   ####  
+#       ###### #    # #           # 
+#       #    #  #  #  #      #    # 
+#       #    #   ##   ######  ####  
+"""
+
+@app.route(REST_API_PREFIX + 'favorites/create.json', methods=['POST'])
+@handleHTTPRequest
+def addFavorite():
+
+
+    class RequestSchema(Schema):
+        def setSchema(self):
+            self.entity_id          = SchemaElement(basestring, required=True)
+            self.stamp_id           = SchemaElement(basestring)
+    return handleRequest(RequestSchema(), request, stampedAPI.addFavorite)
+
+@app.route(REST_API_PREFIX + 'favorites/remove.json', methods=['POST'])
+@handleHTTPRequest
+def removeFavorite():
+    class RequestSchema(Schema):
+        def setSchema(self):
+            self.entity_id          = SchemaElement(basestring, required=True)
+    return handleRequest(RequestSchema(), request, stampedAPI.removeFavorite)
+
+@app.route(REST_API_PREFIX + 'favorites/show.json', methods=['GET'])
+@handleHTTPRequest
+def getFavorites():
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPSlice(), request)
+
+    favorites   = stampedAPI.getFollowers(schema)
+    output      = { 'user_ids': userIds }
+
+    return transformOutput(request, output)
+
+
+
+    class RequestSchema(Schema):
+        def setSchema(self):
+            self.limit              = SchemaElement(int)
+            self.since              = SchemaElement(int)
+            self.before             = SchemaElement(int)
+    return handleRequest(RequestSchema(), request, stampedAPI.getFavorites)
+
+
+"""
+   #                                        
+  # #    ####  ##### # #    # # ##### #   # 
+ #   #  #    #   #   # #    # #   #    # #  
+#     # #        #   # #    # #   #     #   
+####### #        #   # #    # #   #     #   
+#     # #    #   #   #  #  #  #   #     #   
+#     #  ####    #   #   ##   #   #     #   
+"""
 
 @app.route(REST_API_PREFIX + 'activity/show.json', methods=['GET'])
 def getActivity():
@@ -797,33 +916,6 @@ def getActivity():
             self.before             = SchemaElement(int)
     return handleRequest(RequestSchema(), request, stampedAPI.getActivity)
 
-# ######### #
-# Favorites #
-# ######### #
-
-@app.route(REST_API_PREFIX + 'favorites/create.json', methods=['POST'])
-def addFavorite():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.entity_id          = SchemaElement(basestring, required=True)
-            self.stamp_id           = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.addFavorite)
-
-@app.route(REST_API_PREFIX + 'favorites/remove.json', methods=['POST'])
-def removeFavorite():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.entity_id          = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAPI.removeFavorite)
-
-@app.route(REST_API_PREFIX + 'favorites/show.json', methods=['GET'])
-def getFavorites():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.limit              = SchemaElement(int)
-            self.since              = SchemaElement(int)
-            self.before             = SchemaElement(int)
-    return handleRequest(RequestSchema(), request, stampedAPI.getFavorites)
 
 # ############# #
 # Miscellaneous #

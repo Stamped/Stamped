@@ -10,6 +10,7 @@ import Globals
 from datetime import datetime
 from Schemas import *
 
+"""
 class Stamp(StampSchema):
 
     # Set
@@ -58,3 +59,4 @@ class Stamp(StampSchema):
             )
         
         return data
+"""

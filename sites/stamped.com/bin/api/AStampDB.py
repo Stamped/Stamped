@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from Stamp import Stamp
+# from Stamp import Stamp
 
 class AStampDB(object):
     
