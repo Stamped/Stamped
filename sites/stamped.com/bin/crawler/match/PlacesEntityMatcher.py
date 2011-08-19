@@ -11,6 +11,7 @@ from errors import *
 from ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
 from Entity import Entity
 
+from difflib import SequenceMatcher
 from pymongo import GEO2D
 from pymongo.son import SON
 
@@ -31,7 +32,7 @@ class PlacesEntityMatcher(ATitleBasedEntityMatcher):
         q = SON({"$near" : [entity.lng, entity.lat]})
         q.update({"$maxDistance" : self.distance })
         
-        docs     = self._placesDB._collection.find({"coordinates" : q})
+        docs     = self._placesDB._collection.find({"coordinates" : q}, output=list)
         entities = self._gen_entities(docs)
         
         return entities

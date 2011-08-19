@@ -186,10 +186,8 @@ class NetflixCatalog():
     def getIndex(self):
         #requestUrl = '/catalog/titles/index'
         requestUrl = '/catalog/titles/full'
-        res  = self.client._getResource( requestUrl)
+        res  = self.client._getResource(requestUrl)
         return res
-        info = simplejson.loads(res)
-        return info
 
     def searchPeople(self, term,startIndex=None,maxResults=None):
         requestUrl = '/catalog/people'

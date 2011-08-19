@@ -23,13 +23,18 @@ class MongoCollectionProxy(object):
             utils.log("Error: unable to set collection")
             raise
     
-    def find(self, spec=None, **kwargs):
+    def find(self, spec=None, output=None, **kwargs):
         num_retries = 0
         max_retries = 5
         
         while True:
             try:
                 ret = self._collection.find(spec, **kwargs)
+                
+                if output is not None:
+                    if output == list:
+                        ret = list(ret)
+                
                 return ret
             except AutoReconnect as e:
                 num_retries += 1

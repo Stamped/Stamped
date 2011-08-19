@@ -88,9 +88,13 @@ def parseCommandLine():
     
     parser.add_option("-n", "--noop", default=False, 
         action="store_true", dest="noop", 
-        help="just run the dedupper without actually modifying anything")
+        help="run the dedupper in noop mode without modifying anything")
     
     (options, args) = parser.parse_args()
+    
+    if len(args) > 0:
+        parser.print_help()
+        sys.exit(1)
     
     if options.db:
         utils.init_db_config(options.db)

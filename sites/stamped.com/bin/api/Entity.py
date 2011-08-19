@@ -170,6 +170,7 @@ class Entity(ASchemaBasedAttributeDict):
                 'content_provider_name': basestring, 
                 'media_type_id': basestring, 
                 'artwork_url': basestring, 
+                'mpaa_rating' : basestring, 
             }, 
         }, 
         'sources': {
@@ -221,7 +222,16 @@ class Entity(ASchemaBasedAttributeDict):
             'phillymag' : { },
             'washmag' : { }, 
             'netflix' : {
-                'nid' : basestring, 
+                'nid' : int, 
+                'nrating' : float, 
+                'ngenres' : list, 
+                'nurl' : basestring, 
+                'images' : {
+                    'tiny'  : basestring, 
+                    'small' : basestring, 
+                    'large' : basestring, 
+                    'hd'    : basestring, 
+                }, 
             }, 
         }
     }

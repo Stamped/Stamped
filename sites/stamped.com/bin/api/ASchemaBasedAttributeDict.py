@@ -158,8 +158,7 @@ class ASchemaBasedAttributeDict(object):
     @property
     def isValid(self):
         return False
-
-
+    
     def output(self, format=None, **kwargs):
         if str(format).lower() == 'http':
             return self._formatHTTP(**kwargs)
@@ -167,7 +166,6 @@ class ASchemaBasedAttributeDict(object):
             return self._formatMini(**kwargs)
         return self.getDataAsDict()
     
-
     def _formatHTTP(self, **kwargs):
         raise NotImplementedError
 

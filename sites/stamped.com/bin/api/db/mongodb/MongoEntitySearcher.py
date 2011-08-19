@@ -33,7 +33,7 @@ class MongoEntitySearcher(AEntitySearcher):
 
     source_weights = {
         'googlePlaces' : 90, 
-        'openTable' : 100, 
+        'openTable' : 110, 
         'factual' : 5, 
         'apple' : 75, 
         'zagat' : 95, 
@@ -45,6 +45,7 @@ class MongoEntitySearcher(AEntitySearcher):
         'fandango' : 1000, 
         'chicagomag' : 80, 
         'phillymag'  : 80, 
+        'netflix'  : 100, 
     }
     
     def __init__(self):
@@ -174,17 +175,13 @@ class MongoEntitySearcher(AEntitySearcher):
             data['distance']  = distance
             data['totalv']    = aggregate_value
             
-            if distance > 0:
-                from pprint import pprint
-                pprint(data)
+            #from pprint import pprint
+            #pprint(data)
             
             return aggregate_value
         
         # sort the results based on the _get_weight function
         results = sorted(results, key=_get_weight, reverse=True)
-        print
-        print
-        print
         
         # optionally limit the number of results shown
         if limit is not None and limit >= 0:
@@ -197,14 +194,16 @@ class MongoEntitySearcher(AEntitySearcher):
         weight = 1.0
         
         if input_query == title:
+            # if the title is an 'exact' query match (case-insensitive), weight it heavily
             weight = 5.0
         elif input_query in title:
             if title.startswith(input_query):
+                # if the query is a prefix match for the title, weight it more
                 weight = 1.8
             else:
                 weight = 1.2
         
-        is_junk = " \t-".__contains__
+        is_junk = " \t-".__contains__ # characters for SequenceMatcher to disregard
         ratio   = SequenceMatcher(is_junk, input_query, entity.title.lower()).ratio()
         value   = ratio * weight
         
@@ -216,6 +215,7 @@ class MongoEntitySearcher(AEntitySearcher):
         if subcat in self.subcategory_weights:
             weight = self.subcategory_weights[subcat]
         else:
+            # default weight
             weight = 30
         
         return weight / 100.0
@@ -228,7 +228,8 @@ class MongoEntitySearcher(AEntitySearcher):
             if source in self.source_weights:
                 source_value_sum += self.source_weights[source]
             else:
-                source_value_sum += 80
+                # default source value
+                source_value_sum += 50
         
         return source_value_sum / 100.0
     
@@ -261,8 +262,8 @@ class MongoEntitySearcher(AEntitySearcher):
         # away being penalized very quickly as the distance 
         # grows.
         value = a * x3 + b * x2 + c * x + d
-        #value = max(-1000, min(1000, value))
         
+        # rescale
         if value > 0:
             value = math.log10(1 + value)
         else:

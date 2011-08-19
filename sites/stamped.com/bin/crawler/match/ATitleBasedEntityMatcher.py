@@ -25,6 +25,8 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
     def getMatchingDuplicates(self, entity, candidate_entities):
         base_detail  = list(self._genEntityDetail(entity))
         lbase_detail = len(base_detail)
+        base_addr    = entity.address.lower().strip()
+        is_junk = " \t-".__contains__
         
         for candidate in candidate_entities:
             candidate_detail = self._genEntityDetail(candidate)
@@ -38,7 +40,7 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
                 base_title = base_detail[level]
                 level += 1
                 
-                ratio = SequenceMatcher(None, base_title, candidate_title).ratio()
+                ratio = SequenceMatcher(is_junk, base_title, candidate_title).ratio()
                 #print "%f) %s vs %s" % (ratio, base_title, candidate_title)
                 
                 if ratio <= 0:
@@ -46,6 +48,14 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
                 if ratio >= 0.9:
                     match = True
                     break
+                
+                if ratio >= 0.2:
+                    if len(base_title) >= len(candidate_title):
+                        if base_title.startswith(candidate_title) or base_title.endswith(candidate_title):
+                            match = True
+                    else:
+                        if candidate_title.startswith(base_title) or candidate_title.endswith(base_title):
+                            match = True
             
             if match:
                 yield candidate

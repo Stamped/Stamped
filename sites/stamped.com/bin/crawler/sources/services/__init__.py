@@ -1,4 +1,3 @@
 
 import FandangoFeed
-import NetflixAPI
 
