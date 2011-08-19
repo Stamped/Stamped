@@ -198,16 +198,16 @@ class StampedAuth(AStampedAuth):
                 return token.user_id
             
             logs.warning("Invalid access token... deleting")
-            self._accessTokenDB.removeAccessToken(params.oauth_token)
+            self._accessTokenDB.removeAccessToken(token.token_id)
             raise
         except:
             msg = "Invalid Access Token"
             logs.warning(msg)
             raise StampedHTTPError("invalid_token", 401, msg)
     
-    def removeAccessToken(self, params):
+    def removeAccessToken(self, tokenId):
         logs.info("Begin")
-        return self._accessTokenDB.removeAccessToken(params.token_id)
+        return self._accessTokenDB.removeAccessToken(tokenId)
 
 
 
