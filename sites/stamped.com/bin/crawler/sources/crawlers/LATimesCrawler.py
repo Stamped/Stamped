@@ -20,6 +20,7 @@ class LATimesCrawler(AExternalEntitySource):
     
     def __init__(self):
         AExternalEntitySource.__init__(self, "LATimes", self.TYPES, 512)
+        self._count = {}
         self._seen = set()
     
     def getMaxNumEntities(self):
@@ -89,11 +90,20 @@ class LATimesCrawler(AExternalEntitySource):
             if 'CLOSED' in name:
                 continue
             
-            if (name, addr) in self._seen:
+            if addr in self._seen:
                 continue
+                
+            self._seen.add(addr)
             
-            self._seen.add((name, addr))
+            if name in self._count:
+                if self._count[name] < 3:
+                    self._count[name] = self._count[name] + 1 
+                else: 
+                    continue
             
+            else:   
+                self._count[name] = 1 
+        
             entity = Entity()
             entity.subcategory = "restaurant"
             entity.title   = name

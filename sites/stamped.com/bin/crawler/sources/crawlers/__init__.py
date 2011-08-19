@@ -9,4 +9,5 @@ import BostonMagCrawler
 import ChicagoMagCrawler
 import PhillyMagCrawler
 import WashMagCrawler
+import SFGateCrawler
 

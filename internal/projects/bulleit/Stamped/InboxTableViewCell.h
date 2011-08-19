@@ -11,6 +11,7 @@
 @class InboxCellView;
 @class Entity;
 @class PageDotsView;
+@class Stamp;
 
 extern NSString* const kInboxTableDidScrollNotification;
 
@@ -27,5 +28,6 @@ extern NSString* const kInboxTableDidScrollNotification;
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
 @property (nonatomic, retain) Entity* entityObject;
+@property (nonatomic, retain) Stamp* stamp;
 
 @end

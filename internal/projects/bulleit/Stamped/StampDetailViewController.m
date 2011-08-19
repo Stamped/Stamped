@@ -278,10 +278,6 @@ static const CGFloat kKeyboardHeight = 216.0;
   currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
 }
 
-- (IBAction)handleCommentButtonTap:(id)sender {
-  [addCommentField_ becomeFirstResponder];
-}
-
 - (IBAction)handleRestampButtonTap:(id)sender {
   CreateStampViewController* createViewController =
       [[CreateStampViewController alloc] initWithEntityObject:stamp_.entityObject

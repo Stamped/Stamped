@@ -29,9 +29,6 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [RKRequestQueue sharedQueue].showsNetworkActivityIndicatorWhenBusy = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
-  objectManager.client.username = @"stampedtest";
-  objectManager.client.password = @"august1ftw";
-
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",

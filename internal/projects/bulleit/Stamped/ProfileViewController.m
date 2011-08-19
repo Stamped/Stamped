@@ -12,6 +12,7 @@
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
+#import "CreditsViewController.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"
@@ -27,7 +28,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
 
-@property (nonatomic, copy) NSArray* entitiesArray;
+@property (nonatomic, copy) NSArray* stampsArray;
 @end
 
 @implementation ProfileViewController
@@ -42,7 +43,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @synthesize bioLabel = bioLabel_;
 
 @synthesize user = user_;
-@synthesize entitiesArray = entitiesArray_;
+@synthesize stampsArray = stampsArray_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -108,7 +109,10 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (IBAction)creditsButtonPressed:(id)sender {
-  NSLog(@"Credits...");
+  CreditsViewController* creditsViewController =
+      [[CreditsViewController alloc] initWithNibName:@"CreditsViewController" bundle:nil];
+  [self.navigationController pushViewController:creditsViewController animated:YES];
+  [creditsViewController release];
 }
 
 - (IBAction)followersButtonPressed:(id)sender {
@@ -130,7 +134,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.entitiesArray.count;
+  return self.stampsArray.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -141,7 +145,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
 
-  cell.entityObject = (Entity*)[entitiesArray_ objectAtIndex:indexPath.row];
+  cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
   
   return cell;
 }
@@ -160,15 +164,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Entity* entity = [entitiesArray_ objectAtIndex:indexPath.row];
-  Stamp* stamp = nil;
-  if (entity.stamps.count > 0) {
-    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-    NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    stamp = [sortedStamps lastObject];
-  } else {
-    stamp = [entity.stamps anyObject];
-  }
+  Stamp* stamp = [stampsArray_ objectAtIndex:indexPath.row];
   StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
 
   [self.navigationController pushViewController:detailViewController animated:YES];
@@ -216,16 +212,12 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)loadStampsFromDataStore {
-  self.entitiesArray = nil;
+  self.stampsArray = nil;
   NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
   [request setPredicate:[NSPredicate predicateWithFormat:@"user.screenName == %@", user_.screenName]];
-	NSArray* results = [Stamp objectsWithFetchRequest:request];
-  
-  results = [results valueForKeyPath:@"@distinctUnionOfObjects.entityObject"];
-  descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
-  self.entitiesArray = [results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+	self.stampsArray = [Stamp objectsWithFetchRequest:request];
   [self.tableView reloadData];
 }
 

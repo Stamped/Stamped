@@ -168,7 +168,7 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    [self showAuthAlert];
+    [self performSelector:@selector(showAuthAlert) withObject:self afterDelay:1.0];
     return;
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self sendLoginRequest];
