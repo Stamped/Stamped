@@ -10,4 +10,7 @@ import ChicagoMagCrawler
 import PhillyMagCrawler
 import WashMagCrawler
 import SFGateCrawler
-
+import TimeOutLACrawler
+import TimeOutLVCrawler
+import TimeOutMIACrawler
+import TimeOutSFCrawler

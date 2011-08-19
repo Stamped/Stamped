@@ -222,6 +222,10 @@ class Entity(ASchemaBasedAttributeDict):
             'phillymag' : { },
             'washmag' : { },
             'sfgate' : { }, 
+            'timeout_la' : { },
+            'timeout_lv' : { },
+            'timeout_mia' : { },
+            'timeout_sf' : { },
             'netflix' : {
                 'nid' : int, 
                 'nrating' : float, 
