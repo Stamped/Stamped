@@ -26,6 +26,7 @@ static const NSInteger kFollowersSection = 1;
 
 @interface PeopleViewController ()
 - (void)currentUserUpdated:(NSNotification*)notification;
+- (void)topViewTapped:(UITapGestureRecognizer*)recognizer;
 - (void)loadFriendsFromNetwork;
 - (void)loadFriendsFromDataStore;
 
@@ -60,6 +61,10 @@ static const NSInteger kFollowersSection = 1;
   
   userScreenNameLabel_.textColor = [UIColor stampedLightGrayColor];
   userFullNameLabel_.textColor = [UIColor stampedBlackColor];
+  UITapGestureRecognizer* recognizer =
+      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topViewTapped:)];
+  [userScreenNameLabel_.superview addGestureRecognizer:recognizer];
+  [recognizer release];
   [self currentUserUpdated:nil];
   [self loadFriendsFromNetwork];
 }
@@ -156,6 +161,17 @@ static const NSInteger kFollowersSection = 1;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = [AccountManager sharedManager].currentUser;
+  
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
+}
+
+#pragma mark - Custom methods.
+
+- (void)topViewTapped:(UITapGestureRecognizer*)recognizer {
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
   profileViewController.user = [AccountManager sharedManager].currentUser;
   

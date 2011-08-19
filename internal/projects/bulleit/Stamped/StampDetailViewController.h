@@ -25,7 +25,6 @@
 }
 
 - (id)initWithStamp:(Stamp*)stamp;
-- (IBAction)handleCommentButtonTap:(id)sender;
 - (IBAction)handleRestampButtonTap:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;

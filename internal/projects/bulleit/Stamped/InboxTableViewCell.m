@@ -32,7 +32,6 @@ static const CGFloat kSubstringFontSize = 12.0;
 static const CGFloat kUserImageHorizontalMargin = 14.0;
 static const CGFloat kUserImageSize = 41.0;
 static const CGFloat kCellTopPadding = 10.0;
-static const CGFloat kTypeIconSize = 12.0;
 static const CGFloat kSubstringMaxWidth = 218.0;
 static const CGFloat kStampSize = 18.0;
 static const CGFloat kTitleMaxWidth = 210.0;
@@ -105,7 +104,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     
     userImageRightMargin_ = kUserImageSize + (kUserImageHorizontalMargin * 2.0);
     
-    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 58, kTypeIconSize, kTypeIconSize)];
+    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 59, 16, 10)];
     typeImageView_.contentMode = UIViewContentModeScaleAspectFit;
     [self addSubview:typeImageView_];
     [typeImageView_ release];
@@ -429,6 +428,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @implementation InboxTableViewCell
 
 @synthesize entityObject = entityObject_;
+@synthesize stamp = stamp_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
@@ -486,6 +486,20 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
   [super setSelected:selected animated:animated];
   [customView_ setSelected:selected animated:animated];
+}
+
+- (void)setStamp:(Stamp*)stamp {
+  if (stamp_ != stamp) {
+    [stamp_ release];
+    stamp_ = [stamp retain];
+    if (stamp) {
+      customView_.title = stamp.entityObject.title;
+      customView_.typeImage = stamp.entityObject.categoryImage;
+      customView_.stamps = [NSArray arrayWithObject:stamp];
+      pageDotsView_.numDots = 0;
+      [self setNeedsDisplay];
+    }
+  }
 }
 
 - (void)setEntityObject:(Entity*)entityObject {

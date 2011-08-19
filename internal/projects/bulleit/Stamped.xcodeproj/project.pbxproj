@@ -96,6 +96,8 @@
 		7E9F80EB13F88FA4003D7185 /* UIColor+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */; };
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
 		7EB4782813EE2DBE00DA12CB /* MediumUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */; };
+		7EB47EF213FDBD38009AD30A /* CreditsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB47EF013FDBD38009AD30A /* CreditsViewController.m */; };
+		7EB47EF313FDBD38009AD30A /* CreditsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EB47EF113FDBD38009AD30A /* CreditsViewController.xib */; };
 		7EBCBE8713D78896009FCECF /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBCBE8613D78896009FCECF /* Comment.m */; };
 		7EBE8E2713DEFAD200D36E50 /* disclosure_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */; };
 		7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
@@ -363,6 +365,9 @@
 		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
 		7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediumUserImageView.h; sourceTree = "<group>"; };
 		7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediumUserImageView.m; sourceTree = "<group>"; };
+		7EB47EEF13FDBD38009AD30A /* CreditsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreditsViewController.h; sourceTree = "<group>"; };
+		7EB47EF013FDBD38009AD30A /* CreditsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreditsViewController.m; sourceTree = "<group>"; };
+		7EB47EF113FDBD38009AD30A /* CreditsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CreditsViewController.xib; sourceTree = "<group>"; };
 		7EBCBE8513D78896009FCECF /* Comment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Comment.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7EBCBE8613D78896009FCECF /* Comment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Comment.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure_arrow@2x.png"; sourceTree = "<group>"; };
@@ -861,6 +866,9 @@
 				7EE70C4E13FC635D008CCC15 /* ProfileViewController.h */,
 				7EE70C4F13FC635D008CCC15 /* ProfileViewController.m */,
 				7EE70C5013FC635D008CCC15 /* ProfileViewController.xib */,
+				7EB47EEF13FDBD38009AD30A /* CreditsViewController.h */,
+				7EB47EF013FDBD38009AD30A /* CreditsViewController.m */,
+				7EB47EF113FDBD38009AD30A /* CreditsViewController.xib */,
 			);
 			name = "Profile View";
 			sourceTree = "<group>";
@@ -1182,6 +1190,7 @@
 				7EE70C5213FC635D008CCC15 /* ProfileViewController.xib in Resources */,
 				7E52A58B13FC7DB500209A95 /* camera_button@2x.png in Resources */,
 				7E52A58C13FC7DB500209A95 /* profile_detail_button@2x.png in Resources */,
+				7EB47EF313FDBD38009AD30A /* CreditsViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1258,6 +1267,7 @@
 				7E30229213FC1F510094EB28 /* PeopleTableViewCell.m in Sources */,
 				7EE70C4D13FC61AE008CCC15 /* STSectionHeaderView.m in Sources */,
 				7EE70C5113FC635D008CCC15 /* ProfileViewController.m in Sources */,
+				7EB47EF213FDBD38009AD30A /* CreditsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
