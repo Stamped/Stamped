@@ -7,11 +7,10 @@ __license__ = "TODO"
 
 import Globals, auth, utils, logs
 from datetime import datetime
+from Schemas import *
 
 from AMongoCollection import AMongoCollection
-
-from api.AAccountDB import AAccountDB
-from api.Account import Account
+from AAccountDB import AAccountDB
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     

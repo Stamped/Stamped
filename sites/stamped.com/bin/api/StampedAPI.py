@@ -23,15 +23,6 @@ from ACollectionDB import ACollectionDB
 from AFriendshipDB import AFriendshipDB
 from AActivityDB import AActivityDB
 
-from Account import Account
-from Entity import *
-from User import User
-from Stamp import Stamp
-from Comment import Comment
-from Favorite import Favorite
-from Friendship import Friendship
-from Activity import Activity
-
 from Schemas import *
 
 # TODO: input validation and output formatting
@@ -466,6 +457,7 @@ class StampedAPI(AStampedAPI):
         user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         
+        screenNames = []
         mentions = [] 
         
         # Check if string match exists at beginning. Should combine with regex 
@@ -481,8 +473,10 @@ class StampedAPI(AStampedAPI):
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
                 data['display_name'] = user.display_name
+                data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])
+            screenNames.append(data['screen_name'])
             mentions.append(data)
             
         # Run through and grab mentions
@@ -494,9 +488,12 @@ class StampedAPI(AStampedAPI):
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
                 data['display_name'] = user.display_name
+                data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])
-            mentions.append(data)
+            if data['screen_name'] not in screenNames:
+                screenNames.append(data['screen_name'])
+                mentions.append(data)
         
         if len(mentions) > 0:
             return mentions
@@ -562,7 +559,7 @@ class StampedAPI(AStampedAPI):
         if credit != None and len(credit) > 0:
             for creditedUser in credit:
                 userId = creditedUser['user_id']
-                if userId == user.user_id:
+                if userId == user.user_id or userId in creditedUserIds:
                     break
 
                 # Assign credit
@@ -705,7 +702,7 @@ class StampedAPI(AStampedAPI):
         if len(creditedUsers) > 0:
             for creditedUser in creditedUsers:
                 userId = creditedUser['user_id']
-                if userId == user.user_id:
+                if userId == user.user_id or userId in creditedUserIds:
                     break
 
                 # Assign credit
@@ -1002,9 +999,10 @@ class StampedAPI(AStampedAPI):
         except:
             return cap
     
-    def _getStampCollection(self, stampIds, data, includeComments=False):
-        quality     = data.pop('quality', 3)
-        limit       = data.pop('limit', None)
+    def _getStampCollection(self, stampIds, **kwargs):
+        quality         = kwargs.pop('quality', 3)
+        limit           = kwargs.pop('limit', None)
+        includeComments = kwargs.pop('includeComments', False)
                        
         # Set quality
         if quality == 1:
@@ -1020,7 +1018,7 @@ class StampedAPI(AStampedAPI):
         limit = self._setLimit(limit, cap=stampCap)
         
         # Limit slice of data returned
-        since, before = self._setSliceParams(data)
+        since, before = self._setSliceParams(kwargs)
 
         params = {
             'since':    since,
@@ -1030,48 +1028,37 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._stampDB.getStamps(stampIds, **params)
 
-        result = []
-
         if includeComments == True:
+            result = []
             comments = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
 
             ### TODO: Find a more efficient way to run this
             for stamp in stamps:
-                if self.output == 'http':
-                    stamp = stamp.exportFlat()
-
-                stamp['comment_preview'] = []
                 for comment in comments:
-                    if comment.stamp_id == stamp['stamp_id']:
-                        if self.output == 'http':
-                            comment = comment.exportFlat()
+                    if comment.stamp_id == stamp.stamp_id:
                         stamp['comment_preview'].append(comment)
                 result.append(stamp)
-        else:
-            for stamp in stamps:
-                if self.output == 'http':
-                    stamp = stamp.exportFlat()
-                result.append(stamp)
+            return result
         
-        return result
+        return stamps
     
-    def getInboxStamps(self, data, auth):
-        
-        stampIds = self._collectionDB.getInboxStampIds(auth['authenticated_user_id'])
+    def getInboxStamps(self, authUserId, **kwargs):
+        stampIds = self._collectionDB.getInboxStampIds(authUserId)
 
-        return self._getStampCollection(stampIds, data, includeComments=True)
+        kwargs['includeComments'] = True
+
+        return self._getStampCollection(stampIds, **kwargs)
     
-    def getUserStamps(self, data, auth):
-        user = self._getUserFromIdOrScreenName(data)
+    def getUserStamps(self, userRequest, authUserId, **kwargs):
+        user = self._getUserFromIdOrScreenName(userRequest)
 
         # Check privacy
         if user.privacy == True:
-            authenticated_user_id = data.pop('authenticated_user_id', None)
-            if authenticated_user_id == None:
+            if authUserId == None:
                 raise Exception("You must be logged in to view this account")
 
             friendship = Friendship({
-                'user_id':      auth['authenticated_user_id'],
+                'user_id':      authUserId,
                 'friend_id':    user['user_id']
             })
 
@@ -1080,7 +1067,13 @@ class StampedAPI(AStampedAPI):
         
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
 
-        return self._getStampCollection(stampIds, data, includeComments=True)
+        kwargs['includeComments'] = True
+
+        return self._getStampCollection(stampIds, **kwargs)
+    
+    def getCreditedStamps(self, userRequest, authUserId, **kwargs):
+        ### TODO: Implement
+        raise NotImplementedError
     
     def getUserMentions(self, userID, limit=None):
         ### TODO: Implement
@@ -1098,18 +1091,17 @@ class StampedAPI(AStampedAPI):
     #       #    #   ##   ######  ####  
     """
 
-    def addFavorite(self, data, auth):
-        entity      = self._entityDB.getEntity(data['entity_id'])
-        stamp_id    = data.pop('stamp_id', None)
+    def addFavorite(self, authUserId, entityId, stampId=None):
+        entity      = self._entityDB.getEntity(entityId)
 
         favorite = Favorite({
             'entity': entity.exportSchema(EntityMini()),
-            'user_id': auth['authenticated_user_id'],
+            'user_id': authUserId,
         })
         favorite.timestamp.created = datetime.utcnow()
-        if stamp_id != None:
+        if stampId != None:
             stamp   = self._stampDB.getStamp(stamp_id)
-            favorite.stamp = stamp.value
+            favorite.stamp = stamp
 
         ### TODO: Check to verify that user hasn't already favorited entity
 
@@ -1119,24 +1111,18 @@ class StampedAPI(AStampedAPI):
 
         return favorite
     
-    def removeFavorite(self, data, auth):
-        self._favoriteDB.removeFavorite(data['entity_id'], \
-                                        auth['authenticated_user_id'])
-        return True
+    def removeFavorite(self, authUserId, entityId):
+        favorite = self._favoriteDB.getFavorite(authUserId, entityId)
+        self._favoriteDB.removeFavorite(authUserId, entityId)
+        return favorite
     
-    def getFavorites(self, data, auth):        
-        favorites = self._favoriteDB.getFavorites(auth['authenticated_user_id'])
+    def getFavorites(self, authUserId, **kwargs):        
+
+        ### TODO: Add slicing (before, since, limit, quality)
+
+        favorites = self._favoriteDB.getFavorites(authUserId)
 
         return favorites
-    
-    def getFavoritesOld(self, params):        
-        favorites = self._favoriteDB.getFavorites(params.authenticated_user_id)
-        
-        result = []
-        for favorite in favorites:
-            result.append(self._returnFavorite(favorite))
-        
-        return result
     
 
     """
@@ -1149,9 +1135,9 @@ class StampedAPI(AStampedAPI):
     #     #  ####    #   #   ##   #   #     #   
     """
     
-    def getActivity(self, data, auth):
-        quality     = data.pop('quality', 3)
-        limit       = data.pop('limit', None)
+    def getActivity(self, authUserId, **kwargs):
+        quality     = kwargs.pop('quality', 3)
+        limit       = kwargs.pop('limit', None)
                        
         # Set quality
         if quality == 1:
@@ -1167,7 +1153,7 @@ class StampedAPI(AStampedAPI):
         limit = self._setLimit(limit, cap=stampCap)
         
         # Limit slice of data returned
-        since, before = self._setSliceParams(data)
+        since, before = self._setSliceParams(kwargs)
 
         params = {
             'since':    since,
@@ -1175,14 +1161,8 @@ class StampedAPI(AStampedAPI):
             'limit':    limit,
         }
         
-        activity = self._activityDB.getActivity(auth['authenticated_user_id'], \
-                                                **params)
+        activity = self._activityDB.getActivity(authUserId, **params)
         
-        if self.output == 'http':
-            result = []
-            for item in activity:
-                result.append(item.exportFlat())
-            return result
         return activity
     
 

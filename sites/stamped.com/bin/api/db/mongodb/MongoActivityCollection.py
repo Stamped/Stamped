@@ -10,11 +10,11 @@ import Globals, logs
 from datetime import datetime
 from utils import lazyProperty
 
+from Schemas import *
+
 from AMongoCollection import AMongoCollection
 from MongoUserActivityCollection import MongoUserActivityCollection
-
-from api.AActivityDB import AActivityDB
-from api.Activity import Activity
+from AActivityDB import AActivityDB
 
 class MongoActivityCollection(AMongoCollection, AActivityDB):
     
@@ -63,13 +63,13 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         # Get activity
         activityIds = self.user_activity_collection.getUserActivityIds(userId)
 
-        logs.debug("ACTIVITY IDS: %s" % activityIds)
+        # logs.debug("ACTIVITY IDS: %s" % activityIds)
 
         documentIds = []
         for activityId in activityIds:
             documentIds.append(self._getObjectIdFromString(activityId))
 
-        logs.debug("DOCUMENT IDS: %s" % documentIds)
+        # logs.debug("DOCUMENT IDS: %s" % documentIds)
 
         # Get stamps
         documents = self._getMongoDocumentsFromIds(documentIds, **params)

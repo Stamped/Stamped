@@ -8,9 +8,9 @@ __license__ = "TODO"
 import Globals
 from datetime import datetime
 
+from Schemas import *
 from AMongoCollection import AMongoCollection
 from api.AUserDB import AUserDB
-from api.User import User
 
 class MongoUserCollection(AMongoCollection, AUserDB):
     

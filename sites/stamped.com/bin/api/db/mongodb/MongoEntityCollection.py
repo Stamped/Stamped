@@ -14,8 +14,7 @@ from Schemas import *
 
 from AMongoCollection import AMongoCollection
 from MongoPlacesEntityCollection import MongoPlacesEntityCollection
-from api.AEntityDB import AEntityDB
-from api.Entity import Entity
+from AEntityDB import AEntityDB
 from difflib import SequenceMatcher
 
 subcategory_indices = {

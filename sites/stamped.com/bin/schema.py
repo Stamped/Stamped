@@ -100,6 +100,7 @@ class SchemaElement(object):
         self._requiredType  = self._setType(requiredType)
         self._required      = kwargs.pop('required', False)
         self._validate      = kwargs.pop('validate', True)
+        self._overflow      = kwargs.pop('overflow', False)
         self._default       = kwargs.pop('default', None)
         self._case          = self._setCase(kwargs.pop('case', None))
         # self._format        = kwargs.pop('format', None)
@@ -339,6 +340,7 @@ class SchemaList(SchemaElement):
 
         elif isinstance(element, Schema) or isinstance(element, SchemaList):
             newSchemaItem = copy.deepcopy(element)
+            newSchemaItem._overflow = self._overflow
             newSchemaItem.importData(item)
             newSchemaItem._validate = self._validate
             return newSchemaItem
@@ -521,7 +523,6 @@ class Schema(SchemaElement):
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
         self._elements      = {}
-        self._overflow      = kwargs.pop('overflow', False)
 
         self.setSchema()
         self.importData(data)
@@ -634,6 +635,7 @@ class Schema(SchemaElement):
             # Dictionary
             if isinstance(v, Schema) or isinstance(v, SchemaList):
                 v._validate = self._validate
+                v._overflow = self._overflow
                 if item == None:
                     if v._required == True and v._validate == True:
                         msg = "Missing Nested Element (%s)" % k

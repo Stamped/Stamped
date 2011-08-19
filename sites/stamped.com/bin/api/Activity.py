@@ -8,37 +8,37 @@ __license__ = "TODO"
 import Globals
 from datetime import datetime
 from Schemas import *
-from Stamp import Stamp
-from Comment import Comment
-from Favorite import Favorite
+# from Stamp import Stamp
+# from Comment import Comment
+# from Favorite import Favorite
 
-class Activity(ActivitySchema):
+# class Activity(ActivitySchema):
 
-    # Set
-    def setTimestampCreated(self):
-        self.timestamp.created = datetime.utcnow()
+#     # Set
+#     def setTimestampCreated(self):
+#         self.timestamp.created = datetime.utcnow()
 
-    # Export
-    def exportFlat(self):
+#     # Export
+#     def exportFlat(self):
 
-        data = {}
-        data['activity_id'] = self.activity_id
-        data['genre'] = self.genre
-        data['user'] = self.user.value
+#         data = {}
+#         data['activity_id'] = self.activity_id
+#         data['genre'] = self.genre
+#         data['user'] = self.user.value
 
-        if self.stamp.stamp_id != None:
-            stamp = Stamp(self.stamp.value)
-            data['stamp'] = stamp.exportFlat()
+#         if self.stamp.stamp_id != None:
+#             stamp = Stamp(self.stamp.value)
+#             data['stamp'] = stamp.exportFlat()
         
-        if self.comment.comment_id != None:
-            comment = Comment(self.comment.value)
-            data['comment'] = comment.exportFlat()
+#         if self.comment.comment_id != None:
+#             comment = Comment(self.comment.value)
+#             data['comment'] = comment.exportFlat()
 
-        if self.favorite.favorite_id != None:
-            favorite = Favorite(self.favorite.value)
-            data['favorite'] = favorite.exportFlat()
+#         if self.favorite.favorite_id != None:
+#             favorite = Favorite(self.favorite.value)
+#             data['favorite'] = favorite.exportFlat()
 
-        data['created'] = str(self.timestamp.created)
+#         data['created'] = str(self.timestamp.created)
 
-        return data
+#         return data
 

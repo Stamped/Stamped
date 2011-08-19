@@ -167,7 +167,7 @@ class TimestampSchema(Schema):
 # Friendships #
 # ########### #
 
-class FriendshipSchema(Schema):
+class Friendship(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.friend_id          = SchemaElement(basestring, required=True)
@@ -178,11 +178,11 @@ class FriendshipSchema(Schema):
 # Favorite #
 # ######## #
 
-class FavoriteSchema(Schema):
+class Favorite(Schema):
     def setSchema(self):
         self.favorite_id        = SchemaElement(basestring)
-        self.entity             = EntityMini(required=True)
         self.user_id            = SchemaElement(basestring, required=True)
+        self.entity             = EntityMini(required=True)
         self.stamp              = Stamp()
         self.timestamp          = TimestampSchema()
         self.complete           = SchemaElement(bool)
@@ -240,14 +240,14 @@ class Comment(Schema):
 # Activity #
 # ######## #
 
-class ActivitySchema(Schema):
+class Activity(Schema):
     def setSchema(self):
         self.activity_id        = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = UserMini(required=True)
         self.comment            = Comment()
         self.stamp              = Stamp()
-        self.favorite           = FavoriteSchema()
+        self.favorite           = Favorite()
         self.timestamp          = TimestampSchema()
 
 
@@ -272,30 +272,7 @@ class Entity(Schema):
         self.sources            = EntitySourcesSchema()
 
     def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'HTTPEntity':
-            data                = self.value
-            coordinates         = data.pop('coordinates', None)
-
-            schema.importData(data, overflow=True)
-
-            schema.address      = self.details.place.address
-            schema.neighborhood = self.details.place.neighborhood
-            schema.phone        = self.details.contact.phone
-            schema.site         = self.details.contact.site
-            schema.hours        = self.details.contact.hoursOfOperation
-            schema.cuisine      = self.details.restaurant.cuisine
-
-            schema.coordinates  = _coordinatesDictToFlat(coordinates)
-
-            if self.sources.openTable.reserveURL != None:
-                schema.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-                                        (self.sources.openTable.reserveURL)
-        
-        elif schema.__class__.__name__ == 'HTTPEntityAutosuggest':
-            schema.importData(self.exportSparse(), overflow=True)
-            schema.address      = self.details.place.address
-        
-        elif schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
+        if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
             schema.importData(self.exportSparse(), overflow=True)
 
         else:

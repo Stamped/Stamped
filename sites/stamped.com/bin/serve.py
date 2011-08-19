@@ -617,13 +617,14 @@ def removeBlock():
 @handleHTTPRequest
 def addEntity():
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPNewEntity(), request)
+    schema      = parseRequest(HTTPEntityNew(), request)
     entity      = schema.exportSchema(Entity())
 
     entity.sources.userGenerated.user_id = authUserId
-
+    
     entity      = stampedAPI.addEntity(entity)
-    entity      = entity.exportSchema(HTTPEntity())
+    entity      = HTTPEntity().importSchema(entity)
+    print 'ENTITY: %s' % entity
 
     return transformOutput(request, entity.exportSparse())
 
@@ -633,7 +634,7 @@ def getEntity():
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPEntityId(), request)
     entity      = stampedAPI.getEntity(schema.entity_id, authUserId)
-    entity      = entity.exportSchema(HTTPEntity())
+    entity      = HTTPEntity().importSchema(entity)
 
     return transformOutput(request, entity.exportSparse())
 
@@ -641,7 +642,7 @@ def getEntity():
 @handleHTTPRequest
 def updateEntity():
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPModifiedEntity(), request)
+    schema      = parseRequest(HTTPEntityEdit(), request)
 
     ### TEMP: Generate list of changes. Need to do something better eventually...
     data        = schema.exportSparse()
@@ -660,7 +661,7 @@ def updateEntity():
         }
     
     entity      = stampedAPI.updateCustomEntity(authUserId, schema.entity_id, data)
-    entity      = entity.exportSchema(HTTPEntity())
+    entity      = HTTPEntity().importSchema(entity)
 
     return transformOutput(request, entity.exportSparse())
 
@@ -683,7 +684,7 @@ def searchEntities():
     result      = stampedAPI.searchEntities(query.q, query.coordinates)
     autosuggest = []
     for item in result:
-        item = item.exportSchema(HTTPEntityAutosuggest()).exportSparse()
+        item = HTTPEntityAutosuggest().importSchema(item)
         autosuggest.append(item)
 
     return transformOutput(request, autosuggest)
@@ -820,28 +821,41 @@ def getComments():
 """
 
 @app.route(REST_API_PREFIX + 'collections/inbox.json', methods=['GET'])
+@handleHTTPRequest
 def getInboxStamps():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.limit              = SchemaElement(int)
-            self.since              = SchemaElement(int)
-            self.before             = SchemaElement(int)
-            self.quality            = SchemaElement(int)
-    return handleRequest(RequestSchema(), request, stampedAPI.getInboxStamps)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPGenericSlice(), request)
+
+    data        = schema.exportSparse()
+    stamps      = stampedAPI.getInboxStamps(authUserId, **data)
+
+    result = []
+    for stamp in stamps:
+        result.append(HTTPStamp().importSchema(stamp).exportSparse())
+
+    return transformOutput(request, result)
 
 @app.route(REST_API_PREFIX + 'collections/user.json', methods=['GET'])
+@handleHTTPRequest
 def getUserStamps():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.user_id            = SchemaElement(basestring)
-            self.screen_name        = SchemaElement(basestring)
-            self.limit              = SchemaElement(int)
-            self.since              = SchemaElement(int)
-            self.before             = SchemaElement(int)
-            self.quality            = SchemaElement(int)
-    return handleRequest(RequestSchema(), request, stampedAPI.getUserStamps)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserCollectionSlice(), request)
+
+    data        = schema.exportSparse()
+    userRequest = {
+                    'user_id':      data.pop('user_id', None),
+                    'screen_name':  data.pop('screen_name', None)
+                  }
+    stamps      = stampedAPI.getUserStamps(userRequest, authUserId, **data)
+
+    result = []
+    for stamp in stamps:
+        result.append(HTTPStamp().importSchema(stamp).exportSparse())
+
+    return transformOutput(request, result)
 
 @app.route(REST_API_PREFIX + 'getUserMentions', methods=['GET'])
+@handleHTTPRequest
 def getUserMentions():
     return "Not Implemented", 404
     raise NotImplementedError
@@ -860,41 +874,44 @@ def getUserMentions():
 @app.route(REST_API_PREFIX + 'favorites/create.json', methods=['POST'])
 @handleHTTPRequest
 def addFavorite():
+    authUserId  = checkOAuth(request)
 
+    schema      = parseRequest(HTTPFavoriteNew(), request)
+    entityId    = schema.entity_id
+    stampId     = schema.stamp_id
 
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.entity_id          = SchemaElement(basestring, required=True)
-            self.stamp_id           = SchemaElement(basestring)
-    return handleRequest(RequestSchema(), request, stampedAPI.addFavorite)
+    favorite    = stampedAPI.addFavorite(authUserId, entityId, stampId)
+    favorite    = HTTPFavorite().importSchema(favorite)
+
+    return transformOutput(request, favorite.exportSparse())
 
 @app.route(REST_API_PREFIX + 'favorites/remove.json', methods=['POST'])
 @handleHTTPRequest
 def removeFavorite():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.entity_id          = SchemaElement(basestring, required=True)
-    return handleRequest(RequestSchema(), request, stampedAPI.removeFavorite)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPEntityId(), request)
+
+    favorite    = stampedAPI.removeFavorite(authUserId, schema.entity_id)
+    favorite    = HTTPFavorite().importSchema(favorite)
+
+    return transformOutput(request, favorite.exportSparse())
 
 @app.route(REST_API_PREFIX + 'favorites/show.json', methods=['GET'])
 @handleHTTPRequest
 def getFavorites():
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPSlice(), request)
+    schema      = parseRequest(HTTPGenericSlice(), request)
 
-    favorites   = stampedAPI.getFollowers(schema)
-    output      = { 'user_ids': userIds }
+    favorites   = stampedAPI.getFavorites(authUserId, **schema.exportSparse())
 
-    return transformOutput(request, output)
+    result = []
+    for favorite in favorites:
+        result.append(HTTPFavorite().importSchema(favorite).exportSparse())
+    
+    return transformOutput(request, result)
 
 
-
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.limit              = SchemaElement(int)
-            self.since              = SchemaElement(int)
-            self.before             = SchemaElement(int)
-    return handleRequest(RequestSchema(), request, stampedAPI.getFavorites)
+### TODO: Get all favorite ids?
 
 
 """
@@ -908,13 +925,59 @@ def getFavorites():
 """
 
 @app.route(REST_API_PREFIX + 'activity/show.json', methods=['GET'])
+@handleHTTPRequest
 def getActivity():
-    class RequestSchema(Schema):
-        def setSchema(self):
-            self.limit              = SchemaElement(int)
-            self.since              = SchemaElement(int)
-            self.before             = SchemaElement(int)
-    return handleRequest(RequestSchema(), request, stampedAPI.getActivity)
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPGenericSlice(), request)
+
+    activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())
+    
+    result = []
+    for item in activity:
+        result.append(HTTPActivity().importSchema(item).exportSparse())
+    
+    return transformOutput(request, result)
+
+
+"""
+#######                      
+   #    ###### #    # #####  
+   #    #      ##  ## #    # 
+   #    #####  # ## # #    # 
+   #    #      #    # #####  
+   #    #      #    # #      
+   #    ###### #    # #      
+"""
+
+@app.route(REST_API_PREFIX + 'temp/friends.json', methods=['GET'])
+@handleHTTPRequest
+def TEMPgetFriends():
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    userIds     = stampedAPI.getFriends(schema)
+    users       = stampedAPI.getUsers(userIds, None, authUserId)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(request, output)
+
+@app.route(REST_API_PREFIX + 'temp/followers.json', methods=['GET'])
+@handleHTTPRequest
+def TEMPgetFollowers():
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserId(), request)
+
+    userIds     = stampedAPI.getFollowers(schema)
+    users       = stampedAPI.getUsers(userIds, None, authUserId)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(request, output)
 
 
 # ############# #

@@ -5,32 +5,32 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
-from datetime import datetime
-from Schemas import *
+# import Globals
+# from datetime import datetime
+# from Schemas import *
 
-class Favorite(FavoriteSchema):
+# class Favorite(FavoriteSchema):
 
-    # Set
-    def setTimestampCreated(self):
-        self.timestamp.created = datetime.utcnow()
+#     # Set
+#     def setTimestampCreated(self):
+#         self.timestamp.created = datetime.utcnow()
 
-    # Export
-    def exportFlat(self):
-        export = [
-            'favorite_id',
-            'user_id',
-            'stamp',
-            'entity',
-            'complete',
-            'timestamp.created',
-            ]
-        data = self.exportFields(export)
+#     # Export
+#     def exportFlat(self):
+#         export = [
+#             'favorite_id',
+#             'user_id',
+#             'stamp',
+#             'entity',
+#             'complete',
+#             'timestamp.created',
+#             ]
+#         data = self.exportFields(export)
 
-        data['created'] = str(data['timestamp.created'])
-        del(data['timestamp.created'])
+#         data['created'] = str(data['timestamp.created'])
+#         del(data['timestamp.created'])
 
-        if data['stamp']['stamp_id'] == None:
-            data['stamp'] = None
+#         if data['stamp']['stamp_id'] == None:
+#             data['stamp'] = None
         
-        return data
+#         return data

@@ -8,14 +8,14 @@ __license__ = "TODO"
 import Globals
 from Schemas import *
 
-class Friendship(FriendshipSchema):
+# class Friendship(FriendshipSchema):
 
-    def exportFlat(self):
-        export = [
-            'user_id',
-            'friend_id',
-            ]
-        return self.exportFields(export)
+#     def exportFlat(self):
+#         export = [
+#             'user_id',
+#             'friend_id',
+#             ]
+#         return self.exportFields(export)
 
     
 """

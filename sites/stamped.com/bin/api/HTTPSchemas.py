@@ -122,10 +122,8 @@ class HTTPUser(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ in ('Account', 'User'):
             self.importData(schema.exportSparse(), overflow=True)
-
         else:
             raise NotImplementedError
-
         return self
 
 class HTTPUserMini(Schema):
@@ -137,6 +135,13 @@ class HTTPUserMini(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'UserMini':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
 
 class HTTPUserId(Schema):
     def setSchema(self):
@@ -169,7 +174,7 @@ class HTTPStamp(Schema):
         self.credit             = SchemaList(UserTiny())
         self.comment_preview    = SchemaList(HTTPComment())
         self.created            = SchemaElement(basestring)
-        self.num_comments       = SchemaElement(int, default=0)
+        self.num_comments       = SchemaElement(int)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
@@ -179,10 +184,8 @@ class HTTPStamp(Schema):
             self.importData(data, overflow=True)
             self.num_comments = schema.stats.num_comments
             self.entity.coordinates = _coordinatesDictToFlat(coordinates)
-
         else:
             raise NotImplementedError
-
         return self
 
 class HTTPStampNew(Schema):
@@ -203,6 +206,21 @@ class HTTPStampId(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring, required=True)
 
+class HTTPGenericSlice(Schema):
+    def setSchema(self):
+        self.limit              = SchemaElement(int)
+        self.since              = SchemaElement(int)
+        self.before             = SchemaElement(int)
+        self.quality            = SchemaElement(int)
+
+class HTTPUserCollectionSlice(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring)
+        self.screen_name        = SchemaElement(basestring)
+        self.limit              = SchemaElement(int)
+        self.since              = SchemaElement(int)
+        self.before             = SchemaElement(int)
+        self.quality            = SchemaElement(int)
 
 # ######## #
 # Comments #
@@ -268,7 +286,29 @@ class HTTPEntity(Schema):
         self.opentable_url      = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
 
-class HTTPNewEntity(Schema):
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            data                = schema.exportSparse()
+            coordinates         = data.pop('coordinates', None)
+
+            self.importData(data, overflow=True)
+
+            self.address        = schema.details.place.address
+            self.neighborhood   = schema.details.place.neighborhood
+            self.phone          = schema.details.contact.phone
+            self.site           = schema.details.contact.site
+            self.hours          = schema.details.contact.hoursOfOperation
+            self.cuisine        = schema.details.restaurant.cuisine
+            self.coordinates    = _coordinatesDictToFlat(coordinates)
+
+            if schema.sources.openTable.reserveURL != None:
+                self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
+                                        (schema.sources.openTable.reserveURL)
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPEntityNew(Schema):
     def setSchema(self):
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring, required=True)
@@ -280,7 +320,6 @@ class HTTPNewEntity(Schema):
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-
             schema.importData({
                 'title':        self.title,
                 'subtitle':     self.subtitle,
@@ -288,17 +327,13 @@ class HTTPNewEntity(Schema):
                 'subcategory':  self.subcategory,
                 'desc':         self.desc
             })
-
             schema.details.place.address = self.address 
-
             schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-
         else:
             raise NotImplementedError
-
         return schema
 
-class HTTPModifiedEntity(Schema):
+class HTTPEntityEdit(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring)
@@ -311,7 +346,6 @@ class HTTPModifiedEntity(Schema):
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-
             schema.importData({
                 'entity_id':    self.entity_id,
                 'title':        self.title,
@@ -320,14 +354,10 @@ class HTTPModifiedEntity(Schema):
                 'subcategory':  self.subcategory,
                 'desc':         self.desc
             })
-
             schema.details.place.address = self.address 
-
             schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-
         else:
             raise NotImplementedError
-
         return schema
 
 class HTTPEntityAutosuggest(Schema):
@@ -337,6 +367,14 @@ class HTTPEntityAutosuggest(Schema):
         self.subtitle           = SchemaElement(basestring, required=True)
         self.category           = SchemaElement(basestring, required=True)
         self.address            = SchemaElement(basestring)
+        
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            self.importData(schema.exportSparse(), overflow=True)
+            self.address        = schema.details.place.address
+        else:
+            raise NotImplementedError
+        return self
 
 class HTTPEntityId(Schema):
     def setSchema(self):
@@ -349,13 +387,10 @@ class HTTPEntitySearch(Schema):
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'EntitySearch':
-
             schema.importData({'q': self.q})
             schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-
         else:
             raise NotImplementedError
-
         return schema
 
 
@@ -369,37 +404,68 @@ class HTTPFavorite(Schema):
         self.user_id            = SchemaElement(basestring, required=True)
         self.entity             = HTTPEntity(required=True)
         self.stamp              = HTTPStamp()
-        self.created            = SchemaElement(basestring, required=True)
+        self.created            = SchemaElement(basestring)
         self.complete           = SchemaElement(bool)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Favorite':
+            data                = schema.exportSparse()
+            entity              = Entity(data.pop('entity', None))
+            stamp               = Stamp(data.pop('stamp', None))
+            data['entity']      = HTTPEntity().importSchema(entity).exportSparse()
+
+            if stamp.stamp_id != None:
+                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
+
+            self.importData(data, overflow=True)
+            self.created = schema.timestamp.created
+        else:
+            raise NotImplementedError
+        return self
 
 class HTTPFavoriteNew(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.stamp_id           = SchemaElement(basestring)
 
-class HTTPFavoriteId(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-
-class HTTPSlice(Schema):
-    def setSchema(self):
-        self.limit              = SchemaElement(int)
-        self.since              = SchemaElement(int)
-        self.before             = SchemaElement(int)
-
 
 # ######## #
 # Activity #
 # ######## #
 
-class ActivitySchema(Schema):
+class HTTPActivity(Schema):
     def setSchema(self):
-        self.activity_id        = SchemaElement(basestring)
+        self.activity_id        = SchemaElement(basestring, required=True)
         self.genre              = SchemaElement(basestring, required=True)
-        self.user               = UserMiniSchema(required=True)
-        self.comment            = CommentSchema()
-        self.stamp              = StampSchema()
-        self.favorite           = FavoriteSchema()
-        self.timestamp          = TimestampSchema()
+        self.user               = HTTPUserMini(required=True)
+        self.comment            = HTTPComment()
+        self.stamp              = HTTPStamp()
+        self.favorite           = HTTPFavorite()
+        self.created            = SchemaElement(basestring)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Activity':
+            data                = schema.exportSparse()
+            user                = UserMini(data.pop('user', None))
+            stamp               = Stamp(data.pop('stamp', None))
+            comment             = Comment(data.pop('comment', None))
+            favorite            = Favorite(data.pop('favorite', None))
+
+            data['user']        = HTTPUserMini().importSchema(user).exportSparse()
+
+            if stamp.stamp_id != None:
+                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
+            if comment.comment_id != None:
+                data['comment'] = HTTPComment().importSchema(comment).exportSparse()
+            if favorite.favorite_id != None:
+                data['favorite']= HTTPFavorite().importSchema(favorite).exportSparse()
+
+            print 'DONE???'
+
+            self.importData(data, overflow=True)
+            self.created = schema.timestamp.created
+        else:
+            raise NotImplementedError
+        return self
 
 

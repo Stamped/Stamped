@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from Favorite import Favorite
+# from Favorite import Favorite
 
 class AFavoriteDB(object):
     
