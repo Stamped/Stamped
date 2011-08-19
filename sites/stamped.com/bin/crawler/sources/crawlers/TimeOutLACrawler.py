@@ -29,9 +29,15 @@ class TimeOutLACrawler(AExternalEntitySource):
         utils.log("[%s] parsing site" % (self, ))
         
         pool = Pool(512)
-        seed = 'http://www.timeout.com/los-angeles/search/tag/4256/restaurants-cafes'
+
+        #Include restaurant and bars list separately 
+        href = [
+            'http://www.timeout.com/los-angeles/search/tag/4256/restaurants-cafes',
+            'http://www.timeout.com/los-angeles/search/tag/4298/bars-pubs'
+        ]
         
-        self._parseResultsPage(pool, seed)
+        for l in href:
+            pool.spawn(self._parseResultsPage, pool, l)
             
         pool.join()
         self._output.put(StopIteration)
@@ -71,13 +77,25 @@ class TimeOutLACrawler(AExternalEntitySource):
             
             self._seen.add((name, addr))
             
-            entity = Entity()
-            entity.subcategory = "restaurant"
-            entity.title   = name
-            entity.address = addr
-            entity.sources = {
-                'timeout_la' : { }
-            }
+            if 'Bars' in result.findNext('span').getText():
+            
+                entity = Entity()
+                entity.subcategory = "bar"
+                entity.title   = name
+                entity.address = addr
+                entity.sources = {
+                    'timeout_la' : { }
+                }
+
+            else:  
+            
+                entity = Entity()
+                entity.subcategory = "restaurant"
+                entity.title   = name
+                entity.address = addr
+                entity.sources = {
+                    'timeout_la' : { }
+                }
             
             self._output.put(entity)
         
