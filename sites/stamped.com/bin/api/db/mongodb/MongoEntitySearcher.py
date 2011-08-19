@@ -14,6 +14,7 @@ from MongoPlacesEntityCollection import MongoPlacesEntityCollection
 
 from difflib import SequenceMatcher
 from pymongo.son import SON
+from gevent.pool import Pool
 from pprint import pprint
 from utils import abstract
 from Entity import Entity
@@ -55,6 +56,7 @@ class MongoEntitySearcher(AEntitySearcher):
         self.placesDB = MongoPlacesEntityCollection()
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
+        self.pool = Pool(8)
     
     def getSearchResults(self, 
                          query, 
@@ -89,7 +91,7 @@ class MongoEntitySearcher(AEntitySearcher):
                 words[i] = word
             query = string.joinfields(words, ' ').strip()
         
-        query = query.replace(' and ', ' (and|&)? ')
+        query = query.replace(' ands? ', ' (and|&)? ')
         query = query.replace('-', '-?')
         query = query.replace(' ', '[ \t-_]?')
         query = query.replace("'", "'?")
@@ -98,30 +100,45 @@ class MongoEntitySearcher(AEntitySearcher):
         query = query.replace("!", "[!li]?")
         
         data = {}
-        data['input'] = input_query
-        data['query'] = query
-        data['coords'] = coords
-        data['limit'] = limit
-        data['category'] = category_filter
+        data['input']       = input_query
+        data['query']       = query
+        data['coords']      = coords
+        data['limit']       = limit
+        data['category']    = category_filter
         data['subcategory'] = subcategory_filter
         pprint(data)
         
         entity_query = {"title": {"$regex": query, "$options": "i"}}
-        db_results = self.entityDB._collection.find(entity_query)
+        db_results = []
         
         results = []
         results_set = set()
         
-        if coords is not None:
+        if coords is None:
+            db_results = self.entityDB._collection.find(entity_query)
+        else:
             # NOTE: geoNear uses lng/lat and coordinates *must* be stored in lng/lat order in underlying collection
             # TODO: enforce this constraint when storing into mongo
             
             earthRadius = 3959.0 # miles
             q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
             
-            ret = self.placesDB._collection.command(q)
+            wrapper = {}
+            def _find_places(ret):
+                ret['place_results'] = self.placesDB._collection.command(q)
             
-            for doc in ret['results']:
+            def _find_entity(ret):
+                ret['db_results'] = self.entityDB._collection.find(entity_query)
+            
+            # perform the two db reads concurrently
+            self.pool.spawn(_find_entity, wrapper)
+            self.pool.spawn(_find_places, wrapper)
+            self.pool.join()
+            
+            db_results    = wrapper['db_results']
+            place_results = wrapper['place_results']['results']
+            
+            for doc in place_results:
                 entity = Entity(self.entityDB._mongoToObj(doc['obj'], 'entity_id'))
                 result = (entity, doc['dis'])
                 
@@ -195,7 +212,7 @@ class MongoEntitySearcher(AEntitySearcher):
         
         if input_query == title:
             # if the title is an 'exact' query match (case-insensitive), weight it heavily
-            weight = 5.0
+            return 500
         elif input_query in title:
             if title.startswith(input_query):
                 # if the query is a prefix match for the title, weight it more

@@ -70,6 +70,8 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
         self.wordBlacklistSet.add("restaurant")
         self.wordBlacklistSet.add("ristorante")
         self.wordBlacklistSet.add("steakhouse")
+        self.wordBlacklistSet.add("co.")
+        self.wordBlacklistSet.add("company")
         
         # remove characters delimiting the start of a detail suffix string
         # e.g., "Mike's Bar - Soho" would remove " - Soho" as extraneous detail
@@ -81,12 +83,18 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
         # remove trailing words
         self.wordSuffixBlacklistSet = set()
         self.wordSuffixBlacklistSet.add("&")
+        self.wordSuffixBlacklistSet.add("and")
         self.wordSuffixBlacklistSet.add("at")
         self.wordSuffixBlacklistSet.add("the")
         
         # remove special character sequences
         self.wordSpecialBlacklistSet = set()
         self.wordSpecialBlacklistSet.add("...")
+        
+        # replace x with y
+        self.wordReplacementMap = {
+            "&" : "and", 
+        }
     
     def _getCanonicalizedTitle(self, title, complexity, crippleTitle):
         complexity = min(max(complexity, 0), 1.0)
@@ -105,6 +113,14 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
         
         # filter and process individual words
         words = title.split()
+        
+        # replace certain generic words with more specific ones
+        # note: this includes replacing synonyms with roots
+        for i in xrange(len(words)):
+            word = words[i]
+            
+            if word in self.wordReplacementMap:
+                words[i] = self.wordReplacementMap[word]
         
         prevWords = None
         while (prevWords is None or len(words) != len(prevWords)) and len(words) > 0:

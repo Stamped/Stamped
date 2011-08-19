@@ -45,6 +45,9 @@ class AEntityMatcher(object):
             else:
                 entity = self._mongoToObj(mongo_entity)
             
+            if self.options.verbose:
+                utils.log("[%s] deduping %s" % (self, entity.title))
+            
             dupes0 = self.getDuplicates(entity)
             
             if len(dupes0) <= 1:
@@ -188,4 +191,7 @@ class AEntityMatcher(object):
                 objs.append(self._mongoToObj(obj))
             
             return objs
+    
+    def __str__(self):
+        return self.__class__.__name__
 

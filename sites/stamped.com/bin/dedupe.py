@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils
+import init, utils
 import bson, sys
 
 from MongoStampedAPI import MongoStampedAPI
@@ -25,6 +25,7 @@ class EntityDeduper(Greenlet):
         
         self.api = MongoStampedAPI()
         self.matcher = EntityMatcher(self.api, options)
+        self.options = options
     
     def _run(self):
         results = []
@@ -33,10 +34,14 @@ class EntityDeduper(Greenlet):
         numEntities = 0
         pool = Pool(2)
         
-        utils.log("parsing place duplicates")
+        utils.log("[%s] parsing place duplicates" % (self, ))
         while True:
             if last is None:
-                query = None
+                if self.options.seed:
+                    last  = bson.objectid.ObjectId(self.options.seed)
+                    query = {'_id' : last}
+                else:
+                    query = None
             else:
                 query = {'_id' : { "$gt" : last }}
             
@@ -48,13 +53,15 @@ class EntityDeduper(Greenlet):
             last = bson.objectid.ObjectId(current['_id'])
             
             pool.spawn(self.matcher.dedupeOne, current, True)
+            if self.options.seed:
+                break
             #self.matcher.dedupeOne(current, True)
         
         pool.join()
-        utils.log("done parsing place duplicates")
+        utils.log("[%s] done parsing place duplicates" % (self, ))
         
         pool = Pool(8)
-        utils.log("parsing non-place duplicates")
+        utils.log("[%s] parsing non-place duplicates" % (self, ))
         
         last = None
         while True:
@@ -72,10 +79,17 @@ class EntityDeduper(Greenlet):
             
             pool.spawn(self.matcher.dedupeOne, current, False)
             #self.matcher.dedupeOne(current, False)
+            if self.options.seed:
+                break
         
         pool.join()
-        utils.log("done parsing non-place duplicates")
-        utils.log("found a total of %d duplicates (processed %d)" % (self.matcher.numDuplicates, numEntities))
+         
+        numDuplicates = self.matcher.numDuplicates
+        utils.log("[%s] found a total of %d duplicate%s (processed %d)" % 
+            (self, numDuplicates, '' if 1 == numDuplicates else 's', numEntities))
+    
+    def __str__(self):
+        return self.__class__.__name__
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -86,9 +100,17 @@ def parseCommandLine():
         action="store", dest="db", 
         help="db to connect to for output")
     
+    parser.add_option("-s", "--seed", default=None, type="string", 
+        action="store", dest="seed", 
+        help="seed id to start with")
+    
     parser.add_option("-n", "--noop", default=False, 
-        action="store_true", dest="noop", 
+        action="store_true", 
         help="run the dedupper in noop mode without modifying anything")
+    
+    parser.add_option("-v", "--verbose", default=False, 
+        action="store_true", 
+        help="enable verbose logging")
     
     (options, args) = parser.parse_args()
     
