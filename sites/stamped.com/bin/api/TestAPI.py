@@ -7,6 +7,7 @@ __license__ = "TODO"
 
 import Globals
 import sys, thread, urllib, json
+from pprint import pprint
 
 # import StampedAPI from StampedAPI
 
@@ -16,19 +17,20 @@ class apiOpener(urllib.FancyURLopener):
 
 def testGET(baseurl, path, data):
     params = urllib.urlencode(data)
-#     print params
     result = json.load(apiOpener().open("%s/%s?%s" % (baseurl, path, params)))
     return result
-    
+
 def testPOST(baseurl, path, data):
     params = urllib.urlencode(data)
-#     print params
     try:
         result = apiOpener().open("%s/%s" % (baseurl, path), params)
     except IOError as e:
         return e
+    result2 = result.read()
+    pprint(result2)
     try:
-        jsonResult = json.load(result)
+        jsonResult = json.loads(result2)
+        #jsonResult = json.load(result)
         return jsonResult
     except:
         return "Unable to parse data into JSON"
@@ -39,17 +41,18 @@ def main():
     print    
     print '      BEGIN'
     
-    baseurl = "http://0.0.0.0:5000/api/v1"
+    #baseurl = "http://0.0.0.0:5000/api/v1"
+    baseurl = "http://127.0.0.1:5000/api/v1"
     # baseurl = "http://50.19.163.247:5000/api/v1"
     # baseurl = "http://ec2-107-20-53-207.compute-1.amazonaws.com:5000/api/v1"
 #     
-#     accountTest(baseurl)
+    #accountTest(baseurl)
 #     
-#     userTest(baseurl)
+    #userTest(baseurl)
 #     
-#     entityTest(baseurl)
+    #entityTest(baseurl)
 # 
-    # stampTest(baseurl)
+    #stampTest(baseurl)
 
     # friendshipTest(baseurl)
  
@@ -60,9 +63,9 @@ def main():
 #     favoriteTest(baseurl)
 # 
 #     activityTest(baseurl)
-
+    
     oauthTest(baseurl)              # OAuth ready!
- 
+    
     print '      COMPLETE'
     print 
 
@@ -201,7 +204,9 @@ def accountTest(baseurl):
         "password": "******",
         "screen_name": "kevin"
     }
-    userID = testPOST(baseurl, path, data)['user_id']
+    result = testPOST(baseurl, path, data)
+    pprint(result)
+    userID = result['user_id']
     if len(userID) == 24:
         print 'PASS: %s' % path
     else:

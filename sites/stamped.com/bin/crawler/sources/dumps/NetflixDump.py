@@ -71,6 +71,7 @@ class NetflixDump(AExternalDumpEntitySource):
         count = 0
         bonus_materials = set()
         
+        # loop through each XML catalog_title element and parse it as a movie Entity
         for event, elem in context:
             if event == "end" and elem.tag == "catalog_title":
                 root.clear()
@@ -105,7 +106,7 @@ class NetflixDump(AExternalDumpEntitySource):
                     entity.title = title
                     entity.subcategory = 'movie'
                     entity.nid = nid
-                    entity.desc  = elem.find('.//synopsis').text
+                    entity.desc = elem.find('.//synopsis').text
                     entity.nrating = float(rating_elem.text)
                     
                     categories = elem.findall('category')
@@ -154,6 +155,7 @@ class NetflixDump(AExternalDumpEntitySource):
                     self._output.put(entity)
                     count += 1
                     
+                    # give the downstream consumer threads an occasional chance to work
                     if 0 == (count % 512):
                         time.sleep(0.1)
                     

@@ -28,7 +28,8 @@ def comparePasswordToStored(password, stored):
         return False
     except:
         return False
-    
+
 def generateToken(length):
     chars = string.ascii_letters + string.digits
     return ''.join(random.choice(chars) for x in xrange(length))
+

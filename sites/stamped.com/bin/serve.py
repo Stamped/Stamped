@@ -14,7 +14,7 @@ from api.MongoStampedAPI import MongoStampedAPI
 from api.MongoStampedAuth import MongoStampedAuth
 from utils import AttributeDict
 from errors import *
-from resource import *
+from resource_argument import *
 
 # ################ #
 # Global Variables #
@@ -23,9 +23,11 @@ from resource import *
 REST_API_VERSION = "v1"
 REST_API_PREFIX  = "/api/%s/" % REST_API_VERSION
 ROOT = os.path.dirname(os.path.abspath(__file__))
+#utils.init_db_config("localhost:30000")
 
 app = Flask(__name__)
-stampedAPI = MongoStampedAPI()
+
+stampedAPI  = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()
 
 # ################# #
@@ -217,9 +219,9 @@ def handleRequestOld(request, stampedAPIFunc, schema):
         if valid != True:
             logs.info("End request: Fail")
             return valid
-
+        
         requireOAuthToken = False
-
+        
         ### Parse Request
         try:
             parsedInput = parseRequestForm(request, schema, requireOAuthToken=requireOAuthToken)
@@ -289,6 +291,7 @@ def addAccount():
         ("password",              ResourceArgument(required=True, expectedType=basestring)), 
         ("screen_name",           ResourceArgument(required=True, expectedType=basestring))
     ])
+    
     return handleRequest(request, stampedAPI.addAccount, schema)
 
 @app.route(REST_API_PREFIX + 'account/settings.json', methods=['POST', 'GET'])
@@ -687,7 +690,7 @@ def getActivity():
 @app.route('/')
 def hello():
     return "This is where stamped.com will go -- huzzah!"
-    
+
 @app.route(REST_API_PREFIX)
 def indexDoc():
     try:
@@ -822,6 +825,5 @@ def statsDoc():
 # ######## #
 
 if __name__ == '__main__':    
-    app.run(host='0.0.0.0', debug=True, threaded=False)
-    #app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', threaded=False)
 

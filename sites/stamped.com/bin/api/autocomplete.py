@@ -12,19 +12,19 @@ from db.mongodb.MongoEntitySearcher import MongoEntitySearcher
 from optparse import OptionParser
 from pprint import pprint
 
-# debug connection issues with peach
-# get proximity requests working
+# TODO: get gunicorn+nginx running in front of flask
+
 # TODO:
     # lazy loading of external entities
         # location
             # google places
         # misc:
             # amazon
-            # netflix
-                # still need *really* efficient python XML parser
             # barnes n noble
+            # netflix
     # image support
         # find good python image library
+        # static.stamped.com or cdn.stamped.com
     # fast auxillary data structure for autocomplete, indexed on title?
         # written in C++; would have to take into account alternate titles
         # or possibly a smaller mongo collection, optimized for search

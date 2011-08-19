@@ -348,12 +348,19 @@ def getFile(url, opener=None):
     return html
 
 def getSoup(url, opener=None):
+    """ downloads and returns the BeautifulSoup parsed version of the file at the given url """
     return BeautifulSoup(getFile(url, opener))
 
 def createEnum(*sequential, **named):
     return dict(zip(sequential, range(len(sequential))), **named)
 
 def count(container):
+    """
+        utility to count the number of items in the given container, whether it 
+        be a concrete data type or an iterator. think of this function as len()
+        but for either a built-in container type or an iterator.
+    """
+    
     try:
         return len(container)
     except:
@@ -406,6 +413,11 @@ def normalize2(s):
     return s
 
 def normalize(s):
+    """ 
+        attempts to normalize the given value. if it is a string, this includes 
+        escaping html codes and possibly removing non-ascii characters.
+    """
+    
     try:
         if isinstance(s, basestring):
             # replace html escape sequences with their unicode equivalents
@@ -457,6 +469,8 @@ def getStatusStr(count, maxCount):
     return "%d%% (%d / %d)" % (round((100.0 * count) / max(1, maxCount)), count, maxCount)
 
 def abstract(func):
+    """ marks the target function as abstract """
+    
     def wrapper(*__args, **__kwargs):
         raise NotImplementedError('Missing required %s() method' % func.__name__)
     
@@ -467,6 +481,8 @@ def abstract(func):
     return wrapper
 
 def getInstance(name):
+    """ returns the AWS instance associated with the stackName.nodeName (e.g., peach.db0) """
+    
     name = name.lower()
     
     try:
@@ -499,6 +515,8 @@ def getInstance(name):
     return None
 
 def is_ec2():
+    """ returns whether or not this python program is running on EC2 """
+    
     if not os.path.exists("/proc/xen"):
         return False
     if os.path.exists("/etc/ec2_version"):
@@ -507,6 +525,8 @@ def is_ec2():
     return False
 
 def init_db_config(conf):
+    """ initializes MongoDB with proper host configuration """
+    
     if ':' in conf:
         host, port = conf.split(':')
         port = int(port)
@@ -528,6 +548,9 @@ def init_db_config(conf):
         }
     }
     
+    # TODO: there is a Python oddity that needs some investigation where, depending on 
+    # where and when the MongoDBConfig Singleton is imported, it'll register as the same 
+    # instance that AMongoCollection knows about or not.
     from api.db.mongodb.AMongoCollection import MongoDBConfig
     cfg = MongoDBConfig.getInstance()
     cfg.config = AttributeDict(config)
