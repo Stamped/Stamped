@@ -17,9 +17,6 @@ from AAccountDB import AAccountDB
 from AAuthAccessTokenDB import AAuthAccessTokenDB
 from AAuthRefreshTokenDB import AAuthRefreshTokenDB
 
-from AuthAccessToken import AuthAccessToken
-from AuthRefreshToken import AuthRefreshToken
-
 
 class StampedAuth(AStampedAuth):
     """
@@ -102,12 +99,12 @@ class StampedAuth(AStampedAuth):
             
         while True:
             try:
-                refreshToken = AuthRefreshToken()
+                refreshToken = RefreshToken()
                 refreshToken.token_id = auth.generateToken(43)
                 refreshToken.client_id = clientId
-                refreshToken.authenticated_user_id = userId
-                refreshToken.timestamp = { 'created': datetime.utcnow() }
-                logs.debug("Refresh Token: %s" % refreshToken.getDataAsDict())
+                refreshToken.user_id = userId
+                refreshToken.timestamp.created = datetime.utcnow()
+                logs.debug("Refresh Token: %s" % refreshToken)
 
                 self._refreshTokenDB.addRefreshToken(refreshToken)
                 break
@@ -117,15 +114,12 @@ class StampedAuth(AStampedAuth):
                     raise
                 attempt += 1
 
-        logs.info("Refresh token created")
+        logs.info("Refresh token created: %s" % refreshToken)
 
-        accessTokenParams = {
-            'client_id': refreshToken['client_id'],
-            'refresh_token': refreshToken['token_id'],
-            'authenticated_user_id': refreshToken['authenticated_user_id']
-        }
-        accessToken = self.addAccessToken(accessTokenParams)
-
+        accessToken = self.addAccessToken(refreshToken.client_id, \
+                                            refreshToken.user_id, \
+                                            refreshToken.token_id)
+        
         ret = {
             'access_token': accessToken['access_token'],
             'expires_in': accessToken['expires_in'],
@@ -140,17 +134,13 @@ class StampedAuth(AStampedAuth):
         except:
             raise
 
-        if token.authenticated_user_id == None:
+        if token.user_id == None:
             msg = "Invalid refresh token"
-            logs.warn(msg)
+            logs.warning(msg)
             raise StampedHTTPError("invalid_token", 401, msg)
 
         ### Generate Access Token
-        token = self.addAccessToken({
-            'client_id': clientId,
-            'refresh_token': refreshToken,
-            'authenticated_user_id': token.authenticated_user_id
-        })
+        token = self.addAccessToken(clientId, token.user_id, refreshToken)
 
         logs.info("Token created")
 
@@ -163,7 +153,7 @@ class StampedAuth(AStampedAuth):
     # Access Tokens #
     # ############# #
     
-    def addAccessToken(self, params):
+    def addAccessToken(self, clientId, authUserId, refreshToken):
         attempt = 1
         max_attempts = 5
         expire = 3920
@@ -172,14 +162,13 @@ class StampedAuth(AStampedAuth):
             try:
                 rightNow = datetime.utcnow()
 
-                accessToken = AuthAccessToken()
+                accessToken = AccessToken()
                 accessToken.token_id = auth.generateToken(22)
-                accessToken.client_id = params['client_id']
-                accessToken.refresh_token = params['refresh_token']
-                accessToken.authenticated_user_id = params['authenticated_user_id']
+                accessToken.client_id = clientId
+                accessToken.refresh_token = refreshToken
+                accessToken.user_id = authUserId
                 accessToken.expires = rightNow + timedelta(seconds=expire)
-                accessToken.timestamp = { 'created': rightNow }
-                logs.debug("Access Token: %s" % accessToken.getDataAsDict())
+                accessToken.timestamp.created = rightNow
                 
                 self._accessTokenDB.addAccessToken(accessToken)
                 break
@@ -202,12 +191,11 @@ class StampedAuth(AStampedAuth):
         try:
             token = self._accessTokenDB.getAccessToken(token)
             logs.debug("Access token matched")
-            logs.debug("Access token data: %s" % token.getDataAsDict())
+            logs.debug("Access token data: %s" % token)
 
             if token['expires'] > datetime.utcnow():
-                logs.info("Authenticated user id: %s" % \
-                    token.authenticated_user_id)
-                return token.authenticated_user_id
+                logs.info("Authenticated user id: %s" % token.user_id)
+                return token.user_id
             
             logs.warning("Invalid access token... deleting")
             self._accessTokenDB.removeAccessToken(params.oauth_token)

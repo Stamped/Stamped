@@ -6,7 +6,6 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from Activity import Activity
 from utils import abstract
 
 class AActivityDB(object):

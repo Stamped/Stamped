@@ -16,7 +16,6 @@ from MongoFollowersCollection import MongoFollowersCollection
 from MongoBlockCollection import MongoBlockCollection
 
 from api.AFriendshipDB import AFriendshipDB
-from api.Friendship import Friendship
 
 class MongoFriendshipCollection(AFriendshipDB):
     

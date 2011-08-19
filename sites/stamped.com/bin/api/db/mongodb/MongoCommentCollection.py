@@ -9,12 +9,12 @@ import Globals
 
 from datetime import datetime
 from utils import lazyProperty
+from Schemas import *
 
 from AMongoCollection import AMongoCollection
 from MongoStampCommentsCollection import MongoStampCommentsCollection
 
 from api.ACommentDB import ACommentDB
-from api.Comment import Comment
 
 class MongoCommentCollection(AMongoCollection, ACommentDB):
     

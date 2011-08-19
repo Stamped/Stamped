@@ -7,7 +7,6 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from Friendship import Friendship
 
 class AFriendshipDB(object):
     

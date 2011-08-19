@@ -7,7 +7,6 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from User import User
 
 class AUserDB(object):
     
