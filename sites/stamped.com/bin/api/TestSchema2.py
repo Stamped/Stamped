@@ -6,16 +6,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, os, sys, unittest
-
-base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, base)
+import Globals, unittest
 
 from datetime import datetime
 # from Schemas import *
 from schema import *
-
-
 
 class SimpleSchema(Schema):
     def setSchema(self):
@@ -55,7 +50,6 @@ class SparseSchema(Schema):
         self.none               = SchemaElement(basestring)
         self.default            = SchemaElement(basestring, default='abc')
 
-
 class ASchemaTestCase(unittest.TestCase):
     pass
 
@@ -70,7 +64,6 @@ class ASchemaTestCase(unittest.TestCase):
         self.assertTrue(len(a) == size)
 
     ### DEFAULT VARIABLES
-
 
     sampleString                = 'abc'
     sampleInt                   = 123
@@ -88,7 +81,6 @@ class ASchemaTestCase(unittest.TestCase):
     sampleNone                  = None
     sampleDatetime              = datetime.utcnow()
     sampleUTF8                  = '๓๙ใ1฿'
-
 
 class SimpleSchemaTest(ASchemaTestCase):
 
@@ -368,10 +360,6 @@ class SimpleSchemaTest(ASchemaTestCase):
         self.assertEqual(self.schema.integer, 100)
         self.assertIn('integer', self.schema)
 
-
-
-
-
 class NestedSchemaTest(ASchemaTestCase):
 
     def setUp(self):
@@ -454,10 +442,6 @@ class NestedSchemaTest(ASchemaTestCase):
         self.assertTrue(self.schema.basestring != None)
         self.assertTrue(self.schema.inner.item != None)
 
-
-
-
-
 class SparseSchemaTest(ASchemaTestCase):
 
     def setUp(self):
@@ -467,23 +451,21 @@ class SparseSchemaTest(ASchemaTestCase):
             'none':             None,
         }
         self.schema = SparseSchema(self.sampleData)
-
+    
     def test_sparse(self):
         self.assertEqual(
             self.sampleData['basestring'], 
             self.schema.exportSparse()['basestring']
-            )
+        )
         self.assertEqual(
             self.sampleData['none'], 
             self.schema.exportSparse()['none']
-            )
+        )
         self.assertEqual(
             'abc', 
             self.schema.exportSparse()['default']
-            )
+        )
         self.assertTrue('empty' not in self.schema.exportSparse())
-
-
 
 class ListSchemaTest(ASchemaTestCase):
 
@@ -568,16 +550,13 @@ class ListSchemaTest(ASchemaTestCase):
         self.assertEqual(
             self.schema.items.count(self.schema.items[0]), 
             self.sampleData['items'].count(self.sampleData['items'][0])
-            )
+        )
 
     def test_sort(self):
         self.schema.items.sort()
 
     def test_sort(self):
         self.schema.items.reverse()
-
-
-
 
 class ListCommaSchemaTest(ASchemaTestCase):
 
@@ -596,14 +575,11 @@ class ListCommaSchemaTest(ASchemaTestCase):
         self.assertEqual(
             len(self.sampleData['items'].split(',')), 
             len(self.schema.items)
-            )
-
-
+        )
 
 class ContainsSchemaTest(ASchemaTestCase):
 
     def setUp(self):
-
         self.sampleData = {
             'basestring':   self.sampleString,
             'integer':      self.sampleInt,
@@ -635,7 +611,6 @@ class ContainsSchemaTest(ASchemaTestCase):
         except:
             ret = True
         self.assertTrue(ret)
-
 
 if __name__ == '__main__':
     unittest.main()
@@ -731,7 +706,5 @@ print
 print
 print "Stamp.mentions:                  %s" % stamp.mentions
 print "Stamp.credit:                    %s" % stamp.credit
-
-
 """
 

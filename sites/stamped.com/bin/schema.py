@@ -157,20 +157,20 @@ class SchemaElement(object):
     # Public Functions
 
     def validate(self):
-        if self._data == None and self._required == True and \
+        if not self._isSet and self._required == True and \
             self._validate == True:
             msg = "Required field empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
-
+        
         if self._data != None \
             and not isinstance(self._data, self._requiredType):
             msg = "Incorrect type (%s)" % self._name
             logs.warning(msg)
             raise SchemaKeyError(msg)
-
-        return True
         
+        return True
+    
     def setElement(self, name, value):
         try:
             msg = "Set Element Failed (%s)" % name
@@ -237,8 +237,8 @@ class SchemaElement(object):
                 elif self._case == 'lower':
                     value = str(value).lower()
             
-            self._name = name
-            self._data = value
+            self._name  = name
+            self._data  = value
             self._isSet = True
             self.validate()
 
@@ -522,7 +522,7 @@ class Schema(SchemaElement):
     
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
-        self._elements      = {}
+        self._elements = {}
 
         self.setSchema()
         self.importData(data)
@@ -565,42 +565,48 @@ class Schema(SchemaElement):
             if isinstance(self._elements[name], Schema) \
                 or isinstance(self._elements[name], SchemaList):
                 return self._elements[name]
+            
             return self._elements[name].value
         
         msg = "Cannot Get Element (%s)" % name
         logs.warning(msg)
         raise SchemaKeyError(msg)
-        
+    
     def __getitem__(self, key):
         return self.__getattr__(key)
     
     def __len__(self):
         return len(self._elements)
-
+    
     def __iter__(self):
         return self.value.__iter__()
-
+    
     def __contains__(self, item):
         def _contains(_item, data):
             output = 0
             if _item in data and data[_item]._isSet == True:
                 output += 1
+            
             for k, v in data.iteritems():
                 if isinstance(v, Schema):
                     if _item in v:
                         output += 1
+            
             return output
         
-        if _contains(item, self._elements) == 1:
+        ret = _contains(item, self._elements)
+        
+        if 1 == ret:
             return True
-        if _contains(item, self._elements) == 0:
+        elif 0 == ret:
             return False
-        msg = "Multiple Keys Exist (%s)" % item
-        logs.warning(msg)
-        raise SchemaKeyError(msg)
-
+        else:
+            msg = "Multiple Keys Exist (%s)" % item
+            logs.warning(msg)
+            raise SchemaKeyError(msg)
+    
     # Properties
-
+    
     @property
     def value(self):
         ret = {}
@@ -613,39 +619,42 @@ class Schema(SchemaElement):
     def _importData(self, data, **kwargs):
         # Wipe all contents if not set in data
         clear = kwargs.pop('clear', True)
-
+        
         if isinstance(data, Schema):
             data = data.exportSparse()
-
+        
         if not isinstance(data, dict) and data != None:
             msg = "Invalid Type (%s)" % data
             logs.warning(msg)
             raise SchemaTypeError(msg)
-
+        
         ret = {}
         data = copy.copy(data)
-
+        
         for k, v in self._elements.iteritems():
-            item = None
+            item  = None
             isSet = False
+            
             if data != None and k in data:
-                item = data.pop(k)
+                item  = data.pop(k)
                 isSet = True
             
-            # Dictionary
+            # Dictionary or List
             if isinstance(v, Schema) or isinstance(v, SchemaList):
                 v._validate = self._validate
                 v._overflow = self._overflow
+                
                 if item == None:
                     if v._required == True and v._validate == True:
                         msg = "Missing Nested Element (%s)" % k
                         logs.warning(msg)
                         raise SchemaValidationError(msg)
+                
                 if clear:
                     v.setElement(k, item)
                 else:
                     v.importData(item)
-
+            
             # Value
             elif isinstance(v, SchemaElement):
                 if isSet:
@@ -659,16 +668,16 @@ class Schema(SchemaElement):
                 msg = "Unrecognized Element (%s)" % k
                 logs.warning(msg)
                 raise SchemaTypeError(msg)
-
+        
         if data != None and len(data) > 0 and self._overflow == False:
             msg = "Unknown Field: %s" % data
             logs.warning(msg)
             raise SchemaValidationError(msg)
         
         self._isSet = True
-
+    
     # Public Functions
-
+    
     def validate(self):
         if len(self._elements) == 0 and self._required == True \
             and self._validate == True:
@@ -683,16 +692,18 @@ class Schema(SchemaElement):
                 msg = "Unrecognized Element (%s)" % self._name
                 logs.warning(msg)
                 raise SchemaValidationError(msg)
-
+    
     def setElement(self, name, data):
         self._name = name
         self._importData(data, clear=True)
-
+    
     def importData(self, data, overflow=None):
         if data == None or len(data) == 0:
             return
+        
         if overflow == None:
             overflow = self._overflow
+        
         # Preserve state of self._overflow
         _overflow = self._overflow
         try:
@@ -702,11 +713,10 @@ class Schema(SchemaElement):
         except:
             self._overflow = _overflow
             raise
-
+    
     def removeElement(self, name):
         del(self._elements[name])
-
-
+    
     def exportFields(self, fields):
         ret = {}
         for field in fields:
@@ -719,7 +729,7 @@ class Schema(SchemaElement):
             else:
                 ret[field] = result
         return ret
-
+    
     def exportSparse(self):
         ret = {}
         for k, v in self._elements.iteritems():
@@ -731,8 +741,8 @@ class Schema(SchemaElement):
                 if len(v) > 0:
                     ret[k] = v.value
             elif isinstance(v, SchemaElement):
-                # if v.isSet == True:
-                if v.value != None:
+                if v.isSet == True:
+                #if v.value != None:
                     ret[k] = v.value
             else:
                 msg = "Unrecognized Element (%s)" % k
@@ -760,10 +770,9 @@ class Schema(SchemaElement):
             msg = "Conversion failed (Define in subclass?)"
             logs.warning(msg)
             raise SchemaValidationError(msg)
-
-
+    
     # DEPRECATED
-
+    
     def getDataAsDict(self):
         return self.exportSparse()
 

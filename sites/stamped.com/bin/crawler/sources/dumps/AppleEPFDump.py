@@ -12,7 +12,7 @@ from gevent.pool import Pool
 from utils import lazyProperty, Singleton
 from AEntitySource import AExternalDumpEntitySource
 from ASyncGatherSource import ASyncGatherSource
-from api.Entity import Entity
+from Schemas import Entity
 
 from boto.ec2.connection import EC2Connection
 from boto.exception import EC2ResponseError

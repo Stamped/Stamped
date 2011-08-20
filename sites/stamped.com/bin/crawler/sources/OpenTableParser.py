@@ -8,7 +8,7 @@ __license__ = "TODO"
 import Globals, utils
 import re, string, urllib
 
-from api.Entity import Entity
+from Schemas import Entity
 
 __BASE_URL = "http://www.opentable.com/"
 

@@ -9,7 +9,7 @@ import Globals, utils
 
 from EntityMatcher import EntityMatcher
 from AEntityProxy import AEntityProxy
-from api.Entity import Entity
+from Schemas import Entity
 from pprint import pprint
 
 class GooglePlacesEntityProxy(AEntityProxy):

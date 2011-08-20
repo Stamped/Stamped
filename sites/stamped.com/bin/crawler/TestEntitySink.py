@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import Globals, utils
 from AEntitySink import AEntitySink
-from api.Entity import Entity
+from Schemas import Entity
 
 class TestEntitySink(AEntitySink):
     

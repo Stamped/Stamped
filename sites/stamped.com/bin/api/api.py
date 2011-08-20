@@ -12,7 +12,7 @@ import sys, thread
 # from mysql.MySQL import MySQL
 from optparse import OptionParser
 
-from Entity import Entity
+from Schemas import Entity
 from User import User
 from Stamp import Stamp
 from Mention import Mention

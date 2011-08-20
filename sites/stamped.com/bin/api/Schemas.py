@@ -9,6 +9,13 @@ import copy
 from datetime import datetime
 from schema import *
 
+"""
+    notes:
+        * indirect addressing not working properly (e.g. entity.address)
+        * add assertExcept to catch specific exceptions
+        * add ability for default to be a derived value (e.g., lambda schema: ...)
+"""
+
 # #### #
 # Auth #
 # #### #

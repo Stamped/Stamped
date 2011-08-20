@@ -10,7 +10,7 @@ import os, re, time, urllib2
 
 from gevent.pool import Pool
 from AEntitySource import AExternalEntitySource
-from api.Entity import Entity
+from Schemas import Entity
 
 __all__ = [ "LATimesCrawler" ]
 

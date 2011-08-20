@@ -9,7 +9,7 @@ import Globals, CSVUtils, utils
 
 from gevent.pool import Pool
 from AEntitySource import AExternalDumpEntitySource
-from api.Entity import Entity
+from Schemas import Entity
 
 __all__ = [ "FactualUSPlacesDump" ]
 

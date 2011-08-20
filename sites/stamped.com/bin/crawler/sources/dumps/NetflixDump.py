@@ -10,7 +10,7 @@ import gevent, os, re, time
 
 from Netflix import NetflixClient
 from AEntitySource import AExternalDumpEntitySource
-from api.Entity import Entity
+from Schemas import Entity
 from lxml import etree
 from pprint import pprint
 

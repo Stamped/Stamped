@@ -10,7 +10,7 @@ from datetime import datetime
 
 from QL import MySQL
 from AEntityDB import AEntityDB
-from Entity import Entity
+from Schemas import Entity
 
 class MySQLEntityDB(AEntityDB, MySQL):
 

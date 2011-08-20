@@ -9,7 +9,7 @@ import Globals, utils
 
 from utils import lazyProperty
 from StampedAPI import StampedAPI
-from Entity import Entity
+from Schemas import Entity
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoEntityCollection import MongoEntityCollection
