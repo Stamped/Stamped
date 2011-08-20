@@ -9,89 +9,93 @@ import Globals
 
 from datetime import datetime
 from utils import lazyProperty
+from Schemas import *
 
 from AMongoCollection import AMongoCollection
 from MongoStampCommentsCollection import MongoStampCommentsCollection
 
 from api.ACommentDB import ACommentDB
-from api.Comment import Comment
 
 class MongoCommentCollection(AMongoCollection, ACommentDB):
-        
-    SCHEMA = {
-        '_id': object,
-        'stamp_id': basestring,
-        'user': {
-            'user_id': basestring,
-            'screen_name': basestring,
-            'display_name': basestring,
-            'profile_image': basestring,
-            'color_primary': basestring,
-            'color_secondary': basestring,
-            'privacy': bool
-        },
-        'restamp_id': basestring,
-        'blurb': basestring,
-        'mentions': [],
-        'timestamp': {
-            'created': datetime
-        }
-    }
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='comments')
         ACommentDB.__init__(self)
     
-    ### PUBLIC
+    def _convertToMongo(self, comment):
+        document = comment.exportSparse()
+        if 'comment_id' in document:
+            document['_id'] = self._getObjectIdFromString(document['comment_id'])
+            del(document['comment_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['comment_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return Comment(document)
     
+    ### PUBLIC
+
     @lazyProperty
     def stamp_comments_collection(self):
         return MongoStampCommentsCollection()
     
     def addComment(self, comment):
-        ### TODO: Make sure that the user can publish comment (public stamp and not blocked)
-        commentId = self._addDocument(comment, 'comment_id')
-        self.stamp_comments_collection.addStampComment(comment['stamp_id'], commentId)
-        ### TODO: Add to activity feed
-        return commentId
+        document = self._convertToMongo(comment)
+        document = self._addMongoDocument(document)
+        comment = self._convertFromMongo(document)
+
+        self.stamp_comments_collection.addStampComment(comment.stamp_id, comment.comment_id)
+
+        return comment
+    
+    def removeComment(self, commentId):
+        documentId = self._getObjectIdFromString(commentId)
+
+        comment = self.getComment(documentId)
+        self.stamp_comments_collection.removeStampComment(comment.stamp_id, comment.comment_id)
+
+        return self._removeMongoDocument(documentId)
     
     def getComment(self, commentId):
-        comment = Comment(self._getDocumentFromId(commentId, 'comment_id'))
-        if comment.isValid == False:
-            raise KeyError("Comment not valid")
-        return comment
-        
-    def removeComment(self, commentID):
-        self._removeDocument(commentID)
-        return True
-    
-    # Can comments be updated? If a comment then *no*, but if it's a restamp 
-    # then *maybe*. Discuss on product side before implementing here.
+        documentId = self._getObjectIdFromString(commentId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
     
     def getCommentIds(self, stampId):
         return self.stamp_comments_collection.getStampCommentIds(stampId)
+    
+    def getComments(self, stampId):
+        documentIds = []
+        for documentId in self.getCommentIds(stampId):
+            documentIds.append(self._getObjectIdFromString(documentId))
+        comments = []
+        for document in self._getMongoDocumentsFromIds(documentIds):
+            comments.append(self._convertFromMongo(document))
+        return comments
+    
+    def getCommentsAcrossStamps(self, stampIds, limit=4):
+        commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds, limit)
+
+
+        documentIds = []
+        for commentId in commentIds:
+            documentIds.append(self._getObjectIdFromString(commentId))
+
+        # Get comments
+        documents = self._getMongoDocumentsFromIds(documentIds, limit=len(commentIds))
+
+        comments = []
+        for document in documents:
+            comments.append(self._convertFromMongo(document))
+
+        return comments
+
+
+
+
+
         
     def getNumberOfComments(self, stampId):
         return len(self.getCommentIds(stampId))
-    
-    def getComments(self, stampId):
-        comments = self._getDocumentsFromIds(self.getCommentIds(stampId), 'comment_id')
-        result = []
-        for comment in comments:
-            comment = Comment(comment)
-            if comment.isValid == False:
-                raise KeyError("Comment not valid")
-            result.append(comment)
-        return result
-    
-    def getCommentsAcrossStamps(self, stampIds):
-        commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds)
-        comments = self._getDocumentsFromIds(commentIds, 'comment_id', limit=len(commentIds))
-        result = []
-        for comment in comments:
-            comment = Comment(comment)
-            if comment.isValid == False:
-                raise KeyError("Comment not valid")
-            result.append(comment)
-        return result
-

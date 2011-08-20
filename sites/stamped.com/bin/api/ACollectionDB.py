@@ -11,22 +11,14 @@ from utils import abstract
 class ACollectionDB(object):
     
     @abstract
-    def getInboxStampIDs(self, userId, limit=None):
+    def getInboxStampIDs(self, userId):
         pass
     
     @abstract
-    def getInboxStamps(self, userId, limit=None):
+    def getUserStampIDs(self, userId):
         pass
     
     @abstract
-    def getUserStampIDs(self, userId, limit=None):
-        pass
-    
-    @abstract
-    def getUserStamps(self, userId, limit=None):
-        pass
-    
-    @abstract
-    def getMentions(self, userId, limit=None):
+    def getMentions(self, userId):
         pass
 

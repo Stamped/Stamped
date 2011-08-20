@@ -7,7 +7,6 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from Stamp import Stamp
 
 class AStampDB(object):
     
@@ -35,3 +34,26 @@ class AStampDB(object):
     def getStamps(self, stampIds):
         pass
 
+    @abstract
+    def addUserStampReference(self, userId, stampId):
+        pass
+        
+    @abstract
+    def removeUserStampReference(self, userId, stampId):
+        pass
+
+    @abstract
+    def addInboxStampReference(self, userIds, stampId):
+        pass
+
+    @abstract
+    def removeInboxStampReference(self, userIds, stampId):
+        pass
+    
+    @abstract
+    def incrementStatsForStamp(self, stampId, stat, increment=1):
+        pass
+
+    @abstract
+    def giveCredit(self, creditedUserId, stamp):
+        pass

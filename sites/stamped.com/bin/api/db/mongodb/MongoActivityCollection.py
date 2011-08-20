@@ -5,121 +5,46 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, logs
 
 from datetime import datetime
 from utils import lazyProperty
 
+from Schemas import *
+
 from AMongoCollection import AMongoCollection
 from MongoUserActivityCollection import MongoUserActivityCollection
-
-from api.AActivityDB import AActivityDB
-from api.Activity import Activity
+from AActivityDB import AActivityDB
 
 class MongoActivityCollection(AMongoCollection, AActivityDB):
     
-    SCHEMA = {
-        '_id': object,
-        'genre': basestring, # comment, reply, restamp, favorite, directed, mention, credit milestone
-        'user': {
-            'user_id': basestring,
-            'screen_name': basestring,
-            'display_name': basestring,
-            'profile_image': basestring,
-            'color_primary': basestring,
-            'color_secondary': basestring,
-            'privacy': bool
-        },
-        'comment': {
-            'comment_id': basestring,
-            'stamp_id': basestring,
-            'user': {
-                'user_id': basestring,
-                'screen_name': basestring,
-                'display_name': basestring,
-                'profile_image': basestring,
-                'color_primary': basestring,
-                'color_secondary': basestring,
-                'privacy': bool
-            },
-            'restamp_id': basestring,
-            'blurb': basestring,
-            'mentions': [],
-            'timestamp': {
-                'created': datetime
-            }
-        },
-        'stamp': {
-            'stamp_id': basestring,
-            'entity': {
-                'entity_id': basestring,
-                'title': basestring,
-                'coordinates': {
-                    'lat': float, 
-                    'lng': float
-                },
-                'category': basestring,
-                'subtitle': basestring
-            },
-            'user': {
-                'user_id': basestring,
-                'screen_name': basestring,
-                'display_name': basestring,
-                'profile_image': basestring,
-                'color_primary': basestring,
-                'color_secondary': basestring,
-                'privacy': bool
-            },
-            'blurb': basestring,
-            'image': basestring,
-            'mentions': list,
-            'credit': list,
-            'comment_preview': list,
-            'timestamp': {
-                'created': datetime,
-                'modified': datetime
-            },
-            'flags': {
-                'flagged': bool,
-                'locked': bool
-            },
-            'stats': {
-                'num_comments': int,
-                'num_todos': int,
-                'num_credit': int
-            }
-        },
-        'favorite': {
-            'favorite_id': basestring,
-            'entity': {
-                'entity_id': basestring,
-                'title': basestring,
-                'coordinates': {
-                    'lat': float, 
-                    'lng': float
-                },
-                'category': basestring,
-                'subtitle': basestring
-            },
-            'user_id': basestring,
-            'stamp': {
-                'stamp_id': basestring,
-                'display_name': basestring,
-                'user_id': basestring
-            },
-            'timestamp': {
-                'created': datetime,
-                'modified': datetime
-            },
-        },
-        'timestamp': {
-            'created': datetime
-        }
-    }
+    """
+    Activity Types:
+    * restamp
+    * comment
+    * reply
+    * favorite
+    * directed
+    * mention
+    * milestone
+    """
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='activity')
         AActivityDB.__init__(self)
+    
+    def _convertToMongo(self, activity):
+        document = activity.exportSparse()
+        if 'activity_id' in document:
+            document['_id'] = self._getObjectIdFromString(document['activity_id'])
+            del(document['activity_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['activity_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return Activity(document)
     
     ### PUBLIC
     
@@ -127,142 +52,43 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     def user_activity_collection(self):
         return MongoUserActivityCollection()
     
-    def addActivity(self, recipientId, activity):
-        raise NotImplementedError
+    def getActivity(self, userId, **kwargs):
+        params = {
+            'since':    kwargs.pop('since', None),
+            'before':   kwargs.pop('before', None), 
+            'limit':    kwargs.pop('limit', 20),
+            'sort':     'timestamp.created',
+        }
 
-    def addActivityForRestamp(self, recipientIds, user, stamp):
-        activity = {}
-        activity['genre'] = 'restamp'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForComment(self, recipientIds, user, stamp, comment):
-        activity = {}
-        activity['genre'] = 'comment'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity['comment'] = comment.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForReply(self, recipientIds, user, stamp, comment):
-        activity = {}
-        activity['genre'] = 'reply'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity['comment'] = comment.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            MongoUserActivityCollection().addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForFavorite(self, recipientIds, user, favorite):
-        activity = {}
-        activity['genre'] = 'favorite'
-        activity['user'] = user.getDataAsDict()
-        activity['favorite'] = favorite.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForDirected(self, recipientIds, user, stamp):
-        activity = {}
-        activity['genre'] = 'directed'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForMention(self, recipientIds, user, stamp, comment=None):
-        activity = {}
-        activity['genre'] = 'mention'
-        activity['user'] = user.getDataAsDict()
-        activity['stamp'] = stamp.getDataAsDict()
-        if comment != None:
-            activity['comment'] = comment.getDataAsDict()
-        activity = Activity(activity)
-        
-        activity.timestamp = { 'created': datetime.utcnow() }
-        
-        if activity.isValid == False:
-            raise KeyError("Activity not valid")
-        
-        activityId = self._addDocument(activity, 'activity_id')
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activityId)
-            
-        return activityId
-
-    def addActivityForMilestone(self, recipientId, milestone):
-        raise NotImplementedError
-    
-    def getActivity(self, userId, since=None, before=None, limit=20):
         # Get activity
         activityIds = self.user_activity_collection.getUserActivityIds(userId)
-        activityData = self._getDocumentsFromIds(
-                            activityIds, objId='activity_id', since=since, 
-                            before=before, sort='timestamp.created', limit=limit)
+
+        # logs.debug("ACTIVITY IDS: %s" % activityIds)
+
+        documentIds = []
+        for activityId in activityIds:
+            documentIds.append(self._getObjectIdFromString(activityId))
+
+        # logs.debug("DOCUMENT IDS: %s" % documentIds)
+
+        # Get stamps
+        documents = self._getMongoDocumentsFromIds(documentIds, **params)
+
+        activity = []
+        for document in documents:
+            activity.append(self._convertFromMongo(document))
+
+        return activity
+
+    def addActivity(self, recipientIds, activity):
+        document = self._convertToMongo(activity)
+        document = self._addMongoDocument(document)
+        activity = self._convertFromMongo(document)
+
+        for userId in recipientIds:
+            self.user_activity_collection.addUserActivity(userId, activity.activity_id)
         
-        # Loop through and validate
-        result = []
-        for activity in activityData:
-            activity = Activity(activity)
-            if activity.isValid == False:
-                raise KeyError("Activity not valid")
-            result.append(activity)
-        
-        return result
-        
-    def removeActivity(self, activityId):
+    def removeActivity(self, userId, activityId):
         self.user_activity_collection.removeUserActivity(userId, activityId)
         return self._removeDocument(activityId)
 

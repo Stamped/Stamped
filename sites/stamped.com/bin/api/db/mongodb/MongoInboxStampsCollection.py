@@ -35,6 +35,11 @@ class MongoInboxStampsCollection(AMongoCollection):
             
     def removeInboxStamp(self, userId, stampId):
         return self._removeRelationship(keyId=userId, refId=stampId)
+
+    def removeInboxStamps(self, userIds, stampId):
+        for userId in userIds:
+            self.removeInboxStamp(userId, stampId)
+        return True
             
     def getInboxStampIds(self, userId, since=None, limit=None):
         ### TODO: Add limit? Add timestamp to slice?

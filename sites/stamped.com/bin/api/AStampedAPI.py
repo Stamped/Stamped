@@ -24,31 +24,31 @@ class AStampedAPI(AEntitySink):
     # ######## #
     
     @abstract
-    def addAccount(self, params):
+    def addAccount(self, account):
         raise NotImplementedError
     
     @abstract
-    def updateAccount(self, params):
+    def updateAccountSettings(self, authUserId, data):
         raise NotImplementedError
     
     @abstract
-    def getAccount(self, params):
+    def getAccount(self, authUserId):
         raise NotImplementedError
     
     @abstract
-    def updateProfile(self, params):
+    def updateProfile(self, authUserId, data):
         raise NotImplementedError
     
     @abstract
-    def updateProfileImage(self, params):
+    def updateProfileImage(self, authUserId, url):
+        raise NotImplementedError
+    
+    @abstract
+    def removeAccount(self, userId):
         raise NotImplementedError
     
     @abstract
     def verifyAccountCredentials(self, params):
-        raise NotImplementedError
-    
-    @abstract
-    def removeAccount(self, params):
         raise NotImplementedError
     
     @abstract
@@ -60,23 +60,19 @@ class AStampedAPI(AEntitySink):
     # ##### #
     
     @abstract
-    def getUser(self, params):
+    def getUser(self, userRequest, authUserId):
         raise NotImplementedError
     
     @abstract
-    def getUsers(self, params):
+    def getUsers(self, userIds, screenNames, authUserId):
         raise NotImplementedError
     
     @abstract
-    def getUsersByName(self, params):
+    def searchUsers(self, query, limit, authUserId):
         raise NotImplementedError
     
     @abstract
-    def searchUsers(self, params):
-        raise NotImplementedError
-    
-    @abstract
-    def getPrivacy(self, params):
+    def getPrivacy(self, userRequest):
         raise NotImplementedError
     
     # ############# #
@@ -84,59 +80,43 @@ class AStampedAPI(AEntitySink):
     # ############# #
     
     @abstract
-    def addFriendship(self, params):
+    def addFriendship(self, authUserId, userRequest):
         raise NotImplementedError
     
     @abstract
-    def removeFriendship(self, params):
+    def removeFriendship(self, authUserId, userRequest):
         raise NotImplementedError
     
     @abstract
-    def approveFriendship(self, params):
+    def approveFriendship(self, data, auth):
         raise NotImplementedError
     
     @abstract
-    def addBlock(self, params):
+    def checkFriendship(self, authUserId, userRequest):
         raise NotImplementedError
     
     @abstract
-    def removeBlock(self, params):
+    def getFriends(self, userRequest):
         raise NotImplementedError
     
     @abstract
-    def checkFriendship(self, params):
+    def getFollowers(self, userRequest):
         raise NotImplementedError
     
     @abstract
-    def getFriends(self, params):
+    def addBlock(self, authUserId, userRequest):
         raise NotImplementedError
     
     @abstract
-    def getFollowers(self, params):
+    def removeBlock(self, authUserId, userRequest):
         raise NotImplementedError
     
     @abstract
-    def checkBlock(self, params):
+    def checkBlock(self, authUserId, userRequest):
         raise NotImplementedError
     
     @abstract
-    def getBlocks(self, params):
-        raise NotImplementedError
-    
-    # ######### #
-    # Favorites #
-    # ######### #
-    
-    @abstract
-    def addFavorite(self, params):
-        raise NotImplementedError
-    
-    @abstract
-    def removeFavorite(self, params):
-        raise NotImplementedError
-    
-    @abstract
-    def getFavorites(self, params):
+    def getBlocks(self, authUserId):
         raise NotImplementedError
     
     # ######## #
@@ -144,23 +124,31 @@ class AStampedAPI(AEntitySink):
     # ######## #
     
     @abstract
-    def addEntity(self, params):
+    def addEntity(self, entity):
         raise NotImplementedError
     
     @abstract
-    def getEntity(self, params):
+    def getEntity(self, entityId, authUserId=None):
+        raise NotImplementedError
+
+    @abstract
+    def updateCustomEntity(self, authUserId, entityId, data):
         raise NotImplementedError
     
     @abstract
-    def updateEntity(self, params):
+    def updateEntity(self, data, auth):
         raise NotImplementedError
     
     @abstract
-    def removeEntity(self, params):
+    def removeEntity(self, entityId):
         raise NotImplementedError
     
     @abstract
-    def searchEntities(self, params):
+    def removeCustomEntity(self, authUserId, entityId):
+        raise NotImplementedError
+    
+    @abstract
+    def searchEntities(self, query, coordinates=None, authUserId=None):
         raise NotImplementedError
     
     # ###### #
@@ -168,23 +156,19 @@ class AStampedAPI(AEntitySink):
     # ###### #
     
     @abstract
-    def addStamp(self, params):
+    def addStamp(self, authUserId, entityId, data):
         raise NotImplementedError
     
     @abstract
-    def getStamp(self, params):
+    def getStamp(self, stampId, authUserId):
         raise NotImplementedError
     
     @abstract
-    def getStamps(self, params):
+    def updateStamp(self, authUserId, stampId, data):  
         raise NotImplementedError
     
     @abstract
-    def updateStamp(self, params):
-        raise NotImplementedError
-    
-    @abstract
-    def removeStamp(self, params):
+    def removeStamp(self, authUserId, stampId):
         raise NotImplementedError
     
     # ######## #
@@ -192,15 +176,15 @@ class AStampedAPI(AEntitySink):
     # ######## #
     
     @abstract
-    def addComment(self, params):
+    def addComment(self, authUserId, stampId, blurb):
         raise NotImplementedError
     
     @abstract
-    def removeComment(self, params):
+    def removeComment(self, authUserId, commentId):
         raise NotImplementedError
     
     @abstract
-    def getComments(self, params):
+    def getComments(self, stampId, authUserId, **kwargs): 
         raise NotImplementedError
     
     # ########### #
@@ -208,23 +192,39 @@ class AStampedAPI(AEntitySink):
     # ########### #
     
     @abstract
-    def getInboxStampIDs(self, params):
+    def getInboxStamps(self, authUserId, **kwargs):
         raise NotImplementedError
     
     @abstract
-    def getInboxStamps(self, params):
-        raise NotImplementedError
-    
-    @abstract
-    def getUserStampIDs(self, params):
-        raise NotImplementedError
-    
-    @abstract
-    def getUserStamps(self, params):
+    def getUserStamps(self, userRequest, authUserId, **kwargs):
         raise NotImplementedError
     
     @abstract
     def getUserMentions(self, params):
+        raise NotImplementedError
+    
+    # ######### #
+    # Favorites #
+    # ######### #
+    
+    @abstract
+    def addFavorite(self, authUserId, entityId, stampId=None):
+        raise NotImplementedError
+    
+    @abstract
+    def removeFavorite(self, authUserId, entityId):
+        raise NotImplementedError
+    
+    @abstract
+    def getFavorites(self, authUserId, **kwargs):   
+        raise NotImplementedError
+    
+    # ######## #
+    # Activity #
+    # ######## #
+    
+    @abstract
+    def getActivity(self, authUserId, **kwargs):
         raise NotImplementedError
     
     # ########### #
