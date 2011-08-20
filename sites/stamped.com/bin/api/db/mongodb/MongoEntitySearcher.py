@@ -93,7 +93,7 @@ class MongoEntitySearcher(AEntitySearcher):
         
         query = query.replace(' ands? ', ' (and|&)? ')
         query = query.replace('-', '-?')
-        query = query.replace(' ', '[ \t-_]?')
+        query = query.replace(' ', '[ -]?')
         query = query.replace("'", "'?")
         query = query.replace("$", "[$st]?")
         query = query.replace("5", "[5s]?")
