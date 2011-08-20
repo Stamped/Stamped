@@ -64,12 +64,22 @@ class MongoEntitySearcher(AEntitySearcher):
         if 'entity_id' in document:
             document['_id'] = self.entityDB._getObjectIdFromString(document['entity_id'])
             del(document['entity_id'])
+        if 'coordinates' in document and isinstance(document['coordinates'], dict):
+            document['coordinates'] = [
+                document['coordinates']['lat'],
+                document['coordinates']['lng']
+            ]
         return document
 
     def _convertFromMongo(self, document):
         if document != None and '_id' in document:
             document['entity_id'] = self.entityDB._getStringFromObjectId(document['_id'])
             del(document['_id'])
+        if 'coordinates' in document and isinstance(document['coordinates'], list):
+            document['coordinates'] = {
+                'lat': document['coordinates'][0],
+                'lng': document['coordinates'][1],
+            }
         return Entity(document)
     
     def getSearchResults(self, 

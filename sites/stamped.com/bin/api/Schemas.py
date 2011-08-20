@@ -405,7 +405,13 @@ class VideoSchema(Schema):
 
 class ArtistSchema(Schema):
     def setSchema(self):
-        self.albums             = SchemaList(SchemaElement(basestring))
+        self.albums             = SchemaList(ArtistAlbumsSchema())
+
+class ArtistAlbumsSchema(Schema):
+    def setSchema(self):
+        self.album_id           = SchemaElement(int)
+        self.rank               = SchemaElement(int)
+        self.genre_id           = SchemaElement(int)
 
 class SongSchema(Schema):
     def setSchema(self):
