@@ -26,6 +26,8 @@
 
 - (id)initWithStamp:(Stamp*)stamp;
 - (IBAction)handleRestampButtonTap:(id)sender;
+- (IBAction)handleTodoButtonTap:(id)sender;
+- (IBAction)handleSendButtonTap:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* headerView;
@@ -39,6 +41,7 @@
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
+@property (nonatomic, retain) IBOutlet UIButton* addFavoriteButton;
 
 
 @end

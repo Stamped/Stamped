@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+@class Favorite;
 @class Stamp;
 
 typedef enum {
@@ -25,7 +26,6 @@ typedef enum {
 
 @property (nonatomic, retain) NSString* address;
 @property (nonatomic, retain) NSString* category;
-@property (nonatomic, retain) UIImage* categoryImage;
 @property (nonatomic, retain) NSString* entityID;
 @property (nonatomic, retain) NSString* openTableURL;
 @property (nonatomic, retain) NSString* subtitle;
@@ -33,8 +33,10 @@ typedef enum {
 @property (nonatomic, retain) NSString* coordinates;
 @property (nonatomic, retain) NSSet* stamps;
 @property (nonatomic, retain) NSNumber* phone;
+@property (nonatomic, retain) Favorite* favorite;
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
+@property (nonatomic, readonly) UIImage* categoryImage;
 @end
 
 @interface Entity (CoreDataGeneratedAccessors)

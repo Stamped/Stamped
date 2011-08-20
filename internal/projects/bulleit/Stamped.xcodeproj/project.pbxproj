@@ -47,6 +47,7 @@
 		7E303F8D13F0BE2300C1F794 /* sort_icon_music_1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E303F8313F0BE2300C1F794 /* sort_icon_music_1@2x.png */; };
 		7E303F8E13F0BE2300C1F794 /* sort_icon_other_0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E303F8413F0BE2300C1F794 /* sort_icon_other_0@2x.png */; };
 		7E303F8F13F0BE2300C1F794 /* sort_icon_other_1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E303F8513F0BE2300C1F794 /* sort_icon_other_1@2x.png */; };
+		7E32AE3313FEEC04000B6EC2 /* Favorite.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E32AE3213FEEC04000B6EC2 /* Favorite.m */; };
 		7E35A72113DB847F008F856F /* cancel_pressed_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72013DB847F008F856F /* cancel_pressed_background@2x.png */; };
 		7E35A72513DB8647008F856F /* cancel_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72413DB8647008F856F /* cancel_background@2x.png */; };
 		7E35A72913DB895D008F856F /* search_field_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72813DB895D008F856F /* search_field_background@2x.png */; };
@@ -91,6 +92,8 @@
 		7E8AE4B813F9CE9F00479C66 /* globe_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8AE4B713F9CE9F00479C66 /* globe_button@2x.png */; };
 		7E8B1DEA13E5FF9C0060646D /* ActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE813E5FF9C0060646D /* ActivityViewController.m */; };
 		7E8B1DEB13E5FF9C0060646D /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */; };
+		7E90B03B13FF081900875522 /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E90B03913FF081900875522 /* TodoViewController.m */; };
+		7E90B03C13FF081900875522 /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E90B03A13FF081900875522 /* TodoViewController.xib */; };
 		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
 		7E9EE35313DF683500F4736F /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EE35213DF683500F4736F /* Stamp.m */; };
 		7E9F80EB13F88FA4003D7185 /* UIColor+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */; };
@@ -118,8 +121,6 @@
 		7EC1C65213F459B50070CE6D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC1C65113F459B50070CE6D /* Security.framework */; };
 		7EC7A9D313F1DE3800048944 /* sort_icon_search_0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */; };
 		7EC7A9D413F1DE3800048944 /* sort_icon_search_1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */; };
-		7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */; };
-		7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
 		7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDBF9FF13E0C57A003D73D5 /* Entity.m */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
@@ -304,6 +305,8 @@
 		7E303F8313F0BE2300C1F794 /* sort_icon_music_1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_music_1@2x.png"; sourceTree = "<group>"; };
 		7E303F8413F0BE2300C1F794 /* sort_icon_other_0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_other_0@2x.png"; sourceTree = "<group>"; };
 		7E303F8513F0BE2300C1F794 /* sort_icon_other_1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_other_1@2x.png"; sourceTree = "<group>"; };
+		7E32AE3113FEEC04000B6EC2 /* Favorite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Favorite.h; sourceTree = "<group>"; };
+		7E32AE3213FEEC04000B6EC2 /* Favorite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Favorite.m; sourceTree = "<group>"; };
 		7E35A72013DB847F008F856F /* cancel_pressed_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cancel_pressed_background@2x.png"; sourceTree = "<group>"; };
 		7E35A72413DB8647008F856F /* cancel_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cancel_background@2x.png"; sourceTree = "<group>"; };
 		7E35A72813DB895D008F856F /* search_field_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_field_background@2x.png"; sourceTree = "<group>"; };
@@ -357,6 +360,9 @@
 		7E8B1DE713E5FF9C0060646D /* ActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityViewController.h; sourceTree = "<group>"; };
 		7E8B1DE813E5FF9C0060646D /* ActivityViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ActivityViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ActivityViewController.xib; sourceTree = "<group>"; };
+		7E90B03813FF081900875522 /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
+		7E90B03913FF081900875522 /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
+		7E90B03A13FF081900875522 /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TodoViewController.xib; sourceTree = "<group>"; };
 		7E92C11E13E32407008D379D /* shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_background.png; sourceTree = "<group>"; };
 		7E9EE35113DF683500F4736F /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
 		7E9EE35213DF683500F4736F /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
@@ -395,9 +401,6 @@
 		7EC1C65113F459B50070CE6D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_0@2x.png"; sourceTree = "<group>"; };
 		7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_1@2x.png"; sourceTree = "<group>"; };
-		7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoViewController.h; sourceTree = "<group>"; };
-		7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
-		7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TodoViewController.xib; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
 		7EDA5FF413F5705300F23B13 /* OAuthToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OAuthToken.m; sourceTree = "<group>"; };
 		7EDBF9FE13E0C57A003D73D5 /* Entity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Entity.h; sourceTree = "<group>"; };
@@ -531,6 +534,8 @@
 		7E2267D813D52FF500657A66 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				7E32AE3113FEEC04000B6EC2 /* Favorite.h */,
+				7E32AE3213FEEC04000B6EC2 /* Favorite.m */,
 				7EDBF9FE13E0C57A003D73D5 /* Entity.h */,
 				7EDBF9FF13E0C57A003D73D5 /* Entity.m */,
 				7E9EE35113DF683500F4736F /* Stamp.h */,
@@ -538,9 +543,9 @@
 				7E1D92DA13D5F5C40022412D /* User.h */,
 				7E1D92DB13D5F5C40022412D /* User.m */,
 				7EBCBE8513D78896009FCECF /* Comment.h */,
+				7EBCBE8613D78896009FCECF /* Comment.m */,
 				7EC05DB513E60D8E00B22C3F /* Event.h */,
 				7EC05DB613E60D8E00B22C3F /* Event.m */,
-				7EBCBE8613D78896009FCECF /* Comment.m */,
 				7E2BEBED13D7757200A116D2 /* ImageToDataTransformer.h */,
 				7E2BEBEE13D7757300A116D2 /* ImageToDataTransformer.m */,
 			);
@@ -800,9 +805,9 @@
 		7ED2EF5F13E0DBF8007F1AFB /* Todo */ = {
 			isa = PBXGroup;
 			children = (
-				7ED2EF6013E0DC2F007F1AFB /* TodoViewController.h */,
-				7ED2EF6113E0DC2F007F1AFB /* TodoViewController.m */,
-				7ED2EF6213E0DC2F007F1AFB /* TodoViewController.xib */,
+				7E90B03813FF081900875522 /* TodoViewController.h */,
+				7E90B03913FF081900875522 /* TodoViewController.m */,
+				7E90B03A13FF081900875522 /* TodoViewController.xib */,
 			);
 			name = Todo;
 			sourceTree = "<group>";
@@ -1151,7 +1156,6 @@
 				7E7E10A413DF14C900E44DE1 /* credit_icon@2x.png in Resources */,
 				7E7E10A713DF14D100E44DE1 /* toolbar_checkmark@2x.png in Resources */,
 				7E7E10A813DF14D100E44DE1 /* toolbar_close@2x.png in Resources */,
-				7ED2EF6413E0DC2F007F1AFB /* TodoViewController.xib in Resources */,
 				7E92C11F13E32407008D379D /* shelf_background.png in Resources */,
 				7E0BC48013E4A30C008CC076 /* tab_icon_comment_active@2x.png in Resources */,
 				7E0BC48113E4A30C008CC076 /* tab_icon_comment@2x.png in Resources */,
@@ -1191,6 +1195,7 @@
 				7E52A58B13FC7DB500209A95 /* camera_button@2x.png in Resources */,
 				7E52A58C13FC7DB500209A95 /* profile_detail_button@2x.png in Resources */,
 				7EB47EF313FDBD38009AD30A /* CreditsViewController.xib in Resources */,
+				7E90B03C13FF081900875522 /* TodoViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1249,7 +1254,6 @@
 				7E22D6AF13DDA34100C4005E /* CreateStampViewController.m in Sources */,
 				7E9EE35313DF683500F4736F /* Stamp.m in Sources */,
 				7EDBFA0013E0C57A003D73D5 /* Entity.m in Sources */,
-				7ED2EF6313E0DC2F007F1AFB /* TodoViewController.m in Sources */,
 				7E8B1DEA13E5FF9C0060646D /* ActivityViewController.m in Sources */,
 				7EC05DB713E60D8E00B22C3F /* Event.m in Sources */,
 				7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */,
@@ -1268,6 +1272,8 @@
 				7EE70C4D13FC61AE008CCC15 /* STSectionHeaderView.m in Sources */,
 				7EE70C5113FC635D008CCC15 /* ProfileViewController.m in Sources */,
 				7EB47EF213FDBD38009AD30A /* CreditsViewController.m in Sources */,
+				7E32AE3313FEEC04000B6EC2 /* Favorite.m in Sources */,
+				7E90B03B13FF081900875522 /* TodoViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

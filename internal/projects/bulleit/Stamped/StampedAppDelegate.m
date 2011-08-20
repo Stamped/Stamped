@@ -14,6 +14,7 @@
 #import "Comment.h"
 #import "Entity.h"
 #import "Event.h"
+#import "Favorite.h"
 #import "Stamp.h"
 #import "User.h"
 #import "OAuthToken.h"
@@ -76,6 +77,13 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [eventMapping mapRelationship:@"stamp" withMapping:stampMapping];
   [eventMapping mapRelationship:@"user" withMapping:userMapping];
   
+  RKManagedObjectMapping* favoriteMapping = [RKManagedObjectMapping mappingForClass:[Favorite class]];
+  [favoriteMapping mapAttributes:@"complete", nil];
+  [favoriteMapping mapKeyPathsToAttributes:@"favorite_id", @"favoriteID",
+                                           @"user_id", @"userID", nil];
+  favoriteMapping.primaryKeyAttribute = @"favoriteID";
+  [favoriteMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
+  
   RKObjectMapping* oauthMapping = [RKObjectMapping mappingForClass:[OAuthToken class]];
   [oauthMapping mapKeyPathsToAttributes:@"access_token", @"accessToken",
                                         @"refresh_token", @"refreshToken",
@@ -83,6 +91,7 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
   // Example date string: 2011-07-19 20:49:42.037000
   NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
+  [favoriteMapping.dateFormatStrings addObject:dateFormat];
 	[stampMapping.dateFormatStrings addObject:dateFormat];
   [commentMapping.dateFormatStrings addObject:dateFormat];
   [eventMapping.dateFormatStrings addObject:dateFormat];
@@ -92,6 +101,7 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [objectManager.mappingProvider setMapping:entityMapping forKeyPath:@"Entity"];
   [objectManager.mappingProvider setMapping:commentMapping forKeyPath:@"Comment"];
   [objectManager.mappingProvider setMapping:eventMapping forKeyPath:@"Event"];
+  [objectManager.mappingProvider setMapping:favoriteMapping forKeyPath:@"Favorite"];
   [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
 
   self.window.rootViewController = self.navigationController;

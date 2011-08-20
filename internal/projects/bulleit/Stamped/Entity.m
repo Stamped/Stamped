@@ -7,13 +7,13 @@
 //
 
 #import "Entity.h"
+#import "Favorite.h"
 #import "Stamp.h"
 
 @implementation Entity
 
 @dynamic address;
 @dynamic category;
-@dynamic categoryImage;
 @dynamic entityID;
 @dynamic openTableURL;
 @dynamic subtitle;
@@ -21,13 +21,10 @@
 @dynamic coordinates;
 @dynamic stamps;
 @dynamic phone;
+@dynamic favorite;
 
-- (void)awakeFromFetch {
-  [super awakeFromFetch];
-  if (!self.categoryImage) {
-    self.categoryImage =
-        [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
-  }
+- (UIImage*)categoryImage {
+  return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
 }
 
 - (EntityCategory)entityCategory {
