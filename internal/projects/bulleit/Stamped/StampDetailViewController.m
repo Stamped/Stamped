@@ -19,6 +19,7 @@
 #import "PlaceDetailViewController.h"
 #import "GenericItemDetailViewController.h"
 #import "Entity.h"
+#import "Favorite.h"
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
@@ -27,6 +28,9 @@
 
 static const CGFloat kMainCommentFrameMinHeight = 75.0;
 static const CGFloat kKeyboardHeight = 216.0;
+static NSString* const kCreateFavoritePath = @"/favorites/create.json";
+static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
+static NSString* const kCreateCommentPath = @"/comments/create.json";
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
@@ -55,6 +59,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
 @synthesize loadingView = loadingView_;
+@synthesize addFavoriteButton = addFavoriteButton_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -78,6 +83,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
   self.loadingView = nil;
+  self.addFavoriteButton = nil;
   [super dealloc];
 }
 
@@ -121,6 +127,9 @@ static const CGFloat kKeyboardHeight = 216.0;
   mainCommentContainer_.layer.shadowRadius = 2;
   mainCommentContainer_.layer.shadowPath =
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
+
+  if (stamp_.entityObject.favorite)
+    self.addFavoriteButton.selected = YES;
   
   [self setUpMainContentView];
   [self setUpCommentsView];
@@ -142,6 +151,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
   self.loadingView = nil;
+  self.addFavoriteButton = nil;
 }
 
 - (void)setUpHeader {
@@ -278,6 +288,8 @@ static const CGFloat kKeyboardHeight = 216.0;
   currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
 }
 
+#pragma mark - Toolbar Actions
+
 - (IBAction)handleRestampButtonTap:(id)sender {
   CreateStampViewController* createViewController =
       [[CreateStampViewController alloc] initWithEntityObject:stamp_.entityObject
@@ -285,6 +297,35 @@ static const CGFloat kKeyboardHeight = 216.0;
   [self.navigationController pushViewController:createViewController animated:YES];
   [createViewController release];
 }
+
+- (IBAction)handleTodoButtonTap:(id)sender {
+  UIButton* button = sender;
+  BOOL shouldDelete = button.selected;
+  [button setSelected:!shouldDelete];
+  NSString* path = shouldDelete ? kRemoveFavoritePath : kCreateFavoritePath;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = favoriteMapping;
+  if (shouldDelete) {
+    objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+                           [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
+                           stamp_.entityObject.favorite.favoriteID, @"favorite_id", nil];
+    stamp_.entityObject.favorite = nil;
+  } else {
+    objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+                           [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
+                           stamp_.entityObject.entityID, @"entity_id", nil];
+  }
+  [objectLoader send];
+}
+
+- (IBAction)handleSendButtonTap:(id)sender {
+  
+}
+
+#pragma mark -
 
 - (void)preloadEntityView {
   if (detailViewController_)
@@ -401,7 +442,7 @@ static const CGFloat kKeyboardHeight = 216.0;
   [addCommentField_ resignFirstResponder];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/comments/create.json" delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateCommentPath delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -416,11 +457,23 @@ static const CGFloat kKeyboardHeight = 216.0;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
+    Favorite* fav = [objects lastObject];
+    NSLog(@"Entity title %@", fav.entityObject.title);
+    return;
+  }
+
+  if ([objectLoader.resourcePath isEqualToString:kRemoveFavoritePath]) {
+    NSLog(@"%@", objectLoader.response.bodyAsString);
+    //stamp_.entityObject.favorite = nil;
+    return;
+  }
+  
   [loadingView_ stopAnimating];
   addCommentField_.hidden = NO;
   currentUserImageView_.hidden = NO;
 
-	if ([objectLoader.resourcePath isEqualToString:@"/comments/create.json"]) {
+	if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     Comment* comment = [objects objectAtIndex:0];
     [self addComment:comment];
     [stamp_ addCommentsObject:comment];
@@ -439,6 +492,12 @@ static const CGFloat kKeyboardHeight = 216.0;
 	NSLog(@"Hit error: %@", error);
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
+
+  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath] ||
+      [objectLoader.resourcePath isEqualToString:kRemoveFavoritePath]) {
+    NSLog(@"%@", objectLoader.response.bodyAsString);
+    return;
+  }
 
   [loadingView_ stopAnimating];
   addCommentField_.hidden = NO;

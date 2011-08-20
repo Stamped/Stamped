@@ -421,19 +421,24 @@
 						<string key="NSFrame">{{120, 367}, {80, 49}}</string>
 						<reference key="NSSuperview" ref="880728759"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
+						<reference key="NSNextKeyView" ref="537858746"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUIContentMode">1</int>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="663283930"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<reference key="IBUIHighlightedTitleColor" ref="140928236"/>
 						<reference key="IBUINormalTitleColor" ref="577811154"/>
 						<reference key="IBUINormalTitleShadowColor" ref="508534976"/>
 						<object class="NSCustomResource" key="IBUIHighlightedImage">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">tab_icon_favorite_active.png</string>
+						</object>
+						<object class="NSCustomResource" key="IBUISelectedImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">tab_icon_favorited.png</string>
 						</object>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
@@ -617,6 +622,32 @@
 						<reference key="destination" ref="770054237"/>
 					</object>
 					<int key="connectionID">63</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">handleSendButtonTap:</string>
+						<reference key="source" ref="537858746"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">64</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">handleTodoButtonTap:</string>
+						<reference key="source" ref="358418181"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">1</int>
+					</object>
+					<int key="connectionID">66</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">addFavoriteButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="358418181"/>
+					</object>
+					<int key="connectionID">67</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -848,6 +879,7 @@
 					<string>16.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
 					<string>16.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>17.IBPluginDependency</string>
+					<string>17.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
 					<string>17.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>19.IBPluginDependency</string>
 					<string>19.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
@@ -913,7 +945,8 @@
 					<real value="2"/>
 					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="1"/>
+					<real value="2"/>
+					<real value="2"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -954,7 +987,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">63</int>
+			<int key="maxID">67</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -963,14 +996,42 @@
 					<string key="className">StampDetailViewController</string>
 					<string key="superclassName">UIViewController</string>
 					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">handleRestampButtonTap:</string>
-						<string key="NS.object.0">id</string>
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>handleRestampButtonTap:</string>
+							<string>handleSendButtonTap:</string>
+							<string>handleTodoButtonTap:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+						</object>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
-						<string key="NS.key.0">handleRestampButtonTap:</string>
-						<object class="IBActionInfo" key="NS.object.0">
-							<string key="name">handleRestampButtonTap:</string>
-							<string key="candidateClassName">id</string>
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>handleRestampButtonTap:</string>
+							<string>handleSendButtonTap:</string>
+							<string>handleTodoButtonTap:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBActionInfo">
+								<string key="name">handleRestampButtonTap:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">handleSendButtonTap:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">handleTodoButtonTap:</string>
+								<string key="candidateClassName">id</string>
+							</object>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="outlets">
@@ -979,6 +1040,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>activityView</string>
 							<string>addCommentField</string>
+							<string>addFavoriteButton</string>
 							<string>bottomToolbar</string>
 							<string>commenterImageView</string>
 							<string>commenterNameLabel</string>
@@ -994,6 +1056,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UIView</string>
 							<string>UITextField</string>
+							<string>UIButton</string>
 							<string>UIView</string>
 							<string>UserImageView</string>
 							<string>UILabel</string>
@@ -1012,6 +1075,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>activityView</string>
 							<string>addCommentField</string>
+							<string>addFavoriteButton</string>
 							<string>bottomToolbar</string>
 							<string>commenterImageView</string>
 							<string>commenterNameLabel</string>
@@ -1032,6 +1096,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">addCommentField</string>
 								<string key="candidateClassName">UITextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">addFavoriteButton</string>
+								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">bottomToolbar</string>
@@ -1113,6 +1181,7 @@
 				<string>stamp_detail_ripple_top</string>
 				<string>tab_icon_favorite.png</string>
 				<string>tab_icon_favorite_active.png</string>
+				<string>tab_icon_favorited.png</string>
 				<string>tab_icon_restamp.png</string>
 				<string>tab_icon_restamp_active.png</string>
 				<string>tab_icon_share.png</string>
@@ -1123,6 +1192,7 @@
 				<string>{16, 16}</string>
 				<string>{320, 480}</string>
 				<string>{320, 240}</string>
+				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>

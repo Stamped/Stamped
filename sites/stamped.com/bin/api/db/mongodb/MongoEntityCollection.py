@@ -60,7 +60,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         entity = self._convertFromMongo(document)
 
         if entity.coordinates.lat != None:
-            self.places_collection.addEntity(entity.exportSchema(EntityPlace()).value)
+            self.places_collection.addEntity(entity)
 
         return entity
     
