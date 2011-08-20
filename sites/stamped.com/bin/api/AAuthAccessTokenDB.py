@@ -6,7 +6,6 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-from AuthAccessToken import AuthAccessToken
 from utils import abstract
 
 class AAuthAccessTokenDB(object):

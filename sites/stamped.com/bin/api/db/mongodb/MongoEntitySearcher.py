@@ -12,12 +12,13 @@ from AEntitySearcher import AEntitySearcher
 from MongoEntityCollection import MongoEntityCollection
 from MongoPlacesEntityCollection import MongoPlacesEntityCollection
 
+from Schemas import *
+
 from difflib import SequenceMatcher
 from pymongo.son import SON
 from gevent.pool import Pool
 from pprint import pprint
 from utils import abstract
-from Entity import Entity
 
 class MongoEntitySearcher(AEntitySearcher):
     subcategory_weights = {
@@ -57,6 +58,19 @@ class MongoEntitySearcher(AEntitySearcher):
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.pool = Pool(8)
+    
+    def _convertToMongo(self, entity):
+        document = entity.exportSparse()
+        if 'entity_id' in document:
+            document['_id'] = self.entityDB._getObjectIdFromString(document['entity_id'])
+            del(document['entity_id'])
+        return document
+
+    def _convertFromMongo(self, document):
+        if document != None and '_id' in document:
+            document['entity_id'] = self.entityDB._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return Entity(document)
     
     def getSearchResults(self, 
                          query, 
@@ -139,14 +153,16 @@ class MongoEntitySearcher(AEntitySearcher):
             place_results = wrapper['place_results']['results']
             
             for doc in place_results:
-                entity = Entity(self.entityDB._mongoToObj(doc['obj'], 'entity_id'))
+                # entity = Entity(self.entityDB._mongoToObj(doc['obj'], 'entity_id'))
+                entity = self._convertFromMongo(doc['obj'])
                 result = (entity, doc['dis'])
                 
                 results.append(result)
                 results_set.add(entity.entity_id)
         
         for entity in db_results:
-            e = Entity(self.entityDB._mongoToObj(entity, 'entity_id'))
+            # e = Entity(self.entityDB._mongoToObj(entity, 'entity_id'))
+            e = self._convertFromMongo(entity)
             
             if e.entity_id not in results_set:
                 results.append((e, -1))

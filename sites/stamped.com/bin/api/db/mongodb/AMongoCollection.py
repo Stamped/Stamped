@@ -108,7 +108,8 @@ class MongoDBConfig(Singleton):
         while True:            
             try:
                 logs.info("Connecting to MongoDB: %s:%d" % (self.host, self.port))
-                self._connection = pymongo.Connection(self.host, self.port, slave_okay=True)
+                self._connection = pymongo.Connection(self.host, self.port, \
+                    slave_okay=True)
                 return self._connection
             except AutoReconnect as e:
                 if delay > max_delay:
@@ -131,7 +132,8 @@ class AMongoCollection(object):
     
     def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
-        self._collection = MongoCollectionProxy(self, cfg.connection, db, collection)
+        self._collection = MongoCollectionProxy(self, cfg.connection, db, \
+                                                collection)
         
         logs.info("Connected to MongoDB collection: %s" % collection)
     
@@ -147,194 +149,86 @@ class AMongoCollection(object):
         return bson.BSON.encode(obj)
     
     def _getStringFromObjectId(self, objId):
-        #logs.debug("%s | Get String from ObjectID" % self)
+        #logs.debug("Get String from ObjectID")
         return str(bson.objectid.ObjectId(objId))
     
     def _getObjectIdFromString(self, string):
-        #logs.debug("%s | Get ObjectID from String" % self)
+        #logs.debug("Get ObjectID from String")
         try:
             return bson.objectid.ObjectId(string)
         except:
             logs.warning("Invalid ObjectID")
             raise Fail("Invalid ObjectID")
     
-    def _mongoToObj(self, data, objId='id'):
-        assert data is not None
-        
-        data[objId] = self._getStringFromObjectId(data['_id'])
-        del(data['_id'])
-        return data
+
+    ### GENERIC CRUD FUNCTIONS
     
-    def _objToMongo(self, obj, objId='id'):
-        if obj is None:
-            logs.warning("No object passed")
-            return None
-        
-        if obj.isValid == False:
-            logs.warning("Invalid object: %s" % obj.getDataAsDict())
-            return None
-        
-        data = copy.copy(obj.getDataAsDict())
-        
-        if '_id' in data:
-            if isinstance(data['_id'], basestring):
-                data['_id'] = self._getObjectIdFromString(data['_id'])
-        elif objId in data:
-            data['_id'] = self._getObjectIdFromString(data[objId])
-            del(data[objId])
-        
-        return self._mapDataToSchema(data, self.SCHEMA)
+    def _addMongoDocument(self, document):
+        try:
+            document['_id'] = self._collection.insert_one(document, safe=True)
+            return document
+        except Exception as e:
+            logs.warning("Unable to add document: %s" % e)
+            raise
     
-    def _objsToMongo(self, objs, objId='id'):
-        objs = map(lambda o: self._objToMongo(o, objId), objs)
-        return filter(lambda o: o is not None, objs)
+    def _getMongoDocumentFromId(self, documentId):
+        document = self._collection.find_one(documentId)
+        if document == None:
+            logs.warning("Unable to find document (id = %s)" % documentId)
+            raise Exception("Document not found")
+        return document
     
-    def _mapDataToSchema(self, data, schema):
-        def _unionDict(source, schema, dest):
-            for k, v in source.iteritems():
-                _unionItem(k, v, schema, dest)
-            return dest
-        
-        def _unionItem(k, v, schema, dest):
-            # _id should not be converted to a basestring!
-            if k == '_id':
-                dest[k] = v
-                return dest
-            elif k in schema:
-                schemaVal = schema[k]
-                
-                if isinstance(schemaVal, type):
-                    schemaValType = schemaVal
-                else:
-                    schemaValType = type(schemaVal)
-                
-                # basic type checking
-                if not isinstance(v, schemaValType):
-                    isValid = True
-                    
-                    # basic implicit type conversion s.t. if you pass in, for example, 
-                    # "23.4" for longitude as a string, it'll automatically cast to 
-                    # the required float format.
-                    try:
-                        if schemaValType == basestring:
-                            v = str(v)
-                        elif schemaValType == float:
-                            v = float(v)
-                        elif schemaValType == int:
-                            v = int(v)
-                        else:
-                            isValid = False
-                    except ValueError:
-                        isValid = False
-                    
-                    if not isValid:
-                        raise KeyError("Entity error; key '%s' found '%s', expected '%s'" % \
-                            (k, str(type(v)), str(schemaVal)))
-                
-                if isinstance(v, dict):
-                    if k not in dest:
-                        dest[k] = { }
-                    
-                    return _unionDict(v, schemaVal, dest[k])
-                else:
-                    dest[k] = v
-                    return dest
-            else:
-                for k2, v2 in schema.iteritems():
-                    if isinstance(v2, dict):
-                        if k2 in dest:
-                            if not isinstance(dest[k2], dict):
-                                raise KeyError(k2)
-                            
-                            if _unionItem(k, v, v2, dest[k2]):
-                                return dest
-                        else:
-                            temp = { }
-                            
-                            if _unionItem(k, v, v2, temp):
-                                dest[k2] = temp
-                                return dest
-            return dest
-        
-        result = {}
-        if not _unionDict(data, schema, result):
-            raise KeyError("Error: %s" % str(data))
-        
-        return result
+    def _updateMongoDocument(self, document):
+        document['_id'] = self._collection.save(document, safe=True)
+        return document
     
+    def _removeMongoDocument(self, documentId):
+        # Confused here. Supposed to return None on success, so I guess it's 
+        # working, but should probably test more.
+        if self._collection.remove({'_id': documentId}):
+            return False
+        else:
+            return True
+    
+    def _getMongoDocumentsFromIds(self, documentIds, **kwargs):
+        since       = kwargs.pop('since', None)
+        before      = kwargs.pop('before', None)
+        sort        = kwargs.pop('sort', None)
+        limit       = kwargs.pop('limit', 0)
+
+        params = {'_id': {'$in': documentIds}}
+
+        if since != None and before != None:
+            params['timestamp.created'] = {'$gte': since, '$lte': before}
+        elif since != None:
+            params['timestamp.created'] = {'$gte': since}
+        elif before != None:
+            params['timestamp.created'] = {'$lte': before}
+        
+        if sort != None:
+            documents = self._collection.find(params).sort(sort, \
+                pymongo.DESCENDING).limit(limit)
+        else:
+            documents = self._collection.find(params).limit(limit)
+        
+        return documents
+
+
     ### RELATIONSHIP MANAGEMENT
     
     def _getOverflowBucket(self, objId):
-        overflow = self._collection.find_one({'_id': objId}, fields={'overflow': 1})
+        overflow = self._collection.find_one({'_id': objId}, \
+                                                fields={'overflow': 1})
 
         if overflow == None or 'overflow' not in overflow:
             return objId            
         else:
             # Do something to manage overflow conditions?
-            # Grabs the most recent bucket to use and appends that to the id. This is our new key!
+            # Grabs the most recent bucket to use and appends that to the id. 
+            # This is our new key!
             return '%s%s' % (objId, overflow['overflow'][-1])
     
-    ### GENERIC CRUD FUNCTIONS
-    
-    def _addDocument(self, document, objId='id'):
-        try:
-            #logs.debug("%s | Add Document | Begin" % self)
-            obj = self._objToMongo(document, objId)
-            #logs.debug("%s | Add Document | Object: %s" % (self, obj))
-            ret = self._collection.insert_one(obj, safe=True)
-            #logs.debug("%s | Add Document | Document Added" % self)
-            return self._getStringFromObjectId(ret)
-        except Exception as e:
-            logs.warning("Unable to add document: %s" % e)
-            raise #Fail("(%s) Unable to add document" % self) 
-    
-    def _addDocuments(self, documents, objId='id'):
-        objs = self._objsToMongo(documents, objId)
-        #pprint(objs[0])
-        #manipulate = not '_id' in objs[0]
-        ret  = self._collection.insert(objs, safe=True)
-        return map(self._getStringFromObjectId, ret)
-    
-    def _getDocumentFromId(self, documentId, objId='id'):
-        doc = self._collection.find_one(self._getObjectIdFromString(documentId))
-        ret = self._mongoToObj(doc, objId)
-        return ret
-    
-    def _getDocumentsFromIds(self, documentIds, objId='id', since=None, before=None, sort=None, limit=20):
-        ids = []
-        for documentId in documentIds:
-            ids.append(self._getObjectIdFromString(documentId)) 
-        params = {'_id': {'$in': ids}}
-        if since != None and isinstance(since, datetime) and before != None and isinstance(before, datetime):
-            params['timestamp.created'] = {'$gte': since, '$lte': before}
-        elif since != None and isinstance(since, datetime):
-            params['timestamp.created'] = {'$gte': since}
-        elif before != None and isinstance(before, datetime):
-            params['timestamp.created'] = {'$lte': before}
-        
-        if sort != None:
-            documents = self._collection.find(params).sort(sort, pymongo.DESCENDING).limit(limit)
-        else:
-            documents = self._collection.find(params).limit(limit)
-        
-        result = []
-        for document in documents:
-            result.append(self._mongoToObj(document, objId))
-        return result
-    
-    def _updateDocument(self, document, objId='id'):
-        obj = self._objToMongo(document, objId)
-        docId = self._collection.save(obj, safe=True)
-        return self._getStringFromObjectId(docId)
-    
-    def _removeDocument(self, keyId):
-        # Confused here. Supposed to return None on success, so I guess it's working,
-        # but should probably test more.
-        if self._collection.remove({'_id': self._getObjectIdFromString(keyId)}):
-            return False
-        else:
-            return True
-    
+
     ### GENERIC RELATIONSHIP FUNCTIONS
     
     def _createRelationship(self, keyId, refId):

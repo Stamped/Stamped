@@ -7,7 +7,6 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from Entity import Entity
 from AEntitySink import AEntitySink
 
 class AEntityDB(AEntitySink):
@@ -26,7 +25,7 @@ class AEntityDB(AEntitySink):
         raise NotImplementedError
     
     @abstract
-    def getEntity(self, entityID):
+    def getEntity(self, entityId):
         raise NotImplementedError
     
     @abstract
@@ -34,7 +33,11 @@ class AEntityDB(AEntitySink):
         raise NotImplementedError
     
     @abstract
-    def removeEntity(self, entity):
+    def removeEntity(self, entityId):
+        raise NotImplementedError
+    
+    @abstract
+    def removeCustomEntity(self, entityId, userId):
         raise NotImplementedError
     
     @abstract
@@ -42,6 +45,6 @@ class AEntityDB(AEntitySink):
         raise NotImplementedError
     
     @abstract
-    def searchEntities(self, query, limit=20):
+    def searchEntities(self, input_query, limit=20):
         raise NotImplementedError
 

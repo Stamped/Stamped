@@ -5,7 +5,7 @@ __version__ = '1.0'
 __copyright__ = 'Copyright (c) 2011 Stamped.com'
 __license__ = 'TODO'
 
-import Globals
+import Globals, logs
 
 from utils import lazyProperty
 
@@ -16,7 +16,6 @@ from MongoFollowersCollection import MongoFollowersCollection
 from MongoBlockCollection import MongoBlockCollection
 
 from api.AFriendshipDB import AFriendshipDB
-from api.Friendship import Friendship
 
 class MongoFriendshipCollection(AFriendshipDB):
     
@@ -39,35 +38,31 @@ class MongoFriendshipCollection(AFriendshipDB):
         return MongoFollowersCollection()
     
     def addFriendship(self, friendship):
-        friendship = self._objToMongo(friendship)
-        userId = friendship['_id']
-        friendId = friendship['friend_id']
+        userId      = friendship.user_id
+        friendId    = friendship.friend_id
         
-        # TODO: Check if friendship already exists (???)
-        
-        # If block exists, don't surface friend request; otherwise add to queue
-        if self.block_collection.checkBlock(userId, friendId):
-            ### TODO: Log request somewhere
-            return False
-        
-        if self.user_collection.checkPrivacy(userId):
-            # Request approval before creating friendship
-            
-            ### TODO: Add to queue                    
-            return False
-        else:
-            # Create friendship
-            self.friends_collection.addFriend(userId=userId, friendId=friendId)
-            self.followers_collection.addFollower(userId=friendId, followerId=userId)
-            return True
+        logs.debug("Add Friendship: %s -> %s" % (userId, friendId))
+        self.friends_collection.addFriend(userId=userId, friendId=friendId)
+        self.followers_collection.addFollower(userId=friendId, followerId=userId)
+        return True
     
     def checkFriendship(self, friendship):
-        friendship = self._objToMongo(friendship)
-        return self.friends_collection.checkFriend(userId=friendship['_id'], friendId=friendship['friend_id'])
+        userId      = friendship.user_id
+        friendId    = friendship.friend_id
+
+        logs.debug("Check Friendship: %s -> %s" % (userId, friendId))
+        status = self.friends_collection.checkFriend(userId=userId, \
+            friendId=friendId)
+        return status
             
     def removeFriendship(self, friendship):
-        friendship = self._objToMongo(friendship)
-        return self._destroyFriendship(userId=friendship['_id'], friendId=friendship['friend_id'])
+        userId      = friendship.user_id
+        friendId    = friendship.friend_id
+
+        logs.debug("Remove Friendship: %s -> %s" % (userId, friendId))
+        self.friends_collection.removeFriend(userId=userId, friendId=friendId)
+        self.followers_collection.removeFollower(userId=friendId, followerId=userId)
+        return True
             
     def getFriends(self, userId):
         return self.friends_collection.getFriends(userId)
@@ -77,47 +72,32 @@ class MongoFriendshipCollection(AFriendshipDB):
 
     def approveFriendship(self, friendship):
         ### TODO
-        print 'TODO'
         raise NotImplementedError
     
     def addBlock(self, friendship):
-        friendship = self._objToMongo(friendship)
-        try:
-            self.block_collection.addBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
-            self._destroyFriendship(userId=friendship['_id'], friendId=friendship['friend_id'])
-            self._destroyFriendship(userId=friendship['friend_id'], friendId=friendship['_id'])
-            return True
-        except:
-            return False
+        userId      = friendship.user_id
+        friendId    = friendship.friend_id
+
+        logs.debug("Add Block: %s -> %s" % (userId, friendId))
+        self.block_collection.addBlock(userId=userId, friendId=friendId)
     
     def checkBlock(self, friendship):
-        friendship = self._objToMongo(friendship)
-        return self.block_collection.checkBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
+        userId      = friendship.user_id
+        friendId    = friendship.friend_id
+
+        logs.debug("Check Block: %s -> %s" % (userId, friendId))
+        status = self.block_collection.checkBlock(userId=userId, \
+            friendId=friendId)
+        return status
             
     def removeBlock(self, friendship):
-        friendship = self._objToMongo(friendship)
-        return self.block_collection.removeBlock(userId=friendship['_id'], friendId=friendship['friend_id'])
+        userId      = friendship.user_id
+        friendId    = friendship.friend_id
+
+        logs.debug("Remove Block: %s -> %s" % (userId, friendId))
+        return self.block_collection.removeBlock(userId=userId, \
+            friendId=friendId)
             
     def getBlocks(self, userId):
         return self.block_collection.getBlocks(userId)
-    
-    ### PRIVATE
-    
-    def _destroyFriendship(self, userId, friendId):
-        try:
-            self.friends_collection.removeFriend(userId=userId, friendId=friendId)
-            self.followers_collection.removeFollower(userId=friendId, followerId=userId)
-            return True
-        except:
-            return False
-    
-    def _objToMongo(self, obj):
-        if obj.isValid == False:
-            print obj
-            raise KeyError('Object not valid')
-        
-        data = {}
-        data['_id'] = obj.user_id
-        data['friend_id'] = obj.friend_id
-        return data
 

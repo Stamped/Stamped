@@ -11,7 +11,6 @@ from utils import lazyProperty
 
 from MongoUserStampsCollection import MongoUserStampsCollection
 from MongoInboxStampsCollection import MongoInboxStampsCollection
-from MongoStampCollection import MongoStampCollection
 
 from api.ACollectionDB import ACollectionDB
 
@@ -27,35 +26,14 @@ class MongoCollectionCollection(ACollectionDB):
         return MongoInboxStampsCollection()
     
     @lazyProperty
-    def stamp_collection(self):
-        return MongoStampCollection()
-    
-    @lazyProperty
     def user_stamps_collection(self):
         return MongoUserStampsCollection()
     
-    def getInboxStampIDs(self, userId, since=None, limit=None):
-        return self.inbox_stamps_collection.getInboxStampIds(userId, since, limit)
+    def getInboxStampIds(self, userId):
+        return self.inbox_stamps_collection.getInboxStampIds(userId)
     
-    def getInboxStamps(self, userId, since=None, before=None, limit=None):
-        return self.stamp_collection.getStamps(
-            self.getInboxStampIDs(userId), 
-            since=since, 
-            before=before, 
-            limit=limit, 
-            withComments=True)
-    
-    def getUserStampIDs(self, userId, limit=None):
+    def getUserStampIds(self, userId):
         return self.user_stamps_collection.getUserStampIds(userId)
-    
-    def getUserStamps(self, userId, since=None, before=None, limit=None):
-        return self.stamp_collection.getStamps(
-            self.getUserStampIDs(userId), 
-            since=since, 
-            before=before, 
-            limit=limit, 
-            withComments=True)
-    
-    def getMentions(self, userId, limit=None):
-        raise NotImplementedError
 
+    def getMentions(self, userId):
+        raise NotImplementedError

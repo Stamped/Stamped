@@ -28,8 +28,8 @@ class MongoStampedAPI(StampedAPI):
         Implementation of Stamped API atop MongoDB.
     """
     
-    def __init__(self, db=None):
-        StampedAPI.__init__(self, "MongoStampedAPI")
+    def __init__(self, db=None, **kwargs):
+        StampedAPI.__init__(self, "MongoStampedAPI", **kwargs)
         
         if db:
             utils.init_db_config(db)

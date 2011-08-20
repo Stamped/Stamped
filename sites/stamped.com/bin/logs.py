@@ -20,13 +20,13 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(formatter)
 
 # File handler
-file_handler = logging.FileHandler("/stamped/logs/wsgi.log")
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(formatter)
+# file_handler = logging.FileHandler("/stamped/logs/wsgi.log")
+# file_handler.setLevel(logging.INFO)
+# file_handler.setFormatter(formatter)
 
 # Add handler
 log.addHandler(stream_handler)
-log.addHandler(file_handler)
+# log.addHandler(file_handler)
 
 def _generateLogId():
     m = hashlib.md5(str(time.time()))

@@ -7,23 +7,30 @@ __license__ = "TODO"
 
 import Globals
 from utils import abstract
-from User import User
 
 class AUserDB(object):
     
     @abstract
-    def getUser(self, userID):
+    def getUser(self, userId):
         pass
         
     @abstract
-    def lookupUsers(self, userIDs, usernames):
+    def getUserByScreenName(self, screenName):
+        pass
+
+    @abstract
+    def lookupUsers(self, userIds, usernames, limit=0):
         pass
         
     @abstract
-    def searchUsers(self, searchQuery, searchLimit=20):
+    def searchUsers(self, query, limit=20):
         pass
         
     @abstract
-    def checkPrivacy(self, userId):
+    def flagUser(self, user):
+        pass
+        
+    @abstract
+    def updateUserStats(self, userId, stat, value=None, increment=1):
         pass
         
