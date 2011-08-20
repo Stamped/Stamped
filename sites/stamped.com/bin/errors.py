@@ -5,15 +5,15 @@ class Fail(Exception):
 class InvalidArgument(Exception):
     pass
 
+class InvalidState(Exception):
+    pass
+
 class StampedHTTPError(Exception):
 	def __init__(self, msg, code, desc=None):
 		Exception.__init__(self, msg)
 		self.code = code
 		self.msg = msg
 		self.desc = desc
-
-class InvalidState(Exception):
-    pass
 
 class SchemaTypeError(TypeError):
 	def __init__(self, msg=None, desc=None):
@@ -32,3 +32,4 @@ class SchemaValidationError(Exception):
 		Exception.__init__(self, msg)
 		self.msg = msg
 		self.desc = desc
+

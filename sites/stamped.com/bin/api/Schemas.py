@@ -29,7 +29,6 @@ class AccessToken(Schema):
         self.user_id            = SchemaElement(basestring)
         self.expires            = SchemaElement(datetime)
         self.timestamp          = TimestampSchema()
-        
 
 # ####### #
 # Account #
@@ -271,7 +270,6 @@ class Entity(Schema):
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
             schema.importData(self.exportSparse(), overflow=True)
-
         else:
             raise NotImplementedError
 
@@ -553,7 +551,5 @@ class NetflixImageSchema(Schema):
 class UserGeneratedSchema(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
-
-
 
 

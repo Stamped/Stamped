@@ -12,7 +12,10 @@ from db.mongodb.MongoEntitySearcher import MongoEntitySearcher
 from optparse import OptionParser
 from pprint import pprint
 
-# TODO: get gunicorn+nginx running in front of flask
+# TODO: debug Beauty & Essex test case (multiple sources)
+# TODO: add simple regression-oriented set of unit tests for entity searcher
+# TODO: barnes n noble
+# TODO: automate gunicorn + nginx running in front of flask
 
 # TODO:
     # lazy loading of external entities

@@ -18,7 +18,7 @@ transformations in order to minimize variations across structures.
 
 The class is built out of SchemaElement blocks. Each SchemaElement can be set 
 to a specific value; it will then guarantee that the value meets any constrains 
-placed on it. 
+placed on it.
 
 These constraints include:
 
@@ -92,7 +92,7 @@ situation.
 """
 
 class SchemaElement(object):
-
+    
     def __init__(self, requiredType, **kwargs):
         self._name          = None
         self._data          = None
@@ -108,13 +108,13 @@ class SchemaElement(object):
         self._minLength     = self._setInt(kwargs.pop('minLength', None))
         self._maxValue      = self._setInt(kwargs.pop('maxValue', None))
         self._minValue      = self._setInt(kwargs.pop('minValue', None))
-
+        
         if self._default != None:
             self.setElement('[default]', self._default)
-        
+    
     def __str__(self):
         return str(self.value)
-
+    
     def __len__(self):
         if self._data == None:
             return 0
@@ -190,19 +190,16 @@ class SchemaElement(object):
                     msg = "Cannot set dictionary as value (%s)" % name
                     logs.warning(msg)
                     raise SchemaTypeError(msg)
-
                 elif isinstance(value, list):
                     msg = "Cannot set list as value (%s)" % value
                     logs.warning(msg)
                     raise SchemaTypeError(msg)
-
                 elif self._requiredType == bool:
                     b = str(value).lower()
                     if b == 'true' or b == '1':
                         value = True
                     elif b == 'false' or b == '0':
                         value = False
-
                 elif self._requiredType == basestring:
                     value = str(value)
                 elif self._requiredType == float:
@@ -768,5 +765,5 @@ class Schema(SchemaElement):
     # DEPRECATED
 
     def getDataAsDict(self):
-        return self.exportData()
+        return self.exportSparse()
 
