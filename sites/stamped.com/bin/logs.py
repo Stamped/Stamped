@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import datetime, logging, threading, hashlib, random, time
+import datetime, logging, os, threading, hashlib, random, time
 
 # Log
 log = logging.getLogger('stamped')
@@ -20,13 +20,15 @@ stream_handler.setLevel(logging.INFO)
 stream_handler.setFormatter(formatter)
 
 # File handler
-# file_handler = logging.FileHandler("/stamped/logs/wsgi.log")
-# file_handler.setLevel(logging.INFO)
-# file_handler.setFormatter(formatter)
+log_file = "/stamped/logs/wsgi.log"
+if os.path.exists(log_file):
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    log.addHandler(file_handler)
 
 # Add handler
 log.addHandler(stream_handler)
-# log.addHandler(file_handler)
 
 def _generateLogId():
     m = hashlib.md5(str(time.time()))
