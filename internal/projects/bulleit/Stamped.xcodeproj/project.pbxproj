@@ -53,6 +53,7 @@
 		7E35A72913DB895D008F856F /* search_field_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72813DB895D008F856F /* search_field_background@2x.png */; };
 		7E35A72B13DB9267008F856F /* search_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72A13DB9267008F856F /* search_icon@2x.png */; };
 		7E35A72E13DB9CEA008F856F /* SearchEntitiesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E35A72D13DB9CEA008F856F /* SearchEntitiesTableViewCell.m */; };
+		7E3909361401975D00910F98 /* Notifications.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3909351401975C00910F98 /* Notifications.m */; };
 		7E3B6D7A13D7509600FBE958 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3B6D7913D7509600FBE958 /* Util.m */; };
 		7E428A8513EB2C72004CA2B2 /* stacks_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */; };
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
@@ -313,6 +314,8 @@
 		7E35A72A13DB9267008F856F /* search_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_icon@2x.png"; sourceTree = "<group>"; };
 		7E35A72C13DB9CEA008F856F /* SearchEntitiesTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesTableViewCell.h; sourceTree = "<group>"; };
 		7E35A72D13DB9CEA008F856F /* SearchEntitiesTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesTableViewCell.m; sourceTree = "<group>"; };
+		7E3909341401975C00910F98 /* Notifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Notifications.h; sourceTree = "<group>"; };
+		7E3909351401975C00910F98 /* Notifications.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Notifications.m; sourceTree = "<group>"; };
 		7E3B6D7813D7509600FBE958 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		7E3B6D7913D7509600FBE958 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
 		7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacks_back_button@2x.png"; sourceTree = "<group>"; };
@@ -912,6 +915,8 @@
 			children = (
 				7E3B6D7813D7509600FBE958 /* Util.h */,
 				7E3B6D7913D7509600FBE958 /* Util.m */,
+				7E3909341401975C00910F98 /* Notifications.h */,
+				7E3909351401975C00910F98 /* Notifications.m */,
 				7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */,
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E2267D813D52FF500657A66 /* Model */,
@@ -1274,6 +1279,7 @@
 				7EB47EF213FDBD38009AD30A /* CreditsViewController.m in Sources */,
 				7E32AE3313FEEC04000B6EC2 /* Favorite.m in Sources */,
 				7E90B03B13FF081900875522 /* TodoViewController.m in Sources */,
+				7E3909361401975D00910F98 /* Notifications.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

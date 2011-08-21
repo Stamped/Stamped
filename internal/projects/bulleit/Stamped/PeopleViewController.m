@@ -19,19 +19,18 @@
 #import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
 
-static NSString* const kFriendsPath = @"/friendships/friends";
-static NSString* const kFollowersPath = @"/friendships/friends";
+static NSString* const kFriendsPath = @"/temp/friends.json";
+static NSString* const kFollowersPath = @"/temp/followers.json";
 static const NSInteger kFriendsSection = 0;
 static const NSInteger kFollowersSection = 1;
 
 @interface PeopleViewController ()
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)topViewTapped:(UITapGestureRecognizer*)recognizer;
-- (void)loadFriendsFromNetwork;
-- (void)loadFriendsFromDataStore;
+- (void)loadFriendsAndFollowersFromNetwork;
 
-@property (nonatomic, copy) NSArray* followers;
-@property (nonatomic, copy) NSArray* friends;
+@property (nonatomic, copy) NSArray* followersArray;
+@property (nonatomic, copy) NSArray* friendsArray;
 @end
 
 @implementation PeopleViewController
@@ -41,8 +40,8 @@ static const NSInteger kFollowersSection = 1;
 @synthesize userFullNameLabel = userFullNameLabel_;
 @synthesize userScreenNameLabel = userScreenNameLabel_;
 @synthesize addFriendsButton = addFriendsButton_;
-@synthesize followers = followers_;
-@synthesize friends = friends_;
+@synthesize followersArray = followersArray_;
+@synthesize friendsArray = friendsArray_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -66,17 +65,18 @@ static const NSInteger kFollowersSection = 1;
   [userScreenNameLabel_.superview addGestureRecognizer:recognizer];
   [recognizer release];
   [self currentUserUpdated:nil];
-  [self loadFriendsFromNetwork];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-
+  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.currentUserView = nil;
   self.userStampImageView = nil;
   self.userFullNameLabel = nil;
   self.userScreenNameLabel = nil;
   self.addFriendsButton = nil;
+  self.followersArray = nil;
+  self.friendsArray = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -96,32 +96,72 @@ static const NSInteger kFollowersSection = 1;
 }
 
 - (void)userPulledToReload {
-  [self setIsLoading:NO];
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    [self setIsLoading:NO];
+    return;
+  }
+  [self loadFriendsAndFollowersFromNetwork];
 }
 
 - (void)currentUserUpdated:(NSNotification*)notification {
   User* currentUser = [AccountManager sharedManager].currentUser;
+  if (!currentUser)
+    return;
   currentUserView_.imageURL = currentUser.profileImageURL;
   userStampImageView_.image = currentUser.stampImage;
   userScreenNameLabel_.text = currentUser.screenName;
   userFullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", currentUser.firstName, currentUser.lastName];
+  [self loadFriendsAndFollowersFromNetwork];
 }
 
-- (void)loadFriendsFromNetwork {
-  /*if (![[RKClient sharedClient] isNetworkAvailable])
+- (void)loadFriendsAndFollowersFromNetwork {
+  if (![[RKClient sharedClient] isNetworkAvailable])
     return;
+
   NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSDictionary* params = [NSDictionary dictionaryWithObject:authToken forKey:@"oauth_token"];
-  //[[RKClient sharedClient] get:kFriendsPath
-  //                 queryParams:params
-  //                    delegate:self];*/
+  NSString* userID = [AccountManager sharedManager].currentUser.userID;
+  NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:authToken, @"oauth_token", userID, @"user_id", nil];
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  [objectManager loadObjectsAtResourcePath:[kFriendsPath appendQueryParams:params]
+                             objectMapping:userMapping
+                                  delegate:self];
+  [objectManager loadObjectsAtResourcePath:[kFollowersPath appendQueryParams:params]
+                             objectMapping:userMapping
+                                  delegate:self];
 }
 
-- (void)loadFriendsFromDataStore {
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"PeopleLastUpdatedAt"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
+
+	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
+    self.friendsArray = nil;
+    self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"firstName" ascending:YES]]];
+  } else if ([objectLoader.resourcePath rangeOfString:kFollowersPath].location != NSNotFound) {
+    self.followersArray = nil;
+    self.followersArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"firstName" ascending:YES]]];
+  }
+
+  [self setIsLoading:NO];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+	NSLog(@"Hit error: %@", error);
+  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
+  if ([objectLoader.response isUnauthorized]) {
+    [[AccountManager sharedManager] refreshToken];
+    [self loadFriendsAndFollowersFromNetwork];
+    return;
+  }
   
+  [self setIsLoading:NO];
 }
 
-#pragma mark - Table view data source
+#pragma mark - Table view data source.
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
   // Two. Followers and following.
@@ -130,7 +170,12 @@ static const NSInteger kFollowersSection = 1;
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   // Return the number of rows in the section.
-  return 50;
+  if (section == kFollowersSection)
+    return self.followersArray.count;
+  if (section == kFriendsSection)
+    return self.friendsArray.count;
+  
+  return 0;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -140,8 +185,9 @@ static const NSInteger kFollowersSection = 1;
   if (cell == nil) {
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-
-  cell.user = [AccountManager sharedManager].currentUser;
+  
+  NSArray* list = indexPath.section == kFriendsSection ? self.friendsArray : self.followersArray;
+  cell.user = [list objectAtIndex:indexPath.row];
 
   return cell;
 }
@@ -156,13 +202,14 @@ static const NSInteger kFollowersSection = 1;
   STSectionHeaderView* view = [[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)];
   view.leftLabel.text = section == kFriendsSection ? @"Following" : @"Followers";
   view.rightLabel.text =
-      [NSString stringWithFormat:@"%u", section == kFriendsSection ? [friends_ count] : [followers_ count]];
+      [NSString stringWithFormat:@"%u", section == kFriendsSection ? self.friendsArray.count : self.followersArray.count];
   return view;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
-  profileViewController.user = [AccountManager sharedManager].currentUser;
+  NSArray* list = indexPath.section == kFriendsSection ? self.friendsArray : self.followersArray;
+  profileViewController.user = [list objectAtIndex:indexPath.row];
   
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:profileViewController animated:YES];

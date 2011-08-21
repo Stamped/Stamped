@@ -24,6 +24,7 @@
 @property (nonatomic, retain) IBOutlet UILabel* fullNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* usernameLocationLabel;
 @property (nonatomic, retain) IBOutlet UILabel* bioLabel;
+@property (nonatomic, retain) IBOutlet UIImageView* shelfImageView;
 
 @property (nonatomic, retain) User* user;
 

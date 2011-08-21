@@ -41,6 +41,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @synthesize fullNameLabel = fullNameLabel_;
 @synthesize usernameLocationLabel = usernameLocationLabel_;
 @synthesize bioLabel = bioLabel_;
+@synthesize shelfImageView = shelfImageView_;
 
 @synthesize user = user_;
 @synthesize stampsArray = stampsArray_;
@@ -64,7 +65,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   stampLayer.frame = CGRectMake(57, -10, 61, 61);
   stampLayer.opacity = 0.95;
   stampLayer.contents = (id)user_.stampImage.CGImage;
-  [userImageView_.superview.layer addSublayer:stampLayer];
+  [shelfImageView_.superview.layer insertSublayer:stampLayer below:shelfImageView_.layer];
   [stampLayer release];
   cameraButton_.hidden = YES;
   //cameraButton_.hidden = ![user_.userID isEqualToString:[AccountManager sharedManager].currentUser.userID];
@@ -75,6 +76,9 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
   bioLabel_.textColor = [UIColor stampedGrayColor];
   bioLabel_.text = user_.bio;
+  creditCountLabel_.text = [user_.numCredits stringValue];
+  followerCountLabel_.text = [user_.numFollowers stringValue];
+  followingCountLabel_.text = [user_.numFriends stringValue];
   [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
 }
@@ -90,6 +94,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.fullNameLabel = nil;
   self.usernameLocationLabel = nil;
   self.bioLabel = nil;
+  self.shelfImageView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -160,6 +165,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
   STSectionHeaderView* view = [[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)];
   view.leftLabel.text = @"Stamps";
+  view.rightLabel.text = [user_.numStamps stringValue];
   
   return view;
 }

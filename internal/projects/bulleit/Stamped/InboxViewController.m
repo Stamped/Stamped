@@ -23,6 +23,7 @@
 #import "UserImageView.h"
 
 static const CGFloat kFilterRowHeight = 44.0;
+static NSString* const kInboxPath = @"/collections/inbox.json";
 
 typedef enum {
   StampsListFilterTypeBook,
@@ -176,7 +177,7 @@ typedef enum {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSString* resourcePath = [@"/collections/inbox.json" appendQueryParams:[NSDictionary dictionaryWithObject:authToken forKey:@"oauth_token"]];
+  NSString* resourcePath = [kInboxPath appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:authToken, @"oauth_token", @"1", @"quality", nil]];
   [objectManager loadObjectsAtResourcePath:resourcePath
                              objectMapping:stampMapping
                                   delegate:self];

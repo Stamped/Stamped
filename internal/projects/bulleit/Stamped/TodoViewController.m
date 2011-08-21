@@ -16,6 +16,7 @@
 #import "Entity.h"
 #import "EntityDetailViewController.h"
 #import "Favorite.h"
+#import "Notifications.h"
 #import "PlaceDetailViewController.h"
 #import "GenericItemDetailViewController.h"
 #import "StampedAppDelegate.h"
@@ -26,6 +27,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 @interface TodoViewController ()
 - (void)loadFavoritesFromDataStore;
 - (void)loadFavoritesFromNetwork;
+- (void)favoriteDidChange:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* favoritesArray;
 @end
@@ -48,11 +50,16 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self 
+                                           selector:@selector(favoriteDidChange:) 
+                                               name:kFavoriteHasChangedNotification 
+                                             object:nil];
   [self loadFavoritesFromDataStore];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
 }
 
@@ -151,6 +158,10 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
   [request setPredicate:[NSPredicate predicateWithFormat:@"userID == %@", user.userID]];
 	self.favoritesArray = [Favorite objectsWithFetchRequest:request];
   [self.tableView reloadData];
+}
+
+- (void)favoriteDidChange:(NSNotification*)notification {
+  [self loadFavoritesFromDataStore];
 }
 
 @end

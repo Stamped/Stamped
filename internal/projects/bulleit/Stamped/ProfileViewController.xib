@@ -50,22 +50,6 @@
 						<int key="NSvFlags">292</int>
 						<object class="NSMutableArray" key="NSSubviews">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBUIImageView" id="1024393093">
-								<reference key="NSNextResponder" ref="595982083"/>
-								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{0, -234}, {320, 245}}</string>
-								<reference key="NSSuperview" ref="595982083"/>
-								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="724512269"/>
-								<string key="NSReuseIdentifierKey">_NS:366</string>
-								<int key="IBUIContentMode">1</int>
-								<bool key="IBUIUserInteractionEnabled">NO</bool>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<object class="NSCustomResource" key="IBUIImage">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">shelf_background.png</string>
-								</object>
-							</object>
 							<object class="IBUIView" id="724512269">
 								<reference key="NSNextResponder" ref="595982083"/>
 								<int key="NSvFlags">292</int>
@@ -390,6 +374,22 @@
 								<float key="IBUIMinimumFontSize">12</float>
 								<int key="IBUINumberOfLines">0</int>
 							</object>
+							<object class="IBUIImageView" id="1024393093">
+								<reference key="NSNextResponder" ref="595982083"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{0, -234}, {320, 245}}</string>
+								<reference key="NSSuperview" ref="595982083"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="724512269"/>
+								<string key="NSReuseIdentifierKey">_NS:366</string>
+								<int key="IBUIContentMode">1</int>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<object class="NSCustomResource" key="IBUIImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">shelf_background.png</string>
+								</object>
+							</object>
 						</object>
 						<string key="NSFrameSize">{320, 155}</string>
 						<reference key="NSSuperview" ref="873029372"/>
@@ -559,6 +559,14 @@
 					</object>
 					<int key="connectionID">37</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">shelfImageView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="1024393093"/>
+					</object>
+					<int key="connectionID">39</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -595,7 +603,6 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="724512269"/>
-							<reference ref="1024393093"/>
 							<reference ref="723434686"/>
 							<reference ref="802518406"/>
 							<reference ref="1067650366"/>
@@ -609,6 +616,7 @@
 							<reference ref="731695331"/>
 							<reference ref="747625205"/>
 							<reference ref="740533641"/>
+							<reference ref="1024393093"/>
 						</object>
 						<reference key="parent" ref="873029372"/>
 					</object>
@@ -768,7 +776,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">37</int>
+			<int key="maxID">39</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -832,6 +840,7 @@
 							<string>followerCountLabel</string>
 							<string>followingCountLabel</string>
 							<string>fullNameLabel</string>
+							<string>shelfImageView</string>
 							<string>userImageView</string>
 							<string>usernameLocationLabel</string>
 						</object>
@@ -843,6 +852,7 @@
 							<string>UILabel</string>
 							<string>UILabel</string>
 							<string>UILabel</string>
+							<string>UIImageView</string>
 							<string>UserImageView</string>
 							<string>UILabel</string>
 						</object>
@@ -857,6 +867,7 @@
 							<string>followerCountLabel</string>
 							<string>followingCountLabel</string>
 							<string>fullNameLabel</string>
+							<string>shelfImageView</string>
 							<string>userImageView</string>
 							<string>usernameLocationLabel</string>
 						</object>
@@ -885,6 +896,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">fullNameLabel</string>
 								<string key="candidateClassName">UILabel</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">shelfImageView</string>
+								<string key="candidateClassName">UIImageView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">userImageView</string>

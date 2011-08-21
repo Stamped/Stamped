@@ -20,6 +20,7 @@
 #import "GenericItemDetailViewController.h"
 #import "Entity.h"
 #import "Favorite.h"
+#import "Notifications.h"
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
@@ -134,8 +135,8 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   [self setUpMainContentView];
   [self setUpCommentsView];
 
-  //[self renderComments];
-  [self loadCommentsFromServer];
+  [self renderComments];
+  //[self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {
@@ -308,16 +309,10 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  if (shouldDelete) {
-    objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-                           [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
-                           stamp_.entityObject.favorite.favoriteID, @"favorite_id", nil];
-    stamp_.entityObject.favorite = nil;
-  } else {
-    objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-                           [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
-                           stamp_.entityObject.entityID, @"entity_id", nil];
-  }
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+      [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
+      stamp_.entityObject.entityID, @"entity_id", nil];
+
   [objectLoader send];
 }
 
@@ -381,9 +376,7 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
 }
 
 - (void)renderComments {
-  NSSortDescriptor* createdDescriptor = [[NSSortDescriptor alloc] initWithKey:@"created" ascending:YES];
-  NSArray* sortDescriptors = [NSArray arrayWithObject:createdDescriptor];
-  [createdDescriptor release];
+  NSArray* sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]];
   for (Comment* c in [stamp_.comments sortedArrayUsingDescriptors:sortDescriptors])
     [self addComment:c];
 }
@@ -458,14 +451,17 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
-    Favorite* fav = [objects lastObject];
-    NSLog(@"Entity title %@", fav.entityObject.title);
+    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification 
+                                                        object:nil];
     return;
   }
 
   if ([objectLoader.resourcePath isEqualToString:kRemoveFavoritePath]) {
     NSLog(@"%@", objectLoader.response.bodyAsString);
-    //stamp_.entityObject.favorite = nil;
+    Favorite* fav = [objects lastObject];
+    [fav deleteEntity];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification 
+                                                        object:nil];
     return;
   }
   

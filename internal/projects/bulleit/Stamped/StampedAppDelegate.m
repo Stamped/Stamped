@@ -19,7 +19,8 @@
 #import "User.h"
 #import "OAuthToken.h"
 
-static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
+//static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
+static NSString* const kDataBaseURL = @"http://ec2-50-19-33-126.compute-1.amazonaws.com:5000/api/v1";
 
 @implementation StampedAppDelegate
 
@@ -40,6 +41,10 @@ static NSString* kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                        @"color_secondary", @"secondaryColor",
                                        @"profile_image", @"profileImageURL",
                                        @"screen_name", @"screenName",
+                                       @"num_credits", @"numCredits",
+                                       @"num_followers", @"numFollowers",
+                                       @"num_friends", @"numFriends",
+                                       @"num_stamps", @"numStamps",
                                        nil];
   userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapAttributes:@"bio", @"website", nil];

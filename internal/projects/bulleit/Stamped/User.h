@@ -27,6 +27,10 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSSet* stamps;
 @property (nonatomic, retain) NSSet* comments;
 @property (nonatomic, retain) NSSet* events;
+@property (nonatomic, retain) NSNumber* numCredits;
+@property (nonatomic, retain) NSNumber* numFollowers;
+@property (nonatomic, retain) NSNumber* numFriends;
+@property (nonatomic, retain) NSNumber* numStamps;
 @end
 
 @interface User (CoreDataGeneratedAccessors)

@@ -52,6 +52,10 @@
         <attribute name="displayName" optional="YES" attributeType="String"/>
         <attribute name="firstName" optional="YES" attributeType="String"/>
         <attribute name="lastName" optional="YES" attributeType="String"/>
+        <attribute name="numCredits" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
+        <attribute name="numFollowers" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
+        <attribute name="numFriends" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
+        <attribute name="numStamps" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="primaryColor" optional="YES" attributeType="String"/>
         <attribute name="profileImageURL" optional="YES" attributeType="String"/>
         <attribute name="screenName" optional="YES" attributeType="String"/>
@@ -69,6 +73,6 @@
         <element name="Event" positionX="160" positionY="192" width="128" height="135"/>
         <element name="Favorite" positionX="160" positionY="192" width="128" height="120"/>
         <element name="Stamp" positionX="216" positionY="324" width="128" height="165"/>
-        <element name="User" positionX="-45" positionY="63" width="128" height="255"/>
+        <element name="User" positionX="-45" positionY="63" width="128" height="315"/>
     </elements>
 </model>
