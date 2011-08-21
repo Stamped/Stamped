@@ -111,6 +111,9 @@ class SchemaElement(object):
         
         if self._default != None:
             self.setElement('[default]', self._default)
+
+        self._setDerivative(kwargs.pop('derivedFrom', None), \
+                            kwargs.pop('derivedFn', None))
     
     def __str__(self):
         return str(self.value)
@@ -153,6 +156,14 @@ class SchemaElement(object):
     def _clearElement(self):
         self._data = None
         self._isSet = False
+
+    def _setDerivative(self, derivedFrom, derivedFn):
+        if derivedFrom != None or derivedFn != None:
+            self._derivedFrom   = derivedFrom
+            self._derivedFn     = derivedFn
+        else:
+            self._derivedFrom   = None
+            self._derivedFn     = None
 
     # Public Functions
 
@@ -534,6 +545,7 @@ class Schema(SchemaElement):
         elif isinstance(value, SchemaElement):
             try:
                 self._elements[name] = value
+                self._elements[name]._name = name
                 self._elements[name]._validate = self._validate
             except:
                 msg = "Cannot Add Element (%s)" % name
@@ -630,6 +642,7 @@ class Schema(SchemaElement):
         
         ret = {}
         data = copy.copy(data)
+        derivatives = []
         
         for k, v in self._elements.iteritems():
             item  = None
@@ -659,6 +672,9 @@ class Schema(SchemaElement):
             elif isinstance(v, SchemaElement):
                 if isSet:
                     v.setElement(k, item)
+                elif v._derivedFrom != None:
+                    # Wait until everything else has been set
+                    derivatives.append(v)
                 elif clear:
                     v._clearElement()
                 else:
@@ -669,6 +685,18 @@ class Schema(SchemaElement):
                 logs.warning(msg)
                 raise SchemaTypeError(msg)
         
+        # Attempt to set any derivative values
+        for element in derivatives:
+            try:
+                inputValue = self._elements[element._derivedFrom].value
+                element.setElement(element._name, \
+                                    element._derivedFn(inputValue))
+            except:
+                msg = "Unable to derive (%s)" % element._name
+                logs.warning(msg)
+                raise SchemaValidationError(msg)
+        
+        # Fail if excess data exists
         if data != None and len(data) > 0 and self._overflow == False:
             msg = "Unknown Field: %s" % data
             logs.warning(msg)

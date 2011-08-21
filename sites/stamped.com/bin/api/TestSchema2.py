@@ -50,6 +50,15 @@ class SparseSchema(Schema):
         self.none               = SchemaElement(basestring)
         self.default            = SchemaElement(basestring, default='abc')
 
+def addOne(i):
+    print 'ADD ONE: %s' % i
+    return int(i) + 1
+
+class DerivedSchema(Schema):
+    def setSchema(self):
+        self.integerA           = SchemaElement(int)
+        self.integerB           = SchemaElement(int, derivedFrom='integerA', derivedFn=addOne)
+
 class ASchemaTestCase(unittest.TestCase):
     pass
 
@@ -611,6 +620,22 @@ class ContainsSchemaTest(ASchemaTestCase):
         except:
             ret = True
         self.assertTrue(ret)
+
+class DerivedSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'integerA': 1
+        }
+        self.schema = DerivedSchema(self.sampleData)
+
+    def test_retrieve(self):
+
+        self.assertEqual(self.schema.integerB, addOne(self.sampleData['integerA']))
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

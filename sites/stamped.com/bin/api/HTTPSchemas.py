@@ -195,10 +195,19 @@ class HTTPStamp(Schema):
         if schema.__class__.__name__ == 'Stamp':
             data                = schema.exportSparse()
             coordinates         = data['entity'].pop('coordinates', None)
+            comments            = data.pop('comment_preview', [])
+
+            comment_preview = []
+            for comment in comments:
+                comment = Comment(comment)
+                comment = HTTPComment().importSchema(comment).exportSparse()
+                comment_preview.append(comment)
+            data['comment_preview'] = comment_preview
 
             self.importData(data, overflow=True)
             self.num_comments = schema.stats.num_comments
             self.entity.coordinates = _coordinatesDictToFlat(coordinates)
+
         else:
             raise NotImplementedError
         return self
@@ -474,8 +483,6 @@ class HTTPActivity(Schema):
                 data['comment'] = HTTPComment().importSchema(comment).exportSparse()
             if favorite.favorite_id != None:
                 data['favorite']= HTTPFavorite().importSchema(favorite).exportSparse()
-
-            print 'DONE???'
 
             self.importData(data, overflow=True)
             self.created = schema.timestamp.created
