@@ -612,7 +612,7 @@ class StampedAPI(AStampedAPI):
                     # regardless...
 
                 # Update credited user stats
-                self._userDB.updateUserStats(userId, 'num_credit', \
+                self._userDB.updateUserStats(userId, 'num_credits', \
                     None, increment=1)
 
                 ### TODO: Implement this
@@ -750,7 +750,7 @@ class StampedAPI(AStampedAPI):
                     self._commentDB.addComment(comment)
 
                 # Update credited user stats
-                self._userDB.updateUserStats(userId, 'num_credit', \
+                self._userDB.updateUserStats(userId, 'num_credits', \
                     None, increment=1)
                 # if auth['authenticated_user_id'] not in self._userDB.creditGivers(userId):
                 #     self._userDB.addCreditGiver(userId, user.user_id)
