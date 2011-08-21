@@ -12,6 +12,32 @@ from datetime import datetime
 # from Schemas import *
 from schema import *
 
+### Derivative Functions
+
+def addOne(i):
+    return int(i) + 1
+
+def setCategory(subcategory):
+    subcategories = {
+        'restaurant' : 'food', 
+        'bar' : 'food', 
+        'book' : 'book', 
+        'movie' : 'film', 
+        'artist' : 'music', 
+        'song' : 'music', 
+        'album' : 'music', 
+        'app' : 'other', 
+        'other' : 'other',
+    }
+    try:
+        return subcategories[subcategory]
+    except:
+        msg = "Invalid subcategory"
+        print msg
+        raise Exception(msg)
+
+### Schemas
+
 class SimpleSchema(Schema):
     def setSchema(self):
         self.basestring         = SchemaElement(basestring)
@@ -50,14 +76,15 @@ class SparseSchema(Schema):
         self.none               = SchemaElement(basestring)
         self.default            = SchemaElement(basestring, default='abc')
 
-def addOne(i):
-    print 'ADD ONE: %s' % i
-    return int(i) + 1
-
 class DerivedSchema(Schema):
     def setSchema(self):
         self.integerA           = SchemaElement(int)
         self.integerB           = SchemaElement(int, derivedFrom='integerA', derivedFn=addOne)
+
+class DerivedCategorySchema(Schema):
+    def setSchema(self):
+        self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=setCategory)
+        self.subcategory        = SchemaElement(basestring)
 
 class ASchemaTestCase(unittest.TestCase):
     pass
@@ -621,19 +648,38 @@ class ContainsSchemaTest(ASchemaTestCase):
             ret = True
         self.assertTrue(ret)
 
-class DerivedSchemaTest(ASchemaTestCase):
-
+class DerivedBasicSchemaTest(ASchemaTestCase):
     def setUp(self):
-
         self.sampleData = {
             'integerA': 1
         }
         self.schema = DerivedSchema(self.sampleData)
 
     def test_retrieve(self):
-
         self.assertEqual(self.schema.integerB, addOne(self.sampleData['integerA']))
 
+class DerivedCategorySchemaTest(ASchemaTestCase):
+    def setUp(self):
+        self.sampleData = {
+            'subcategory': 'restaurant'
+        }
+        self.schema = DerivedCategorySchema(self.sampleData)
+
+    def test_retrieve(self):
+        self.assertEqual(self.schema.category, setCategory(self.sampleData['subcategory']))
+
+class DerivedCategorySchemaFail(ASchemaTestCase):
+    def setUp(self):
+        self.sampleData = {
+            'subcategory': 'something else'
+        }
+        try:
+            self.schema = DerivedCategorySchema(self.sampleData)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+        
 
 
 

@@ -143,11 +143,11 @@ class FlagsSchema(Schema):
 class UserStatsSchema(Schema):
     def setSchema(self):
         self.num_stamps         = SchemaElement(int)
-        self.num_following      = SchemaElement(int)
+        self.num_friends        = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
         self.num_todos          = SchemaElement(int)
-        self.num_credit         = SchemaElement(int)
-        self.num_credit_given   = SchemaElement(int)
+        self.num_credits        = SchemaElement(int)
+        self.num_credits_given  = SchemaElement(int)
 
 class StampStatsSchema(Schema):
     def setSchema(self):

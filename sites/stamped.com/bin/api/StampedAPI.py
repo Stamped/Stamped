@@ -248,6 +248,12 @@ class StampedAPI(AStampedAPI):
         self._friendshipDB.addFriendship(friendship)
 
         ### TODO: Add activity item for receipient?
+
+        # Increment stats for both users
+        self._userDB.updateUserStats(authUserId, 'num_friends', \
+                    None, increment=1)
+        self._userDB.updateUserStats(user.user_id, 'num_followers', \
+                    None, increment=1)
         
         return user
     
@@ -267,6 +273,12 @@ class StampedAPI(AStampedAPI):
         self._friendshipDB.removeFriendship(friendship)
 
         ### TODO: Remove stamps from Inbox
+
+        # Increment stats for both users
+        self._userDB.updateUserStats(authUserId, 'num_friends', \
+                    None, increment=-1)
+        self._userDB.updateUserStats(user.user_id, 'num_followers', \
+                    None, increment=-1)
 
         return user
     

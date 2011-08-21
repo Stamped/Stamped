@@ -132,11 +132,24 @@ class HTTPUser(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
-        ### TODO: Add stats
+        self.num_stamps         = SchemaElement(int)
+        self.num_friends        = SchemaElement(int)
+        self.num_followers      = SchemaElement(int)
+        self.num_todos          = SchemaElement(int)
+        self.num_credits        = SchemaElement(int)
+        self.num_credits_given  = SchemaElement(int)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ in ('Account', 'User'):
             self.importData(schema.exportSparse(), overflow=True)
+            
+            stats = schema.stats.exportSparse()
+            self.num_stamps         = stats.pop('num_stamps', 0)
+            self.num_friends        = stats.pop('num_friends', 0)
+            self.num_followers      = stats.pop('num_followers', 0)
+            self.num_todos          = stats.pop('num_todos', 0)
+            self.num_credits        = stats.pop('num_credits', 0)
+            self.num_credits_given  = stats.pop('num_credits_given', 0)
         else:
             raise NotImplementedError
         return self
