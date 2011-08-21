@@ -573,6 +573,10 @@ class StampedAPI(AStampedAPI):
         followers = self._friendshipDB.getFollowers(user.user_id)
         followers.append(user.user_id)
         self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
+
+        # Increment user stats by one
+        self._userDB.updateUserStats(authUserId, 'num_stamps', \
+                    None, increment=1)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -817,6 +821,12 @@ class StampedAPI(AStampedAPI):
         ### TODO: If restamp, remove from credited stamps' comment list
 
         ### TODO: Remove from activity? To do? Anything else?
+
+        # Update user stats 
+        ### TODO: Do an actual count / update?
+        self._userDB.updateUserStats(authUserId, 'num_stamps', \
+                    None, increment=-1)
+        ### TODO: Update credit stats if credit given
 
         return stamp
         
@@ -1135,11 +1145,20 @@ class StampedAPI(AStampedAPI):
 
         favorite = self._favoriteDB.addFavorite(favorite)
 
+        # Increment user stats by one
+        self._userDB.updateUserStats(authUserId, 'num_faves', \
+                    None, increment=1)
+
         return favorite
     
     def removeFavorite(self, authUserId, entityId):
         favorite = self._favoriteDB.getFavorite(authUserId, entityId)
         self._favoriteDB.removeFavorite(authUserId, entityId)
+
+        # Decrement user stats by one
+        self._userDB.updateUserStats(authUserId, 'num_faves', \
+                    None, increment=-1)
+
         return favorite
     
     def getFavorites(self, authUserId, **kwargs):        

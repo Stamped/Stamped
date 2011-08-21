@@ -135,7 +135,7 @@ class HTTPUser(Schema):
         self.num_stamps         = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
-        self.num_todos          = SchemaElement(int)
+        self.num_faves          = SchemaElement(int)
         self.num_credits        = SchemaElement(int)
         self.num_credits_given  = SchemaElement(int)
 
@@ -147,7 +147,7 @@ class HTTPUser(Schema):
             self.num_stamps         = stats.pop('num_stamps', 0)
             self.num_friends        = stats.pop('num_friends', 0)
             self.num_followers      = stats.pop('num_followers', 0)
-            self.num_todos          = stats.pop('num_todos', 0)
+            self.num_faves          = stats.pop('num_faves', 0)
             self.num_credits        = stats.pop('num_credits', 0)
             self.num_credits_given  = stats.pop('num_credits_given', 0)
         else:

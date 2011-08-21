@@ -145,7 +145,7 @@ class UserStatsSchema(Schema):
         self.num_stamps         = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
-        self.num_todos          = SchemaElement(int)
+        self.num_faves          = SchemaElement(int)
         self.num_credits        = SchemaElement(int)
         self.num_credits_given  = SchemaElement(int)
 
