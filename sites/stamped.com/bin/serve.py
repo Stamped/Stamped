@@ -119,8 +119,8 @@ def parseRequest(schema, request):
 
         return schema
 
-    except (InvalidArgument, Fail) as e:
-        msg = str(e)
+    except:
+        msg = "Unable to parse form"
         logs.warning(msg)
         raise StampedHTTPError("bad_request", 400, e)
 

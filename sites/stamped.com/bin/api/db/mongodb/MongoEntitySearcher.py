@@ -279,11 +279,15 @@ class MongoEntitySearcher(AEntitySearcher):
     def _get_quality_value(self, entity):
         value = 1.0
         
+        """
+        # Note: Disabling temporarily since it fails on multiple "popularity" items 
+        # in schema
         if 'popularity' in entity:
             # popularity is in the range [1,1000]
             #print 'POPULARITY: %d' % (entity['popularity'], )
             value *= 5 * ((2000 - int(entity['popularity'])) / 1000.0)
-        
+        """
+
         return value
     
     def _get_distance_value(self, distance):

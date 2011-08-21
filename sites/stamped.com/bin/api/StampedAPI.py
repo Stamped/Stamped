@@ -182,7 +182,6 @@ class StampedAPI(AStampedAPI):
     def getUsers(self, userIds, screenNames, authUserId):
 
         ### TODO: Add check for privacy settings
-        print 'DO IT:', userIds, screenNames
 
         users = self._userDB.lookupUsers(userIds, screenNames, limit=100)
 

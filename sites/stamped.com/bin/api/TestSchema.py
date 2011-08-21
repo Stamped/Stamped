@@ -1,407 +1,753 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 __author__ = "Stamped (dev@stamped.com)"
 __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy
+import Globals, unittest, logging
+
 from datetime import datetime
+# from Schemas import *
+from schema import *
 
+### Turn off logging
+log = logging.getLogger('stamped')
+log.setLevel(logging.ERROR)
 
-class SchemaElement(object):
+### Derivative Functions
 
-    def __init__(self, requiredType, **kwargs):
-        self._data = None
-        self._requiredType = requiredType
-        self._required = kwargs.pop('required', False)
+def addOne(i):
+    return int(i) + 1
+
+def setCategory(subcategory):
+    subcategories = {
+        'restaurant' : 'food', 
+        'bar' : 'food', 
+        'book' : 'book', 
+        'movie' : 'film', 
+        'artist' : 'music', 
+        'song' : 'music', 
+        'album' : 'music', 
+        'app' : 'other', 
+        'other' : 'other',
+    }
+    try:
+        return subcategories[subcategory]
+    except:
+        msg = "Invalid subcategory"
+        print msg
+        raise Exception(msg)
+
+### Schemas
+
+class SimpleSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.integer            = SchemaElement(int, default=100)
+        self.float              = SchemaElement(float)
+        self.long               = SchemaElement(long)
+        self.required           = SchemaElement(basestring, required=True)
+        self.bool               = SchemaElement(bool)
+        self.datetime           = SchemaElement(datetime)
+
+class InnerSchema(Schema):
+    def setSchema(self):
+        self.item               = SchemaElement(basestring)
+        self.required           = SchemaElement(basestring, required=True)
+        self.basestring         = SchemaElement(basestring)
+
+class NestedSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.inner              = InnerSchema()
+
+class DoubleNestedSchema(Schema):
+    def setSchema(self):
+        self.string             = SchemaElement(basestring)
+        self.inner              = NestedSchema()
+
+class ListSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.items              = SchemaList(InnerSchema())
+
+class ListCommaSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.items              = SchemaList(SchemaElement(basestring), delimiter=',')
+
+class SparseSchema(Schema):
+    def setSchema(self):
+        self.basestring         = SchemaElement(basestring)
+        self.empty              = SchemaElement(basestring)
+        self.none               = SchemaElement(basestring)
+        self.default            = SchemaElement(basestring, default='abc')
+
+class DerivedSchema(Schema):
+    def setSchema(self):
+        self.integerA           = SchemaElement(int)
+        self.integerB           = SchemaElement(int, derivedFrom='integerA', derivedFn=addOne)
+
+class DerivedCategorySchema(Schema):
+    def setSchema(self):
+        self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=setCategory)
+        self.subcategory        = SchemaElement(basestring)
+
+class ASchemaTestCase(unittest.TestCase):
+    pass
+
+    ### DEFAULT ASSERTIONS
+    def assertIsInstance(self, a, b):
+        self.assertTrue(isinstance(a, b))
         
-    def __str__(self):
-        return str(self.value)
+    def assertIn(self, a, b):
+        self.assertTrue((a in b) == True)
 
-    def __len__(self):
-        if self._data == None:
-            return 0
-        return len(self._data)
+    def assertLength(self, a, size):
+        self.assertTrue(len(a) == size)
 
-    @property
-    def value(self):
-        return self._data
+    ### DEFAULT VARIABLES
 
-    def validate(self, name='N/A'):
-        return self.setElement(name, self._data)
-        
-    def setElement(self, name, value=None):
-        if value == None:
-            if self._required == True:
-                msg = "Required field empty (%s)" % name
-                print msg
-                raise Exception(msg)
-            self._data = value
-            return
-        
-        if not isinstance(value, self._requiredType):
+    sampleString                = 'abc'
+    sampleInt                   = 123
+    sampleIntB                  = '123'
+    sampleFloat                 = 123.45
+    sampleFloatB                = '123.45'
+    sampleLong                  = 2L
+    sampleList                  = [1, 2, 3]
+    sampleDict                  = {'a': 1, 'b': 2}
+    sampleTuple                 = (1, 2, 3, 'abc')
+    sampleBool                  = True
+    sampleBool2                 = 'True'
+    sampleBool3                 = 1
+    sampleBool4                 = 1L
+    sampleNone                  = None
+    sampleDatetime              = datetime.utcnow()
+    sampleUTF8                  = '๓๙ใ1฿'
+
+
+class SimpleSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':   self.sampleString,
+            'integer':      self.sampleInt,
+            'float':        self.sampleFloat,
+            'required':     self.sampleString,
+            'long':         self.sampleLong,
+            'bool':         self.sampleBool,
+            'datetime':     self.sampleDatetime,
+        }
+        self.schema = SimpleSchema(self.sampleData)
+
+    def tearDown(self):
+        pass
+
+    def test_retrieve(self):
+        self.assertEqual(self.sampleString, self.schema.basestring)
+        self.assertEqual(self.sampleInt, self.schema.integer)
+        self.assertEqual(self.sampleFloat, self.schema.float)
+        self.assertEqual(self.sampleLong, self.schema.long)
+        self.assertEqual(self.sampleBool, self.schema.bool)
+        self.assertEqual(self.sampleDatetime, self.schema.datetime)
+
+        self.assertEqual(self.sampleString, self.schema['basestring'])
+        self.assertEqual(self.sampleInt, self.schema['integer'])
+        self.assertEqual(self.sampleFloat, self.schema['float'])
+        self.assertEqual(self.sampleLong, self.schema['long'])
+        self.assertEqual(self.sampleBool, self.schema['bool'])
+        self.assertEqual(self.sampleDatetime, self.schema['datetime'])
+
+        self.assertIsInstance(self.schema.basestring, basestring)
+        self.assertIsInstance(self.schema.integer, int)
+        self.assertIsInstance(self.schema.float, float)
+        self.assertIsInstance(self.schema.long, long)
+        self.assertIsInstance(self.schema.bool, bool)
+        self.assertIsInstance(self.schema.datetime, datetime)
+
+    def test_contain(self):
+        self.assertIn('basestring', self.schema)
+        self.assertIn('integer', self.schema)
+        self.assertIn('float', self.schema)
+        self.assertIn('required', self.schema)
+        self.assertIn('long', self.schema)
+        self.assertIn('bool', self.schema)
+        self.assertIn('datetime', self.schema)
+
+    def test_valid_float(self):
+        values = [
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleBool,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.float = i
+
+    def test_invalid_float(self):
+        values = [
+            self.sampleString,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool2,
+            self.sampleDatetime,
+        ]
+        for i in values:
             try:
-                if isinstance(value, dict):
-                    msg = "Cannot set dictionary as value (%s)" % name
-                    print msg
-                    raise TypeError(msg)
-                elif self._requiredType == basestring:
-                    value = str(value)
-                elif self._requiredType == float:
-                    value = float(value)
-                elif self._requiredType == int:
-                    value = int(value)
-                if not isinstance(value, self._requiredType):
-                    raise
+                self.schema.float = i
+                ret = False
             except:
-                msg = "Incorrect type (%s)" % name
-                print msg
-                raise KeyError(msg)
-        
-        self._data = value
+                ret = True
+            self.assertTrue(ret)
 
-class SchemaList(SchemaElement):
-    
-    def __init__(self, element, **kwargs):
-        SchemaElement.__init__(self, dict, **kwargs)
-        self._element = element
-        self._data = []
+    def test_valid_int(self):
+        values = [
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleLong,
+            self.sampleBool,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.integer = i
 
-    def __len__(self):
-        return len(self._elements)
-
-    @property
-    def value(self):
-        ret = []
-        for item in self._data:
-            ret.append(item.value)
-        return ret
-
-    def importData(self, data):
-        if data == None or len(data) == 0:
-            return
-        if not isinstance(data, list):
-            raise TypeError
-
-        data = copy.copy(data)
-
-        # print 'Validating   | %s' % self
-        # print 'Data         | %s' % data
-        # print 'Elements     | %s' % self._elements.keys()
-
-        if not isinstance(self._element, SchemaElement):
-            raise Exception("Invalid element in list")
-        element = self._element
-
-        # Dictionary
-        if isinstance(element, Schema):
-            for item in data:
-                newSchema = copy.deepcopy(element)
-                newSchema.importData(item)
-                self._data.append(newSchema)
-
-        # List
-        elif isinstance(element, SchemaList):
-            for item in data:
-                newSchemaList = copy.deepcopy(element)
-                newSchemaList.importData(item)
-                self._data.append(newSchemaList)
-
-        # Value
-        elif isinstance(element, SchemaElement):
-            for item in data:
-                newSchemaElement = copy.deepcopy(element)
-                newSchemaElement.setElement('e', item)
-                self._data.append(newSchemaElement)
-        
-        else:
-            msg = "Unrecognized element in schema"
-            print msg
-            raise Exception(msg)
-
-    def validate(self):
-        for item in self._data:
-            if not isinstance(item, SchemaElement):
-                msg = "Incorrect type (%s)" % name
-                print msg
-                raise TypeError(msg)
-            item.validate()
-
-class Schema(SchemaElement):
-    
-    def __init__(self, data=None, **kwargs):
-        SchemaElement.__init__(self, dict, **kwargs)
-        self._elements = {}
-
-        self.setSchema()
-        self.importData(data)
-
-    def __setattr__(self, name, value):
-        # value = utils.normalize(value)
-        if name[:1] == '_':
-            object.__setattr__(self, name, value)
-            return None
-        elif isinstance(value, SchemaElement) or isinstance(value, Schema):
+    def test_invalid_int(self):
+        values = [
+            self.sampleString,
+            self.sampleFloatB,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool2,
+            self.sampleDatetime,
+        ]
+        for i in values:
             try:
-                self._elements[name] = value
-                return True
+                self.schema.integer = i
+                ret = False
             except:
-                raise
-        else:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_valid_string(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleBool,
+            self.sampleBool2,
+            self.sampleDatetime,
+            self.sampleNone,
+            self.sampleTuple, ## Is this expected behavior??
+            self.sampleUTF8,
+        ]
+        for i in values:
+            self.schema.basestring = i
+            # self.assertEqual(self.schema.basestring.value, i)
+
+    def test_invalid_string(self):
+        values = [
+            self.sampleList,
+            self.sampleDict,
+        ]
+        for i in values:
             try:
-                # print 'Set element: (%s, %s)' % (name, value)
-                self._elements[name].setElement(name, value)
-                return True
+                self.schema.basestring = i
+                ret = False
             except:
-                print "Error: (%s, %s)" % (name, value)
-                raise
-    
-    def __setitem__(self, key, value):
-        self.__setattr__(key, value)
-    
-    def __delattr__(self, key):
-        self.__setattr__(key, None)
-    
-    def __delitem__(self, key):
-        self.__setattr__(key, None)
-    
-    def __getattr__(self, name):
-        if name[:1] == '_':
-            return SchemaElement.__getattr__(self, name)
+                ret = True
+            self.assertTrue(ret)
+
+    def test_valid_long(self):
+        values = [
+            self.sampleLong,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.long = i
+
+    def test_invalid_long(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool,
+            self.sampleBool2,
+            self.sampleDatetime,
+        ]
+        for i in values:
+            try:
+                self.schema.long = i
+                ret = False
+            except:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_valid_bool(self):
+        values = [
+            self.sampleBool,
+            self.sampleBool2,
+            self.sampleBool3,
+            self.sampleBool4,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.bool = i
+
+    def test_invalid_bool(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleDatetime,
+        ]
+        for i in values:
+            try:
+                self.schema.bool = i
+                ret = False
+            except:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_valid_datetime(self):
+        values = [
+            self.sampleDatetime,
+            self.sampleNone,
+        ]
+        for i in values:
+            self.schema.datetime = i
+
+    def test_invalid_datetime(self):
+        values = [
+            self.sampleString,
+            self.sampleInt,
+            self.sampleIntB,
+            self.sampleFloat,
+            self.sampleFloatB,
+            self.sampleLong,
+            self.sampleList,
+            self.sampleDict,
+            self.sampleTuple,
+            self.sampleBool,
+            self.sampleBool2,
+        ]
+        for i in values:
+            try:
+                self.schema.datetime = i
+                ret = False
+            except:
+                ret = True
+            self.assertTrue(ret)
+
+    def test_required(self):
+        try:
+            self.schema.required = None
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_iter(self):
+        for i in self.schema:
+            pass
+
+    def test_len(self):
+        self.assertEqual(len(self.schema), len(self.sampleData))
+
+    def test_del(self):
+        self.assertEqual(self.schema.basestring, self.sampleString)
+        del(self.schema.basestring)
+        self.assertEqual(self.schema.basestring, None)
+        self.assertIn('basestring', self.schema)
+
+    def test_default(self):
+        self.assertEqual(self.schema.integer, self.sampleInt)
+        del(self.schema.integer)
+        self.assertEqual(self.schema.integer, 100)
+        self.assertIn('integer', self.schema)
+
+
+class NestedSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'inner': {
+                'item':         self.sampleString,
+                'required':     self.sampleString,
+                'basestring':   self.sampleString,
+            },
+        }
+        self.schema = NestedSchema(self.sampleData)
+
+    def test_retrieve(self):
+        self.assertEqual(self.sampleString, self.schema.basestring)
+        self.assertEqual(self.sampleString, self.schema.inner.item)
+
+        self.assertEqual(self.sampleString, self.schema['basestring'])
+        self.assertEqual(self.sampleString, self.schema['inner']['item'])
+
+        self.assertIsInstance(self.schema.basestring, basestring)
+        self.assertIsInstance(self.schema.inner.item, basestring)
+        self.assertIsInstance(self.schema.inner, Schema)
+        self.assertIsInstance(self.schema.inner.value, dict)
+
+        self.assertEqual(self.sampleData, self.schema.value)
+
+        self.assertEqual(
+            self.sampleData['inner']['item'], 
+            self.schema.exportFields(['inner.item']).values()[0])
+
+    def test_contain_valid(self):
+        self.assertIn('inner', self.schema)
+        self.assertIn('item', self.schema)
+
+    def test_contain_invalid(self):
+        try:
+            'basestring' in self.schema
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_iter(self):
+        n = 0
+        for i in self.schema:
+            n += 1
+        self.assertEqual(n, len(self.sampleData))
+        n = 0
+
+        for i in self.schema.inner:
+            n += 1
+        self.assertEqual(n, len(self.sampleData['inner']))
+
+    def test_len(self):
+        self.assertEqual(len(self.schema), len(self.sampleData))
+
+    def test_del(self):
+        self.assertEqual(self.schema.inner.item, self.sampleString)
+        del(self.schema.inner.item)
+        self.assertEqual(self.schema.inner.item, None)
+        self.assertIn('item', self.schema)
+
+    def test_required(self):
+        try:
+            self.schema.inner.required = None
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_set_element(self):
+        self.schema.setElement('schema', {'inner': {'required': self.sampleString}})
+        self.assertTrue(self.schema.basestring == None)
+        self.assertTrue(self.schema.inner.item == None)
+
+    def test_import(self):
+        self.schema.importData({'inner': {'required': self.sampleString}})
+        self.assertTrue(self.schema.basestring != None)
+        self.assertTrue(self.schema.inner.item != None)
+
+    def test_path_shortcut(self):
+        self.assertTrue(self.schema.required == self.sampleData['inner']['required'])
+
+        self.schema.required = 'Required value'
+        self.assertTrue(self.schema.required == 'Required value')
+        self.assertTrue(self.schema.inner.required == 'Required value')
         
-        if name in self._elements:
-            return self._elements[name]
+        self.schema.item = 'Item value'
+        self.assertTrue(self.schema.item == 'Item value')
+        self.assertTrue(self.schema.inner.item == 'Item value')
+
+        self.schema.basestring = 'Outer basestring'
+        self.assertTrue(self.schema.basestring == 'Outer basestring')
+
+        self.schema.inner.basestring = 'Inner basestring'
+        self.assertTrue(self.schema.inner.basestring == 'Inner basestring')
+
+
+class DoubleNestedSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'string':               self.sampleString,
+            'inner': {
+                'basestring':       self.sampleString,
+                'inner': {
+                    'item':         self.sampleString,
+                    'required':     self.sampleString,
+                    'basestring':   self.sampleString,
+                },
+            },
+        }
+        self.schema = DoubleNestedSchema(self.sampleData)
+
+    def test_path_shortcut(self):
+        self.assertTrue(self.schema.required == \
+                        self.sampleData['inner']['inner']['required'])
+
+        self.schema.required = 'Required value'
+        self.assertTrue(self.schema.required == 'Required value')
+        self.assertTrue(self.schema.inner.required == 'Required value')
+        self.assertTrue(self.schema.inner.inner.required == 'Required value')
         
-        raise KeyError(name)
-        
-    def __getitem__(self, key):
-        return self.__getattr__(key)
+        self.schema.item = 'Item value'
+        self.assertTrue(self.schema.item == 'Item value')
+        self.assertTrue(self.schema.inner.item == 'Item value')
+        self.assertTrue(self.schema.inner.inner.item == 'Item value')
+
+        self.schema.inner.basestring = 'Outer basestring'
+        self.assertTrue(self.schema.inner.basestring == 'Outer basestring')
+
+        self.schema.inner.inner.basestring = 'Inner basestring'
+        self.assertTrue(self.schema.inner.inner.basestring == 'Inner basestring')
+
+    def test_path_shortcut_fail(self):
+        try:
+            self.schema.basestring = 'Set basestring'
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+
+
+class SparseSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'none':             None,
+        }
+        self.schema = SparseSchema(self.sampleData)
     
-    def __len__(self):
-        return len(self._elements)
+    def test_sparse(self):
+        self.assertEqual(
+            self.sampleData['basestring'], 
+            self.schema.exportSparse()['basestring']
+        )
+        self.assertEqual(
+            self.sampleData['none'], 
+            self.schema.exportSparse()['none']
+        )
+        self.assertEqual(
+            'abc', 
+            self.schema.exportSparse()['default']
+        )
+        self.assertTrue('empty' not in self.schema.exportSparse())
 
-    def __contains__(self, item):
-        def _contains(_item, data):
-            output = 0
-            if _item in data:
-                output += 1
-            for k, v in data.iteritems():
-                if isinstance(v, Schema):
-                    if _item in v:
-                        output += 1
-            return output
+
+class ListSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'items': [
+                {
+                    'item':         self.sampleString,
+                    'required':     self.sampleString,
+                    'basestring':   self.sampleString,
+                },
+                {
+                    'item':         self.sampleString,
+                    'required':     self.sampleString,
+                    'basestring':   self.sampleString,
+                },
+            ],
+        }
+        self.schema = ListSchema(self.sampleData)
+
+    def test_retrieve(self):
+        self.assertEqual(self.sampleString, self.schema.basestring)
+        self.assertEqual(self.sampleString, self.schema.items[0].item)
+
+        self.assertEqual(self.sampleString, self.schema['basestring'])
+        self.assertEqual(self.sampleString, self.schema.items[0].item)
+
+        self.assertIsInstance(self.schema.basestring, basestring)
+        self.assertIsInstance(self.schema.items, SchemaList)
+        self.assertIsInstance(self.schema.items.value, list)
+
+        self.assertEqual(self.sampleData, self.schema.value)
+        self.assertEqual(self.sampleData['items'], self.schema.items.value)
+
+    def test_contain(self):
+        self.assertIn('basestring', self.schema)
+        self.assertIn('items', self.schema)
+        self.assertFalse('item' in self.schema) # Shouldn't look in items within a list!
+
+    def test_iter(self):
+        for i in self.schema:
+            pass
+
+        for i in self.schema.items:
+            self.assertIsInstance(i, SchemaElement)
+
+    def test_len(self):
+        self.assertEqual(len(self.schema), len(self.sampleData))
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items']))
+
+    def test_add(self):
+        self.schema.items.append(self.sampleData['items'][0])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])+1)
+
+        self.schema.items.insert(0, self.sampleData['items'][0])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])+2)
+
+        self.schema.items.extend(self.sampleData['items'][:2])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])+4)
+
+    def test_del(self):
+        del(self.schema.items[-1])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])-1)
+        self.assertIn('items', self.schema)
+
+    def test_remove(self):
+        self.schema.items.remove(self.schema.items[0])
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])-1)
+        self.assertIn('items', self.schema)
+
+    def test_pop(self):
+        self.schema.items.pop()
+        self.assertEqual(len(self.schema.items), len(self.sampleData['items'])-1)
+        self.assertIn('items', self.schema)
+
+    def test_index(self):
+        self.schema.items.index(self.schema.items[0])
+
+    def test_count(self):
+        self.assertEqual(
+            self.schema.items.count(self.schema.items[0]), 
+            self.sampleData['items'].count(self.sampleData['items'][0])
+        )
+
+    def test_sort(self):
+        self.schema.items.sort()
+
+    def test_sort(self):
+        self.schema.items.reverse()
+
+
+class ListCommaSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+
+        self.sampleData = {
+            'basestring':       self.sampleString,
+            'items':            '1,2,3'
+        }
+        self.schema = ListCommaSchema(self.sampleData)
+
+    def test_retrieve(self):
+
+        self.assertIsInstance(self.schema.items.value, list)
+
+        self.assertEqual(
+            len(self.sampleData['items'].split(',')), 
+            len(self.schema.items)
+        )
+
+class ContainsSchemaTest(ASchemaTestCase):
+
+    def setUp(self):
+        self.sampleData = {
+            'basestring':   self.sampleString,
+            'integer':      self.sampleInt,
+            'float':        self.sampleFloat,
+            'required':     self.sampleString,
+        }
+        self.schema = SimpleSchema(self.sampleData)
+
+    def tearDown(self):
+        pass
+
+    def test_contain(self):
+        self.assertIn('basestring', self.schema)
+        self.assertIn('integer', self.schema)
+        self.assertIn('float', self.schema)
+        self.assertIn('required', self.schema)
         
-        if _contains(item, self._elements) == 1:
-            return True
-        if _contains(item, self._elements) == 0:
-            return False
-        raise Exception("Multiple keys!")
+    def test_not_set(self):
+        try:
+            self.assertIn('long', self.schema)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
 
-    @property
-    def value(self):
-        ret = {}
-        for k, v in self._elements.iteritems():
-            ret[k] = v.value
-        return ret
+        try:
+            self.assertIn('madeupstring', self.schema)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
 
-    def validate(self):
-        for k, v in self._elements.iteritems():
-            
-            # Dictionary
-            if isinstance(v, Schema):
-                if item == None:
-                    if v._required == True:
-                        msg = "Missing nested directory (%s)" % k
-                        print msg
-                        raise Exception(msg)
-                else:
-                    v.validate()
+class DerivedBasicSchemaTest(ASchemaTestCase):
+    def setUp(self):
+        self.sampleData = {
+            'integerA': 1
+        }
+        self.schema = DerivedSchema(self.sampleData)
 
-            # List
-            elif isinstance(v, SchemaList):
-                if item == None:
-                    if v._required == True:
-                        msg = "Missing list (%s)" % k
-                        print msg
-                        raise Exception(msg)
-                else:
-                    v.validate()
+    def test_retrieve(self):
+        self.assertEqual(self.schema.integerB, addOne(self.sampleData['integerA']))
 
-            # Value
-            elif isinstance(v, SchemaElement):
-                v.validate(k)
-            
-            else:
-                msg = "Unrecognized element in schema"
-                print msg
-                raise Exception(msg)
+class DerivedCategorySchemaTest(ASchemaTestCase):
+    def setUp(self):
+        self.sampleData = {
+            'subcategory': 'restaurant'
+        }
+        self.schema = DerivedCategorySchema(self.sampleData)
 
-    def importData(self, data):
-        if data == None or len(data) == 0:
-            return
-        if not isinstance(data, dict):
-            raise TypeError
+    def test_retrieve(self):
+        self.assertEqual(self.schema.category, setCategory(self.sampleData['subcategory']))
 
-        ret = {}
-        data = copy.copy(data)
-
-        # print 'Validating   | %s' % self
-        # print 'Data         | %s' % data
-        # print 'Elements     | %s' % self._elements.keys()
-
-        for k, v in self._elements.iteritems():
-            item = data.pop(k, None)
-            # print 'Current run  | %s :: %s' % (k, item)
-            
-            # Dictionary
-            if isinstance(v, Schema):
-                if item == None:
-                    if v._required == True:
-                        msg = "Missing nested directory (%s)" % k
-                        print msg
-                        raise Exception(msg)
-                else:
-                    v.importData(item)
-
-            # List
-            elif isinstance(v, SchemaList):
-                if item == None:
-                    if v._required == True:
-                        msg = "Missing nested list (%s)" % k
-                        print msg
-                        raise Exception(msg)
-                else:
-                    v.importData(item)
-
-            # Value
-            elif isinstance(v, SchemaElement):
-                v.setElement(k, item)
-            
-            else:
-                msg = "Unrecognized constraint in schema"
-                print msg
-                raise Exception(msg)
-
-        if len(data) > 0:
-            msg = "Unknown field: %s" % data
-            print msg
-            raise Exception(msg)
-
-    def exportData(self, format=None):
-        if str(format).lower() in ['flat', 'http']:
-            return self._exportFlat()
-        else:
-            return self.value
-
-    def _exportFlat(self):
-        raise NotImplementedError
-
-    def setSchema(self):
-        raise NotImplementedError
-
-    # DEPRECATED
-    def getDataAsDict(self):
-        return self.exportData()
-
-
-class UserTinySchema(Schema):
-    def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-
-
-class EntityMiniSchema(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.coordinates        = CoordinatesSchema()
-
-class CoordinatesSchema(Schema):
-    def setSchema(self):
-        self.lat                = SchemaElement(float, required=True)
-        self.lng                = SchemaElement(float, required=True)
-
-class UserMiniSchema(Schema):
-    def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
-        self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring, required=True)
-        self.color_primary      = SchemaElement(basestring, required=True)
-        self.color_secondary    = SchemaElement(basestring)
-        self.privacy            = SchemaElement(bool, required=True)
-
-class TimestampSchema(Schema):
-    def setSchema(self):
-        self.created            = SchemaElement(datetime, required=True)
-        self.modified           = SchemaElement(datetime)
-
-class StampFlagsSchema(Schema):
-    def setSchema(self):
-        self.flagged            = SchemaElement(bool)
-        self.locked             = SchemaElement(bool)
-
-class StampStatsSchema(Schema):
-    def setSchema(self):
-        self.num_comments       = SchemaElement(int)
-        self.num_todos          = SchemaElement(int)
-        self.num_credit         = SchemaElement(int)
-
-class StampSchema(Schema):
-    def setSchema(self):
-        self.stamp_id           = SchemaElement(basestring, required=True)
-        self.entity             = EntityMiniSchema(required=True)
-        self.user               = UserMiniSchema(required=True)
-        self.blurb              = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
-        self.mentions           = SchemaList(SchemaElement(basestring, required=True))
-        self.credit             = SchemaList(UserTinySchema())
-        self.comment_preview    = SchemaElement(list)
-        self.timestamp          = TimestampSchema(required=True)
-        self.flags              = StampFlagsSchema()
-        self.stats              = StampStatsSchema()
-
-    def _exportFlatOld(self):
-        ret = {}
-        ret['stamp_id']         = self.stamp_id.value
-        ret['entity']           = self.entity.value
-        ret['user']             = self.user.value
-        ret['blurb']            = self.blurb.value
-        ret['image']            = self.image.value
-        ret['mentions']         = self.mentions.value
-        ret['credit']           = self.credit.value
-        ret['comment_preview']  = self.comment_preview.value
-        ret['created']          = self.timestamp.created.value
-        ret['flags']            = self.flags.locked.value
-        ret['num_comments']     = self.stats.num_comments.value
-
-        ret['entity']['coordinates'] = '%s,%s' % (
-            self.entity.coordinates.lat,
-            self.entity.coordinates.lng)
-
-        return ret
-
-    def _exportFlat(self):
-        ret = self.value
-
-        ret['created']          = self.timestamp.created.value
-        ret['flags']            = self.flags.locked.value
-        ret['num_comments']     = self.stats.num_comments.value
+class DerivedCategorySchemaFail(ASchemaTestCase):
+    def setUp(self):
+        self.sampleData = {
+            'subcategory': 'something else'
+        }
+        try:
+            self.schema = DerivedCategorySchema(self.sampleData)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
         
-        ret['entity']['coordinates'] = '%s,%s' % (
-            self.entity.coordinates.lat,
-            self.entity.coordinates.lng)
-
-        del(ret['timestamp'])
-        del(ret['stats'])
-
-        return ret
 
 
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+"""
 
 ### Example implementation
 stampData = {
@@ -442,28 +788,7 @@ stampData = {
 print 
 print 'START'
 
-testStamp = StampSchema(stampData)
-# print 'ASDFS'
-# print "Is valid: %s" % testStamp.isValid
-# print
-
-# stamp = Stamp(stampData)
-# print stamp.user['display_name']
-# stamp.user['screen_name'] = None
-# del(stamp.entity['coordinates']['lat'])
-# print stamp.entity
-# print stamp.coordinates
-# stamp = StampSchema()
-# print 'ASDFS'
-# stamp.stamp_id = '4321'
-# print stampData
 stamp = StampSchema(stampData)
-# print 'ASDFS'
-# stamp.validate()
-# print stamp
-#stamp.entity['title'] = 'The Little Owl'
-# print stamp._elements
-# print "New: ", stamp.stamp_id
 
 print "Stamp['user']['user_id']:        %s" % stamp['user']['user_id']
 
@@ -497,8 +822,6 @@ print stamp.exportData(format='flat')['entity']
 print stamp.exportData(format='flat')['entity']['coordinates']
 print stamp.exportData(format='flat')['credit'][0]
 
-print
-print
 #print stamp.entity.entity_id
 
 if 'entity' in stamp:
@@ -514,51 +837,5 @@ print
 print
 print "Stamp.mentions:                  %s" % stamp.mentions
 print "Stamp.credit:                    %s" % stamp.credit
-
-
-
-
-
-
-### For reference
-_schema = {
-    'stamp_id': basestring,
-    'entity': {
-        'entity_id': basestring,
-        'title': basestring,
-        'coordinates': {
-            'lat': float, 
-            'lng': float
-        },
-        'category': basestring,
-        'subtitle': basestring
-    },
-    'user': {
-        'user_id': basestring,
-        'screen_name': basestring,
-        'display_name': basestring,
-        'profile_image': basestring,
-        'color_primary': basestring,
-        'color_secondary': basestring,
-        'privacy': bool
-    },
-    'blurb': basestring,
-    'image': basestring,
-    'mentions': list,
-    'credit': list,
-    'comment_preview': list,
-    'timestamp': {
-        'created': datetime,
-        'modified': datetime
-    },
-    'flags': {
-        'flagged': bool,
-        'locked': bool
-    },
-    'stats': {
-        'num_comments': int,
-        'num_todos': int,
-        'num_credit': int
-    }
-}
+"""
 

@@ -168,7 +168,9 @@ class SchemaElement(object):
     # Public Functions
 
     def validate(self):
-        if not self._isSet and self._required == True and \
+        # if not self._isSet and self._required == True and \
+        #     self._validate == True:
+        if self.value == None and self._required == True and \
             self._validate == True:
             msg = "Required field empty (%s)" % self._name
             logs.warning(msg)
@@ -553,12 +555,20 @@ class Schema(SchemaElement):
                 raise SchemaKeyError(msg)
         
         else:
-            try:
+            if name in self._elements:
                 self._elements[name].setElement(name, value)
-            except:
-                msg = "Cannot Set Element (%s)" % name
-                logs.warning(msg)
-                raise SchemaKeyError(msg)
+            else:
+                try:
+                    if len(self._contents(name)) == 1:
+                        for k, v in self._elements.iteritems():
+                            if isinstance(v, Schema):
+                                v[name] = value
+                    else:
+                        raise
+                except:
+                    msg = "Cannot Set Element (%s)" % name
+                    logs.warning(msg)
+                    raise SchemaKeyError(msg)
     
     def __setitem__(self, key, value):
         self.__setattr__(key, value)
@@ -573,17 +583,24 @@ class Schema(SchemaElement):
         if name[:1] == '_':
             return SchemaElement.__getattr__(self, name)
         
+        def _returnOutput(item):
+            if isinstance(item, Schema) or isinstance(item, SchemaList):
+                return item
+            return item.value
+
         if name in self._elements:
-            if isinstance(self._elements[name], Schema) \
-                or isinstance(self._elements[name], SchemaList):
-                return self._elements[name]
-            
-            return self._elements[name].value
-        
-        msg = "Cannot Get Element (%s)" % name
-        logs.warning(msg)
-        raise SchemaKeyError(msg)
-    
+            return _returnOutput(self._elements[name])
+
+        try:
+            result = self._contents(name)
+            if len(result) != 1:
+                raise
+            return _returnOutput(result[0])
+        except:
+            msg = "Cannot Get Element (%s)" % name
+            logs.warning(msg)
+            raise SchemaKeyError(msg)
+
     def __getitem__(self, key):
         return self.__getattr__(key)
     
@@ -594,23 +611,11 @@ class Schema(SchemaElement):
         return self.value.__iter__()
     
     def __contains__(self, item):
-        def _contains(_item, data):
-            output = 0
-            if _item in data and data[_item]._isSet == True:
-                output += 1
-            
-            for k, v in data.iteritems():
-                if isinstance(v, Schema):
-                    if _item in v:
-                        output += 1
-            
-            return output
-        
-        ret = _contains(item, self._elements)
-        
-        if 1 == ret:
-            return True
-        elif 0 == ret:
+        ret = self._contents(item)
+
+        if len(ret) == 1:
+            return ret[0]._isSet
+        elif len(ret) == 0:
             return False
         else:
             msg = "Multiple Keys Exist (%s)" % item
@@ -703,6 +708,17 @@ class Schema(SchemaElement):
             raise SchemaValidationError(msg)
         
         self._isSet = True
+
+    def _contents(self, item):
+        output = []
+        if item in self._elements:
+            output.append(self._elements[item])
+        
+        for k, v in self._elements.iteritems():
+            if isinstance(v, Schema):
+                output.extend(v._contents(item))
+        
+        return output
     
     # Public Functions
     
