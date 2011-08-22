@@ -117,6 +117,13 @@ static const CGFloat kSubstringFontSize = 12.0;
   }
 }
 
+- (void)setCompleted:(BOOL)completed {
+  completed_ = completed;
+  stampImageView_.hidden = completed;
+  completedImageView_.hidden = !completed;
+  [self setNeedsDisplay];
+}
+
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
   [titleAttributes_ setObject:(id)color.CGColor forKey:(id)kCTForegroundColorAttributeName];
   NSAttributedString* titleAttributedString =

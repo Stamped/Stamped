@@ -19,6 +19,21 @@
 
 static const CGFloat kMinContainerHeight = 204.0;
 
+@interface STCreditTextField : UITextField
+@end
+
+@implementation STCreditTextField
+
+- (CGRect)textRectForBounds:(CGRect)bounds {
+  return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
+}
+
+- (CGRect)editingRectForBounds:(CGRect)bounds {
+  return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
+}
+
+@end
+
 @interface CreateStampViewController ()
 - (void)editorDoneButtonPressed:(id)sender;
 - (void)dismissSelf;

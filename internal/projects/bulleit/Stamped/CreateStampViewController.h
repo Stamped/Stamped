@@ -13,6 +13,7 @@
 @class UserImageView;
 @class CAGradientLayer;
 @class User;
+@class STCreditTextField;
 
 @interface CreateStampViewController : UIViewController<UITextFieldDelegate,
                                                         UITextViewDelegate,
@@ -37,7 +38,7 @@
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* spinner;
 @property (nonatomic, retain) IBOutlet UIButton* checkmarkButton;
-@property (nonatomic, retain) IBOutlet UITextField* creditTextField;
+@property (nonatomic, retain) IBOutlet STCreditTextField* creditTextField;
 
 
 - (IBAction)backOrCancelButtonPressed:(id)sender;

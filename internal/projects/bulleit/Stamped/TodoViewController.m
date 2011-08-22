@@ -101,7 +101,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
   Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row];
   cell.entityObject = fave.entityObject;
-//  cell.textLabel.text = fave.entityObject.title;
+  cell.completed = [fave.complete boolValue];
   
   return cell;
 }
