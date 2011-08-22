@@ -210,7 +210,7 @@ class AStampedAPITestCase(unittest.TestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
 
-
+"""
 # ####### #
 # ACCOUNT #
 # ####### #
@@ -1068,7 +1068,7 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
         self.deleteComment(self.tokenA, self.commentJ['comment_id'])
         self.deleteComment(self.tokenA, self.commentK['comment_id'])
 
-
+"""
 
 # ######### #
 # FAVORITES #
@@ -1076,27 +1076,65 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
 
 class StampedAPIFavoriteTest(AStampedAPITestCase):
     def setUp(self):
-        (self.user, self.token) = self.createAccount('UserA')
-        self.entity = self.createEntity(self.token)
-        self.stamp = self.createStamp(self.token, self.entity['entity_id'])
-        self.favorite = self.createFavorite(self.token, self.entity['entity_id'])
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.entity = self.createEntity(self.tokenA)
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
+        self.favorite = self.createFavorite(self.tokenB, self.entity['entity_id'])
 
     def tearDown(self):
-        self.deleteFavorite(self.token, self.entity['entity_id'])
-        self.deleteStamp(self.token, self.stamp['stamp_id'])
-        self.deleteEntity(self.token, self.entity['entity_id'])
-        self.deleteAccount(self.token)
+        self.deleteFavorite(self.tokenB, self.entity['entity_id'])
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
 
 class StampedAPIFavoritesShow(StampedAPIFavoriteTest):
     def test_show(self):
         path = "favorites/show.json"
         data = { 
-            "oauth_token": self.token['access_token'],
+            "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 1)
 
+    def test_show_nothing(self):
+        path = "favorites/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 0)
 
+class StampedAPIFavoritesAlreadyComplete(StampedAPIFavoriteTest):
+    def test_create_completed(self):
+        self.entityB = self.createEntity(self.tokenB)
+        self.stampB = self.createStamp(self.tokenB, self.entityB['entity_id'])
+        self.favoriteB = self.createFavorite(self.tokenB, self.entityB['entity_id'])
+
+        path = "favorites/show.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 2)
+        self.assertTrue(result[0]['complete'])
+
+        self.deleteFavorite(self.tokenB, self.entityB['entity_id'])
+        self.deleteStamp(self.tokenB, self.stampB['stamp_id'])
+        self.deleteEntity(self.tokenB, self.entityB['entity_id'])
+
+class StampedAPIFavoritesAlreadyOnList(StampedAPIFavoriteTest):
+    def test_already_on_list(self):
+        try:
+            self.favoriteB = self.createFavorite(self.tokenB, self.entity['entity_id'])
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+
+"""
 # ######## #
 # ACTIVITY #
 # ######## #
@@ -1204,7 +1242,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
-
+"""
 """
         
         

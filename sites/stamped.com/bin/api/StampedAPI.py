@@ -1139,8 +1139,22 @@ class StampedAPI(AStampedAPI):
             favorite.stamp = stamp
 
         ### TODO: Check to verify that user hasn't already favorited entity
+        try:
+            fav = self._favoriteDB.getFavorite(authUserId, entityId)
+            if fav.favorite_id == None:
+                raise
+            exists = True
+        except:
+            exists = False
 
-        ### TODO: Check if user has already stamped entity
+        if exists:
+            msg = 'Favorite already exists'
+            logs.warning(msg)
+            raise Exception(msg)
+
+        # Check if user has already stamped entity, mark as complete if so
+        if self._stampDB.checkStamp(authUserId, entityId):
+            favorite.complete = True
 
         favorite = self._favoriteDB.addFavorite(favorite)
 
