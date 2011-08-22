@@ -156,7 +156,9 @@ class StampedAPI(AStampedAPI):
         screen_name     = userRequest.pop('screen_name', None)
 
         if user_id == None and screen_name == None:
-            raise Exception("Required field missing")
+            msg = "Required field missing (user id or screen name)"
+            logs.warning(msg)
+            raise InputError(msg)
 
         if user_id != None:
             return self._userDB.getUser(user_id)
@@ -169,7 +171,9 @@ class StampedAPI(AStampedAPI):
         
         if user.privacy == True:
             if authUserId == None:
-                raise Exception("You must be logged in to view this account")
+                msg = "Insufficient privileges to view user"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
 
             friendship = Friendship({
                 'user_id':      authUserId,
@@ -177,7 +181,9 @@ class StampedAPI(AStampedAPI):
             })
 
             if not self._friendshipDB.checkFriendship(friendship):
-                raise Exception("You do not have permission to view this account")
+                msg = "Insufficient privileges to view user"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
         
         return user
     
@@ -238,7 +244,7 @@ class StampedAPI(AStampedAPI):
         # Check if authenticating user is being blocked
         if self._friendshipDB.checkBlock(reverseFriendship) == True:
             logs.info("Block exists")
-            raise Exception
+            raise Exception("Block exists")
 
         # Check if friend has private account
         if user.privacy == True:
@@ -419,7 +425,9 @@ class StampedAPI(AStampedAPI):
         # Check if user has access to this entity
         if entity.sources.userGenerated.user_id != authUserId \
             or entity.sources.userGenerated.user_id == None:
-            raise Exception("Insufficient privilages to update entity")
+            msg = "Insufficient privileges to update custom entity"
+            logs.warning(msg)
+            raise InsufficientPrivilegesError(msg)
 
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -433,11 +441,6 @@ class StampedAPI(AStampedAPI):
 
     def updateEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
-        
-        # Check if user has access to this entity
-        if entity.getUserGenerated() != auth['authenticated_user_id'] \
-            or entity.getUserGenerated() == None:
-            raise Exception("Insufficient privilages to update entity")
 
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -469,7 +472,9 @@ class StampedAPI(AStampedAPI):
                 if coords[0] == None or coords[1] == None:
                     raise
             except:
-                raise InvalidArgument('invalid input coordinates %s' % coords)
+                msg = "Invalid coordinates (%s)" % coords
+                logs.warning(msg)
+                raise InputError(msg)
         else:
             coords = None
         
@@ -550,7 +555,9 @@ class StampedAPI(AStampedAPI):
 
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
-            raise Exception("Cannot stamp same entity twice")
+            msg = "Cannot stamp same entity twice"
+            logs.warning(msg)
+            raise IllegalActionError(msg)
 
         # Extract mentions
         mentions = None
@@ -686,7 +693,9 @@ class StampedAPI(AStampedAPI):
 
         # Verify user can modify the stamp
         if authUserId != stamp.user.user_id:
-            raise Exception("Insufficient privileges to modify stamp")
+            msg = "Insufficient privileges to modify stamp"
+            logs.warning(msg)
+            raise InsufficientPrivilegesError(msg)
 
         # Extract mentions
         mentions = stamp.mentions
@@ -816,7 +825,9 @@ class StampedAPI(AStampedAPI):
 
         # Verify user has permission to delete
         if stamp.user.user_id != authUserId:
-            raise Exception("Insufficient privilages to remove Stamp")
+            msg = "Insufficient privileges to remove stamp"
+            logs.warning(msg)
+            raise InsufficientPrivilegesError(msg)
 
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
@@ -855,7 +866,9 @@ class StampedAPI(AStampedAPI):
             })
 
             if not self._friendshipDB.checkFriendship(friendship):
-                raise Exception("Insufficient privilages to view Stamp")
+                msg = "Insufficient privileges to view stamp"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
       
         return stamp
     
@@ -884,7 +897,9 @@ class StampedAPI(AStampedAPI):
             })
 
             if not self._friendshipDB.checkFriendship(friendship):
-                raise Exception("Insufficient privilages to add Comment")
+                msg = "Insufficient privileges to add comment"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
 
         # Check if user is blocked by stamp owner
         ### TODO: Unit test this reverse friendship notion
@@ -894,7 +909,7 @@ class StampedAPI(AStampedAPI):
         })
         if self._friendshipDB.checkBlock(reverseFriendship) == True:
             logs.info("Block exists")
-            raise Exception
+            raise Exception("Block exists")
 
         # Extract mentions
         mentions = None
@@ -981,11 +996,15 @@ class StampedAPI(AStampedAPI):
         if comment.user.user_id != authUserId:
             stamp = self._stampDB.getStamp(comment.stamp_id)
             if stamp.user.user_id != authUserId:
-                raise Exception("Insufficient privilages to remove Comment")
+                msg = "Insufficient privileges to remove comment"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
 
         # Don't allow user to delete comment for restamp notification
         if comment.restamp_id != None:
-            raise Exception("Cannot remove 'Stamp' comment")
+            msg = "Cannot remove 'restamp' comment"
+            logs.warning(msg)
+            raise IllegalActionError(msg)
 
         # Remove comment
         self._commentDB.removeComment(comment.comment_id)
@@ -1010,7 +1029,9 @@ class StampedAPI(AStampedAPI):
             })
 
             if not self._friendshipDB.checkFriendship(friendship):
-                raise Exception("Insufficient privilages to view Stamp")
+                msg = "Insufficient privileges to view stamp"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
               
         comments = self._commentDB.getComments(stamp.stamp_id)
             
@@ -1105,7 +1126,9 @@ class StampedAPI(AStampedAPI):
         # Check privacy
         if user.privacy == True:
             if authUserId == None:
-                raise Exception("You must be logged in to view this account")
+                msg = "Must be logged in to view account"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
 
             friendship = Friendship({
                 'user_id':      authUserId,
@@ -1113,7 +1136,9 @@ class StampedAPI(AStampedAPI):
             })
 
             if not self._friendshipDB.checkFriendship(friendship):
-                raise Exception("You do not have permission to view this user")
+                msg = "Insufficient privileges to view user"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
         
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
 
@@ -1163,9 +1188,9 @@ class StampedAPI(AStampedAPI):
             exists = False
 
         if exists:
-            msg = 'Favorite already exists'
+            msg = "Favorite already exists"
             logs.warning(msg)
-            raise Exception(msg)
+            raise IllegalActionError(msg)
 
         # Check if user has already stamped entity, mark as complete if so
         if self._stampDB.checkStamp(authUserId, entityId):

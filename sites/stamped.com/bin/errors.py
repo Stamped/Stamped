@@ -33,3 +33,21 @@ class SchemaValidationError(Exception):
 		self.msg = msg
 		self.desc = desc
 
+class InsufficientPrivilegesError(Exception):
+	def __init__(self, msg=None, desc=None):
+		Exception.__init__(self, msg)
+		self.msg = msg
+		self.desc = desc
+
+class IllegalActionError(Exception):
+	def __init__(self, msg=None, desc=None):
+		Exception.__init__(self, msg)
+		self.msg = msg
+		self.desc = desc
+
+class MissingInputError(Exception):
+	def __init__(self, msg=None, desc=None):
+		Exception.__init__(self, msg)
+		self.msg = msg
+		self.desc = desc
+
