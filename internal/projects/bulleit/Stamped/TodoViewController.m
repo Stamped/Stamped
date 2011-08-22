@@ -20,6 +20,7 @@
 #import "PlaceDetailViewController.h"
 #import "GenericItemDetailViewController.h"
 #import "StampedAppDelegate.h"
+#import "TodoTableViewCell.h"
 #import "User.h"
 
 static NSString* const kShowFavoritesPath = @"/favorites/show.json";
@@ -61,6 +62,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  self.favoritesArray = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -91,14 +93,15 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   static NSString* CellIdentifier = @"Cell";
-  
-  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+
+  TodoTableViewCell* cell = (TodoTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-    cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+    cell = [[[TodoTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  
+
   Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row];
-  cell.textLabel.text = fave.entityObject.title;
+  cell.entityObject = fave.entityObject;
+//  cell.textLabel.text = fave.entityObject.title;
   
   return cell;
 }
@@ -138,7 +141,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 - (void)loadFavoritesFromNetwork {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
-  
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
   NSString* authToken = [AccountManager sharedManager].authToken.accessToken;

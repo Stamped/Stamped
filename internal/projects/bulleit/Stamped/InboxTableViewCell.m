@@ -24,10 +24,10 @@
 
 NSString* const kInboxTableDidScrollNotification = @"InboxTableDidScrollNotification";
 
-static NSString* kTitleFontString = @"TGLight";
+static NSString* const kTitleFontString = @"TGLight";
 static const CGFloat kTitleFontSize = 47.0;
-static NSString* kUserNameFontString = @"Helvetica-Bold";
-static NSString* kCommentFontString = @"Helvetica";
+static NSString* const kUserNameFontString = @"Helvetica-Bold";
+static NSString* const kCommentFontString = @"Helvetica";
 static const CGFloat kSubstringFontSize = 12.0;
 static const CGFloat kUserImageHorizontalMargin = 14.0;
 static const CGFloat kUserImageSize = 41.0;

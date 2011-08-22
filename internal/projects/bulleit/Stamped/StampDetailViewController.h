@@ -14,8 +14,8 @@
 @class UserImageView;
 @class Stamp;
 
-@interface StampDetailViewController : UIViewController<UITextFieldDelegate,
-                                                        RKObjectLoaderDelegate> {
+@interface StampDetailViewController : UIViewController <UITextFieldDelegate,
+                                                         RKObjectLoaderDelegate> {
  @private
   Stamp* stamp_;
   // Managed by the view system.

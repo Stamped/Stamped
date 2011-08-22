@@ -138,7 +138,6 @@
 
 - (IBAction)createStamp:(id)sender {
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
-  [self.searchStampsNavigationController setNavigationBarHidden:YES];
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 

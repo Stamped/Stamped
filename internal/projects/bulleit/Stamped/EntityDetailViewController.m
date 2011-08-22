@@ -143,6 +143,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
+  NSLog(@"Query: %@ Response: %@", objectLoader.resourcePath, objectLoader.response.bodyAsString);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];

@@ -136,7 +136,6 @@ static const NSInteger kFollowersSection = 1;
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"PeopleLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
-  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
 
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
@@ -151,7 +150,6 @@ static const NSInteger kFollowersSection = 1;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
-  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadFriendsAndFollowersFromNetwork];
@@ -219,6 +217,9 @@ static const NSInteger kFollowersSection = 1;
 #pragma mark - Custom methods.
 
 - (void)topViewTapped:(UITapGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
   profileViewController.user = [AccountManager sharedManager].currentUser;
   

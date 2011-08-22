@@ -85,19 +85,20 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
   [self.locationManager startUpdatingLocation];
-  [self.navigationController setNavigationBarHidden:YES];
+  [self.navigationController setNavigationBarHidden:YES animated:animated];
+  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
   [self.searchField becomeFirstResponder];
+  [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
+  [self.navigationController setNavigationBarHidden:NO animated:animated];
   [self.locationManager stopUpdatingLocation];
+  [super viewWillDisappear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -197,7 +198,6 @@ static NSString* const kSearchPath = @"/entities/search.json";
   CreateStampViewController* detailViewController =
       [[CreateStampViewController alloc] initWithEntityObject:entityObject];
   [self.navigationController pushViewController:detailViewController animated:YES];
-  [self.navigationController setNavigationBarHidden:NO animated:YES];
   [detailViewController release];
 }
 

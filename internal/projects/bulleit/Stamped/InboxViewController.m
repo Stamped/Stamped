@@ -136,20 +136,19 @@ typedef enum {
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  if (foodFilterButton_.selected) {
-    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-    STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-    [navBar setButtonFlipped:YES animated:animated];
-  }
+  [super viewDidAppear:animated];
+
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+  [navBar setButtonFlipped:YES animated:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  if (foodFilterButton_.selected) {
-    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-    STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-    [navBar setButtonFlipped:NO animated:NO];
-  }  
+  
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+  [navBar setButtonFlipped:NO animated:NO];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -192,10 +191,6 @@ typedef enum {
 
 - (IBAction)filterButtonPushed:(id)sender {
   filteredEntitiesArray_ = nil;
-  // In case the nav bar map button needs to be flipped.
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setButtonFlipped:NO animated:NO];
 
   UIButton* selectedButton = (UIButton*)sender;
   for (UIButton* button in self.filterButtons)
@@ -214,7 +209,6 @@ typedef enum {
   NSString* filterString = nil;
   if (selectedButton == foodFilterButton_) {
     filterString = @"food";
-    [navBar setButtonFlipped:YES animated:YES];
   } else if (selectedButton == booksFilterButton_) {
     filterString = @"books";
   } else if (selectedButton == filmFilterButton_) {

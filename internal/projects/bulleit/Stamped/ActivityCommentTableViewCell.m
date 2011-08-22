@@ -70,9 +70,8 @@ static const CGFloat kBadgeSize = 21.0;
     headerTextLayer_.fontSize = 12.0;
     headerTextLayer_.foregroundColor = [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
     headerTextLayer_.frame = CGRectMake(70, 13, 210, 16);
-    NSDictionary* actions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
-    headerTextLayer_.actions = actions;
-    [actions release];
+    headerTextLayer_.actions = [NSDictionary dictionaryWithObject:[NSNull null]
+                                                           forKey:@"contents"];
     [self.layer addSublayer:headerTextLayer_];
     [headerTextLayer_ release];
     
