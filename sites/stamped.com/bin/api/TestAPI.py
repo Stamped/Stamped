@@ -210,7 +210,7 @@ class AStampedAPITestCase(unittest.TestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
 
-"""
+
 # ####### #
 # ACCOUNT #
 # ####### #
@@ -943,6 +943,67 @@ class StampedAPICommentsReply(StampedAPICommentTest):
 
         self.deleteComment(self.tokenB, self.comment['comment_id'])
 
+class StampedAPICommentsText(StampedAPICommentTest):
+    def test_utf8(self):
+        blurb = '“Iñtërnâtiônàlizætiøn”'
+        commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            blurb)
+
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+
+        self.deleteComment(self.tokenA, commentUTF['comment_id'])
+
+    def test_doublequotes(self):
+        blurb = '"test"'
+        commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            blurb)
+
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+
+        self.deleteComment(self.tokenA, commentUTF['comment_id'])
+
+    def test_quotes(self):
+        blurb = '\'test\''
+        commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            blurb)
+
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+
+        self.deleteComment(self.tokenA, commentUTF['comment_id'])
+
+    def test_other_characters(self):
+        blurb = '"test" & \'%test\''
+        commentUTF = self.createComment(self.tokenB, self.stamp['stamp_id'], \
+            blurb)
+
+        path = "comments/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(result[2]['blurb'] == blurb.decode('utf-8'))
+
+        self.deleteComment(self.tokenA, commentUTF['comment_id'])
+
 
 # ########### #
 # COLLECTIONS #
@@ -1068,7 +1129,6 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
         self.deleteComment(self.tokenA, self.commentJ['comment_id'])
         self.deleteComment(self.tokenA, self.commentK['comment_id'])
 
-"""
 
 # ######### #
 # FAVORITES #
@@ -1134,7 +1194,7 @@ class StampedAPIFavoritesAlreadyOnList(StampedAPIFavoriteTest):
         self.assertTrue(ret)
 
 
-"""
+
 # ######## #
 # ACTIVITY #
 # ######## #
@@ -1242,7 +1302,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
-"""
+
 """
         
         

@@ -68,10 +68,8 @@ class HTTPAccount(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
             self.importData(schema.exportSparse(), overflow=True)
-
         else:
             raise NotImplementedError
-
         return self
 
 class HTTPAccountNew(Schema):
@@ -85,10 +83,8 @@ class HTTPAccountNew(Schema):
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
             schema.importData(self.exportSparse(), overflow=True)
-
         else:
             raise NotImplementedError
-
         return schema
 
 class HTTPAccountSettings(Schema):
@@ -220,6 +216,7 @@ class HTTPStamp(Schema):
             self.importData(data, overflow=True)
             self.num_comments = schema.stats.num_comments
             self.entity.coordinates = _coordinatesDictToFlat(coordinates)
+            self.created = schema.timestamp.created
 
         else:
             raise NotImplementedError

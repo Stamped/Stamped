@@ -1,17 +1,8 @@
 # STAMPED API #
 
-### [Entities](entities) ###
-* POST entities/create
-* GET entities/show
-* POST entities/update
-* POST entities/remove
-* GET entities/search
-
-### [Stamps](stamps) ###
-* POST stamps/create
-* POST stamps/update
-* POST stamps/remove
-* GET stamps/show
+### [OAuth2](oauth2) ###
+* POST oauth2/token
+* POST oauth2/login
 
 ### [Accounts](accounts) ###
 * POST accounts/create
@@ -40,6 +31,19 @@
 * GET friendships/blocking 
 * POST friendships/blocks/remove
 
+### [Entities](entities) ###
+* POST entities/create
+* GET entities/show
+* POST entities/update
+* POST entities/remove
+* GET entities/search
+
+### [Stamps](stamps) ###
+* POST stamps/create
+* POST stamps/update
+* POST stamps/remove
+* GET stamps/show
+
 ### [Comments](comments) ###
 * POST comments/create
 * GET comments/show
@@ -56,4 +60,8 @@
 
 ### [Activity](activity) ###
 * GET activity/show
+
+### [Temp](temp) ###
+* GET temp/friends
+* GET temp/followers
 
