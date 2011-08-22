@@ -654,11 +654,14 @@ class StampedAPI(AStampedAPI):
         # Add activity for credited users
         ### TODO: Verify user isn't being blocked
         if self._activity == True and len(creditedUserIds) > 0:
+            logs.debug("Add activity")
+            logs.debug("Stamp: %s" % stamp.value)
             activity = Activity({
                 'genre': 'restamp',
                 'user': user.exportSchema(UserMini()),
                 'stamp': stamp.value,
             })
+            logs.debug("Activity created")
             activity.timestamp.created = datetime.utcnow()
             self._activityDB.addActivity(creditedUserIds, activity)
         
