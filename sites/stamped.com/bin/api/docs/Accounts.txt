@@ -6,10 +6,10 @@
 ## POST account/create ##
 
 ### Description ###
-Creates a new account on Stamped for a user. 
+Create a new account on Stamped for a user. This function returns both the user object created as well as the necessary authentication details (refresh token and access token). 
 
 ### Details ###
-* No Authentication
+* Client ID / Client Secret Required
 
 ### Parameters ###
 
@@ -29,17 +29,24 @@ The password for the new account. This must be a minimum of six characters.
 A unique string that acts as a handle for the user. This will be used for authentication and for account identification. The screen name must be unique within Stamped, and account creation will fail if it is not.
 
 ### Sample Request ###
-	POST https://api.stamped.com/1/account/create.json
-	first_name=Kevin&last_name=Palms&email=kevin@stamped.com&password=12345&screen_name=kevin
+	POST https://api.stamped.com/v1/account/create.json
+	client_id=iPhoneApp&client_secret=1234567890&first_name=Kevin&last_name=Palms&email=kevin@stamped.com&password=12345&screen_name=kevin
 
 ### Sample Result ###
 	{
-		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
-		"email": "kevin@stamped.com",
-		"screen_name": "kevin",
-		"display_name": "Kevin P."
+		"user": {
+			"user_id": "47cc67093475061e3d95369d",
+			"first_name": "Kevin",
+			"last_name": "Palms",
+			"email": "kevin@stamped.com",
+			"screen_name": "kevin",
+			"display_name": "Kevin P."
+		},
+		"token": {
+			"access_token": "1234567890123456789012",
+			"expires_in": 3920,
+			"refresh_token": "1234567890123456789012345678901234567890123"
+		}
 	}
 
 
@@ -47,15 +54,13 @@ A unique string that acts as a handle for the user. This will be used for authen
 ## POST account/settings ##
 
 ### Description ###
-Updates settings for the authenticating user.
+Update account settings for the authenticating user.
 
 ### Details ###
-* Requires Authentication
+* OAuth Token Required
+* At least one field must be included. Any fields not included will not be changed. 
 
 ### Parameters ###
-
-**authenticated_user_id** _required_
-The user id of the authenticating user. 
 
 **email** _optional_
 The email address of the registering user. This must be in a valid format and must be unique within Stamped.
@@ -69,15 +74,9 @@ A unique string that acts as a handle for the user. This will be used for authen
 **privacy** _optional_
 A Boolean value representing whether or not the account should be publicly visible. The default value is 'true'. Only Boolean values are accepted, i.e. 'true', '1', 'false', and '0'.
 
-**language** _optional_
-The language used by Stamped for the user. Inputs must be in the form of the appropriate ISO 639-1 code. Currently only "en" is supported.
-
-**time_zone** _optional_
-The time zone that should be used for the user. Inputs must be in the form of the appropriate TZ (or Olson) representation, such as "America/New_York".
-
 ### Sample Request ###
-	POST https://api.stamped.com/1/account/settings.json
-	screen_name=kpalms&privacy=true&language=en
+	POST https://api.stamped.com/v1/account/settings.json
+	oauth_token=1234567890123456789012&screen_name=kpalms&privacy=true
 
 ### Sample Result ###
 	{
@@ -86,11 +85,7 @@ The time zone that should be used for the user. Inputs must be in the form of th
 		"last_name": "Palms",
 		"email": "kevin@stamped.com",
 		"screen_name": "kpalms",
-		"privacy": true,
-		"locale": {
-			"language": "en",
-			"time_zone": "America/New_York"
-		}
+		"privacy": true
 	}
 
 
@@ -98,18 +93,17 @@ The time zone that should be used for the user. Inputs must be in the form of th
 ## GET account/settings ##
 
 ### Description ###
-Retrieve settings for the authenticating user.
+Retrieve account settings for the authenticating user.
 
 ### Details ###
-* Requires Authentication
+* OAuth Token Required
 
 ### Parameters ###
 
-**authenticated_user_id** _required_
-The user id of the authenticating user. 
+_None_
 
 ### Sample Request ###
-	GET https://api.stamped.com/1/account/settings.json
+	GET https://api.stamped.com/v1/account/settings.json?oauth_token=1234567890123456789012
 
 ### Sample Result ###
 	{
@@ -118,11 +112,7 @@ The user id of the authenticating user.
 		"last_name": "Palms",
 		"email": "kevin@stamped.com",
 		"screen_name": "kpalms",
-		"privacy": true,
-		"locale": {
-			"language": "en",
-			"time_zone": "America/New_York"
-		}
+		"privacy": true
 	}
 
 
@@ -133,12 +123,10 @@ The user id of the authenticating user.
 Update profile information for the authenticating user.
 
 ### Details ###
-* Requires Authentication
+* OAuth Token Required
+* At least one field must be included. Any fields not included will not be changed. To remove a value for a field you can submit an empty string.
 
 ### Parameters ###
-
-**authenticated_user_id** _required_
-The user id of the authenticating user. 
 
 **first_name** _optional_
 The first name of the registering user. This field has a maximum of 80 characters.
@@ -146,29 +134,40 @@ The first name of the registering user. This field has a maximum of 80 character
 **last_name** _optional_
 The last name of the registering user. This field has a maximum of 80 characters.
 
-**bio** _optional_
-A brief biography of the user. This is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.
-
-**website** _optional_
-A link to the user's website. This is optional. The maximum length is 140 characters.
-
 **color** _optional_
 The hexadecimal representation of the user's stamp color. If two colors are provided they should be separated by a comma (",").
 
+**bio** _optional_
+A brief biography of the user. This section of the profile is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.
+
+**website** _optional_
+A link to the user's website. This section of the profile is optional. The maximum length is 140 characters.
+
+**location** _optional_
+The user's current location. This section of the profile is optional.
+
 ### Sample Request ###
 	POST https://api.stamped.com/1/account/update_profile.json
-	color=333333,999999&bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.
+	oauth_token=1234567890123456789012&color=333333,999999&bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.
 
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
 		"first_name": "Kevin",
 		"last_name": "Palms",
+		"screen_name": "kevin",
 		"display_name": "Kevin P.",
+		"profile_image": "http://img.stamped.com/u/kevin.png"
 		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
-		"website": null,
 		"color_primary": "333333",
-		"color_secondary": "999999"
+		"color_secondary": "999999",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 0,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
 	}
 
 
@@ -179,24 +178,51 @@ The hexadecimal representation of the user's stamp color. If two colors are prov
 Update the profile image for the authenticating user.
 
 ### Details ###
-* Requires Authentication
+* OAuth Token Required
+* **TEMP**: This function currently only accepts a link to an existing photo online. It needs to be updated to accept data files.
 
 ### Parameters ###
 
-**authenticated_user_id** _required_
-The user id of the authenticating user.
-
 **profile_image** _required_
-The base64-encoded image for the user. Image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+<strike>The base64-encoded image for the user. Image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down.</strike>
+The URL of a current online image. 
 
 ### Sample Request ###
 	POST https://api.stamped.com/1/account/update_profile_image.json
-	profile_image=<<data>>
+	oauth_token=1234567890123456789012&profile_image=<<data>>
 
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"profile_image": "http://img.stamped.com/user/47cc67093475061e3d95369d"
+		"profile_image": "http://img.stamped.com/u/kevin.png"
+	}
+
+
+------------------------------------------------------------------------------
+## POST account/remove ##
+
+### Description ###
+Removes the account of the authenticating user. 
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+_None_
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/remove.json
+	oauth_token=1234567890123456789012
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"email": "kevin@stamped.com",
+		"screen_name": "kpalms",
+		"privacy": true
 	}
 
 
@@ -207,36 +233,15 @@ The base64-encoded image for the user. Image must be a valid GIF, JPG, or PNG le
 Checks if the supplied credentials are valid.
 
 ### Details ###
-* Requires Authentication
+* OAuth Token Required
+* **NOTE**: This function is not yet supported.
 
 ### Parameters ###
 
-**authenticated_user_id** _required_
-The user id of the authenticating user.
+_None_
 
 ### Sample Request ###
 	GET https://api.stamped.com/1/account/verify_credentials.json
-
-### Sample Result ###
-	true
-
-
-------------------------------------------------------------------------------
-## POST account/remove ##
-
-### Description ###
-Removes the account of the authenticating user. 
-
-### Details ###
-* Requires Authentication
-
-### Parameters ###
-
-**authenticated_user_id** _required_
-The user id of the authenticating user.
-
-### Sample Request ###
-	POST https://api.stamped.com/1/account/remove.json
 
 ### Sample Result ###
 	true
@@ -249,12 +254,12 @@ The user id of the authenticating user.
 Resets the password for the authenticating user.
 
 ### Details ###
-* No Authentication
+* OAuth Token Required
+* **NOTE**: This function is not yet supported.
 
 ### Parameters ###
 
-**authenticated_user_id** _required_
-The user id of the authenticating user.
+_None_
 
 ### Sample Request ###
 	POST https://api.stamped.com/1/account/reset_password.json

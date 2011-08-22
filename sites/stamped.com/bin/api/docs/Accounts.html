@@ -3,11 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Markdown Preview</title>
+  <title>Accounts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif; } 
-html>body { font-size: 14px; } 
+/* 
+ This document has been created with Marked.app <http://markedapp.com>, Copyright 2011 Brett Terpstra
+ Please leave this notice in place, along with any additional credits below.
+ ---------------------------------------------------------------
+ SwissStyle by Brett Terpstra
+ */
+
+body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif;margin:0 } 
+html>body { font-size: 13px; } 
 p { margin: 1.3125em  0; font-size: 1.1429em; line-height: 1.3125em; }
 li {
 	font-size: 110%;
@@ -59,7 +66,7 @@ h4 {
     vertical-align: super;
     color: rgb(13,110,161)
 }
-#contentdiv img {
+#wrapper img {
     max-width: 100%
 }
 dt {
@@ -68,16 +75,13 @@ dt {
 dd {
     margin-bottom: 1em
 }
-@media print {body {
-    overflow: auto;
-}
+@media print {
+    body {
+        overflow: auto;
+    }
     #wrapper {
         background: #fff;
         position: relative
-    }
-    #contentdiv {
-        position: relative;
-        background: transparent;
         color: #303030;
         text-indent: 0px;
         padding: 10px;
@@ -86,11 +90,7 @@ dd {
     
 }
 @media screen {
-    body {
-        overflow: hidden
-    }
     .inverted, .inverted #wrapper { background:#111 !important }
-    .inverted #contentdiv {background:transparent !important }
     .inverted p,.inverted td,.inverted li,.inverted h1,.inverted h2,
     .inverted h3,.inverted h4, .inverted h5, .inverted h6, .inverted pre,
     .inverted code,.inverted th {
@@ -99,47 +99,7 @@ dd {
     .inverted a { color:#fff;text-decoration:underline }
     #wrapper {
         background: transparent;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        -webkit-box-shadow: inset 0px 0px 4px #8F8D87
-    }
-    #contentdiv {
-        position: fixed;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        background: transparent;
-        color: #303030;
-        overflow: auto;
-        text-indent: 0px;
-        padding: 15px;
-        margin:0 10px
-    }
-    #contentdiv::-webkit-scrollbar {
-        width: 6px
-    }
-    #contentdiv::-webkit-scrollbar:horizontal {
-        height: 6px;
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-track {
-        background: transparent;
-        -webkit-border-radius: 0;
-        right: 10px
-    }
-    #contentdiv::-webkit-scrollbar-track:disabled {
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-thumb {
-        border-width: 0;
-        min-height: 20px;
-        background: rgba(40,40,40,0.22);
-        opacity: 0.4;
-        -webkit-border-radius: 5px
+        padding:20px;
     }
     
 }
@@ -226,21 +186,20 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-    <div id="contentdiv">
       <h1 id="accounts">ACCOUNTS</h1>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postaccountcreate">POST account/create</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Creates a new account on Stamped for a user. </p>
+<p>Create a new account on Stamped for a user. This function returns both the user object created as well as the necessary authentication details (refresh token and access token). </p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>No Authentication</li>
+<li>Client ID / Client Secret Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
@@ -262,38 +221,45 @@ A unique string that acts as a handle for the user. This will be used for authen
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/account/create.json
-first_name=Kevin&amp;last_name=Palms&amp;email=kevin@stamped.com&amp;password=12345&amp;screen_name=kevin</code></pre>
+<pre><code>POST https://api.stamped.com/v1/account/create.json
+client_id=iPhoneApp&amp;client_secret=1234567890&amp;first_name=Kevin&amp;last_name=Palms&amp;email=kevin@stamped.com&amp;password=12345&amp;screen_name=kevin
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "47cc67093475061e3d95369d",
-    "first_name": "Kevin",
-    "last_name": "Palms",
-    "email": "kevin@stamped.com",
-    "screen_name": "kevin",
-    "display_name": "Kevin P."
-}</code></pre>
+    &quot;user&quot;: {
+        &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+        &quot;first_name&quot;: &quot;Kevin&quot;,
+        &quot;last_name&quot;: &quot;Palms&quot;,
+        &quot;email&quot;: &quot;kevin@stamped.com&quot;,
+        &quot;screen_name&quot;: &quot;kevin&quot;,
+        &quot;display_name&quot;: &quot;Kevin P.&quot;
+    },
+    &quot;token&quot;: {
+        &quot;access_token&quot;: &quot;1234567890123456789012&quot;,
+        &quot;expires_in&quot;: 3920,
+        &quot;refresh_token&quot;: &quot;1234567890123456789012345678901234567890123&quot;
+    }
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postaccountsettings">POST account/settings</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Updates settings for the authenticating user.</p>
+<p>Update account settings for the authenticating user.</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
+<li>At least one field must be included. Any fields not included will not be changed.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user. </p>
 
 <p><strong>email</strong> <em>optional</em>
 The email address of the registering user. This must be in a valid format and must be unique within Stamped.</p>
@@ -307,71 +273,60 @@ A unique string that acts as a handle for the user. This will be used for authen
 <p><strong>privacy</strong> <em>optional</em>
 A Boolean value representing whether or not the account should be publicly visible. The default value is &#8216;true&#8217;. Only Boolean values are accepted, i.e. &#8216;true&#8217;, &#8216;1&#8217;, &#8216;false&#8217;, and &#8216;0&#8217;.</p>
 
-<p><strong>language</strong> <em>optional</em>
-The language used by Stamped for the user. Inputs must be in the form of the appropriate ISO 639-1 code. Currently only &#8220;en&#8221; is supported.</p>
-
-<p><strong>time_zone</strong> <em>optional</em>
-The time zone that should be used for the user. Inputs must be in the form of the appropriate TZ (or Olson) representation, such as &#8220;America/New_York&#8221;.</p>
-
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/account/settings.json
-screen_name=kpalms&amp;privacy=true&amp;language=en</code></pre>
+<pre><code>POST https://api.stamped.com/v1/account/settings.json
+oauth_token=1234567890123456789012&amp;screen_name=kpalms&amp;privacy=true
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "47cc67093475061e3d95369d",
-    "first_name": "Kevin",
-    "last_name": "Palms",
-    "email": "kevin@stamped.com",
-    "screen_name": "kpalms",
-    "privacy": true,
-    "locale": {
-        "language": "en",
-        "time_zone": "America/New_York"
-    }
-}</code></pre>
+    &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+    &quot;first_name&quot;: &quot;Kevin&quot;,
+    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;email&quot;: &quot;kevin@stamped.com&quot;,
+    &quot;screen_name&quot;: &quot;kpalms&quot;,
+    &quot;privacy&quot;: true
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getaccountsettings">GET account/settings</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Retrieve settings for the authenticating user.</p>
+<p>Retrieve account settings for the authenticating user.</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user. </p>
+<p><em>None</em></p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/account/settings.json</code></pre>
+<pre><code>GET https://api.stamped.com/v1/account/settings.json?oauth_token=1234567890123456789012
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "47cc67093475061e3d95369d",
-    "first_name": "Kevin",
-    "last_name": "Palms",
-    "email": "kevin@stamped.com",
-    "screen_name": "kpalms",
-    "privacy": true,
-    "locale": {
-        "language": "en",
-        "time_zone": "America/New_York"
-    }
-}</code></pre>
+    &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+    &quot;first_name&quot;: &quot;Kevin&quot;,
+    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;email&quot;: &quot;kevin@stamped.com&quot;,
+    &quot;screen_name&quot;: &quot;kpalms&quot;,
+    &quot;privacy&quot;: true
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postaccountupdate_profile">POST account/update_profile</h2>
 
@@ -382,13 +337,11 @@ The user id of the authenticating user. </p>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
+<li>At least one field must be included. Any fields not included will not be changed. To remove a value for a field you can submit an empty string.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user. </p>
 
 <p><strong>first_name</strong> <em>optional</em>
 The first name of the registering user. This field has a maximum of 80 characters.</p>
@@ -396,34 +349,47 @@ The first name of the registering user. This field has a maximum of 80 character
 <p><strong>last_name</strong> <em>optional</em>
 The last name of the registering user. This field has a maximum of 80 characters.</p>
 
-<p><strong>bio</strong> <em>optional</em>
-A brief biography of the user. This is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.</p>
-
-<p><strong>website</strong> <em>optional</em>
-A link to the user&#8217;s website. This is optional. The maximum length is 140 characters.</p>
-
 <p><strong>color</strong> <em>optional</em>
 The hexadecimal representation of the user&#8217;s stamp color. If two colors are provided they should be separated by a comma (&#8220;,&#8221;).</p>
+
+<p><strong>bio</strong> <em>optional</em>
+A brief biography of the user. This section of the profile is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.</p>
+
+<p><strong>website</strong> <em>optional</em>
+A link to the user&#8217;s website. This section of the profile is optional. The maximum length is 140 characters.</p>
+
+<p><strong>location</strong> <em>optional</em>
+The user&#8217;s current location. This section of the profile is optional.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>POST https://api.stamped.com/1/account/update_profile.json
-color=333333,999999&amp;bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.</code></pre>
+oauth_token=1234567890123456789012&amp;color=333333,999999&amp;bio=The%20very%20purpose%20of%20existence%20is%20to%20reconcile%20the%20glowing%20opinion%20we%20have%20of%20ourselves%20with%20the%20appalling%20things%20that%20other%20people%20think%20about%20us.
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "47cc67093475061e3d95369d",
-    "first_name": "Kevin",
-    "last_name": "Palms",
-    "display_name": "Kevin P.",
-    "bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
-    "website": null,
-    "color_primary": "333333",
-    "color_secondary": "999999"
-}</code></pre>
+    &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+    &quot;first_name&quot;: &quot;Kevin&quot;,
+    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;screen_name&quot;: &quot;kevin&quot;,
+    &quot;display_name&quot;: &quot;Kevin P.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
+    &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
+    &quot;color_primary&quot;: &quot;333333&quot;,
+    &quot;color_secondary&quot;: &quot;999999&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 0,
+    &quot;num_followers&quot;: 0,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postaccountupdate_profile_image">POST account/update_profile_image</h2>
 
@@ -434,57 +400,31 @@ color=333333,999999&amp;bio=The%20very%20purpose%20of%20existence%20is%20to%20re
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
+<li><strong>TEMP</strong>: This function currently only accepts a link to an existing photo online. It needs to be updated to accept data files.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
-
 <p><strong>profile_image</strong> <em>required</em>
-The base64-encoded image for the user. Image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. </p>
+<strike>The base64-encoded image for the user. Image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down.</strike>
+The URL of a current online image. </p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>POST https://api.stamped.com/1/account/update_profile_image.json
-profile_image=&lt;&lt;data&gt;&gt;</code></pre>
+oauth_token=1234567890123456789012&amp;profile_image=&lt;&lt;data&gt;&gt;
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "47cc67093475061e3d95369d",
-    "profile_image": "http://img.stamped.com/user/47cc67093475061e3d95369d"
-}</code></pre>
+    &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
+}
+</code></pre>
 
-<hr />
-
-<h2 id="getaccountverify_credentials">GET account/verify_credentials</h2>
-
-<h3 id="description">Description</h3>
-
-<p>Checks if the supplied credentials are valid.</p>
-
-<h3 id="details">Details</h3>
-
-<ul>
-<li>Requires Authentication</li>
-</ul>
-
-<h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
-
-<h3 id="samplerequest">Sample Request</h3>
-
-<pre><code>GET https://api.stamped.com/1/account/verify_credentials.json</code></pre>
-
-<h3 id="sampleresult">Sample Result</h3>
-
-<pre><code>true</code></pre>
-
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postaccountremove">POST account/remove</h2>
 
@@ -495,23 +435,61 @@ The user id of the authenticating user.</p>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><em>None</em></p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/account/remove.json</code></pre>
+<pre><code>POST https://api.stamped.com/1/account/remove.json
+oauth_token=1234567890123456789012
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
-<pre><code>true</code></pre>
+<pre><code>{
+    &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+    &quot;first_name&quot;: &quot;Kevin&quot;,
+    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;email&quot;: &quot;kevin@stamped.com&quot;,
+    &quot;screen_name&quot;: &quot;kpalms&quot;,
+    &quot;privacy&quot;: true
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="getaccountverify_credentials">GET account/verify_credentials</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Checks if the supplied credentials are valid.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+<li><strong>NOTE</strong>: This function is not yet supported.</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><em>None</em></p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/1/account/verify_credentials.json
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>true
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postaccountreset_password">POST account/reset_password</h2>
 
@@ -522,21 +500,23 @@ The user id of the authenticating user.</p>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>No Authentication</li>
+<li>OAuth Token Required</li>
+<li><strong>NOTE</strong>: This function is not yet supported.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><em>None</em></p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/account/reset_password.json</code></pre>
+<pre><code>POST https://api.stamped.com/1/account/reset_password.json
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
-<pre><code>true</code></pre>
+<pre><code>true
+</code></pre>
 
     </div>
 </body>

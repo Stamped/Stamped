@@ -9,22 +9,19 @@
 Add a comment to a specified stamp. The authenticated user must have permission to view and comment on the stamp.
 
 ### Details ###
-* Requires Authentication
+* OAuth Token Required
 
 ### Parameters ###
 
-**authenticated_user_id** _required_
-The user id of the authenticating user.
-
 **stamp_id** _required_
-The id of the stamp commented on.
+The id of the stamp being commented on.
 
 **blurb** _required_
-A brief text field containing the comment. This is currently limited to 512 characters.
+A brief text field containing the comment. This is currently limited to 512 characters. Any embedded mentions will be derived on the server.
 
 ### Sample Request ###
-	POST https://api.stamped.com/1/comments/create.json
-	authenticated_user_id=4e259ca532a7ba6cd7000008&stamp_id=4e259ca532a7ba6cd700000a&blurb=That+looks+awesome.+Thanks+%40robby!
+	POST https://api.stamped.com/v1/comments/create.json
+	oauth_token=1234567890123456789012&stamp_id=4e259ca532a7ba6cd700000a&blurb=That+looks+awesome.+Thanks+%40robby!
 
 ### Sample Result ###
 	{
@@ -43,11 +40,56 @@ A brief text field containing the comment. This is currently limited to 512 char
 		"created": "2011-07-19 15:03:01.843073", 
 		"user": {
 			"user_id": "47cc67093475061e3d95369d", 
-			"profile__image": "user.png", 
+			"profile__image": "http://img.stamped.com/u/kevin.png", 
 			"display_name": "Kevin P.", 
 			"color_primary": "333333",
 			"color_secondary": "999999",
-			"screen_name": "kpalms",
+			"screen_name": "kevin",
+			"privacy": false
+		}
+	}
+
+
+------------------------------------------------------------------------------
+## POST comments/remove ##
+
+### Description ###
+Remove a comment. The comment must either be owned by the authenticating user or the authenticating user must own the stamp that was commented on.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**comment_id** _required_
+The unique id of the stamp.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/comments/remove.json
+	oauth_token=1234567890123456789012&comment_id=4e259ca532a7ba6cd700000b
+
+### Sample Result ###
+	{
+		"blurb": "That looks awesome. Thanks @robby!", 
+		"comment_id": "4e259ca532a7ba6cd700000b", 
+		"mentions": [
+			{
+				"display_name": "Robby S.", 
+				"indices": [27,33], 
+				"screen_name": "robby", 
+				"user_id": "4e2854ba32a7ba9d96000008"
+			}
+		], 
+		"restamp_id": null, 
+		"stamp_id": "4e259ca532a7ba6cd700000a", 
+		"created": "2011-07-19 15:03:01.843073", 
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"profile__image": "http://img.stamped.com/u/kevin.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kevin",
 			"privacy": false
 		}
 	}
@@ -60,64 +102,66 @@ A brief text field containing the comment. This is currently limited to 512 char
 Return comments for a given stamp. This includes any restamps that have occurred on the stamp.
 
 ### Details ###
-* No Authentication
+* OAuth Token Required
 
 ### Parameters ###
 
 **stamp_id** _required_
 The id of the stamp commented on.
 
-**authenticated_user_id** _optional_
-The user id of the authenticating user. This is necessary only if the stamp is private.
+**limit** _optional_
+The maximum number of desired results. Values greater than the default will be ignored.
+
+**since** _optional_
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of comments to be returned. 
+
+**before** _optional_
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of comments to be returned.
 
 ### Sample Request ###
-	GET https://api.stamped.com/1/comments/show.json
-	authenticated_user_id=4e259ca532a7ba6cd7000008&stamp_id=4e259ca532a7ba6cd700000a
+	GET https://api.stamped.com/v1/comments/show.json?oauth_token=1234567890123456789012&stamp_id=4e259ca532a7ba6cd700000a
 
 ### Sample Result ###
 	[
 		{
-			"blurb": "That looks awesome.", 
+			"blurb": "That looks awesome. Thanks @robby!", 
 			"comment_id": "4e259ca532a7ba6cd700000b", 
-			"mentions": null, 
+			"mentions": [
+				{
+					"display_name": "Robby S.", 
+					"indices": [27,33], 
+					"screen_name": "robby", 
+					"user_id": "4e2854ba32a7ba9d96000008"
+				}
+			], 
 			"restamp_id": null, 
 			"stamp_id": "4e259ca532a7ba6cd700000a", 
 			"created": "2011-07-19 15:03:01.843073", 
 			"user": {
 				"user_id": "47cc67093475061e3d95369d", 
-				"profile__image": "user.png", 
+				"profile__image": "http://img.stamped.com/u/kevin.png", 
 				"display_name": "Kevin P.", 
 				"color_primary": "333333",
 				"color_secondary": "999999",
-				"screen_name": "kpalms",
+				"screen_name": "kevin",
+				"privacy": false
+			}
+		},
+		{
+			"blurb": "No problem!", 
+			"comment_id": "4e259ca532a7ba6cd700000c",
+			"stamp_id": "4e259ca532a7ba6cd700000a", 
+			"created": "2011-07-19 15:21:43.382018", 
+			"user": {
+				"user_id": "4e2854ba32a7ba9d96000008", 
+				"profile__image": "http://img.stamped.com/u/robby.png", 
+				"display_name": "Robby S.", 
+				"color_primary": "A0EE33",
+				"color_secondary": "BBBBFF",
+				"screen_name": "robby",
 				"privacy": false
 			}
 		}
 	]
-
-
-------------------------------------------------------------------------------
-## POST comments/remove ##
-
-### Description ###
-Remove a comment owned by the authenticating user.
-
-### Details ###
-* Requires Authentication
-
-### Parameters ###
-
-**authenticated_user_id** _required_
-The user id of the authenticating user. This user must be the owner of the stamp or the owner of the comment.
-
-**comment_id** _required_
-The unique id of the stamp.
-
-### Sample Request ###
-	POST https://api.stamped.com/1/comments/remove.json
-	authenticated_user_id=4e259ca532a7ba6cd7000008&comment_id=4e259ca532a7ba6cd700000b
-
-### Sample Result ###
-	true
 
 

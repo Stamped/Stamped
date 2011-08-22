@@ -125,8 +125,10 @@ class StampedAPI(AStampedAPI):
         
         return url
     
-    def removeAccount(self, userId):
-        return self._accountDB.removeAccount(userId)
+    def removeAccount(self, authUserId):
+        account = self._accountDB.getAccount(authUserId)
+        self._accountDB.removeAccount(authUserId)
+        return account
     
     def verifyAccountCredentials(self, data, auth):
         raise NotImplementedError
@@ -285,11 +287,20 @@ class StampedAPI(AStampedAPI):
         raise NotImplementedError
     
     def checkFriendship(self, authUserId, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
+        userA = self._getUserFromIdOrScreenName({
+                    'user_id': userRequest.user_id_a,
+                    'screen_name': userRequest.screen_name_a
+                })
+        userB = self._getUserFromIdOrScreenName({
+                    'user_id': userRequest.user_id_b,
+                    'screen_name': userRequest.screen_name_b
+                })
+
+        ### TODO: If either account is private, make sure authUserId is friend
 
         friendship = Friendship({
-            'user_id':      authUserId,
-            'friend_id':    user['user_id']
+            'user_id':      userA['user_id'],
+            'friend_id':    userB['user_id']
         })
 
         if self._friendshipDB.checkFriendship(friendship):
@@ -442,7 +453,11 @@ class StampedAPI(AStampedAPI):
         return self._entityDB.removeEntity(entityId)
     
     def removeCustomEntity(self, authUserId, entityId):
-        return self._entityDB.removeCustomEntity(entityId, authUserId)
+        entity = self._entityDB.getEntity(entityId)
+
+        self._entityDB.removeCustomEntity(entityId, authUserId)
+
+        return entity
     
     def searchEntities(self, query, coords=None, authUserId=None):
 

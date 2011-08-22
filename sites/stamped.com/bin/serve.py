@@ -273,9 +273,10 @@ def removeAccount():
     authUserId  = checkOAuth(request)
     schema      = parseRequest(None, request)
 
-    result      = stampedAPI.removeAccount(authUserId)
+    account     = stampedAPI.removeAccount(authUserId)
+    account     = HTTPAccount().importSchema(account)
 
-    return transformOutput(request, result)
+    return transformOutput(request, account.exportSparse())
 
 @app.route(REST_API_PREFIX + 'account/verify_credentials.json', methods=['GET'])
 def verifyAccountCredentials():
@@ -385,7 +386,7 @@ def removeFriendship():
 @handleHTTPRequest
 def checkFriendship():
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPUserId(), request)
+    schema      = parseRequest(HTTPUserRelationship(), request)
 
     result      = stampedAPI.checkFriendship(authUserId, schema)
 
@@ -534,9 +535,10 @@ def updateEntity():
 def removeEntity():
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPEntityId(), request)
-    result      = stampedAPI.removeCustomEntity(authUserId, schema.entity_id)
-    
-    return transformOutput(request, result)
+    entity      = stampedAPI.removeCustomEntity(authUserId, schema.entity_id)
+    entity      = HTTPEntity().importSchema(entity)
+
+    return transformOutput(request, entity.exportSparse())
 
 @app.route(REST_API_PREFIX + 'entities/search.json', methods=['GET'])
 @handleHTTPRequest
@@ -965,6 +967,30 @@ def favoritesDoc():
 def activityDoc():
     try:
         f = open(os.path.join(ROOT, 'api/docs/Activity.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
+
+@app.route(REST_API_PREFIX + 'temp')
+def tempDoc():
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/Temp.html'))
+        ret = f.read()
+        f.close()
+        return ret
+    except Exception as e:
+        msg = "Error processing '%s' (%s)" % (utils.getFuncName(0), str(e))
+        utils.log(msg)
+        return msg, 500
+
+@app.route(REST_API_PREFIX + 'oauth2')
+def oauthDoc():
+    try:
+        f = open(os.path.join(ROOT, 'api/docs/OAuth2.html'))
         ret = f.read()
         f.close()
         return ret

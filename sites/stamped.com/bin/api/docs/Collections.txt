@@ -9,18 +9,15 @@
 Show stamps for a given user.
 
 ### Details ###
-* No Authentication
+* OAuth Token Required
 
 ### Parameters ###
 
 **user_id** or **screen_name** _required_
-The user id of the requested user.
-
-**authenticated_user_id** _optional_
-The user id of the authenticating user. This is necessary if the requested user is locked.
+The identifer of the requested user.
 
 **limit** _optional_
-The maximum number of desired results. Values greater than the default (20) will be ignored.
+The maximum number of desired results. Values greater than the default will be ignored.
 
 **since** _optional_
 A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of stamps to be returned. 
@@ -28,40 +25,78 @@ A UNIX timestamp stating the beginning of the time slice desired. This enables a
 **before** _optional_
 A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.
 
+**quality** _optional_
+A number representing the quality of the connection: 1 (high), 2 (medium), or 3 (low). The quality number passed will impact the maximum limits enforced, including total number of stamps and number of previewed comments.
+
 ### Sample Request ###
-	GET https://api.stamped.com/1/collections/user.json
-	user_id=47cc67093475061e3d95369d
+	GET https://api.stamped.com/v1/collections/user.json?oauth_token=1234567890123456789012&user_id=47cc67093475061e3d95369d
 
 ### Sample Result ###
 	[
 		{
-			"stamp_id": "4e226fcd4e18474561000000", 
-			"blurb": "Really, the best ever.", 
+			"blurb": "Went here with @robby... Really, the best ever.", 
 			"entity": {
-			    "category": "Restaurant", 
-			    "entity_id": "4e226fcd4e61754161000006", 
-			    "subtitle": "American food in the West Village", 
-			    "title": "Little Owl"
+				"entity_id": "4e226ea84e61754161000000",
+				"title": "Spotted Pig",
+				"subtitle": "New York, NY"
+				"category": "food",
+				"subcategory": "restaurant"
+				"desc": "Burger place",
+				"coordinates": "40.714623,-74.006605",
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"last_modified": "2011-07-17 19:03:22.354813",
+				"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+				"phone": "1235551234"
 			}, 
-			"flags": {
-				"privacy": false
-			}, 
-			"image": "image2.png", 
+			"stamp_id": "4e226fcd4e18474561000000", 
 			"credit": [
-				"4e226fcd4e61754161000007", 
-				"4e226fcd4e61754161000008"
+				{
+					"user_id": "4e226fcd4e61754161000007",
+					"screen_name": "robby",
+					"display_name": "Robby S."
+				},
+				{
+					"user_id": "4e226fcd4e61754161000008",
+					"screen_name": "bart",
+					"display_name": "Bart S."
+				}
 			], 
-			"created": "2011-07-17 05:14:54.128641", 
+			"mentions": [
+				{
+					"display_name": "Robby S.", 
+					"indices": [15,21], 
+					"screen_name": "robby", 
+					"user_id": "4e226fcd4e61754161000007"
+				}
+			], 
+			"created": "2011-07-17 05:14:54.128641",
 			"user": {
 				"user_id": "47cc67093475061e3d95369d", 
-				"profile__image": "user.png", 
+				"profile_image": "http://img.stamped.com/u/kevin.png", 
 				"display_name": "Kevin P.", 
 				"color_primary": "333333",
 				"color_secondary": "999999",
-				"screen_name": "kpalms",
+				"screen_name": "kevin",
 				"privacy": false
-			},
-			"comment_preview": null
+			}
+			"comment_preview": [
+				{
+					"comment_id": "47cc67093475061e3d953691",
+					"user": {
+						"user_id": "47cc67093475061e3d95369d", 
+						"profile_image": "http://img.stamped.com/u/kevin.png", 
+						"display_name": "Kevin P.", 
+						"color_primary": "333333",
+						"color_secondary": "999999",
+						"screen_name": "kevin",
+						"privacy": false
+					},
+					"stamp_id": "4e226fcd4e18474561000000",
+					"blurb": "Yeah, this place rules.",
+					"created": "2011-07-17 05:19:03.471937"
+				}
+			]
+			"num_comments": 1
 		}
 	]
 
@@ -73,12 +108,9 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
 Show stamps in the authenticating user's inbox.
 
 ### Details ###
-* Requires Authentication
+* OAuth Token Required
 
 ### Parameters ###
-
-**authenticated_user_id** _required_
-The user id of the authenticating user.
 
 **limit** _optional_
 The maximum number of desired results. Values greater than the default (20) will be ignored.
@@ -89,37 +121,78 @@ A UNIX timestamp stating the beginning of the time slice desired. This enables a
 **before** _optional_
 A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.
 
-### Sample Request ###
-	GET https://api.stamped.com/1/collections/inbox.json
-	authenticated_user_id=47cc67093475061e3d95369d
+**quality** _optional_
+A number representing the quality of the connection: 1 (high), 2 (medium), or 3 (low). The quality number passed will impact the maximum limits enforced, including total number of stamps and number of previewed comments.
 
+### Sample Request ###
+	GET https://api.stamped.com/v1/collections/inbox.json?oauth_token=1234567890123456789012
+	
 ### Sample Result ###
 	[
 		{
-			"stamp_id": "8ac73h4532a7ba01cb00000e",
-			"blurb": "Best burger in the city.", 
+			"blurb": "Went here with @robby... Really, the best ever.", 
 			"entity": {
-			    "category": "Restaurant", 
-			    "entity_id": "3r426fcd4e61754161000006", 
-			    "subtitle": "Burgers, and that's all.", 
-			    "title": "Spotted Pig"
+				"entity_id": "4e226ea84e61754161000000",
+				"title": "Spotted Pig",
+				"subtitle": "New York, NY"
+				"category": "food",
+				"subcategory": "restaurant"
+				"desc": "Burger place",
+				"coordinates": "40.714623,-74.006605",
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"last_modified": "2011-07-17 19:03:22.354813",
+				"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+				"phone": "1235551234"
 			}, 
-			"flags": {
-				"privacy": false
-			}, 
-			"image": "image3.png", 
-			"credit": null, 
-			"created": "2011-05-12 18:24:44.432141",
+			"stamp_id": "4e226fcd4e18474561000000", 
+			"credit": [
+				{
+					"user_id": "4e226fcd4e61754161000007",
+					"screen_name": "robby",
+					"display_name": "Robby S."
+				},
+				{
+					"user_id": "4e226fcd4e61754161000008",
+					"screen_name": "bart",
+					"display_name": "Bart S."
+				}
+			], 
+			"mentions": [
+				{
+					"display_name": "Robby S.", 
+					"indices": [15,21], 
+					"screen_name": "robby", 
+					"user_id": "4e226fcd4e61754161000007"
+				}
+			], 
+			"created": "2011-07-17 05:14:54.128641",
 			"user": {
 				"user_id": "47cc67093475061e3d95369d", 
-				"profile__image": "user.png", 
+				"profile_image": "http://img.stamped.com/u/kevin.png", 
 				"display_name": "Kevin P.", 
 				"color_primary": "333333",
 				"color_secondary": "999999",
-				"screen_name": "kpalms",
+				"screen_name": "kevin",
 				"privacy": false
-			},
-			"comment_preview": null
+			}
+			"comment_preview": [
+				{
+					"comment_id": "47cc67093475061e3d953691",
+					"user": {
+						"user_id": "47cc67093475061e3d95369d", 
+						"profile_image": "http://img.stamped.com/u/kevin.png", 
+						"display_name": "Kevin P.", 
+						"color_primary": "333333",
+						"color_secondary": "999999",
+						"screen_name": "kevin",
+						"privacy": false
+					},
+					"stamp_id": "4e226fcd4e18474561000000",
+					"blurb": "Yeah, this place rules.",
+					"created": "2011-07-17 05:19:03.471937"
+				}
+			]
+			"num_comments": 1
 		}
 	]
 

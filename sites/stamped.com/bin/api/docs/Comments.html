@@ -3,11 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Markdown Preview</title>
+  <title>Comments</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif; } 
-html>body { font-size: 14px; } 
+/* 
+ This document has been created with Marked.app <http://markedapp.com>, Copyright 2011 Brett Terpstra
+ Please leave this notice in place, along with any additional credits below.
+ ---------------------------------------------------------------
+ SwissStyle by Brett Terpstra
+ */
+
+body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif;margin:0 } 
+html>body { font-size: 13px; } 
 p { margin: 1.3125em  0; font-size: 1.1429em; line-height: 1.3125em; }
 li {
 	font-size: 110%;
@@ -59,7 +66,7 @@ h4 {
     vertical-align: super;
     color: rgb(13,110,161)
 }
-#contentdiv img {
+#wrapper img {
     max-width: 100%
 }
 dt {
@@ -68,16 +75,13 @@ dt {
 dd {
     margin-bottom: 1em
 }
-@media print {body {
-    overflow: auto;
-}
+@media print {
+    body {
+        overflow: auto;
+    }
     #wrapper {
         background: #fff;
         position: relative
-    }
-    #contentdiv {
-        position: relative;
-        background: transparent;
         color: #303030;
         text-indent: 0px;
         padding: 10px;
@@ -86,11 +90,7 @@ dd {
     
 }
 @media screen {
-    body {
-        overflow: hidden
-    }
     .inverted, .inverted #wrapper { background:#111 !important }
-    .inverted #contentdiv {background:transparent !important }
     .inverted p,.inverted td,.inverted li,.inverted h1,.inverted h2,
     .inverted h3,.inverted h4, .inverted h5, .inverted h6, .inverted pre,
     .inverted code,.inverted th {
@@ -99,47 +99,7 @@ dd {
     .inverted a { color:#fff;text-decoration:underline }
     #wrapper {
         background: transparent;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        -webkit-box-shadow: inset 0px 0px 4px #8F8D87
-    }
-    #contentdiv {
-        position: fixed;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        background: transparent;
-        color: #303030;
-        overflow: auto;
-        text-indent: 0px;
-        padding: 15px;
-        margin:0 10px
-    }
-    #contentdiv::-webkit-scrollbar {
-        width: 6px
-    }
-    #contentdiv::-webkit-scrollbar:horizontal {
-        height: 6px;
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-track {
-        background: transparent;
-        -webkit-border-radius: 0;
-        right: 10px
-    }
-    #contentdiv::-webkit-scrollbar-track:disabled {
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-thumb {
-        border-width: 0;
-        min-height: 20px;
-        background: rgba(40,40,40,0.22);
-        opacity: 0.4;
-        -webkit-border-radius: 5px
+        padding:20px;
     }
     
 }
@@ -226,10 +186,9 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-    <div id="contentdiv">
       <h1 id="comments">COMMENTS</h1>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postcommentscreate">POST comments/create</h2>
 
@@ -240,53 +199,105 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
-
 <p><strong>stamp_id</strong> <em>required</em>
-The id of the stamp commented on.</p>
+The id of the stamp being commented on.</p>
 
 <p><strong>blurb</strong> <em>required</em>
-A brief text field containing the comment. This is currently limited to 512 characters.</p>
+A brief text field containing the comment. This is currently limited to 512 characters. Any embedded mentions will be derived on the server.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/comments/create.json
-authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700000a&amp;blurb=That+looks+awesome.+Thanks+%40robby!</code></pre>
+<pre><code>POST https://api.stamped.com/v1/comments/create.json
+oauth_token=1234567890123456789012&amp;stamp_id=4e259ca532a7ba6cd700000a&amp;blurb=That+looks+awesome.+Thanks+%40robby!
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "blurb": "That looks awesome. Thanks @robby!", 
-    "comment_id": "4e259ca532a7ba6cd700000b", 
-    "mentions": [
+    &quot;blurb&quot;: &quot;That looks awesome. Thanks @robby!&quot;, 
+    &quot;comment_id&quot;: &quot;4e259ca532a7ba6cd700000b&quot;, 
+    &quot;mentions&quot;: [
         {
-            "display_name": "Robby S.", 
-            "indices": [27,33], 
-            "screen_name": "robby", 
-            "user_id": "4e2854ba32a7ba9d96000008"
+            &quot;display_name&quot;: &quot;Robby S.&quot;, 
+            &quot;indices&quot;: [27,33], 
+            &quot;screen_name&quot;: &quot;robby&quot;, 
+            &quot;user_id&quot;: &quot;4e2854ba32a7ba9d96000008&quot;
         }
     ], 
-    "restamp_id": null, 
-    "stamp_id": "4e259ca532a7ba6cd700000a", 
-    "created": "2011-07-19 15:03:01.843073", 
-    "user": {
-        "user_id": "47cc67093475061e3d95369d", 
-        "profile__image": "user.png", 
-        "display_name": "Kevin P.", 
-        "color_primary": "333333",
-        "color_secondary": "999999",
-        "screen_name": "kpalms",
-        "privacy": false
+    &quot;restamp_id&quot;: null, 
+    &quot;stamp_id&quot;: &quot;4e259ca532a7ba6cd700000a&quot;, 
+    &quot;created&quot;: &quot;2011-07-19 15:03:01.843073&quot;, 
+    &quot;user&quot;: {
+        &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+        &quot;profile__image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+        &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+        &quot;color_primary&quot;: &quot;333333&quot;,
+        &quot;color_secondary&quot;: &quot;999999&quot;,
+        &quot;screen_name&quot;: &quot;kevin&quot;,
+        &quot;privacy&quot;: false
     }
-}</code></pre>
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="postcommentsremove">POST comments/remove</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Remove a comment. The comment must either be owned by the authenticating user or the authenticating user must own the stamp that was commented on.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>comment_id</strong> <em>required</em>
+The unique id of the stamp.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v1/comments/remove.json
+oauth_token=1234567890123456789012&amp;comment_id=4e259ca532a7ba6cd700000b
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;blurb&quot;: &quot;That looks awesome. Thanks @robby!&quot;, 
+    &quot;comment_id&quot;: &quot;4e259ca532a7ba6cd700000b&quot;, 
+    &quot;mentions&quot;: [
+        {
+            &quot;display_name&quot;: &quot;Robby S.&quot;, 
+            &quot;indices&quot;: [27,33], 
+            &quot;screen_name&quot;: &quot;robby&quot;, 
+            &quot;user_id&quot;: &quot;4e2854ba32a7ba9d96000008&quot;
+        }
+    ], 
+    &quot;restamp_id&quot;: null, 
+    &quot;stamp_id&quot;: &quot;4e259ca532a7ba6cd700000a&quot;, 
+    &quot;created&quot;: &quot;2011-07-19 15:03:01.843073&quot;, 
+    &quot;user&quot;: {
+        &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+        &quot;profile__image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+        &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+        &quot;color_primary&quot;: &quot;333333&quot;,
+        &quot;color_secondary&quot;: &quot;999999&quot;,
+        &quot;screen_name&quot;: &quot;kevin&quot;,
+        &quot;privacy&quot;: false
+    }
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getcommentsshow">GET comments/show</h2>
 
@@ -297,7 +308,7 @@ authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700
 <h3 id="details">Details</h3>
 
 <ul>
-<li>No Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
@@ -305,66 +316,64 @@ authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700
 <p><strong>stamp_id</strong> <em>required</em>
 The id of the stamp commented on.</p>
 
-<p><strong>authenticated_user_id</strong> <em>optional</em>
-The user id of the authenticating user. This is necessary only if the stamp is private.</p>
+<p><strong>limit</strong> <em>optional</em>
+The maximum number of desired results. Values greater than the default will be ignored.</p>
+
+<p><strong>since</strong> <em>optional</em>
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of comments to be returned. </p>
+
+<p><strong>before</strong> <em>optional</em>
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of comments to be returned.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/comments/show.json
-authenticated_user_id=4e259ca532a7ba6cd7000008&amp;stamp_id=4e259ca532a7ba6cd700000a</code></pre>
+<pre><code>GET https://api.stamped.com/v1/comments/show.json?oauth_token=1234567890123456789012&amp;stamp_id=4e259ca532a7ba6cd700000a
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>[
     {
-        "blurb": "That looks awesome.", 
-        "comment_id": "4e259ca532a7ba6cd700000b", 
-        "mentions": null, 
-        "restamp_id": null, 
-        "stamp_id": "4e259ca532a7ba6cd700000a", 
-        "created": "2011-07-19 15:03:01.843073", 
-        "user": {
-            "user_id": "47cc67093475061e3d95369d", 
-            "profile__image": "user.png", 
-            "display_name": "Kevin P.", 
-            "color_primary": "333333",
-            "color_secondary": "999999",
-            "screen_name": "kpalms",
-            "privacy": false
+        &quot;blurb&quot;: &quot;That looks awesome. Thanks @robby!&quot;, 
+        &quot;comment_id&quot;: &quot;4e259ca532a7ba6cd700000b&quot;, 
+        &quot;mentions&quot;: [
+            {
+                &quot;display_name&quot;: &quot;Robby S.&quot;, 
+                &quot;indices&quot;: [27,33], 
+                &quot;screen_name&quot;: &quot;robby&quot;, 
+                &quot;user_id&quot;: &quot;4e2854ba32a7ba9d96000008&quot;
+            }
+        ], 
+        &quot;restamp_id&quot;: null, 
+        &quot;stamp_id&quot;: &quot;4e259ca532a7ba6cd700000a&quot;, 
+        &quot;created&quot;: &quot;2011-07-19 15:03:01.843073&quot;, 
+        &quot;user&quot;: {
+            &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+            &quot;profile__image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+            &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+            &quot;color_primary&quot;: &quot;333333&quot;,
+            &quot;color_secondary&quot;: &quot;999999&quot;,
+            &quot;screen_name&quot;: &quot;kevin&quot;,
+            &quot;privacy&quot;: false
+        }
+    },
+    {
+        &quot;blurb&quot;: &quot;No problem!&quot;, 
+        &quot;comment_id&quot;: &quot;4e259ca532a7ba6cd700000c&quot;,
+        &quot;stamp_id&quot;: &quot;4e259ca532a7ba6cd700000a&quot;, 
+        &quot;created&quot;: &quot;2011-07-19 15:21:43.382018&quot;, 
+        &quot;user&quot;: {
+            &quot;user_id&quot;: &quot;4e2854ba32a7ba9d96000008&quot;, 
+            &quot;profile__image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;, 
+            &quot;display_name&quot;: &quot;Robby S.&quot;, 
+            &quot;color_primary&quot;: &quot;A0EE33&quot;,
+            &quot;color_secondary&quot;: &quot;BBBBFF&quot;,
+            &quot;screen_name&quot;: &quot;robby&quot;,
+            &quot;privacy&quot;: false
         }
     }
-]</code></pre>
-
-<hr />
-
-<h2 id="postcommentsremove">POST comments/remove</h2>
-
-<h3 id="description">Description</h3>
-
-<p>Remove a comment owned by the authenticating user.</p>
-
-<h3 id="details">Details</h3>
-
-<ul>
-<li>Requires Authentication</li>
-</ul>
-
-<h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user. This user must be the owner of the stamp or the owner of the comment.</p>
-
-<p><strong>comment_id</strong> <em>required</em>
-The unique id of the stamp.</p>
-
-<h3 id="samplerequest">Sample Request</h3>
-
-<pre><code>POST https://api.stamped.com/1/comments/remove.json
-authenticated_user_id=4e259ca532a7ba6cd7000008&amp;comment_id=4e259ca532a7ba6cd700000b</code></pre>
-
-<h3 id="sampleresult">Sample Result</h3>
-
-<pre><code>true</code></pre>
+]
+</code></pre>
 
     </div>
 </body>

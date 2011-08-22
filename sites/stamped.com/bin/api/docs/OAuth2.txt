@@ -1,0 +1,61 @@
+
+# OAUTH 2.0 #
+
+
+------------------------------------------------------------------------------
+## POST oauth2/token ##
+
+### Description ###
+Acquire a new access token using a refresh token.
+
+### Details ###
+* Client ID / Client Secret Required
+
+### Parameters ###
+
+**refresh_token** _required_
+The refresh token associated with the user and device. This is acquired after successfully creating an account and / or logging in.
+
+**grant_type** _required_
+The grant type. This string **must** be set to `refresh_token` or else the request will fail. Additional grant types will be added in the future.
+
+### Sample Request ###
+    POST https://api.stamped.com/v1/oauth2/token.json
+    client_id=iPhoneApp&client_secret=1234567890&refresh_token=1234567890123456789012345678901234567890123&grant_type=refresh_token
+
+### Sample Result ###
+    {
+        "access_token": "1234567890123456789012",
+        "expires_in": 3920
+    }
+
+
+------------------------------------------------------------------------------
+## POST oauth2/login ##
+
+### Description ###
+Acquire a new refresh token and access token after logging in with user credentials.
+
+### Details ###
+* Client ID / Client Secret Required
+
+### Parameters ###
+
+**screen_name** _required_
+The user's screen name.
+
+**password** _required_
+The user's password
+
+### Sample Request ###
+    POST https://api.stamped.com/v1/oauth2/login.json
+    client_id=iPhoneApp&client_secret=1234567890&screen_name=kevin&password=12345
+
+### Sample Result ###
+    {
+        "access_token": "1234567890123456789012",
+        "expires_in": 3920,
+        "refresh_token": "1234567890123456789012345678901234567890123"
+    }
+    
+

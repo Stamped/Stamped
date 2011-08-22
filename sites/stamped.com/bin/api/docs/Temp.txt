@@ -1,0 +1,119 @@
+
+# TEMP #
+
+
+------------------------------------------------------------------------------
+## GET temp/friends ##
+
+### Description ###
+Return a list of the specified user's friends. Unlikes friendships/friends, this returns the full user object.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the user.
+
+### Sample Request ###
+    GET https://api.stamped.com/v1/temp/friends.json?oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+    [
+        {
+            "user_id": "47cc67093475061e3d95369d",
+            "first_name": "Kevin",
+            "last_name": "Palms",
+            "screen_name": "kevin",
+            "display_name": "Kevin P.",
+            "profile_image": "http://img.stamped.com/u/kevin.png"
+            "bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+            "color_primary": "333333",
+            "color_secondary": "999999",
+            "privacy": false,
+            "num_stamps": 0,
+            "num_friends": 0,
+            "num_followers": 0,
+            "num_faves": 0,
+            "num_credits": 0,
+            "num_credits_given": 0
+        },
+        {
+            "user_id": "4e226fcd4e61754161000007",
+            "first_name": "Robby",
+            "last_name": "Stein",
+            "screen_name": "robby",
+            "display_name": "Robby S.",
+            "profile_image": "http://img.stamped.com/u/robby.png"
+            "bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+            "color_primary": "A0EE33",
+            "color_secondary": "BBBBFF",
+            "privacy": false,
+            "num_stamps": 0,
+            "num_friends": 0,
+            "num_followers": 0,
+            "num_faves": 0,
+            "num_credits": 0,
+            "num_credits_given": 0
+        }
+    ]
+
+
+------------------------------------------------------------------------------
+## GET temp/followers ##
+
+### Description ###
+Return a list of the specified user's followers. Unlikes friendships/followers, this returns the full user object.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the user.
+
+### Sample Request ###
+    GET https://api.stamped.com/v1/temp/followers.json?oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+    [
+        {
+            "user_id": "47cc67093475061e3d95369d",
+            "first_name": "Kevin",
+            "last_name": "Palms",
+            "screen_name": "kevin",
+            "display_name": "Kevin P.",
+            "profile_image": "http://img.stamped.com/u/kevin.png"
+            "bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+            "color_primary": "333333",
+            "color_secondary": "999999",
+            "privacy": false,
+            "num_stamps": 0,
+            "num_friends": 0,
+            "num_followers": 0,
+            "num_faves": 0,
+            "num_credits": 0,
+            "num_credits_given": 0
+        },
+        {
+            "user_id": "4e226fcd4e61754161000007",
+            "first_name": "Robby",
+            "last_name": "Stein",
+            "screen_name": "robby",
+            "display_name": "Robby S.",
+            "profile_image": "http://img.stamped.com/u/robby.png"
+            "bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+            "color_primary": "A0EE33",
+            "color_secondary": "BBBBFF",
+            "privacy": false,
+            "num_stamps": 0,
+            "num_friends": 0,
+            "num_followers": 0,
+            "num_faves": 0,
+            "num_credits": 0,
+            "num_credits_given": 0
+        }
+    ]
+

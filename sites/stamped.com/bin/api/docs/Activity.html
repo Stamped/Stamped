@@ -3,11 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Markdown Preview</title>
+  <title>Activity</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif; } 
-html>body { font-size: 14px; } 
+/* 
+ This document has been created with Marked.app <http://markedapp.com>, Copyright 2011 Brett Terpstra
+ Please leave this notice in place, along with any additional credits below.
+ ---------------------------------------------------------------
+ SwissStyle by Brett Terpstra
+ */
+
+body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif;margin:0 } 
+html>body { font-size: 13px; } 
 p { margin: 1.3125em  0; font-size: 1.1429em; line-height: 1.3125em; }
 li {
 	font-size: 110%;
@@ -59,7 +66,7 @@ h4 {
     vertical-align: super;
     color: rgb(13,110,161)
 }
-#contentdiv img {
+#wrapper img {
     max-width: 100%
 }
 dt {
@@ -68,16 +75,13 @@ dt {
 dd {
     margin-bottom: 1em
 }
-@media print {body {
-    overflow: auto;
-}
+@media print {
+    body {
+        overflow: auto;
+    }
     #wrapper {
         background: #fff;
         position: relative
-    }
-    #contentdiv {
-        position: relative;
-        background: transparent;
         color: #303030;
         text-indent: 0px;
         padding: 10px;
@@ -86,11 +90,7 @@ dd {
     
 }
 @media screen {
-    body {
-        overflow: hidden
-    }
     .inverted, .inverted #wrapper { background:#111 !important }
-    .inverted #contentdiv {background:transparent !important }
     .inverted p,.inverted td,.inverted li,.inverted h1,.inverted h2,
     .inverted h3,.inverted h4, .inverted h5, .inverted h6, .inverted pre,
     .inverted code,.inverted th {
@@ -99,47 +99,7 @@ dd {
     .inverted a { color:#fff;text-decoration:underline }
     #wrapper {
         background: transparent;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        -webkit-box-shadow: inset 0px 0px 4px #8F8D87
-    }
-    #contentdiv {
-        position: fixed;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        background: transparent;
-        color: #303030;
-        overflow: auto;
-        text-indent: 0px;
-        padding: 15px;
-        margin:0 10px
-    }
-    #contentdiv::-webkit-scrollbar {
-        width: 6px
-    }
-    #contentdiv::-webkit-scrollbar:horizontal {
-        height: 6px;
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-track {
-        background: transparent;
-        -webkit-border-radius: 0;
-        right: 10px
-    }
-    #contentdiv::-webkit-scrollbar-track:disabled {
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-thumb {
-        border-width: 0;
-        min-height: 20px;
-        background: rgba(40,40,40,0.22);
-        opacity: 0.4;
-        -webkit-border-radius: 5px
+        padding:20px;
     }
     
 }
@@ -226,10 +186,9 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-    <div id="contentdiv">
       <h1 id="activity">ACTIVITY</h1>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getactivityshow">GET activity/show</h2>
 
@@ -240,139 +199,151 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
+<li>Note that the <code>num_comments</code> and <code>comment_preview</code> fields are removed for any embedded stamps.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><strong>limit</strong> <em>optional</em>
+The maximum number of desired results. Values greater than the default will be ignored.</p>
+
+<p><strong>since</strong> <em>optional</em>
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of activity to be returned. </p>
+
+<p><strong>before</strong> <em>optional</em>
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of activity to be returned.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/activity/show.json
-authenticated_user_id=47cc67093475061e3d95369d</code></pre>
+<pre><code>GET https://api.stamped.com/v1/activity/show.json?oauth_token=1234567890123456789012
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>[
     {
-        "comment": null, 
-        "created": "2011-07-27 16:02:15.394000", 
-        "genre": "mention", 
-        "stamp": {
-            "blurb": "Great date spot. Thanks @rmstein!", 
-            "comment_preview": [], 
-            "created": "2011-07-27 16:02:14.549000", 
-            "credit": null, 
-            "entity": {
-                "category": "Restaurant", 
-                "coordinates": {
-                    "lat": 40.714623000000003, 
-                    "lng": -74.006604999999993
-                }, 
-                "entity_id": "4e30368432a7ba613b000003", 
-                "subtitle": "Other", 
-                "title": "Recette"
+        &quot;comment&quot;: null, 
+        &quot;created&quot;: &quot;2011-07-27 16:02:15.394000&quot;, 
+        &quot;genre&quot;: &quot;mention&quot;, 
+        &quot;stamp&quot;: {
+            &quot;blurb&quot;: &quot;Great date spot. Thanks @rmstein!&quot;, 
+            &quot;comment_preview&quot;: [], 
+            &quot;created&quot;: &quot;2011-07-27 16:02:14.549000&quot;, 
+            &quot;credit&quot;: null, 
+            &quot;entity&quot;: {
+                &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+                &quot;title&quot;: &quot;Spotted Pig&quot;,
+                &quot;subtitle&quot;: &quot;New York, NY&quot;
+                &quot;category&quot;: &quot;food&quot;,
+                &quot;subcategory&quot;: &quot;restaurant&quot;
+                &quot;desc&quot;: &quot;Burger place&quot;,
+                &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+                &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+                &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+                &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+                &quot;phone&quot;: &quot;1235551234&quot;
             }, 
-            "image": "image.png", 
-            "mentions": [
+            &quot;mentions&quot;: [
                 {
-                    "display_name": "Robby S.", 
-                    "indices": [24, 32], 
-                    "screen_name": "rmstein", 
-                    "user_id": "4e30368332a7ba613b000001"
+                    &quot;display_name&quot;: &quot;Robby S.&quot;, 
+                    &quot;indices&quot;: [24, 32], 
+                    &quot;screen_name&quot;: &quot;rmstein&quot;, 
+                    &quot;user_id&quot;: &quot;4e30368332a7ba613b000001&quot;
                 }
             ], 
-            "num_comments": 0, 
-            "stamp_id": "4e30368732a7ba613b000007", 
-            "user": {
-                "color_primary": "333333", 
-                "color_secondary": "999999", 
-                "display_name": "Kevin P.", 
-                "privacy": false, 
-                "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
-                "screen_name": "kpalms", 
-                "user_id": "4e30368332a7ba613b000000"
+            &quot;stamp_id&quot;: &quot;4e30368732a7ba613b000007&quot;, 
+            &quot;user&quot;: {
+                &quot;color_primary&quot;: &quot;333333&quot;, 
+                &quot;color_secondary&quot;: &quot;999999&quot;, 
+                &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+                &quot;privacy&quot;: false, 
+                &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+                &quot;screen_name&quot;: &quot;kpalms&quot;, 
+                &quot;user_id&quot;: &quot;4e30368332a7ba613b000000&quot;
             }
         }, 
-        "user": {
-            "color_primary": "333333", 
-            "color_secondary": "999999", 
-            "display_name": "Kevin P.", 
-            "privacy": false, 
-            "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
-            "screen_name": "kpalms", 
-            "user_id": "4e30368332a7ba613b000000"
+        &quot;user&quot;: {
+            &quot;color_primary&quot;: &quot;333333&quot;, 
+            &quot;color_secondary&quot;: &quot;999999&quot;, 
+            &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+            &quot;privacy&quot;: false, 
+            &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+            &quot;screen_name&quot;: &quot;kpalms&quot;, 
+            &quot;user_id&quot;: &quot;4e30368332a7ba613b000000&quot;
         }
     }, 
     {
-        "comment": {
-            "blurb": "That looks awesome. Well done, @rmstein..", 
-            "comment_id": "4e30368632a7ba613b000005", 
-            "created": "2011-07-27 16:02:13.509000", 
-            "mentions": [
+        &quot;comment&quot;: {
+            &quot;blurb&quot;: &quot;That looks awesome. Well done, @rmstein..&quot;, 
+            &quot;comment_id&quot;: &quot;4e30368632a7ba613b000005&quot;, 
+            &quot;created&quot;: &quot;2011-07-27 16:02:13.509000&quot;, 
+            &quot;mentions&quot;: [
                 {
-                    "display_name": "Robby S.", 
-                    "indices": [31, 39], 
-                    "screen_name": "rmstein", 
-                    "user_id": "4e30368332a7ba613b000001"
+                    &quot;display_name&quot;: &quot;Robby S.&quot;, 
+                    &quot;indices&quot;: [31, 39], 
+                    &quot;screen_name&quot;: &quot;rmstein&quot;, 
+                    &quot;user_id&quot;: &quot;4e30368332a7ba613b000001&quot;
                 }
             ], 
-            "restamp_id": null, 
-            "stamp_id": "4e30368532a7ba613b000004", 
-            "user": {
-                "color_primary": "333333", 
-                "color_secondary": "999999", 
-                "display_name": "Kevin P.", 
-                "privacy": false, 
-                "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
-                "screen_name": "kpalms", 
-                "user_id": "4e30368332a7ba613b000000"
+            &quot;restamp_id&quot;: null, 
+            &quot;stamp_id&quot;: &quot;4e30368532a7ba613b000004&quot;, 
+            &quot;user&quot;: {
+                &quot;color_primary&quot;: &quot;333333&quot;, 
+                &quot;color_secondary&quot;: &quot;999999&quot;, 
+                &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+                &quot;privacy&quot;: false, 
+                &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+                &quot;screen_name&quot;: &quot;kpalms&quot;, 
+                &quot;user_id&quot;: &quot;4e30368332a7ba613b000000&quot;
             }
         }, 
-        "created": "2011-07-27 16:02:14.203000", 
-        "genre": "comment", 
-        "stamp": {
-            "blurb": "Favorite restaurant in the Village.", 
-            "comment_preview": [], 
-            "created": "2011-07-27 16:02:12.658000", 
-            "credit": null, 
-            "entity": {
-                "category": "Restaurant", 
-                "coordinates": {
-                    "lat": 40.714623000000003, 
-                    "lng": -74.006604999999993
-                }, 
-                "entity_id": "4e30368432a7ba613b000002", 
-                "subtitle": "Other", 
-                "title": "Little Owl"
+        &quot;created&quot;: &quot;2011-07-27 16:02:14.203000&quot;, 
+        &quot;genre&quot;: &quot;comment&quot;, 
+        &quot;stamp&quot;: {
+            &quot;blurb&quot;: &quot;Favorite restaurant in the Village.&quot;, 
+            &quot;comment_preview&quot;: [], 
+            &quot;created&quot;: &quot;2011-07-27 16:02:12.658000&quot;, 
+            &quot;credit&quot;: null, 
+            &quot;entity&quot;: {
+                &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+                &quot;title&quot;: &quot;Spotted Pig&quot;,
+                &quot;subtitle&quot;: &quot;New York, NY&quot;
+                &quot;category&quot;: &quot;food&quot;,
+                &quot;subcategory&quot;: &quot;restaurant&quot;
+                &quot;desc&quot;: &quot;Burger place&quot;,
+                &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+                &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+                &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+                &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+                &quot;phone&quot;: &quot;1235551234&quot;
             }, 
-            "image": "image.png", 
-            "mentions": null, 
-            "num_comments": 0, 
-            "stamp_id": "4e30368532a7ba613b000004", 
-            "user": {
-                "color_primary": "333333", 
-                "color_secondary": "999999", 
-                "display_name": "Kevin P.", 
-                "privacy": false, 
-                "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
-                "screen_name": "kpalms", 
-                "user_id": "4e30368332a7ba613b000000"
+            &quot;image&quot;: &quot;image.png&quot;, 
+            &quot;mentions&quot;: null, 
+            &quot;num_comments&quot;: 0, 
+            &quot;stamp_id&quot;: &quot;4e30368532a7ba613b000004&quot;, 
+            &quot;user&quot;: {
+                &quot;color_primary&quot;: &quot;333333&quot;, 
+                &quot;color_secondary&quot;: &quot;999999&quot;, 
+                &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+                &quot;privacy&quot;: false, 
+                &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+                &quot;screen_name&quot;: &quot;kpalms&quot;, 
+                &quot;user_id&quot;: &quot;4e30368332a7ba613b000000&quot;
             }
         }, 
-        "user": {
-            "color_primary": "333333", 
-            "color_secondary": "999999", 
-            "display_name": "Kevin P.", 
-            "privacy": false, 
-            "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg", 
-            "screen_name": "kpalms", 
-            "user_id": "4e30368332a7ba613b000000"
+        &quot;user&quot;: {
+            &quot;color_primary&quot;: &quot;333333&quot;, 
+            &quot;color_secondary&quot;: &quot;999999&quot;, 
+            &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+            &quot;privacy&quot;: false, 
+            &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+            &quot;screen_name&quot;: &quot;kpalms&quot;, 
+            &quot;user_id&quot;: &quot;4e30368332a7ba613b000000&quot;
         }
     }
-]</code></pre>
+]
+</code></pre>
 
     </div>
 </body>

@@ -3,11 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Markdown Preview</title>
+  <title>Friendships</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif; } 
-html>body { font-size: 14px; } 
+/* 
+ This document has been created with Marked.app <http://markedapp.com>, Copyright 2011 Brett Terpstra
+ Please leave this notice in place, along with any additional credits below.
+ ---------------------------------------------------------------
+ SwissStyle by Brett Terpstra
+ */
+
+body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif;margin:0 } 
+html>body { font-size: 13px; } 
 p { margin: 1.3125em  0; font-size: 1.1429em; line-height: 1.3125em; }
 li {
 	font-size: 110%;
@@ -59,7 +66,7 @@ h4 {
     vertical-align: super;
     color: rgb(13,110,161)
 }
-#contentdiv img {
+#wrapper img {
     max-width: 100%
 }
 dt {
@@ -68,16 +75,13 @@ dt {
 dd {
     margin-bottom: 1em
 }
-@media print {body {
-    overflow: auto;
-}
+@media print {
+    body {
+        overflow: auto;
+    }
     #wrapper {
         background: #fff;
         position: relative
-    }
-    #contentdiv {
-        position: relative;
-        background: transparent;
         color: #303030;
         text-indent: 0px;
         padding: 10px;
@@ -86,11 +90,7 @@ dd {
     
 }
 @media screen {
-    body {
-        overflow: hidden
-    }
     .inverted, .inverted #wrapper { background:#111 !important }
-    .inverted #contentdiv {background:transparent !important }
     .inverted p,.inverted td,.inverted li,.inverted h1,.inverted h2,
     .inverted h3,.inverted h4, .inverted h5, .inverted h6, .inverted pre,
     .inverted code,.inverted th {
@@ -99,47 +99,7 @@ dd {
     .inverted a { color:#fff;text-decoration:underline }
     #wrapper {
         background: transparent;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        -webkit-box-shadow: inset 0px 0px 4px #8F8D87
-    }
-    #contentdiv {
-        position: fixed;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        background: transparent;
-        color: #303030;
-        overflow: auto;
-        text-indent: 0px;
-        padding: 15px;
-        margin:0 10px
-    }
-    #contentdiv::-webkit-scrollbar {
-        width: 6px
-    }
-    #contentdiv::-webkit-scrollbar:horizontal {
-        height: 6px;
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-track {
-        background: transparent;
-        -webkit-border-radius: 0;
-        right: 10px
-    }
-    #contentdiv::-webkit-scrollbar-track:disabled {
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-thumb {
-        border-width: 0;
-        min-height: 20px;
-        background: rgba(40,40,40,0.22);
-        opacity: 0.4;
-        -webkit-border-radius: 5px
+        padding:20px;
     }
     
 }
@@ -226,10 +186,9 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-    <div id="contentdiv">
       <h1 id="friendships">FRIENDSHIPS</h1>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postfriendshipscreate">POST friendships/create</h2>
 
@@ -240,123 +199,143 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
 The user id or screen name of the friend.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/friendships/create.json
-user_id=4e226fcd4e61754161000007</code></pre>
+<pre><code>POST https://api.stamped.com/v1/friendships/create.json
+oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "4e226fcd4e61754161000007",
-    "screen_name": "robby"
-}</code></pre>
+    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+    &quot;first_name&quot;: &quot;Robby&quot;,
+    &quot;last_name&quot;: &quot;Stein&quot;,
+    &quot;screen_name&quot;: &quot;robby&quot;,
+    &quot;display_name&quot;: &quot;Robby S.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;
+    &quot;bio&quot;: &quot;Former product manager at Google. Current awesomeness at stealth-mode startup.&quot;,
+    &quot;color_primary&quot;: &quot;A0EE33&quot;,
+    &quot;color_secondary&quot;: &quot;BBBBFF&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 0,
+    &quot;num_followers&quot;: 1,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getfriendshipscheck">GET friendships/check</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Check whether or not a friendship exists.</p>
+<p>Check whether or not a friendship exists between user a and user b. Will return true if user a follows user b, otherwise it will return false.</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><strong>user_id_a</strong> or <strong>screen_name_a</strong> <em>required</em>
+The user id or screen name of the user who may be following the other.</p>
 
-<p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
-The user id or screen name of the friend.</p>
+<p><strong>user_id_a</strong> or <strong>screen_name_a</strong> <em>required</em>
+The user id or screen name of the user who is potentially being followed.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/friendships/check.json
-user_id=4e226fcd4e61754161000007</code></pre>
+<pre><code>GET https://api.stamped.com/v1/friendships/check.json?oauth_token=1234567890123456789012&amp;user_id_a=47cc67093475061e3d95369d&amp;user_id_b=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
-<pre><code>true</code></pre>
+<pre><code>true
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getfriendshipsfriends">GET friendships/friends</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Return a list of the authenticating user&#8217;s friends.</p>
+<p>Return a list of the specified user&#8217;s friends.</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
+The user id or screen name of the user.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/friendships/friends.json</code></pre>
+<pre><code>GET https://api.stamped.com/v1/friendships/friends.json?oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_ids": [
-        "4e226fcd4e61754161000007"
+    &quot;user_ids&quot;: [
+        &quot;4e226fcd4e61754161000007&quot;,
+        &quot;4e226fcd4e61754161000008&quot;
     ]
-}</code></pre>
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getfriendshipsfollowers">GET friendships/followers</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Return a list of the authenticating user&#8217;s followers.</p>
+<p>Return a list of the specified user&#8217;s followers.</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
+The user id or screen name of the user.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/friendships/followers.json</code></pre>
+<pre><code>GET https://api.stamped.com/v1/friendships/followers.json?oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_ids": [
-        "4e226fcd4e61754161000007"
+    &quot;user_ids&quot;: [
+        &quot;4e226fcd4e61754161000007&quot;,
+        &quot;4e226fcd4e61754161000008&quot;
     ]
-}</code></pre>
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getfriendshipspending">GET friendships/pending</h2>
 
@@ -367,29 +346,30 @@ The user id of the authenticating user.</p>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><em>None</em></p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/friendships/pending.json</code></pre>
+<pre><code>GET https://api.stamped.com/v1/friendships/pending.json?oauth_token=1234567890123456789012
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_ids": [
-        "4e226fcd4e61754161000007"
+    &quot;user_ids&quot;: [
+        &quot;4e226fcd4e61754161000007&quot;
     ]
-}</code></pre>
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getfriendshipsapprove">GET friendships/approve</h2>
+<h2 id="postfriendshipsapprove">POST friendships/approve</h2>
 
 <h3 id="description">Description</h3>
 
@@ -398,52 +378,43 @@ The user id of the authenticating user.</p>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
-
-<p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em></p>
+<p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
+The user id or screen name of the user requesting friendship.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/friendships/approve.json
-user_id=4e226fcd4e61754161000007</code></pre>
+<pre><code>POST https://api.stamped.com/v1/friendships/approve.json
+oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "4e226fcd4e61754161000007",
-    "first_name": "Robby",
-    "last_name": "Stein",
-    "screen_name": "robby",
-    "display_name": "Robby S.",
-    "bio": "Starting something new in NYC. Former Google product manager.",
-    "website": null,
-    "color_primary": "333333",
-    "color_secondary": "999999",
-    "last_stamp": {
-        "blurb": "Best burger in the city.", 
-        "entity": {
-            "category": "Restaurant", 
-            "entity_id": "3r426fcd4e61754161000006", 
-            "subtitle": "Burgers, and that's all.", 
-            "title": "Spotted Pig"
-        }, 
-        "flags": {
-            "privacy": false
-        }, 
-        "stamp_id": "3e526fcd4e18474561000000", 
-        "image": "image3.png", 
-        "credit": null, 
-        "timestamp": "2011-05-12 18:24:44.432141"
-    }
-}</code></pre>
+    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+    &quot;first_name&quot;: &quot;Robby&quot;,
+    &quot;last_name&quot;: &quot;Stein&quot;,
+    &quot;screen_name&quot;: &quot;robby&quot;,
+    &quot;display_name&quot;: &quot;Robby S.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;
+    &quot;bio&quot;: &quot;Former product manager at Google. Current awesomeness at stealth-mode startup.&quot;,
+    &quot;color_primary&quot;: &quot;A0EE33&quot;,
+    &quot;color_secondary&quot;: &quot;BBBBFF&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 1,
+    &quot;num_followers&quot;: 1,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postfriendshipsremove">POST friendships/remove</h2>
 
@@ -454,30 +425,43 @@ user_id=4e226fcd4e61754161000007</code></pre>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
 The user id or screen name of the friend.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/friendships/remove.json
-user_id=4e226fcd4e61754161000007</code></pre>
+<pre><code>POST https://api.stamped.com/v1/friendships/remove.json
+oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "4e226fcd4e61754161000007",
-    "screen_name": "robby"
-}</code></pre>
+    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+    &quot;first_name&quot;: &quot;Robby&quot;,
+    &quot;last_name&quot;: &quot;Stein&quot;,
+    &quot;screen_name&quot;: &quot;robby&quot;,
+    &quot;display_name&quot;: &quot;Robby S.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;
+    &quot;bio&quot;: &quot;Former product manager at Google. Current awesomeness at stealth-mode startup.&quot;,
+    &quot;color_primary&quot;: &quot;A0EE33&quot;,
+    &quot;color_secondary&quot;: &quot;BBBBFF&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 0,
+    &quot;num_followers&quot;: 0,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postfriendshipsblockscreate">POST friendships/blocks/create</h2>
 
@@ -488,30 +472,43 @@ user_id=4e226fcd4e61754161000007</code></pre>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
 The user id or screen name of the blocked user.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/friendships/blocks/create.json
-user_id=4e226fcd4e61754161000007</code></pre>
+<pre><code>POST https://api.stamped.com/v1/friendships/blocks/create.json
+oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "4e226fcd4e61754161000007",
-    "screen_name": "robby"
-}</code></pre>
+    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+    &quot;first_name&quot;: &quot;Robby&quot;,
+    &quot;last_name&quot;: &quot;Stein&quot;,
+    &quot;screen_name&quot;: &quot;robby&quot;,
+    &quot;display_name&quot;: &quot;Robby S.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;
+    &quot;bio&quot;: &quot;Former product manager at Google. Current awesomeness at stealth-mode startup.&quot;,
+    &quot;color_primary&quot;: &quot;A0EE33&quot;,
+    &quot;color_secondary&quot;: &quot;BBBBFF&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 0,
+    &quot;num_followers&quot;: 0,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getfriendshipsblockscheck">GET friendships/blocks/check</h2>
 
@@ -522,27 +519,25 @@ user_id=4e226fcd4e61754161000007</code></pre>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
 The user id or screen name of the blocked user.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/friendships/blocks/check.json
-user_id=4e226fcd4e61754161000007</code></pre>
+<pre><code>GET https://api.stamped.com/v1/friendships/blocks/check.json?oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
-<pre><code>true</code></pre>
+<pre><code>true
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getfriendshipsblocking">GET friendships/blocking</h2>
 
@@ -553,27 +548,28 @@ user_id=4e226fcd4e61754161000007</code></pre>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><em>None</em></p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/friendships/blocking.json</code></pre>
+<pre><code>GET https://api.stamped.com/v1/friendships/blocking.json?oauth_token=1234567890123456789012
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_ids": [
-        "4e226fcd4e61754161000007"
+    &quot;user_ids&quot;: [
+        &quot;4e226fcd4e61754161000007&quot;
     ]
-}</code></pre>
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postfriendshipsblocksremove">POST friendships/blocks/remove</h2>
 
@@ -584,28 +580,41 @@ The user id of the authenticating user.</p>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>user_id</strong> or <strong>screen_name</strong> <em>required</em>
 The user id or screen name of the blocked user.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/friendships/blocks/remove.json
-user_id=4e226fcd4e61754161000007</code></pre>
+<pre><code>POST https://api.stamped.com/v1/friendships/blocks/remove.json
+oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "user_id": "4e226fcd4e61754161000007",
-    "screen_name": "robby"
-}</code></pre>
+    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+    &quot;first_name&quot;: &quot;Robby&quot;,
+    &quot;last_name&quot;: &quot;Stein&quot;,
+    &quot;screen_name&quot;: &quot;robby&quot;,
+    &quot;display_name&quot;: &quot;Robby S.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;
+    &quot;bio&quot;: &quot;Former product manager at Google. Current awesomeness at stealth-mode startup.&quot;,
+    &quot;color_primary&quot;: &quot;A0EE33&quot;,
+    &quot;color_secondary&quot;: &quot;BBBBFF&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 0,
+    &quot;num_followers&quot;: 0,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
+}
+</code></pre>
 
     </div>
 </body>

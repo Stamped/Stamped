@@ -3,11 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Markdown Preview</title>
+  <title>Entities</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif; } 
-html>body { font-size: 14px; } 
+/* 
+ This document has been created with Marked.app <http://markedapp.com>, Copyright 2011 Brett Terpstra
+ Please leave this notice in place, along with any additional credits below.
+ ---------------------------------------------------------------
+ SwissStyle by Brett Terpstra
+ */
+
+body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif;margin:0 } 
+html>body { font-size: 13px; } 
 p { margin: 1.3125em  0; font-size: 1.1429em; line-height: 1.3125em; }
 li {
 	font-size: 110%;
@@ -59,7 +66,7 @@ h4 {
     vertical-align: super;
     color: rgb(13,110,161)
 }
-#contentdiv img {
+#wrapper img {
     max-width: 100%
 }
 dt {
@@ -68,16 +75,13 @@ dt {
 dd {
     margin-bottom: 1em
 }
-@media print {body {
-    overflow: auto;
-}
+@media print {
+    body {
+        overflow: auto;
+    }
     #wrapper {
         background: #fff;
         position: relative
-    }
-    #contentdiv {
-        position: relative;
-        background: transparent;
         color: #303030;
         text-indent: 0px;
         padding: 10px;
@@ -86,11 +90,7 @@ dd {
     
 }
 @media screen {
-    body {
-        overflow: hidden
-    }
     .inverted, .inverted #wrapper { background:#111 !important }
-    .inverted #contentdiv {background:transparent !important }
     .inverted p,.inverted td,.inverted li,.inverted h1,.inverted h2,
     .inverted h3,.inverted h4, .inverted h5, .inverted h6, .inverted pre,
     .inverted code,.inverted th {
@@ -99,47 +99,7 @@ dd {
     .inverted a { color:#fff;text-decoration:underline }
     #wrapper {
         background: transparent;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        -webkit-box-shadow: inset 0px 0px 4px #8F8D87
-    }
-    #contentdiv {
-        position: fixed;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        background: transparent;
-        color: #303030;
-        overflow: auto;
-        text-indent: 0px;
-        padding: 15px;
-        margin:0 10px
-    }
-    #contentdiv::-webkit-scrollbar {
-        width: 6px
-    }
-    #contentdiv::-webkit-scrollbar:horizontal {
-        height: 6px;
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-track {
-        background: transparent;
-        -webkit-border-radius: 0;
-        right: 10px
-    }
-    #contentdiv::-webkit-scrollbar-track:disabled {
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-thumb {
-        border-width: 0;
-        min-height: 20px;
-        background: rgba(40,40,40,0.22);
-        opacity: 0.4;
-        -webkit-border-radius: 5px
+        padding:20px;
     }
     
 }
@@ -226,10 +186,9 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-    <div id="contentdiv">
       <h1 id="entities">ENTITIES</h1>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postentitiescreate">POST entities/create</h2>
 
@@ -240,151 +199,22 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>title</strong> <em>required</em>
 The title of the custom entity.</p>
 
+<p><strong>subtitle</strong> <em>required</em>
+The subtitle of the custom entity. This should default to the category if no additional information is provided.</p>
+
 <p><strong>category</strong> <em>required</em>
-The category of the custom entity. If an invalid category is passed it will default to &#8220;Other&#8221;.</p>
+The category of the custom entity. The default valud is &#8220;Other&#8221;.</p>
 
-<p><strong>desc</strong> <em>required</em>
-A brief description of the entity.</p>
-
-<p><strong>image</strong> <em>optional</em>
-A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. </p>
-
-<p><strong>address</strong> <em>optional</em>
-The address of the entity.</p>
-
-<p><strong>coordinates</strong> <em>optional</em>
-The latitude and longitude of the entity, separated by a comma.</p>
-
-<h3 id="samplerequest">Sample Request</h3>
-
-<pre><code>POST https://api.stamped.com/1/entities/create.json
-title=Spotted+Pig&amp;category=Restaurant&amp;desc=Burger+place&amp;coordinates=40.714623,-74.006605</code></pre>
-
-<h3 id="sampleresult">Sample Result</h3>
-
-<pre><code>{
-    "entity_id": "4e226ea84e61754161000000",
-    "title": "Spotted Pig",
-    "category": "Restaurant",
-    "desc": "Burger place",
-    "image": null,
-    "details": {
-        "place": {
-            "address": "314 West 11th Street New York, NY 10014-2369",
-            "coordinates": {
-                "lat": 40.714623,
-                "lng": -74.006605
-            }
-        }
-    },
-    "last_modified": "2011-07-17 19:03:22.354813"
-}</code></pre>
-
-<hr />
-
-<h2 id="getentitiesshow">GET entities/show</h2>
-
-<h3 id="description">Description</h3>
-
-<p>Show details for a given entity.</p>
-
-<h3 id="details">Details</h3>
-
-<ul>
-<li>No Authentication</li>
-</ul>
-
-<h3 id="parameters">Parameters</h3>
-
-<p><strong>entity_id</strong> <em>required</em>
-The unique identifier for the entity.</p>
-
-<p><strong>authenticated_user_id</strong> <em>optional</em>
-The user id of the authenticating user. This is used to display stamps from any friends.</p>
-
-<h3 id="samplerequest">Sample Request</h3>
-
-<pre><code>GET https://api.stamped.com/1/entities/show.json
-entity_id=4e226ea84e61754161000000</code></pre>
-
-<h3 id="sampleresult">Sample Result</h3>
-
-<pre><code>{
-    "entity_id": "4e226ea84e61754161000000",
-    "title": "Spotted Pig",
-    "category": "Restaurant",
-    "desc": "Burger place",
-    "image": null,
-    "details": {
-        "place": {
-            "address": "314 West 11th Street New York, NY 10014-2369",
-            "coordinates": {
-                "lat": 40.714623,
-                "lng": -74.006605
-            }
-        }
-    },
-    "last_modified": "2011-07-17 19:03:22.354813",
-    "stamps": [
-        {
-            "blurb": "Best place ever!", 
-            "flags": {
-                "privacy": false
-            }, 
-            "id": "4e226fcd4e18474561000000", 
-            "img": "image2.png", 
-            "credit": [
-                "4e226fcd4e61754161000007", 
-                "4e226fcd4e61754161000008"
-            ], 
-            "timestamp": "2011-07-17 05:14:54.128641", 
-            "user": {
-                "user_id": "47cc67093475061e3d95369d", 
-                "user_img": "user.png", 
-                "user_name": "Kevin P"
-            }
-        }
-    ]
-}</code></pre>
-
-<hr />
-
-<h2 id="postentitiesupdate">POST entities/update</h2>
-
-<h3 id="description">Description</h3>
-
-<p>Update details for a custom entity.</p>
-
-<h3 id="details">Details</h3>
-
-<ul>
-<li>Requires Authentication</li>
-</ul>
-
-<h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user. The user must be the creator of the entity.</p>
-
-<p><strong>entity_id</strong> <em>required</em>
-The unique identifier of the entity being updated.</p>
-
-<p><strong>title</strong> <em>optional</em>
-The title of the custom entity.</p>
-
-<p><strong>category</strong> <em>optional</em>
-The category of the custom entity. If an invalid category is passed it will default to &#8220;Other&#8221;.</p>
+<p><strong>subcategory</strong> <em>required</em>
+The subcategory of the custom entity. The default valud is &#8220;Other&#8221;.</p>
 
 <p><strong>desc</strong> <em>optional</em>
 A brief description of the entity.</p>
@@ -400,62 +230,172 @@ The latitude and longitude of the entity, separated by a comma.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/entities/update.json
-entity_id=4e226ea84e61754161000000&amp;desc=Gastropub+in+the+West+Village,+NYC</code></pre>
+<pre><code>POST https://api.stamped.com/v1/entities/create.json
+oauth_token=1234567890123456789012&amp;title=Spotted+Pig&amp;subtitle=New+York,+NY&amp;category=food&amp;subcategory=restaurant&amp;desc=Burger+place&amp;coordinates=40.714623,-74.006605
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "entity_id": "4e226ea84e61754161000000",
-    "title": "Spotted Pig",
-    "category": "Restaurant",
-    "desc": "Gastropub in the West Village, NYC",
-    "image": null,
-    "details": {
-        "place": {
-            "address": "314 West 11th Street New York, NY 10014-2369",
-            "coordinates": {
-                "lat": 40.714623,
-                "lng": -74.006605
-            }
-        }
-    },
-    "last_modified": "2011-07-17 21:25:31.583402"
-}</code></pre>
+    &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+    &quot;title&quot;: &quot;Spotted Pig&quot;,
+    &quot;subtitle&quot;: &quot;New York, NY&quot;
+    &quot;category&quot;: &quot;food&quot;,
+    &quot;subcategory&quot;: &quot;restaurant&quot;
+    &quot;desc&quot;: &quot;Burger place&quot;,
+    &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+    &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="getentitiesshow">GET entities/show</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Show details for a given entity.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>entity_id</strong> <em>required</em>
+The unique identifier for the entity.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/v1/entities/show.json?oauth_token=1234567890123456789012&amp;entity_id=4e226ea84e61754161000000
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+    &quot;title&quot;: &quot;Spotted Pig&quot;,
+    &quot;subtitle&quot;: &quot;New York, NY&quot;
+    &quot;category&quot;: &quot;food&quot;,
+    &quot;subcategory&quot;: &quot;restaurant&quot;
+    &quot;desc&quot;: &quot;Burger place&quot;,
+    &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+    &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+    &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+    &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+    &quot;phone&quot;: &quot;1235551234&quot;
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="postentitiesupdate">POST entities/update</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Update details for a custom entity.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+<li>At least one field other than entity_id must be included. Any fields not included will not be changed. To remove a value for a field you can submit an empty string.</li>
+<li>Users can only modify entities that they created.</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>entity_id</strong> <em>required</em>
+The unique identifier of the entity being updated.</p>
+
+<p><strong>title</strong> <em>optional</em>
+The title of the custom entity.</p>
+
+<p><strong>subtitle</strong> <em>optional</em>
+The subtitle of the custom entity. This should default to the category if no additional information is provided.of the custom entity. If an invalid category is passed it will default to &#8220;Other&#8221;.</p>
+
+<p><strong>category</strong> <em>optional</em>
+The category of the custom entity. The default valud is &#8220;Other&#8221;.</p>
+
+<p><strong>subcategory</strong> <em>optional</em>
+The subcategory of the custom entity. The default valud is &#8220;Other&#8221;.</p>
+
+<p><strong>desc</strong> <em>optional</em>
+A brief description of the entity.</p>
+
+<p><strong>image</strong> <em>optional</em>
+A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. </p>
+
+<p><strong>address</strong> <em>optional</em>
+The address of the entity.</p>
+
+<p><strong>coordinates</strong> <em>optional</em>
+The latitude and longitude of the entity, separated by a comma.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v1/entities/update.json
+oauth_token=1234567890123456789012&amp;entity_id=4e226ea84e61754161000000&amp;desc=Gastropub+in+the+West+Village,+NYC
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+    &quot;title&quot;: &quot;Spotted Pig&quot;,
+    &quot;subtitle&quot;: &quot;New York, NY&quot;
+    &quot;category&quot;: &quot;food&quot;,
+    &quot;subcategory&quot;: &quot;restaurant&quot;
+    &quot;desc&quot;: &quot;Gastropub in the West Village, NYC&quot;,
+    &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+    &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postentitiesremove">POST entities/remove</h2>
 
 <h3 id="description">Description</h3>
 
 <p>Remove a custom entity.
-<strong>Warning:</strong> How will this impact subsequent stamps on this entity?</p>
+<strong>Warning:</strong> It is still undecided as to what effect this will have on any stamps that exist on the entity.</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
+<li>Only the creator of a custom entity can delete the entity.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user. The user must be the creator of the entity.</p>
 
 <p><strong>entity_id</strong> <em>required</em>
 The unique identifier of the entity being removed.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/entities/remove.json
-entity_id=4e226ea84e61754161000000</code></pre>
+<pre><code>POST https://api.stamped.com/v1/entities/remove.json
+oauth_token=1234567890123456789012&amp;entity_id=4e226ea84e61754161000000
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
-<pre><code>true</code></pre>
+<pre><code>{
+    &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+    &quot;title&quot;: &quot;Spotted Pig&quot;,
+    &quot;subtitle&quot;: &quot;New York, NY&quot;
+    &quot;category&quot;: &quot;food&quot;,
+    &quot;subcategory&quot;: &quot;restaurant&quot;
+    &quot;desc&quot;: &quot;Gastropub in the West Village, NYC&quot;,
+    &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+    &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getentitiessearch">GET entities/search</h2>
 
@@ -466,13 +406,11 @@ entity_id=4e226ea84e61754161000000</code></pre>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
+<li><strong>Note:</strong> Undecided if the distance calculation will happen on the backend or on the client.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>q</strong> <em>required</em>
 Text string to match against the entity title.</p>
@@ -482,19 +420,20 @@ Coordinates of current location to prioritize local results. Coordinates should 
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/entities/search.json
-q=Spotted+Pig</code></pre>
+<pre><code>GET https://api.stamped.com/v1/entities/search.json?oauth_token=1234567890123456789012&amp;q=Spotted+Pig
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>[
     {
-        "entity_id": "4e226ea84e61754161000000",
-        "title": "Spotted Pig",
-        "category": "Restaurant",
-        "subtitle": "New York, NY"
+        &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+        &quot;title&quot;: &quot;Spotted Pig&quot;,
+        &quot;category&quot;: &quot;Restaurant&quot;,
+        &quot;subtitle&quot;: &quot;New York, NY&quot;,
     }
-]</code></pre>
+]
+</code></pre>
 
     </div>
 </body>

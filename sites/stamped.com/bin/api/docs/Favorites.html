@@ -3,11 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Markdown Preview</title>
+  <title>Favorites</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif; } 
-html>body { font-size: 14px; } 
+/* 
+ This document has been created with Marked.app <http://markedapp.com>, Copyright 2011 Brett Terpstra
+ Please leave this notice in place, along with any additional credits below.
+ ---------------------------------------------------------------
+ SwissStyle by Brett Terpstra
+ */
+
+body { font: normal 0.8764em/1.5em Arial,Verdana,sans-serif;margin:0 } 
+html>body { font-size: 13px; } 
 p { margin: 1.3125em  0; font-size: 1.1429em; line-height: 1.3125em; }
 li {
 	font-size: 110%;
@@ -59,7 +66,7 @@ h4 {
     vertical-align: super;
     color: rgb(13,110,161)
 }
-#contentdiv img {
+#wrapper img {
     max-width: 100%
 }
 dt {
@@ -68,16 +75,13 @@ dt {
 dd {
     margin-bottom: 1em
 }
-@media print {body {
-    overflow: auto;
-}
+@media print {
+    body {
+        overflow: auto;
+    }
     #wrapper {
         background: #fff;
         position: relative
-    }
-    #contentdiv {
-        position: relative;
-        background: transparent;
         color: #303030;
         text-indent: 0px;
         padding: 10px;
@@ -86,11 +90,7 @@ dd {
     
 }
 @media screen {
-    body {
-        overflow: hidden
-    }
     .inverted, .inverted #wrapper { background:#111 !important }
-    .inverted #contentdiv {background:transparent !important }
     .inverted p,.inverted td,.inverted li,.inverted h1,.inverted h2,
     .inverted h3,.inverted h4, .inverted h5, .inverted h6, .inverted pre,
     .inverted code,.inverted th {
@@ -99,47 +99,7 @@ dd {
     .inverted a { color:#fff;text-decoration:underline }
     #wrapper {
         background: transparent;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        -webkit-box-shadow: inset 0px 0px 4px #8F8D87
-    }
-    #contentdiv {
-        position: fixed;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        background: transparent;
-        color: #303030;
-        overflow: auto;
-        text-indent: 0px;
-        padding: 15px;
-        margin:0 10px
-    }
-    #contentdiv::-webkit-scrollbar {
-        width: 6px
-    }
-    #contentdiv::-webkit-scrollbar:horizontal {
-        height: 6px;
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-track {
-        background: transparent;
-        -webkit-border-radius: 0;
-        right: 10px
-    }
-    #contentdiv::-webkit-scrollbar-track:disabled {
-        display: none
-    }
-    #contentdiv::-webkit-scrollbar-thumb {
-        border-width: 0;
-        min-height: 20px;
-        background: rgba(40,40,40,0.22);
-        opacity: 0.4;
-        -webkit-border-radius: 5px
+        padding:20px;
     }
     
 }
@@ -226,27 +186,23 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-    <div id="contentdiv">
       <h1 id="favorites">FAVORITES</h1>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postfavoritescreate">POST favorites/create</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Add a given entity to the authenticated user&#8217;s list. If inspired a stamp, the stamp&#8217;s unique id is recorded as well.</p>
+<p>Add a given entity to the authenticated user&#8217;s list. If inspired by a stamp, the stamp&#8217;s unique id is recorded as well.</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
-
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
 
 <p><strong>entity_id</strong> <em>required</em>
 The id of the entity added to the list</p>
@@ -256,33 +212,82 @@ The id of the stamp that the entity was saved from. This is used to suggest cred
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/favorites/create.json
-authenticated_user_id=4e26294e32a7ba0d4a000004&amp;entity_id=4e26294e32a7ba0d4a000005</code></pre>
+<pre><code>POST https://api.stamped.com/v1/favorites/create.json
+oauth_token=1234567890123456789012&amp;entity_id=4e26294e32a7ba0d4a000005
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>{
-    "complete": false, 
-    "entity": {
-        "category": "Restaurant", 
-        "coordinates": {
-            "lat": 40.714623000000003, 
-            "lng": -74.006604999999993
+    &quot;complete&quot;: false, 
+    &quot;entity&quot;: {
+        &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+        &quot;title&quot;: &quot;Spotted Pig&quot;,
+        &quot;subtitle&quot;: &quot;New York, NY&quot;
+        &quot;category&quot;: &quot;food&quot;,
+        &quot;subcategory&quot;: &quot;restaurant&quot;
+        &quot;desc&quot;: &quot;Burger place&quot;,
+        &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+        &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+        &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+        &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+        &quot;phone&quot;: &quot;1235551234&quot;
+    }, 
+    &quot;favorite_id&quot;: &quot;4e26294f32a7ba0d4a000007&quot;, 
+    &quot;stamp&quot;: {
+        &quot;blurb&quot;: &quot;Went here with @robby... Really, the best ever.&quot;, 
+        &quot;entity&quot;: {
+            &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+            &quot;title&quot;: &quot;Spotted Pig&quot;,
+            &quot;subtitle&quot;: &quot;New York, NY&quot;
+            &quot;category&quot;: &quot;food&quot;,
+            &quot;subcategory&quot;: &quot;restaurant&quot;
+            &quot;desc&quot;: &quot;Burger place&quot;,
+            &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+            &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+            &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+            &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+            &quot;phone&quot;: &quot;1235551234&quot;
         }, 
-        "entity_id": "4e26294e32a7ba0d4a000005", 
-        "subtitle": "Other", 
-        "title": "Little Owl"
+        &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;, 
+        &quot;credit&quot;: [
+            {
+                &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+                &quot;screen_name&quot;: &quot;robby&quot;,
+                &quot;display_name&quot;: &quot;Robby S.&quot;
+            },
+            {
+                &quot;user_id&quot;: &quot;4e226fcd4e61754161000008&quot;,
+                &quot;screen_name&quot;: &quot;bart&quot;,
+                &quot;display_name&quot;: &quot;Bart S.&quot;
+            }
+        ], 
+        &quot;mentions&quot;: [
+            {
+                &quot;display_name&quot;: &quot;Robby S.&quot;, 
+                &quot;indices&quot;: [15,21], 
+                &quot;screen_name&quot;: &quot;robby&quot;, 
+                &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;
+            }
+        ], 
+        &quot;created&quot;: &quot;2011-07-17 05:14:54.128641&quot;,
+        &quot;user&quot;: {
+            &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+            &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+            &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+            &quot;color_primary&quot;: &quot;333333&quot;,
+            &quot;color_secondary&quot;: &quot;999999&quot;,
+            &quot;screen_name&quot;: &quot;kevin&quot;,
+            &quot;privacy&quot;: false
+        },
+        &quot;num_comments&quot;: 1
     }, 
-    "favorite_id": "4e26294f32a7ba0d4a000007", 
-    "stamp": {
-        "display_name": "Kevin P.", 
-        "stamp_id": "4e26294e32a7ba0d4a000006"
-    }, 
-    "created": "2011-07-20 01:03:11.223326",
-    "user_id": "4e26294e32a7ba0d4a000004"
-}</code></pre>
+    &quot;created&quot;: &quot;2011-07-20 01:03:11.223326&quot;,
+    &quot;user_id&quot;: &quot;4e26294e32a7ba0d4a000004&quot;
+}
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="getfavoritesshow">GET favorites/show</h2>
 
@@ -293,45 +298,99 @@ authenticated_user_id=4e26294e32a7ba0d4a000004&amp;entity_id=4e26294e32a7ba0d4a0
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
+<p><strong>limit</strong> <em>optional</em>
+The maximum number of desired results. Values greater than the default (20) will be ignored.</p>
+
+<p><strong>since</strong> <em>optional</em>
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of stamps to be returned. </p>
+
+<p><strong>before</strong> <em>optional</em>
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/favorites/show.json
-authenticated_user_id=4e26294e32a7ba0d4a000004</code></pre>
+<pre><code>GET https://api.stamped.com/v1/favorites/show.json?oauth_token=1234567890123456789012
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
 <pre><code>[
     {
-        "complete": false, 
-        "entity": {
-            "category": "Restaurant", 
-            "coordinates": {
-                "lat": 40.714623000000003, 
-                "lng": -74.006604999999993
+        &quot;complete&quot;: false, 
+        &quot;entity&quot;: {
+            &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+            &quot;title&quot;: &quot;Spotted Pig&quot;,
+            &quot;subtitle&quot;: &quot;New York, NY&quot;
+            &quot;category&quot;: &quot;food&quot;,
+            &quot;subcategory&quot;: &quot;restaurant&quot;
+            &quot;desc&quot;: &quot;Burger place&quot;,
+            &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+            &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+            &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+            &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+            &quot;phone&quot;: &quot;1235551234&quot;
+        }, 
+        &quot;favorite_id&quot;: &quot;4e26294f32a7ba0d4a000007&quot;, 
+        &quot;stamp&quot;: {
+            &quot;blurb&quot;: &quot;Went here with @robby... Really, the best ever.&quot;, 
+            &quot;entity&quot;: {
+                &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+                &quot;title&quot;: &quot;Spotted Pig&quot;,
+                &quot;subtitle&quot;: &quot;New York, NY&quot;
+                &quot;category&quot;: &quot;food&quot;,
+                &quot;subcategory&quot;: &quot;restaurant&quot;
+                &quot;desc&quot;: &quot;Burger place&quot;,
+                &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+                &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+                &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+                &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+                &quot;phone&quot;: &quot;1235551234&quot;
             }, 
-            "entity_id": "4e26294e32a7ba0d4a000005", 
-            "subtitle": "Other", 
-            "title": "Little Owl"
+            &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;, 
+            &quot;credit&quot;: [
+                {
+                    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+                    &quot;screen_name&quot;: &quot;robby&quot;,
+                    &quot;display_name&quot;: &quot;Robby S.&quot;
+                },
+                {
+                    &quot;user_id&quot;: &quot;4e226fcd4e61754161000008&quot;,
+                    &quot;screen_name&quot;: &quot;bart&quot;,
+                    &quot;display_name&quot;: &quot;Bart S.&quot;
+                }
+            ], 
+            &quot;mentions&quot;: [
+                {
+                    &quot;display_name&quot;: &quot;Robby S.&quot;, 
+                    &quot;indices&quot;: [15,21], 
+                    &quot;screen_name&quot;: &quot;robby&quot;, 
+                    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;
+                }
+            ], 
+            &quot;created&quot;: &quot;2011-07-17 05:14:54.128641&quot;,
+            &quot;user&quot;: {
+                &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+                &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+                &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+                &quot;color_primary&quot;: &quot;333333&quot;,
+                &quot;color_secondary&quot;: &quot;999999&quot;,
+                &quot;screen_name&quot;: &quot;kevin&quot;,
+                &quot;privacy&quot;: false
+            },
+            &quot;num_comments&quot;: 1
         }, 
-        "favorite_id": "4e26294f32a7ba0d4a000007", 
-        "stamp": {
-            "display_name": "Kevin P.", 
-            "stamp_id": "4e26294e32a7ba0d4a000006"
-        }, 
-        "created": "2011-07-20 01:03:11.223000",
-        "user_id": "4e26294e32a7ba0d4a000004"
+        &quot;created&quot;: &quot;2011-07-20 01:03:11.223326&quot;,
+        &quot;user_id&quot;: &quot;4e26294e32a7ba0d4a000004&quot;
     }
-]</code></pre>
+]
+</code></pre>
 
-<hr />
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postfavoritesremove">POST favorites/remove</h2>
 
@@ -342,25 +401,90 @@ authenticated_user_id=4e26294e32a7ba0d4a000004</code></pre>
 <h3 id="details">Details</h3>
 
 <ul>
-<li>Requires Authentication</li>
+<li>OAuth Token Required</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>authenticated_user_id</strong> <em>required</em>
-The user id of the authenticating user.</p>
-
-<p><strong>favorite_id</strong> <em>required</em>
-The unique id of the favorited item.</p>
+<p><strong>entity_id</strong> <em>required</em>
+The unique id of the favorited entity.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>POST https://api.stamped.com/1/favorites/remove.json
-authenticated_user_id=4e26294e32a7ba0d4a000004&amp;favorite_id=4e26294f32a7ba0d4a000007</code></pre>
+<pre><code>POST https://api.stamped.com/v1/favorites/remove.json
+oauth_token=1234567890123456789012&amp;favorite_id=4e26294f32a7ba0d4a000007
+</code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
 
-<pre><code>true</code></pre>
+<pre><code>{
+    &quot;complete&quot;: false, 
+    &quot;entity&quot;: {
+        &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+        &quot;title&quot;: &quot;Spotted Pig&quot;,
+        &quot;subtitle&quot;: &quot;New York, NY&quot;
+        &quot;category&quot;: &quot;food&quot;,
+        &quot;subcategory&quot;: &quot;restaurant&quot;
+        &quot;desc&quot;: &quot;Burger place&quot;,
+        &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+        &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+        &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+        &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+        &quot;phone&quot;: &quot;1235551234&quot;
+    }, 
+    &quot;favorite_id&quot;: &quot;4e26294f32a7ba0d4a000007&quot;, 
+    &quot;stamp&quot;: {
+        &quot;blurb&quot;: &quot;Went here with @robby... Really, the best ever.&quot;, 
+        &quot;entity&quot;: {
+            &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+            &quot;title&quot;: &quot;Spotted Pig&quot;,
+            &quot;subtitle&quot;: &quot;New York, NY&quot;
+            &quot;category&quot;: &quot;food&quot;,
+            &quot;subcategory&quot;: &quot;restaurant&quot;
+            &quot;desc&quot;: &quot;Burger place&quot;,
+            &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+            &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+            &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+            &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+            &quot;phone&quot;: &quot;1235551234&quot;
+        }, 
+        &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;, 
+        &quot;credit&quot;: [
+            {
+                &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+                &quot;screen_name&quot;: &quot;robby&quot;,
+                &quot;display_name&quot;: &quot;Robby S.&quot;
+            },
+            {
+                &quot;user_id&quot;: &quot;4e226fcd4e61754161000008&quot;,
+                &quot;screen_name&quot;: &quot;bart&quot;,
+                &quot;display_name&quot;: &quot;Bart S.&quot;
+            }
+        ], 
+        &quot;mentions&quot;: [
+            {
+                &quot;display_name&quot;: &quot;Robby S.&quot;, 
+                &quot;indices&quot;: [15,21], 
+                &quot;screen_name&quot;: &quot;robby&quot;, 
+                &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;
+            }
+        ], 
+        &quot;created&quot;: &quot;2011-07-17 05:14:54.128641&quot;,
+        &quot;user&quot;: {
+            &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+            &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+            &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+            &quot;color_primary&quot;: &quot;333333&quot;,
+            &quot;color_secondary&quot;: &quot;999999&quot;,
+            &quot;screen_name&quot;: &quot;kevin&quot;,
+            &quot;privacy&quot;: false
+        },
+        &quot;num_comments&quot;: 1
+    }, 
+    &quot;created&quot;: &quot;2011-07-20 01:03:11.223326&quot;,
+    &quot;user_id&quot;: &quot;4e26294e32a7ba0d4a000004&quot;
+}
+</code></pre>
 
     </div>
 </body>

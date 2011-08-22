@@ -182,6 +182,145 @@ class HTTPUserSearch(Schema):
         self.q                  = SchemaElement(basestring)
         self.limit              = SchemaElement(int)
 
+class HTTPUserRelationship(Schema):
+    def setSchema(self):
+        self.user_id_a          = SchemaElement(basestring)
+        self.screen_name_a      = SchemaElement(basestring)
+        self.user_id_b          = SchemaElement(basestring)
+        self.screen_name_b      = SchemaElement(basestring)
+
+
+# ######## #
+# Entities #
+# ######## #
+
+class HTTPEntity(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+        self.subcategory        = SchemaElement(basestring, required=True)
+        self.desc               = SchemaElement(basestring)
+        self.address            = SchemaElement(basestring)
+        self.neighborhood       = SchemaElement(basestring)
+        self.coordinates        = SchemaElement(basestring)
+        self.image              = SchemaElement(basestring)
+        self.phone              = SchemaElement(int)
+        self.site               = SchemaElement(basestring)
+        self.hours              = SchemaElement(basestring)
+        self.cuisine            = SchemaElement(basestring)
+        self.opentable_url      = SchemaElement(basestring)
+        self.last_modified      = SchemaElement(basestring)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            data                = schema.exportSparse()
+            coordinates         = data.pop('coordinates', None)
+
+            self.importData(data, overflow=True)
+
+            self.address        = schema.details.place.address
+            self.neighborhood   = schema.details.place.neighborhood
+            self.phone          = schema.details.contact.phone
+            self.site           = schema.details.contact.site
+            self.hours          = schema.details.contact.hoursOfOperation
+            self.cuisine        = schema.details.restaurant.cuisine
+            self.coordinates    = _coordinatesDictToFlat(coordinates)
+
+            self.last_modified  = schema.timestamp.created
+
+            if schema.sources.openTable.reserveURL != None:
+                url = "http://www.opentable.com/reserve/%s&ref=9166" % \
+                        (schema.sources.openTable.reserveURL)
+                self.opentable_url = url
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPEntityNew(Schema):
+    def setSchema(self):
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+        self.subcategory        = SchemaElement(basestring, required=True)
+        self.desc               = SchemaElement(basestring)
+        self.address            = SchemaElement(basestring)
+        self.coordinates        = SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            schema.importData({
+                'title':        self.title,
+                'subtitle':     self.subtitle,
+                'category':     self.category,
+                'subcategory':  self.subcategory,
+                'desc':         self.desc
+            })
+            schema.details.place.address = self.address 
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+        else:
+            raise NotImplementedError
+        return schema
+
+class HTTPEntityEdit(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring)
+        self.subtitle           = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+        self.desc               = SchemaElement(basestring)
+        self.address            = SchemaElement(basestring)
+        self.coordinates        = SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            schema.importData({
+                'entity_id':    self.entity_id,
+                'title':        self.title,
+                'subtitle':     self.subtitle,
+                'category':     self.category,
+                'subcategory':  self.subcategory,
+                'desc':         self.desc
+            })
+            schema.details.place.address = self.address 
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+        else:
+            raise NotImplementedError
+        return schema
+
+class HTTPEntityAutosuggest(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring, required=True)
+        
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Entity':
+            self.importData(schema.exportSparse(), overflow=True)
+        else:
+            raise NotImplementedError
+        return self
+
+class HTTPEntityId(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring, required=True)
+
+class HTTPEntitySearch(Schema):
+    def setSchema(self):
+        self.q                  = SchemaElement(basestring, required=True)
+        self.coordinates        = SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'EntitySearch':
+            schema.importData({'q': self.q})
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+        else:
+            raise NotImplementedError
+        return schema
+
 
 # ###### #
 # Stamps #
@@ -298,137 +437,6 @@ class HTTPCommentSlice(Schema):
 
 
 # ######## #
-# Entities #
-# ######## #
-
-class HTTPEntity(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.neighborhood       = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
-        self.phone              = SchemaElement(int)
-        self.site               = SchemaElement(basestring)
-        self.hours              = SchemaElement(basestring)
-        self.cuisine            = SchemaElement(basestring)
-        self.opentable_url      = SchemaElement(basestring)
-        self.last_modified      = SchemaElement(basestring)
-
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-            data                = schema.exportSparse()
-            coordinates         = data.pop('coordinates', None)
-
-            self.importData(data, overflow=True)
-
-            self.address        = schema.details.place.address
-            self.neighborhood   = schema.details.place.neighborhood
-            self.phone          = schema.details.contact.phone
-            self.site           = schema.details.contact.site
-            self.hours          = schema.details.contact.hoursOfOperation
-            self.cuisine        = schema.details.restaurant.cuisine
-            self.coordinates    = _coordinatesDictToFlat(coordinates)
-
-            if schema.sources.openTable.reserveURL != None:
-                self.opentable_url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-                                        (schema.sources.openTable.reserveURL)
-        else:
-            raise NotImplementedError
-        return self
-
-class HTTPEntityNew(Schema):
-    def setSchema(self):
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-            schema.importData({
-                'title':        self.title,
-                'subtitle':     self.subtitle,
-                'category':     self.category,
-                'subcategory':  self.subcategory,
-                'desc':         self.desc
-            })
-            schema.details.place.address = self.address 
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-        else:
-            raise NotImplementedError
-        return schema
-
-class HTTPEntityEdit(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring)
-        self.subtitle           = SchemaElement(basestring)
-        self.category           = SchemaElement(basestring)
-        self.subcategory        = SchemaElement(basestring)
-        self.desc               = SchemaElement(basestring)
-        self.address            = SchemaElement(basestring)
-        self.coordinates        = SchemaElement(basestring)
-
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-            schema.importData({
-                'entity_id':    self.entity_id,
-                'title':        self.title,
-                'subtitle':     self.subtitle,
-                'category':     self.category,
-                'subcategory':  self.subcategory,
-                'desc':         self.desc
-            })
-            schema.details.place.address = self.address 
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-        else:
-            raise NotImplementedError
-        return schema
-
-class HTTPEntityAutosuggest(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.address            = SchemaElement(basestring)
-        
-    def importSchema(self, schema):
-        if schema.__class__.__name__ == 'Entity':
-            self.importData(schema.exportSparse(), overflow=True)
-            self.address        = schema.details.place.address
-        else:
-            raise NotImplementedError
-        return self
-
-class HTTPEntityId(Schema):
-    def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
-
-class HTTPEntitySearch(Schema):
-    def setSchema(self):
-        self.q                  = SchemaElement(basestring, required=True)
-        self.coordinates        = SchemaElement(basestring)
-
-    def exportSchema(self, schema):
-        if schema.__class__.__name__ == 'EntitySearch':
-            schema.importData({'q': self.q})
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
-        else:
-            raise NotImplementedError
-        return schema
-
-
-# ######## #
 # Favorite #
 # ######## #
 
@@ -489,6 +497,8 @@ class HTTPActivity(Schema):
 
             if stamp.stamp_id != None:
                 data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
+                if 'num_comments' in data['stamp']:
+                    del(data['stamp']['num_comments'])
             if comment.comment_id != None:
                 data['comment'] = HTTPComment().importSchema(comment).exportSparse()
             if favorite.favorite_id != None:

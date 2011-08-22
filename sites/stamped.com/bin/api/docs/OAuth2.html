@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Index</title>
+  <title>OAuth2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
 /* 
@@ -186,105 +186,80 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-      <h1 id="stampedapi">STAMPED API</h1>
+      <h1 id="oauth2.0">OAUTH 2.0</h1>
 
-<h3 id="oauth2.0"><a href="oauth2">OAuth 2.0</a></h3>
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<ul>
-<li>POST oauth2/token</li>
-<li>POST oauth2/login</li>
-</ul>
+<h2 id="postoauth2token">POST oauth2/token</h2>
 
-<h3 id="accounts"><a href="accounts">Accounts</a></h3>
+<h3 id="description">Description</h3>
 
-<ul>
-<li>POST accounts/create</li>
-<li>POST accounts/settings</li>
-<li>GET accounts/settings</li>
-<li>POST account/update_profile</li>
-<li>POST account/update_profile_image</li>
-<li>GET account/verify_credentials</li>
-</ul>
+<p>Acquire a new access token using a refresh token.</p>
 
-<h3 id="users"><a href="users">Users</a></h3>
+<h3 id="details">Details</h3>
 
 <ul>
-<li>GET users/show</li>
-<li>GET users/lookup</li>
-<li>GET users/search</li>
-<li>GET users/privacy</li>
+<li>Client ID / Client Secret Required</li>
 </ul>
 
-<h3 id="friendships"><a href="friendships">Friendships</a></h3>
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>refresh_token</strong> <em>required</em>
+The refresh token associated with the user and device. This is acquired after successfully creating an account and / or logging in.</p>
+
+<p><strong>grant_type</strong> <em>required</em>
+The grant type. This string <strong>must</strong> be set to <code>refresh_token</code> or else the request will fail. Additional grant types will be added in the future.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v1/oauth2/token.json
+client_id=iPhoneApp&amp;client_secret=1234567890&amp;refresh_token=1234567890123456789012345678901234567890123&amp;grant_type=refresh_token
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;access_token&quot;: &quot;1234567890123456789012&quot;,
+    &quot;expires_in&quot;: 3920
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="postoauth2login">POST oauth2/login</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Acquire a new refresh token and access token after logging in with user credentials.</p>
+
+<h3 id="details">Details</h3>
 
 <ul>
-<li>POST friendships/create</li>
-<li>GET friendships/check</li>
-<li>GET friendships/friends</li>
-<li>GET friendships/followers</li>
-<li>GET friendships/pending</li>
-<li>POST friendships/approve</li>
-<li>POST friendships/remove</li>
-<li>POST friendships/blocks/create</li>
-<li>GET friendships/blocks/check</li>
-<li>GET friendships/blocking</li>
-<li>POST friendships/blocks/remove</li>
+<li>Client ID / Client Secret Required</li>
 </ul>
 
-<h3 id="entities"><a href="entities">Entities</a></h3>
+<h3 id="parameters">Parameters</h3>
 
-<ul>
-<li>POST entities/create</li>
-<li>GET entities/show</li>
-<li>POST entities/update</li>
-<li>POST entities/remove</li>
-<li>GET entities/search</li>
-</ul>
+<p><strong>screen_name</strong> <em>required</em>
+The user&#8217;s screen name.</p>
 
-<h3 id="stamps"><a href="stamps">Stamps</a></h3>
+<p><strong>password</strong> <em>required</em>
+The user&#8217;s password</p>
 
-<ul>
-<li>POST stamps/create</li>
-<li>POST stamps/update</li>
-<li>POST stamps/remove</li>
-<li>GET stamps/show</li>
-</ul>
+<h3 id="samplerequest">Sample Request</h3>
 
-<h3 id="comments"><a href="comments">Comments</a></h3>
+<pre><code>POST https://api.stamped.com/v1/oauth2/login.json
+client_id=iPhoneApp&amp;client_secret=1234567890&amp;screen_name=kevin&amp;password=12345
+</code></pre>
 
-<ul>
-<li>POST comments/create</li>
-<li>GET comments/show</li>
-<li>POST comments/remove</li>
-</ul>
+<h3 id="sampleresult">Sample Result</h3>
 
-<h3 id="collections"><a href="collections">Collections</a></h3>
-
-<ul>
-<li>GET collections/inbox</li>
-<li>GET collections/user</li>
-</ul>
-
-<h3 id="favorites"><a href="favorites">Favorites</a></h3>
-
-<ul>
-<li>POST favorites/create</li>
-<li>GET favorites/show</li>
-<li>POST favorites/remove</li>
-</ul>
-
-<h3 id="activity"><a href="activity">Activity</a></h3>
-
-<ul>
-<li>GET activity/show</li>
-</ul>
-
-<h3 id="temp"><a href="temp">Temp</a></h3>
-
-<ul>
-<li>GET temp/friends</li>
-<li>GET temp/followers</li>
-</ul>
+<pre><code>{
+    &quot;access_token&quot;: &quot;1234567890123456789012&quot;,
+    &quot;expires_in&quot;: 3920,
+    &quot;refresh_token&quot;: &quot;1234567890123456789012345678901234567890123&quot;
+}
+</code></pre>
 
     </div>
 </body>

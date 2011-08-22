@@ -428,7 +428,8 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
         path = "friendships/check.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
-            "user_id": self.userB['user_id']
+            "user_id_a": self.userA['user_id'],
+            "user_id_b": self.userB['user_id'],
         }
         result = self.handleGET(path, data)
         self.assertTrue(result)
@@ -437,7 +438,8 @@ class StampedAPIFriendshipsCheck(StampedAPIFriendshipTest):
         path = "friendships/check.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],
-            "user_id": self.userA['user_id']
+            "user_id_a": self.userB['user_id'],
+            "user_id_b": self.userA['user_id'],
         }
         result = self.handleGET(path, data)
         self.assertFalse(result)

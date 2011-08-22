@@ -1,6 +1,6 @@
 # STAMPED API #
 
-### [OAuth2](oauth2) ###
+### [OAuth 2.0](oauth2) ###
 * POST oauth2/token
 * POST oauth2/login
 
@@ -24,7 +24,7 @@
 * GET friendships/friends
 * GET friendships/followers
 * GET friendships/pending 
-* GET friendships/approve 
+* POST friendships/approve 
 * POST friendships/remove
 * POST friendships/blocks/create 
 * GET friendships/blocks/check 
