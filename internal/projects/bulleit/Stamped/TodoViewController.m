@@ -142,7 +142,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
-  [self setIsLoading:NO];
+  [self loadFavoritesFromDataStore];
 } 
 
 #pragma mark - TodoTableViewCellDelegate Methods.

@@ -540,6 +540,7 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
     NSLog(@"%@", objectLoader.response.bodyAsString);
     Favorite* fav = [objects lastObject];
     [fav deleteEntity];
+    [[fav managedObjectContext] save:NULL];
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification 
                                                         object:nil];
     return;
