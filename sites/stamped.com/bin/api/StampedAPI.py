@@ -568,7 +568,7 @@ class StampedAPI(AStampedAPI):
         if credit != None:
             ret = []
             for creditedUser in self._userDB.lookupUsers(None, credit):
-                ret.append(creditedUser.exportSchema(UserTiny()))
+                ret.append(creditedUser.exportSchema(UserMini()))
             ### TODO: How do we handle credited users that have not yet joined?
             ### TODO: Expand with stamp details (potentially)
             credit = ret
@@ -706,7 +706,7 @@ class StampedAPI(AStampedAPI):
         if credit != None:
             ret = []
             for creditedUser in self._userDB.lookupUsers(None, credit):
-                ret.append(creditedUser.exportSchema(UserTiny()))
+                ret.append(creditedUser.exportSchema(UserMini()))
             ### TODO: How do we handle credited users that have not yet joined?
             ### TODO: Expand with stamp details (potentially)
             credit = ret

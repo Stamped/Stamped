@@ -49,13 +49,21 @@ The screen names for any users that should receive credit for the stamp. Multipl
 		"credit": [
 			{
 				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
 				"screen_name": "robby",
-				"display_name": "Robby S."
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			},
 			{
 				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
 				"screen_name": "bart",
-				"display_name": "Bart S."
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			}
 		], 
 		"created": "2011-07-17 05:14:54.128641",
@@ -122,13 +130,21 @@ The screen names for any users that should receive credit for the stamp. Multipl
 		"credit": [
 			{
 				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
 				"screen_name": "robby",
-				"display_name": "Robby S."
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			},
 			{
 				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
 				"screen_name": "bart",
-				"display_name": "Bart S."
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			}
 		], 
 		"mentions": [
@@ -192,13 +208,21 @@ The unique id of the stamp.
 		"credit": [
 			{
 				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
 				"screen_name": "robby",
-				"display_name": "Robby S."
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			},
 			{
 				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
 				"screen_name": "bart",
-				"display_name": "Bart S."
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			}
 		], 
 		"mentions": [
@@ -261,13 +285,21 @@ The unique id of the stamp.
 		"credit": [
 			{
 				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
 				"screen_name": "robby",
-				"display_name": "Robby S."
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			},
 			{
 				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
 				"screen_name": "bart",
-				"display_name": "Bart S."
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
 			}
 		], 
 		"mentions": [

@@ -59,13 +59,21 @@ The id of the stamp that the entity was saved from. This is used to suggest cred
 			"credit": [
 				{
 					"user_id": "4e226fcd4e61754161000007",
+					"profile_image": "http://img.stamped.com/u/robby.png", 
 					"screen_name": "robby",
-					"display_name": "Robby S."
+					"display_name": "Robby S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
 				},
 				{
 					"user_id": "4e226fcd4e61754161000008",
+					"profile_image": "http://img.stamped.com/u/bart.png", 
 					"screen_name": "bart",
-					"display_name": "Bart S."
+					"display_name": "Bart S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
 				}
 			], 
 			"mentions": [
@@ -153,13 +161,21 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
 				"credit": [
 					{
 						"user_id": "4e226fcd4e61754161000007",
+						"profile_image": "http://img.stamped.com/u/robby.png", 
 						"screen_name": "robby",
-						"display_name": "Robby S."
+						"display_name": "Robby S.",
+						"color_primary": "333333",
+						"color_secondary": "999999",
+						"privacy": false
 					},
 					{
 						"user_id": "4e226fcd4e61754161000008",
+						"profile_image": "http://img.stamped.com/u/bart.png", 
 						"screen_name": "bart",
-						"display_name": "Bart S."
+						"display_name": "Bart S.",
+						"color_primary": "333333",
+						"color_secondary": "999999",
+						"privacy": false
 					}
 				], 
 				"mentions": [
@@ -242,13 +258,21 @@ The unique id of the favorited entity.
 			"credit": [
 				{
 					"user_id": "4e226fcd4e61754161000007",
+					"profile_image": "http://img.stamped.com/u/robby.png", 
 					"screen_name": "robby",
-					"display_name": "Robby S."
+					"display_name": "Robby S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
 				},
 				{
 					"user_id": "4e226fcd4e61754161000008",
+					"profile_image": "http://img.stamped.com/u/bart.png", 
 					"screen_name": "bart",
-					"display_name": "Bart S."
+					"display_name": "Bart S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
 				}
 			], 
 			"mentions": [

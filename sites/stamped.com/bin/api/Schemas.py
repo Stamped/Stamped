@@ -210,7 +210,7 @@ class Stamp(Schema):
         self.blurb              = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
-        self.credit             = SchemaList(UserTiny())
+        self.credit             = SchemaList(UserMini())
         self.comment_preview    = SchemaList(Comment())
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
