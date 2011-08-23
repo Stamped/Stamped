@@ -138,8 +138,8 @@ static const CGFloat kMinContainerHeight = 204.0;
     b2 = b1;
   }
   ribbonGradientLayer_.colors =
-      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
-                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
+      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.9].CGColor,
+                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.9].CGColor,
                                 nil];
   ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
   ribbonGradientLayer_.startPoint = CGPointMake(0.0, 0.0);
@@ -337,6 +337,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                       object:stamp];
   entityObject_.favorite.complete = [NSNumber numberWithBool:YES];
+  entityObject_.favorite.stamp = stamp;
   [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                       object:stamp];
   

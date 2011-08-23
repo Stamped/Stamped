@@ -10,11 +10,13 @@
 #import <UIKit/UIKit.h>
 
 @class Entity;
+@class Favorite;
+@class Stamp;
 @class TodoTableViewCell;
 
 @protocol TodoTableViewCellDelegate
-@optional
 - (void)todoTableViewCell:(TodoTableViewCell*)cell shouldStampEntity:(Entity*)entity;
+- (void)todoTableViewCell:(TodoTableViewCell*)cell shouldShowStamp:(Stamp*)stamp;
 @end
 
 @interface TodoTableViewCell : UITableViewCell {
@@ -26,8 +28,7 @@
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
-@property (nonatomic, assign) BOOL completed;
-@property (nonatomic, retain) Entity* entityObject;
+@property (nonatomic, retain) Favorite* favorite;
 @property (nonatomic, assign) id<TodoTableViewCellDelegate> delegate;
 
 @end

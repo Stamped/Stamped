@@ -36,6 +36,7 @@
         <attribute name="favoriteID" optional="YES" attributeType="String"/>
         <attribute name="userID" optional="YES" attributeType="String"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="favorite" inverseEntity="Entity"/>
+        <relationship name="stamp" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Stamp" inverseName="favorites" inverseEntity="Stamp"/>
     </entity>
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="blurb" optional="YES" attributeType="String"/>
@@ -43,8 +44,10 @@
         <attribute name="numComments" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="stamp" inverseEntity="Comment"/>
+        <relationship name="credits" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" inverseName="credits" inverseEntity="User"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamps" inverseEntity="Entity"/>
         <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Event" inverseName="stamp" inverseEntity="Event"/>
+        <relationship name="favorites" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Favorite" inverseName="stamp" inverseEntity="Favorite"/>
         <relationship name="user" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="stamps" inverseEntity="User"/>
     </entity>
     <entity name="User" representedClassName="User">
@@ -64,6 +67,7 @@
         <attribute name="userID" attributeType="String"/>
         <attribute name="website" optional="YES" attributeType="String"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="user" inverseEntity="Comment"/>
+        <relationship name="credits" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="credits" inverseEntity="Stamp"/>
         <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Event" inverseName="user" inverseEntity="Event"/>
         <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="user" inverseEntity="Stamp"/>
     </entity>
@@ -71,8 +75,8 @@
         <element name="Comment" positionX="162" positionY="45" width="128" height="135"/>
         <element name="Entity" positionX="556" positionY="216" width="128" height="195"/>
         <element name="Event" positionX="160" positionY="192" width="128" height="135"/>
-        <element name="Favorite" positionX="160" positionY="192" width="128" height="120"/>
-        <element name="Stamp" positionX="216" positionY="324" width="128" height="165"/>
+        <element name="Favorite" positionX="160" positionY="192" width="128" height="135"/>
+        <element name="Stamp" positionX="216" positionY="324" width="128" height="195"/>
         <element name="User" positionX="-45" positionY="63" width="128" height="315"/>
     </elements>
 </model>

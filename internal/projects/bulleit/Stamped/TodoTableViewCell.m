@@ -15,6 +15,7 @@
 #import "Entity.h"
 #import "Favorite.h"
 #import "Notifications.h"
+#import "Stamp.h"
 #import "UIColor+Stamped.h"
 #import "User.h"
 #import "Util.h"
@@ -43,13 +44,12 @@ static const CGFloat kSubstringFontSize = 12.0;
 @property (nonatomic, readonly) UIImageView* typeImageView;
 @property (nonatomic, readonly) UILabel* descriptionLabel;
 
-@property (nonatomic, assign) BOOL inAddingPhase;
+@property (nonatomic, assign) BOOL inButtonPhase;
 @end
 
 @implementation TodoTableViewCell
 
-@synthesize completed = completed_;
-@synthesize entityObject = entityObject_;
+@synthesize favorite = favorite_;
 @synthesize stampImageView = stampImageView_;
 @synthesize completedImageView = completedImageView_;
 @synthesize title = title_;
@@ -57,7 +57,7 @@ static const CGFloat kSubstringFontSize = 12.0;
 @synthesize disclosureImageView = disclosureImageView_;
 @synthesize typeImageView = typeImageView_;
 @synthesize descriptionLabel = descriptionLabel_;
-@synthesize inAddingPhase = inAddingPhase_;
+@synthesize inButtonPhase = inButtonPhase_;
 @synthesize delegate = delegate_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
@@ -78,7 +78,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   CFRelease(titleFont_);
   CFRelease(titleStyle_);
   self.title = nil;
-  self.entityObject = nil;
+  self.favorite = nil;
   self.delegate = nil;
   [super dealloc];
 }
@@ -100,29 +100,24 @@ static const CGFloat kSubstringFontSize = 12.0;
   [self invertColors];
 }
 
-- (void)setEntityObject:(Entity*)entityObject {
-  if (entityObject_ != entityObject) {
-    [entityObject_ release];
-    entityObject_ = [entityObject retain];
+- (void)setFavorite:(Favorite *)favorite {
+  if (favorite_ != favorite) {
+    [favorite_ release];
+    favorite_ = [favorite retain];
     
-    if (entityObject) {
-      self.title = entityObject.title;
+    if (favorite) {
+      stampImageView_.hidden = [favorite.complete boolValue];
+      completedImageView_.hidden = ![favorite.complete boolValue];
+      self.title = favorite.entityObject.title;
       titleLayer_.string = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
-      UIImage* typeImage = [entityObject categoryImage];
+      UIImage* typeImage = [favorite.entityObject categoryImage];
       typeImageView_.image = typeImage;
       typeImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:typeImage];
-      descriptionLabel_.text = entityObject.subtitle;
-
+      descriptionLabel_.text = favorite.entityObject.subtitle;
+      
       [self setNeedsDisplay];
     }
   }
-}
-
-- (void)setCompleted:(BOOL)completed {
-  completed_ = completed;
-  stampImageView_.hidden = completed;
-  completedImageView_.hidden = !completed;
-  [self setNeedsDisplay];
 }
 
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
@@ -149,12 +144,12 @@ static const CGFloat kSubstringFontSize = 12.0;
   UIImage* highlightedImage = [Util whiteMaskedImageUsingImage:stampImage];
   stampImageView_ = [[UIImageView alloc] initWithImage:stampImage highlightedImage:highlightedImage];
   stampImageView_.frame = CGRectOffset(stampImageView_.frame, 14, 8);
-  stampImageView_.hidden = completed_;
+  stampImageView_.hidden = [favorite_.complete boolValue];
   [self.contentView addSubview:stampImageView_];
   [stampImageView_ release];
 
   completedImageView_ = [[UIImageView alloc] initWithFrame:stampImageView_.frame];
-  completedImageView_.hidden = !completed_;
+  completedImageView_.hidden = ![favorite_.complete boolValue];
   completedImageView_.image = [self completedStamp];
   [self.contentView addSubview:completedImageView_];
   [completedImageView_ release];
@@ -198,23 +193,26 @@ static const CGFloat kSubstringFontSize = 12.0;
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   UITouch* touch = [touches anyObject];
-  if (!stampImageView_.hidden &&
-      CGRectContainsPoint(stampImageView_.frame, [touch locationInView:self.contentView])) {
-    inAddingPhase_ = YES;
+  if (CGRectContainsPoint(stampImageView_.frame, [touch locationInView:self.contentView])) {
+    inButtonPhase_ = YES;
     return;
   }
   [super touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  inAddingPhase_ = NO;
+  inButtonPhase_ = NO;
   [super touchesCancelled:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (inAddingPhase_) {
-    [delegate_ todoTableViewCell:self shouldStampEntity:entityObject_];
-    inAddingPhase_ = NO;
+  if (inButtonPhase_) {
+    if (!stampImageView_.hidden) {
+      [delegate_ todoTableViewCell:self shouldStampEntity:favorite_.entityObject];
+    } else {
+      [delegate_ todoTableViewCell:self shouldShowStamp:favorite_.stamp];
+    }
+    inButtonPhase_ = NO;
     return;
   }
   [super touchesEnded:touches withEvent:event];

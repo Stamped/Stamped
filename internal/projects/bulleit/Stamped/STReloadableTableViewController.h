@@ -20,5 +20,6 @@
 
 - (void)userPulledToReload;
 - (void)setIsLoading:(BOOL)loading;
+- (void)reloadData;
 
 @end

@@ -24,6 +24,8 @@ extern NSString* kStampWasCreatedNotification;
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) Event* event;
 @property (nonatomic, retain) NSSet* comments;
+@property (nonatomic, retain) NSSet* credits;
+@property (nonatomic, retain) NSSet* favorites;
 @end
 
 @interface Stamp (CoreDataGeneratedAccessors)

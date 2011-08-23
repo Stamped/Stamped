@@ -16,6 +16,7 @@
 #import "AccountManager.h"
 #import "Entity.h"
 #import "UserImageView.h"
+#import "Notifications.h"
 #import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
@@ -323,8 +324,6 @@ typedef enum {
   }
   
   StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
-
-  // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
@@ -334,6 +333,14 @@ typedef enum {
 
 - (void)userPulledToReload {
   [super userPulledToReload];
+  [self loadStampsFromNetwork];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadNewsPane
+                                                      object:nil];
+}
+
+- (void)reloadData {
+  // Reload the view if needed.
+  [self view];
   [self loadStampsFromNetwork];
 }
 

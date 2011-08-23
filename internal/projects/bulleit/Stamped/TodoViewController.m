@@ -21,6 +21,7 @@
 #import "PlaceDetailViewController.h"
 #import "GenericItemDetailViewController.h"
 #import "StampedAppDelegate.h"
+#import "StampDetailViewController.h"
 #import "TodoTableViewCell.h"
 #import "User.h"
 
@@ -45,7 +46,12 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 - (void)userPulledToReload {
   [self loadFavoritesFromNetwork];
-  [self setIsLoading:NO];
+}
+
+- (void)reloadData {
+  // Reload the view if needed.
+  [self view];
+  [self loadFavoritesFromNetwork];
 }
 
 #pragma mark - View lifecycle
@@ -103,8 +109,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
   Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row];
   cell.delegate = self;
-  cell.entityObject = fave.entityObject;
-  cell.completed = [fave.complete boolValue];
+  cell.favorite = fave;
   
   return cell;
 }
@@ -137,6 +142,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
+  [self setIsLoading:NO];
 } 
 
 #pragma mark - TodoTableViewCellDelegate Methods.
@@ -145,6 +151,16 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
   CreateStampViewController* detailViewController = [[CreateStampViewController alloc] initWithEntityObject:entity];
   
   // Pass the selected object to the new view controller.
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
+}
+
+- (void)todoTableViewCell:(TodoTableViewCell*)cell shouldShowStamp:(Stamp*)stamp {
+  if (!stamp)
+    return;
+  
+  StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];

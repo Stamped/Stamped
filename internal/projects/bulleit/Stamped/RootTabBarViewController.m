@@ -12,6 +12,7 @@
 #import "InboxViewController.h"
 #import "ActivityViewController.h"
 #import "SearchEntitiesViewController.h"
+#import "Notifications.h"
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
 #import "STNavigationBar.h"
@@ -23,6 +24,8 @@
 - (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
+- (void)newsCountChanged:(NSNotification*)notification;
+- (void)reloadPanes:(NSNotification*)notification;
 @end
 
 @implementation RootTabBarViewController
@@ -73,12 +76,25 @@
                                            selector:@selector(currentUserUpdated:)
                                                name:kCurrentUserHasUpdatedNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(newsCountChanged:)
+                                               name:kNewsItemCountHasChangedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(reloadPanes:)
+                                               name:UIApplicationSignificantTimeChangeNotification
+                                             object:nil];
+  
+
   [AccountManager sharedManager].delegate = self;
   if ([AccountManager sharedManager].authenticated) {
     [self finishViewInit];
   } else {
     [[AccountManager sharedManager] authenticate];
   }
+
+  if ([AccountManager sharedManager].currentUser)
+    [self fillStampImageView];
 }
 
 - (void)finishViewInit {
@@ -199,6 +215,17 @@
   }
 }
 
+- (void)newsCountChanged:(NSNotification*)notification {
+  NSNumber* newItemCount = notification.object;
+  if (self.selectedViewController.tabBarItem != activityTabBarItem_)
+    activityTabBarItem_.badgeValue = [newItemCount stringValue];
+}
+
+- (void)reloadPanes:(NSNotification*)notification {
+  for (STReloadableTableViewController* viewController in self.viewControllers)
+    [viewController reloadData];
+}
+
 #pragma mark - AccountManagerDelegate Methods.
 
 - (void)accountManagerDidAuthenticate {
@@ -214,7 +241,8 @@
     self.navigationItem.title = @"Stamps";
   } else if (item == activityTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:1];
-    self.navigationItem.title = @"Activity";
+    self.navigationItem.title = @"News";
+    activityTabBarItem_.badgeValue = nil;
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];
     self.navigationItem.title = @"Todo";

@@ -8,6 +8,7 @@
 
 #import "Favorite.h"
 #import "Entity.h"
+#import "Stamp.h"
 
 
 @implementation Favorite
@@ -16,5 +17,6 @@
 @dynamic created;
 @dynamic userID;
 @dynamic entityObject;
+@dynamic stamp;
 
 @end

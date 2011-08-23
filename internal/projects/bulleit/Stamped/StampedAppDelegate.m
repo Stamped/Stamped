@@ -73,6 +73,9 @@ static NSString* const kDataBaseURL = @"http://ec2-50-19-33-126.compute-1.amazon
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
   [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];
+  [stampMapping mapKeyPath:@"credit" toRelationship:@"credits" withMapping:userMapping];
+  
+  [userMapping mapRelationship:@"credits" withMapping:stampMapping];
   
   RKManagedObjectMapping* eventMapping = [RKManagedObjectMapping mappingForClass:[Event class]];
   [eventMapping mapAttributes:@"created", @"genre", nil];
@@ -88,6 +91,9 @@ static NSString* const kDataBaseURL = @"http://ec2-50-19-33-126.compute-1.amazon
                                            @"user_id", @"userID", nil];
   favoriteMapping.primaryKeyAttribute = @"favoriteID";
   [favoriteMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
+  [favoriteMapping mapRelationship:@"stamp" withMapping:stampMapping];
+  
+  [stampMapping mapRelationship:@"favorites" withMapping:favoriteMapping];
   
   RKObjectMapping* oauthMapping = [RKObjectMapping mappingForClass:[OAuthToken class]];
   [oauthMapping mapKeyPathsToAttributes:@"access_token", @"accessToken",

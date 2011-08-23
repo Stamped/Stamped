@@ -15,6 +15,7 @@
 #import "ActivityCommentTableViewCell.h"
 #import "ActivityCreditTableViewCell.h"
 #import "Comment.h"
+#import "Notifications.h"
 #import "Event.h"
 #import "Entity.h"
 #import "Stamp.h"
@@ -33,7 +34,19 @@
 
 #pragma mark - View lifecycle
 
+- (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
+  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(reloadData)
+                                                 name:kAppShouldReloadNewsPane
+                                               object:nil];
+  }
+  return self;
+}
+
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.eventsArray = nil;
   [super dealloc];
@@ -52,11 +65,20 @@
 }
 
 - (void)loadEventsFromDataStore {
-  self.eventsArray = nil;
 	NSFetchRequest* request = [Event fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-	self.eventsArray = [Event objectsWithFetchRequest:request];
+  NSArray* results = [Event objectsWithFetchRequest:request];
+  if (self.eventsArray) {
+    NSUInteger newItemCount = results.count - self.eventsArray.count;
+    if (newItemCount > 0) {
+      [[NSNotificationCenter defaultCenter]
+       postNotificationName:kNewsItemCountHasChangedNotification 
+       object:[NSNumber numberWithUnsignedInteger:newItemCount]];
+    }
+  }
+  self.eventsArray = nil;
+	self.eventsArray = results;
   [self.tableView reloadData];
 }
 
@@ -165,6 +187,12 @@
 
 - (void)userPulledToReload {
   [super userPulledToReload];
+  [self loadEventsFromNetwork];
+}
+
+- (void)reloadData {
+  // Reload the view if needed.
+  [self view];
   [self loadEventsFromNetwork];
 }
 

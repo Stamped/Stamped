@@ -25,6 +25,7 @@
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
+#import "UIColor+Stamped.h"
 #import "StampDetailCommentView.h"
 #import "UserImageView.h"
 
@@ -120,7 +121,7 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  
+
   UITapGestureRecognizer* gestureRecognizer =
       [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
   [self.view addGestureRecognizer:gestureRecognizer];
@@ -271,12 +272,59 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   [mainCommentContainer_ addSubview:commentLabel];
   CGRect mainCommentFrame = mainCommentContainer_.frame;
   mainCommentFrame.size.height = fmaxf(kMainCommentFrameMinHeight, CGRectGetMaxY(commentLabel.frame) + 10);
+  User* creditedUser = [stamp_.credits anyObject];
+  if (creditedUser) {
+    mainCommentFrame.size.height += 35;
+    CALayer* firstStampLayer = [[CALayer alloc] init];
+    firstStampLayer.contents = (id)creditedUser.stampImage.CGImage;
+    firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentFrame) - 30, 12, 12);
+    [mainCommentContainer_.layer addSublayer:firstStampLayer];
+    [firstStampLayer release];
+    
+    CALayer* secondStampLayer = [[CALayer alloc] init];
+    secondStampLayer.contents = (id)stamp_.user.stampImage.CGImage;
+    secondStampLayer.frame = CGRectOffset(firstStampLayer.frame, CGRectGetWidth(firstStampLayer.frame) / 2, 0);
+    [mainCommentContainer_.layer addSublayer:secondStampLayer];
+    [secondStampLayer release];
+    
+    CATextLayer* creditStringLayer = [[CATextLayer alloc] init];
+    creditStringLayer.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
+                                         CGRectGetMinY(secondStampLayer.frame) + 1, 200, 14);
+    creditStringLayer.truncationMode = kCATruncationEnd;
+    creditStringLayer.contentsScale = [[UIScreen mainScreen] scale];
+    creditStringLayer.fontSize = 12.0;
+    creditStringLayer.foregroundColor = [UIColor stampedGrayColor].CGColor;
+    CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+    CFIndex numSettings = 1;
+    CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+    CTParagraphStyleSetting settings[1] = {
+      {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+    };
+    CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
+    NSString* user = creditedUser.displayName;
+    NSString* full = [NSString stringWithFormat:@"%@ %@", @"Credit to", user];
+    NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
+    [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                           (id)style, (id)kCTParagraphStyleAttributeName,
+                           (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                    range:NSMakeRange(0, full.length)];
+    [string addAttribute:(NSString*)kCTFontAttributeName
+                   value:(id)font 
+                   range:[full rangeOfString:user]];
+    CFRelease(font);
+    CFRelease(style);
+    creditStringLayer.string = string;
+    [string release];
+    [mainCommentContainer_.layer addSublayer:creditStringLayer];
+    [creditStringLayer release];
+  }
   mainCommentContainer_.frame = mainCommentFrame;
   mainCommentContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
   CGRect activityFrame = activityView_.frame;
   activityFrame.size.height = CGRectGetMaxY(mainCommentContainer_.frame) + CGRectGetHeight(commentsView_.bounds) + 5;
   [commentLabel release];
   activityView_.frame = activityFrame;
+  
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
 
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
@@ -292,8 +340,8 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
     b2 = b1;
   }
   activityGradientLayer_.colors =
-      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.75].CGColor,
-                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.75].CGColor,
+      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.9].CGColor,
+                                (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.9].CGColor,
                                 nil];
   activityGradientLayer_.frame = activityView_.bounds;
   activityGradientLayer_.startPoint = CGPointMake(0.0, 0.0);

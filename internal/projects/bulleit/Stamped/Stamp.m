@@ -24,6 +24,8 @@ NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 @dynamic entityObject;
 @dynamic user;
 @dynamic comments;
+@dynamic credits;
 @dynamic event;
+@dynamic favorites;
 
 @end

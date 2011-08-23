@@ -10,6 +10,7 @@
 #import <CoreData/CoreData.h>
 
 @class Entity;
+@class Stamp;
 
 @interface Favorite : NSManagedObject {
 @private
@@ -19,5 +20,6 @@
 @property (nonatomic, retain) NSDate* created;
 @property (nonatomic, retain) NSString* userID;
 @property (nonatomic, retain) Entity* entityObject;
+@property (nonatomic, retain) Stamp* stamp;
 
 @end

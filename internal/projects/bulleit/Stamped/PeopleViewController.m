@@ -103,6 +103,12 @@ static const NSInteger kFollowersSection = 1;
   [self loadFriendsAndFollowersFromNetwork];
 }
 
+- (void)reloadData {
+  // Reload the view if needed.
+  [self view];
+  [self loadFriendsAndFollowersFromNetwork];
+}
+
 - (void)currentUserUpdated:(NSNotification*)notification {
   User* currentUser = [AccountManager sharedManager].currentUser;
   if (!currentUser)

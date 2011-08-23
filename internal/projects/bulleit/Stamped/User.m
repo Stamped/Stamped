@@ -31,6 +31,7 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic stamps;
 @dynamic events;
 @dynamic comments;
+@dynamic credits;
 @dynamic numCredits;
 @dynamic numFriends;
 @dynamic numFollowers;

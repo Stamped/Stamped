@@ -103,10 +103,15 @@ static NSString* kLoadingText = @"Loading...";
                    completion:nil];
 }
 
-// To be implemented by subclasses.
+#pragma mark - To be implemented by subclasses.
+
 - (void)userPulledToReload {
   if (![[RKClient sharedClient] isNetworkAvailable])
     [self setIsLoading:NO];
+}
+
+- (void)reloadData {
+  // NOTHING. YOU DO NOTHING!
 }
 
 #pragma mark - UIScrollView delegate methods
