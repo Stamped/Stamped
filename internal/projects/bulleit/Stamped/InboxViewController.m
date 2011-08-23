@@ -15,13 +15,17 @@
 
 #import "AccountManager.h"
 #import "Entity.h"
+#import "UserImageView.h"
+#import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 #import "Stamp.h"
 #import "STNavigationBar.h"
+#import "STPlaceAnnotation.h"
 #import "InboxTableViewCell.h"
 #import "UserImageView.h"
 
+static const CGFloat kMapUserImageSize = 32.0;
 static const CGFloat kFilterRowHeight = 44.0;
 static NSString* const kInboxPath = @"/collections/inbox.json";
 
@@ -37,13 +41,18 @@ typedef enum {
 @interface InboxViewController ()
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
+- (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)mapButtonWasPressed:(NSNotification*)notification;
 - (void)listButtonWasPressed:(NSNotification*)notification;
+- (void)addAnnotationForEntity:(Entity*)entity;
+- (void)mapUserTapped:(id)sender;
+- (void)mapDisclosureTapped:(id)sender;
 
 @property (nonatomic, copy) NSArray* filterButtons;
 @property (nonatomic, copy) NSArray* entitiesArray;
 @property (nonatomic, copy) NSArray* filteredEntitiesArray;
+@property (nonatomic, retain) UIButton* selectedFilterButton;
 @end
 
 @implementation InboxViewController
@@ -58,6 +67,7 @@ typedef enum {
 @synthesize filmFilterButton = filmFilterButton_;
 @synthesize musicFilterButton = musicFilterButton_;
 @synthesize otherFilterButton = otherFilterButton_;
+@synthesize selectedFilterButton = selectedFilterButton_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -70,15 +80,34 @@ typedef enum {
   self.otherFilterButton = nil;
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
+  self.selectedFilterButton = nil;
   [super dealloc];
 }
 
 - (void)mapButtonWasPressed:(NSNotification*)notification {
-  [UIView animateWithDuration:0.5 animations:^{ mapView_.alpha = 1.0; }];
+  CGRect mapFrame = mapView_.frame;
+  mapFrame.origin.y = self.tableView.contentOffset.y;
+  mapView_.frame = mapFrame;
+  userPannedMap_ = NO;
+  self.tableView.scrollEnabled = NO;
+  [UIView animateWithDuration:0.5
+                   animations:^{ mapView_.alpha = 1.0; }
+                   completion:^(BOOL finished) {
+                     mapView_.showsUserLocation = YES;
+                     for (Entity* e in self.filteredEntitiesArray) {
+                       if (!e.coordinates)
+                         continue;
+                      [self addAnnotationForEntity:e];
+                     }
+                   }];
 }
 
 - (void)listButtonWasPressed:(NSNotification*)notification {
-  [UIView animateWithDuration:0.5 animations:^{ mapView_.alpha = 0.0; }];
+  self.tableView.scrollEnabled = YES;
+  mapView_.showsUserLocation = NO;
+  [mapView_ removeAnnotations:mapView_.annotations];
+  [UIView animateWithDuration:0.5
+                   animations:^{ mapView_.alpha = 0.0; }];
 }
 
 #pragma mark - View lifecycle
@@ -99,6 +128,7 @@ typedef enum {
                                              object:nil];
   mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
   mapView_.alpha = 0.0;
+  mapView_.delegate = self;
   [self.view addSubview:mapView_];
   [mapView_ release];
 
@@ -127,6 +157,8 @@ typedef enum {
   self.filmFilterButton = nil;
   self.musicFilterButton = nil;
   self.otherFilterButton = nil;
+  self.mapView.delegate = nil;
+  self.selectedFilterButton = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -140,7 +172,7 @@ typedef enum {
 
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setButtonFlipped:YES animated:animated];
+  [navBar setButtonShown:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -148,7 +180,7 @@ typedef enum {
   
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  [navBar setButtonFlipped:NO animated:NO];
+  [navBar setButtonShown:NO];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -165,8 +197,7 @@ typedef enum {
   results = [results valueForKeyPath:@"@distinctUnionOfObjects.entityObject"];
   descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
   self.entitiesArray = [results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
-  
-  [self filterButtonPushed:nil];
+  [self filterStamps];
 }
 
 - (void)loadStampsFromNetwork {
@@ -196,26 +227,31 @@ typedef enum {
   for (UIButton* button in self.filterButtons)
     button.selected = (button == selectedButton && !button.selected);
 
-  if (selectedButton && !selectedButton.selected) {
+  self.selectedFilterButton = selectedButton;
+  if (selectedButton && !selectedButton.selected)
+    self.selectedFilterButton = nil;
+  
+  [self filterStamps];
+}
+
+- (void)filterStamps {
+  if (!self.selectedFilterButton) {
+    // No need to filter.
     self.filteredEntitiesArray = entitiesArray_;
     [self.tableView reloadData];
     return;
-  } else if (!selectedButton) {
-    // Initial load from datastore.
-    self.filteredEntitiesArray = entitiesArray_;
-    [self.tableView reloadData];
   }
-
+  
   NSString* filterString = nil;
-  if (selectedButton == foodFilterButton_) {
+  if (self.selectedFilterButton == foodFilterButton_) {
     filterString = @"food";
-  } else if (selectedButton == booksFilterButton_) {
+  } else if (self.selectedFilterButton == booksFilterButton_) {
     filterString = @"books";
-  } else if (selectedButton == filmFilterButton_) {
+  } else if (self.selectedFilterButton == filmFilterButton_) {
     filterString = @"film";
-  } else if (selectedButton == musicFilterButton_) {
+  } else if (self.selectedFilterButton == musicFilterButton_) {
     filterString = @"music";
-  } else if (selectedButton == otherFilterButton_) {
+  } else if (self.selectedFilterButton == otherFilterButton_) {
     filterString = @"other";
   }
   if (filterString) {
@@ -223,6 +259,7 @@ typedef enum {
     self.filteredEntitiesArray = [entitiesArray_ filteredArrayUsingPredicate:filterPredicate];
     [self.tableView reloadData];
   }
+
 }
 
 #pragma mark - Table view data source
@@ -244,7 +281,7 @@ typedef enum {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
   cell.entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
-  
+
   return cell;
 }
 
@@ -284,6 +321,7 @@ typedef enum {
   } else {
     stamp = [entity.stamps anyObject];
   }
+  
   StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
 
   // Pass the selected object to the new view controller.
@@ -311,5 +349,94 @@ typedef enum {
 - (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
   [super scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
 }
+
+#pragma mark - Map stuff.
+
+- (void)addAnnotationForEntity:(Entity*)entity {
+  NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","]; 
+  CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
+  CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
+  STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
+                                                                    longitude:longitude];
+  annotation.stamp = [entity.stamps anyObject];
+  
+  [mapView_ addAnnotation:annotation];
+  [annotation release];
+}
+
+- (void)mapUserTapped:(id)sender {
+  UserImageView* userImage = sender;
+  UIView* view = [userImage superview];
+  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
+    view = [view superview];
+  
+  if (!view)
+    return;
+  
+  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = annotation.stamp.user;
+
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
+}
+
+- (void)mapDisclosureTapped:(id)sender {
+  UIButton* disclosureButton = sender;
+  UIView* view = [disclosureButton superview];
+  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
+    view = [view superview];
+
+  if (!view)
+    return;
+  
+  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
+  StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:annotation.stamp];
+  
+  // Pass the selected object to the new view controller.
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
+}
+
+#pragma mark - MKMapViewDelegate Methods
+
+- (void)mapView:(MKMapView*)mapView didUpdateUserLocation:(MKUserLocation*)userLocation {
+  if (!userPannedMap_) {
+    CLLocationCoordinate2D currentLocation = mapView_.userLocation.location.coordinate;
+    MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
+    MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
+    [mapView setRegion:region animated:YES];
+  }
+}
+
+- (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
+  userPannedMap_ = YES;
+}
+
+- (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
+  if (![annotation isKindOfClass:[STPlaceAnnotation class]])
+    return nil;
+  
+  MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
+  UIButton* disclosureButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+  [disclosureButton addTarget:self
+                       action:@selector(mapDisclosureTapped:)
+             forControlEvents:UIControlEventTouchUpInside];
+  pinView.rightCalloutAccessoryView = disclosureButton;
+  UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, kMapUserImageSize, kMapUserImageSize)];
+  [userImageView addTarget:self
+                    action:@selector(mapUserTapped:)
+          forControlEvents:UIControlEventTouchUpInside];
+  userImageView.imageURL = [(STPlaceAnnotation*)annotation stamp].user.profileImageURL;
+  pinView.leftCalloutAccessoryView = userImageView;
+  [userImageView release];
+  pinView.pinColor = MKPinAnnotationColorRed;
+  pinView.canShowCallout = YES;
+  pinView.animatesDrop = YES;
+  return pinView;
+}
+
 
 @end

@@ -10,6 +10,12 @@
 #import <UIKit/UIKit.h>
 
 @class Entity;
+@class TodoTableViewCell;
+
+@protocol TodoTableViewCellDelegate
+@optional
+- (void)todoTableViewCell:(TodoTableViewCell*)cell shouldStampEntity:(Entity*)entity;
+@end
 
 @interface TodoTableViewCell : UITableViewCell {
  @private
@@ -22,5 +28,6 @@
 
 @property (nonatomic, assign) BOOL completed;
 @property (nonatomic, retain) Entity* entityObject;
+@property (nonatomic, assign) id<TodoTableViewCellDelegate> delegate;
 
 @end

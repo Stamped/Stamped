@@ -40,6 +40,9 @@
   callActionButton_.layer.cornerRadius = 2.0;
   callActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
   callActionLabel_.text = [entityObject_ localizedPhoneNumber];
+
+  callActionButton_.hidden = YES;
+
   if (!entityObject_.coordinates)
     return;
 

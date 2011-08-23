@@ -9,11 +9,15 @@
 #import <UIKit/UIKit.h>
 
 @class Comment;
+@class UserImageView;
+
+extern NSString* const kCommentUserImageTappedNotification;
 
 @interface StampDetailCommentView : UIView
 
 - (id)initWithComment:(Comment*)comment;
 
 @property (nonatomic, retain) Comment* comment;
+@property (nonatomic, readonly) UserImageView* userImage;
 
 @end

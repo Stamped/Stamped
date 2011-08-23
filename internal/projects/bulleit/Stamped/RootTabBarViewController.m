@@ -15,11 +15,14 @@
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
 #import "STNavigationBar.h"
+#import "Util.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
+- (void)fillStampImageView;
 - (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
+- (void)currentUserUpdated:(NSNotification*)notification;
 @end
 
 @implementation RootTabBarViewController
@@ -32,6 +35,7 @@
 @synthesize activityTabBarItem = activityTabBarItem_;
 @synthesize mustDoTabBarItem = mustDoTabBarItem_;
 @synthesize peopleTabBarItem = peopleTabBarItem_;
+@synthesize userStampBackgroundImageView = userStampBackgroundImageView_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -43,6 +47,7 @@
   self.activityTabBarItem = nil;
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
+  self.userStampBackgroundImageView = nil;
 
   [super dealloc];
 }
@@ -63,6 +68,10 @@
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(currentUserUpdated:)
+                                               name:kCurrentUserHasUpdatedNotification
                                              object:nil];
   [AccountManager sharedManager].delegate = self;
   if ([AccountManager sharedManager].authenticated) {
@@ -98,6 +107,47 @@
   }
 }
 
+- (void)currentUserUpdated:(NSNotification*)notification {
+  [self fillStampImageView];
+}
+
+- (void)fillStampImageView {
+  User* user = [AccountManager sharedManager].currentUser;
+  
+  CGFloat r1, g1, b1, r2, g2, b2;
+  [Util splitHexString:user.primaryColor toRed:&r1 green:&g1 blue:&b1];
+  
+  if (user.secondaryColor) {
+    [Util splitHexString:user.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+  } else {
+    r2 = r1;
+    g2 = g1;
+    b2 = b1;
+  }
+
+  CGFloat width = userStampBackgroundImageView_.frame.size.width;
+  CGFloat height = userStampBackgroundImageView_.frame.size.height;
+  
+  UIGraphicsBeginImageContextWithOptions(userStampBackgroundImageView_.frame.size, NO, 0.0);
+  CGContextRef context = UIGraphicsGetCurrentContext();
+
+  CGFloat colors[] = {r1, g1, b1, 1.0,  r2, g2, b2, 1.0};
+  CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+  CGGradientRef gradientRef = CGGradientCreateWithColorComponents(colorSpace, colors, NULL, 2);
+  CGPoint gradientStartPoint = CGPointZero;
+  CGPoint gradientEndPoint = CGPointMake(width, height);
+  CGContextDrawLinearGradient(context,
+                              gradientRef,
+                              gradientStartPoint,
+                              gradientEndPoint,
+                              kCGGradientDrawsAfterEndLocation);
+  CGGradientRelease(gradientRef);
+  CGColorSpaceRelease(colorSpace);
+  userStampBackgroundImageView_.image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  [userStampBackgroundImageView_ setNeedsDisplay];
+}
+
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -110,6 +160,7 @@
   self.activityTabBarItem = nil;
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
+  self.userStampBackgroundImageView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -142,7 +193,10 @@
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {
-  self.tabBar.selectedItem = stampsTabBarItem_;
+  if (self.tabBar.selectedItem != mustDoTabBarItem_) {
+    self.tabBar.selectedItem = stampsTabBarItem_;
+    [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
+  }
 }
 
 #pragma mark - AccountManagerDelegate Methods.
@@ -177,7 +231,7 @@
   [self.selectedViewController viewDidDisappear:NO];
   [newViewController viewWillAppear:NO];
   [self ensureCorrectHeightOfViewControllers];
-  [self.view addSubview:newViewController.view];
+  [self.view insertSubview:newViewController.view atIndex:0];
   [newViewController viewDidAppear:NO];
   self.selectedViewController = newViewController;
 }

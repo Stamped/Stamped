@@ -37,7 +37,6 @@ static NSString* const kSearchPath = @"/entities/search.json";
 @synthesize cancelButton = cancelButton_;
 @synthesize locationManager = locationManager_;
 
-
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
@@ -71,7 +70,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
                        action:@selector(textFieldDidChange:)
              forControlEvents:UIControlEventEditingChanged];
 
-  self.locationManager = [[CLLocationManager alloc] init];
+  self.locationManager = [[[CLLocationManager alloc] init] autorelease];
 }
 
 - (void)viewDidUnload {

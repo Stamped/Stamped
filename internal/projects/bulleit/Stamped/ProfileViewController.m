@@ -163,7 +163,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
-  STSectionHeaderView* view = [[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)];
+  STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
   view.leftLabel.text = @"Stamps";
   view.rightLabel.text = [user_.numStamps stringValue];
   

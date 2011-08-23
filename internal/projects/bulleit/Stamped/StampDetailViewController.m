@@ -21,6 +21,7 @@
 #import "Entity.h"
 #import "Favorite.h"
 #import "Notifications.h"
+#import "ProfileViewController.h"
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
@@ -38,8 +39,10 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
 - (void)setUpToolbar;
 - (void)setUpMainContentView;
 - (void)setUpCommentsView;
-- (void)handleTap:(UITapGestureRecognizer*)sender;
-- (void)handleEntityTap:(UITapGestureRecognizer*)sender;
+- (void)handleTap:(UITapGestureRecognizer*)recognizer;
+- (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
+- (void)handleCommentUserImageViewTap:(NSNotification*)notification;
+- (void)handleUserImageViewTap:(id)sender;
 - (void)renderComments;
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
@@ -97,20 +100,31 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
 #pragma mark - View lifecycle
 
 - (void)viewWillDisappear:(BOOL)animated {
-  [super viewWillDisappear:animated];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [super viewWillDisappear:animated];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(handleCommentUserImageViewTap:)
+                                               name:kCommentUserImageTappedNotification
+                                             object:nil];
+  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
   [self preloadEntityView];
+  [super viewDidAppear:animated];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  
   UITapGestureRecognizer* gestureRecognizer =
       [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-  [self.activityView addGestureRecognizer:gestureRecognizer];
+  [self.view addGestureRecognizer:gestureRecognizer];
+  gestureRecognizer.cancelsTouchesInView = NO;
   [gestureRecognizer release];
 
   scrollView_.contentSize = self.view.bounds.size;
@@ -141,6 +155,7 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.headerView = nil;
   self.bottomToolbar = nil;
@@ -182,7 +197,7 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   CALayer* typeIconLayer = [[CALayer alloc] init];
   typeIconLayer.contentsGravity = kCAGravityResizeAspect;
   typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
-  typeIconLayer.frame = CGRectMake(17, 50, 12, 12);
+  typeIconLayer.frame = CGRectMake(17, 50, 15, 12);
   [headerView_.layer addSublayer:typeIconLayer];
   [typeIconLayer release];
   
@@ -220,7 +235,9 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
 
 - (void)setUpMainContentView {
   commenterImageView_.imageURL = stamp_.user.profileImageURL;
-
+  [commenterImageView_ addTarget:self 
+                          action:@selector(handleUserImageViewTap:)
+                forControlEvents:UIControlEventTouchUpInside];
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
   CGSize stringSize = [stamp_.user.displayName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
                                                    forWidth:218
@@ -336,20 +353,35 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   }
 }
 
-- (void)handleTap:(UITapGestureRecognizer*)sender {
-  if (sender.state != UIGestureRecognizerStateEnded)
+- (void)handleTap:(UITapGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
   [addCommentField_ resignFirstResponder];
 }
 
-- (void)handleEntityTap:(UITapGestureRecognizer*)sender {
-  if (sender.state != UIGestureRecognizerStateEnded)
+- (void)handleEntityTap:(UITapGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
   [addCommentField_ resignFirstResponder];
   // Pass the selected object to the new view controller.
   [self.navigationController pushViewController:detailViewController_ animated:YES];
+}
+
+- (void)handleUserImageViewTap:(id)sender {
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = stamp_.user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
+}
+
+- (void)handleCommentUserImageViewTap:(NSNotification*)notification {
+  StampDetailCommentView* commentView = notification.object;
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = commentView.comment.user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

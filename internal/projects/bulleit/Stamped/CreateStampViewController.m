@@ -12,7 +12,9 @@
 
 #import "AccountManager.h"
 #import "Entity.h"
+#import "Favorite.h"
 #import "STNavigationBar.h"
+#import "Notifications.h"
 #import "Stamp.h"
 #import "UserImageView.h"
 #import "Util.h"
@@ -334,6 +336,9 @@ static const CGFloat kMinContainerHeight = 204.0;
   [entityObject_ addStampsObject:stamp];
   [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                       object:stamp];
+  entityObject_.favorite.complete = [NSNumber numberWithBool:YES];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
+                                                      object:stamp];
   
   [spinner_ stopAnimating];
   CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));
@@ -365,6 +370,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
 
+  NSLog(@"response: %@", objectLoader.response.bodyAsString);
   [spinner_ stopAnimating];
   cancelButton_.enabled = YES;
   checkmarkButton_.enabled = YES;

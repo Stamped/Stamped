@@ -104,7 +104,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     
     userImageRightMargin_ = kUserImageSize + (kUserImageHorizontalMargin * 2.0);
     
-    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 59, 16, 10)];
+    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 58, 15, 12)];
     typeImageView_.contentMode = UIViewContentModeScaleAspectFit;
     [self addSubview:typeImageView_];
     [typeImageView_ release];
@@ -296,7 +296,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   CGSize stringSize = [userName sizeWithFont:[UIFont fontWithName:kUserNameFontString size:kSubstringFontSize]
                                      forWidth:kSubstringMaxWidth
                                 lineBreakMode:UILineBreakModeTailTruncation];
-  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 16, 57, stringSize.width, stringSize.height);
+  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 17, 57, stringSize.width, stringSize.height);
   userNameLabel_.text = userName;
 
   NSString* comment = stamp.blurb;

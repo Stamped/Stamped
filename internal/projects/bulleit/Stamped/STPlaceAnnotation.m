@@ -8,9 +8,13 @@
 
 #import "STPlaceAnnotation.h"
 
+#import "Entity.h"
+#import "Stamp.h"
+
 const CGFloat kStandardLatLongSpan = 400.0f / 111000.0f;
 
 @implementation STPlaceAnnotation
+@synthesize stamp = stamp_;
 
 - (id)initWithLatitude:(CLLocationDegrees)latitude
              longitude:(CLLocationDegrees)longitude {
@@ -24,6 +28,14 @@ const CGFloat kStandardLatLongSpan = 400.0f / 111000.0f;
 
 - (CLLocationCoordinate2D)coordinate {
   return CLLocationCoordinate2DMake(latitude_, longitude_);
+}
+
+- (NSString*)title {
+  return stamp_.entityObject.title;
+}
+
+- (NSString*)subtitle {
+  return stamp_.entityObject.subtitle;
 }
 
 @end

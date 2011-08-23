@@ -13,15 +13,13 @@ extern NSString* const kListViewButtonPressedNotification;
 
 @interface STNavigationBar : UINavigationBar {
  @private
-  CALayer* containerLayer_;
   CALayer* mapLayer_;
-  CALayer* whiteLayer_;
   BOOL listButtonShown_;
   BOOL potentialButtonTap_;
-  BOOL buttonFlipped_;
+  BOOL buttonShown_;
 }
 
-- (void)setButtonFlipped:(BOOL)flipped animated:(BOOL)animated;
+- (void)setButtonShown:(BOOL)shown;
 
 @property (nonatomic, assign) BOOL hideLogo;
 @end

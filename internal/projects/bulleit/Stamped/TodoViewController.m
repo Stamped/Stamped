@@ -13,6 +13,7 @@
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
+#import "CreateStampViewController.h"
 #import "Entity.h"
 #import "EntityDetailViewController.h"
 #import "Favorite.h"
@@ -56,6 +57,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
                                                name:kFavoriteHasChangedNotification 
                                              object:nil];
   [self loadFavoritesFromDataStore];
+  [self loadFavoritesFromNetwork];
 }
 
 - (void)viewDidUnload {
@@ -100,6 +102,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
   }
 
   Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row];
+  cell.delegate = self;
   cell.entityObject = fave.entityObject;
   cell.completed = [fave.complete boolValue];
   
@@ -135,6 +138,17 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
 } 
+
+#pragma mark - TodoTableViewCellDelegate Methods.
+
+- (void)todoTableViewCell:(TodoTableViewCell*)cell shouldStampEntity:(Entity*)entity {
+  CreateStampViewController* detailViewController = [[CreateStampViewController alloc] initWithEntityObject:entity];
+  
+  // Pass the selected object to the new view controller.
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
+}
 
 #pragma mark - Custom methods.
 

@@ -197,7 +197,7 @@ static const NSInteger kFollowersSection = 1;
 }
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
-  STSectionHeaderView* view = [[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)];
+  STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
   view.leftLabel.text = section == kFriendsSection ? @"Following" : @"Followers";
   view.rightLabel.text =
       [NSString stringWithFormat:@"%u", section == kFriendsSection ? self.friendsArray.count : self.followersArray.count];

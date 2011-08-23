@@ -12,13 +12,17 @@
 #import "User.h"
 #import "UserImageView.h"
 
+NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedNotification";
+
 @interface StampDetailCommentView ()
 - (void)initViews;
+- (void)userImageTapped:(id)sender;
 @end
 
 @implementation StampDetailCommentView
 
 @synthesize comment = comment_;
+@synthesize userImage = userImage_;
 
 - (id)initWithComment:(Comment*)comment {
   self = [super initWithFrame:CGRectZero];
@@ -31,14 +35,17 @@
 }
 
 - (void)initViews {
-  UserImageView* userImage = [[UserImageView alloc] initWithFrame:CGRectMake(10, 8, 31, 31)];
-  userImage.imageURL = comment_.user.profileImageURL;
-  [self addSubview:userImage];
-  [userImage release];
-  CGFloat minHeight = CGRectGetMaxY(userImage.frame) + 8;
+  userImage_ = [[UserImageView alloc] initWithFrame:CGRectMake(10, 8, 31, 31)];
+  userImage_.imageURL = comment_.user.profileImageURL;
+  [userImage_ addTarget:self
+                 action:@selector(userImageTapped:)
+       forControlEvents:UIControlEventTouchUpInside];
+  [self addSubview:userImage_];
+  [userImage_ release];
+  CGFloat minHeight = CGRectGetMaxY(userImage_.frame) + 8;
 
   UIFont* nameFont = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-  const CGFloat leftPadding = CGRectGetMaxX(userImage.frame) + 8;
+  const CGFloat leftPadding = CGRectGetMaxX(userImage_.frame) + 8;
   CGSize stringSize = [comment_.user.displayName sizeWithFont:nameFont
                                                      forWidth:260
                                                 lineBreakMode:UILineBreakModeTailTruncation];
@@ -73,6 +80,10 @@
   CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.9 alpha:1.0].CGColor);
   CGContextFillRect(ctx, CGRectMake(0, CGRectGetMaxY(self.bounds) - 1, CGRectGetWidth(self.bounds), 1));
   CGContextRestoreGState(ctx);
+}
+
+- (void)userImageTapped:(id)sender {
+  [[NSNotificationCenter defaultCenter] postNotificationName:kCommentUserImageTappedNotification object:self];
 }
 
 @end

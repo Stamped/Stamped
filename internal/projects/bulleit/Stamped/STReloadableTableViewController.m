@@ -21,6 +21,7 @@ static NSString* kLoadingText = @"Loading...";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  previousOffset_ = self.tableView.contentSize.height + self.tableView.contentOffset.y;
 
   reloadLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(87, -40, 146, 21)];
   reloadLabel_.text = kPullDownText;
@@ -81,13 +82,14 @@ static NSString* kLoadingText = @"Loading...";
     reloadLabel_.text = kPullDownText;
     reloadLabel_.layer.transform = CATransform3DIdentity;
     [UIView animateWithDuration:0.2
-                          delay:0 
+                          delay:0
                         options:UIViewAnimationOptionBeginFromCurrentState | 
                                 UIViewAnimationOptionAllowUserInteraction
                      animations:^{
                        self.tableView.contentInset = UIEdgeInsetsZero;
                      }
                      completion:nil];
+    
     return;
   }
 
@@ -109,7 +111,7 @@ static NSString* kLoadingText = @"Loading...";
 
 #pragma mark - UIScrollView delegate methods
 
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {  
   if (isLoading_)
     return;
   

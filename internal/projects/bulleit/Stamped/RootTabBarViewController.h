@@ -16,6 +16,7 @@
 @property (nonatomic, retain) UIViewController* selectedViewController;
 @property (nonatomic, retain) IBOutlet UINavigationController* searchStampsNavigationController;
 @property (nonatomic, retain) IBOutlet UITabBar* tabBar;
+@property (nonatomic, retain) IBOutlet UIImageView* userStampBackgroundImageView;
 @property (nonatomic, retain) IBOutlet UITabBarItem* stampsTabBarItem;
 @property (nonatomic, retain) IBOutlet UITabBarItem* activityTabBarItem;
 @property (nonatomic, retain) IBOutlet UITabBarItem* mustDoTabBarItem;

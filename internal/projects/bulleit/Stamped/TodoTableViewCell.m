@@ -34,7 +34,6 @@ static const CGFloat kSubstringFontSize = 12.0;
 - (void)setupViews;
 - (UIImage*)completedStamp;
 - (void)currentUserChanged:(NSNotification*)notification;
-- (void)updateServerState;
 
 @property (nonatomic, readonly) UIImageView* stampImageView;
 @property (nonatomic, readonly) UIImageView* completedImageView;
@@ -44,7 +43,7 @@ static const CGFloat kSubstringFontSize = 12.0;
 @property (nonatomic, readonly) UIImageView* typeImageView;
 @property (nonatomic, readonly) UILabel* descriptionLabel;
 
-@property (nonatomic, assign) BOOL inTogglePhase;
+@property (nonatomic, assign) BOOL inAddingPhase;
 @end
 
 @implementation TodoTableViewCell
@@ -58,7 +57,8 @@ static const CGFloat kSubstringFontSize = 12.0;
 @synthesize disclosureImageView = disclosureImageView_;
 @synthesize typeImageView = typeImageView_;
 @synthesize descriptionLabel = descriptionLabel_;
-@synthesize inTogglePhase = inTogglePhase_;
+@synthesize inAddingPhase = inAddingPhase_;
+@synthesize delegate = delegate_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
@@ -79,6 +79,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   CFRelease(titleStyle_);
   self.title = nil;
   self.entityObject = nil;
+  self.delegate = nil;
   [super dealloc];
 }
 
@@ -125,6 +126,9 @@ static const CGFloat kSubstringFontSize = 12.0;
 }
 
 - (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color {
+  if (!title_)
+    return nil;
+
   [titleAttributes_ setObject:(id)color.CGColor forKey:(id)kCTForegroundColorAttributeName];
   NSAttributedString* titleAttributedString =
       [[NSAttributedString alloc] initWithString:title_
@@ -179,12 +183,12 @@ static const CGFloat kSubstringFontSize = 12.0;
   [self.contentView.layer addSublayer:titleLayer_];
   [titleLayer_ release];
   
-  typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 15, 59, 16, 10)];
+  typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 15, 59, 15, 12)];
   typeImageView_.contentMode = UIViewContentModeScaleAspectFit;
   [self addSubview:typeImageView_];
   [typeImageView_ release];
   
-  descriptionLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 2, 56, 200, 16)];
+  descriptionLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 3, 57, 200, 16)];
   descriptionLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   descriptionLabel_.textColor = [UIColor stampedGrayColor];
   descriptionLabel_.highlightedTextColor = [UIColor whiteColor];
@@ -194,26 +198,23 @@ static const CGFloat kSubstringFontSize = 12.0;
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   UITouch* touch = [touches anyObject];
-  if (CGRectContainsPoint(stampImageView_.frame, [touch locationInView:self.contentView])) {
-    inTogglePhase_ = YES;
+  if (!stampImageView_.hidden &&
+      CGRectContainsPoint(stampImageView_.frame, [touch locationInView:self.contentView])) {
+    inAddingPhase_ = YES;
     return;
   }
   [super touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
-  inTogglePhase_ = NO;
+  inAddingPhase_ = NO;
   [super touchesCancelled:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
-  if (inTogglePhase_) {
-    completed_ = !completed_;
-    stampImageView_.hidden = completed_;
-    completedImageView_.hidden = !completed_;
-    [self setNeedsDisplay];
-    [self updateServerState];
-    inTogglePhase_ = NO;
+  if (inAddingPhase_) {
+    [delegate_ todoTableViewCell:self shouldStampEntity:entityObject_];
+    inAddingPhase_ = NO;
     return;
   }
   [super touchesEnded:touches withEvent:event];
@@ -264,12 +265,6 @@ static const CGFloat kSubstringFontSize = 12.0;
 
 - (void)currentUserChanged:(NSNotification*)notification {
   completedImageView_.image = [self completedStamp];
-}
-
-- (void)updateServerState {
-  self.entityObject.favorite.complete = [NSNumber numberWithBool:completed_];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification 
-                                                      object:nil];
 }
 
 @end

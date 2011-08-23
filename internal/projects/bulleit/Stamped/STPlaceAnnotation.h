@@ -10,11 +10,15 @@
 
 extern const CGFloat kStandardLatLongSpan;
 
+@class Stamp;
+
 @interface STPlaceAnnotation : NSObject<MKAnnotation> {
 @private
   CLLocationDegrees latitude_;
   CLLocationDegrees longitude_;
 }
+
+@property (nonatomic, retain) Stamp* stamp;
 
 - (id)initWithLatitude:(CLLocationDegrees)latitude
              longitude:(CLLocationDegrees)longitude;

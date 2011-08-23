@@ -10,7 +10,8 @@
 #import <UIKit/UIKit.h>
 
 #import "STReloadableTableViewController.h"
+#import "TodoTableViewCell.h"
 
-@interface TodoViewController : STReloadableTableViewController <RKObjectLoaderDelegate>
+@interface TodoViewController : STReloadableTableViewController <RKObjectLoaderDelegate, TodoTableViewCellDelegate>
 
 @end

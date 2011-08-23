@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UserImageView : UIView {
+@class User;
+
+@interface UserImageView : UIControl {
  @private
   UIImageView* imageView_;
 }

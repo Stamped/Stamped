@@ -6,16 +6,18 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <MapKit/MapKit.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
 #import "STReloadableTableViewController.h"
 
-@class MKMapView;
-
-@interface InboxViewController : STReloadableTableViewController <UIScrollViewDelegate, RKObjectLoaderDelegate> {
+@interface InboxViewController : STReloadableTableViewController <UIScrollViewDelegate,
+                                                                  RKObjectLoaderDelegate,
+                                                                  MKMapViewDelegate> {
  @private
   BOOL userDidScroll_;
+  BOOL userPannedMap_;
 }
 
 @property (nonatomic, readonly) MKMapView* mapView;
