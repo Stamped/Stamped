@@ -4,4 +4,5 @@ import OpenTableDump
 import FactualiPhoneAppsDump
 import FactualUSRestaurantsDump
 import AppleEPFDump
+import BarnesAndNobleDump
 

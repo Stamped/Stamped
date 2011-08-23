@@ -368,8 +368,8 @@ class AppSchema(Schema):
     def setSchema(self):
         self.developer          = SchemaElement(basestring) 
         self.developerURL       = SchemaElement(basestring) 
-        self.developerSupportURL        = SchemaElement(basestring) 
-        self.publisher          = SchemaElement(basestring) 
+        self.developerSupportURL= SchemaElement(basestring) 
+        #self.publisher          = SchemaElement(basestring) 
         self.releaseDate        = SchemaElement(basestring) 
         self.appCategory        = SchemaElement(basestring) 
         self.language           = SchemaElement(basestring) 
@@ -387,8 +387,11 @@ class AppSchema(Schema):
 
 class BookSchema(Schema):
     def setSchema(self):
-        # TODO
-        pass
+        self.isbn               = SchemaElement(basestring)
+        self.author             = SchemaElement(basestring)
+        self.sku_number         = SchemaElement(basestring)
+        self.publisher          = SchemaElement(basestring)
+        self.publish_date       = SchemaElement(basestring)
 
 class VideoSchema(Schema):
     def setSchema(self):
@@ -428,27 +431,27 @@ class AlbumSchema(Schema):
         self.label_studio       = SchemaElement(basestring) 
         self.is_compilation     = SchemaElement(bool)
         
-        self.a_retail_price     = SchemaElement(basestring) 
-        self.a_hq_price         = SchemaElement(basestring) 
-        self.a_currency_code    = SchemaElement(basestring) 
+        self.a_retail_price             = SchemaElement(basestring) 
+        self.a_hq_price                 = SchemaElement(basestring) 
+        self.a_currency_code            = SchemaElement(basestring) 
         self.a_availability_date        = SchemaElement(basestring) 
 
 class MediaSchema(Schema):
     def setSchema(self):
-        self.title_version      = SchemaElement(basestring) 
-        self.search_terms       = SchemaElement(basestring) 
+        self.title_version              = SchemaElement(basestring) 
+        self.search_terms               = SchemaElement(basestring) 
         self.parental_advisory_id       = SchemaElement(basestring) 
         self.artist_display_name        = SchemaElement(basestring) 
         self.collection_display_name    = SchemaElement(basestring) 
         self.original_release_date      = SchemaElement(basestring) 
         self.itunes_release_date        = SchemaElement(basestring) 
-        self.track_length       = SchemaElement(basestring) 
-        self.copyright          = SchemaElement(basestring) 
-        self.p_line             = SchemaElement(basestring) 
+        self.track_length               = SchemaElement(basestring) 
+        self.copyright                  = SchemaElement(basestring) 
+        self.p_line                     = SchemaElement(basestring) 
         self.content_provider_name      = SchemaElement(basestring) 
-        self.media_type_id      = SchemaElement(basestring) 
-        self.artwork_url        = SchemaElement(basestring) 
-        self.mpaa_rating        = SchemaElement(basestring) 
+        self.media_type_id              = SchemaElement(basestring) 
+        self.artwork_url                = SchemaElement(basestring) 
+        self.mpaa_rating                = SchemaElement(basestring) 
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
@@ -468,6 +471,7 @@ class EntitySourcesSchema(Schema):
         self.washmag            = WashMagSchema()
         self.netflix            = NetflixSchema()
         self.userGenerated      = UserGeneratedSchema()
+        self.barnesAndNoble     = BarnesAndNobleSchema()
 
 class GooglePlacesSchema(Schema):
     def setSchema(self):
@@ -565,4 +569,7 @@ class UserGeneratedSchema(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
 
+class BarnesAndNobleSchema(Schema):
+    def setSchema(self):
+        self.bid                = SchemaElement(int) 
 

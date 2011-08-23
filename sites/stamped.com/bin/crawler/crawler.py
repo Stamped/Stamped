@@ -26,6 +26,7 @@ from api.MongoStampedAPI import MongoStampedAPI
 
 #-----------------------------------------------------------
 
+_globals = {}
 
 # TODO: commandline control over setting up / erasing / updating crawler
 # TODO: commandline control over DB versioning s.t. an entire run of the crawler may be rolled back if desired
@@ -142,6 +143,9 @@ def parseCommandLine():
                 sys.exit(1)
             else:
                 options.sources.append(source)
+    
+    for source in options.sources:
+        source._globals = _globals
     
     if options.count or options.ratio:
         count = 0

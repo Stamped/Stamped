@@ -67,7 +67,6 @@ class NetflixDump(AExternalDumpEntitySource):
         match_ratings_func  = lambda c: re.match(match_ratings_re, c.get('scheme')) is not None
         match_language_func = lambda c: re.match(language_re, c.get('scheme')) is not None
         
-        e = None
         count = 0
         bonus_materials = set()
         

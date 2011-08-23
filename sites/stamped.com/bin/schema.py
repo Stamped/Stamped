@@ -543,7 +543,7 @@ class Schema(SchemaElement):
     def __setattr__(self, name, value):
         if name[:1] == '_':
             object.__setattr__(self, name, value)
-
+        
         elif isinstance(value, SchemaElement):
             try:
                 self._elements[name] = value
@@ -561,14 +561,16 @@ class Schema(SchemaElement):
                 try:
                     if len(self._contents(name)) == 1:
                         for k, v in self._elements.iteritems():
-                            if isinstance(v, Schema):
+                            if isinstance(v, Schema) and 1 == len(v._contents(name)):
                                 v[name] = value
-                    else:
-                        raise
+                                v._isSet = True
+                        return
                 except:
-                    msg = "Cannot Set Element (%s)" % name
-                    logs.warning(msg)
-                    raise SchemaKeyError(msg)
+                    pass
+                
+                msg = "Cannot Set Element (%s)" % name
+                logs.warning(msg)
+                raise SchemaKeyError(msg)
     
     def __setitem__(self, key, value):
         self.__setattr__(key, value)
@@ -587,10 +589,10 @@ class Schema(SchemaElement):
             if isinstance(item, Schema) or isinstance(item, SchemaList):
                 return item
             return item.value
-
+        
         if name in self._elements:
             return _returnOutput(self._elements[name])
-
+        
         try:
             result = self._contents(name)
             if len(result) != 1:
@@ -612,7 +614,7 @@ class Schema(SchemaElement):
     
     def __contains__(self, item):
         ret = self._contents(item)
-
+        
         if len(ret) == 1:
             return ret[0]._isSet
         elif len(ret) == 0:
@@ -628,7 +630,9 @@ class Schema(SchemaElement):
     def value(self):
         ret = {}
         for k, v in self._elements.iteritems():
-            ret[k] = v.value
+            if v.isSet:
+                ret[k] = v.value
+        
         return ret
 
     # Private Functions
@@ -740,6 +744,7 @@ class Schema(SchemaElement):
     def setElement(self, name, data):
         self._name = name
         self._importData(data, clear=True)
+        self._isSet = True
     
     def importData(self, data, overflow=None):
         if data == None or len(data) == 0:

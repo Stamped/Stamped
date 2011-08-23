@@ -30,7 +30,7 @@ class EntityTest(ASchemaTestCase):
         entity = Entity()
         entity.title = "test"
         entity.subcategory = "restaurant"
-        entity.desc = "&gt;example summary&lt;"
+        entity.desc = "&lt;example summary&gt;"
         
         self.assertTrue(entity.validate())
 

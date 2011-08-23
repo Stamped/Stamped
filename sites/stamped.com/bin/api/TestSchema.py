@@ -739,9 +739,6 @@ class DerivedCategorySchemaFail(ASchemaTestCase):
         except:
             ret = True
         self.assertTrue(ret)
-        
-
-
 
 if __name__ == '__main__':
     unittest.main()
