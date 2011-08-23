@@ -279,7 +279,6 @@ class Entity(Schema):
             schema.importData(self.exportSparse(), overflow=True)
         else:
             raise NotImplementedError
-
         return schema
 
 class EntityMini(Schema):
