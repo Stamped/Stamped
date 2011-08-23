@@ -654,14 +654,11 @@ class StampedAPI(AStampedAPI):
         # Add activity for credited users
         ### TODO: Verify user isn't being blocked
         if self._activity == True and len(creditedUserIds) > 0:
-            logs.debug("Add activity")
-            logs.debug("Stamp: %s" % stamp.value)
             activity = Activity({
                 'genre': 'restamp',
                 'user': user.exportSchema(UserMini()),
-                'stamp': stamp.value,
+                'stamp': stamp,
             })
-            logs.debug("Activity created")
             activity.timestamp.created = datetime.utcnow()
             self._activityDB.addActivity(creditedUserIds, activity)
         
@@ -678,7 +675,7 @@ class StampedAPI(AStampedAPI):
                 activity = Activity({
                     'genre': 'mention',
                     'user': user.exportSchema(UserMini()),
-                    'stamp': stamp.value,
+                    'stamp': stamp,
                 })
                 activity.timestamp.created = datetime.utcnow()
                 self._activityDB.addActivity(mentionedUserIds, activity)
@@ -798,7 +795,7 @@ class StampedAPI(AStampedAPI):
             activity = Activity({
                 'genre': 'restamp',
                 'user': user.exportSchema(UserMini()),
-                'stamp': stamp.value,
+                'stamp': stamp,
             })
             activity.timestamp.created = datetime.utcnow()
             self._activityDB.addActivity(creditedUserIds, activity)
@@ -816,7 +813,7 @@ class StampedAPI(AStampedAPI):
                 activity = Activity({
                     'genre': 'mention',
                     'user': user.exportSchema(UserMini()),
-                    'stamp': stamp.value,
+                    'stamp': stamp,
                 })
                 activity.timestamp.created = datetime.utcnow()
                 self._activityDB.addActivity(mentionedUserIds, activity)
@@ -944,8 +941,8 @@ class StampedAPI(AStampedAPI):
                 activity = Activity({
                     'genre': 'mention',
                     'user': user.exportSchema(UserMini()),
-                    'stamp': stamp.value,
-                    'comment': comment.value,
+                    'stamp': stamp,
+                    'comment': comment,
                 })
                 activity.timestamp.created = datetime.utcnow()
                 self._activityDB.addActivity(mentionedUserIds, activity)
@@ -960,8 +957,8 @@ class StampedAPI(AStampedAPI):
             activity = Activity({
                 'genre': 'comment',
                 'user': user.exportSchema(UserMini()),
-                'stamp': stamp.value,
-                'comment': comment.value,
+                'stamp': stamp,
+                'comment': comment,
             })
             activity.timestamp.created = datetime.utcnow()
             self._activityDB.addActivity(commentedUserIds, activity)
@@ -981,8 +978,8 @@ class StampedAPI(AStampedAPI):
             activity = Activity({
                 'genre': 'reply',
                 'user': user.exportSchema(UserMini()),
-                'stamp': stamp.value,
-                'comment': comment.value,
+                'stamp': stamp,
+                'comment': comment,
             })
             activity.timestamp.created = datetime.utcnow()
             self._activityDB.addActivity(repliedUserIds, activity)
