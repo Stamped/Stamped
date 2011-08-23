@@ -466,7 +466,7 @@ class EntitySourcesSchema(Schema):
         self.latimes            = LATimesSchema()
         self.bostonmag          = BostonMagSchema()
         self.fandango           = FandangoSchema()
-        self.chimag             = ChicagoMagSchema()
+        self.chicagomag         = ChicagoMagSchema()
         self.phillymag          = PhillyMagSchema()
         self.washmag            = WashMagSchema()
         self.netflix            = NetflixSchema()
