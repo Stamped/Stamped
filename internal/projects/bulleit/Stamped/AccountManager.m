@@ -285,5 +285,10 @@ static AccountManager* sharedAccountManager_ = nil;
   }
 }
 
+#pragma mark - RKRequestQueueDelegate methods.
+
+- (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
+  NSLog(@"Sending a request: %@", request.resourcePath);
+}
 
 @end

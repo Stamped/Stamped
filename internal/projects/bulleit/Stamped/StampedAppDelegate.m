@@ -11,6 +11,7 @@
 #import <RestKit/RestKit.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "AccountManager.h"
 #import "Comment.h"
 #import "Entity.h"
 #import "Event.h"
@@ -30,6 +31,7 @@ static NSString* const kDataBaseURL = @"http://ec2-50-19-33-126.compute-1.amazon
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   [RKRequestQueue sharedQueue].showsNetworkActivityIndicatorWhenBusy = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
+  [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];

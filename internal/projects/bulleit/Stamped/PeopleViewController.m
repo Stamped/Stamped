@@ -64,7 +64,6 @@ static const NSInteger kFollowersSection = 1;
       [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topViewTapped:)];
   [userScreenNameLabel_.superview addGestureRecognizer:recognizer];
   [recognizer release];
-  [self currentUserUpdated:nil];
 }
 
 - (void)viewDidUnload {
