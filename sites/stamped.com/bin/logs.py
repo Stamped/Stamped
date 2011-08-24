@@ -9,7 +9,7 @@ import datetime, logging, os, threading, hashlib, random, time
 
 # Log
 log = logging.getLogger('stamped')
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 
 # Formatter
 formatter = logging.Formatter('%(asctime)s | %(message)s', datefmt='%H:%M:%S')
