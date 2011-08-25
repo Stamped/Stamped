@@ -26,6 +26,7 @@ extern NSString* const kCurrentUserHasUpdatedNotification;
   KeychainItemWrapper* passwordKeychainItem_;
   KeychainItemWrapper* accessTokenKeychainItem_;
   KeychainItemWrapper* refreshTokenKeychainItem_;
+  RKRequestQueue* oAuthRequestQueue_;
   UITextField* usernameField_;
   UITextField* passwordField_;
   NSTimer* oauthRefreshTimer_;

@@ -29,7 +29,7 @@ static NSString* const kDataBaseURL = @"http://ec2-50-19-33-126.compute-1.amazon
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  [RKRequestQueue sharedQueue].showsNetworkActivityIndicatorWhenBusy = YES;
+  [RKRequestQueue sharedQueue].suspended = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
@@ -88,7 +88,7 @@ static NSString* const kDataBaseURL = @"http://ec2-50-19-33-126.compute-1.amazon
   [eventMapping mapRelationship:@"user" withMapping:userMapping];
   
   RKManagedObjectMapping* favoriteMapping = [RKManagedObjectMapping mappingForClass:[Favorite class]];
-  [favoriteMapping mapAttributes:@"complete", nil];
+  [favoriteMapping mapAttributes:@"complete", @"created", nil];
   [favoriteMapping mapKeyPathsToAttributes:@"favorite_id", @"favoriteID",
                                            @"user_id", @"userID", nil];
   favoriteMapping.primaryKeyAttribute = @"favoriteID";

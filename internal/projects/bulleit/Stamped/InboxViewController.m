@@ -27,7 +27,6 @@
 #import "UserImageView.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
-static const CGFloat kFilterRowHeight = 44.0;
 static NSString* const kInboxPath = @"/collections/inbox.json";
 
 typedef enum {
@@ -164,8 +163,6 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  if (!userDidScroll_)
-    self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -207,16 +204,14 @@ typedef enum {
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSString* resourcePath = [kInboxPath appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:authToken, @"oauth_token", @"1", @"quality", nil]];
-  [objectManager loadObjectsAtResourcePath:resourcePath
-                             objectMapping:stampMapping
-                                  delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kInboxPath delegate:self];
+  objectLoader.objectMapping = stampMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", nil];
+  [objectLoader send];
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {
   [self loadStampsFromDataStore];
-  self.tableView.contentOffset = CGPointMake(0, kFilterRowHeight);
 }
 
 #pragma mark - Filter stuff
@@ -347,7 +342,6 @@ typedef enum {
 #pragma mark - UIScrollView delegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-  userDidScroll_ = YES;
   [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
                                                       object:scrollView];
   [super scrollViewDidScroll:scrollView];

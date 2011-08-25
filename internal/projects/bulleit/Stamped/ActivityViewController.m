@@ -22,6 +22,8 @@
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
 
+static NSString* const kActivityLookupPath = @"/activity/show.json";
+
 @interface ActivityViewController ()
 - (void)loadEventsFromDataStore;
 - (void)loadEventsFromNetwork;
@@ -88,12 +90,10 @@
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* eventMapping = [objectManager.mappingProvider mappingForKeyPath:@"Event"];
-  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSString* resourcePath =
-      [NSString stringWithFormat:@"/activity/show.json?oauth_token=%@", authToken];
-  [objectManager loadObjectsAtResourcePath:resourcePath
-                             objectMapping:eventMapping
-                                  delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kActivityLookupPath
+                                                                    delegate:self];
+  objectLoader.objectMapping = eventMapping;
+  [objectLoader send];
 }
 
 #pragma mark - Table view data source

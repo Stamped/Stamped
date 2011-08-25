@@ -300,7 +300,6 @@ static const CGFloat kMinContainerHeight = 204.0;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       reasoningTextView_.text, @"blurb",
       credit, @"credit",
-      [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
       entityObject_.entityID, @"entity_id", nil];
   [objectLoader send];
 }

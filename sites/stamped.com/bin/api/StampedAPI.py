@@ -79,7 +79,7 @@ class StampedAPI(AStampedAPI):
                                 (account.first_name, account.last_name[0])
 
         account = self._accountDB.addAccount(account)
-
+        
         return account
 
 
@@ -1201,6 +1201,8 @@ class StampedAPI(AStampedAPI):
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=1)
+
+        ### TODO: Add to Activity
 
         return favorite
     

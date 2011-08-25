@@ -211,11 +211,11 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSString* resourcePath = [kUserStampsPath appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:authToken, @"oauth_token", user_.userID, @"user_id", nil]];
-  [objectManager loadObjectsAtResourcePath:resourcePath
-                             objectMapping:stampMapping
-                                  delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserStampsPath
+                                                                    delegate:self];
+  objectLoader.objectMapping = stampMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id", nil];
+  [objectLoader send];
 }
 
 - (void)loadStampsFromDataStore {

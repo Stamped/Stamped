@@ -153,17 +153,18 @@ static NSString* const kSearchPath = @"/entities/search.json";
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
+  objectLoader.objectMapping = entityMapping;
   NSMutableDictionary* params =
-      [NSMutableDictionary dictionaryWithKeysAndObjects:@"oauth_token",
-          [AccountManager sharedManager].authToken.accessToken, @"q", searchField_.text, nil];
+      [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", searchField_.text, nil];
   if (self.locationManager.location) {
     CLLocationCoordinate2D coordinate = self.locationManager.location.coordinate;
     NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
     [params setObject:coordString forKey:@"coordinates"];
-  }
-  [objectManager loadObjectsAtResourcePath:[kSearchPath appendQueryParams:params]
-                             objectMapping:entityMapping
-                                  delegate:self];
+  }  
+  objectLoader.params = params;
+  [objectLoader send];
+
   [searchField_ resignFirstResponder];
   return NO;
 }

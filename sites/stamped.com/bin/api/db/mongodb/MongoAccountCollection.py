@@ -34,7 +34,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     ### PUBLIC
     
     def addAccount(self, user):
-        return self._addObject(user)
+        try:
+            return self._addObject(user)
+        except Exception as e:
+            print 'FAIL'
+            print e
+            raise Exception
     
     def getAccount(self, userId):
         documentId = self._getObjectIdFromString(userId)

@@ -34,6 +34,7 @@ static const CGFloat kKeyboardHeight = 216.0;
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 static NSString* const kCreateCommentPath = @"/comments/create.json";
+static NSString* const kCommentsPath = @"/comments/show.json";
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
@@ -375,7 +376,6 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-      [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
       stamp_.entityObject.entityID, @"entity_id", nil];
 
   [objectLoader send];
@@ -448,11 +448,10 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
-  NSString* resourcePath = [@"/comments/show.json" appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:stamp_.stampID, @"stamp_id",
-          [AccountManager sharedManager].authToken.accessToken, @"oauth_token", nil]];
-  [objectManager loadObjectsAtResourcePath:resourcePath
-                             objectMapping:commentMapping
-                                  delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCommentsPath delegate:self];
+  objectLoader.objectMapping = commentMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:stamp_.stampID, @"stamp_id", nil];
+  [objectLoader send];
 }
 
 - (void)renderComments {
@@ -520,7 +519,6 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
       addCommentField_.text, @"blurb",
-      [AccountManager sharedManager].authToken.accessToken, @"oauth_token",
       stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
  
@@ -537,7 +535,6 @@ static NSString* const kCreateCommentPath = @"/comments/create.json";
   }
 
   if ([objectLoader.resourcePath isEqualToString:kRemoveFavoritePath]) {
-    NSLog(@"%@", objectLoader.response.bodyAsString);
     Favorite* fav = [objects lastObject];
     [fav deleteEntity];
     [[fav managedObjectContext] save:NULL];
