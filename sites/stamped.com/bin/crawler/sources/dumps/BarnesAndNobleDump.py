@@ -12,7 +12,11 @@ from Netflix import NetflixClient
 from AEntitySource import AExternalDumpEntitySource
 from Schemas import Entity
 from pprint import pprint
-from lxml import etree
+
+try:
+    from lxml import etree
+except ImportError:
+    utils.log("warning: couldn't find lxml")
 
 __all__ = [ "BarnesAndNobleDump" ]
 

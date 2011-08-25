@@ -33,7 +33,7 @@ class NYMagCrawler(AExternalEntitySource):
         
         categories = [
             'restaurant', 
-            #'bar'
+            'bar'
         ]
         
         for category in categories:

@@ -11,8 +11,12 @@ import gevent, gzip, os, re, time
 from Netflix import NetflixClient
 from AEntitySource import AExternalDumpEntitySource
 from Schemas import Entity
-from lxml import etree
 from pprint import pprint
+
+try:
+    from lxml import etree
+except ImportError:
+    utils.log("warning: couldn't find lxml")
 
 __all__ = [ "NetflixDump" ]
 
