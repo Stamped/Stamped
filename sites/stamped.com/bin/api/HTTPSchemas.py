@@ -217,9 +217,9 @@ class HTTPEntity(Schema):
         if schema.__class__.__name__ == 'Entity':
             data                = schema.exportSparse()
             coordinates         = data.pop('coordinates', None)
-
+            
             self.importData(data, overflow=True)
-
+            
             self.address        = schema.details.place.address
             self.neighborhood   = schema.details.place.neighborhood
             self.phone          = schema.details.contact.phone
@@ -227,9 +227,9 @@ class HTTPEntity(Schema):
             self.hours          = schema.details.contact.hoursOfOperation
             self.cuisine        = schema.details.restaurant.cuisine
             self.coordinates    = _coordinatesDictToFlat(coordinates)
-
+            
             self.last_modified  = schema.timestamp.created
-
+            
             if schema.sources.openTable.reserveURL != None:
                 url = "http://www.opentable.com/reserve/%s&ref=9166" % \
                         (schema.sources.openTable.reserveURL)
@@ -294,12 +294,17 @@ class HTTPEntityAutosuggest(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, required=True)
-        
+    
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
             self.importData(schema.exportSparse(), overflow=True)
+            if self.subtitle is None:
+                if schema.address is not None:
+                    self.subtitle = schema.address
+                else:
+                    self.subtitle = schema.subcategory
         else:
             raise NotImplementedError
         return self
@@ -320,7 +325,6 @@ class HTTPEntitySearch(Schema):
         else:
             raise NotImplementedError
         return schema
-
 
 # ###### #
 # Stamps #

@@ -568,7 +568,7 @@ def searchEntities():
     for item in result:
         item = HTTPEntityAutosuggest().importSchema(item).exportSparse()
         autosuggest.append(item)
-
+    
     return transformOutput(request, autosuggest)
 
 
