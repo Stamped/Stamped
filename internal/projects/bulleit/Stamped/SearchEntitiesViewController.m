@@ -36,6 +36,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
 @synthesize searchField = searchField_;
 @synthesize cancelButton = cancelButton_;
 @synthesize locationManager = locationManager_;
+@synthesize addStampCell = addStampCell_;
+@synthesize addStampLabel = addStampLabel_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -51,6 +53,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
   self.entitiesArray = nil;
   self.locationManager.delegate = nil;
   self.locationManager = nil;
+  self.addStampCell = nil;
+  self.addStampLabel = nil;
   [super dealloc];
 }
 
@@ -81,6 +85,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
   self.filteredEntitiesArray = nil;
   self.entitiesArray = nil;
   self.locationManager = nil;
+  self.addStampCell = nil;
+  self.addStampLabel = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -150,7 +156,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   if (textField != searchField_)
     return YES;
-  
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
@@ -209,8 +215,13 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (void)textFieldDidChange:(id)sender {
-  if (sender == self.searchField)
-    [self searchDataStoreFor:self.searchField.text];
+  if (sender != self.searchField)
+    return;
+
+  [self searchDataStoreFor:self.searchField.text];
+
+  //self.addStampCell.hidden = self.searchField.text.length == 0;
+  self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
 }
 
 @end

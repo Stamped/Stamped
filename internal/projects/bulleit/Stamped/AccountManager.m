@@ -296,11 +296,11 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
+  [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+
   if (queue == oAuthRequestQueue_) {
     [RKRequestQueue sharedQueue].suspended = YES;
-  } else if (queue == [RKRequestQueue sharedQueue] && queue.count > 0) {
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    
+  } else if (queue == [RKRequestQueue sharedQueue]) {
     // Wrap shiz with the current oauth token.
     NSMutableDictionary* params =
         [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
@@ -315,7 +315,7 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
-  if (queue == [RKRequestQueue sharedQueue] && queue.count == 0)
+  if (queue.count == 0)
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 

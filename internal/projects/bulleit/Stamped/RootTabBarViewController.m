@@ -162,6 +162,8 @@
   userStampBackgroundImageView_.image = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
   [userStampBackgroundImageView_ setNeedsDisplay];
+//#warning DELETE WHEN SHIPPING
+//  [self createStamp:nil];
 }
 
 - (void)viewDidUnload {

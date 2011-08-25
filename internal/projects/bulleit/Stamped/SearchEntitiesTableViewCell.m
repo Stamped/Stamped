@@ -10,6 +10,7 @@
 
 #import "Entity.h"
 #import "Util.h"
+#import "UIColor+Stamped.h"
 
 @interface SearchEntitiesCellView : UIView
 
@@ -38,7 +39,7 @@
     titleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
     titleLabel_.backgroundColor = [UIColor clearColor];
     titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
-    titleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+    titleLabel_.textColor = [UIColor stampedBlackColor];
     titleLabel_.highlightedTextColor = [UIColor whiteColor];
     [self addSubview:titleLabel_];
     [titleLabel_ release];
@@ -46,7 +47,7 @@
     subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 34, 241, 20)];
     subtitleLabel_.backgroundColor = [UIColor clearColor];
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
-    subtitleLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+    subtitleLabel_.textColor = [UIColor stampedGrayColor];
     subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
     [self addSubview:subtitleLabel_];
     [subtitleLabel_ release];
