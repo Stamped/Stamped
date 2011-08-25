@@ -67,9 +67,6 @@ class NYMagCrawler(AExternalEntitySource):
             href = link.get("href")
             name = link.getText().strip()
             
-            if not 'eauty' in name:
-                continue
-            
             detail = pool.spawn(self._parseDetailPage, name, href, subcategory)
     
     def _parseDetailPage(self, name, href, subcategory):
