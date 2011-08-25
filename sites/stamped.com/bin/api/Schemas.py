@@ -325,69 +325,69 @@ class EntityDetailsSchema(Schema):
 
 class PlaceSchema(Schema):
     def setSchema(self):
-        self.address            = SchemaElement(basestring) 
+        self.address            = SchemaElement(basestring)
         self.types              = SchemaList(SchemaElement(basestring))
-        self.vicinity           = SchemaElement(basestring) 
-        self.neighborhood       = SchemaElement(basestring) 
-        self.crossStreet        = SchemaElement(basestring) 
-        self.publicTransit      = SchemaElement(basestring) 
-        self.parking            = SchemaElement(basestring) 
-        self.parkingDetails     = SchemaElement(basestring) 
-        self.wheelchairAccess   = SchemaElement(basestring) 
+        self.vicinity           = SchemaElement(basestring)
+        self.neighborhood       = SchemaElement(basestring)
+        self.crossStreet        = SchemaElement(basestring)
+        self.publicTransit      = SchemaElement(basestring)
+        self.parking            = SchemaElement(basestring)
+        self.parkingDetails     = SchemaElement(basestring)
+        self.wheelchairAccess   = SchemaElement(basestring)
 
 class ContactSchema(Schema):
     def setSchema(self):
-        self.phone              = SchemaElement(basestring) 
-        self.fax                = SchemaElement(basestring) 
-        self.site               = SchemaElement(basestring) 
-        self.email              = SchemaElement(basestring) 
-        self.hoursOfOperation   = SchemaElement(basestring) 
+        self.phone              = SchemaElement(basestring)
+        self.fax                = SchemaElement(basestring)
+        self.site               = SchemaElement(basestring)
+        self.email              = SchemaElement(basestring)
+        self.hoursOfOperation   = SchemaElement(basestring)
 
 class RestaurantSchema(Schema):
     def setSchema(self):
-        self.diningStyle        = SchemaElement(basestring) 
-        self.cuisine            = SchemaElement(basestring) 
-        self.price              = SchemaElement(basestring) 
-        self.payment            = SchemaElement(basestring) 
-        self.dressCode          = SchemaElement(basestring) 
-        self.acceptsReservations        = SchemaElement(basestring) 
-        self.acceptsWalkins     = SchemaElement(basestring) 
-        self.offers             = SchemaElement(basestring) 
-        self.privatePartyFacilities     = SchemaElement(basestring) 
-        self.privatePartyContact        = SchemaElement(basestring) 
-        self.entertainment      = SchemaElement(basestring) 
-        self.specialEvents      = SchemaElement(basestring) 
-        self.catering           = SchemaElement(basestring) 
-        self.takeout            = SchemaElement(basestring) 
-        self.delivery           = SchemaElement(basestring) 
-        self.kosher             = SchemaElement(basestring) 
-        self.bar                = SchemaElement(basestring) 
-        self.alcohol            = SchemaElement(basestring) 
-        self.menuLink           = SchemaElement(basestring) 
-        self.chef               = SchemaElement(basestring) 
-        self.owner              = SchemaElement(basestring) 
-        self.reviewLinks        = SchemaElement(basestring) 
+        self.diningStyle        = SchemaElement(basestring)
+        self.cuisine            = SchemaElement(basestring)
+        self.price              = SchemaElement(basestring)
+        self.payment            = SchemaElement(basestring)
+        self.dressCode          = SchemaElement(basestring)
+        self.acceptsReservations        = SchemaElement(basestring)
+        self.acceptsWalkins     = SchemaElement(basestring)
+        self.offers             = SchemaElement(basestring)
+        self.privatePartyFacilities     = SchemaElement(basestring)
+        self.privatePartyContact        = SchemaElement(basestring)
+        self.entertainment      = SchemaElement(basestring)
+        self.specialEvents      = SchemaElement(basestring)
+        self.catering           = SchemaElement(basestring)
+        self.takeout            = SchemaElement(basestring)
+        self.delivery           = SchemaElement(basestring)
+        self.kosher             = SchemaElement(basestring)
+        self.bar                = SchemaElement(basestring)
+        self.alcohol            = SchemaElement(basestring)
+        self.menuLink           = SchemaElement(basestring)
+        self.chef               = SchemaElement(basestring)
+        self.owner              = SchemaElement(basestring)
+        self.reviewLinks        = SchemaElement(basestring)
 
 class AppSchema(Schema):
     def setSchema(self):
-        self.developer          = SchemaElement(basestring) 
-        self.developerURL       = SchemaElement(basestring) 
-        self.developerSupportURL= SchemaElement(basestring) 
-        #self.publisher          = SchemaElement(basestring) 
-        self.releaseDate        = SchemaElement(basestring) 
-        self.appCategory        = SchemaElement(basestring) 
-        self.language           = SchemaElement(basestring) 
-        self.rating             = SchemaElement(basestring) 
-        self.popularity         = SchemaElement(basestring) 
-        self.parentalRating     = SchemaElement(basestring) 
-        self.platform           = SchemaElement(basestring) 
-        self.requirements       = SchemaElement(basestring) 
-        self.size               = SchemaElement(basestring) 
-        self.version            = SchemaElement(basestring) 
-        self.downloadURL        = SchemaElement(basestring) 
-        self.thumbnailURL       = SchemaElement(basestring) 
-        self.screenshotURL      = SchemaElement(basestring) 
-        self.videoURL           = SchemaElement(basestring) 
+        self.developer          = SchemaElement(basestring)
+        self.developerURL       = SchemaElement(basestring)
+        self.developerSupportURL= SchemaElement(basestring)
+        #self.publisher          = SchemaElement(basestring)
+        self.releaseDate        = SchemaElement(basestring)
+        self.appCategory        = SchemaElement(basestring)
+        self.language           = SchemaElement(basestring)
+        self.rating             = SchemaElement(basestring)
+        self.popularity         = SchemaElement(basestring)
+        self.parentalRating     = SchemaElement(basestring)
+        self.platform           = SchemaElement(basestring)
+        self.requirements       = SchemaElement(basestring)
+        self.size               = SchemaElement(basestring)
+        self.version            = SchemaElement(basestring)
+        self.downloadURL        = SchemaElement(basestring)
+        self.thumbnailURL       = SchemaElement(basestring)
+        self.screenshotURL      = SchemaElement(basestring)
+        self.videoURL           = SchemaElement(basestring)
 
 class BookSchema(Schema):
     def setSchema(self):
@@ -400,20 +400,20 @@ class BookSchema(Schema):
 class VideoSchema(Schema):
     def setSchema(self):
         # TODO: modify types
-        self.studio_name        = SchemaElement(basestring) 
-        self.network_name       = SchemaElement(basestring) 
-        self.short_description  = SchemaElement(basestring) 
-        self.long_description   = SchemaElement(basestring) 
-        self.episode_production_number  = SchemaElement(basestring) 
+        self.studio_name        = SchemaElement(basestring)
+        self.network_name       = SchemaElement(basestring)
+        self.short_description  = SchemaElement(basestring)
+        self.long_description   = SchemaElement(basestring)
+        self.episode_production_number  = SchemaElement(basestring)
         
-        self.v_retail_price     = SchemaElement(basestring) 
-        self.v_currency_code    = SchemaElement(basestring) 
-        self.v_availability_date        = SchemaElement(basestring) 
-        self.v_sd_price         = SchemaElement(basestring) 
-        self.v_hq_price         = SchemaElement(basestring) 
-        self.v_lc_rental_price  = SchemaElement(basestring) 
-        self.v_sd_rental_price  = SchemaElement(basestring) 
-        self.v_hd_rental_price  = SchemaElement(basestring) 
+        self.v_retail_price     = SchemaElement(basestring)
+        self.v_currency_code    = SchemaElement(basestring)
+        self.v_availability_date        = SchemaElement(basestring)
+        self.v_sd_price         = SchemaElement(basestring)
+        self.v_hq_price         = SchemaElement(basestring)
+        self.v_lc_rental_price  = SchemaElement(basestring)
+        self.v_sd_rental_price  = SchemaElement(basestring)
+        self.v_hd_rental_price  = SchemaElement(basestring)
 
 class ArtistSchema(Schema):
     def setSchema(self):
@@ -427,35 +427,35 @@ class ArtistAlbumsSchema(Schema):
 
 class SongSchema(Schema):
     def setSchema(self):
-        self.preview_url        = SchemaElement(basestring) 
-        self.preview_length     = SchemaElement(basestring) 
+        self.preview_url        = SchemaElement(basestring)
+        self.preview_length     = SchemaElement(basestring)
 
 class AlbumSchema(Schema):
     def setSchema(self):
-        self.label_studio       = SchemaElement(basestring) 
+        self.label_studio       = SchemaElement(basestring)
         self.is_compilation     = SchemaElement(bool)
         
-        self.a_retail_price             = SchemaElement(basestring) 
-        self.a_hq_price                 = SchemaElement(basestring) 
-        self.a_currency_code            = SchemaElement(basestring) 
-        self.a_availability_date        = SchemaElement(basestring) 
+        self.a_retail_price             = SchemaElement(basestring)
+        self.a_hq_price                 = SchemaElement(basestring)
+        self.a_currency_code            = SchemaElement(basestring)
+        self.a_availability_date        = SchemaElement(basestring)
 
 class MediaSchema(Schema):
     def setSchema(self):
-        self.title_version              = SchemaElement(basestring) 
-        self.search_terms               = SchemaElement(basestring) 
-        self.parental_advisory_id       = SchemaElement(basestring) 
-        self.artist_display_name        = SchemaElement(basestring) 
-        self.collection_display_name    = SchemaElement(basestring) 
-        self.original_release_date      = SchemaElement(basestring) 
-        self.itunes_release_date        = SchemaElement(basestring) 
-        self.track_length               = SchemaElement(basestring) 
-        self.copyright                  = SchemaElement(basestring) 
-        self.p_line                     = SchemaElement(basestring) 
-        self.content_provider_name      = SchemaElement(basestring) 
-        self.media_type_id              = SchemaElement(basestring) 
-        self.artwork_url                = SchemaElement(basestring) 
-        self.mpaa_rating                = SchemaElement(basestring) 
+        self.title_version              = SchemaElement(basestring)
+        self.search_terms               = SchemaElement(basestring)
+        self.parental_advisory_id       = SchemaElement(basestring)
+        self.artist_display_name        = SchemaElement(basestring)
+        self.collection_display_name    = SchemaElement(basestring)
+        self.original_release_date      = SchemaElement(basestring)
+        self.itunes_release_date        = SchemaElement(basestring)
+        self.track_length               = SchemaElement(basestring)
+        self.copyright                  = SchemaElement(basestring)
+        self.p_line                     = SchemaElement(basestring)
+        self.content_provider_name      = SchemaElement(basestring)
+        self.media_type_id              = SchemaElement(basestring)
+        self.artwork_url                = SchemaElement(basestring)
+        self.mpaa_rating                = SchemaElement(basestring)
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
@@ -464,6 +464,7 @@ class EntitySourcesSchema(Schema):
         self.factual            = FactualSchema()
         self.apple              = AppleSchema()
         self.zagat              = ZagatSchema()
+        self.yelp               = YelpSchema()
         self.urbanspoon         = UrbanSpoonSchema()
         self.nymag              = NYMagSchema()
         self.sfmag              = SFMagSchema()
@@ -479,52 +480,58 @@ class EntitySourcesSchema(Schema):
 
 class GooglePlacesSchema(Schema):
     def setSchema(self):
-        self.gid                = SchemaElement(basestring) 
-        self.gurl               = SchemaElement(basestring) 
-        self.reference          = SchemaElement(basestring) 
+        self.gid                = SchemaElement(basestring)
+        self.gurl               = SchemaElement(basestring)
+        self.reference          = SchemaElement(basestring)
 
 class OpenTableSchema(Schema):
     def setSchema(self):
-        self.rid                = SchemaElement(basestring) 
-        self.reserveURL         = SchemaElement(basestring) 
-        self.countryID          = SchemaElement(basestring) 
-        self.metroName          = SchemaElement(basestring) 
-        self.neighborhoodName   = SchemaElement(basestring) 
+        self.rid                = SchemaElement(basestring)
+        self.reserveURL         = SchemaElement(basestring)
+        self.countryID          = SchemaElement(basestring)
+        self.metroName          = SchemaElement(basestring)
+        self.neighborhoodName   = SchemaElement(basestring)
 
 class FactualSchema(Schema):
     def setSchema(self):
-        self.faid               = SchemaElement(basestring) 
-        self.table              = SchemaElement(basestring) 
+        self.faid               = SchemaElement(basestring)
+        self.table              = SchemaElement(basestring)
 
 class AppleSchema(Schema):
     def setSchema(self):
-        self.aid                = SchemaElement(basestring) 
-        self.export_date        = SchemaElement(basestring) 
+        self.aid                = SchemaElement(basestring)
+        self.export_date        = SchemaElement(basestring)
         self.is_actual_artist   = SchemaElement(bool)
-        self.view_url           = SchemaElement(basestring) 
+        self.view_url           = SchemaElement(basestring)
         self.popularity         = SchemaElement(int)
         self.match              = AppleMatchSchema()
 
 class AppleMatchSchema(Schema):
     def setSchema(self):
-        self.upc                = SchemaElement(basestring) 
-        self.isrc               = SchemaElement(basestring) 
-        self.grid               = SchemaElement(basestring) 
-        self.amg_video_id       = SchemaElement(basestring) 
-        self.amg_track_id       = SchemaElement(basestring) 
-        self.isan               = SchemaElement(basestring) 
+        self.upc                = SchemaElement(basestring)
+        self.isrc               = SchemaElement(basestring)
+        self.grid               = SchemaElement(basestring)
+        self.amg_video_id       = SchemaElement(basestring)
+        self.amg_track_id       = SchemaElement(basestring)
+        self.isan               = SchemaElement(basestring)
 
 class ZagatSchema(Schema):
     def setSchema(self):
-        self.zurl               = SchemaElement(basestring) 
+        self.zurl               = SchemaElement(basestring)
 
 class UrbanSpoonSchema(Schema):
     def setSchema(self):
-        self.uurl               = SchemaElement(basestring) 
+        self.uurl               = SchemaElement(basestring)
 
 class NYMagSchema(Schema):
     def setSchema(self):
         pass
+
+class YelpSchema(Schema):
+    def setSchema(self):
+        self.yurl               = SchemaElement(basestring)
+        self.yrating            = SchemaElement(float)
+        self.yreviews           = SchemaElement(int)
 
 class SFMagSchema(Schema):
     def setSchema(self):
@@ -556,10 +563,10 @@ class WashMagSchema(Schema):
 
 class NetflixSchema(Schema):
     def setSchema(self):
-        self.nid                = SchemaElement(int) 
-        self.nrating            = SchemaElement(float) 
+        self.nid                = SchemaElement(int)
+        self.nrating            = SchemaElement(float)
         self.ngenres            = SchemaList(SchemaElement(basestring))
-        self.nurl               = SchemaElement(basestring) 
+        self.nurl               = SchemaElement(basestring)
         self.images             = NetflixImageSchema()
 
 class NetflixImageSchema(Schema):
@@ -575,5 +582,5 @@ class UserGeneratedSchema(Schema):
 
 class BarnesAndNobleSchema(Schema):
     def setSchema(self):
-        self.bid                = SchemaElement(int) 
+        self.bid                = SchemaElement(int)
 

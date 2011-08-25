@@ -39,7 +39,7 @@ class YelpCrawler(AExternalEntitySource):
         return 9000 # return an approximation for now
     
     def _run(self):
-        utils.log("[%s] parsing site" % (self, ))
+        utils.log("[%s] parsing site %s" % (self, self.base))
         
         pool = Pool(64)
         seed = 'http://www.yelp.com/search?cflt=restaurants&find_desc=&find_loc=New+York%2C+NY&rpp={0}&sortby=rating&start=0'.format(self.results_per_page)
