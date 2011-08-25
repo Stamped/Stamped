@@ -5,13 +5,15 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import gzip, httplib, json, logging, os, sys, pickle, threading, time, traceback, urllib, urllib2
+import gzip, httplib, json, logging, os, sys, pickle, string, threading, time
+import traceback, urllib, urllib2
 from boto.ec2.connection import EC2Connection
 from subprocess import Popen, PIPE
 from functools import wraps
 from BeautifulSoup import BeautifulSoup
 from StringIO import StringIO
 import htmlentitydefs
+import logs
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -47,7 +49,8 @@ def lazyProperty(undecorated):
     return decorated
 
 def log(s):
-    print _formatLog(s)
+    #print _formatLog(s)
+    sys.stderr.write(s)
     sys.stdout.flush()
     sys.stderr.flush()
 
@@ -55,7 +58,7 @@ def logRaw(s, includeFormat=False):
     if includeFormat:
         s = _formatLog(s)
     
-    sys.stdout.write(s)
+    sys.stderr.write(s)
     sys.stdout.flush()
     sys.stderr.flush()
 
@@ -74,7 +77,14 @@ def printException():
     """
         Simple debug utility to print a stack trace.
     """
-    traceback.print_exc()
+    #traceback.print_exc()
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    
+    #traceback.print_exception(exc_type, exc_value, exc_traceback,
+    #                          limit=8, file=sys.stderr)
+    f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    f = string.joinfields(f, '')
+    logs.warning(f)
 
 def resolvePath(path):
     if "." in path and not os.path.exists(path):

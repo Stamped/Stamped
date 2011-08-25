@@ -21,7 +21,7 @@ stream_handler.setFormatter(formatter)
 
 # File handler
 log_file = "/stamped/logs/wsgi.log"
-if os.path.exists(log_file):
+if os.path.exists(os.path.dirname(log_file)):
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)

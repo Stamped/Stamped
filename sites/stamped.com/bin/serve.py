@@ -48,19 +48,25 @@ def handleHTTPRequest(fn):
             return ret
         except StampedHTTPError as e:
             logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
+            utils.printException()
             return e.msg, e.code
         except IllegalActionError as e:
             logs.warning("403 Error: %s" % (e.msg))
+            utils.printException()
             return "illegal_action", 403
         except InsufficientPrivilegesError as e:
             logs.warning("403 Error: %s" % (e.msg))
+            utils.printException()
             return "insufficient_privileges", 403
         except InputError as e:
             logs.warning("400 Error: %s" % (e.msg))
+            utils.printException()
             return "invalid_request", 400
         except Exception as e:
             logs.warning("500 Error: %s" % e)
+            utils.printException()
             return "Error", 500
+    
     return handleHTTPRequest
 
 def checkOAuth(request):
