@@ -174,12 +174,10 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
-  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSString* resourcePath =
-      [kShowFavoritesPath appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:authToken, @"oauth_token", nil]];
-  [objectManager loadObjectsAtResourcePath:resourcePath
-                             objectMapping:favoriteMapping
-                                  delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kShowFavoritesPath
+                                                                    delegate:self];
+  objectLoader.objectMapping = favoriteMapping;
+  [objectLoader send];
 }
 
 - (void)loadFavoritesFromDataStore {

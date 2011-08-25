@@ -14,6 +14,8 @@
 #import "Entity.h"
 #import "Stamp.h"
 
+static NSString* const kEntityLookupPath = @"/entities/show.json";
+
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 @interface EntityDetailViewController ()
@@ -68,12 +70,11 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
-  NSString* resourcePath = [@"/entities/show.json" appendQueryParams:
-      [NSDictionary dictionaryWithObjectsAndKeys:entityObject_.entityID, @"entity_id",
-          [AccountManager sharedManager].authToken.accessToken, @"oauth_token",nil]];
-  [objectManager loadObjectsAtResourcePath:resourcePath
-                             objectMapping:entityMapping
-                                  delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
+                                                                    delegate:self];
+  objectLoader.objectMapping = entityMapping;
+  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"entity_id", entityObject_.entityID, nil];
+  [objectLoader send];
   [self view];
   [self.loadingView startAnimating];
 }

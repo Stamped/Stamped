@@ -16,7 +16,6 @@
                                                                   RKObjectLoaderDelegate,
                                                                   MKMapViewDelegate> {
  @private
-  BOOL userDidScroll_;
   BOOL userPannedMap_;
 }
 

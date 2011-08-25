@@ -82,16 +82,21 @@ static AccountManager* sharedAccountManager_ = nil;
     passwordKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kPasswordKeychainItemID];
     accessTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kAccessTokenKeychainItemID];
     refreshTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kRefreshTokenKeychainItemID];
+    oAuthRequestQueue_ = [[RKRequestQueue alloc] init];
+    oAuthRequestQueue_.delegate = self;
+    oAuthRequestQueue_.concurrentRequestsLimit = 1;
+    [oAuthRequestQueue_ start];
   }
   return self;
 }
 
 - (void)refreshToken {
+  [RKRequestQueue sharedQueue].suspended = YES;
   [self sendTokenRefreshRequest];
 }
 
 - (void)showAuthAlert {
-  [[RKRequestQueue sharedQueue] cancelAllRequests];
+  [oAuthRequestQueue_ cancelAllRequests];
   UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:nil
                                                       message:@"\n\n\n"
                                                      delegate:self
@@ -156,6 +161,7 @@ static AccountManager* sharedAccountManager_ = nil;
                                                         selector:@selector(refreshTimerFired:)
                                                         userInfo:nil
                                                          repeats:YES];
+    [RKRequestQueue sharedQueue].suspended = NO;
     [self sendUserInfoRequest];
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
@@ -167,6 +173,12 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  if ([objectLoader.response isUnauthorized] &&
+      [objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
+    [self refreshToken];
+    return;
+  }
+
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
     [self performSelector:@selector(showAuthAlert) withObject:self afterDelay:1.0];
     return;
@@ -196,7 +208,6 @@ static AccountManager* sharedAccountManager_ = nil;
   [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifetimeSecs]
                                             forKey:kTokenExpirationUserDefaultsKey];
   [[NSUserDefaults standardUserDefaults] synchronize];
-  
   if (oauthRefreshTimer_) {
     [oauthRefreshTimer_ invalidate];
     oauthRefreshTimer_ = nil;
@@ -211,7 +222,7 @@ static AccountManager* sharedAccountManager_ = nil;
     [self.delegate accountManagerDidAuthenticate];
     firstRun_ = NO;
   }
-
+  [RKRequestQueue sharedQueue].suspended = NO;
   [self sendUserInfoRequest];
 }
 
@@ -232,7 +243,7 @@ static AccountManager* sharedAccountManager_ = nil;
       password, @"password",
       kClientID, @"client_id",
       kClientSecret, @"client_secret", nil];
-  [objectLoader send];
+  [oAuthRequestQueue_ addRequest:objectLoader];
 }
 
 - (void)sendTokenRefreshRequest {
@@ -250,7 +261,7 @@ static AccountManager* sharedAccountManager_ = nil;
                          @"refresh_token", @"grant_type",
                          kClientID, @"client_id",
                          kClientSecret, @"client_secret", nil];
-  [objectLoader send];
+  [oAuthRequestQueue_ addRequest:objectLoader];
 }
 
 - (void)sendUserInfoRequest {
@@ -260,13 +271,10 @@ static AccountManager* sharedAccountManager_ = nil;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* username = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
-  NSDictionary* params =
-      [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username,
-                                                 @"oauth_token", self.authToken.accessToken,
-                                                 nil];
-  [objectManager loadObjectsAtResourcePath:[kUserLookupPath appendQueryParams:params]
-                             objectMapping:userMapping
-                                  delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath delegate:self];
+  objectLoader.objectMapping = userMapping;
+  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username, nil];
+  [objectLoader send];
 }
 
 - (void)refreshTimerFired:(NSTimer*)theTimer {
@@ -288,7 +296,27 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
-  NSLog(@"Sending a request: %@", request.resourcePath);
+  if (queue == oAuthRequestQueue_) {
+    [RKRequestQueue sharedQueue].suspended = YES;
+  } else if (queue == [RKRequestQueue sharedQueue] && queue.count > 0) {
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
+    // Wrap shiz with the current oauth token.
+    NSMutableDictionary* params =
+        [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
+    [params setObject:self.authToken.accessToken forKey:@"oauth_token"];
+    request.params = params;
+    
+    if (request.isGET) {
+      request.resourcePath = [request.resourcePath appendQueryParams:params];
+      request.params = nil;
+    }
+  }
+}
+
+- (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
+  if (queue == [RKRequestQueue sharedQueue] && queue.count == 0)
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 @end

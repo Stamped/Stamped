@@ -46,7 +46,6 @@ static const NSInteger kFollowersSection = 1;
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-  // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -64,6 +63,9 @@ static const NSInteger kFollowersSection = 1;
       [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topViewTapped:)];
   [userScreenNameLabel_.superview addGestureRecognizer:recognizer];
   [recognizer release];
+  [self currentUserUpdated:nil];
+  if ([AccountManager sharedManager].currentUser)
+    [self loadFriendsAndFollowersFromNetwork];
 }
 
 - (void)viewDidUnload {
@@ -116,24 +118,24 @@ static const NSInteger kFollowersSection = 1;
   userStampImageView_.image = currentUser.stampImage;
   userScreenNameLabel_.text = currentUser.screenName;
   userFullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", currentUser.firstName, currentUser.lastName];
-  [self loadFriendsAndFollowersFromNetwork];
 }
 
 - (void)loadFriendsAndFollowersFromNetwork {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
-
-  NSString* authToken = [AccountManager sharedManager].authToken.accessToken;
-  NSString* userID = [AccountManager sharedManager].currentUser.userID;
-  NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:authToken, @"oauth_token", userID, @"user_id", nil];
+  
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
-  [objectManager loadObjectsAtResourcePath:[kFriendsPath appendQueryParams:params]
-                             objectMapping:userMapping
-                                  delegate:self];
-  [objectManager loadObjectsAtResourcePath:[kFollowersPath appendQueryParams:params]
-                             objectMapping:userMapping
-                                  delegate:self];
+  NSString* userID = [AccountManager sharedManager].currentUser.userID;
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendsPath delegate:self];
+  objectLoader.objectMapping = userMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"user_id", nil];
+  [objectLoader send];
+  
+  objectLoader = [objectManager objectLoaderWithResourcePath:kFollowersPath delegate:self];
+  objectLoader.objectMapping = userMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"user_id", nil];
+  [objectLoader send];
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
@@ -149,7 +151,7 @@ static const NSInteger kFollowersSection = 1;
     self.followersArray = nil;
     self.followersArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"firstName" ascending:YES]]];
   }
-
+  [self.tableView reloadData];
   [self setIsLoading:NO];
 }
 
