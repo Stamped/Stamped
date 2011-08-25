@@ -104,7 +104,7 @@ class SchemaElement(object):
         self._overflow      = kwargs.pop('overflow', False)
         self._default       = kwargs.pop('default', None)
         self._case          = self._setCase(kwargs.pop('case', None))
-        self._normalize     = self._setCase(kwargs.pop('normalize', True))
+        self._normalize     = kwargs.pop('normalize', True)
         # self._format        = kwargs.pop('format', None)
         self._maxLength     = self._setInt(kwargs.pop('maxLength', None))
         self._minLength     = self._setInt(kwargs.pop('minLength', None))
@@ -130,11 +130,15 @@ class SchemaElement(object):
     @property
     def value(self):
         return self._data
-
+    
     @property
     def isSet(self):
         return self._isSet
-
+    
+    @property
+    def name(self):
+        return self._name
+    
     # Private Functions
 
     def _setType(self, requiredType):
@@ -541,10 +545,10 @@ class Schema(SchemaElement):
     def __init__(self, data=None, **kwargs):
         SchemaElement.__init__(self, dict, **kwargs)
         self._elements = {}
-
+        
         self.setSchema()
         self.importData(data)
-
+    
     def __setattr__(self, name, value):
         if name[:1] == '_':
             object.__setattr__(self, name, value)
@@ -737,14 +741,10 @@ class Schema(SchemaElement):
             msg = "Required Schema Empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
-
+        
         for k, v in self._elements.iteritems():
-            if isinstance(v, SchemaElement):
+            if v.isSet:
                 v.validate()
-            else:
-                msg = "Unrecognized Element (%s)" % self._name
-                logs.warning(msg)
-                raise SchemaValidationError(msg)
     
     def setElement(self, name, data):
         self._name = name

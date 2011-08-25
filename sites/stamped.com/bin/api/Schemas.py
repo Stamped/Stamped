@@ -262,13 +262,13 @@ class Entity(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
+        #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.locale             = SchemaElement(basestring)
         self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
-
         self.timestamp          = TimestampSchema()
         self.coordinates        = CoordinatesSchema()
         self.details            = EntityDetailsSchema()
@@ -326,7 +326,7 @@ class EntityDetailsSchema(Schema):
 class PlaceSchema(Schema):
     def setSchema(self):
         self.address            = SchemaElement(basestring) 
-        self.types              = SchemaList(SchemaElement(basestring)) 
+        self.types              = SchemaList(SchemaElement(basestring))
         self.vicinity           = SchemaElement(basestring) 
         self.neighborhood       = SchemaElement(basestring) 
         self.crossStreet        = SchemaElement(basestring) 

@@ -525,7 +525,21 @@ class DoubleNestedSchemaTest(ASchemaTestCase):
 
         self.schema.inner.inner.basestring = 'Inner basestring'
         self.assertTrue(self.schema.inner.inner.basestring == 'Inner basestring')
-
+    
+    def test_path_set_shortcut(self):
+        test_strs = [
+            "  ", 
+            "", 
+            "test", 
+            "test\n\n", 
+        ]
+        
+        for s in test_strs:
+            self.schema.item = s
+            self.assertEqual(self.schema.item, s)
+        
+        self.inner = {}
+    
     def test_path_shortcut_fail(self):
         try:
             self.schema.basestring = 'Set basestring'
@@ -533,8 +547,6 @@ class DoubleNestedSchemaTest(ASchemaTestCase):
         except:
             ret = True
         self.assertTrue(ret)
-
-
 
 class SparseSchemaTest(ASchemaTestCase):
 

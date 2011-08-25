@@ -23,13 +23,13 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
         self.initWordBlacklists()
     
     def getMatchingDuplicates(self, entity, candidate_entities):
-        base_detail  = list(self._genEntityDetail(entity))
+        base_detail  = list(self._getEntityDetail(entity))
         lbase_detail = len(base_detail)
         base_addr    = entity.address.lower().strip()
-        is_junk = " \t-".__contains__
+        is_junk      = " \t-".__contains__
         
         for candidate in candidate_entities:
-            candidate_detail = self._genEntityDetail(candidate)
+            candidate_detail = self._getEntityDetail(candidate)
             level = 0
             match = False
             
@@ -51,11 +51,13 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
                 
                 if ratio >= 0.2:
                     if len(base_title) >= len(candidate_title):
-                        if base_title.startswith(candidate_title) or base_title.endswith(candidate_title):
+                        if base_title.startswith(candidate_title):
                             match = True
+                            break
                     else:
-                        if candidate_title.startswith(base_title) or candidate_title.endswith(base_title):
+                        if candidate_title.startswith(base_title):
                             match = True
+                            break
             
             if match:
                 yield candidate
@@ -210,16 +212,21 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
         # whitespace that might've snuck in to form the resulting title
         return string.joinfields(words, ' ').strip()
     
-    def _genEntityDetail(self, entity, numComplexityLevels = 4):
-        origTitle = entity['title'].lower()
+    def _getEntityDetail(self, entity, numComplexityLevels = 4):
+        orig_title = entity['title'].lower()
+        prev_title = None
+        titles = []
         
         for i in xrange(numComplexityLevels):
             complexity = float(numComplexityLevels - i - 1) / (max(1, numComplexityLevels - 1))
-            title = self._getCanonicalizedTitle(origTitle, complexity, False)
-            if len(title) < 1:
+            title = self._getCanonicalizedTitle(orig_title, complexity, False)
+            if len(title) < 1 or title == prev_title:
                 break
             
-            yield title
+            prev_title = title
+            titles.append(title)
+        
+        return titles
 
 # ------------------------------------------------------------------------------
 

@@ -6,10 +6,11 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
+from Entity import *
 
 from utils import lazyProperty
 from StampedAPI import StampedAPI
-from Schemas import Entity
+from Schemas import *
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoEntityCollection import MongoEntityCollection
@@ -79,15 +80,21 @@ class MongoStampedAPI(StampedAPI):
     
     def getStats(self):
         source_stats = { }
+        subcategory_stats = { }
         
-        for source in Entity._schema['sources']:
+        for source in EntitySourcesSchema()._elements:
             count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()
             source_stats[source] = count
+        
+        for subcategory in subcategories:
+            count = self._entityDB._collection.find({"subcategory" : subcategory}).count()
+            subcategory_stats[subcategory] = count
         
         stats = {
             'entities' : {
                 'count' : self._entityDB._collection.count(), 
                 'sources' : source_stats, 
+                'subcategory' : subcategory_stats, 
                 'places' : {
                     'count' : self._placesEntityDB._collection.count(), 
                 }, 

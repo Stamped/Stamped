@@ -8,6 +8,7 @@ __license__ = "TODO"
 import Globals, utils
 from utils import abstract
 from Schemas import Entity
+from pprint import pprint
 from errors import *
 
 __all__ = [
@@ -67,16 +68,15 @@ class AEntityMatcher(object):
             if 0 == numDuplicates:
                 return
             
-            utils.log("%s %s) found %d duplicate%s" % (keep.title, keep.entity_id, numDuplicates, '' if 1 == numDuplicates else 's'))
+            utils.log("%s) found %d duplicate%s" % (keep.title, numDuplicates, '' if 1 == numDuplicates else 's'))
             self.numDuplicates += numDuplicates
             
             for i in xrange(numDuplicates):
                 dupe = dupes1[i]
                 self.dead_entities.add(dupe.entity_id)
-                utils.log("   %d) removing %s (%s)" % (i + 1, dupe.title, dupe.entity_id))
+                utils.log("   %d) removing %s" % (i + 1, dupe.title))
             
-            if not self.options.noop:
-                self.removeDuplicates(keep, dupes1)
+            self.removeDuplicates(keep, dupes1)
         except Fail:
             try:
                 entity_id = entity['_id']
@@ -169,9 +169,10 @@ class AEntityMatcher(object):
     
     def removeDuplicates(self, keep, duplicates):
         numDuplicates = len(duplicates)
-        
         assert numDuplicates > 0
-        assert not self.options.noop
+        
+        #titles = set()
+        #titles.add(keep.title)
         
         # look through and remove all duplicates
         for i in xrange(numDuplicates):
@@ -186,12 +187,22 @@ class AEntityMatcher(object):
             
             # add any fields from this version of the duplicate to the version 
             # that we're keeping if they don't already exist
-            _addDict(entity.getDataAsDict(), keep)
+            _addDict(entity.exportSparse(), keep)
+            #titles.add(entity.title)
             
-            self._entityDB.removeEntity(entity.entity_id)
-            self._placesDB.removeEntity(entity.entity_id)
+            if not self.options.noop:
+                self._entityDB.removeEntity(entity.entity_id)
+                self._placesDB.removeEntity(entity.entity_id)
         
-        self._entityDB.updateEntity(keep)
+        #keep.titles = list(titles)
+        
+        if self.options.verbose:
+            utils.log("[%s] retaining %s:" % (self, keep.title))
+            pprint(keep.value)
+        
+        if not self.options.noop:
+            self._entityDB.updateEntity(keep)
+            self._placesDB.updateEntity(keep)
     
     def _convertFromMongo(self, mongo):
         if isinstance(mongo, dict):

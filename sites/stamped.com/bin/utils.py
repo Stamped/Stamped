@@ -436,7 +436,9 @@ def normalize(s):
                         else:
                             val = unichr(htmlentitydefs.name2codepoint[name])
                         
-                        s = u"%s%s%s" % (s[:l], val, s[l+len(escape_seq):])
+                        s2 = u"%s%s%s" % (s[:l], val, s[l+len(escape_seq):])
+                        #print "%s => %s" % (s, s2)
+                        s = s2
             
             # handle &#xxxx;
             escape_seq = '&#'
