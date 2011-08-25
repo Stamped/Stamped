@@ -14,6 +14,8 @@ from Schemas import Entity
 
 __all__ = [ "YelpCrawler" ]
 
+# TODO: crawler cutting out after seemingly indeterminate amount of time; why?
+
 class YelpCrawler(AExternalEntitySource):
     """ 
         Entity crawler which exhaustively outputs all of the (high quality) 

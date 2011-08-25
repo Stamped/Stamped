@@ -1,0 +1,18 @@
+
+import NYMagCrawler
+import OpenTableCrawler
+import UrbanspoonCrawler
+import SFMagCrawler
+import ZagatCrawler
+import LATimesCrawler
+import BostonMagCrawler
+import ChicagoMagCrawler
+import PhillyMagCrawler
+import WashMagCrawler
+import SFGateCrawler
+import TimeOutLACrawler
+import TimeOutLVCrawler
+import TimeOutMIACrawler
+import TimeOutSFCrawler
+import YelpCrawler
+
