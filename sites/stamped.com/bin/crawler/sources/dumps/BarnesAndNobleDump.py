@@ -105,6 +105,13 @@ class BarnesAndNobleDump(AExternalDumpEntitySource):
                     if 0 == (count % 512):
                         time.sleep(0.1)
                     
+                    parent = elem.getparent()
+                    while True:
+                        prev = elem.getprevious()
+                        if prev is None:
+                            break
+                        parent.remove(prev)
+                    
                     elem.clear()
                 except Exception, e:
                     utils.printException()

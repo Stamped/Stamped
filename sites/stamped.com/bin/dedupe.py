@@ -55,9 +55,10 @@ class EntityDeduper(Greenlet):
                 last = bson.objectid.ObjectId(current['_id'])
                 
                 pool.spawn(self.matcher.dedupeOne, current, True)
+                #self.matcher.dedupeOne(current, True)
+                
                 if self.options.seed:
                     break
-                #self.matcher.dedupeOne(current, True)
             
             pool.join()
             utils.log("[%s] done parsing place duplicates" % (self, ))
@@ -82,6 +83,7 @@ class EntityDeduper(Greenlet):
                 
                 pool.spawn(self.matcher.dedupeOne, current, False)
                 #self.matcher.dedupeOne(current, False)
+                
                 if self.options.seed:
                     break
             
