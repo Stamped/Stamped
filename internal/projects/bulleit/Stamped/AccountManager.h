@@ -21,7 +21,7 @@ extern NSString* const kCurrentUserHasUpdatedNotification;
 
 @class KeychainItemWrapper;
 
-@interface AccountManager : NSObject<RKObjectLoaderDelegate, UIAlertViewDelegate> {
+@interface AccountManager : NSObject<RKObjectLoaderDelegate, RKRequestQueueDelegate, UIAlertViewDelegate> {
  @private
   KeychainItemWrapper* passwordKeychainItem_;
   KeychainItemWrapper* accessTokenKeychainItem_;
