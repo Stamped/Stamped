@@ -14,4 +14,5 @@ import TimeOutLACrawler
 import TimeOutLVCrawler
 import TimeOutMIACrawler
 import TimeOutSFCrawler
+import YelpCrawler
 
