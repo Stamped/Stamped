@@ -170,7 +170,7 @@ class AMongoCollection(object):
             if self._primary_key in document:
                 document['_id'] = self._getObjectIdFromString(document[self._primary_key])
                 del(document[self._primary_key])
-        
+
         return document
     
     def _convertFromMongo(self, document):
@@ -192,7 +192,7 @@ class AMongoCollection(object):
         document = self._convertToMongo(obj)
         document = self._addMongoDocument(document)
         obj      = self._convertFromMongo(document)
-        
+
         if self._obj is not None:
             assert isinstance(obj, self._obj)
         

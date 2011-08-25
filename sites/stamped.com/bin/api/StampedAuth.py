@@ -129,10 +129,9 @@ class StampedAuth(AStampedAuth):
         ### Verify Refresh Token
         try:
             token = self._refreshTokenDB.getRefreshToken(refreshToken)
+            if token.user_id == None:
+                raise
         except:
-            raise
-
-        if token.user_id == None:
             msg = "Invalid refresh token"
             logs.warning(msg)
             raise StampedHTTPError("invalid_token", 401, msg)
