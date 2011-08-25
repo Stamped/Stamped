@@ -125,10 +125,12 @@ class MongoDBConfig(Singleton):
 
 class AMongoCollection(object):
     
-    def __init__(self, collection):
+    def __init__(self, collection, primary_key=None, obj=None):
         self._desc = self.__class__.__name__
         
         self._init_collection('stamped', collection)
+        self._primary_key = primary_key
+        self._obj = obj
     
     def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
@@ -149,24 +151,85 @@ class AMongoCollection(object):
         return bson.BSON.encode(obj)
     
     def _getStringFromObjectId(self, objId):
-        #logs.debug("Get String from ObjectID")
         return str(bson.objectid.ObjectId(objId))
     
     def _getObjectIdFromString(self, string):
-        #logs.debug("Get ObjectID from String")
         try:
             return bson.objectid.ObjectId(string)
         except:
-            logs.warning("Invalid ObjectID")
-            raise Fail("Invalid ObjectID")
+            logs.warning("Invalid ObjectID (%s)" % string)
+            raise
     
-
+    def _convertToMongo(self, obj):
+        if self._obj is not None:
+            assert isinstance(obj, self._obj)
+        
+        document = obj.exportSparse()
+        
+        if self._primary_key:
+            if self._primary_key in document:
+                document['_id'] = self._getObjectIdFromString(document[self._primary_key])
+                del(document[self._primary_key])
+        
+        return document
+    
+    def _convertFromMongo(self, document):
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        
+        if self._obj is not None:
+            return self._obj(document)
+        else:
+            return document
+    
     ### GENERIC CRUD FUNCTIONS
+    
+    def _addObject(self, obj):
+        if self._obj is not None:
+            assert isinstance(obj, self._obj)
+        
+        document = self._convertToMongo(obj)
+        document = self._addMongoDocument(document)
+        obj      = self._convertFromMongo(document)
+        
+        if self._obj is not None:
+            assert isinstance(obj, self._obj)
+        
+        return obj
+    
+    def _addObjects(self, objs):
+        if self._obj is not None:
+            for obj in objs:
+                assert isinstance(obj, self._obj)
+        
+        documents = map(self._convertToMongo, objs)
+        documents = self._addMongoDocuments(documents)
+        objs      = map(self._convertFromMongo, documents)
+        
+        if self._obj is not None:
+            for obj in objs:
+                assert isinstance(obj, self._obj)
+        
+        return objs
     
     def _addMongoDocument(self, document):
         try:
             document['_id'] = self._collection.insert_one(document, safe=True)
             return document
+        except Exception as e:
+            logs.warning("Unable to add document: %s" % e)
+            raise
+    
+    def _addMongoDocuments(self, documents):
+        try:
+            ids = self._collection.insert(documents)
+            assert len(ids) == len(documents)
+            
+            for i in xrange(len(ids)):
+                documents[i]['_id'] = ids[i]
+            
+            return documents
         except Exception as e:
             logs.warning("Unable to add document: %s" % e)
             raise
@@ -197,7 +260,7 @@ class AMongoCollection(object):
         limit       = kwargs.pop('limit', 0)
 
         params = {'_id': {'$in': documentIds}}
-
+        
         if since != None and before != None:
             params['timestamp.created'] = {'$gte': since, '$lte': before}
         elif since != None:
@@ -212,14 +275,14 @@ class AMongoCollection(object):
             documents = self._collection.find(params).limit(limit)
         
         return documents
-
-
+    
+    
     ### RELATIONSHIP MANAGEMENT
     
     def _getOverflowBucket(self, objId):
         overflow = self._collection.find_one({'_id': objId}, \
                                                 fields={'overflow': 1})
-
+        
         if overflow == None or 'overflow' not in overflow:
             return objId            
         else:
@@ -228,7 +291,6 @@ class AMongoCollection(object):
             # This is our new key!
             return '%s%s' % (objId, overflow['overflow'][-1])
     
-
     ### GENERIC RELATIONSHIP FUNCTIONS
     
     def _createRelationship(self, keyId, refId):

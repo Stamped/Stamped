@@ -262,8 +262,8 @@ class Entity(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
+        self.subtitle           = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.locale             = SchemaElement(basestring)
         self.desc               = SchemaElement(basestring)
@@ -273,13 +273,18 @@ class Entity(Schema):
         self.coordinates        = CoordinatesSchema()
         self.details            = EntityDetailsSchema()
         self.sources            = EntitySourcesSchema()
-
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
             schema.importData(self.exportSparse(), overflow=True)
         else:
             raise NotImplementedError
         return schema
+    
+    def set_category(self, subcategory):
+        from Entity import subcategories
+        
+        return subcategories[subcategory]
 
 class EntityMini(Schema):
     def setSchema(self):

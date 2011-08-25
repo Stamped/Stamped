@@ -30,21 +30,8 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     """
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='activity')
+        AMongoCollection.__init__(self, collection='activity', primary_key='activity_id', obj=Activity)
         AActivityDB.__init__(self)
-    
-    def _convertToMongo(self, activity):
-        document = activity.exportSparse()
-        if 'activity_id' in document:
-            document['_id'] = self._getObjectIdFromString(document['activity_id'])
-            del(document['activity_id'])
-        return document
-
-    def _convertFromMongo(self, document):
-        if '_id' in document:
-            document['activity_id'] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
-        return Activity(document)
     
     ### PUBLIC
     
@@ -79,12 +66,10 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             activity.append(self._convertFromMongo(document))
 
         return activity
-
+    
     def addActivity(self, recipientIds, activity):
-        document = self._convertToMongo(activity)
-        document = self._addMongoDocument(document)
-        activity = self._convertFromMongo(document)
-
+        activity = self._addObject(activity)
+        
         for userId in recipientIds:
             self.user_activity_collection.addUserActivity(userId, activity.activity_id)
         

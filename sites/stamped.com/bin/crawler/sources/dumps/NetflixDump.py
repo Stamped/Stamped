@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import gevent, os, re, time
+import gevent, gzip, os, re, time
 
 from Netflix import NetflixClient
 from AEntitySource import AExternalDumpEntitySource
@@ -37,23 +37,23 @@ class NetflixDump(AExternalDumpEntitySource):
     def _run(self):
         utils.log("[%s] parsing movie index" % (self, ))
         
-        filename = 'netflix.index'
+        filename = 'netflix.index.gz'
         
         if not os.path.exists(filename):
             utils.log("[%s] downloading movie index (this may take a few minutes...)" % (self, ))
             index = self._client.catalog.getIndex()
             
-            out = file(filename, 'w')
+            out = gzip.open(filename, 'wb')
             out.write(index)
             out.close()
         
-        count = self._parse_index(filename)
+        count = self._parse_dump(filename)
         
         self._output.put(StopIteration)
         utils.log("[%s] finished parsing %d movies" % (self, count))
     
-    def _parse_index(self, index):
-        f = file(index, 'r')
+    def _parse_dump(self, filename):
+        f = gzip.open(filename, 'rb')
         context = iter(etree.iterparse(f, events=("start", "end")))
         
         event, root = context.next()

@@ -43,8 +43,4 @@ class AEntityDB(AEntitySink):
     @abstract
     def addEntities(self, entities):
         raise NotImplementedError
-    
-    @abstract
-    def searchEntities(self, input_query, limit=20):
-        raise NotImplementedError
 

@@ -451,8 +451,6 @@ def normalize(s):
                 
                 val = unichr(int(s[l + 2 : m]))
                 s = u"%s%s%s" % (s[:l], val, s[m + 1:])
-        elif isinstance(s, unicode):
-            s = removeNonAscii(s.encode("utf-8"))
     except Exception as e:
         utils.printException()
         utils.log(e)

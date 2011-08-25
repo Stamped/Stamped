@@ -480,7 +480,7 @@ class StampedAPI(AStampedAPI):
         
         results = self._entitySearcher.getSearchResults(query=query, coords=coords, limit=10)
         output = []
-
+        
         for result in results:
             output.append(result[0])
         
@@ -1222,7 +1222,6 @@ class StampedAPI(AStampedAPI):
 
         return favorites
     
-
     """
        #                                        
       # #    ####  ##### # #    # # ##### #   # 
@@ -1263,7 +1262,7 @@ class StampedAPI(AStampedAPI):
         
         return activity
     
-
+    
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 
@@ -1278,11 +1277,10 @@ class StampedAPI(AStampedAPI):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))
             try:
-                entity_id = self._entityDB.addEntity(entity)
+                entity2 = self._entityDB.addEntity(entity)
                 
                 if 'place' in entity:
-                    entity.entity_id = entity_id
-                    self._placesEntityDB.addEntity(entity)
+                    self._placesEntityDB.addEntity(entity2)
             except Exception as e:
                 utils.log("[%s] error adding 1 entities:" % (self, ))
                 utils.printException()
@@ -1297,14 +1295,13 @@ class StampedAPI(AStampedAPI):
         utils.log("[%s] adding %d entities" % (self, numEntities))
         
         try:
-            entity_ids = self._entityDB.addEntities(entities)
-            assert len(entity_ids) == len(entities)
+            entities2 = self._entityDB.addEntities(entities)
+            assert len(entities2) == len(entities)
             place_entities = []
             
-            for i in xrange(len(entities)):
-                entity = entities[i]
+            for i in xrange(len(entities2)):
+                entity = entities2[i]
                 if 'place' in entity:
-                    entity.entity_id = entity_ids[i]
                     place_entities.append(entity)
             
             if len(place_entities) > 0:
@@ -1313,4 +1310,4 @@ class StampedAPI(AStampedAPI):
             utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
             utils.printException()
             # don't let error propagate
-    
+

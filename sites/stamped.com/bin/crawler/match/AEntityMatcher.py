@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import Globals, utils
 from utils import abstract
-from Entity import Entity
+from Schemas import Entity
 from errors import *
 
 __all__ = [
@@ -41,9 +41,12 @@ class AEntityMatcher(object):
     def dedupeOne(self, mongo_entity, isPlace):
         try:
             if isPlace:
-                entity = Entity(self._placesDB._mongoToObj(mongo_entity, 'entity_id'))
+                entity = self._placesDB._convertFromMongo(mongo_entity)
             else:
-                entity = self._mongoToObj(mongo_entity)
+                entity = self._convertFromMongo(mongo_entity)
+            
+            if entity.entity_id in self.dead_entities:
+                return
             
             if self.options.verbose:
                 utils.log("[%s] deduping %s" % (self, entity.title))
@@ -54,18 +57,23 @@ class AEntityMatcher(object):
                 return
             
             keep, dupes1 = self.getBestDuplicate(dupes0)
-            dupes1 = filter(lambda e: e.entity_id != keep.entity_id, dupes1)
+            if keep.entity_id in self.dead_entities:
+                return
+            
+            filter_func = (lambda e: e.entity_id != keep.entity_id and not e.entity_id in self.dead_entities)
+            dupes1 = filter(filter_func, dupes1)
             
             numDuplicates = len(dupes1)
-            assert numDuplicates > 0
+            if 0 == numDuplicates:
+                return
             
-            utils.log("%s) found %d duplicate%s" % (keep.title, numDuplicates, '' if 1 == numDuplicates else 's'))
+            utils.log("%s %s) found %d duplicate%s" % (keep.title, keep.entity_id, numDuplicates, '' if 1 == numDuplicates else 's'))
             self.numDuplicates += numDuplicates
             
             for i in xrange(numDuplicates):
                 dupe = dupes1[i]
                 self.dead_entities.add(dupe.entity_id)
-                utils.log("   %d) removing %s" % (i + 1, dupe.title))
+                utils.log("   %d) removing %s (%s)" % (i + 1, dupe.title, dupe.entity_id))
             
             if not self.options.noop:
                 self.removeDuplicates(keep, dupes1)
@@ -74,6 +82,9 @@ class AEntityMatcher(object):
                 entity_id = entity['_id']
             except:
                 entity_id = entity['entity_id']
+            
+            if entity_id in self.dead_entities:
+                return
             
             utils.log("%s) removing malformed / invalid entity (%s)" % (self.__class__.__name__, entity_id))
             self.dead_entities.add(entity_id)
@@ -182,13 +193,13 @@ class AEntityMatcher(object):
         
         self._entityDB.updateEntity(keep)
     
-    def _mongoToObj(self, mongo):
+    def _convertFromMongo(self, mongo):
         if isinstance(mongo, dict):
-            return Entity(self._entityDB._mongoToObj(mongo, 'entity_id'))
+            return self._entityDB._convertFromMongo(mongo)
         else:
             objs = []
             for obj in mongo:
-                objs.append(self._mongoToObj(obj))
+                objs.append(self._convertFromMongo(obj))
             
             return objs
     

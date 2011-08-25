@@ -8,6 +8,7 @@ __license__ = "TODO"
 import copy, logs
 from datetime import datetime
 from errors import *
+from utils import normalize
 
 """
 The goal of the Schema class is to create a wrapper that allows for certain 
@@ -103,6 +104,7 @@ class SchemaElement(object):
         self._overflow      = kwargs.pop('overflow', False)
         self._default       = kwargs.pop('default', None)
         self._case          = self._setCase(kwargs.pop('case', None))
+        self._normalize     = self._setCase(kwargs.pop('normalize', True))
         # self._format        = kwargs.pop('format', None)
         self._maxLength     = self._setInt(kwargs.pop('maxLength', None))
         self._minLength     = self._setInt(kwargs.pop('minLength', None))
@@ -249,6 +251,9 @@ class SchemaElement(object):
                     value = str(value).upper()
                 elif self._case == 'lower':
                     value = str(value).lower()
+            
+            if self._normalize:
+                value = normalize(value)
             
             self._name  = name
             self._data  = value
@@ -747,7 +752,7 @@ class Schema(SchemaElement):
         self._isSet = True
     
     def importData(self, data, overflow=None):
-        if data == None or len(data) == 0:
+        if data == None: # or len(data) == 0:
             return
         
         if overflow == None:
@@ -782,26 +787,16 @@ class Schema(SchemaElement):
     def exportSparse(self):
         ret = {}
         for k, v in self._elements.iteritems():
-            if isinstance(v, Schema):
-                data = v.exportSparse()
-                if len(data) > 0:
-                    ret[k] = data
-            elif isinstance(v, SchemaList):
-                if len(v) > 0:
+            if v.isSet:
+                if isinstance(v, Schema):
+                    ret[k] = v.exportSparse()
+                else:
                     ret[k] = v.value
-            elif isinstance(v, SchemaElement):
-                if v.isSet == True:
-                #if v.value != None:
-                    ret[k] = v.value
-            else:
-                msg = "Unrecognized Element (%s)" % k
-                logs.warning(msg)
-                raise SchemaTypeError(msg)
         return ret
-
+    
     def setSchema(self):
         raise NotImplementedError
-
+    
     def importSchema(self, schema):
         try:
             self.importData(schema.exportSparse(), overflow=True)

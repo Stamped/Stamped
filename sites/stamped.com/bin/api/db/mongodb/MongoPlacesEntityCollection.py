@@ -10,53 +10,39 @@ import Globals, utils
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
-from utils import OrderedDict
 from api.APlacesEntityDB import APlacesEntityDB
-
 
 class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='places')
+        AMongoCollection.__init__(self, collection='places', primary_key='entity_id', obj=Entity)
         APlacesEntityDB.__init__(self)
     
-
     ### TODO: Rework this (hacking it right now)
-
+    
     def _convertToMongo(self, entity):
-        document = entity.exportSparse()
-        if 'entity_id' in document:
-            document['_id'] = self._getObjectIdFromString(document['entity_id'])
-            del(document['entity_id'])
+        document = AMongoCollection._convertToMongo(self, entity)
+        
         if 'coordinates' in document:
             document['coordinates'] = [
-                document['coordinates']['lat'],
-                document['coordinates']['lng']
+                document['coordinates']['lng'], 
+                document['coordinates']['lat'], 
             ]
         return document
-
+    
     def _convertFromMongo(self, document):
-        if '_id' in document:
-            document['entity_id'] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
         if 'coordinates' in document:
             document['coordinates'] = {
-                'lat': document['coordinates'][0],
-                'lng': document['coordinates'][1],
+                'lat': document['coordinates'][1],
+                'lng': document['coordinates'][0],
             }
-        return Entity(document)
+        
+        return AMongoCollection._convertFromMongo(self, document)
     
     ### PUBLIC
     
     def addEntity(self, entity):
-        document = self._convertToMongo(entity)
-        document = self._addMongoDocument(document)
-        entity = self._convertFromMongo(document)
-
-        return entity
-    
-    # def addEntity(self, entity):
-    #     return self._addDocument(entity, 'entity_id')
+        return self._addObject(entity)
     
     def getEntity(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
@@ -73,24 +59,5 @@ class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
         return self._removeMongoDocument(documentId)
     
     def addEntities(self, entities):
-        ### HACK 
-        ### TODO: Make this better
-        result = []
-        for entity in entities:
-            result.append(self.addEntity(entity))
-        return result
-    
-    def _mongoToObj(self, data, objId='id'):
-        data = AMongoCollection._mongoToObj(self, data, objId)
-        coords = data['coordinates']
-        data['coordinates'] = {
-            'lat' : coords[1], 
-            'lng' : coords[0], 
-        }
-        return data
-    
-    def _mapDataToSchema(self, data, schema):
-        coords = data['coordinates']
-        data['coordinates'] = [ coords['lng'], coords['lat'] ]
-        return AMongoCollection._mapDataToSchema(self, data, schema)
+        return self._addObjects(entities)
 

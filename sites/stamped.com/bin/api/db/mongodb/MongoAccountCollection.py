@@ -15,33 +15,26 @@ from AAccountDB import AAccountDB
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, 'users')
+        AMongoCollection.__init__(self, 'users', primary_key='user_id', obj=Account)
         AAccountDB.__init__(self)
+        
+        ### TEMP: For now, verify that no duplicates can occur via index
+        self._collection.ensure_index('screen_name', unique=True)
     
     def _convertToMongo(self, account):
-        document = account.exportSparse()
-        if 'user_id' in document:
-            document['_id'] = self._getObjectIdFromString(document['user_id'])
-            del(document['user_id'])
+        document = AMongoCollection._convertToMongo(self, account)
+        
+        # TODO: why are we storing screen_name in lowercase?  this invalidates the 
+        # possibility of mixed-case usernames
         if 'screen_name' in document:
             document['screen_name'] = str(document['screen_name']).lower()
+        
         return document
-
-    def _convertFromMongo(self, document):
-        if '_id' in document:
-            document['user_id'] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
-        return Account(document)
     
     ### PUBLIC
     
     def addAccount(self, user):
-        ### TEMP: For now, verify that no duplicates can occur via index
-        self._collection.ensure_index('screen_name', unique=True)
-
-        document = self._convertToMongo(user)
-        document = self._addMongoDocument(document)
-        return self._convertFromMongo(document)
+        return self._addObject(user)
     
     def getAccount(self, userId):
         documentId = self._getObjectIdFromString(userId)

@@ -9,7 +9,7 @@ import Globals, utils
 from errors import *
 
 from ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
-from Entity import Entity
+from Schemas import Entity
 
 from difflib import SequenceMatcher
 from pymongo import GEO2D
@@ -38,5 +38,5 @@ class PlacesEntityMatcher(ATitleBasedEntityMatcher):
         return entities
     
     def _gen_entities(self, docs):
-        return (Entity(self._placesDB._mongoToObj(doc, 'entity_id')) for doc in docs)
+        return (self._placesDB._convertFromMongo(doc) for doc in docs)
 

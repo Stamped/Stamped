@@ -33,7 +33,7 @@ class NYMagCrawler(AExternalEntitySource):
         
         categories = [
             'restaurant', 
-            'bar'
+            #'bar'
         ]
         
         for category in categories:
@@ -66,6 +66,9 @@ class NYMagCrawler(AExternalEntitySource):
             link = result.find("dt").find("a")
             href = link.get("href")
             name = link.getText().strip()
+            
+            if not 'eauty' in name:
+                continue
             
             detail = pool.spawn(self._parseDetailPage, name, href, subcategory)
     

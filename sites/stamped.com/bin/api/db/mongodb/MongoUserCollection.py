@@ -15,21 +15,8 @@ from api.AUserDB import AUserDB
 class MongoUserCollection(AMongoCollection, AUserDB):
     
     def __init__(self, setup=False):
-        AMongoCollection.__init__(self, collection='users')
+        AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User)
         AUserDB.__init__(self)
-    
-    def _convertToMongo(self, user):
-        document = user.exportSparse()
-        if 'user_id' in document:
-            document['_id'] = self._getObjectIdFromString(document['user_id'])
-            del(document['user_id'])
-        return document
-
-    def _convertFromMongo(self, document):
-        if '_id' in document:
-            document['user_id'] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
-        return User(document, overflow=True)
     
     ### PUBLIC
     

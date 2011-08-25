@@ -17,37 +17,20 @@ from AAuthAccessTokenDB import AAuthAccessTokenDB
 class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='accesstokens')
+        AMongoCollection.__init__(self, collection='accesstokens', primary_key='token_id', obj=AccessToken)
         AAuthAccessTokenDB.__init__(self)
     
-    def _convertToMongo(self, token):
-        document = token.exportSparse()
-        if 'token_id' in document:
-            document['_id'] = document['token_id']
-            del(document['token_id'])
-        return document
-
-    def _convertFromMongo(self, document):
-        if document != None and '_id' in document:
-            document['token_id'] = document['_id']
-            del(document['_id'])
-        return AccessToken(document)
-
     ### PUBLIC
-
+    
     def addAccessToken(self, token):
         logs.debug("Token: %s" % token.token_id)
-
-        document = self._convertToMongo(token)
-        document = self._addMongoDocument(document)
-        token = self._convertFromMongo(document)
-
-        return token
-
+        
+        return self._addObject(token)
+    
     def getAccessToken(self, tokenId):
         document = self._getMongoDocumentFromId(tokenId)
         return self._convertFromMongo(document)
     
     def removeAccessToken(self, tokenId):
         return self._removeMongoDocument(tokenId)
-    
+

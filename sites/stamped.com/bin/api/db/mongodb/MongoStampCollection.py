@@ -23,25 +23,12 @@ from api.AStampDB import AStampDB
 class MongoStampCollection(AMongoCollection, AStampDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='stamps')
+        AMongoCollection.__init__(self, collection='stamps', primary_key='stamp_id', obj=Stamp)
         AStampDB.__init__(self)
         
         # Define patterns
         self.user_regex  = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         self.reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
-    
-    def _convertToMongo(self, stamp):
-        document = stamp.exportSparse()
-        if 'stamp_id' in document:
-            document['_id'] = self._getObjectIdFromString(document['stamp_id'])
-            del(document['stamp_id'])
-        return document
-
-    def _convertFromMongo(self, document):
-        if document != None and '_id' in document:
-            document['stamp_id'] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
-        return Stamp(document)
     
     ### PUBLIC
     
@@ -63,11 +50,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
 
     
     def addStamp(self, stamp):
-        document = self._convertToMongo(stamp)
-        document = self._addMongoDocument(document)
-        stamp = self._convertFromMongo(document)
-
-        return stamp
+        return self._addObject(stamp)
     
     def getStamp(self, stampId):
         documentId = self._getObjectIdFromString(stampId)
@@ -143,11 +126,11 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         # Add to 'credit received'
         ### TODO: Does this belong here?
         self.credit_received_collection.addCredit(creditedUserId, stamp.stamp_id)
-    
+        
         # Add to 'credit givers'
         ### TODO: Does this belong here?
         self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
-
+        
         # Update the amount of credit on the user's stamp
         try:
             document = self._collection.find_one({
@@ -156,6 +139,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             })
         except:
             document = None
-
+        
         return self._convertFromMongo(document)
 

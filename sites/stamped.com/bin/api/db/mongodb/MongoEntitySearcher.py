@@ -59,29 +59,6 @@ class MongoEntitySearcher(AEntitySearcher):
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.pool = Pool(8)
     
-    def _convertToMongo(self, entity):
-        document = entity.exportSparse()
-        if 'entity_id' in document:
-            document['_id'] = self.entityDB._getObjectIdFromString(document['entity_id'])
-            del(document['entity_id'])
-        if 'coordinates' in document and isinstance(document['coordinates'], dict):
-            document['coordinates'] = [
-                document['coordinates']['lat'],
-                document['coordinates']['lng']
-            ]
-        return document
-
-    def _convertFromMongo(self, document):
-        if document != None and '_id' in document:
-            document['entity_id'] = self.entityDB._getStringFromObjectId(document['_id'])
-            del(document['_id'])
-        if 'coordinates' in document and isinstance(document['coordinates'], list):
-            document['coordinates'] = {
-                'lat': document['coordinates'][0],
-                'lng': document['coordinates'][1],
-            }
-        return Entity(document)
-    
     def getSearchResults(self, 
                          query, 
                          coords=None, 
@@ -164,7 +141,7 @@ class MongoEntitySearcher(AEntitySearcher):
             
             for doc in place_results:
                 # entity = Entity(self.entityDB._mongoToObj(doc['obj'], 'entity_id'))
-                entity = self._convertFromMongo(doc['obj'])
+                entity = self.placesDB._convertFromMongo(doc['obj'])
                 result = (entity, doc['dis'])
                 
                 results.append(result)
@@ -172,7 +149,7 @@ class MongoEntitySearcher(AEntitySearcher):
         
         for entity in db_results:
             # e = Entity(self.entityDB._mongoToObj(entity, 'entity_id'))
-            e = self._convertFromMongo(entity)
+            e = self.entityDB._convertFromMongo(entity)
             
             if e.entity_id not in results_set:
                 results.append((e, -1))

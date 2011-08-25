@@ -19,21 +19,8 @@ from api.ACommentDB import ACommentDB
 class MongoCommentCollection(AMongoCollection, ACommentDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='comments')
+        AMongoCollection.__init__(self, collection='comments', primary_key='comment_id', obj=Comment)
         ACommentDB.__init__(self)
-    
-    def _convertToMongo(self, comment):
-        document = comment.exportSparse()
-        if 'comment_id' in document:
-            document['_id'] = self._getObjectIdFromString(document['comment_id'])
-            del(document['comment_id'])
-        return document
-
-    def _convertFromMongo(self, document):
-        if '_id' in document:
-            document['comment_id'] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
-        return Comment(document)
     
     ### PUBLIC
 
@@ -42,12 +29,9 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         return MongoStampCommentsCollection()
     
     def addComment(self, comment):
-        document = self._convertToMongo(comment)
-        document = self._addMongoDocument(document)
-        comment = self._convertFromMongo(document)
-
+        comment = self._addObject(comment)
         self.stamp_comments_collection.addStampComment(comment.stamp_id, comment.comment_id)
-
+        
         return comment
     
     def removeComment(self, commentId):
@@ -77,25 +61,20 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     
     def getCommentsAcrossStamps(self, stampIds, limit=4):
         commentIds = self.stamp_comments_collection.getCommentIdsAcrossStampIds(stampIds, limit)
-
-
+        
         documentIds = []
         for commentId in commentIds:
             documentIds.append(self._getObjectIdFromString(commentId))
-
+        
         # Get comments
         documents = self._getMongoDocumentsFromIds(documentIds, limit=len(commentIds))
-
+        
         comments = []
         for document in documents:
             comments.append(self._convertFromMongo(document))
-
-        return comments
-
-
-
-
-
         
+        return comments
+    
     def getNumberOfComments(self, stampId):
         return len(self.getCommentIds(stampId))
+

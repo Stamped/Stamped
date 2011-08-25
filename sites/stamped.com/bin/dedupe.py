@@ -32,57 +32,60 @@ class EntityDeduper(Greenlet):
         last = None
         
         numEntities = 0
-        pool = Pool(2)
         
-        utils.log("[%s] parsing place duplicates" % (self, ))
-        while True:
-            if last is None:
-                if self.options.seed:
-                    last  = bson.objectid.ObjectId(self.options.seed)
-                    query = {'_id' : last}
+        if self.options.place:
+            pool = Pool(2)
+            
+            utils.log("[%s] parsing place duplicates" % (self, ))
+            while True:
+                if last is None:
+                    if self.options.seed:
+                        last  = bson.objectid.ObjectId(self.options.seed)
+                        query = {'_id' : last}
+                    else:
+                        query = None
                 else:
+                    query = {'_id' : { "$gt" : last }}
+                
+                current = self.matcher._placesDB._collection.find_one(query)
+                if current is None:
+                    break
+                
+                numEntities += 1
+                last = bson.objectid.ObjectId(current['_id'])
+                
+                pool.spawn(self.matcher.dedupeOne, current, True)
+                if self.options.seed:
+                    break
+                #self.matcher.dedupeOne(current, True)
+            
+            pool.join()
+            utils.log("[%s] done parsing place duplicates" % (self, ))
+        
+        if self.options.nonplace:
+            pool = Pool(8)
+            utils.log("[%s] parsing non-place duplicates" % (self, ))
+            
+            last = None
+            while True:
+                if last is None:
                     query = None
-            else:
-                query = {'_id' : { "$gt" : last }}
+                else:
+                    query = {'_id' : { "$gt" : last }}
+                
+                current = self.matcher._entityDB._collection.find_one(query)
+                if current is None:
+                    break
+                
+                numEntities += 1
+                last = bson.objectid.ObjectId(current['_id'])
+                
+                pool.spawn(self.matcher.dedupeOne, current, False)
+                #self.matcher.dedupeOne(current, False)
+                if self.options.seed:
+                    break
             
-            current = self.matcher._placesDB._collection.find_one(query)
-            if current is None:
-                break
-            
-            numEntities += 1
-            last = bson.objectid.ObjectId(current['_id'])
-            
-            pool.spawn(self.matcher.dedupeOne, current, True)
-            if self.options.seed:
-                break
-            #self.matcher.dedupeOne(current, True)
-        
-        pool.join()
-        utils.log("[%s] done parsing place duplicates" % (self, ))
-        
-        pool = Pool(8)
-        utils.log("[%s] parsing non-place duplicates" % (self, ))
-        
-        last = None
-        while True:
-            if last is None:
-                query = None
-            else:
-                query = {'_id' : { "$gt" : last }}
-            
-            current = self.matcher._entityDB._collection.find_one(query)
-            if current is None:
-                break
-            
-            numEntities += 1
-            last = bson.objectid.ObjectId(current['_id'])
-            
-            pool.spawn(self.matcher.dedupeOne, current, False)
-            #self.matcher.dedupeOne(current, False)
-            if self.options.seed:
-                break
-        
-        pool.join()
+            pool.join()
          
         numDuplicates = self.matcher.numDuplicates
         utils.log("[%s] found a total of %d duplicate%s (processed %d)" % 
@@ -104,9 +107,14 @@ def parseCommandLine():
         action="store", dest="seed", 
         help="seed id to start with")
     
-    parser.add_option("-n", "--noop", default=False, 
-        action="store_true", 
+    parser.add_option("-n", "--noop", default=False, action="store_true", 
         help="run the dedupper in noop mode without modifying anything")
+    
+    parser.add_option("-p", "--place", default=False, action="store_true", 
+        help="dedupe only place entities")
+    
+    parser.add_option("-P", "--nonplace", default=False, action="store_true", 
+        help="dedupe only non-place entities")
     
     parser.add_option("-v", "--verbose", default=False, 
         action="store_true", 
@@ -117,6 +125,10 @@ def parseCommandLine():
     if len(args) > 0:
         parser.print_help()
         sys.exit(1)
+    
+    if not (options.place or options.nonplace):
+        options.place = True
+        options.nonplace = True
     
     if options.db:
         utils.init_db_config(options.db)

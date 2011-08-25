@@ -87,6 +87,9 @@ class OpenTableDump(AExternalDumpEntitySource):
             'neighborhoodName' : row[2], 
         }
         
+        if not 'eauty' in entity.title:
+            return
+        
         # don't make external calls to opentable in test mode
         if not Globals.options.test:
             #result = OpenTableParser.parseEntity(entity)

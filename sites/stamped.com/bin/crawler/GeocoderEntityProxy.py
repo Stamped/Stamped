@@ -23,10 +23,9 @@ class GeocoderEntityProxy(AEntityProxy):
     
     def _transform(self, entity):
         try:
-            latLng = (entity.lat, entity.lng)
-            
             # if entity is already populated with lat/lng, then return it as-is
-            return entity
+            if entity.lat is not None and entity.lng is not None:
+                return entity
         except KeyError:
             pass
         

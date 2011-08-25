@@ -28,10 +28,6 @@ from api.MongoStampedAPI import MongoStampedAPI
 
 _globals = {}
 
-# TODO: commandline control over setting up / erasing / updating crawler
-# TODO: commandline control over DB versioning s.t. an entire run of the crawler may be rolled back if desired
-
-
 # TODO: use Crawler(multiprocessing.Process) instead of Thread!
 class Crawler(Thread):
     """Crawls for objects..."""
@@ -50,7 +46,7 @@ class Crawler(Thread):
         gather.startProducing()
         
         # TODO: get asynchronous mongoDB entity sink processing to work properly
-        sink.processQueue(gather, async=True, poolSize = 8)
+        sink.processQueue(gather, async=True, poolSize = 4)
         #sink.processQueue(gather, async=False)
         
         gevent.joinall(sources)
