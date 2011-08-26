@@ -98,6 +98,7 @@ class SchemaElement(object):
         self._name          = None
         self._data          = None
         self._isSet         = False
+        self._parent        = None
         self._requiredType  = self._setType(requiredType)
         self._required      = kwargs.pop('required', False)
         self._validate      = kwargs.pop('validate', True)
@@ -144,7 +145,7 @@ class SchemaElement(object):
     def setIsSet(self, isSet):
         self._isSet = True
         
-        if hasattr(self, '_parent'):
+        if self._parent != None:
             self._parent.setIsSet(True)
     
     def _setType(self, requiredType):
@@ -580,6 +581,7 @@ class Schema(SchemaElement):
                             if isinstance(v, Schema) and 1 == len(v._contents(name)):
                                 v[name] = value
                                 v.setIsSet(True)
+                        
                         return
                 except:
                     pass

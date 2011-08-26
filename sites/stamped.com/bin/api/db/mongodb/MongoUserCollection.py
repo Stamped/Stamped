@@ -17,6 +17,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def __init__(self, setup=False):
         AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User, overflow=True)
         AUserDB.__init__(self)
+
+    ### Note that overflow=True
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['user_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return User(document, overflow=True)
     
     ### PUBLIC
     
@@ -30,7 +37,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name": screenName})
         return self._convertFromMongo(document)
-
+    
     def checkScreenNameExists(self, screenName):
         try:
             self.getUserByScreenName(screenName)

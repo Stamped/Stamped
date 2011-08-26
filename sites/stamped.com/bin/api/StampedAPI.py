@@ -405,6 +405,7 @@ class StampedAPI(AStampedAPI):
     
     def addEntity(self, entity):
         entity.timestamp.created = datetime.utcnow()
+
         entity = self._entityDB.addEntity(entity)
 
         return entity
@@ -617,7 +618,7 @@ class StampedAPI(AStampedAPI):
                 creditedStamp = self._stampDB.giveCredit(userId, stamp)
                 
                 # Add restamp as comment (if prior stamp exists)
-                if creditedStamp.stamp_id != None:
+                if creditedStamp:
                     # Build comment
                     comment = Comment({
                         'user': user.exportSchema(UserMini()),
@@ -627,7 +628,7 @@ class StampedAPI(AStampedAPI):
                         'mentions': mentions,
                     })
                     comment.timestamp.created = datetime.utcnow()
-                        
+                    
                     # Add the comment data to the database
                     self._commentDB.addComment(comment)
 
@@ -1102,12 +1103,16 @@ class StampedAPI(AStampedAPI):
         if includeComments == True:
             result = []
             comments = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
+            print 'GET COMMENTS: %s' % comments
 
             ### TODO: Find a more efficient way to run this
             for stamp in stamps:
                 for comment in comments:
+                    print 'COMMENT (%s)\nSTAMP(%s)\n' % (comment, stamp)
                     if comment.stamp_id == stamp.stamp_id:
+                        print 'MATCH!!!\n\n'
                         stamp['comment_preview'].append(comment)
+
                 result.append(stamp)
             return result
         

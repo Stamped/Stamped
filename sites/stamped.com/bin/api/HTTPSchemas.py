@@ -258,7 +258,7 @@ class HTTPEntityNew(Schema):
                 'desc':         self.desc
             })
             schema.details.place.address = self.address 
-            if self.coordinates is not None and len(self.coordinates) > 0:
+            if _coordinatesFlatToDict(self.coordinates) != None:
                 schema.coordinates = _coordinatesFlatToDict(self.coordinates)
         else:
             raise NotImplementedError
@@ -350,13 +350,22 @@ class HTTPStamp(Schema):
             data                = schema.exportSparse()
             coordinates         = data['entity'].pop('coordinates', None)
             comments            = data.pop('comment_preview', [])
+            mentions            = data.pop('mentions', [])
+            credit              = data.pop('credit', [])
 
             comment_preview = []
+            print 'COMMENTS: %s' % len(comments)
             for comment in comments:
                 comment = Comment(comment)
                 comment = HTTPComment().importSchema(comment).exportSparse()
                 comment_preview.append(comment)
             data['comment_preview'] = comment_preview
+
+            if len(mentions) > 0:
+                data['mentions'] = mentions
+
+            if len(credit) > 0:
+                data['credit'] = credit
 
             self.importData(data, overflow=True)
             self.num_comments = schema.stats.num_comments

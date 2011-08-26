@@ -137,8 +137,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                 'user.user_id': creditedUserId, 
                 'entity.entity_id': stamp.entity.entity_id,
             })
+            return self._convertFromMongo(document)
         except:
-            document = None
-        
-        return self._convertFromMongo(document)
-
+            return None
+            

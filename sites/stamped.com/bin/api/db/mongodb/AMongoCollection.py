@@ -166,7 +166,7 @@ class AMongoCollection(object):
             return None
         
         if self._obj is not None:
-            assert isinstance(obj, self._obj)
+            assert obj.__class__.__name__ == self._obj.__name__
         
         document = obj.exportSparse()
         
@@ -194,7 +194,7 @@ class AMongoCollection(object):
     
     def _addObject(self, obj):
         if self._obj is not None:
-            assert isinstance(obj, self._obj)
+            assert obj.__class__.__name__ == self._obj.__name__
         
         document = self._convertToMongo(obj)
         document = self._addMongoDocument(document)
@@ -205,14 +205,14 @@ class AMongoCollection(object):
         obj      = self._convertFromMongo(document)
         
         if self._obj is not None:
-            assert isinstance(obj, self._obj)
+            assert obj.__class__.__name__ == self._obj.__name__
         
         return obj
     
     def _addObjects(self, objs):
         if self._obj is not None:
             for obj in objs:
-                assert isinstance(obj, self._obj)
+                assert obj.__class__.__name__ == self._obj.__name__
         
         documents = map(self._convertToMongo, objs)
         documents = self._addMongoDocuments(documents)
@@ -220,7 +220,7 @@ class AMongoCollection(object):
         
         if self._obj is not None:
             for obj in objs:
-                assert isinstance(obj, self._obj)
+                assert obj.__class__.__name__ == self._obj.__name__
         
         return objs
     
