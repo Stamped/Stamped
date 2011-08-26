@@ -268,6 +268,7 @@ class Entity(Schema):
         self.locale             = SchemaElement(basestring)
         self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
+        self.popularity         = SchemaElement(int)
         self.timestamp          = TimestampSchema()
         self.coordinates        = CoordinatesSchema()
         self.details            = EntityDetailsSchema()
@@ -474,6 +475,7 @@ class EntitySourcesSchema(Schema):
         self.phillymag          = PhillyMagSchema()
         self.washmag            = WashMagSchema()
         self.netflix            = NetflixSchema()
+        self.amazon             = AmazonSchema()
         self.userGenerated      = UserGeneratedSchema()
         self.barnesAndNoble     = BarnesAndNobleSchema()
 
@@ -502,7 +504,6 @@ class AppleSchema(Schema):
         self.export_date        = SchemaElement(basestring)
         self.is_actual_artist   = SchemaElement(bool)
         self.view_url           = SchemaElement(basestring)
-        self.popularity         = SchemaElement(int)
         self.match              = AppleMatchSchema()
 
 class AppleMatchSchema(Schema):
@@ -547,6 +548,11 @@ class BostonMagSchema(Schema):
 class FandangoSchema(Schema):
     def setSchema(self):
         self.fid                = SchemaElement(basestring)
+
+class AmazonSchema(Schema):
+    def setSchema(self):
+        self.asin               = SchemaElement(basestring)
+        self.amazon_link        = SchemaElement(basestring)
 
 class ChicagoMagSchema(Schema):
     def setSchema(self):

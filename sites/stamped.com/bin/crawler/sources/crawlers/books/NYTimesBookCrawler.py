@@ -14,8 +14,6 @@ from Schemas import Entity
 
 __all__ = [ "NYTimesBookCrawler" ]
 
-# TODO: crawler cutting out after seemingly indeterminate amount of time; why?
-
 class NYTimesBookCrawler(AExternalEntitySource):
     """ 
         Entity crawler which parses all of the NYTimes bestseller list.

@@ -15,6 +15,7 @@ from Schemas import Entity
 __all__ = [ "YelpCrawler" ]
 
 # TODO: crawler cutting out after seemingly indeterminate amount of time; why?
+# NOTE: root cause resolved to gevent.Pool deadlock; example workaround in AmazonBestSellerBookFeeds
 
 class YelpCrawler(AExternalEntitySource):
     """ 
