@@ -125,12 +125,13 @@ class MongoDBConfig(Singleton):
 
 class AMongoCollection(object):
     
-    def __init__(self, collection, primary_key=None, obj=None):
+    def __init__(self, collection, primary_key=None, obj=None, overflow=False):
         self._desc = self.__class__.__name__
         
         self._init_collection('stamped', collection)
         self._primary_key = primary_key
         self._obj = obj
+        self._overflow = overflow
     
     def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
@@ -161,6 +162,9 @@ class AMongoCollection(object):
             raise
     
     def _convertToMongo(self, obj):
+        if obj is None:
+            return None
+        
         if self._obj is not None:
             assert isinstance(obj, self._obj)
         
@@ -170,16 +174,19 @@ class AMongoCollection(object):
             if self._primary_key in document:
                 document['_id'] = self._getObjectIdFromString(document[self._primary_key])
                 del(document[self._primary_key])
-
+        
         return document
     
     def _convertFromMongo(self, document):
+        if document is None:
+            return None
+        
         if '_id' in document and self._primary_key is not None:
             document[self._primary_key] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
         
         if self._obj is not None:
-            return self._obj(document)
+            return self._obj(document, overflow=self._overflow)
         else:
             return document
     
@@ -191,8 +198,12 @@ class AMongoCollection(object):
         
         document = self._convertToMongo(obj)
         document = self._addMongoDocument(document)
+        from pprint import pformat
+        #pprint(document)
+        logs.warning(pformat(document))
+        
         obj      = self._convertFromMongo(document)
-
+        
         if self._obj is not None:
             assert isinstance(obj, self._obj)
         

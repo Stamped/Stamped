@@ -174,12 +174,12 @@ class StampedAPI(AStampedAPI):
                 msg = "Insufficient privileges to view user"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
+            
             friendship = Friendship({
                 'user_id':      authUserId,
                 'friend_id':    user['user_id']
             })
-
+            
             if not self._friendshipDB.checkFriendship(friendship):
                 msg = "Insufficient privileges to view user"
                 logs.warning(msg)

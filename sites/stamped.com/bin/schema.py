@@ -141,6 +141,12 @@ class SchemaElement(object):
     
     # Private Functions
 
+    def setIsSet(self, isSet):
+        self._isSet = True
+        
+        if hasattr(self, '_parent'):
+            self._parent.setIsSet(True)
+    
     def _setType(self, requiredType):
         allowed = [basestring, bool, int, long, float, dict, list, datetime]
         if requiredType in allowed:
@@ -161,7 +167,7 @@ class SchemaElement(object):
 
     def _clearElement(self):
         self._data = None
-        self._isSet = False
+        self.setIsSet(False)
 
     def _setDerivative(self, derivedFrom, derivedFn):
         if derivedFrom != None or derivedFn != None:
@@ -261,7 +267,7 @@ class SchemaElement(object):
             
             self._name  = name
             self._data  = value
-            self._isSet = True
+            self.setIsSet(True)
             self.validate()
 
         except:
@@ -448,7 +454,7 @@ class SchemaList(SchemaElement):
         for item in data:
             self.append(item)
 
-        self._isSet = True
+        self.setIsSet(True)
 
     def validate(self):
         if len(self._data) == 0 and self._required == True \
@@ -558,6 +564,7 @@ class Schema(SchemaElement):
                 self._elements[name] = value
                 self._elements[name]._name = name
                 self._elements[name]._validate = self._validate
+                self._elements[name]._parent = self
             except:
                 msg = "Cannot Add Element (%s)" % name
                 logs.warning(msg)
@@ -572,7 +579,7 @@ class Schema(SchemaElement):
                         for k, v in self._elements.iteritems():
                             if isinstance(v, Schema) and 1 == len(v._contents(name)):
                                 v[name] = value
-                                v._isSet = True
+                                v.setIsSet(True)
                         return
                 except:
                     pass
@@ -596,6 +603,7 @@ class Schema(SchemaElement):
         
         def _returnOutput(item):
             if isinstance(item, Schema) or isinstance(item, SchemaList):
+                item._parent = self
                 return item
             return item.value
         
@@ -720,8 +728,8 @@ class Schema(SchemaElement):
             logs.warning(msg)
             raise SchemaValidationError(msg)
         
-        self._isSet = True
-
+        self.setIsSet(True)
+    
     def _contents(self, item):
         output = []
         if item in self._elements:
@@ -749,7 +757,7 @@ class Schema(SchemaElement):
     def setElement(self, name, data):
         self._name = name
         self._importData(data, clear=True)
-        self._isSet = True
+        self.setIsSet(True)
     
     def importData(self, data, overflow=None):
         if data == None: # or len(data) == 0:

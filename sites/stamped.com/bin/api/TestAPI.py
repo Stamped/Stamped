@@ -7,17 +7,19 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import sys, thread, urllib, json
+import atexit, sys, thread, urllib, json
 import os, unittest
+from pprint import pprint
 
 CLIENT_ID = "stampedtest"
 CLIENT_SECRET = "august1ftw"
 
+_accounts  = []
+_test_case = None
+
 class StampedAPIURLOpener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
         return ('stampedtest', 'august1ftw')
-
-
 
 class AStampedAPITestCase(unittest.TestCase):
 
@@ -60,6 +62,9 @@ class AStampedAPITestCase(unittest.TestCase):
 
     ### HELPER FUNCTIONS
     def createAccount(self, name='UserA'):
+        global _test_case, _accounts
+        _test_case = self
+        
         path = "account/create.json"
         data = {
             "client_id": CLIENT_ID,
@@ -76,20 +81,32 @@ class AStampedAPITestCase(unittest.TestCase):
         
         user = response['user']
         token = response['token']
-
+        
+        _accounts.append((user, token))
+        
         self.assertValidKey(user['user_id'])
         self.assertValidKey(token['access_token'], 22)
         self.assertValidKey(token['refresh_token'], 43)
-
+        
         return user, token
-
+    
     def deleteAccount(self, token):
         path = "account/remove.json"
         data = { "oauth_token": token['access_token'] }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-
-
+    
+    def deleteAccount2(self, screen_name, password):
+        path = "oauth2/login.json"
+        data = {
+            "screen_name" : screen_name, 
+            "password" : password, 
+        }
+        
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+        pprint(result)
+    
     def createFriendship(self, token, friend):
         path = "friendships/create.json"
         data = {
@@ -159,7 +176,6 @@ class AStampedAPITestCase(unittest.TestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-
     
     def createStamp(self, token, entityId, data=None):
         path = "stamps/create.json"
@@ -229,7 +245,9 @@ class AStampedAPITestCase(unittest.TestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-
+    
+    def setUp(self):
+        pass
 
 # ####### #
 # ACCOUNT #
@@ -237,9 +255,10 @@ class AStampedAPITestCase(unittest.TestCase):
 
 class StampedAPIAccountTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.user, self.token) = self.createAccount()
         self.privacy = False
-
+    
     def tearDown(self):
         self.deleteAccount(self.token)
 
@@ -295,6 +314,7 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
 
 class StampedAPIOAuthTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
 
     def tearDown(self):
@@ -331,6 +351,7 @@ class StampedAPIOAuthLogin(StampedAPIOAuthTest):
 
 class StampedAPIUserTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.screen_names = ['usera', 'userb']
@@ -357,6 +378,8 @@ class StampedAPIUsersShow(StampedAPIUserTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(result['user_id'], self.userA['user_id'])
+
+"""
 
 class StampedAPIUsersLookup(StampedAPIUserTest):
     def test_lookup_user_ids(self):
@@ -427,13 +450,13 @@ class StampedAPIUsersPrivacy(StampedAPIUserTest):
             ret = True
         self.assertTrue(ret)
 
-
 # ########## #
 # FRIENDSHIP #
 # ########## #
 
 class StampedAPIFriendshipTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenA, self.userB)
@@ -524,6 +547,7 @@ class StampedAPIFollowers(StampedAPIFriendshipTest):
 
 class StampedAPIBlockTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenA, self.userB)
@@ -581,13 +605,13 @@ class StampedAPIBlocking(StampedAPIBlockTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result['user_ids']), 1)
 
-
 # ###### #
 # ENTITY #
 # ###### #
 
 class StampedAPIEntityTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.user, self.token) = self.createAccount()
         self.entity = self.createEntity(self.token)
 
@@ -598,7 +622,7 @@ class StampedAPIEntityTest(AStampedAPITestCase):
 class StampedAPIEntitiesShow(StampedAPIEntityTest):
     def test_show(self):
         path = "entities/show.json"
-        data = { 
+        data = {
             "oauth_token": self.token['access_token'],
             "entity_id": self.entity['entity_id']
         }
@@ -647,6 +671,7 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
 
 class StampedAPIPlaceTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.user, self.token) = self.createAccount()
         self.entity = self.createPlaceEntity(self.token)
 
@@ -705,6 +730,7 @@ class StampedAPIPlacesSearch(StampedAPIPlaceTest):
 
 class StampedAPIStampTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenB, self.userA)
@@ -744,6 +770,7 @@ class StampedAPIStampsUpdate(StampedAPIStampTest):
 
 class StampedAPIStampMentionsTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenB, self.userA)
@@ -838,6 +865,7 @@ class StampedAPIStampsCreditUpdate(StampedAPIStampMentionsTest):
 
 class StampedAPIStampPlaceTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenB, self.userA)
@@ -875,6 +903,7 @@ class StampedAPIStampPlacesUpdate(StampedAPIStampPlaceTest):
 
 class StampedAPIStampPlaceMentionsTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenB, self.userA)
@@ -967,6 +996,7 @@ class StampedAPIStampPlacesCreditUpdate(StampedAPIStampPlaceMentionsTest):
 
 class StampedAPICommentTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenB, self.userA)
@@ -1220,6 +1250,7 @@ class StampedAPICommentsText(StampedAPICommentTest):
 
 class StampedAPICollectionTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenB, self.userA)
@@ -1345,6 +1376,7 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
 
 class StampedAPIFavoriteTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.entity = self.createEntity(self.tokenA)
@@ -1410,6 +1442,7 @@ class StampedAPIFavoritesAlreadyOnList(StampedAPIFavoriteTest):
 
 class StampedAPIActivityTest(AStampedAPITestCase):
     def setUp(self):
+        AStampedAPITestCase.setUp(self)
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.createFriendship(self.tokenB, self.userA)
@@ -1511,9 +1544,24 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
+"""
+
+if __name__ == '__main__':
+    def cleanup():
+        global _test_case, _accounts
+        
+        test = _test_case
+        if test is not None:
+            for acct in _accounts:
+                try:
+                    test.deleteAccount(acct[1])
+                except:
+                    pass
+    
+    atexit.register(cleanup)
+    unittest.main()
 
 """
-        
         
         path = "friendships/blocks/create.json"
         data = {
@@ -1528,7 +1576,6 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
             print result
             raise Exception
             
-        
         path = "friendships/blocks/check.json"
         data = {
             "authenticated_user_id": userA,
@@ -1541,8 +1588,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
             print 'FAIL: %s' % path
             print result
             raise Exception
-            
-            
+        
         path = "friendships/blocking.json"
         data = {
             "authenticated_user_id": userA
@@ -1554,7 +1600,6 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
             print 'FAIL: %s' % path
             print result
             raise Exception
-        
         
         path = "friendships/blocks/remove.json"
         data = {
@@ -1572,6 +1617,4 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
           
 """
 
-if __name__ == '__main__':
-    unittest.main()
 

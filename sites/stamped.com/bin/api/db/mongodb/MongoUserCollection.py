@@ -15,14 +15,15 @@ from api.AUserDB import AUserDB
 class MongoUserCollection(AMongoCollection, AUserDB):
     
     def __init__(self, setup=False):
-        AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User)
+        AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User, overflow=True)
         AUserDB.__init__(self)
     
     ### PUBLIC
     
     def getUser(self, userId):
         documentId = self._getObjectIdFromString(userId)
-        document = self._getMongoDocumentFromId(documentId)
+        document   = self._getMongoDocumentFromId(documentId)
+        
         return self._convertFromMongo(document)
     
     def getUserByScreenName(self, screenName):

@@ -117,27 +117,26 @@ def parseRequest(schema, request):
     try:
         logs.debug("Request url: %s" % request.base_url)
         logs.debug("Request data: %s" % request.values)
-
+        
         data = request.values.to_dict()
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
-    
+        
         if schema == None:
             if len(data) > 0:
                 raise
             return
         
         schema.importData(data)
-
+        
         logs.debug("Parsed request data: %s" % schema)
-
         return schema
-
     except:
         msg = "Unable to parse form"
         logs.warning(msg)
-        raise StampedHTTPError("bad_request", 400, e)
+        utils.printException()
+        raise StampedHTTPError("bad_request", 400)
 
 def encodeType(obj):
     if '_dict' in obj:
@@ -146,10 +145,14 @@ def encodeType(obj):
         return obj.__dict__
 
 def transformOutput(request, d):
+    # TODO: don't return pretty-print'ed json (just extra fluff data to transfer over HTTP)
+    # just log the pretty-printed version
     output_json = json.dumps(d, sort_keys=True, \
         indent=None if request.is_xhr else 2, default=encodeType)
+    
     output = Response(output_json, mimetype='application/json')
     logs.debug("Transform output: \"%s\"" % output_json)
+    
     return output
 
 
@@ -287,10 +290,10 @@ def updateProfileImage():
 def removeAccount():
     authUserId  = checkOAuth(request)
     schema      = parseRequest(None, request)
-
+    
     account     = stampedAPI.removeAccount(authUserId)
     account     = HTTPAccount().importSchema(account)
-
+    
     return transformOutput(request, account.exportSparse())
 
 @app.route(REST_API_PREFIX + 'account/verify_credentials.json', methods=['GET'])
@@ -570,7 +573,6 @@ def searchEntities():
         autosuggest.append(item)
     
     return transformOutput(request, autosuggest)
-
 
 """
  #####                                    

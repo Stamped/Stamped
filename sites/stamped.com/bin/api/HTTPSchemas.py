@@ -258,7 +258,8 @@ class HTTPEntityNew(Schema):
                 'desc':         self.desc
             })
             schema.details.place.address = self.address 
-            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+            if self.coordinates is not None and len(self.coordinates) > 0:
+                schema.coordinates = _coordinatesFlatToDict(self.coordinates)
         else:
             raise NotImplementedError
         return schema
@@ -300,6 +301,7 @@ class HTTPEntityAutosuggest(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
             self.importData(schema.exportSparse(), overflow=True)
+            
             if self.subtitle is None:
                 if schema.address is not None:
                     self.subtitle = schema.address

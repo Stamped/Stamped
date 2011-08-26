@@ -23,7 +23,7 @@ stream_handler.setFormatter(formatter)
 log_file = "/stamped/logs/wsgi.log"
 if os.path.exists(os.path.dirname(log_file)):
     file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.INFO)
+    file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     log.addHandler(file_handler)
 

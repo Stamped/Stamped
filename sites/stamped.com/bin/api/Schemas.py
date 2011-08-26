@@ -103,7 +103,6 @@ class User(Schema):
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('UserMini', 'UserTiny'):
             schema.importData(self.exportSparse(), overflow=True)
-
         else:
             raise NotImplementedError
 
