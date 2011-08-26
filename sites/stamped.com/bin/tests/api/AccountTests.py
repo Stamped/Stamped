@@ -26,7 +26,7 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
         path = "account/settings.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "screen_name": "kevin",
+            "screen_name": "UserA2",
             "privacy": False,
         }
         result = self.handlePOST(path, data)
@@ -66,6 +66,13 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['profile_image'], url)
+
+### TESTS TO ADD:
+# Change bio from string to None
+# Make sure screen_name change propagates through system
+# Check how display name works if weird first name / last name things are sent
+# Upload image data for avatar
+# Test privacy settings
 
 if __name__ == '__main__':
     main()
