@@ -712,9 +712,12 @@ def getInboxStamps():
 
     data        = schema.exportSparse()
     stamps      = stampedAPI.getInboxStamps(authUserId, **data)
+    print 'ALL STAMPS: %s' % stamps
+    print
 
     result = []
     for stamp in stamps:
+        print 'STAMP: %s' % stamp._elements['comment_preview']._data
         result.append(HTTPStamp().importSchema(stamp).exportSparse())
 
     return transformOutput(request, result)
