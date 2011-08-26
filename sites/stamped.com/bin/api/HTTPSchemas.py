@@ -302,11 +302,9 @@ class HTTPEntityAutosuggest(Schema):
         if schema.__class__.__name__ == 'Entity':
             self.importData(schema.exportSparse(), overflow=True)
             
-            if self.subtitle is None:
-                if schema.address is not None:
-                    self.subtitle = schema.address
-                else:
-                    self.subtitle = schema.subcategory
+            if schema.address is not None:
+                self.subtitle = schema.address
+        
         else:
             raise NotImplementedError
         return self
@@ -354,7 +352,6 @@ class HTTPStamp(Schema):
             credit              = data.pop('credit', [])
 
             comment_preview = []
-            print 'COMMENTS: %s' % len(comments)
             for comment in comments:
                 comment = Comment(comment)
                 comment = HTTPComment().importSchema(comment).exportSparse()

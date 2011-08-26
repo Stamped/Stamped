@@ -1108,9 +1108,7 @@ class StampedAPI(AStampedAPI):
             ### TODO: Find a more efficient way to run this
             for stamp in stamps:
                 for comment in comments:
-                    print 'COMMENT (%s)\nSTAMP(%s)\n' % (comment, stamp)
                     if comment.stamp_id == stamp.stamp_id:
-                        print 'MATCH!!!\n\n'
                         stamp['comment_preview'].append(comment)
 
                 result.append(stamp)

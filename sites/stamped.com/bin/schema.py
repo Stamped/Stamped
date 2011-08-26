@@ -401,15 +401,18 @@ class SchemaList(SchemaElement):
 
     def append(self, item):
         self._data.append(self._import(item))
+        self.setIsSet(True)
 
     def insert(self, position, item):
         self._data.insert(position, self._import(item))
+        self.setIsSet(True)
 
     def extend(self, items):
         data = []
         for item in items:
             data.append(self._import(item))
         self._data.extend(data)
+        self.setIsSet(True)
 
     def remove(self, item):
         return self._data.remove(self._import(item))
