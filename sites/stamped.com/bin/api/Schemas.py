@@ -476,6 +476,7 @@ class EntitySourcesSchema(Schema):
         self.washmag            = WashMagSchema()
         self.netflix            = NetflixSchema()
         self.amazon             = AmazonSchema()
+        self.awardAnnals        = AwardAnnalsSchema()
         self.userGenerated      = UserGeneratedSchema()
         self.barnesAndNoble     = BarnesAndNobleSchema()
 
@@ -542,6 +543,10 @@ class LATimesSchema(Schema):
         pass
 
 class BostonMagSchema(Schema):
+    def setSchema(self):
+        pass
+
+class AwardAnnalsSchema(Schema):
     def setSchema(self):
         pass
 

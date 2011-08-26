@@ -17,13 +17,13 @@ __all__ = [ "AmazonBestSellerBookFeeds" ]
 
 class AmazonBestSellerBookFeeds(AExternalEntitySource):
     """ 
-        Entity crawler which parses all of the NYTimes bestseller list.
+        Entity crawler which extracts all of the Amazon bestseller RSS feeds.
     """
     
     TYPES = set([ 'book' ])
     
     def __init__(self):
-        AExternalEntitySource.__init__(self, "NYTimesBook", self.TYPES, 512)
+        AExternalEntitySource.__init__(self, "AmazonBestSellerBookFeeds", self.TYPES, 512)
         self.base = 'http://www.nytimes.com'
         self.seen = set()
         self.max_depth = 2
