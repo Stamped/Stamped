@@ -230,7 +230,7 @@ class AStampedAPITestCase(unittest.TestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
 
-
+"""
 # ####### #
 # ACCOUNT #
 # ####### #
@@ -581,7 +581,6 @@ class StampedAPIBlocking(StampedAPIBlockTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result['user_ids']), 1)
 
-
 # ###### #
 # ENTITY #
 # ###### #
@@ -639,7 +638,6 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
-
 
 # ###### #
 # PLACE #
@@ -1213,6 +1211,7 @@ class StampedAPICommentsText(StampedAPICommentTest):
 
         self.deleteComment(self.tokenA, commentUTF['comment_id'])
 
+"""
 
 # ########### #
 # COLLECTIONS #
@@ -1249,35 +1248,35 @@ class StampedAPICollectionTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-class StampedAPICollectionsShow(StampedAPICollectionTest):
-    def test_inbox(self):
-        path = "collections/inbox.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+# class StampedAPICollectionsShow(StampedAPICollectionTest):
+#     def test_inbox(self):
+#         path = "collections/inbox.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 3)
+#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
-    def test_user_screen_name(self):
-        path = "collections/user.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "screen_name": self.userA['screen_name']
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+#     def test_user_screen_name(self):
+#         path = "collections/user.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#             "screen_name": self.userA['screen_name']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 3)
+#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
-    def test_user_user_id(self):
-        path = "collections/user.json"
-        data = { 
-            "oauth_token": self.tokenB['access_token'],
-            "user_id": self.userA['user_id']
-        }
-        result = self.handleGET(path, data)
-        self.assertEqual(len(result), 3)
-        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+#     def test_user_user_id(self):
+#         path = "collections/user.json"
+#         data = { 
+#             "oauth_token": self.tokenB['access_token'],
+#             "user_id": self.userA['user_id']
+#         }
+#         result = self.handleGET(path, data)
+#         self.assertEqual(len(result), 3)
+#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
 class StampedAPICollectionsQuality(StampedAPICollectionTest):
     def test_show(self):
@@ -1307,6 +1306,7 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
             "quality": 1
         }
         result = self.handleGET(path, data)
+        print '\n%s\n' % result
         self.assertEqual(len(result), 3)
         self.assertEqual(len(result[-1]['comment_preview']), 11)
 
@@ -1339,6 +1339,7 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
         self.deleteComment(self.tokenA, self.commentK['comment_id'])
 
 
+"""
 # ######### #
 # FAVORITES #
 # ######### #
@@ -1512,6 +1513,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
 
+"""
 """
         
         

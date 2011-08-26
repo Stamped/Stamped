@@ -17,6 +17,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def __init__(self, setup=False):
         AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User)
         AUserDB.__init__(self)
+
+    ### Note that overflow=True
+    def _convertFromMongo(self, document):
+        if '_id' in document:
+            document['user_id'] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+        return User(document, overflow=True)
     
     ### PUBLIC
     

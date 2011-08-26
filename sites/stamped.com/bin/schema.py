@@ -98,6 +98,7 @@ class SchemaElement(object):
         self._name          = None
         self._data          = None
         self._isSet         = False
+        self._parent        = None
         self._requiredType  = self._setType(requiredType)
         self._required      = kwargs.pop('required', False)
         self._validate      = kwargs.pop('validate', True)
@@ -566,6 +567,9 @@ class Schema(SchemaElement):
         else:
             if name in self._elements:
                 self._elements[name].setElement(name, value)
+                self._isSet = True
+                if self._parent != None:
+                    self._parent._isSet = True
             else:
                 try:
                     if len(self._contents(name)) == 1:
@@ -573,6 +577,8 @@ class Schema(SchemaElement):
                             if isinstance(v, Schema) and 1 == len(v._contents(name)):
                                 v[name] = value
                                 v._isSet = True
+                                if v._parent != None:
+                                    v._parent._isSet = True
                         return
                 except:
                     pass
@@ -596,6 +602,7 @@ class Schema(SchemaElement):
         
         def _returnOutput(item):
             if isinstance(item, Schema) or isinstance(item, SchemaList):
+                item._parent = self
                 return item
             return item.value
         
@@ -683,8 +690,9 @@ class Schema(SchemaElement):
                 
                 if clear:
                     v.setElement(k, item)
-                else:
+                elif item != None:
                     v.importData(item)
+                    v._isSet = True
             
             # Value
             elif isinstance(v, SchemaElement):
