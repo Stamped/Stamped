@@ -304,7 +304,8 @@ class HTTPEntityAutosuggest(Schema):
             
             if schema.address is not None:
                 self.subtitle = schema.address
-        
+            if self.subtitle is None:
+                self.subtitle = schema.subcategory
         else:
             raise NotImplementedError
         return self
