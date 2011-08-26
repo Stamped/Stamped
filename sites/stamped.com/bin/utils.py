@@ -395,7 +395,7 @@ def normalize(s, strict=False):
                     escape_seq = '&%s;' % name
                     
                     while True:
-                        l = s.find(escape_seq)
+                        l = s.lower().find(escape_seq)
                         if l < 0:
                             break
                         

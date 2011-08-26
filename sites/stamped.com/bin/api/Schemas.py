@@ -467,6 +467,7 @@ class EntitySourcesSchema(Schema):
         self.yelp               = YelpSchema()
         self.urbanspoon         = UrbanSpoonSchema()
         self.nymag              = NYMagSchema()
+        self.nytimes            = NYTimesSchema()
         self.sfmag              = SFMagSchema()
         self.latimes            = LATimesSchema()
         self.bostonmag          = BostonMagSchema()
@@ -525,6 +526,10 @@ class UrbanSpoonSchema(Schema):
         self.uurl               = SchemaElement(basestring)
 
 class NYMagSchema(Schema):
+    def setSchema(self):
+        pass
+
+class NYTimesSchema(Schema):
     def setSchema(self):
         pass
 

@@ -1,5 +1,5 @@
 
 import AmazonBestSellerBookFeeds
 import AwardAnnalsCrawler
-import NYTimesBookCrawler
+import NYTimesBestSellerCrawler
 

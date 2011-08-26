@@ -49,7 +49,6 @@ class OAuthLogin(Schema):
         self.screen_name        = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
 
-
 # ####### #
 # Account #
 # ####### #
@@ -108,7 +107,6 @@ class HTTPAccountProfile(Schema):
 class HTTPAccountProfileImage(Schema):
     def setSchema(self):
         self.profile_image      = SchemaElement(basestring)
-
 
 # ##### #
 # Users #
@@ -188,7 +186,6 @@ class HTTPUserRelationship(Schema):
         self.screen_name_a      = SchemaElement(basestring)
         self.user_id_b          = SchemaElement(basestring)
         self.screen_name_b      = SchemaElement(basestring)
-
 
 # ######## #
 # Entities #
@@ -448,7 +445,6 @@ class HTTPCommentSlice(Schema):
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
 
-
 # ######## #
 # Favorite #
 # ######## #
@@ -522,5 +518,4 @@ class HTTPActivity(Schema):
         else:
             raise NotImplementedError
         return self
-
 
