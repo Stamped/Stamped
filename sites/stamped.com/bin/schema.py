@@ -92,6 +92,19 @@ situation.
 
 """
 
+# adding generic validation for email, username, etc. on a per-element basis
+# isSet consistency
+# 
+# user updates info; set existing value to empty
+# empty strings
+#
+# exporting sparse version which ignores isSet and just returns if it's an actual, concrete value
+# remove unused arguments and complexity from schema
+
+# required set None value or not?
+# derived values
+# default values
+
 class SchemaElement(object):
     
     def __init__(self, requiredType, **kwargs):

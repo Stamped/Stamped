@@ -1,137 +1,17 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
-import Globals, unittest, logging
-
-from datetime import datetime
-# from Schemas import *
-from schema import *
-
-### Turn off logging
-log = logging.getLogger('stamped')
-log.setLevel(logging.ERROR)
-
-### Derivative Functions
-
-def addOne(i):
-    return int(i) + 1
-
-def setCategory(subcategory):
-    subcategories = {
-        'restaurant' : 'food', 
-        'bar' : 'food', 
-        'book' : 'book', 
-        'movie' : 'film', 
-        'artist' : 'music', 
-        'song' : 'music', 
-        'album' : 'music', 
-        'app' : 'other', 
-        'other' : 'other',
-    }
-    try:
-        return subcategories[subcategory]
-    except:
-        msg = "Invalid subcategory"
-        print msg
-        raise Exception(msg)
-
-### Schemas
-
-class SimpleSchema(Schema):
-    def setSchema(self):
-        self.basestring         = SchemaElement(basestring)
-        self.integer            = SchemaElement(int, default=100)
-        self.float              = SchemaElement(float)
-        self.long               = SchemaElement(long)
-        self.required           = SchemaElement(basestring, required=True)
-        self.bool               = SchemaElement(bool)
-        self.datetime           = SchemaElement(datetime)
-
-class InnerSchema(Schema):
-    def setSchema(self):
-        self.item               = SchemaElement(basestring)
-        self.required           = SchemaElement(basestring, required=True)
-        self.basestring         = SchemaElement(basestring)
-
-class NestedSchema(Schema):
-    def setSchema(self):
-        self.basestring         = SchemaElement(basestring)
-        self.inner              = InnerSchema()
-
-class DoubleNestedSchema(Schema):
-    def setSchema(self):
-        self.string             = SchemaElement(basestring)
-        self.inner              = NestedSchema()
-
-class ListSchema(Schema):
-    def setSchema(self):
-        self.basestring         = SchemaElement(basestring)
-        self.items              = SchemaList(InnerSchema())
-
-class ListCommaSchema(Schema):
-    def setSchema(self):
-        self.basestring         = SchemaElement(basestring)
-        self.items              = SchemaList(SchemaElement(basestring), delimiter=',')
-
-class SparseSchema(Schema):
-    def setSchema(self):
-        self.basestring         = SchemaElement(basestring)
-        self.empty              = SchemaElement(basestring)
-        self.none               = SchemaElement(basestring)
-        self.default            = SchemaElement(basestring, default='abc')
-
-class DerivedSchema(Schema):
-    def setSchema(self):
-        self.integerA           = SchemaElement(int)
-        self.integerB           = SchemaElement(int, derivedFrom='integerA', derivedFn=addOne)
-
-class DerivedCategorySchema(Schema):
-    def setSchema(self):
-        self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=setCategory)
-        self.subcategory        = SchemaElement(basestring)
-
-class ASchemaTestCase(unittest.TestCase):
-    pass
-
-    ### DEFAULT ASSERTIONS
-    def assertIsInstance(self, a, b):
-        self.assertTrue(isinstance(a, b))
-        
-    def assertIn(self, a, b):
-        self.assertTrue((a in b) == True)
-
-    def assertLength(self, a, size):
-        self.assertTrue(len(a) == size)
-
-    ### DEFAULT VARIABLES
-
-    sampleString                = 'abc'
-    sampleInt                   = 123
-    sampleIntB                  = '123'
-    sampleFloat                 = 123.45
-    sampleFloatB                = '123.45'
-    sampleLong                  = 2L
-    sampleList                  = [1, 2, 3]
-    sampleDict                  = {'a': 1, 'b': 2}
-    sampleTuple                 = (1, 2, 3, 'abc')
-    sampleBool                  = True
-    sampleBool2                 = 'True'
-    sampleBool3                 = 1
-    sampleBool4                 = 1L
-    sampleNone                  = None
-    sampleDatetime              = datetime.utcnow()
-    sampleUTF8                  = '๓๙ใ1฿'
-
+import Globals, utils
+from ASchemaTestCase import *
 
 class SimpleSchemaTest(ASchemaTestCase):
-
+    
     def setUp(self):
-
         self.sampleData = {
             'basestring':   self.sampleString,
             'integer':      self.sampleInt,
@@ -142,10 +22,10 @@ class SimpleSchemaTest(ASchemaTestCase):
             'datetime':     self.sampleDatetime,
         }
         self.schema = SimpleSchema(self.sampleData)
-
+    
     def tearDown(self):
         pass
-
+    
     def test_retrieve(self):
         self.assertEqual(self.sampleString, self.schema.basestring)
         self.assertEqual(self.sampleInt, self.schema.integer)
@@ -388,7 +268,6 @@ class SimpleSchemaTest(ASchemaTestCase):
         self.assertEqual(self.schema.integer, 100)
         self.assertIn('integer', self.schema)
 
-
 class NestedSchemaTest(ASchemaTestCase):
 
     def setUp(self):
@@ -488,7 +367,6 @@ class NestedSchemaTest(ASchemaTestCase):
         self.schema.inner.basestring = 'Inner basestring'
         self.assertTrue(self.schema.inner.basestring == 'Inner basestring')
 
-
 class DoubleNestedSchemaTest(ASchemaTestCase):
 
     def setUp(self):
@@ -572,7 +450,6 @@ class SparseSchemaTest(ASchemaTestCase):
             self.schema.exportSparse()['default']
         )
         self.assertTrue('empty' not in self.schema.exportSparse())
-
 
 class ListSchemaTest(ASchemaTestCase):
 
@@ -665,7 +542,6 @@ class ListSchemaTest(ASchemaTestCase):
     def test_sort(self):
         self.schema.items.reverse()
 
-
 class ListCommaSchemaTest(ASchemaTestCase):
 
     def setUp(self):
@@ -753,98 +629,5 @@ class DerivedCategorySchemaFail(ASchemaTestCase):
         self.assertTrue(ret)
 
 if __name__ == '__main__':
-    unittest.main()
-
-
-"""
-
-### Example implementation
-stampData = {
-    'stamp_id': '12345',
-    'entity': {
-        'entity_id': '567890',
-        'title': 'Little Owl',
-        'coordinates': {
-            'lat': 123, 
-            'lng': 456
-        },
-        'category': 'food',
-        'subtitle': 'New York, NY'
-    },
-    'user': {
-        'user_id': '432111111',
-        'screen_name': 'kevin',
-        'display_name': 'Kevin P.',
-        'profile_image': 'http://img.stamped.com/kevin',
-        'color_primary': '#dddddd',
-        'color_secondary': '#333333',
-        'privacy': False
-    },
-    'blurb': 'Best spot in the city',
-    # 'image': 'MyImage.png',
-    'mentions': ['robby', 'bart'],
-    'credit': [
-        {'user_id': '12345', 'screen_name': 'robby', 'display_name': 'Robby S.'},
-        {'user_id': '23456', 'screen_name': 'bart', 'display_name': 'Bart S.'}
-    ],
-    'comment_preview': None,
-    'timestamp': {
-        'created': datetime.utcnow(),
-        # 'modified': datetime.utcnow()
-    },
-}
-
-print 
-print 'START'
-
-stamp = StampSchema(stampData)
-
-print "Stamp['user']['user_id']:        %s" % stamp['user']['user_id']
-
-
-stamp.stamp_id = '4321'
-stamp.user.user_id = 'asdf'
-stamp.entity.coordinates.lat = '123'
-
-print "Stamp.user:                      %s" % stamp.user
-print "Stamp.user.user_id:              %s" % stamp.user.user_id
-
-print "Stamp.entity:                    %s" % stamp.entity
-print "Stamp.entity.title:              %s" % stamp.entity.title
-print "Stamp.entity.coordinates:        %s" % stamp.entity.coordinates
-print "Stamp.entity.coordinates.lat:    %s" % stamp.entity.coordinates.lat
-
-print "Stamp.timestamp:                 %s" % stamp.timestamp
-print "Stamp.timestamp.created:         %s" % stamp.timestamp.created
-
-del(stamp.user['color_secondary'])
-del(stamp.user.color_secondary)
-
-print "Stamp.user length:               %s" % len(stamp.user)
-print "Stamp.user.user_id length:       %s" % len(stamp.user.user_id)
-
-print
-print #stamp.timestamp.modified
-
-print stamp.exportData(format='flat')
-print stamp.exportData(format='flat')['entity']
-print stamp.exportData(format='flat')['entity']['coordinates']
-print stamp.exportData(format='flat')['credit'][0]
-
-#print stamp.entity.entity_id
-
-if 'entity' in stamp:
-    print 'entity: pass'
-if 'eentity' not in stamp:
-    print 'eentity: pass'
-if 'coordinates' in stamp:
-    print 'coordinates: pass'
-if 'lat' in stamp:
-    print 'lat: pass'
-
-print 
-print
-print "Stamp.mentions:                  %s" % stamp.mentions
-print "Stamp.credit:                    %s" % stamp.credit
-"""
+    StampedTestRunner().run()
 

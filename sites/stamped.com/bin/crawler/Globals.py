@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import os, sys
 
-base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, base)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-sys.path.append(os.path.join(base, "api"))
-
-import init
+while True:
+    try:
+        import init
+        break
+    except ImportError:
+        sys.path.insert(0, os.path.dirname(sys.path[0]))
 
 #__builtins__['options'] = { }
 from utils import AttributeDict

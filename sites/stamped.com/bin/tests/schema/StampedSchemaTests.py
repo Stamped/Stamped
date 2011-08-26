@@ -1,28 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import Globals, utils
-import os, sys, unittest
-
-from datetime import datetime
 from Schemas import *
-
-class ASchemaTestCase(unittest.TestCase):
-    
-    ### DEFAULT ASSERTIONS
-    def assertIsInstance(self, a, b):
-        self.assertTrue(isinstance(a, b))
-        
-    def assertIn(self, a, b):
-        self.assertTrue(a in b)
-
-    def assertLength(self, a, size):
-        self.assertEqual(len(a), size)
+from ASchemaTestCase import *
 
 class EntityTest(ASchemaTestCase):
     
@@ -54,5 +40,5 @@ class EntityTest(ASchemaTestCase):
         self.assertEqual(entity.title, "test's")
 
 if __name__ == '__main__':
-    unittest.main()
+    StampedTestRunner().run()
 
