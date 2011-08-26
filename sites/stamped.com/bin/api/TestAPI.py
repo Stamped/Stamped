@@ -249,6 +249,7 @@ class AStampedAPITestCase(unittest.TestCase):
     def setUp(self):
         pass
 
+
 # ####### #
 # ACCOUNT #
 # ####### #
@@ -379,7 +380,6 @@ class StampedAPIUsersShow(StampedAPIUserTest):
         result = self.handleGET(path, data)
         self.assertEqual(result['user_id'], self.userA['user_id'])
 
-"""
 
 class StampedAPIUsersLookup(StampedAPIUserTest):
     def test_lookup_user_ids(self):
@@ -1336,7 +1336,6 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
             "quality": 1
         }
         result = self.handleGET(path, data)
-        print '\n%s\n' % result
         self.assertEqual(len(result), 3)
         self.assertEqual(len(result[-1]['comment_preview']), 11)
 
@@ -1367,7 +1366,6 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
         self.deleteComment(self.tokenA, self.commentI['comment_id'])
         self.deleteComment(self.tokenA, self.commentJ['comment_id'])
         self.deleteComment(self.tokenA, self.commentK['comment_id'])
-
 
 # ######### #
 # FAVORITES #
@@ -1543,7 +1541,6 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityTest):
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
 
-"""
 
 if __name__ == '__main__':
     def cleanup():

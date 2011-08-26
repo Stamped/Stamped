@@ -354,7 +354,6 @@ class HTTPStamp(Schema):
             credit              = data.pop('credit', [])
 
             comment_preview = []
-            print 'COMMENTS: %s' % len(comments)
             for comment in comments:
                 comment = Comment(comment)
                 comment = HTTPComment().importSchema(comment).exportSparse()
