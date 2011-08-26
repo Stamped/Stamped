@@ -12,10 +12,16 @@ from db.mongodb.MongoEntitySearcher import MongoEntitySearcher
 from optparse import OptionParser
 from pprint import pprint
 
+
+# TODO:
+    # entity keyword search by breaking title up into distinct lexemes
+    # unit tests and regression tests for autocomplete
+        # Beauty & Essex, Per Se
+    # unit tests for deduper
+    # fuzzy autocomplete to help with misspellings?
+
 # TODO: debug Beauty & Essex test case (multiple sources)
 # TODO: add simple regression-oriented set of unit tests for entity searcher
-# TODO: barnes n noble
-# TODO: automate gunicorn + nginx running in front of flask
 
 # TODO:
     # lazy loading of external entities
@@ -23,10 +29,8 @@ from pprint import pprint
             # google places
         # misc:
             # amazon
-            # barnes n noble
-            # netflix
     # image support
-        # find good python image library
+        # find good python image library (PIL?)
         # static.stamped.com or cdn.stamped.com
     # fast auxillary data structure for autocomplete, indexed on title?
         # written in C++; would have to take into account alternate titles

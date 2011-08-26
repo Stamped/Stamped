@@ -118,13 +118,13 @@ class AInstance(object):
     def __str__(self):
         name = "%s(%s.%s)" % (self.__class__.__name__, self.stack.name, self.name)
         
-        if self.state == 'running':
-            try:
-                public_dns_name = self.public_dns_name
-                if public_dns_name != None and len(public_dns_name) > 0:
-                    return "%s %s" % (name, public_dns_name)
-            except NotInitializedError:
-                pass
+        #if self.state == 'running':
+        #    try:
+        #        public_dns_name = self.public_dns_name
+        #        if public_dns_name != None and len(public_dns_name) > 0:
+        #            return "%s %s" % (name, public_dns_name)
+        #    except NotInitializedError:
+        #        pass
         
         return name
 

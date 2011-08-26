@@ -155,8 +155,6 @@ class AWSDeploymentStack(ADeploymentStack):
                 'numInstances' : 1, 
                 'mapSourceToProcess' : True, 
             }, 
-        ]
-        """
             {
                 'sources' : [ 
                     'opentable', 
@@ -182,22 +180,14 @@ class AWSDeploymentStack(ADeploymentStack):
             }, 
             {
                 'sources' : [ 
-                    'nymag', 
-                    'bostonmag', 
-                ], 
-                'numInstances' : 1, 
-                'mapSourceToProcess' : True, 
-            }, 
-            {
-                'sources' : [ 
                     'phillymag', 
                     'chicagomag', 
+                    'washmag', 
                 ], 
                 'numInstances' : 1, 
                 'mapSourceToProcess' : True, 
             }, 
         ]
-        """
         
         #crawler_instances = self.crawler_instances
         crawler_instances = []
