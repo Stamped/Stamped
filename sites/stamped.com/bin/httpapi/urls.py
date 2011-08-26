@@ -104,4 +104,6 @@ urlpatterns = patterns('',
     (r'v0/temp/$',                      'v0.views.temp'),
     (r'v0/$',                           'v0.views.index'),
 
+    url(r'^$', 'v0.views.default'),
+
 )

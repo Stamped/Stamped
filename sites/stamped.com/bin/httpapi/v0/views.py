@@ -60,3 +60,5 @@ def activity(request):
 def temp(request):
     return _getDoc('Temp')
 
+def default(request):
+    return HttpResponse("This is where the API will go.")
