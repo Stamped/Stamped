@@ -40,20 +40,6 @@ These constraints include:
                 value of the string will be stored. Note that this only applies 
                 to basestring types only.
 
-* Format        Set a specific format for the value. Current accepted values 
-                are "email", "url", and "screen_name". This will guarantee that 
-                the value matches specific custom constraints (e.g. is a valid 
-                email address, has URL-safe characters, etc.).
-                NOTE: NOT YET IMPLEMENTED
-
-* MaxLength     Set a maximum length for the value. Valid for strings only.
-
-* MinLength     Set a minimum length for the value. Valid for strings only.
-
-* MaxValue      Set a maximum value for the value. Valid for numbers only.
-
-* MinValue      Set a minimum value for the value. Valid for numbers only.
-
 Additionally, a SchemaElement has the following attributes and functions:
 
 * value         Returns the value of the element.
@@ -114,16 +100,10 @@ class SchemaElement(object):
         self._parent        = None
         self._requiredType  = self._setType(requiredType)
         self._required      = kwargs.pop('required', False)
-        self._validate      = kwargs.pop('validate', True)
         self._overflow      = kwargs.pop('overflow', False)
         self._default       = kwargs.pop('default', None)
         self._case          = self._setCase(kwargs.pop('case', None))
         self._normalize     = kwargs.pop('normalize', True)
-        # self._format        = kwargs.pop('format', None)
-        self._maxLength     = self._setInt(kwargs.pop('maxLength', None))
-        self._minLength     = self._setInt(kwargs.pop('minLength', None))
-        self._maxValue      = self._setInt(kwargs.pop('maxValue', None))
-        self._minValue      = self._setInt(kwargs.pop('minValue', None))
         
         if self._default != None:
             self.setElement('[default]', self._default)
@@ -138,9 +118,9 @@ class SchemaElement(object):
         if self._data == None:
             return 0
         return len(self._data)
-
+    
     # Properties
-
+    
     @property
     def value(self):
         return self._data
@@ -194,10 +174,7 @@ class SchemaElement(object):
     # Public Functions
 
     def validate(self):
-        # if not self._isSet and self._required == True and \
-        #     self._validate == True:
-        if self.value == None and self._required == True and \
-            self._validate == True:
+        if self.value == None and self._required == True:
             msg = "Required field empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
@@ -250,25 +227,7 @@ class SchemaElement(object):
                     msg = "Incorrect type (%s)" % name
                     logs.warning(msg)
                     raise SchemaKeyError(msg)
-
-            # Min/Max Length
-            if self._maxLength and len(value) > self._maxLength:
-                msg = "Length is too long (%s)" % name
-                raise
-
-            elif self._minLength and len(value) < self._minLength:
-                msg = "Length is too short (%s)" % name
-                raise
-
-            # Min/Max Value
-            if self._maxValue and value > self._maxValue:
-                msg = "Value is too high (%s)" % name
-                raise
-
-            elif self._minValue and value < self._minValue:
-                msg = "Value is too low (%s)" % name
-                raise
-
+            
             # Case
             if self._case:
                 if self._case == 'upper':
@@ -283,11 +242,9 @@ class SchemaElement(object):
             self._data  = value
             self.setIsSet(True)
             self.validate()
-
         except:
             logs.warning(msg)
-            raise SchemaValidationError(msg)
-
+            raise
 
 """
 A SchemaList is a special type of SchemaElement that contains multiple 
@@ -383,13 +340,11 @@ class SchemaList(SchemaElement):
             newSchemaItem = copy.deepcopy(element)
             newSchemaItem._overflow = self._overflow
             newSchemaItem.importData(item)
-            newSchemaItem._validate = self._validate
             return newSchemaItem
 
         elif isinstance(element, SchemaElement):
             newSchemaElement = copy.deepcopy(element)
             newSchemaElement.setElement('e', item)
-            newSchemaElement._validate = self._validate
             return newSchemaElement
 
         else:
@@ -474,8 +429,7 @@ class SchemaList(SchemaElement):
         self.setIsSet(True)
 
     def validate(self):
-        if len(self._data) == 0 and self._required == True \
-            and self._validate == True:
+        if len(self._data) == 0 and self._required == True:
             msg = "Required List Empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
@@ -580,7 +534,6 @@ class Schema(SchemaElement):
             try:
                 self._elements[name] = value
                 self._elements[name]._name = name
-                self._elements[name]._validate = self._validate
                 self._elements[name]._parent = self
             except:
                 msg = "Cannot Add Element (%s)" % name
@@ -698,11 +651,10 @@ class Schema(SchemaElement):
             
             # Dictionary or List
             if isinstance(v, Schema) or isinstance(v, SchemaList):
-                v._validate = self._validate
                 v._overflow = self._overflow
                 
                 if item == None:
-                    if v._required == True and v._validate == True:
+                    if v._required == True:
                         msg = "Missing Nested Element (%s)" % k
                         logs.warning(msg)
                         raise SchemaValidationError(msg)
@@ -762,8 +714,7 @@ class Schema(SchemaElement):
     # Public Functions
     
     def validate(self):
-        if len(self._elements) == 0 and self._required == True \
-            and self._validate == True:
+        if len(self._elements) == 0 and self._required == True:
             msg = "Required Schema Empty (%s)" % self._name
             logs.warning(msg)
             raise SchemaValidationError(msg)
@@ -797,19 +748,6 @@ class Schema(SchemaElement):
     def removeElement(self, name):
         del(self._elements[name])
     
-    def exportFields(self, fields):
-        ret = {}
-        for field in fields:
-            result = self
-            path = field.split('.')
-            for level in path:
-                result = result[level]
-            if isinstance(result, Schema) or isinstance(result, SchemaList):
-                ret[field] = result.value
-            else:
-                ret[field] = result
-        return ret
-    
     def exportSparse(self):
         ret = {}
         for k, v in self._elements.iteritems():
@@ -831,7 +769,7 @@ class Schema(SchemaElement):
             msg = "Conversion failed (Define in subclass?)"
             logs.warning(msg)
             raise SchemaValidationError(msg)
-
+    
     def exportSchema(self, schema):
         try:
             schema.importData(self.exportSparse(), overflow=True)

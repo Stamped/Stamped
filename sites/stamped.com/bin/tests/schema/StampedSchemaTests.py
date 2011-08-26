@@ -16,10 +16,7 @@ class EntityTest(ASchemaTestCase):
         entity = Entity()
         entity.title = "test"
         entity.subcategory = "restaurant"
-        entity.desc = "&lt;example summary&gt;"
         entity.validate()
-        
-        self.assertEqual(entity.desc, "<example summary>")
     
     def test_normalization(self):
         strs = [
@@ -38,6 +35,9 @@ class EntityTest(ASchemaTestCase):
         #entity.title = 'test&#8217;s'
         entity.title = 'test&rsquo;s'
         self.assertEqual(entity.title, "test's")
+        
+        entity.desc = "&lt;example summary&gt;"
+        self.assertEqual(entity.desc, "<example summary>")
 
 if __name__ == '__main__':
     StampedTestRunner().run()

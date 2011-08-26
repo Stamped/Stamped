@@ -296,10 +296,6 @@ class NestedSchemaTest(ASchemaTestCase):
 
         self.assertEqual(self.sampleData, self.schema.value)
 
-        self.assertEqual(
-            self.sampleData['inner']['item'], 
-            self.schema.exportFields(['inner.item']).values()[0])
-
     def test_contain_valid(self):
         self.assertIn('inner', self.schema)
         self.assertIn('item', self.schema)

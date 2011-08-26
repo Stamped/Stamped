@@ -64,7 +64,7 @@ def logRaw(s, includeFormat=False):
 
 def _formatLog(s):
     try:
-        return "[%s] %s" % (threading.currentThread().getName(), normalize2(s))
+        return "[%s] %s" % (threading.currentThread().getName(), normalize(s, strict=True))
     except:
         return "[%s] __error__ printout" % (threading.currentThread().getName(), )
 
@@ -380,7 +380,12 @@ def count(container):
 def removeNonAscii(s):
     return "".join(ch for ch in s if ord(ch) < 128)
 
-def normalize2(s):
+def normalize(s, strict=False):
+    """ 
+        Attempts to normalize the given value. If it is a string, this includes 
+        escaping html codes and possibly removing non-ascii characters.
+    """
+    
     try:
         if isinstance(s, basestring):
             # replace html escape sequences with their unicode equivalents
@@ -414,55 +419,9 @@ def normalize2(s):
                 
                 val = unichr(int(s[l + 2 : m]))
                 s = u"%s%s%s" % (s[:l], val, s[m + 1:])
-        if isinstance(s, unicode):
+        
+        if strict and isinstance(s, unicode):
             s = removeNonAscii(s.encode("utf-8"))
-    except Exception as e:
-        utils.printException()
-        utils.log(e)
-    
-    return s
-
-def normalize(s):
-    """ 
-        attempts to normalize the given value. if it is a string, this includes 
-        escaping html codes and possibly removing non-ascii characters.
-    """
-    
-    try:
-        if isinstance(s, basestring):
-            # replace html escape sequences with their unicode equivalents
-            if '&' in s and ';' in s:
-                for name in htmlentitydefs.name2codepoint:
-                    escape_seq = '&%s;' % name
-                    
-                    while True:
-                        l = s.find(escape_seq)
-                        if l < 0:
-                            break
-                        
-                        if name == 'lsquo' or name == 'rsquo':
-                            # simplify unicode single quotes to use the ascii apostrophe character
-                            val = "'"
-                        else:
-                            val = unichr(htmlentitydefs.name2codepoint[name])
-                        
-                        s2 = u"%s%s%s" % (s[:l], val, s[l+len(escape_seq):])
-                        #print "%s => %s" % (s, s2)
-                        s = s2
-            
-            # handle &#xxxx;
-            escape_seq = '&#'
-            while True:
-                l = s.find(escape_seq)
-                if l < 0:
-                    break
-                
-                m = s.find(';', l)
-                if m < 0 or m <= l + 2:
-                    break
-                
-                val = unichr(int(s[l + 2 : m]))
-                s = u"%s%s%s" % (s[:l], val, s[m + 1:])
     except Exception as e:
         utils.printException()
         utils.log(e)
@@ -544,7 +503,10 @@ def init_db_config(conf):
         host, port = (conf, 27017)
         
         if '.' in conf and not conf.endswith('.com'):
+            # attempt to resolve the (possible) semantic EC2 instance name to 
+            # a valid DNS name or associated IP address
             instance = getInstance(conf)
+            
             if instance:
                 if is_ec2():
                     host = instance.private_dns_name
@@ -558,9 +520,10 @@ def init_db_config(conf):
         }
     }
     
-    # TODO: there is a Python oddity that needs some investigation where, depending on 
+    # TODO: there is a Python oddity that needs some investigation, where, depending on 
     # where and when the MongoDBConfig Singleton is imported, it'll register as the same 
-    # instance that AMongoCollection knows about or not.
+    # instance that AMongoCollection knows about or not. For now, as a workaround, just 
+    # import it multiple ways and initialize the config with both possible import paths.
     from api.db.mongodb.AMongoCollection import MongoDBConfig
     cfg = MongoDBConfig.getInstance()
     cfg.config = AttributeDict(config)
@@ -568,4 +531,9 @@ def init_db_config(conf):
     from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
     cfg2 = MongoDBConfig2.getInstance()
     cfg2.config = AttributeDict(config)
+    
+    return config
+
+def is_func(obj):
+    return hasattr(obj, '__call__')
 

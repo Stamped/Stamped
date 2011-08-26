@@ -1,5 +1,5 @@
 
-* autogenerate docs and REST API from lower-level API
+* autogenerate docs and REST API from lower-level API?
 * decouple API implementation from HTTP (e.g., 400 errors)
 * consistent input validation
 * consistent security strategy
