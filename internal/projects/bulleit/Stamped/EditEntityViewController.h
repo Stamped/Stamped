@@ -10,4 +10,7 @@
 
 @interface EditEntityViewController : UIViewController
 
+@property (nonatomic, retain) IBOutlet UIImageView* categoryDropdownImageView;
+
+- (IBAction)categoryDropdownPressed:(id)sender;
 @end
