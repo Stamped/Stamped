@@ -39,8 +39,9 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* spinner;
 @property (nonatomic, retain) IBOutlet UIButton* checkmarkButton;
 @property (nonatomic, retain) IBOutlet STCreditTextField* creditTextField;
+@property (nonatomic, retain) IBOutlet UIButton* editButton;
 
-
+- (IBAction)editButtonPressed:(id)sender;
 - (IBAction)backOrCancelButtonPressed:(id)sender;
 - (IBAction)saveStampButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;
