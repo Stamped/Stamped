@@ -22,11 +22,88 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
-    (r'v0/account/create.json', 'v0.functions.account.create'),
-    (r'v0/account/remove.json', 'v0.functions.account.remove'),
-    (r'v0/account/settings.json', 'v0.functions.account.settings'),
-    (r'v0/account/update_profile.json', 'v0.functions.account.update_profile'),
-    (r'v0/account/update_profile_image.json', 'v0.functions.account.update_profile_image'),
-    (r'v0/account/verify_credentials.json', 'v0.functions.account.verify_credentials'),
-    (r'v0/account/reset_password.json', 'v0.functions.account.reset_password'),
+
+    ### OAUTH
+    (r'v0/oauth2/token.json', 			'v0.functions.oauth2.token'),
+    (r'v0/oauth2/login.json', 			'v0.functions.oauth2.login'),
+
+    ### ACCOUNT
+    (r'v0/account/create.json', 				'v0.functions.account.create'),
+    (r'v0/account/remove.json', 				'v0.functions.account.remove'),
+    (r'v0/account/settings.json', 				'v0.functions.account.settings'),
+    (r'v0/account/update_profile.json', 		'v0.functions.account.update_profile'),
+    (r'v0/account/update_profile_image.json',	'v0.functions.account.update_profile_image'),
+    (r'v0/account/verify_credentials.json', 	'v0.functions.account.verify_credentials'),
+    (r'v0/account/reset_password.json', 		'v0.functions.account.reset_password'),
+
+    ### USERS
+    (r'v0/users/show.json', 			'v0.functions.users.show'),
+    (r'v0/users/lookup.json', 			'v0.functions.users.lookup'),
+    (r'v0/users/search.json', 			'v0.functions.users.search'),
+    (r'v0/users/privacy.json', 			'v0.functions.users.privacy'),
+
+    ### FRIENDS
+    (r'v0/friendships/create.json', 			'v0.functions.friendships.create'),
+    (r'v0/friendships/remove.json', 			'v0.functions.friendships.remove'),
+    (r'v0/friendships/check.json', 				'v0.functions.friendships.check'),
+    (r'v0/friendships/friends.json', 			'v0.functions.friendships.friends'),
+    (r'v0/friendships/followers.json', 			'v0.functions.friendships.followers'),
+    (r'v0/friendships/approve.json', 			'v0.functions.friendships.approve'),
+    (r'v0/friendships/blocks/create.json', 		'v0.functions.friendships.blocksCreate'),
+    (r'v0/friendships/blocks/check.json', 		'v0.functions.friendships.blocksCheck'),
+    (r'v0/friendships/blocking.json', 			'v0.functions.friendships.blocking'),
+    (r'v0/friendships/blocks/remove.json', 		'v0.functions.friendships.blocksRemove'),
+
+    ### ENTITIES
+    (r'v0/entities/create.json', 		'v0.functions.entities.create'),
+    (r'v0/entities/show.json', 			'v0.functions.entities.show'),
+    (r'v0/entities/update.json', 		'v0.functions.entities.update'),
+    (r'v0/entities/remove.json', 		'v0.functions.entities.remove'),
+    (r'v0/entities/search.json', 		'v0.functions.entities.search'),
+
+    ### STAMPS
+    (r'v0/stamps/create.json', 			'v0.functions.stamps.create'),
+    (r'v0/stamps/update.json', 			'v0.functions.stamps.update'),
+    (r'v0/stamps/show.json', 			'v0.functions.stamps.show'),
+    (r'v0/stamps/remove.json', 			'v0.functions.stamps.remove'),
+
+    ### COMMENTS
+    (r'v0/comments/create.json', 		'v0.functions.comments.create'),
+    (r'v0/comments/remove.json', 		'v0.functions.comments.remove'),
+    (r'v0/comments/show.json', 			'v0.functions.comments.show'),
+
+    ### COLLECTIONS
+    (r'v0/collections/inbox.json', 		'v0.functions.collections.inbox'),
+    (r'v0/collections/user.json', 		'v0.functions.collections.user'),
+
+    ### FAVORITES
+    (r'v0/favorites/create.json', 		'v0.functions.favorites.create'),
+    (r'v0/favorites/remove.json', 		'v0.functions.favorites.remove'),
+    (r'v0/favorites/show.json', 		'v0.functions.favorites.show'),
+
+    ### ACTIVITY
+    (r'v0/activity/show.json', 			'v0.functions.activity.show'),
+
+    ### TEMP
+    (r'v0/temp/friends.json', 			'v0.functions.temp.friends'),
+    (r'v0/temp/followers.json', 		'v0.functions.temp.followers'),
+
+
+
+    ### DOCS
+    (r'v0/oauth2/$',                    'v0.views.oauth2'),
+    (r'v0/account/$',                   'v0.views.account'),
+    (r'v0/users/$',                     'v0.views.users'),
+    (r'v0/friendships/$',               'v0.views.friendships'),
+    (r'v0/entities/$',                  'v0.views.entities'),
+    (r'v0/stamps/$',                    'v0.views.stamps'),
+    (r'v0/comments/$',                  'v0.views.comments'),
+    (r'v0/collections/$',               'v0.views.collections'),
+    (r'v0/favorites/$',                 'v0.views.favorites'),
+    (r'v0/activity/$',                  'v0.views.activity'),
+    (r'v0/temp/$',                      'v0.views.temp'),
+    (r'v0/$',                           'v0.views.index'),
+
+    url(r'^$', 'v0.views.default'),
+
 )

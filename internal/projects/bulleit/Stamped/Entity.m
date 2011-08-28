@@ -24,7 +24,10 @@
 @dynamic favorite;
 
 - (UIImage*)categoryImage {
-  return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
+  if (self.category)
+    return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
+  
+  return [UIImage imageNamed:@"cat_icon_other"];
 }
 
 - (EntityCategory)entityCategory {

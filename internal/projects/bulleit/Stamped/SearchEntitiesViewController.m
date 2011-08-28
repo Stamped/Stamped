@@ -136,10 +136,17 @@ static NSString* const kSearchPath = @"/entities/search.json";
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   // Return the number of rows in the section.
-  return [filteredEntitiesArray_ count];
+  NSInteger numRows = [filteredEntitiesArray_ count];
+  if (self.searchField.text.length > 0)
+    ++numRows;  // One more for the 'Add new entity' cell.
+
+  return numRows;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.row == [filteredEntitiesArray_ count])
+    return self.addStampCell;
+  
   static NSString* CellIdentifier = @"EntityCell";
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
@@ -200,7 +207,13 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Entity* entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
+  Entity* entityObject = nil;
+  if (indexPath.row == [filteredEntitiesArray_ count]) {
+    entityObject = [Entity object];
+    entityObject.title = self.searchField.text;
+  } else {
+    entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
+  }
   CreateStampViewController* detailViewController =
       [[CreateStampViewController alloc] initWithEntityObject:entityObject];
   [self.navigationController pushViewController:detailViewController animated:YES];
@@ -219,8 +232,6 @@ static NSString* const kSearchPath = @"/entities/search.json";
     return;
 
   [self searchDataStoreFor:self.searchField.text];
-
-  //self.addStampCell.hidden = self.searchField.text.length == 0;
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
 }
 

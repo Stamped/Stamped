@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
+#import "EditEntityViewController.h"
 #import "Entity.h"
 #import "Favorite.h"
 #import "STNavigationBar.h"
@@ -60,6 +61,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 @synthesize spinner = spinner_;
 @synthesize checkmarkButton = checkmarkButton_;
 @synthesize creditTextField = creditTextField_;
+@synthesize editButton = editButton_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -95,6 +97,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.cancelButton = nil;
   self.checkmarkButton = nil;
   self.creditTextField = nil;
+  self.editButton = nil;
   [super dealloc];
 }
 
@@ -112,13 +115,6 @@ static const CGFloat kMinContainerHeight = 204.0;
   User* currentUser = [AccountManager sharedManager].currentUser;
   self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
-  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
-  backgroundGradient.colors = [NSArray arrayWithObjects:
-                               (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
-                               (id)[UIColor colorWithWhite:0.93 alpha:1.0].CGColor, nil];
-  backgroundGradient.frame = self.view.bounds;
-  [self.view.layer insertSublayer:backgroundGradient atIndex:0];
-  [backgroundGradient release];
   
   ribbonedContainerView_.layer.shadowOpacity = 0.1;
   ribbonedContainerView_.layer.shadowOffset = CGSizeMake(0, 1);
@@ -150,7 +146,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
   accessoryView.backgroundColor = [UIColor colorWithWhite:0.43 alpha:1.0];
   
-  backgroundGradient = [[CAGradientLayer alloc] init];
+  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
   backgroundGradient.frame = CGRectMake(0, 1, 320, 43);
   backgroundGradient.colors = [NSArray arrayWithObjects:
       (id)[UIColor colorWithWhite:0.19 alpha:1.0].CGColor,
@@ -222,6 +218,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.cancelButton = nil;
   self.checkmarkButton = nil;
   self.creditTextField = nil;
+  self.editButton = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -282,6 +279,13 @@ static const CGFloat kMinContainerHeight = 204.0;
 }
 
 #pragma mark - Actions.
+
+- (IBAction)editButtonPressed:(id)sender {
+  EditEntityViewController* editViewController =
+      [[EditEntityViewController alloc] initWithNibName:@"EditEntityViewController" bundle:nil];
+  [self.navigationController pushViewController:editViewController animated:YES];
+  [editViewController release];
+}
 
 - (IBAction)backOrCancelButtonPressed:(id)sender {
   [self.navigationController popViewControllerAnimated:YES];

@@ -16,7 +16,6 @@ from api.MongoStampedAPI import MongoStampedAPI
 from api.MongoStampedAuth import MongoStampedAuth
 from utils import AttributeDict
 from errors import *
-from resource_argument import *
 
 # ################ #
 # Global Variables #

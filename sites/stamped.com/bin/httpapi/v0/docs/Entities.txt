@@ -1,0 +1,211 @@
+
+# ENTITIES #
+
+
+------------------------------------------------------------------------------
+## POST entities/create ##
+
+### Description ###
+Create a new entity. This is only used for custom entities added by users.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**title** _required_
+The title of the custom entity.
+
+**subtitle** _required_
+The subtitle of the custom entity. This should default to the category if no additional information is provided.
+
+**category** _required_
+The category of the custom entity. The default valud is "Other".
+
+**subcategory** _required_
+The subcategory of the custom entity. The default valud is "Other".
+
+**desc** _optional_
+A brief description of the entity.
+
+**image** _optional_
+A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+
+**address** _optional_
+The address of the entity.
+
+**coordinates** _optional_
+The latitude and longitude of the entity, separated by a comma.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/entities/create.json
+	oauth_token=1234567890123456789012&title=Spotted+Pig&subtitle=New+York,+NY&category=food&subcategory=restaurant&desc=Burger+place&coordinates=40.714623,-74.006605
+
+### Sample Result ###
+	{
+		"entity_id": "4e226ea84e61754161000000",
+		"title": "Spotted Pig",
+		"subtitle": "New York, NY"
+		"category": "food",
+		"subcategory": "restaurant"
+		"desc": "Burger place",
+		"coordinates": "40.714623,-74.006605",
+		"last_modified": "2011-07-17 19:03:22.354813",
+	}
+
+
+------------------------------------------------------------------------------
+## GET entities/show ##
+
+### Description ###
+Show details for a given entity.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**entity_id** _required_
+The unique identifier for the entity.
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/entities/show.json?oauth_token=1234567890123456789012&entity_id=4e226ea84e61754161000000
+
+### Sample Result ###
+	{
+		"entity_id": "4e226ea84e61754161000000",
+		"title": "Spotted Pig",
+		"subtitle": "New York, NY"
+		"category": "food",
+		"subcategory": "restaurant"
+		"desc": "Burger place",
+		"coordinates": "40.714623,-74.006605",
+		"address": "314 West 11th Street New York, NY 10014-2369",
+		"last_modified": "2011-07-17 19:03:22.354813",
+		"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+		"phone": "1235551234"
+	}
+
+
+------------------------------------------------------------------------------
+## POST entities/update ##
+
+### Description ###
+Update details for a custom entity.
+
+### Details ###
+* OAuth Token Required
+* At least one field other than entity_id must be included. Any fields not included will not be changed. To remove a value for a field you can submit an empty string.
+* Users can only modify entities that they created.
+
+### Parameters ###
+
+**entity_id** _required_
+The unique identifier of the entity being updated.
+
+**title** _optional_
+The title of the custom entity.
+
+**subtitle** _optional_
+The subtitle of the custom entity. This should default to the category if no additional information is provided.of the custom entity. If an invalid category is passed it will default to "Other".
+
+**category** _optional_
+The category of the custom entity. The default valud is "Other".
+
+**subcategory** _optional_
+The subcategory of the custom entity. The default valud is "Other".
+
+**desc** _optional_
+A brief description of the entity.
+
+**image** _optional_
+A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+
+**address** _optional_
+The address of the entity.
+
+**coordinates** _optional_
+The latitude and longitude of the entity, separated by a comma.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/entities/update.json
+	oauth_token=1234567890123456789012&entity_id=4e226ea84e61754161000000&desc=Gastropub+in+the+West+Village,+NYC
+
+### Sample Result ###
+	{
+		"entity_id": "4e226ea84e61754161000000",
+		"title": "Spotted Pig",
+		"subtitle": "New York, NY"
+		"category": "food",
+		"subcategory": "restaurant"
+		"desc": "Gastropub in the West Village, NYC",
+		"coordinates": "40.714623,-74.006605",
+		"last_modified": "2011-07-17 19:03:22.354813",
+	}
+
+
+------------------------------------------------------------------------------
+## POST entities/remove ##
+
+### Description ###
+Remove a custom entity.
+**Warning:** It is still undecided as to what effect this will have on any stamps that exist on the entity.
+
+### Details ###
+* OAuth Token Required
+* Only the creator of a custom entity can delete the entity.
+
+### Parameters ###
+
+**entity_id** _required_
+The unique identifier of the entity being removed.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/entities/remove.json
+	oauth_token=1234567890123456789012&entity_id=4e226ea84e61754161000000
+
+### Sample Result ###
+	{
+		"entity_id": "4e226ea84e61754161000000",
+		"title": "Spotted Pig",
+		"subtitle": "New York, NY"
+		"category": "food",
+		"subcategory": "restaurant"
+		"desc": "Gastropub in the West Village, NYC",
+		"coordinates": "40.714623,-74.006605",
+		"last_modified": "2011-07-17 19:03:22.354813",
+	}
+
+
+------------------------------------------------------------------------------
+## GET entities/search ##
+
+### Description ###
+Search for an entity.
+
+### Details ###
+* OAuth Token Required
+* **Note:** Undecided if the distance calculation will happen on the backend or on the client.
+
+### Parameters ###
+
+**q** _required_
+Text string to match against the entity title.
+
+**coordinates** _optional_
+Coordinates of current location to prioritize local results. Coordinates should be in the format "lat,lng".
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/entities/search.json?oauth_token=1234567890123456789012&q=Spotted+Pig
+
+### Sample Result ###
+	[
+		{
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"category": "Restaurant",
+			"subtitle": "New York, NY",
+		}
+	]
+
+

@@ -20,8 +20,6 @@
 #import "User.h"
 #import "Util.h"
 
-static UIImage* kCompletedStamp = nil;
-
 static NSString* const kTitleFontString = @"TGLight";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
@@ -219,9 +217,6 @@ static const CGFloat kSubstringFontSize = 12.0;
 }
 
 - (UIImage*)completedStamp {
-  if (kCompletedStamp)
-    return kCompletedStamp;
-  
   User* currentUser = [AccountManager sharedManager].currentUser;
   if (!currentUser)
     return nil;
@@ -256,9 +251,9 @@ static const CGFloat kSubstringFontSize = 12.0;
                               kCGGradientDrawsAfterEndLocation);
   CGGradientRelease(gradientRef);
   CGColorSpaceRelease(colorSpace);
-  kCompletedStamp = UIGraphicsGetImageFromCurrentImageContext();
+  UIImage* completedStamp = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
-  return kCompletedStamp;
+  return completedStamp;
 }
 
 - (void)currentUserChanged:(NSNotification*)notification {

@@ -1,0 +1,343 @@
+
+# STAMPS #
+
+
+------------------------------------------------------------------------------
+## POST stamps/create ##
+
+### Description ###
+Create a new stamp for the authenticating user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**entity_id** _required_
+The unique id of the entity that the user is stamping. 
+
+**blurb** _optional_
+A brief text description of why the user is stamping the entity. This is currently limited to 512 characters. Any embedded mentions will be derived on the server.
+
+**image** _optional_
+An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+
+**credit** _optional_
+The screen names for any users that should receive credit for the stamp. Multiple screen names must be separated by commas.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/stamps/create.json
+	oauth_token=1234567890123456789012&entity_id=4e226ea84e61754161000000&blurb=Best+place+ever!&credit=robby,bart
+
+### Sample Result ###
+	{
+		"blurb": "Best place ever!", 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"credit": [
+			{
+				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
+				"screen_name": "robby",
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			},
+			{
+				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
+				"screen_name": "bart",
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			}
+		], 
+		"created": "2011-07-17 05:14:54.128641",
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"profile_image": "http://img.stamped.com/u/kevin.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kevin",
+			"privacy": false
+		}
+		"comment_preview": []
+		"num_comments": 0
+	}
+
+
+------------------------------------------------------------------------------
+## POST stamps/update ##
+
+### Description ###
+Update details for a stamp owned by the authenticating user.
+
+### Details ###
+* OAuth Token Required
+* At least one field other than stamp_id must be included. Any fields not included will not be changed. To remove a value for a field you can submit an empty string.
+* Users can only modify stamps that they created.
+
+### Parameters ###
+
+**stamp_id** _required_
+The unique id of the stamp.
+
+**blurb** _optional_
+A brief text description of why the user is stamping the entity. This is currently limited to 512 characters. Any embedded mentions will be derived on the server.
+
+**image** _optional_
+An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
+
+**credit** _optional_
+The screen names for any users that should receive credit for the stamp. Multiple screen names must be separated by commas.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/stamps/update.json
+	oauth_token=1234567890123456789012&&stamp_id=4e226fcd4e18474561000000&blurb=Went+here+with+%40robby...+Really,+the+best+ever.
+
+### Sample Result ###
+	{
+		"blurb": "Went here with @robby... Really, the best ever.", 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"credit": [
+			{
+				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
+				"screen_name": "robby",
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			},
+			{
+				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
+				"screen_name": "bart",
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			}
+		], 
+		"mentions": [
+			{
+				"display_name": "Robby S.", 
+				"indices": [15,21], 
+				"screen_name": "robby", 
+				"user_id": "4e226fcd4e61754161000007"
+			}
+		], 
+		"created": "2011-07-17 05:14:54.128641",
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"profile_image": "http://img.stamped.com/u/kevin.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kevin",
+			"privacy": false
+		}
+		"comment_preview": []
+		"num_comments": 0
+	}
+
+
+------------------------------------------------------------------------------
+## POST stamps/remove ##
+
+### Description ###
+Remove a stamp owned by the authenticating user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**stamp_id** _required_
+The unique id of the stamp.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/stamps/remove.json
+	oauth_token=1234567890123456789012&stamp_id=4e226fcd4e18474561000000
+
+### Sample Result ###
+	{
+		"blurb": "Went here with @robby... Really, the best ever.", 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"credit": [
+			{
+				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
+				"screen_name": "robby",
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			},
+			{
+				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
+				"screen_name": "bart",
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			}
+		], 
+		"mentions": [
+			{
+				"display_name": "Robby S.", 
+				"indices": [15,21], 
+				"screen_name": "robby", 
+				"user_id": "4e226fcd4e61754161000007"
+			}
+		], 
+		"created": "2011-07-17 05:14:54.128641",
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"profile_image": "http://img.stamped.com/u/kevin.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kevin",
+			"privacy": false
+		}
+		"comment_preview": []
+		"num_comments": 0
+	}
+
+
+------------------------------------------------------------------------------
+## GET stamps/show ##
+
+### Description ###
+Show details for a given stamp.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**stamp_id** _required_
+The unique id of the stamp.
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/stamps/show.json?oauth_token=1234567890123456789012&stamp_id=4e226fcd4e18474561000000
+
+### Sample Result ###
+	{
+		"blurb": "Went here with @robby... Really, the best ever.", 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"credit": [
+			{
+				"user_id": "4e226fcd4e61754161000007",
+				"profile_image": "http://img.stamped.com/u/robby.png", 
+				"screen_name": "robby",
+				"display_name": "Robby S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			},
+			{
+				"user_id": "4e226fcd4e61754161000008",
+				"profile_image": "http://img.stamped.com/u/bart.png", 
+				"screen_name": "bart",
+				"display_name": "Bart S.",
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"privacy": false
+			}
+		], 
+		"mentions": [
+			{
+				"display_name": "Robby S.", 
+				"indices": [15,21], 
+				"screen_name": "robby", 
+				"user_id": "4e226fcd4e61754161000007"
+			}
+		], 
+		"created": "2011-07-17 05:14:54.128641",
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"profile_image": "http://img.stamped.com/u/kevin.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kevin",
+			"privacy": false
+		},
+		"comment_preview": [
+			{
+				"comment_id": "47cc67093475061e3d953691",
+				"user": {
+					"user_id": "47cc67093475061e3d95369d", 
+					"profile_image": "http://img.stamped.com/u/kevin.png", 
+					"display_name": "Kevin P.", 
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"screen_name": "kevin",
+					"privacy": false
+				},
+				"stamp_id": "4e226fcd4e18474561000000",
+				"blurb": "Yeah, this place rules.",
+				"created": "2011-07-17 05:19:03.471937"
+			}
+		]
+		"num_comments": 1
+	}
+
+

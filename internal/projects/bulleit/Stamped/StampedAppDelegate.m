@@ -20,8 +20,7 @@
 #import "User.h"
 #import "OAuthToken.h"
 
-//static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
-static NSString* const kDataBaseURL = @"http://ec2-50-19-33-126.compute-1.amazonaws.com:5000/api/v1";
+static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
 @implementation StampedAppDelegate
 

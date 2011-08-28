@@ -1,0 +1,344 @@
+
+# FRIENDSHIPS #
+
+
+------------------------------------------------------------------------------
+## POST friendships/create ##
+
+### Description ###
+Create a friendship between two users. This allows the authenticating user to subscribe to their friend's stamps.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the friend.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/friendships/create.json
+	oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"first_name": "Robby",
+		"last_name": "Stein",
+		"screen_name": "robby",
+		"display_name": "Robby S.",
+		"profile_image": "http://img.stamped.com/u/robby.png"
+		"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+		"color_primary": "A0EE33",
+		"color_secondary": "BBBBFF",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 1,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
+	}
+
+
+------------------------------------------------------------------------------
+## GET friendships/check ##
+
+### Description ###
+Check whether or not a friendship exists between user a and user b. Will return true if user a follows user b, otherwise it will return false.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id_a** or **screen_name_a** _required_
+The user id or screen name of the user who may be following the other.
+
+**user_id_a** or **screen_name_a** _required_
+The user id or screen name of the user who is potentially being followed.
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/friendships/check.json?oauth_token=1234567890123456789012&user_id_a=47cc67093475061e3d95369d&user_id_b=4e226fcd4e61754161000007
+
+### Sample Result ###
+	true
+
+
+------------------------------------------------------------------------------
+## GET friendships/friends ##
+
+### Description ###
+Return a list of the specified user's friends.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the user.
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/friendships/friends.json?oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007",
+			"4e226fcd4e61754161000008"
+		]
+	}
+
+
+------------------------------------------------------------------------------
+## GET friendships/followers ##
+
+### Description ###
+Return a list of the specified user's followers.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the user.
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/friendships/followers.json?oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007",
+			"4e226fcd4e61754161000008"
+		]
+	}
+
+
+------------------------------------------------------------------------------
+## GET friendships/pending ##
+
+### Description ###
+Return a list of the authenticating user's followers that are pending approval. For private accounts only.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+_None_
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/friendships/pending.json?oauth_token=1234567890123456789012
+
+### Sample Result ###
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007"
+		]
+	}
+
+
+------------------------------------------------------------------------------
+## POST friendships/approve ##
+
+### Description ###
+Approve a follower of the authenticating user. For private accounts only.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the user requesting friendship.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/friendships/approve.json
+	oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"first_name": "Robby",
+		"last_name": "Stein",
+		"screen_name": "robby",
+		"display_name": "Robby S.",
+		"profile_image": "http://img.stamped.com/u/robby.png"
+		"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+		"color_primary": "A0EE33",
+		"color_secondary": "BBBBFF",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 1,
+		"num_followers": 1,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
+	}
+
+
+------------------------------------------------------------------------------
+## POST friendships/remove ##
+
+### Description ###
+Remove a friendship between two users.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the friend.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/friendships/remove.json
+	oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"first_name": "Robby",
+		"last_name": "Stein",
+		"screen_name": "robby",
+		"display_name": "Robby S.",
+		"profile_image": "http://img.stamped.com/u/robby.png"
+		"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+		"color_primary": "A0EE33",
+		"color_secondary": "BBBBFF",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 0,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
+	}
+
+
+------------------------------------------------------------------------------
+## POST friendships/blocks/create ##
+
+### Description ###
+Create a block between two users. This destroys any friendships that exist between the two users and prevents the blocked user from viewing the authenticating user's stamps in their inbox. It also prevents the blocked user from commenting on the authenticating user's stamps, and mutes any activity from the blocked user towards the authenticating user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the blocked user.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/friendships/blocks/create.json
+	oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"first_name": "Robby",
+		"last_name": "Stein",
+		"screen_name": "robby",
+		"display_name": "Robby S.",
+		"profile_image": "http://img.stamped.com/u/robby.png"
+		"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+		"color_primary": "A0EE33",
+		"color_secondary": "BBBBFF",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 0,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
+	}
+
+
+------------------------------------------------------------------------------
+## GET friendships/blocks/check ##
+
+### Description ###
+Check whether or not a block exists.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the blocked user.
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/friendships/blocks/check.json?oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	true
+
+
+------------------------------------------------------------------------------
+## GET friendships/blocking ##
+
+### Description ###
+Return a list of the user ids blocked by the authenticating user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+_None_
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/friendships/blocking.json?oauth_token=1234567890123456789012
+
+### Sample Result ###
+	{
+		"user_ids": [
+			"4e226fcd4e61754161000007"
+		]
+	}
+
+
+------------------------------------------------------------------------------
+## POST friendships/blocks/remove ##
+
+### Description ###
+Remove a block for a specific user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the blocked user.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/friendships/blocks/remove.json
+	oauth_token=1234567890123456789012&user_id=4e226fcd4e61754161000007
+
+### Sample Result ###
+	{
+		"user_id": "4e226fcd4e61754161000007",
+		"first_name": "Robby",
+		"last_name": "Stein",
+		"screen_name": "robby",
+		"display_name": "Robby S.",
+		"profile_image": "http://img.stamped.com/u/robby.png"
+		"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+		"color_primary": "A0EE33",
+		"color_secondary": "BBBBFF",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 0,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
+	}
+
+

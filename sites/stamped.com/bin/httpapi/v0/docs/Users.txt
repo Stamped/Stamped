@@ -1,0 +1,168 @@
+
+# USERS #
+
+
+------------------------------------------------------------------------------
+## GET users/show ##
+
+### Description ###
+Show detailed information for a given user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the requested user. If the user id does not match the screen name then the user id will take precedence. 
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/users/show.json
+	oauth_token=1234567890123456789012&user_id=47cc67093475061e3d95369d
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"screen_name": "kevin",
+		"display_name": "Kevin P.",
+		"profile_image": "http://img.stamped.com/u/kevin.png"
+		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+		"color_primary": "333333",
+		"color_secondary": "999999",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 0,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
+	}
+
+
+------------------------------------------------------------------------------
+## GET users/lookup ##
+
+### Description ###
+Return detailed information for up to 100 users. Users can be specified by id, screen name, or a combination of the two.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_ids** or **screen_names** _required_
+The user ids or screen names of the requested users. Multiple values should be separated by commas.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/lookup.json
+	oauth_token=1234567890123456789012&user_ids=47cc67093475061e3d95369d,4e226fcd4e61754161000007&screen_names=kevin,robby
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"first_name": "Kevin",
+			"last_name": "Palms",
+			"screen_name": "kevin",
+			"display_name": "Kevin P.",
+			"profile_image": "http://img.stamped.com/u/kevin.png"
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		},
+		{
+			"user_id": "4e226fcd4e61754161000007",
+			"first_name": "Robby",
+			"last_name": "Stein",
+			"screen_name": "robby",
+			"display_name": "Robby S.",
+			"profile_image": "http://img.stamped.com/u/robby.png"
+			"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+			"color_primary": "A0EE33",
+			"color_secondary": "BBBBFF",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		}
+	]
+
+
+------------------------------------------------------------------------------
+## GET users/search ##
+
+### Description ###
+Search users via their name, screen name, and bio. Returns a list of user objects, up to 20 at most.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**q** _required_
+The search query to run. 
+
+**limit** _optional_
+The number of results to return. Default is 20.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/search.json
+	oauth_token=1234567890123456789012&q=Kevin%20Palms
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"first_name": "Kevin",
+			"last_name": "Palms",
+			"screen_name": "kevin",
+			"display_name": "Kevin P.",
+			"profile_image": "http://img.stamped.com/u/kevin.png"
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		}
+	]
+
+
+------------------------------------------------------------------------------
+## GET users/privacy ##
+
+### Description ###
+Check whether a given user's account is publicly available or not.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**user_id** or **screen_name** _required_
+The user id or screen name of the requested user.
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/privacy.json
+	oauth_token=1234567890123456789012&user_id=47cc67093475061e3d95369d
+
+### Sample Result ###
+	false
+
+

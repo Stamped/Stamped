@@ -48,6 +48,22 @@
 				<int key="NSvFlags">274</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
+					<object class="IBUIImageView" id="730835077">
+						<reference key="NSNextResponder" ref="191373211"/>
+						<int key="NSvFlags">292</int>
+						<string key="NSFrame">{{0, -64}, {320, 480}}</string>
+						<reference key="NSSuperview" ref="191373211"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="870662028"/>
+						<string key="NSReuseIdentifierKey">_NS:541</string>
+						<int key="IBUIContentMode">4</int>
+						<bool key="IBUIUserInteractionEnabled">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<object class="NSCustomResource" key="IBUIImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">gradient_background.png</string>
+						</object>
+					</object>
 					<object class="IBUIScrollView" id="870662028">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">268</int>
@@ -86,7 +102,7 @@
 								<string key="NSFrame">{{30, 50}, {270, 15}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="101741781"/>
+								<reference key="NSNextKeyView" ref="591413953"/>
 								<string key="NSReuseIdentifierKey">_NS:129</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -368,6 +384,46 @@
 								<reference key="IBUIBackgroundColor" ref="935530847"/>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
+							<object class="IBUIButton" id="591413953">
+								<reference key="NSNextResponder" ref="870662028"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{261, 29}, {45, 24}}</string>
+								<reference key="NSSuperview" ref="870662028"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="101741781"/>
+								<string key="NSReuseIdentifierKey">_NS:222</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<int key="IBUIContentMode">1</int>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIContentHorizontalAlignment">2</int>
+								<int key="IBUIContentVerticalAlignment">0</int>
+								<object class="NSFont" key="IBUIFont">
+									<string key="NSName">Helvetica-Bold</string>
+									<double key="NSSize">10</double>
+									<int key="NSfFlags">16</int>
+								</object>
+								<double key="IBUIImageEdgeInsets.top">0.0</double>
+								<double key="IBUIImageEdgeInsets.bottom">3</double>
+								<double key="IBUIImageEdgeInsets.left">0.0</double>
+								<double key="IBUIImageEdgeInsets.right">2</double>
+								<string key="IBUINormalTitle">Edit</string>
+								<object class="NSColor" key="IBUIHighlightedTitleColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MAA</bytes>
+								</object>
+								<object class="NSColor" key="IBUINormalTitleColor">
+									<int key="NSColorSpace">1</int>
+									<bytes key="NSRGB">MC42IDAuNiAwLjYAA</bytes>
+								</object>
+								<object class="NSColor" key="IBUINormalTitleShadowColor" id="5386939">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MC41AA</bytes>
+								</object>
+								<object class="NSCustomResource" key="IBUINormalImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">edit_pencil.png</string>
+								</object>
+							</object>
 						</object>
 						<string key="NSFrameSize">{320, 416}</string>
 						<reference key="NSSuperview" ref="191373211"/>
@@ -412,10 +468,7 @@
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
-						<object class="NSColor" key="IBUINormalTitleShadowColor" id="5386939">
-							<int key="NSColorSpace">3</int>
-							<bytes key="NSWhite">MC41AA</bytes>
-						</object>
+						<reference key="IBUINormalTitleShadowColor" ref="5386939"/>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">toolbar_close</string>
@@ -427,6 +480,7 @@
 						<string key="NSFrame">{{181, 367}, {55, 49}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:196</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUIContentMode">1</int>
@@ -461,7 +515,7 @@
 				<string key="NSFrame">{{0, 64}, {320, 416}}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
-				<reference key="NSNextKeyView" ref="870662028"/>
+				<reference key="NSNextKeyView" ref="730835077"/>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">3</int>
 					<bytes key="NSWhite">MQA</bytes>
@@ -634,6 +688,23 @@
 					</object>
 					<int key="connectionID">102</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">editButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="591413953"/>
+					</object>
+					<int key="connectionID">105</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">editButtonPressed:</string>
+						<reference key="source" ref="591413953"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">106</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -654,6 +725,7 @@
 							<reference ref="573052172"/>
 							<reference ref="870662028"/>
 							<reference ref="20863377"/>
+							<reference ref="730835077"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -678,6 +750,7 @@
 							<reference ref="895504012"/>
 							<reference ref="9764505"/>
 							<reference ref="555494954"/>
+							<reference ref="591413953"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -827,6 +900,18 @@
 						<reference key="parent" ref="101741781"/>
 						<string key="objectName">Credit Text Field</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">103</int>
+						<reference key="object" ref="591413953"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Edit Button</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">104</int>
+						<reference key="object" ref="730835077"/>
+						<reference key="parent" ref="191373211"/>
+						<string key="objectName">Gradient Background Image View</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -841,6 +926,10 @@
 					<string>10.IBPluginDependency</string>
 					<string>100.CustomClassName</string>
 					<string>100.IBPluginDependency</string>
+					<string>103.IBPluginDependency</string>
+					<string>103.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
+					<string>103.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
+					<string>104.IBPluginDependency</string>
 					<string>36.IBPluginDependency</string>
 					<string>36.IBUserGuides</string>
 					<string>37.IBPluginDependency</string>
@@ -873,6 +962,10 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>STCreditTextField</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<real value="2"/>
+					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
@@ -912,7 +1005,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">102</int>
+			<int key="maxID">106</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -925,10 +1018,12 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>backOrCancelButtonPressed:</string>
+							<string>editButtonPressed:</string>
 							<string>saveStampButtonPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 						</object>
@@ -938,12 +1033,17 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>backOrCancelButtonPressed:</string>
+							<string>editButtonPressed:</string>
 							<string>saveStampButtonPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">backOrCancelButtonPressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">editButtonPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -962,6 +1062,7 @@
 							<string>checkmarkButton</string>
 							<string>creditTextField</string>
 							<string>detailLabel</string>
+							<string>editButton</string>
 							<string>reasoningLabel</string>
 							<string>reasoningTextView</string>
 							<string>ribbonedContainerView</string>
@@ -979,6 +1080,7 @@
 							<string>UIButton</string>
 							<string>STCreditTextField</string>
 							<string>UILabel</string>
+							<string>UIButton</string>
 							<string>UILabel</string>
 							<string>UITextView</string>
 							<string>UIView</string>
@@ -999,6 +1101,7 @@
 							<string>checkmarkButton</string>
 							<string>creditTextField</string>
 							<string>detailLabel</string>
+							<string>editButton</string>
 							<string>reasoningLabel</string>
 							<string>reasoningTextView</string>
 							<string>ribbonedContainerView</string>
@@ -1033,6 +1136,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">detailLabel</string>
 								<string key="candidateClassName">UILabel</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">editButton</string>
+								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">reasoningLabel</string>
@@ -1096,6 +1203,8 @@
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>credit_icon@2x.png</string>
+				<string>edit_pencil.png</string>
+				<string>gradient_background.png</string>
 				<string>shelf_background.png</string>
 				<string>stamp_detail_ripple_bottom</string>
 				<string>stamp_detail_ripple_top</string>
@@ -1105,6 +1214,8 @@
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{30, 20}</string>
+				<string>{16, 16}</string>
+				<string>{320, 480}</string>
 				<string>{320, 240}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>

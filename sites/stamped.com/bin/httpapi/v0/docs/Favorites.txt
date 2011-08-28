@@ -1,0 +1,302 @@
+
+# FAVORITES #
+
+
+------------------------------------------------------------------------------
+## POST favorites/create ##
+
+### Description ###
+Add a given entity to the authenticated user's list. If inspired by a stamp, the stamp's unique id is recorded as well.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**entity_id** _required_
+The id of the entity added to the list
+
+**stamp_id** _optional_
+The id of the stamp that the entity was saved from. This is used to suggest credit upon completion of the item. 
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/favorites/create.json
+	oauth_token=1234567890123456789012&entity_id=4e26294e32a7ba0d4a000005
+
+### Sample Result ###
+	{
+		"complete": false, 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"favorite_id": "4e26294f32a7ba0d4a000007", 
+		"stamp": {
+			"blurb": "Went here with @robby... Really, the best ever.", 
+			"entity": {
+				"entity_id": "4e226ea84e61754161000000",
+				"title": "Spotted Pig",
+				"subtitle": "New York, NY"
+				"category": "food",
+				"subcategory": "restaurant"
+				"desc": "Burger place",
+				"coordinates": "40.714623,-74.006605",
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"last_modified": "2011-07-17 19:03:22.354813",
+				"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+				"phone": "1235551234"
+			}, 
+			"stamp_id": "4e226fcd4e18474561000000", 
+			"credit": [
+				{
+					"user_id": "4e226fcd4e61754161000007",
+					"profile_image": "http://img.stamped.com/u/robby.png", 
+					"screen_name": "robby",
+					"display_name": "Robby S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
+				},
+				{
+					"user_id": "4e226fcd4e61754161000008",
+					"profile_image": "http://img.stamped.com/u/bart.png", 
+					"screen_name": "bart",
+					"display_name": "Bart S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
+				}
+			], 
+			"mentions": [
+				{
+					"display_name": "Robby S.", 
+					"indices": [15,21], 
+					"screen_name": "robby", 
+					"user_id": "4e226fcd4e61754161000007"
+				}
+			], 
+			"created": "2011-07-17 05:14:54.128641",
+			"user": {
+				"user_id": "47cc67093475061e3d95369d", 
+				"profile_image": "http://img.stamped.com/u/kevin.png", 
+				"display_name": "Kevin P.", 
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"screen_name": "kevin",
+				"privacy": false
+			},
+			"num_comments": 1
+		}, 
+		"created": "2011-07-20 01:03:11.223326",
+		"user_id": "4e26294e32a7ba0d4a000004"
+	}
+
+
+------------------------------------------------------------------------------
+## GET favorites/show ##
+
+### Description ###
+Return all favorites for a given user. 
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**limit** _optional_
+The maximum number of desired results. Values greater than the default (20) will be ignored.
+
+**since** _optional_
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of stamps to be returned. 
+
+**before** _optional_
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of stamps to be returned.
+
+### Sample Request ###
+	GET https://api.stamped.com/v1/favorites/show.json?oauth_token=1234567890123456789012
+
+### Sample Result ###
+	[
+		{
+			"complete": false, 
+			"entity": {
+				"entity_id": "4e226ea84e61754161000000",
+				"title": "Spotted Pig",
+				"subtitle": "New York, NY"
+				"category": "food",
+				"subcategory": "restaurant"
+				"desc": "Burger place",
+				"coordinates": "40.714623,-74.006605",
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"last_modified": "2011-07-17 19:03:22.354813",
+				"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+				"phone": "1235551234"
+			}, 
+			"favorite_id": "4e26294f32a7ba0d4a000007", 
+			"stamp": {
+				"blurb": "Went here with @robby... Really, the best ever.", 
+				"entity": {
+					"entity_id": "4e226ea84e61754161000000",
+					"title": "Spotted Pig",
+					"subtitle": "New York, NY"
+					"category": "food",
+					"subcategory": "restaurant"
+					"desc": "Burger place",
+					"coordinates": "40.714623,-74.006605",
+					"address": "314 West 11th Street New York, NY 10014-2369",
+					"last_modified": "2011-07-17 19:03:22.354813",
+					"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+					"phone": "1235551234"
+				}, 
+				"stamp_id": "4e226fcd4e18474561000000", 
+				"credit": [
+					{
+						"user_id": "4e226fcd4e61754161000007",
+						"profile_image": "http://img.stamped.com/u/robby.png", 
+						"screen_name": "robby",
+						"display_name": "Robby S.",
+						"color_primary": "333333",
+						"color_secondary": "999999",
+						"privacy": false
+					},
+					{
+						"user_id": "4e226fcd4e61754161000008",
+						"profile_image": "http://img.stamped.com/u/bart.png", 
+						"screen_name": "bart",
+						"display_name": "Bart S.",
+						"color_primary": "333333",
+						"color_secondary": "999999",
+						"privacy": false
+					}
+				], 
+				"mentions": [
+					{
+						"display_name": "Robby S.", 
+						"indices": [15,21], 
+						"screen_name": "robby", 
+						"user_id": "4e226fcd4e61754161000007"
+					}
+				], 
+				"created": "2011-07-17 05:14:54.128641",
+				"user": {
+					"user_id": "47cc67093475061e3d95369d", 
+					"profile_image": "http://img.stamped.com/u/kevin.png", 
+					"display_name": "Kevin P.", 
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"screen_name": "kevin",
+					"privacy": false
+				},
+				"num_comments": 1
+			}, 
+			"created": "2011-07-20 01:03:11.223326",
+			"user_id": "4e26294e32a7ba0d4a000004"
+		}
+	]
+
+
+------------------------------------------------------------------------------
+## POST favorites/remove ##
+
+### Description ###
+Remove a given item from the list of favorites. This does not destroy any stamps that were created from the item.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**entity_id** _required_
+The unique id of the favorited entity.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/favorites/remove.json
+	oauth_token=1234567890123456789012&favorite_id=4e26294f32a7ba0d4a000007
+
+### Sample Result ###
+	{
+		"complete": false, 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"favorite_id": "4e26294f32a7ba0d4a000007", 
+		"stamp": {
+			"blurb": "Went here with @robby... Really, the best ever.", 
+			"entity": {
+				"entity_id": "4e226ea84e61754161000000",
+				"title": "Spotted Pig",
+				"subtitle": "New York, NY"
+				"category": "food",
+				"subcategory": "restaurant"
+				"desc": "Burger place",
+				"coordinates": "40.714623,-74.006605",
+				"address": "314 West 11th Street New York, NY 10014-2369",
+				"last_modified": "2011-07-17 19:03:22.354813",
+				"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+				"phone": "1235551234"
+			}, 
+			"stamp_id": "4e226fcd4e18474561000000", 
+			"credit": [
+				{
+					"user_id": "4e226fcd4e61754161000007",
+					"profile_image": "http://img.stamped.com/u/robby.png", 
+					"screen_name": "robby",
+					"display_name": "Robby S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
+				},
+				{
+					"user_id": "4e226fcd4e61754161000008",
+					"profile_image": "http://img.stamped.com/u/bart.png", 
+					"screen_name": "bart",
+					"display_name": "Bart S.",
+					"color_primary": "333333",
+					"color_secondary": "999999",
+					"privacy": false
+				}
+			], 
+			"mentions": [
+				{
+					"display_name": "Robby S.", 
+					"indices": [15,21], 
+					"screen_name": "robby", 
+					"user_id": "4e226fcd4e61754161000007"
+				}
+			], 
+			"created": "2011-07-17 05:14:54.128641",
+			"user": {
+				"user_id": "47cc67093475061e3d95369d", 
+				"profile_image": "http://img.stamped.com/u/kevin.png", 
+				"display_name": "Kevin P.", 
+				"color_primary": "333333",
+				"color_secondary": "999999",
+				"screen_name": "kevin",
+				"privacy": false
+			},
+			"num_comments": 1
+		}, 
+		"created": "2011-07-20 01:03:11.223326",
+		"user_id": "4e26294e32a7ba0d4a000004"
+	}
+
+
