@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy
+import copy, urllib, urlparse
 from datetime import datetime
 from schema import *
 from Schemas import *
@@ -13,6 +13,9 @@ from Schemas import *
 # ####### #
 # PRIVATE #
 # ####### #
+
+LINKSHARE_TOKEN = 'QaV3NQJNPRA'
+FANDANGO_TOKEN  = '5348839'
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -34,6 +37,36 @@ def _coordinatesFlatToDict(coordinates):
         }
     except:
         return None
+
+def _encodeLinkShareDeepURL(raw_url):
+    parsed_url  = urlparse.urlparse(raw_url)
+    query       = "partnerId=30"
+    new_query   = (parsed_url.query+'&'+query) if parsed_url.query else query
+    url         = urlparse.urlunparse((
+                        parsed_url.scheme,
+                        parsed_url.netloc,
+                        parsed_url.path,
+                        parsed_url.params,
+                        new_query,
+                        parsed_url.fragment
+                    ))
+    deep_url    = urllib.quote_plus(urllib.quote_plus(url))
+    return deep_url
+
+def _encodeiTunesShortURL(raw_url):
+    parsed_url  = urlparse.urlparse(raw_url)
+    query       = "partnerId=30&siteID=%s" % LINKSHARE_TOKEN
+    new_query   = (parsed_url.query+'&'+query) if parsed_url.query else query
+    url         = urlparse.urlunparse((
+                        parsed_url.scheme,
+                        parsed_url.netloc,
+                        parsed_url.path,
+                        parsed_url.params,
+                        new_query,
+                        parsed_url.fragment
+                    ))
+    return url
+
 
 # ######### #
 # OAuth 2.0 #
@@ -199,16 +232,37 @@ class HTTPEntity(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.subcategory        = SchemaElement(basestring, required=True)
         self.desc               = SchemaElement(basestring)
+        self.image              = SchemaElement(basestring)
+        self.last_modified      = SchemaElement(basestring)
+
         self.address            = SchemaElement(basestring)
         self.neighborhood       = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
+
         self.phone              = SchemaElement(int)
         self.site               = SchemaElement(basestring)
         self.hours              = SchemaElement(basestring)
+
         self.cuisine            = SchemaElement(basestring)
+
+        self.isbn               = SchemaElement(basestring)
+        self.publisher          = SchemaElement(basestring)
+        self.format             = SchemaElement(basestring)
+        self.language           = SchemaElement(basestring)
+
+        self.rating             = SchemaElement(basestring)
+        self.track_length       = SchemaElement(basestring)
+        self.release_date       = SchemaElement(basestring)
+        self.genre              = SchemaElement(basestring)
+        self.cast               = SchemaElement(basestring)
+        self.director           = SchemaElement(basestring)
+
         self.opentable_url      = SchemaElement(basestring)
-        self.last_modified      = SchemaElement(basestring)
+        self.itunes_url         = SchemaElement(basestring)
+        self.itunes_short_url   = SchemaElement(basestring)
+        self.netflix_url        = SchemaElement(basestring)
+        self.fandango_url       = SchemaElement(basestring)
+        self.barnesnoble_url    = SchemaElement(basestring)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
@@ -216,24 +270,87 @@ class HTTPEntity(Schema):
             coordinates         = data.pop('coordinates', None)
             
             self.importData(data, overflow=True)
+
+            self.last_modified  = schema.timestamp.created
             
+            # Place
             self.address        = schema.details.place.address
             self.neighborhood   = schema.details.place.neighborhood
+            self.coordinates    = _coordinatesDictToFlat(coordinates)
+
+            # Contact
             self.phone          = schema.details.contact.phone
             self.site           = schema.details.contact.site
             self.hours          = schema.details.contact.hoursOfOperation
+            
+            # Food
             self.cuisine        = schema.details.restaurant.cuisine
-            self.coordinates    = _coordinatesDictToFlat(coordinates)
+
+            # Book
+            self.isbn           = schema.details.book.isbn
+            self.publisher      = schema.details.book.publisher
+            # self.format         = None
+            # self.language       = None
+
+            # Film
+            self.rating         = schema.details.media.mpaa_rating
+            self.track_length   = schema.details.media.track_length
+            self.release_date   = schema.details.media.original_release_date
+            # self.genre          = None
+            # self.cast           = None
+            # self.director       = None
+
+            # Music
+            ### TODO
             
-            self.last_modified  = schema.timestamp.created
-            
+            # Affiliates
             if schema.sources.openTable.reserveURL != None:
                 url = "http://www.opentable.com/reserve/%s&ref=9166" % \
                         (schema.sources.openTable.reserveURL)
                 self.opentable_url = url
+            
+            if schema.sources.apple.view_url != None:
+                itunes_url  = schema.sources.apple.view_url
+                base_url    = "http://click.linksynergy.com/fs-bin/stat"
+                params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" \
+                            % (LINKSHARE_TOKEN)
+                deep_url    = "%s?%s&RD_PARM1=%s" % (base_url, params, \
+                                    _encodeLinkShareDeepURL(itunes_url))
+                short_url   = _encodeiTunesShortURL(itunes_url)
+
+                self.itunes_url         = deep_url
+                self.itunes_short_url   = short_url
+
+            # if schema.sources.netflix
+
+            # if schema.sources.fandango.url != None:
+
+            # if schema.sources.barnesAndNoble
+            
+
         else:
             raise NotImplementedError
         return self
+    
+    def exportSparse(self):
+        ret = {}
+        for k, v in self._elements.iteritems():
+            if isinstance(v, Schema):
+                data = v.exportSparse()
+                if len(data) > 0:
+                    ret[k] = data
+            elif isinstance(v, SchemaList):
+                if len(v) > 0:
+                    ret[k] = v.value
+            elif isinstance(v, SchemaElement):
+                # if v.isSet == True:
+                if v.value != None:
+                    ret[k] = v.value
+            else:
+                msg = "Unrecognized Element (%s)" % k
+                logs.warning(msg)
+                raise SchemaTypeError(msg)
+        return ret
 
 class HTTPEntityNew(Schema):
     def setSchema(self):

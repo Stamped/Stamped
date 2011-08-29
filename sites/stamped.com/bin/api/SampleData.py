@@ -242,7 +242,7 @@ def betaAccountDataOAuth(baseurl):
         "bio": "Head of mobile awesomeness at NYC startup. Formerly at the Google. Went to Tufts. It was not my safety school.",
         "website": "http://about.me/andybons",
         "color": "14A800,5DD960",
-        "profile_image": "https://si0.twimg.com/profile_images/1443373911/image_reasonably_small.jpg" ### TEMP!!!
+        "profile_image": "https://twimg0-a.akamaihd.net/profile_images/1492360014/me.jpg" ### TEMP!!!
     }
     users.append(createUser(baseurl, userData))
 
@@ -277,7 +277,7 @@ def betaAccountDataOAuth(baseurl):
     
     userData = {
         "first_name": "Jill",
-        "last_name": "Lubochinksy", 
+        "last_name": "Lubochinski", 
         "email": "jlubo3@gmail.com", 
         "password": "12345",
         "screen_name": "jill",
@@ -323,7 +323,7 @@ def betaAccountDataOAuth(baseurl):
         "privacy": False,
         "bio": "Google Chrome Software Engineer / open source software developer / photographer",
         "color": "0072BC,005480",
-        "profile_image": "https://twimg0-a.akamaihd.net/profile_images/194428542/Photo_14.jpg" ### TEMP!!!        
+        "profile_image": "http://media02.linkedin.com/media/p/3/000/024/03b/3297d26.jpg" ### TEMP!!!        
     }
     users.append(createUser(baseurl, userData))
 
@@ -336,7 +336,7 @@ def betaAccountDataOAuth(baseurl):
         "privacy": False,
         "bio": "I'm cute. And small. And fun.",
         "color": "000000,000000",
-        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!        
+        "profile_image": "https://twimg0-a.akamaihd.net/profile_images/1259707017/blackminimaliz.jpg" ### TEMP!!!        
     }
     users.append(createUser(baseurl, userData))
 
