@@ -137,11 +137,75 @@ def betaAccountDataOAuth(baseurl):
         "screen_name": "danielle",
         "privacy": False,
         "bio": "I'm cute. And small. And fun.",
-        "color": "33B6DA,006C89",
-        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!        
+        "color": "8C1FC3,A02BCF",
+        "profile_image": "http://a2.twimg.com/profile_images/1507664855/165735_776996026577_602907_42417430_6887446_n.jpg" ### TEMP!!!        
+    }
+    users.append(createUser(baseurl, userData))
+    
+    userData = {
+        "first_name": "Jill",
+        "last_name": "Lubochinksy", 
+        "email": "jlubo3@gmail.com", 
+        "password": "12345",
+        "screen_name": "jill",
+        "privacy": False,
+        "bio": "i love tv and watch a lot of it. way more than you.",
+        "color": "F2DF11,F2DF11",
+        "profile_image": "http://media.linkedin.com/mpr/pub/image-0JORppVmtUmZQKn00DB6pRGNbCEPliQ0rIsyprAQbN-8AWh9/jill-lubochinski.jpg"        
+    }
+    users.append(createUser(baseurl, userData))
+    
+    userData = {
+        "first_name": "Andy",
+        "last_name": "Kraut", 
+        "email": "andykraut@gmail.com", 
+        "password": "12345",
+        "screen_name": "andy",
+        "privacy": False,
+        "bio": "Coolest things about me: FunnyOrDie employee. Live in NYC. Literate.",
+        "color": "09876A,09876A",
+        "profile_image": "http://a2.twimg.com/profile_images/1469480706/image.jpg" ### TEMP!!!        
+    }
+    users.append(createUser(baseurl, userData))
+    
+    userData = {
+        "first_name": "Eli",
+        "last_name": "Horne", 
+        "email": "elihorne@gmail.com", 
+        "password": "12345",
+        "screen_name": "elihorne",
+        "privacy": False,
+        "bio": "UX designer @ Google.",
+        "color": "80e2f2,43afc1",
+        "profile_image": "http://a0.twimg.com/profile_images/1310573812/tweeters-square.png" ### TEMP!!!        
+    }
+    users.append(createUser(baseurl, userData))
+    
+    userData = {
+        "first_name": "Robert",
+        "last_name": "Sesek", 
+        "email": "rsesek@gmail.com", 
+        "password": "12345",
+        "screen_name": "rsesek",
+        "privacy": False,
+        "bio": "Google Chrome Software Engineer / open source software developer / photographer",
+        "color": "0072BC,005480",
+        "profile_image": "https://twimg0-a.akamaihd.net/profile_images/194428542/Photo_14.jpg" ### TEMP!!!        
     }
     users.append(createUser(baseurl, userData))
 
+    userData = {
+        "first_name": "Liz",
+        "last_name": "Tan", 
+        "email": "lizxtan@gmail.com", 
+        "password": "12345",
+        "screen_name": "liztan",
+        "privacy": False,
+        "bio": "I'm cute. And small. And fun.",
+        "color": "000000,000000",
+        "profile_image": "https://si0.twimg.com/profile_images/147088134/twitter_profile_reasonably_small.jpg" ### TEMP!!!        
+    }
+    users.append(createUser(baseurl, userData))
 
 
     print users
