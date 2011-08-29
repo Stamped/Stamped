@@ -102,7 +102,7 @@ class User(Schema):
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('UserMini', 'UserTiny'):
-            schema.importData(self.exportSparse(), overflow=True)
+            schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
 
@@ -276,7 +276,7 @@ class Entity(Schema):
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
-            schema.importData(self.exportSparse(), overflow=True)
+            schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
         return schema

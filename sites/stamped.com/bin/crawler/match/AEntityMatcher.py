@@ -187,7 +187,7 @@ class AEntityMatcher(object):
             
             # add any fields from this version of the duplicate to the version 
             # that we're keeping if they don't already exist
-            _addDict(entity.exportSparse(), keep)
+            _addDict(entity.value, keep)
             #titles.add(entity.title)
             
             if not self.options.noop:

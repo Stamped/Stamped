@@ -435,17 +435,17 @@ class SparseSchemaTest(ASchemaTestCase):
     def test_sparse(self):
         self.assertEqual(
             self.sampleData['basestring'], 
-            self.schema.exportSparse()['basestring']
+            self.schema.value['basestring']
         )
         self.assertEqual(
             self.sampleData['none'], 
-            self.schema.exportSparse()['none']
+            self.schema.value['none']
         )
         self.assertEqual(
             'abc', 
-            self.schema.exportSparse()['default']
+            self.schema.value['default']
         )
-        self.assertTrue('empty' not in self.schema.exportSparse())
+        self.assertTrue('empty' not in self.schema.value)
 
 class ListSchemaTest(ASchemaTestCase):
 

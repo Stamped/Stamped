@@ -266,7 +266,7 @@ class HTTPEntity(Schema):
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            data                = schema.exportSparse()
+            data                = schema.value
             coordinates         = data.pop('coordinates', None)
             
             self.importData(data, overflow=True)
@@ -331,26 +331,6 @@ class HTTPEntity(Schema):
         else:
             raise NotImplementedError
         return self
-    
-    def exportSparse(self):
-        ret = {}
-        for k, v in self._elements.iteritems():
-            if isinstance(v, Schema):
-                data = v.exportSparse()
-                if len(data) > 0:
-                    ret[k] = data
-            elif isinstance(v, SchemaList):
-                if len(v) > 0:
-                    ret[k] = v.value
-            elif isinstance(v, SchemaElement):
-                # if v.isSet == True:
-                if v.value != None:
-                    ret[k] = v.value
-            else:
-                msg = "Unrecognized Element (%s)" % k
-                logs.warning(msg)
-                raise SchemaTypeError(msg)
-        return ret
 
 class HTTPEntityNew(Schema):
     def setSchema(self):
@@ -414,7 +394,7 @@ class HTTPEntityAutosuggest(Schema):
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            self.importData(schema.exportSparse(), overflow=True)
+            self.importData(schema.value, overflow=True)
             
             if schema.address is not None:
                 self.subtitle = schema.address
