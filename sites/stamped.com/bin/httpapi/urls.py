@@ -88,8 +88,6 @@ urlpatterns = patterns('',
     (r'v0/temp/friends.json', 			'v0.functions.temp.friends'),
     (r'v0/temp/followers.json', 		'v0.functions.temp.followers'),
 
-
-
     ### DOCS
     (r'v0/oauth2/$',                    'v0.views.oauth2'),
     (r'v0/account/$',                   'v0.views.account'),

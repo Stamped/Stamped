@@ -9,6 +9,7 @@ import Globals, utils, logs, re
 from datetime import datetime
 from errors import *
 from auth import convertPasswordForStorage
+import base64
 
 from AStampedAPI import AStampedAPI
 
@@ -117,13 +118,15 @@ class StampedAPI(AStampedAPI):
 
         return account
     
-    def updateProfileImage(self, authUserId, url):
-
-        ### TODO: Grab image and do something with it. Currently just sets as url.
-            
-        self._accountDB.setProfileImageLink(authUserId, url)
+    def updateProfileImage(self, authUserId, data):
+        data = base64.decodestring(data)
         
-        return url
+        #self._accountDB.setProfileImageLink(authUserId, url)
+        
+        image = self._imageDB.getImage(data)
+        self._imageDB.addProfileImage(authUserId, image)
+        
+        return True
     
     def removeAccount(self, authUserId):
         account = self._accountDB.getAccount(authUserId)

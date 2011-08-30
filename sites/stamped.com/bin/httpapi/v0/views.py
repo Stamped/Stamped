@@ -23,7 +23,6 @@ def _getDoc(name):
         response.status_code = 500
         return response
 
-
 def index(request):
     return _getDoc('Index')
 
@@ -62,3 +61,4 @@ def temp(request):
 
 def default(request):
     return HttpResponse("This is where the API will go.")
+

@@ -59,19 +59,21 @@ class MongoDBConfig(Singleton):
                 raise
         
         if not 'mongodb' in self.config:
-            logs.info("Invalid config file; defaulting to localhost:30000")
+            self.config = AttributeDict({
+               "mongodb" : {
+                   "host" : "localhost", 
+                   "port" : 30000, 
+               }
+            })
+            
+            logs.info("Invalid config file; defaulting to %s:%d" % (self.config.mongodb.host, self.config.mongodb.port))
+            
             # self.config = AttributeDict({
             #     "mongodb" : {
             #         "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
             #         "port" : 27017, 
             #     }
             # })
-            self.config = AttributeDict({
-               "mongodb" : {
-                   "host" : "localhost", 
-                   "port" : 27017, 
-               }
-            })
             # self.config = AttributeDict({
             #    "mongodb" : {
             #        "host" : "localhost", 

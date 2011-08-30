@@ -30,11 +30,11 @@ def parseCommandLine():
 def main():
     options, args = parseCommandLine()
     
-    stampedAPI = MongoStampedAPI(options.db)
+    stampedAPI = MongoStampedAPI()
     stats = stampedAPI.getStats()
     
     pprint(stats)
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     main()
 

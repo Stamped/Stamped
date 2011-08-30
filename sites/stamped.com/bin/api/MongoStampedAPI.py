@@ -11,6 +11,7 @@ from Entity import *
 from utils import lazyProperty
 from StampedAPI import StampedAPI
 from Schemas import *
+from S3ImageDB import S3ImageDB
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoEntityCollection import MongoEntityCollection
@@ -77,6 +78,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _entitySearcher(self):
         return MongoEntitySearcher()
+    
+    @lazyProperty
+    def _imageDB(self):
+        return S3ImageDB()
     
     def getStats(self):
         source_stats = { }

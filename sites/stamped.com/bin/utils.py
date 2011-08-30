@@ -13,6 +13,7 @@ from functools import wraps
 from BeautifulSoup import BeautifulSoup
 from StringIO import StringIO
 import htmlentitydefs
+import aws
 import logs
 
 def shell(cmd, customEnv=None):
@@ -424,8 +425,8 @@ def normalize(s, strict=False):
         if strict and isinstance(s, unicode):
             s = removeNonAscii(s.encode("utf-8"))
     except Exception as e:
-        utils.printException()
-        utils.log(e)
+        printException()
+        log(e)
     
     return s
 
@@ -463,10 +464,7 @@ def getInstance(name):
     except ValueError:
         return None
     
-    AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
-    AWS_SECRET_KEY    = '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'
-    
-    conn = EC2Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+    conn = EC2Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
     reservations = conn.get_all_instances()
     
     for reservation in reservations:

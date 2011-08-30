@@ -1,0 +1,14 @@
+<html>
+<head>
+    <title>{{ name }}</title>
+</head>
+<body>
+    {% for img in images %}
+    <p>
+        <img src="{{ img.url }}">
+        ({{ img.size }})
+    </p>
+    {% endfor %}
+</body>
+</html>
+

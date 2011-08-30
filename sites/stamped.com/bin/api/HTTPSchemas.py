@@ -106,7 +106,7 @@ class HTTPAccountProfile(Schema):
 
 class HTTPAccountProfileImage(Schema):
     def setSchema(self):
-        self.profile_image      = SchemaElement(basestring)
+        self.profile_image      = SchemaElement(basestring, normalize=False)
 
 # ##### #
 # Users #

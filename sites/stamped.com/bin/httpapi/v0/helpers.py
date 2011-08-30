@@ -20,7 +20,6 @@ from django.views.decorators.http import require_http_methods
 stampedAPI  = MongoStampedAPI()
 stampedAuth = MongoStampedAuth()
 
-
 def handleHTTPRequest(fn):
     @wraps(fn)
     def handleHTTPRequest(request, *args, **kwargs):
@@ -58,6 +57,8 @@ def handleHTTPRequest(fn):
 
         except Exception as e:
             logs.warning("500 Error: %s" % e)
+            utils.printException()
+            
             response = HttpResponse("error")
             response.status_code = 500
             return response
@@ -147,6 +148,8 @@ def parseRequest(schema, request):
     except Exception as e:
         msg = "Unable to parse form (%s)" % e
         logs.warning(msg)
+        utils.printException()
+        
         raise StampedHTTPError("bad_request", 400)
 
 def transformOutput(value, **kwargs):
@@ -155,6 +158,4 @@ def transformOutput(value, **kwargs):
     output = HttpResponse(output_json, **kwargs)
     logs.debug("Transform output: \"%s\"" % output_json)
     return output
-
-
 

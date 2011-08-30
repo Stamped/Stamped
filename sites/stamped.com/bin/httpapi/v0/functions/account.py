@@ -24,7 +24,6 @@ def create(request):
 
     return transformOutput(output)
 
-
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
@@ -35,7 +34,6 @@ def remove(request):
     account     = HTTPAccount().importSchema(account)
 
     return transformOutput(account.exportSparse())
-
 
 @handleHTTPRequest
 @require_http_methods(["POST", "GET"])
@@ -65,7 +63,6 @@ def settings(request):
 
     return transformOutput(account.exportSparse())
 
-
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile(request):
@@ -90,32 +87,50 @@ def update_profile(request):
 
     return transformOutput(user.exportSparse())
 
-
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile_image(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPAccountProfileImage(), request)
     
-    url         = stampedAPI.updateProfileImage(authUserId, schema.profile_image)
-
-    output      = { 'user_id': authUserId, 'profile_image': url }
-
+    ret         = stampedAPI.updateProfileImage(authUserId, schema.profile_image)
+    
+    suffix      = '.jpg'
+    
+    images = { }
+    prefixes = {
+        'fast' : 'static.stamped.com/', 
+        'slow' : 'http://stamped.com.static.images.s3.amazonaws.com/', 
+    }
+    
+    for k, prefix in prefixes.iteritems():
+        prefix = "%s/users/%s" % (prefix, authUserId)
+        value  = []
+        
+        value.append("%s%s" % (prefix, suffix))
+        value.append("%s-144x144%s" % (prefix, suffix))
+        value.append("%s-72x72%s" % (prefix, suffix))
+        value.append("%s-110x110%s" % (prefix, suffix))
+        value.append("%s-55x55%s" % (prefix, suffix))
+        value.append("%s-92x92%s" % (prefix, suffix))
+        value.append("%s-46x46%s" % (prefix, suffix))
+        value.append("%s-74x74%s" % (prefix, suffix))
+        value.append("%s-37x37%s" % (prefix, suffix))
+        value.append("%s-62x62%s" % (prefix, suffix))
+        value.append("%s-31x31%s" % (prefix, suffix))
+        images[k] = value
+    
+    output      = { 'user_id': authUserId, 'images': images, }
+    
     return transformOutput(output)
-
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def verify_credentials(request):
     raise NotImplementedError
 
-
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def reset_password(request):
     raise NotImplementedError
-
-
-
-
 

@@ -14,9 +14,11 @@ from pprint import pprint
 
 
 # TODO:
+    # TODO: photos
     # entity keyword search by breaking title up into distinct lexemes
     # unit tests and regression tests for autocomplete
         # Beauty & Essex, Per Se
+    # dedupe books
     # unit tests for deduper
     # fuzzy autocomplete to help with misspellings?
 
