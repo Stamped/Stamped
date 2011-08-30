@@ -105,6 +105,7 @@
 - (IBAction)addLocationButtonPressed:(id)sender {
   if (addLocationButton_ != sender)
     return;
+
   addLocationView_.hidden = NO;
   [UIView animateWithDuration:0.2 animations:^{
     addLocationButton_.alpha = 0.0;
@@ -117,6 +118,9 @@
 }
 
 - (IBAction)categoryDropdownPressed:(id)sender {
+  if (sender != categoryDropdownButton_)
+    return;
+  
   UIButton* button = sender;
   button.selected = YES;
   categoryDropdownTableView_.hidden = NO;
