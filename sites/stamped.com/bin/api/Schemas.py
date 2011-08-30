@@ -9,13 +9,6 @@ import copy
 from datetime import datetime
 from schema import *
 
-"""
-    notes:
-        * indirect addressing not working properly (e.g. entity.address)
-        * add assertExcept to catch specific exceptions
-        * add ability for default to be a derived value (e.g., lambda schema: ...)
-"""
-
 # #### #
 # Auth #
 # #### #
@@ -76,7 +69,6 @@ class LocaleSchema(Schema):
     def setSchema(self):
         self.language           = SchemaElement(basestring, default='en')
         self.time_zone          = SchemaElement(basestring)
-
 
 # ##### #
 # Users #
@@ -237,7 +229,6 @@ class Comment(Schema):
         self.mentions           = SchemaList(MentionSchema())
         self.timestamp          = TimestampSchema()
 
-
 # ######## #
 # Activity #
 # ######## #
@@ -260,8 +251,6 @@ class ActivityLink(Schema):
         self.entity_id          = SchemaElement(basestring)
         self.comment_id         = SchemaElement(basestring)
         self.url                = SchemaElement(basestring)
-
-
 
 # ######## #
 # Entities #
@@ -286,6 +275,11 @@ class Entity(Schema):
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
+            if self.subtitle is None:
+                if 'address' in self:
+                    self.subtitle = self.address
+                else:
+                    self.subtitle = self.subcategory
             schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
@@ -491,6 +485,7 @@ class EntitySourcesSchema(Schema):
         self.userGenerated      = UserGeneratedSchema()
         self.barnesAndNoble     = BarnesAndNobleSchema()
         self.sfweekly           = SFWeeklySchema()
+        self.seattletimes       = SeattleTimesSchema()
 
 class GooglePlacesSchema(Schema):
     def setSchema(self):
@@ -555,6 +550,10 @@ class SFMagSchema(Schema):
         pass
 
 class SFWeeklySchema(Schema):
+    def setSchema(self):
+        pass
+
+class SeattleTimesSchema(Schema):
     def setSchema(self):
         pass
 

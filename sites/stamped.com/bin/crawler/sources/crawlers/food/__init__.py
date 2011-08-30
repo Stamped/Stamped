@@ -9,6 +9,7 @@ import BostonMagCrawler
 import ChicagoMagCrawler
 import PhillyMagCrawler
 import WashMagCrawler
+import SeattleTimesCrawler
 import SFGateCrawler
 import SFWeeklyCrawler
 import TimeOutLACrawler
