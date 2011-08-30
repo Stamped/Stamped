@@ -102,7 +102,7 @@ class User(Schema):
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('UserMini', 'UserTiny'):
-            schema.importData(self.exportSparse(), overflow=True)
+            schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
 
@@ -247,10 +247,20 @@ class Activity(Schema):
         self.activity_id        = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = UserMini(required=True)
-        self.comment            = Comment()
-        self.stamp              = Stamp()
-        self.favorite           = Favorite()
+        self.image              = SchemaElement(basestring)
+        self.subject            = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring)
+        self.link               = ActivityLink()
         self.timestamp          = TimestampSchema()
+
+class ActivityLink(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring)
+        self.stamp_id           = SchemaElement(basestring)
+        self.entity_id          = SchemaElement(basestring)
+        self.comment_id         = SchemaElement(basestring)
+        self.url                = SchemaElement(basestring)
+
 
 
 # ######## #
@@ -276,7 +286,7 @@ class Entity(Schema):
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
-            schema.importData(self.exportSparse(), overflow=True)
+            schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
         return schema
@@ -480,6 +490,7 @@ class EntitySourcesSchema(Schema):
         self.awardAnnals        = AwardAnnalsSchema()
         self.userGenerated      = UserGeneratedSchema()
         self.barnesAndNoble     = BarnesAndNobleSchema()
+        self.sfweekly           = SFWeeklySchema()
 
 class GooglePlacesSchema(Schema):
     def setSchema(self):
@@ -540,6 +551,10 @@ class YelpSchema(Schema):
         self.yreviews           = SchemaElement(int)
 
 class SFMagSchema(Schema):
+    def setSchema(self):
+        pass
+
+class SFWeeklySchema(Schema):
     def setSchema(self):
         pass
 

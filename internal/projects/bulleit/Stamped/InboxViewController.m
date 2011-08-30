@@ -157,7 +157,6 @@ typedef enum {
   self.filmFilterButton = nil;
   self.musicFilterButton = nil;
   self.otherFilterButton = nil;
-  self.mapView.delegate = nil;
   self.selectedFilterButton = nil;
 }
 

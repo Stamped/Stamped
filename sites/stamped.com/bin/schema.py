@@ -630,7 +630,7 @@ class Schema(SchemaElement):
         clear = kwargs.pop('clear', True)
         
         if isinstance(data, Schema):
-            data = data.exportSparse()
+            data = data.value
         
         if not isinstance(data, dict) and data != None:
             msg = "Invalid Type (%s)" % data
@@ -751,11 +751,21 @@ class Schema(SchemaElement):
     def exportSparse(self):
         ret = {}
         for k, v in self._elements.iteritems():
-            if v.isSet:
-                if isinstance(v, Schema):
-                    ret[k] = v.exportSparse()
-                else:
+            if isinstance(v, Schema):
+                data = v.exportSparse()
+                if len(data) > 0:
+                    ret[k] = data
+            elif isinstance(v, SchemaList):
+                if len(v) > 0:
                     ret[k] = v.value
+            elif isinstance(v, SchemaElement):
+                # if v.isSet == True:
+                if v.value != None:
+                    ret[k] = v.value
+            else:
+                msg = "Unrecognized Element (%s)" % k
+                logs.warning(msg)
+                raise SchemaTypeError(msg)
         return ret
     
     def setSchema(self):
@@ -763,7 +773,7 @@ class Schema(SchemaElement):
     
     def importSchema(self, schema):
         try:
-            self.importData(schema.exportSparse(), overflow=True)
+            self.importData(schema.value, overflow=True)
             return self
         except:
             msg = "Conversion failed (Define in subclass?)"
@@ -772,7 +782,7 @@ class Schema(SchemaElement):
     
     def exportSchema(self, schema):
         try:
-            schema.importData(self.exportSparse(), overflow=True)
+            schema.importData(self.value, overflow=True)
             return schema
         except:
             msg = "Conversion failed (Define in subclass?)"
@@ -782,5 +792,5 @@ class Schema(SchemaElement):
     # DEPRECATED
     
     def getDataAsDict(self):
-        return self.exportSparse()
+        return self.value
 

@@ -31,9 +31,9 @@ class FandangoFeed(AExternalDumpEntitySource):
     
     def _run(self):
         feeds = [
-            'http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=3387661&a=12170', 
-            'http://www.fandango.com/rss/openingthisweekmobile.rss?pid=3387661&a=12169', 
-            'http://www.fandango.com/rss/top10boxofficemobile.rss?pid=3387661&a=12168', 
+            'http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=5348839&a=12170', 
+            'http://www.fandango.com/rss/openingthisweekmobile.rss?pid=5348839&a=12169', 
+            'http://www.fandango.com/rss/top10boxofficemobile.rss?pid=5348839&a=12168', 
         ]
         
         pool = Pool(128)

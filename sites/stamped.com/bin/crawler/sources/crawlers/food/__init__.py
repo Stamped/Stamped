@@ -10,6 +10,7 @@ import ChicagoMagCrawler
 import PhillyMagCrawler
 import WashMagCrawler
 import SFGateCrawler
+import SFWeeklyCrawler
 import TimeOutLACrawler
 import TimeOutLVCrawler
 import TimeOutMIACrawler

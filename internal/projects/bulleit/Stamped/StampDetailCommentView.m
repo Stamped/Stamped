@@ -37,6 +37,7 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 - (void)initViews {
   userImage_ = [[UserImageView alloc] initWithFrame:CGRectMake(10, 8, 31, 31)];
   userImage_.imageURL = comment_.user.profileImageURL;
+  userImage_.enabled = YES;
   [userImage_ addTarget:self
                  action:@selector(userImageTapped:)
        forControlEvents:UIControlEventTouchUpInside];

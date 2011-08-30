@@ -237,6 +237,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)setUpMainContentView {
   commenterImageView_.imageURL = stamp_.user.profileImageURL;
+  commenterImageView_.enabled = YES;
   [commenterImageView_ addTarget:self 
                           action:@selector(handleUserImageViewTap:)
                 forControlEvents:UIControlEventTouchUpInside];

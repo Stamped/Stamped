@@ -19,7 +19,8 @@ class StampedAPIFavoriteTest(AStampedAPITestCase):
         (self.userB, self.tokenB) = self.createAccount('UserB')
         self.entity = self.createEntity(self.tokenA)
         self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
-        self.favorite = self.createFavorite(self.tokenB, self.entity['entity_id'])
+        self.favorite = self.createFavorite(self.tokenB, \
+                                            self.entity['entity_id'])
 
     def tearDown(self):
         self.deleteFavorite(self.tokenB, self.entity['entity_id'])
@@ -71,6 +72,20 @@ class StampedAPIFavoritesAlreadyOnList(StampedAPIFavoriteTest):
         except:
             ret = True
         self.assertTrue(ret)
+
+class StampedAPIFavoritesViaStamp(StampedAPIFavoriteTest):
+    def test_show_via_stamp(self):
+        self.deleteFavorite(self.tokenB, self.entity['entity_id'])
+        self.favorite = self.createFavorite(self.tokenB, \
+                                            self.entity['entity_id'], \
+                                            stampId=self.stamp['stamp_id'])
+
+        path = "favorites/show.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 1)
 
 if __name__ == '__main__':
     main()

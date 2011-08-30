@@ -48,6 +48,7 @@
 }
 
 - (void)initialize {
+  self.enabled = NO;
   self.backgroundColor = [UIColor whiteColor];
   CGFloat borderWidth = CGRectGetWidth(self.frame) > 35.0 ? 2.0 : 1.0;
   imageView_ = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, borderWidth, borderWidth)];

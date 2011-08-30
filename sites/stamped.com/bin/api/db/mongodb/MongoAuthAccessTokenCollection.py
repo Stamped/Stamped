@@ -21,7 +21,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
         AAuthAccessTokenDB.__init__(self)
     
     def _convertToMongo(self, token):
-        document = token.exportSparse()
+        document = token.value
         if 'token_id' in document:
             document['_id'] = document['token_id']
             del(document['token_id'])
