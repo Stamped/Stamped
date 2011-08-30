@@ -49,20 +49,20 @@ def main():
 
             print 'COMPLETE'
 
-        elif collection in ['entities', 'places']:
-            print 'SKIPPED'
+        # elif collection in ['entities', 'places']:
+        #     print 'SKIPPED'
         
         else:
             mongoExportImport(collection)
             print 'COMPLETE'
-            
+
         print 
 
 def mongoExportImport(collection):
 
-    cmdExport = "~/Downloads/mongodb-osx-i386-1.8.2/bin/mongodump --db stamped --collection %s --host %s --out /stamped/tmp" % \
+    cmdExport = "mongodump --db stamped --collection %s --host %s --out /stamped/tmp" % \
                 (collection, OLD_HOST)
-    cmdImport = "~/Downloads/mongodb-osx-i386-1.8.2/bin/mongorestore --db stamped --collection %s --host %s /stamped/tmp/stamped/%s.bson" % \
+    cmdImport = "mongorestore --db stamped --collection %s --host %s /stamped/tmp/stamped/%s.bson" % \
                 (collection, NEW_HOST, collection)
     cmdImport = "echo 'skip: %s'" % collection ### TEMP
 
@@ -72,28 +72,20 @@ def mongoExportImport(collection):
     pp  = Popen(cmd, shell=True, stdout=out, stderr=out)
     pp.wait()
 
-
 def mongoExportJSON(collection):
     collection = collection.lower()
-    cmdExport = "~/Downloads/mongodb-osx-i386-1.8.2/bin/mongoexport --db stamped --collection %s --host %s --out /stamped/tmp/stamped/%s.json" % \
+    cmdExport = "mongoexport --db stamped --collection %s --host %s --out /stamped/tmp/stamped/%s.json" % \
                 (collection, OLD_HOST, collection)
     pp = Popen(cmdExport, shell=True, stdout=PIPE)
     pp.wait()
 
 def mongoImportJSON(collection):
     collection = collection.lower()
-    cmdImport = "~/Downloads/mongodb-osx-i386-1.8.2/bin/mongoimport --db stamped --collection %s --host %s /stamped/tmp/stamped/%s_out.json" % \
+    cmdImport = "mongoimport --db stamped --collection %s --host %s /stamped/tmp/stamped/%s_out.json" % \
                 (collection, NEW_HOST, collection)
     cmdImport = "echo 'skip: %s'" % collection ### TEMP
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
-
-    # ### TODO: Delete file?
-    # rmImportFile = "rm -rf /stamped/tmp/stamped/%s.json" % importCollection
-    # rmExportFile = "rm -rf /stamped/tmp/stamped/%s.json" % exportCollection
-    # cmd = "%s && %s" % (rmExportFile, rmImportFile)
-    # pp = Popen(cmd, shell=True, stdout=PIPE)
-    # pp.wait()
 
 def convertActivity():
 
@@ -168,63 +160,3 @@ if __name__ == '__main__':
     main()
 
 
-"""
-database = connection['stamped']
-collection = database['activity']
-newCollection = database['activity3']
-
-oldData = collection.find()
-
-for data in oldData:
-    print 'OLD: %s' % data
-
-    if 'link' in data:
-        print 'PASS'
-        print
-        print 
-        break
-
-    activity = {}
-
-    if 'comment' in data:
-        activity['blurb'] = data['comment']['blurb']
-    elif 'stamp' in data:
-        activity['blurb'] = data['stamp']['blurb']
-    else:
-        activity['blurb'] = None
-
-    if 'stamp' in data:
-        activity['subject'] = data['stamp']['entity']['title']
-
-    if 'comment' in data:
-        activity['link'] = {}
-        activity['link']['comment_id'] = data['comment']['comment_id']
-        activity['link']['stamp_id'] = data['comment']['stamp_id']
-    elif 'stamp' in data:
-        activity['link'] = {}
-        activity['link']['stamp_id'] = data['stamp']['stamp_id']
-    elif 'user' in data:
-        activity['link'] = {}
-        activity['link']['user_id'] = data['user']['user_id']
-
-    activity['user'] = {
-        'color_primary': data['user']['color_primary'], 
-        'color_secondary': data['user']['color_secondary'], 
-        'screen_name': data['user']['screen_name'], 
-        'privacy': data['user']['privacy'], 
-        'user_id': data['user']['user_id']
-    }
-
-    activity['user']        = data['user']       ### TEMP
-    activity['_id']         = data['_id']
-    activity['genre']       = data['genre']
-    activity['timestamp']   = data['timestamp']
-
-    print
-    print 'NEW: %s' % activity
-    newCollection.insert(activity)
-
-    print
-    print
-    print
-"""
