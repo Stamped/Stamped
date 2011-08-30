@@ -80,12 +80,18 @@ class StampedAPIStampPlacesMentionsShow(StampedAPIStampPlaceMentionsTest):
             "stamp_id": self.stamp['stamp_id']
         }
         result = self.handleGET(path, data)
+
         self.assertEqual(result['blurb'], self.stamp['blurb'])
+        self.assertTrue(len(result['credit']) == 1)
         self.assertEqual(
             result['credit'][0]['screen_name'], 
             self.stampData['credit']
             )
         self.assertTrue(len(result['mentions']) == 1)
+        self.assertEqual(
+            result['mentions'][0]['screen_name'], 
+            self.userB['screen_name']
+            )
 
 class StampedAPIStampPlacesMentionsUpdate(StampedAPIStampPlaceMentionsTest):
     def test_no_mentions(self):

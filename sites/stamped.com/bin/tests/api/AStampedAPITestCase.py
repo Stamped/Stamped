@@ -24,8 +24,8 @@ class StampedAPIURLOpener(urllib.FancyURLopener):
 class AStampedAPITestCase(AStampedTestCase):
     
     # _baseurl = "http://0.0.0.0:5000/api/v1"
-    _baseurl = "http://localhost:18000/v0"
-    #_baseurl = "http://localhost:8080/v0"
+    # _baseurl = "http://localhost:18000/v0"
+    _baseurl = "http://localhost:8080/v0"
     
     _opener = StampedAPIURLOpener()
     client_auth = {

@@ -62,24 +62,12 @@ class MongoDBConfig(Singleton):
             self.config = AttributeDict({
                "mongodb" : {
                    "host" : "localhost", 
-                   "port" : 30000, 
+                   "port" : 27017, 
+                   # "port" : 30000, 
                }
             })
             
             logs.info("Invalid config file; defaulting to %s:%d" % (self.config.mongodb.host, self.config.mongodb.port))
-            
-            # self.config = AttributeDict({
-            #     "mongodb" : {
-            #         "host" : "ec2-50-19-194-148.compute-1.amazonaws.com", 
-            #         "port" : 27017, 
-            #     }
-            # })
-            # self.config = AttributeDict({
-            #    "mongodb" : {
-            #        "host" : "localhost", 
-            #        "port" : 30000, 
-            #    }
-            # })
     
     @property
     def host(self):

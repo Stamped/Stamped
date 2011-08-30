@@ -19,17 +19,22 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         AAccountDB.__init__(self)
         
         ### TEMP: For now, verify that no duplicates can occur via index
-        self._collection.ensure_index('screen_name', unique=True)
+        self._collection.ensure_index('screen_name_lower', unique=True)
+
+    def _convertFromMongo(self, document):
+        if 'screen_name_lower' in document:
+            del(document['screen_name_lower'])
+        
+        return AMongoCollection._convertFromMongo(self, document)
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
         
-        # TODO: why are we storing screen_name in lowercase?  this invalidates the 
-        # possibility of mixed-case usernames
         if 'screen_name' in document:
-            document['screen_name'] = str(document['screen_name']).lower()
+            document['screen_name_lower'] = str(document['screen_name']).lower()
         
         return document
+
     
     ### PUBLIC
     
@@ -64,8 +69,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
     def verifyAccountCredentials(self, screen_name, password):
         logs.debug("verifyAccountCredentials: %s:%s" % (screen_name, password))
+        screen_name = str(screen_name).lower()
         try:
-            user = self._collection.find_one({'screen_name': screen_name})
+            user = self._collection.find_one({'screen_name_lower': screen_name})
             logs.debug("User data: %s" % (user))
             if auth.comparePasswordToStored(password, user['password']):
                 return user['_id']

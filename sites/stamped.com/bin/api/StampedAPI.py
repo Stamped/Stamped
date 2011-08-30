@@ -517,6 +517,7 @@ class StampedAPI(AStampedAPI):
 
     def _extractMentions(self, text):
         # Define patterns
+        ### TODO: Modify these to match screen name pattern defined above
         user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         
