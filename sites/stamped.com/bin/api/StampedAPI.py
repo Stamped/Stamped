@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils, logs, re
+import Globals, utils, logs, re, Blacklist
 from datetime import datetime
 from errors import *
 from auth import convertPasswordForStorage
@@ -78,6 +78,20 @@ class StampedAPI(AStampedAPI):
         account.password = convertPasswordForStorage(account['password'])
         account.display_name = "%s %s." % \
                                 (account.first_name, account.last_name[0])
+        
+        # Validate Screen Name
+        if not re.match("^[\w-]+$", account.screen_name) \
+            or len(account.screen_name) < 1 \
+            or len(account.screen_name) > 32:
+            msg = "Invalid format for screen name"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Check blacklist
+        if account.screen_name.lower() in Blacklist.screen_names:
+            msg = "Blacklisted screen name"
+            logs.warning(msg)
+            raise InputError(msg)
 
         account = self._accountDB.addAccount(account)
         

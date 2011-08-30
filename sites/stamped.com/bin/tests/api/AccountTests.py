@@ -67,6 +67,66 @@ class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['profile_image'], url)
 
+class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
+    def test_blacklist(self):
+        try:
+            (user, token) = self.createAccount('cock')
+            ret = False
+        except:
+            ret = True
+
+        self.assertTrue(ret)
+
+    def test_invalid_characters(self):
+        try:
+            (user, token) = self.createAccount('a b')
+            ret = False
+        except:
+            ret = True
+
+        self.assertTrue(ret)
+
+        try:
+            (user, token) = self.createAccount('a*b')
+            ret = False
+        except:
+            ret = True
+
+        self.assertTrue(ret)
+        try:
+            (user, token) = self.createAccount('a!')
+            ret = False
+        except:
+            ret = True
+
+        self.assertTrue(ret)
+
+        try:
+            (user, token) = self.createAccount('a+b')
+            ret = False
+        except:
+            ret = True
+
+        self.assertTrue(ret)
+
+        try:
+            (user, token) = self.createAccount('a/b')
+            ret = False
+        except:
+            ret = True
+
+        self.assertTrue(ret)
+
+        try:
+            (user, token) = self.createAccount('@ab')
+            ret = False
+        except:
+            ret = True
+
+        self.assertTrue(ret)
+
+
+
 ### TESTS TO ADD:
 # Change bio from string to None
 # Make sure screen_name change propagates through system
