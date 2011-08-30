@@ -17,7 +17,7 @@
         <attribute name="entityID" attributeType="String"/>
         <attribute name="openTableURL" optional="YES" attributeType="String"/>
         <attribute name="phone" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
-        <attribute name="subtitle" optional="YES" attributeType="String"/>
+        <attribute name="subtitle" optional="YES" attributeType="String" defaultValueString="Other"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="favorite" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Favorite" inverseName="entityObject" inverseEntity="Favorite"/>
         <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="entityObject" inverseEntity="Stamp"/>

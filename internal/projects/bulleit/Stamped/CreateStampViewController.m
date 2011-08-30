@@ -115,6 +115,8 @@ static const CGFloat kMinContainerHeight = 204.0;
   User* currentUser = [AccountManager sharedManager].currentUser;
   self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
+
+  editButton_.hidden = entityObject_.entityID != nil;
   
   ribbonedContainerView_.layer.shadowOpacity = 0.1;
   ribbonedContainerView_.layer.shadowOffset = CGSizeMake(0, 1);
@@ -282,7 +284,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 - (IBAction)editButtonPressed:(id)sender {
   EditEntityViewController* editViewController =
-      [[EditEntityViewController alloc] initWithNibName:@"EditEntityViewController" bundle:nil];
+      [[EditEntityViewController alloc] initWithEntity:entityObject_];
   [self.navigationController pushViewController:editViewController animated:YES];
   [editViewController release];
 }

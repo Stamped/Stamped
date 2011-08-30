@@ -72,10 +72,10 @@
 							<object class="IBUILabel" id="9764505">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{15, 9}, {291, 56}}</string>
+								<string key="NSFrame">{{15, 9}, {238, 56}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="715334343"/>
+								<reference key="NSNextKeyView" ref="591413953"/>
 								<string key="NSReuseIdentifierKey">_NS:129</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -94,6 +94,7 @@
 								</object>
 								<nil key="IBUIHighlightedColor"/>
 								<int key="IBUIBaselineAdjustment">1</int>
+								<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 								<float key="IBUIMinimumFontSize">10</float>
 							</object>
 							<object class="IBUILabel" id="895504012">
@@ -102,7 +103,7 @@
 								<string key="NSFrame">{{30, 50}, {270, 15}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="591413953"/>
+								<reference key="NSNextKeyView" ref="101741781"/>
 								<string key="NSReuseIdentifierKey">_NS:129</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -239,7 +240,7 @@
 												<reference key="NSWindow"/>
 												<reference key="NSNextKeyView" ref="430629333"/>
 												<string key="NSReuseIdentifierKey">_NS:522</string>
-												<object class="NSColor" key="IBUIBackgroundColor">
+												<object class="NSColor" key="IBUIBackgroundColor" id="343956617">
 													<int key="NSColorSpace">3</int>
 													<bytes key="NSWhite">MCAwAA</bytes>
 												</object>
@@ -387,41 +388,48 @@
 							<object class="IBUIButton" id="591413953">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{261, 29}, {45, 24}}</string>
+								<string key="NSFrame">{{261, 16}, {50, 30}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="101741781"/>
+								<reference key="NSNextKeyView" ref="715334343"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
+								<reference key="IBUIBackgroundColor" ref="343956617"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<int key="IBUIContentHorizontalAlignment">2</int>
+								<int key="IBUIContentHorizontalAlignment">0</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<object class="NSFont" key="IBUIFont">
 									<string key="NSName">Helvetica-Bold</string>
 									<double key="NSSize">10</double>
 									<int key="NSfFlags">16</int>
 								</object>
+								<double key="IBUITitleEdgeInsets.top">0.0</double>
+								<double key="IBUITitleEdgeInsets.bottom">0.0</double>
+								<double key="IBUITitleEdgeInsets.left">2</double>
+								<double key="IBUITitleEdgeInsets.right">0.0</double>
 								<double key="IBUIImageEdgeInsets.top">0.0</double>
 								<double key="IBUIImageEdgeInsets.bottom">3</double>
 								<double key="IBUIImageEdgeInsets.left">0.0</double>
 								<double key="IBUIImageEdgeInsets.right">2</double>
+								<string key="IBUITitleShadowOffset">{0, 1}</string>
 								<string key="IBUINormalTitle">Edit</string>
 								<object class="NSColor" key="IBUIHighlightedTitleColor">
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MAA</bytes>
 								</object>
 								<object class="NSColor" key="IBUINormalTitleColor">
-									<int key="NSColorSpace">1</int>
-									<bytes key="NSRGB">MC42IDAuNiAwLjYAA</bytes>
-								</object>
-								<object class="NSColor" key="IBUINormalTitleShadowColor" id="5386939">
 									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC41AA</bytes>
+									<bytes key="NSWhite">MC42AA</bytes>
 								</object>
+								<reference key="IBUINormalTitleShadowColor" ref="935530847"/>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">edit_pencil.png</string>
+								</object>
+								<object class="NSCustomResource" key="IBUINormalBackgroundImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">edit_button_background.png</string>
 								</object>
 							</object>
 						</object>
@@ -468,7 +476,10 @@
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
-						<reference key="IBUINormalTitleShadowColor" ref="5386939"/>
+						<object class="NSColor" key="IBUINormalTitleShadowColor" id="5386939">
+							<int key="NSColorSpace">3</int>
+							<bytes key="NSWhite">MC41AA</bytes>
+						</object>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">toolbar_close</string>
@@ -964,7 +975,7 @@
 					<string>STCreditTextField</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="2"/>
+					<real value="1"/>
 					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1181,6 +1192,14 @@
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
+					<string key="className">STCreditTextField</string>
+					<string key="superclassName">UITextField</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/STCreditTextField.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
 					<string key="className">UserImageView</string>
 					<string key="superclassName">UIControl</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
@@ -1203,6 +1222,7 @@
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>credit_icon@2x.png</string>
+				<string>edit_button_background.png</string>
 				<string>edit_pencil.png</string>
 				<string>gradient_background.png</string>
 				<string>shelf_background.png</string>
@@ -1214,6 +1234,7 @@
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{30, 20}</string>
+				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{320, 480}</string>
 				<string>{320, 240}</string>
