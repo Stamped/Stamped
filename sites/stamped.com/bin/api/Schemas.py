@@ -37,13 +37,10 @@ class AccessToken(Schema):
 class Account(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring)
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring)
-        self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
@@ -77,11 +74,8 @@ class LocaleSchema(Schema):
 class User(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring)
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
@@ -104,8 +98,6 @@ class UserMini(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
@@ -114,7 +106,6 @@ class UserTiny(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
 
 
 # ##### #
@@ -181,13 +172,6 @@ class Favorite(Schema):
         self.timestamp          = TimestampSchema()
         self.complete           = SchemaElement(bool)
 
-# class FavoriteStampSchema(Schema):
-#     def setSchema(self):
-#         self.stamp_id           = SchemaElement(basestring, required=True)
-#         self.display_name       = SchemaElement(basestring, required=True)
-#         self.user_id            = SchemaElement(basestring, required=True)
-#         self.blurb              = SchemaElement(basestring)
-
 
 # ###### #
 # Stamps #
@@ -210,7 +194,6 @@ class Stamp(Schema):
 class MentionSchema(Schema):
     def setSchema(self):
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring)
         self.user_id            = SchemaElement(basestring)
         self.indices            = SchemaList(SchemaElement(int))
 

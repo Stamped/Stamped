@@ -54,14 +54,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def removeAccount(self, userId):
         documentId = self._getObjectIdFromString(userId)
         return self._removeMongoDocument(documentId)
-
-    def setProfileImageLink(self, userId, url):
-        documentId = self._getObjectIdFromString(userId)
-        self._collection.update(
-            {'_id': documentId},
-            {'$set': {'profile_image': url}}
-            )
-        return True
     
     def flagUser(self, user):
         # TODO

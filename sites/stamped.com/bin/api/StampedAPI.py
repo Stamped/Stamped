@@ -76,8 +76,6 @@ class StampedAPI(AStampedAPI):
 
         account.timestamp.created = datetime.utcnow()
         account.password = convertPasswordForStorage(account['password'])
-        account.display_name = "%s %s." % \
-                                (account.first_name, account.last_name[0])
         
         # Validate Screen Name
         if not re.match("^[\w-]+$", account.screen_name) \
@@ -134,8 +132,6 @@ class StampedAPI(AStampedAPI):
     
     def updateProfileImage(self, authUserId, data):
         data = base64.decodestring(data)
-        
-        #self._accountDB.setProfileImageLink(authUserId, url)
         
         image = self._imageDB.getImage(data)
         self._imageDB.addProfileImage(authUserId, image)
@@ -536,7 +532,6 @@ class StampedAPI(AStampedAPI):
             try:
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
-                data['display_name'] = user.display_name
                 data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])
@@ -551,7 +546,6 @@ class StampedAPI(AStampedAPI):
             try:
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
-                data['display_name'] = user.display_name
                 data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])

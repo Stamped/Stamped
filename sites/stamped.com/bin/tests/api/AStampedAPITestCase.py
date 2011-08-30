@@ -61,8 +61,7 @@ class AStampedAPITestCase(AStampedTestCase):
         data = {
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
-            "first_name": name,
-            "last_name": "Test", 
+            "name": name,
             "email": "%s@stamped.com" % name, 
             "password": "12345",
             "screen_name": name

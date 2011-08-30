@@ -89,8 +89,7 @@ class OAuthLogin(Schema):
 class HTTPAccount(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.email              = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.privacy            = SchemaElement(bool, required=True)
@@ -106,8 +105,7 @@ class HTTPAccount(Schema):
 
 class HTTPAccountNew(Schema):
     def setSchema(self):
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
@@ -130,8 +128,7 @@ class HTTPAccountSettings(Schema):
 
 class HTTPAccountProfile(Schema):
     def setSchema(self):
-        self.first_name         = SchemaElement(basestring)
-        self.last_name          = SchemaElement(basestring)
+        self.name               = SchemaElement(basestring)
         self.color              = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
         self.website            = SchemaElement(basestring)
@@ -148,11 +145,8 @@ class HTTPAccountProfileImage(Schema):
 class HTTPUser(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
@@ -185,8 +179,6 @@ class HTTPUserMini(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
