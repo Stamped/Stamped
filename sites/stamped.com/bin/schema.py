@@ -136,10 +136,10 @@ class SchemaElement(object):
     # Private Functions
 
     def setIsSet(self, isSet):
-        self._isSet = True
+        self._isSet = isSet
         
-        if self._parent != None:
-            self._parent.setIsSet(True)
+        if self._parent != None and isSet:
+            self._parent.setIsSet(isSet)
     
     def _setType(self, requiredType):
         allowed = [basestring, bool, int, long, float, dict, list, datetime]

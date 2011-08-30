@@ -77,9 +77,7 @@ class SFWeeklyCrawler(AExternalEntitySource):
             entity.subcategory = "bar"
             entity.title   = name
             entity.address = addr
-            entity.sources = {
-                'sfweekly' : { }
-            }
+            entity.sources.sfweekly = { }
             
             self._output.put(entity)
         

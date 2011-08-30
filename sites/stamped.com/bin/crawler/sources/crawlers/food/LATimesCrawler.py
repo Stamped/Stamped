@@ -108,9 +108,7 @@ class LATimesCrawler(AExternalEntitySource):
             entity.subcategory = "restaurant"
             entity.title   = name
             entity.address = addr
-            entity.sources = {
-                'latimes' : { }
-            }    
+            entity.sources.latimes = { }
             
             self._output.put(entity)
         

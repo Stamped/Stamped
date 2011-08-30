@@ -157,10 +157,8 @@ class ZagatCrawler(AExternalEntitySource):
         entity.subcategory = "restaurant"
         entity.title   = restaurant_name
         entity.address = address
-        entity.sources = {
-            'zagat' : {
-                'zurl' : self.base + href, 
-            }
+        entity.sources.zagat = {
+            'zurl' : self.base + href, 
         }
         
         self._output.put(entity)

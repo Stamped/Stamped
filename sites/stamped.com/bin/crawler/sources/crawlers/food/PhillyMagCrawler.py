@@ -113,9 +113,7 @@ class PhillyMagCrawler(AExternalEntitySource):
             entity.subcategory = "restaurant"
             entity.title   = name
             entity.address = addr
-            entity.sources = {
-                'phillymag' : { }
-            }
+            entity.sources.phillymag = { }
             
             self._output.put(entity)
         

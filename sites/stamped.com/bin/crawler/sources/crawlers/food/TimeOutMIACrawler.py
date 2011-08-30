@@ -76,25 +76,16 @@ class TimeOutMIACrawler(AExternalEntitySource):
             
             self._seen.add((name, addr))
             
+            entity = Entity()
             if 'Bars' in result.findNext('span').getText():
-            
-                entity = Entity()
                 entity.subcategory = "bar"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_mia' : { }
-                }
-
             else:  
-            
-                entity = Entity()
                 entity.subcategory = "restaurant"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_mia' : { }
-                }
+            
+            entity.title   = name
+            entity.address = addr
+            entity.sources.timeout_mia = { }
+            
             self._output.put(entity)
         
         # try the next page

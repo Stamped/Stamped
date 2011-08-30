@@ -198,11 +198,13 @@ class AMongoCollection(object):
         if self._obj is not None:
             assert obj.__class__.__name__ == self._obj.__name__
         
+        #from pprint import pformat
+        #logs.warning(pformat(obj.value))
         document = self._convertToMongo(obj)
         document = self._addMongoDocument(document)
-        from pprint import pformat
+        
         #pprint(document)
-        logs.warning(pformat(document))
+        #logs.warning(pformat(document))
         
         obj      = self._convertFromMongo(document)
         

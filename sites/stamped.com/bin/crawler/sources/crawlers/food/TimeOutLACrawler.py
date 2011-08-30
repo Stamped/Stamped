@@ -77,25 +77,15 @@ class TimeOutLACrawler(AExternalEntitySource):
             
             self._seen.add((name, addr))
             
+            entity = Entity()
             if 'Bars' in result.findNext('span').getText():
-            
-                entity = Entity()
                 entity.subcategory = "bar"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_la' : { }
-                }
-
-            else:  
-            
-                entity = Entity()
+            else:
                 entity.subcategory = "restaurant"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_la' : { }
-                }
+            
+            entity.title   = name
+            entity.address = addr
+            entity.sources.timeout_la = { }
             
             self._output.put(entity)
         

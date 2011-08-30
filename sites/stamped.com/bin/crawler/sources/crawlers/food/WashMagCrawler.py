@@ -105,9 +105,7 @@ class WashMagCrawler(AExternalEntitySource):
             entity.subcategory = "restaurant"
             entity.title   = name
             entity.address = addr
-            entity.sources = {
-                'washmag' : { }
-            }
+            entity.sources.washmag = { }
             
             self._output.put(entity)
         

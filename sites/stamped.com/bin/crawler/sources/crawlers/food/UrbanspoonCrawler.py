@@ -164,10 +164,8 @@ class UrbanspoonCrawler(AExternalEntitySource):
         entity.subcategory = "restaurant"
         entity.title   = restaurant_name
         entity.address = address
-        entity.sources = {
-            'urbanspoon' : {
-                'uurl' : href, 
-            }
+        entity.sources.urbanspoon = {
+            'uurl' : href, 
         }
         
         self._output.put(entity)

@@ -77,26 +77,16 @@ class TimeOutLVCrawler(AExternalEntitySource):
             
             self._seen.add((name, addr))
             
+            entity = Entity()
             if 'Bars' in result.findNext('span').getText():
-            
-                entity = Entity()
                 entity.subcategory = "bar"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_lv' : { }
-                }
-
-            else:  
-            
-                entity = Entity()
+            else:
                 entity.subcategory = "restaurant"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_lv' : { }
-                }
-                
+            
+            entity.title   = name
+            entity.address = addr
+            entity.sources.timeout_lv = { }
+            
             self._output.put(entity)
         
         # try the next page

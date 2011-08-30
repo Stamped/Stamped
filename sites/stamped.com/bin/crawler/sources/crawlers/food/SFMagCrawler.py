@@ -66,9 +66,7 @@ class SFMagCrawler(AExternalEntitySource):
             entity.subcategory = "restaurant"
             entity.title   = name
             entity.address = addr
-            entity.sources = {
-                'sfmag' : { }
-            }    
+            entity.sources.sfmag = { }
             
             self._output.put(entity)
         

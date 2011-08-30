@@ -78,9 +78,7 @@ class SFGateCrawler(AExternalEntitySource):
             entity.subcategory = "restaurant"
             entity.title   = name
             entity.address = addr
-            entity.sources = {
-                'sfgate' : { }
-            }
+            entity.sources.sfgate = { }
             
             self._output.put(entity)
         

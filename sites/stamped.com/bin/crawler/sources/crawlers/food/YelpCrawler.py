@@ -103,6 +103,7 @@ class YelpCrawler(AExternalEntitySource):
         for result in results:
             entity = Entity()
             entity.subcategory = 'restaurant'
+            entity.sources.yelp = { }
             
             titlel = result.find('a')
             title  = titlel.getText()

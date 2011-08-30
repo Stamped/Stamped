@@ -76,25 +76,16 @@ class TimeOutSFCrawler(AExternalEntitySource):
                 continue
             
             self._seen.add((name, addr))
+            entity = Entity()
             if 'Bars' in result.findNext('span').getText():
-            
-                entity = Entity()
                 entity.subcategory = "bar"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_sf' : { }
-                }
-
             else:  
-            
-                entity = Entity()
                 entity.subcategory = "restaurant"
-                entity.title   = name
-                entity.address = addr
-                entity.sources = {
-                    'timeout_sf' : { }
-                }
+            
+            entity.title   = name
+            entity.address = addr
+            entity.sources.timeout_sf = { }
+            
             self._output.put(entity)
         
         # try the next page
