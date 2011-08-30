@@ -40,7 +40,7 @@ class SeattleTimesCrawler(AExternalEntitySource):
         pool  = Pool(64)
         seed  = 'http://community.seattletimes.nwsource.com/entertainment/i_results.php?search=venue&type=Restaurant&page=1'
         
-        pool.spawn(self._parseResultsPage, pool, queue, seed, 'current', True)
+        pool.spawn(self._parseResultsPage, pool, queue, seed, '1', True)
         
         while True:
             items = []
@@ -74,6 +74,10 @@ class SeattleTimesCrawler(AExternalEntitySource):
         
         #self._globals['books'] = soup
         
+        results = soup.findAll('div', {'class' : 'ev_result_block'})
+        if 0 == len(results):
+            return
+        
         # extract and parse the rest of the paginated results
         if base:
             num_pages = 16
@@ -87,7 +91,6 @@ class SeattleTimesCrawler(AExternalEntitySource):
                 
                 queue.put_nowait((self._parseResultsPage, cur_url, name2, i == num_pages - 1))
         
-        results = soup.findAll('div', {'class' : 'ev_result_block'})
         for result in results:
             link  = result.find('a')
             href  = link.get('href')
@@ -112,13 +115,29 @@ class SeattleTimesCrawler(AExternalEntitySource):
         entity.subcategory = "restaurant"
         entity.seattletimes = {}
         
+        details = content.find('div', {'id' : 'edbtext'})
+        desc    = details.find('p').getText()
+        if desc is not None:
+            entity.desc = desc
         
-        # TODO
+        details = details.findAll('p', {'class' : 'list'})
+        address = details[0].renderContents().strip().replace('<br />', '')
+        address = re.sub('[ \n\t]+', ' ', address)
+        entity.address = address
         
+        if len(details) > 1:
+            site = details[1].get('href')
+            if site is not None:
+                entity.site = site
+        
+        if len(details) > 2:
+            hoursOfOperation = details[2].getText()
+            if hoursOfOperation is not None:
+                entity.hoursOfOperation = hoursOfOperation
         
         key = (entity.title, entity.address)
-        if key in self.seen:
-            continue
+        if key in self.seen or '(closed)' in entity.title.lower():
+            return
         
         self.seen.add(key)
         self._output.put(entity)

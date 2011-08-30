@@ -419,7 +419,14 @@ def normalize(s, strict=False):
                 if m < 0 or m <= l + 2:
                     break
                 
-                val = unichr(int(s[l + 2 : m]))
+                try:
+                    val = unichr(int(s[l + 2 : m]))
+                except ValueError:
+                    try:
+                        val = unichr(int(s[l + 3 : m]))
+                    except ValueError:
+                        break
+                
                 s = u"%s%s%s" % (s[:l], val, s[m + 1:])
         
         if strict and isinstance(s, unicode):

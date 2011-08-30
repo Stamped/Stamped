@@ -8,6 +8,7 @@ __license__ = "TODO"
 import Globals, utils
 from AEntitySink import AEntitySink
 from Schemas import Entity
+from pprint import pprint
 
 class TestEntitySink(AEntitySink):
     
@@ -16,7 +17,6 @@ class TestEntitySink(AEntitySink):
     
     def _processItem(self, item):
         assert isinstance(item, Entity)
-        #from pprint import pprint
         #pprint(item.value)
         #return
         
