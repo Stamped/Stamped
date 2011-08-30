@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE
 # from Schemas import *
 
 OLD_HOST        = "ec2-50-17-124-56.compute-1.amazonaws.com"
-NEW_HOST        = "localhost"
+NEW_HOST        = "ec2-50-17-36-190.compute-1.amazonaws.com"
 
 old_connection  = pymongo.Connection(OLD_HOST, 27017)
 new_connection  = pymongo.Connection(NEW_HOST, 27017)
@@ -58,13 +58,13 @@ def main():
 
         print 
 
+
 def mongoExportImport(collection):
 
     cmdExport = "mongodump --db stamped --collection %s --host %s --out /stamped/tmp" % \
                 (collection, OLD_HOST)
     cmdImport = "mongorestore --db stamped --collection %s --host %s /stamped/tmp/stamped/%s.bson" % \
                 (collection, NEW_HOST, collection)
-    cmdImport = "echo 'skip: %s'" % collection ### TEMP
 
     out = open("/stamped/tmp/convert_%s.log" % collection, "w")
     cmd = "%s && %s && rm -rf /stamped/tmp/stamped/%s.bson" % \
@@ -83,7 +83,6 @@ def mongoImportJSON(collection):
     collection = collection.lower()
     cmdImport = "mongoimport --db stamped --collection %s --host %s /stamped/tmp/stamped/%s_out.json" % \
                 (collection, NEW_HOST, collection)
-    cmdImport = "echo 'skip: %s'" % collection ### TEMP
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
 
