@@ -586,31 +586,32 @@ class HTTPActivity(Schema):
         self.activity_id        = SchemaElement(basestring, required=True)
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = HTTPUserMini(required=True)
-        self.comment            = HTTPComment()
-        self.stamp              = HTTPStamp()
-        self.favorite           = HTTPFavorite()
+        self.image              = SchemaElement(basestring)
+        self.subject            = SchemaElement(basestring)
+        self.blurb              = SchemaElement(basestring)
+        self.link_user_id       = SchemaElement(basestring)
+        self.link_stamp_id      = SchemaElement(basestring)
+        self.link_entity_id     = SchemaElement(basestring)
+        self.link_url           = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Activity':
-            data                = schema.exportSparse()
+            data                = schema.value
             user                = UserMini(data.pop('user', None))
-            stamp               = Stamp(data.pop('stamp', None))
-            comment             = Comment(data.pop('comment', None))
-            favorite            = Favorite(data.pop('favorite', None))
-
-            data['user']        = HTTPUserMini().importSchema(user).exportSparse()
-
-            if stamp.stamp_id != None:
-                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
-                if 'num_comments' in data['stamp']:
-                    del(data['stamp']['num_comments'])
-            if comment.comment_id != None:
-                data['comment'] = HTTPComment().importSchema(comment).exportSparse()
-            if favorite.favorite_id != None:
-                data['favorite']= HTTPFavorite().importSchema(favorite).exportSparse()
+            data['user']        = HTTPUserMini().importSchema(user).value
 
             self.importData(data, overflow=True)
+            
+            if schema.link.stamp_id != None:
+                self.link_stamp_id = schema.link.stamp_id
+            elif schema.link.user_id != None:
+                self.link_user_id = schema.link.user_id
+            elif schema.link.entity_id != None:
+                self.link_entity_id = schema.link.entity_id
+            elif schema.link.url != None:
+                self.link_url = schema.link.url
+
             self.created = schema.timestamp.created
         else:
             raise NotImplementedError

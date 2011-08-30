@@ -655,12 +655,13 @@ class StampedAPI(AStampedAPI):
         # Add activity for credited users
         ### TODO: Verify user isn't being blocked
         if self._activity == True and len(creditedUserIds) > 0:
-            activity = Activity({
-                'genre': 'restamp',
-                'user': user.exportSchema(UserMini()),
-                'stamp': stamp,
-            })
-            activity.timestamp.created = datetime.utcnow()
+            activity                = Activity()
+            activity.genre          = 'restamp'
+            activity.user           = user.exportSchema(UserMini())
+            activity.subject        = stamp.entity.title
+            activity.stamp_id       = stamp.stamp_id
+            activity.created        = datetime.utcnow()
+
             self._activityDB.addActivity(creditedUserIds, activity)
         
         # Add activity for mentioned users
@@ -673,12 +674,14 @@ class StampedAPI(AStampedAPI):
                     and mention['user_id'] != user.user_id:
                     mentionedUserIds.append(mention['user_id'])
             if len(mentionedUserIds) > 0:
-                activity = Activity({
-                    'genre': 'mention',
-                    'user': user.exportSchema(UserMini()),
-                    'stamp': stamp,
-                })
-                activity.timestamp.created = datetime.utcnow()
+                activity                = Activity()
+                activity.genre          = 'mention'
+                activity.user           = user.exportSchema(UserMini())
+                activity.subject        = stamp.entity.title
+                activity.blurb          = stamp.blurb
+                activity.stamp_id       = stamp.stamp_id
+                activity.created        = datetime.utcnow()
+                
                 self._activityDB.addActivity(mentionedUserIds, activity)
         
         return stamp
@@ -793,12 +796,13 @@ class StampedAPI(AStampedAPI):
         # Add activity for credited users
         ### TODO: Verify user isn't being blocked
         if self._activity == True and len(creditedUserIds) > 0:
-            activity = Activity({
-                'genre': 'restamp',
-                'user': user.exportSchema(UserMini()),
-                'stamp': stamp,
-            })
-            activity.timestamp.created = datetime.utcnow()
+            activity                = Activity()
+            activity.genre          = 'restamp'
+            activity.user           = user.exportSchema(UserMini())
+            activity.subject        = stamp.entity.title
+            activity.stamp_id       = stamp.stamp_id
+            activity.created        = datetime.utcnow()
+            
             self._activityDB.addActivity(creditedUserIds, activity)
         
         # Add activity for mentioned users
@@ -811,12 +815,14 @@ class StampedAPI(AStampedAPI):
                     and mention['user_id'] != user.user_id:
                     mentionedUserIds.append(mention['user_id'])
             if len(mentionedUserIds) > 0:
-                activity = Activity({
-                    'genre': 'mention',
-                    'user': user.exportSchema(UserMini()),
-                    'stamp': stamp,
-                })
-                activity.timestamp.created = datetime.utcnow()
+                activity                = Activity()
+                activity.genre          = 'mention'
+                activity.user           = user.exportSchema(UserMini())
+                activity.subject        = stamp.entity.title
+                activity.blurb          = stamp.blurb
+                activity.stamp_id       = stamp.stamp_id
+                activity.created        = datetime.utcnow()
+
                 self._activityDB.addActivity(mentionedUserIds, activity)
 
         return stamp
@@ -939,13 +945,15 @@ class StampedAPI(AStampedAPI):
                 if 'user_id' in mention and mention['user_id'] != user.user_id:
                     mentionedUserIds.append(mention['user_id'])
             if len(mentionedUserIds) > 0:
-                activity = Activity({
-                    'genre': 'mention',
-                    'user': user.exportSchema(UserMini()),
-                    'stamp': stamp,
-                    'comment': comment,
-                })
-                activity.timestamp.created = datetime.utcnow()
+                activity                = Activity()
+                activity.genre          = 'mention'
+                activity.user           = user.exportSchema(UserMini())
+                activity.subject        = stamp.entity.title
+                activity.blurb          = comment.blurb
+                activity.stamp_id       = stamp.stamp_id
+                activity.comment_id     = comment.comment_id
+                activity.created        = datetime.utcnow()
+
                 self._activityDB.addActivity(mentionedUserIds, activity)
         
         # Add activity for commentor and for stamp owner
@@ -955,13 +963,15 @@ class StampedAPI(AStampedAPI):
             and stamp.user.user_id != user.user_id:
             commentedUserIds.append(stamp.user.user_id)
         if len(commentedUserIds) > 0:
-            activity = Activity({
-                'genre': 'comment',
-                'user': user.exportSchema(UserMini()),
-                'stamp': stamp,
-                'comment': comment,
-            })
-            activity.timestamp.created = datetime.utcnow()
+            activity                = Activity()
+            activity.genre          = 'comment'
+            activity.user           = user.exportSchema(UserMini())
+            activity.subject        = stamp.entity.title
+            activity.blurb          = comment.blurb
+            activity.stamp_id       = stamp.stamp_id
+            activity.comment_id     = comment.comment_id
+            activity.created        = datetime.utcnow()
+            
             self._activityDB.addActivity(commentedUserIds, activity)
         
         # Add activity for previous commenters
@@ -976,13 +986,15 @@ class StampedAPI(AStampedAPI):
                 repliedUsersDict[prevComment['user']['user_id']] = 1 
         repliedUserIds = repliedUsersDict.keys()
         if len(repliedUserIds) > 0:
-            activity = Activity({
-                'genre': 'reply',
-                'user': user.exportSchema(UserMini()),
-                'stamp': stamp,
-                'comment': comment,
-            })
-            activity.timestamp.created = datetime.utcnow()
+            activity                = Activity()
+            activity.genre          = 'reply'
+            activity.user           = user.exportSchema(UserMini())
+            activity.subject        = stamp.entity.title
+            activity.blurb          = comment.blurb
+            activity.stamp_id       = stamp.stamp_id
+            activity.comment_id     = comment.comment_id
+            activity.created        = datetime.utcnow()
+
             self._activityDB.addActivity(repliedUserIds, activity)
         
         # Increment comment count on stamp
@@ -1170,7 +1182,7 @@ class StampedAPI(AStampedAPI):
     """
 
     def addFavorite(self, authUserId, entityId, stampId=None):
-        entity      = self._entityDB.getEntity(entityId)
+        entity  = self._entityDB.getEntity(entityId)
 
         favorite = Favorite({
             'entity': entity.exportSchema(EntityMini()),
@@ -1178,10 +1190,10 @@ class StampedAPI(AStampedAPI):
         })
         favorite.timestamp.created = datetime.utcnow()
         if stampId != None:
-            stamp   = self._stampDB.getStamp(stamp_id)
+            stamp   = self._stampDB.getStamp(stampId)
             favorite.stamp = stamp
 
-        ### TODO: Check to verify that user hasn't already favorited entity
+        # Check to verify that user hasn't already favorited entity
         try:
             fav = self._favoriteDB.getFavorite(authUserId, entityId)
             if fav.favorite_id == None:
@@ -1205,7 +1217,20 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=1)
 
-        ### TODO: Add to Activity
+        # Add activity for stamp owner (if not self)
+        ### TODO: Verify user isn't being blocked
+        ### TODO: Verify activity item doesn't already exist
+        if self._activity == True and stampId != None \
+            and stamp.user.user_id != authUserId:
+            user                    = self._userDB.getUser(authUserId)
+            activity                = Activity()
+            activity.genre          = 'favorite'
+            activity.user           = user.exportSchema(UserMini())
+            activity.subject        = stamp.entity.title
+            activity.stamp_id       = stamp.stamp_id
+            activity.created        = datetime.utcnow()
+
+            self._activityDB.addActivity(stamp.user.user_id, activity)
 
         return favorite
     
@@ -1216,6 +1241,8 @@ class StampedAPI(AStampedAPI):
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=-1)
+
+        ### TODO: Remove activity item?
 
         return favorite
     
