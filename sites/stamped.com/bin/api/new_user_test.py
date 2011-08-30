@@ -34,16 +34,18 @@ def main():
     print    
     print '      BEGIN'
     
-    baseurl = "http://0.0.0.0:5000/api/v1"
+#     baseurl = "http://0.0.0.0:5000/api/v1"
     #baseurl = "http://192.168.0.10:5000/api/v1"
-    #baseurl = "http://api.stamped.com:5000/api/v1"
+    baseurl = "http://api.stamped.com:5000/api/v1"
     
     # betaAccountData(baseurl)
-    # betaAccountDataOAuth(baseurl)
+#     betaAccountDataOAuth(baseurl)
     
-    friendship = addFriend(baseurl)
-    print friendship
-
+    #friendship = addFriend(baseurl)
+    #print friendship
+    update_profile(baseurl)
+    
+    
 
 def addFriend(baseurl):
     
@@ -55,6 +57,31 @@ def addFriend(baseurl):
     result = testPOST(baseurl, path, data)
     return result
 
+
+def login(baseurl):
+    
+    path = "oauth2/login.json"
+    data = {
+        "client_id": 'stampedtest',
+        "client_secret": "august1ftw",
+        "screen_name": "jill",
+        "password": "12345",
+    }
+    result = testPOST(baseurl, path, data)
+    print 'TOKEN: %s' % result
+    return result
+
+
+
+def update_profile(baseurl):
+    path = "account/update_profile.json"
+    data = {
+        "oauth_token": login(baseurl)['access_token'],
+        "last_name": "Lubochinski"
+    }
+    result = testPOST(baseurl, path, data)
+    print result
+    return  
 
 
 def createUser(baseurl, userData):
@@ -128,19 +155,19 @@ def createUser(baseurl, userData):
 
 def betaAccountDataOAuth(baseurl):
     users = []
-
-    userData = {
-        "first_name": "Danielle",
-        "last_name": "Zilberstein", 
-        "email": "danielle.zilberstein@gmail.com", 
-        "password": "12345",
-        "screen_name": "danielle",
-        "privacy": False,
-        "bio": "I'm cute. And small. And fun.",
-        "color": "8C1FC3,A02BCF",
-        "profile_image": "http://a2.twimg.com/profile_images/1507664855/165735_776996026577_602907_42417430_6887446_n.jpg" ### TEMP!!!        
-    }
-    users.append(createUser(baseurl, userData))
+# 
+#     userData = {
+#         "first_name": "Danielle",
+#         "last_name": "Zilberstein", 
+#         "email": "danielle.zilberstein@gmail.com", 
+#         "password": "12345",
+#         "screen_name": "danielle",
+#         "privacy": False,
+#         "bio": "I'm cute. And small. And fun.",
+#         "color": "8C1FC3,A02BCF",
+#         "profile_image": "http://a2.twimg.com/profile_images/1507664855/165735_776996026577_602907_42417430_6887446_n.jpg" ### TEMP!!!        
+#     }
+#     users.append(createUser(baseurl, userData))
     
     userData = {
         "first_name": "Jill",
