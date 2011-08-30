@@ -87,6 +87,7 @@ urlpatterns = patterns('',
     ### TEMP
     (r'v0/temp/friends.json', 			'v0.functions.temp.friends'),
     (r'v0/temp/followers.json', 		'v0.functions.temp.followers'),
+    (r'v0/temp/activity.json',          'v0.functions.temp.activity'),
 
     ### DOCS
     (r'v0/oauth2/$',                    'v0.views.oauth2'),

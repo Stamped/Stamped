@@ -40,3 +40,27 @@ def followers():
     return transformOutput(output)
 
 
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def activity(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPGenericSlice(), request)
+
+    activity    = stampedAPI.getActivity(authUserId, **schema.exportSparse())
+    
+    result = []
+    for item in activity:
+        # result.append(HTTPActivity().importSchema(item).exportSparse())
+        
+        ### TEMP
+        stamp = None
+        if item.stamp_id != None:
+            stamp = stampedAPI.getStamp(item.stamp_id, authUserId)
+
+        comment = None
+        if item.comment_id != None:
+            comment = stampedAPI._getComment(item.comment_id)
+
+        result.append(HTTPActivityOld().importSchema(item, stamp, comment).exportSparse())
+
+    return transformOutput(result)

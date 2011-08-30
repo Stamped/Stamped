@@ -562,7 +562,7 @@ class StampedAPI(AStampedAPI):
         user    = self._userDB.getUser(authUserId)
         entity  = self._entityDB.getEntity(entityId)
 
-        blurb   = data.pop('blurb', None)
+        blurb   = data.pop('blurb', None).strip()
         credit  = data.pop('credit', None)
         image   = data.pop('image', None)
 
@@ -703,7 +703,7 @@ class StampedAPI(AStampedAPI):
         stamp   = self._stampDB.getStamp(stampId)       
         user    = self._userDB.getUser(authUserId)
 
-        blurb   = data.pop('blurb', stamp.blurb)
+        blurb   = data.pop('blurb', stamp.blurb).strip()
         credit  = data.pop('credit', None)
         image   = data.pop('image', stamp.image)
 
@@ -1061,6 +1061,10 @@ class StampedAPI(AStampedAPI):
         comments = self._commentDB.getComments(stamp.stamp_id)
             
         return comments
+    
+    ### TEMP: Remove after switching to new activity
+    def _getComment(self, commentId, **kwargs): 
+        return self._commentDB.getComment(commentId)
     
 
     """
