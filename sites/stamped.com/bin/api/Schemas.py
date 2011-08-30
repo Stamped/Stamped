@@ -490,6 +490,7 @@ class EntitySourcesSchema(Schema):
         self.awardAnnals        = AwardAnnalsSchema()
         self.userGenerated      = UserGeneratedSchema()
         self.barnesAndNoble     = BarnesAndNobleSchema()
+        self.sfweekly           = SFWeeklySchema()
 
 class GooglePlacesSchema(Schema):
     def setSchema(self):
@@ -550,6 +551,10 @@ class YelpSchema(Schema):
         self.yreviews           = SchemaElement(int)
 
 class SFMagSchema(Schema):
+    def setSchema(self):
+        pass
+
+class SFWeeklySchema(Schema):
     def setSchema(self):
         pass
 
