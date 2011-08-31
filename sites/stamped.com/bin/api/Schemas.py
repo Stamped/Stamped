@@ -470,6 +470,12 @@ class EntitySourcesSchema(Schema):
         self.barnesAndNoble     = BarnesAndNobleSchema()
         self.sfweekly           = SFWeeklySchema()
         self.seattletimes       = SeattleTimesSchema()
+        self.sfgate             = SFGateSchema()
+        self.timeout_chi        = TimeOutChiSchema()
+        self.timeout_la         = TimeOutLASchema()
+        self.timeout_lv         = TimeOutLVSchema()
+        self.timeout_mia        = TimeOutMIASchema()
+        self.timeout_sf         = TimeOutSFSchema()
 
 class GooglePlacesSchema(Schema):
     def setSchema(self):
@@ -567,6 +573,30 @@ class ChicagoMagSchema(Schema):
         pass
 
 class PhillyMagSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutChiSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutLASchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutLVSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutMIASchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutSFSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class SFGateSchema(Schema):
     def setSchema(self):
         pass
 
