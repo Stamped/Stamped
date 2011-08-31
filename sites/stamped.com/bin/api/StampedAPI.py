@@ -26,6 +26,8 @@ from AActivityDB import AActivityDB
 
 from Schemas import *
 
+EARNED_CREDIT_MULTIPLIER = 2
+
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 
 # db-specific validation should occur elsewhere. This validation includes 
@@ -664,7 +666,7 @@ class StampedAPI(AStampedAPI):
                 self._userDB.updateUserStats(userId, 'num_credits', \
                     None, increment=1)
                 self._userDB.updateUserStats(userId, 'num_stamps_left', \
-                    None, increment=1)
+                    None, increment=EARNED_CREDIT_MULTIPLIER)
 
                 ### TODO: Implement this
                 # if user.user_id not in self._userDB.creditGivers(userId):
@@ -809,7 +811,7 @@ class StampedAPI(AStampedAPI):
                 self._userDB.updateUserStats(userId, 'num_credits', \
                     None, increment=1)
                 self._userDB.updateUserStats(userId, 'num_stamps_left', \
-                    None, increment=1)
+                    None, increment=EARNED_CREDIT_MULTIPLIER)
 
                 # if auth['authenticated_user_id'] not in self._userDB.creditGivers(userId):
                 #     self._userDB.addCreditGiver(userId, user.user_id)

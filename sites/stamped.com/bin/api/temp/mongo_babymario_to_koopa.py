@@ -179,7 +179,7 @@ def convertUsers():
 
         num_stamps_left = 100
         if 'num_credits' in data['stats']:
-            num_stamps_left = num_stamps_left + int(data['stats']['num_credits'])
+            num_stamps_left = num_stamps_left + int(data['stats']['num_credits']) * 2
         if 'num_stamps' in data['stats']:
             num_stamps_left = num_stamps_left - int(data['stats']['num_stamps'])
         data['stats']['num_stamps_left'] = num_stamps_left
