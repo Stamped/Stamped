@@ -176,10 +176,16 @@ def convertUsers():
     o = codecs.open('/stamped/tmp/stamped/users_out.json', 'w', 'utf-8')
     for line in f:
         data = json.loads(line)
+
+        num_stamps_left = 100
+        if 'num_credits' in data['stats']:
+            num_stamps_left = num_stamps_left + int(data['stats']['num_credits'])
+        if 'num_stamps' in data['stats']:
+            num_stamps_left = num_stamps_left - int(data['stats']['num_stamps'])
+        data['stats']['num_stamps_left'] = num_stamps_left
         
         data['name'] = '%s %s' % (data['first_name'], data['last_name'])
         data['screen_name_lower'] = (data['screen_name']).lower()
-        data['stats']['num_stamps_left'] = 100 + int(data['stats']['num_credits_given']) - int(data['stats']['num_stamps']) 
         del(data['profile_image'])
         del(data['display_name'])
         del(data['first_name'])
