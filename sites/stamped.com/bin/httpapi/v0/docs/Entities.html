@@ -188,6 +188,46 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
   <div id="wrapper">
       <h1 id="entities">ENTITIES</h1>
 
+<h3 id="notes">Notes</h3>
+
+<p>Valid entity categories and subcategories include:</p>
+
+<ul>
+<li><strong>food</strong>
+
+<ul>
+<li>bar</li>
+<li>cafe</li>
+<li>restaurant</li>
+</ul></li>
+<li><strong>book</strong>
+
+<ul>
+<li>book</li>
+</ul></li>
+<li><strong>film</strong>
+
+<ul>
+<li>movie</li>
+<li>tv</li>
+</ul></li>
+<li><strong>music</strong>
+
+<ul>
+<li>album</li>
+<li>artist</li>
+<li>song</li>
+</ul></li>
+<li><strong>other</strong>
+
+<ul>
+<li>app</li>
+<li>other</li>
+</ul></li>
+</ul>
+
+<p>Note that all strings should be lowercase.</p>
+
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
 <h2 id="postentitiescreate">POST entities/create</h2>
@@ -211,16 +251,13 @@ The title of the custom entity.</p>
 The subtitle of the custom entity. This should default to the category if no additional information is provided.</p>
 
 <p><strong>category</strong> <em>required</em>
-The category of the custom entity. The default valud is &#8220;Other&#8221;.</p>
+The category of the custom entity.</p>
 
 <p><strong>subcategory</strong> <em>required</em>
-The subcategory of the custom entity. The default valud is &#8220;Other&#8221;.</p>
+The subcategory of the custom entity.</p>
 
 <p><strong>desc</strong> <em>optional</em>
 A brief description of the entity.</p>
-
-<p><strong>image</strong> <em>optional</em>
-A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. </p>
 
 <p><strong>address</strong> <em>optional</em>
 The address of the entity.</p>
@@ -324,9 +361,6 @@ The subcategory of the custom entity. The default valud is &#8220;Other&#8221;.<
 
 <p><strong>desc</strong> <em>optional</em>
 A brief description of the entity.</p>
-
-<p><strong>image</strong> <em>optional</em>
-A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. </p>
 
 <p><strong>address</strong> <em>optional</em>
 The address of the entity.</p>
