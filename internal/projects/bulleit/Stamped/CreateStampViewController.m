@@ -57,9 +57,8 @@ static const CGFloat kMinContainerHeight = 204.0;
 @synthesize doneButton = doneButton_;
 @synthesize bottomToolbar = bottomToolbar_;
 @synthesize shelfBackground = shelfBackground_;
-@synthesize cancelButton = cancelButton_;
 @synthesize spinner = spinner_;
-@synthesize checkmarkButton = checkmarkButton_;
+@synthesize stampItButton = stampItButton_;
 @synthesize creditTextField = creditTextField_;
 @synthesize editButton = editButton_;
 
@@ -94,8 +93,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.bottomToolbar = nil;
   self.shelfBackground = nil;
   self.spinner = nil;
-  self.cancelButton = nil;
-  self.checkmarkButton = nil;
+  self.stampItButton = nil;
   self.creditTextField = nil;
   self.editButton = nil;
   [super dealloc];
@@ -215,8 +213,7 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.bottomToolbar = nil;
   self.shelfBackground = nil;
   self.spinner = nil;
-  self.cancelButton = nil;
-  self.checkmarkButton = nil;
+  self.stampItButton = nil;
   self.creditTextField = nil;
   self.editButton = nil;
 }
@@ -295,14 +292,13 @@ static const CGFloat kMinContainerHeight = 204.0;
   [editViewController release];
 }
 
-- (IBAction)backOrCancelButtonPressed:(id)sender {
+- (IBAction)backButtonPressed:(id)sender {
   [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (IBAction)saveStampButtonPressed:(id)sender {
   [spinner_ startAnimating];
-  cancelButton_.enabled = NO;
-  checkmarkButton_.enabled = NO;
+  stampItButton_.enabled = NO;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/stamps/create.json" delegate:self];
@@ -359,8 +355,7 @@ static const CGFloat kMinContainerHeight = 204.0;
                    animations:^{ 
                      shelfBackground_.transform = topTransform;
                      bottomToolbar_.transform = bottomTransform;
-                     checkmarkButton_.transform = bottomTransform;
-                     cancelButton_.transform = bottomTransform;
+                     stampItButton_.transform = bottomTransform;
                    }
                    completion:^(BOOL finished) {
                      [UIView animateWithDuration:0.3
@@ -384,8 +379,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 
   NSLog(@"response: %@", objectLoader.response.bodyAsString);
   [spinner_ stopAnimating];
-  cancelButton_.enabled = YES;
-  checkmarkButton_.enabled = YES;
+  stampItButton_.enabled = YES;
   [UIView animateWithDuration:0.2
                    animations:^{
                      shelfBackground_.transform = CGAffineTransformIdentity;
