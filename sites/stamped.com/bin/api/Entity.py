@@ -9,8 +9,10 @@ categories = set([ 'food', 'music', 'film', 'book', 'other' ])
 subcategories = {
     'restaurant' : 'food', 
     'bar' : 'food', 
+    'cafe' : 'food', 
     'book' : 'book', 
     'movie' : 'film', 
+    'tv' : 'film', 
     'artist' : 'music', 
     'song' : 'music', 
     'album' : 'music', 
