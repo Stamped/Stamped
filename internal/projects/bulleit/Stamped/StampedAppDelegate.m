@@ -55,7 +55,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                          @"opentable_url", @"openTableURL", nil];
   entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapAttributes:@"address", @"category", @"subtitle",
-                               @"title", @"coordinates", @"phone", nil];
+                               @"title", @"coordinates", @"phone", @"subcategory", nil];
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];

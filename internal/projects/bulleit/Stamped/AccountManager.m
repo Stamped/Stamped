@@ -304,6 +304,12 @@ static AccountManager* sharedAccountManager_ = nil;
     // Wrap shiz with the current oauth token.
     NSMutableDictionary* params =
         [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
+
+    if (!self.authToken.accessToken) {
+      [self refreshToken];
+      return;
+    }
+
     [params setObject:self.authToken.accessToken forKey:@"oauth_token"];
     request.params = params;
     

@@ -111,6 +111,9 @@
 		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
 		7E9EE35313DF683500F4736F /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EE35213DF683500F4736F /* Stamp.m */; };
 		7E9F80EB13F88FA4003D7185 /* UIColor+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */; };
+		7EA64105140DC89900153627 /* menu_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EA64104140DC89900153627 /* menu_arrow@2x.png */; };
+		7EA64108140DD05C00153627 /* white_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EA64106140DD05C00153627 /* white_button_bg@2x.png */; };
+		7EA64109140DD05C00153627 /* blue_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EA64107140DD05C00153627 /* blue_button_bg@2x.png */; };
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
 		7EB4782813EE2DBE00DA12CB /* MediumUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */; };
 		7EB47EF213FDBD38009AD30A /* CreditsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB47EF013FDBD38009AD30A /* CreditsViewController.m */; };
@@ -430,6 +433,9 @@
 		7E9EE35213DF683500F4736F /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
 		7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+Stamped.h"; sourceTree = "<group>"; };
 		7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Stamped.m"; sourceTree = "<group>"; };
+		7EA64104140DC89900153627 /* menu_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "menu_arrow@2x.png"; sourceTree = "<group>"; };
+		7EA64106140DD05C00153627 /* white_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "white_button_bg@2x.png"; sourceTree = "<group>"; };
+		7EA64107140DD05C00153627 /* blue_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "blue_button_bg@2x.png"; sourceTree = "<group>"; };
 		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
 		7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediumUserImageView.h; sourceTree = "<group>"; };
 		7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediumUserImageView.m; sourceTree = "<group>"; };
@@ -692,6 +698,9 @@
 			children = (
 				7E47E94A1409B92C00130B32 /* edit_category_dropdown@2x.png */,
 				7E5EB26B140C56FE007D164F /* edit_action_button@2x.png */,
+				7EA64106140DD05C00153627 /* white_button_bg@2x.png */,
+				7EA64107140DD05C00153627 /* blue_button_bg@2x.png */,
+				7EA64104140DC89900153627 /* menu_arrow@2x.png */,
 				7E5EB267140C3843007D164F /* edit_category_dropdown_dark@2x.png */,
 				7E5EB26D140C5832007D164F /* map_pin_icon_small@2x.png */,
 				7E5EB26E140C5832007D164F /* plus_icon_small@2x.png */,
@@ -1401,6 +1410,9 @@
 				7E5EB26C140C56FE007D164F /* edit_action_button@2x.png in Resources */,
 				7E5EB26F140C5832007D164F /* map_pin_icon_small@2x.png in Resources */,
 				7E5EB270140C5832007D164F /* plus_icon_small@2x.png in Resources */,
+				7EA64105140DC89900153627 /* menu_arrow@2x.png in Resources */,
+				7EA64108140DD05C00153627 /* white_button_bg@2x.png in Resources */,
+				7EA64109140DD05C00153627 /* blue_button_bg@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -241,7 +241,7 @@ typedef enum {
   if (self.selectedFilterButton == foodFilterButton_) {
     filterString = @"food";
   } else if (self.selectedFilterButton == booksFilterButton_) {
-    filterString = @"books";
+    filterString = @"book";
   } else if (self.selectedFilterButton == filmFilterButton_) {
     filterString = @"film";
   } else if (self.selectedFilterButton == musicFilterButton_) {
@@ -254,7 +254,6 @@ typedef enum {
     self.filteredEntitiesArray = [entitiesArray_ filteredArrayUsingPredicate:filterPredicate];
     [self.tableView reloadData];
   }
-
 }
 
 #pragma mark - Table view data source

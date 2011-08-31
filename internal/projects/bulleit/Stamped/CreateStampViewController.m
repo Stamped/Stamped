@@ -175,7 +175,6 @@ static const CGFloat kMinContainerHeight = 204.0;
                   action:@selector(editorDoneButtonPressed:)
         forControlEvents:UIControlEventTouchUpInside];
   
-  titleLabel_.text = entityObject_.title;
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
   titleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
 
@@ -192,11 +191,10 @@ static const CGFloat kMinContainerHeight = 204.0;
   [scrollView_.layer insertSublayer:stampLayer_ above:titleLabel_.layer];
   [stampLayer_ release];
   
-  detailLabel_.text = entityObject_.subtitle;
   detailLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
 
   reasoningLabel_.textColor = [UIColor colorWithWhite:0.75 alpha:1.0];
-  categoryImageView_.image = entityObject_.categoryImage;
+
 
   if (creditedUser_)
     creditTextField_.text = creditedUser_.screenName;
@@ -221,6 +219,14 @@ static const CGFloat kMinContainerHeight = 204.0;
   self.checkmarkButton = nil;
   self.creditTextField = nil;
   self.editButton = nil;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  titleLabel_.text = entityObject_.title;
+  detailLabel_.text = entityObject_.subtitle;
+  categoryImageView_.image = entityObject_.categoryImage;
+
+  [super viewWillAppear:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -285,7 +291,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 - (IBAction)editButtonPressed:(id)sender {
   EditEntityViewController* editViewController =
       [[EditEntityViewController alloc] initWithEntity:entityObject_];
-  [self.navigationController pushViewController:editViewController animated:YES];
+  [self.navigationController presentModalViewController:editViewController animated:YES];
   [editViewController release];
 }
 

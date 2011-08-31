@@ -22,6 +22,7 @@
 @dynamic stamps;
 @dynamic phone;
 @dynamic favorite;
+@dynamic subcategory;
 
 - (UIImage*)categoryImage {
   if (self.category)
