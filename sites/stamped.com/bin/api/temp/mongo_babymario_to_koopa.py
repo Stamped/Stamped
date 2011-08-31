@@ -19,6 +19,9 @@ new_database    = new_connection['stamped']
 
 collections     = old_database.collection_names()
 
+if not os.path.isdir('/stamped/tmp/stamped/'):
+   os.makedirs('/stamped/tmp/stamped')
+
 def main():
     for collection in collections:
         print 'RUN %s' % collection
@@ -30,6 +33,19 @@ def main():
 
             rmExportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'activity'
             rmImportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'activityold'
+            cmd = "%s && %s" % (rmExportFile, rmImportFile)
+            pp = Popen(cmd, shell=True, stdout=PIPE)
+            pp.wait()
+
+            print 'COMPLETE'
+        
+        elif collection == 'users':
+            mongoExportJSON('users')
+            convertUsers()
+            mongoImportJSON('users')
+
+            rmExportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
+            rmImportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
             cmd = "%s && %s" % (rmExportFile, rmImportFile)
             pp = Popen(cmd, shell=True, stdout=PIPE)
             pp.wait()
@@ -147,6 +163,26 @@ def convertUserData(collection):
         
         del(data['user']['profile_image'])
         del(data['user']['display_name'])
+
+        json.dump(data, o)
+        o.write("\n")
+
+    f.close()
+    o.close()
+
+def convertUser():
+
+    f = codecs.open('/stamped/tmp/stamped/users.json', 'rU', 'utf-8')
+    o = codecs.open('/stamped/tmp/stamped/users_out.json', 'w', 'utf-8')
+    for line in f:
+        data = json.loads(line)
+        
+        data['name'] = '%s %s' % (data['first_name'], data['last_name'])
+        data['screen_name_lower'] = (data['screen_name']).lower()
+        del(data['profile_image'])
+        del(data['display_name'])
+        del(data['first_name'])
+        del(data['last_name'])
 
         json.dump(data, o)
         o.write("\n")
