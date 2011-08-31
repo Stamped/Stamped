@@ -179,6 +179,7 @@ def convertUsers():
         
         data['name'] = '%s %s' % (data['first_name'], data['last_name'])
         data['screen_name_lower'] = (data['screen_name']).lower()
+        data['stats']['num_stamps_left'] = 100 + int(data['stats']['num_credits_given']) - int(data['stats']['num_stamps']) 
         del(data['profile_image'])
         del(data['display_name'])
         del(data['first_name'])

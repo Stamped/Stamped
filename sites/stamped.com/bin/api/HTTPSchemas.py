@@ -154,6 +154,7 @@ class HTTPUser(Schema):
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
         self.num_stamps         = SchemaElement(int)
+        self.num_stamps_left    = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
         self.num_faves          = SchemaElement(int)
@@ -166,6 +167,7 @@ class HTTPUser(Schema):
             
             stats = schema.stats.exportSparse()
             self.num_stamps         = stats.pop('num_stamps', 0)
+            self.num_stamps_left    = stats.pop('num_stamps_left', 0)
             self.num_friends        = stats.pop('num_friends', 0)
             self.num_followers      = stats.pop('num_followers', 0)
             self.num_faves          = stats.pop('num_faves', 0)

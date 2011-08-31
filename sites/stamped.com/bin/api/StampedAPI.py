@@ -76,6 +76,9 @@ class StampedAPI(AStampedAPI):
 
         account.timestamp.created = datetime.utcnow()
         account.password = convertPasswordForStorage(account['password'])
+
+        # Set initial stamp limit
+        account.stats.num_stamps_left = 100
         
         # Validate Screen Name
         if not re.match("^[\w-]+$", account.screen_name) \
@@ -566,6 +569,12 @@ class StampedAPI(AStampedAPI):
         credit  = data.pop('credit', None)
         image   = data.pop('image', None)
 
+        # Check to make sure the user has stamps left
+        if user.num_stamps_left <= 0:
+            msg = "No more stamps remaining"
+            logs.warning(msg)
+            raise IllegalActionError(msg)
+
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
             msg = "Cannot stamp same entity twice"
@@ -608,9 +617,11 @@ class StampedAPI(AStampedAPI):
         followers.append(user.user_id)
         self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
 
-        # Increment user stats by one
+        # Update user stats 
         self._userDB.updateUserStats(authUserId, 'num_stamps', \
                     None, increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
+                    None, increment=-1)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -651,6 +662,8 @@ class StampedAPI(AStampedAPI):
 
                 # Update credited user stats
                 self._userDB.updateUserStats(userId, 'num_credits', \
+                    None, increment=1)
+                self._userDB.updateUserStats(userId, 'num_stamps_left', \
                     None, increment=1)
 
                 ### TODO: Implement this
@@ -795,6 +808,9 @@ class StampedAPI(AStampedAPI):
                 # Update credited user stats
                 self._userDB.updateUserStats(userId, 'num_credits', \
                     None, increment=1)
+                self._userDB.updateUserStats(userId, 'num_stamps_left', \
+                    None, increment=1)
+
                 # if auth['authenticated_user_id'] not in self._userDB.creditGivers(userId):
                 #     self._userDB.addCreditGiver(userId, user.user_id)
                 #     self._userDB.updateUserStats(userId, 'num_credit_givers', \
@@ -870,6 +886,9 @@ class StampedAPI(AStampedAPI):
         ### TODO: Do an actual count / update?
         self._userDB.updateUserStats(authUserId, 'num_stamps', \
                     None, increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
+                    None, increment=1)
+
         ### TODO: Update credit stats if credit given
 
         return stamp

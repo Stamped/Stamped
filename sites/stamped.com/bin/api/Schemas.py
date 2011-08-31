@@ -125,6 +125,7 @@ class FlagsSchema(Schema):
 class UserStatsSchema(Schema):
     def setSchema(self):
         self.num_stamps         = SchemaElement(int)
+        self.num_stamps_left    = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
         self.num_faves          = SchemaElement(int)

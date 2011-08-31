@@ -139,6 +139,76 @@ class StampedAPIStampsCreditUpdate(StampedAPIStampMentionsTest):
         result = self.handlePOST(path, data)
         self.assertTrue(len(result['credit']) == 2)
 
+class StampedAPIStampsLimits(StampedAPIStampTest):
+    def test_show(self):
+        path = "users/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userA['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['num_stamps_left'], self.userA['num_stamps_left']-1)
+
+    def test_max_limit(self):
+        entity_ids = []
+        stamp_ids = []
+
+        # Time to create some stamps!
+        num_stamps_left = self.userA['num_stamps_left']
+        for i in xrange(num_stamps_left-1):
+
+            data = {
+                "oauth_token": self.tokenA['access_token'],
+                "title": "Entity %s" % i,
+                "subtitle": "Sample item",
+                "desc": "Sample item", 
+                "category": "music",
+                "subcategory": "artist",
+            }
+            entity = self.createEntity(self.tokenA, data)
+            entity_ids.append(entity['entity_id'])
+            stamp = self.createStamp(self.tokenA, entity['entity_id'])
+            stamp_ids.append(stamp['stamp_id'])
+
+        # Check user to verify that they've used up all their stamps
+        path = "users/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userA['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['num_stamps_left'], 0)
+        self.assertEqual(result['num_stamps'], self.userA['num_stamps_left'])
+
+        # User should now be over their limit
+        try:
+            data = {
+                "oauth_token": self.tokenA['access_token'],
+                "title": "Entity 100!",
+                "subtitle": "Sample item",
+                "desc": "Sample item", 
+                "category": "music",
+                "subcategory": "artist",
+            }
+            entity = self.createEntity(self.tokenA, data)
+            entity_ids.append(entity['entity_id'])
+            stamp = self.createStamp(self.tokenA, entity['entity_id'])
+            stamp_ids.append(stamp['stamp_id'])
+            result = False
+        except:
+            result = True
+        
+        self.assertTrue(result)
+
+        # Delete everything
+        for stamp_id in stamp_ids:
+            self.deleteStamp(self.tokenA, stamp_id)
+        for entity_id in entity_ids:
+            self.deleteEntity(self.tokenA, entity_id)
+
+
+
+
 if __name__ == '__main__':
     main()
 
