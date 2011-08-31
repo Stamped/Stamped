@@ -170,7 +170,7 @@ def convertUserData(collection):
     f.close()
     o.close()
 
-def convertUser():
+def convertUsers():
 
     f = codecs.open('/stamped/tmp/stamped/users.json', 'rU', 'utf-8')
     o = codecs.open('/stamped/tmp/stamped/users_out.json', 'w', 'utf-8')
