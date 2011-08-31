@@ -1,6 +1,28 @@
 
 # ENTITIES #
 
+### Notes ###
+
+Valid entity categories and subcategories include:
+
+* **food**
+	* bar
+	* cafe
+	* restaurant
+* **book**
+	* book
+* **film**
+	* movie
+	* tv
+* **music**
+	* album
+	* artist
+	* song
+* **other**
+	* app
+	* other
+
+Note that all strings should be lowercase.
 
 ------------------------------------------------------------------------------
 ## POST entities/create ##
@@ -20,16 +42,13 @@ The title of the custom entity.
 The subtitle of the custom entity. This should default to the category if no additional information is provided.
 
 **category** _required_
-The category of the custom entity. The default valud is "Other".
+The category of the custom entity.
 
 **subcategory** _required_
-The subcategory of the custom entity. The default valud is "Other".
+The subcategory of the custom entity.
 
 **desc** _optional_
 A brief description of the entity.
-
-**image** _optional_
-A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
 
 **address** _optional_
 The address of the entity.
@@ -117,9 +136,6 @@ The subcategory of the custom entity. The default valud is "Other".
 
 **desc** _optional_
 A brief description of the entity.
-
-**image** _optional_
-A base64-encoded image of the entity. The image must be a valid GIF, JPG, or PNG less than 700 kilobytes in size. Images larger than 500 pixels will be scaled down. 
 
 **address** _optional_
 The address of the entity.

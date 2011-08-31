@@ -50,6 +50,8 @@ def show(request):
     for comment in comments:
         result.append(HTTPComment().importSchema(comment).exportSparse())
     
+    result = sorted(result, key=lambda k: k['created'])
+
     return transformOutput(result)
 
 

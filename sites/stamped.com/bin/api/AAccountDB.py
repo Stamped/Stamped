@@ -27,10 +27,6 @@ class AAccountDB(object):
         pass
     
     @abstract
-    def setProfileImageLink(self, userId, url):
-        pass
-    
-    @abstract
     def flagAccount(self, user):
         pass
 

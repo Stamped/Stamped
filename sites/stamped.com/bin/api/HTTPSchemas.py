@@ -89,8 +89,7 @@ class OAuthLogin(Schema):
 class HTTPAccount(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.email              = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.privacy            = SchemaElement(bool, required=True)
@@ -106,8 +105,7 @@ class HTTPAccount(Schema):
 
 class HTTPAccountNew(Schema):
     def setSchema(self):
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
@@ -130,8 +128,7 @@ class HTTPAccountSettings(Schema):
 
 class HTTPAccountProfile(Schema):
     def setSchema(self):
-        self.first_name         = SchemaElement(basestring)
-        self.last_name          = SchemaElement(basestring)
+        self.name               = SchemaElement(basestring)
         self.color              = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
         self.website            = SchemaElement(basestring)
@@ -148,11 +145,8 @@ class HTTPAccountProfileImage(Schema):
 class HTTPUser(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
-        self.first_name         = SchemaElement(basestring, required=True)
-        self.last_name          = SchemaElement(basestring, required=True)
+        self.name               = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.bio                = SchemaElement(basestring)
@@ -160,6 +154,7 @@ class HTTPUser(Schema):
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
         self.num_stamps         = SchemaElement(int)
+        self.num_stamps_left    = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
         self.num_faves          = SchemaElement(int)
@@ -172,6 +167,7 @@ class HTTPUser(Schema):
             
             stats = schema.stats.exportSparse()
             self.num_stamps         = stats.pop('num_stamps', 0)
+            self.num_stamps_left    = stats.pop('num_stamps_left', 0)
             self.num_friends        = stats.pop('num_friends', 0)
             self.num_followers      = stats.pop('num_followers', 0)
             self.num_faves          = stats.pop('num_faves', 0)
@@ -185,8 +181,6 @@ class HTTPUserMini(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
-        self.display_name       = SchemaElement(basestring, required=True)
-        self.profile_image      = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
@@ -621,3 +615,37 @@ class HTTPActivity(Schema):
             raise NotImplementedError
         return self
 
+
+### TEMPORARY
+class HTTPActivityOld(Schema):
+    def setSchema(self):
+        self.activity_id        = SchemaElement(basestring, required=True)
+        self.genre              = SchemaElement(basestring, required=True)
+        self.user               = HTTPUserMini(required=True)
+        self.comment            = HTTPComment()
+        self.stamp              = HTTPStamp()
+        self.favorite           = HTTPFavorite()
+        self.created            = SchemaElement(basestring)
+
+    def importSchema(self, schema, stamp=None, comment=None, favorite=None):
+        if schema.__class__.__name__ == 'Activity':
+            data                = schema.exportSparse()
+            user                = UserMini(data.pop('user', None))
+
+            data['user']        = HTTPUserMini().importSchema(user).exportSparse()
+
+            if stamp != None and stamp.stamp_id != None:
+                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
+                if 'num_comments' in data['stamp']:
+                    del(data['stamp']['num_comments'])
+            if comment != None and comment.comment_id != None:
+                data['comment'] = HTTPComment().importSchema(comment).exportSparse()
+            if favorite != None and favorite.favorite_id != None:
+                data['favorite']= HTTPFavorite().importSchema(favorite).exportSparse()
+ 
+            self.importData(data, overflow=True)
+
+            self.created = schema.timestamp.created
+        else:
+            raise NotImplementedError
+        return self

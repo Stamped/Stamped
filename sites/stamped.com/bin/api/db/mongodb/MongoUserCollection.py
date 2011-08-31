@@ -35,7 +35,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     
     def getUserByScreenName(self, screenName):
         screenName = str(screenName).lower()
-        document = self._collection.find_one({"screen_name": screenName})
+        document = self._collection.find_one({"screen_name_lower": screenName})
         return self._convertFromMongo(document)
     
     def checkScreenNameExists(self, screenName):
@@ -58,7 +58,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         data = self._collection.find({"$or": [
             {"_id": {"$in": queryUserIDs}}, 
-            {"screen_name": {"$in": queryScreenNames}}
+            {"screen_name_lower": {"$in": queryScreenNames}}
             ]}).limit(limit)
             
         result = []

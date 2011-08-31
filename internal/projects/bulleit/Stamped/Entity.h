@@ -31,6 +31,7 @@ typedef enum {
 @property (nonatomic, retain) NSString* subtitle;
 @property (nonatomic, retain) NSString* title;
 @property (nonatomic, retain) NSString* coordinates;
+@property (nonatomic, retain) NSString* subcategory;
 @property (nonatomic, retain) NSSet* stamps;
 @property (nonatomic, retain) NSNumber* phone;
 @property (nonatomic, retain) Favorite* favorite;

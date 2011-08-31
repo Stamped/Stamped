@@ -17,7 +17,7 @@ class StampedAPIUserTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
-        self.screen_names = ['usera', 'userb']
+        self.screen_names = ['UserA', 'UserB']
 
     def tearDown(self):
         self.deleteAccount(self.tokenA)

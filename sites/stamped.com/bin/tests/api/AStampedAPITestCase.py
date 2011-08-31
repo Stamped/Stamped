@@ -25,7 +25,9 @@ class AStampedAPITestCase(AStampedTestCase):
     
     # _baseurl = "http://0.0.0.0:5000/api/v1"
     _baseurl = "http://localhost:18000/v0"
-    #_baseurl = "http://localhost:8080/v0"
+    # _baseurl = "http://localhost:8080/v0"
+    # _baseurl = "https://dev.stamped.com/v0"
+    # _baseurl = "http://dev.stamped.com:5000/v0"
     
     _opener = StampedAPIURLOpener()
     client_auth = {
@@ -61,8 +63,7 @@ class AStampedAPITestCase(AStampedTestCase):
         data = {
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
-            "first_name": name,
-            "last_name": "Test", 
+            "name": name,
             "email": "%s@stamped.com" % name, 
             "password": "12345",
             "screen_name": name

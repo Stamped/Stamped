@@ -26,6 +26,8 @@ from AActivityDB import AActivityDB
 
 from Schemas import *
 
+EARNED_CREDIT_MULTIPLIER = 2
+
 # TODO: input validation and output formatting
 # NOTE: this is the place where all input validation should occur. any 
 # db-specific validation should occur elsewhere. This validation includes 
@@ -75,8 +77,9 @@ class StampedAPI(AStampedAPI):
 
         account.timestamp.created = datetime.utcnow()
         account.password = convertPasswordForStorage(account['password'])
-        account.display_name = "%s %s." % \
-                                (account.first_name, account.last_name[0])
+
+        # Set initial stamp limit
+        account.stats.num_stamps_left = 100
         
         # Validate Screen Name
         if not re.match("^[\w-]+$", account.screen_name) \
@@ -133,8 +136,6 @@ class StampedAPI(AStampedAPI):
     
     def updateProfileImage(self, authUserId, data):
         data = base64.decodestring(data)
-        
-        #self._accountDB.setProfileImageLink(authUserId, url)
         
         image = self._imageDB.getImage(data)
         self._imageDB.addProfileImage(authUserId, image)
@@ -519,6 +520,7 @@ class StampedAPI(AStampedAPI):
 
     def _extractMentions(self, text):
         # Define patterns
+        ### TODO: Modify these to match screen name pattern defined above
         user_regex = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         
@@ -537,7 +539,6 @@ class StampedAPI(AStampedAPI):
             try:
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
-                data['display_name'] = user.display_name
                 data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])
@@ -552,7 +553,6 @@ class StampedAPI(AStampedAPI):
             try:
                 user = self._userDB.getUserByScreenName(data['screen_name'])
                 data['user_id'] = user.user_id
-                data['display_name'] = user.display_name
                 data['screen_name'] = user.screen_name
             except:
                 logs.warning("User not found (%s)" % data['screen_name'])
@@ -568,9 +568,15 @@ class StampedAPI(AStampedAPI):
         user    = self._userDB.getUser(authUserId)
         entity  = self._entityDB.getEntity(entityId)
 
-        blurb   = data.pop('blurb', None)
+        blurb   = data.pop('blurb', None).strip()
         credit  = data.pop('credit', None)
         image   = data.pop('image', None)
+
+        # Check to make sure the user has stamps left
+        if user.num_stamps_left <= 0:
+            msg = "No more stamps remaining"
+            logs.warning(msg)
+            raise IllegalActionError(msg)
 
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
@@ -614,9 +620,11 @@ class StampedAPI(AStampedAPI):
         followers.append(user.user_id)
         self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
 
-        # Increment user stats by one
+        # Update user stats 
         self._userDB.updateUserStats(authUserId, 'num_stamps', \
                     None, increment=1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
+                    None, increment=-1)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -658,6 +666,8 @@ class StampedAPI(AStampedAPI):
                 # Update credited user stats
                 self._userDB.updateUserStats(userId, 'num_credits', \
                     None, increment=1)
+                self._userDB.updateUserStats(userId, 'num_stamps_left', \
+                    None, increment=EARNED_CREDIT_MULTIPLIER)
 
                 ### TODO: Implement this
                 # if user.user_id not in self._userDB.creditGivers(userId):
@@ -709,7 +719,7 @@ class StampedAPI(AStampedAPI):
         stamp   = self._stampDB.getStamp(stampId)       
         user    = self._userDB.getUser(authUserId)
 
-        blurb   = data.pop('blurb', stamp.blurb)
+        blurb   = data.pop('blurb', stamp.blurb).strip()
         credit  = data.pop('credit', None)
         image   = data.pop('image', stamp.image)
 
@@ -801,6 +811,9 @@ class StampedAPI(AStampedAPI):
                 # Update credited user stats
                 self._userDB.updateUserStats(userId, 'num_credits', \
                     None, increment=1)
+                self._userDB.updateUserStats(userId, 'num_stamps_left', \
+                    None, increment=EARNED_CREDIT_MULTIPLIER)
+
                 # if auth['authenticated_user_id'] not in self._userDB.creditGivers(userId):
                 #     self._userDB.addCreditGiver(userId, user.user_id)
                 #     self._userDB.updateUserStats(userId, 'num_credit_givers', \
@@ -876,6 +889,9 @@ class StampedAPI(AStampedAPI):
         ### TODO: Do an actual count / update?
         self._userDB.updateUserStats(authUserId, 'num_stamps', \
                     None, increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
+                    None, increment=1)
+
         ### TODO: Update credit stats if credit given
 
         return stamp
@@ -1067,6 +1083,10 @@ class StampedAPI(AStampedAPI):
         comments = self._commentDB.getComments(stamp.stamp_id)
             
         return comments
+    
+    ### TEMP: Remove after switching to new activity
+    def _getComment(self, commentId, **kwargs): 
+        return self._commentDB.getComment(commentId)
     
 
     """
