@@ -78,9 +78,13 @@ def remove(request):
 def search(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPEntitySearch(), request)
-    query       = schema.exportSchema(EntitySearch())
+    search      = schema.exportSchema(EntitySearch())
     
-    result      = stampedAPI.searchEntities(query.q, query.coordinates)
+    result      = stampedAPI.searchEntities(search.q, 
+                                            search.coordinates, 
+                                            authUserId, 
+                                            search.category, 
+                                            search.subcategory)
     
     autosuggest = []
     for item in result:
@@ -88,5 +92,4 @@ def search(request):
         autosuggest.append(item)
     
     return transformOutput(autosuggest)
-
 

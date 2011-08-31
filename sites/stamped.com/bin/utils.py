@@ -6,15 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import gzip, httplib, json, logging, os, sys, pickle, string, threading, time
-import traceback, urllib, urllib2
+import htmlentitydefs, traceback, urllib, urllib2
+import aws, logs, math
+
 from boto.ec2.connection import EC2Connection
-from subprocess import Popen, PIPE
-from functools import wraps
-from BeautifulSoup import BeautifulSoup
-from StringIO import StringIO
-import htmlentitydefs
-import aws
-import logs
+from subprocess          import Popen, PIPE
+from functools           import wraps
+from BeautifulSoup       import BeautifulSoup
+from StringIO            import StringIO
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
@@ -542,4 +541,24 @@ def init_db_config(conf):
 
 def is_func(obj):
     return hasattr(obj, '__call__')
+
+def get_spherical_distance(latLng1, latLng2):
+    # convert latitude and longitude to spherical coordinates in radians
+    degrees_to_radians = math.pi / 180.0
+    
+    # phi = 90 - latitude
+    phi1 = (90.0 - latLng1[0]) * degrees_to_radians
+    phi2 = (90.0 - latLng2[0]) * degrees_to_radians
+    
+    # theta = longitude
+    theta1 = latLng1[1] * degrees_to_radians
+    theta2 = latLng2[1] * degrees_to_radians
+    
+    # compute distance from spherical coordinates
+    cos = (math.sin(phi1) * math.sin(phi2) * math.cos(theta1 - theta2) + 
+           math.cos(phi1) * math.cos(phi2))
+    arc = math.acos(cos)
+    
+    # multiply arc by the earth's radius in your desired units to get length
+    return arc
 

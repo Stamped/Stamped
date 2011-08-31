@@ -110,6 +110,9 @@ class SeattleTimesCrawler(AExternalEntitySource):
         
         content = soup.find('div', { 'id' : 'content'})
         
+        if content is None:
+            return
+        
         entity = Entity()
         entity.title = content.find('h1').getText()
         entity.subcategory = "restaurant"

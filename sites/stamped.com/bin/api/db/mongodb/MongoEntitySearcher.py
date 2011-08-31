@@ -8,19 +8,16 @@ __license__ = "TODO"
 import Globals, utils
 import math, pymongo, string
 
-from AEntitySearcher import AEntitySearcher
-from MongoEntityCollection import MongoEntityCollection
-from MongoPlacesEntityCollection import MongoPlacesEntityCollection
+from EntitySearcher import EntitySearcher
+from GooglePlaces   import GooglePlaces
+from Schemas        import Entity
+from difflib        import SequenceMatcher
+from pymongo.son    import SON
+from gevent.pool    import Pool
+from pprint         import pprint
+from utils          import lazyProperty
 
-from Schemas import *
-
-from difflib import SequenceMatcher
-from pymongo.son import SON
-from gevent.pool import Pool
-from pprint import pprint
-from utils import abstract
-
-class MongoEntitySearcher(AEntitySearcher):
+class MongoEntitySearcher(EntitySearcher):
     subcategory_weights = {
         'restaurant' : 100, 
         'bar' : 90, 
@@ -34,7 +31,7 @@ class MongoEntitySearcher(AEntitySearcher):
     }
 
     source_weights = {
-        'googlePlaces' : 90, 
+        'googlePlaces' : 80, 
         'openTable' : 110, 
         'factual' : 5, 
         'apple' : 75, 
@@ -50,14 +47,58 @@ class MongoEntitySearcher(AEntitySearcher):
         'netflix'  : 100, 
     }
     
-    def __init__(self):
-        AEntitySearcher.__init__(self)
+    google_subcategory_whitelist = set([
+        "amusement_park", 
+        "aquarium", 
+        "art_gallery", 
+        "bakery", 
+        "bar", 
+        "beauty_salon", 
+        "book_store", 
+        "bowling_alley", 
+        "cafe", 
+        "campground", 
+        "casino", 
+        "clothing_store", 
+        "department_store", 
+        "florist", 
+        "food", 
+        "grocery_or_supermarket", 
+        "market", 
+        "gym", 
+        "home_goods_store", 
+        "jewelry_store", 
+        "library", 
+        "liquor_store", 
+        "lodging", 
+        "movie_theater", 
+        "museum", 
+        "night_club", 
+        "park", 
+        "restaurant", 
+        "school", 
+        "shoe_store", 
+        "shopping_mall", 
+        "spa", 
+        "stadium", 
+        "store", 
+        "university", 
+        "zoo", 
+    ])
+    
+    def __init__(self, api):
+        EntitySearcher.__init__(self)
         
-        self.entityDB = MongoEntityCollection()
-        self.placesDB = MongoPlacesEntityCollection()
+        self.api = api
+        self.entityDB = api._entityDB
+        self.placesDB = api._placesEntityDB
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
-        self.pool = Pool(8)
+        self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
+    
+    @lazyProperty
+    def _googlePlaces(self):
+        return GooglePlaces()
     
     def getSearchResults(self, 
                          query, 
@@ -65,7 +106,7 @@ class MongoEntitySearcher(AEntitySearcher):
                          limit=10, 
                          category_filter=None, 
                          subcategory_filter=None, 
-                         full=None):
+                         full=False):
         input_query = query.strip().lower()
         
         query = input_query
@@ -107,19 +148,19 @@ class MongoEntitySearcher(AEntitySearcher):
         data['limit']       = limit
         data['category']    = category_filter
         data['subcategory'] = subcategory_filter
+        data['full']        = full
         pprint(data)
         
         entity_query = {"title": {"$regex": query, "$options": "i"}}
         db_results = []
         
-        results = []
         results_set = set()
+        results = []
         
         if coords is None:
             db_results = self.entityDB._collection.find(entity_query)
         else:
-            # NOTE: geoNear uses lng/lat and coordinates *must* be stored in lng/lat order in underlying collection
-            # TODO: enforce this constraint when storing into mongo
+            pool = Pool(8)
             
             earthRadius = 3959.0 # miles
             q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
@@ -131,21 +172,75 @@ class MongoEntitySearcher(AEntitySearcher):
             def _find_entity(ret):
                 ret['db_results'] = self.entityDB._collection.find(entity_query)
             
-            # perform the two db reads concurrently
-            self.pool.spawn(_find_entity, wrapper)
-            self.pool.spawn(_find_places, wrapper)
-            self.pool.join()
+            def _find_google_places(ret):
+                params = {
+                    'name' : input_query, 
+                }
+                
+                google_results = self._googlePlaces.getSearchResultsByLatLng(coords, params)
+                entities = []
+                output   = []
+                
+                if google_results is not None:
+                    for result in google_results:
+                        subcategory  = self._googlePlaces.getSubcategoryFromTypes(result['types'])
+                        if subcategory not in self.google_subcategory_whitelist:
+                            continue
+                        
+                        entity = Entity()
+                        entity.title = result['name']
+                        entity.image = result['icon']
+                        entity.lat   = result['geometry']['location']['lat']
+                        entity.lng   = result['geometry']['location']['lng']
+                        entity.gid   = result['id']
+                        entity.reference    = result['reference']
+                        entity.subcategory  = subcategory
+                        if 'vicinity' in result:
+                            entity.neighborhood = result['vicinity']
+                        
+                        entities.append(entity)
+                    
+                    entities = self.api._entityMatcher.addMany(entities)
+                    
+                    if entities is not None:
+                        for entity in entities:
+                            distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
+                            distance = distance * earthRadius
+                            
+                            output.append((entity, distance))
+                
+                ret['google_place_results'] = output
             
-            db_results    = wrapper['db_results']
-            place_results = wrapper['place_results']['results']
+            if full:
+                pool.spawn(_find_google_places, wrapper)
+            
+            # perform the two db reads concurrently
+            pool.spawn(_find_entity, wrapper)
+            pool.spawn(_find_places, wrapper)
+            
+            pool.join()
+            db_results = wrapper['db_results']
+            
+            try:
+                place_results = wrapper['place_results']['results']
+            except KeyError:
+                place_results = []
             
             for doc in place_results:
-                # entity = Entity(self.entityDB._mongoToObj(doc['obj'], 'entity_id'))
                 entity = self.placesDB._convertFromMongo(doc['obj'])
                 result = (entity, doc['dis'])
                 
                 results.append(result)
                 results_set.add(entity.entity_id)
+            
+            if full:
+                try:
+                    google_place_results = wrapper['google_place_results']
+                except KeyError:
+                    google_place_results = []
+                
+                for result in google_place_results:
+                    results.append(result)
         
         for entity in db_results:
             # e = Entity(self.entityDB._mongoToObj(entity, 'entity_id'))
@@ -232,10 +327,10 @@ class MongoEntitySearcher(AEntitySearcher):
     def _get_subcategory_value(self, entity):
         subcat = entity.subcategory
         
-        if subcat in self.subcategory_weights:
+        try:
             weight = self.subcategory_weights[subcat]
-        else:
-            # default weight
+        except KeyError:
+            # default weight for non-standard subcategories
             weight = 30
         
         return weight / 100.0

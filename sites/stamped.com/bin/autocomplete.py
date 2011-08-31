@@ -8,13 +8,12 @@ __license__ = "TODO"
 import init, utils
 import sys
 
-from db.mongodb.MongoEntitySearcher import MongoEntitySearcher
+from MongoStampedAPI import MongoStampedAPI
 from optparse import OptionParser
 from pprint import pprint
 
 
 # TODO:
-    # TODO: photos
     # entity keyword search by breaking title up into distinct lexemes
     # unit tests and regression tests for autocomplete
         # Beauty & Essex, Per Se
@@ -62,6 +61,7 @@ from pprint import pprint
 # TODO: add valid affiliate urls to fandangofeed
 # TODO: add -f option to crawler to either force overwrite of preexisting data or disregard previous records?
 
+# TODO: (DONE) add photo support
 # TODO: (DONE) add fandango source
 # TODO: (DONE) add pricing info to movies and albums
 # TODO: (DONE) filter albums the same way we're filtering movies by retaining 
@@ -146,7 +146,8 @@ def parseCommandLine():
 def main():
     options, args = parseCommandLine()
     
-    searcher = MongoEntitySearcher()
+    api      = MongoStampedAPI()
+    searcher = api._entitySearcher
     results  = searcher.getSearchResults(query=args[0], 
                                          coords=options.location, 
                                          limit=options.limit, 

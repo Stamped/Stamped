@@ -59,7 +59,6 @@ class StampedAPI(AStampedAPI):
     def _validate(self):
         self._validated = True
     
-    
     """
        #                                                    
       # #    ####   ####   ####  #    # #    # #####  ####  
@@ -422,22 +421,17 @@ class StampedAPI(AStampedAPI):
     
     def addEntity(self, entity):
         entity.timestamp.created = datetime.utcnow()
-
         entity = self._entityDB.addEntity(entity)
-
         return entity
     
     def getEntity(self, entityId, authUserId=None):
         entity = self._entityDB.getEntity(entityId)
         
         ### TODO: Check if user has access to this entity
-
         return entity
 
     def updateCustomEntity(self, authUserId, entityId, data):
-        
         ### TODO: Reexamine how updates are done
-
         entity = self._entityDB.getEntity(entityId)
         
         # Check if user has access to this entity
@@ -446,28 +440,26 @@ class StampedAPI(AStampedAPI):
             msg = "Insufficient privileges to update custom entity"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
-
+        
         # Try to import as a full entity
         for k, v in data.iteritems():
             entity[k] = v
         
         entity.timestamp.modified = datetime.utcnow()
-
         self._entityDB.updateEntity(entity)
-
+        
         return entity
 
     def updateEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
-
+        
         # Try to import as a full entity
         for k, v in data.iteritems():
             entity[k] = v
         
         entity.timestamp.modified = datetime.utcnow()
-
         self._entityDB.updateEntity(entity)
-
+        
         return entity
     
     def removeEntity(self, entityId):
@@ -480,10 +472,27 @@ class StampedAPI(AStampedAPI):
 
         return entity
     
-    def searchEntities(self, query, coords=None, authUserId=None):
-
-        ### TODO: Customize query based on authenticated_user_id / coordinates
+    def searchEntities(self, 
+                       query, 
+                       coords=None, 
+                       authUserId=None, 
+                       category_filter=None, 
+                       subcategory_filter=None):
+        coords  = self._parseCoords(coords)
+        results = self._entitySearcher.getSearchResults(query=query, 
+                                                        coords=coords, 
+                                                        limit=10, 
+                                                        category_filter=category_filter, 
+                                                        subcategory_filter=subcategory_filter, 
+                                                        full=True)
+        output  = []
         
+        for result in results:
+            output.append(result[0])
+        
+        return output
+    
+    def _parseCoords(self, coords):
         if coords is not None and 'lat' in coords and coords.lat != None:
             try:
                 coords = [coords['lat'], coords['lng']]
@@ -493,18 +502,11 @@ class StampedAPI(AStampedAPI):
                 msg = "Invalid coordinates (%s)" % coords
                 logs.warning(msg)
                 raise InputError(msg)
+            
+            return coords
         else:
-            coords = None
-        
-        results = self._entitySearcher.getSearchResults(query=query, coords=coords, limit=10)
-        output = []
-        
-        for result in results:
-            output.append(result[0])
-        
-        return output
+            return None
     
-
     """
      #####                                    
     #     # #####   ##   #    # #####   ####  
@@ -525,7 +527,7 @@ class StampedAPI(AStampedAPI):
         
         # Check if string match exists at beginning. Should combine with regex 
         # below once I figure out how :)
-
+        
         ### TODO: Test this -- seeing some issues where it doesn't pick up replies
         reply = reply_regex.match(text)
         if reply:
@@ -561,8 +563,7 @@ class StampedAPI(AStampedAPI):
         if len(mentions) > 0:
             return mentions
         return None
-        # return mentions
-
+    
     def addStamp(self, authUserId, entityId, data):
         user    = self._userDB.getUser(authUserId)
         entity  = self._entityDB.getEntity(entityId)
@@ -1326,10 +1327,12 @@ class StampedAPI(AStampedAPI):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))
             try:
+                #self._entityMatcher.addOne(entity)
                 entity2 = self._entityDB.addEntity(entity)
                 
                 if 'place' in entity:
                     self._placesEntityDB.addEntity(entity2)
+                return entity2
             except Exception as e:
                 utils.log("[%s] error adding 1 entities:" % (self, ))
                 utils.printException()
@@ -1355,6 +1358,8 @@ class StampedAPI(AStampedAPI):
             
             if len(place_entities) > 0:
                 self._placesEntityDB.addEntities(place_entities)
+            
+            return entities2
         except Exception as e:
             utils.log("[%s] error adding %d entities:" % (self, utils.count(entities)))
             utils.printException()

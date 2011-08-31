@@ -25,7 +25,6 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
     def getMatchingDuplicates(self, entity, candidate_entities):
         base_detail  = list(self._getEntityDetail(entity))
         lbase_detail = len(base_detail)
-        base_addr    = entity.address.lower().strip()
         is_junk      = " \t-".__contains__
         
         for candidate in candidate_entities:

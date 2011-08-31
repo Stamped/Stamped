@@ -54,8 +54,9 @@ class EntityDeduper(Greenlet):
                 numEntities += 1
                 last = bson.objectid.ObjectId(current['_id'])
                 
-                pool.spawn(self.matcher.dedupeOne, current, True)
-                #self.matcher.dedupeOne(current, True)
+                current = self.matcher._placesDB._convertFromMongo(current)
+                pool.spawn(self.matcher.dedupeOne, current)
+                #self.matcher.dedupeOne(current)
                 
                 if self.options.seed:
                     break
@@ -81,8 +82,9 @@ class EntityDeduper(Greenlet):
                 numEntities += 1
                 last = bson.objectid.ObjectId(current['_id'])
                 
-                pool.spawn(self.matcher.dedupeOne, current, False)
-                #self.matcher.dedupeOne(current, False)
+                current = self.matcher._entityDB._convertFromMongo(current)
+                pool.spawn(self.matcher.dedupeOne, current)
+                #self.matcher.dedupeOne(current)
                 
                 if self.options.seed:
                     break

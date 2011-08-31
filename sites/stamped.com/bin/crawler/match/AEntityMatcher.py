@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from utils import abstract
+from utils import abstract, AttributeDict
 from Schemas import Entity
 from pprint import pprint
 from errors import *
@@ -20,10 +20,15 @@ class AEntityMatcher(object):
         Abstract base class for finding and matching duplicate entities.
     """
     
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
+        if options is None:
+            options = AttributeDict(
+                verbose=False, 
+                noop=False, 
+            )
+        
         self.stamped_api = stamped_api
         self.options = options
-        
         self.dead_entities = set()
         self.numDuplicates = 0
     
@@ -39,15 +44,31 @@ class AEntityMatcher(object):
     def _stampDB(self):
         return self.stamped_api._stampDB
     
-    def dedupeOne(self, mongo_entity, isPlace):
-        try:
-            if isPlace:
-                entity = self._placesDB._convertFromMongo(mongo_entity)
-            else:
-                entity = self._convertFromMongo(mongo_entity)
+    def addOne(self, entity, force=False):
+        if force or not self.dedupeOne(entity):
+            utils.log("[%s] adding entity '%s'" % (self, entity.title))
+            entity = self._entityDB.addEntity(entity)
             
+            if 'place' in entity:
+                self._placesEntityDB.addEntity(entity2)
+            
+            return entity
+        else:
+            return None
+    
+    def addMany(self, entities, force=False):
+        results = []
+        for entity in entities or []:
+            result = self.addOne(entity, force)
+            if result is not None:
+                results.append(result)
+        
+        return results
+    
+    def dedupeOne(self, entity):
+        try:
             if entity.entity_id in self.dead_entities:
-                return
+                return False
             
             if self.options.verbose:
                 utils.log("[%s] deduping %s" % (self, entity.title))
@@ -55,18 +76,18 @@ class AEntityMatcher(object):
             dupes0 = self.getDuplicates(entity)
             
             if len(dupes0) <= 1:
-                return
+                return False
             
             keep, dupes1 = self.getBestDuplicate(dupes0)
-            if keep.entity_id in self.dead_entities:
-                return
+            if 'entity_id' not in keep or keep.entity_id in self.dead_entities:
+                return False
             
             filter_func = (lambda e: e.entity_id != keep.entity_id and not e.entity_id in self.dead_entities)
             dupes1 = filter(filter_func, dupes1)
             
             numDuplicates = len(dupes1)
             if 0 == numDuplicates:
-                return
+                return False
             
             utils.log("%s) found %d duplicate%s" % (keep.title, numDuplicates, '' if 1 == numDuplicates else 's'))
             self.numDuplicates += numDuplicates
@@ -77,23 +98,26 @@ class AEntityMatcher(object):
                 utils.log("   %d) removing %s" % (i + 1, dupe.title))
             
             self.removeDuplicates(keep, dupes1)
+            return True
         except Fail:
-            try:
-                entity_id = entity['_id']
-            except:
+            if 'entity_id' in entity:
                 entity_id = entity['entity_id']
+                
+                if entity_id in self.dead_entities:
+                    return
+                
+                utils.log("%s) removing malformed / invalid entity (%s)" % (self.__class__.__name__, entity_id))
+                self.dead_entities.add(entity_id)
+                
+                if not self.options.noop:
+                    self._entityDB.removeEntity(entity_id)
+                    self._placesDB.removeEntity(entity_id)
             
-            if entity_id in self.dead_entities:
-                return
-            
-            utils.log("%s) removing malformed / invalid entity (%s)" % (self.__class__.__name__, entity_id))
-            self.dead_entities.add(entity_id)
-            
-            if not self.options.noop:
-                self._entityDB.removeEntity(entity_id)
-                self._placesDB.removeEntity(entity_id)
+            return False
         except InvalidState:
             pass
+        
+        return False
     
     def getDuplicates(self, entity):
         candidate_entities = self.getDuplicateCandidates(entity)
@@ -101,21 +125,25 @@ class AEntityMatcher(object):
         if candidate_entities is None:
             return []
         
-        matches    = list(self.getMatchingDuplicates(entity, candidate_entities))
-        entity_id  = entity.entity_id
-        numMatches = len(filter(lambda e: e.entity_id == entity_id, matches))
+        matches = list(self.getMatchingDuplicates(entity, candidate_entities))
         
-        # ensure that the entity in question is contained in the results
-        if 0 == numMatches:
-            matches.insert(0, entity)
+        if 'entity_id' in entity:
+            entity_id  = entity.entity_id
+            numMatches = len(filter(lambda e: e.entity_id == entity_id, matches))
+            
+            # ensure that the entity in question is contained in the results
+            if 0 == numMatches:
+                matches.insert(0, entity)
+            else:
+                index = 0
+                while numMatches > 1 and index < len(matches):
+                    if matches[index].entity_id == entity_id:
+                        matches.pop(index)
+                        numMatches -= 1
+                    else:
+                        index += 1
         else:
-            index = 0
-            while numMatches > 1 and index < len(matches):
-                if matches[index].entity_id == entity_id:
-                    matches.pop(index)
-                    numMatches -= 1
-                else:
-                    index += 1
+            matches.insert(0, entity)
         
         return matches
     
@@ -133,6 +161,9 @@ class AEntityMatcher(object):
         
         for i in xrange(len(duplicates)):
             entity = duplicates[i]
+            
+            if 'entity_id' not in entity:
+                continue
             
             has_stamp = self._stampDB._collection.find_one({ 'entity.entity_id' : entity.entity_id })
             if has_stamp != None:
@@ -159,7 +190,12 @@ class AEntityMatcher(object):
             entity = duplicates[i]
             lmatch = len(entity.title)
             
-            if lmatch < lshortest or (lmatch == lshortest and 'openTable' in entity):
+            if 'entity_id' not in entity:
+                continue
+            
+            if 'entity_id' not in shortest or \
+                lmatch < lshortest or \
+                (lmatch == lshortest and 'openTable' in entity):
                 shortest  = entity
                 lshortest = lmatch
                 ishortest = i
@@ -169,10 +205,9 @@ class AEntityMatcher(object):
     
     def removeDuplicates(self, keep, duplicates):
         numDuplicates = len(duplicates)
-        assert numDuplicates > 0
         
-        #titles = set()
-        #titles.add(keep.title)
+        assert numDuplicates > 0
+        assert 'entity_id' in keep
         
         # look through and remove all duplicates
         for i in xrange(numDuplicates):
@@ -188,13 +223,10 @@ class AEntityMatcher(object):
             # add any fields from this version of the duplicate to the version 
             # that we're keeping if they don't already exist
             _addDict(entity.value, keep)
-            #titles.add(entity.title)
             
-            if not self.options.noop:
+            if not self.options.noop and 'entity_id' in entity:
                 self._entityDB.removeEntity(entity.entity_id)
                 self._placesDB.removeEntity(entity.entity_id)
-        
-        #keep.titles = list(titles)
         
         if self.options.verbose:
             utils.log("[%s] retaining %s:" % (self, keep.title))

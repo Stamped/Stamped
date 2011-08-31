@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import datetime, logging, os, threading, hashlib, random, time
+import inspect
 
 # Log
 log = logging.getLogger('stamped')
@@ -42,12 +43,16 @@ localData = threading.local()
 refresh()
 
 def formatMessage(msg):
-    import inspect
-    fnc = inspect.stack()[2][3]
     try:
         localData.logId
     except:
         refresh()
+    
+    try:
+        fnc = inspect.stack()[2][3]
+    except:
+        fnc = ""
+    
     msg = "%s | %-25s | %s" % (localData.logId, fnc, msg)
     return msg
 

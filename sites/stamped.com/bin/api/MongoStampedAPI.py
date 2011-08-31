@@ -6,24 +6,24 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from Entity import *
 
-from utils import lazyProperty
-from StampedAPI import StampedAPI
-from Schemas import *
-from S3ImageDB import S3ImageDB
+from Entity                 import *
+from utils                  import lazyProperty
+from StampedAPI             import StampedAPI
+from S3ImageDB              import S3ImageDB
+from match.EntityMatcher    import EntityMatcher
 
-from db.mongodb.MongoAccountCollection import MongoAccountCollection
-from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoAccountCollection      import MongoAccountCollection
+from db.mongodb.MongoEntityCollection       import MongoEntityCollection
 from db.mongodb.MongoPlacesEntityCollection import MongoPlacesEntityCollection
-from db.mongodb.MongoUserCollection import MongoUserCollection
-from db.mongodb.MongoStampCollection import MongoStampCollection
-from db.mongodb.MongoCommentCollection import MongoCommentCollection
-from db.mongodb.MongoFavoriteCollection import MongoFavoriteCollection
-from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
-from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
-from db.mongodb.MongoActivityCollection import MongoActivityCollection
-from db.mongodb.MongoEntitySearcher import MongoEntitySearcher
+from db.mongodb.MongoUserCollection         import MongoUserCollection
+from db.mongodb.MongoStampCollection        import MongoStampCollection
+from db.mongodb.MongoCommentCollection      import MongoCommentCollection
+from db.mongodb.MongoFavoriteCollection     import MongoFavoriteCollection
+from db.mongodb.MongoCollectionCollection   import MongoCollectionCollection
+from db.mongodb.MongoFriendshipCollection   import MongoFriendshipCollection
+from db.mongodb.MongoActivityCollection     import MongoActivityCollection
+from db.mongodb.MongoEntitySearcher         import MongoEntitySearcher
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -77,11 +77,15 @@ class MongoStampedAPI(StampedAPI):
     
     @lazyProperty
     def _entitySearcher(self):
-        return MongoEntitySearcher()
+        return MongoEntitySearcher(self)
     
     @lazyProperty
     def _imageDB(self):
         return S3ImageDB()
+    
+    @lazyProperty
+    def _entityMatcher(self):
+        return EntityMatcher(self)
     
     def getStats(self):
         source_stats = { }

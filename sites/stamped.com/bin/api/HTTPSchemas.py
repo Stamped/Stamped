@@ -412,11 +412,15 @@ class HTTPEntitySearch(Schema):
     def setSchema(self):
         self.q                  = SchemaElement(basestring, required=True)
         self.coordinates        = SchemaElement(basestring)
-
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+    
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'EntitySearch':
             schema.importData({'q': self.q})
             schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+            schema.importData({'category': self.category})
+            schema.importData({'subcategory': self.subcategory})
         else:
             raise NotImplementedError
         return schema

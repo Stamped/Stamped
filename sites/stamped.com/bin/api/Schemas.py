@@ -288,7 +288,11 @@ class Entity(Schema):
     def set_category(self, subcategory):
         from Entity import subcategories
         
-        return subcategories[subcategory]
+        try:
+            return subcategories[subcategory]
+        except KeyError:
+            # default to 'other' category
+            return "other"
 
 class EntityMini(Schema):
     def setSchema(self):
@@ -308,6 +312,8 @@ class EntitySearch(Schema):
     def setSchema(self):
         self.q                  = SchemaElement(basestring, required=True)
         self.coordinates        = CoordinatesSchema()
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
 
 class CoordinatesSchema(Schema):
     def setSchema(self):

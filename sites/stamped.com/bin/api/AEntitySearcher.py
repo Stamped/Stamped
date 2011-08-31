@@ -6,16 +6,17 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
+
 from utils import abstract
 
 class AEntitySearcher(object):
     @abstract
     def getSearchResults(self, 
-                         input_query, 
+                         query, 
                          coords=None, 
                          limit=10, 
                          category_filter=None, 
                          subcategory_filter=None, 
-                         full=None):
+                         full=False):
         pass
 

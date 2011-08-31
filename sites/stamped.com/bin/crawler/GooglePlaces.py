@@ -6,19 +6,20 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import json, urllib
+import json, logs, urllib
 
 from optparse import OptionParser
 from Geocoder import Geocoder
 from AKeyBasedAPI import AKeyBasedAPI
 from AEntitySource import AExternalServiceEntitySource
+from Schemas import Entity
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
     FORMAT          = 'json'
     DEFAULT_RADIUS  = 500 # meters
     NAME            = 'GooglePlaces'
-    TYPES           = set([ 'place', 'restaurant' ])
+    TYPES           = set([ 'restaurant' ])
     
     API_KEYS = [
         'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok',  # Travis
@@ -27,6 +28,12 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         'AIzaSyA90G9YbjX7q3kXOBdmi0JFB3mTCOl45c4',  # Ed
         'AIzaSyCZnt6jjlHxzRsyklNoYJKsv6kcPeQs-W8',  # Jake
     ]
+    
+    _googleTypeToSubcategoryMap = {
+        "food" : "restaurant", 
+        "restaurant" : "restaurant", 
+        "grocery_or_supermarket" : "market", 
+    }
     
     def __init__(self):
         AExternalServiceEntitySource.__init__(self, self.NAME, self.TYPES)
@@ -37,7 +44,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     def _run(self):
         pass
     
-    def getPlaceDetails(self, reference, optionalParams=None):
+    def getPlaceDetails(self, reference, params=None):
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
@@ -46,7 +53,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             if apiKey is None:
                 return None
             
-            response = self.getPlaceDetailsResponse(reference, apiKey, optionalParams)
+            response = self.getPlaceDetailsResponse(reference, apiKey, params)
             
             if response is None:
                 return None
@@ -64,7 +71,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             return response['result']
     
-    def getSearchResultsByAddress(self, address, optionalParams=None):
+    def getSearchResultsByAddress(self, address, params=None):
         latLng = self.addressToLatLng(address)
         
         if latLng is None:
@@ -72,9 +79,27 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             # be unable to cross-reference this address with google places.
             return None
         
-        return self.getSearchResultsByLatLng(latLng, optionalParams)
+        return self.getSearchResultsByLatLng(latLng, params)
     
-    def getSearchResultsByLatLng(self, latLng, optionalParams=None):
+    def getEntityResultsByLatLng(self, latLng, params=None):
+        results = self.getSearchResultsByLatLng(latLng, params)
+        output  = []
+        
+        for result in results:
+            entity = Entity()
+            entity.title = result['name']
+            entity.image = result['icon']
+            entity.lat   = result['geometry']['location']['lat']
+            entity.lng   = result['geometry']['location']['lng']
+            entity.gid   = result['id']
+            entity.reference = result['reference']
+            entity.neighborhood = result['vicinity']
+            
+            output.append(entity)
+        
+        return output
+    
+    def getSearchResultsByLatLng(self, latLng, params=None):
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
@@ -83,10 +108,12 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             if apiKey is None:
                 return None
             
-            response = self._getSearchResponseByLatLng(latLng, apiKey, optionalParams)
+            response = self._getSearchResponseByLatLng(latLng, apiKey, params)
             
             if response is None:
                 return None
+            
+            #utils.log(json.dumps(response, sort_keys=True, indent=2))
             
             # ensure that we received a valid response
             if response['status'] != 'OK' or len(response['results']) <= 0:
@@ -116,7 +143,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('search', params)
-        #utils.log('[GooglePlaces] ' + url)
+        #logs.debug('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
@@ -141,7 +168,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('details', params)
-        #utils.log('[GooglePlaces] ' + url)
+        #logs.debug('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
@@ -162,6 +189,16 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     
     def _getAPIURL(self, method, params):
         return self.BASE_URL + '/' + method + '/' + self.FORMAT + '?' + urllib.urlencode(params)
+    
+    def getSubcategoryFromTypes(self, types):
+        for t in types:
+            if t != "establishment":
+                try:
+                    return self._googleTypeToSubcategoryMap[t]
+                except KeyError:
+                    return t
+        
+        return "other"
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] address|latLng"
@@ -198,6 +235,11 @@ def parseCommandLine():
     if len(args) < 1:
         parser.print_help()
         return None
+    
+    if not options.address:
+        lat, lng = args[0].split(',')
+        lat, lng = float(lat), float(lng)
+        args[0] = (lat, lng)
     
     return (options, args)
 

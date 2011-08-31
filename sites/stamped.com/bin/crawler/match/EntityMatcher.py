@@ -20,7 +20,7 @@ __all__ = [
 
 class EntityMatcher(AEntityMatcher):
     
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
         AEntityMatcher.__init__(self, stamped_api, options)
     
     @lazyProperty
