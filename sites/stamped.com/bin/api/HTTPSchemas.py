@@ -239,6 +239,7 @@ class HTTPEntity(Schema):
 
         self.cuisine            = SchemaElement(basestring)
 
+        self.author             = SchemaElement(basestring)
         self.isbn               = SchemaElement(basestring)
         self.publisher          = SchemaElement(basestring)
         self.format             = SchemaElement(basestring)
@@ -250,6 +251,9 @@ class HTTPEntity(Schema):
         self.genre              = SchemaElement(basestring)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
+
+        self.artist             = SchemaElement(basestring)
+        self.album              = SchemaElement(basestring)
 
         self.opentable_url      = SchemaElement(basestring)
         self.itunes_url         = SchemaElement(basestring)
@@ -268,33 +272,36 @@ class HTTPEntity(Schema):
             self.last_modified  = schema.timestamp.created
             
             # Place
-            self.address        = schema.details.place.address
-            self.neighborhood   = schema.details.place.neighborhood
+            self.address        = schema.address
+            self.neighborhood   = schema.neighborhood
             self.coordinates    = _coordinatesDictToFlat(coordinates)
 
             # Contact
-            self.phone          = schema.details.contact.phone
-            self.site           = schema.details.contact.site
-            self.hours          = schema.details.contact.hoursOfOperation
+            self.phone          = schema.phone
+            self.site           = schema.site
+            self.hours          = schema.hoursOfOperation
             
             # Food
-            self.cuisine        = schema.details.restaurant.cuisine
+            self.cuisine        = schema.cuisine
 
             # Book
-            self.isbn           = schema.details.book.isbn
-            self.publisher      = schema.details.book.publisher
+            self.author         = schema.author
+            self.isbn           = schema.isbn
+            self.publisher      = schema.publisher
             # self.format         = None
             # self.language       = None
 
             # Film
-            self.rating         = schema.details.media.mpaa_rating
-            self.track_length   = schema.details.media.track_length
-            self.release_date   = schema.details.media.original_release_date
+            self.rating         = schema.mpaa_rating
+            self.track_length   = schema.track_length
+            self.release_date   = schema.original_release_date
+            self.cast           = schema.cast
+            self.director       = schema.director
             # self.genre          = None
-            # self.cast           = None
-            # self.director       = None
 
             # Music
+            self.artist         = schema.artist_display_name
+            self.album          = schema.album_name
             ### TODO
             
             # Affiliates
@@ -335,6 +342,12 @@ class HTTPEntityNew(Schema):
         self.desc               = SchemaElement(basestring)
         self.address            = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
+        self.cast               = SchemaElement(basestring)
+        self.director           = SchemaElement(basestring)
+        self.release_date       = SchemaElement(basestring)
+        self.artist             = SchemaElement(basestring)
+        self.album              = SchemaElement(basestring)
+        self.author             = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
@@ -345,7 +358,14 @@ class HTTPEntityNew(Schema):
                 'subcategory':  self.subcategory,
                 'desc':         self.desc
             })
-            schema.details.place.address = self.address 
+            schema.address      = self.address 
+            schema.director     = self.director
+            schema.cast         = self.cast
+            schema.album_name   = self.album
+            schema.author       = self.author
+            schema.artist_display_name = self.artist
+            schema.original_release_date = self.release_date
+
             if _coordinatesFlatToDict(self.coordinates) != None:
                 schema.coordinates = _coordinatesFlatToDict(self.coordinates)
         else:

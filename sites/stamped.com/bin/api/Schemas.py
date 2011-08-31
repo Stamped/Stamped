@@ -393,6 +393,9 @@ class VideoSchema(Schema):
         self.short_description  = SchemaElement(basestring)
         self.long_description   = SchemaElement(basestring)
         self.episode_production_number  = SchemaElement(basestring)
+        ### TODO: populate cast / director from crawler
+        self.cast               = SchemaElement(basestring)
+        self.director           = SchemaElement(basestring)
         
         self.v_retail_price     = SchemaElement(basestring)
         self.v_currency_code    = SchemaElement(basestring)
@@ -417,6 +420,8 @@ class SongSchema(Schema):
     def setSchema(self):
         self.preview_url        = SchemaElement(basestring)
         self.preview_length     = SchemaElement(basestring)
+        ### TODO: modify this based on crawler logic (only for custom entities currently)
+        self.album_name         = SchemaElement(basestring) 
 
 class AlbumSchema(Schema):
     def setSchema(self):
