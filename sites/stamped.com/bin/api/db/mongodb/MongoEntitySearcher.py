@@ -10,6 +10,7 @@ import math, pymongo, string
 
 from EntitySearcher import EntitySearcher
 from GooglePlaces   import GooglePlaces
+from libs.AmazonAPI import AmazonAPI
 from Schemas        import Entity
 from difflib        import SequenceMatcher
 from pymongo.son    import SON
@@ -156,6 +157,10 @@ class MongoEntitySearcher(EntitySearcher):
     def _googlePlaces(self):
         return GooglePlaces()
     
+    @lazyProperty
+    def _amazonAPI(self):
+        return AmazonAPI()
+    
     def getSearchResults(self, 
                          query, 
                          coords=None, 
@@ -208,25 +213,48 @@ class MongoEntitySearcher(EntitySearcher):
         pprint(data)
         
         entity_query = {"title": {"$regex": query, "$options": "i"}}
-        db_results = []
         
         results_set = set()
         results = []
         
+        pool = Pool(8)
+        wrapper = {}
+        
+        def _find_entity(ret):
+            ret['db_results'] = self.entityDB._collection.find(entity_query)
+        
+        pool.spawn(_find_entity, wrapper)
+        
         if coords is None:
-            db_results = self.entityDB._collection.find(entity_query)
-        else:
-            pool = Pool(8)
+            def _find_amazon(ret):
+                results = self._amazonAPI.item_detail_search(Keywords=input_query, 
+                                                             SearchIndex='All', 
+                                                             Availability='Available', 
+                                                             transform=True)
+                
+                entities = self.api._entityMatcher.addMany(results)
+                
+                ret['amazon_results'] = list((e, -1) for e in entities)
             
+            if full:
+                pool.spawn(_find_amazon, wrapper)
+            
+            pool.join()
+            
+            if full:
+                try:
+                    amazon_results = wrapper['amazon_results']
+                except KeyError:
+                    amazon_results = []
+                
+                for result in amazon_results:
+                    results.append(result)
+        else:
             earthRadius = 3959.0 # miles
             q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
             
-            wrapper = {}
             def _find_places(ret):
                 ret['place_results'] = self.placesDB._collection.command(q)
-            
-            def _find_entity(ret):
-                ret['db_results'] = self.entityDB._collection.find(entity_query)
             
             def _find_google_places(ret):
                 params = {
@@ -249,8 +277,9 @@ class MongoEntitySearcher(EntitySearcher):
                         entity.lat   = result['geometry']['location']['lat']
                         entity.lng   = result['geometry']['location']['lng']
                         entity.gid   = result['id']
-                        entity.reference    = result['reference']
-                        entity.subcategory  = subcategory
+                        entity.reference   = result['reference']
+                        entity.subcategory = subcategory
+                        
                         if 'vicinity' in result:
                             entity.neighborhood = result['vicinity']
                         
@@ -271,11 +300,9 @@ class MongoEntitySearcher(EntitySearcher):
                 pool.spawn(_find_google_places, wrapper)
             
             # perform the two db reads concurrently
-            pool.spawn(_find_entity, wrapper)
             pool.spawn(_find_places, wrapper)
             
             pool.join()
-            db_results = wrapper['db_results']
             
             try:
                 place_results = wrapper['place_results']['results']
@@ -298,8 +325,7 @@ class MongoEntitySearcher(EntitySearcher):
                 for result in google_place_results:
                     results.append(result)
         
-        for entity in db_results:
-            # e = Entity(self.entityDB._mongoToObj(entity, 'entity_id'))
+        for entity in wrapper['db_results']:
             e = self.entityDB._convertFromMongo(entity)
             
             if e.entity_id not in results_set:
@@ -337,14 +363,14 @@ class MongoEntitySearcher(EntitySearcher):
                                   distance_value * distance_weight
             
             data = {}
-            data['title']     = entity.title
-            data['titlev']    = title_value
-            data['subcatv']   = subcategory_value
-            data['sourcev']   = source_value
-            data['qualityv']  = quality_value
-            data['distancev'] = distance_value
-            data['distance']  = distance
-            data['totalv']    = aggregate_value
+            data['title']       = entity.title
+            data['titlev']      = title_value
+            data['subcatv']     = subcategory_value
+            data['sourcev']     = source_value
+            data['qualityv']    = quality_value
+            data['distancev']   = distance_value
+            data['distance']    = distance
+            data['totalv']      = aggregate_value
             
             #from pprint import pprint
             #pprint(data)
@@ -415,7 +441,7 @@ class MongoEntitySearcher(EntitySearcher):
             #print 'POPULARITY: %d' % (entity['popularity'], )
             value *= 5 * ((2000 - int(entity['popularity'])) / 1000.0)
         """
-
+        
         return value
     
     def _get_distance_value(self, distance):

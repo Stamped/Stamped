@@ -55,6 +55,12 @@ class EntityMatcher(AEntityMatcher):
         if 'fandango' in entity:
             return self._fandango_matcher
         
+        
+        # TODO: add book deduper
+        # TODO: add movie deduper
+        # TODO: add product deduper
+        
+        
         print type(entity)
         from pprint import pprint
         pprint(entity)

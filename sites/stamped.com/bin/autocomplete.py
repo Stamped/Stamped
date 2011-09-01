@@ -12,6 +12,15 @@ from MongoStampedAPI import MongoStampedAPI
 from optparse import OptionParser
 from pprint import pprint
 
+# TODO: AUTOSUGGEST
+    # after setting up CDN, going to have to run a cache-warming process
+    # need a concrete benchmark to tune autosuggest against
+    # possibly route geo-based searches to nearest edge location:
+        # http://aws.amazon.com/cloudfront/#details
+    # support 'blank (in|near) [city or region]'
+        # would need to support general recognizing of city/region
+        # would need city/region list to match against
+
 
 # TODO:
     # entity keyword search by breaking title up into distinct lexemes

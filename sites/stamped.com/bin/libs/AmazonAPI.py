@@ -8,13 +8,13 @@ __license__ = "TODO"
 import Globals, utils
 import aws, copy, gevent, os, re, string, sys
 
-from BeautifulSoup import BeautifulSoup
-from optparse        import OptionParser
-from Schemas    import Entity
-from lxml       import objectify, etree
-from bottlenose import Amazon
-from errors     import Fail
-from pprint     import pprint
+from BeautifulSoup  import BeautifulSoup
+from optparse       import OptionParser
+from Schemas        import Entity
+from lxml           import objectify, etree
+from bottlenose     import Amazon
+from errors         import Fail
+from pprint         import pprint
 
 __all__      = [ "AmazonAPI" ]
 ASSOCIATE_ID = 'stamped01-20'
@@ -263,9 +263,9 @@ class AmazonAPI(object):
             result = re.sub('xmlns="[^"]*"', '', result)
             tree   = objectify.fromstring(result)
             
-            f = open('out.xml', 'w')
-            f.write(etree.tostring(tree, pretty_print=True))
-            f.close()
+            #f = open('out.xml', 'w')
+            #f.write(etree.tostring(tree, pretty_print=True))
+            #f.close()
             
             return tree
     
@@ -278,25 +278,25 @@ def parseCommandLine():
     parser  = OptionParser(usage=usage, version=version)
     
     defaults = {
-        'SearchIndex' : 'All', 
+        'SearchIndex'  : 'All', 
         'Availability' : 'Available', 
-        'Sort' : None, 
+        'Sort'         : None, 
     }
     
     parser.add_option("-i", "--SearchIndex", action="store", default=defaults['SearchIndex'], 
-                      help="Amazon SearchIndex (defaults to %s)" % defaults['SearchIndex'])
+                      help="Amazon SearchIndex parameter (defaults to %s)" % defaults['SearchIndex'])
     
     parser.add_option("-a", "--Availability", action="store", default=defaults['Availability'], 
-                      help="Availability parameter (defaults to %s)" % defaults['Availability'])
+                      help="Amazon Availability parameter (defaults to %s)" % defaults['Availability'])
     
     parser.add_option("-s", "--Sort", action="store", default=defaults['Sort'], 
-                      help="how to sort results (defaults to %s)" % defaults['Sort'])
+                      help="Amazon Sort parameter to sort results (defaults to %s)" % defaults['Sort'])
     
     parser.add_option("-v", "--verbose", action="store_true", default=False, 
-                      help="print out verbose results")
+                      help="Print out verbose results")
     
     parser.add_option("-d", "--details", action="store_true", default=False, 
-                      help="query and parse details for all search results")
+                      help="Query and parse details for all search results with an extra ItemLookup operation")
     
     (options, args) = parser.parse_args()
     

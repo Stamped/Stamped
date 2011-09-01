@@ -298,7 +298,7 @@ def getFile(url, opener=None):
     
     maxDelay = 64
     delay = 0.5
-    html = None
+    data = None
     request = None
     
     if opener is None:
@@ -312,7 +312,7 @@ def getFile(url, opener=None):
     while True:
         try:
             response = urllib2.urlopen(request)
-            html = response.read()
+            data = response.read()
             break
         except urllib2.HTTPError, e:
             #log("'%s' fetching url '%s'" % (str(e), url))
@@ -349,14 +349,14 @@ def getFile(url, opener=None):
         delay *= 2
     
     if response.info().get('Content-Encoding') == 'gzip':
-        #html = zlib.decompress(html)
-        buf = StringIO(html)
+        #data = zlib.decompress(data)
+        buf = StringIO(data)
         f = gzip.GzipFile(fileobj=buf)
-        html = f.read()
+        data = f.read()
         buf.close()
     
-    # return the successfully parsed html
-    return html
+    # return the successfully downloaded file
+    return data
 
 def getSoup(url, opener=None):
     """ downloads and returns the BeautifulSoup parsed version of the file at the given url """
