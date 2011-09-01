@@ -513,8 +513,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     customView_.title = entityObject.title;
     customView_.typeImage = entityObject.categoryImage;
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-    customView_.stamps =
-        [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    NSArray* stampsArray = [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+    customView_.stamps = stampsArray;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     if (customView_.stamps.count > 1) {
       [[NSNotificationCenter defaultCenter] addObserver:self

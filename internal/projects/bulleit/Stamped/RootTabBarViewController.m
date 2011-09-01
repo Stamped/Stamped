@@ -82,6 +82,10 @@
                                              object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(reloadPanes:)
+                                               name:kAppShouldReloadAllPanes
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(reloadPanes:)
                                                name:UIApplicationSignificantTimeChangeNotification
                                              object:nil];
   
@@ -222,8 +226,10 @@
 }
 
 - (void)reloadPanes:(NSNotification*)notification {
-  for (STReloadableTableViewController* viewController in self.viewControllers)
-    [viewController reloadData];
+  for (STReloadableTableViewController* viewController in self.viewControllers) {
+    if (notification.object != viewController)
+      [viewController reloadData];
+  }
 }
 
 #pragma mark - AccountManagerDelegate Methods.

@@ -35,6 +35,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 - (void)fillInUserData;
 - (void)loadRelationshipData;
 
+@property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, copy) NSArray* stampsArray;
 @end
 
@@ -56,6 +57,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 @synthesize followButton = followButton_;
 @synthesize unfollowButton = unfollowButton_;
 @synthesize followIndicator = followIndicator_;
+@synthesize stampsAreTemporary = stampsAreTemporary_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -98,7 +100,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   toolbarView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:toolbarView_.bounds].CGPath;
   toolbarView_.layer.shadowOpacity = 0.2;
   toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
-  toolbarView_.alpha = 0.9;
+  toolbarView_.alpha = 0.85;
   [self loadRelationshipData];
   [self loadStampsFromNetwork];
   [self loadUserInfoFromNetwork];
@@ -124,6 +126,8 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
+                            animated:animated];
   [super viewWillAppear:animated];
 }
 
@@ -207,9 +211,8 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   static NSString* CellIdentifier = @"StampCell";
   InboxTableViewCell* cell = (InboxTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
-  if (cell == nil) {
+  if (!cell)
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
-  }
 
   cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
   
@@ -247,6 +250,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
+    self.stampsAreTemporary = NO;
     followIndicator_.hidden = YES;
     unfollowButton_.hidden = NO;
     followButton_.hidden = YES;
@@ -255,6 +259,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
+    self.stampsAreTemporary = YES;
     followIndicator_.hidden = YES;
     unfollowButton_.hidden = YES;
     followButton_.hidden = NO;
@@ -266,6 +271,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
     [self.tableView reloadData];
+    self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
   }
 }
 
@@ -285,13 +291,22 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
     followIndicator_.hidden = YES;
     if ([response.bodyAsString isEqualToString:@"false"]) {
       followButton_.hidden = NO;
+      self.stampsAreTemporary = YES;
     } else {
       unfollowButton_.hidden = NO;
+      self.stampsAreTemporary = NO;
     }
   }
 }
 
 #pragma mark - Private methods.
+
+- (void)setStampsAreTemporary:(BOOL)stampsAreTemporary {
+  stampsAreTemporary_ = stampsAreTemporary;
+
+  for (Stamp* stamp in stampsArray_)
+    stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
+}
 
 - (void)loadRelationshipData {
   NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
@@ -342,7 +357,8 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserStampsPath
                                                                     delegate:self];
   objectLoader.objectMapping = stampMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id", nil];
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id",
+                                                                   @"1", @"quality", nil];
   [objectLoader send];
 }
 

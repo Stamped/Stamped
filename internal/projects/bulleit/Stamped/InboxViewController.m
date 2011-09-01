@@ -189,8 +189,8 @@ typedef enum {
 	NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
 	NSArray* results = [Stamp objectsWithFetchRequest:request];
-
   results = [results valueForKeyPath:@"@distinctUnionOfObjects.entityObject"];
   descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
   self.entitiesArray = [results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
@@ -311,6 +311,7 @@ typedef enum {
   if (entity.stamps.count > 0) {
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
     NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
     stamp = [sortedStamps lastObject];
   } else {
     stamp = [entity.stamps anyObject];
@@ -327,8 +328,8 @@ typedef enum {
 - (void)userPulledToReload {
   [super userPulledToReload];
   [self loadStampsFromNetwork];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadNewsPane
-                                                      object:nil];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes
+                                                      object:self];
 }
 
 - (void)reloadData {
