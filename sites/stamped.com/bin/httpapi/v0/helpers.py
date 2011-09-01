@@ -154,6 +154,7 @@ def parseRequest(schema, request):
 
 def transformOutput(value, **kwargs):
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
+    kwargs.setdefault('mimetype', 'application/json')
     output_json = json.dumps(value, sort_keys=True)
     output = HttpResponse(output_json, **kwargs)
     logs.debug("Transform output: \"%s\"" % output_json)
