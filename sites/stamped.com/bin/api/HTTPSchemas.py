@@ -413,6 +413,8 @@ class HTTPEntityAutosuggest(Schema):
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
+            from Entity import setSubtitle
+            setSubtitle(schema)
             self.importData(schema.value, overflow=True)
             
             if schema.address is not None:
