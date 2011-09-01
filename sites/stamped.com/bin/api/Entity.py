@@ -13,6 +13,7 @@ subcategories = {
     'cafe' : 'food', 
     'book' : 'book', 
     'movie' : 'film', 
+    'tv' : 'film', 
     'artist' : 'music', 
     'song' : 'music', 
     'album' : 'music', 

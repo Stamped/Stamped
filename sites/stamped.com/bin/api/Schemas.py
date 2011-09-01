@@ -316,6 +316,7 @@ class EntityDetailsSchema(Schema):
         self.song               = SongSchema()
         self.album              = AlbumSchema()
         self.media              = MediaSchema()
+        self.product            = ProductSchema()
 
 class PlaceSchema(Schema):
     def setSchema(self):
@@ -341,7 +342,7 @@ class RestaurantSchema(Schema):
     def setSchema(self):
         self.diningStyle        = SchemaElement(basestring)
         self.cuisine            = SchemaElement(basestring)
-        self.price              = SchemaElement(basestring)
+        #self.price              = SchemaElement(basestring)
         self.payment            = SchemaElement(basestring)
         self.dressCode          = SchemaElement(basestring)
         self.acceptsReservations        = SchemaElement(basestring)
@@ -364,24 +365,25 @@ class RestaurantSchema(Schema):
 
 class AppSchema(Schema):
     def setSchema(self):
-        self.developer          = SchemaElement(basestring)
-        self.developerURL       = SchemaElement(basestring)
-        self.developerSupportURL= SchemaElement(basestring)
+        pass
+        #self.developer          = SchemaElement(basestring)
+        #self.developerURL       = SchemaElement(basestring)
+        #self.developerSupportURL= SchemaElement(basestring)
         #self.publisher          = SchemaElement(basestring)
-        self.releaseDate        = SchemaElement(basestring)
-        self.appCategory        = SchemaElement(basestring)
-        self.language           = SchemaElement(basestring)
-        self.rating             = SchemaElement(basestring)
-        self.popularity         = SchemaElement(basestring)
-        self.parentalRating     = SchemaElement(basestring)
-        self.platform           = SchemaElement(basestring)
-        self.requirements       = SchemaElement(basestring)
-        self.size               = SchemaElement(basestring)
-        self.version            = SchemaElement(basestring)
-        self.downloadURL        = SchemaElement(basestring)
-        self.thumbnailURL       = SchemaElement(basestring)
-        self.screenshotURL      = SchemaElement(basestring)
-        self.videoURL           = SchemaElement(basestring)
+        #self.releaseDate        = SchemaElement(basestring)
+        #self.appCategory        = SchemaElement(basestring)
+        #self.language           = SchemaElement(basestring)
+        #self.rating             = SchemaElement(basestring)
+        #self.popularity         = SchemaElement(basestring)
+        #self.parentalRating     = SchemaElement(basestring)
+        #self.platform           = SchemaElement(basestring)
+        #self.requirements       = SchemaElement(basestring)
+        #self.size               = SchemaElement(basestring)
+        #self.version            = SchemaElement(basestring)
+        #self.downloadURL        = SchemaElement(basestring)
+        #self.thumbnailURL       = SchemaElement(basestring)
+        #self.screenshotURL      = SchemaElement(basestring)
+        #self.videoURL           = SchemaElement(basestring)
 
 class BookSchema(Schema):
     def setSchema(self):
@@ -390,6 +392,7 @@ class BookSchema(Schema):
         self.sku_number         = SchemaElement(basestring)
         self.publisher          = SchemaElement(basestring)
         self.publish_date       = SchemaElement(basestring)
+        self.num_pages          = SchemaElement(int)
 
 class VideoSchema(Schema):
     def setSchema(self):
@@ -433,6 +436,21 @@ class AlbumSchema(Schema):
         self.a_hq_price                 = SchemaElement(basestring)
         self.a_currency_code            = SchemaElement(basestring)
         self.a_availability_date        = SchemaElement(basestring)
+        
+        self.tracks                     = SchemaList(SchemaElement(basestring))
+
+class ProductSchema(Schema):
+    def setSchema(self):
+        self.manufacturer               = SchemaElement(basestring)
+        self.brand                      = SchemaElement(basestring)
+        self.salesRank                  = SchemaElement(int)
+        self.price                      = PriceSchema()
+
+class PriceSchema(Schema):
+    def setSchema(self):
+        self.amount                     = SchemaElement(int)
+        self.currency_code              = SchemaElement(basestring)
+        self.formatted_price            = SchemaElement(basestring)
 
 class MediaSchema(Schema):
     def setSchema(self):

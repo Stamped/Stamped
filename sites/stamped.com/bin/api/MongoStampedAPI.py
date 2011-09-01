@@ -12,6 +12,7 @@ from utils                  import lazyProperty
 from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
 from match.EntityMatcher    import EntityMatcher
+from Schemas                import *
 
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoEntityCollection       import MongoEntityCollection
