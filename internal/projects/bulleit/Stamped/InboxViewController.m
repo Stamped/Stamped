@@ -28,6 +28,7 @@
 
 static const CGFloat kMapUserImageSize = 32.0;
 static NSString* const kInboxPath = @"/collections/inbox.json";
+static NSString* const kEverythingPath = @"/temp/inbox.json";
 
 typedef enum {
   StampsListFilterTypeBook,
@@ -201,9 +202,13 @@ typedef enum {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
+  NSString* path = kInboxPath;
+  if (entitiesArray_.count == 0)
+    path = kEverythingPath;
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kInboxPath delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", nil];
   [objectLoader send];
@@ -216,7 +221,7 @@ typedef enum {
 #pragma mark - Filter stuff
 
 - (IBAction)filterButtonPushed:(id)sender {
-  filteredEntitiesArray_ = nil;
+  self.filteredEntitiesArray = nil;
 
   UIButton* selectedButton = (UIButton*)sender;
   for (UIButton* button in self.filterButtons)
