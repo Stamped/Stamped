@@ -88,7 +88,7 @@
 								<reference key="IBUITabBar" ref="729558307"/>
 							</object>
 							<object class="IBUITabBarItem" id="473721066">
-								<string key="IBUITitle">Todo</string>
+								<string key="IBUITitle">To-Do</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">toolbar_todo</string>
@@ -620,11 +620,15 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>addStampCell</string>
+							<string>addStampLabel</string>
 							<string>cancelButton</string>
 							<string>searchField</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>UITableViewCell</string>
+							<string>UILabel</string>
 							<string>UIButton</string>
 							<string>STSearchField</string>
 						</object>
@@ -633,11 +637,21 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>addStampCell</string>
+							<string>addStampLabel</string>
 							<string>cancelButton</string>
 							<string>searchField</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBToOneOutletInfo">
+								<string key="name">addStampCell</string>
+								<string key="candidateClassName">UITableViewCell</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">addStampLabel</string>
+								<string key="candidateClassName">UILabel</string>
+							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">cancelButton</string>
 								<string key="candidateClassName">UIButton</string>

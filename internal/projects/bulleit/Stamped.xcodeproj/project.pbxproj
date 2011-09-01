@@ -29,6 +29,9 @@
 		7E2267D413D501CB00657A66 /* StampedModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */; };
 		7E22D6AF13DDA34100C4005E /* CreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */; };
 		7E22D6B013DDA34100C4005E /* CreateStampViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */; };
+		7E2B33A0140F29F300AFC384 /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2B339C140F29F300AFC384 /* libTestFlight.a */; };
+		7E2B33A1140F29F300AFC384 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7E2B339D140F29F300AFC384 /* README.txt */; };
+		7E2B33A2140F29F300AFC384 /* release_notes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7E2B339E140F29F300AFC384 /* release_notes.txt */; };
 		7E2BEBEF13D7757300A116D2 /* ImageToDataTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E2BEBEE13D7757300A116D2 /* ImageToDataTransformer.m */; };
 		7E30229213FC1F510094EB28 /* PeopleTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E30229113FC1F510094EB28 /* PeopleTableViewCell.m */; };
 		7E303F7A13F0BB7700C1F794 /* gradient_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E303F7813F0BB7700C1F794 /* gradient_background.png */; };
@@ -335,6 +338,10 @@
 		7E22D6AC13DDA34100C4005E /* CreateStampViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CreateStampViewController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CreateStampViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CreateStampViewController.xib; sourceTree = "<group>"; };
+		7E2B339C140F29F300AFC384 /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libTestFlight.a; sourceTree = "<group>"; };
+		7E2B339D140F29F300AFC384 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		7E2B339E140F29F300AFC384 /* release_notes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
+		7E2B339F140F29F300AFC384 /* TestFlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestFlight.h; sourceTree = "<group>"; };
 		7E2BEBED13D7757200A116D2 /* ImageToDataTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageToDataTransformer.h; sourceTree = "<group>"; };
 		7E2BEBEE13D7757300A116D2 /* ImageToDataTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageToDataTransformer.m; sourceTree = "<group>"; };
 		7E30229013FC1F510094EB28 /* PeopleTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeopleTableViewCell.h; sourceTree = "<group>"; };
@@ -582,6 +589,7 @@
 				7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */,
 				7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */,
 				7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
+				7E2B33A0140F29F300AFC384 /* libTestFlight.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -659,6 +667,17 @@
 				7E2BEBEE13D7757300A116D2 /* ImageToDataTransformer.m */,
 			);
 			name = Model;
+			sourceTree = "<group>";
+		};
+		7E2B339B140F29F300AFC384 /* TestFlightSDK */ = {
+			isa = PBXGroup;
+			children = (
+				7E2B339C140F29F300AFC384 /* libTestFlight.a */,
+				7E2B339D140F29F300AFC384 /* README.txt */,
+				7E2B339E140F29F300AFC384 /* release_notes.txt */,
+				7E2B339F140F29F300AFC384 /* TestFlight.h */,
+			);
+			path = TestFlightSDK;
 			sourceTree = "<group>";
 		};
 		7E2CED0C13C7A2630068D576 /* Categories */ = {
@@ -794,6 +813,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				7E2B339B140F29F300AFC384 /* TestFlightSDK */,
 				7EC1C65113F459B50070CE6D /* Security.framework */,
 				7EE1193B13CE0C8500378139 /* CFNetwork.framework */,
 				7EE1193C13CE0C8500378139 /* CoreData.framework */,
@@ -1426,6 +1446,8 @@
 				7E453721140F003C0097E64F /* RelationshipsViewController.xib in Resources */,
 				7E6FFA53140F137400F23A26 /* clear_unfollow_bg@2x.png in Resources */,
 				7E6FFA54140F137400F23A26 /* green_follow_bg@2x.png in Resources */,
+				7E2B33A1140F29F300AFC384 /* README.txt in Resources */,
+				7E2B33A2140F29F300AFC384 /* release_notes.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1569,6 +1591,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
@@ -1584,6 +1607,7 @@
 					"-all_load",
 				);
 				SDKROOT = iphoneos;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
@@ -1592,6 +1616,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1605,6 +1630,7 @@
 					"-all_load",
 				);
 				SDKROOT = iphoneos;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Release;
 		};
@@ -1625,6 +1651,10 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TestFlightSDK\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				WRAPPER_EXTENSION = app;
@@ -1647,6 +1677,10 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Stamped/Stamped-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TestFlightSDK\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				VALIDATE_PRODUCT = YES;
