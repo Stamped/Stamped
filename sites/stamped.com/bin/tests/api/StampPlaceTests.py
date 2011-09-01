@@ -54,6 +54,7 @@ class StampedAPIStampPlaceMentionsTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
         self.createFriendship(self.tokenB, self.userA)
         self.entity = self.createPlaceEntity(self.tokenA)
         self.stampData = {
@@ -71,6 +72,7 @@ class StampedAPIStampPlaceMentionsTest(AStampedAPITestCase):
         self.deleteFriendship(self.tokenB, self.userA)
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
 
 class StampedAPIStampPlacesMentionsShow(StampedAPIStampPlaceMentionsTest):
     def test_show(self):
@@ -136,7 +138,7 @@ class StampedAPIStampPlacesCreditUpdate(StampedAPIStampPlaceMentionsTest):
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id'],
             "credit": "%s,%s" % (
-                self.userA['screen_name'],
+                self.userC['screen_name'],
                 self.userB['screen_name']
             )
         }

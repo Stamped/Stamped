@@ -186,7 +186,7 @@ class Stamp(Schema):
         self.blurb              = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
-        self.credit             = SchemaList(UserMini())
+        self.credit             = SchemaList(CreditSchema())
         self.comment_preview    = SchemaList(Comment())
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
@@ -197,6 +197,12 @@ class MentionSchema(Schema):
         self.screen_name        = SchemaElement(basestring, required=True)
         self.user_id            = SchemaElement(basestring)
         self.indices            = SchemaList(SchemaElement(int))
+
+class CreditSchema(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.screen_name        = SchemaElement(basestring, required=True)
+        self.stamp_id           = SchemaElement(basestring)
 
 
 # ######## #

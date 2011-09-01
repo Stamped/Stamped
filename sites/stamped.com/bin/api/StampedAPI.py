@@ -566,12 +566,12 @@ class StampedAPI(AStampedAPI):
         # return mentions
 
     def addStamp(self, authUserId, entityId, data):
-        user    = self._userDB.getUser(authUserId)
-        entity  = self._entityDB.getEntity(entityId)
+        user        = self._userDB.getUser(authUserId)
+        entity      = self._entityDB.getEntity(entityId)
 
-        blurb   = data.pop('blurb', None)
-        credit  = data.pop('credit', None)
-        image   = data.pop('image', None)
+        blurbData   = data.pop('blurb', None)
+        creditData  = data.pop('credit', None)
+        imageData   = data.pop('image', None)
 
         # Check to make sure the user has stamps left
         if user.num_stamps_left <= 0:
@@ -585,31 +585,60 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise IllegalActionError(msg)
 
-        # Extract mentions
-        mentions = None
-        if blurb != None:
-            mentions = self._extractMentions(blurb)
-            blurb = blurb.strip()
-                
-        # Extract credit
-        if credit != None:
-            ret = []
-            for creditedUser in self._userDB.lookupUsers(None, credit):
-                ret.append(creditedUser.exportSchema(UserMini()))
-            ### TODO: How do we handle credited users that have not yet joined?
-            ### TODO: Expand with stamp details (potentially)
-            credit = ret
-
         # Build stamp
         stamp = Stamp({
             'user': user.exportSchema(UserMini()),
             'entity': entity.exportSchema(EntityMini()),
-            'blurb': blurb,
-            'credit': credit,
-            'image': image,
-            'mentions': mentions,
+            'image': imageData,
         })
         stamp.timestamp.created = datetime.utcnow()
+
+        # Extract mentions
+        if blurbData != None:
+            stamp.blurb = blurbData.strip()
+            stamp.mentions = self._extractMentions(blurbData)
+                
+        # Extract credit
+        credit = []
+        creditedUserIds = []
+        if creditData != None:
+            creditedUsers = self._userDB.lookupUsers(None, creditData)
+
+            for creditedUser in creditedUsers:
+                userId = creditedUser['user_id']
+                if userId == user.user_id or userId in creditedUserIds:
+                    continue
+                
+                result = CreditSchema()
+                result.user_id      = creditedUser['user_id']
+                result.screen_name  = creditedUser['screen_name']
+
+                # Assign credit
+                creditedStamp = self._stampDB.getStampFromUserEntity(userId, entityId)
+                if creditedStamp != None:
+                    result.stamp_id = creditedStamp.stamp_id
+
+                credit.append(result)
+
+                # Check if block exists between user and credited user
+                friendship = Friendship({
+                    'user_id':      user.user_id,
+                    'friend_id':    userId,
+                })
+                if self._friendshipDB.blockExists(friendship) == True:
+                    logs.debug("Block exists")
+                    continue
+
+                ### NOTE:
+                # For now, if a block exists then no comment or activity is
+                # created. This may change ultimately (i.e. we create the
+                # 'comment' and hide it from the recipient until they're
+                # unblocked), but for now we're not going to do anything.
+
+                creditedUserIds.append(result.user_id)
+
+            ### TODO: How do we handle credited users that have not yet joined?
+            stamp.credit = credit
             
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
@@ -635,40 +664,25 @@ class StampedAPI(AStampedAPI):
             pass
         
         # Give credit
-        creditedUserIds = []
-        if credit != None and len(credit) > 0:
-            for creditedUser in credit:
-                userId = creditedUser['user_id']
-                if userId == user.user_id or userId in creditedUserIds:
-                    break
+        if stamp.credit != None and len(stamp.credit) > 0:
+            for item in credit:
 
-                # Check if block exists between user and credited user
-                friendship = Friendship({
-                    'user_id':      user.user_id,
-                    'friend_id':    userId,
-                })
-                if self._friendshipDB.blockExists(friendship) == True:
-                    logs.debug("Block exists")
-                    break
-
-                ### NOTE:
-                # For now, if a block exists then no comment or activity is
-                # created. This may change ultimately (i.e. we create the
-                # 'comment' and hide it from the recipient until they're
-                # unblocked), but for now we're not going to do anything.
+                # Only run if user is flagged as credited
+                if item not in creditedUserIds:
+                    continue
 
                 # Assign credit
-                creditedStamp = self._stampDB.giveCredit(userId, stamp)
+                self._stampDB.giveCredit(item.user_id, stamp)
                 
                 # Add restamp as comment (if prior stamp exists)
-                if creditedStamp:
+                if 'stamp_id' in item and item['stamp_id'] != None:
                     # Build comment
                     comment = Comment({
                         'user': user.exportSchema(UserMini()),
-                        'stamp_id': creditedStamp.stamp_id,
+                        'stamp_id': item.stamp_id,
                         'restamp_id': stamp.stamp_id,
-                        'blurb': blurb,
-                        'mentions': mentions,
+                        'blurb': stamp.blurb,
+                        'mentions': stamp.mentions,
                     })
                     comment.timestamp.created = datetime.utcnow()
                     
@@ -676,31 +690,29 @@ class StampedAPI(AStampedAPI):
                     self._commentDB.addComment(comment)
 
                 # Update credited user stats
-                self._userDB.updateUserStats(userId, 'num_credits', \
+                self._userDB.updateUserStats(item.user_id, 'num_credits', \
                     None, increment=1)
-                self._userDB.updateUserStats(userId, 'num_stamps_left', \
+                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
                     None, increment=EARNED_CREDIT_MULTIPLIER)
-
-                # Append user_id for activity
-                creditedUserIds.append(creditedUser['user_id'])
 
         # Note: No activity should be generated for the user creating the stamp
 
         # Add activity for credited users
         if self._activity == True and len(creditedUserIds) > 0:
+            
             activity                = Activity()
             activity.genre          = 'restamp'
             activity.user           = user.exportSchema(UserMini())
             activity.subject        = stamp.entity.title
             activity.stamp_id       = stamp.stamp_id
             activity.created        = datetime.utcnow()
-
+            
             self._activityDB.addActivity(creditedUserIds, activity)
         
         # Add activity for mentioned users
-        if self._activity == True and mentions != None and len(mentions) > 0:
+        if self._activity == True and stamp.mentions != None and len(stamp.mentions) > 0:
             mentionedUserIds = []
-            for mention in mentions:
+            for mention in stamp.mentions:
                 if 'user_id' in mention \
                     and mention['user_id'] not in creditedUserIds \
                     and mention['user_id'] != user.user_id:
@@ -726,12 +738,12 @@ class StampedAPI(AStampedAPI):
 
             
     def updateStamp(self, authUserId, stampId, data):        
-        stamp   = self._stampDB.getStamp(stampId)       
-        user    = self._userDB.getUser(authUserId)
+        stamp       = self._stampDB.getStamp(stampId)       
+        user        = self._userDB.getUser(authUserId)
 
-        blurb   = data.pop('blurb', stamp.blurb)
-        credit  = data.pop('credit', None)
-        image   = data.pop('image', stamp.image)
+        blurbData   = data.pop('blurb', stamp.blurb)
+        creditData  = data.pop('credit', None)
+        imageData   = data.pop('image', stamp.image)
 
         # Verify user can modify the stamp
         if authUserId != stamp.user.user_id:
@@ -739,67 +751,63 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
 
-        # Extract mentions
-        mentions = stamp.mentions
-        if blurb != None:
-            mentions = self._extractMentions(blurb)
-            blurb = blurb.strip()
-                
-        # Extract credit
-        if credit != None:
-            ret = []
-            for creditedUser in self._userDB.lookupUsers(None, credit):
-                ret.append(creditedUser.exportSchema(UserMini()))
-            ### TODO: How do we handle credited users that have not yet joined?
-            ### TODO: Expand with stamp details (potentially)
-            credit = ret
-        
-        # Compare
-        if blurb != stamp.blurb:
-            stamp.blurb = blurb
-
-        if image != stamp.image:
+        # Images
+        if imageData != stamp.image:
             ### TODO: Actually upload the image....
-            stamp.image = image
+            stamp.image = imageData
 
+        # Blurb & Mentions
         mentionedUsers = []
-        ### TODO: Verify that this works as expected
-        if mentions != stamp.mentions:
-            if mentions != None:
-                previouslyMentioned = []
+        if blurbData == None:
+            stamp.blurb = None
+        elif blurbData.strip() != stamp.blurb:
+            stamp.blurb = blurbData.strip()
+
+            previouslyMentioned = []
+            if stamp.mentions != None:
                 for mention in stamp.mentions:
                     previouslyMentioned.append(mention.screen_name)
+            
+            mentions = self._extractMentions(blurbData)
+            if mentions != None:
                 for mention in mentions:
                     if mention['screen_name'] not in previouslyMentioned:
                         mentionedUsers.append(mention)
-            stamp.mentions = mentions
-        
-        creditedUsers = []
-        ### TODO: Verify that this works as expected
-        if credit != stamp.credit:
-            if credit == None:
-                stamp.credit = []
-            else:
-                previouslyCredited = []
-                for creditedUser in stamp.credit:
-                    previouslyCredited.append(creditedUser.user_id)
-                for creditedUser in credit:
-                    if creditedUser['user_id'] not in previouslyCredited:
-                        creditedUsers.append(creditedUser)
-                stamp.credit = credit
-
-        stamp.timestamp.modified = datetime.utcnow()
             
-        # Update the stamp data in the database
-        stamp = self._stampDB.updateStamp(stamp)
-
-        # Give credit
+            stamp.mentions = mentions
+                
+        # Credit
+        credit = []
         creditedUserIds = []
-        if len(creditedUsers) > 0:
+        if creditData == None:
+            stamp.credit = None
+        else:
+            previouslyCredited = []
+            for creditedUser in stamp.credit:
+                previouslyCredited.append(creditedUser.user_id)
+
+            creditedUsers = self._userDB.lookupUsers(None, creditData)
+
             for creditedUser in creditedUsers:
                 userId = creditedUser['user_id']
                 if userId == user.user_id or userId in creditedUserIds:
-                    break
+                    continue
+                
+                result = CreditSchema()
+                result.user_id      = creditedUser['user_id']
+                result.screen_name  = creditedUser['screen_name']
+
+                # Assign credit
+                creditedStamp = self._stampDB.getStampFromUserEntity(userId, \
+                                    stamp.entity.entity_id)
+                if creditedStamp != None:
+                    result.stamp_id = creditedStamp.stamp_id
+
+                credit.append(result)
+
+                # Check if user was credited previously
+                if userId in previouslyCredited:
+                    continue
 
                 # Check if block exists between user and credited user
                 friendship = Friendship({
@@ -808,7 +816,7 @@ class StampedAPI(AStampedAPI):
                 })
                 if self._friendshipDB.blockExists(friendship) == True:
                     logs.debug("Block exists")
-                    break
+                    continue
 
                 ### NOTE:
                 # For now, if a block exists then no comment or activity is
@@ -816,32 +824,47 @@ class StampedAPI(AStampedAPI):
                 # 'comment' and hide it from the recipient until they're
                 # unblocked), but for now we're not going to do anything.
 
+                creditedUserIds.append(result.user_id)
+
+            ### TODO: How do we handle credited users that have not yet joined?
+            stamp.credit = credit
+
+        stamp.timestamp.modified = datetime.utcnow()
+            
+        # Update the stamp data in the database
+        stamp = self._stampDB.updateStamp(stamp)
+
+        # Give credit
+        if stamp.credit != None and len(stamp.credit) > 0:
+            for item in credit:
+
+                # Only run if user is flagged as credited
+                if item not in creditedUserIds:
+                    continue
+
                 # Assign credit
-                creditedStamp = self._stampDB.giveCredit(userId, stamp)
+                self._stampDB.giveCredit(item.user_id, stamp)
                 
                 # Add restamp as comment (if prior stamp exists)
-                if creditedStamp.stamp_id != None:
+                if 'stamp_id' in item and item['stamp_id'] != None:
                     # Build comment
                     comment = Comment({
                         'user': user.exportSchema(UserMini()),
-                        'stamp_id': creditedStamp.stamp_id,
+                        'stamp_id': item.stamp_id,
                         'restamp_id': stamp.stamp_id,
-                        'blurb': blurb,
-                        'mentions': mentions,
+                        'blurb': stamp.blurb,
+                        'mentions': stamp.mentions,
                     })
                     comment.timestamp.created = datetime.utcnow()
-                        
+                    
                     # Add the comment data to the database
                     self._commentDB.addComment(comment)
 
                 # Update credited user stats
-                self._userDB.updateUserStats(userId, 'num_credits', \
+                self._userDB.updateUserStats(item.user_id, 'num_credits', \
                     None, increment=1)
-                self._userDB.updateUserStats(userId, 'num_stamps_left', \
+                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
                     None, increment=EARNED_CREDIT_MULTIPLIER)
-
-                # Append user_id for activity
-                creditedUserIds.append(creditedUser['user_id'])
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -857,10 +880,10 @@ class StampedAPI(AStampedAPI):
             self._activityDB.addActivity(creditedUserIds, activity)
         
         # Add activity for mentioned users
-        ### TODO: Verify user isn't being blocked
-        if self._activity == True and mentions != None and len(mentions) > 0:
+        if self._activity == True and stamp.mentions != None \
+            and len(stamp.mentions) > 0:
             mentionedUserIds = []
-            for mention in mentions:
+            for mention in stamp.mentions:
                 if 'user_id' in mention \
                     and mention['user_id'] not in creditedUserIds \
                     and mention['user_id'] != user.user_id:
