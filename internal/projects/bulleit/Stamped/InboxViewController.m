@@ -28,6 +28,7 @@
 
 static const CGFloat kMapUserImageSize = 32.0;
 static NSString* const kInboxPath = @"/collections/inbox.json";
+static NSString* const kEverythingPath = @"/temp/inbox.json";
 
 typedef enum {
   StampsListFilterTypeBook,
@@ -189,8 +190,8 @@ typedef enum {
 	NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
 	NSArray* results = [Stamp objectsWithFetchRequest:request];
-
   results = [results valueForKeyPath:@"@distinctUnionOfObjects.entityObject"];
   descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
   self.entitiesArray = [results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
@@ -201,9 +202,13 @@ typedef enum {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
+  NSString* path = kInboxPath;
+  if (entitiesArray_.count == 0)
+    path = kEverythingPath;
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kInboxPath delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", nil];
   [objectLoader send];
@@ -216,7 +221,7 @@ typedef enum {
 #pragma mark - Filter stuff
 
 - (IBAction)filterButtonPushed:(id)sender {
-  filteredEntitiesArray_ = nil;
+  self.filteredEntitiesArray = nil;
 
   UIButton* selectedButton = (UIButton*)sender;
   for (UIButton* button in self.filterButtons)
@@ -311,6 +316,7 @@ typedef enum {
   if (entity.stamps.count > 0) {
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
     NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
     stamp = [sortedStamps lastObject];
   } else {
     stamp = [entity.stamps anyObject];
@@ -327,8 +333,8 @@ typedef enum {
 - (void)userPulledToReload {
   [super userPulledToReload];
   [self loadStampsFromNetwork];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadNewsPane
-                                                      object:nil];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes
+                                                      object:self];
 }
 
 - (void)reloadData {

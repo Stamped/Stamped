@@ -36,19 +36,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 #pragma mark - View lifecycle
 
-- (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-  if (self) {
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(reloadData)
-                                                 name:kAppShouldReloadNewsPane
-                                               object:nil];
-  }
-  return self;
-}
-
 - (void)dealloc {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.eventsArray = nil;
   [super dealloc];
@@ -75,8 +63,8 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     NSUInteger newItemCount = results.count - self.eventsArray.count;
     if (newItemCount > 0) {
       [[NSNotificationCenter defaultCenter]
-       postNotificationName:kNewsItemCountHasChangedNotification 
-       object:[NSNumber numberWithUnsignedInteger:newItemCount]];
+          postNotificationName:kNewsItemCountHasChangedNotification 
+          object:[NSNumber numberWithUnsignedInteger:newItemCount]];
     }
   }
   self.eventsArray = nil;
@@ -188,6 +176,8 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (void)userPulledToReload {
   [super userPulledToReload];
   [self loadEventsFromNetwork];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes
+                                                      object:self];
 }
 
 - (void)reloadData {

@@ -56,7 +56,7 @@
         <attribute name="created" optional="YES" attributeType="Date"/>
         <attribute name="numComments" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
-        <attribute name="temporary" optional="YES" attributeType="Boolean"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" defaultValueString="NO"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="stamp" inverseEntity="Comment"/>
         <relationship name="credits" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" inverseName="credits" inverseEntity="User"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamps" inverseEntity="Entity"/>
@@ -83,8 +83,6 @@
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="user" inverseEntity="Comment"/>
         <relationship name="credits" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="credits" inverseEntity="Stamp"/>
         <relationship name="events" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Event" inverseName="user" inverseEntity="Event"/>
-        <relationship name="followers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User"/>
-        <relationship name="friends" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User"/>
         <relationship name="stamps" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Stamp" inverseName="user" inverseEntity="Stamp"/>
     </entity>
     <elements>
@@ -93,6 +91,6 @@
         <element name="Event" positionX="160" positionY="192" width="128" height="135"/>
         <element name="Favorite" positionX="160" positionY="192" width="128" height="135"/>
         <element name="Stamp" positionX="216" positionY="324" width="128" height="210"/>
-        <element name="User" positionX="-45" positionY="63" width="128" height="315"/>
+        <element name="User" positionX="-45" positionY="63" width="128" height="330"/>
     </elements>
 </model>

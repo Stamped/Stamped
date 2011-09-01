@@ -530,7 +530,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification 
+    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                         object:nil];
     return;
   }

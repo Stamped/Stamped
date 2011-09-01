@@ -36,8 +36,6 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic numFriends;
 @dynamic numFollowers;
 @dynamic numStamps;
-@dynamic friends;
-@dynamic followers;
 
 - (void)generateStampImage {
   CGFloat r1, g1, b1, r2, g2, b2;
