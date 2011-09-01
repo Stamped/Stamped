@@ -133,17 +133,19 @@ class MongoCollectionProxy(object):
                         logs.debug("Inserted %d documents (%s)" % (count, self._parent.__class__.__name__))
                     ret += result
                 except AutoReconnect as e:
-                    if level > max_retries or count <= 1:
+                    if level > max_retries:
                         logs.warning("Unable to connect after %d retries (%s)" % \
                             (max_retries, self._parent.__class__.__name__))
                         raise
                     
                     logs.warning("Insert document failed (%s)" % (self._parent.__class__.__name__))
                     
-                    time.sleep(0.05)
-                    mid = count / 2
-                    ret += _insert(objects[:mid], level + 1)
-                    ret += _insert(objects[mid:], level + 1)
+                    time.sleep(1)
+
+                    if count > 1:
+                        mid = count / 2
+                        ret += _insert(objects[:mid], level + 1)
+                        ret += _insert(objects[mid:], level + 1)
             
             return ret
         
