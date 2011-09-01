@@ -81,6 +81,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         logs.debug("Add Block: %s -> %s" % (userId, friendId))
         self.block_collection.addBlock(userId=userId, friendId=friendId)
     
+    # One Way (Is User A blocking User B?)
     def checkBlock(self, friendship):
         userId      = friendship.user_id
         friendId    = friendship.friend_id
@@ -89,6 +90,23 @@ class MongoFriendshipCollection(AFriendshipDB):
         status = self.block_collection.checkBlock(userId=userId, \
             friendId=friendId)
         return status
+    
+    # Two Way (Is User A blocking User B or blocked by User B?)
+    def blockExists(self, friendship):
+        userId      = friendship.user_id
+        friendId    = friendship.friend_id
+
+        logs.debug("Check Block: %s -> %s" % (userId, friendId))
+        statusA = self.block_collection.checkBlock(userId=userId, \
+            friendId=friendId)
+
+        logs.debug("Check Block: %s -> %s" % (friendId, userId))
+        statusB = self.block_collection.checkBlock(userId=friendId, \
+            friendId=userId)
+
+        if statusA or statusB:
+            return True
+        return False
             
     def removeBlock(self, friendship):
         userId      = friendship.user_id
