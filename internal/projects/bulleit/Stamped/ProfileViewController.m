@@ -14,6 +14,7 @@
 #import "AccountManager.h"
 #import "CreditsViewController.h"
 #import "Entity.h"
+#import "RelationshipsViewController.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"
 #import "STSectionHeaderView.h"
@@ -23,10 +24,16 @@
 #import "UIColor+Stamped.h"
 
 static NSString* const kUserStampsPath = @"/collections/user.json";
+static NSString* const kUserLookupPath = @"/users/lookup.json";
+static NSString* const kFriendshipCheckPath = @"/friendships/check.json";
+static NSString* const kFriendshipCreatePath = @"friendships/create.json";
+static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 @interface ProfileViewController ()
-- (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
+- (void)loadUserInfoFromNetwork;
+- (void)fillInUserData;
+- (void)loadRelationshipData;
 
 @property (nonatomic, copy) NSArray* stampsArray;
 @end
@@ -42,9 +49,13 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @synthesize usernameLocationLabel = usernameLocationLabel_;
 @synthesize bioLabel = bioLabel_;
 @synthesize shelfImageView = shelfImageView_;
-
+@synthesize toolbarView = toolbarView_;
+@synthesize tableView = tableView_;
 @synthesize user = user_;
 @synthesize stampsArray = stampsArray_;
+@synthesize followButton = followButton_;
+@synthesize unfollowButton = unfollowButton_;
+@synthesize followIndicator = followIndicator_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -70,17 +81,27 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   cameraButton_.hidden = YES;
   //cameraButton_.hidden = ![user_.userID isEqualToString:[AccountManager sharedManager].currentUser.userID];
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
-  fullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", user_.firstName, user_.lastName];
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
-  usernameLocationLabel_.text = [NSString stringWithFormat:@"%@  /  %@", user_.screenName, @"Scranton, PA"];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
   bioLabel_.textColor = [UIColor stampedGrayColor];
-  bioLabel_.text = user_.bio;
-  creditCountLabel_.text = [user_.numCredits stringValue];
-  followerCountLabel_.text = [user_.numFollowers stringValue];
-  followingCountLabel_.text = [user_.numFriends stringValue];
-  [self loadStampsFromDataStore];
+  if (user_.firstName)
+    [self fillInUserData];
+
+  CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
+  toolbarGradient.colors = [NSArray arrayWithObjects:
+                            (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
+                            (id)[UIColor colorWithWhite:0.855 alpha:1.0].CGColor, nil];
+  toolbarGradient.frame = toolbarView_.bounds;
+  [toolbarView_.layer addSublayer:toolbarGradient];
+  [toolbarGradient release];
+  
+  toolbarView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:toolbarView_.bounds].CGPath;
+  toolbarView_.layer.shadowOpacity = 0.2;
+  toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
+  toolbarView_.alpha = 0.9;
+  [self loadRelationshipData];
   [self loadStampsFromNetwork];
+  [self loadUserInfoFromNetwork];
 }
 
 - (void)viewDidUnload {
@@ -95,6 +116,11 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   self.usernameLocationLabel = nil;
   self.bioLabel = nil;
   self.shelfImageView = nil;
+  self.toolbarView = nil;
+  self.tableView = nil;
+  self.followIndicator = nil;
+  self.followButton = nil;
+  self.unfollowButton = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -114,6 +140,32 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [super viewDidDisappear:animated];
 }
 
+- (IBAction)followButtonPressed:(id)sender {
+  followButton_.hidden = YES;
+  followIndicator_.hidden = NO;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendshipCreatePath 
+                                                                    delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = userMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id", nil];
+  [objectLoader send];
+}
+
+- (IBAction)unfollowButtonPressed:(id)sender {
+  unfollowButton_.hidden = YES;
+  followIndicator_.hidden = NO;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendshipRemovePath 
+                                                                    delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = userMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id", nil];
+  [objectLoader send];
+}
+
 - (IBAction)creditsButtonPressed:(id)sender {
   CreditsViewController* creditsViewController =
       [[CreditsViewController alloc] initWithNibName:@"CreditsViewController" bundle:nil];
@@ -122,11 +174,19 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (IBAction)followersButtonPressed:(id)sender {
-  NSLog(@"Followers...");
+  RelationshipsViewController* relationshipsViewController =
+      [[RelationshipsViewController alloc] initWithRelationship:RelationshipTypeFollowers];
+  relationshipsViewController.user = user_;
+  [self.navigationController pushViewController:relationshipsViewController animated:YES];
+  [relationshipsViewController release];
 }
 
 - (IBAction)followingButtonPressed:(id)sender {
-  NSLog(@"Following...");
+  RelationshipsViewController* relationshipsViewController =
+      [[RelationshipsViewController alloc] initWithRelationship:RelationshipTypeFriends];
+  relationshipsViewController.user = user_;
+  [self.navigationController pushViewController:relationshipsViewController animated:YES];
+  [relationshipsViewController release];
 }
 
 - (IBAction)cameraButtonPressed:(id)sender {
@@ -178,32 +238,100 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [detailViewController release];
 }
 
-#pragma mark - STReloadableViewController Methods.
-
-- (void)userPulledToReload {
-  [super userPulledToReload];
-  [self loadStampsFromNetwork];
-}
-
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[self loadStampsFromDataStore];
-  [self setIsLoading:NO];
+  if ([objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
+    self.user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", user_.screenName]];
+    [self fillInUserData];
+  }
+
+  if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
+    followIndicator_.hidden = YES;
+    unfollowButton_.hidden = NO;
+    followButton_.hidden = YES;
+    user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] + 1];
+    followerCountLabel_.text = [user_.numFollowers stringValue];
+  }
+
+  if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
+    followIndicator_.hidden = YES;
+    unfollowButton_.hidden = YES;
+    followButton_.hidden = NO;
+    user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] - 1];
+    followerCountLabel_.text = [user_.numFollowers stringValue];
+  }
+  
+  if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+    [self.tableView reloadData];
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
-    [self loadStampsFromNetwork];
+    [objectLoader send];
     return;
   }
-  
-  [self setIsLoading:NO];
+}
+
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  if ([request.resourcePath rangeOfString:kFriendshipCheckPath].location != NSNotFound) {
+    followIndicator_.hidden = YES;
+    if ([response.bodyAsString isEqualToString:@"false"]) {
+      followButton_.hidden = NO;
+    } else {
+      unfollowButton_.hidden = NO;
+    }
+  }
 }
 
 #pragma mark - Private methods.
+
+- (void)loadRelationshipData {
+  NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
+  if (!currentUserID)
+    return;
+
+  if ([currentUserID isEqualToString:user_.userID]) {
+    followIndicator_.hidden = YES;
+    toolbarView_.hidden = YES;
+    return;
+  }
+  followIndicator_.hidden = NO;
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kFriendshipCheckPath delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:currentUserID, @"user_id_a",
+                                                              user_.userID, @"user_id_b", nil];
+  [request send];
+}
+
+- (void)fillInUserData {
+  fullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", user_.firstName, user_.lastName];
+  usernameLocationLabel_.text = [NSString stringWithFormat:@"%@  /  %@", user_.screenName, @"Scranton, PA"];
+  bioLabel_.text = user_.bio;
+  creditCountLabel_.text = [user_.numCredits stringValue];
+  followerCountLabel_.text = [user_.numFollowers stringValue];
+  followingCountLabel_.text = [user_.numFriends stringValue];
+  [self.tableView reloadData];
+}
+
+- (void)loadUserInfoFromNetwork {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
+
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  NSString* username = user_.screenName;
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath delegate:self];
+  objectLoader.objectMapping = userMapping;
+  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username, nil];
+  [objectLoader send];
+}
 
 - (void)loadStampsFromNetwork {
   if (![[RKClient sharedClient] isNetworkAvailable])
@@ -216,16 +344,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id", nil];
   [objectLoader send];
-}
-
-- (void)loadStampsFromDataStore {
-  self.stampsArray = nil;
-  NSFetchRequest* request = [Stamp fetchRequest];
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"user.screenName == %@", user_.screenName]];
-	self.stampsArray = [Stamp objectsWithFetchRequest:request];
-  [self.tableView reloadData];
 }
 
 @end

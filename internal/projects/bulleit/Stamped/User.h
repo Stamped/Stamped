@@ -28,6 +28,8 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSSet* comments;
 @property (nonatomic, retain) NSSet* events;
 @property (nonatomic, retain) NSSet* credits;
+@property (nonatomic, retain) NSSet* friends;
+@property (nonatomic, retain) NSSet* followers;
 @property (nonatomic, retain) NSNumber* numCredits;
 @property (nonatomic, retain) NSNumber* numFollowers;
 @property (nonatomic, retain) NSNumber* numFriends;
@@ -35,6 +37,15 @@ extern const CGFloat kMediumUserImageSize;
 @end
 
 @interface User (CoreDataGeneratedAccessors)
+- (void)addFriendsObject:(NSManagedObject*)value;
+- (void)removeFriendsObject:(NSManagedObject*)value;
+- (void)addFriends:(NSSet*)values;
+- (void)removeFriends:(NSSet*)values;
+
+- (void)addFollowersObject:(NSManagedObject*)value;
+- (void)removeFollowersObject:(NSManagedObject*)value;
+- (void)addFollowers:(NSSet*)values;
+- (void)removeFollowers:(NSSet*)values;
 
 - (void)addStampsObject:(NSManagedObject*)value;
 - (void)removeStampsObject:(NSManagedObject*)value;

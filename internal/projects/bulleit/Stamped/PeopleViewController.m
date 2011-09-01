@@ -81,6 +81,7 @@ static const NSInteger kFollowersSection = 1;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [self loadFriendsAndFollowersFromNetwork];
   [super viewWillAppear:animated];
 }
 
