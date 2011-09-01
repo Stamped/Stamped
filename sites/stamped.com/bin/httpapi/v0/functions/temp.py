@@ -10,7 +10,7 @@ from httpapi.v0.helpers import *
 
 @handleHTTPRequest
 @require_http_methods(["GET"])
-def friends():
+def friends(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPUserId(), request)
 
@@ -26,7 +26,7 @@ def friends():
 
 @handleHTTPRequest
 @require_http_methods(["GET"])
-def followers():
+def followers(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPUserId(), request)
 
