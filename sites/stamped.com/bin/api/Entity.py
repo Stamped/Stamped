@@ -23,7 +23,7 @@ subcategories = {
     'cafe'              : 'food', 
     'market'            : 'food', 
     'food'              : 'food', 
-    'night_club'        : 'other', 
+    'night_club'        : 'food', 
     
     # --------------------------
     #           book
@@ -48,6 +48,8 @@ subcategories = {
     # --------------------------
     'app'               : 'other', 
     'other'             : 'other', 
+    
+    # note: the following subcategories are from google places
     'amusement_park'    : 'other', 
     'aquarium'          : 'other', 
     'art_gallery'       : 'other', 

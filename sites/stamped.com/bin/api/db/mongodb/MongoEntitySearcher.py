@@ -19,19 +19,75 @@ from utils          import lazyProperty
 
 class MongoEntitySearcher(EntitySearcher):
     subcategory_weights = {
-        'restaurant' : 100, 
-        'bar' : 90, 
-        'book' : 50, 
-        'movie' : 60, 
-        'artist' : 55, 
-        'song' : 20, 
-        'album' : 25, 
-        'app' : 15, 
-        'other' : 10,
+        # --------------------------
+        #           food
+        # --------------------------
+        'restaurant'        : 100, 
+        'bar'               : 90, 
+        'bakery'            : 70, 
+        'cafe'              : 70, 
+        'market'            : 60, 
+        'food'              : 70, 
+        'night_club'        : 75, 
+        
+        # --------------------------
+        #           book
+        # --------------------------
+        'book'              : 50, 
+        
+        # --------------------------
+        #           film
+        # --------------------------
+        'movie'             : 65, 
+        'tv'                : 65, 
+        
+        # --------------------------
+        #           music
+        # --------------------------
+        'artist'            : 55, 
+        'song'              : 20, 
+        'album'             : 25, 
+        
+        # --------------------------
+        #           other
+        # --------------------------
+        'app'               : 15, 
+        'other'             : 5, 
+        
+        # note: the following subcategories are from google places
+        'amusement_park'    : 25, 
+        'aquarium'          : 25, 
+        'art_gallery'       : 25, 
+        'beauty_salon'      : 15, 
+        'book_store'        : 15, 
+        'bowling_alley'     : 25, 
+        'campground'        : 20, 
+        'casino'            : 25, 
+        'clothing_store'    : 20, 
+        'department_store'  : 20, 
+        'florist'           : 15, 
+        'gym'               : 10, 
+        'home_goods_store'  : 5, 
+        'jewelry_store'     : 15, 
+        'library'           : 5, 
+        'liquor_store'      : 10, 
+        'lodging'           : 45, 
+        'movie_theater'     : 45, 
+        'museum'            : 70, 
+        'park'              : 50, 
+        'school'            : 25, 
+        'shoe_store'        : 20, 
+        'shopping_mall'     : 20, 
+        'spa'               : 25, 
+        'stadium'           : 25, 
+        'store'             : 15, 
+        'university'        : 70, 
+        'zoo'               : 65, 
     }
-
+    
     source_weights = {
-        'googlePlaces' : 80, 
+        'googlePlaces' : 50, 
+        'amazon' : 90, 
         'openTable' : 110, 
         'factual' : 5, 
         'apple' : 75, 
