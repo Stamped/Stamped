@@ -186,7 +186,7 @@ class Stamp(Schema):
         self.blurb              = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
-        self.credit             = SchemaList(UserMini())
+        self.credit             = SchemaList(CreditSchema())
         self.comment_preview    = SchemaList(Comment())
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
@@ -197,6 +197,12 @@ class MentionSchema(Schema):
         self.screen_name        = SchemaElement(basestring, required=True)
         self.user_id            = SchemaElement(basestring)
         self.indices            = SchemaList(SchemaElement(int))
+
+class CreditSchema(Schema):
+    def setSchema(self):
+        self.user_id            = SchemaElement(basestring, required=True)
+        self.screen_name        = SchemaElement(basestring, required=True)
+        self.stamp_id           = SchemaElement(basestring)
 
 
 # ######## #
@@ -396,12 +402,14 @@ class BookSchema(Schema):
 
 class VideoSchema(Schema):
     def setSchema(self):
-        # TODO: modify types
         self.studio_name        = SchemaElement(basestring)
         self.network_name       = SchemaElement(basestring)
         self.short_description  = SchemaElement(basestring)
         self.long_description   = SchemaElement(basestring)
         self.episode_production_number  = SchemaElement(basestring)
+        ### TODO: populate cast / director from crawler
+        self.cast               = SchemaElement(basestring)
+        self.director           = SchemaElement(basestring)
         
         self.v_retail_price     = SchemaElement(basestring)
         self.v_currency_code    = SchemaElement(basestring)
@@ -426,6 +434,8 @@ class SongSchema(Schema):
     def setSchema(self):
         self.preview_url        = SchemaElement(basestring)
         self.preview_length     = SchemaElement(basestring)
+        ### TODO: modify this based on crawler logic (only for custom entities currently)
+        self.album_name         = SchemaElement(basestring) 
 
 class AlbumSchema(Schema):
     def setSchema(self):
@@ -494,6 +504,12 @@ class EntitySourcesSchema(Schema):
         self.barnesAndNoble     = BarnesAndNobleSchema()
         self.sfweekly           = SFWeeklySchema()
         self.seattletimes       = SeattleTimesSchema()
+        self.sfgate             = SFGateSchema()
+        self.timeout_chi        = TimeOutChiSchema()
+        self.timeout_la         = TimeOutLASchema()
+        self.timeout_lv         = TimeOutLVSchema()
+        self.timeout_mia        = TimeOutMIASchema()
+        self.timeout_sf         = TimeOutSFSchema()
 
 class GooglePlacesSchema(Schema):
     def setSchema(self):
@@ -591,6 +607,30 @@ class ChicagoMagSchema(Schema):
         pass
 
 class PhillyMagSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutChiSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutLASchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutLVSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutMIASchema(Schema):
+    def setSchema(self):
+        pass
+        
+class TimeOutSFSchema(Schema):
+    def setSchema(self):
+        pass
+        
+class SFGateSchema(Schema):
     def setSchema(self):
         pass
 

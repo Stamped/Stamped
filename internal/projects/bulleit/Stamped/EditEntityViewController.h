@@ -29,6 +29,7 @@
 @property (nonatomic, retain) IBOutlet UITextField* primaryTextField;
 @property (nonatomic, retain) IBOutlet UITextField* secondaryTextField;
 @property (nonatomic, retain) IBOutlet UITextField* tertiaryTextField;
+@property (nonatomic, retain) IBOutlet UITextField* descriptionTextField;
 @property (nonatomic, retain) IBOutlet UIButton* addLocationButton;
 @property (nonatomic, retain) IBOutlet UIButton* addDescriptionButton;
 @property (nonatomic, retain) IBOutlet UIView* addLocationView;

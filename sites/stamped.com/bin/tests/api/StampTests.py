@@ -54,6 +54,7 @@ class StampedAPIStampMentionsTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
         self.createFriendship(self.tokenB, self.userA)
         self.entity = self.createEntity(self.tokenA)
         self.stampData = {
@@ -71,6 +72,7 @@ class StampedAPIStampMentionsTest(AStampedAPITestCase):
         self.deleteFriendship(self.tokenB, self.userA)
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
 
 class StampedAPIStampsMentionsShow(StampedAPIStampMentionsTest):
     def test_show(self):
@@ -132,8 +134,8 @@ class StampedAPIStampsCreditUpdate(StampedAPIStampMentionsTest):
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id'],
             "credit": "%s,%s" % (
-                self.userA['screen_name'],
-                self.userB['screen_name']
+                self.userB['screen_name'],
+                self.userC['screen_name']
             )
         }
         result = self.handlePOST(path, data)
@@ -205,6 +207,48 @@ class StampedAPIStampsLimits(StampedAPIStampTest):
             self.deleteStamp(self.tokenA, stamp_id)
         for entity_id in entity_ids:
             self.deleteEntity(self.tokenA, entity_id)
+
+class StampedAPIStampCreditTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenB)
+        self.stampA = self.createStamp(self.tokenB, self.entity['entity_id'])
+        self.stampData = {
+            "oauth_token": self.tokenA['access_token'],
+            "entity_id": self.entity['entity_id'],
+            "blurb": "Great spot.",
+            "credit": self.userB['screen_name']
+        }
+        self.stampB = self.createStamp(self.tokenA, self.entity['entity_id'], \
+            self.stampData)
+
+    def tearDown(self):
+        self.deleteStamp(self.tokenA, self.stampB['stamp_id'])
+        self.deleteStamp(self.tokenB, self.stampA['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
+
+class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
+    def test_show(self):
+        path = "stamps/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stampB['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(len(result['credit']) == 1)
+        self.assertEqual(
+            result['credit'][0]['screen_name'], 
+            self.stampData['credit']
+            )
+        self.assertEqual(
+            result['credit'][0]['stamp_id'], 
+            self.stampA['stamp_id']
+            )
 
 
 

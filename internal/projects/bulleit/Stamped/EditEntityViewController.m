@@ -48,7 +48,7 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize stateTextField = stateTextField_;
 @synthesize zipTextField = zipTextField_;
 @synthesize menuArrow = menuArrow_;
-
+@synthesize descriptionTextField = descriptionTextField_;
 @synthesize segmentedControl = segmentedControl_;
 
 
@@ -71,12 +71,12 @@ const CGFloat kKeyboardHeight = 217.0;
   [super viewDidLoad];
 
   entityNameTextField_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
-  entityNameTextField_.text = entityObject_.title;
   categoryDropdownTableView_.alpha = 0.0;
   menuArrow_.alpha = 0.0;
   addLocationView_.alpha = 0.0;
   secondaryTextField_.alpha = 0.0;
   tertiaryTextField_.alpha = 0.0;
+  descriptionTextField_.alpha = 0.0;
   self.segmentedControl = [[UISegmentedControl alloc] initWithItems:
       [NSArray arrayWithObjects:@"Restaurant", @"Bar", nil]];
   self.segmentedControl.alpha = 0.0;
@@ -84,15 +84,11 @@ const CGFloat kKeyboardHeight = 217.0;
   self.segmentedControl.frame = CGRectMake(10, CGRectGetMinY(primaryTextField_.frame) - 2, 299, 33);
   [primaryTextField_.superview insertSubview:segmentedControl_ belowSubview:categoryDropdownTableView_];
   [segmentedControl_ release];
-  NSIndexPath* path = [NSIndexPath indexPathForRow:STEditCategoryRowOther inSection:0];
-  [categoryDropdownTableView_ selectRowAtIndexPath:path
-                                          animated:NO
-                                    scrollPosition:UITableViewScrollPositionNone];
-  selectedCategory_ = STEditCategoryRowOther;
   [segmentedControl_ addTarget:self
                         action:@selector(segmentedControlChanged:)
               forControlEvents:UIControlEventValueChanged];
   scrollView_.contentSize = self.view.bounds.size;
+  
 }
 
 - (void)viewDidUnload {
@@ -116,10 +112,64 @@ const CGFloat kKeyboardHeight = 217.0;
   self.zipTextField = nil;
   self.segmentedControl = nil;
   self.menuArrow = nil;
+  self.descriptionTextField = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   navBar_.hideLogo = YES;
+  entityNameTextField_.text = entityObject_.title;
+  descriptionTextField_.text = entityObject_.desc;
+  streetTextField_.text = entityObject_.street;
+  secondStreetTextField_.text = entityObject_.substreet;
+  cityTextField_.text = entityObject_.city;
+  stateTextField_.text = entityObject_.state;
+  zipTextField_.text = entityObject_.zipcode;
+  segmentedControl_.selectedSegmentIndex = 0;
+  
+  if ([entityObject_.category isEqualToString:@"film"]) {
+    [self showFilmView];
+    selectedCategory_ = STEditCategoryRowFilm;
+    categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_film_icon"];
+    primaryTextField_.text = entityObject_.cast;
+    secondaryTextField_.text = entityObject_.director;
+    tertiaryTextField_.text = entityObject_.year;
+    if ([entityObject_.subcategory isEqualToString:@"tv"]) {
+      segmentedControl_.selectedSegmentIndex = 1;
+    }
+  } else if ([entityObject_.category isEqualToString:@"book"]) {
+    [self showBookView];
+    categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_book_icon"];
+    primaryTextField_.text = entityObject_.authors;
+    selectedCategory_ = STEditCategoryRowBooks;
+  } else if ([entityObject_.category isEqualToString:@"food"]) {
+    [self showFoodView];
+    categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_food_icon"];
+    if ([entityObject_.subcategory isEqualToString:@"bar"]) {
+      segmentedControl_.selectedSegmentIndex = 1;
+    }
+    selectedCategory_ = STEditCategoryRowFood;
+  } else if ([entityObject_.category isEqualToString:@"music"]) {
+    [self showMusicView];
+    categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_music_icon"];
+    if ([entityObject_.subcategory isEqualToString:@"song"]) {
+      segmentedControl_.selectedSegmentIndex = 1;
+    } else if ([entityObject_.subcategory isEqualToString:@"artist"]) {
+      segmentedControl_.selectedSegmentIndex = 2;
+    }
+    primaryTextField_.text = entityObject_.artist;
+    secondaryTextField_.text = entityObject_.album;
+    selectedCategory_ = STEditCategoryRowMusic;
+  } else if ([entityObject_.category isEqualToString:@"other"]) {
+    [self showOtherView];
+    categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_other_icon"];
+    selectedCategory_ = STEditCategoryRowOther;
+  } else {
+    selectedCategory_ = STEditCategoryRowOther;
+  }
+  NSIndexPath* path = [NSIndexPath indexPathForRow:selectedCategory_ inSection:0];
+  [categoryDropdownTableView_ selectRowAtIndexPath:path
+                                          animated:NO
+                                    scrollPosition:UITableViewScrollPositionNone];
   [super viewWillAppear:animated];
 }
 
@@ -173,10 +223,11 @@ const CGFloat kKeyboardHeight = 217.0;
     if (view.alpha != 0.0)
       maxY = fmaxf(CGRectGetMaxY(view.frame), maxY);
   }
-  CGFloat inset = fmaxf(0, kKeyboardHeight - (scrollView_.contentSize.height - maxY - 10));
+  CGFloat inset = fmaxf(0, kKeyboardHeight - (scrollView_.contentSize.height - maxY - 20));
   CGFloat yOffset = 0.0;
+  CGRect textFieldFrame = [textField convertRect:textField.frame toView:scrollView_];
   if (scrollView_.contentOffset.y == 0 &&
-      CGRectGetMaxY(textField.frame) > (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight)) {
+      CGRectGetMaxY(textFieldFrame) > (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight)) {
     yOffset = inset;
   }
   [UIView animateWithDuration:0.2 animations:^{
@@ -222,6 +273,7 @@ const CGFloat kKeyboardHeight = 217.0;
   cityTextField_.text = nil;
   stateTextField_.text = nil;
   zipTextField_.text = nil;
+  descriptionTextField_.text = nil;
 }
 
 - (void)showOtherView {
@@ -233,6 +285,7 @@ const CGFloat kKeyboardHeight = 217.0;
   addLocationButton_.alpha = 1.0;
   addLocationView_.alpha = 0.0;
   addDescriptionButton_.alpha = 1.0;
+  descriptionTextField_.alpha = 0.0;
   CGRect frame = primaryTextField_.frame;
   frame.origin.y = 69;
   primaryTextField_.frame = frame;
@@ -258,13 +311,13 @@ const CGFloat kKeyboardHeight = 217.0;
 
   [segmentedControl_ setTitle:@"Restaurant" forSegmentAtIndex:0];
   [segmentedControl_ setTitle:@"Bar" forSegmentAtIndex:1];
-  segmentedControl_.selectedSegmentIndex = -1;
   [UIView setAnimationsEnabled:YES];
   addLocationButton_.alpha = 0.0;
   addLocationView_.alpha = 1.0;
   secondaryTextField_.alpha = 0.0;
   tertiaryTextField_.alpha = 0.0;
   addDescriptionButton_.alpha = 1.0;
+  descriptionTextField_.alpha = 0.0;
   CGRect frame = addLocationView_.frame;
   frame.origin.y = CGRectGetMaxY(segmentedControl_.frame) + 12;
   addLocationView_.frame = frame;
@@ -283,13 +336,13 @@ const CGFloat kKeyboardHeight = 217.0;
   tertiaryTextField_.placeholder = @"Year";
   segmentedControl_.alpha = 1.0;
   addDescriptionButton_.alpha = 1.0;
+  descriptionTextField_.alpha = 0.0;
   [UIView setAnimationsEnabled:NO];
   if (segmentedControl_.numberOfSegments == 3)
     [segmentedControl_ removeSegmentAtIndex:2 animated:NO];
 
   [segmentedControl_ setTitle:@"Film" forSegmentAtIndex:0];
   [segmentedControl_ setTitle:@"TV Series" forSegmentAtIndex:1];
-  segmentedControl_.selectedSegmentIndex = 0;
   [UIView setAnimationsEnabled:YES];
   addLocationButton_.alpha = 0.0;
   addLocationView_.alpha = 0.0;
@@ -320,8 +373,8 @@ const CGFloat kKeyboardHeight = 217.0;
     [segmentedControl_ setTitle:@"Artist" forSegmentAtIndex:2];
   }
   [UIView setAnimationsEnabled:YES];
-  segmentedControl_.selectedSegmentIndex = 0;
   addDescriptionButton_.alpha = 0.0;
+  descriptionTextField_.alpha = 0.0;
   addLocationButton_.alpha = 0.0;
   addLocationView_.alpha = 0.0;
   CGRect frame = primaryTextField_.frame;
@@ -339,6 +392,7 @@ const CGFloat kKeyboardHeight = 217.0;
   secondaryTextField_.alpha = 0.0;
   tertiaryTextField_.alpha = 0.0;
   addDescriptionButton_.alpha = 1.0;
+  descriptionTextField_.alpha = 0.0;
   CGRect frame = primaryTextField_.frame;
   frame.origin.y = 69;
   primaryTextField_.frame = frame;
@@ -346,7 +400,6 @@ const CGFloat kKeyboardHeight = 217.0;
   frame.origin.x = 10;
   frame.origin.y = 32 + CGRectGetMaxY(primaryTextField_.frame);
   addDescriptionButton_.frame = frame;
-
 }
 
 #pragma mark - Segmented control change methods.
@@ -400,24 +453,80 @@ const CGFloat kKeyboardHeight = 217.0;
 
 - (IBAction)doneButtonPressed:(id)sender {
   entityObject_.title = entityNameTextField_.text;
+  entityObject_.desc = descriptionTextField_.text;
+  entityObject_.street = streetTextField_.text;
+  entityObject_.substreet = secondStreetTextField_.text;
+  entityObject_.city = cityTextField_.text;
+  entityObject_.state = stateTextField_.text;
+  entityObject_.zipcode = zipTextField_.text;
+  
+  NSString* street = [[NSArray arrayWithObjects:entityObject_.street, entityObject_.substreet, nil] componentsJoinedByString:@" "];
+  NSString* cityStateZip = [[NSArray arrayWithObjects:entityObject_.city, entityObject_.state, entityObject_.zipcode, nil] componentsJoinedByString:@" "];
+  street = [street stringByTrimmingCharactersInSet:
+      [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  cityStateZip = [cityStateZip stringByTrimmingCharactersInSet:
+      [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  if (street.length > 0 && cityStateZip.length > 0) {
+    entityObject_.address = [[NSArray arrayWithObjects:street, cityStateZip, nil] componentsJoinedByString:@", "];
+  } else {
+    entityObject_.address = street.length > 0 ? street : cityStateZip;
+  }
+  
   switch (selectedCategory_) {
     case STEditCategoryRowFilm:
       entityObject_.category = @"film";
-      [self showFilmView];
+      entityObject_.cast = primaryTextField_.text;
+      entityObject_.director = secondaryTextField_.text;
+      entityObject_.year = tertiaryTextField_.text;
+      if (segmentedControl_.selectedSegmentIndex == 0) {
+        entityObject_.subcategory = @"movie";
+      } else {
+        entityObject_.subcategory = @"tv";
+      }
+      if (entityObject_.year.length > 0) {
+        entityObject_.subtitle = entityObject_.year;
+      } else {
+        entityObject_.subtitle =
+            segmentedControl_.selectedSegmentIndex == 0 ? @"Film" : @"TV Series";
+      }
       break;
     case STEditCategoryRowBooks:
       entityObject_.category = @"book";
-      [self showBookView];
+      entityObject_.subcategory = @"book";
+      entityObject_.authors = primaryTextField_.text;
+      entityObject_.subtitle =
+          entityObject_.authors.length > 0 ? entityObject_.authors : @"Book";
       break;
     case STEditCategoryRowFood:
       entityObject_.category = @"food";
-      [self showFoodView];
+      entityObject_.subcategory =
+          segmentedControl_.selectedSegmentIndex == 0 ? @"restaurant" : @"bar";
+      entityObject_.subtitle = entityObject_.address;
       break;
     case STEditCategoryRowMusic:
       entityObject_.category = @"music";
+      if (segmentedControl_.selectedSegmentIndex == 0) {
+        entityObject_.subcategory = @"album";
+        entityObject_.artist = primaryTextField_.text;
+        entityObject_.subtitle =
+            entityObject_.artist.length > 0 ? entityObject_.artist : @"Album";
+      } else if (segmentedControl_.selectedSegmentIndex == 1) {
+        entityObject_.subcategory = @"song";
+        entityObject_.artist = primaryTextField_.text;
+        entityObject_.album = secondaryTextField_.text;
+        entityObject_.subtitle =
+            entityObject_.artist.length > 0 ? entityObject_.artist : @"Song";
+      } else {
+        entityObject_.subcategory = @"artist";
+        entityObject_.artist = entityNameTextField_.text;
+        entityObject_.subtitle = @"Artist";
+      }
       break;
     case STEditCategoryRowOther:
       entityObject_.category = @"other";
+      entityObject_.subcategory = @"other";
+      entityObject_.subtitle =
+          primaryTextField_.text.length > 0 ? primaryTextField_.text : @"Other";
       break;
     default:
       break;
@@ -434,6 +543,20 @@ const CGFloat kKeyboardHeight = 217.0;
     return;
 
   [self hideCategoryMenu];
+  CGRect frame = descriptionTextField_.frame;
+  frame.origin.y = CGRectGetMinY(addDescriptionButton_.frame) - 10;
+  descriptionTextField_.frame = frame;
+  
+  [UIView animateWithDuration:0.2 animations:^{
+    if (addLocationButton_.alpha != 0.0) {
+      CGRect frame = addLocationButton_.frame;
+      frame.origin.y = 25 + CGRectGetMaxY(descriptionTextField_.frame);
+      addLocationButton_.frame = frame;
+      addLocationView_.frame = CGRectOffset(addLocationView_.frame, 0, 40);
+    }
+    descriptionTextField_.alpha = 1.0;
+    addDescriptionButton_.alpha = 0.0;
+  } completion:^(BOOL finished) { [descriptionTextField_ becomeFirstResponder]; }];
 }
 
 - (IBAction)addLocationButtonPressed:(id)sender {

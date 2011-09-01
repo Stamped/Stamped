@@ -9,12 +9,13 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STReloadableTableViewController.h"
-
 @class User;
 @class UserImageView;
 
-@interface ProfileViewController : STReloadableTableViewController <RKObjectLoaderDelegate>
+@interface ProfileViewController : UIViewController <RKObjectLoaderDelegate,
+                                                     RKRequestDelegate,
+                                                     UITableViewDelegate,
+                                                     UITableViewDataSource>
 
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
 @property (nonatomic, retain) IBOutlet UIButton* cameraButton;
@@ -25,9 +26,16 @@
 @property (nonatomic, retain) IBOutlet UILabel* usernameLocationLabel;
 @property (nonatomic, retain) IBOutlet UILabel* bioLabel;
 @property (nonatomic, retain) IBOutlet UIImageView* shelfImageView;
+@property (nonatomic, retain) IBOutlet UIView* toolbarView;
+@property (nonatomic, retain) IBOutlet UITableView* tableView;
+@property (nonatomic, retain) IBOutlet UIButton* followButton;
+@property (nonatomic, retain) IBOutlet UIButton* unfollowButton;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* followIndicator;
 
 @property (nonatomic, retain) User* user;
 
+- (IBAction)followButtonPressed:(id)sender;
+- (IBAction)unfollowButtonPressed:(id)sender;
 - (IBAction)creditsButtonPressed:(id)sender;
 - (IBAction)followersButtonPressed:(id)sender;
 - (IBAction)followingButtonPressed:(id)sender;

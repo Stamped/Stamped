@@ -27,5 +27,6 @@ NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 @dynamic credits;
 @dynamic event;
 @dynamic favorites;
+@dynamic temporary;
 
 @end

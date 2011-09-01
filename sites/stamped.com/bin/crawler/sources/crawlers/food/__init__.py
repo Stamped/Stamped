@@ -12,6 +12,7 @@ import WashMagCrawler
 import SeattleTimesCrawler
 import SFGateCrawler
 import SFWeeklyCrawler
+import TimeOutChiCrawler
 import TimeOutLACrawler
 import TimeOutLVCrawler
 import TimeOutMIACrawler

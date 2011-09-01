@@ -21,6 +21,8 @@
 #import "Util.h"
 
 static const CGFloat kMinContainerHeight = 204.0;
+static NSString* const kCreateStampPath = @"/stamps/create.json";
+static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 @interface STCreditTextField : UITextField
 @end
@@ -39,6 +41,8 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 @interface CreateStampViewController ()
 - (void)editorDoneButtonPressed:(id)sender;
+- (void)sendSaveStampRequest;
+- (void)sendSaveEntityRequest;
 - (void)dismissSelf;
 
 @property (nonatomic, retain) UIButton* doneButton;
@@ -298,18 +302,12 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 - (IBAction)saveStampButtonPressed:(id)sender {
   [spinner_ startAnimating];
-  stampItButton_.enabled = NO;
-  RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/stamps/create.json" delegate:self];
-  objectLoader.method = RKRequestMethodPOST;
-  objectLoader.objectMapping = stampMapping;
-  NSString* credit = [creditTextField_.text stringByReplacingOccurrencesOfString:@" " withString:@""];
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-      reasoningTextView_.text, @"blurb",
-      credit, @"credit",
-      entityObject_.entityID, @"entity_id", nil];
-  [objectLoader send];
+  stampItButton_.hidden = YES;
+  if (entityObject_.entityID) {
+    [self sendSaveStampRequest];
+  } else {
+    [self sendSaveEntityRequest];
+  }
 }
 
 - (void)editorDoneButtonPressed:(id)sender {
@@ -318,6 +316,45 @@ static const CGFloat kMinContainerHeight = 204.0;
     scrollView_.contentInset = UIEdgeInsetsZero;
   }];
   [scrollView_ setContentOffset:CGPointZero animated:YES];
+}
+
+- (void)sendSaveStampRequest {
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateStampPath delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = stampMapping;
+  NSString* credit = [creditTextField_.text stringByReplacingOccurrencesOfString:@" " withString:@""];
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+                         reasoningTextView_.text, @"blurb",
+                         credit, @"credit",
+                         entityObject_.entityID, @"entity_id", nil];
+  [objectLoader send];
+}
+
+- (void)sendSaveEntityRequest {
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateEntityPath 
+                                                                    delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = entityMapping;
+  
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+      entityObject_.title, @"title",
+      entityObject_.subtitle, @"subtitle",
+      entityObject_.category, @"category",
+      entityObject_.subcategory, @"subcategory",
+      nil];
+  if (entityObject_.desc)
+    [params setObject:entityObject_.desc forKey:@"desc"];
+  if (entityObject_.address.length > 0)
+    [params setObject:entityObject_.address forKey:@"address"];
+  if (entityObject_.coordinates)
+    [params setObject:entityObject_.coordinates forKey:@"coordinates"];
+
+  objectLoader.params = params;
+  [objectLoader send];
 }
 
 - (void)dismissSelf {
@@ -335,42 +372,47 @@ static const CGFloat kMinContainerHeight = 204.0;
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
-- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	if (![objectLoader.resourcePath isEqualToString:@"/stamps/create.json"])
-    return;
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
+  if ([objectLoader.resourcePath isEqualToString:kCreateEntityPath]) {
+    Entity* entity = object;
+    entityObject_.entityID = entity.entityID;
+    [entityObject_.managedObjectContext save:NULL];
+    [self sendSaveStampRequest];
+  } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {    
+    Stamp* stamp = object;
+    [entityObject_ addStampsObject:stamp];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
+                                                        object:stamp];
+    entityObject_.favorite.complete = [NSNumber numberWithBool:YES];
+    entityObject_.favorite.stamp = stamp;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
+                                                        object:stamp];
+    
+    [spinner_ stopAnimating];
+    CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));
+    CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
+    [UIView animateWithDuration:0.2
+                     animations:^{ 
+                       shelfBackground_.transform = topTransform;
+                       bottomToolbar_.transform = bottomTransform;
+                       stampItButton_.transform = bottomTransform;
+                     }
+                     completion:^(BOOL finished) {
+                       [UIView animateWithDuration:0.3
+                                             delay:0
+                                           options:UIViewAnimationCurveEaseIn
+                                        animations:^{
+                                          stampLayer_.transform = CATransform3DIdentity;
+                                          stampLayer_.opacity = 1.0;
+                                        }
+                                        completion:^(BOOL finished) {
+                                          [self performSelector:@selector(dismissSelf)
+                                                     withObject:nil
+                                                     afterDelay:0.75];
+                                        }];
+                     }];
 
-  Stamp* stamp = [objects objectAtIndex:0];
-  [entityObject_ addStampsObject:stamp];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
-                                                      object:stamp];
-  entityObject_.favorite.complete = [NSNumber numberWithBool:YES];
-  entityObject_.favorite.stamp = stamp;
-  [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
-                                                      object:stamp];
-  
-  [spinner_ stopAnimating];
-  CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));
-  CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
-  [UIView animateWithDuration:0.2
-                   animations:^{ 
-                     shelfBackground_.transform = topTransform;
-                     bottomToolbar_.transform = bottomTransform;
-                     stampItButton_.transform = bottomTransform;
-                   }
-                   completion:^(BOOL finished) {
-                     [UIView animateWithDuration:0.3
-                                           delay:0
-                                         options:UIViewAnimationCurveEaseIn
-                                      animations:^{
-                                        stampLayer_.transform = CATransform3DIdentity;
-                                        stampLayer_.opacity = 1.0;
-                                      }
-                                      completion:^(BOOL finished) {
-                                        [self performSelector:@selector(dismissSelf)
-                                                   withObject:nil
-                                                   afterDelay:0.75];
-                                      }];
-                   }];
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -379,7 +421,7 @@ static const CGFloat kMinContainerHeight = 204.0;
 
   NSLog(@"response: %@", objectLoader.response.bodyAsString);
   [spinner_ stopAnimating];
-  stampItButton_.enabled = YES;
+  stampItButton_.hidden = NO;
   [UIView animateWithDuration:0.2
                    animations:^{
                      shelfBackground_.transform = CGAffineTransformIdentity;

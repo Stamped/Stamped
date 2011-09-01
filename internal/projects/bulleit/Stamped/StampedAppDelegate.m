@@ -11,6 +11,8 @@
 #import <RestKit/RestKit.h>
 #import <RestKit/CoreData/CoreData.h>
 
+#import "TestFlight.h"
+
 #import "AccountManager.h"
 #import "Comment.h"
 #import "Entity.h"
@@ -28,6 +30,8 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
+
   [RKRequestQueue sharedQueue].suspended = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
@@ -55,7 +59,10 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                          @"opentable_url", @"openTableURL", nil];
   entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapAttributes:@"address", @"category", @"subtitle",
-                               @"title", @"coordinates", @"phone", @"subcategory", nil];
+                               @"title", @"coordinates", @"phone", @"subcategory",
+                               @"street", @"substreet", @"city", @"state", @"zipcode",
+                               @"desc", @"artist", @"album", @"authors",
+                               @"cast", @"director", @"year", nil];
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];

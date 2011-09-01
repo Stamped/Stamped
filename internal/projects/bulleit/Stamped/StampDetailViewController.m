@@ -232,7 +232,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
   bottomToolbar_.layer.shadowOpacity = 0.2;
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
-  bottomToolbar_.alpha = 0.75;
+  bottomToolbar_.alpha = 0.9;
 }
 
 - (void)setUpMainContentView {

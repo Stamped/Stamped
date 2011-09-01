@@ -13,6 +13,11 @@
 @implementation Entity
 
 @dynamic address;
+@dynamic street;
+@dynamic substreet;
+@dynamic city;
+@dynamic state;
+@dynamic zipcode;
 @dynamic category;
 @dynamic entityID;
 @dynamic openTableURL;
@@ -23,6 +28,13 @@
 @dynamic phone;
 @dynamic favorite;
 @dynamic subcategory;
+@dynamic artist;
+@dynamic desc;
+@dynamic album;
+@dynamic authors;
+@dynamic cast;
+@dynamic director;
+@dynamic year;
 
 - (UIImage*)categoryImage {
   if (self.category)

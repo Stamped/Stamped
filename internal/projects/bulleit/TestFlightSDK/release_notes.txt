@@ -1,0 +1,21 @@
+0.5 - August 19, 2011
+Feedback that is not attached to a checkpoint [TestFlight openFeedbackView]
+Usability changes to question views
+Removed pause and resume sessions, replaced with sessions being stopped and started
+Added text autocorrection to the Long Answer question type
+Crash reports now send on crash instead of next launch
+0.4 - August 15, 2011
+In Application Feedback with Questions
+In application updates
+Custom Environment Information added
+Networking stack reimplementation
+Exception handling fixes
+0.3 - June 15, 2011
+Removed all mention of JSONKit from the README
+Added support for using both the Bundle Version and the Bundle Short Version string
+0.2 - June 14, 2011
+Removed all categories this allows users to use the SDK without having to set -ObjC and -load_all
+Prefixed JSONKit for use in TestFlight to remove reported issues where some users were already using JSONKit
+Added support for armv6 again
+0.1 - June 11, 2011
+Initial Version

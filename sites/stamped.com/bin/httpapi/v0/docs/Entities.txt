@@ -56,6 +56,24 @@ The address of the entity.
 **coordinates** _optional_
 The latitude and longitude of the entity, separated by a comma.
 
+**cast** _optional_
+Optional field for movies.
+
+**director** _optional_
+Optional field for movies.
+
+**release_date** _optional_
+Optional field for film.
+
+**artist** _optional_
+Optional field for songs and albums.
+
+**album** _optional_
+Optional field for songs.
+
+**author** _optional_
+Optional field for books.
+
 ### Sample Request ###
 	POST https://api.stamped.com/v1/entities/create.json
 	oauth_token=1234567890123456789012&title=Spotted+Pig&subtitle=New+York,+NY&category=food&subcategory=restaurant&desc=Burger+place&coordinates=40.714623,-74.006605

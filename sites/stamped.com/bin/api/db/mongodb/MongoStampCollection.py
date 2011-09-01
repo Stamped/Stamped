@@ -122,6 +122,16 @@ class MongoStampCollection(AMongoCollection, AStampDB):
                                 upsert=True)
         return True
 
+    def getStampFromUserEntity(self, userId, entityId):
+        try:
+            document = self._collection.find_one({
+                'user.user_id': userId, 
+                'entity.entity_id': entityId,
+            })
+            return self._convertFromMongo(document)
+        except:
+            return None
+
     def giveCredit(self, creditedUserId, stamp):
         # Add to 'credit received'
         ### TODO: Does this belong here?
@@ -131,13 +141,4 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         ### TODO: Does this belong here?
         self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
         
-        # Update the amount of credit on the user's stamp
-        try:
-            document = self._collection.find_one({
-                'user.user_id': creditedUserId, 
-                'entity.entity_id': stamp.entity.entity_id,
-            })
-            return self._convertFromMongo(document)
-        except:
-            return None
             
