@@ -251,6 +251,7 @@ class HTTPEntity(Schema):
         self.genre              = SchemaElement(basestring)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
+        self.channel            = SchemaElement(basestring)
 
         self.artist             = SchemaElement(basestring)
         self.album              = SchemaElement(basestring)
@@ -264,6 +265,9 @@ class HTTPEntity(Schema):
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
+            from Entity import setSubtitle
+            setSubtitle(schema)
+            
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
             
@@ -297,6 +301,7 @@ class HTTPEntity(Schema):
             self.release_date   = schema.original_release_date
             self.cast           = schema.cast
             self.director       = schema.director
+            self.channel        = schema.channel
             # self.genre          = None
 
             # Music

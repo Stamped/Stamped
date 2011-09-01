@@ -48,3 +48,16 @@ class MongoInboxStampsCollection(AMongoCollection):
     def checkInboxStamp(self, userID, stampID):
         return self._checkRelationship(keyId=userId, refId=stampId)
 
+    def addInboxStampsForUser(self, userId, stampIds):
+        ### TODO: Make this more efficient
+        for stampId in stampIds:
+            self.addInboxStamp(userId, stampId)
+        return True
+
+    def removeInboxStampsForUser(self, userId, stampIds):
+        ### TODO: Make this more efficient
+        for stampId in stampIds:
+            self.removeInboxStamp(userId, stampId)
+        return True
+
+

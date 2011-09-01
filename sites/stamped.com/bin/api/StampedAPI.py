@@ -248,18 +248,13 @@ class StampedAPI(AStampedAPI):
             'friend_id':    user['user_id']
         })
 
-        reverseFriendship = Friendship({
-            'user_id':      user['user_id'],
-            'friend_id':    authUserId,
-        })
-
         # Check if friendship already exists
         if self._friendshipDB.checkFriendship(friendship) == True:
             logs.info("Friendship exists")
             return user
 
         # Check if block exists between authenticating user and user
-        if self._friendshipDB.blockExists(reverseFriendship) == True:
+        if self._friendshipDB.blockExists(friendship) == True:
             logs.info("Block exists")
             raise Exception("Block exists")
 
@@ -272,6 +267,10 @@ class StampedAPI(AStampedAPI):
         self._friendshipDB.addFriendship(friendship)
 
         ### TODO: Add activity item for receipient?
+
+        # Add stamps to Inbox
+        stampIds = self._collectionDB.getUserStampIds(user.user_id)
+        self._stampDB.addInboxStampReferencesForUser(authUserId, stampIds)
 
         # Increment stats for both users
         self._userDB.updateUserStats(authUserId, 'num_friends', \
@@ -296,13 +295,15 @@ class StampedAPI(AStampedAPI):
             
         self._friendshipDB.removeFriendship(friendship)
 
-        ### TODO: Remove stamps from Inbox
-
         # Increment stats for both users
         self._userDB.updateUserStats(authUserId, 'num_friends', \
                     None, increment=-1)
         self._userDB.updateUserStats(user.user_id, 'num_followers', \
                     None, increment=-1)
+
+        # Remove stamps from Inbox
+        stampIds = self._collectionDB.getUserStampIds(user.user_id)
+        self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
 
         return user
     
@@ -1184,6 +1185,7 @@ class StampedAPI(AStampedAPI):
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
         includeComments = kwargs.pop('includeComments', False)
+        godMode         = kwargs.pop('godMode', False)
                        
         # Set quality
         if quality == 1:
@@ -1195,6 +1197,10 @@ class StampedAPI(AStampedAPI):
         else:
             stampCap    = 20
             commentCap  = 4
+
+        if godMode == True:
+            stampCap    = 10000
+            commentCap  = 20
         
         limit = self._setLimit(limit, cap=stampCap)
         
@@ -1212,7 +1218,6 @@ class StampedAPI(AStampedAPI):
         if includeComments == True:
             result = []
             comments = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
-            print 'GET COMMENTS: %s' % comments
 
             ### TODO: Find a more efficient way to run this
             for stamp in stamps:

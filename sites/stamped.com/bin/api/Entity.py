@@ -80,3 +80,39 @@ subcategories = {
     'zoo'               : 'other', 
 }
 
+def setSubtitle(entity):
+    if entity.category == 'food':
+        if entity.address != None:
+            entity.subtitle = entity.address
+        else:
+            entity.subtitle = str(entity.subcategory).title()
+
+    elif entity.category == 'book':
+        if entity.author != None:
+            entity.subtitle = entity.author
+        else:
+            entity.subtitle = str(entity.subcategory).title()
+
+    elif entity.category == 'film':
+        if entity.subcategory == 'movie':
+            if entity.original_release_date != None:
+                entity.subtitle = entity.original_release_date
+            else:
+                entity.subtitle = 'Movie'
+        elif entity.subcategory == 'tv':
+            if entity.channel != None:
+                entity.subtitle = entity.channel
+            else:
+                entity.subtitle = 'TV Show'
+
+    elif entity.category == 'music':
+        if entity.subcategory == 'artist':
+            entity.subtitle = 'Artist'
+        else:
+            entity.subtitle = str(entity.subcategory).title()       
+
+    elif entity.category == 'other':
+        entity.subtitle = str(entity.subcategory).replace('_', ' ').title() 
+
+    return entity
+

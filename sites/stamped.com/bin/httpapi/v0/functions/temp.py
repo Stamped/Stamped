@@ -64,3 +64,19 @@ def activity(request):
         result.append(HTTPActivityOld().importSchema(item, stamp, comment).exportSparse())
 
     return transformOutput(result)
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def inbox(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPGenericSlice(), request)
+
+    data        = schema.exportSparse()
+    data['godMode'] = True
+    stamps      = stampedAPI.getInboxStamps(authUserId, **data)
+
+    result = []
+    for stamp in stamps:
+        result.append(HTTPStamp().importSchema(stamp).exportSparse())
+
+    return transformOutput(result)

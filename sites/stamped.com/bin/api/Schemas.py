@@ -265,11 +265,13 @@ class Entity(Schema):
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
-            if self.subtitle is None:
-                if 'address' in self:
-                    self.subtitle = self.address
-                else:
-                    self.subtitle = self.subcategory
+            from Entity import setSubtitle
+            setSubtitle(self)
+            # if self.subtitle is None:
+            #     if 'address' in self:
+            #         self.subtitle = self.address
+            #     else:
+            #         self.subtitle = self.subcategory
             schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
@@ -407,9 +409,10 @@ class VideoSchema(Schema):
         self.short_description  = SchemaElement(basestring)
         self.long_description   = SchemaElement(basestring)
         self.episode_production_number  = SchemaElement(basestring)
-        ### TODO: populate cast / director from crawler
+        ### TODO: modify ese based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
+        self.channel            = SchemaElement(basestring)
         
         self.v_retail_price     = SchemaElement(basestring)
         self.v_currency_code    = SchemaElement(basestring)

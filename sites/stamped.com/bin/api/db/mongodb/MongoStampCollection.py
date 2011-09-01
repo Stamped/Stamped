@@ -82,6 +82,12 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         # Remove a reference to the stamp in followers' inbox
         self.inbox_stamps_collection.removeInboxStamps(userIds, stampId)
 
+    def addInboxStampReferencesForUser(self, userId, stampIds):
+        self.inbox_stamps_collection.addInboxStampsForUser(userId, stampIds)
+
+    def removeInboxStampReferencesForUser(self, userId, stampIds):
+        self.inbox_stamps_collection.removeInboxStampsForUser(userId, stampIds)
+
     def getStamps(self, stampIds, **kwargs):
         params = {
             'since':    kwargs.pop('since', None),
