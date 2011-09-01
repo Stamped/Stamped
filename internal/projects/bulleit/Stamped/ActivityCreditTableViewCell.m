@@ -160,7 +160,7 @@
     {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
   };
   CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* user = event.user.displayName;
+  NSString* user = event.user.screenName;
   NSString* full = [NSString stringWithFormat:@"%@ %@", user, @"gave you credit for"];
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
   [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:

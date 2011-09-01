@@ -90,12 +90,12 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [self.locationManager startUpdatingLocation];
   [self.navigationController setNavigationBarHidden:YES animated:animated];
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  [self.locationManager startUpdatingLocation];
   [self.searchField becomeFirstResponder];
   [super viewDidAppear:animated];
 }

@@ -47,12 +47,12 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 
   UIFont* nameFont = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   const CGFloat leftPadding = CGRectGetMaxX(userImage_.frame) + 8;
-  CGSize stringSize = [comment_.user.displayName sizeWithFont:nameFont
+  CGSize stringSize = [comment_.user.screenName sizeWithFont:nameFont
                                                      forWidth:260
                                                 lineBreakMode:UILineBreakModeTailTruncation];
   UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(leftPadding, 8, stringSize.width, stringSize.height)];
   nameLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  nameLabel.text = comment_.user.displayName;
+  nameLabel.text = comment_.user.screenName;
   nameLabel.font = nameFont;
   [self addSubview:nameLabel];
   [nameLabel release];

@@ -166,7 +166,7 @@ static const CGFloat kBadgeSize = 21.0;
   if ([event.user.userID isEqualToString:currentUser.userID]) {
     user = @"You";
   } else {
-    user = event.user.displayName;
+    user = event.user.screenName;
   }
   NSString* actionString = @"";
   if ([event.genre isEqualToString:@"reply"]) {

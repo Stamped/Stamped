@@ -292,11 +292,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
   Stamp* stamp = [stamps_ lastObject];
   self.stampImage = stamp.user.stampImage;
-  NSString* userName = stamp.user.displayName;
+  NSString* userName = stamp.user.screenName;
   CGSize stringSize = [userName sizeWithFont:[UIFont fontWithName:kUserNameFontString size:kSubstringFontSize]
                                      forWidth:kSubstringMaxWidth
                                 lineBreakMode:UILineBreakModeTailTruncation];
-  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 17, 57, stringSize.width, stringSize.height);
+  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 19, 57, stringSize.width, stringSize.height);
   userNameLabel_.text = userName;
 
   NSString* comment = stamp.blurb;

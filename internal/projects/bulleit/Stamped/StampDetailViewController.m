@@ -242,14 +242,14 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                           action:@selector(handleUserImageViewTap:)
                 forControlEvents:UIControlEventTouchUpInside];
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
-  CGSize stringSize = [stamp_.user.displayName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
+  CGSize stringSize = [stamp_.user.screenName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
                                                    forWidth:218
                                               lineBreakMode:UILineBreakModeTailTruncation];
   CGRect nameLabelFrame = commenterNameLabel_.frame;
   nameLabelFrame.size = stringSize;
   commenterNameLabel_.frame = nameLabelFrame;
   commenterNameLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-  commenterNameLabel_.text = stamp_.user.displayName;
+  commenterNameLabel_.text = stamp_.user.screenName;
 
   stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"Helvetica" size:14]
                                forWidth:60
@@ -303,7 +303,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
       {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
     };
     CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-    NSString* user = creditedUser.displayName;
+    NSString* user = creditedUser.screenName;
     NSString* full = [NSString stringWithFormat:@"%@ %@", @"Credit to", user];
     NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
     [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
