@@ -461,7 +461,6 @@ class HTTPStamp(Schema):
         self.entity             = HTTPEntity(required=True)
         self.user               = HTTPUserMini(required=True)
         self.blurb              = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
         self.credit             = SchemaList(CreditSchema())
         self.comment_preview    = SchemaList(HTTPComment())
@@ -502,14 +501,12 @@ class HTTPStampNew(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.blurb              = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
 
 class HTTPStampEdit(Schema):
     def setSchema(self):
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.blurb              = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
 
 class HTTPStampId(Schema):
@@ -531,6 +528,11 @@ class HTTPUserCollectionSlice(Schema):
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
         self.quality            = SchemaElement(int)
+
+class HTTPStampImage(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.image              = SchemaElement(basestring, required=True, normalize=False)
 
 # ######## #
 # Comments #

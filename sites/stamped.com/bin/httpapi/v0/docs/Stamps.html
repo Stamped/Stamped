@@ -374,6 +374,45 @@ oauth_token=1234567890123456789012&amp;&amp;stamp_id=4e226fcd4e18474561000000&am
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
+<h2 id="poststampsupdate_image">POST stamps/update_image</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Upload an image for a stamp owned by the authenticating user.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>stamp_id</strong> <em>required</em>
+The unique id of the stamp.</p>
+
+<p><strong>image</strong> <em>required</em>
+An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG. </p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v1/stamps/update.json
+oauth_token=1234567890123456789012&amp;&amp;stamp_id=4e226fcd4e18474561000000&amp;image=&lt;&lt;data&gt;&gt;
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;,
+    &quot;images&quot;: {
+        &quot;fast&quot;: [&quot;static.stamped.com/stamps/4e226fcd4e18474561000000.jpg&quot;],
+        &quot;slow&quot;: [&quot;http://stamped.com.static.images.s3.amazonaws.com/stamps/4e226fcd4e18474561000000.jpg&quot;],
+    }
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
 <h2 id="poststampsremove">POST stamps/remove</h2>
 
 <h3 id="description">Description</h3>

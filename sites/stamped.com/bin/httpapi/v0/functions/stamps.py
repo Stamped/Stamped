@@ -45,6 +45,35 @@ def update(request):
 
 
 @handleHTTPRequest
+@require_http_methods(["POST"])
+def update_image(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPImage(), request)
+    
+    ret         = stampedAPI.updateStampImage(authUserId, schema.stamp_id, \
+                                                schema.image)
+    
+    suffix      = '.jpg'
+    
+    images = { }
+    prefixes = {
+        'fast' : 'static.stamped.com/', 
+        'slow' : 'http://stamped.com.static.images.s3.amazonaws.com/', 
+    }
+    
+    for k, prefix in prefixes.iteritems():
+        prefix = "%s/stamps/%s" % (prefix, schema.stamp_id)
+        value  = []
+        
+        value.append("%s%s" % (prefix, suffix))
+        images[k] = value
+    
+    output      = { 'stamp_id': schema.stamp_id, 'images': images, }
+    
+    return transformOutput(output)
+
+
+@handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
     authUserId  = checkOAuth(request)

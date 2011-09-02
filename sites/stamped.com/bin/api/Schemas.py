@@ -183,7 +183,6 @@ class Stamp(Schema):
         self.entity             = EntityMini(required=True)
         self.user               = UserMini(required=True)
         self.blurb              = SchemaElement(basestring)
-        self.image              = SchemaElement(basestring)
         self.mentions           = SchemaList(MentionSchema())
         self.credit             = SchemaList(CreditSchema())
         self.comment_preview    = SchemaList(Comment())

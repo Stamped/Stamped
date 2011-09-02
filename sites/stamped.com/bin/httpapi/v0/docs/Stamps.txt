@@ -171,6 +171,37 @@ The screen names for any users that should receive credit for the stamp. Multipl
 
 
 ------------------------------------------------------------------------------
+## POST stamps/update_image ##
+
+### Description ###
+Upload an image for a stamp owned by the authenticating user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**stamp_id** _required_
+The unique id of the stamp.
+
+**image** _required_
+An image that can be attached to the stamp. Data must be base64-encoded, and the image must be a valid GIF, JPG, or PNG. 
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/stamps/update.json
+	oauth_token=1234567890123456789012&&stamp_id=4e226fcd4e18474561000000&image=<<data>>
+
+### Sample Result ###
+	{
+		"stamp_id": "4e226fcd4e18474561000000",
+		"images": {
+			"fast": ["static.stamped.com/stamps/4e226fcd4e18474561000000.jpg"],
+			"slow": ["http://stamped.com.static.images.s3.amazonaws.com/stamps/4e226fcd4e18474561000000.jpg"],
+		}
+	}
+
+
+------------------------------------------------------------------------------
 ## POST stamps/remove ##
 
 ### Description ###

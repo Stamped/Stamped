@@ -64,7 +64,8 @@ urlpatterns = patterns('',
 
     ### STAMPS
     (r'v0/stamps/create.json', 			'v0.functions.stamps.create'),
-    (r'v0/stamps/update.json', 			'v0.functions.stamps.update'),
+    (r'v0/stamps/update.json',          'v0.functions.stamps.update'),
+    (r'v0/stamps/update_image.json',    'v0.functions.stamps.update_image'),
     (r'v0/stamps/show.json', 			'v0.functions.stamps.show'),
     (r'v0/stamps/remove.json', 			'v0.functions.stamps.remove'),
 

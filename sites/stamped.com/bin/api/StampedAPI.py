@@ -591,7 +591,6 @@ class StampedAPI(AStampedAPI):
 
         blurbData   = data.pop('blurb', None)
         creditData  = data.pop('credit', None)
-        imageData   = data.pop('image', None)
 
         # Check to make sure the user has stamps left
         if user.num_stamps_left <= 0:
@@ -609,7 +608,6 @@ class StampedAPI(AStampedAPI):
         stamp           = Stamp()
         stamp.user_id   = user.user_id
         stamp.entity    = entity.exportSchema(EntityMini())
-        stamp.image     = imageData
         stamp.created   = datetime.utcnow()
 
         # Extract mentions
@@ -764,18 +762,12 @@ class StampedAPI(AStampedAPI):
 
         blurbData   = data.pop('blurb', stamp.blurb)
         creditData  = data.pop('credit', None)
-        imageData   = data.pop('image', stamp.image)
 
         # Verify user can modify the stamp
         if authUserId != stamp.user_id:
             msg = "Insufficient privileges to modify stamp"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
-
-        # Images
-        if imageData != stamp.image:
-            ### TODO: Actually upload the image....
-            stamp.image = imageData
 
         # Blurb & Mentions
         mentionedUsers = []
@@ -990,6 +982,22 @@ class StampedAPI(AStampedAPI):
                 raise InsufficientPrivilegesError(msg)
       
         return stamp
+    
+    def updateStampImage(self, authUserId, stampId, data):
+        stamp = self._stampDB.getStamp(stampId)
+
+        # Verify user has permission to delete
+        if stamp.user_id != authUserId:
+            msg = "Insufficient privileges to update stamp image"
+            logs.warning(msg)
+            raise InsufficientPrivilegesError(msg)
+
+        data = base64.decodestring(data)
+        
+        image = self._imageDB.getImage(data)
+        self._imageDB.addStampImage(stampId, image)
+        
+        return True
     
 
     """
