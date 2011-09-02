@@ -127,20 +127,16 @@ def convertActivity():
 
         if 'comment' in data:
             activity['link'] = {}
-            activity['link']['comment_id'] = data['comment']['comment_id']
-            activity['link']['stamp_id'] = data['comment']['stamp_id']
+            activity['link']['link_comment_id'] = data['comment']['comment_id']
+            activity['link']['link_stamp_id'] = data['comment']['stamp_id']
         elif 'stamp' in data:
             activity['link'] = {}
-            activity['link']['stamp_id'] = data['stamp']['stamp_id']
+            activity['link']['link_stamp_id'] = data['stamp']['stamp_id']
         elif 'user' in data:
             activity['link'] = {}
-            activity['link']['user_id'] = data['user']['user_id']
+            activity['link']['link_user_id'] = data['user']['user_id']
 
         activity['user'] = {
-            'color_primary': data['user']['color_primary'], 
-            'color_secondary': data['user']['color_secondary'], 
-            'screen_name': data['user']['screen_name'], 
-            'privacy': data['user']['privacy'], 
             'user_id': data['user']['user_id']
         }
 
@@ -163,6 +159,10 @@ def convertUserData(collection):
         
         del(data['user']['profile_image'])
         del(data['user']['display_name'])
+        del(data['user']['screen_name'])
+        del(data['user']['color_primary'])
+        del(data['user']['color_secondary'])
+        del(data['user']['privacy'])
 
         json.dump(data, o)
         o.write("\n")
