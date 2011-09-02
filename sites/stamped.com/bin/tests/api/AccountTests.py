@@ -43,11 +43,22 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
 
 class StampedAPIAccountUpdateProfile(StampedAPIAccountTest):
     def test_update_profile(self):
+        bio = "My long biography goes here."
         path = "account/update_profile.json"
         data = {
             "oauth_token": self.token['access_token'],
-            "bio": "My long biography goes here.",
-            "color": "333333,999999"
+            "bio": bio
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['bio'], bio)
+
+class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
+    def test_customize_stamp(self):
+        path = "account/customize_stamp.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "color_primary": '333333',
+            "color_secondary": '999999',
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['color_primary'], '333333')

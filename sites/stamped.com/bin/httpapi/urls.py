@@ -33,6 +33,7 @@ urlpatterns = patterns('',
     (r'v0/account/settings.json', 				'v0.functions.account.settings'),
     (r'v0/account/update_profile.json', 		'v0.functions.account.update_profile'),
     (r'v0/account/update_profile_image.json',	'v0.functions.account.update_profile_image'),
+    (r'v0/account/customize_stamp.json',        'v0.functions.account.customize_stamp'),
     (r'v0/account/verify_credentials.json', 	'v0.functions.account.verify_credentials'),
     (r'v0/account/reset_password.json', 		'v0.functions.account.reset_password'),
 

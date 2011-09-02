@@ -126,6 +126,18 @@ def update_profile_image(request):
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
+def customize_stamp(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPCustomizeStamp(), request)
+    data        = schema.exportSparse()
+    
+    account     = stampedAPI.updateProfile(authUserId, data)
+    user        = HTTPUser().importSchema(account)
+
+    return transformOutput(user.exportSparse())
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
 def verify_credentials(request):
     raise NotImplementedError
 

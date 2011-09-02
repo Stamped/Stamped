@@ -134,9 +134,6 @@ The first name of the registering user. This field has a maximum of 80 character
 **last_name** _optional_
 The last name of the registering user. This field has a maximum of 80 characters.
 
-**color** _optional_
-The hexadecimal representation of the user's stamp color. If two colors are provided they should be separated by a comma (",").
-
 **bio** _optional_
 A brief biography of the user. This section of the profile is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.
 
@@ -195,6 +192,48 @@ The URL of a current online image.
 	{
 		"user_id": "47cc67093475061e3d95369d",
 		"profile_image": "http://img.stamped.com/u/kevin.png"
+	}
+
+
+------------------------------------------------------------------------------
+## POST account/customize_stamp ##
+
+### Description ###
+Update the stamp colors for the authenticating user.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**color_primary** _required_
+The hexadecimal representation of the user's primary stamp color.
+
+**color_secondary** _required_
+The hexadecimal representation of the user's secondary stamp color.
+
+### Sample Request ###
+	POST https://api.stamped.com/1/account/customize_stamp.json
+	oauth_token=1234567890123456789012&color_primary=333333&color_secondary=999999
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"screen_name": "kevin",
+		"display_name": "Kevin P.",
+		"profile_image": "http://img.stamped.com/u/kevin.png"
+		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+		"color_primary": "333333",
+		"color_secondary": "999999",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 0,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
 	}
 
 

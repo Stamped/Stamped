@@ -134,6 +134,11 @@ class HTTPAccountProfile(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
 
+class HTTPCustomizeStamp(Schema):
+    def setSchema(self):
+        self.color_primary      = SchemaElement(basestring, required=True)
+        self.color_secondary    = SchemaElement(basestring, required=True)
+
 class HTTPAccountProfileImage(Schema):
     def setSchema(self):
         self.profile_image      = SchemaElement(basestring, normalize=False)

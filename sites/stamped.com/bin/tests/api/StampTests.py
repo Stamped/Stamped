@@ -53,10 +53,11 @@ class StampedAPIStampsUpdate(StampedAPIStampTest):
 class StampedAPIStampsUserDetails(StampedAPIStampTest):
     def test_user_details(self):
 
-        path = "account/update_profile.json"
+        path = "account/customize_stamp.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
-            "color": "123456,123456"
+            "color_primary": "123456",
+            "color_secondary": "123456",
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['color_primary'], '123456')

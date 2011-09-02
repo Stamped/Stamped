@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title>Accounts</title>
+  <title>Account</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
 /* 
@@ -186,7 +186,7 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 </head>
 <body>
   <div id="wrapper">
-      <h1 id="accounts">ACCOUNTS</h1>
+      <h1 id="account">ACCOUNT</h1>
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
@@ -349,9 +349,6 @@ The first name of the registering user. This field has a maximum of 80 character
 <p><strong>last_name</strong> <em>optional</em>
 The last name of the registering user. This field has a maximum of 80 characters.</p>
 
-<p><strong>color</strong> <em>optional</em>
-The hexadecimal representation of the user&#8217;s stamp color. If two colors are provided they should be separated by a comma (&#8220;,&#8221;).</p>
-
 <p><strong>bio</strong> <em>optional</em>
 A brief biography of the user. This section of the profile is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.</p>
 
@@ -421,6 +418,56 @@ oauth_token=1234567890123456789012&amp;profile_image=&lt;&lt;data&gt;&gt;
 <pre><code>{
     &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
     &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="postaccountcustomize_stamp">POST account/customize_stamp</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Update the stamp colors for the authenticating user.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>color_primary</strong> <em>required</em>
+The hexadecimal representation of the user&#8217;s primary stamp color.</p>
+
+<p><strong>color_secondary</strong> <em>required</em>
+The hexadecimal representation of the user&#8217;s secondary stamp color.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/1/account/customize_stamp.json
+oauth_token=1234567890123456789012&amp;color_primary=333333&amp;color_secondary=999999
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+    &quot;first_name&quot;: &quot;Kevin&quot;,
+    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;screen_name&quot;: &quot;kevin&quot;,
+    &quot;display_name&quot;: &quot;Kevin P.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
+    &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
+    &quot;color_primary&quot;: &quot;333333&quot;,
+    &quot;color_secondary&quot;: &quot;999999&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 0,
+    &quot;num_followers&quot;: 0,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
 }
 </code></pre>
 

@@ -134,6 +134,20 @@ class StampedAPI(AStampedAPI):
 
         return account
     
+    def customizeStamp(self, authUserId, data):
+        
+        ### TODO: Reexamine how updates are done
+
+        account = self._accountDB.getAccount(authUserId)
+
+        # Import each item
+        account.color_primary   = data['color_primary']
+        account.color_secondary = data['color_secondary']
+
+        self._accountDB.updateAccount(account)
+
+        return account
+    
     def updateProfileImage(self, authUserId, data):
         data = base64.decodestring(data)
         
