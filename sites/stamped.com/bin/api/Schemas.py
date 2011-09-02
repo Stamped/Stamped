@@ -91,16 +91,15 @@ class User(Schema):
             schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
-
         return schema
 
 class UserMini(Schema):
     def setSchema(self):
         self.user_id            = SchemaElement(basestring, required=True)
-        self.screen_name        = SchemaElement(basestring, required=True)
+        self.screen_name        = SchemaElement(basestring)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
-        self.privacy            = SchemaElement(bool, required=True)
+        self.privacy            = SchemaElement(bool)
 
 class UserTiny(Schema):
     def setSchema(self):
@@ -227,7 +226,7 @@ class Activity(Schema):
     def setSchema(self):
         self.activity_id        = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring, required=True)
-        self.user               = UserMini(required=True)
+        self.user               = UserMini()
         self.image              = SchemaElement(basestring)
         self.subject            = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring)
@@ -236,11 +235,11 @@ class Activity(Schema):
 
 class ActivityLink(Schema):
     def setSchema(self):
-        self.user_id            = SchemaElement(basestring)
-        self.stamp_id           = SchemaElement(basestring)
-        self.entity_id          = SchemaElement(basestring)
-        self.comment_id         = SchemaElement(basestring)
-        self.url                = SchemaElement(basestring)
+        self.link_user_id       = SchemaElement(basestring)
+        self.link_stamp_id      = SchemaElement(basestring)
+        self.link_entity_id     = SchemaElement(basestring)
+        self.link_comment_id    = SchemaElement(basestring)
+        self.link_url           = SchemaElement(basestring)
 
 # ######## #
 # Entities #

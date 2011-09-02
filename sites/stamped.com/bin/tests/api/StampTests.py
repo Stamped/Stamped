@@ -50,6 +50,27 @@ class StampedAPIStampsUpdate(StampedAPIStampTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['blurb'], blurb)
 
+class StampedAPIStampsUserDetails(StampedAPIStampTest):
+    def test_user_details(self):
+
+        path = "account/update_profile.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "color": "123456,123456"
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['color_primary'], '123456')
+        self.assertEqual(result['color_secondary'], '123456')
+
+        path = "stamps/show.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(result['user']['color_primary'], '123456')
+        self.assertEqual(result['user']['color_secondary'], '123456')
+
 class StampedAPIStampMentionsTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')

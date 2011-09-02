@@ -628,14 +628,14 @@ class HTTPActivity(Schema):
 
             self.importData(data, overflow=True)
             
-            if schema.link.stamp_id != None:
-                self.link_stamp_id = schema.link.stamp_id
-            elif schema.link.user_id != None:
-                self.link_user_id = schema.link.user_id
-            elif schema.link.entity_id != None:
-                self.link_entity_id = schema.link.entity_id
-            elif schema.link.url != None:
-                self.link_url = schema.link.url
+            if schema.link_stamp_id != None:
+                self.link_stamp_id = schema.link_stamp_id
+            elif schema.link_user_id != None:
+                self.link_user_id = schema.link_user_id
+            elif schema.link_entity_id != None:
+                self.link_entity_id = schema.link_entity_id
+            elif schema.link_url != None:
+                self.link_url = schema.link_url
 
             self.created = schema.timestamp.created
         else:

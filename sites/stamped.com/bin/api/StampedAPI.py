@@ -143,6 +143,10 @@ class StampedAPI(AStampedAPI):
         return True
     
     def removeAccount(self, authUserId):
+
+        ### TODO: Remove all activity, stamps, entities, etc. for user
+        ### TODO: Verify w/ password?
+
         account = self._accountDB.getAccount(authUserId)
         self._accountDB.removeAccount(authUserId)
         return account
@@ -588,12 +592,11 @@ class StampedAPI(AStampedAPI):
             raise IllegalActionError(msg)
 
         # Build stamp
-        stamp = Stamp({
-            'user': user.exportSchema(UserMini()),
-            'entity': entity.exportSchema(EntityMini()),
-            'image': imageData,
-        })
-        stamp.timestamp.created = datetime.utcnow()
+        stamp           = Stamp()
+        stamp.user_id   = user.user_id
+        stamp.entity    = entity.exportSchema(EntityMini())
+        stamp.image     = imageData
+        stamp.created   = datetime.utcnow()
 
         # Extract mentions
         if blurbData != None:
@@ -645,6 +648,9 @@ class StampedAPI(AStampedAPI):
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
 
+        # Add user object back into stamp
+        stamp.user = user.exportSchema(UserMini())
+
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
         
@@ -670,7 +676,7 @@ class StampedAPI(AStampedAPI):
             for item in credit:
 
                 # Only run if user is flagged as credited
-                if item not in creditedUserIds:
+                if item.user_id not in creditedUserIds:
                     continue
 
                 # Assign credit
@@ -679,14 +685,13 @@ class StampedAPI(AStampedAPI):
                 # Add restamp as comment (if prior stamp exists)
                 if 'stamp_id' in item and item['stamp_id'] != None:
                     # Build comment
-                    comment = Comment({
-                        'user': user.exportSchema(UserMini()),
-                        'stamp_id': item.stamp_id,
-                        'restamp_id': stamp.stamp_id,
-                        'blurb': stamp.blurb,
-                        'mentions': stamp.mentions,
-                    })
-                    comment.timestamp.created = datetime.utcnow()
+                    comment             = Comment()
+                    comment.user_id     = user.user_id
+                    comment.stamp_id    = item.stamp_id
+                    comment.restamp_id  = stamp.stamp_id
+                    comment.blurb       = stamp.blurb
+                    comment.mentions    = stamp.mentions
+                    comment.created     = datetime.utcnow()
                     
                     # Add the comment data to the database
                     self._commentDB.addComment(comment)
@@ -704,9 +709,9 @@ class StampedAPI(AStampedAPI):
             
             activity                = Activity()
             activity.genre          = 'restamp'
-            activity.user           = user.exportSchema(UserMini())
+            activity.user_id        = user.user_id
             activity.subject        = stamp.entity.title
-            activity.stamp_id       = stamp.stamp_id
+            activity.link_stamp_id  = stamp.stamp_id
             activity.created        = datetime.utcnow()
             
             self._activityDB.addActivity(creditedUserIds, activity)
@@ -728,10 +733,10 @@ class StampedAPI(AStampedAPI):
             if len(mentionedUserIds) > 0:
                 activity                = Activity()
                 activity.genre          = 'mention'
-                activity.user           = user.exportSchema(UserMini())
+                activity.user_id        = user.user_id
                 activity.subject        = stamp.entity.title
                 activity.blurb          = stamp.blurb
-                activity.stamp_id       = stamp.stamp_id
+                activity.link_stamp_id  = stamp.stamp_id
                 activity.created        = datetime.utcnow()
                 
                 self._activityDB.addActivity(mentionedUserIds, activity)
@@ -748,7 +753,7 @@ class StampedAPI(AStampedAPI):
         imageData   = data.pop('image', stamp.image)
 
         # Verify user can modify the stamp
-        if authUserId != stamp.user.user_id:
+        if authUserId != stamp.user_id:
             msg = "Insufficient privileges to modify stamp"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
@@ -836,12 +841,15 @@ class StampedAPI(AStampedAPI):
         # Update the stamp data in the database
         stamp = self._stampDB.updateStamp(stamp)
 
+        # Add user object back into stamp
+        stamp.user = user.exportSchema(UserMini())
+
         # Give credit
         if stamp.credit != None and len(stamp.credit) > 0:
             for item in credit:
 
                 # Only run if user is flagged as credited
-                if item not in creditedUserIds:
+                if item.user_id not in creditedUserIds:
                     continue
 
                 # Assign credit
@@ -850,14 +858,13 @@ class StampedAPI(AStampedAPI):
                 # Add restamp as comment (if prior stamp exists)
                 if 'stamp_id' in item and item['stamp_id'] != None:
                     # Build comment
-                    comment = Comment({
-                        'user': user.exportSchema(UserMini()),
-                        'stamp_id': item.stamp_id,
-                        'restamp_id': stamp.stamp_id,
-                        'blurb': stamp.blurb,
-                        'mentions': stamp.mentions,
-                    })
-                    comment.timestamp.created = datetime.utcnow()
+                    comment             = Comment()
+                    comment.user_id     = user.user_id
+                    comment.stamp_id    = item.stamp_id
+                    comment.restamp_id  = stamp.stamp_id
+                    comment.blurb       = stamp.blurb
+                    comment.mentions    = stamp.mentions
+                    comment.created     = datetime.utcnow()
                     
                     # Add the comment data to the database
                     self._commentDB.addComment(comment)
@@ -874,9 +881,9 @@ class StampedAPI(AStampedAPI):
         if self._activity == True and len(creditedUserIds) > 0:
             activity                = Activity()
             activity.genre          = 'restamp'
-            activity.user           = user.exportSchema(UserMini())
+            activity.user_id        = user.user_id
             activity.subject        = stamp.entity.title
-            activity.stamp_id       = stamp.stamp_id
+            activity.link_stamp_id  = stamp.stamp_id
             activity.created        = datetime.utcnow()
             
             self._activityDB.addActivity(creditedUserIds, activity)
@@ -899,10 +906,10 @@ class StampedAPI(AStampedAPI):
             if len(mentionedUserIds) > 0:
                 activity                = Activity()
                 activity.genre          = 'mention'
-                activity.user           = user.exportSchema(UserMini())
+                activity.user_id        = user.user_id
                 activity.subject        = stamp.entity.title
                 activity.blurb          = stamp.blurb
-                activity.stamp_id       = stamp.stamp_id
+                activity.link_stamp_id  = stamp.stamp_id
                 activity.created        = datetime.utcnow()
 
                 self._activityDB.addActivity(mentionedUserIds, activity)
@@ -910,10 +917,12 @@ class StampedAPI(AStampedAPI):
         return stamp
     
     def removeStamp(self, authUserId, stampId):
-        stamp = self._stampDB.getStamp(stampId)
+        stamp       = self._stampDB.getStamp(stampId)
+        user        = self._userDB.getUser(stamp.user_id)
+        stamp.user  = user.exportSchema(UserMini())
 
         # Verify user has permission to delete
-        if stamp.user.user_id != authUserId:
+        if stamp.user_id != authUserId:
             msg = "Insufficient privileges to remove stamp"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
@@ -950,12 +959,14 @@ class StampedAPI(AStampedAPI):
         return stamp
         
     def getStamp(self, stampId, authUserId):
-        stamp = self._stampDB.getStamp(stampId)
+        stamp       = self._stampDB.getStamp(stampId)
+        user        = self._userDB.getUser(stamp.user_id)
+        stamp.user  = user.exportSchema(UserMini())
 
         # Check privacy of stamp
-        if stamp.user.privacy == True:
+        if stamp.user_id != authUserId and user.privacy == True:
             friendship = Friendship({
-                'user_id':      stamp.user.user_id,
+                'user_id':      user.user_id,
                 'friend_id':    authUserId,
             })
 
@@ -1005,16 +1016,19 @@ class StampedAPI(AStampedAPI):
             mentions = self._extractMentions(blurb)
 
         # Build comment
-        comment = Comment({
-            'user': user.exportSchema(UserMini()),
-            'stamp_id': stamp.stamp_id,
-            'blurb': blurb,
-            'mentions': mentions,
-        })
-        comment.timestamp.created = datetime.utcnow()
+        comment             = Comment()
+        comment.user_id     = user.user_id
+        comment.stamp_id    = stamp.stamp_id
+        comment.blurb       = blurb
+        comment.created     = datetime.utcnow()
+        if mentions != None:
+            comment.mentions = mentions
             
         # Add the comment data to the database
         comment = self._commentDB.addComment(comment)
+
+        # Add full user object back
+        comment.user = user.exportSchema(UserMini())
 
         # Note: No activity should be generated for the user creating the comment
 
@@ -1031,14 +1045,14 @@ class StampedAPI(AStampedAPI):
                     if self._friendshipDB.blockExists(friendship) == False:
                         mentionedUserIds.append(mention['user_id'])
             if len(mentionedUserIds) > 0:
-                activity                = Activity()
-                activity.genre          = 'mention'
-                activity.user           = user.exportSchema(UserMini())
-                activity.subject        = stamp.entity.title
-                activity.blurb          = comment.blurb
-                activity.stamp_id       = stamp.stamp_id
-                activity.comment_id     = comment.comment_id
-                activity.created        = datetime.utcnow()
+                activity                    = Activity()
+                activity.genre              = 'mention'
+                activity.user_id            = user.user_id
+                activity.subject            = stamp.entity.title
+                activity.blurb              = comment.blurb
+                activity.link_stamp_id      = stamp.stamp_id
+                activity.link_comment_id    = comment.comment_id
+                activity.created            = datetime.utcnow()
 
                 self._activityDB.addActivity(mentionedUserIds, activity)
         
@@ -1048,14 +1062,14 @@ class StampedAPI(AStampedAPI):
             and stamp.user.user_id != user.user_id:
             commentedUserIds.append(stamp.user.user_id)
         if len(commentedUserIds) > 0:
-            activity                = Activity()
-            activity.genre          = 'comment'
-            activity.user           = user.exportSchema(UserMini())
-            activity.subject        = stamp.entity.title
-            activity.blurb          = comment.blurb
-            activity.stamp_id       = stamp.stamp_id
-            activity.comment_id     = comment.comment_id
-            activity.created        = datetime.utcnow()
+            activity                    = Activity()
+            activity.genre              = 'comment'
+            activity.user_id            = user.user_id
+            activity.subject            = stamp.entity.title
+            activity.blurb              = comment.blurb
+            activity.link_stamp_id      = stamp.stamp_id
+            activity.link_comment_id    = comment.comment_id
+            activity.created            = datetime.utcnow()
             
             self._activityDB.addActivity(commentedUserIds, activity)
         
@@ -1080,14 +1094,14 @@ class StampedAPI(AStampedAPI):
                 repliedUserIds.append(repliedUserId)
 
         if len(repliedUserIds) > 0:
-            activity                = Activity()
-            activity.genre          = 'reply'
-            activity.user           = user.exportSchema(UserMini())
-            activity.subject        = stamp.entity.title
-            activity.blurb          = comment.blurb
-            activity.stamp_id       = stamp.stamp_id
-            activity.comment_id     = comment.comment_id
-            activity.created        = datetime.utcnow()
+            activity                    = Activity()
+            activity.genre              = 'reply'
+            activity.user_id            = user.user_id
+            activity.subject            = stamp.entity.title
+            activity.blurb              = comment.blurb
+            activity.link_stamp_id      = stamp.stamp_id
+            activity.link_comment_id    = comment.comment_id
+            activity.created            = datetime.utcnow()
 
             self._activityDB.addActivity(repliedUserIds, activity)
         
@@ -1121,6 +1135,10 @@ class StampedAPI(AStampedAPI):
         # Increment comment count on stamp
         self._stampDB.incrementStatsForStamp(comment.stamp_id, 'num_comments', -1)
 
+        # Add user object
+        user = self._userDB.getUser(comment.user_id)
+        comment.user = user.exportSchema(UserMini())
+
         return comment
     
     def getComments(self, stampId, authUserId, **kwargs): 
@@ -1140,7 +1158,24 @@ class StampedAPI(AStampedAPI):
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
               
-        comments = self._commentDB.getComments(stamp.stamp_id)
+        commentData = self._commentDB.getComments(stamp.stamp_id)
+
+        # Get user objects
+        userIds = {}
+        for comment in commentData:
+            userIds[comment.user_id] = 1
+
+        users = self._userDB.lookupUsers(userIds.keys(), None)
+
+        for user in users:
+            userIds[user.user_id] = user.exportSchema(UserMini())
+
+        comments = []
+        for comment in commentData:
+            comment.user = userIds[comment.user_id]
+            comments.append(comment)
+
+        comments = sorted(comments, key=lambda k: k['timestamp']['created'])
             
         return comments
     
@@ -1213,21 +1248,54 @@ class StampedAPI(AStampedAPI):
             'limit':    limit,
         }
 
-        stamps = self._stampDB.getStamps(stampIds, **params)
+        stampData = self._stampDB.getStamps(stampIds, **params)
 
         if includeComments == True:
             result = []
-            comments = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
+            commentData = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
 
-            ### TODO: Find a more efficient way to run this
-            for stamp in stamps:
-                for comment in comments:
-                    if comment.stamp_id == stamp.stamp_id:
-                        stamp['comment_preview'].append(comment)
+            # Append user objects
+            userIds = {}
+            for comment in commentData:
+                userIds[comment.user_id] = 1
 
-                result.append(stamp)
-            return result
-        
+            users = self._userDB.lookupUsers(userIds.keys(), None)
+
+            for user in users:
+                userIds[user.user_id] = user.exportSchema(UserMini())
+
+            # Group previews by stamp_id
+            commentPreviews = {}
+            for comment in commentData:
+                comment.user = userIds[comment.user_id]
+                if comment.stamp_id not in commentPreviews:
+                    commentPreviews[comment.stamp_id] = []
+                commentPreviews[comment.stamp_id].append(comment)
+
+            # Add user object and preview to stamps
+            stamps = []
+            for stamp in stampData:
+                if stamp.stamp_id in commentPreviews:
+                    stamp.comment_preview = commentPreviews[stamp.stamp_id]
+                stamp.user = userIds[stamp.user_id]
+                stamps.append(stamp)
+
+        else:
+            # Append user objects
+            userIds = {}
+            for stamp in stampData:
+                userIds[stamp.user_id] = 1
+
+            users = self._userDB.lookupUsers(userIds.keys(), None)
+
+            for user in users:
+                userIds[user.user_id] = user.exportSchema(UserMini())
+
+            stamps = []
+            for stamp in stampData:
+                stamp.user = userIds[stamp.user_id]
+                stamps.append(stamp)
+
         return stamps
     
     def getInboxStamps(self, authUserId, **kwargs):
@@ -1291,6 +1359,7 @@ class StampedAPI(AStampedAPI):
             'user_id': authUserId,
         })
         favorite.timestamp.created = datetime.utcnow()
+
         if stampId != None:
             stamp   = self._stampDB.getStamp(stampId)
             favorite.stamp = stamp
@@ -1315,6 +1384,11 @@ class StampedAPI(AStampedAPI):
 
         favorite = self._favoriteDB.addFavorite(favorite)
 
+        # Add user object into stamp (if it exists)
+        if stampId != None:
+            user = self._userDB.getUser(favorite.stamp.user_id)
+            favorite.stamp.user = user.exportSchema(UserMini())
+
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=1)
@@ -1323,16 +1397,15 @@ class StampedAPI(AStampedAPI):
         ### TODO: Verify user isn't being blocked
         ### TODO: Verify activity item doesn't already exist
         if self._activity == True and stampId != None \
-            and stamp.user.user_id != authUserId:
-            user                    = self._userDB.getUser(authUserId)
+            and stamp.user_id != authUserId:
             activity                = Activity()
             activity.genre          = 'favorite'
-            activity.user           = user.exportSchema(UserMini())
+            activity.user_id        = authUserId
             activity.subject        = stamp.entity.title
-            activity.stamp_id       = stamp.stamp_id
+            activity.link_stamp_id  = stamp.stamp_id
             activity.created        = datetime.utcnow()
 
-            self._activityDB.addActivity(stamp.user.user_id, activity)
+            self._activityDB.addActivity(stamp.user_id, activity)
 
         return favorite
     
@@ -1346,13 +1419,34 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Remove activity item?
 
+        # Add user object into stamp (if it exists)
+        if favorite.stamp.user_id != None:
+            user = self._userDB.getUser(favorite.stamp.user_id)
+            favorite.stamp.user = user.exportSchema(UserMini())
+
         return favorite
     
     def getFavorites(self, authUserId, **kwargs):        
 
         ### TODO: Add slicing (before, since, limit, quality)
 
-        favorites = self._favoriteDB.getFavorites(authUserId)
+        favoriteData = self._favoriteDB.getFavorites(authUserId)
+
+        userIds = {}
+        for favorite in favoriteData:
+            if 'stamp' in favorite:
+                userIds[favorite.stamp.user_id] = 1
+
+        users = self._userDB.lookupUsers(userIds.keys(), None)
+
+        for user in users:
+            userIds[user.user_id] = user.exportSchema(UserMini())
+
+        favorites = []
+        for favorite in favoriteData:
+            if 'stamp' in favorite:
+                favorite.stamp.user = userIds[favorite.stamp.user_id]
+            favorites.append(favorite)
 
         return favorites
     
@@ -1392,7 +1486,24 @@ class StampedAPI(AStampedAPI):
             'limit':    limit,
         }
         
-        activity = self._activityDB.getActivity(authUserId, **params)
+        activityData = self._activityDB.getActivity(authUserId, **params)
+
+        # Append user objects
+        userIds = {}
+        for item in activityData:
+            if item.user.user_id != None:
+                userIds[item.user.user_id] = 1
+
+        users = self._userDB.lookupUsers(userIds.keys(), None)
+
+        for user in users:
+            userIds[user.user_id] = user.exportSchema(UserMini())
+
+        activity = []
+        for item in activityData:
+            if item.user.user_id != None:
+                item.user = userIds[item.user.user_id]
+            activity.append(item)
         
         return activity
     
