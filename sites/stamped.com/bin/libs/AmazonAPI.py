@@ -31,7 +31,8 @@ class AmazonAPI(object):
         'video' : 'movie', 
         'movie' : 'movie', 
         'music' : 'music', 
-        'video games' : 'video game', 
+        'video games' : 'video_game', 
+        'digital music track' : 'song', 
     }
     
     _binding_blacklist = set([
@@ -42,7 +43,7 @@ class AmazonAPI(object):
         'ABIS_BOOK'  : 'book', 
         'ABIS_MUSIC' : 'album', 
         'ABIS_DVD'   : 'movie', 
-        'CONSOLE_VIDEO_GAMES'    : 'video game', 
+        'CONSOLE_VIDEO_GAMES'    : 'video_game', 
         'VIDEO_GAME_HARDWARE'    : None, 
         'VIDEO_GAME_ACCESSORIES' : None, 
     }
@@ -63,7 +64,11 @@ class AmazonAPI(object):
         #print '\n\n\n'
         
         item_ids = string.joinfields((e.asin for e in entities), ',')
-        return self.item_lookup(ItemId=item_ids, ResponseGroup='Large', transform=transform)
+        
+        if 0 == len(item_ids):
+            return []
+        else:
+            return self.item_lookup(ItemId=item_ids, ResponseGroup='Large', transform=transform)
     
     def item_lookup(self, **kwargs):
         return self._item_helper(self.amazon.ItemLookup, **kwargs)
@@ -263,9 +268,9 @@ class AmazonAPI(object):
             result = re.sub('xmlns="[^"]*"', '', result)
             tree   = objectify.fromstring(result)
             
-            #f = open('out.xml', 'w')
-            #f.write(etree.tostring(tree, pretty_print=True))
-            #f.close()
+            f = open('out.xml', 'w')
+            f.write(etree.tostring(tree, pretty_print=True))
+            f.close()
             
             return tree
     

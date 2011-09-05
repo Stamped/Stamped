@@ -31,7 +31,7 @@ class AIDBasedEntityMatcher(AEntityMatcher):
         value   = self.getIDValue(entity)
         results = self._entityDB._collection.find({ self.id_key : value })
         
-        return self._mongoToObj(results)
+        return self._convertFromMongo(results)
     
     def getMatchingDuplicates(self, entity, candidate_entities):
         value   = self.getIDValue(entity)

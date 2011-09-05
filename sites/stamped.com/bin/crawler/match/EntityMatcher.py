@@ -7,10 +7,14 @@ __license__ = "TODO"
 
 import Globals, utils
 
-from AEntityMatcher import AEntityMatcher
+from AEntityMatcher           import AEntityMatcher
+from PlacesEntityMatcher      import PlacesEntityMatcher
+from FilmEntityMatcher        import FilmEntityMatcher
+from BookEntityMatcher        import BookEntityMatcher
+from MusicEntityMatcher       import MusicEntityMatcher
+
 from TitleBasedEntityMatchers import *
-from IDBasedEntityMatchers import *
-from PlacesEntityMatcher import PlacesEntityMatcher
+from IDBasedEntityMatchers    import *
 
 from utils import lazyProperty
 
@@ -23,9 +27,25 @@ class EntityMatcher(AEntityMatcher):
     def __init__(self, stamped_api, options=None):
         AEntityMatcher.__init__(self, stamped_api, options)
     
+    # --------------------------
+    #          matchers
+    # --------------------------
+    
     @lazyProperty
     def _places_matcher(self):
         return PlacesEntityMatcher(self.stamped_api, self.options)
+    
+    @lazyProperty
+    def _film_matcher(self):
+        return FilmEntityMatcher(self.stamped_api, self.options)
+    
+    @lazyProperty
+    def _book_matcher(self):
+        return BookEntityMatcher(self.stamped_api, self.options)
+    
+    @lazyProperty
+    def _music_matcher(self):
+        return MusicEntityMatcher(self.stamped_api, self.options)
     
     @lazyProperty
     def _apple_matcher(self):
@@ -35,36 +55,87 @@ class EntityMatcher(AEntityMatcher):
     def _fandango_matcher(self):
         return FandangoEntityMatcher(self.stamped_api, self.options)
     
-    def getDuplicateCandidates(self, entity):
-        matcher = self._get_matcher_for_entity(entity)
-        return matcher.getDuplicateCandidates(entity)
+    @lazyProperty
+    def _openTable_matcher(self):
+        return OpenTableEntityMatcher(self.stamped_api, self.options)
     
-    def getMatchingDuplicates(self, entity, candidate_entities):
-        matcher = self._get_matcher_for_entity(entity)
-        return matcher.getMatchingDuplicates(entity, candidate_entities)
+    @lazyProperty
+    def _googlePlaces_matcher(self):
+        return GooglePlacesEntityMatcher(self.stamped_api, self.options)
     
-    def getBestDuplicate(self, duplicates):
-        matcher = self._get_matcher_for_entity(duplicates[0])
-        return matcher.getBestDuplicate(duplicates)
+    @lazyProperty
+    def _amazon_matcher(self):
+        return AmazonEntityMatcher(self.stamped_api, self.options)
     
-    def _get_matcher_for_entity(self, entity):
-        if 'apple' in entity:
-            return self._apple_matcher
-        if 'place' in entity:
-            return self._places_matcher
-        if 'fandango' in entity:
-            return self._fandango_matcher
+    @lazyProperty
+    def _factual_matcher(self):
+        return FactualEntityMatcher(self.stamped_api, self.options)
+    
+    # --------------------------
+    #        proxy methods
+    # --------------------------
+    
+    def getDuplicates(self, entity):
+        matchers = self._get_matchers_for_entity(entity)
+        dupes = []
         
+        for matcher in matchers:
+            cur_dupes = matcher.getDuplicateCandidates(entity)
+            
+            dupes.extend(cur_dupes)
         
-        # TODO: add book deduper
-        # TODO: add movie deduper
-        # TODO: add product deduper
+        def _get_id(e):
+            return e.entity_id
         
+        dupes  = sorted(dupes, key=_get_id)
+        delete = []
+        index  = 0
+        
+        # remove duplicate matches
+        while index < len(dupes) - 1:
+            if dupes[index].entity_id == dupes[index + 1].entity_id:
+                dupes.pop(index)
+            else:
+                index += 1
+        
+        return dupes
+    
+    # --------------------------
+    #        proxy mapping
+    # --------------------------
+    
+    def _get_matchers_for_entity(self, entity):
+        matchers = set()
+        
+        matcher_map = {
+            'place'         : self._places_matcher, 
+            'apple'         : self._apple_matcher, 
+            'fandango'      : self._fandango_matcher, 
+            'openTable'     : self._openTable_matcher, 
+            'googlePlaces'  : self._googlePlaces_matcher, 
+            'amazon'        : self._amazon_matcher, 
+            'factual'       : self._factual_matcher, 
+        }
+        
+        if entity.category == 'food':
+            matchers.add(self._places_matcher)
+        elif entity.category == 'film':
+            matchers.add(self._film_matcher)
+        elif entity.category == 'book':
+            matchers.add(self._book_matcher)
+        elif entity.category == 'music':
+            matchers.add(self._music_matcher)
+        
+        for k, v in matcher_map.iteritems():
+            if k in entity:
+                matchers.add(v)
+        
+        if len(matchers) > 0:
+            return list(matchers)
         
         print type(entity)
         from pprint import pprint
         pprint(entity)
         
         assert False
-        return self._places_matcher
 

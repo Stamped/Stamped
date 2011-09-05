@@ -49,7 +49,7 @@ subcategories = {
     'app'               : 'other', 
     'other'             : 'other', 
     
-    # note: the following subcategories are from google places
+    # the following subcategories are from google places
     'amusement_park'    : 'other', 
     'aquarium'          : 'other', 
     'art_gallery'       : 'other', 
@@ -78,6 +78,9 @@ subcategories = {
     'store'             : 'other', 
     'university'        : 'other', 
     'zoo'               : 'other', 
+    
+    # the following subcategories are from amazon
+    'video_game'        : 'other', 
 }
 
 def setSubtitle(entity):
@@ -109,10 +112,10 @@ def setSubtitle(entity):
         if entity.subcategory == 'artist':
             entity.subtitle = 'Artist'
         else:
-            entity.subtitle = str(entity.subcategory).title()       
+            entity.subtitle = str(entity.subcategory).title()
 
     elif entity.category == 'other':
-        entity.subtitle = str(entity.subcategory).replace('_', ' ').title() 
+        entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
 
     return entity
 

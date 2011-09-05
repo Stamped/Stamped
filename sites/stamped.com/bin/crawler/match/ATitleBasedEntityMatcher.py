@@ -11,10 +11,7 @@ import string
 from AEntityMatcher import AEntityMatcher
 from difflib import SequenceMatcher
 
-__all__ = [
-    "ATitleBasedEntityMatcher", 
-    "ATitleSourceBasedEntityMatcher", 
-]
+__all__ = [ "ATitleBasedEntityMatcher" ]
 
 class ATitleBasedEntityMatcher(AEntityMatcher):
     def __init__(self, stamped_api, options):
@@ -65,7 +62,8 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
         # remove leading words
         self.wordPrefixBlacklistSet = set()
         self.wordPrefixBlacklistSet.add("the")
-        
+        self.wordPrefixBlacklistSet.add("a")
+        self.wordPrefixBlacklistSet.add("an")
         # remove words regardless of position
         self.wordBlacklistSet = set()
         self.wordBlacklistSet.add("restaurant")
@@ -84,6 +82,8 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
         # remove trailing words
         self.wordSuffixBlacklistSet = set()
         self.wordSuffixBlacklistSet.add("&")
+        self.wordSuffixBlacklistSet.add("a")
+        self.wordSuffixBlacklistSet.add("an")
         self.wordSuffixBlacklistSet.add("and")
         self.wordSuffixBlacklistSet.add("at")
         self.wordSuffixBlacklistSet.add("the")
@@ -226,17 +226,4 @@ class ATitleBasedEntityMatcher(AEntityMatcher):
             titles.append(title)
         
         return titles
-
-# ------------------------------------------------------------------------------
-
-class ATitleSourceBasedEntityMatcher(ATitleBasedEntityMatcher):
-    def __init__(self, stamped_api, options, source):
-        ATitleBasedEntityMatcher.__init__(self, stamped_api, options)
-        
-        self.source = source
-    
-    def getDuplicateCandidates(self, entity):
-        results = self._entityDB._collection.find({ self.source : { "$exists" : True }})
-        
-        return self._mongoToObj(results)
 

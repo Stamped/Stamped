@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import math, pymongo, string
+import logs, math, pymongo, re, string
+import CityList
 
 from EntitySearcher import EntitySearcher
 from GooglePlaces   import GooglePlaces
@@ -15,7 +16,7 @@ from Schemas        import Entity
 from difflib        import SequenceMatcher
 from pymongo.son    import SON
 from gevent.pool    import Pool
-from pprint         import pprint
+from pprint         import pprint, pformat
 from utils          import lazyProperty
 
 class MongoEntitySearcher(EntitySearcher):
@@ -55,7 +56,7 @@ class MongoEntitySearcher(EntitySearcher):
         'app'               : 15, 
         'other'             : 5, 
         
-        # note: the following subcategories are from google places
+        # the following subcategories are from google places
         'amusement_park'    : 25, 
         'aquarium'          : 25, 
         'art_gallery'       : 25, 
@@ -82,26 +83,29 @@ class MongoEntitySearcher(EntitySearcher):
         'spa'               : 25, 
         'stadium'           : 25, 
         'store'             : 15, 
-        'university'        : 70, 
+        'university'        : 65, 
         'zoo'               : 65, 
+        
+        # the following subcategories are from amazon
+        'video_game'        : 65
     }
     
     source_weights = {
-        'googlePlaces' : 50, 
-        'amazon' : 90, 
-        'openTable' : 110, 
-        'factual' : 5, 
-        'apple' : 75, 
-        'zagat' : 95, 
-        'urbanspoon' : 80, 
-        'nymag' : 95, 
-        'sfmag' : 95, 
-        'latimes' : 80, 
-        'bostonmag' : 90, 
-        'fandango' : 1000, 
-        'chicagomag' : 80, 
-        'phillymag'  : 80, 
-        'netflix'  : 100, 
+        'googlePlaces'      : 50, 
+        'amazon'            : 90, 
+        'openTable'         : 110, 
+        'factual'           : 5, 
+        'apple'             : 75, 
+        'zagat'             : 95, 
+        'urbanspoon'        : 80, 
+        'nymag'             : 95, 
+        'sfmag'             : 95, 
+        'latimes'           : 80, 
+        'bostonmag'         : 90, 
+        'fandango'          : 1000, 
+        'chicagomag'        : 80, 
+        'phillymag'         : 80, 
+        'netflix'           : 100, 
     }
     
     google_subcategory_whitelist = set([
@@ -152,6 +156,35 @@ class MongoEntitySearcher(EntitySearcher):
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
+        
+        self._init_cities()
+    
+    def _init_cities(self):
+        self._regions = {}
+        city_in_state = {}
+        
+        for k, v in CityList.popular_cities.iteritems():
+            if 'synonyms' in v:
+                for synonym in v['synonyms']:
+                    self._regions[synonym.lower()] = v
+            
+            v['name'] = k
+            self._regions[k.lower()] = v
+            
+            state = v['state']
+            if not state in city_in_state or v['population'] > city_in_state[state]['population']:
+                city_in_state[state] = v
+        
+        # push lat/lng as best candidate for state
+        for k, v in city_in_state.iteritems():
+            self._regions[k.lower()] = v
+        
+        near_synonyms = set(['in', 'near'])
+        self._near_synonym_res = []
+        
+        for synonym in near_synonyms:
+            synonym_re = re.compile("(.*) %s ([a-z -']+)" % synonym)
+            self._near_synonym_res.append(synonym_re)
     
     @lazyProperty
     def _googlePlaces(self):
@@ -169,8 +202,24 @@ class MongoEntitySearcher(EntitySearcher):
                          subcategory_filter=None, 
                          full=False):
         input_query = query.strip().lower()
+        original_coords = True
         
         query = input_query
+        
+        for synonym_re in self._near_synonym_res:
+            match = synonym_re.match(query)
+            
+            if match is not None:
+                groups = match.groups()
+                region_name = groups[1]
+                
+                if region_name in self._regions:
+                    region = self._regions[region_name]
+                    query  = groups[0]
+                    coords = [ region['lat'], region['lng'], ]
+                    original_coords = False
+                    break
+        
         query = query.replace('[', '\[?')
         query = query.replace(']', '\]?')
         query = query.replace('(', '\(?')
@@ -210,12 +259,11 @@ class MongoEntitySearcher(EntitySearcher):
         data['category']    = category_filter
         data['subcategory'] = subcategory_filter
         data['full']        = full
-        pprint(data)
+        logs.debug(pformat(data))
         
         entity_query = {"title": {"$regex": query, "$options": "i"}}
         
-        results_set = set()
-        results = []
+        results = {}
         
         pool = Pool(8)
         wrapper = {}
@@ -227,13 +275,12 @@ class MongoEntitySearcher(EntitySearcher):
         
         if coords is None:
             def _find_amazon(ret):
-                results = self._amazonAPI.item_detail_search(Keywords=input_query, 
-                                                             SearchIndex='All', 
-                                                             Availability='Available', 
-                                                             transform=True)
+                amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
+                                                                    SearchIndex='All', 
+                                                                    Availability='Available', 
+                                                                    transform=True)
                 
-                entities = self.api._entityMatcher.addMany(results)
-                
+                entities = self.api._entityMatcher.addMany(amazon_results)
                 ret['amazon_results'] = list((e, -1) for e in entities)
             
             if full:
@@ -248,7 +295,7 @@ class MongoEntitySearcher(EntitySearcher):
                     amazon_results = []
                 
                 for result in amazon_results:
-                    results.append(result)
+                    results[result[0].entity_id] = result
         else:
             earthRadius = 3959.0 # miles
             q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
@@ -283,6 +330,17 @@ class MongoEntitySearcher(EntitySearcher):
                         if 'vicinity' in result:
                             entity.neighborhood = result['vicinity']
                         
+                        details = self._googlePlaces.getPlaceDetails(result['reference'])
+                        
+                        #logs.info(pformat(details))
+                        
+                        if 'formatted_phone_number' in details:
+                            entity.phone = details['formatted_phone_number']
+                        if 'formatted_address' in details:
+                            entity.address = details['formatted_address']
+                        if 'address_components' in details:
+                            entity.address_components = details['address_components']
+                        
                         entities.append(entity)
                     
                     entities = self.api._entityMatcher.addMany(entities)
@@ -299,9 +357,8 @@ class MongoEntitySearcher(EntitySearcher):
             if full:
                 pool.spawn(_find_google_places, wrapper)
             
-            # perform the two db reads concurrently
+            # perform the requests concurrently
             pool.spawn(_find_places, wrapper)
-            
             pool.join()
             
             try:
@@ -313,8 +370,7 @@ class MongoEntitySearcher(EntitySearcher):
                 entity = self.placesDB._convertFromMongo(doc['obj'])
                 result = (entity, doc['dis'])
                 
-                results.append(result)
-                results_set.add(entity.entity_id)
+                results[result[0].entity_id] = result
             
             if full:
                 try:
@@ -323,23 +379,41 @@ class MongoEntitySearcher(EntitySearcher):
                     google_place_results = []
                 
                 for result in google_place_results:
-                    results.append(result)
+                    results[result[0].entity_id] = result
         
         for entity in wrapper['db_results']:
             e = self.entityDB._convertFromMongo(entity)
             
-            if e.entity_id not in results_set:
-                results.append((e, -1))
+            results[e.entity_id] = (e, -1)
         
+        results = results.values()
+        
+        # apply category filter to results
         if category_filter is not None:
             results = filter(lambda e: e[0].category == category_filter, results)
+        
+        # apply subcategory filter to results
         if subcategory_filter is not None:
             results = filter(lambda e: e[0].subcategory == subcategory_filter, results)
         
         if 0 == len(results):
             return results
         
-        def _get_weight(result):
+        # sort the results based on a custom ranking function
+        results = sorted(results, key=self._get_entity_weight_func(input_query), reverse=True)
+        
+        # optionally limit the number of results shown
+        if limit is not None and limit >= 0:
+            results = results[0 : min(len(results), limit)]
+        
+        # strip out distance from results if not using original (user's) coordinates
+        if not original_coords:
+            results = list((result[0], -1) for result in results)
+        
+        return results
+    
+    def _get_entity_weight_func(self, input_query):
+        def _get_entity_weight(result):
             entity   = result[0]
             distance = result[1]
             
@@ -377,14 +451,7 @@ class MongoEntitySearcher(EntitySearcher):
             
             return aggregate_value
         
-        # sort the results based on the _get_weight function
-        results = sorted(results, key=_get_weight, reverse=True)
-        
-        # optionally limit the number of results shown
-        if limit is not None and limit >= 0:
-            results = results[0 : min(len(results), limit)]
-        
-        return results
+        return _get_entity_weight
     
     def _get_title_value(self, input_query, entity):
         title  = entity.title.lower()
