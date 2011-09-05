@@ -418,7 +418,7 @@
 		7E52B53C1412CAA600B46A55 /* done_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "done_button@2x.png"; sourceTree = "<group>"; };
 		7E52B53E1412DD0500B46A55 /* choose_photo_button_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "choose_photo_button_large@2x.png"; sourceTree = "<group>"; };
 		7E52B53F1412DD0500B46A55 /* take_photo_button_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "take_photo_button_large@2x.png"; sourceTree = "<group>"; };
-		7E5406DA141550A900912463 /* FirstRunViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; path = FirstRunViewController.h; sourceTree = "<group>"; };
+		7E5406DA141550A900912463 /* FirstRunViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FirstRunViewController.h; sourceTree = "<group>"; };
 		7E5406DB141550A900912463 /* FirstRunViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FirstRunViewController.m; sourceTree = "<group>"; };
 		7E5406DC141550A900912463 /* FirstRunViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FirstRunViewController.xib; sourceTree = "<group>"; };
 		7E5406E0141550E000912463 /* learnmore_00@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_00@2x.png"; sourceTree = "<group>"; };
@@ -1692,6 +1692,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1708,6 +1709,7 @@
 					"-ObjC",
 					"-all_load",
 				);
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
@@ -1717,6 +1719,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -1731,6 +1734,7 @@
 					"-ObjC",
 					"-all_load",
 				);
+				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
