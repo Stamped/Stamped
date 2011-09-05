@@ -15,7 +15,7 @@
 #import "Notifications.h"
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
-#import "LearnMoreViewController.h"
+#import "FirstRunViewController.h"
 #import "STNavigationBar.h"
 #import "Util.h"
 
@@ -107,8 +107,7 @@
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
   TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
   PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];
-    
-     
+
   self.viewControllers = [NSArray arrayWithObjects:inbox, activity, todo, people, nil];
   [inbox release];
   [activity release];
@@ -121,13 +120,12 @@
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
-  
-  
+
   // Load Learn More instead of other views. 
-  LearnMoreViewController* learnMore = [[LearnMoreViewController alloc] initWithNibName:@"LearnMoreViewController" bundle:nil];
+  FirstRunViewController* learnMore = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
+  learnMore.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
   [self presentModalViewController:learnMore animated:YES];
   [learnMore release];
-
 }
 
 - (void)ensureCorrectHeightOfViewControllers {

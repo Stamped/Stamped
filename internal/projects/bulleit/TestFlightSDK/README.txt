@@ -1,6 +1,6 @@
 Thanks for downloading the TestFlight SDK! 
 
-This document is also availale on the web at https://www.testflightapp.com/sdk/doc
+This document is also available on the web at https://www.testflightapp.com/sdk/doc
 
 1. Why use the TestFlight SDK?
 2. Considerations
@@ -30,7 +30,7 @@ Alongside the Checkpoint API is the Questions interface. The Questions interface
 
 Information gathered by the SDK is sent to the website in real time. When an application is put into the background (iOS 4.x) or terminated (iOS 3.x) we try to send the finalizing information for the session during the time allowed for finalizing the application. Should all of the data not get sent the remaining data will be sent the next time the application is launched. As such, to get the most out of the SDK we recommend your application support iOS 4.0 and higher.
 
-This SDK can be run from both the iPhone Simulator and Device and has been tested using XCode 4.0.
+This SDK can be run from both the iPhone Simulator and Device and has been tested using Xcode 4.0.
 
 3. How do I integrate the SDK into my project?
 
@@ -53,7 +53,7 @@ This SDK can be run from both the iPhone Simulator and Device and has been teste
 3. In your Application Delegate:
 
     1. Import TestFlight -> #import "TestFlight.h"
-    NOTE: If you do not want to import TestFlight.h in every file you may add the above line into you precompiled header (<projectname>_Prefix.pch) file inside of the 
+    NOTE: If you do not want to import TestFlight.h in every file you may add the above line into you pre-compiled header (<projectname>_Prefix.pch) file inside of the 
 
             #ifdef __OBJC__ section. 
         This will give you access to the SDK across all files.
@@ -65,11 +65,11 @@ This SDK can be run from both the iPhone Simulator and Device and has been teste
                 [TestFlight takeOff:@"Insert your Team Token here"];
             }
 
-    4. To report crashes to you we install our own unhandled exception handler. If you are not currently using an exception handler of your own then all you need ot do is go to the next step. If you currently use an Exception Handler, or you use another framework that does please go to the section on advanced exception handling.
+    4. To report crashes to you we install our own uncaught exception handler. If you are not currently using an exception handler of your own then all you need to do is go to the next step. If you currently use an Exception Handler, or you use another framework that does please go to the section on advanced exception handling.
 
-4. To enable the best crash reporting possible we recommend setting the following project build settings in XCode to NO for all targets that you want to have live crash reporting for You can find build settings by opening the Project Navigator (default command+1 or command+shift_j) then clicking on the project you are configuring (usually the first selection in the list) from there you can choose to either change the global project settings or settings on an individual project basis. All settings below are in the Deployment Section.
+4. To enable the best crash reporting possible we recommend setting the following project build settings in Xcode to NO for all targets that you want to have live crash reporting for You can find build settings by opening the Project Navigator (default command + 1 or command + shift + j) then clicking on the project you are configuring (usually the first selection in the list) from there you can choose to either change the global project settings or settings on an individual project basis. All settings below are in the Deployment Section.
 
-    1. Deployment Postprocessing
+    1. Deployment Post Processing
     2. Strip Debug Symbols During Copy
     3. Strip Linked Product
 
@@ -100,7 +100,7 @@ In order to ask a question, you'll need to associate it with a checkpoint. Make 
 
 There are three question types available: Yes/No, Multiple Choice, and Long Answer.
 
-To create questions, visit your build's Questions page, and click on 'Add Question'. If you choose Multiple Choice, you'll need to enter a list of possible answers for your testers to choose from &mdash; otherwise, you'll only need to enter your question's, well, question. If your build has no questions, you can also choose to migrate questions from another build (because seriously &mdash; who wants to do all that typing again)?
+To create questions, visit your builds Questions page, and click on 'Add Question'. If you choose Multiple Choice, you'll need to enter a list of possible answers for your testers to choose from &mdash; otherwise, you'll only need to enter your question's, well, question. If your build has no questions, you can also choose to migrate questions from another build (because seriously &mdash; who wants to do all that typing again)?
 
 After restarting your application on an approved device when you pass the checkpoint associated with your questions a Test Flight modal question form will appear on the screen asking the beta tester to answer your question.
 
@@ -112,10 +112,10 @@ As testers install your build and start to test it you will see their session da
 
 9. Advanced Exception Handling
 
-An unhandled exception means that your application is in an unknown state and there is not much that you can do but try and exit gracefully. Our SDK does its best to get the data we collect in this situation to you while it is crashing but it is designed in such a way that the important act of saving the data occurs in as safe way a way as possible before trying to send anything. If you do use unhandled exception or signal handlers install your handlers before calling takeOff our SDK will then call your handler while ours is running. For example:
+An uncaught exception means that your application is in an unknown state and there is not much that you can do but try and exit gracefully. Our SDK does its best to get the data we collect in this situation to you while it is crashing but it is designed in such a way that the important act of saving the data occurs in as safe way a way as possible before trying to send anything. If you do use uncaught exception or signal handlers install your handlers before calling takeOff our SDK will then call your handler while ours is running. For example:
 
             /*
-             My Apps Custom unhandled exception catcher, we do special stuff here, and TestFlight takes care of the rest
+             My Apps Custom uncaught exception catcher, we do special stuff here, and TestFlight takes care of the rest
             **/
             void HandleExceptions(NSException *exception) {
                 NSLog(@"This is where we save the application data during a exception");
@@ -135,7 +135,7 @@ An unhandled exception means that your application is in an unknown state and th
                 NSSetUncaughtExceptionHandler(&HandleExceptions);
                 // create the signal action structure 
                 struct sigaction newSignalAction;
-                // intialize the signal action structure
+                // initialize the signal action structure
                 memset(&newSignalAction, 0, sizeof(newSignalAction));
                 // set SignalHandler as the handler in the signal action structure
                 newSignalAction.sa_handler = &SignalHandler;
@@ -145,7 +145,7 @@ An unhandled exception means that your application is in an unknown state and th
                 sigaction(SIGBUS, &newSignalAction, NULL);
                 // Call takeOff after install your own unhandled exception and signal handlers
                 [TestFlight takeOff:@"Insert your Team Token here"];
-                // continue with your application intialization
+                // continue with your application initialization
             }
 
 You do not need to add the above code if your application does not use exception handling already.
