@@ -584,6 +584,67 @@ class StampedAPI(AStampedAPI):
         if len(mentions) > 0:
             return mentions
         return None
+
+    
+    def _addUserObjects(self, stampData, userIds=None):
+        singleStamp = False
+        if not isinstance(stampData, list):
+            singleStamp = True
+            stampData = [stampData]
+
+        if userIds == None:
+            # Grab user data
+            userIds = {}
+
+            for stamp in stampData:
+                # Grab user_id from stamp
+                userIds[stamp.user_id] = 1
+
+                # Grab user_id from credit
+                for credit in stamp.credit:
+                    userIds[credit.user_id] = 1
+                
+                # Grab user_id from comments
+                for comment in stamp.comment_preview:
+                    userIds[comment.user_id] = 1
+
+            users = self._userDB.lookupUsers(userIds.keys(), None)
+
+            for user in users:
+                userIds[user.user_id] = user.exportSchema(UserMini())
+
+        # Add user objects to stamps
+        stamps = []
+        for stamp in stampData:
+            # Add stamp user
+            stamp.user = userIds[stamp.user_id]
+
+            # Add credited user(s)
+            if stamp.credit != None:
+                for i in xrange(len(stamp.credit)):
+                    creditedUser = userIds[stamp.credit[i].user_id]
+                    stamp.credit[i].color_primary = creditedUser['color_primary']
+                    stamp.credit[i].color_secondary = creditedUser['color_secondary']
+                    stamp.credit[i].privacy = creditedUser['privacy']
+
+            # Add commenting user(s)
+            if stamp.comment_preview != None:
+                for i in xrange(len(stamp.comment_preview)):
+                    commentingUser = userIds[stamp.comment_preview[i].user_id]
+                    stamp.comment_preview[i].user = commentingUser
+
+            stamps.append(stamp)
+
+        if singleStamp == True:
+            return stamps[0]
+
+        return stamps
+
+
+
+
+
+
     
     def addStamp(self, authUserId, entityId, data):
         user        = self._userDB.getUser(authUserId)
@@ -610,6 +671,10 @@ class StampedAPI(AStampedAPI):
         stamp.entity    = entity.exportSchema(EntityMini())
         stamp.created   = datetime.utcnow()
 
+        # Collect user ids
+        userIds = {}
+        userIds[user.user_id] = user.exportSchema(UserMini())
+
         # Extract mentions
         if blurbData != None:
             stamp.blurb = blurbData.strip()
@@ -629,6 +694,9 @@ class StampedAPI(AStampedAPI):
                 result = CreditSchema()
                 result.user_id      = creditedUser['user_id']
                 result.screen_name  = creditedUser['screen_name']
+
+                # Add to user ids
+                userIds[userId] = creditedUser.exportSchema(UserMini())
 
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, entityId)
@@ -660,8 +728,8 @@ class StampedAPI(AStampedAPI):
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
 
-        # Add user object back into stamp
-        stamp.user = user.exportSchema(UserMini())
+        # Add user objects back into stamp
+        stamp = self._addUserObjects(stamp, userIds=userIds)
 
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
@@ -769,6 +837,10 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
 
+        # Collect user ids
+        userIds = {}
+        userIds[user.user_id] = user.exportSchema(UserMini())
+
         # Blurb & Mentions
         mentionedUsers = []
         if blurbData == None:
@@ -810,6 +882,9 @@ class StampedAPI(AStampedAPI):
                 result.user_id      = creditedUser['user_id']
                 result.screen_name  = creditedUser['screen_name']
 
+                # Add to user ids
+                userIds[userId] = creditedUser.exportSchema(UserMini())
+
                 # Assign credit
                 creditedStamp = self._stampDB.getStampFromUserEntity(userId, \
                                     stamp.entity.entity_id)
@@ -847,8 +922,8 @@ class StampedAPI(AStampedAPI):
         # Update the stamp data in the database
         stamp = self._stampDB.updateStamp(stamp)
 
-        # Add user object back into stamp
-        stamp.user = user.exportSchema(UserMini())
+        # Add user objects back into stamp
+        stamp = self._addUserObjects(stamp, userIds=userIds)
 
         # Give credit
         if stamp.credit != None and len(stamp.credit) > 0:
@@ -924,8 +999,7 @@ class StampedAPI(AStampedAPI):
     
     def removeStamp(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
-        user        = self._userDB.getUser(stamp.user_id)
-        stamp.user  = user.exportSchema(UserMini())
+        stamp       = self._addUserObjects(stamp)
 
         # Verify user has permission to delete
         if stamp.user_id != authUserId:
@@ -966,8 +1040,7 @@ class StampedAPI(AStampedAPI):
         
     def getStamp(self, stampId, authUserId):
         stamp       = self._stampDB.getStamp(stampId)
-        user        = self._userDB.getUser(stamp.user_id)
-        stamp.user  = user.exportSchema(UserMini())
+        stamp       = self._addUserObjects(stamp)
 
         # Check privacy of stamp
         if stamp.user_id != authUserId and user.privacy == True:
@@ -981,12 +1054,28 @@ class StampedAPI(AStampedAPI):
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
 
-        ### TODO: Add user object
+        ### TODO: Add user object for credit
+        if len(stamp.credit) > 0:
+            userIds = {}
+            for i in xrange(len(stamp.credit)):
+                userIds[stamp.credit[i].user_id] = 1
+
+            users = self._userDB.lookupUsers(userIds.keys(), None)
+
+            for user in users:
+                userIds[user.user_id] = user.exportSchema(UserMini())
+
+            for i in xrange(len(stamp.credit)):
+                creditedUser = userIds[stamp.credit[i].user_id]
+                stamp.credit[i].color_primary = creditedUser['color_primary']
+                stamp.credit[i].color_secondary = creditedUser['color_secondary']
+                stamp.credit[i].privacy = creditedUser['privacy']
       
         return stamp
     
     def updateStampImage(self, authUserId, stampId, data):
-        stamp = self._stampDB.getStamp(stampId)
+        stamp       = self._stampDB.getStamp(stampId)
+        stamp       = self._addUserObjects(stamp)
 
         # Verify user has permission to delete
         if stamp.user_id != authUserId:
@@ -999,9 +1088,12 @@ class StampedAPI(AStampedAPI):
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
 
-        ### TODO: Add dimensions to stamp object
+        # Add image dimensions to stamp object (width,height)
+        width, height           = image.size
+        stamp.image_dimensions  = "%s,%s" % (width, height)
+        stamp                   = self._stampDB.updateStamp(stamp)
         
-        return True
+        return stamp
     
 
     """
@@ -1277,27 +1369,11 @@ class StampedAPI(AStampedAPI):
         stampData = self._stampDB.getStamps(stampIds, **params)
 
         if includeComments == True:
-            result = []
             commentData = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
-
-            # Append user objects
-            userIds = {}
-            for stamp in stampData:
-                userIds[stamp.user_id] = 1
-                for i in xrange(len(stamp.credit)):
-                    userIds[stamp.credit[i].user_id] = 1
-            for comment in commentData:
-                userIds[comment.user_id] = 1
-
-            users = self._userDB.lookupUsers(userIds.keys(), None)
-
-            for user in users:
-                userIds[user.user_id] = user.exportSchema(UserMini())
 
             # Group previews by stamp_id
             commentPreviews = {}
             for comment in commentData:
-                comment.user = userIds[comment.user_id]
                 if comment.stamp_id not in commentPreviews:
                     commentPreviews[comment.stamp_id] = []
                 commentPreviews[comment.stamp_id].append(comment)
@@ -1307,36 +1383,9 @@ class StampedAPI(AStampedAPI):
             for stamp in stampData:
                 if stamp.stamp_id in commentPreviews:
                     stamp.comment_preview = commentPreviews[stamp.stamp_id]
-                stamp.user = userIds[stamp.user_id]
-                for i in xrange(len(stamp.credit)):
-                    creditedUser = userIds[stamp.credit[i].user_id]
-                    stamp.credit[i].color_primary = creditedUser['color_primary']
-                    stamp.credit[i].color_secondary = creditedUser['color_secondary']
-                    stamp.credit[i].privacy = creditedUser['privacy']
                 stamps.append(stamp)
 
-        else:
-            # Append user objects
-            userIds = {}
-            for stamp in stampData:
-                userIds[stamp.user_id] = 1
-                for i in xrange(len(stamp.credit)):
-                    userIds[stamp.credit[i].user_id] = 1
-
-            users = self._userDB.lookupUsers(userIds.keys(), None)
-
-            for user in users:
-                userIds[user.user_id] = user.exportSchema(UserMini())
-
-            stamps = []
-            for stamp in stampData:
-                stamp.user = userIds[stamp.user_id]
-                for i in xrange(len(stamp.credit)):
-                    creditedUser = userIds[stamp.credit[i].user_id]
-                    stamp.credit[i].color_primary = creditedUser['color_primary']
-                    stamp.credit[i].color_secondary = creditedUser['color_secondary']
-                    stamp.credit[i].privacy = creditedUser['privacy']
-                stamps.append(stamp)
+        stamps = self._addUserObjects(stamps)
 
         return stamps
     
