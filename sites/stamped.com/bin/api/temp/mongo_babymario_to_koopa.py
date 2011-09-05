@@ -167,8 +167,10 @@ def convertUserData(collection):
         if collection == 'stamps':
             if 'credit' in data and len(data['credit']) > 0:
                 for i in xrange(len(data['credit'])):
-                    del(data['credit']['profile_image'])
-                    del(data['credit']['display_name'])
+                    del(data['credit'][i]['profile_image'])
+                    del(data['credit'][i]['display_name'])
+            if 'image' in data:
+                del(data['image'])
 
         json.dump(data, o)
         o.write("\n")
