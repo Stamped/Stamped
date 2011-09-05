@@ -262,6 +262,17 @@ typedef enum {
 }
 
 #pragma mark - Table view data source
+/*
+- (UITableViewCellEditingStyle)tableView:(UITableView*)tableView
+           editingStyleForRowAtIndexPath:(NSIndexPath*)indexPath {
+  return UITableViewCellEditingStyleDelete;
+}
+
+- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (editingStyle == UITableViewCellEditingStyleDelete) {
+    //add code here for when you hit delete
+  }    
+}*/
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
   return 1;

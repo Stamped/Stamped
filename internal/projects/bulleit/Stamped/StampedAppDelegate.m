@@ -36,7 +36,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [RKRequestQueue sharedQueue].suspended = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
@@ -130,7 +130,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication*)application {
+/*- (void)applicationWillResignActive:(UIApplication*)application {
 }
 
 - (void)applicationDidEnterBackground:(UIApplication*)application {
@@ -143,7 +143,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application {
-}
+}*/
 
 - (void)dealloc {
   [window_ release];

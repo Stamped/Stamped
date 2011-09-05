@@ -97,7 +97,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   if (self) {
     self.opaque = YES;
     self.backgroundColor = [UIColor whiteColor];
-    self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
     
     defaultTitleColor_ = [[UIColor alloc] initWithWhite:0.37 alpha:1.0];
     defaultSubstringColor_ = [[UIColor alloc] initWithWhite:0.6 alpha:1.0];

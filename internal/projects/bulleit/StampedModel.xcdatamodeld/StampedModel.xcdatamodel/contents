@@ -87,7 +87,7 @@
     </entity>
     <elements>
         <element name="Comment" positionX="169" positionY="-108" width="128" height="135"/>
-        <element name="Entity" positionX="628" positionY="90" width="128" height="390"/>
+        <element name="Entity" positionX="558" positionY="81" width="128" height="390"/>
         <element name="Event" positionX="88" positionY="135" width="128" height="135"/>
         <element name="Favorite" positionX="358" positionY="144" width="128" height="135"/>
         <element name="Stamp" positionX="252" positionY="333" width="128" height="210"/>
