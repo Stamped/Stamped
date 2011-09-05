@@ -201,6 +201,10 @@ class CreditSchema(Schema):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.stamp_id           = SchemaElement(basestring)
+        ### TEMP?
+        self.color_primary      = SchemaElement(basestring)
+        self.color_secondary    = SchemaElement(basestring)
+        self.privacy            = SchemaElement(bool)
 
 
 # ######## #

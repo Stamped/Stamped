@@ -78,7 +78,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                         @"created", @"created",
                                         @"num_comments", @"numComments", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapAttributes:@"blurb", nil];
+  [stampMapping mapAttributes:@"blurb", @"image", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
   [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];
@@ -130,7 +130,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication*)application {
+/*- (void)applicationWillResignActive:(UIApplication*)application {
 }
 
 - (void)applicationDidEnterBackground:(UIApplication*)application {
@@ -143,7 +143,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application {
-}
+}*/
 
 - (void)dealloc {
   [window_ release];

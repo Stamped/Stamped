@@ -43,5 +43,4 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIButton* addFavoriteButton;
 
-
 @end

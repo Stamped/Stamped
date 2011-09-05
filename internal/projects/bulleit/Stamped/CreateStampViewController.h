@@ -17,12 +17,16 @@
 
 @interface CreateStampViewController : UIViewController<UITextFieldDelegate,
                                                         UITextViewDelegate,
-                                                        RKObjectLoaderDelegate> {
+                                                        RKObjectLoaderDelegate,
+                                                        UINavigationControllerDelegate,
+                                                        UIImagePickerControllerDelegate,
+                                                        UIActionSheetDelegate> {
  @private
   Entity* entityObject_;
   CAGradientLayer* ribbonGradientLayer_;
   CALayer* stampLayer_;
   User* creditedUser_;
+  CGRect originalCommentFrame_;
 }
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
@@ -39,6 +43,8 @@
 @property (nonatomic, retain) IBOutlet UIButton* stampItButton;
 @property (nonatomic, retain) IBOutlet STCreditTextField* creditTextField;
 @property (nonatomic, retain) IBOutlet UIButton* editButton;
+@property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
+@property (nonatomic, retain) IBOutlet UIImageView* backgroundImageView;
 
 - (IBAction)editButtonPressed:(id)sender;
 - (IBAction)backButtonPressed:(id)sender; 

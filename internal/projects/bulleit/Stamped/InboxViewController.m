@@ -262,6 +262,17 @@ typedef enum {
 }
 
 #pragma mark - Table view data source
+/*
+- (UITableViewCellEditingStyle)tableView:(UITableView*)tableView
+           editingStyleForRowAtIndexPath:(NSIndexPath*)indexPath {
+  return UITableViewCellEditingStyleDelete;
+}
+
+- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (editingStyle == UITableViewCellEditingStyleDelete) {
+    //add code here for when you hit delete
+  }    
+}*/
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
   return 1;
@@ -275,7 +286,7 @@ typedef enum {
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   static NSString* CellIdentifier = @"StampCell";
   InboxTableViewCell* cell = (InboxTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-  
+
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
@@ -431,6 +442,7 @@ typedef enum {
              forControlEvents:UIControlEventTouchUpInside];
   pinView.rightCalloutAccessoryView = disclosureButton;
   UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, kMapUserImageSize, kMapUserImageSize)];
+  userImageView.enabled = YES;
   [userImageView addTarget:self
                     action:@selector(mapUserTapped:)
           forControlEvents:UIControlEventTouchUpInside];

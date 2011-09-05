@@ -49,7 +49,11 @@
 
 - (void)initialize {
   self.enabled = NO;
-  self.backgroundColor = [UIColor whiteColor];
+  CALayer* backgroundLayer = [[CALayer alloc] init];
+  backgroundLayer.frame = self.bounds;
+  backgroundLayer.backgroundColor = [UIColor whiteColor].CGColor;
+  [self.layer addSublayer:backgroundLayer];
+  [backgroundLayer release];
   CGFloat borderWidth = CGRectGetWidth(self.frame) > 35.0 ? 2.0 : 1.0;
   imageView_ = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, borderWidth, borderWidth)];
   [self addSubview:imageView_];

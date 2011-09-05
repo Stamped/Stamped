@@ -20,6 +20,7 @@
 #import "GenericItemDetailViewController.h"
 #import "Entity.h"
 #import "Favorite.h"
+#import "GTMStringEncoding.h"
 #import "Notifications.h"
 #import "ProfileViewController.h"
 #import "Stamp.h"
@@ -274,6 +275,28 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [mainCommentContainer_ addSubview:commentLabel];
   CGRect mainCommentFrame = mainCommentContainer_.frame;
   mainCommentFrame.size.height = fmaxf(kMainCommentFrameMinHeight, CGRectGetMaxY(commentLabel.frame) + 10);
+  
+  if (stamp_.image) {
+    GTMStringEncoding* decoder = [GTMStringEncoding rfc4648Base64WebsafeStringEncoding];
+    UIImage* stampPhoto = [UIImage imageWithData:[decoder decode:stamp_.image]];
+    UIImageView* stampPhotoView = [[UIImageView alloc] initWithImage:stampPhoto];
+    stampPhotoView.contentMode = UIViewContentModeScaleAspectFit;
+    stampPhotoView.layer.shadowOffset = CGSizeZero;
+    stampPhotoView.layer.shadowOpacity = 0.25;
+    stampPhotoView.layer.shadowRadius = 1.0;
+    
+    CGFloat width = stampPhoto.size.width;
+    CGFloat height = stampPhoto.size.height;
+    
+    stampPhotoView.frame = CGRectMake(leftPadding, 
+                                      CGRectGetMaxY(commentLabel.frame) + 8,
+                                      200, 200 * (height / width));
+    stampPhotoView.layer.shadowPath = [UIBezierPath bezierPathWithRect:stampPhotoView.bounds].CGPath;
+    mainCommentFrame.size.height += CGRectGetHeight(stampPhotoView.bounds) + 10;
+    [mainCommentContainer_ addSubview:stampPhotoView];
+    [stampPhotoView release];
+  }
+  
   User* creditedUser = [stamp_.credits anyObject];
   if (creditedUser) {
     mainCommentFrame.size.height += 35;
@@ -282,7 +305,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentFrame) - 30, 12, 12);
     [mainCommentContainer_.layer addSublayer:firstStampLayer];
     [firstStampLayer release];
-    
+
     CALayer* secondStampLayer = [[CALayer alloc] init];
     secondStampLayer.contents = (id)stamp_.user.stampImage.CGImage;
     secondStampLayer.frame = CGRectOffset(firstStampLayer.frame, CGRectGetWidth(firstStampLayer.frame) / 2, 0);
