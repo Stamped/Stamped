@@ -286,7 +286,7 @@ typedef enum {
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   static NSString* CellIdentifier = @"StampCell";
   InboxTableViewCell* cell = (InboxTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-  
+
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
@@ -442,6 +442,7 @@ typedef enum {
              forControlEvents:UIControlEventTouchUpInside];
   pinView.rightCalloutAccessoryView = disclosureButton;
   UserImageView* userImageView = [[UserImageView alloc] initWithFrame:CGRectMake(0, 0, kMapUserImageSize, kMapUserImageSize)];
+  userImageView.enabled = YES;
   [userImageView addTarget:self
                     action:@selector(mapUserTapped:)
           forControlEvents:UIControlEventTouchUpInside];

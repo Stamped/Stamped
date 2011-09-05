@@ -186,6 +186,7 @@ class Stamp(Schema):
         self.mentions           = SchemaList(MentionSchema())
         self.credit             = SchemaList(CreditSchema())
         self.comment_preview    = SchemaList(Comment())
+        self.image_dimensions   = SchemaElement(basestring)
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()

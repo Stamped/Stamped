@@ -1,8 +1,17 @@
+0.6 - September 2, 2011
+Renamed base64_encode to testflight_base64_encode to remove a conflict with other third party libraries
+Added ability to reinstall crash handlers when they are overwritten using the setOptions API
+Fixed an issue where crash reports might not get sent under certain circumstances
+Fixed a deadlock when the application is put in the background and then resumed before all information can be sent
+Fixed an issue when attempting to un-install all signal handlers during a signal
+Added support for landscape mode on the iPad to the Questions and Feedback views
+Crash reporting now works in versions of Xcode earlier than 4.2
+Fixed a memory leak during handshake
 0.5 - August 19, 2011
 Feedback that is not attached to a checkpoint [TestFlight openFeedbackView]
 Usability changes to question views
 Removed pause and resume sessions, replaced with sessions being stopped and started
-Added text autocorrection to the Long Answer question type
+Added text auto correction to the Long Answer question type
 Crash reports now send on crash instead of next launch
 0.4 - August 15, 2011
 In Application Feedback with Questions

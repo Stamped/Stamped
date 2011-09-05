@@ -169,8 +169,19 @@ def convertUserData(collection):
                 for i in xrange(len(data['credit'])):
                     del(data['credit'][i]['profile_image'])
                     del(data['credit'][i]['display_name'])
+                    del(data['credit'][i]['color_primary'])
+                    del(data['credit'][i]['color_secondary'])
+                    del(data['credit'][i]['privacy'])
+            if 'mentions' in data and len(data['mentions']) > 0:
+                for i in xrange(len(data['mentions'])):
+                    del(data['mentions'][i]['display_name'])
             if 'image' in data:
                 del(data['image'])
+
+        if collection == 'comments':
+            if 'mentions' in data and len(data['mentions']) > 0:
+                for i in xrange(len(data['mentions'])):
+                    del(data['mentions'][i]['display_name'])
 
         json.dump(data, o)
         o.write("\n")

@@ -464,6 +464,7 @@ class HTTPStamp(Schema):
         self.mentions           = SchemaList(MentionSchema())
         self.credit             = SchemaList(CreditSchema())
         self.comment_preview    = SchemaList(HTTPComment())
+        self.image_dimensions   = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
         self.num_comments       = SchemaElement(int)
 
