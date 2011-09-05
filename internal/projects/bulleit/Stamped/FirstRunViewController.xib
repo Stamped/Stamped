@@ -51,26 +51,9 @@
 							<object class="IBUIScrollView" id="534721092">
 								<reference key="NSNextResponder" ref="197941075"/>
 								<int key="NSvFlags">274</int>
-								<object class="NSMutableArray" key="NSSubviews">
-									<bool key="EncodedWithXMLCoder">YES</bool>
-									<object class="IBUIImageView" id="319280791">
-										<reference key="NSNextResponder" ref="534721092"/>
-										<int key="NSvFlags">274</int>
-										<string key="NSFrameSize">{320, 2}</string>
-										<reference key="NSSuperview" ref="534721092"/>
-										<reference key="NSNextKeyView" ref="811322092"/>
-										<string key="NSReuseIdentifierKey">_NS:541</string>
-										<bool key="IBUIOpaque">NO</bool>
-										<bool key="IBUIUserInteractionEnabled">NO</bool>
-										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-										<object class="NSCustomResource" key="IBUIImage">
-											<string key="NSClassName">NSImage</string>
-											<string key="NSResourceName">top-round-corner-mask@2x.png</string>
-										</object>
-									</object>
-								</object>
 								<string key="NSFrameSize">{320, 388}</string>
 								<reference key="NSSuperview" ref="197941075"/>
+								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="319280791"/>
 								<string key="NSReuseIdentifierKey">_NS:174</string>
 								<bool key="IBUIOpaque">NO</bool>
@@ -84,6 +67,7 @@
 						</object>
 						<string key="NSFrameSize">{320, 388}</string>
 						<reference key="NSSuperview" ref="191373211"/>
+						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="534721092"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
@@ -106,6 +90,7 @@
 								<int key="NSvFlags">290</int>
 								<string key="NSFrameSize">{320, 4}</string>
 								<reference key="NSSuperview" ref="811322092"/>
+								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
 								<bool key="IBUIClipsSubviews">YES</bool>
 								<int key="IBUIContentMode">2</int>
@@ -119,6 +104,7 @@
 						</object>
 						<string key="NSFrame">{{0, 388}, {320, 72}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
+						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="809146970"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
@@ -131,9 +117,26 @@
 						</object>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 					</object>
+					<object class="IBUIImageView" id="319280791">
+						<reference key="NSNextResponder" ref="191373211"/>
+						<int key="NSvFlags">274</int>
+						<string key="NSFrameSize">{320, 2}</string>
+						<reference key="NSSuperview" ref="191373211"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="811322092"/>
+						<string key="NSReuseIdentifierKey">_NS:541</string>
+						<bool key="IBUIOpaque">NO</bool>
+						<bool key="IBUIUserInteractionEnabled">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<object class="NSCustomResource" key="IBUIImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">top-round-corner-mask@2x.png</string>
+						</object>
+					</object>
 				</object>
 				<string key="NSFrame">{{0, 20}, {320, 460}}</string>
 				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="197941075"/>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">3</int>
@@ -206,6 +209,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="811322092"/>
 							<reference ref="197941075"/>
+							<reference ref="319280791"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -251,7 +255,6 @@
 						<reference key="object" ref="534721092"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="319280791"/>
 						</object>
 						<reference key="parent" ref="197941075"/>
 						<string key="objectName">Background Scroll View</string>
@@ -259,7 +262,7 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">13</int>
 						<reference key="object" ref="319280791"/>
-						<reference key="parent" ref="534721092"/>
+						<reference key="parent" ref="191373211"/>
 					</object>
 				</object>
 			</object>
