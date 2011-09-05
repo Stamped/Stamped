@@ -214,6 +214,15 @@
 		7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */; };
 		7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */; };
 		7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */; };
+		CB62A6DF14153738007461C7 /* learnmore_00@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB62A6D814153738007461C7 /* learnmore_00@2x.png */; };
+		CB62A6E014153738007461C7 /* learnmore_01@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB62A6D914153738007461C7 /* learnmore_01@2x.png */; };
+		CB62A6E114153738007461C7 /* learnmore_02@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB62A6DA14153738007461C7 /* learnmore_02@2x.png */; };
+		CB62A6E214153738007461C7 /* learnmore_03@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB62A6DB14153738007461C7 /* learnmore_03@2x.png */; };
+		CB62A6E314153738007461C7 /* learnmore_04@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB62A6DC14153738007461C7 /* learnmore_04@2x.png */; };
+		CB62A6E414153738007461C7 /* learnmore_star@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB62A6DD14153738007461C7 /* learnmore_star@2x.png */; };
+		CB62A6E514153738007461C7 /* top-round-corner-mask@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB62A6DE14153738007461C7 /* top-round-corner-mask@2x.png */; };
+		CBB2C36F1413FF5D0080D554 /* LearnMoreViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CBB2C36E1413FF5D0080D554 /* LearnMoreViewController.m */; };
+		CBB2C3711413FF950080D554 /* LearnMoreViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBB2C3701413FF950080D554 /* LearnMoreViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -565,6 +574,16 @@
 		7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTabBarViewController.h; sourceTree = "<group>"; };
 		7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTabBarViewController.m; sourceTree = "<group>"; };
 		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RootTabBarViewController.xib; sourceTree = "<group>"; };
+		CB62A6D814153738007461C7 /* learnmore_00@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_00@2x.png"; sourceTree = "<group>"; };
+		CB62A6D914153738007461C7 /* learnmore_01@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_01@2x.png"; sourceTree = "<group>"; };
+		CB62A6DA14153738007461C7 /* learnmore_02@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_02@2x.png"; sourceTree = "<group>"; };
+		CB62A6DB14153738007461C7 /* learnmore_03@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_03@2x.png"; sourceTree = "<group>"; };
+		CB62A6DC14153738007461C7 /* learnmore_04@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_04@2x.png"; sourceTree = "<group>"; };
+		CB62A6DD14153738007461C7 /* learnmore_star@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_star@2x.png"; sourceTree = "<group>"; };
+		CB62A6DE14153738007461C7 /* top-round-corner-mask@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "top-round-corner-mask@2x.png"; sourceTree = "<group>"; };
+		CBB2C36D1413FF5D0080D554 /* LearnMoreViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LearnMoreViewController.h; sourceTree = "<group>"; };
+		CBB2C36E1413FF5D0080D554 /* LearnMoreViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LearnMoreViewController.m; sourceTree = "<group>"; };
+		CBB2C3701413FF950080D554 /* LearnMoreViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = LearnMoreViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -938,6 +957,7 @@
 				7E47E93F1409B58300130B32 /* Edit Entity */,
 				7EC6B4A513C6039000CE83DD /* Stamp List Filter */,
 				7E7612B413C95BBD0023CCC4 /* Entity Details */,
+				CB62A6BC14142507007461C7 /* Learn More */,
 				7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */,
 				7E1D92E913D632DE0022412D /* stamp_shape_textured@2x.png */,
 				7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */,
@@ -1130,6 +1150,7 @@
 				7ED2EF5F13E0DBF8007F1AFB /* Todo */,
 				7ED2EF6D13E0DF83007F1AFB /* People */,
 				7EE70C5313FC6378008CCC15 /* Profile View */,
+				CBB2C3641413FB160080D554 /* Learn More */,
 				7ED2EF6713E0DED5007F1AFB /* Root View */,
 				7EDA5FF213F56D7F00F23B13 /* Authentication */,
 				7E42FDE813EF3A64007B3C26 /* STReloadableTableViewController.h */,
@@ -1154,6 +1175,30 @@
 				7EE482F013FACFC300359EEA /* STPlaceAnnotation.m */,
 			);
 			name = Classes;
+			sourceTree = "<group>";
+		};
+		CB62A6BC14142507007461C7 /* Learn More */ = {
+			isa = PBXGroup;
+			children = (
+				CB62A6D814153738007461C7 /* learnmore_00@2x.png */,
+				CB62A6D914153738007461C7 /* learnmore_01@2x.png */,
+				CB62A6DA14153738007461C7 /* learnmore_02@2x.png */,
+				CB62A6DB14153738007461C7 /* learnmore_03@2x.png */,
+				CB62A6DC14153738007461C7 /* learnmore_04@2x.png */,
+				CB62A6DD14153738007461C7 /* learnmore_star@2x.png */,
+				CB62A6DE14153738007461C7 /* top-round-corner-mask@2x.png */,
+			);
+			name = "Learn More";
+			sourceTree = "<group>";
+		};
+		CBB2C3641413FB160080D554 /* Learn More */ = {
+			isa = PBXGroup;
+			children = (
+				CBB2C36D1413FF5D0080D554 /* LearnMoreViewController.h */,
+				CBB2C36E1413FF5D0080D554 /* LearnMoreViewController.m */,
+				CBB2C3701413FF950080D554 /* LearnMoreViewController.xib */,
+			);
+			name = "Learn More";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1448,6 +1493,14 @@
 				7E6FFA54140F137400F23A26 /* green_follow_bg@2x.png in Resources */,
 				7E2B33A1140F29F300AFC384 /* README.txt in Resources */,
 				7E2B33A2140F29F300AFC384 /* release_notes.txt in Resources */,
+				CBB2C3711413FF950080D554 /* LearnMoreViewController.xib in Resources */,
+				CB62A6DF14153738007461C7 /* learnmore_00@2x.png in Resources */,
+				CB62A6E014153738007461C7 /* learnmore_01@2x.png in Resources */,
+				CB62A6E114153738007461C7 /* learnmore_02@2x.png in Resources */,
+				CB62A6E214153738007461C7 /* learnmore_03@2x.png in Resources */,
+				CB62A6E314153738007461C7 /* learnmore_04@2x.png in Resources */,
+				CB62A6E414153738007461C7 /* learnmore_star@2x.png in Resources */,
+				CB62A6E514153738007461C7 /* top-round-corner-mask@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1532,6 +1585,7 @@
 				7E5EB263140C0535007D164F /* STEditEntityTextField.m in Sources */,
 				7E5EB266140C166A007D164F /* STCategoryDropdownTableView.m in Sources */,
 				7E453720140F003C0097E64F /* RelationshipsViewController.m in Sources */,
+				CBB2C36F1413FF5D0080D554 /* LearnMoreViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
