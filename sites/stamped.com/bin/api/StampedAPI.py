@@ -697,13 +697,13 @@ class StampedAPI(AStampedAPI):
                 # Add restamp as comment (if prior stamp exists)
                 if 'stamp_id' in item and item['stamp_id'] != None:
                     # Build comment
-                    comment             = Comment()
-                    comment.user_id     = user.user_id
-                    comment.stamp_id    = item.stamp_id
-                    comment.restamp_id  = stamp.stamp_id
-                    comment.blurb       = stamp.blurb
-                    comment.mentions    = stamp.mentions
-                    comment.created     = datetime.utcnow()
+                    comment                 = Comment()
+                    comment.user.user_id    = user.user_id
+                    comment.stamp_id        = item.stamp_id
+                    comment.restamp_id      = stamp.stamp_id
+                    comment.blurb           = stamp.blurb
+                    comment.mentions        = stamp.mentions
+                    comment.created         = datetime.utcnow()
                     
                     # Add the comment data to the database
                     self._commentDB.addComment(comment)
@@ -864,13 +864,13 @@ class StampedAPI(AStampedAPI):
                 # Add restamp as comment (if prior stamp exists)
                 if 'stamp_id' in item and item['stamp_id'] != None:
                     # Build comment
-                    comment             = Comment()
-                    comment.user_id     = user.user_id
-                    comment.stamp_id    = item.stamp_id
-                    comment.restamp_id  = stamp.stamp_id
-                    comment.blurb       = stamp.blurb
-                    comment.mentions    = stamp.mentions
-                    comment.created     = datetime.utcnow()
+                    comment                 = Comment()
+                    comment.user.user_id    = user.user_id
+                    comment.stamp_id        = item.stamp_id
+                    comment.restamp_id      = stamp.stamp_id
+                    comment.blurb           = stamp.blurb
+                    comment.mentions        = stamp.mentions
+                    comment.created         = datetime.utcnow()
                     
                     # Add the comment data to the database
                     self._commentDB.addComment(comment)
@@ -980,6 +980,8 @@ class StampedAPI(AStampedAPI):
                 msg = "Insufficient privileges to view stamp"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
+
+        ### TODO: Add user object
       
         return stamp
     
@@ -996,6 +998,8 @@ class StampedAPI(AStampedAPI):
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
+
+        ### TODO: Add dimensions to stamp object
         
         return True
     
@@ -1278,6 +1282,10 @@ class StampedAPI(AStampedAPI):
 
             # Append user objects
             userIds = {}
+            for stamp in stampData:
+                userIds[stamp.user_id] = 1
+                for i in xrange(len(stamp.credit)):
+                    userIds[stamp.credit[i].user_id] = 1
             for comment in commentData:
                 userIds[comment.user_id] = 1
 
@@ -1300,6 +1308,11 @@ class StampedAPI(AStampedAPI):
                 if stamp.stamp_id in commentPreviews:
                     stamp.comment_preview = commentPreviews[stamp.stamp_id]
                 stamp.user = userIds[stamp.user_id]
+                for i in xrange(len(stamp.credit)):
+                    creditedUser = userIds[stamp.credit[i].user_id]
+                    stamp.credit[i].color_primary = creditedUser['color_primary']
+                    stamp.credit[i].color_secondary = creditedUser['color_secondary']
+                    stamp.credit[i].privacy = creditedUser['privacy']
                 stamps.append(stamp)
 
         else:
@@ -1307,6 +1320,8 @@ class StampedAPI(AStampedAPI):
             userIds = {}
             for stamp in stampData:
                 userIds[stamp.user_id] = 1
+                for i in xrange(len(stamp.credit)):
+                    userIds[stamp.credit[i].user_id] = 1
 
             users = self._userDB.lookupUsers(userIds.keys(), None)
 
@@ -1316,6 +1331,11 @@ class StampedAPI(AStampedAPI):
             stamps = []
             for stamp in stampData:
                 stamp.user = userIds[stamp.user_id]
+                for i in xrange(len(stamp.credit)):
+                    creditedUser = userIds[stamp.credit[i].user_id]
+                    stamp.credit[i].color_primary = creditedUser['color_primary']
+                    stamp.credit[i].color_secondary = creditedUser['color_secondary']
+                    stamp.credit[i].privacy = creditedUser['privacy']
                 stamps.append(stamp)
 
         return stamps
