@@ -639,8 +639,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   CGFloat height = original.size.height;
   CGSize newSize = CGSizeZero;
   if ((width > height && width > 640) || (height > width && height > 960)) {
-    width *= 0.3;
-    height *= 0.3;
+    newSize.width = width * 0.3;
+    newSize.height = height * 0.3;
     UIGraphicsBeginImageContext(newSize);
     [original drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
     self.stampPhoto = UIGraphicsGetImageFromCurrentImageContext();  
