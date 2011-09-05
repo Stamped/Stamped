@@ -166,7 +166,7 @@ def convertUserData(collection):
 
         if collection == 'stamps':
             if 'credit' in data and len(data['credit']) > 0:
-                for i in xrange(len(data['mentions'])):
+                for i in xrange(len(data['credit'])):
                     del(data['credit']['profile_image'])
                     del(data['credit']['display_name'])
 
