@@ -18,6 +18,8 @@
 @synthesize scrollView = scrollView_;
 @synthesize bottomView = bottomView_;
 @synthesize animView = animView_;
+@synthesize signInButton = signInButton_;
+@synthesize createAccountButton = createAccountButton_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.

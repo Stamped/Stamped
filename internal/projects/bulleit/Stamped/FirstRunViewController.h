@@ -14,5 +14,7 @@
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* bottomView;
 @property (nonatomic, retain) IBOutlet UIView* animView;
+@property (nonatomic, retain) IBOutlet UIButton* signInButton;
+@property (nonatomic, retain) IBOutlet UIButton* createAccountButton;
 
 @end

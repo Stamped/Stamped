@@ -22,6 +22,10 @@
 		7E146FF113F07A7500B954C6 /* MediumUserImageButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E146FF013F07A7500B954C6 /* MediumUserImageButton.m */; };
 		7E1D92DC13D5F5C50022412D /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E1D92DB13D5F5C40022412D /* User.m */; };
 		7E1D92EA13D632DE0022412D /* stamp_shape_textured@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1D92E913D632DE0022412D /* stamp_shape_textured@2x.png */; };
+		7E1E107C141571D700E6B980 /* create_account_button_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1E1078141571D700E6B980 /* create_account_button_active@2x.png */; };
+		7E1E107D141571D700E6B980 /* create_account_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1E1079141571D700E6B980 /* create_account_button@2x.png */; };
+		7E1E107E141571D700E6B980 /* sign_in_button_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1E107A141571D700E6B980 /* sign_in_button_active@2x.png */; };
+		7E1E107F141571D700E6B980 /* sign_in_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1E107B141571D700E6B980 /* sign_in_button@2x.png */; };
 		7E22679913D4D90F00657A66 /* AccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22679813D4D90F00657A66 /* AccountManager.m */; };
 		7E22679D13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */; };
 		7E22679E13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E22679C13D4E96A00657A66 /* stamp_detail_ripple_top@2x.png */; };
@@ -345,6 +349,10 @@
 		7E1D92DA13D5F5C40022412D /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = User.h; sourceTree = "<group>"; };
 		7E1D92DB13D5F5C40022412D /* User.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = User.m; sourceTree = "<group>"; };
 		7E1D92E913D632DE0022412D /* stamp_shape_textured@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_shape_textured@2x.png"; sourceTree = "<group>"; };
+		7E1E1078141571D700E6B980 /* create_account_button_active@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_account_button_active@2x.png"; sourceTree = "<group>"; };
+		7E1E1079141571D700E6B980 /* create_account_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_account_button@2x.png"; sourceTree = "<group>"; };
+		7E1E107A141571D700E6B980 /* sign_in_button_active@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sign_in_button_active@2x.png"; sourceTree = "<group>"; };
+		7E1E107B141571D700E6B980 /* sign_in_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sign_in_button@2x.png"; sourceTree = "<group>"; };
 		7E22679713D4D90F00657A66 /* AccountManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountManager.h; sourceTree = "<group>"; };
 		7E22679813D4D90F00657A66 /* AccountManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AccountManager.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_detail_ripple_bottom@2x.png"; sourceTree = "<group>"; };
@@ -418,7 +426,7 @@
 		7E52B53C1412CAA600B46A55 /* done_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "done_button@2x.png"; sourceTree = "<group>"; };
 		7E52B53E1412DD0500B46A55 /* choose_photo_button_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "choose_photo_button_large@2x.png"; sourceTree = "<group>"; };
 		7E52B53F1412DD0500B46A55 /* take_photo_button_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "take_photo_button_large@2x.png"; sourceTree = "<group>"; };
-		7E5406DA141550A900912463 /* FirstRunViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; path = FirstRunViewController.h; sourceTree = "<group>"; };
+		7E5406DA141550A900912463 /* FirstRunViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FirstRunViewController.h; sourceTree = "<group>"; };
 		7E5406DB141550A900912463 /* FirstRunViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FirstRunViewController.m; sourceTree = "<group>"; };
 		7E5406DC141550A900912463 /* FirstRunViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FirstRunViewController.xib; sourceTree = "<group>"; };
 		7E5406E0141550E000912463 /* learnmore_00@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "learnmore_00@2x.png"; sourceTree = "<group>"; };
@@ -820,6 +828,10 @@
 		7E5406DF141550D000912463 /* First run */ = {
 			isa = PBXGroup;
 			children = (
+				7E1E1078141571D700E6B980 /* create_account_button_active@2x.png */,
+				7E1E1079141571D700E6B980 /* create_account_button@2x.png */,
+				7E1E107A141571D700E6B980 /* sign_in_button_active@2x.png */,
+				7E1E107B141571D700E6B980 /* sign_in_button@2x.png */,
 				7E5406E0141550E000912463 /* learnmore_00@2x.png */,
 				7E5406E1141550E000912463 /* learnmore_01@2x.png */,
 				7E5406E2141550E000912463 /* learnmore_02@2x.png */,
@@ -1548,6 +1560,10 @@
 				7E5406EA141550E000912463 /* learnmore_04@2x.png in Resources */,
 				7E5406EB141550E000912463 /* learnmore_star@2x.png in Resources */,
 				7E5406ED141550FE00912463 /* top-round-corner-mask@2x.png in Resources */,
+				7E1E107C141571D700E6B980 /* create_account_button_active@2x.png in Resources */,
+				7E1E107D141571D700E6B980 /* create_account_button@2x.png in Resources */,
+				7E1E107E141571D700E6B980 /* sign_in_button_active@2x.png in Resources */,
+				7E1E107F141571D700E6B980 /* sign_in_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
