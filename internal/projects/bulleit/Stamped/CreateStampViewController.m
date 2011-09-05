@@ -15,6 +15,7 @@
 #import "EditEntityViewController.h"
 #import "Entity.h"
 #import "Favorite.h"
+#import "GTMStringEncoding.h"
 #import "STNavigationBar.h"
 #import "Notifications.h"
 #import "Stamp.h"
@@ -493,7 +494,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 #pragma mark - UIActionSheetDelegate methods.
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-  if (buttonIndex == 0) {  // Remove the thing.
+  if (buttonIndex == 0) {  // Remove the photo.
     [stampPhotoView_ removeFromSuperview];
     stampPhotoView_ = nil;
     self.stampPhoto = nil;
@@ -515,10 +516,16 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = stampMapping;
   NSString* credit = [creditTextField_.text stringByReplacingOccurrencesOfString:@" " withString:@""];
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-                         reasoningTextView_.text, @"blurb",
-                         credit, @"credit",
-                         entityObject_.entityID, @"entity_id", nil];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+      reasoningTextView_.text, @"blurb",
+      credit, @"credit",
+      entityObject_.entityID, @"entity_id", nil];
+  if (self.stampPhoto) {
+    GTMStringEncoding* encoder = [GTMStringEncoding rfc4648Base64WebsafeStringEncoding];
+    NSString* encoded = [encoder encode:UIImagePNGRepresentation(self.stampPhoto)];
+    [params setObject:encoded forKey:@"image"];
+  }
+  objectLoader.params = params;
   [objectLoader send];
 }
 
@@ -624,9 +631,23 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info {
   NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
 
-  // Handle a still image capture.
+  UIImage* original = nil;
   if (CFStringCompare((CFStringRef)mediaType, kUTTypeImage, 0) == kCFCompareEqualTo)
-    self.stampPhoto = (UIImage*)[info objectForKey:UIImagePickerControllerOriginalImage];
+    original = (UIImage*)[info objectForKey:UIImagePickerControllerOriginalImage];
+
+  CGFloat width = original.size.width;
+  CGFloat height = original.size.height;
+  CGSize newSize = CGSizeZero;
+  if ((width > height && width > 640) || (height > width && height > 960)) {
+    width *= 0.3;
+    height *= 0.3;
+    UIGraphicsBeginImageContext(newSize);
+    [original drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    self.stampPhoto = UIGraphicsGetImageFromCurrentImageContext();  
+    UIGraphicsEndImageContext();
+  } else {
+    self.stampPhoto = original;
+  }
 
   stampPhotoView_ = [[UIImageView alloc] initWithImage:self.stampPhoto];
   stampPhotoView_.contentMode = UIViewContentModeScaleAspectFit;
@@ -634,8 +655,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   stampPhotoView_.layer.shadowOpacity = 0.25;
   stampPhotoView_.layer.shadowRadius = 1.0;
   
-  CGFloat width = stampPhoto_.size.width;
-  CGFloat height = stampPhoto_.size.height;
+  width = stampPhoto_.size.width;
+  height = stampPhoto_.size.height;
 
   stampPhotoView_.frame = CGRectMake(8, 30, 200, 200 * (height / width));
   stampPhotoView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:stampPhotoView_.bounds].CGPath;

@@ -36,7 +36,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [RKRequestQueue sharedQueue].suspended = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
@@ -78,7 +78,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                         @"created", @"created",
                                         @"num_comments", @"numComments", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapAttributes:@"blurb", nil];
+  [stampMapping mapAttributes:@"blurb", @"image", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
   [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];
