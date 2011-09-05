@@ -171,14 +171,14 @@ def convertUserData(collection):
                     del(data['credit'][i]['display_name'])
             if 'mentions' in data and len(data['mentions']) > 0:
                 for i in xrange(len(data['mentions'])):
-                    del(data['credit'][i]['display_name'])
+                    del(data['mentions'][i]['display_name'])
             if 'image' in data:
                 del(data['image'])
 
         if collection == 'comments':
             if 'mentions' in data and len(data['mentions']) > 0:
                 for i in xrange(len(data['mentions'])):
-                    del(data['credit'][i]['display_name'])
+                    del(data['mentions'][i]['display_name'])
 
         json.dump(data, o)
         o.write("\n")
