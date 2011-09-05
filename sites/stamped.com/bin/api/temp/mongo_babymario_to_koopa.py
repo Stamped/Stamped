@@ -164,6 +164,12 @@ def convertUserData(collection):
         del(data['user']['color_secondary'])
         del(data['user']['privacy'])
 
+        if collection == 'stamps':
+            if 'credit' in data and len(data['credit']) > 0:
+                for i in xrange(len(data['mentions'])):
+                    del(data['credit']['profile_image'])
+                    del(data['credit']['display_name'])
+
         json.dump(data, o)
         o.write("\n")
 
