@@ -86,7 +86,7 @@ class StampedAPIImageTests(AImageTest):
             
             data = {
                 "oauth_token": self.token['access_token'],
-                "profile_image": base64.encodestring(data), 
+                "profile_image": base64.urlsafe_b64encode(data), 
             }
             
             result = self.handlePOST(path, data)
