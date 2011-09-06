@@ -511,7 +511,7 @@ class HTTPStampNew(Schema):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.blurb              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
-        self.image              = SchemaElement(basestring, required=True, normalize=False)
+        self.image              = SchemaElement(basestring, normalize=False)
 
 class HTTPStampEdit(Schema):
     def setSchema(self):
