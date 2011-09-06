@@ -120,8 +120,7 @@ def parseCommandLine():
     parser.add_option("-P", "--nonplace", default=False, action="store_true", 
         help="dedupe only non-place entities")
     
-    parser.add_option("-v", "--verbose", default=False, 
-        action="store_true", 
+    parser.add_option("-v", "--verbose", default=False, action="store_true", 
         help="enable verbose logging")
     
     (options, args) = parser.parse_args()

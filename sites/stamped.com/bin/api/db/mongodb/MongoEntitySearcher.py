@@ -147,6 +147,17 @@ class MongoEntitySearcher(EntitySearcher):
         "zoo", 
     ])
     
+    location_category_blacklist = set([
+        'music', 
+        'film', 
+        'book', 
+    ])
+    
+    location_subcategory_blacklist = set([
+        'app', 
+        'video_game', 
+    ])
+    
     def __init__(self, api):
         EntitySearcher.__init__(self)
         
@@ -206,19 +217,25 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = input_query
         
-        for synonym_re in self._near_synonym_res:
-            match = synonym_re.match(query)
-            
-            if match is not None:
-                groups = match.groups()
-                region_name = groups[1]
+        if not self._is_possible_location_query(category_filter, subcategory_filter):
+            # if we're filtering by category / subcategory and the filtered results 
+            # couldn't possibly contain a location, then ensure that coords is disabled
+            coords = None
+        else:
+            # process 'in' or 'near' location hint
+            for synonym_re in self._near_synonym_res:
+                match = synonym_re.match(query)
                 
-                if region_name in self._regions:
-                    region = self._regions[region_name]
-                    query  = groups[0]
-                    coords = [ region['lat'], region['lng'], ]
-                    original_coords = False
-                    break
+                if match is not None:
+                    groups = match.groups()
+                    region_name = groups[1]
+                    
+                    if region_name in self._regions:
+                        region = self._regions[region_name]
+                        query  = groups[0]
+                        coords = [ region['lat'], region['lng'], ]
+                        original_coords = False
+                        break
         
         query = query.replace('[', '\[?')
         query = query.replace(']', '\]?')
@@ -229,6 +246,7 @@ class MongoEntitySearcher(EntitySearcher):
         query = query.replace(':', ':?')
         query = query.replace('&', ' & ')
         
+        # process individual words in query
         words = query.split(' ')
         if len(words) > 1:
             for i in xrange(len(words)):
@@ -330,9 +348,8 @@ class MongoEntitySearcher(EntitySearcher):
                         if 'vicinity' in result:
                             entity.neighborhood = result['vicinity']
                         
+                        # fetch a google places details request to fill in any missing data
                         details = self._googlePlaces.getPlaceDetails(result['reference'])
-                        
-                        #logs.info(pformat(details))
                         
                         if 'formatted_phone_number' in details:
                             entity.phone = details['formatted_phone_number']
@@ -381,6 +398,7 @@ class MongoEntitySearcher(EntitySearcher):
                 for result in google_place_results:
                     results[result[0].entity_id] = result
         
+        # process the normal mongodb results
         for entity in wrapper['db_results']:
             e = self.entityDB._convertFromMongo(entity)
             
@@ -538,4 +556,16 @@ class MongoEntitySearcher(EntitySearcher):
             value = -math.log10(1 - value)
         
         return value
+    
+    def _is_possible_location_query(self, category_filter, subcategory_filter):
+        if category_filter is None and subcategory_filter is None:
+            return True
+        
+        if category_filter in self.location_category_blacklist:
+            return False
+        
+        if subcategory_filter in self.location_subcategory_blacklist:
+            return False
+        
+        return True
 

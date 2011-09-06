@@ -114,7 +114,7 @@ class AEntityMatcher(object):
                     self.dead_entities.add(dupe.entity_id)
                     utils.log("   %d) removing %s" % (i + 1, dupe.title))
             
-            self.removeDuplicates(keep, dupes1)
+            self.mergeDuplicates(keep, dupes1)
             return keep
         except Fail:
             if 'entity_id' in entity:
@@ -223,7 +223,7 @@ class AEntityMatcher(object):
         keep = duplicates.pop(ishortest)
         return (keep, duplicates)
     
-    def removeDuplicates(self, keep, duplicates):
+    def mergeDuplicates(self, keep, duplicates, override=False):
         numDuplicates = len(duplicates)
         
         assert numDuplicates > 0
@@ -241,6 +241,9 @@ class AEntityMatcher(object):
                         wrap['stale'] = True
                     elif isinstance(v, dict):
                         _addDict(v, dest, wrap)
+                    elif override:
+                        dest[k] = v
+                        wrap['stale'] = True
             
             # add any fields from this version of the duplicate to the version 
             # that we're keeping if they don't already exist
@@ -262,6 +265,8 @@ class AEntityMatcher(object):
                 
                 if 'place' in entity:
                     self._placesDB.updateEntity(keep)
+        
+        return keep
     
     def _convertFromMongo(self, mongo):
         if isinstance(mongo, dict):
