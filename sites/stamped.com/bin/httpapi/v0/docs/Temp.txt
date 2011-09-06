@@ -117,3 +117,246 @@ The user id or screen name of the user.
         }
     ]
 
+
+------------------------------------------------------------------------------
+## GET temp/inbox ##
+
+### Description ###
+Show stamps in the authenticating user's inbox. There is an extended limit on this version (10,000 stamps).
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+_None_
+
+### Sample Request ###
+      GET https://api.stamped.com/v1/temp/inbox.json?oauth_token=1234567890123456789012
+      
+### Sample Result ###
+      [
+            {
+                  "blurb": "Went here with @robby... Really, the best ever.", 
+                  "entity": {
+                        "entity_id": "4e226ea84e61754161000000",
+                        "title": "Spotted Pig",
+                        "subtitle": "New York, NY"
+                        "category": "food",
+                        "subcategory": "restaurant"
+                        "desc": "Burger place",
+                        "coordinates": "40.714623,-74.006605",
+                        "address": "314 West 11th Street New York, NY 10014-2369",
+                        "last_modified": "2011-07-17 19:03:22.354813",
+                        "opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+                        "phone": "1235551234"
+                  }, 
+                  "stamp_id": "4e226fcd4e18474561000000", 
+                  "credit": [
+                        {
+                              "user_id": "4e226fcd4e61754161000007",
+                              "profile_image": "http://img.stamped.com/u/robby.png", 
+                              "screen_name": "robby",
+                              "display_name": "Robby S.",
+                              "color_primary": "333333",
+                              "color_secondary": "999999",
+                              "privacy": false
+                        },
+                        {
+                              "user_id": "4e226fcd4e61754161000008",
+                              "profile_image": "http://img.stamped.com/u/bart.png", 
+                              "screen_name": "bart",
+                              "display_name": "Bart S.",
+                              "color_primary": "333333",
+                              "color_secondary": "999999",
+                              "privacy": false
+                        }
+                  ], 
+                  "mentions": [
+                        {
+                              "display_name": "Robby S.", 
+                              "indices": [15,21], 
+                              "screen_name": "robby", 
+                              "user_id": "4e226fcd4e61754161000007"
+                        }
+                  ], 
+                  "created": "2011-07-17 05:14:54.128641",
+                  "user": {
+                        "user_id": "47cc67093475061e3d95369d", 
+                        "profile_image": "http://img.stamped.com/u/kevin.png", 
+                        "display_name": "Kevin P.", 
+                        "color_primary": "333333",
+                        "color_secondary": "999999",
+                        "screen_name": "kevin",
+                        "privacy": false
+                  }
+                  "comment_preview": [
+                        {
+                              "comment_id": "47cc67093475061e3d953691",
+                              "user": {
+                                    "user_id": "47cc67093475061e3d95369d", 
+                                    "profile_image": "http://img.stamped.com/u/kevin.png", 
+                                    "display_name": "Kevin P.", 
+                                    "color_primary": "333333",
+                                    "color_secondary": "999999",
+                                    "screen_name": "kevin",
+                                    "privacy": false
+                              },
+                              "stamp_id": "4e226fcd4e18474561000000",
+                              "blurb": "Yeah, this place rules.",
+                              "created": "2011-07-17 05:19:03.471937"
+                        }
+                  ]
+                  "num_comments": 1
+            }
+      ]
+
+
+------------------------------------------------------------------------------
+## GET temp/activity ##
+
+### Description ###
+Display activity data for the authenticating user. This uses the "old" style of data.
+
+### Details ###
+* OAuth Token Required
+* Note that the `num_comments` and `comment_preview` fields are removed for any embedded stamps.
+
+### Parameters ###
+
+**limit** _optional_
+The maximum number of desired results. Values greater than the default will be ignored.
+
+**since** _optional_
+A UNIX timestamp stating the beginning of the time slice desired. This enables a certain range of activity to be returned. 
+
+**before** _optional_
+A UNIX timestamp stating the end of the time slice desired. This enables a certain range of activity to be returned.
+
+### Sample Request ###
+      GET https://api.stamped.com/v1/activity/show.json?oauth_token=1234567890123456789012
+
+### Sample Result ###
+    [
+        {
+            "comment": null, 
+            "created": "2011-07-27 16:02:15.394000", 
+            "genre": "mention", 
+            "stamp": {
+                "blurb": "Great date spot. Thanks @rmstein!", 
+                "comment_preview": [], 
+                "created": "2011-07-27 16:02:14.549000", 
+                "credit": null, 
+                "entity": {
+                    "entity_id": "4e226ea84e61754161000000",
+                    "title": "Spotted Pig",
+                    "subtitle": "New York, NY"
+                    "category": "food",
+                    "subcategory": "restaurant"
+                    "desc": "Burger place",
+                    "coordinates": "40.714623,-74.006605",
+                    "address": "314 West 11th Street New York, NY 10014-2369",
+                    "last_modified": "2011-07-17 19:03:22.354813",
+                    "opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+                    "phone": "1235551234"
+                }, 
+                "mentions": [
+                    {
+                        "display_name": "Robby S.", 
+                        "indices": [24, 32], 
+                        "screen_name": "rmstein", 
+                        "user_id": "4e30368332a7ba613b000001"
+                    }
+                ], 
+                "stamp_id": "4e30368732a7ba613b000007", 
+                "user": {
+                    "color_primary": "333333", 
+                    "color_secondary": "999999", 
+                    "display_name": "Kevin P.", 
+                    "privacy": false, 
+                    "profile_image": "http://img.stamped.com/u/kevin.png", 
+                    "screen_name": "kpalms", 
+                    "user_id": "4e30368332a7ba613b000000"
+                }
+            }, 
+            "user": {
+                "color_primary": "333333", 
+                "color_secondary": "999999", 
+                "display_name": "Kevin P.", 
+                "privacy": false, 
+                "profile_image": "http://img.stamped.com/u/kevin.png", 
+                "screen_name": "kpalms", 
+                "user_id": "4e30368332a7ba613b000000"
+            }
+        }, 
+        {
+            "comment": {
+                "blurb": "That looks awesome. Well done, @rmstein..", 
+                "comment_id": "4e30368632a7ba613b000005", 
+                "created": "2011-07-27 16:02:13.509000", 
+                "mentions": [
+                    {
+                        "display_name": "Robby S.", 
+                        "indices": [31, 39], 
+                        "screen_name": "rmstein", 
+                        "user_id": "4e30368332a7ba613b000001"
+                    }
+                ], 
+                "restamp_id": null, 
+                "stamp_id": "4e30368532a7ba613b000004", 
+                "user": {
+                    "color_primary": "333333", 
+                    "color_secondary": "999999", 
+                    "display_name": "Kevin P.", 
+                    "privacy": false, 
+                    "profile_image": "http://img.stamped.com/u/kevin.png", 
+                    "screen_name": "kpalms", 
+                    "user_id": "4e30368332a7ba613b000000"
+                }
+            }, 
+            "created": "2011-07-27 16:02:14.203000", 
+            "genre": "comment", 
+            "stamp": {
+                "blurb": "Favorite restaurant in the Village.", 
+                "comment_preview": [], 
+                "created": "2011-07-27 16:02:12.658000", 
+                "credit": null, 
+                "entity": {
+                    "entity_id": "4e226ea84e61754161000000",
+                    "title": "Spotted Pig",
+                    "subtitle": "New York, NY"
+                    "category": "food",
+                    "subcategory": "restaurant"
+                    "desc": "Burger place",
+                    "coordinates": "40.714623,-74.006605",
+                    "address": "314 West 11th Street New York, NY 10014-2369",
+                    "last_modified": "2011-07-17 19:03:22.354813",
+                    "opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+                    "phone": "1235551234"
+                }, 
+                "image": "image.png", 
+                "mentions": null, 
+                "num_comments": 0, 
+                "stamp_id": "4e30368532a7ba613b000004", 
+                "user": {
+                    "color_primary": "333333", 
+                    "color_secondary": "999999", 
+                    "display_name": "Kevin P.", 
+                    "privacy": false, 
+                    "profile_image": "http://img.stamped.com/u/kevin.png", 
+                    "screen_name": "kpalms", 
+                    "user_id": "4e30368332a7ba613b000000"
+                }
+            }, 
+            "user": {
+                "color_primary": "333333", 
+                "color_secondary": "999999", 
+                "display_name": "Kevin P.", 
+                "privacy": false, 
+                "profile_image": "http://img.stamped.com/u/kevin.png", 
+                "screen_name": "kpalms", 
+                "user_id": "4e30368332a7ba613b000000"
+            }
+        }
+    ]
+
