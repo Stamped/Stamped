@@ -500,7 +500,7 @@ class HTTPStamp(Schema):
             self.created = schema.timestamp.created
 
             if self.image_dimensions != None:
-                self.image_url = 'static.stamped.com/stamps/%s.jpg' % self.stamp_id
+                self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
 
         else:
             raise NotImplementedError
