@@ -755,7 +755,7 @@ class StampedAPI(AStampedAPI):
 
         # Add image to stamp
         if imageData != None:
-            imageData = base64.decodestring(imageData)
+            imageData = base64.urlsafe_b64decode(imageData)
             
             image = self._imageDB.getImage(imageData)
             self._imageDB.addStampImage(stampId, image)
