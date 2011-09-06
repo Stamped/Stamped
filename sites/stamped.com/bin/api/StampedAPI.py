@@ -666,12 +666,7 @@ class StampedAPI(AStampedAPI):
             return stamps[0]
 
         return stamps
-
-
-
-
-
-
+        
     
     def addStamp(self, authUserId, entityId, data):
         user        = self._userDB.getUser(authUserId)
@@ -752,20 +747,22 @@ class StampedAPI(AStampedAPI):
 
             ### TODO: How do we handle credited users that have not yet joined?
             stamp.credit = credit
+            
+        # Add the stamp data to the database
+        stamp = self._stampDB.addStamp(stamp)
 
         # Add image to stamp
+        ### TODO: Unwind stamp if this fails
         if imageData != None:
-            imageData = base64.urlsafe_b64decode(imageData)
+            imageData = base64.urlsafe_b64decode(imageData.encode('ascii'))
             
             image = self._imageDB.getImage(imageData)
-            self._imageDB.addStampImage(stampId, image)
+            self._imageDB.addStampImage(stamp.stamp_id, image)
 
             # Add image dimensions to stamp object (width,height)
             width, height           = image.size
             stamp.image_dimensions  = "%s,%s" % (width, height)
-            
-        # Add the stamp data to the database
-        stamp = self._stampDB.addStamp(stamp)
+            stamp                   = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
         stamp = self._addUserObjects(stamp, userIds=userIds)
