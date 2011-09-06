@@ -6,14 +6,12 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from errors import *
 
 from ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
-from Schemas import Entity
-
-from difflib import SequenceMatcher
-from pymongo import GEO2D
-from pymongo.son import SON
+from Schemas                  import Entity
+from pymongo                  import GEO2D
+from pymongo.son              import SON
+from errors                   import Fail
 
 class PlacesEntityMatcher(ATitleBasedEntityMatcher):
     def __init__(self, stamped_api, options):

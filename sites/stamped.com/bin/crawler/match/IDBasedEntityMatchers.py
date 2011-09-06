@@ -14,7 +14,12 @@ __all__ = [
     "FandangoEntityMatcher", 
     "OpenTableEntityMatcher", 
     "FactualEntityMatcher", 
+    "AmazonEntityMatcher", 
 ]
+
+class AmazonEntityMatcher(AIDBasedEntityMatcher):
+    def __init__(self, stamped_api, options):
+        AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.amazon.asin')
 
 class AppleEntityMatcher(AIDBasedEntityMatcher):
     def __init__(self, stamped_api, options):

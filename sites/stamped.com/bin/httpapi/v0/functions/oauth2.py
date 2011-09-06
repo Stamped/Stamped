@@ -31,7 +31,7 @@ def login(request):
     schema      = parseRequest(OAuthLogin(), request)
 
     token       = stampedAuth.verifyUserCredentials(client_id, \
-                                                    schema.screen_name, \
+                                                    schema.login, \
                                                     schema.password)
 
     return transformOutput(token)

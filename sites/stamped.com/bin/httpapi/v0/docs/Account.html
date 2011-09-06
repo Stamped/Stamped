@@ -509,6 +509,53 @@ oauth_token=1234567890123456789012
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
+<h2 id="postaccountcheck">POST account/check</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Returns the user object if the user exists; otherwise, returns a 404.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>Client ID / Client Secret Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>login</strong> <em>required</em>
+The user&#8217;s screen name or email.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v0/account/check.json
+client_id=iPhoneApp&amp;client_secret=1234567890&amp;login=kevin
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+    &quot;first_name&quot;: &quot;Kevin&quot;,
+    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;screen_name&quot;: &quot;kevin&quot;,
+    &quot;display_name&quot;: &quot;Kevin P.&quot;,
+    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
+    &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
+    &quot;color_primary&quot;: &quot;333333&quot;,
+    &quot;color_secondary&quot;: &quot;999999&quot;,
+    &quot;privacy&quot;: false,
+    &quot;num_stamps&quot;: 0,
+    &quot;num_friends&quot;: 0,
+    &quot;num_followers&quot;: 0,
+    &quot;num_faves&quot;: 0,
+    &quot;num_credits&quot;: 0,
+    &quot;num_credits_given&quot;: 0
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
 <h2 id="getaccountverify_credentials">GET account/verify_credentials</h2>
 
 <h3 id="description">Description</h3>

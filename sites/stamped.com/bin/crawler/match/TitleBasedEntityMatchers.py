@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from ATitleBasedEntityMatcher import ATitleSourceBasedEntityMatcher
+from ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
 
 __all__ = [
     "ZagatEntityMatcher", 
@@ -16,6 +16,17 @@ __all__ = [
     "LATimesEntityMatcher", 
     "BostonMagEntityMatcher", 
 ]
+
+class ATitleSourceBasedEntityMatcher(ATitleBasedEntityMatcher):
+    def __init__(self, stamped_api, options, source):
+        ATitleBasedEntityMatcher.__init__(self, stamped_api, options)
+        
+        self.source = source
+    
+    def getDuplicateCandidates(self, entity):
+        results = self._entityDB._collection.find({ self.source : { "$exists" : True }})
+        
+        return self._mongoToObj(results)
 
 class ZagatEntityMatcher(ATitleSourceBasedEntityMatcher):
     def __init__(self, stamped_api, options):

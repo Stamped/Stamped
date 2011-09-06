@@ -6,10 +6,12 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from utils import abstract, AttributeDict
-from Schemas import Entity
-from pprint import pprint
-from errors import *
+
+from AStampedAPI import AStampedAPI
+from utils       import abstract, AttributeDict
+from Schemas     import Entity
+from pprint      import pprint
+from errors      import *
 
 __all__ = [
     "AEntityMatcher", 
@@ -21,14 +23,16 @@ class AEntityMatcher(object):
     """
     
     def __init__(self, stamped_api, options=None):
+        assert isinstance(stamped_api, AStampedAPI)
+        
         if options is None:
             options = AttributeDict(
                 verbose=False, 
                 noop=False, 
             )
         
-        self.stamped_api = stamped_api
-        self.options = options
+        self.stamped_api   = stamped_api
+        self.options       = options
         self.dead_entities = set()
         self.numDuplicates = 0
     
@@ -45,21 +49,24 @@ class AEntityMatcher(object):
         return self.stamped_api._stampDB
     
     def addOne(self, entity, force=False):
-        if force or not self.dedupeOne(entity):
-            utils.log("[%s] adding entity '%s'" % (self, entity.title))
-            entity = self._entityDB.addEntity(entity)
+        if not force:
+            result = self.dedupeOne(entity)
             
-            if 'place' in entity:
-                self._placesEntityDB.addEntity(entity2)
-            
-            return entity
-        else:
-            return None
+            if result is not None:
+                return result
+        
+        entity = self._entityDB.addEntity(entity)
+        
+        if 'place' in entity:
+            self._placesDB.addEntity(entity)
+        
+        return entity
     
     def addMany(self, entities, force=False):
         results = []
         for entity in entities or []:
             result = self.addOne(entity, force)
+            
             if result is not None:
                 results.append(result)
         
@@ -68,37 +75,47 @@ class AEntityMatcher(object):
     def dedupeOne(self, entity):
         try:
             if entity.entity_id in self.dead_entities:
-                return False
+                return None
             
             if self.options.verbose:
                 utils.log("[%s] deduping %s" % (self, entity.title))
             
             dupes0 = self.getDuplicates(entity)
             
-            if len(dupes0) <= 1:
-                return False
+            if len(dupes0) <= 0:
+                return None
+            
+            dupes0 = self.resolveMatches(entity, dupes0)
             
             keep, dupes1 = self.getBestDuplicate(dupes0)
             if 'entity_id' not in keep or keep.entity_id in self.dead_entities:
-                return False
+                return None
             
             filter_func = (lambda e: e.entity_id != keep.entity_id and not e.entity_id in self.dead_entities)
             dupes1 = filter(filter_func, dupes1)
             
+            filter_func2 = (lambda e: e.entity_id is not None)
+            dupes2 = filter(filter_func2, dupes1)
+            
             numDuplicates = len(dupes1)
             if 0 == numDuplicates:
-                return False
+                return None
             
-            utils.log("%s) found %d duplicate%s" % (keep.title, numDuplicates, '' if 1 == numDuplicates else 's'))
-            self.numDuplicates += numDuplicates
+            numDuplicates2 = len(dupes2)
+            
+            if numDuplicates2 > 0:
+                utils.log("%s) found %d duplicate%s" % (keep.title, numDuplicates, '' if 1 == numDuplicates else 's'))
+                self.numDuplicates += numDuplicates2
             
             for i in xrange(numDuplicates):
                 dupe = dupes1[i]
-                self.dead_entities.add(dupe.entity_id)
-                utils.log("   %d) removing %s" % (i + 1, dupe.title))
+                
+                if dupe.entity_id is not None:
+                    self.dead_entities.add(dupe.entity_id)
+                    utils.log("   %d) removing %s" % (i + 1, dupe.title))
             
-            self.removeDuplicates(keep, dupes1)
-            return True
+            self.mergeDuplicates(keep, dupes1)
+            return keep
         except Fail:
             if 'entity_id' in entity:
                 entity_id = entity['entity_id']
@@ -111,13 +128,15 @@ class AEntityMatcher(object):
                 
                 if not self.options.noop:
                     self._entityDB.removeEntity(entity_id)
-                    self._placesDB.removeEntity(entity_id)
+                    
+                    if 'place' in entity:
+                        self._placesDB.removeEntity(entity_id)
             
-            return False
+            return None
         except InvalidState:
             pass
         
-        return False
+        return None
     
     def getDuplicates(self, entity):
         candidate_entities = self.getDuplicateCandidates(entity)
@@ -125,8 +144,9 @@ class AEntityMatcher(object):
         if candidate_entities is None:
             return []
         
-        matches = list(self.getMatchingDuplicates(entity, candidate_entities))
-        
+        return list(self.getMatchingDuplicates(entity, candidate_entities))
+    
+    def resolveMatches(self, entity, matches):
         if 'entity_id' in entity:
             entity_id  = entity.entity_id
             numMatches = len(filter(lambda e: e.entity_id == entity_id, matches))
@@ -203,38 +223,50 @@ class AEntityMatcher(object):
         keep = duplicates.pop(ishortest)
         return (keep, duplicates)
     
-    def removeDuplicates(self, keep, duplicates):
+    def mergeDuplicates(self, keep, duplicates, override=False):
         numDuplicates = len(duplicates)
         
         assert numDuplicates > 0
         assert 'entity_id' in keep
+        wrap = { 'stale' : False }
         
         # look through and remove all duplicates
         for i in xrange(numDuplicates):
             entity = duplicates[i]
             
-            def _addDict(src, dest):
+            def _addDict(src, dest, wrap):
                 for k, v in src.iteritems():
                     if not k in dest:
                         dest[k] = v
+                        wrap['stale'] = True
                     elif isinstance(v, dict):
-                        _addDict(v, dest)
+                        _addDict(v, dest, wrap)
+                    elif override:
+                        dest[k] = v
+                        wrap['stale'] = True
             
             # add any fields from this version of the duplicate to the version 
             # that we're keeping if they don't already exist
-            _addDict(entity.value, keep)
+            _addDict(entity.value, keep, wrap)
             
             if not self.options.noop and 'entity_id' in entity:
                 self._entityDB.removeEntity(entity.entity_id)
-                self._placesDB.removeEntity(entity.entity_id)
+                
+                if 'place' in entity:
+                    self._placesDB.removeEntity(entity.entity_id)
         
-        if self.options.verbose:
-            utils.log("[%s] retaining %s:" % (self, keep.title))
-            pprint(keep.value)
+        if wrap['stale']:
+            if self.options.verbose:
+                utils.log("[%s] retaining %s:" % (self, keep.title))
+                pprint(keep.value)
+            
+            if not self.options.noop:
+                self._entityDB.updateEntity(keep)
+                
+                if 'place' in entity:
+                    self._placesDB.updateEntity(keep)
         
-        if not self.options.noop:
-            self._entityDB.updateEntity(keep)
-            self._placesDB.updateEntity(keep)
+        return keep
     
     def _convertFromMongo(self, mongo):
         if isinstance(mongo, dict):

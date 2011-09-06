@@ -54,8 +54,8 @@ def activity(request):
         
         ### TEMP
         stamp = None
-        if item.stamp_id != None:
-            stamp = stampedAPI.getStamp(item.stamp_id, authUserId)
+        if item.link_stamp_id != None:
+            stamp = stampedAPI.getStamp(item.link_stamp_id, authUserId)
 
         comment = None
         if item.comment_id != None:

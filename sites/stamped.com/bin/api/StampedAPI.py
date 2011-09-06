@@ -82,6 +82,7 @@ class StampedAPI(AStampedAPI):
         account.stats.num_stamps_left = 100
         
         # Validate Screen Name
+        account.screen_name = account.screen_name.strip()
         if not re.match("^[\w-]+$", account.screen_name) \
             or len(account.screen_name) < 1 \
             or len(account.screen_name) > 32:
@@ -92,6 +93,13 @@ class StampedAPI(AStampedAPI):
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
             msg = "Blacklisted screen name"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Validate email address
+        account.email = str(account.email).lower().strip()
+        if not utils.validate_email(account.email):
+            msg = "Invalid format for email address"
             logs.warning(msg)
             raise InputError(msg)
 
@@ -164,6 +172,25 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         self._accountDB.removeAccount(authUserId)
         return account
+
+    def checkAccount(self, login):
+        try:
+            # Email
+            if utils.validate_email(login):
+                user = self._accountDB.getAccountByEmail(login)
+            # Screen Name
+            elif utils.validate_screen_name(login):
+                # Check blacklist
+                if login.lower() in Blacklist.screen_names:
+                    raise
+                user = self._accountDB.getAccountByScreenName(login)
+            else:
+                raise
+            return user
+        except:
+            msg = "Login info does not exist"
+            logs.debug(msg)
+            raise
     
     def verifyAccountCredentials(self, data, auth):
         raise NotImplementedError

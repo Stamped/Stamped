@@ -21,17 +21,89 @@ class StampedAPIOAuthTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
 
 class StampedAPIOAuthLogin(StampedAPIOAuthTest):
-    def test_login(self):
+    def test_login_screen_name(self):
         path = "oauth2/login.json"
         data = { 
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
-            "screen_name": self.userA['screen_name'],
+            "login": self.userA['screen_name'],
             "password": "12345"
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result['access_token']) == 22)
         self.assertTrue(len(result['refresh_token']) == 43)
+
+    def test_login_email(self):
+        path = "oauth2/login.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": "UserA@stamped.com",
+            "password": "12345"
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result['access_token']) == 22)
+        self.assertTrue(len(result['refresh_token']) == 43)
+
+    def test_failed_login_screen_name(self):
+        path = "oauth2/login.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": self.userA['screen_name'],
+            "password": "123456"
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_failed_login_email(self):
+        path = "oauth2/login.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": "UserA@stamped.com",
+            "password": "123456"
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_failed_login_empty_password(self):
+        path = "oauth2/login.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": "UserA@stamped.com",
+            "password": ""
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_failed_login_star_password(self):
+        path = "oauth2/login.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": "UserA@stamped.com",
+            "password": "*"
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
 
     def test_token(self):
         path = "oauth2/token.json"

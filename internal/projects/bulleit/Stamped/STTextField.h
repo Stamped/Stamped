@@ -1,5 +1,5 @@
 //
-//  STEditEntityTextField.h
+//  STTextField.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 8/29/11.
@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STEditEntityTextField : UITextField
+@interface STTextField : UITextField
 
 @end

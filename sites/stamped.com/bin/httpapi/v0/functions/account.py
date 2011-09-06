@@ -24,6 +24,7 @@ def create(request):
 
     return transformOutput(output)
 
+
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def remove(request):
@@ -34,6 +35,7 @@ def remove(request):
     account     = HTTPAccount().importSchema(account)
 
     return transformOutput(account.exportSparse())
+
 
 @handleHTTPRequest
 @require_http_methods(["POST", "GET"])
@@ -63,6 +65,7 @@ def settings(request):
 
     return transformOutput(account.exportSparse())
 
+
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile(request):
@@ -86,6 +89,7 @@ def update_profile(request):
     user        = HTTPUser().importSchema(account)
 
     return transformOutput(user.exportSparse())
+
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
@@ -124,6 +128,7 @@ def update_profile_image(request):
     
     return transformOutput(output)
 
+
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def customize_stamp(request):
@@ -136,10 +141,29 @@ def customize_stamp(request):
 
     return transformOutput(user.exportSparse())
 
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def check(request):
+    client_id   = checkClient(request)
+    schema      = parseRequest(HTTPAccountCheck(), request)
+
+    try:
+        user    = stampedAPI.checkAccount(schema.login)
+        user    = HTTPUser().importSchema(user)
+
+        return transformOutput(user.exportSparse())
+    except:
+        response = HttpResponse("not_found")
+        response.status_code = 404
+        return response
+
+
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def verify_credentials(request):
     raise NotImplementedError
+
 
 @handleHTTPRequest
 @require_http_methods(["POST"])

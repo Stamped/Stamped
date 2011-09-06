@@ -270,11 +270,6 @@ class Entity(Schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
             from Entity import setSubtitle
             setSubtitle(self)
-            # if self.subtitle is None:
-            #     if 'address' in self:
-            #         self.subtitle = self.address
-            #     else:
-            #         self.subtitle = self.subcategory
             schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
@@ -332,6 +327,7 @@ class EntityDetailsSchema(Schema):
 class PlaceSchema(Schema):
     def setSchema(self):
         self.address            = SchemaElement(basestring)
+        self.address_components = SchemaList(AddressComponentSchema())
         self.types              = SchemaList(SchemaElement(basestring))
         self.vicinity           = SchemaElement(basestring)
         self.neighborhood       = SchemaElement(basestring)
@@ -340,6 +336,12 @@ class PlaceSchema(Schema):
         self.parking            = SchemaElement(basestring)
         self.parkingDetails     = SchemaElement(basestring)
         self.wheelchairAccess   = SchemaElement(basestring)
+
+class AddressComponentSchema(Schema):
+    def setSchema(self):
+        self.long_name          = SchemaElement(basestring)
+        self.short_name         = SchemaElement(basestring)
+        self.types              = SchemaList(SchemaElement(basestring))
 
 class ContactSchema(Schema):
     def setSchema(self):
