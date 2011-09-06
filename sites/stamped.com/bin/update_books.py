@@ -124,18 +124,18 @@ def main():
             if success:
                 break
             else:
-                print "%s vs %s" % (orig_title, amazon_result.title)
-                print "%s vs %s" % (orig_titlel, amazon_titlel)
+                utils.log("%s vs %s" % (orig_title, amazon_result.title))
+                utils.log("%s vs %s" % (orig_titlel, amazon_titlel))
         
         if success:
             entity = matcher.mergeDuplicates(entity, [ amazon_result ])
-            print "Success: %s vs %s" % (orig_title, entity.title)
+            utils.log("Success: %s vs %s" % (orig_title, entity.title))
             num_converted += 1
         else:
-            print "Failure: %s" % entity.title
+            utils.log("Failure: %s" % entity.title)
             pprint(params)
             pprint(entity.value)
-            print len(amazon_results)
+            utils.log(len(amazon_results))
             num_failed += 1
     
     print "num processed: %d" % num_processed
