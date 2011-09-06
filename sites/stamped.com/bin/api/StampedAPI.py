@@ -1320,7 +1320,7 @@ class StampedAPI(AStampedAPI):
         # Get user objects
         userIds = {}
         for comment in commentData:
-            userIds[comment.user_id] = 1
+            userIds[comment.user.user_id] = 1
 
         users = self._userDB.lookupUsers(userIds.keys(), None)
 
@@ -1338,7 +1338,13 @@ class StampedAPI(AStampedAPI):
     
     ### TEMP: Remove after switching to new activity
     def _getComment(self, commentId, **kwargs): 
-        return self._commentDB.getComment(commentId)
+        comment = self._commentDB.getComment(commentId)
+
+        # Get user objects
+        user            = self._userDB.getUser(comment.user.user_id)
+        comment.user    = user.exportSchema(UserMini())
+
+        return comment
     
 
     """
