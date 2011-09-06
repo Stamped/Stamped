@@ -59,35 +59,47 @@ class StampedAuth(AStampedAuth):
     # Users #
     # ##### #
     
-    def verifyUserCredentials(self, clientId, screenName, password):
+    def verifyUserCredentials(self, clientId, userIdentifier, password):
 
-        ### Login
-        authenticated_user_id = self._accountDB.verifyAccountCredentials( \
-            screenName, password)
-        if authenticated_user_id == None:
+        try:
+            # Login via email
+            if utils.validate_email(userIdentifier):
+                user = self._accountDB.getAccountByEmail(userIdentifier)
+            # Login via screen name
+            elif utils.validate_screen_name(userIdentifier):
+                user = self._accountDB.getAccountByScreenName(userIdentifier)
+            else:
+                raise
+
+            if not auth.comparePasswordToStored(password, user.password):
+                raise
+
+            logs.info("Login successful")
+            
+            """
+            IMPORTANT!!!!!
+
+            Right now we're returning a refresh token upon login. This will 
+            have to change ultimately, but it's an okay assumption for now 
+            that every login will be from the iPhone. Once that changes we may 
+            have to modify this.
+
+            Also, we'll ultimately need a way to deprecate unused refresh 
+            tokens. Not sure how we'll implement that yet....
+            """
+
+            ### Generate Refresh Token & Access Token
+            token = self.addRefreshToken(clientId, user.user_id)
+
+            logs.info("Token created")
+
+            return token
+        except:
             msg = "Invalid user credentials"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
 
-        logs.info("Login successful")
-        
-        """
-        IMPORTANT!!!!!
 
-        Right now we're returning a refresh token upon login. This will have to 
-        change ultimately, but it's an okay assumption for now that every login
-        will be from the iPhone. Once that changes we may have to modify this.
-
-        Also, we'll ultimately need a way to deprecate unused refresh tokens. Not
-        sure how we'll implement that yet....
-        """
-
-        ### Generate Refresh Token & Access Token
-        token = self.addRefreshToken(clientId, authenticated_user_id)
-
-        logs.info("Token created")
-
-        return token
 
     # ############## #
     # Refresh Tokens #

@@ -59,15 +59,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # TODO
         raise NotImplementedError("TODO")
 
-    def verifyAccountCredentials(self, screen_name, password):
-        logs.debug("verifyAccountCredentials: %s:%s" % (screen_name, password))
-        screen_name = str(screen_name).lower()
-        try:
-            user = self._collection.find_one({'screen_name_lower': screen_name})
-            logs.debug("User data: %s" % (user))
-            if auth.comparePasswordToStored(password, user['password']):
-                return user['_id']
-            return None
-        except:
-            return None
+    def getAccountByEmail(self, email):
+        email = str(email).lower()
+        document = self._collection.find_one({"email": email})
+        return self._convertFromMongo(document)
+    
+    def getAccountByScreenName(self, screenName):
+        screenName = str(screenName).lower()
+        document = self._collection.find_one({"screen_name_lower": screenName})
+        return self._convertFromMongo(document)
 
