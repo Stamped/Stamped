@@ -157,7 +157,7 @@ class StampedAPI(AStampedAPI):
         return account
     
     def updateProfileImage(self, authUserId, data):
-        data = base64.decodestring(data)
+        data = base64.urlsafe_b64decode(data.encode('ascii'))
         
         image = self._imageDB.getImage(data)
         self._imageDB.addProfileImage(authUserId, image)
@@ -666,7 +666,7 @@ class StampedAPI(AStampedAPI):
             return stamps[0]
 
         return stamps
-        
+
     
     def addStamp(self, authUserId, entityId, data):
         user        = self._userDB.getUser(authUserId)
@@ -1119,7 +1119,7 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
 
-        data = base64.decodestring(data)
+        data = base64.urlsafe_b64decode(data.encode('ascii'))
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
