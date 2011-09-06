@@ -1,18 +1,18 @@
 //
-//  STEditEntityTextField.m
+//  STTextField.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 8/29/11.
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "STEditEntityTextField.h"
+#import "STTextField.h"
 
 #import "UIColor+Stamped.h"
 
 const CGFloat kTextLeftInset = 10.0;
 
-@implementation STEditEntityTextField
+@implementation STTextField
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
