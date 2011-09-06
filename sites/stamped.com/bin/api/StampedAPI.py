@@ -679,6 +679,7 @@ class StampedAPI(AStampedAPI):
 
         blurbData   = data.pop('blurb', None)
         creditData  = data.pop('credit', None)
+        imageData   = data.pop('image', None)
 
         # Check to make sure the user has stamps left
         if user.num_stamps_left <= 0:
@@ -751,6 +752,17 @@ class StampedAPI(AStampedAPI):
 
             ### TODO: How do we handle credited users that have not yet joined?
             stamp.credit = credit
+
+        # Add image to stamp
+        if imageData != None:
+            imageData = base64.decodestring(imageData)
+            
+            image = self._imageDB.getImage(imageData)
+            self._imageDB.addStampImage(stampId, image)
+
+            # Add image dimensions to stamp object (width,height)
+            width, height           = image.size
+            stamp.image_dimensions  = "%s,%s" % (width, height)
             
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
@@ -1070,7 +1082,7 @@ class StampedAPI(AStampedAPI):
         stamp       = self._addUserObjects(stamp)
 
         # Check privacy of stamp
-        if stamp.user_id != authUserId and user.privacy == True:
+        if stamp.user_id != authUserId and stamp.user.privacy == True:
             friendship = Friendship({
                 'user_id':      user.user_id,
                 'friend_id':    authUserId,
@@ -1104,7 +1116,7 @@ class StampedAPI(AStampedAPI):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._addUserObjects(stamp)
 
-        # Verify user has permission to delete
+        # Verify user has permission to add image
         if stamp.user_id != authUserId:
             msg = "Insufficient privileges to update stamp image"
             logs.warning(msg)
