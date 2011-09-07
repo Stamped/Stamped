@@ -19,6 +19,7 @@
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
+#import "UIColor+Stamped.h"
 
 static const CGFloat kBadgeSize = 21.0;
 
@@ -68,7 +69,7 @@ static const CGFloat kBadgeSize = 21.0;
     headerTextLayer_.truncationMode = kCATruncationEnd;
     headerTextLayer_.contentsScale = [[UIScreen mainScreen] scale];
     headerTextLayer_.fontSize = 12.0;
-    headerTextLayer_.foregroundColor = [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
+    headerTextLayer_.foregroundColor = [UIColor stampedGrayColor].CGColor;
     headerTextLayer_.frame = CGRectMake(70, 13, 210, 16);
     headerTextLayer_.actions = [NSDictionary dictionaryWithObject:[NSNull null]
                                                            forKey:@"contents"];
@@ -100,7 +101,7 @@ static const CGFloat kBadgeSize = 21.0;
   NSMutableAttributedString* headerAttributedString =
       [[NSMutableAttributedString alloc] initWithAttributedString:headerTextLayer_.string];
   CGColorRef color = inverted ? [UIColor whiteColor].CGColor :
-      [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
+      [UIColor stampedGrayColor].CGColor;
   [headerAttributedString setAttributes:
    [NSDictionary dictionaryWithObject:(id)color 
                                forKey:(id)kCTForegroundColorAttributeName] 
@@ -190,7 +191,7 @@ static const CGFloat kBadgeSize = 21.0;
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
   [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
       (id)style, (id)kCTParagraphStyleAttributeName,
-      (id)[UIColor colorWithWhite:0.6 alpha:1.0].CGColor, (id)kCTForegroundColorAttributeName, nil]
+      (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
                   range:NSMakeRange(0, full.length)];
   if (![user isEqualToString:@"You"]) {
     [string addAttribute:(NSString*)kCTFontAttributeName value:(id)font range:NSMakeRange(0, user.length)];

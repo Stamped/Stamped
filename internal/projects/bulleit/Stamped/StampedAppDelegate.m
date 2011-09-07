@@ -36,16 +36,13 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [RKRequestQueue sharedQueue].suspended = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
-                                       @"first_name", @"firstName",
-                                       @"last_name", @"lastName",
-                                       @"display_name", @"displayName",
+                                       @"name", @"name",
                                        @"color_primary", @"primaryColor",
                                        @"color_secondary", @"secondaryColor",
-                                       @"profile_image", @"profileImageURL",
                                        @"screen_name", @"screenName",
                                        @"num_credits", @"numCredits",
                                        @"num_followers", @"numFollowers",
@@ -76,9 +73,11 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
   [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
                                         @"created", @"created",
-                                        @"num_comments", @"numComments", nil];
+                                        @"num_comments", @"numComments",
+                                        @"image_dimensions", @"imageDimensions",
+                                        @"image_url", @"imageURL", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapAttributes:@"blurb", @"image", nil];
+  [stampMapping mapAttributes:@"blurb", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
   [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];
@@ -126,7 +125,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];
-  
+
   return YES;
 }
 

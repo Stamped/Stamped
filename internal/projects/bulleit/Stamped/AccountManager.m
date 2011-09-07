@@ -10,6 +10,8 @@
 
 #import <RestKit/CoreData/CoreData.h>
 
+#import "StampedAppDelegate.h"
+#import "FirstRunViewController.h"
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
 
@@ -30,8 +32,10 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)sendLoginRequest;
 - (void)sendTokenRefreshRequest;
 - (void)sendUserInfoRequest;
-- (void)showAuthAlert;
+- (void)showFirstRunViewController;
 - (void)refreshTimerFired:(NSTimer*)theTimer;
+
+@property (nonatomic, retain) FirstRunViewController* firstRunViewController;
 @end
 
 @implementation AccountManager
@@ -39,8 +43,8 @@ static AccountManager* sharedAccountManager_ = nil;
 @synthesize authToken = authToken_;
 @synthesize currentUser = currentUser_;
 @synthesize delegate = delegate_;
-@synthesize alertView = alertView_;
 @synthesize authenticated = authenticated_;
+@synthesize firstRunViewController = firstRunViewController_;
 
 + (AccountManager*)sharedManager {
   if (sharedAccountManager_ == nil)
@@ -95,35 +99,14 @@ static AccountManager* sharedAccountManager_ = nil;
   [self sendTokenRefreshRequest];
 }
 
-- (void)showAuthAlert {
+- (void)showFirstRunViewController {
   [oAuthRequestQueue_ cancelAllRequests];
-  UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:nil
-                                                      message:@"\n\n\n"
-                                                     delegate:self
-                                            cancelButtonTitle:@"Cancel"
-                                            otherButtonTitles:@"Go", nil];
-  usernameField_ = [[UITextField alloc] initWithFrame:CGRectMake(16, 20, 252, 25)];
-  usernameField_.placeholder = @"username";
-  usernameField_.borderStyle = UITextBorderStyleRoundedRect;
-  usernameField_.autocapitalizationType = UITextAutocapitalizationTypeNone;
-  usernameField_.autocorrectionType = UITextAutocorrectionTypeNo;
-  usernameField_.keyboardAppearance = UIKeyboardAppearanceAlert;
-  [usernameField_ becomeFirstResponder];
-  [alertView addSubview:usernameField_];
-  [usernameField_ release];
-  passwordField_ = [[UITextField alloc] initWithFrame:CGRectMake(16, 55, 252, 25)];
-  passwordField_.placeholder = @"password";
-  passwordField_.secureTextEntry = YES;
-  passwordField_.borderStyle = UITextBorderStyleRoundedRect;
-  passwordField_.autocapitalizationType = UITextAutocapitalizationTypeNone;
-  passwordField_.autocorrectionType = UITextAutocorrectionTypeNo;
-  passwordField_.keyboardAppearance = UIKeyboardAppearanceAlert;
-  [alertView addSubview:passwordField_];
-  [passwordField_ release];
-  alertView.delegate = self;
-  [alertView show];
-  self.alertView = alertView;
-  [alertView release];
+
+  self.firstRunViewController = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
+  firstRunViewController_.delegate = self;
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController presentModalViewController:firstRunViewController_ animated:YES];
+  [firstRunViewController_ release];
 }
 
 - (void)authenticate {
@@ -131,13 +114,13 @@ static AccountManager* sharedAccountManager_ = nil;
   if (screenName.length > 0) {
     self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
   } else {
-    [self showAuthAlert];
+    [self showFirstRunViewController];
     return;
   }
   NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
   // Fresh install.
   if (!tokenExpirationDate) {
-    [self showAuthAlert];
+    [self showFirstRunViewController];
     return;
   }
   NSString* accessToken = [accessTokenKeychainItem_ objectForKey:(id)kSecValueData];
@@ -165,7 +148,6 @@ static AccountManager* sharedAccountManager_ = nil;
     [self sendUserInfoRequest];
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
-    self.alertView = nil;
     firstRun_ = NO;
   }
 }
@@ -180,7 +162,7 @@ static AccountManager* sharedAccountManager_ = nil;
   }
 
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    [self performSelector:@selector(showAuthAlert) withObject:self afterDelay:1.0];
+    [self.firstRunViewController signInFailed:nil];
     return;
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self sendLoginRequest];
@@ -197,6 +179,10 @@ static AccountManager* sharedAccountManager_ = nil;
   
   OAuthToken* token = object;
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
+    self.firstRunViewController.delegate = nil;
+    [self.firstRunViewController.parentViewController dismissModalViewControllerAnimated:YES];
+    self.firstRunViewController = nil;
+
     [refreshTokenKeychainItem_ setObject:@"RefreshToken" forKey:(id)kSecAttrAccount];
     [refreshTokenKeychainItem_ setObject:token.refreshToken forKey:(id)kSecValueData];
     self.authToken = token;
@@ -239,7 +225,7 @@ static AccountManager* sharedAccountManager_ = nil;
   NSString* username = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
   NSString* password = [passwordKeychainItem_ objectForKey:(id)kSecValueData];
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-      username, @"screen_name",
+      username, @"login",
       password, @"password",
       kClientID, @"client_id",
       kClientSecret, @"client_secret", nil];
@@ -281,15 +267,17 @@ static AccountManager* sharedAccountManager_ = nil;
   [self sendTokenRefreshRequest];
 }
 
-#pragma mark - UIAlertViewDelegate methods.
+#pragma mark - FirstRunViewControllerDelegate methods.
 
-- (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-  if (usernameField_.text.length > 0 && passwordField_.text.length > 0) {
-    [passwordKeychainItem_ setObject:usernameField_.text forKey:(id)kSecAttrAccount];
-    [passwordKeychainItem_ setObject:passwordField_.text forKey:(id)kSecValueData];
+- (void)viewController:(FirstRunViewController*)viewController 
+    didReceiveUsername:(NSString*)username 
+              password:(NSString*)password {
+  if (username.length > 0 && password.length > 0) {
+    [passwordKeychainItem_ setObject:username forKey:(id)kSecAttrAccount];
+    [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];
     [self sendLoginRequest];
   } else {
-    [self showAuthAlert];
+    [viewController signInFailed:nil];
   }
 }
 

@@ -21,6 +21,8 @@ extern NSString* kStampWasCreatedNotification;
 @property (nonatomic, retain) NSNumber* numComments;
 @property (nonatomic, retain) NSNumber* temporary;
 @property (nonatomic, retain) NSString* stampID;
+@property (nonatomic, retain) NSString* imageDimensions;
+@property (nonatomic, retain) NSString* imageURL;
 @property (nonatomic, retain) NSString* image;
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) User* user;

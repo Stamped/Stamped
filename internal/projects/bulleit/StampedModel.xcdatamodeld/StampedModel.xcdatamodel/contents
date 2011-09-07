@@ -16,7 +16,7 @@
         <attribute name="artist" optional="YES" attributeType="String"/>
         <attribute name="authors" optional="YES" attributeType="String"/>
         <attribute name="cast" optional="YES" attributeType="String"/>
-        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="category" optional="YES" attributeType="String" defaultValueString="other"/>
         <attribute name="city" optional="YES" attributeType="String"/>
         <attribute name="coordinates" optional="YES" attributeType="String"/>
         <attribute name="desc" optional="YES" attributeType="String"/>
@@ -26,7 +26,7 @@
         <attribute name="phone" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="state" optional="YES" attributeType="String"/>
         <attribute name="street" optional="YES" attributeType="String"/>
-        <attribute name="subcategory" optional="YES" attributeType="String"/>
+        <attribute name="subcategory" optional="YES" attributeType="String" defaultValueString="other"/>
         <attribute name="substreet" optional="YES" attributeType="String"/>
         <attribute name="subtitle" optional="YES" attributeType="String" defaultValueString="Other"/>
         <attribute name="title" optional="YES" attributeType="String"/>
@@ -54,7 +54,8 @@
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="blurb" optional="YES" attributeType="String"/>
         <attribute name="created" optional="YES" attributeType="Date"/>
-        <attribute name="image" optional="YES" attributeType="String"/>
+        <attribute name="imageDimensions" optional="YES" attributeType="String"/>
+        <attribute name="imageURL" optional="YES" attributeType="String"/>
         <attribute name="numComments" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
         <attribute name="temporary" optional="YES" attributeType="Boolean" defaultValueString="NO"/>
@@ -67,15 +68,12 @@
     </entity>
     <entity name="User" representedClassName="User">
         <attribute name="bio" optional="YES" attributeType="String"/>
-        <attribute name="displayName" optional="YES" attributeType="String"/>
-        <attribute name="firstName" optional="YES" attributeType="String"/>
-        <attribute name="lastName" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="numCredits" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="numFollowers" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="numFriends" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="numStamps" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="primaryColor" optional="YES" attributeType="String"/>
-        <attribute name="profileImageURL" optional="YES" attributeType="String"/>
         <attribute name="screenName" optional="YES" attributeType="String"/>
         <attribute name="secondaryColor" optional="YES" attributeType="String"/>
         <attribute name="stampImage" optional="YES" attributeType="Transformable" valueTransformerName="ImageToDataTransformer"/>
@@ -91,7 +89,7 @@
         <element name="Entity" positionX="558" positionY="81" width="128" height="390"/>
         <element name="Event" positionX="88" positionY="135" width="128" height="135"/>
         <element name="Favorite" positionX="358" positionY="144" width="128" height="135"/>
-        <element name="Stamp" positionX="252" positionY="333" width="128" height="225"/>
+        <element name="Stamp" positionX="252" positionY="333" width="128" height="240"/>
         <element name="User" positionX="-101" positionY="102" width="128" height="330"/>
     </elements>
 </model>

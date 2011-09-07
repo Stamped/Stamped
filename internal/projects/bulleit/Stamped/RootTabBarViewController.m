@@ -15,7 +15,6 @@
 #import "Notifications.h"
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
-#import "FirstRunViewController.h"
 #import "STNavigationBar.h"
 #import "Util.h"
 
@@ -120,12 +119,6 @@
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
-
-  // Load Learn More instead of other views. 
-  FirstRunViewController* learnMore = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
-  learnMore.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-  [self presentModalViewController:learnMore animated:YES];
-  [learnMore release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {

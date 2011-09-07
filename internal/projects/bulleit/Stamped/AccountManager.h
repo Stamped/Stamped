@@ -11,6 +11,7 @@
 
 #import "User.h"
 #import "OAuthToken.h"
+#import "FirstRunViewController.h"
 
 extern NSString* const kCurrentUserHasUpdatedNotification;
 
@@ -21,14 +22,12 @@ extern NSString* const kCurrentUserHasUpdatedNotification;
 
 @class KeychainItemWrapper;
 
-@interface AccountManager : NSObject<RKObjectLoaderDelegate, RKRequestQueueDelegate, UIAlertViewDelegate> {
+@interface AccountManager : NSObject<RKObjectLoaderDelegate, RKRequestQueueDelegate, FirstRunViewControllerDelegate> {
  @private
   KeychainItemWrapper* passwordKeychainItem_;
   KeychainItemWrapper* accessTokenKeychainItem_;
   KeychainItemWrapper* refreshTokenKeychainItem_;
   RKRequestQueue* oAuthRequestQueue_;
-  UITextField* usernameField_;
-  UITextField* passwordField_;
   NSTimer* oauthRefreshTimer_;
   BOOL firstRun_;
 }
@@ -37,7 +36,6 @@ extern NSString* const kCurrentUserHasUpdatedNotification;
 - (void)authenticate;
 - (void)refreshToken;
 
-@property (nonatomic, retain) UIAlertView* alertView; 
 @property (nonatomic, retain) User* currentUser;
 @property (nonatomic, retain) OAuthToken* authToken;
 @property (nonatomic, assign) id<AccountManagerDelegate> delegate;

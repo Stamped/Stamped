@@ -86,7 +86,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
   bioLabel_.textColor = [UIColor stampedGrayColor];
-  if (user_.firstName)
+  if (user_.name)
     [self fillInUserData];
 
   CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
@@ -304,8 +304,10 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 - (void)setStampsAreTemporary:(BOOL)stampsAreTemporary {
   stampsAreTemporary_ = stampsAreTemporary;
 
-  for (Stamp* stamp in stampsArray_)
+  for (Stamp* stamp in stampsArray_) {
     stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
+    [stamp.managedObjectContext save:NULL];
+  }
 }
 
 - (void)loadRelationshipData {
@@ -326,7 +328,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 }
 
 - (void)fillInUserData {
-  fullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", user_.firstName, user_.lastName];
+  fullNameLabel_.text = user_.name;
   usernameLocationLabel_.text = [NSString stringWithFormat:@"%@  /  %@", user_.screenName, @"Scranton, PA"];
   bioLabel_.text = user_.bio;
   creditCountLabel_.text = [user_.numCredits stringValue];

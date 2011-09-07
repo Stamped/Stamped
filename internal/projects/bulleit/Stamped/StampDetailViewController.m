@@ -20,15 +20,16 @@
 #import "GenericItemDetailViewController.h"
 #import "Entity.h"
 #import "Favorite.h"
-#import "GTMStringEncoding.h"
 #import "Notifications.h"
 #import "ProfileViewController.h"
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
+#import "STImageView.h"
 #import "StampDetailCommentView.h"
 #import "UserImageView.h"
+#import "UIColor+Stamped.h"
 
 static const CGFloat kMainCommentFrameMinHeight = 75.0;
 static const CGFloat kKeyboardHeight = 216.0;
@@ -50,6 +51,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
+
+@property (nonatomic, retain) STImageView* stampPhotoView;
 @end
 
 @implementation StampDetailViewController
@@ -67,6 +70,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize stampedLabel = stampedLabel_;
 @synthesize loadingView = loadingView_;
 @synthesize addFavoriteButton = addFavoriteButton_;
+@synthesize stampPhotoView = stampPhotoView_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -80,17 +84,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [stamp_ release];
   [detailViewController_ release];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
-  self.headerView = nil;
-  self.bottomToolbar = nil;
-  self.activityView = nil;
-  self.mainCommentContainer = nil;
-  self.scrollView = nil;
-  self.currentUserImageView = nil;
-  self.commenterImageView = nil;
-  self.commenterNameLabel = nil;
-  self.stampedLabel = nil;
-  self.loadingView = nil;
-  self.addFavoriteButton = nil;
   [super dealloc];
 }
 
@@ -118,6 +111,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [self preloadEntityView];
+  self.stampPhotoView.imageURL = stamp_.imageURL;
   [super viewDidAppear:animated];
 }
 
@@ -131,7 +125,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [gestureRecognizer release];
 
   scrollView_.contentSize = self.view.bounds.size;
-  
+
   [self setUpToolbar];
   [self setUpHeader];
 
@@ -153,7 +147,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [self setUpCommentsView];
 
   [self renderComments];
-  //[self loadCommentsFromServer];
+  [self loadCommentsFromServer];
 }
 
 - (void)viewDidUnload {
@@ -171,6 +165,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.stampedLabel = nil;
   self.loadingView = nil;
   self.addFavoriteButton = nil;
+  self.stampPhotoView = nil;
 }
 
 - (void)setUpHeader {
@@ -210,7 +205,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   detailLabel.backgroundColor = [UIColor clearColor];
   detailLabel.text = stamp_.entityObject.subtitle;
   detailLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
-  detailLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  detailLabel.textColor = [UIColor stampedGrayColor];
   [headerView_ addSubview:detailLabel];
   [detailLabel release];
 
@@ -249,7 +244,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   CGRect nameLabelFrame = commenterNameLabel_.frame;
   nameLabelFrame.size = stringSize;
   commenterNameLabel_.frame = nameLabelFrame;
-  commenterNameLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  commenterNameLabel_.textColor = [UIColor stampedGrayColor];
   commenterNameLabel_.text = stamp_.user.screenName;
 
   stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"Helvetica" size:14]
@@ -259,7 +254,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   stampedFrame.origin.x = CGRectGetMaxX(nameLabelFrame) + 3;
   stampedFrame.size = stringSize;
   stampedLabel_.frame = stampedFrame;
-  stampedLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  stampedLabel_.textColor = [UIColor stampedGrayColor];
 
   // TODO(andybons): Use this pattern for labels.
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -276,25 +271,19 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   CGRect mainCommentFrame = mainCommentContainer_.frame;
   mainCommentFrame.size.height = fmaxf(kMainCommentFrameMinHeight, CGRectGetMaxY(commentLabel.frame) + 10);
   
-  if (stamp_.image) {
-    GTMStringEncoding* decoder = [GTMStringEncoding rfc4648Base64WebsafeStringEncoding];
-    UIImage* stampPhoto = [UIImage imageWithData:[decoder decode:stamp_.image]];
-    UIImageView* stampPhotoView = [[UIImageView alloc] initWithImage:stampPhoto];
-    stampPhotoView.contentMode = UIViewContentModeScaleAspectFit;
-    stampPhotoView.layer.shadowOffset = CGSizeZero;
-    stampPhotoView.layer.shadowOpacity = 0.25;
-    stampPhotoView.layer.shadowRadius = 1.0;
+  if (stamp_.imageURL) {
+    self.stampPhotoView = [[STImageView alloc] initWithFrame:CGRectZero];
+    NSArray* coordinates = [stamp_.imageDimensions componentsSeparatedByString:@","]; 
+    CGFloat width = [(NSString*)[coordinates objectAtIndex:0] floatValue];
+    CGFloat height = [(NSString*)[coordinates objectAtIndex:1] floatValue];
     
-    CGFloat width = stampPhoto.size.width;
-    CGFloat height = stampPhoto.size.height;
-    
-    stampPhotoView.frame = CGRectMake(leftPadding, 
+    stampPhotoView_.frame = CGRectMake(leftPadding,
                                       CGRectGetMaxY(commentLabel.frame) + 8,
                                       200, 200 * (height / width));
-    stampPhotoView.layer.shadowPath = [UIBezierPath bezierPathWithRect:stampPhotoView.bounds].CGPath;
-    mainCommentFrame.size.height += CGRectGetHeight(stampPhotoView.bounds) + 10;
-    [mainCommentContainer_ addSubview:stampPhotoView];
-    [stampPhotoView release];
+
+    mainCommentFrame.size.height += CGRectGetHeight(stampPhotoView_.bounds) + 10;
+    [mainCommentContainer_ addSubview:stampPhotoView_];
+    [stampPhotoView_ release];
   }
   
   User* creditedUser = [stamp_.credits anyObject];
@@ -485,7 +474,15 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)addComment:(Comment*)comment {
-  StampDetailCommentView* commentView = [[StampDetailCommentView alloc] initWithComment:comment];
+  StampDetailCommentView* commentView = nil;
+  for (UIView* view in commentsView_.subviews) {
+    if ([view isMemberOfClass:[StampDetailCommentView class]]) {
+      commentView = (StampDetailCommentView*)view;
+      if ([commentView.comment.commentID isEqualToString:comment.commentID])
+        return;
+    }
+  }
+  commentView = [[StampDetailCommentView alloc] initWithComment:comment];
 
   CGRect frame = commentView.frame;
   CGFloat yPos = 0.0;
@@ -582,6 +579,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     addCommentField_.text = nil;
     return;
   }
+  stamp_.numComments = [NSNumber numberWithUnsignedInteger:objects.count];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
+                                                      object:stamp_];
   stamp_.comments = [NSSet setWithArray:objects];
   [self renderComments];
 }

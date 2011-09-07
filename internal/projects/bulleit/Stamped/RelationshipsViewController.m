@@ -105,7 +105,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   self.peopleArray = nil;
-  self.peopleArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"firstName" ascending:YES]]];
+  self.peopleArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
   [self.tableView reloadData];
   [self setIsLoading:NO];
 }

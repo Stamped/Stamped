@@ -29,5 +29,7 @@ NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 @dynamic favorites;
 @dynamic temporary;
 @dynamic image;
+@dynamic imageURL;
+@dynamic imageDimensions;
 
 @end

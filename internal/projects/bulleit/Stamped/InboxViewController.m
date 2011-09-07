@@ -141,7 +141,6 @@ typedef enum {
                                 (id)otherFilterButton_, nil];
   
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
-  [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
 }
 
@@ -163,11 +162,11 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self loadStampsFromDataStore];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
@@ -196,6 +195,7 @@ typedef enum {
   descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
   self.entitiesArray = [results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
   [self filterStamps];
+  self.tableView.contentOffset = scrollPosition_;
 }
 
 - (void)loadStampsFromNetwork {

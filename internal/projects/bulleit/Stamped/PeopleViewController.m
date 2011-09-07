@@ -112,7 +112,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   currentUserView_.imageURL = currentUser.profileImageURL;
   userStampImageView_.image = currentUser.stampImage;
   userScreenNameLabel_.text = currentUser.screenName;
-  userFullNameLabel_.text = [NSString stringWithFormat:@"%@ %@", currentUser.firstName, currentUser.lastName];
+  userFullNameLabel_.text = currentUser.name;
 }
 
 - (void)loadFriendsFromNetwork {
@@ -136,9 +136,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
-    self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"firstName" ascending:YES]]];
+    self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
   }
   [self.tableView reloadData];
+  self.tableView.contentOffset = scrollPosition_;
   [self setIsLoading:NO];
 }
 
