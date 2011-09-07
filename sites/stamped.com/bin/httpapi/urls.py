@@ -43,6 +43,9 @@ urlpatterns = patterns('',
     (r'v0/users/lookup.json',           'v0.functions.users.lookup'),
     (r'v0/users/search.json',           'v0.functions.users.search'),
     (r'v0/users/privacy.json',          'v0.functions.users.privacy'),
+    (r'v0/users/find/email.json',       'v0.functions.users.findEmail'),
+    (r'v0/users/find/phone.json',       'v0.functions.users.findPhone'),
+    (r'v0/users/find/twitter.json',     'v0.functions.users.findTwitter'),
 
     ### FRIENDS
     (r'v0/friendships/create.json',             'v0.functions.friendships.create'),

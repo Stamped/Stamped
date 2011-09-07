@@ -13,11 +13,8 @@ Create a new account on Stamped for a user. This function returns both the user 
 
 ### Parameters ###
 
-**first_name** _required_
-The first name of the registering user. This field has a maximum of 80 characters.
-
-**last_name** _required_
-The last name of the registering user. This field has a maximum of 80 characters.
+**name** _required_
+The full name of the registering user. This field has a maximum of 80 characters.
 
 **email** _required_
 The email address of the registering user. This must be in a valid format and must be unique within Stamped.
@@ -28,6 +25,9 @@ The password for the new account. This must be a minimum of six characters.
 **screen_name** _required_
 A unique string that acts as a handle for the user. This will be used for authentication and for account identification. The screen name must be unique within Stamped, and account creation will fail if it is not.
 
+**phone** _optional_
+The user's phone number. Data must be based as an integer with no formatting (e.g. 1235551234).
+
 ### Sample Request ###
 	POST https://api.stamped.com/v1/account/create.json
 	client_id=iPhoneApp&client_secret=1234567890&first_name=Kevin&last_name=Palms&email=kevin@stamped.com&password=12345&screen_name=kevin
@@ -36,11 +36,10 @@ A unique string that acts as a handle for the user. This will be used for authen
 	{
 		"user": {
 			"user_id": "47cc67093475061e3d95369d",
-			"first_name": "Kevin",
-			"last_name": "Palms",
+			"name": "Kevin Palms",
 			"email": "kevin@stamped.com",
 			"screen_name": "kevin",
-			"display_name": "Kevin P."
+			"phone": "1235551234"
 		},
 		"token": {
 			"access_token": "1234567890123456789012",
@@ -74,6 +73,9 @@ A unique string that acts as a handle for the user. This will be used for authen
 **privacy** _optional_
 A Boolean value representing whether or not the account should be publicly visible. The default value is 'true'. Only Boolean values are accepted, i.e. 'true', '1', 'false', and '0'.
 
+**phone** _optional_
+The user's phone number. Data must be based as an integer with no formatting (e.g. 1235551234).
+
 ### Sample Request ###
 	POST https://api.stamped.com/v1/account/settings.json
 	oauth_token=1234567890123456789012&screen_name=kpalms&privacy=true
@@ -81,11 +83,11 @@ A Boolean value representing whether or not the account should be publicly visib
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
+		"name": "Kevin Palms",
 		"email": "kevin@stamped.com",
 		"screen_name": "kpalms",
-		"privacy": true
+		"privacy": true,
+		"phone": "1235551234"
 	}
 
 
@@ -108,8 +110,7 @@ _None_
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
+		"name": "Kevin Palms",
 		"email": "kevin@stamped.com",
 		"screen_name": "kpalms",
 		"privacy": true
@@ -128,11 +129,8 @@ Update profile information for the authenticating user.
 
 ### Parameters ###
 
-**first_name** _optional_
-The first name of the registering user. This field has a maximum of 80 characters.
-
-**last_name** _optional_
-The last name of the registering user. This field has a maximum of 80 characters.
+**name** _optional_
+The full name of the registering user. This field has a maximum of 80 characters.
 
 **bio** _optional_
 A brief biography of the user. This section of the profile is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.
@@ -150,11 +148,8 @@ The user's current location. This section of the profile is optional.
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
+		"name": "Kevin Palms",
 		"screen_name": "kevin",
-		"display_name": "Kevin P.",
-		"profile_image": "http://img.stamped.com/u/kevin.png"
 		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 		"color_primary": "333333",
 		"color_secondary": "999999",
@@ -219,11 +214,8 @@ The hexadecimal representation of the user's secondary stamp color.
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
+		"name": "Kevin Palms",
 		"screen_name": "kevin",
-		"display_name": "Kevin P.",
-		"profile_image": "http://img.stamped.com/u/kevin.png"
 		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 		"color_primary": "333333",
 		"color_secondary": "999999",
@@ -257,8 +249,7 @@ _None_
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
+		"name": "Kevin Palms",
 		"email": "kevin@stamped.com",
 		"screen_name": "kpalms",
 		"privacy": true
@@ -286,11 +277,8 @@ The user's screen name or email.
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
+		"name": "Kevin Palms",
 		"screen_name": "kevin",
-		"display_name": "Kevin P.",
-		"profile_image": "http://img.stamped.com/u/kevin.png"
 		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 		"color_primary": "333333",
 		"color_secondary": "999999",

@@ -257,6 +257,22 @@ class StampedAPI(AStampedAPI):
 
         return users
     
+    def findUsersByEmail(self, authUserId, emails):
+
+        ### TODO: Add check for privacy settings?
+
+        users = self._userDB.findUsersByEmail(emails, limit=100)
+        
+        return users
+    
+    def findUsersByPhone(self, authUserId, phone):
+
+        ### TODO: Add check for privacy settings?
+
+        users = self._userDB.findUsersByPhone(phone, limit=100)
+        
+        return users
+    
     def searchUsers(self, query, limit, authUserId):
 
         limit = self._setLimit(limit, cap=20)

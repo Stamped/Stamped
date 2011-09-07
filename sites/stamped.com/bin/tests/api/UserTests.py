@@ -113,6 +113,69 @@ class StampedAPIUsersPrivacy(StampedAPIUserTest):
         
         self.assertTrue(ret)
 
+class StampedAPIUsersFindEmail(StampedAPIUserTest):
+    def test_find_by_email(self):
+        path = "users/find/email.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": "%s@stamped.com,%s@stamped.com" % (
+                self.userA['screen_name'],
+                self.userB['screen_name']
+            )
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+
+    def test_find_by_phone(self):
+        # Set phone number
+        path = "account/settings.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "phone": 1235551111,
+        }
+        result = self.handlePOST(path, data)
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "phone": 1235551112,
+        }
+        result = self.handlePOST(path, data)
+
+        path = "users/find/phone.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": "1235551111,1235551112"
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+
+    def test_find_by_phone_twofer(self):
+        # Set phone number
+        path = "account/settings.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "phone": 1235551234,
+        }
+        result = self.handlePOST(path, data)
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "phone": 1235551234,
+        }
+        result = self.handlePOST(path, data)
+
+        path = "users/find/phone.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": 1235551234
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+
 if __name__ == '__main__':
     main()
 

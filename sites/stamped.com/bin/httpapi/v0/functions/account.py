@@ -78,12 +78,6 @@ def update_profile(request):
     for k, v in data.iteritems():
         if v == '':
             data[k] = None
-
-    if 'color' in data:
-        color = data['color'].split(',')
-        data['color_primary']   = color[0]
-        data['color_secondary'] = color[-1]
-        del(data['color'])
     
     account     = stampedAPI.updateProfile(authUserId, data)
     user        = HTTPUser().importSchema(account)

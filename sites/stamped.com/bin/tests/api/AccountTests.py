@@ -28,6 +28,7 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
             "oauth_token": self.token['access_token'],
             "screen_name": "UserA2",
             "privacy": False,
+            "phone": 1235551234,
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['privacy'], False)

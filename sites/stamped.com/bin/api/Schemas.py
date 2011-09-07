@@ -43,6 +43,7 @@ class Account(Schema):
         self.screen_name        = SchemaElement(basestring, required=True)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
+        self.phone              = SchemaElement(int)
         self.bio                = SchemaElement(basestring)
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)

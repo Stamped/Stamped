@@ -93,6 +93,7 @@ class HTTPAccount(Schema):
         self.email              = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.privacy            = SchemaElement(bool, required=True)
+        self.phone              = SchemaElement(int)
         # self.language           = SchemaElement(basestring)
         # self.time_zone          = SchemaElement(basestring)
 
@@ -109,6 +110,7 @@ class HTTPAccountNew(Schema):
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
+        self.phone              = SchemaElement(int)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
@@ -123,6 +125,7 @@ class HTTPAccountSettings(Schema):
         self.password           = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
+        self.phone              = SchemaElement(int)
         # self.language           = SchemaElement(basestring)
         # self.time_zone          = SchemaElement(basestring)
 
@@ -222,6 +225,10 @@ class HTTPUserRelationship(Schema):
         self.screen_name_a      = SchemaElement(basestring)
         self.user_id_b          = SchemaElement(basestring)
         self.screen_name_b      = SchemaElement(basestring)
+
+class HTTPFindUser(Schema):
+    def setSchema(self):
+        self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
 
 # ######## #
 # Entities #
