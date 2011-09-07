@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import copy, urllib, urlparse
-from datetime import datetime
+from datetime import datetime, date
 from schema import *
 from Schemas import *
 
@@ -253,33 +253,53 @@ class HTTPEntity(Schema):
         self.image              = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
 
+        # Address
         self.address            = SchemaElement(basestring)
+        self.address_street     = SchemaElement(basestring)
+        self.address_city       = SchemaElement(basestring)
+        self.address_state      = SchemaElement(basestring)
+        self.address_country    = SchemaElement(basestring)
+        self.address_zip        = SchemaElement(basestring)
+
         self.neighborhood       = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
 
+        # Contact
         self.phone              = SchemaElement(basestring)
         self.site               = SchemaElement(basestring)
         self.hours              = SchemaElement(basestring)
 
-        self.cuisine            = SchemaElement(basestring)
+        # Cross-Category
+        self.release_date       = SchemaElement(datetime)
+        self.length             = SchemaElement(basestring)
+        self.rating             = SchemaElement(basestring)
 
+        # Food
+        self.cuisine            = SchemaElement(basestring)
+        self.price_scale        = SchemaElement(float)
+
+        # Book
         self.author             = SchemaElement(basestring)
         self.isbn               = SchemaElement(basestring)
         self.publisher          = SchemaElement(basestring)
         self.format             = SchemaElement(basestring)
         self.language           = SchemaElement(basestring)
+        self.edition            = SchemaElement(basestring)
 
-        self.rating             = SchemaElement(basestring)
-        self.track_length       = SchemaElement(basestring)
-        self.release_date       = SchemaElement(basestring)
+        # Film
         self.genre              = SchemaElement(basestring)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
-        self.channel            = SchemaElement(basestring)
+        self.network            = SchemaElement(basestring)
+        self.in_theaters        = SchemaElement(basestring)
+        self.run_dates          = SchemaElement(basestring)
 
-        self.artist             = SchemaElement(basestring)
-        self.album              = SchemaElement(basestring)
+        # Music
+        self.artist_name        = SchemaElement(basestring)
+        self.album_name         = SchemaElement(basestring)
+        self.label              = SchemaElement(basestring)
 
+        # Affiliates
         self.opentable_url      = SchemaElement(basestring)
         self.itunes_url         = SchemaElement(basestring)
         self.itunes_short_url   = SchemaElement(basestring)
@@ -304,33 +324,107 @@ class HTTPEntity(Schema):
             self.neighborhood   = schema.neighborhood
             self.coordinates    = _coordinatesDictToFlat(coordinates)
 
+            if len(schema.address_components) > 0:
+                address = {}
+                for component in schema.address_components:
+                    for i in component['types']:
+                        address[i] = component['short_name']
+                    
+                if 'street_address' in address:
+                    self.address_street = address['street_address']
+                elif 'street_number' in address and 'route' in address:
+                    self.address_street = "%s %s" % \
+                        (address['street_number'], address['route'])
+
+                if 'locality' in address:
+                    self.address_city = address['locality']
+
+                if 'administrative_area_level_1' in address:
+                    self.address_state = address['administrative_area_level_1']
+
+                if 'country' in address:
+                    self.address_country = address['country']
+
+                if 'postal_code' in address:
+                    self.address_zip = address['postal_code']
+
             # Contact
             self.phone          = schema.phone
             self.site           = schema.site
             self.hours          = schema.hoursOfOperation
             
+            # Cross-Category
+
+            ### TODO: Unify these within Schemas.py where possible
+            if self.category == 'book':
+                self.release_date   = schema.publish_date
+                self.length         = schema.num_pages
+
+            elif self.category == 'film':
+                try:
+                    dateString = schema.original_release_date
+                    release_date = date(int(dateString[0:4]), \
+                                        int(dateString[5:7]), \
+                                        int(dateString[8:10]))
+                    self.release_date   = release_date
+                except:
+                    self.release_date   = None
+
+                self.length         = schema.track_length
+                self.rating         = schema.mpaa_rating
+
+                if schema.ngenres != None:
+                    for genre in schema.ngenres:
+                        if self.genre == None:
+                            self.genre = genre
+                        else:
+                            self.genre = "%s; %s" % (self.genre, genre)
+
+                if schema.short_description != None:
+                    self.desc = schema.short_description
+
+            elif self.category == 'music':
+                try:
+                    dateString = schema.original_release_date
+                    release_date = date(int(dateString[0:4]), \
+                                        int(dateString[5:7]), \
+                                        int(dateString[8:10]))
+                    self.release_date   = release_date
+                except:
+                    self.release_date   = None
+
+                self.length         = schema.track_length
+                if schema.parental_advisory_id == 1:
+                    self.rating         = "Parental Advisory"
+            
             # Food
             self.cuisine        = schema.cuisine
+            self.price_scale    = schema.priceScale
 
             # Book
             self.author         = schema.author
             self.isbn           = schema.isbn
             self.publisher      = schema.publisher
-            # self.format         = None
-            # self.language       = None
+            self.format         = schema.book_format
+            self.language       = schema.language
+            self.edition        = schema.edition
 
             # Film
-            self.rating         = schema.mpaa_rating
-            self.track_length   = schema.track_length
             self.release_date   = schema.original_release_date
             self.cast           = schema.cast
             self.director       = schema.director
-            self.channel        = schema.channel
-            # self.genre          = None
+            self.network        = schema.network_name
+            self.in_theaters    = schema.in_theaters
 
             # Music
-            self.artist         = schema.artist_display_name
-            self.album          = schema.album_name
+            self.artist_name    = schema.artist_display_name
+            self.album_name     = schema.album_name
+            self.label          = schema.label_studio
+
+            if self.subcategory == 'artist':
+                self.album_list     = schema.albums
+            if self.subcategory == 'album':
+                self.track_list     = schema.tracks
             ### TODO
             
             # Affiliates

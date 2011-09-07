@@ -376,6 +376,7 @@ class RestaurantSchema(Schema):
         self.chef               = SchemaElement(basestring)
         self.owner              = SchemaElement(basestring)
         self.reviewLinks        = SchemaElement(basestring)
+        self.priceScale         = SchemaElement(float)
 
 class AppSchema(Schema):
     def setSchema(self):
@@ -406,6 +407,9 @@ class BookSchema(Schema):
         self.sku_number         = SchemaElement(basestring)
         self.publisher          = SchemaElement(basestring)
         self.publish_date       = SchemaElement(basestring)
+        self.language           = SchemaElement(basestring)
+        self.book_format        = SchemaElement(basestring)
+        self.edition            = SchemaElement(basestring)
         self.num_pages          = SchemaElement(int)
 
 class VideoSchema(Schema):
@@ -418,7 +422,7 @@ class VideoSchema(Schema):
         ### TODO: modify ese based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
-        self.channel            = SchemaElement(basestring)
+        self.in_theaters        = SchemaElement(bool)
         
         self.v_retail_price     = SchemaElement(basestring)
         self.v_currency_code    = SchemaElement(basestring)
