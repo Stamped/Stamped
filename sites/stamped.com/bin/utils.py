@@ -577,7 +577,7 @@ def validate_email(email):
         return False
 
 def validate_screen_name(screen_name):
-    screen_name_re = re.compile("^[\w-]{2,32}$", re.IGNORECASE)
+    screen_name_re = re.compile("^[\w-]{1,32}$", re.IGNORECASE)
 
     try:
         if screen_name_re.match(screen_name):
