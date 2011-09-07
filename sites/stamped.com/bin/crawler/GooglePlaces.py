@@ -124,11 +124,14 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         results = self.getSearchResultsByLatLng(latLng, params)
         output  = []
         
+        if results is None:
+            return None
+        
         for result in results:
             entity = self.getEntityFromResult(result, detailed=detailed)
             
             if entity is not None:
-                output.append(output)
+                output.append(entity)
         
         return output
     

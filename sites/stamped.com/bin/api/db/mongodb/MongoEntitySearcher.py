@@ -331,7 +331,7 @@ class MongoEntitySearcher(EntitySearcher):
                 output   = []
                 
                 if google_results is not None and len(google_results) > 0:
-                    entities = self.api._entityMatcher.addMany(google_results)
+                    #entities = self.api._entityMatcher.addMany(google_results)
                     
                     if entities is not None:
                         for entity in entities:
