@@ -287,7 +287,7 @@ class MongoEntitySearcher(EntitySearcher):
         wrapper = {}
         
         def _find_entity(ret):
-            ret['db_results'] = self.entityDB._collection.find(entity_query)
+            ret['db_results'] = self.entityDB._collection.find(entity_query, output=list)
         
         def _find_amazon(ret):
             amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
