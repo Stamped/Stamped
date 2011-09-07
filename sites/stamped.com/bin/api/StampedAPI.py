@@ -478,7 +478,7 @@ class StampedAPI(AStampedAPI):
         
         ### TODO: Check if user has access to this entity
         return entity
-
+    
     def updateCustomEntity(self, authUserId, entityId, data):
         ### TODO: Reexamine how updates are done
         entity = self._entityDB.getEntity(entityId)

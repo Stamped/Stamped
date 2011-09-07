@@ -242,7 +242,7 @@ class HTTPEntity(Schema):
         self.neighborhood       = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
 
-        self.phone              = SchemaElement(int)
+        self.phone              = SchemaElement(basestring)
         self.site               = SchemaElement(basestring)
         self.hours              = SchemaElement(basestring)
 
