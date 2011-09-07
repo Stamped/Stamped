@@ -23,11 +23,8 @@ The user id or screen name of the requested user. If the user id does not match 
 ### Sample Result ###
 	{
 		"user_id": "47cc67093475061e3d95369d",
-		"first_name": "Kevin",
-		"last_name": "Palms",
+		"name": "Kevin Palms",
 		"screen_name": "kevin",
-		"display_name": "Kevin P.",
-		"profile_image": "http://img.stamped.com/u/kevin.png"
 		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 		"color_primary": "333333",
 		"color_secondary": "999999",
@@ -63,11 +60,8 @@ The user ids or screen names of the requested users. Multiple values should be s
 	[
 		{
 			"user_id": "47cc67093475061e3d95369d",
-			"first_name": "Kevin",
-			"last_name": "Palms",
+			"name": "Kevin Palms",
 			"screen_name": "kevin",
-			"display_name": "Kevin P.",
-			"profile_image": "http://img.stamped.com/u/kevin.png"
 			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 			"color_primary": "333333",
 			"color_secondary": "999999",
@@ -81,11 +75,8 @@ The user ids or screen names of the requested users. Multiple values should be s
 		},
 		{
 			"user_id": "4e226fcd4e61754161000007",
-			"first_name": "Robby",
-			"last_name": "Stein",
+			"name": "Robby Stein",
 			"screen_name": "robby",
-			"display_name": "Robby S.",
-			"profile_image": "http://img.stamped.com/u/robby.png"
 			"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
 			"color_primary": "A0EE33",
 			"color_secondary": "BBBBFF",
@@ -125,11 +116,8 @@ The number of results to return. Default is 20.
 	[
 		{
 			"user_id": "47cc67093475061e3d95369d",
-			"first_name": "Kevin",
-			"last_name": "Palms",
+			"name": "Kevin Palms",
 			"screen_name": "kevin",
-			"display_name": "Kevin P.",
-			"profile_image": "http://img.stamped.com/u/kevin.png"
 			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
 			"color_primary": "333333",
 			"color_secondary": "999999",
@@ -164,5 +152,111 @@ The user id or screen name of the requested user.
 
 ### Sample Result ###
 	false
+
+
+------------------------------------------------------------------------------
+## GET users/find/email ##
+
+### Description ###
+Match and return detailed information for up to 100 users based on their email addresses.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**q** _required_
+The url-encoded list of emails. Multiple values should be separated by commas.
+
+### Sample Request ###
+	GET https://api.stamped.com/v0/users/find/email.json
+	oauth_token=1234567890123456789012&q=kevin%40stamped.com,robby%40stamped.com
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"name": "Kevin Palms",
+			"screen_name": "kevin",
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		},
+		{
+			"user_id": "4e226fcd4e61754161000007",
+			"name": "Robby Stein",
+			"screen_name": "robby",
+			"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+			"color_primary": "A0EE33",
+			"color_secondary": "BBBBFF",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		}
+	]
+
+
+------------------------------------------------------------------------------
+## GET users/find/phone ##
+
+### Description ###
+Match and return detailed information for up to 100 users based on their phone numbers. As phone numbers are not required to be unique, multiple results may be returned for the same number.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**q** _required_
+The url-encoded list of phone numbers. Multiple values should be separated by commas. Each phone number must be a valid integer and not a string, e.g. "123-555-1234" will be rejected.
+
+### Sample Request ###
+	GET https://api.stamped.com/v0/users/find/email.json
+	oauth_token=1234567890123456789012&q=1235551111,1235551112
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"name": "Kevin Palms",
+			"screen_name": "kevin",
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		},
+		{
+			"user_id": "4e226fcd4e61754161000007",
+			"name": "Robby Stein",
+			"screen_name": "robby",
+			"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+			"color_primary": "A0EE33",
+			"color_secondary": "BBBBFF",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		}
+	]
 
 
