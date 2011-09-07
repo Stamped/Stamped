@@ -290,13 +290,17 @@ class MongoEntitySearcher(EntitySearcher):
             ret['db_results'] = self.entityDB._collection.find(entity_query, output=list)
         
         def _find_amazon(ret):
-            amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
-                                                                SearchIndex='All', 
-                                                                Availability='Available', 
-                                                                transform=True)
-            
-            entities = self.api._entityMatcher.addMany(amazon_results)
-            ret['amazon_results'] = list((e, -1) for e in entities)
+            try:
+                amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
+                                                                    SearchIndex='All', 
+                                                                    Availability='Available', 
+                                                                    transform=True)
+                
+                entities = self.api._entityMatcher.addMany(amazon_results)
+                ret['amazon_results'] = list((e, -1) for e in entities)
+            except:
+                utils.printException()
+                raise
         
         if full:
             pool.spawn(_find_amazon, wrapper)
@@ -311,26 +315,30 @@ class MongoEntitySearcher(EntitySearcher):
                 ret['place_results'] = self.placesDB._collection.command(q)
             
             def _find_google_places(ret):
-                params = {
-                    'name' : input_query, 
-                }
-                
-                google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, True)
-                
-                entities = []
-                output   = []
-                
-                if google_results is not None and len(google_results) > 0:
-                    entities = self.api._entityMatcher.addMany(google_results)
+                try:
+                    params = {
+                        'name' : input_query, 
+                    }
                     
-                    if entities is not None:
-                        for entity in entities:
-                            distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
-                            distance = distance * earthRadius
-                            
-                            output.append((entity, distance))
-                
-                ret['google_place_results'] = output
+                    google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, True)
+                    
+                    entities = []
+                    output   = []
+                    
+                    if google_results is not None and len(google_results) > 0:
+                        entities = self.api._entityMatcher.addMany(google_results)
+                        
+                        if entities is not None:
+                            for entity in entities:
+                                distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
+                                distance = distance * earthRadius
+                                
+                                output.append((entity, distance))
+                    
+                    ret['google_place_results'] = output
+                except:
+                    utils.printException()
+                    raise
             
             if full:
                 pool.spawn(_find_google_places, wrapper)

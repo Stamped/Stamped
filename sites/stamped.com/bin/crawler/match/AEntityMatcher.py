@@ -23,8 +23,6 @@ class AEntityMatcher(object):
     """
     
     def __init__(self, stamped_api, options=None):
-        assert isinstance(stamped_api, AStampedAPI)
-        
         if options is None:
             options = AttributeDict(
                 verbose=False, 
