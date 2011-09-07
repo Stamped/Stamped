@@ -616,6 +616,37 @@ oauth_token=1234567890123456789012&amp;user_id=4e226fcd4e61754161000007
 }
 </code></pre>
 
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="postfriendshipsinvite">POST friendships/invite</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Invite a user to join the service.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+<li>Subsequent requests to invite the same user will result in failures.</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>email</strong> <em>required</em>
+The url-encoded email address of the user who should be invited.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v1/friendships/invite.json
+oauth_token=1234567890123456789012&amp;email=kevin%40stamped.com
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>True
+</code></pre>
+
     </div>
 </body>
 </html>

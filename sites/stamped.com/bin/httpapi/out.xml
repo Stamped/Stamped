@@ -3,19 +3,19 @@
     <HTTPHeaders>
       <Header Name="UserAgent" Value="Python-urllib/2.6"/>
     </HTTPHeaders>
-    <RequestId>7f93180a-0631-4322-879c-1ec948c85253</RequestId>
+    <RequestId>e727cdf9-b7c1-4f86-88f5-99e00b7aa09e</RequestId>
     <Arguments>
       <Argument Name="Operation" Value="ItemLookup"/>
       <Argument Name="Service" Value="AWSECommerceService"/>
-      <Argument Name="ItemId" Value="B000003TA2,B001ENOVP2,B0007ZIYWY"/>
-      <Argument Name="AWSAccessKeyId" Value="AKIAIXLZZZT4DMTKZBDQ"/>
-      <Argument Name="Timestamp" Value="2011-09-07T15:14:03Z"/>
-      <Argument Name="Signature" Value="j17Rws3Esdk/FNZCrOzCuZR+/acm6o8IDJaRoDD1EJA="/>
-      <Argument Name="ResponseGroup" Value="Large"/>
+      <Argument Name="Signature" Value="NyEU9OyJyKrMjkELOLK2tEzzIpPJW9rhg6ypCATRnDM="/>
       <Argument Name="AssociateTag" Value="stamped01-20"/>
       <Argument Name="Version" Value="2011-08-01"/>
+      <Argument Name="ItemId" Value="B000003TA2,B001ENOVP2,B0007ZIYWY"/>
+      <Argument Name="AWSAccessKeyId" Value="AKIAIXLZZZT4DMTKZBDQ"/>
+      <Argument Name="Timestamp" Value="2011-09-07T21:05:21Z"/>
+      <Argument Name="ResponseGroup" Value="Large"/>
     </Arguments>
-    <RequestProcessingTime>0.1773640000000000</RequestProcessingTime>
+    <RequestProcessingTime>0.1765370000000000</RequestProcessingTime>
   </OperationRequest>
   <Items>
     <Request>
@@ -62,7 +62,7 @@
           <URL>http://www.amazon.com/gp/offer-listing/B000003TA2%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB000003TA2</URL>
         </ItemLink>
       </ItemLinks>
-      <SalesRank>4009</SalesRank>
+      <SalesRank>7001</SalesRank>
       <SmallImage>
         <URL>http://ecx.images-amazon.com/images/I/61J0lLR3U9L._SL75_.jpg</URL>
         <Height Units="pixels">75</Height>
@@ -159,16 +159,16 @@
           <FormattedPrice>$4.24</FormattedPrice>
         </LowestNewPrice>
         <LowestUsedPrice>
-          <Amount>125</Amount>
+          <Amount>124</Amount>
           <CurrencyCode>USD</CurrencyCode>
-          <FormattedPrice>$1.25</FormattedPrice>
+          <FormattedPrice>$1.24</FormattedPrice>
         </LowestUsedPrice>
         <LowestCollectiblePrice>
           <Amount>1199</Amount>
           <CurrencyCode>USD</CurrencyCode>
           <FormattedPrice>$11.99</FormattedPrice>
         </LowestCollectiblePrice>
-        <TotalNew>44</TotalNew>
+        <TotalNew>45</TotalNew>
         <TotalUsed>41</TotalUsed>
         <TotalCollectible>1</TotalCollectible>
         <TotalRefurbished>0</TotalRefurbished>
@@ -182,7 +182,7 @@
             <Condition>New</Condition>
           </OfferAttributes>
           <OfferListing>
-            <OfferListingId>2pNr11oUakp6nlgbnehbWr82pBu%2FBUJ3fbUobEyBNMT6vvUWsu0oSSDPWKWHp2x9Uxw4Iu8ZdulUOXVW0iM09nax35UdzEQjGx1pdqRP5lE%3D</OfferListingId>
+            <OfferListingId>YsrEPshgh%2BHoCcVL88coX3fU5BzEbmqwNd2vKGCHCOvHaSVkayhszX8sRYCwgyPFA%2BrW3meLEamSNm4KEZJLTNelOBPuk4C0Ch43PcRH0G4%3D</OfferListingId>
             <Price>
               <Amount>753</Amount>
               <CurrencyCode>USD</CurrencyCode>
@@ -205,7 +205,7 @@
         </Offer>
       </Offers>
       <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B000003TA2&amp;atag=stamped01-20&amp;exp=2011-09-08T15%3A14%3A04Z&amp;v=2&amp;sig=l2Lj61A96N8zxnJ92Or7W%2B1QGVxr6EkeTVekiaOvR0M%3D</IFrameURL>
+        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B000003TA2&amp;atag=stamped01-20&amp;exp=2011-09-08T21%3A05%3A22Z&amp;v=2&amp;sig=xNtZdVlG6Nf2uJiCBd2nN38qUcQ8yflSCAYG%2FZlehgQ%3D</IFrameURL>
         <HasReviews>true</HasReviews>
       </CustomerReviews>
       <EditorialReviews>
@@ -462,7 +462,7 @@
           <URL>http://www.amazon.com/gp/offer-listing/B001ENOVP2%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB001ENOVP2</URL>
         </ItemLink>
       </ItemLinks>
-      <SalesRank>3371</SalesRank>
+      <SalesRank>4031</SalesRank>
       <SmallImage>
         <URL>http://ecx.images-amazon.com/images/I/51hVeP%2BumpL._SL75_.jpg</URL>
         <Height Units="pixels">75</Height>
@@ -823,18 +823,18 @@
             <Condition>New</Condition>
           </OfferAttributes>
           <OfferListing>
-            <OfferListingId>0j1MydbCI%2FjOcaV7f2NP3g7fV61azaJMhTZZo8gArvZIwmu0lDe7JE3IM28mx7zx7a9T6UoKTTVb9IUzu%2B7jtKyt2PPVeWA6jJXShSjtvft%2FFGuK9DxCUuFE%2FVWC6IfF%2FZbPHoC4gKmfL%2B%2FTt2xfAIndaYUYfomS</OfferListingId>
+            <OfferListingId>AeU9kuxdEK1lKcaPMm3cShVpxFkgc3ja2O6THou6%2FdHl8DgCCdlVzJYr4wKKCSx%2FdvJmJTPdgC0wtCNXFLqkFARMmmrSZ7uLKz6TpnO0q6HBba%2FLELw5lanZ%2FV4IqU%2BCRsC3UjToB7uHD9WRq7vMEFvpCpZBtJwz</OfferListingId>
             <Price>
-              <Amount>746</Amount>
+              <Amount>727</Amount>
               <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$7.46</FormattedPrice>
+              <FormattedPrice>$7.27</FormattedPrice>
             </Price>
             <AmountSaved>
-              <Amount>1253</Amount>
+              <Amount>1272</Amount>
               <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$12.53</FormattedPrice>
+              <FormattedPrice>$12.72</FormattedPrice>
             </AmountSaved>
-            <PercentageSaved>63</PercentageSaved>
+            <PercentageSaved>64</PercentageSaved>
             <Availability>Usually ships in 24 hours</Availability>
             <AvailabilityAttributes>
               <AvailabilityType>now</AvailabilityType>
@@ -846,7 +846,7 @@
         </Offer>
       </Offers>
       <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B001ENOVP2&amp;atag=stamped01-20&amp;exp=2011-09-08T15%3A14%3A04Z&amp;v=2&amp;sig=tj9RduxqwtX6aupXViB8VjinHUkwgDpcVYCnIp78LYQ%3D</IFrameURL>
+        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B001ENOVP2&amp;atag=stamped01-20&amp;exp=2011-09-08T21%3A05%3A22Z&amp;v=2&amp;sig=uoRcyAOVcHbk%2BgdUAwdsII9HGHDp31p0YVbm16P6cXg%3D</IFrameURL>
         <HasReviews>true</HasReviews>
       </CustomerReviews>
       <EditorialReviews>
@@ -985,7 +985,7 @@
           <URL>http://www.amazon.com/gp/offer-listing/B0007ZIYWY%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
         </ItemLink>
       </ItemLinks>
-      <SalesRank>101774</SalesRank>
+      <SalesRank>103898</SalesRank>
       <SmallImage>
         <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL75_.jpg</URL>
         <Height Units="pixels">75</Height>
@@ -1083,16 +1083,16 @@
       </ItemAttributes>
       <OfferSummary>
         <LowestNewPrice>
-          <Amount>1727</Amount>
+          <Amount>1532</Amount>
           <CurrencyCode>USD</CurrencyCode>
-          <FormattedPrice>$17.27</FormattedPrice>
+          <FormattedPrice>$15.32</FormattedPrice>
         </LowestNewPrice>
         <LowestUsedPrice>
           <Amount>572</Amount>
           <CurrencyCode>USD</CurrencyCode>
           <FormattedPrice>$5.72</FormattedPrice>
         </LowestUsedPrice>
-        <TotalNew>35</TotalNew>
+        <TotalNew>36</TotalNew>
         <TotalUsed>13</TotalUsed>
         <TotalCollectible>0</TotalCollectible>
         <TotalRefurbished>0</TotalRefurbished>
@@ -1106,7 +1106,7 @@
             <Condition>New</Condition>
           </OfferAttributes>
           <OfferListing>
-            <OfferListingId>Z27B4CmGt6kfxHndJWupVtFeqUXMqWfW0vgsarLiukCiElKTsMlAzRR2lIunG0D%2BGilI3i93VHLrgJ4uTgBSl2D9pN6Hziqp0dFJWUfAYRnq3WeogDBmhg%3D%3D</OfferListingId>
+            <OfferListingId>YwUlAnuM9ZiP92RyMnJnsMuTiV0f6FRwlw82RGnyCeKQn8Q0OI7Sh7IU8%2F11Ps%2BAIPT2UbTsMFenetKmwy%2BOpbjtqPaSnpXrAvekTDICDQHwue9Md4qaTQ%3D%3D</OfferListingId>
             <Price>
               <Amount>2427</Amount>
               <CurrencyCode>USD</CurrencyCode>
@@ -1129,7 +1129,7 @@
         </Offer>
       </Offers>
       <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B0007ZIYWY&amp;atag=stamped01-20&amp;exp=2011-09-08T15%3A14%3A04Z&amp;v=2&amp;sig=WZ5%2ByArEHIt4Q8rIeBokMpaHoS0u%2BrM4NftFIpbhvdI%3D</IFrameURL>
+        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B0007ZIYWY&amp;atag=stamped01-20&amp;exp=2011-09-08T21%3A05%3A22Z&amp;v=2&amp;sig=lA0Rj%2BquLsyC7mBxNYHAU0k%2BX8QLSw%2FsAs4stEmdCDs%3D</IFrameURL>
         <HasReviews>true</HasReviews>
       </CustomerReviews>
       <EditorialReviews>

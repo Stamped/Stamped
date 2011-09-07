@@ -230,6 +230,14 @@ class HTTPFindUser(Schema):
     def setSchema(self):
         self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
 
+# ####### #
+# Invites #
+# ####### #
+
+class HTTPInvitation(Schema):
+    def setSchema(self):
+        self.email              = SchemaElement(basestring)
+
 # ######## #
 # Entities #
 # ######## #

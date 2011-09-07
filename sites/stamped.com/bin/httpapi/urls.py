@@ -58,6 +58,7 @@ urlpatterns = patterns('',
     (r'v0/friendships/blocks/check.json',       'v0.functions.friendships.blocksCheck'),
     (r'v0/friendships/blocking.json',           'v0.functions.friendships.blocking'),
     (r'v0/friendships/blocks/remove.json',      'v0.functions.friendships.blocksRemove'),
+    (r'v0/friendships/invite.json',             'v0.functions.friendships.invite'),
 
     ### ENTITIES
     (r'v0/entities/create.json',        'v0.functions.entities.create'),

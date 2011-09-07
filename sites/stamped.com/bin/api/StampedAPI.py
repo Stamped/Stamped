@@ -103,7 +103,35 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise InputError(msg)
 
+        # Create account
         account = self._accountDB.addAccount(account)
+
+        # Add activity if invitations were sent
+        invites = self._inviteDB.getInvites(account.email)
+        invitedBy = {}
+        for invite in invites:
+            invitedBy[invite['user_id']] = 1
+
+            activity                = Activity()
+            ### TODO: What genre are we picking for this activity item?
+            activity.genre          = 'invite_sent'
+            activity.user_id        = invite['user_id']
+            activity.link_user_id   = invite['user_id']
+            activity.created        = datetime.utcnow()
+            
+            self._activityDB.addActivity([account.user_id], activity)
+
+        if len(invitedBy) > 0:
+            activity                = Activity()
+            ### TODO: What genre are we picking for this activity item?
+            activity.genre          = 'invite_received'
+            activity.user_id        = account.user_id
+            activity.link_user_id   = account.user_id
+            activity.created        = datetime.utcnow()
+            
+            self._activityDB.addActivity(invitedBy.keys(), activity)
+        
+        self._inviteDB.join(account.email)
         
         return account
 
@@ -166,11 +194,15 @@ class StampedAPI(AStampedAPI):
     
     def removeAccount(self, authUserId):
 
-        ### TODO: Remove all activity, stamps, entities, etc. for user
+        ### TODO: Remove all activity, stamps, entities, images, etc. for user
         ### TODO: Verify w/ password?
 
         account = self._accountDB.getAccount(authUserId)
         self._accountDB.removeAccount(authUserId)
+
+        # Remove email address from invite list
+        self._inviteDB.remove(account.email)
+
         return account
 
     def checkAccount(self, login):
@@ -472,6 +504,19 @@ class StampedAPI(AStampedAPI):
         ### TODO: Reenable activity items that were hidden before
 
         return user
+
+    def inviteFriend(self, authUserId, email):
+        # Validate email address
+        email = str(email).lower().strip()
+        if not utils.validate_email(email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Store email address linked to auth user id
+        self._inviteDB.inviteUser(email, authUserId)
+
+        return True
     
 
     """
