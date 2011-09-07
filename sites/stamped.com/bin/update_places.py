@@ -9,6 +9,7 @@ import init
 import utils
 
 from GooglePlacesEntityMatcher  import GooglePlacesEntityMatcher
+from gevent.pool                import Pool
 from match.EntityMatcher        import EntityMatcher
 from GooglePlaces               import GooglePlaces
 from MongoStampedAPI            import MongoStampedAPI
@@ -44,30 +45,26 @@ def main():
     matcher2   = EntityMatcher(stampedAPI, options)
     placesDB   = stampedAPI._placesEntityDB
     
-    rs = placesDB._collection.find({"sources.googlePlaces" : { "$exists" : False }})
+    rs = placesDB._collection.find({"sources.googlePlaces" : { "$exists" : False }}, output=list)
     
-    num_processed = 0
-    num_converted = 0
-    num_failed    = 0
+    pool = Pool(32)
     
     for result in rs:
         entity = placesDB._convertFromMongo(result)
-        num_processed += 1
         
-        match = matcher.tryMatchEntityWithGooglePlaces(entity, detailed=True)
-        
-        if match is not None:
-            entity = matcher2.mergeDuplicates(entity, [ match ])
-            utils.log("Success: %s vs %s" % (entity.title, match.title))
-            num_converted += 1
-        else:
-            utils.log("Failure: %s" % entity.title)
-            pprint(entity.value)
-            num_failed += 1
+        pool.spawn(handle_entity, entity, matcher, matcher2)
     
-    print "num processed: %d" % num_processed
-    print "num converted: %d" % num_converted
-    print "num failed:    %d" % num_failed
+    pool.join()
+
+def handle_entity(entity, matcher, matcher2):
+    match = matcher.tryMatchEntityWithGooglePlaces(entity, detailed=True)
+    
+    if match is not None:
+        entity = matcher2.mergeDuplicates(entity, [ match ])
+        utils.log("Success: %s vs %s" % (entity.title, match.title))
+    else:
+        utils.log("Failure: %s" % entity.title)
+        pprint(entity.value)
 
 if __name__ == '__main__':
     main()

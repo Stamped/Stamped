@@ -289,32 +289,21 @@ class MongoEntitySearcher(EntitySearcher):
         def _find_entity(ret):
             ret['db_results'] = self.entityDB._collection.find(entity_query)
         
+        def _find_amazon(ret):
+            amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
+                                                                SearchIndex='All', 
+                                                                Availability='Available', 
+                                                                transform=True)
+            
+            entities = self.api._entityMatcher.addMany(amazon_results)
+            ret['amazon_results'] = list((e, -1) for e in entities)
+        
+        if full:
+            pool.spawn(_find_amazon, wrapper)
+        
         pool.spawn(_find_entity, wrapper)
         
-        if coords is None:
-            def _find_amazon(ret):
-                amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
-                                                                    SearchIndex='All', 
-                                                                    Availability='Available', 
-                                                                    transform=True)
-                
-                entities = self.api._entityMatcher.addMany(amazon_results)
-                ret['amazon_results'] = list((e, -1) for e in entities)
-            
-            if full:
-                pool.spawn(_find_amazon, wrapper)
-            
-            pool.join()
-            
-            if full:
-                try:
-                    amazon_results = wrapper['amazon_results']
-                except KeyError:
-                    amazon_results = []
-                
-                for result in amazon_results:
-                    results[result[0].entity_id] = result
-        else:
+        if coords is not None:
             earthRadius = 3959.0 # miles
             q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
             
@@ -346,35 +335,33 @@ class MongoEntitySearcher(EntitySearcher):
             if full:
                 pool.spawn(_find_google_places, wrapper)
             
-            # perform the requests concurrently
             pool.spawn(_find_places, wrapper)
-            pool.join()
-            
+        
+        # perform the requests concurrently
+        pool.join()
+        
+        if 'db_results' in wrapper:
+            for doc in wrapper['db_results']:
+                e = self.entityDB._convertFromMongo(doc)
+                results[e.entity_id] = (e, -1)
+        
+        if 'place_results' in wrapper:
             try:
                 place_results = wrapper['place_results']['results']
             except KeyError:
                 place_results = []
             
             for doc in place_results:
-                entity = self.placesDB._convertFromMongo(doc['obj'])
-                result = (entity, doc['dis'])
-                
-                results[result[0].entity_id] = result
-            
-            if full:
-                try:
-                    google_place_results = wrapper['google_place_results']
-                except KeyError:
-                    google_place_results = []
-                
-                for result in google_place_results:
-                    results[result[0].entity_id] = result
+                e = self.placesDB._convertFromMongo(doc['obj'])
+                results[e.entity_id] = (e, doc['dis'])
         
-        # process the normal mongodb results
-        for entity in wrapper['db_results']:
-            e = self.entityDB._convertFromMongo(entity)
-            
-            results[e.entity_id] = (e, -1)
+        if 'google_place_results' in wrapper:
+            for result in wrapper['google_place_results']:
+                results[result[0].entity_id] = result
+        
+        if 'amazon_results' in wrapper:
+            for result in wrapper['amazon_results']:
+                results[result[0].entity_id] = result
         
         results = results.values()
         
