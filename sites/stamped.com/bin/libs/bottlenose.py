@@ -1,6 +1,7 @@
 from base64 import b64encode
 import gzip
 import sys
+import httplib
 import urllib
 import urllib2
 import hmac
@@ -86,16 +87,47 @@ class AmazonCall(object):
         keys.sort()
 
         quoted_strings = "&".join("%s=%s" % (k, urllib.quote(unicode(kwargs[k]).encode('utf-8'), safe = '~')) for k in keys)
-
+        
         data = "GET\n" + service_domain + "\n/onca/xml\n" + quoted_strings
-
+        
         digest = hmac.new(self.AWSSecretAccessKey, data, sha256).digest()
         signature = urllib.quote(b64encode(digest))
-
+        
         api_string = "http://" + service_domain + "/onca/xml?" + quoted_strings + "&Signature=%s" % signature
         api_request = urllib2.Request(api_string, headers={"Accept-Encoding": "gzip"})
-        response = urllib2.urlopen(api_request)
-
+        
+        maxDelay = 32
+        delay = 0.5
+        
+        while True:
+            try:
+                response = urllib2.urlopen(api_request)
+                break
+            except urllib2.HTTPError, e:
+                # reraise the exception if the request resulted in an HTTP client 4xx error code, 
+                # since it was a problem with the url / headers and retrying most likely won't 
+                # solve the problem.
+                if e.code >= 400 and e.code < 500:
+                    raise
+                
+                # if delay is already too large, request will likely not complete successfully, 
+                # so propagate the error and return.
+                if delay > maxDelay:
+                    raise
+            except (ValueError, IOError, httplib.BadStatusLine):
+                if delay > maxDelay:
+                    raise
+            except Exception, e:
+                print type(e)
+                print "Unexpected Error '%s' fetching url '%s'" % (str(e), url)
+                if delay > maxDelay:
+                    raise
+            
+            # put the current thread to sleep for a bit, increase the delay, 
+            # and retry the request
+            time.sleep(delay)
+            delay *= 2
+        
         if "gzip" in response.info().getheader("Content-Encoding"):
             gzipped_file  = gzip.GzipFile(fileobj=StringIO.StringIO(response.read()))
             response_text = gzipped_file.read()

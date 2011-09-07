@@ -326,41 +326,12 @@ class MongoEntitySearcher(EntitySearcher):
                     'name' : input_query, 
                 }
                 
-                google_results = self._googlePlaces.getSearchResultsByLatLng(coords, params)
+                google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, True)
                 entities = []
                 output   = []
                 
-                if google_results is not None:
-                    for result in google_results:
-                        subcategory  = self._googlePlaces.getSubcategoryFromTypes(result['types'])
-                        if subcategory not in self.google_subcategory_whitelist:
-                            continue
-                        
-                        entity = Entity()
-                        entity.title = result['name']
-                        entity.image = result['icon']
-                        entity.lat   = result['geometry']['location']['lat']
-                        entity.lng   = result['geometry']['location']['lng']
-                        entity.gid   = result['id']
-                        entity.reference   = result['reference']
-                        entity.subcategory = subcategory
-                        
-                        if 'vicinity' in result:
-                            entity.neighborhood = result['vicinity']
-                        
-                        # fetch a google places details request to fill in any missing data
-                        details = self._googlePlaces.getPlaceDetails(result['reference'])
-                        
-                        if 'formatted_phone_number' in details:
-                            entity.phone = details['formatted_phone_number']
-                        if 'formatted_address' in details:
-                            entity.address = details['formatted_address']
-                        if 'address_components' in details:
-                            entity.address_components = details['address_components']
-                        
-                        entities.append(entity)
-                    
-                    entities = self.api._entityMatcher.addMany(entities)
+                if google_results is not None and len(google_results) > 0:
+                    entities = self.api._entityMatcher.addMany(google_results)
                     
                     if entities is not None:
                         for entity in entities:

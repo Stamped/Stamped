@@ -356,23 +356,23 @@ class AppleEPFArtistDump(AAppleEPFDump):
         self.artist_to_albums = AppleEPFArtistsToAlbumsRelationalDB()
         self.artist_to_albums.start()
         
-        #self.artist_to_songs = AppleEPFArtistsToSongsRelationalDB()
-        #self.artist_to_songs.start()
+        self.artist_to_songs = AppleEPFArtistsToSongsRelationalDB()
+        self.artist_to_songs.start()
         
         self.album_popularity_per_genre = AppleEPFAlbumPopularityPerGenreRelationalDB()
         self.album_popularity_per_genre.start()
         
-        #self.song_popularity_per_genre = AppleEPFSongPopularityPerGenreRelationalDB()
-        #self.song_popularity_per_genre.start()
+        self.song_popularity_per_genre = AppleEPFSongPopularityPerGenreRelationalDB()
+        self.song_popularity_per_genre.start()
         
         self.genres = AppleEPFGenreRelationalDB()
         self.genres.start()
         
         artist_type.join()
         self.artist_to_albums.join()
-        #self.artist_to_songs.join()
+        self.artist_to_songs.join()
         self.album_popularity_per_genre.join()
-        #self.song_popularity_per_genre.join()
+        self.song_popularity_per_genre.join()
         self.genres.join()
         
         self.artist_type_id = int(artist_type.results['Artist'])
@@ -484,9 +484,9 @@ class AppleEPFArtistDump(AAppleEPFDump):
             out_albums.append(out_album)
         
         # query for all songs by this artist
-        """
         songs = self.artist_to_songs.get_rows('artist_id', artist_id)
         
+        out_songs = []
         if len(songs) <= 0:
             return False
         
@@ -494,11 +494,17 @@ class AppleEPFArtistDump(AAppleEPFDump):
             song_id = song['song_id']
             pop = self.song_popularity_per_genre.get_row('song_id', song_id)
             
+            out_song = {
+                'song_id' : song_id, 
+            }
+            
             if pop is not None:
-                popular = True
-        
-        return popular
-        """
+                rank = pop['song_rank']
+                
+                if popularity is None or rank < popularity:
+                    popularity = rank
+            
+            out_songs.append(out_song)
         
         return {
             'albums' : out_albums, 
@@ -1006,7 +1012,7 @@ import EntitySources
 
 #EntitySources.registerSource('apple', AppleEPFDumps)
 EntitySources.registerSource('apple_artists', AppleEPFArtistDump)
-#EntitySources.registerSource('apple_songs',   AppleEPFSongDump)
+EntitySources.registerSource('apple_songs',   AppleEPFSongDump)
 EntitySources.registerSource('apple_albums',  AppleEPFAlbumDump)
 EntitySources.registerSource('apple_videos',  AppleEPFVideoDump)
 

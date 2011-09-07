@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import init
-import utils
+import re, time, utils
 
 from libs.AmazonAPI         import AmazonAPI
 from match.EntityMatcher    import EntityMatcher
@@ -41,7 +41,12 @@ def strip_title(title):
     
     for delimiter in delimiters:
         l = title.find(delimiter)
-        if l > 0: title = title[:l]
+        if l > 0:
+            if delimiter == ':':
+                if l >= len(title) - 1 or title[l + 1] != ' ':
+                    continue
+            
+            title = title[:l]
     
     return title.strip().lower()
 
@@ -53,7 +58,8 @@ def main():
     matcher    = EntityMatcher(stampedAPI, options)
     entityDB   = stampedAPI._entityDB
     
-    rs = entityDB._collection.find({"subcategory" : "book"})
+    rs = entityDB._collection.find({"subcategory" : "book", 
+                                   "details.product" : {"$exists" : False }})
     is_junk = " \t-,:'()".__contains__
     
     num_processed = 0
@@ -72,11 +78,14 @@ def main():
                 ItemId=entity.asin, ResponseGroup='Large', 
             )
             
+            utils.log("searching...")
             amazon_results = amazonAPI.item_lookup(**params)
         else:
-            for i in xrange(0, 2):
+            for i in xrange(0, 4):
                 if i != 0:
                     orig_title = strip_title(entity.title)
+                if i == 2:
+                    orig_title = re.sub('series', '', orig_title)
                 
                 params = dict(
                     transform=True, 
@@ -84,20 +93,32 @@ def main():
                     Title=orig_title, 
                 )
                 
-                if 'author' in entity:
+                if 'author' in entity and i < 3:
                     author = entity.author
                     if ',' in author:
                         author = author.split(',')[0]
                     
-                    params['Author'] = author
+                    if i == 2:
+                        if '.' in author:
+                            author = author.split('.')[-1]
+                        elif ' ' in author:
+                            author = author.split(' ')[-1]
+                        else:
+                            author = None
+                    
+                    if author is not None:
+                        params['Author'] = author.strip()
                 
+                utils.log("searching...")
                 amazon_results = amazonAPI.item_detail_search(**params)
                 
                 if len(amazon_results) > 0:
                     break
+                
+                #time.sleep(i + 1)
         
-        success = False
         orig_titlel = strip_title(orig_title)
+        success = False
         
         # inspect amazon lookup results
         for amazon_result in amazon_results:
@@ -136,6 +157,8 @@ def main():
             pprint(params)
             pprint(entity.value)
             utils.log(len(amazon_results))
+            for r in amazon_results:
+                pprint(r.value)
             num_failed += 1
     
     print "num processed: %d" % num_processed

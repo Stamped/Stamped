@@ -161,6 +161,10 @@ class ZagatCrawler(AExternalEntitySource):
             'zurl' : self.base + href, 
         }
         
+        header = soup.find('div', {'class' : 'content'}).find('ul').find('li', {'class' : 'first'})
+        if header is not None:
+            entity.cuisine = header.getText()
+        
         self._output.put(entity)
 
 import EntitySources

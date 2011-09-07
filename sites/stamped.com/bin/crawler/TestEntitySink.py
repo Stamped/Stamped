@@ -17,12 +17,9 @@ class TestEntitySink(AEntitySink):
     
     def _processItem(self, item):
         assert isinstance(item, Entity)
-        #pprint(item.value)
-        #return
+        pprint(item.value)
+        return
         
-        #if 'googlePlaces' in item.sources and Globals.options.googlePlaces:
-        #    utils.log("%s) %s" % (item.title, item.sources['googlePlaces']['gid']))
-        #else:
         utils.log("%s" % (item.title, ))
     
     def _processItems(self, items):

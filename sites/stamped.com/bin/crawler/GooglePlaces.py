@@ -35,6 +35,45 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         "grocery_or_supermarket" : "market", 
     }
     
+    google_subcategory_whitelist = set([
+        "amusement_park", 
+        "aquarium", 
+        "art_gallery", 
+        "bakery", 
+        "bar", 
+        "beauty_salon", 
+        "book_store", 
+        "bowling_alley", 
+        "cafe", 
+        "campground", 
+        "casino", 
+        "clothing_store", 
+        "department_store", 
+        "florist", 
+        "food", 
+        "grocery_or_supermarket", 
+        "market", 
+        "gym", 
+        "home_goods_store", 
+        "jewelry_store", 
+        "library", 
+        "liquor_store", 
+        "lodging", 
+        "movie_theater", 
+        "museum", 
+        "night_club", 
+        "park", 
+        "restaurant", 
+        "school", 
+        "shoe_store", 
+        "shopping_mall", 
+        "spa", 
+        "stadium", 
+        "store", 
+        "university", 
+        "zoo", 
+    ])
+    
     def __init__(self):
         AExternalServiceEntitySource.__init__(self, self.NAME, self.TYPES)
         AKeyBasedAPI.__init__(self, self.API_KEYS)
@@ -81,23 +120,54 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         return self.getSearchResultsByLatLng(latLng, params)
     
-    def getEntityResultsByLatLng(self, latLng, params=None):
+    def getEntityResultsByLatLng(self, latLng, params=None, detailed=False):
         results = self.getSearchResultsByLatLng(latLng, params)
         output  = []
         
         for result in results:
-            entity = Entity()
-            entity.title = result['name']
-            entity.image = result['icon']
-            entity.lat   = result['geometry']['location']['lat']
-            entity.lng   = result['geometry']['location']['lng']
-            entity.gid   = result['id']
-            entity.reference = result['reference']
-            entity.neighborhood = result['vicinity']
+            entity = self.getEntityFromResult(result, detailed=detailed)
             
-            output.append(entity)
+            if entity is not None:
+                output.append(output)
         
         return output
+    
+    def getEntityFromResult(self, result, detailed=False):
+        if result is None:
+            return None
+        
+        subcategory  = self.getSubcategoryFromTypes(result['types'])
+        if subcategory not in self.google_subcategory_whitelist:
+            return None
+        
+        entity = Entity()
+        entity.title = result['name']
+        entity.lat   = result['geometry']['location']['lat']
+        entity.lng   = result['geometry']['location']['lng']
+        entity.gid   = result['id']
+        entity.reference = result['reference']
+        entity.subcategory = subcategory
+        
+        if result['icon'] != u'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' and \
+           result['icon'] != u'http://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png':
+            entity.image = result['icon']
+        
+        if 'vicinity' in result:
+            entity.neighborhood = result['vicinity']
+        
+        if detailed:
+            # fetch a google places details request to fill in any missing data
+            details = self.getPlaceDetails(result['reference'])
+            
+            if details is not None:
+                if 'formatted_phone_number' in details:
+                    entity.phone = details['formatted_phone_number']
+                if 'formatted_address' in details:
+                    entity.address = details['formatted_address']
+                if 'address_components' in details:
+                    entity.address_components = details['address_components']
+        
+        return entity
     
     def getSearchResultsByLatLng(self, latLng, params=None):
         (offset, count) = self._initAPIKeyIndices()
@@ -139,6 +209,12 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         if optionalParams is not None:
             for key in optionalParams:
                 params[key] = optionalParams[key]
+        
+        for k in params:
+            v = params[k]
+            
+            if isinstance(v, unicode):
+                params[k] = v.encode("ascii", "xmlcharrefreplace")
         
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
@@ -188,7 +264,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         return latLng
     
     def _getAPIURL(self, method, params):
-        return self.BASE_URL + '/' + method + '/' + self.FORMAT + '?' + urllib.urlencode(params)
+        return "%s/%s/%s?%s" % (self.BASE_URL, method, self.FORMAT, urllib.urlencode(params))
     
     def getSubcategoryFromTypes(self, types):
         for t in types:
@@ -207,19 +283,28 @@ def parseCommandLine():
     
     parser.add_option("-a", "--address", action="store_true", dest="address", 
         default=True, help="Parse the argument as an address")
+    
     parser.add_option("-b", "--latLng", action="store_false", dest="address", 
         default=False, help="Parse the argument as an encoded latitude/longitude pair (e.g., '40.144729,-74.053527')")
+    
     parser.add_option("-n", "--name", action="store", type="string", dest="name", 
         default=None, help="Optionally provide a name to filter results")
+    
     parser.add_option("-r", "--radius", action="store", type="int", dest="radius", 
         default=500, help="Optionally specify a radius in meters (defaults to %default meters)")
+    
     parser.add_option("-t", "--types", action="store", type="string", dest="types", 
         default=None, help="Optionally specify one or more types to search by, with " + 
         "each type separated by a pipe symbol (e.g., -t 'food|restaurant'). " + 
         "Note that types must be surrounded by single quotes to prevent shell interpretation " + 
         "of the pipe character(s).")
+    
     parser.add_option("-l", "--limit", action="store", type="int", dest="limit", 
         default=None, help="Limit the number of results shown to the top n results")
+    
+    parser.add_option("-v", "--verbose", action="store_true", default=False, 
+                      help="Print out verbose results")
+    
     #parser.add_option("-d", "--detail", action="store_true", dest="detail", 
     #    default=False, help="Included more detailed search result info.")
     

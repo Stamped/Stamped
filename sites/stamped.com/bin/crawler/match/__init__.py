@@ -2,4 +2,5 @@
 import AEntityMatcher
 import AIDBasedEntityMatcher
 import ATitleBasedEntityMatcher
+import GooglePlacesEntityCrossReference
 
