@@ -206,7 +206,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   [scrollView_.layer insertSublayer:stampLayer_ above:titleLabel_.layer];
   [stampLayer_ release];
 
-  detailLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  detailLabel_.textColor = [UIColor stampedGrayColor];
   // Place the reasoning label (fake placeholder) within the TextView.
   reasoningLabel_.textColor = [UIColor stampedGrayColor];
   CGRect reasoningFrame = reasoningLabel_.frame;
@@ -549,7 +549,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [params setObject:entityObject_.address forKey:@"address"];
   if (entityObject_.coordinates)
     [params setObject:entityObject_.coordinates forKey:@"coordinates"];
-
+  NSLog(@"params: %@", params);
   objectLoader.params = params;
   [objectLoader send];
 }

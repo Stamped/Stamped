@@ -102,7 +102,7 @@ static const CGFloat kUserImageSize = 41.0;
     customView_.userImageView.imageURL = user.profileImageURL;
     customView_.stampImageView.image = user.stampImage;
     customView_.usernameLabel.text = user.screenName;
-    customView_.fullNameLabel.text = [NSString stringWithFormat:@"%@ %@", user.firstName, user.lastName];
+    customView_.fullNameLabel.text = user.name;
   }
 }
 

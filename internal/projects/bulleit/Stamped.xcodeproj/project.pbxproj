@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7E0A87B2141672110013AC4D /* sign_up_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0A87B1141672110013AC4D /* sign_up_header@2x.png */; };
+		7E0A87B71416CBDB0013AC4D /* STImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0A87B61416CBDB0013AC4D /* STImageView.m */; };
 		7E0BC48013E4A30C008CC076 /* tab_icon_comment_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0BC47613E4A30B008CC076 /* tab_icon_comment_active@2x.png */; };
 		7E0BC48113E4A30C008CC076 /* tab_icon_comment@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0BC47713E4A30B008CC076 /* tab_icon_comment@2x.png */; };
 		7E0BC48213E4A30C008CC076 /* tab_icon_favorite_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0BC47813E4A30B008CC076 /* tab_icon_favorite_active@2x.png */; };
@@ -334,6 +336,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		7E0A87B1141672110013AC4D /* sign_up_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sign_up_header@2x.png"; sourceTree = "<group>"; };
+		7E0A87B51416CBDB0013AC4D /* STImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageView.h; sourceTree = "<group>"; };
+		7E0A87B61416CBDB0013AC4D /* STImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageView.m; sourceTree = "<group>"; };
 		7E0BC47613E4A30B008CC076 /* tab_icon_comment_active@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_icon_comment_active@2x.png"; sourceTree = "<group>"; };
 		7E0BC47713E4A30B008CC076 /* tab_icon_comment@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_icon_comment@2x.png"; sourceTree = "<group>"; };
 		7E0BC47813E4A30B008CC076 /* tab_icon_favorite_active@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_icon_favorite_active@2x.png"; sourceTree = "<group>"; };
@@ -833,6 +838,7 @@
 			isa = PBXGroup;
 			children = (
 				7E530A2C141592C100DEF881 /* stamped_logo_large@2x.png */,
+				7E0A87B1141672110013AC4D /* sign_up_header@2x.png */,
 				7E1E1078141571D700E6B980 /* create_account_button_active@2x.png */,
 				7E1E1079141571D700E6B980 /* create_account_button@2x.png */,
 				7E1E107A141571D700E6B980 /* sign_in_button_active@2x.png */,
@@ -1257,6 +1263,8 @@
 				7E146FF013F07A7500B954C6 /* MediumUserImageButton.m */,
 				7EE482EA13FAA41400359EEA /* STSearchField.h */,
 				7EE482EB13FAA41400359EEA /* STSearchField.m */,
+				7E0A87B51416CBDB0013AC4D /* STImageView.h */,
+				7E0A87B61416CBDB0013AC4D /* STImageView.m */,
 				7EE482EF13FACFC300359EEA /* STPlaceAnnotation.h */,
 				7EE482F013FACFC300359EEA /* STPlaceAnnotation.m */,
 			);
@@ -1576,6 +1584,7 @@
 				7E530A281415895800DEF881 /* first_run_cancel@2x.png in Resources */,
 				7E530A2B14158A2A00DEF881 /* first_run_confirm@2x.png in Resources */,
 				7E530A2D141592C100DEF881 /* stamped_logo_large@2x.png in Resources */,
+				7E0A87B2141672110013AC4D /* sign_up_header@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1662,6 +1671,7 @@
 				7E453720140F003C0097E64F /* RelationshipsViewController.m in Sources */,
 				7EB29D821414531C003A8EA3 /* GTMStringEncoding.m in Sources */,
 				7E5406DD141550A900912463 /* FirstRunViewController.m in Sources */,
+				7E0A87B71416CBDB0013AC4D /* STImageView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1730,7 +1740,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build\"";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -1752,7 +1762,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build\"";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (

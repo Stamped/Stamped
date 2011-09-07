@@ -13,6 +13,7 @@
   BOOL shouldReload_;
   BOOL isLoading_;
   CGFloat previousOffset_;
+  CGPoint scrollPosition_;
   UILabel* reloadLabel_;
   UIImageView* arrowImageView_;
   UIActivityIndicatorView* spinnerView_;

@@ -62,7 +62,6 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
                                            selector:@selector(favoriteDidChange:) 
                                                name:kFavoriteHasChangedNotification 
                                              object:nil];
-  [self loadFavoritesFromDataStore];
   [self loadFavoritesFromNetwork];
 }
 
@@ -74,6 +73,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [self loadFavoritesFromDataStore];
   [super viewWillAppear:animated];
 }
 
@@ -95,7 +95,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
   return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   return self.favoritesArray.count;
 }
 
@@ -189,6 +189,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
   [request setPredicate:[NSPredicate predicateWithFormat:@"userID == %@", user.userID]];
 	self.favoritesArray = [Favorite objectsWithFetchRequest:request];
   [self.tableView reloadData];
+  self.tableView.contentOffset = scrollPosition_;
 }
 
 - (void)favoriteDidChange:(NSNotification*)notification {

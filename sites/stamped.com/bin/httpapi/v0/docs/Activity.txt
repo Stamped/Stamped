@@ -6,11 +6,19 @@
 ## GET activity/show ##
 
 ### Description ###
-Display activity data for the authenticating user. 
+Display activity data for the authenticating user. This is a generic(-ish) result that can applied to multiple formats of activity. 
 
 ### Details ###
 * OAuth Token Required
-* Note that the `num_comments` and `comment_preview` fields are removed for any embedded stamps.
+* The following fields are returned in a given item:
+    * **activity_id**: The unique id for the activity item.
+    * **genre**: The type of activity. Currently this will be one of _restamp, comment, reply, favorite, mention, milestone_ or _custom_. This field should dictate the template used.
+    * **user**: The user object.
+    * **image**: The image to use in the activity cell. This should only apply for _custom_ types.
+    * **subject**: The subject of the activity. This will most likely be the entity title (for a stamp, a comment on a stamp, etc.) and should be used as such in any templates. In the event of a _custom_ activity item, this will be the entire field.
+    * **blurb**: The main body of the activity cell. This will often be the comment text or the stamp blurb. Different templates should treat this field differently.
+    * **links**: Links to various ids. This is actually four separate fields: **link_user_id**, **link_stamp_id**, **link_entity_id**, and **link_url**. This link dictates where (if anywhere) tapping on the cell should take the user. 
+    * **created**: The timestamp of the activity item. Note that this may not match the timestamp of the underlying item, e.g. the timestamp of the activity item for a comment will be slightly delayed from the timestamp on the comment itself.
 
 ### Parameters ###
 
@@ -29,46 +37,12 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
 ### Sample Result ###
     [
         {
-            "comment": null, 
+            "activity_id": "4e30368732a7ba613b000008",
             "created": "2011-07-27 16:02:15.394000", 
             "genre": "mention", 
-            "stamp": {
-                "blurb": "Great date spot. Thanks @rmstein!", 
-                "comment_preview": [], 
-                "created": "2011-07-27 16:02:14.549000", 
-                "credit": null, 
-                "entity": {
-                    "entity_id": "4e226ea84e61754161000000",
-                    "title": "Spotted Pig",
-                    "subtitle": "New York, NY"
-                    "category": "food",
-                    "subcategory": "restaurant"
-                    "desc": "Burger place",
-                    "coordinates": "40.714623,-74.006605",
-                    "address": "314 West 11th Street New York, NY 10014-2369",
-                    "last_modified": "2011-07-17 19:03:22.354813",
-                    "opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
-                    "phone": "1235551234"
-                }, 
-                "mentions": [
-                    {
-                        "display_name": "Robby S.", 
-                        "indices": [24, 32], 
-                        "screen_name": "rmstein", 
-                        "user_id": "4e30368332a7ba613b000001"
-                    }
-                ], 
-                "stamp_id": "4e30368732a7ba613b000007", 
-                "user": {
-                    "color_primary": "333333", 
-                    "color_secondary": "999999", 
-                    "display_name": "Kevin P.", 
-                    "privacy": false, 
-                    "profile_image": "http://img.stamped.com/u/kevin.png", 
-                    "screen_name": "kpalms", 
-                    "user_id": "4e30368332a7ba613b000000"
-                }
-            }, 
+            "blurb": "Great date spot. Thanks @rmstein!", 
+            "title": "Spotted Pig",
+            "link_stamp_id": "4e30368732a7ba613b000007", 
             "user": {
                 "color_primary": "333333", 
                 "color_secondary": "999999", 
@@ -80,64 +54,12 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
             }
         }, 
         {
-            "comment": {
-                "blurb": "That looks awesome. Well done, @rmstein..", 
-                "comment_id": "4e30368632a7ba613b000005", 
-                "created": "2011-07-27 16:02:13.509000", 
-                "mentions": [
-                    {
-                        "display_name": "Robby S.", 
-                        "indices": [31, 39], 
-                        "screen_name": "rmstein", 
-                        "user_id": "4e30368332a7ba613b000001"
-                    }
-                ], 
-                "restamp_id": null, 
-                "stamp_id": "4e30368532a7ba613b000004", 
-                "user": {
-                    "color_primary": "333333", 
-                    "color_secondary": "999999", 
-                    "display_name": "Kevin P.", 
-                    "privacy": false, 
-                    "profile_image": "http://img.stamped.com/u/kevin.png", 
-                    "screen_name": "kpalms", 
-                    "user_id": "4e30368332a7ba613b000000"
-                }
-            }, 
+            "activity_id": "4e30368732a7ba613b000009",
+            "blurb": "That looks awesome. Well done, @rmstein..", 
+            "subject": "Spotted Pig",
             "created": "2011-07-27 16:02:14.203000", 
             "genre": "comment", 
-            "stamp": {
-                "blurb": "Favorite restaurant in the Village.", 
-                "comment_preview": [], 
-                "created": "2011-07-27 16:02:12.658000", 
-                "credit": null, 
-                "entity": {
-                    "entity_id": "4e226ea84e61754161000000",
-                    "title": "Spotted Pig",
-                    "subtitle": "New York, NY"
-                    "category": "food",
-                    "subcategory": "restaurant"
-                    "desc": "Burger place",
-                    "coordinates": "40.714623,-74.006605",
-                    "address": "314 West 11th Street New York, NY 10014-2369",
-                    "last_modified": "2011-07-17 19:03:22.354813",
-                    "opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
-                    "phone": "1235551234"
-                }, 
-                "image": "image.png", 
-                "mentions": null, 
-                "num_comments": 0, 
-                "stamp_id": "4e30368532a7ba613b000004", 
-                "user": {
-                    "color_primary": "333333", 
-                    "color_secondary": "999999", 
-                    "display_name": "Kevin P.", 
-                    "privacy": false, 
-                    "profile_image": "http://img.stamped.com/u/kevin.png", 
-                    "screen_name": "kpalms", 
-                    "user_id": "4e30368332a7ba613b000000"
-                }
-            }, 
+            "link_stamp_id": "4e30368532a7ba613b000004", 
             "user": {
                 "color_primary": "333333", 
                 "color_secondary": "999999", 
@@ -149,3 +71,4 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
             }
         }
     ]
+

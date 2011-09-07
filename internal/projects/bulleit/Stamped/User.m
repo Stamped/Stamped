@@ -18,10 +18,8 @@ const CGFloat kMediumUserImageSize = 41.0;
 
 @implementation User
 @dynamic bio;
-@dynamic displayName;
 @dynamic primaryColor;
-@dynamic firstName;
-@dynamic lastName;
+@dynamic name;
 @dynamic userID;
 @dynamic website;
 @dynamic secondaryColor;
@@ -70,6 +68,10 @@ const CGFloat kMediumUserImageSize = 41.0;
   CGColorSpaceRelease(colorSpace);
   self.stampImage = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
+}
+
+- (NSString*)profileImageURL {
+  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg", self.screenName];
 }
 
 - (void)awakeFromFetch {

@@ -22,7 +22,7 @@
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
 
-static NSString* const kActivityLookupPath = @"/activity/show.json";
+static NSString* const kActivityLookupPath = @"/temp/activity.json";
 
 @interface ActivityViewController ()
 - (void)loadEventsFromDataStore;
@@ -44,7 +44,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [self loadEventsFromDataStore];
   [self loadEventsFromNetwork];
 }
 
@@ -52,6 +51,11 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   [super viewDidUnload];
   [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
   self.eventsArray = nil;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [self loadEventsFromDataStore];
+  [super viewWillAppear:animated];
 }
 
 - (void)loadEventsFromDataStore {
@@ -70,6 +74,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   self.eventsArray = nil;
 	self.eventsArray = results;
   [self.tableView reloadData];
+  self.tableView.contentOffset = scrollPosition_;
 }
 
 - (void)loadEventsFromNetwork {

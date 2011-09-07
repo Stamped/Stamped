@@ -11,6 +11,7 @@
 #import "Comment.h"
 #import "User.h"
 #import "UserImageView.h"
+#import "UIColor+Stamped.h"
 
 NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedNotification";
 
@@ -51,7 +52,7 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
                                                      forWidth:260
                                                 lineBreakMode:UILineBreakModeTailTruncation];
   UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(leftPadding, 8, stringSize.width, stringSize.height)];
-  nameLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  nameLabel.textColor = [UIColor stampedGrayColor];
   nameLabel.text = comment_.user.screenName;
   nameLabel.font = nameFont;
   [self addSubview:nameLabel];

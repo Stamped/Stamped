@@ -18,6 +18,7 @@
 #import "User.h"
 #import "UserImageView.h"
 #import "Util.h"
+#import "UIColor+Stamped.h"
 
 @interface ActivityCreditCellView : UIView
 - (void)invertColors:(BOOL)inverted;
@@ -57,7 +58,7 @@
     headerTextLayer_.truncationMode = kCATruncationEnd;
     headerTextLayer_.contentsScale = [[UIScreen mainScreen] scale];
     headerTextLayer_.fontSize = 12.0;
-    headerTextLayer_.foregroundColor = [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
+    headerTextLayer_.foregroundColor = [UIColor stampedGrayColor].CGColor;
     headerTextLayer_.frame = CGRectMake(70, 13, 220, 16);
     NSDictionary* actions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
     headerTextLayer_.actions = actions;
@@ -98,7 +99,7 @@
   NSMutableAttributedString* headerAttributedString =
       [[NSMutableAttributedString alloc] initWithAttributedString:headerTextLayer_.string];
   CGColorRef color = inverted ? [UIColor whiteColor].CGColor :
-                                [UIColor colorWithWhite:0.6 alpha:1.0].CGColor;
+                                [UIColor stampedGrayColor].CGColor;
   [headerAttributedString setAttributes:
       [NSDictionary dictionaryWithObject:(id)color 
                                   forKey:(id)kCTForegroundColorAttributeName] 
@@ -165,7 +166,7 @@
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
   [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                          (id)style, (id)kCTParagraphStyleAttributeName,
-                         (id)[UIColor colorWithWhite:0.6 alpha:1.0].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                         (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
                   range:NSMakeRange(0, full.length)];
   [string addAttribute:(NSString*)kCTFontAttributeName value:(id)font range:NSMakeRange(0, user.length)];
   CFRelease(font);

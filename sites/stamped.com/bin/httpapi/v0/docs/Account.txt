@@ -266,6 +266,45 @@ _None_
 
 
 ------------------------------------------------------------------------------
+## POST account/check ##
+
+### Description ###
+Returns the user object if the user exists; otherwise, returns a 404.
+
+### Details ###
+* Client ID / Client Secret Required
+
+### Parameters ###
+
+**login** _required_
+The user's screen name or email.
+
+### Sample Request ###
+	POST https://api.stamped.com/v0/account/check.json
+	client_id=iPhoneApp&client_secret=1234567890&login=kevin
+
+### Sample Result ###
+	{
+		"user_id": "47cc67093475061e3d95369d",
+		"first_name": "Kevin",
+		"last_name": "Palms",
+		"screen_name": "kevin",
+		"display_name": "Kevin P.",
+		"profile_image": "http://img.stamped.com/u/kevin.png"
+		"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+		"color_primary": "333333",
+		"color_secondary": "999999",
+		"privacy": false,
+		"num_stamps": 0,
+		"num_friends": 0,
+		"num_followers": 0,
+		"num_faves": 0,
+		"num_credits": 0,
+		"num_credits_given": 0
+	}
+
+
+------------------------------------------------------------------------------
 ## GET account/verify_credentials ##
 
 ### Description ###

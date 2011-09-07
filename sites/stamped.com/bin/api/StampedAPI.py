@@ -82,6 +82,7 @@ class StampedAPI(AStampedAPI):
         account.stats.num_stamps_left = 100
         
         # Validate Screen Name
+        account.screen_name = account.screen_name.strip()
         if not re.match("^[\w-]+$", account.screen_name) \
             or len(account.screen_name) < 1 \
             or len(account.screen_name) > 32:
@@ -92,6 +93,13 @@ class StampedAPI(AStampedAPI):
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
             msg = "Blacklisted screen name"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Validate email address
+        account.email = str(account.email).lower().strip()
+        if not utils.validate_email(account.email):
+            msg = "Invalid format for email address"
             logs.warning(msg)
             raise InputError(msg)
 
@@ -149,7 +157,7 @@ class StampedAPI(AStampedAPI):
         return account
     
     def updateProfileImage(self, authUserId, data):
-        data = base64.decodestring(data)
+        data = base64.urlsafe_b64decode(data.encode('ascii'))
         
         image = self._imageDB.getImage(data)
         self._imageDB.addProfileImage(authUserId, image)
@@ -164,6 +172,25 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         self._accountDB.removeAccount(authUserId)
         return account
+
+    def checkAccount(self, login):
+        try:
+            # Email
+            if utils.validate_email(login):
+                user = self._accountDB.getAccountByEmail(login)
+            # Screen Name
+            elif utils.validate_screen_name(login):
+                # Check blacklist
+                if login.lower() in Blacklist.screen_names:
+                    raise
+                user = self._accountDB.getAccountByScreenName(login)
+            else:
+                raise
+            return user
+        except:
+            msg = "Login info does not exist"
+            logs.debug(msg)
+            raise
     
     def verifyAccountCredentials(self, data, auth):
         raise NotImplementedError
@@ -640,11 +667,6 @@ class StampedAPI(AStampedAPI):
 
         return stamps
 
-
-
-
-
-
     
     def addStamp(self, authUserId, entityId, data):
         user        = self._userDB.getUser(authUserId)
@@ -652,6 +674,7 @@ class StampedAPI(AStampedAPI):
 
         blurbData   = data.pop('blurb', None)
         creditData  = data.pop('credit', None)
+        imageData   = data.pop('image', None)
 
         # Check to make sure the user has stamps left
         if user.num_stamps_left <= 0:
@@ -727,6 +750,19 @@ class StampedAPI(AStampedAPI):
             
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
+
+        # Add image to stamp
+        ### TODO: Unwind stamp if this fails
+        if imageData != None:
+            imageData = base64.urlsafe_b64decode(imageData.encode('ascii'))
+            
+            image = self._imageDB.getImage(imageData)
+            self._imageDB.addStampImage(stamp.stamp_id, image)
+
+            # Add image dimensions to stamp object (width,height)
+            width, height           = image.size
+            stamp.image_dimensions  = "%s,%s" % (width, height)
+            stamp                   = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
         stamp = self._addUserObjects(stamp, userIds=userIds)
@@ -1043,7 +1079,7 @@ class StampedAPI(AStampedAPI):
         stamp       = self._addUserObjects(stamp)
 
         # Check privacy of stamp
-        if stamp.user_id != authUserId and user.privacy == True:
+        if stamp.user_id != authUserId and stamp.user.privacy == True:
             friendship = Friendship({
                 'user_id':      user.user_id,
                 'friend_id':    authUserId,
@@ -1077,13 +1113,13 @@ class StampedAPI(AStampedAPI):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._addUserObjects(stamp)
 
-        # Verify user has permission to delete
+        # Verify user has permission to add image
         if stamp.user_id != authUserId:
             msg = "Insufficient privileges to update stamp image"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
 
-        data = base64.decodestring(data)
+        data = base64.urlsafe_b64decode(data.encode('ascii'))
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
@@ -1281,7 +1317,7 @@ class StampedAPI(AStampedAPI):
         # Get user objects
         userIds = {}
         for comment in commentData:
-            userIds[comment.user_id] = 1
+            userIds[comment.user.user_id] = 1
 
         users = self._userDB.lookupUsers(userIds.keys(), None)
 
@@ -1299,7 +1335,13 @@ class StampedAPI(AStampedAPI):
     
     ### TEMP: Remove after switching to new activity
     def _getComment(self, commentId, **kwargs): 
-        return self._commentDB.getComment(commentId)
+        comment = self._commentDB.getComment(commentId)
+
+        # Get user objects
+        user            = self._userDB.getUser(comment.user.user_id)
+        comment.user    = user.exportSchema(UserMini())
+
+        return comment
     
 
     """

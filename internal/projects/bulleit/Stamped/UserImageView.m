@@ -20,6 +20,7 @@
 @implementation UserImageView
 
 @synthesize imageURL = imageURL_;
+@synthesize imageView = imageView_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -56,12 +57,13 @@
   [backgroundLayer release];
   CGFloat borderWidth = CGRectGetWidth(self.frame) > 35.0 ? 2.0 : 1.0;
   imageView_ = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, borderWidth, borderWidth)];
+  imageView_.image = [UIImage imageNamed:@"profile_placeholder"];
   [self addSubview:imageView_];
   [imageView_ release];
   CALayer* layer = self.layer;
   layer.contentsGravity = kCAGravityResizeAspect;
   layer.frame = self.frame;
-  layer.shadowOpacity = 0.5;
+  layer.shadowOpacity = 0.25;
   layer.shadowOffset = CGSizeMake(0, 0.5);
   layer.shadowRadius = 1.0;
   layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;

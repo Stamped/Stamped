@@ -79,7 +79,7 @@ class OAuthTokenRequest(Schema):
 
 class OAuthLogin(Schema):
     def setSchema(self):
-        self.screen_name        = SchemaElement(basestring, required=True)
+        self.login              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
 
 # ####### #
@@ -142,6 +142,10 @@ class HTTPCustomizeStamp(Schema):
 class HTTPAccountProfileImage(Schema):
     def setSchema(self):
         self.profile_image      = SchemaElement(basestring, normalize=False)
+
+class HTTPAccountCheck(Schema):
+    def setSchema(self):
+        self.login              = SchemaElement(basestring, required=True)
 
 # ##### #
 # Users #
@@ -465,6 +469,7 @@ class HTTPStamp(Schema):
         self.credit             = SchemaList(CreditSchema())
         self.comment_preview    = SchemaList(HTTPComment())
         self.image_dimensions   = SchemaElement(basestring)
+        self.image_url          = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
         self.num_comments       = SchemaElement(int)
 
@@ -494,6 +499,9 @@ class HTTPStamp(Schema):
             self.entity.coordinates = _coordinatesDictToFlat(coordinates)
             self.created = schema.timestamp.created
 
+            if self.image_dimensions != None:
+                self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
+
         else:
             raise NotImplementedError
         return self
@@ -503,6 +511,7 @@ class HTTPStampNew(Schema):
         self.entity_id          = SchemaElement(basestring, required=True)
         self.blurb              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
+        self.image              = SchemaElement(basestring, normalize=False)
 
 class HTTPStampEdit(Schema):
     def setSchema(self):

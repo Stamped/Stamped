@@ -11,6 +11,8 @@
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/RestKit.h>
 
+#import "UIColor+Stamped.h"
+
 static NSString* kPullDownText = @"Pull down to refresh...";
 static NSString* kReleaseText = @"Release to refresh...";
 static NSString* kLoadingText = @"Loading...";
@@ -27,7 +29,7 @@ static NSString* kLoadingText = @"Loading...";
   reloadLabel_.text = kPullDownText;
   reloadLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   reloadLabel_.backgroundColor = [UIColor clearColor];
-  reloadLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  reloadLabel_.textColor = [UIColor stampedGrayColor];
   reloadLabel_.textAlignment = UITextAlignmentCenter;
   [self.tableView addSubview:reloadLabel_];
   [reloadLabel_ release];
@@ -116,7 +118,8 @@ static NSString* kLoadingText = @"Loading...";
 
 #pragma mark - UIScrollView delegate methods
 
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {  
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  scrollPosition_ = scrollView.contentOffset;
   if (isLoading_)
     return;
   

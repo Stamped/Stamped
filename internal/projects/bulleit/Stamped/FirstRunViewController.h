@@ -9,7 +9,19 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
-@interface FirstRunViewController : UIViewController <UIScrollViewDelegate, UITextFieldDelegate>
+@class UserImageView;
+@class FirstRunViewController;
+
+@protocol FirstRunViewControllerDelegate
+- (void)viewController:(FirstRunViewController*)viewController didReceiveUsername:(NSString*)username password:(NSString*)password;
+
+@end
+
+@interface FirstRunViewController : UIViewController <UIScrollViewDelegate,
+                                                      UITextFieldDelegate,
+                                                      UINavigationControllerDelegate,
+                                                      UIImagePickerControllerDelegate,
+                                                      UIActionSheetDelegate>
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* bottomView;
@@ -22,10 +34,23 @@
 @property (nonatomic, retain) IBOutlet UIImageView* stampedLogo;
 @property (nonatomic, retain) IBOutlet UITextField* usernameTextField;
 @property (nonatomic, retain) IBOutlet UITextField* passwordTextField;
+@property (nonatomic, retain) IBOutlet UIScrollView* signUpScrollView;
+@property (nonatomic, retain) IBOutlet UITextField* signUpFullNameTextField;
+@property (nonatomic, retain) IBOutlet UITextField* signUpUsernameTextField;
+@property (nonatomic, retain) IBOutlet UITextField* signUpEmailTextField;
+@property (nonatomic, retain) IBOutlet UITextField* signUpPasswordTextField;
+@property (nonatomic, retain) IBOutlet UITextField* signUpPhoneTextField;
+@property (nonatomic, retain) IBOutlet UserImageView* userImageView;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* activityIndicator;
+@property (nonatomic, assign) id<FirstRunViewControllerDelegate> delegate;
 
 - (IBAction)createAccountButtonPressed:(id)sender;
 - (IBAction)signInButtonPressed:(id)sender;
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)confirmButtonPressed:(id)sender;
+- (IBAction)takePhotoButtonPressed:(id)sender;
+
+- (void)signInFailed:(NSString*)reason;
 
 @end
+

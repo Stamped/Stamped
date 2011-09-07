@@ -8,12 +8,20 @@
 
 #import "FirstRunViewController.h"
 
+#import <MobileCoreServices/UTCoreTypes.h>
+
+#import "UserImageView.h"
+
+static const CGFloat kKeyboardOffset = 216;
+static const CGFloat kProfileImageSize = 144;
+
 @interface FirstRunViewController ()
 - (void)setupBottomView;
 - (void)setupSlide:(UIImageView*)imageView;
 - (void)setSecondaryButtonsVisible:(BOOL)visible;
 
 @property (nonatomic, assign) BOOL editing;
+@property (nonatomic, retain) UIImage* profilePhoto;
 @end
 
 @implementation FirstRunViewController
@@ -30,10 +38,26 @@
 @synthesize editing = editing_;
 @synthesize usernameTextField = usernameTextField_;
 @synthesize passwordTextField = passwordTextField_;
+@synthesize signUpScrollView = signUpScrollView_;
+@synthesize signUpEmailTextField = signUpEmailTextField_;
+@synthesize signUpPhoneTextField = signUpPhoneTextField_;
+@synthesize signUpFullNameTextField = signUpFullNameTextField_;
+@synthesize signUpPasswordTextField = signUpPasswordTextField_;
+@synthesize signUpUsernameTextField = signUpUsernameTextField_;
+@synthesize userImageView = userImageView_;
+@synthesize profilePhoto = profilePhoto_;
+@synthesize activityIndicator = activityIndicator_;
+@synthesize delegate = delegate_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
+}
+
+- (void)dealloc {
+  self.delegate = nil;
+
+  [super dealloc];
 }
 
 #pragma mark - View lifecycle
@@ -71,11 +95,14 @@
   self.cancelButton.alpha = 0.0;
   self.confirmButton.alpha = 0.0;
   self.confirmButton.titleLabel.textAlignment = UITextAlignmentCenter;
+  signUpScrollView_.contentSize = CGRectInset(signUpScrollView_.bounds, 0, 20).size;
+  userImageView_.enabled = YES;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   [self.signInScrollView removeFromSuperview];
+  [self.signUpScrollView removeFromSuperview];
 
   self.bottomView = nil;
   self.scrollView = nil;
@@ -86,6 +113,15 @@
   self.confirmButton = nil;
   self.signInScrollView = nil;
   self.stampedLogo = nil;
+  self.signUpScrollView = nil;
+  self.signUpEmailTextField = nil;
+  self.signUpPhoneTextField = nil;
+  self.signUpFullNameTextField = nil;
+  self.signUpPasswordTextField = nil;
+  self.signUpUsernameTextField = nil;
+  self.userImageView = nil;
+  self.profilePhoto = nil;
+  self.activityIndicator = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -119,7 +155,6 @@
   }
 }
 
-
 #pragma mark - Transitions
 
 - (void)setSecondaryButtonsVisible:(BOOL)visible {
@@ -131,6 +166,14 @@
   }];
 }
 
+- (void)signInFailed:(NSString*)reason {
+  if (signInScrollView_.superview) {
+    [activityIndicator_ stopAnimating];
+    [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+    confirmButton_.enabled = YES;
+  }
+}
+
 #pragma mark - Nib Actions.
 
 - (IBAction)createAccountButtonPressed:(id)sender {
@@ -140,6 +183,10 @@
   confirmButton_.enabled = NO;
   [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   [self setSecondaryButtonsVisible:YES];
+  [self.view insertSubview:signUpScrollView_ atIndex:0];
+  [UIView animateWithDuration:0.2 animations:^{
+    animationContentView_.alpha = 0.0;
+  }];
 }
 
 - (IBAction)signInButtonPressed:(id)sender {
@@ -164,28 +211,91 @@
 - (IBAction)cancelButtonPressed:(id)sender {
   if (sender != cancelButton_)
     return;
-  
-  usernameTextField_.text = nil;
-  passwordTextField_.text = nil;
+
   // This is a visual hack to prevent the logo from cross-fading if switching
   // between the login screen and the learn more flow (but only if the learn more
-  // flow is at the first slide).
-  if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero) && !editing_)
+  // flow is at the first slide and not editing.).
+  if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero) && !editing_ && !signUpScrollView_.superview)
     [self.view addSubview:stampedLogo_];
   
+  [activityIndicator_ stopAnimating];
   [self setSecondaryButtonsVisible:NO];
   [UIView animateWithDuration:0.2 animations:^{
     animationContentView_.alpha = 1.0;
   } completion:^(BOOL finished) {
-    if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero) && !editing_)
+    if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero) && !editing_ && !signUpScrollView_.superview)
       [signInScrollView_ addSubview:stampedLogo_];
+
     [signInScrollView_ removeFromSuperview];
+    [signUpScrollView_ removeFromSuperview];
+    usernameTextField_.text = nil;
+    passwordTextField_.text = nil;
+    signUpFullNameTextField_.text = nil;
+    signUpUsernameTextField_.text = nil;
+    signUpEmailTextField_.text = nil;
+    signUpPasswordTextField_.text = nil;
+    signUpPhoneTextField_.text = nil;
+    userImageView_.imageView.image = [UIImage imageNamed:@"profile_placeholder"];
   }];
 }
 
 - (IBAction)confirmButtonPressed:(id)sender {
   if (sender != confirmButton_)
     return;
+  
+  if (signInScrollView_.superview) {
+    confirmButton_.enabled = NO;
+    [confirmButton_ setTitle:nil forState:UIControlStateNormal];
+    [activityIndicator_ startAnimating];
+    [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
+  }
+}
+
+- (IBAction)takePhotoButtonPressed:(id)sender {
+  UIActionSheet* sheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                     delegate:self
+                                            cancelButtonTitle:@"Cancel"
+                                       destructiveButtonTitle:nil
+                                            otherButtonTitles:@"Take photo", @"Choose photo", nil];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  [sheet showInView:self.view];
+}
+
+#pragma mark - UIActionSheetDelegate methods.
+
+- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  if (buttonIndex == 2)
+    return;  // Canceled.
+  
+  UIImagePickerController* imagePicker = [[UIImagePickerController alloc] init];
+  imagePicker.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+  imagePicker.delegate = self;
+  imagePicker.allowsEditing = YES;
+  imagePicker.mediaTypes = [NSArray arrayWithObject:(NSString*)kUTTypeImage];
+
+  if (buttonIndex == 0) {
+    imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    imagePicker.cameraDevice = UIImagePickerControllerCameraDeviceFront;
+  }
+  [self presentModalViewController:imagePicker animated:YES];
+  [imagePicker release];
+}
+
+#pragma mark - UIImagePickerControllerDelegate methods.
+
+- (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info {
+  NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+
+  if (CFStringCompare((CFStringRef)mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
+    UIImage* photo = (UIImage*)[info objectForKey:UIImagePickerControllerEditedImage];
+  
+    UIGraphicsBeginImageContext(CGSizeMake(kProfileImageSize, kProfileImageSize));
+    [photo drawInRect:CGRectMake(0, 0, kProfileImageSize, kProfileImageSize)];
+    self.profilePhoto = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    userImageView_.imageView.image = profilePhoto_;
+  }
+  [self dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark - UITextFieldDelegate methods.
@@ -197,9 +307,20 @@
                           delay:0 
                         options:UIViewAnimationOptionBeginFromCurrentState 
                      animations:^{
-                       signInScrollView_.frame = CGRectOffset(signInScrollView_.frame, 0, -216);
-                       bottomView_.frame = CGRectOffset(bottomView_.frame, 0, -216);
-                     } 
+                       animationContentView_.frame = CGRectOffset(animationContentView_.frame, 0, -kKeyboardOffset);
+                       bottomView_.frame = CGRectOffset(bottomView_.frame, 0, -kKeyboardOffset);
+                       signInScrollView_.frame = CGRectOffset(signInScrollView_.frame, 0, -kKeyboardOffset);
+                     }
+                     completion:nil];
+  } else if (textField.superview == signUpScrollView_) {
+    CGFloat offset = (kKeyboardOffset - CGRectGetHeight(bottomView_.bounds)) / 2;
+    [UIView animateWithDuration:0.3
+                          delay:0 
+                        options:UIViewAnimationOptionBeginFromCurrentState 
+                     animations:^{
+                       signUpScrollView_.frame = CGRectInset(CGRectOffset(signUpScrollView_.frame, 0, -offset), 0, offset);
+                       [signUpScrollView_ scrollRectToVisible:textField.frame animated:YES];
+                     }
                      completion:nil];
   }
 }
@@ -211,24 +332,60 @@
                           delay:0 
                         options:UIViewAnimationOptionBeginFromCurrentState 
                      animations:^{
-                       signInScrollView_.frame = CGRectOffset(signInScrollView_.frame, 0, 216);
-                       bottomView_.frame = CGRectOffset(bottomView_.frame, 0, 216);
-                     } 
+                       animationContentView_.frame = CGRectOffset(animationContentView_.frame, 0, kKeyboardOffset);
+                       bottomView_.frame = CGRectOffset(bottomView_.frame, 0, kKeyboardOffset);
+                       signInScrollView_.frame = CGRectOffset(signInScrollView_.frame, 0, kKeyboardOffset);
+                     }
                      completion:nil];
+  } else if (textField.superview == signUpScrollView_) {
+    CGPoint contentOffset = signUpScrollView_.contentOffset;
+    CGFloat offset = (kKeyboardOffset - CGRectGetHeight(bottomView_.bounds)) / 2;
+    [UIView animateWithDuration:0.3
+                          delay:0 
+                        options:UIViewAnimationOptionBeginFromCurrentState 
+                     animations:^{
+                       signUpScrollView_.frame = CGRectInset(CGRectOffset(signUpScrollView_.frame, 0, offset), 0, -offset);
+                       signUpScrollView_.contentOffset = contentOffset;
+                     }
+                     completion:^(BOOL finished) {
+                       if (!editing_) {
+                         [UIView animateWithDuration:0.2 animations:^{
+                           signUpScrollView_.contentOffset = CGPointZero;
+                         }];
+                       }
+                     }];
   }
-}
-
-- (BOOL)textFieldShouldReturn:(UITextField*)textField {
-  [textField resignFirstResponder];
-
-  return YES;
 }
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
   if (textField.superview == signInScrollView_) {
-    // enable/disable sign-in button.
+    if (textField == usernameTextField_) {
+      confirmButton_.enabled = passwordTextField_.text.length &&
+          [textField.text stringByReplacingCharactersInRange:range withString:string].length;
+    } else if (textField == passwordTextField_) {
+      confirmButton_.enabled = usernameTextField_.text.length &&
+          [textField.text stringByReplacingCharactersInRange:range withString:string].length;
+    }
   }
+  return YES;
+}
 
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  UIView* nextView = [textField.superview viewWithTag:textField.tag + 1];
+  if (nextView) {
+    [nextView becomeFirstResponder];
+  } else {
+    if (textField.superview == signUpScrollView_) {
+      confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
+                                signUpUsernameTextField_.text.length &&
+                                signUpEmailTextField_.text.length &&
+                                signUpPasswordTextField_.text.length);
+    } else if (textField.superview == signInScrollView_) {
+      confirmButton_.enabled = (usernameTextField_.text.length &&
+                                passwordTextField_.text.length);
+    }
+    [textField resignFirstResponder];
+  }
   return YES;
 }
 

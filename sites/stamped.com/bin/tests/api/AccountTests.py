@@ -64,19 +64,19 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
         self.assertEqual(result['color_primary'], '333333')
         self.assertEqual(result['color_secondary'], '999999')
 
-class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
-    def test_update_profile_image(self):
-        # TODO: this url is temporary!
-        url = 'https://si0.twimg.com/profile_images/147088134/'
-        url = url + 'twitter_profile_reasonably_small.jpg'
+# class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
+#     def test_update_profile_image(self):
+#         # TODO: this url is temporary!
+#         url = 'https://si0.twimg.com/profile_images/147088134/'
+#         url = url + 'twitter_profile_reasonably_small.jpg'
         
-        path = "account/update_profile_image.json"
-        data = {
-            "oauth_token": self.token['access_token'],
-            "profile_image": url, 
-        }
-        result = self.handlePOST(path, data)
-        self.assertEqual(result['profile_image'], url)
+#         path = "account/update_profile_image.json"
+#         data = {
+#             "oauth_token": self.token['access_token'],
+#             "profile_image": url, 
+#         }
+#         result = self.handlePOST(path, data)
+#         self.assertEqual(result['profile_image'], url)
 
 class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
     def test_blacklist(self):
@@ -135,6 +135,56 @@ class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
             ret = True
 
         self.assertTrue(ret)
+
+
+class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
+    def test_check_email_available(self):
+        path = "account/check.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": 'testest1234@stamped.com',
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_check_screen_name_available(self):
+        path = "account/check.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": 'testtest1234',
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_check_email_taken(self):
+        path = "account/check.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": 'usera@stamped.com',
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['user_id'], self.user['user_id'])
+
+    def test_check_screen_name_taken(self):
+        path = "account/check.json"
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": self.user['screen_name'].lower(),
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['user_id'], self.user['user_id'])
 
 
 

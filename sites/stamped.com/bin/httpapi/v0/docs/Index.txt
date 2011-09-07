@@ -10,7 +10,9 @@
 * GET accounts/settings
 * POST account/update_profile
 * POST account/update_profile_image
+* POST account/customize_stamp
 * GET account/verify_credentials
+* POST account/check
 
 ### [Users](users) ###
 * GET users/show
@@ -41,6 +43,7 @@
 ### [Stamps](stamps) ###
 * POST stamps/create
 * POST stamps/update
+* POST stamps/update_image
 * POST stamps/remove
 * GET stamps/show
 
@@ -64,4 +67,6 @@
 ### [Temp](temp) ###
 * GET temp/friends
 * GET temp/followers
+* GET temp/activity
+* GET temp/inbox
 

@@ -13,6 +13,7 @@
 #import "AccountManager.h"
 #import "Entity.h"
 #import "Stamp.h"
+#import "UIColor+Stamped.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
@@ -100,7 +101,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
   categoryImageView_.image = entityObject_.categoryImage;
   descriptionLabel_.text = nil;
-  descriptionLabel_.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
+  descriptionLabel_.textColor = [UIColor stampedGrayColor];
   mainActionButton_.layer.masksToBounds = YES;
   mainActionButton_.layer.cornerRadius = 2.0;
   mainActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];

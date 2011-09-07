@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import gzip, httplib, json, logging, os, sys, pickle, string, threading, time
+import gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
 import htmlentitydefs, traceback, urllib, urllib2
 import aws, logs, math
 
@@ -562,3 +562,26 @@ def get_spherical_distance(latLng1, latLng2):
     # multiply arc by the earth's radius in your desired units to get length
     return arc
 
+def validate_email(email):
+    # Taken from Django validators.py
+    email_re = re.compile(
+        R"(^[-!#$%&'*+/=?^_`{}|~0-9A-Z]+(\.[-!#$%&'*+/=?^_`{}|~0-9A-Z]+)*"  # dot-atom
+        R'|^"([\001-\010\013\014\016-\037!#-\[\]-\177]|\\[\001-011\013\014\016-\177])*"' # quoted-string
+        R')@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?$', re.IGNORECASE)  # domain
+
+    try:
+        if email_re.match(email):
+            return True
+        raise
+    except:
+        return False
+
+def validate_screen_name(screen_name):
+    screen_name_re = re.compile("^[\w-]{1,32}$", re.IGNORECASE)
+
+    try:
+        if screen_name_re.match(screen_name):
+            return True
+        raise
+    except:
+        return False

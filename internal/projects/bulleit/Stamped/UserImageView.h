@@ -10,9 +10,7 @@
 
 @class User;
 
-@interface UserImageView : UIControl {
- @private
-  UIImageView* imageView_;
-}
+@interface UserImageView : UIControl
+@property (nonatomic, readonly) UIImageView* imageView;
 @property (nonatomic, copy) NSString* imageURL;
 @end

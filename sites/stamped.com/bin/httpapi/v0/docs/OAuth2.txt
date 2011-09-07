@@ -41,8 +41,8 @@ Acquire a new refresh token and access token after logging in with user credenti
 
 ### Parameters ###
 
-**screen_name** _required_
-The user's screen name.
+**login** _required_
+The user's screen name or email address.
 
 **password** _required_
 The user's password
