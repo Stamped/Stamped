@@ -341,6 +341,7 @@ class MongoEntitySearcher(EntitySearcher):
         pool.join()
         
         if 'db_results' in wrapper:
+            logs.debug('db_results: %d' % len(wrapper['db_results']))
             for doc in wrapper['db_results']:
                 e = self.entityDB._convertFromMongo(doc)
                 results[e.entity_id] = (e, -1)
@@ -351,15 +352,18 @@ class MongoEntitySearcher(EntitySearcher):
             except KeyError:
                 place_results = []
             
+            logs.debug('place_results: %d' % len(place_results))
             for doc in place_results:
                 e = self.placesDB._convertFromMongo(doc['obj'])
                 results[e.entity_id] = (e, doc['dis'])
         
         if 'google_place_results' in wrapper:
+            logs.debug('google_place_results: %d' % len(wrapper['google_place_results']))
             for result in wrapper['google_place_results']:
                 results[result[0].entity_id] = result
         
         if 'amazon_results' in wrapper:
+            logs.debug('amazon_results: %d' % len(wrapper['amazon_results']))
             for result in wrapper['amazon_results']:
                 results[result[0].entity_id] = result
         
