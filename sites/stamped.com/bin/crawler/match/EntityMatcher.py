@@ -80,7 +80,8 @@ class EntityMatcher(AEntityMatcher):
         dupes = []
         
         for matcher in matchers:
-            cur_dupes = matcher.getDuplicateCandidates(entity)
+            candidates = list(matcher.getDuplicateCandidates(entity))
+            cur_dupes  = list(matcher.getMatchingDuplicates(entity, candidates))
             
             dupes.extend(cur_dupes)
         

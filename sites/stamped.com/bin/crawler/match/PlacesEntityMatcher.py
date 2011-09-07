@@ -17,7 +17,7 @@ class PlacesEntityMatcher(ATitleBasedEntityMatcher):
     def __init__(self, stamped_api, options):
         ATitleBasedEntityMatcher.__init__(self, stamped_api, options)
         earthRadius = 3959.0 # miles
-        maxDistance = 50.0 / earthRadius # convert to radians
+        maxDistance = 20.0 / earthRadius # convert to radians
         
         self.distance = maxDistance
         self._placesDB._collection.ensure_index([("coordinates", GEO2D)])

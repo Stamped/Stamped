@@ -327,11 +327,12 @@ class MongoEntitySearcher(EntitySearcher):
                 }
                 
                 google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, True)
+                
                 entities = []
                 output   = []
                 
                 if google_results is not None and len(google_results) > 0:
-                    #entities = self.api._entityMatcher.addMany(google_results)
+                    entities = self.api._entityMatcher.addMany(google_results)
                     
                     if entities is not None:
                         for entity in entities:
@@ -452,9 +453,11 @@ class MongoEntitySearcher(EntitySearcher):
         elif input_query in title:
             if title.startswith(input_query):
                 # if the query is a prefix match for the title, weight it more
-                weight = 1.8
+                weight = 6
+            elif title.endswith(input_query):
+                weight = 4
             else:
-                weight = 1.2
+                weight = 1.4
         
         is_junk = " \t-".__contains__ # characters for SequenceMatcher to disregard
         ratio   = SequenceMatcher(is_junk, input_query, entity.title.lower()).ratio()
