@@ -410,7 +410,6 @@ class HTTPEntity(Schema):
             self.edition        = schema.edition
 
             # Film
-            self.release_date   = schema.original_release_date
             self.cast           = schema.cast
             self.director       = schema.director
             self.network        = schema.network_name

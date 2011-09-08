@@ -108,11 +108,20 @@ def setSubtitle(entity):
             else:
                 entity.subtitle = 'TV Show'
 
-    elif entity.category == 'music':
-        if entity.subcategory == 'artist':
-            entity.subtitle = 'Artist'
+    elif entity.category == 'music' and entity.subcategory == 'artist':
+        entity.subtitle = 'Artist'
+
+    elif entity.category == 'music' and entity.subcategory == 'album':
+        if entity.artist != None:
+            entity.subtitle = "%s (Album)" % entity.artist
         else:
-            entity.subtitle = str(entity.subcategory).title()
+            entity.subtitle = 'Album'
+            
+    elif entity.category == 'music' and entity.subcategory == 'song':
+        if entity.artist != None:
+            entity.subtitle = "%s (Song)" % entity.artist
+        else:
+            entity.subtitle = 'Song'
 
     elif entity.category == 'other':
         entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
