@@ -73,11 +73,11 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [self loadFavoritesFromDataStore];
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  [self loadFavoritesFromDataStore];
   [super viewDidAppear:animated];
 }
 

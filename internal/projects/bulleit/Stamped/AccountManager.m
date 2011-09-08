@@ -289,14 +289,20 @@ static AccountManager* sharedAccountManager_ = nil;
   if (queue == oAuthRequestQueue_) {
     [RKRequestQueue sharedQueue].suspended = YES;
   } else if (queue == [RKRequestQueue sharedQueue]) {
-    // Wrap shiz with the current oauth token.
-    NSMutableDictionary* params =
-        [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
-
     if (!self.authToken.accessToken) {
       [self refreshToken];
       return;
     }
+
+    if ([request.params isKindOfClass:[RKParams class]]) {
+      NSLog(@"RKParams class...");
+      [(RKParams*)request.params setValue:self.authToken.accessToken forParam:@"oauth_token"];
+      return;
+    }
+    
+    // Wrap shiz with the current oauth token.
+    NSMutableDictionary* params =
+        [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
 
     [params setObject:self.authToken.accessToken forKey:@"oauth_token"];
     request.params = params;

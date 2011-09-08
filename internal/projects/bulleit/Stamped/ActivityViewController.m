@@ -53,9 +53,9 @@ static NSString* const kActivityLookupPath = @"/temp/activity.json";
   self.eventsArray = nil;
 }
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   [self loadEventsFromDataStore];
-  [super viewWillAppear:animated];
 }
 
 - (void)loadEventsFromDataStore {

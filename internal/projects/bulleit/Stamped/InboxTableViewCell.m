@@ -636,6 +636,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)expandStack {
+  [self setSelected:NO animated:NO];
+  [self setHighlighted:NO animated:NO];
   if (stackExpanded_)
     return;
 

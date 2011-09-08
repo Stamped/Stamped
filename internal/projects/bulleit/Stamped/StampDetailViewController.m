@@ -172,7 +172,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   NSString* fontString = @"TitlingGothicFBComp-Regular";
   CGFloat fontSize = 36.0;
   CGSize stringSize = [stamp_.entityObject.title sizeWithFont:[UIFont fontWithName:fontString size:fontSize]
-                                                     forWidth:280
+                                                     forWidth:250
                                                 lineBreakMode:UILineBreakModeTailTruncation];
   
   UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 15, stringSize.width, stringSize.height)];
