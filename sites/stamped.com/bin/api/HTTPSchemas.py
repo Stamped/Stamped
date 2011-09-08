@@ -584,6 +584,8 @@ class HTTPStamp(Schema):
         self.num_comments       = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
         self.like_threshold_hit = SchemaElement(bool)
+        self.is_liked           = SchemaElement(bool)
+        self.is_fav             = SchemaElement(bool)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
@@ -612,6 +614,8 @@ class HTTPStamp(Schema):
             self.num_likes              = schema.num_likes
             self.like_threshold_hit     = schema.like_threshold_hit
             self.created                = schema.timestamp.created
+            self.is_liked               = schema.is_liked
+            self.is_fav                 = schema.is_fav
 
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id

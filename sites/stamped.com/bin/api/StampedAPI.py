@@ -671,16 +671,17 @@ class StampedAPI(AStampedAPI):
         return None
 
     
-    def _addUserObjects(self, stampData, userIds=None):
+    def _enrichStampObjects(self, stampData, **kwargs):
+        authUserId  = kwargs.pop('authUserId', None)
+        userIds     = kwargs.pop('userIds', {})
+
         singleStamp = False
         if not isinstance(stampData, list):
             singleStamp = True
             stampData = [stampData]
 
-        if userIds == None:
-            # Grab user data
-            userIds = {}
-
+        # Users
+        if len(userIds) == 0:
             for stamp in stampData:
                 # Grab user_id from stamp
                 userIds[stamp.user_id] = 1
@@ -692,11 +693,19 @@ class StampedAPI(AStampedAPI):
                 # Grab user_id from comments
                 for comment in stamp.comment_preview:
                     userIds[comment.user_id] = 1
-
+                
             users = self._userDB.lookupUsers(userIds.keys(), None)
 
             for user in users:
                 userIds[user.user_id] = user.exportSchema(UserMini())
+
+        # Favorites
+        # favorites = self._favoriteDB.getFavorites(authUserId)
+        ### TODO: Do this efficiently
+
+        # Likes
+        if authUserId:
+            likes = self._stampDB.getUserLikes(authUserId)
 
         # Add user objects to stamps
         stamps = []
@@ -717,6 +726,11 @@ class StampedAPI(AStampedAPI):
                 for i in xrange(len(stamp.comment_preview)):
                     commentingUser = userIds[stamp.comment_preview[i].user_id]
                     stamp.comment_preview[i].user = commentingUser
+
+            # Mark as liked
+            if authUserId:
+                if stamp.stamp_id in likes:
+                    stamp.is_liked = True
 
             stamps.append(stamp)
 
@@ -822,7 +836,7 @@ class StampedAPI(AStampedAPI):
             stamp                   = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
-        stamp = self._addUserObjects(stamp, userIds=userIds)
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds)
 
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
@@ -1016,7 +1030,7 @@ class StampedAPI(AStampedAPI):
         stamp = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
-        stamp = self._addUserObjects(stamp, userIds=userIds)
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds)
 
         # Give credit
         if stamp.credit != None and len(stamp.credit) > 0:
@@ -1092,7 +1106,7 @@ class StampedAPI(AStampedAPI):
     
     def removeStamp(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Verify user has permission to delete
         if stamp.user_id != authUserId:
@@ -1133,7 +1147,7 @@ class StampedAPI(AStampedAPI):
         
     def getStamp(self, stampId, authUserId):
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Check privacy of stamp
         if stamp.user_id != authUserId and stamp.user.privacy == True:
@@ -1168,7 +1182,7 @@ class StampedAPI(AStampedAPI):
     
     def updateStampImage(self, authUserId, stampId, data):
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Verify user has permission to add image
         if stamp.user_id != authUserId:
@@ -1200,7 +1214,7 @@ class StampedAPI(AStampedAPI):
     def addComment(self, authUserId, stampId, blurb):
         user    = self._userDB.getUser(authUserId)
         stamp   = self._stampDB.getStamp(stampId)
-        stamp   = self._addUserObjects(stamp)
+        stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Verify user has the ability to comment on the stamp
         friendship = Friendship({
@@ -1414,7 +1428,7 @@ class StampedAPI(AStampedAPI):
 
     def addLike(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Verify user has the ability to 'like' the stamp
         if stamp.user_id != authUserId:
@@ -1457,6 +1471,7 @@ class StampedAPI(AStampedAPI):
         if stamp.num_likes == None:
             stamp.num_likes = 0
         stamp.num_likes += 1
+        stamp.is_liked = True
 
         # Give credit once at five likes
         if stamp.num_likes >= 5 and not stamp.like_threshold_hit:
@@ -1492,7 +1507,7 @@ class StampedAPI(AStampedAPI):
 
         # Get stamp object
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Increment user stats by one
         self._userDB.updateUserStats( \
@@ -1544,7 +1559,7 @@ class StampedAPI(AStampedAPI):
         except:
             return cap
     
-    def _getStampCollection(self, stampIds, **kwargs):
+    def _getStampCollection(self, authUserId, stampIds, **kwargs):
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
         includeComments = kwargs.pop('includeComments', False)
@@ -1595,7 +1610,7 @@ class StampedAPI(AStampedAPI):
                     stamp.comment_preview = commentPreviews[stamp.stamp_id]
                 stamps.append(stamp)
 
-        stamps = self._addUserObjects(stamps)
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
         return stamps
     
@@ -1604,7 +1619,7 @@ class StampedAPI(AStampedAPI):
 
         kwargs['includeComments'] = True
 
-        return self._getStampCollection(stampIds, **kwargs)
+        return self._getStampCollection(authUserId, stampIds, **kwargs)
     
     def getUserStamps(self, userRequest, authUserId, **kwargs):
         user = self._getUserFromIdOrScreenName(userRequest)
@@ -1630,7 +1645,7 @@ class StampedAPI(AStampedAPI):
 
         kwargs['includeComments'] = True
 
-        return self._getStampCollection(stampIds, **kwargs)
+        return self._getStampCollection(authUserId, stampIds, **kwargs)
     
     def getCreditedStamps(self, userRequest, authUserId, **kwargs):
         ### TODO: Implement

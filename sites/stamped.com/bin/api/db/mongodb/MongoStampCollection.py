@@ -13,6 +13,7 @@ from utils import lazyProperty
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
+from MongoUserLikesCollection import MongoUserLikesCollection
 from MongoStampLikesCollection import MongoStampLikesCollection
 from MongoUserStampsCollection import MongoUserStampsCollection
 from MongoInboxStampsCollection import MongoInboxStampsCollection
@@ -52,6 +53,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     @lazyProperty
     def stamp_likes_collection(self):
         return MongoStampLikesCollection()
+    
+    @lazyProperty
+    def user_likes_collection(self):
+        return MongoUserLikesCollection()
 
     
     def addStamp(self, stamp):
@@ -172,14 +177,26 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     def addLike(self, userId, stampId):
         # Add a reference to the user in the stamp's 'like' collection
         self.stamp_likes_collection.addStampLike(stampId, userId) 
+        # Add a reference to the stamp in the user's 'like' collection
+        self.user_likes_collection.addUserLike(userId, stampId) 
         
     def removeLike(self, userId, stampId):
         # Remove a reference to the user in the stamp's 'like' collection
-        return self.stamp_likes_collection.removeStampLike(stampId, userId) 
+        stampLike = self.stamp_likes_collection.removeStampLike(stampId, userId)
+        # Remove a reference to the stamp in the user's 'like' collection
+        userLike = self.user_likes_collection.removeUserLike(userId, stampId) 
+
+        if stampLike == True and userLike == True:
+            return True
+        return False
         
     def getStampLikes(self, stampId):
         # Add a reference to the user in the stamp's 'like' collection
         return self.stamp_likes_collection.getStampLikes(stampId) 
+        
+    def getUserLikes(self, userId):
+        # Add a reference to the user in the stamp's 'like' collection
+        return self.user_likes_collection.getUserLikes(userId) 
 
     def checkLike(self, userId, stampId):
         try:

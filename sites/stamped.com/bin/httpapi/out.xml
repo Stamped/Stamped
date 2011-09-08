@@ -3,19 +3,19 @@
     <HTTPHeaders>
       <Header Name="UserAgent" Value="Python-urllib/2.6"/>
     </HTTPHeaders>
-    <RequestId>7d2c0370-6f99-4b6e-9cce-850bdaff88b5</RequestId>
+    <RequestId>a9ba450e-c343-479a-be1e-c73cbdd0065b</RequestId>
     <Arguments>
       <Argument Name="Operation" Value="ItemLookup"/>
       <Argument Name="Service" Value="AWSECommerceService"/>
-      <Argument Name="Signature" Value="N00edAxuM0jG3DQ7TdhQdbAUtkwDoiAUPQCERdm3MV0="/>
+      <Argument Name="Signature" Value="9NUGb0trrtQGiEqA8puxv3f4rKvK1MCdO2lpej0I5BQ="/>
       <Argument Name="AssociateTag" Value="stamped01-20"/>
       <Argument Name="Version" Value="2011-08-01"/>
       <Argument Name="ItemId" Value="B000003TA2,B001ENOVP2"/>
       <Argument Name="AWSAccessKeyId" Value="AKIAIXLZZZT4DMTKZBDQ"/>
-      <Argument Name="Timestamp" Value="2011-09-08T22:15:08Z"/>
+      <Argument Name="Timestamp" Value="2011-09-08T23:12:03Z"/>
       <Argument Name="ResponseGroup" Value="Large"/>
     </Arguments>
-    <RequestProcessingTime>0.1237960000000000</RequestProcessingTime>
+    <RequestProcessingTime>0.1608170000000000</RequestProcessingTime>
   </OperationRequest>
   <Items>
     <Request>
@@ -181,7 +181,7 @@
             <Condition>New</Condition>
           </OfferAttributes>
           <OfferListing>
-            <OfferListingId>E1jFY8BYgoUPMHCX%2F8GTgibJJvI4SMEbHkZn8ZZa57Wd2mZnokxXZx9UXSK9Q19irt7jeGx0LXZjr4vvEZ0Pk%2FiDsg0n9nOPA0qEiNgSySA%3D</OfferListingId>
+            <OfferListingId>GESNpYYLc9tL0q9pjHo9rTRCmyaZaACNxWSyUKMPqx7S4jlPL6zUnPQja5oA4jUsQvMli4%2FmUch%2BNi1kL9I9lpJlcYNgSGCc5X4vICY4oaI%3D</OfferListingId>
             <Price>
               <Amount>848</Amount>
               <CurrencyCode>USD</CurrencyCode>
@@ -204,7 +204,7 @@
         </Offer>
       </Offers>
       <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B000003TA2&amp;atag=stamped01-20&amp;exp=2011-09-09T22%3A15%3A09Z&amp;v=2&amp;sig=Ew3KktKWJB3XQM2RxCQJD%2BAxThp1X9avZCzxI%2Bai7Yo%3D</IFrameURL>
+        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B000003TA2&amp;atag=stamped01-20&amp;exp=2011-09-09T23%3A12%3A03Z&amp;v=2&amp;sig=64pvDWS7tzKIqHeG0cXpNui4hhliRi9cLM4K6AWr0nk%3D</IFrameURL>
         <HasReviews>true</HasReviews>
       </CustomerReviews>
       <EditorialReviews>
@@ -822,7 +822,7 @@
             <Condition>New</Condition>
           </OfferAttributes>
           <OfferListing>
-            <OfferListingId>qtXMfLvoiwPYELUSQeMrxHuso97NW1UTXgV5DpCSH0cud%2BqLeeGz%2Fh12QuWP1%2FiiWpH3RreSrNaw7iMnlp1SmtyPYkFMI58VddMVgMUhYp8LJmxMGUb9Py47SeTAVr7ueG2YVEIeshOapmZklVay2YA6tGw9WeWt</OfferListingId>
+            <OfferListingId>i27q4khTETJjd4rSsDWqZEyRMbKahJkwaVxcfUI1l0YpOyEb66Ukfmi2LkodnPsuWe2oT1iSjaziGvDBeoh0AeuAL%2B%2FtV9sFZkFXFeKH7vMcBfvDbdF6FU6ZrQqj76dCzZVLk1eDjaekiwVK%2BRWpYZGle1UR%2BHFq</OfferListingId>
             <Price>
               <Amount>709</Amount>
               <CurrencyCode>USD</CurrencyCode>
@@ -845,7 +845,7 @@
         </Offer>
       </Offers>
       <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B001ENOVP2&amp;atag=stamped01-20&amp;exp=2011-09-09T22%3A15%3A09Z&amp;v=2&amp;sig=jRhrQnh41Y3cM6rvVAJKFmDzx1qHMkdgdDqGRZJoT14%3D</IFrameURL>
+        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B001ENOVP2&amp;atag=stamped01-20&amp;exp=2011-09-09T23%3A12%3A03Z&amp;v=2&amp;sig=8SZnFKJNjPTUfYvMY1pf3tyk%2BsLLYWy9DpqUwHzlhFg%3D</IFrameURL>
         <HasReviews>true</HasReviews>
       </CustomerReviews>
       <EditorialReviews>

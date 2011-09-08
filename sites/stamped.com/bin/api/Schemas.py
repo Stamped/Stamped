@@ -195,6 +195,7 @@ class Stamp(Schema):
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
+        self.attributes         = StampAttributesSchema()
 
 class MentionSchema(Schema):
     def setSchema(self):
@@ -211,6 +212,11 @@ class CreditSchema(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
+
+class StampAttributesSchema(Schema):
+    def setSchema(self):
+        self.is_liked           = SchemaElement(bool)
+        self.is_fav             = SchemaElement(bool)
 
 
 # ######## #
