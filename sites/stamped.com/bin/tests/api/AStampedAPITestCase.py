@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import atexit, urllib, json, unittest, mimetools
+import atexit, urllib, json, unittest
 
 from StampedTestUtils import *
 
@@ -38,6 +38,8 @@ class AStampedAPITestCase(AStampedTestCase):
     def handleGET(self, path, data):
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (self._baseurl, path, params)
+        import utils
+        utils.log(url)
         result = json.load(self._opener.open(url))
         
         return result
@@ -45,6 +47,8 @@ class AStampedAPITestCase(AStampedTestCase):
     def handlePOST(self, path, data):
         params = urllib.urlencode(data)
         url    = "%s/%s" % (self._baseurl, path)
+        import utils
+        utils.log(url)
         result = json.load(self._opener.open(url, params))
         
         return result

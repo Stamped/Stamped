@@ -13,35 +13,22 @@ from optparse import OptionParser
 from pprint import pprint
 
 # TODO: AUTOSUGGEST
+    # only start searching after we have at least 3 characters
+    # \w{3,n}
     # after setting up CDN, going to have to run a cache-warming process
     # need a concrete benchmark to tune autosuggest against
     # possibly route geo-based searches to nearest edge location:
         # http://aws.amazon.com/cloudfront/#details
-    # support 'blank (in|near) [city or region]'
-        # would need to support general recognizing of city/region
-        # would need city/region list to match against
-
+        # static.stamped.com/search/...
 
 # TODO:
     # entity keyword search by breaking title up into distinct lexemes
     # unit tests and regression tests for autocomplete
         # Beauty & Essex, Per Se
-    # dedupe books
-    # unit tests for deduper
     # fuzzy autocomplete to help with misspellings?
 
 # TODO: debug Beauty & Essex test case (multiple sources)
 # TODO: add simple regression-oriented set of unit tests for entity searcher
-
-# TODO:
-    # lazy loading of external entities
-        # location
-            # google places
-        # misc:
-            # amazon
-    # image support
-        # find good python image library (PIL?)
-        # static.stamped.com or cdn.stamped.com
     # fast auxillary data structure for autocomplete, indexed on title?
         # written in C++; would have to take into account alternate titles
         # or possibly a smaller mongo collection, optimized for search
@@ -81,6 +68,21 @@ from pprint import pprint
 # TODO: (DONE) what are the other regex options available?
 # TODO: (DONE) searchEntities should take into account whether or not 
 # TODO: (DONE) merge autocomplete.py with MongoEntityCollection.searchEntities
+# TODO: (DONE) support 'blank (in|near) [city or region]'
+    # would need to support general recognizing of city/region
+    # would need city/region list to match against
+# TODO: (DONE)
+    # dedupe books
+    # unit tests for deduper
+# TODO: (DONE)
+    # lazy loading of external entities
+        # location
+            # google places
+        # misc:
+            # amazon
+    # image support
+        # find good python image library (PIL?)
+        # static.stamped.com or cdn.stamped.com
 
 # travis' manhattan apartment (for proximity testing purposes): '40.797898,-73.968148'
 

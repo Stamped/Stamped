@@ -3,6 +3,6 @@ import NetflixDump
 import OpenTableDump
 import FactualiPhoneAppsDump
 import FactualUSRestaurantsDump
-import AppleEPFDump
+import AppleEPFDumps
 import BarnesAndNobleDump
 
