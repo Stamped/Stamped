@@ -273,6 +273,133 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditTest):
             )
 
 
+class StampedAPIStampLikesTest(AStampedAPITestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
+
+    def tearDown(self):
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
+
+class StampedAPILikesPass(StampedAPIStampLikesTest):
+    def test_like(self):
+        path = "stamps/likes/create.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
+        self.assertEqual(result['num_likes'], 1)
+
+        path = "stamps/likes/remove.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
+        self.assertEqual(result['num_likes'], 0)
+
+    def test_many_likes(self):
+        tokens = []
+        for i in xrange(6):
+            user, token = self.createAccount('User%s' % i)
+            tokens.append(token)
+
+            path = "stamps/likes/create.json"
+            data = { 
+                "oauth_token": token['access_token'],
+                "stamp_id": self.stamp['stamp_id']
+            }
+            result = self.handlePOST(path, data)
+            self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
+            self.assertEqual(result['num_likes'], i + 1)
+
+            if i + 1 >= 5:
+                self.assertTrue(result['like_threshold_hit'])
+            else:
+                if 'like_threshold_hit' in result:
+                    self.assertEqual(result['like_threshold_hit'], False)
+
+        for i in xrange(6):
+            token = tokens[i]
+            path = "stamps/likes/remove.json"
+            data = { 
+                "oauth_token": token['access_token'],
+                "stamp_id": self.stamp['stamp_id']
+            }
+            result = self.handlePOST(path, data)
+
+            self.deleteAccount(token)
+
+class StampedAPILikesFail(StampedAPIStampLikesTest):
+    def test_remove(self):
+        path = "stamps/likes/remove.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+    def test_like_twice(self):
+        path = "stamps/likes/create.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
+        self.assertEqual(result['num_likes'], 1)
+
+        try:
+            result = self.handlePOST(path, data)
+            ret = False
+        except:
+            ret = True
+        self.assertTrue(ret)
+
+        path = "stamps/likes/remove.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "stamp_id": self.stamp['stamp_id']
+        }
+        result = self.handlePOST(path, data)
+        self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
+        self.assertEqual(result['num_likes'], 0)
+
+    def test_many_likes_from_one_user(self):
+        for i in xrange(6):
+            path = "stamps/likes/create.json"
+            data = { 
+                "oauth_token": self.tokenB['access_token'],
+                "stamp_id": self.stamp['stamp_id']
+            }
+            result = self.handlePOST(path, data)
+            self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
+
+            if 'like_threshold_hit' in result:
+                self.assertEqual(result['like_threshold_hit'], False)
+
+            path = "stamps/likes/remove.json"
+            data = { 
+                "oauth_token": self.tokenB['access_token'],
+                "stamp_id": self.stamp['stamp_id']
+            }
+            result = self.handlePOST(path, data)
+
 
 
 if __name__ == '__main__':

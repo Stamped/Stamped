@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils, logs, re, Blacklist, binascii
+import Globals, utils, logs, re, Blacklist
 from datetime import datetime
 from errors import *
 from auth import convertPasswordForStorage
@@ -184,8 +184,6 @@ class StampedAPI(AStampedAPI):
         return account
     
     def updateProfileImage(self, authUserId, data):
-        data = binascii.a2b_qp(data)
-        
         image = self._imageDB.getImage(data)
         self._imageDB.addProfileImage(authUserId, image)
         
@@ -814,7 +812,6 @@ class StampedAPI(AStampedAPI):
         # Add image to stamp
         ### TODO: Unwind stamp if this fails
         if imageData != None:
-            imageData = binascii.a2b_qp(imageData)
             
             image = self._imageDB.getImage(imageData)
             self._imageDB.addStampImage(stamp.stamp_id, image)
@@ -1178,8 +1175,6 @@ class StampedAPI(AStampedAPI):
             msg = "Insufficient privileges to update stamp image"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
-
-        data = binascii.a2b_qp(data)
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
@@ -1205,6 +1200,7 @@ class StampedAPI(AStampedAPI):
     def addComment(self, authUserId, stampId, blurb):
         user    = self._userDB.getUser(authUserId)
         stamp   = self._stampDB.getStamp(stampId)
+        stamp   = self._addUserObjects(stamp)
 
         # Verify user has the ability to comment on the stamp
         friendship = Friendship({
@@ -1320,7 +1316,8 @@ class StampedAPI(AStampedAPI):
             self._activityDB.addActivity(repliedUserIds, activity)
         
         # Increment comment count on stamp
-        self._stampDB.incrementStatsForStamp(stamp.stamp_id, 'num_comments', 1)
+        self._stampDB.updateStampStats( \
+            stamp.stamp_id, 'num_comments', increment=1)
 
         return comment
     
@@ -1347,7 +1344,8 @@ class StampedAPI(AStampedAPI):
         ### TODO: Remove activity?
 
         # Increment comment count on stamp
-        self._stampDB.incrementStatsForStamp(comment.stamp_id, 'num_comments', -1)
+        self._stampDB.updateStampStats( \
+            comment.stamp_id, 'num_comments', increment=-1)
 
         # Add user object
         user = self._userDB.getUser(comment.user_id)
@@ -1402,6 +1400,116 @@ class StampedAPI(AStampedAPI):
         comment.user    = user.exportSchema(UserMini())
 
         return comment
+
+    
+    """
+    #                              
+    #       # #    # ######  ####  
+    #       # #   #  #      #      
+    #       # ####   #####   ####  
+    #       # #  #   #           # 
+    #       # #   #  #      #    # 
+    ####### # #    # ######  ####  
+    """
+
+    def addLike(self, authUserId, stampId):
+        stamp       = self._stampDB.getStamp(stampId)
+        stamp       = self._addUserObjects(stamp)
+
+        # Verify user has the ability to 'like' the stamp
+        if stamp.user_id != authUserId:
+            friendship = Friendship({
+                'user_id':      stamp.user_id,
+                'friend_id':    authUserId,
+            })
+
+            # Check if stamp is private; if so, must be a follower
+            if stamp.user.privacy == True:
+                if not self._friendshipDB.checkFriendship(friendship):
+                    msg = "Insufficient privileges to add comment"
+                    logs.warning(msg)
+                    raise InsufficientPrivilegesError(msg)
+
+            # Check if block exists between user and stamp owner
+            if self._friendshipDB.blockExists(friendship) == True:
+                logs.info("Block exists")
+                raise Exception("Block exists")
+
+        # Check to verify that user hasn't already liked stamp
+        if self._stampDB.checkLike(authUserId, stampId):
+            msg = "'Like' exists for user (%s) on stamp (%s)" \
+                % (authUserId, stampId)
+            logs.warning(msg)
+            raise IllegalActionError(msg)
+
+        # Add like
+        self._stampDB.addLike(authUserId, stampId)
+
+        # Increment user stats by one
+        self._userDB.updateUserStats( \
+            stamp.user_id, 'num_likes', increment=1)
+        self._userDB.updateUserStats( \
+            authUserId, 'num_likes_given', increment=1)
+
+        # Increment stamp stats by one
+        self._stampDB.updateStampStats( \
+            stamp.stamp_id, 'num_likes', increment=1)
+        if stamp.num_likes == None:
+            stamp.num_likes = 0
+        stamp.num_likes += 1
+
+        # Give credit once at five likes
+        if stamp.num_likes >= 5 and not stamp.like_threshold_hit:
+            # Update stamp stats
+            self._stampDB.giveLikeCredit(stamp.stamp_id)
+            stamp.like_threshold_hit = True
+
+            # Update user stats with new credit
+            self._userDB.updateUserStats( \
+                stamp.user_id, 'num_stamps_left', increment=1)
+
+        # Add activity for stamp owner (if not self)
+        ### TODO: Verify activity item doesn't already exist
+        if self._activity == True and stamp.user_id != authUserId:
+            activity                = Activity()
+            activity.genre          = 'like'
+            activity.user_id        = authUserId
+            activity.subject        = stamp.entity.title
+            activity.link_stamp_id  = stamp.stamp_id
+            activity.created        = datetime.utcnow()
+
+            self._activityDB.addActivity(stamp.user_id, activity)
+
+        return stamp
+    
+    def removeLike(self, authUserId, stampId):
+        # Remove like (if it exists)
+        if not self._stampDB.removeLike(authUserId, stampId):
+            msg = "'Like' does not exist for user (%s) on stamp (%s)" \
+                % (authUserId, stampId)
+            logs.warning(msg)
+            raise IllegalActionError(msg)
+
+        # Get stamp object
+        stamp       = self._stampDB.getStamp(stampId)
+        stamp       = self._addUserObjects(stamp)
+
+        # Increment user stats by one
+        self._userDB.updateUserStats( \
+            stamp.user_id, 'num_likes', increment=-1)
+        self._userDB.updateUserStats( \
+            authUserId, 'num_likes_given', increment=-1)
+
+        # Increment stamp stats by one
+        self._stampDB.updateStampStats( \
+            stamp.stamp_id, 'num_likes', increment=-1)
+        if stamp.num_likes == None:
+            stamp.num_likes = 0
+        stamp.num_likes -= 1
+
+        ### TODO: Remove activity item?
+
+        return stamp
     
 
     """

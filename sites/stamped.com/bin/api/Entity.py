@@ -103,8 +103,8 @@ def setSubtitle(entity):
             else:
                 entity.subtitle = 'Movie'
         elif entity.subcategory == 'tv':
-            if entity.channel != None:
-                entity.subtitle = entity.channel
+            if entity.network_name != None:
+                entity.subtitle = entity.network_name
             else:
                 entity.subtitle = 'TV Show'
 
