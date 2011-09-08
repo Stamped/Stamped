@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import atexit, urllib, json, unittest
+import atexit, urllib, json, unittest, mimetools
 
 from StampedTestUtils import *
 

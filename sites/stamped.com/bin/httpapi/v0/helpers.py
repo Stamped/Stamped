@@ -152,6 +152,57 @@ def parseRequest(schema, request):
         
         raise StampedHTTPError("bad_request", 400)
 
+def parseFileUpload(schema, request, fileName='image'):
+    ### Parse Request
+    try:
+        if request.method != 'POST':
+            raise
+        rawData = request.POST
+
+        # Build the dict because django sucks
+        data = {}
+        for k, v in rawData.iteritems():
+            data[k] = v
+
+        logs.debug("Request url: %s" % request.path)
+        logs.debug("Request data: %s" % data)
+
+        # Extract file
+        f = request.FILES[fileName]
+        print 'FILE SIZE: %s' % f.size
+        if f.size > 131072: # 1 mb in bytes
+            raise
+        data[fileName] = f.read()
+
+        logs.debug("Added file: %s" % fileName)
+    
+        # for chunk in f.chunks():
+        #     destination.write(chunk)
+        # destination.close()
+
+        data.pop('oauth_token', None)
+        data.pop('client_id', None)
+        data.pop('client_secret', None)
+    
+        if schema == None:
+            if len(data) > 0:
+                raise
+            return
+        
+        schema.importData(data)
+
+        logs.debug("Parsed request data")
+
+        return schema
+
+    except Exception as e:
+        msg = "Unable to parse form (%s)" % e
+        logs.warning(msg)
+        utils.printException()
+        
+        raise StampedHTTPError("bad_request", 400)
+
+
 def transformOutput(value, **kwargs):
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
