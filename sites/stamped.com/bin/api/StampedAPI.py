@@ -5,11 +5,10 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils, logs, re, Blacklist
+import Globals, utils, logs, re, Blacklist, binascii
 from datetime import datetime
 from errors import *
 from auth import convertPasswordForStorage
-import base64
 
 from AStampedAPI import AStampedAPI
 
@@ -185,7 +184,7 @@ class StampedAPI(AStampedAPI):
         return account
     
     def updateProfileImage(self, authUserId, data):
-        data = base64.urlsafe_b64decode(data.encode('ascii'))
+        data = binascii.a2b_qp(data)
         
         image = self._imageDB.getImage(data)
         self._imageDB.addProfileImage(authUserId, image)
@@ -815,7 +814,7 @@ class StampedAPI(AStampedAPI):
         # Add image to stamp
         ### TODO: Unwind stamp if this fails
         if imageData != None:
-            imageData = base64.urlsafe_b64decode(imageData.encode('ascii'))
+            imageData = binascii.a2b_qp(imageData)
             
             image = self._imageDB.getImage(imageData)
             self._imageDB.addStampImage(stamp.stamp_id, image)
@@ -1180,7 +1179,7 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
 
-        data = base64.urlsafe_b64decode(data.encode('ascii'))
+        data = binascii.a2b_qp(data)
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
