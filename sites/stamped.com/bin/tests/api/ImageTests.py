@@ -75,24 +75,6 @@ class StampedAPIImageTests(AImageTest):
         (self.user, self.token) = self.createAccount()
     
     def test_profile_images(self):
-        for image in self.images:
-            path = "account/update_profile_image.json"
-            temp = 'temp.jpg'
-            image.save(temp, optimize=True)
-            
-            f = open(temp, 'r')
-            data = f.read()
-            f.close()
-            
-            data = {
-                "oauth_token": self.token['access_token'],
-                "profile_image": base64.urlsafe_b64encode(data), 
-            }
-            
-            result = self.handlePOST(path, data)
-            self.assertIn('images', result)
-    
-    def test_profile_images(self):
 
         for image in self.images:
             path = "account/update_profile_image.json"
