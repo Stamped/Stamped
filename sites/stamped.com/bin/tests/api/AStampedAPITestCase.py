@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import atexit, urllib, json, unittest
+import atexit, urllib, json, unittest, mimetools, urllib2
 
 from StampedTestUtils import *
 
@@ -52,6 +52,60 @@ class AStampedAPITestCase(AStampedTestCase):
         result = json.load(self._opener.open(url, params))
         
         return result
+
+    def handleMultiPart(self, path, fields, files, file_type='image/jpeg'):
+        url             = "%s/%s" % (self._baseurl, path)
+        headers, data   = self.encodeMultiPart(fields, files, file_type)
+        
+        request         = urllib2.Request(url, data, headers)
+        result          = urllib2.urlopen(request)
+        json_result     = json.load(result)
+
+        return json_result
+        
+    def encodeMultiPart(self, fields, files, file_type='image/jpeg'):
+
+        # Inspired by http://code.google.com/apis/cloudprint/docs/pythonCode.html
+
+        CRLF = '\r\n'
+        BOUNDARY = mimetools.choose_boundary()
+
+        """Encodes list of parameters and files for HTTP multipart format.
+
+        Args:
+          fields: list of tuples containing name and value of parameters.
+          files: list of tuples containing param name, filename, and file contents.
+          file_type: string if file type different than application/xml.
+        Returns:
+          A string to be sent as data for the HTTP post request.
+        """
+        lines = []
+        for key, value in fields.iteritems():
+            lines.append('--' + BOUNDARY)
+            lines.append('Content-Disposition: form-data; name="%s"' % key)
+            lines.append('')  # blank line
+            lines.append(value)
+        for key, value in files.iteritems():
+            filename = value['filename']
+            data = value['data']
+            lines.append('--' + BOUNDARY)
+            lines.append(
+                'Content-Disposition: form-data; name="%s"; filename="%s"'
+                % (key, filename))
+            lines.append('Content-Type: %s' % file_type)
+            lines.append('')  # blank line
+            lines.append(data)
+        lines.append('--' + BOUNDARY + '--')
+        lines.append('')  # blank line
+        data = CRLF.join(lines)
+
+        headers = {
+            'Content-Length': len(data), 
+            'Content-Type': 'multipart/form-data; boundary=%s' % BOUNDARY
+        }
+
+        return headers, data
+
     
     ### CUSTOM ASSERTIONS
     def assertValidKey(self, key, length=24):

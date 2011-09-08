@@ -168,18 +168,14 @@ def parseFileUpload(schema, request, fileName='image'):
         logs.debug("Request data: %s" % data)
 
         # Extract file
-        f = request.FILES[fileName]
-        print 'FILE SIZE: %s' % f.size
-        if f.size > 131072: # 1 mb in bytes
-            raise
-        data[fileName] = f.read()
+        if fileName in request.FILES:
+            f = request.FILES[fileName]
+            if f.size > 1048576: # 1 mb in bytes
+                raise Exception
+            data[fileName] = f.read()
 
-        logs.debug("Added file: %s" % fileName)
+            logs.debug("Added file: %s" % fileName)
     
-        # for chunk in f.chunks():
-        #     destination.write(chunk)
-        # destination.close()
-
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)

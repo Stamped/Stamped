@@ -88,16 +88,9 @@ def update_profile(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update_profile_image(request):
-    print 'REQUEST: %s' % request
-    print
-    print 'RAW REQUEST: %s' % request.raw_post_data
-    print
-    print 'REQUEST FILES: %s' % request.FILES
-    print
-    # authUserId  = checkOAuth(request)
+    authUserId  = checkOAuth(request)
     schema      = parseFileUpload(HTTPAccountProfileImage(), request, 'profile_image')
     
-    print 'SUCCESS????'
     ret         = stampedAPI.updateProfileImage(authUserId, schema.profile_image)
     
     suffix      = '.jpg'

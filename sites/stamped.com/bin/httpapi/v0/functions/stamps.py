@@ -13,7 +13,7 @@ from httpapi.v0.helpers import *
 def create(request):
     authUserId  = checkOAuth(request)
 
-    schema      = parseRequest(HTTPStampNew(), request)
+    schema      = parseFileUpload(HTTPStampNew(), request, 'image')
     entityId    = schema.entity_id
     data        = schema.exportSparse()
     del(data['entity_id'])
@@ -48,7 +48,7 @@ def update(request):
 @require_http_methods(["POST"])
 def update_image(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPImage(), request)
+    schema      = parseFileUpload(HTTPStampImage(), request, 'image')
     
     ret         = stampedAPI.updateStampImage(authUserId, schema.stamp_id, \
                                                 schema.image)
