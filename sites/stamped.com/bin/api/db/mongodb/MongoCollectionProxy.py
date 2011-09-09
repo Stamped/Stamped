@@ -110,6 +110,8 @@ class MongoCollectionProxy(object):
     def insert(self, docs, manipulate=True, safe=False, check_keys=True, **kwargs):
         max_batch_size = 64
         max_retries = 7
+
+        storeLog = kwargs.pop('log', True)
         
         def _insert(objects, level):
             ret = []
@@ -128,17 +130,20 @@ class MongoCollectionProxy(object):
                 try:
                     result = self._collection.insert(objects, manipulate, safe, check_keys, **kwargs)
                     if count == 1:
-                        logs.debug("Inserted document (%s)" % (self._parent.__class__.__name__))
+                        if storeLog:
+                            logs.debug("Inserted document (%s)" % (self._parent.__class__.__name__))
                     else:
-                        logs.debug("Inserted %d documents (%s)" % (count, self._parent.__class__.__name__))
+                        if storeLog:
+                            logs.debug("Inserted %d documents (%s)" % (count, self._parent.__class__.__name__))
                     ret += result
                 except AutoReconnect as e:
-                    if level > max_retries:
+                    if level > max_retries and storeLog:
                         logs.warning("Unable to connect after %d retries (%s)" % \
                             (max_retries, self._parent.__class__.__name__))
                         raise
                     
-                    logs.warning("Insert document failed (%s)" % (self._parent.__class__.__name__))
+                    if storeLog:
+                        logs.warning("Insert document failed (%s)" % (self._parent.__class__.__name__))
                     
                     time.sleep(1)
 
@@ -151,8 +156,8 @@ class MongoCollectionProxy(object):
         
         return _insert(docs, 0)
     
-    def insert_one(self, doc, safe=False):
-        return self.insert([doc], safe=safe)[0]
+    def insert_one(self, doc, safe=False, **kwargs):
+        return self.insert([doc], safe=safe, **kwargs)[0]
         
     def save(self, to_save, manipulate=True, safe=False, **kwargs):
         num_retries = 0

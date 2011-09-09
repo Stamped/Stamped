@@ -27,6 +27,8 @@ from db.mongodb.MongoActivityCollection     import MongoActivityCollection
 from db.mongodb.MongoInviteCollection       import MongoInviteCollection
 from db.mongodb.MongoEntitySearcher         import MongoEntitySearcher
 
+from db.mongodb.MongoLogsCollection         import MongoLogsCollection
+
 class MongoStampedAPI(StampedAPI):
     """
         Implementation of Stamped API atop MongoDB.
@@ -92,6 +94,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _entityMatcher(self):
         return EntityMatcher(self)
+    
+    @lazyProperty
+    def _logsDB(self):
+        return MongoLogsCollection()
     
     def getStats(self):
         source_stats = { }

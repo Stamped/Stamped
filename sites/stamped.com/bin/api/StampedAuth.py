@@ -200,7 +200,6 @@ class StampedAuth(AStampedAuth):
         try:
             token = self._accessTokenDB.getAccessToken(token)
             logs.debug("Access token matched")
-            logs.debug("Access token data: %s" % token)
 
             if token['expires'] > datetime.utcnow():
                 logs.info("Authenticated user id: %s" % token.user_id)
