@@ -19,7 +19,7 @@ import MongoStampCollection
 import MongoStampCommentsCollection
 import MongoUserActivityCollection
 import MongoUserCollection
-import MongoUserFavoritesCollection
+import MongoUserFavEntitiesCollection
 import MongoUserStampsCollection
 import MongoEntitySearcher
 import MongoPlacesEntityCollection
