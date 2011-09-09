@@ -64,7 +64,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 }
 
 - (void)dealloc {
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.user = nil;
   [super dealloc];
 }
@@ -108,7 +108,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.userImageView = nil;
   self.cameraButton = nil;
   self.creditCountLabel = nil;
@@ -137,7 +137,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {

@@ -95,7 +95,7 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)refreshToken {
-  [RKRequestQueue sharedQueue].suspended = YES;
+  [RKClient sharedClient].requestQueue.suspended = YES;
   [self sendTokenRefreshRequest];
 }
 
@@ -144,7 +144,7 @@ static AccountManager* sharedAccountManager_ = nil;
                                                         selector:@selector(refreshTimerFired:)
                                                         userInfo:nil
                                                          repeats:YES];
-    [RKRequestQueue sharedQueue].suspended = NO;
+    [RKClient sharedClient].requestQueue.suspended = NO;
     [self sendUserInfoRequest];
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
@@ -208,7 +208,7 @@ static AccountManager* sharedAccountManager_ = nil;
     [self.delegate accountManagerDidAuthenticate];
     firstRun_ = NO;
   }
-  [RKRequestQueue sharedQueue].suspended = NO;
+  [RKClient sharedClient].requestQueue.suspended = NO;
   [self sendUserInfoRequest];
 }
 
@@ -285,17 +285,15 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-
   if (queue == oAuthRequestQueue_) {
-    [RKRequestQueue sharedQueue].suspended = YES;
-  } else if (queue == [RKRequestQueue sharedQueue]) {
+    [RKClient sharedClient].requestQueue.suspended = YES;
+  } else if (queue == [RKClient sharedClient].requestQueue) {
     if (!self.authToken.accessToken) {
       [self refreshToken];
       return;
     }
 
     if ([request.params isKindOfClass:[RKParams class]]) {
-      NSLog(@"RKParams class...");
       [(RKParams*)request.params setValue:self.authToken.accessToken forParam:@"oauth_token"];
       return;
     }
@@ -312,6 +310,7 @@ static AccountManager* sharedAccountManager_ = nil;
       request.params = nil;
     }
   }
+  NSLog(@"Request: %@", request.resourcePath);
 }
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {

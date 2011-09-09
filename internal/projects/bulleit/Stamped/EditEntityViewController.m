@@ -440,11 +440,7 @@ const CGFloat kKeyboardHeight = 217.0;
 }
 
 - (void)dismissSelf {
-  UIViewController* vc = nil;
-  if ([self respondsToSelector:@selector(presentingViewController)])
-    vc = [self presentingViewController];
-  else
-    vc = self.parentViewController;
+  UIViewController* vc = self.parentViewController;
   if (vc && vc.modalViewController)
     [vc dismissModalViewControllerAnimated:YES];
 }

@@ -28,6 +28,7 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "StampDetailCommentView.h"
+#import "ShowImageViewController.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
 
@@ -83,7 +84,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)dealloc {
   [stamp_ release];
   [detailViewController_ release];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super dealloc];
 }
 
@@ -97,7 +98,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super viewWillDisappear:animated];
 }
 
@@ -153,7 +154,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.headerView = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
@@ -418,7 +419,18 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
-  [addCommentField_ resignFirstResponder];
+  if ([addCommentField_ isFirstResponder]) {
+    [addCommentField_ resignFirstResponder];
+    return;
+  }
+  
+  if (stampPhotoView_.image &&
+      CGRectContainsPoint(stampPhotoView_.frame, [recognizer locationInView:stampPhotoView_.superview])) {
+    ShowImageViewController* viewController = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
+    viewController.image = stampPhotoView_.image;
+    [self.navigationController pushViewController:viewController animated:YES];
+    [viewController release];
+  }
 }
 
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer {

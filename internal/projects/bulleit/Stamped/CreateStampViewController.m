@@ -200,15 +200,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
   titleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
 
-  CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
-                                            forWidth:CGRectGetWidth(titleLabel_.frame)
-                                       lineBreakMode:titleLabel_.lineBreakMode];
   stampLayer_ = [[CALayer alloc] init];
-  stampLayer_.frame = CGRectMake(15 + stringSize.width - (46 / 2),
-                                11 - (46 / 2),
-                                46, 46);
   stampLayer_.contents = (id)[AccountManager sharedManager].currentUser.stampImage.CGImage;
-  stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   stampLayer_.opacity = 0.0;
   [scrollView_.layer insertSublayer:stampLayer_ above:titleLabel_.layer];
   [stampLayer_ release];
@@ -245,7 +238,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.creditedUserText = self.creditTextField.text;
 
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.scrollView = nil;
   self.titleLabel = nil;
   self.detailLabel = nil;
@@ -270,6 +263,14 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   titleLabel_.text = entityObject_.title;
   detailLabel_.text = entityObject_.subtitle;
   categoryImageView_.image = entityObject_.categoryImage;
+  CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
+                                            forWidth:CGRectGetWidth(titleLabel_.frame)
+                                       lineBreakMode:titleLabel_.lineBreakMode];
+  stampLayer_.transform = CATransform3DIdentity;
+  stampLayer_.frame = CGRectMake(15 + stringSize.width - (46 / 2),
+                                 11 - (46 / 2),
+                                 46, 46);
+  stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
 
   [super viewWillAppear:animated];
 }
@@ -550,7 +551,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
   if (self.stampPhoto) {
     NSData* imageData = UIImageJPEGRepresentation(self.stampPhoto, 0.8);
-    [params setData:imageData MIMEType:@"image/png" forParam:@"image"];
+    [params setData:imageData MIMEType:@"image/jpeg" forParam:@"image"];
   }
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
@@ -587,11 +588,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 }
 
 - (void)dismissSelf {
-  UIViewController* vc = nil;
-  if ([self.navigationController respondsToSelector:@selector(presentingViewController)])
-    vc = [self.navigationController presentingViewController];
-  else
-    vc = self.navigationController.parentViewController;
+  UIViewController* vc = self.navigationController.parentViewController;
   if (vc && vc.modalViewController) {
     [vc dismissModalViewControllerAnimated:YES];
   } else {
@@ -703,9 +700,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   CGFloat width = original.size.width;
   CGFloat height = original.size.height;
 
-  if ((width > height && width > 640) || (height > width && height > 960)) {
-    CGFloat horizontalRatio = 640 / width;
-    CGFloat verticalRatio = 960 / height;
+  if ((width > height && width > 320) || (height > width && height > 480)) {
+    CGFloat horizontalRatio = 320 / width;
+    CGFloat verticalRatio = 480 / height;
     CGFloat ratio = MIN(horizontalRatio, verticalRatio);
     CGRect drawRect = CGRectIntegral(CGRectMake(0, 0, width * ratio, height * ratio));
     UIGraphicsBeginImageContextWithOptions(drawRect.size, YES, 0.0);

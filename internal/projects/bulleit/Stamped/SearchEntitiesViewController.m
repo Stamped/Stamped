@@ -79,7 +79,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.searchField = nil;
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
@@ -115,10 +115,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (IBAction)cancelButtonTapped:(id)sender {
-  if ([self respondsToSelector:@selector(presentingViewController)])
-    [[self presentingViewController] dismissModalViewControllerAnimated:YES];
-  else
-    [self.parentViewController dismissModalViewControllerAnimated:YES];
+  [self.parentViewController dismissModalViewControllerAnimated:YES];
 }
 
 #pragma mark - Core Data Shiz.

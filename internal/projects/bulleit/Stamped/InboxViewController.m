@@ -146,7 +146,7 @@ typedef enum {
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;

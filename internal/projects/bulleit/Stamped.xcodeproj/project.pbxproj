@@ -111,6 +111,8 @@
 		7E5FEED913D0C497008BCA48 /* nav_bar_ripple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */; };
 		7E668C2913D8B27C00E79E14 /* StampDetailCommentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */; };
 		7E684AAF140DE32F00394A70 /* big_blue_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E684AAE140DE32F00394A70 /* big_blue_button_bg@2x.png */; };
+		7E68B919141AA51200D55021 /* ShowImageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E68B917141AA51100D55021 /* ShowImageViewController.m */; };
+		7E68B91A141AA51200D55021 /* ShowImageViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E68B918141AA51100D55021 /* ShowImageViewController.xib */; };
 		7E69021713E7451400B09802 /* activity_mention_badge@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E69021613E7451400B09802 /* activity_mention_badge@2x.png */; };
 		7E69021A13E76A4100B09802 /* ActivityCreditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E69021913E76A4100B09802 /* ActivityCreditTableViewCell.m */; };
 		7E6FFA53140F137400F23A26 /* clear_unfollow_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FFA51140F137400F23A26 /* clear_unfollow_bg@2x.png */; };
@@ -461,6 +463,9 @@
 		7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailCommentView.h; sourceTree = "<group>"; };
 		7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampDetailCommentView.m; sourceTree = "<group>"; };
 		7E684AAE140DE32F00394A70 /* big_blue_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "big_blue_button_bg@2x.png"; sourceTree = "<group>"; };
+		7E68B916141AA51100D55021 /* ShowImageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShowImageViewController.h; sourceTree = "<group>"; };
+		7E68B917141AA51100D55021 /* ShowImageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShowImageViewController.m; sourceTree = "<group>"; };
+		7E68B918141AA51100D55021 /* ShowImageViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ShowImageViewController.xib; sourceTree = "<group>"; };
 		7E69021613E7451400B09802 /* activity_mention_badge@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "activity_mention_badge@2x.png"; sourceTree = "<group>"; };
 		7E69021813E76A4100B09802 /* ActivityCreditTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityCreditTableViewCell.h; sourceTree = "<group>"; };
 		7E69021913E76A4100B09802 /* ActivityCreditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityCreditTableViewCell.m; sourceTree = "<group>"; };
@@ -863,6 +868,16 @@
 			name = "Stamp Detail";
 			sourceTree = "<group>";
 		};
+		7E68B915141AA4F500D55021 /* Show Image */ = {
+			isa = PBXGroup;
+			children = (
+				7E68B916141AA51100D55021 /* ShowImageViewController.h */,
+				7E68B917141AA51100D55021 /* ShowImageViewController.m */,
+				7E68B918141AA51100D55021 /* ShowImageViewController.xib */,
+			);
+			name = "Show Image";
+			sourceTree = "<group>";
+		};
 		7E76129F13C940500023CCC4 /* Logos */ = {
 			isa = PBXGroup;
 			children = (
@@ -1148,14 +1163,14 @@
 				7EE1192013CE0C4100378139 /* libRestKitNetwork.a */,
 				7EE1192213CE0C4100378139 /* libRestKitObjectMapping.a */,
 				7EE1192413CE0C4100378139 /* libRestKitSupport.a */,
-				7EA73BD413E6EE3100E3C722 /* libRestKitJSONParser+NXJSON.a */,
+				7EA73BD413E6EE3100E3C722 /* libRestKitJSONParserNXJSON.a */,
 				7EE1192613CE0C4100378139 /* libRestKitJSONParserYAJL.a */,
 				7EE1192813CE0C4100378139 /* libRestKitJSONParserSBJSON.a */,
 				7EE1192A13CE0C4100378139 /* libRestKitJSONParserJSONKit.a */,
 				7EE1192C13CE0C4100378139 /* libRestKitXMLParserLibxml.a */,
 				7EE1192E13CE0C4100378139 /* libRestKitCoreData.a */,
 				7EE1193013CE0C4100378139 /* libRestKitThree20.a */,
-				7EE1193213CE0C4100378139 /* UISpec.app */,
+				7EE1193213CE0C4100378139 /* RestKitSpecs.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1208,6 +1223,7 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				7E68B915141AA4F500D55021 /* Show Image */,
 				7E3B6D7813D7509600FBE958 /* Util.h */,
 				7E3B6D7913D7509600FBE958 /* Util.m */,
 				7E3909341401975C00910F98 /* Notifications.h */,
@@ -1329,10 +1345,9 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		7EA73BD413E6EE3100E3C722 /* libRestKitJSONParser+NXJSON.a */ = {
+		7EA73BD413E6EE3100E3C722 /* libRestKitJSONParserNXJSON.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			name = "libRestKitJSONParser+NXJSON.a";
 			path = libRestKitJSONParserNXJSON.a;
 			remoteRef = 7EA73BD313E6EE3100E3C722 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -1400,10 +1415,10 @@
 			remoteRef = 7EE1192F13CE0C4100378139 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		7EE1193213CE0C4100378139 /* UISpec.app */ = {
+		7EE1193213CE0C4100378139 /* RestKitSpecs.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = UISpec.app;
+			path = RestKitSpecs.app;
 			remoteRef = 7EE1193113CE0C4100378139 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1570,6 +1585,7 @@
 				7E530A2B14158A2A00DEF881 /* first_run_confirm@2x.png in Resources */,
 				7E530A2D141592C100DEF881 /* stamped_logo_large@2x.png in Resources */,
 				7E0A87B2141672110013AC4D /* sign_up_header@2x.png in Resources */,
+				7E68B91A141AA51200D55021 /* ShowImageViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1656,6 +1672,7 @@
 				7E453720140F003C0097E64F /* RelationshipsViewController.m in Sources */,
 				7E5406DD141550A900912463 /* FirstRunViewController.m in Sources */,
 				7E0A87B71416CBDB0013AC4D /* STImageView.m in Sources */,
+				7E68B919141AA51200D55021 /* ShowImageViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

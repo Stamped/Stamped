@@ -42,6 +42,7 @@
 }
 
 - (void)dealloc {
+  [self.connection cancel];
   self.connection = nil;
   self.downloadData = nil;
   self.imageURL = nil;
@@ -86,7 +87,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
-  self.image = [[[UIImage alloc] initWithData:self.downloadData] autorelease];
+  self.image = [UIImage imageWithData:self.downloadData];
   self.downloadData = nil;
 }
 

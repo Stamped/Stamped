@@ -33,11 +33,12 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 
-  [RKRequestQueue sharedQueue].suspended = YES;
-  [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
-  [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
+  [RKClient sharedClient].requestQueue.suspended = YES;
+  [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
+  [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
+
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
                                        @"name", @"name",
@@ -109,11 +110,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
                                         @"expires_in", @"lifetimeSecs", nil];
 
   // Example date string: 2011-07-19 20:49:42.037000
-  NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
-  [favoriteMapping.dateFormatStrings addObject:dateFormat];
-	[stampMapping.dateFormatStrings addObject:dateFormat];
-  [commentMapping.dateFormatStrings addObject:dateFormat];
-  [eventMapping.dateFormatStrings addObject:dateFormat];
+  [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss.SSSSSS" inTimeZone:nil];
   
   [objectManager.mappingProvider setMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setMapping:stampMapping forKeyPath:@"Stamp"];
