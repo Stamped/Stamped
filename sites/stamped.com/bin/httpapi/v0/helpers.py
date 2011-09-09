@@ -170,7 +170,7 @@ def parseFileUpload(schema, request, fileName='image'):
         # Extract file
         if fileName in request.FILES:
             f = request.FILES[fileName]
-            max_size = 1048576: # 1 mb in bytes
+            max_size = 1048576 # 1 mb in bytes
             
             if f.size > max_size:
                 msg = "Uploaded file is too large (%s) (max size is %d)" % (f.size, max_size)
