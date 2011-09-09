@@ -697,6 +697,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (CFStringCompare((CFStringRef)mediaType, kUTTypeImage, 0) == kCFCompareEqualTo)
     original = (UIImage*)[info objectForKey:UIImagePickerControllerOriginalImage];
 
+  if (!original)
+    return;
+
   CGFloat width = original.size.width;
   CGFloat height = original.size.height;
 

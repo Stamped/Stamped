@@ -259,6 +259,7 @@ static const CGFloat kProfileImageSize = 144;
                                             otherButtonTitles:@"Take photo", @"Choose photo", nil];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   [sheet showInView:self.view];
+  [sheet release];
 }
 
 #pragma mark - UIActionSheetDelegate methods.

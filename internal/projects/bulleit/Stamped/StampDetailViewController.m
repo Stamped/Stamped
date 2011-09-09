@@ -284,7 +284,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
     mainCommentFrame.size.height += CGRectGetHeight(stampPhotoView_.bounds) + 10;
     [mainCommentContainer_ addSubview:stampPhotoView_];
-    [stampPhotoView_ release];
+    [self.stampPhotoView release];
   }
   
   User* creditedUser = [stamp_.credits anyObject];

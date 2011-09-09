@@ -106,7 +106,7 @@ static AccountManager* sharedAccountManager_ = nil;
   firstRunViewController_.delegate = self;
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController presentModalViewController:firstRunViewController_ animated:YES];
-  [firstRunViewController_ release];
+  [self.firstRunViewController release];
 }
 
 - (void)authenticate {

@@ -31,8 +31,10 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+#if !TARGET_IPHONE_SIMULATOR
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
-
+#endif
+  
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.suspended = YES;
