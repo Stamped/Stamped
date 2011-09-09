@@ -71,16 +71,23 @@ static const CGFloat kProfileImageSize = 144;
                                                 [UIImage imageNamed:@"learnmore_01"],
                                                 [UIImage imageNamed:@"learnmore_02"],
                                                 [UIImage imageNamed:@"learnmore_03"],
-                                                [UIImage imageNamed:@"learnmore_04"], nil];
+                                                [UIImage imageNamed:@"learnmore_04b"], nil];
   
   for (NSUInteger i = 0; i < bgImages.count; ++i) {
+    UIImageView* subview = [[UIImageView alloc] initWithImage:[bgImages objectAtIndex:i]];
+
     CGRect frame = self.scrollView.frame;
-    frame.origin.x = self.scrollView.frame.size.width * i;
+    frame.origin.x = CGRectGetWidth(frame) * i;
+    if (i == 4) {
+      UIImageView* learnMore = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"learnmore_04"]];
+      learnMore.frame = frame;
+      [self.scrollView addSubview:learnMore];
+      [learnMore release];
+    }
+    subview.frame = frame;
     
-    UIImageView* subview = [[UIImageView alloc] initWithFrame:frame];
-    subview.image = [bgImages objectAtIndex:i];
     subview.clipsToBounds = YES;
-    subview.contentMode = UIViewContentModeRight;
+    subview.contentMode = UIViewContentModeCenter;
     
     if (i == 1)
       [self setupSlide:subview];

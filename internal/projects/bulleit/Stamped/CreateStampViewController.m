@@ -119,8 +119,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 #pragma mark - View lifecycle
 
-//- (void)viewWillAppear:(BOOL)animated
-
 - (void)viewDidLoad {
   [super viewDidLoad];
   User* currentUser = [AccountManager sharedManager].currentUser;
@@ -227,10 +225,10 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (creditedUserText_)
     creditTextField_.text = creditedUserText_;
   
-  if (self.stampPhoto)
+  if (self.stampPhoto) {
     [self addStampPhotoView];
-  
-  [self.firstResponder becomeFirstResponder];
+    [self.reasoningTextView becomeFirstResponder];
+  }
 }
 
 - (void)viewDidUnload {

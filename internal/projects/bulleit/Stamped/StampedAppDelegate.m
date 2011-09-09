@@ -23,7 +23,7 @@
 #import "OAuthToken.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
-static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
+static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 
 @implementation StampedAppDelegate
 
@@ -35,7 +35,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
   
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.suspended = YES;
   [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
