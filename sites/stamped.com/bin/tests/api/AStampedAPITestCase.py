@@ -24,9 +24,8 @@ class StampedAPIURLOpener(urllib.FancyURLopener):
 class AStampedAPITestCase(AStampedTestCase):
     
     #_baseurl = "http://0.0.0.0:5000/api/v1"
-    #_baseurl = "http://localhost:18000/v0"
-    # _baseurl = "http://localhost:8080/v0"
-    _baseurl = "https://dev.stamped.com/v0"
+    _baseurl = "http://localhost:18000/v0"
+    #_baseurl = "https://dev.stamped.com/v0"
     #_baseurl = "http://dev.stamped.com:5000/v0"
     
     _opener = StampedAPIURLOpener()
@@ -38,8 +37,6 @@ class AStampedAPITestCase(AStampedTestCase):
     def handleGET(self, path, data):
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (self._baseurl, path, params)
-        import utils
-        utils.log(url)
         result = json.load(self._opener.open(url))
         
         return result
@@ -47,8 +44,6 @@ class AStampedAPITestCase(AStampedTestCase):
     def handlePOST(self, path, data):
         params = urllib.urlencode(data)
         url    = "%s/%s" % (self._baseurl, path)
-        import utils
-        utils.log(url)
         result = json.load(self._opener.open(url, params))
         
         return result

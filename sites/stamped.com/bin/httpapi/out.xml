@@ -3,19 +3,19 @@
     <HTTPHeaders>
       <Header Name="UserAgent" Value="Python-urllib/2.6"/>
     </HTTPHeaders>
-    <RequestId>a78a71de-711b-4975-b360-a22322f526c7</RequestId>
+    <RequestId>a9ba450e-c343-479a-be1e-c73cbdd0065b</RequestId>
     <Arguments>
       <Argument Name="Operation" Value="ItemLookup"/>
       <Argument Name="Service" Value="AWSECommerceService"/>
+      <Argument Name="Signature" Value="9NUGb0trrtQGiEqA8puxv3f4rKvK1MCdO2lpej0I5BQ="/>
       <Argument Name="AssociateTag" Value="stamped01-20"/>
       <Argument Name="Version" Value="2011-08-01"/>
-      <Argument Name="Signature" Value="uGqVwdMUfFMv8o4bQlD2T+tz7gfPumEoNIP93veNEW0="/>
-      <Argument Name="ItemId" Value="B000003TA2,B001ENOVP2,B0007ZIYWY"/>
+      <Argument Name="ItemId" Value="B000003TA2,B001ENOVP2"/>
       <Argument Name="AWSAccessKeyId" Value="AKIAIXLZZZT4DMTKZBDQ"/>
-      <Argument Name="Timestamp" Value="2011-09-08T04:38:36Z"/>
+      <Argument Name="Timestamp" Value="2011-09-08T23:12:03Z"/>
       <Argument Name="ResponseGroup" Value="Large"/>
     </Arguments>
-    <RequestProcessingTime>0.0667890000000000</RequestProcessingTime>
+    <RequestProcessingTime>0.1608170000000000</RequestProcessingTime>
   </OperationRequest>
   <Items>
     <Request>
@@ -24,7 +24,6 @@
         <IdType>ASIN</IdType>
         <ItemId>B000003TA2</ItemId>
         <ItemId>B001ENOVP2</ItemId>
-        <ItemId>B0007ZIYWY</ItemId>
         <ResponseGroup>Large</ResponseGroup>
         <VariationPage>All</VariationPage>
       </ItemLookupRequest>
@@ -62,7 +61,7 @@
           <URL>http://www.amazon.com/gp/offer-listing/B000003TA2%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB000003TA2</URL>
         </ItemLink>
       </ItemLinks>
-      <SalesRank>17596</SalesRank>
+      <SalesRank>18691</SalesRank>
       <SmallImage>
         <URL>http://ecx.images-amazon.com/images/I/61J0lLR3U9L._SL75_.jpg</URL>
         <Height Units="pixels">75</Height>
@@ -154,22 +153,22 @@
       </ItemAttributes>
       <OfferSummary>
         <LowestNewPrice>
-          <Amount>424</Amount>
+          <Amount>419</Amount>
           <CurrencyCode>USD</CurrencyCode>
-          <FormattedPrice>$4.24</FormattedPrice>
+          <FormattedPrice>$4.19</FormattedPrice>
         </LowestNewPrice>
         <LowestUsedPrice>
-          <Amount>122</Amount>
+          <Amount>118</Amount>
           <CurrencyCode>USD</CurrencyCode>
-          <FormattedPrice>$1.22</FormattedPrice>
+          <FormattedPrice>$1.18</FormattedPrice>
         </LowestUsedPrice>
         <LowestCollectiblePrice>
           <Amount>1199</Amount>
           <CurrencyCode>USD</CurrencyCode>
           <FormattedPrice>$11.99</FormattedPrice>
         </LowestCollectiblePrice>
-        <TotalNew>44</TotalNew>
-        <TotalUsed>41</TotalUsed>
+        <TotalNew>43</TotalNew>
+        <TotalUsed>42</TotalUsed>
         <TotalCollectible>1</TotalCollectible>
         <TotalRefurbished>0</TotalRefurbished>
       </OfferSummary>
@@ -182,18 +181,18 @@
             <Condition>New</Condition>
           </OfferAttributes>
           <OfferListing>
-            <OfferListingId>zOi8ZB5QVF2TPohfCCfg5Tky5OtgB2IlIXcaN6jXVeo06A2SYnDMQTbuwR5YThOSFupLuzK0zosVIlXCbg9ehC5fHPMHAkKSWP%2BdrZsKZPk%3D</OfferListingId>
+            <OfferListingId>GESNpYYLc9tL0q9pjHo9rTRCmyaZaACNxWSyUKMPqx7S4jlPL6zUnPQja5oA4jUsQvMli4%2FmUch%2BNi1kL9I9lpJlcYNgSGCc5X4vICY4oaI%3D</OfferListingId>
             <Price>
-              <Amount>863</Amount>
+              <Amount>848</Amount>
               <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$8.63</FormattedPrice>
+              <FormattedPrice>$8.48</FormattedPrice>
             </Price>
             <AmountSaved>
-              <Amount>335</Amount>
+              <Amount>350</Amount>
               <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$3.35</FormattedPrice>
+              <FormattedPrice>$3.50</FormattedPrice>
             </AmountSaved>
-            <PercentageSaved>28</PercentageSaved>
+            <PercentageSaved>29</PercentageSaved>
             <Availability>Usually ships in 24 hours</Availability>
             <AvailabilityAttributes>
               <AvailabilityType>now</AvailabilityType>
@@ -205,7 +204,7 @@
         </Offer>
       </Offers>
       <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B000003TA2&amp;atag=stamped01-20&amp;exp=2011-09-09T04%3A38%3A36Z&amp;v=2&amp;sig=SUmDR204gJvw4JfWErRz6qagxlht4N9TDHfwumD1%2FhU%3D</IFrameURL>
+        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B000003TA2&amp;atag=stamped01-20&amp;exp=2011-09-09T23%3A12%3A03Z&amp;v=2&amp;sig=64pvDWS7tzKIqHeG0cXpNui4hhliRi9cLM4K6AWr0nk%3D</IFrameURL>
         <HasReviews>true</HasReviews>
       </CustomerReviews>
       <EditorialReviews>
@@ -462,7 +461,7 @@
           <URL>http://www.amazon.com/gp/offer-listing/B001ENOVP2%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB001ENOVP2</URL>
         </ItemLink>
       </ItemLinks>
-      <SalesRank>2786</SalesRank>
+      <SalesRank>3235</SalesRank>
       <SmallImage>
         <URL>http://ecx.images-amazon.com/images/I/51hVeP%2BumpL._SL75_.jpg</URL>
         <Height Units="pixels">75</Height>
@@ -809,7 +808,7 @@
           <CurrencyCode>USD</CurrencyCode>
           <FormattedPrice>$4.00</FormattedPrice>
         </LowestUsedPrice>
-        <TotalNew>15</TotalNew>
+        <TotalNew>14</TotalNew>
         <TotalUsed>15</TotalUsed>
         <TotalCollectible>0</TotalCollectible>
         <TotalRefurbished>0</TotalRefurbished>
@@ -823,18 +822,18 @@
             <Condition>New</Condition>
           </OfferAttributes>
           <OfferListing>
-            <OfferListingId>5vF3Ip9IPsPSq4oDsslf8xKPzBUA6Wia1rOV3wq5B6PrcXYiVjiDbEd4psNtBx3k92fzrYCxKDWH0lbpC6TIiztxzR8EXeMVKZe5VBIYCTOn1GUwgpfev3dValjEEbKd8oQXQJcbjuO7LQqrx6Ep9KD48tKLeg9W</OfferListingId>
+            <OfferListingId>i27q4khTETJjd4rSsDWqZEyRMbKahJkwaVxcfUI1l0YpOyEb66Ukfmi2LkodnPsuWe2oT1iSjaziGvDBeoh0AeuAL%2B%2FtV9sFZkFXFeKH7vMcBfvDbdF6FU6ZrQqj76dCzZVLk1eDjaekiwVK%2BRWpYZGle1UR%2BHFq</OfferListingId>
             <Price>
-              <Amount>727</Amount>
+              <Amount>709</Amount>
               <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$7.27</FormattedPrice>
+              <FormattedPrice>$7.09</FormattedPrice>
             </Price>
             <AmountSaved>
-              <Amount>1272</Amount>
+              <Amount>1290</Amount>
               <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$12.72</FormattedPrice>
+              <FormattedPrice>$12.90</FormattedPrice>
             </AmountSaved>
-            <PercentageSaved>64</PercentageSaved>
+            <PercentageSaved>65</PercentageSaved>
             <Availability>Usually ships in 24 hours</Availability>
             <AvailabilityAttributes>
               <AvailabilityType>now</AvailabilityType>
@@ -846,7 +845,7 @@
         </Offer>
       </Offers>
       <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B001ENOVP2&amp;atag=stamped01-20&amp;exp=2011-09-09T04%3A38%3A36Z&amp;v=2&amp;sig=emSknL4flAijvKL61ea3JIL8%2BiVOp0OLcs48YEqR%2BtQ%3D</IFrameURL>
+        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B001ENOVP2&amp;atag=stamped01-20&amp;exp=2011-09-09T23%3A12%3A03Z&amp;v=2&amp;sig=8SZnFKJNjPTUfYvMY1pf3tyk%2BsLLYWy9DpqUwHzlhFg%3D</IFrameURL>
         <HasReviews>true</HasReviews>
       </CustomerReviews>
       <EditorialReviews>
@@ -945,401 +944,6 @@
                 <BrowseNode>
                   <BrowseNodeId>229534</BrowseNodeId>
                   <Name>Software</Name>
-                </BrowseNode>
-              </Ancestors>
-            </BrowseNode>
-          </Ancestors>
-        </BrowseNode>
-      </BrowseNodes>
-    </Item>
-    <Item>
-      <ASIN>B0007ZIYWY</ASIN>
-      <DetailPageURL>http://www.amazon.com/Goo-Sonic-Youth/dp/B0007ZIYWY%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3DB0007ZIYWY</DetailPageURL>
-      <ItemLinks>
-        <ItemLink>
-          <Description>Technical Details</Description>
-          <URL>http://www.amazon.com/Goo-Sonic-Youth/dp/tech-data/B0007ZIYWY%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
-        </ItemLink>
-        <ItemLink>
-          <Description>Add To Baby Registry</Description>
-          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3DB0007ZIYWY%26SubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
-        </ItemLink>
-        <ItemLink>
-          <Description>Add To Wedding Registry</Description>
-          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3DB0007ZIYWY%26SubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
-        </ItemLink>
-        <ItemLink>
-          <Description>Add To Wishlist</Description>
-          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3DB0007ZIYWY%26SubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
-        </ItemLink>
-        <ItemLink>
-          <Description>Tell A Friend</Description>
-          <URL>http://www.amazon.com/gp/pdp/taf/B0007ZIYWY%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
-        </ItemLink>
-        <ItemLink>
-          <Description>All Customer Reviews</Description>
-          <URL>http://www.amazon.com/review/product/B0007ZIYWY%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
-        </ItemLink>
-        <ItemLink>
-          <Description>All Offers</Description>
-          <URL>http://www.amazon.com/gp/offer-listing/B0007ZIYWY%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</URL>
-        </ItemLink>
-      </ItemLinks>
-      <SalesRank>110985</SalesRank>
-      <SmallImage>
-        <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL75_.jpg</URL>
-        <Height Units="pixels">75</Height>
-        <Width Units="pixels">75</Width>
-      </SmallImage>
-      <MediumImage>
-        <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL160_.jpg</URL>
-        <Height Units="pixels">160</Height>
-        <Width Units="pixels">160</Width>
-      </MediumImage>
-      <LargeImage>
-        <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL.jpg</URL>
-        <Height Units="pixels">500</Height>
-        <Width Units="pixels">500</Width>
-      </LargeImage>
-      <ImageSets>
-        <ImageSet Category="primary">
-          <SwatchImage>
-            <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL30_.jpg</URL>
-            <Height Units="pixels">30</Height>
-            <Width Units="pixels">30</Width>
-          </SwatchImage>
-          <SmallImage>
-            <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL75_.jpg</URL>
-            <Height Units="pixels">75</Height>
-            <Width Units="pixels">75</Width>
-          </SmallImage>
-          <ThumbnailImage>
-            <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL75_.jpg</URL>
-            <Height Units="pixels">75</Height>
-            <Width Units="pixels">75</Width>
-          </ThumbnailImage>
-          <TinyImage>
-            <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL110_.jpg</URL>
-            <Height Units="pixels">110</Height>
-            <Width Units="pixels">110</Width>
-          </TinyImage>
-          <MediumImage>
-            <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL._SL160_.jpg</URL>
-            <Height Units="pixels">160</Height>
-            <Width Units="pixels">160</Width>
-          </MediumImage>
-          <LargeImage>
-            <URL>http://ecx.images-amazon.com/images/I/51sVBIaY4VL.jpg</URL>
-            <Height Units="pixels">500</Height>
-            <Width Units="pixels">500</Width>
-          </LargeImage>
-        </ImageSet>
-      </ImageSets>
-      <ItemAttributes>
-        <Artist>Sonic Youth</Artist>
-        <Binding>Audio CD</Binding>
-        <EAN>0602498604939</EAN>
-        <EANList>
-          <EANListElement>0602498604939</EANListElement>
-        </EANList>
-        <Format>Extra tracks</Format>
-        <Format>Original recording remastered</Format>
-        <Format>Deluxe Edition</Format>
-        <ItemDimensions>
-          <Weight Units="hundredths-pounds">36</Weight>
-        </ItemDimensions>
-        <Label>Geffen Records</Label>
-        <Languages>
-          <Language>
-            <Name>English</Name>
-            <Type>Original Language</Type>
-          </Language>
-        </Languages>
-        <ListPrice>
-          <Amount>2998</Amount>
-          <CurrencyCode>USD</CurrencyCode>
-          <FormattedPrice>$29.98</FormattedPrice>
-        </ListPrice>
-        <Manufacturer>Geffen Records</Manufacturer>
-        <NumberOfDiscs>2</NumberOfDiscs>
-        <PackageDimensions>
-          <Height Units="hundredths-inches">63</Height>
-          <Length Units="hundredths-inches">551</Length>
-          <Weight Units="hundredths-pounds">44</Weight>
-          <Width Units="hundredths-inches">496</Width>
-        </PackageDimensions>
-        <PackageQuantity>1</PackageQuantity>
-        <ProductGroup>Music</ProductGroup>
-        <ProductTypeName>ABIS_MUSIC</ProductTypeName>
-        <Publisher>Geffen Records</Publisher>
-        <ReleaseDate>2005-09-13</ReleaseDate>
-        <SKU>SELEX-201-8-181632</SKU>
-        <Studio>Geffen Records</Studio>
-        <Title>Goo</Title>
-        <UPC>602498604939</UPC>
-        <UPCList>
-          <UPCListElement>602498604939</UPCListElement>
-        </UPCList>
-      </ItemAttributes>
-      <OfferSummary>
-        <LowestNewPrice>
-          <Amount>1532</Amount>
-          <CurrencyCode>USD</CurrencyCode>
-          <FormattedPrice>$15.32</FormattedPrice>
-        </LowestNewPrice>
-        <LowestUsedPrice>
-          <Amount>572</Amount>
-          <CurrencyCode>USD</CurrencyCode>
-          <FormattedPrice>$5.72</FormattedPrice>
-        </LowestUsedPrice>
-        <TotalNew>35</TotalNew>
-        <TotalUsed>13</TotalUsed>
-        <TotalCollectible>0</TotalCollectible>
-        <TotalRefurbished>0</TotalRefurbished>
-      </OfferSummary>
-      <Offers>
-        <TotalOffers>1</TotalOffers>
-        <TotalOfferPages>1</TotalOfferPages>
-        <MoreOffersUrl>http://www.amazon.com/gp/offer-listing/B0007ZIYWY%3FSubscriptionId%3DAKIAIXLZZZT4DMTKZBDQ%26tag%3Dstamped01-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3DB0007ZIYWY</MoreOffersUrl>
-        <Offer>
-          <OfferAttributes>
-            <Condition>New</Condition>
-          </OfferAttributes>
-          <OfferListing>
-            <OfferListingId>437OcZm4gzP1zeOAlRNITSHzOWP4m6sbl%2FDysV2prh%2FENA%2BbiK7N0NxucWPv0BqgNG9ADHNTmoU5UVJDt2kxelpERYqId29aE403HsVyBZFxrVyydGAyxg%3D%3D</OfferListingId>
-            <Price>
-              <Amount>2427</Amount>
-              <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$24.27</FormattedPrice>
-            </Price>
-            <AmountSaved>
-              <Amount>571</Amount>
-              <CurrencyCode>USD</CurrencyCode>
-              <FormattedPrice>$5.71</FormattedPrice>
-            </AmountSaved>
-            <PercentageSaved>19</PercentageSaved>
-            <Availability>Usually ships in 24 hours</Availability>
-            <AvailabilityAttributes>
-              <AvailabilityType>now</AvailabilityType>
-              <MinimumHours>0</MinimumHours>
-              <MaximumHours>0</MaximumHours>
-            </AvailabilityAttributes>
-            <IsEligibleForSuperSaverShipping>1</IsEligibleForSuperSaverShipping>
-          </OfferListing>
-        </Offer>
-      </Offers>
-      <CustomerReviews>
-        <IFrameURL>http://www.amazon.com/reviews/iframe?akid=AKIAIXLZZZT4DMTKZBDQ&amp;alinkCode=xm2&amp;asin=B0007ZIYWY&amp;atag=stamped01-20&amp;exp=2011-09-09T04%3A38%3A36Z&amp;v=2&amp;sig=7kRPDY%2BuKbM5tOItsaF%2FJTnTi0nCamdWnkidyUzcdxU%3D</IFrameURL>
-        <HasReviews>true</HasReviews>
-      </CustomerReviews>
-      <EditorialReviews>
-        <EditorialReview>
-          <Source>Album Description</Source>
-          <Content>Sonic Youth's Goo, a landmark album in the history of alternative rock, receives the Deluxe Edition treatment with digital remastering and the addition of rarities and unreleased recordings.  The two-CD Goo - Deluxe Edition, expands the original 1990 album with outtakes, b-sides, rehearsal recordings, demos and the audio from a tongue-in-cheek promotion-only interview flexi disc.   Sonic Youth's eighth album, Goo was the band's first to receive major label distribution, and first to find a place on Billboard's Top 100 Albums chart.  Goo reached more ears than any earlier SY album, including those of Neil Young...who invited the band on tour with Crazy Horse.  Along with the Top 10 Modern Rock hit "Kool Thing," guesting Public Enemy's Chuck D, Disc One of Goo - Deluxe Edition presents "Tunic," "Disappearer," "Titanium Expose," "Dirty Boots," "Cinderella's Big Score," "My Friend Goo," "Mote," "Mary-Christ," "Mildred Pierce" and "Scooter + Jinx."  Added are two previously unreleased tracks, a vocal take of "Lee #2" and "Tuff Boyz," plus the rarities "That's All I Know (Right Now)" (a cover of the proto-punk Neon Boys song), a live version of "The Bedroom," and "Dr. Benway's House," the band's contribution to William Burroughs' Dead City Radio album. For Disc Two, previously unreleased instrumentals "Isaac" and "Can Song" join a cover of the Beach Boys' "I Know There's An Answer" recorded for the Smiles, Vibes And Harmony compilation and the promotion-only Goo interview flexi disc.  Also heard are 11 demos, highlighted by extended versions, a pre-Chuck D "Kool Thing" and near-nine-minute "Blow Job" (aka "Mildred Pierce"), actually one of the first SY songs ever written.  The demos were widely bootlegged before the band issued them via their fan club.  They are heard remixed and remastered for the first time on Goo - Deluxe Edition.</Content>
-          <IsLinkSuppressed>0</IsLinkSuppressed>
-        </EditorialReview>
-      </EditorialReviews>
-      <SimilarProducts>
-        <SimilarProduct>
-          <ASIN>B000083LQB</ASIN>
-          <Title>Dirty (Deluxe Edition)</Title>
-        </SimilarProduct>
-        <SimilarProduct>
-          <ASIN>B000003TAL</ASIN>
-          <Title>Daydream Nation</Title>
-        </SimilarProduct>
-        <SimilarProduct>
-          <ASIN>B000003TAJ</ASIN>
-          <Title>Sister</Title>
-        </SimilarProduct>
-        <SimilarProduct>
-          <ASIN>B000003TAH</ASIN>
-          <Title>Evol</Title>
-        </SimilarProduct>
-        <SimilarProduct>
-          <ASIN>B000003TAF</ASIN>
-          <Title>Bad Moon Rising</Title>
-        </SimilarProduct>
-      </SimilarProducts>
-      <Tracks>
-        <Disc Number="1">
-          <Track Number="1">Dirty Boots</Track>
-          <Track Number="2">Tunic (Song For Karen)</Track>
-          <Track Number="3">Mary-Christ</Track>
-          <Track Number="4">Kool Thing</Track>
-          <Track Number="5">Mote</Track>
-          <Track Number="6">My Friend Goo</Track>
-          <Track Number="7">Disappearer</Track>
-          <Track Number="8">Mildred Pierce</Track>
-          <Track Number="9">Cinderella's Big Score</Track>
-          <Track Number="10">Scooter + Jinx</Track>
-          <Track Number="11">Titanium Expose</Track>
-          <Track Number="12">Lee #2</Track>
-          <Track Number="13">That's All I Know (Right Now)</Track>
-          <Track Number="14">The Bedroom</Track>
-          <Track Number="15">Dr. Benway's House</Track>
-          <Track Number="16">Tuff Boyz</Track>
-        </Disc>
-        <Disc Number="2">
-          <Track Number="1">Tunic</Track>
-          <Track Number="2">Number One (Disappearer)</Track>
-          <Track Number="3">Titanium Expose</Track>
-          <Track Number="4">Dirty Boots</Track>
-          <Track Number="5">Corky (Cinderella's Big Score)</Track>
-          <Track Number="6">My Friend Goo</Track>
-          <Track Number="7">Bookstore (Mote)</Track>
-          <Track Number="8">Animals (Mary-Christ)</Track>
-          <Track Number="9">DV2 (Kool Thing)</Track>
-          <Track Number="10">Blowjob (Mildred Pierce)</Track>
-          <Track Number="11">Lee #2</Track>
-          <Track Number="12">I Know There's An Answer</Track>
-          <Track Number="13">Can Song</Track>
-          <Track Number="14">Isaac</Track>
-          <Track Number="15">Goo Interview Flexi</Track>
-        </Disc>
-      </Tracks>
-      <BrowseNodes>
-        <BrowseNode>
-          <BrowseNodeId>602072</BrowseNodeId>
-          <Name>American Alternative</Name>
-          <Ancestors>
-            <BrowseNode>
-              <BrowseNodeId>30</BrowseNodeId>
-              <Name>Alternative Rock</Name>
-              <Ancestors>
-                <BrowseNode>
-                  <BrowseNodeId>301668</BrowseNodeId>
-                  <Name>Styles</Name>
-                  <IsCategoryRoot>1</IsCategoryRoot>
-                  <Ancestors>
-                    <BrowseNode>
-                      <BrowseNodeId>5174</BrowseNodeId>
-                      <Name>Music</Name>
-                    </BrowseNode>
-                  </Ancestors>
-                </BrowseNode>
-              </Ancestors>
-            </BrowseNode>
-          </Ancestors>
-        </BrowseNode>
-        <BrowseNode>
-          <BrowseNodeId>468300</BrowseNodeId>
-          <Name>Indie &amp; Lo-Fi</Name>
-          <Ancestors>
-            <BrowseNode>
-              <BrowseNodeId>30</BrowseNodeId>
-              <Name>Alternative Rock</Name>
-              <Ancestors>
-                <BrowseNode>
-                  <BrowseNodeId>301668</BrowseNodeId>
-                  <Name>Styles</Name>
-                  <IsCategoryRoot>1</IsCategoryRoot>
-                  <Ancestors>
-                    <BrowseNode>
-                      <BrowseNodeId>5174</BrowseNodeId>
-                      <Name>Music</Name>
-                    </BrowseNode>
-                  </Ancestors>
-                </BrowseNode>
-              </Ancestors>
-            </BrowseNode>
-          </Ancestors>
-        </BrowseNode>
-        <BrowseNode>
-          <BrowseNodeId>37</BrowseNodeId>
-          <Name>Pop</Name>
-          <Children>
-            <BrowseNode>
-              <BrowseNodeId>465378</BrowseNodeId>
-              <Name>By Decade</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>602104</BrowseNodeId>
-              <Name>Adult Alternative</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>67167</BrowseNodeId>
-              <Name>Adult Contemporary</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>63704</BrowseNodeId>
-              <Name>Dance Pop</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>67171</BrowseNodeId>
-              <Name>Easy Listening</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>604222</BrowseNodeId>
-              <Name>Euro Pop</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>63852</BrowseNodeId>
-              <Name>Latin Pop</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>284031</BrowseNodeId>
-              <Name>Oldies</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>67176</BrowseNodeId>
-              <Name>Singer-Songwriters</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>67177</BrowseNodeId>
-              <Name>Soft Rock</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>302118</BrowseNodeId>
-              <Name>Teen Pop</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>301404011</BrowseNodeId>
-              <Name>Tributes</Name>
-            </BrowseNode>
-            <BrowseNode>
-              <BrowseNodeId>406646</BrowseNodeId>
-              <Name>Vocal Pop</Name>
-            </BrowseNode>
-          </Children>
-          <Ancestors>
-            <BrowseNode>
-              <BrowseNodeId>301668</BrowseNodeId>
-              <Name>Styles</Name>
-              <IsCategoryRoot>1</IsCategoryRoot>
-              <Ancestors>
-                <BrowseNode>
-                  <BrowseNodeId>5174</BrowseNodeId>
-                  <Name>Music</Name>
-                </BrowseNode>
-              </Ancestors>
-            </BrowseNode>
-          </Ancestors>
-        </BrowseNode>
-        <BrowseNode>
-          <BrowseNodeId>408264</BrowseNodeId>
-          <Name>Progressive Rock</Name>
-          <Ancestors>
-            <BrowseNode>
-              <BrowseNodeId>292809</BrowseNodeId>
-              <Name>Progressive</Name>
-              <Ancestors>
-                <BrowseNode>
-                  <BrowseNodeId>40</BrowseNodeId>
-                  <Name>Rock</Name>
-                  <Ancestors>
-                    <BrowseNode>
-                      <BrowseNodeId>301668</BrowseNodeId>
-                      <Name>Styles</Name>
-                      <IsCategoryRoot>1</IsCategoryRoot>
-                      <Ancestors>
-                        <BrowseNode>
-                          <BrowseNodeId>5174</BrowseNodeId>
-                          <Name>Music</Name>
-                        </BrowseNode>
-                      </Ancestors>
-                    </BrowseNode>
-                  </Ancestors>
                 </BrowseNode>
               </Ancestors>
             </BrowseNode>

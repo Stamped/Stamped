@@ -82,3 +82,27 @@ def remove(request):
     return transformOutput(stamp.exportSparse())
 
 
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def likesCreate(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampId(), request)
+
+    stamp       = stampedAPI.addLike(authUserId, schema.stamp_id)
+    stamp       = HTTPStamp().importSchema(stamp)
+    
+    return transformOutput(stamp.exportSparse())
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def likesRemove(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampId(), request)
+
+    stamp       = stampedAPI.removeLike(authUserId, schema.stamp_id)
+    stamp       = HTTPStamp().importSchema(stamp)
+    
+    return transformOutput(stamp.exportSparse())
+
+

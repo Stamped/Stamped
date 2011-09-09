@@ -131,12 +131,16 @@ class UserStatsSchema(Schema):
         self.num_faves          = SchemaElement(int)
         self.num_credits        = SchemaElement(int)
         self.num_credits_given  = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.num_likes_given    = SchemaElement(int)
 
 class StampStatsSchema(Schema):
     def setSchema(self):
         self.num_comments       = SchemaElement(int)
         self.num_todos          = SchemaElement(int)
         self.num_credit         = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.like_threshold_hit = SchemaElement(bool)
 
 
 # ########## #
@@ -191,6 +195,7 @@ class Stamp(Schema):
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
+        self.attributes         = StampAttributesSchema()
 
 class MentionSchema(Schema):
     def setSchema(self):
@@ -207,6 +212,11 @@ class CreditSchema(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
+
+class StampAttributesSchema(Schema):
+    def setSchema(self):
+        self.is_liked           = SchemaElement(bool)
+        self.is_fav             = SchemaElement(bool)
 
 
 # ######## #

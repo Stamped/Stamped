@@ -73,6 +73,8 @@ urlpatterns = patterns('',
     (r'v0/stamps/update_image.json',    'v0.functions.stamps.update_image'),
     (r'v0/stamps/show.json',            'v0.functions.stamps.show'),
     (r'v0/stamps/remove.json',          'v0.functions.stamps.remove'),
+    (r'v0/stamps/likes/create.json',    'v0.functions.stamps.likesCreate'),
+    (r'v0/stamps/likes/remove.json',    'v0.functions.stamps.likesRemove'),
 
     ### COMMENTS
     (r'v0/comments/create.json',        'v0.functions.comments.create'),

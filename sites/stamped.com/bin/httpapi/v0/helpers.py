@@ -171,11 +171,13 @@ def parseFileUpload(schema, request, fileName='image'):
         if fileName in request.FILES:
             f = request.FILES[fileName]
             max_size = 1048576: # 1 mb in bytes
+            
             if f.size > max_size:
-                raise Exception("Uploaded file is too large (max size %d)" % max_size)
+                msg = "Uploaded file is too large (%s) (max size is %d)" % (f.size, max_size)
+                logs.warning(msg)
+                raise Exception(msg)
             
             data[fileName] = f.read()
-
             logs.debug("Added file: %s" % fileName)
         
         data.pop('oauth_token', None)
@@ -191,7 +193,6 @@ def parseFileUpload(schema, request, fileName='image'):
         
         logs.debug("Parsed request data")
         return schema
-
     except Exception as e:
         msg = "Unable to parse form (%s)" % e
         logs.warning(msg)
@@ -199,12 +200,15 @@ def parseFileUpload(schema, request, fileName='image'):
         
         raise StampedHTTPError("bad_request", 400)
 
-
 def transformOutput(value, **kwargs):
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
+    
     output_json = json.dumps(value, sort_keys=True)
     output = HttpResponse(output_json, **kwargs)
-    logs.debug("Transform output: \"%s\"" % output_json)
+    
+    pretty_output = json.dumps(value, sort_keys=True, indent=2)
+    logs.debug("Transform output: \"%s\"" % pretty_output)
+    
     return output
 
