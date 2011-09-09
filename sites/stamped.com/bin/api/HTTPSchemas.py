@@ -187,6 +187,8 @@ class HTTPUser(Schema):
             self.num_faves          = stats.pop('num_faves', 0)
             self.num_credits        = stats.pop('num_credits', 0)
             self.num_credits_given  = stats.pop('num_credits_given', 0)
+            self.num_likes          = stats.pop('num_credits', 0)
+            self.num_likes_given    = stats.pop('num_credits_given', 0)
         else:
             raise NotImplementedError
         return self
