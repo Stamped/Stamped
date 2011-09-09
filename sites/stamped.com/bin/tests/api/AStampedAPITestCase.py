@@ -23,11 +23,11 @@ class StampedAPIURLOpener(urllib.FancyURLopener):
 
 class AStampedAPITestCase(AStampedTestCase):
     
-    # _baseurl = "http://0.0.0.0:5000/api/v1"
-    _baseurl = "http://localhost:18000/v0"
+    #_baseurl = "http://0.0.0.0:5000/api/v1"
+    #_baseurl = "http://localhost:18000/v0"
     # _baseurl = "http://localhost:8080/v0"
-    # _baseurl = "https://dev.stamped.com/v0"
-    # _baseurl = "http://dev.stamped.com:5000/v0"
+    _baseurl = "https://dev.stamped.com/v0"
+    #_baseurl = "http://dev.stamped.com:5000/v0"
     
     _opener = StampedAPIURLOpener()
     client_auth = {
@@ -97,8 +97,9 @@ class AStampedAPITestCase(AStampedTestCase):
             lines.append(data)
         lines.append('--' + BOUNDARY + '--')
         lines.append('')  # blank line
+        
         data = CRLF.join(lines)
-
+        
         headers = {
             'Content-Length': len(data), 
             'Content-Type': 'multipart/form-data; boundary=%s' % BOUNDARY
@@ -113,7 +114,7 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertLength(key, length)
     
     ### HELPER FUNCTIONS
-    def createAccount(self, name='UserA'):
+    def createAccount(self, name='TestUser'):
         global _test_case, _accounts
         _test_case = self
         

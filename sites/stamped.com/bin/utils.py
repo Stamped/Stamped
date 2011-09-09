@@ -315,7 +315,8 @@ def getFile(url, opener=None):
             data = response.read()
             break
         except urllib2.HTTPError, e:
-            #log("'%s' fetching url '%s'" % (str(e), url))
+            log("'%s' fetching url '%s'" % (str(e), url))
+            printException()
             
             # reraise the exception if the request resulted in an HTTP client 4xx error code, 
             # since it was a problem with the url / headers and retrying most likely won't 
@@ -327,8 +328,9 @@ def getFile(url, opener=None):
             # so propagate the error and return.
             if delay > maxDelay:
                 raise
-        except (ValueError, IOError, httplib.BadStatusLine):
-            #log("Error '%s' fetching url '%s'" % (str(e), url))
+        except (ValueError, IOError, httplib.BadStatusLine) as e:
+            log("Error '%s' fetching url '%s'" % (str(e), url))
+            printException()
             
             # if delay is already too large, request will likely not complete successfully, 
             # so propagate the error and return.

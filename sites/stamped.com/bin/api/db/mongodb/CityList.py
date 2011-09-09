@@ -1029,6 +1029,7 @@ popular_cities = {
         'state' : 'Wyoming', 
     }, 
     'Chicago' : {
+        'synonyms' : [ 'chi', ], 
         'population' : 2878948, 
         'lat' : 41.84, 
         'lng' : -87.68, 
@@ -4811,7 +4812,7 @@ popular_cities = {
         'state' : 'Florida', 
     }, 
     'San Francisco' : {
-        'synonyms' : [ 'bay area', 'the bay area' ], 
+        'synonyms' : [ 'sf', 's.f.', 'bay area', 'the bay area' ], 
         'population' : 817411, 
         'lat' : 37.77, 
         'lng' : -122.45, 
@@ -4977,12 +4978,6 @@ popular_cities = {
         'population' : 614214, 
         'lat' : 47.62, 
         'lng' : -122.35, 
-        'state' : 'Washington', 
-    }, 
-    'Seattle Hill-Silver Firs' : {
-        'population' : 48033, 
-        'lat' : 47.88, 
-        'lng' : -122.18, 
         'state' : 'Washington', 
     }, 
     'Severn' : {

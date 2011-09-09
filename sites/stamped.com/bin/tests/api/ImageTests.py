@@ -63,7 +63,10 @@ class ImageDBTests(AImageTest):
             image2 = self.imageDB.getImage(f)
             
             self.assertEqual(image.size, image2.size)
-            self.assertEqual(image.mode, image2.mode)
+            # note: we convert all images to JPEG upon upload, which'll 
+            # convert RGBA to RGB, so the modes won't necessarily be 
+            # equal.
+            #self.assertEqual(image.mode, image2.mode)
     
     def tearDown(self):
         keys = self.imageDB.bucket.get_all_keys()
@@ -81,10 +84,10 @@ class StampedAPIImageTests(AImageTest):
             temp = 'temp.jpg'
             image.save(temp, optimize=True)
             
-            f = open(temp, 'rb')
+            f = open(temp, 'r')
             image = f.read()
             # Send data ascii-encoded
-            image = binascii.b2a_qp(image)
+            #image = binascii.b2a_qp(image)
             f.close()
 
             path    = "account/update_profile_image.json"

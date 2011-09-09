@@ -39,10 +39,10 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         # determine if it's up-to-date s.t. we won't recalculate it if it'd 
         # be unnecessary.
         try:
-            row0  = self.execute('SELECT * FROM %s' % (self.table, ), error_okay=True).fetchone()
+            row0  = self.execute('SELECT * FROM %s LIMIT 1' % (self.table, ), error_okay=True).fetchone()
             count = self.execute('SELECT COUNT(*) FROM %s' % (self.table, ), error_okay=True).fetchone()[0]
             
-            if row0 is None or count is None:
+            if row0 is None or count is None or count <= 0:
                 stale = True
             elif len(row0) != len(dict(table_format.cols)):
                 stale = True
@@ -70,7 +70,7 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             cols  = []
             
             # currently disabling primary keys for most tables
-            found_primary = True #(len(table_format.primary_keys) != 1)
+            found_primary = False #(len(table_format.primary_keys) != 1)
             
             for col in table_format.cols:
                 cols.append('')
@@ -86,11 +86,12 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                 
                 col2  = table_format.cols[col]
                 col_type = col2['type']
-                col_type = col_type.lower()
+                if col_type == 'DATETIME':
+                    col_type = 'TIMESTAMP'
                 
                 text  = "%s %s%s" % (col, col_type, primary)
                 index = col2['index']
-                cols[index]  = text
+                cols[index] = text
             
             args = string.joinfields(cols, ', ')
             self.execute("DROP TABLE %s" % (self.table, ), error_okay=True)
@@ -106,8 +107,10 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                 count += 1
                 
                 if numLines > 100 and (count % (numLines / 100)) == 0:
-                    utils.log("[%s] done parsing %s" % \
-                        (self, utils.getStatusStr(count, numLines)))
+                    num_rows = self.execute('SELECT COUNT(*) FROM %s' % (self.table, )).fetchone()[0]
+                    
+                    utils.log("[%s] done parsing %s -- %d rows" % \
+                        (self, utils.getStatusStr(count, numLines), num_rows))
             
             self._try_flush_buffer(force=True)
             
@@ -131,6 +134,9 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         return self._parseRow(ret, row)
     
     def _parseRow(self, row, row_list):
+        #pprint(dict(row))
+        #print row_list
+        
         try:
             retain_result = self._filter(row)
         except ValueError:
@@ -147,13 +153,29 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             if row_list[i] == '':
                 row_list[i] = None
         
-        self._buffer.append(row_list)
+        self._buffer.append((row, row_list))
         self._try_flush_buffer()
     
     def _try_flush_buffer(self, force=False):
         if not force and len(self._buffer) < self._buffer_threshold:
             return
         
+        for k in self._buffer:
+            row, row_list = k
+            
+            try:
+                self.db.execute(self._cmd, row_list)
+            except psycopg2.Error, e:
+                utils.log(e.pgerror)
+                utils.log(self._cmd)
+                
+                utils.log(row)
+                utils.log(row_list)
+                
+                self.conn.rollback()
+                raise
+        
+        """
         try:
             self.db.executemany(self._cmd, self._buffer)
         except psycopg2.Error, e:
@@ -161,20 +183,10 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             utils.log(self._cmd)
             self.conn.rollback()
             raise
-        
-        """
-        for row in self._buffer:
-            try:
-                self.db.execute(self._cmd, row)
-            except psycopg2.Error, e:
-                utils.log(e.pgerror)
-                utils.log(self._cmd)
-                utils.log(row)
-                raise
         """
         
-        self.conn.commit()
         self._buffer = []
+        self.conn.commit()
 
 class AppleEPFArtistRelationalDB(AppleEPFRelationalDB):
     
@@ -215,7 +227,7 @@ class AppleEPFArtistRelationalDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Artists", 
                                       filename="artist", 
-                                      primary="artist_id")
+                                      index="artist_id")
         
         artist_type = AppleEPFArtistType()
         artist_type.start()
@@ -245,8 +257,8 @@ class AppleEPFArtistRelationalDB(AppleEPFRelationalDB):
         self.artist_type_id = int(artist_type.get_row('name', 'Artist')['artist_type_id'])
     
     def _filter(self, row):
-        artist_type_id = row.artist_type_id
-        is_actual_artist = row.is_actual_artist
+        artist_type_id   = int(row.artist_type_id)
+        is_actual_artist = int(row.is_actual_artist)
         
         """
         Blacklist:
@@ -327,6 +339,18 @@ class AppleEPFSongRelationalDB(AppleEPFRelationalDB):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Songs", 
                                       filename="song", 
                                       index="song_id")
+    
+    def _filter(self, row):
+        if row.name is None or len(row.name) <= 0:
+            return False
+        
+        try:
+            # ensure that invalid rows are filtered out
+            song_id = int(row.song_id)
+        except ValueError:
+            return False
+        
+        return True
 
 class AppleEPFAlbumRelationalDB(AppleEPFRelationalDB):
     
@@ -358,13 +382,13 @@ class AppleEPFAlbumRelationalDB(AppleEPFRelationalDB):
         self.music_type_id = int(media_type.get_row('name', 'Music')['media_type_id'])
     
     def _filter(self, row):
-        collection_type_id = row.collection_type_id
+        collection_type_id = int(row.collection_type_id)
         
         # only retain album collections
         if collection_type_id != self.album_type_id:
             return False
         
-        media_type_id = row.media_type_id
+        media_type_id = (row.media_type_id)
         
         # only retain music collections
         if media_type_id != self.music_type_id:
@@ -375,7 +399,7 @@ class AppleEPFAlbumRelationalDB(AppleEPFRelationalDB):
             if s in name:
                 return False
         
-        collection_id = row.collection_id
+        collection_id = int(row.collection_id)
         
         # only retain albums which are available for purchase in the US storefront
         price_info = self.album_prices.get_row('collection_id', collection_id)
@@ -404,13 +428,13 @@ class AppleEPFVideoDump(AppleEPFRelationalDB):
         self.movie_type_id = int(media_type.get_row('name', 'Movies')['media_type_id'])
     
     def _filter(self, row):
-        media_type_id = row.media_type_id
+        media_type_id = int(row.media_type_id)
         
         # only keep videos which are movies
         if media_type_id != self.movie_type_id:
             return False
         
-        video_id = row.video_id
+        video_id = (row.video_id)
         
         # only retain videos which are available for purchase in the US storefront
         price_info = self.video_prices.get_row('video_id', video_id)
@@ -454,7 +478,7 @@ class AppleEPFVideoPriceRelationalDB(AppleEPFRelationalDB):
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
     
     def _filter(self, row):
-        storefront_id = row.storefront_id
+        storefront_id = int(row.storefront_id)
         
         # only retain us prices
         return storefront_id == self.us_storefront_id
@@ -471,7 +495,7 @@ class AppleEPFAlbumPriceRelationalDB(AppleEPFRelationalDB):
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
     
     def _filter(self, row):
-        storefront_id = row.storefront_id
+        storefront_id = int(row.storefront_id)
         
         # only retain us prices
         return storefront_id == self.us_storefront_id
@@ -505,11 +529,11 @@ class AppleEPFArtistsToAlbumsRelationalDB(AppleEPFRelationalDB):
     
     def _filter(self, row):
         #pprint(row)
-        #is_primary_artist = row.is_primary_artist
+        #is_primary_artist = int(row.is_primary_artist)
         #if not is_primary_artist:
         #    return False
         
-        #role_id = row.role_id
+        #role_id = int(row.role_id)
         #if role_id not in self.role_ids:
         #    return False
         
@@ -533,7 +557,7 @@ class AppleEPFAlbumPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
     
     def _filter(self, row):
-        storefront_id = row.storefront_id
+        storefront_id = int(row.storefront_id)
         
         # only retain us popularity metrics
         return storefront_id == self.us_storefront_id
@@ -550,7 +574,7 @@ class AppleEPFSongPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
     
     def _filter(self, row):
-        storefront_id = row.storefront_id
+        storefront_id = int(row.storefront_id)
         
         # only retain us popularity metrics
         return storefront_id == self.us_storefront_id

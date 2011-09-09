@@ -170,25 +170,26 @@ def parseFileUpload(schema, request, fileName='image'):
         # Extract file
         if fileName in request.FILES:
             f = request.FILES[fileName]
-            if f.size > 1048576: # 1 mb in bytes
-                raise Exception
+            max_size = 1048576: # 1 mb in bytes
+            if f.size > max_size:
+                raise Exception("Uploaded file is too large (max size %d)" % max_size)
+            
             data[fileName] = f.read()
 
             logs.debug("Added file: %s" % fileName)
-    
+        
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
-    
+        
         if schema == None:
             if len(data) > 0:
                 raise
             return
         
         schema.importData(data)
-
+        
         logs.debug("Parsed request data")
-
         return schema
 
     except Exception as e:
