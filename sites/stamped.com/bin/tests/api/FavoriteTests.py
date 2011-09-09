@@ -58,7 +58,10 @@ class StampedAPIFavoritesAlreadyComplete(StampedAPIFavoriteTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 2)
-        self.assertTrue(result[0]['complete'])
+        if result[0]['entity']['entity_id'] == self.entityB['entity_id']:
+            self.assertTrue(result[0]['complete'])
+        else:
+            self.assertTrue(result[1]['complete'])
 
         self.deleteFavorite(self.tokenB, self.entityB['entity_id'])
         self.deleteStamp(self.tokenB, self.stampB['stamp_id'])

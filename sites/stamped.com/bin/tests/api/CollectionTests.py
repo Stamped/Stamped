@@ -42,35 +42,35 @@ class StampedAPICollectionTest(AStampedAPITestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
-# class StampedAPICollectionsShow(StampedAPICollectionTest):
-#     def test_inbox(self):
-#         path = "collections/inbox.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+class StampedAPICollectionsShow(StampedAPICollectionTest):
+    def test_inbox(self):
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
-#     def test_user_screen_name(self):
-#         path = "collections/user.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "screen_name": self.userA['screen_name']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+    def test_user_screen_name(self):
+        path = "collections/user.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "screen_name": self.userA['screen_name']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
-#     def test_user_user_id(self):
-#         path = "collections/user.json"
-#         data = { 
-#             "oauth_token": self.tokenB['access_token'],
-#             "user_id": self.userA['user_id']
-#         }
-#         result = self.handleGET(path, data)
-#         self.assertEqual(len(result), 3)
-#         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+    def test_user_user_id(self):
+        path = "collections/user.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "user_id": self.userA['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
 
 class StampedAPICollectionsQuality(StampedAPICollectionTest):
     def test_show(self):
@@ -121,6 +121,69 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
         self.deleteComment(self.tokenA, self.commentI['comment_id'])
         self.deleteComment(self.tokenA, self.commentJ['comment_id'])
         self.deleteComment(self.tokenA, self.commentK['comment_id'])
+
+
+class StampedAPICollectionsActions(StampedAPICollectionTest):
+    def test_like(self):
+        path = "stamps/likes/create.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+            "stamp_id": self.stampA['stamp_id']
+        }
+        result = self.handlePOST(path, data)
+
+        # User B should have "is_liked=True" 
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        for stamp in result:
+            if stamp['stamp_id'] == self.stampA['stamp_id']:
+                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                self.assertTrue(stamp['is_liked'])
+
+        # User A should not have "is_liked"
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        for stamp in result:
+            if stamp['stamp_id'] == self.stampA['stamp_id']:
+                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                self.assertTrue('is_liked' not in stamp)
+
+    def test_fav(self):
+        favorite = self.createFavorite(self.tokenB, self.entityA['entity_id'])
+
+        # User B should have "is_fav=True" 
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        for stamp in result:
+            if stamp['stamp_id'] == self.stampA['stamp_id']:
+                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                self.assertTrue(stamp['is_fav'])
+
+        # User A should not have "is_fav"
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 3)
+        for stamp in result:
+            if stamp['stamp_id'] == self.stampA['stamp_id']:
+                self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
+                self.assertTrue('is_fav' not in stamp)
+
+        self.deleteFavorite(self.tokenB, self.entityA['entity_id'])
 
 if __name__ == '__main__':
     main()

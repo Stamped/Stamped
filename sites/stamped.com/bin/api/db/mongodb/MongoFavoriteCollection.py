@@ -11,7 +11,7 @@ from datetime import datetime
 from utils import lazyProperty
 
 from AMongoCollection import AMongoCollection
-from MongoUserFavoritesCollection import MongoUserFavoritesCollection
+from MongoUserFavEntitiesCollection import MongoUserFavEntitiesCollection
 from AFavoriteDB import AFavoriteDB
 
 from Schemas import *
@@ -25,15 +25,15 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     ### PUBLIC
     
     @lazyProperty
-    def user_favorites_collection(self):
-        return MongoUserFavoritesCollection()
+    def user_fav_entities_collection(self):
+        return MongoUserFavEntitiesCollection()
     
     def addFavorite(self, favorite):
         favorite = self._addObject(favorite)
         
-        # Add link to favorite
-        self.user_favorites_collection.addUserFavorite(favorite.user_id, \
-                                                       favorite.favorite_id)
+        # Add links to favorite
+        self.user_fav_entities_collection.addUserFavoriteEntity( \
+            favorite.user_id, favorite.entity.entity_id)
         
         return favorite
     
@@ -41,6 +41,10 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
         try:
             self._collection.remove({'entity.entity_id': entityId, \
                                         'user_id': userId})
+        
+            # Remove links to favorite
+            self.user_fav_entities_collection.addUserFavoriteEntity( \
+                userId, entityId)
         except:
             logs.warning("Cannot remove document")
             raise Exception
@@ -56,33 +60,42 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
             raise Exception
     
     def getFavorites(self, userId, **kwargs):
-        params = {
-            'since':    kwargs.pop('since', None),
-            'before':   kwargs.pop('before', None), 
-            'limit':    kwargs.pop('limit', 20),
-            'sort':     'timestamp.created',
-        }
+        since       = kwargs.pop('since', None)
+        before      = kwargs.pop('before', None)
+        sort        = kwargs.pop('sort', None)
+        limit       = kwargs.pop('limit', 0)
+
+        ### TODO: Make sure this is indexed
+        params = {'user_id': userId}
         
-        favoriteIds = self.user_favorites_collection.getUserFavoriteIds(userId)
+        if since != None and before != None:
+            params['timestamp.created'] = {'$gte': since, '$lte': before}
+        elif since != None:
+            params['timestamp.created'] = {'$gte': since}
+        elif before != None:
+            params['timestamp.created'] = {'$lte': before}
         
-        documentIds = []
-        for favoriteId in favoriteIds:
-            documentIds.append(self._getObjectIdFromString(favoriteId))
-        
-        # Get stamps
-        documents = self._getMongoDocumentsFromIds(documentIds, **params)
+        if sort != None:
+            documents = self._collection.find(params).sort(sort, \
+                pymongo.DESCENDING).limit(limit)
+        else:
+            documents = self._collection.find(params).limit(limit)
         
         favorites = []
         for document in documents:
             favorites.append(self._convertFromMongo(document))
         
         return favorites
+
+    def getFavoriteEntityIds(self, userId):
+        return self.user_fav_entities_collection.getUserFavoriteEntities(userId)
     
     def completeFavorite(self, entityId, userId, complete=True):
         try:
             self._collection.update(
                 {'entity.entity_id': entityId, 'user_id': userId},
-                {'$set': {'complete': complete}}
+                {'$set': {'complete': complete}},
+                safe=True
             )
         except:
             logs.warning("Cannot complete favorite")

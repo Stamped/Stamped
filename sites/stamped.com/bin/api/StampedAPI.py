@@ -699,12 +699,11 @@ class StampedAPI(AStampedAPI):
             for user in users:
                 userIds[user.user_id] = user.exportSchema(UserMini())
 
-        # Favorites
-        # favorites = self._favoriteDB.getFavorites(authUserId)
-        ### TODO: Do this efficiently
-
-        # Likes
         if authUserId:
+            # Favorites
+            favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
+
+            # Likes
             likes = self._stampDB.getUserLikes(authUserId)
 
         # Add user objects to stamps
@@ -727,8 +726,12 @@ class StampedAPI(AStampedAPI):
                     commentingUser = userIds[stamp.comment_preview[i].user_id]
                     stamp.comment_preview[i].user = commentingUser
 
-            # Mark as liked
             if authUserId:
+                # Mark as favorited
+                if stamp.entity_id in favorites:
+                    stamp.is_fav = True
+
+                # Mark as liked
                 if stamp.stamp_id in likes:
                     stamp.is_liked = True
 
