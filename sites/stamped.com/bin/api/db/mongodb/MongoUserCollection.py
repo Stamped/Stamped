@@ -100,6 +100,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         for email in emails:
             queryEmails.append(str(email).lower())
 
+        ### TODO: Add Index
         data = self._collection.find({"email": {"$in": queryEmails}}).limit(limit)
             
         result = []
@@ -112,7 +113,19 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         for number in phone:
             queryPhone.append(int(number))
 
+        ### TODO: Add Index
         data = self._collection.find({"phone": {"$in": queryPhone}}).limit(limit)
+            
+        result = []
+        for item in data:
+            result.append(self._convertFromMongo(item))
+        return result
+
+    def findUsersByTwitter(self, twitterIds, limit=0): 
+        ### TODO: Add Index
+        data = self._collection.find(
+            {"linked_accounts.twitter.twitter_id": {"$in": twitterIds}}
+        ).limit(limit)
             
         result = []
         for item in data:

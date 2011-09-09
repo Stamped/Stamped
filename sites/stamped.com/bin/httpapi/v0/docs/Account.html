@@ -544,26 +544,30 @@ client_id=iPhoneApp&amp;client_secret=1234567890&amp;login=kevin
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getaccountverify_credentials">GET account/verify_credentials</h2>
+<h2 id="postaccountlinked_accounts">POST account/linked_accounts</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Checks if the supplied credentials are valid.</p>
+<p>Store identifying properties from linked third-party accounts (e.g. Twitter, Facebook, etc.).</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
 <li>OAuth Token Required</li>
-<li><strong>NOTE</strong>: This function is not yet supported.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><em>None</em></p>
+<p><strong>twitter_id</strong> <em>optional</em>
+The user&#8217;s twitter id.</p>
+
+<p><strong>twitter_screen_name</strong> <em>optional</em>
+The user&#8217;s twitter screen_name.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/account/verify_credentials.json
+<pre><code>POST https://api.stamped.com/v0/account/linked_accounts.json
+oauth_token=1234567890123456789012&amp;twitter_id=1234567890&amp;twitter_screen_name=abcd
 </code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>

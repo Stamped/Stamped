@@ -176,6 +176,31 @@ class StampedAPIUsersFindEmail(StampedAPIUserTest):
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
 
+
+class StampedAPIUsersFindTwitter(StampedAPIUserTest):
+    def test_find_by_twitter(self):
+        path = "account/linked_accounts.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "twitter_id": '1234567890',
+        }
+        result = self.handlePOST(path, data)
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "twitter_id": '0987654321',
+        }
+        result = self.handlePOST(path, data)
+
+        path = "users/find/twitter.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": "1234567890,0987654321"
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+
 if __name__ == '__main__':
     main()
 

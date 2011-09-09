@@ -150,6 +150,19 @@ class HTTPAccountCheck(Schema):
     def setSchema(self):
         self.login              = SchemaElement(basestring, required=True)
 
+class HTTPLinkedAccounts(Schema):
+    def setSchema(self):
+        self.twitter_id         = SchemaElement(basestring)
+        self.twitter_screen_name= SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'LinkedAccounts':
+            schema.twitter_id           = self.twitter_id
+            schema.twitter_screen_name  = self.twitter_screen_name
+        else:
+            raise NotImplementedError
+        return schema
+
 # ##### #
 # Users #
 # ##### #

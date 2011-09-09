@@ -494,6 +494,67 @@ oauth_token=1234567890123456789012&amp;q=1235551111,1235551112
 ]
 </code></pre>
 
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="getusersfindtwitter">GET users/find/twitter</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Match and return detailed information for up to 100 users based on their twitter id.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>q</strong> <em>required</em>
+The url-encoded list of twitter ids. Multiple values should be separated by commas. Each id must be a valid integer.</p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/v0/users/find/email.json
+oauth_token=1234567890123456789012&amp;q=6253282,783214
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>[
+    {
+        &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+        &quot;name&quot;: &quot;Kevin Palms&quot;,
+        &quot;screen_name&quot;: &quot;kevin&quot;,
+        &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
+        &quot;color_primary&quot;: &quot;333333&quot;,
+        &quot;color_secondary&quot;: &quot;999999&quot;,
+        &quot;privacy&quot;: false,
+        &quot;num_stamps&quot;: 0,
+        &quot;num_friends&quot;: 0,
+        &quot;num_followers&quot;: 0,
+        &quot;num_faves&quot;: 0,
+        &quot;num_credits&quot;: 0,
+        &quot;num_credits_given&quot;: 0
+    },
+    {
+        &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+        &quot;name&quot;: &quot;Robby Stein&quot;,
+        &quot;screen_name&quot;: &quot;robby&quot;,
+        &quot;bio&quot;: &quot;Former product manager at Google. Current awesomeness at stealth-mode startup.&quot;,
+        &quot;color_primary&quot;: &quot;A0EE33&quot;,
+        &quot;color_secondary&quot;: &quot;BBBBFF&quot;,
+        &quot;privacy&quot;: false,
+        &quot;num_stamps&quot;: 0,
+        &quot;num_friends&quot;: 0,
+        &quot;num_followers&quot;: 0,
+        &quot;num_faves&quot;: 0,
+        &quot;num_credits&quot;: 0,
+        &quot;num_credits_given&quot;: 0
+    }
+]
+</code></pre>
+
     </div>
 </body>
 </html>

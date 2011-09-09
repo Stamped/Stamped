@@ -69,3 +69,16 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         document = self._collection.find_one({"screen_name_lower": screenName})
         return self._convertFromMongo(document)
 
+    def updateLinkedAccounts(self, userId, data):
+        fields = {}
+        if 'twitter_id' in data:
+            fields['linked_accounts.twitter.twitter_id'] = data['twitter_id']
+        if 'twitter_screen_name' in data:
+            fields['linked_accounts.twitter.twitter_screen_name'] =\
+                data['twitter_screen_name']
+        
+        if len(fields) > 0:
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(userId)},
+                {'$set': fields}
+            )

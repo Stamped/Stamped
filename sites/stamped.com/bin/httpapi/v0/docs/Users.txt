@@ -260,3 +260,56 @@ The url-encoded list of phone numbers. Multiple values should be separated by co
 	]
 
 
+------------------------------------------------------------------------------
+## GET users/find/twitter ##
+
+### Description ###
+Match and return detailed information for up to 100 users based on their twitter id.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**q** _required_
+The url-encoded list of twitter ids. Multiple values should be separated by commas. Each id must be a valid integer.
+
+### Sample Request ###
+	GET https://api.stamped.com/v0/users/find/email.json
+	oauth_token=1234567890123456789012&q=6253282,783214
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"name": "Kevin Palms",
+			"screen_name": "kevin",
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		},
+		{
+			"user_id": "4e226fcd4e61754161000007",
+			"name": "Robby Stein",
+			"screen_name": "robby",
+			"bio": "Former product manager at Google. Current awesomeness at stealth-mode startup.",
+			"color_primary": "A0EE33",
+			"color_secondary": "BBBBFF",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		}
+	]
+
+

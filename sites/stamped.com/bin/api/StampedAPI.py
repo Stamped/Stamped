@@ -133,11 +133,24 @@ class StampedAPI(AStampedAPI):
         self._inviteDB.join(account.email)
         
         return account
+    
+    def removeAccount(self, authUserId):
 
+        ### TODO: Remove all activity, stamps, entities, images, etc. for user
+        ### TODO: Verify w/ password?
+
+        account = self._accountDB.getAccount(authUserId)
+        self._accountDB.removeAccount(authUserId)
+
+        # Remove email address from invite list
+        self._inviteDB.remove(account.email)
+
+        return account
 
     def updateAccountSettings(self, authUserId, data):
         
         ### TODO: Reexamine how updates are done
+        ### TODO: Verify that email address is unique, confirm it
 
         account = self._accountDB.getAccount(authUserId)
 
@@ -146,6 +159,28 @@ class StampedAPI(AStampedAPI):
             if k == 'password':
                 v = convertPasswordForStorage(v)
             account[k] = v
+        
+        # Validate Screen Name
+        account.screen_name = account.screen_name.strip()
+        if not re.match("^[\w-]+$", account.screen_name) \
+            or len(account.screen_name) < 1 \
+            or len(account.screen_name) > 32:
+            msg = "Invalid format for screen name"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Check blacklist
+        if account.screen_name.lower() in Blacklist.screen_names:
+            msg = "Blacklisted screen name"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Validate email address
+        account.email = str(account.email).lower().strip()
+        if not utils.validate_email(account.email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
 
         self._accountDB.updateAccount(account)
 
@@ -188,41 +223,37 @@ class StampedAPI(AStampedAPI):
         self._imageDB.addProfileImage(authUserId, image)
         
         return True
-    
-    def removeAccount(self, authUserId):
-
-        ### TODO: Remove all activity, stamps, entities, images, etc. for user
-        ### TODO: Verify w/ password?
-
-        account = self._accountDB.getAccount(authUserId)
-        self._accountDB.removeAccount(authUserId)
-
-        # Remove email address from invite list
-        self._inviteDB.remove(account.email)
-
-        return account
 
     def checkAccount(self, login):
+        valid = False
         try:
             # Email
             if utils.validate_email(login):
+                valid = True
                 user = self._accountDB.getAccountByEmail(login)
             # Screen Name
             elif utils.validate_screen_name(login):
                 # Check blacklist
-                if login.lower() in Blacklist.screen_names:
-                    raise
-                user = self._accountDB.getAccountByScreenName(login)
+                if login.lower() not in Blacklist.screen_names:
+                    valid = True
+                    user = self._accountDB.getAccountByScreenName(login)
             else:
                 raise
             return user
         except:
-            msg = "Login info does not exist"
-            logs.debug(msg)
-            raise
-    
-    def verifyAccountCredentials(self, data, auth):
-        raise NotImplementedError
+            if valid == True:
+                msg = "Login info does not exist"
+                logs.debug(msg)
+                raise KeyError(msg)
+            else:
+                msg = "Invalid input"
+                logs.warning(msg)
+                raise InputError(msg)
+
+    def updateLinkedAccounts(self, authUserId, linkedAccounts):
+        self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
+
+        return True
     
     def resetPassword(self, params):
         raise NotImplementedError
@@ -299,6 +330,14 @@ class StampedAPI(AStampedAPI):
         ### TODO: Add check for privacy settings?
 
         users = self._userDB.findUsersByPhone(phone, limit=100)
+        
+        return users
+    
+    def findUsersByTwitter(self, authUserId, twitterIds):
+
+        ### TODO: Add check for privacy settings?
+
+        users = self._userDB.findUsersByTwitter(twitterIds, limit=100)
         
         return users
     
