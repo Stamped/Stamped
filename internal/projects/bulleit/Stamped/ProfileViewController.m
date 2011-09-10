@@ -17,6 +17,7 @@
 #import "RelationshipsViewController.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"
+#import "ShowImageViewController.h"
 #import "STSectionHeaderView.h"
 #import "InboxTableViewCell.h"
 #import "User.h"
@@ -30,6 +31,7 @@ static NSString* const kFriendshipCreatePath = @"friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 @interface ProfileViewController ()
+- (void)userImageTapped:(id)sender;
 - (void)loadStampsFromNetwork;
 - (void)loadUserInfoFromNetwork;
 - (void)fillInUserData;
@@ -74,6 +76,11 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   userImageView_.imageURL = user_.profileImageURL;
+  userImageView_.enabled = YES;
+  [userImageView_ addTarget:self 
+                     action:@selector(userImageTapped:)
+           forControlEvents:UIControlEventTouchUpInside];
+
   CALayer* stampLayer = [[CALayer alloc] init];
   stampLayer.frame = CGRectMake(57, -10, 61, 61);
   stampLayer.opacity = 0.95;
@@ -143,6 +150,15 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
 }
+
+- (void)userImageTapped:(id)sender {
+  ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
+  controller.image = userImageView_.imageView.image;
+  [self.navigationController pushViewController:controller animated:YES];
+  [controller release];
+}
+
+#pragma mark - IBActions
 
 - (IBAction)followButtonPressed:(id)sender {
   followButton_.hidden = YES;
