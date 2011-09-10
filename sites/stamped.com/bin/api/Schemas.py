@@ -92,6 +92,7 @@ class User(Schema):
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema(required=True)
+        self.identifier         = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('UserMini', 'UserTiny'):

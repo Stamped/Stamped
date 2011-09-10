@@ -178,6 +178,7 @@ class HTTPUser(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
+        self.identifier         = SchemaElement(basestring)
         self.num_stamps         = SchemaElement(int)
         self.num_stamps_left    = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
