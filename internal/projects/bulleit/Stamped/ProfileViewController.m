@@ -146,7 +146,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (IBAction)followButtonPressed:(id)sender {
   followButton_.hidden = YES;
-  followIndicator_.hidden = NO;
+  [followIndicator_ startAnimating];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendshipCreatePath 
@@ -159,7 +159,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (IBAction)unfollowButtonPressed:(id)sender {
   unfollowButton_.hidden = YES;
-  followIndicator_.hidden = NO;
+  [followIndicator_ startAnimating];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendshipRemovePath 
@@ -251,7 +251,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
     self.stampsAreTemporary = NO;
-    followIndicator_.hidden = YES;
+    [followIndicator_ stopAnimating];
     unfollowButton_.hidden = NO;
     followButton_.hidden = YES;
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] + 1];
@@ -260,7 +260,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
     self.stampsAreTemporary = YES;
-    followIndicator_.hidden = YES;
+    [followIndicator_ stopAnimating];
     unfollowButton_.hidden = YES;
     followButton_.hidden = NO;
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] - 1];
@@ -288,7 +288,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if ([request.resourcePath rangeOfString:kFriendshipCheckPath].location != NSNotFound) {
-    followIndicator_.hidden = YES;
+    [followIndicator_ stopAnimating];
     if ([response.bodyAsString isEqualToString:@"false"]) {
       followButton_.hidden = NO;
       self.stampsAreTemporary = YES;
@@ -316,11 +316,11 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
     return;
 
   if ([currentUserID isEqualToString:user_.userID]) {
-    followIndicator_.hidden = YES;
+    [followIndicator_ stopAnimating];
     toolbarView_.hidden = YES;
     return;
   }
-  followIndicator_.hidden = NO;
+  [followIndicator_ startAnimating];
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kFriendshipCheckPath delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:currentUserID, @"user_id_a",
                                                               user_.userID, @"user_id_b", nil];
