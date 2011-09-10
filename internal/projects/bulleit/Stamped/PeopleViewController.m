@@ -65,7 +65,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.currentUserView = nil;
   self.userStampImageView = nil;
   self.userFullNameLabel = nil;
@@ -84,6 +83,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super viewWillDisappear:animated];
 }
 

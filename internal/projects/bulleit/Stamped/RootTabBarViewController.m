@@ -222,7 +222,7 @@
 
 - (void)newsCountChanged:(NSNotification*)notification {
   NSNumber* newItemCount = notification.object;
-  if (self.selectedViewController.tabBarItem != activityTabBarItem_)
+  if (self.tabBar.selectedItem != activityTabBarItem_)
     activityTabBarItem_.badgeValue = [newItemCount stringValue];
 }
 
