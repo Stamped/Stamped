@@ -300,6 +300,10 @@ typedef enum {
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"InboxLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
+  for (Stamp* stamp in objects) {
+    stamp.temporary = [NSNumber numberWithBool:NO];
+    [stamp.managedObjectContext save:NULL];
+  }
 	[self loadStampsFromDataStore];
   [self setIsLoading:NO];
 }
