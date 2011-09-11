@@ -35,6 +35,7 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)showFirstRunViewController;
 - (void)refreshTimerFired:(NSTimer*)theTimer;
 
+@property (nonatomic, retain) UINavigationController* navController;
 @property (nonatomic, retain) FirstRunViewController* firstRunViewController;
 @end
 
@@ -44,6 +45,7 @@ static AccountManager* sharedAccountManager_ = nil;
 @synthesize currentUser = currentUser_;
 @synthesize delegate = delegate_;
 @synthesize authenticated = authenticated_;
+@synthesize navController = navController_;
 @synthesize firstRunViewController = firstRunViewController_;
 
 + (AccountManager*)sharedManager {
@@ -104,8 +106,14 @@ static AccountManager* sharedAccountManager_ = nil;
 
   self.firstRunViewController = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
   firstRunViewController_.delegate = self;
+
+  self.navController = [[UINavigationController alloc] initWithRootViewController:self.firstRunViewController];
+  self.navController.navigationBarHidden = YES;
+
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController presentModalViewController:firstRunViewController_ animated:YES];
+  [delegate.navigationController presentModalViewController:self.navController animated:YES];
+
+  [self.navController release];
   [self.firstRunViewController release];
 }
 
@@ -180,7 +188,7 @@ static AccountManager* sharedAccountManager_ = nil;
   OAuthToken* token = object;
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
     self.firstRunViewController.delegate = nil;
-    [self.firstRunViewController.parentViewController dismissModalViewControllerAnimated:YES];
+    [self.navController.parentViewController dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
 
     [refreshTokenKeychainItem_ setObject:@"RefreshToken" forKey:(id)kSecAttrAccount];
