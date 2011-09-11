@@ -222,6 +222,7 @@
 
 - (void)newsCountChanged:(NSNotification*)notification {
   NSNumber* newItemCount = notification.object;
+  NSLog(@"Setting news item count to %@", newItemCount);
   if (self.tabBar.selectedItem != activityTabBarItem_)
     activityTabBarItem_.badgeValue = [newItemCount stringValue];
 }
@@ -249,6 +250,7 @@
   } else if (item == activityTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"News";
+    NSLog(@"Setting badge value to nil...");
     activityTabBarItem_.badgeValue = nil;
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];

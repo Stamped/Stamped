@@ -44,6 +44,7 @@ static NSString* const kActivityLookupPath = @"/temp/activity.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [self loadEventsFromDataStore];  // Needed otherwise the counter won't update.
   [self loadEventsFromNetwork];
 }
 
