@@ -20,6 +20,7 @@
 		1E1A1B68141C41DA00B7C627 /* add_friends_done_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E1A1B66141C41DA00B7C627 /* add_friends_done_button@2x.png */; };
 		1E1A1B69141C41DB00B7C627 /* add_friends_toolbar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E1A1B67141C41DA00B7C627 /* add_friends_toolbar@2x.png */; };
 		1E1A1B6B141C41FA00B7C627 /* first_run_button_done_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E1A1B6A141C41F900B7C627 /* first_run_button_done_bg@2x.png */; };
+		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
 		7E0A87B2141672110013AC4D /* sign_up_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0A87B1141672110013AC4D /* sign_up_header@2x.png */; };
 		7E0A87B71416CBDB0013AC4D /* STImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0A87B61416CBDB0013AC4D /* STImageView.m */; };
 		7E0BC48013E4A30C008CC076 /* tab_icon_comment_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0BC47613E4A30B008CC076 /* tab_icon_comment_active@2x.png */; };
@@ -263,6 +264,41 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		1E5AFFBC141D29EC00772F11 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC07E0554694100DB518D;
+			remoteInfo = OAuthTouchStaticLib;
+		};
+		1E5AFFBE141D29EC00772F11 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4F35139213EA1FF500E12259;
+			remoteInfo = OAuthTouchNonGoogleStaticLib;
+		};
+		1E5AFFC0141D29EC00772F11 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4F3513AD13EA200500E12259;
+			remoteInfo = GTMOAuthNonGoogle.framework;
+		};
+		1E5AFFC2141D29EC00772F11 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4F7249AD122483B8001A4AD0;
+			remoteInfo = UnitTests;
+		};
+		1E5AFFCE141D2A8D00772F11 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F35138613EA1FF500E12259;
+			remoteInfo = OAuthTouchNonGoogleStaticLib;
+		};
 		7EA73BD313E6EE3100E3C722 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
@@ -372,6 +408,7 @@
 		1E1A1B66141C41DA00B7C627 /* add_friends_done_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_done_button@2x.png"; sourceTree = "<group>"; };
 		1E1A1B67141C41DA00B7C627 /* add_friends_toolbar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_toolbar@2x.png"; sourceTree = "<group>"; };
 		1E1A1B6A141C41F900B7C627 /* first_run_button_done_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "first_run_button_done_bg@2x.png"; sourceTree = "<group>"; };
+		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
 		7E0A87B1141672110013AC4D /* sign_up_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sign_up_header@2x.png"; sourceTree = "<group>"; };
 		7E0A87B51416CBDB0013AC4D /* STImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageView.h; sourceTree = "<group>"; };
 		7E0A87B61416CBDB0013AC4D /* STImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageView.m; sourceTree = "<group>"; };
@@ -669,6 +706,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */,
 				7EC1C65213F459B50070CE6D /* Security.framework in Frameworks */,
 				7EE1193F13CE0C8500378139 /* CFNetwork.framework in Frameworks */,
 				7EE1194013CE0C8500378139 /* CoreData.framework in Frameworks */,
@@ -703,6 +741,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E5AFFB2141D29EC00772F11 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E5AFFBD141D29EC00772F11 /* libOAuthTouch.a */,
+				1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */,
+				1E5AFFC1141D29EC00772F11 /* GTMOAuth */,
+				1E5AFFC3141D29EC00772F11 /* UnitTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E5AFFC5141D2A5000772F11 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				7E2B339B140F29F300AFC384 /* TestFlightSDK */,
+				7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */,
+				1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */,
+			);
+			name = Vendor;
+			sourceTree = "<group>";
+		};
 		7E0BC47413E4A07F008CC076 /* Search Entities */ = {
 			isa = PBXGroup;
 			children = (
@@ -984,20 +1043,10 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
-				7E2B339B140F29F300AFC384 /* TestFlightSDK */,
-				7EC1C65113F459B50070CE6D /* Security.framework */,
-				7EE1193B13CE0C8500378139 /* CFNetwork.framework */,
-				7EE1193C13CE0C8500378139 /* CoreData.framework */,
-				7EE1193D13CE0C8500378139 /* MobileCoreServices.framework */,
-				7EE1193E13CE0C8500378139 /* SystemConfiguration.framework */,
-				7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */,
-				7E7612AC13C94D7E0023CCC4 /* CoreLocation.framework */,
-				7E7612A813C943E30023CCC4 /* MapKit.framework */,
-				7EDE38E513C51133003AEE52 /* CoreText.framework */,
-				7EDE38E313C5093E003AEE52 /* QuartzCore.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
+				1E5AFFC5141D2A5000772F11 /* Vendor */,
 				7EC0177213C3754300ABE6E2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -1014,6 +1063,15 @@
 		7EC0177413C3754300ABE6E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7EC1C65113F459B50070CE6D /* Security.framework */,
+				7EE1193B13CE0C8500378139 /* CFNetwork.framework */,
+				7EE1193C13CE0C8500378139 /* CoreData.framework */,
+				7EE1193D13CE0C8500378139 /* MobileCoreServices.framework */,
+				7EE1193E13CE0C8500378139 /* SystemConfiguration.framework */,
+				7E7612AC13C94D7E0023CCC4 /* CoreLocation.framework */,
+				7E7612A813C943E30023CCC4 /* MapKit.framework */,
+				7EDE38E513C51133003AEE52 /* CoreText.framework */,
+				7EDE38E313C5093E003AEE52 /* QuartzCore.framework */,
 				7EC0177513C3754300ABE6E2 /* UIKit.framework */,
 				7EC0177713C3754300ABE6E2 /* Foundation.framework */,
 				7EC0177913C3754300ABE6E2 /* CoreGraphics.framework */,
@@ -1352,6 +1410,7 @@
 			);
 			dependencies = (
 				7EE1193513CE0C4B00378139 /* PBXTargetDependency */,
+				1E5AFFCF141D2A8D00772F11 /* PBXTargetDependency */,
 			);
 			name = Stamped;
 			productName = Stamped;
@@ -1397,6 +1456,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 1E5AFFB2141D29EC00772F11 /* Products */;
+					ProjectRef = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
+				},
+				{
 					ProductGroup = 7EE1190C13CE0C4100378139 /* Products */;
 					ProjectRef = 7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */;
 				},
@@ -1410,6 +1473,35 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		1E5AFFBD141D29EC00772F11 /* libOAuthTouch.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOAuthTouch.a;
+			remoteRef = 1E5AFFBC141D29EC00772F11 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOAuthTouch.a;
+			remoteRef = 1E5AFFBE141D29EC00772F11 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E5AFFC1141D29EC00772F11 /* GTMOAuth */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			name = GTMOAuth;
+			path = GTMOAuth.framework;
+			remoteRef = 1E5AFFC0141D29EC00772F11 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E5AFFC3141D29EC00772F11 /* UnitTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = UnitTests.octest;
+			remoteRef = 1E5AFFC2141D29EC00772F11 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		7EA73BD413E6EE3100E3C722 /* libRestKitJSONParserNXJSON.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1772,6 +1864,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1E5AFFCF141D2A8D00772F11 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OAuthTouchNonGoogleStaticLib;
+			targetProxy = 1E5AFFCE141D2A8D00772F11 /* PBXContainerItemProxy */;
+		};
 		7EC017A013C3754300ABE6E2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 7EC0177013C3754300ABE6E2 /* Stamped */;
