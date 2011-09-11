@@ -21,6 +21,7 @@
 #import "MediumUserImageButton.h"
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
+#import "UIColor+Stamped.h"
 
 NSString* const kInboxTableDidScrollNotification = @"InboxTableDidScrollNotification";
 
@@ -40,19 +41,18 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @interface InboxCellView : UIView {
  @private
   // Managed by the top-level view system.
-  UIImageView* typeImageView_;
   UIImageView* disclosureImageView_;
+  UIImageView* cameraImageView_;
+  UIImageView* commentBubbleImageView_;
   UILabel* userNameLabel_;
   UILabel* commentLabel_;
-  UILabel* badgeLabel_;
+  UILabel* numCommentsLabel_;
   MediumUserImageView* topUserImageView_;
   MediumUserImageView* middleUserImageView_;
   MediumUserImageView* bottomUserImageView_;
 
   // NOT managed. Must manage ownership.
   CATextLayer* titleLayer_;
-  UIColor* defaultTitleColor_;
-  UIColor* defaultSubstringColor_;
   CTFontRef titleFont_;
   CTParagraphStyleRef titleStyle_;
   NSMutableDictionary* titleAttributes_;
@@ -69,8 +69,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @property (nonatomic, assign) NSUInteger numComments;
 @property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, copy) NSString* title;
-@property (nonatomic, retain) UIImage* typeImage;
 @property (nonatomic, copy) NSArray* stamps;
+
+@property (nonatomic, readonly) UILabel* subtitleLabel;
+@property (nonatomic, readonly) UIImageView* typeImageView;
 
 @end
 
@@ -88,9 +90,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize numComments = numComments_;
 @synthesize stampImage = stampImage_;
 @synthesize title = title_;
-@synthesize typeImage = typeImage_;
 @synthesize stamps = stamps_;
 @synthesize hidePhotos = hidePhotos_;
+@synthesize subtitleLabel = subtitleLabel_;
+@synthesize typeImageView = typeImageView_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -99,17 +102,32 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     self.backgroundColor = [UIColor whiteColor];
     self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
     
-    defaultTitleColor_ = [[UIColor alloc] initWithWhite:0.37 alpha:1.0];
-    defaultSubstringColor_ = [[UIColor alloc] initWithWhite:0.6 alpha:1.0];
-    
     userImageRightMargin_ = kUserImageSize + (kUserImageHorizontalMargin * 2.0);
     
-    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 58, 15, 12)];
-    typeImageView_.contentMode = UIViewContentModeScaleAspectFit;
+    typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(userImageRightMargin_, 74, 15, 12)];
+    typeImageView_.contentMode = UIViewContentModeBottomLeft;
     [self addSubview:typeImageView_];
     [typeImageView_ release];
+    
+    subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
+                                                               CGRectGetMinY(typeImageView_.frame) + 1, 
+                                                               175,
+                                                               CGRectGetHeight(typeImageView_.frame))];
+    subtitleLabel_.textColor = [UIColor stampedLightGrayColor];
+    subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
+    subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:10];
+    [self addSubview:subtitleLabel_];
+    [subtitleLabel_ release];
 
-    disclosureImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(300, 34, 8, 11)];
+    cameraImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(293, 34, 17, 14)];
+    cameraImageView_.contentMode = UIViewContentModeCenter;
+    UIImage* photoIconImage = [UIImage imageNamed:@"inbox_photo_icon"];
+    cameraImageView_.image = photoIconImage;
+    cameraImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:photoIconImage];
+    [self addSubview:cameraImageView_];
+    [cameraImageView_ release];
+    
+    disclosureImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(300, 37, 8, 11)];
     disclosureImageView_.contentMode = UIViewContentModeScaleAspectFit;
     UIImage* disclosureArrowImage = [UIImage imageNamed:@"disclosure_arrow"];
     disclosureImageView_.image = disclosureArrowImage;
@@ -119,7 +137,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     
     userNameLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     userNameLabel_.lineBreakMode = UILineBreakModeTailTruncation;
-    userNameLabel_.textColor = defaultSubstringColor_;
+    userNameLabel_.textColor = [UIColor stampedGrayColor];
     userNameLabel_.highlightedTextColor = [UIColor whiteColor];
     userNameLabel_.font = [UIFont fontWithName:kUserNameFontString size:kSubstringFontSize];
     [self addSubview:userNameLabel_];
@@ -127,27 +145,30 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     
     commentLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     commentLabel_.font = [UIFont fontWithName:kCommentFontString size:kSubstringFontSize];
-    commentLabel_.textColor = defaultSubstringColor_;
+    commentLabel_.textColor = [UIColor stampedGrayColor];
     commentLabel_.highlightedTextColor = [UIColor whiteColor];
     [self addSubview:commentLabel_];
     [commentLabel_ release];
 
-    CGRect badgeFrame = CGRectMake(CGRectGetMaxX(self.bounds) - 10 - 17, 30, 17, 17);
-    badgeLabel_ = [[UILabel alloc] initWithFrame:badgeFrame];
-    badgeLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
-    badgeLabel_.backgroundColor = [UIColor lightGrayColor];
-    badgeLabel_.layer.cornerRadius = 2.0;
-    badgeLabel_.layer.masksToBounds = YES;
-    badgeLabel_.textAlignment = UITextAlignmentCenter;
-    badgeLabel_.textColor = [UIColor whiteColor];
-    badgeLabel_.highlightedTextColor = [UIColor blueColor];
-    [self addSubview:badgeLabel_];
-    [badgeLabel_ release];
+    UIImage* bubbleImage = [UIImage imageNamed:@"inbox_chat_bubble"];
+    commentBubbleImageView_ = [[UIImageView alloc] initWithImage:bubbleImage
+                                                highlightedImage:[Util whiteMaskedImageUsingImage:bubbleImage]];
+    commentBubbleImageView_.contentMode = UIViewContentModeCenter;
+    [self addSubview:commentBubbleImageView_];
+    [commentBubbleImageView_ release];
+    
+    numCommentsLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    numCommentsLabel_.font = [UIFont fontWithName:@"Helvetica" size:10];
+    numCommentsLabel_.textAlignment = UITextAlignmentRight;
+    numCommentsLabel_.textColor = [UIColor stampedGrayColor];
+    numCommentsLabel_.highlightedTextColor = [UIColor whiteColor];
+    [self addSubview:numCommentsLabel_];
+    [numCommentsLabel_ release];
     
     titleLayer_ = [[CATextLayer alloc] init];
     titleLayer_.truncationMode = kCATruncationEnd;
     titleLayer_.contentsScale = [[UIScreen mainScreen] scale];
-    titleLayer_.foregroundColor = defaultTitleColor_.CGColor;
+    titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
     titleLayer_.fontSize = 24.0;
     titleLayer_.frame = CGRectMake(userImageRightMargin_, kCellTopPadding, kTitleMaxWidth, kTitleFontSize);
     titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
@@ -159,7 +180,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     titleStyle_ = CTParagraphStyleCreate(settings, numSettings);
     titleAttributes_ = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
         (id)titleFont_, (id)kCTFontAttributeName,
-        (id)defaultTitleColor_.CGColor, (id)kCTForegroundColorAttributeName,
+        (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName,
         (id)titleStyle_, (id)kCTParagraphStyleAttributeName,
         (id)[NSNumber numberWithDouble:1.2], (id)kCTKernAttributeName, nil];
     CGRect userImgFrame = CGRectMake(kUserImageHorizontalMargin, kCellTopPadding - 1, kUserImageSize, kUserImageSize);
@@ -179,10 +200,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.stampImage = nil;
-  self.typeImage = nil;
   self.stamps = nil;
-  [defaultTitleColor_ release];
-  [defaultSubstringColor_ release];
   [titleAttributes_ release];
   [titleLayer_ release];
   CFRelease(titleFont_);
@@ -191,13 +209,12 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)invertColors:(BOOL)inverted {
-  UIColor* titleColor = defaultTitleColor_;
+  UIColor* titleColor = [UIColor stampedDarkGrayColor];
   UIColor* badgeColor = [UIColor lightGrayColor];
   if (inverted) {
     titleColor = [UIColor whiteColor];
     badgeColor = [UIColor whiteColor];
   }
-  badgeLabel_.backgroundColor = badgeColor;
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
@@ -244,22 +261,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   return [titleAttributedString autorelease];
 }
 
-- (void)setTypeImage:(UIImage*)typeImage {
-  if (typeImage != typeImage_) {
-    [typeImage_ release];
-    typeImage_ = [typeImage retain];
-    if (typeImage) {
-      typeImageView_.image = typeImage;
-      typeImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:typeImage];
-    }
-  }
-}
-
 - (void)setTitle:(NSString*)title {
   if (title_ != title) {
     title_ = [title copy];
 
-    NSAttributedString* attrString = [self titleAttributedStringWithColor:defaultTitleColor_];
+    NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
     titleLayer_.string = attrString;
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
     CGFloat ascent, descent, leading, width;
@@ -278,10 +284,21 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)setNumComments:(NSUInteger)numComments {
   numComments_ = numComments;
-  badgeLabel_.hidden = (numComments_ == 0);
-  disclosureImageView_.hidden = !badgeLabel_.hidden;
-  badgeLabel_.text = [NSString stringWithFormat:@"%u", numComments];
-  [self setNeedsDisplayInRect:badgeLabel_.frame];
+  numCommentsLabel_.hidden = (numComments_ == 0);
+  commentBubbleImageView_.hidden = numCommentsLabel_.hidden;
+  numCommentsLabel_.text = [NSString stringWithFormat:@"%u", numComments];
+  [numCommentsLabel_ sizeToFit];
+  if (numComments_ > 0) {
+    numCommentsLabel_.frame = CGRectMake(283 - CGRectGetWidth(numCommentsLabel_.frame),
+                                         58,
+                                         CGRectGetWidth(numCommentsLabel_.frame),
+                                         CGRectGetHeight(numCommentsLabel_.frame));
+    commentBubbleImageView_.frame = CGRectMake(CGRectGetMinX(numCommentsLabel_.frame) - CGRectGetWidth(commentBubbleImageView_.frame) - 2,
+                                               60,
+                                               CGRectGetWidth(commentBubbleImageView_.frame),
+                                               CGRectGetHeight(commentBubbleImageView_.frame));
+  }
+  [self setNeedsDisplay];
 }
 
 - (void)setStamps:(NSArray*)stamps {
@@ -289,27 +306,35 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     return;
 
   stamps_ = [stamps copy];
-
   Stamp* stamp = [stamps_ lastObject];
+  cameraImageView_.hidden = stamp.imageURL ? NO : YES;
+  disclosureImageView_.hidden = !cameraImageView_.hidden;
+
   self.stampImage = stamp.user.stampImage;
-  NSString* userName = stamp.user.screenName;
-  CGSize stringSize = [userName sizeWithFont:[UIFont fontWithName:kUserNameFontString size:kSubstringFontSize]
-                                     forWidth:kSubstringMaxWidth
-                                lineBreakMode:UILineBreakModeTailTruncation];
-  userNameLabel_.frame = CGRectMake(userImageRightMargin_ + 19, 57, stringSize.width, stringSize.height);
-  userNameLabel_.text = userName;
+  userNameLabel_.text = stamp.user.screenName;
+  [userNameLabel_ sizeToFit];
+  userNameLabel_.frame = CGRectMake(userImageRightMargin_,
+                                    57,
+                                    CGRectGetWidth(userNameLabel_.frame),
+                                    CGRectGetHeight(userNameLabel_.frame));
 
-  NSString* comment = stamp.blurb;
-  if ([comment length] > 0)
-    comment = [NSString stringWithFormat:@"\u201c%@\u201d", comment];
-
-  stringSize = [comment sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
-                            forWidth:kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 14
-                       lineBreakMode:UILineBreakModeTailTruncation];
-  commentLabel_.text = comment;
-  commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3, 57, stringSize.width, stringSize.height);
-
+  NSString* comment = stamp.blurb.length ?
+      [NSString stringWithFormat:@"\u201c%@\u201d", stamp.blurb] : @"stamped";
+  
   self.numComments = [stamp.numComments unsignedIntegerValue];
+
+  CGFloat commentMaxWidth = kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 3;
+  if (numComments_ > 0)
+    commentMaxWidth -= (CGRectGetWidth(numCommentsLabel_.frame) + CGRectGetWidth(commentBubbleImageView_.frame) + 8);
+
+  CGSize stringSize = [comment sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
+                                   forWidth:commentMaxWidth
+                              lineBreakMode:UILineBreakModeTailTruncation];
+  commentLabel_.text = comment;
+  commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3,
+                                   57,
+                                   stringSize.width,
+                                   stringSize.height);
 
   self.hidePhotos = NO;
   
@@ -495,7 +520,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     stamp_ = [stamp retain];
     if (stamp) {
       customView_.title = stamp.entityObject.title;
-      customView_.typeImage = stamp.entityObject.categoryImage;
+      customView_.typeImageView.image = stamp.entityObject.categoryImage;
+      customView_.typeImageView.highlightedImage =
+          [Util whiteMaskedImageUsingImage:stamp.entityObject.categoryImage];
+      customView_.subtitleLabel.text = stamp.entityObject.subtitle;
       customView_.stamps = [NSArray arrayWithObject:stamp];
       pageDotsView_.numDots = 0;
       [self setNeedsDisplay];
@@ -512,7 +540,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   if (entityObject) {
     [self collapseStack];
     customView_.title = entityObject.title;
-    customView_.typeImage = entityObject.categoryImage;
+    customView_.typeImageView.image = entityObject.categoryImage;
+    customView_.typeImageView.highlightedImage = [Util whiteMaskedImageUsingImage:entityObject.categoryImage];
+    customView_.subtitleLabel.text = entityObject.subtitle;
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
     NSArray* stampsArray = [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
     stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];

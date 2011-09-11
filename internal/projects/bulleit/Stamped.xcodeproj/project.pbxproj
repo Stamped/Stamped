@@ -48,6 +48,7 @@
 		7E2267D413D501CB00657A66 /* StampedModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */; };
 		7E22D6AF13DDA34100C4005E /* CreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */; };
 		7E22D6B013DDA34100C4005E /* CreateStampViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */; };
+		7E29C874141D5D51005D60CE /* inbox_chat_bubble@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E29C873141D5D51005D60CE /* inbox_chat_bubble@2x.png */; };
 		7E2B33A0140F29F300AFC384 /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2B339C140F29F300AFC384 /* libTestFlight.a */; };
 		7E2B33A1140F29F300AFC384 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7E2B339D140F29F300AFC384 /* README.txt */; };
 		7E2B33A2140F29F300AFC384 /* release_notes.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7E2B339E140F29F300AFC384 /* release_notes.txt */; };
@@ -442,6 +443,7 @@
 		7E22D6AC13DDA34100C4005E /* CreateStampViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CreateStampViewController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CreateStampViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CreateStampViewController.xib; path = ../Interfaces/CreateStampViewController.xib; sourceTree = "<group>"; };
+		7E29C873141D5D51005D60CE /* inbox_chat_bubble@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_chat_bubble@2x.png"; sourceTree = "<group>"; };
 		7E2B339C140F29F300AFC384 /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libTestFlight.a; sourceTree = "<group>"; };
 		7E2B339D140F29F300AFC384 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		7E2B339E140F29F300AFC384 /* release_notes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = release_notes.txt; sourceTree = "<group>"; };
@@ -1035,6 +1037,7 @@
 		7EB29D831414657C003A8EA3 /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
+				7E29C873141D5D51005D60CE /* inbox_chat_bubble@2x.png */,
 				7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */,
 			);
 			name = Inbox;
@@ -1761,6 +1764,7 @@
 				1E1A1B68141C41DA00B7C627 /* add_friends_done_button@2x.png in Resources */,
 				1E1A1B69141C41DB00B7C627 /* add_friends_toolbar@2x.png in Resources */,
 				1E1A1B6B141C41FA00B7C627 /* first_run_button_done_bg@2x.png in Resources */,
+				7E29C874141D5D51005D60CE /* inbox_chat_bubble@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
