@@ -23,10 +23,12 @@ static NSString* const kSearchPath = @"/entities/search.json";
 - (void)loadEntitiesFromDataStore;
 - (void)searchDataStoreFor:(NSString*)searchText;
 - (void)textFieldDidChange:(id)sender;
+- (void)sendSearchRequest;
 
 @property (nonatomic, copy) NSArray* entitiesArray;
 @property (nonatomic, copy) NSArray* filteredEntitiesArray;
 @property (nonatomic, retain) CLLocationManager* locationManager;
+@property (nonatomic, readonly) UIImageView* tooltipImageView;
 @end
 
 @implementation SearchEntitiesViewController
@@ -38,6 +40,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
 @synthesize locationManager = locationManager_;
 @synthesize addStampCell = addStampCell_;
 @synthesize addStampLabel = addStampLabel_;
+@synthesize tooltipImageView = tooltipImageView_;
+@synthesize searchingIndicatorView = searchingIndicatorView_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -75,6 +79,12 @@ static NSString* const kSearchPath = @"/entities/search.json";
              forControlEvents:UIControlEventEditingChanged];
 
   self.locationManager = [[[CLLocationManager alloc] init] autorelease];
+  
+  tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_tooltip"]];
+  tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 6, 40);
+  tooltipImageView_.alpha = 0.0;
+  [self.view addSubview:tooltipImageView_];
+  [tooltipImageView_ release];
 }
 
 - (void)viewDidUnload {
@@ -87,6 +97,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
+  self.searchingIndicatorView = nil;
+  tooltipImageView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -97,6 +109,11 @@ static NSString* const kSearchPath = @"/entities/search.json";
 - (void)viewDidAppear:(BOOL)animated {
   [self.locationManager startUpdatingLocation];
   [self.searchField becomeFirstResponder];
+  if (self.searchField.text.length == 0) {
+    [UIView animateWithDuration:0.3 animations:^{
+      tooltipImageView_.alpha = 1.0;
+    }];
+  }
   [super viewDidAppear:animated];
 }
 
@@ -161,28 +178,35 @@ static NSString* const kSearchPath = @"/entities/search.json";
   if (textField != searchField_)
     return YES;
 
+  [self sendSearchRequest];
+  [searchField_ resignFirstResponder];
+  return NO;
+}
+
+- (void)sendSearchRequest {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
   objectLoader.objectMapping = entityMapping;
   NSMutableDictionary* params =
-      [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", searchField_.text, nil];
+  [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", searchField_.text, nil];
   if (self.locationManager.location) {
     CLLocationCoordinate2D coordinate = self.locationManager.location.coordinate;
     NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
     [params setObject:coordString forKey:@"coordinates"];
   }  
   objectLoader.params = params;
+  searchingIndicatorView_.hidden = NO;
   [objectLoader send];
-
-  [searchField_ resignFirstResponder];
-  return NO;
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	self.entitiesArray = nil;
+  searchingIndicatorView_.hidden = YES;
+  
+  self.entitiesArray = nil;
   self.entitiesArray = objects;
   self.filteredEntitiesArray = nil;
   self.filteredEntitiesArray = objects;
@@ -191,6 +215,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
 	NSLog(@"Hit error: %@", error);
+  searchingIndicatorView_.hidden = YES;
+
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
 
@@ -228,8 +254,22 @@ static NSString* const kSearchPath = @"/entities/search.json";
   if (sender != self.searchField)
     return;
 
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
+                     tooltipImageView_.alpha = self.searchField.text.length > 0 ? 0.0 : 1.0;
+                   }
+                   completion:nil];
+
   [self searchDataStoreFor:self.searchField.text];
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
+  if (searchField_.text.length > 3) {
+    [self sendSearchRequest];
+  } else if (searchField_.text.length == 0) {
+    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+    searchingIndicatorView_.hidden = YES;
+  }
 }
 
 @end

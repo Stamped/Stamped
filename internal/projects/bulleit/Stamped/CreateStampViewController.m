@@ -8,6 +8,7 @@
 
 #import "CreateStampViewController.h"
 
+#import <CoreText/CoreText.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 #import <QuartzCore/QuartzCore.h>
 
@@ -20,6 +21,7 @@
 #import "Stamp.h"
 #import "UserImageView.h"
 #import "Util.h"
+#import "User.h"
 #import "UIColor+Stamped.h"
 
 static NSString* const kCreateStampPath = @"/stamps/create.json";
@@ -52,6 +54,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)dismissSelf;
 - (void)addStampPhotoView;
 - (void)restoreViewState;
+- (void)addStampsRemainingLayer;
 
 @property (nonatomic, retain) UIImage* stampPhoto;
 @property (nonatomic, retain) UIButton* takePhotoButton;
@@ -61,6 +64,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, copy) NSString* creditedUserText;
 @property (nonatomic, assign) BOOL savePhoto;
 @property (nonatomic, retain) UIResponder* firstResponder;
+@property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
 @end
 
 @implementation CreateStampViewController
@@ -89,6 +93,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize reasoningText = reasoningText_;
 @synthesize creditedUserText = creditedUserText_;
 @synthesize firstResponder = firstResponder_;
+@synthesize stampsRemainingLayer = stampsRemainingLayer_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -113,7 +118,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.reasoningText = nil;
   self.creditedUserText = nil;
   self.firstResponder = nil;
-  
+
   [super dealloc];
 }
 
@@ -167,7 +172,13 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
   bottomToolbar_.layer.shadowOpacity = 0.2;
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
-  bottomToolbar_.alpha = 0.85;
+  CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
+  toolbarGradient.frame = bottomToolbar_.bounds;
+  toolbarGradient.colors = [NSArray arrayWithObjects:
+      (id)[UIColor whiteColor].CGColor,
+      (id)[UIColor colorWithWhite:0.85 alpha:1.0].CGColor, nil];
+  [bottomToolbar_.layer addSublayer:toolbarGradient];
+  [toolbarGradient release];
 
   UIButton* doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
   doneButton.frame = CGRectMake(248, 4, 69, 38);
@@ -214,8 +225,49 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
   if (creditedUser_)
     creditTextField_.text = creditedUser_.screenName;
-  
+
+  [self addStampsRemainingLayer];
   [self restoreViewState];
+}
+
+- (void)addStampsRemainingLayer {
+  stampsRemainingLayer_ = [[CATextLayer alloc] init];
+  stampsRemainingLayer_.alignmentMode = kCAAlignmentCenter;
+  stampsRemainingLayer_.frame = CGRectMake(0, 
+                                           CGRectGetMaxY(self.view.frame) - 19,
+                                           CGRectGetWidth(self.view.frame),
+                                           CGRectGetHeight(self.view.frame));
+  stampsRemainingLayer_.fontSize = 12;
+  stampsRemainingLayer_.foregroundColor = [UIColor stampedGrayColor].CGColor;
+  stampsRemainingLayer_.contentsScale = [[UIScreen mainScreen] scale];
+  stampsRemainingLayer_.shadowColor = [UIColor whiteColor].CGColor;
+  stampsRemainingLayer_.shadowOpacity = 1.0;
+  stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
+  stampsRemainingLayer_.shadowRadius = 0;
+  
+  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStamps stringValue];
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  CFIndex numSettings = 1;
+  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+  CTParagraphStyleSetting settings[1] = {
+    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+  };
+  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
+  NSString* full = [NSString stringWithFormat:@"You have %@ stamps remaining", stampsLeft];
+  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
+  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                         (id)style, (id)kCTParagraphStyleAttributeName,
+                         (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                  range:NSMakeRange(0, full.length)];
+  [string addAttribute:(NSString*)kCTFontAttributeName
+                 value:(id)font 
+                 range:[full rangeOfString:stampsLeft]];
+  CFRelease(font);
+  CFRelease(style);
+  stampsRemainingLayer_.string = string;
+  [string release];
+  [self.view.layer addSublayer:stampsRemainingLayer_];
+  [stampsRemainingLayer_ release];
 }
 
 - (void)restoreViewState {
@@ -255,6 +307,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.backgroundImageView = nil;
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
+  stampsRemainingLayer_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -602,16 +655,20 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     entityObject_.entityID = entity.entityID;
     [entityObject_.managedObjectContext save:NULL];
     [self sendSaveStampRequest];
-  } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {    
+  } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
     Stamp* stamp = object;
+    stamp.temporary = [NSNumber numberWithBool:NO];
     [entityObject_ addStampsObject:stamp];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                         object:stamp];
     entityObject_.favorite.complete = [NSNumber numberWithBool:YES];
     entityObject_.favorite.stamp = stamp;
+    [stamp.managedObjectContext save:NULL];
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                         object:stamp];
-    
+    NSUInteger numStamps = [[AccountManager sharedManager].currentUser.numStamps unsignedIntegerValue];
+    [AccountManager sharedManager].currentUser.numStamps = [NSNumber numberWithUnsignedInteger:--numStamps];
+
     [spinner_ stopAnimating];
     CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));
     CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
@@ -620,6 +677,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                        shelfBackground_.transform = topTransform;
                        bottomToolbar_.transform = bottomTransform;
                        stampItButton_.transform = bottomTransform;
+                       stampsRemainingLayer_.transform = CATransform3DMakeAffineTransform(bottomTransform);
                      }
                      completion:^(BOOL finished) {
                        [UIView animateWithDuration:0.3

@@ -8,6 +8,7 @@
 
 #import "ProfileViewController.h"
 
+#import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
@@ -36,9 +37,11 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 - (void)loadUserInfoFromNetwork;
 - (void)fillInUserData;
 - (void)loadRelationshipData;
+- (void)addStampsRemainingLayer;
 
 @property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, copy) NSArray* stampsArray;
+@property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
 @end
 
 @implementation ProfileViewController
@@ -60,6 +63,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 @synthesize unfollowButton = unfollowButton_;
 @synthesize followIndicator = followIndicator_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
+@synthesize stampsRemainingLayer = stampsRemainingLayer_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -326,6 +330,46 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   }
 }
 
+- (void)addStampsRemainingLayer {
+  stampsRemainingLayer_ = [[CATextLayer alloc] init];
+  stampsRemainingLayer_.alignmentMode = kCAAlignmentCenter;
+  stampsRemainingLayer_.frame = CGRectMake(0, 
+                                           CGRectGetMaxY(self.view.frame) - 30,
+                                           CGRectGetWidth(self.view.frame),
+                                           CGRectGetHeight(self.view.frame));
+  stampsRemainingLayer_.fontSize = 12;
+  stampsRemainingLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
+  stampsRemainingLayer_.contentsScale = [[UIScreen mainScreen] scale];
+  stampsRemainingLayer_.shadowColor = [UIColor whiteColor].CGColor;
+  stampsRemainingLayer_.shadowOpacity = 1.0;
+  stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
+  stampsRemainingLayer_.shadowRadius = 0;
+  
+  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStamps stringValue];
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  CFIndex numSettings = 1;
+  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+  CTParagraphStyleSetting settings[1] = {
+    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+  };
+  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
+  NSString* full = [NSString stringWithFormat:@"You have %@ stamps remaining", stampsLeft];
+  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
+  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                         (id)style, (id)kCTParagraphStyleAttributeName,
+                         (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                  range:NSMakeRange(0, full.length)];
+  [string addAttribute:(NSString*)kCTFontAttributeName
+                 value:(id)font 
+                 range:[full rangeOfString:stampsLeft]];
+  CFRelease(font);
+  CFRelease(style);
+  stampsRemainingLayer_.string = string;
+  [string release];
+  [self.view.layer addSublayer:stampsRemainingLayer_];
+  [stampsRemainingLayer_ release];
+}
+
 - (void)loadRelationshipData {
   NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
   if (!currentUserID)
@@ -333,7 +377,9 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
   if ([currentUserID isEqualToString:user_.userID]) {
     [followIndicator_ stopAnimating];
-    toolbarView_.hidden = YES;
+    followButton_.hidden = YES;
+    unfollowButton_.hidden = YES;
+    [self addStampsRemainingLayer];
     return;
   }
   [followIndicator_ startAnimating];

@@ -325,7 +325,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                     range:NSMakeRange(0, full.length)];
     [string addAttribute:(NSString*)kCTFontAttributeName
                    value:(id)font 
-                   range:[full rangeOfString:user]];
+                   range:[full rangeOfString:user options:NSBackwardsSearch]];
     CFRelease(font);
     CFRelease(style);
     creditStringLayer.string = string;
