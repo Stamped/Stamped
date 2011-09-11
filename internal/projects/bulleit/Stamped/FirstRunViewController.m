@@ -11,6 +11,7 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 
 #import "UserImageView.h"
+#import "WelcomeViewController.h"
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 144;
@@ -255,6 +256,10 @@ static const CGFloat kProfileImageSize = 144;
     [confirmButton_ setTitle:nil forState:UIControlStateNormal];
     [activityIndicator_ startAnimating];
     [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
+  } else if (signUpScrollView_.superview) {
+    WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
+    [self.navigationController pushViewController:welcomeVC animated:YES];
+    [welcomeVC release];
   }
 }
 
