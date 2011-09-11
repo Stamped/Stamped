@@ -429,6 +429,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 @synthesize entityObject = entityObject_;
 @synthesize stamp = stamp_;
+@synthesize customView = customView_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
@@ -603,7 +604,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     customView_.transform = CGAffineTransformIdentity;
     stacksBackgroundView_.alpha = 0;
     stackCollapseButton_.alpha = 0;
-    pageDotsView_.transform = CGAffineTransformMakeTranslation(50, 0);
     pageDotsView_.transform = CGAffineTransformIdentity;
 
     NSUInteger i = 0;
