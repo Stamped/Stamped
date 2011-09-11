@@ -595,7 +595,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     view.transform = CGAffineTransformTranslate(view.transform, 60, 0);
     ++i;
   }
-  NSUInteger stampsCount = [entityObject_.stamps count];
+  NSUInteger stampsCount = [customView_.stamps count];
   [UIView animateWithDuration:0.25
                         delay:0
                       options:UIViewAnimationOptionAllowUserInteraction
