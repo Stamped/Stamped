@@ -13,6 +13,7 @@ from GeocoderEntityProxy import GeocoderEntityProxy
 from AEntityProxy import AEntityProxy
 from ASyncGatherSource import ASyncGatherSource
 from TestEntitySink import TestEntitySink
+from MergeEntitySink import MergeEntitySink
 
 from optparse import OptionParser
 from threading import Thread

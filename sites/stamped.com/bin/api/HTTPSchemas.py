@@ -270,7 +270,7 @@ class HTTPEntity(Schema):
         self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
-
+        
         # Address
         self.address            = SchemaElement(basestring)
         self.address_street     = SchemaElement(basestring)
@@ -278,24 +278,24 @@ class HTTPEntity(Schema):
         self.address_state      = SchemaElement(basestring)
         self.address_country    = SchemaElement(basestring)
         self.address_zip        = SchemaElement(basestring)
-
+        
         self.neighborhood       = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
-
+        
         # Contact
         self.phone              = SchemaElement(basestring)
         self.site               = SchemaElement(basestring)
         self.hours              = SchemaElement(basestring)
-
+        
         # Cross-Category
         self.release_date       = SchemaElement(datetime)
         self.length             = SchemaElement(basestring)
         self.rating             = SchemaElement(basestring)
-
+        
         # Food
         self.cuisine            = SchemaElement(basestring)
         self.price_scale        = SchemaElement(float)
-
+        
         # Book
         self.author             = SchemaElement(basestring)
         self.isbn               = SchemaElement(basestring)
@@ -303,7 +303,7 @@ class HTTPEntity(Schema):
         self.format             = SchemaElement(basestring)
         self.language           = SchemaElement(basestring)
         self.edition            = SchemaElement(basestring)
-
+        
         # Film
         self.genre              = SchemaElement(basestring)
         self.cast               = SchemaElement(basestring)
@@ -311,12 +311,14 @@ class HTTPEntity(Schema):
         self.network            = SchemaElement(basestring)
         self.in_theaters        = SchemaElement(basestring)
         self.run_dates          = SchemaElement(basestring)
-
+        
         # Music
         self.artist_name        = SchemaElement(basestring)
         self.album_name         = SchemaElement(basestring)
         self.label              = SchemaElement(basestring)
-
+        self.albums             = SchemaList(SchemaElement(basestring))
+        self.songs              = SchemaList(SchemaElement(basestring))
+        
         # Affiliates
         self.opentable_url      = SchemaElement(basestring)
         self.itunes_url         = SchemaElement(basestring)
@@ -462,6 +464,26 @@ class HTTPEntity(Schema):
                 self.itunes_url         = deep_url
                 self.itunes_short_url   = short_url
 
+            if schema.image is not None:
+                self.image = schema.image
+            elif schema.large is not None:
+                self.image = schema.large
+            elif schema.small is not None:
+                self.image = schema.small
+            elif schema.tiny is not None:
+                self.image = schema.tiny
+            
+            if schema.subcategory == "song" and schema.songs is not None:
+                songs = list(song.song_name for song in schema.songs)
+                self.songs = songs
+            
+            if schema.subcategory == "album" and schema.albums is not None:
+                try:
+                    albums = list(album.album_name for album in schema.albums)
+                    self.albums = albums
+                except:
+                    pass
+            
             # if schema.sources.netflix
 
             # if schema.sources.fandango.url != None:

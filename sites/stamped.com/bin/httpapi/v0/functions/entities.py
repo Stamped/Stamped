@@ -33,7 +33,6 @@ def show(request):
 
     return transformOutput(entity.exportSparse())
 
-
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update(request):

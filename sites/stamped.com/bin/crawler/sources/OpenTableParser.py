@@ -58,7 +58,7 @@ def parseEntity(entity):
     while index < len(urls):
         try:
             url = urls[index]
-            #utils.log("[OpenTable] crawling " + url)
+            utils.log("[OpenTable] crawling " + url)
             soup = utils.getSoup(url)
             
             if index == numOrigURLs - 1:

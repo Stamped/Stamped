@@ -6,21 +6,28 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-from AEntitySink import AEntitySink
-from Schemas import Entity
-from pprint import pprint
+
+from match.EntityMatcher    import EntityMatcher
+from MongoStampedAPI        import MongoStampedAPI
+from AEntitySink            import AEntitySink
+from Schemas                import Entity
+from pprint                 import pprint
+
+from match.IDBasedEntityMatchers import OpenTableEntityMatcher
 
 class MergeEntitySink(AEntitySink):
     
     def __init__(self):
         AEntitySink.__init__(self, "MergeEntitySink")
+        
+        self.stampedAPI = MongoStampedAPI()
+        self.matcher    = OpenTableEntityMatcher(self.stampedAPI)
     
     def _processItem(self, item):
         assert isinstance(item, Entity)
-        pprint(item.value)
-        return
+        utils.log("merging item %s" % (item.title, ))
         
-        utils.log("%s" % (item.title, ))
+        self.matcher.addOne(item)
     
     def _processItems(self, items):
         for item in items:
