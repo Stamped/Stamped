@@ -303,7 +303,7 @@ static AccountManager* sharedAccountManager_ = nil;
 
 #pragma mark - FirstRunViewControllerDelegate methods.
 
-- (void)viewController:(FirstRunViewController*)viewController 
+- (void)viewController:(FirstRunViewController*)viewController
     didReceiveUsername:(NSString*)username 
               password:(NSString*)password {
   if (username.length > 0 && password.length > 0) {
@@ -326,6 +326,9 @@ willCreateUserWithName:(NSString*)name
 
   if (![name length] || ![handle length] || ![password length] || ![email length])
     return [self.firstRunViewController signUpFailed:@"Please fill out all required fields."];
+  
+  [passwordKeychainItem_ setObject:handle forKey:(id)kSecAttrAccount];
+  [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];
 
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"Registration"];

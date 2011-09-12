@@ -176,7 +176,11 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error {
-  NSAssert(!error, @"GTMOAuth error = %@", error);  // TODO: probably do something less bad.
+  if (error) {
+    NSLog(@"GTMOAuth error = %@", error);
+    return;
+  }
+  //NSAssert(!error, @"GTMOAuth error = %@", error);  // TODO: probably do something less bad.
   self.authentication = auth;
 }
 
