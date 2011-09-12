@@ -21,6 +21,8 @@
 		1E1A1B69141C41DB00B7C627 /* add_friends_toolbar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E1A1B67141C41DA00B7C627 /* add_friends_toolbar@2x.png */; };
 		1E1A1B6B141C41FA00B7C627 /* first_run_button_done_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E1A1B6A141C41F900B7C627 /* first_run_button_done_bg@2x.png */; };
 		1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E5AFFBF141D29EC00772F11 /* libOAuthTouch.a */; };
+		1E5AFFF0141D38E200772F11 /* GTMOAuthViewTouch.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1E5AFFEF141D38E200772F11 /* GTMOAuthViewTouch.xib */; };
+		1E5AFFF2141D637300772F11 /* add_friends_nipple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1E5AFFF1141D637300772F11 /* add_friends_nipple@2x.png */; };
 		7E0A87B2141672110013AC4D /* sign_up_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0A87B1141672110013AC4D /* sign_up_header@2x.png */; };
 		7E0A87B71416CBDB0013AC4D /* STImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0A87B61416CBDB0013AC4D /* STImageView.m */; };
 		7E0BC48013E4A30C008CC076 /* tab_icon_comment_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0BC47613E4A30B008CC076 /* tab_icon_comment_active@2x.png */; };
@@ -410,6 +412,8 @@
 		1E1A1B67141C41DA00B7C627 /* add_friends_toolbar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_toolbar@2x.png"; sourceTree = "<group>"; };
 		1E1A1B6A141C41F900B7C627 /* first_run_button_done_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "first_run_button_done_bg@2x.png"; sourceTree = "<group>"; };
 		1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GTMOAuth.xcodeproj; path = "Vendor/gtm-oauth/Source/GTMOAuth.xcodeproj"; sourceTree = "<group>"; };
+		1E5AFFEF141D38E200772F11 /* GTMOAuthViewTouch.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = GTMOAuthViewTouch.xib; path = "../Vendor/gtm-oauth/Source/Touch/GTMOAuthViewTouch.xib"; sourceTree = "<group>"; };
+		1E5AFFF1141D637300772F11 /* add_friends_nipple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_nipple@2x.png"; sourceTree = "<group>"; };
 		7E0A87B1141672110013AC4D /* sign_up_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sign_up_header@2x.png"; sourceTree = "<group>"; };
 		7E0A87B51416CBDB0013AC4D /* STImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageView.h; sourceTree = "<group>"; };
 		7E0A87B61416CBDB0013AC4D /* STImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageView.m; sourceTree = "<group>"; };
@@ -977,6 +981,7 @@
 				1E1A1B08141C022200B7C627 /* twitter_logo@2x.png */,
 				1E1A1B66141C41DA00B7C627 /* add_friends_done_button@2x.png */,
 				1E1A1B67141C41DA00B7C627 /* add_friends_toolbar@2x.png */,
+				1E5AFFF1141D637300772F11 /* add_friends_nipple@2x.png */,
 			);
 			name = "First run";
 			sourceTree = "<group>";
@@ -1341,6 +1346,7 @@
 		7EFE8F8213C3CE3000324F34 /* Interface */ = {
 			isa = PBXGroup;
 			children = (
+				1E5AFFEF141D38E200772F11 /* GTMOAuthViewTouch.xib */,
 				7EC0178713C3754300ABE6E2 /* MainWindow.xib */,
 			);
 			name = Interface;
@@ -1764,6 +1770,8 @@
 				1E1A1B68141C41DA00B7C627 /* add_friends_done_button@2x.png in Resources */,
 				1E1A1B69141C41DB00B7C627 /* add_friends_toolbar@2x.png in Resources */,
 				1E1A1B6B141C41FA00B7C627 /* first_run_button_done_bg@2x.png in Resources */,
+				1E5AFFF0141D38E200772F11 /* GTMOAuthViewTouch.xib in Resources */,
+				1E5AFFF2141D637300772F11 /* add_friends_nipple@2x.png in Resources */,
 				7E29C874141D5D51005D60CE /* inbox_chat_bubble@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1928,7 +1936,11 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build\"";
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/Vendor/gtm-oauth/HTTPFetcher",
+					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
+					"\"$(SOURCE_ROOT)/RestKit/Build\"",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_LDFLAGS = (
@@ -1950,7 +1962,11 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build\"";
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/Vendor/gtm-oauth/HTTPFetcher",
+					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
+					"\"$(SOURCE_ROOT)/RestKit/Build\"",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";

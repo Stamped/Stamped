@@ -8,6 +8,17 @@
 
 #import "Util.h"
 
+NSString* const kTwitterConsumerKey = @"qGrQ7CoKq00upjxoSSJA";
+NSString* const kTwitterConsumerSecret = @"1DQI3LDZiFiDsAorLlu02ZWaHAnuPtbDdaUbvZkPc";
+NSString* const kTwitterRequestTokenURL = @"https://api.twitter.com/oauth/request_token";
+NSString* const kTwitterAuthorizeURL = @"https://api.twitter.com/oauth/authorize";
+NSString* const kTwitterAccessTokenURL = @"https://api.twitter.com/oauth/access_token";
+
+NSString* const kOAuthCallbackURL = @"http://stamped.com/oauth_callback";
+NSString* const kTwitterScope = @"http://stamped.com/oauth_scope";
+
+NSString* const kKeychainTwitterToken = @"Twitter for Stamped";
+
 @implementation Util
 
 + (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue {

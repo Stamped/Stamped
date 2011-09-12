@@ -39,10 +39,14 @@
 
 #pragma mark - Actions
 
-- (IBAction)findfromContacts:(id)sender {}
+- (IBAction)findfromContacts:(id)sender {
+  FindFriendsViewController* findFriendsVC = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromContacts];
+  [self.navigationController pushViewController:findFriendsVC animated:YES];
+  [findFriendsVC release];
+}
 
 - (IBAction)findFromTwitter:(id)sender {
-  FindFriendsViewController* findFriendsVC = [[FindFriendsViewController alloc] init];
+  FindFriendsViewController* findFriendsVC = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromTwitter];
   [self.navigationController pushViewController:findFriendsVC animated:YES];
   [findFriendsVC release];
 }
@@ -56,7 +60,6 @@
   CGPoint offset = CGPointMake(xOffset, 0);
 
   [self.scrollView setContentOffset:offset animated:YES];
-  NSLog(@"current page = %d", self.pageControl.currentPage);
 }
 
 #pragma mark - Scroll View Delegate

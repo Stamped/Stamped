@@ -182,6 +182,25 @@ static const CGFloat kProfileImageSize = 144;
   }
 }
 
+- (void)signUpSucess {
+  WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
+  [self.navigationController pushViewController:welcomeVC animated:YES];
+  [welcomeVC release];
+}
+
+- (void)signUpFailed:(NSString*)reason {
+  UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Sign Up Error"
+                                                  message:reason
+                                                 delegate:nil
+                                        cancelButtonTitle:@"OK"
+                                        otherButtonTitles:nil];
+  [alert show];
+  [alert release];
+
+  [activityIndicator_ stopAnimating];
+  confirmButton_.enabled = YES;
+}
+
 #pragma mark - Nib Actions.
 
 - (IBAction)createAccountButtonPressed:(id)sender {
@@ -257,9 +276,14 @@ static const CGFloat kProfileImageSize = 144;
     [activityIndicator_ startAnimating];
     [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
   } else if (signUpScrollView_.superview) {
-    WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
-    [self.navigationController pushViewController:welcomeVC animated:YES];
-    [welcomeVC release];
+    confirmButton_.enabled = NO;
+    [activityIndicator_ startAnimating];
+    [delegate_ viewController:self
+       willCreateUserWithName:signUpFullNameTextField_.text
+                     username:signUpUsernameTextField_.text
+                     password:signUpPasswordTextField_.text
+                        email:signUpEmailTextField_.text
+                  phoneNumber:signUpPhoneTextField_.text];
   }
 }
 
