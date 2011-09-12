@@ -141,9 +141,6 @@ class AAppleEPFDump(AExternalDumpEntitySource):
             utils.log(cmd)
         
         try:
-            #if not cmd.endswith(';'):
-            #    cmd += ';'
-            
             self.db.execute(cmd)
         #except sqlite3.OperationalError:
         except psycopg2.Error, e:

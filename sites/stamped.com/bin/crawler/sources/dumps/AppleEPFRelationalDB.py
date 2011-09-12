@@ -579,3 +579,9 @@ class AppleEPFSongPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
         # only retain us popularity metrics
         return storefront_id == self.us_storefront_id
 
+class AppleEPFAlbumToSong(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Album to Song", 
+                                      filename="collection_song", 
+                                      index="collection_id")
+
