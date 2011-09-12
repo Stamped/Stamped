@@ -57,7 +57,6 @@ class ZagatCrawler(AExternalEntitySource):
             name = location.getText().strip()
             href = self.base + location.get("href")
             pool.spawn(self._parseLocationPage, pool, name, href)
-            break
     
     def _parseLocationPage(self, pool, region_name, href):
         utils.log("[%s] parsing region '%s' (%s)" % (self, region_name, href))
@@ -87,7 +86,6 @@ class ZagatCrawler(AExternalEntitySource):
                 city_href = self.base + city.get("href")
                 
                 pool.spawn(self._parseCityPage, pool, region_name, city_name, city_href)
-                break
     
     def _parseCityPage(self, pool, region_name, city_name, href):
         utils.log("[%s] parsing city '%s.%s' (%s)" % (self, region_name, city_name, href))
@@ -116,16 +114,6 @@ class ZagatCrawler(AExternalEntitySource):
             utils.log("[%s] error downloading page %s" % (self, href))
             return
         
-        try:
-            # parse next page
-            next_page = soup.find("li", {"class" : re.compile("pager-next")}).find("a", {"class" : "active"})
-            if False: #next_page is not None:
-                next_page_href = self.base + next_page.get("href")
-                pool.spawn(self._parseAllRestaurantsInCityPage, pool, region_name, city_name, next_page_href)
-        except AttributeError:
-            # no next paginated page for restaurants within this city
-            pass
-        
         # parse all zagat-rated restaurants on this page
         restaurants = soup.findAll("li", {"class" : "zr"})
         if restaurants is not None:
@@ -136,7 +124,16 @@ class ZagatCrawler(AExternalEntitySource):
                 
                 # asynchronously parse the current restaurant
                 pool.spawn(self._parseRestaurantPage, pool, region_name, city_name, restaurant_name, restaurant_href)
-                break
+        
+        try:
+            # parse next page
+            next_page = soup.find("li", {"class" : re.compile("pager-next")}).find("a", {"class" : "active"})
+            if next_page is not None:
+                next_page_href = self.base + next_page.get("href")
+                self._parseAllRestaurantsInCityPage(pool, region_name, city_name, next_page_href)
+        except AttributeError:
+            # no next paginated page for restaurants within this city
+            pass
     
     def _parseRestaurantPage(self, pool, region_name, city_name, restaurant_name, href):
         utils.log("[%s] parsing restaurant '%s.%s.%s' (%s)" % (self, region_name, city_name, restaurant_name, href))
