@@ -8,14 +8,12 @@ __license__ = "TODO"
 import init, utils
 import bson, sys
 
-from MongoStampedAPI import MongoStampedAPI
-from db.mongodb.AMongoCollection import MongoDBConfig
-
-from gevent import Greenlet
-from gevent.pool import Pool
-from optparse import OptionParser
 from match.EntityMatcher import EntityMatcher
-from pprint import pprint
+from MongoStampedAPI     import MongoStampedAPI
+from gevent              import Greenlet
+from gevent.pool         import Pool
+from optparse            import OptionParser
+from pprint              import pprint
 
 #-----------------------------------------------------------
 

@@ -471,6 +471,7 @@ class AlbumSchema(Schema):
         self.a_currency_code            = SchemaElement(basestring)
         self.a_availability_date        = SchemaElement(basestring)
         
+        self.track_count                = SchemaElement(int)
         self.tracks                     = SchemaList(SchemaElement(basestring))
 
 class ProductSchema(Schema):
