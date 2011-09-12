@@ -39,15 +39,16 @@
       self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", entityObject_.artist];
   }
   
-//  NSLog(@"%@", entityObject_);
+  NSLog(@"%@", entityObject_);
   
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-//  if (entityObject_.artwork) {
-//    self.imageView.image  = entityObject_.artwork; 
+  if (entityObject_.image) {
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
+                                                   [NSURL URLWithString:entityObject_.image]]];
     self.imageView.hidden = NO;
-//  }
+  }
   
 }
 
@@ -110,11 +111,11 @@
 - (void) setupSectionViews {
   
   // Tracks
-  if (!entityObject_.trackList) {
+  if (entityObject_.songs) {
 
     // *** HARDCODED ***
-    NSString* tracks = [NSString stringWithFormat:(@"Dream Shake\nSup Outside\nIce Cream\nGaydream Nation\nKeyisha\nHeavy Pets\nJewel On It\nAll Day\nCabana Boys\nSun Roof Top")];
-    NSArray* tracksArray = [tracks componentsSeparatedByString:@"\n"];
+//    NSString* tracks = [NSString stringWithFormat:(@"Dream Shake\nSup Outside\nIce Cream\nGaydream Nation\nKeyisha\nHeavy Pets\nJewel On It\nAll Day\nCabana Boys\nSun Roof Top")];
+    NSArray* tracksArray = entityObject_.songs;
     
     [self addSectionWithName:@"Tracks" previewHeight:136.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Tracks"];

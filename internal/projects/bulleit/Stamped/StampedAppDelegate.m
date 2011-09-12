@@ -35,7 +35,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
   
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.suspended = YES;
   [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
@@ -61,9 +61,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                          @"itunes_short_url", @"itunesShortURL",
                                          @"itunes_url", @"itunesURL", 
                                          @"artist_name", @"artist",
-                                         @"album_name", @"album", 
                                          @"release_date", @"releaseDate", 
-                                         @"track_list", @"trackList", 
                                          @"amazon_url", @"amazonURL",
                                          @"in_theaters", @"inTheaters", 
                                          @"fandango_url", @"fandangoURL", nil];
@@ -75,7 +73,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                @"neighborhood", @"desc", @"genre", @"label", @"length", 
                                @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
                                @"price", @"website", @"rating", @"isbn", @"format", 
-                               @"publisher", @"language", nil];
+                               @"publisher", @"language", @"albums", @"songs",
+                               @"image", nil];
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];

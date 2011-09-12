@@ -157,7 +157,7 @@ const CGFloat kKeyboardHeight = 217.0;
       segmentedControl_.selectedSegmentIndex = 2;
     }
     primaryTextField_.text = entityObject_.artist;
-    secondaryTextField_.text = entityObject_.album;
+    secondaryTextField_.text = entityObject_.albums;
     selectedCategory_ = STEditCategoryRowMusic;
   } else if ([entityObject_.category isEqualToString:@"other"]) {
     [self showOtherView];
@@ -509,7 +509,7 @@ const CGFloat kKeyboardHeight = 217.0;
       } else if (segmentedControl_.selectedSegmentIndex == 1) {
         entityObject_.subcategory = @"song";
         entityObject_.artist = primaryTextField_.text;
-        entityObject_.album = secondaryTextField_.text;
+        entityObject_.albums = secondaryTextField_.text;
         entityObject_.subtitle =
             entityObject_.artist.length > 0 ? entityObject_.artist : @"Song";
       } else {

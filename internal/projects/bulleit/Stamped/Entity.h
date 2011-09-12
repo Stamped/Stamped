@@ -40,7 +40,8 @@ typedef enum {
 @property (nonatomic, retain) NSString* subcategory;
 @property (nonatomic, retain) NSString* desc;
 @property (nonatomic, retain) NSString* artist;
-@property (nonatomic, retain) NSString* album;
+@property (nonatomic, retain) NSArray*  albums;
+@property (nonatomic, retain) NSArray*  songs;
 @property (nonatomic, retain) NSString* author;
 @property (nonatomic, retain) NSString* cast;
 @property (nonatomic, retain) NSString* director;
@@ -55,7 +56,6 @@ typedef enum {
 @property (nonatomic, retain) NSString* itunesShortURL;
 @property (nonatomic, retain) NSString* itunesURL;
 @property (nonatomic, retain) NSString* releaseDate;
-@property (nonatomic, retain) NSString* trackList;
 @property (nonatomic, retain) NSString* genre;
 @property (nonatomic, retain) NSString* label;
 @property (nonatomic, retain) NSNumber* length;
@@ -67,6 +67,7 @@ typedef enum {
 @property (nonatomic, retain) NSString* amazonURL;
 @property (nonatomic, retain) NSNumber* inTheaters;
 @property (nonatomic, retain) NSString* fandangoURL;
+@property (nonatomic, retain) NSString* image;
 
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
