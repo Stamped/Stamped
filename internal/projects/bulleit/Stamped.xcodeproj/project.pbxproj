@@ -725,7 +725,7 @@
 		7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_stamps@2x.png"; sourceTree = "<group>"; };
 		7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTabBarViewController.h; sourceTree = "<group>"; };
 		7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTabBarViewController.m; sourceTree = "<group>"; };
-		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RootTabBarViewController.xib; sourceTree = "<group>"; };
+		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RootTabBarViewController.xib; path = ../Interfaces/RootTabBarViewController.xib; sourceTree = "<group>"; };
 		CB3725D5141D6117002A8F96 /* CollapsiblePreviewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CollapsiblePreviewController.xib; sourceTree = "<group>"; };
 		CB3725D8141DA5EE002A8F96 /* BookDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookDetailViewController.h; sourceTree = "<group>"; };
 		CB3725D9141DA5EE002A8F96 /* BookDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookDetailViewController.m; sourceTree = "<group>"; };
@@ -749,7 +749,6 @@
 		CBD1260E141A801100CCBDD8 /* PairedLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PairedLabel.h; sourceTree = "<group>"; };
 		CBD1260F141A801100CCBDD8 /* PairedLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PairedLabel.m; sourceTree = "<group>"; };
 		CBD12610141A801100CCBDD8 /* PairedLabel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PairedLabel.xib; sourceTree = "<group>"; };
-		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RootTabBarViewController.xib; path = ../Interfaces/RootTabBarViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1592,6 +1591,7 @@
 		7EA73BD413E6EE3100E3C722 /* libRestKitJSONParserNXJSON.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
+			name = "libRestKitJSONParser+NXJSON.a";
 			path = libRestKitJSONParserNXJSON.a;
 			remoteRef = 7EA73BD313E6EE3100E3C722 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -1662,7 +1662,7 @@
 		7EE1193213CE0C4100378139 /* RestKitSpecs.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = RestKitSpecs.app;
+			path = UISpec.app;
 			remoteRef = 7EE1193113CE0C4100378139 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
