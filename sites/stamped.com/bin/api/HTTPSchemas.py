@@ -442,24 +442,25 @@ class HTTPEntity(Schema):
             
             # Affiliates
             if schema.sources.openTable.reserveURL != None:
-                url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-                        (schema.sources.openTable.reserveURL)
+                url = "http://www.opentable.com/reserve/%s&ref=9166" % 
+                        (schema.sources.openTable.reserveURL, )
                 self.opentable_url = url
             
             if schema.sources.apple.view_url != None:
                 itunes_url  = schema.sources.apple.view_url
                 base_url    = "http://click.linksynergy.com/fs-bin/stat"
                 params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" \
-                            % (LINKSHARE_TOKEN)
+                               % (LINKSHARE_TOKEN)
                 deep_url    = "%s?%s&RD_PARM1=%s" % (base_url, params, \
                                     _encodeLinkShareDeepURL(itunes_url))
                 short_url   = _encodeiTunesShortURL(itunes_url)
-
+                
                 self.itunes_url         = deep_url
                 self.itunes_short_url   = short_url
             
             is_apple = 'apple' in schema
             
+            # Image
             if schema.image is not None:
                 self.image = self._handle_image(schema.image, is_apple)
             elif schema.large is not None:
@@ -485,13 +486,6 @@ class HTTPEntity(Schema):
                     self.albums = albums
                 except:
                     pass
-            
-            # if schema.sources.netflix
-            
-            # if schema.sources.fandango.url != None:
-            
-            # if schema.sources.barnesAndNoble
-            
         else:
             raise NotImplementedError
         return self

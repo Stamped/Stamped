@@ -8,11 +8,15 @@ __license__ = "TODO"
 import Globals, utils
 import epf, sqlite3, string
 import CSVUtils
-import psycopg2
-import psycopg2.extensions
 
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+try:
+    import psycopg2
+    import psycopg2.extensions
+
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+except ImportError:
+    utils.log("Warning: missing required psycopg2 module")
 
 from pprint       import pprint
 from utils        import AttributeDict

@@ -164,7 +164,8 @@ class ZagatCrawler(AExternalEntitySource):
             'zurl' : self.base + href, 
         }
         
-        self._globals['soup'] = soup
+        #self._globals['soup'] = soup
+        # parse cuisine
         header = soup.find('div', {'id' : "block-zagat_restaurants-14"})
         if header is not None:
             header = header.find('ul').find('li', {'class' : 'first'})
@@ -172,6 +173,7 @@ class ZagatCrawler(AExternalEntitySource):
             if header is not None:
                 entity.cuisine = header.getText()
         
+        # parse website
         site = soup.find('span', {'class' : 'website'})
         if site is not None:
             site = site.find('a')
@@ -179,6 +181,7 @@ class ZagatCrawler(AExternalEntitySource):
             if site is not None:
                 entity.site = site.get('href')
         
+        # parse preview image
         img = soup.find('div', {'id' : 'content'}).find('div', {'class' : 'photo'})
         if img is not None:
             img = img.find('img')
