@@ -69,7 +69,7 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1/"];
+  self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
 }
 
 - (void)viewDidUnload {
