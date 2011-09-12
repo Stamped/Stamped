@@ -236,7 +236,6 @@
   if (stamps && stamps.count > 0)
   {
     [self addSectionStampedBy];
-    
   }
   
 }

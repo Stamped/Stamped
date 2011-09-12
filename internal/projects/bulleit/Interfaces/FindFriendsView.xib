@@ -50,7 +50,7 @@
 						<string key="NSFrame">{{0, 96}, {320, 364}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="771997158"/>
+						<reference key="NSNextKeyView"/>
 						<object class="NSColor" key="IBUIBackgroundColor" id="375088325">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MQA</bytes>
@@ -61,7 +61,7 @@
 						<int key="IBUISeparatorStyle">1</int>
 						<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
 						<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
-						<float key="IBUIRowHeight">44</float>
+						<float key="IBUIRowHeight">51</float>
 						<float key="IBUISectionHeaderHeight">22</float>
 						<float key="IBUISectionFooterHeight">22</float>
 					</object>
@@ -138,7 +138,7 @@
 						<string key="NSFrame">{{181, 52}, {48, 34}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="628756118"/>
+						<reference key="NSNextKeyView" ref="771997158"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
@@ -161,6 +161,7 @@
 						<string key="NSFrame">{{0, 95}, {320, 9}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="628756118"/>
 						<int key="IBUIContentMode">4</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -254,6 +255,22 @@
 						<reference key="destination" ref="771997158"/>
 					</object>
 					<int key="connectionID">16</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">dataSource</string>
+						<reference key="source" ref="628756118"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">17</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">tableView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="628756118"/>
+					</object>
+					<int key="connectionID">18</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -369,7 +386,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">16</int>
+			<int key="maxID">18</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -422,12 +439,14 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>contactsButton</string>
 							<string>nipple</string>
+							<string>tableView</string>
 							<string>twitterButton</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UIButton</string>
 							<string>UIImageView</string>
+							<string>UITableView</string>
 							<string>UIButton</string>
 						</object>
 					</object>
@@ -437,6 +456,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>contactsButton</string>
 							<string>nipple</string>
+							<string>tableView</string>
 							<string>twitterButton</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -448,6 +468,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">nipple</string>
 								<string key="candidateClassName">UIImageView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">tableView</string>
+								<string key="candidateClassName">UITableView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">twitterButton</string>

@@ -12,22 +12,14 @@
 #import "GTMOAuthViewControllerTouch.h"
 
 #import "STSectionHeaderView.h"
+#import "PeopleTableViewCell.h"
 #import "Util.h"
-
-// Constants ///////////////////////////////////////////////////////////////////
 
 NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
 NSString* const kTwitterFriendsURI = @"/friends/ids.json";
 NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 
-// Private Interface ///////////////////////////////////////////////////////////
-
 @interface FindFriendsViewController ()
-
-@property (nonatomic, assign) FindFriendsSource findSource;
-@property (nonatomic, retain) GTMOAuthAuthentication* authentication;
-@property (nonatomic, retain) RKClient* twitterClient;
-
 - (void)adjustNippleToView:(UIView*)view;
 - (GTMOAuthAuthentication*)createAuthentication;
 - (void)signInToTwitter;
@@ -38,19 +30,26 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 - (void)fetchCurrentUser;
 - (void)fetchFriendIDs:(NSString*)userIDString;
 - (void)findStampedFriendsFromTwitter:(NSArray*)twitterIDs;
+
+@property (nonatomic, assign) FindFriendsSource findSource;
+@property (nonatomic, retain) GTMOAuthAuthentication* authentication;
+@property (nonatomic, retain) RKClient* twitterClient;
+@property (nonatomic, copy) NSArray* twitterFriends;
 @end
 
-// Implementation //////////////////////////////////////////////////////////////
 
 @implementation FindFriendsViewController
 
 @synthesize findSource = findSource_;
 @synthesize authentication = authentication_;
 @synthesize twitterClient = twitterClient_;
+@synthesize twitterFriends = twitterFriends_;
 
 @synthesize contactsButton = contactsButton_;
 @synthesize twitterButton = twitterButton_;
 @synthesize nipple = nipple_;
+@synthesize tableView = tableView_;
+
 
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
@@ -74,6 +73,11 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 
 - (void)viewDidUnload {
   self.twitterClient = nil;
+  self.twitterFriends = nil;
+  self.contactsButton = nil;
+  self.twitterButton = nil;
+  self.nipple = nil;
+  self.tableView = nil;
 
   [super viewDidUnload];
 }
@@ -83,8 +87,7 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
     [self findFromContacts:self];
   else if (self.findSource == FindFriendsFromTwitter)
     [self findFromTwitter:self];
-  //else
-  //  NSAssert(NO, @"Find source %d invalid", self.findSource);  // Causing an error on archive build!?
+  [super viewWillAppear:animated];
 }
 
 #pragma mark - Actions
@@ -108,6 +111,9 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
                       forState:UIControlStateNormal];
   [self adjustNippleToView:self.twitterButton];
 
+  if (twitterFriends_)
+    return;
+
   GTMOAuthAuthentication* auth = [self createAuthentication];
   if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
                                                  authentication:auth]) {
@@ -119,6 +125,29 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   }
 }
 
+#pragma mark - Table view data source.
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
+  return 1;
+}
+
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  return self.twitterFriends.count;
+}
+
+- (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  static NSString* CellIdentifier = @"Cell";
+  
+  PeopleTableViewCell* cell = (PeopleTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  if (cell == nil) {
+    cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+  }
+  
+  cell.user = [self.twitterFriends objectAtIndex:indexPath.row];
+  
+  return cell;
+}
+
 #pragma mark - Table View Delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
@@ -128,7 +157,7 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
   view.leftLabel.text = @"Contacts using Stamped";
-  view.rightLabel.text = @"42";
+  view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
   return view;
 }
 
@@ -181,7 +210,6 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
     NSLog(@"GTMOAuth error = %@", error);
     return;
   }
-  //NSAssert(!error, @"GTMOAuth error = %@", error);  // TODO: probably do something less bad.
   self.authentication = auth;
 }
 
@@ -194,7 +222,8 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 }
 
 - (void)fetchFriendIDs:(NSString*)userIDString {
-  NSString* path = [NSString stringWithFormat:@"%@?cursor=-1&user_id=%@", kTwitterFriendsURI, userIDString];
+  NSString* path =
+      [kTwitterFriendsURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
   RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
   [self.authentication authorizeRequest:request.URLRequest];
   [request send];
@@ -204,18 +233,16 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   // TODO: the server only supports 100 IDs at a time. need to chunk.
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
-
-  NSString* path = [NSString stringWithFormat:@"%@?q=%@",
-      kStampedTwitterFriendsURI, [twitterIDs componentsJoinedByString:@","]];
-  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:path
+  
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedTwitterFriendsURI
                                                         delegate:self];
+  loader.method = RKRequestMethodPOST;
+  loader.params = [NSDictionary dictionaryWithObject:[twitterIDs componentsJoinedByString:@","] forKey:@"q"];
   loader.objectMapping = mapping;
   [loader send];
 }
 
-#pragma mark - RestKit Delegate
-
-// Requests ////////////////////////////////////////////////////////////////////
+#pragma mark - RKRequest Delegate Methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
@@ -253,10 +280,13 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   NSLog(@"Twitter error %@ for request %@", error, request);
 }
 
-// Object Loader ///////////////////////////////////////////////////////////////
+#pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  NSLog(@"got users: %@", objects);
+  if (findSource_ == FindFriendsFromTwitter)
+    self.twitterFriends = objects;
+
+  [self.tableView reloadData];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
