@@ -14,8 +14,14 @@
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIPageControl* pageControl;
 
+@property (nonatomic, retain) IBOutlet UILabel* page1Title;
+@property (nonatomic, retain) IBOutlet UILabel* page2Title;
+@property (nonatomic, retain) IBOutlet UILabel* page3Title;
+
 - (IBAction)findfromContacts:(id)sender;
 - (IBAction)findFromTwitter:(id)sender;
+
+- (IBAction)dismissWelcomeView:(id)sender;
 
 - (IBAction)pageViewChanged:(id)sender;
 

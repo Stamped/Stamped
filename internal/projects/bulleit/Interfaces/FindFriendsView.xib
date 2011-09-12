@@ -158,15 +158,16 @@
 					<object class="IBUIImageView" id="771997158">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{100, 96}, {18, 9}}</string>
+						<string key="NSFrame">{{0, 96}, {320, 9}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView"/>
+						<int key="IBUIContentMode">4</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">add_friends_nipple.png</string>
+							<string key="NSResourceName">add_friends_nipple_bar.png</string>
 						</object>
 					</object>
 				</object>
@@ -475,7 +476,7 @@
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>add_friends_done_button.png</string>
-				<string>add_friends_nipple.png</string>
+				<string>add_friends_nipple_bar.png</string>
 				<string>add_friends_toolbar.png</string>
 				<string>contacts_icon.png</string>
 				<string>twitter_logo.png</string>
