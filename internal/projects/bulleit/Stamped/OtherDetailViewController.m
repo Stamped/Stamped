@@ -91,7 +91,7 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.mainContentView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
