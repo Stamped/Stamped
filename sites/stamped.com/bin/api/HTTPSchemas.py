@@ -458,14 +458,16 @@ class HTTPEntity(Schema):
                 self.itunes_url         = deep_url
                 self.itunes_short_url   = short_url
             
+            is_apple = 'apple' in schema
+            
             if schema.image is not None:
-                self.image = schema.image
+                self.image = self._handle_image(schema.image, is_apple)
             elif schema.large is not None:
-                self.image = schema.large
+                self.image = self._handle_image(schema.large, is_apple)
             elif schema.small is not None:
-                self.image = schema.small
+                self.image = self._handle_image(schema.small, is_apple)
             elif schema.tiny is not None:
-                self.image = schema.tiny
+                self.image = self._handle_image(schema.tiny, is_apple)
             
             if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
                 songs = schema.songs
@@ -493,6 +495,12 @@ class HTTPEntity(Schema):
         else:
             raise NotImplementedError
         return self
+    
+    def _handle_image(self, url, is_apple):
+        if is_apple:
+            return url.replace('100x100', '200x200')
+        
+        return url
 
 class HTTPEntityNew(Schema):
     def setSchema(self):
