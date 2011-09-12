@@ -118,14 +118,15 @@ class EntityMatcher(AEntityMatcher):
             'factual'       : self._factual_matcher, 
         }
         
-        if entity.category == 'food':
-            matchers.add(self._places_matcher)
-        elif entity.category == 'film':
-            matchers.add(self._film_matcher)
-        elif entity.category == 'book':
-            matchers.add(self._book_matcher)
-        elif entity.category == 'music':
-            matchers.add(self._music_matcher)
+        if (not hasattr(self.options, 'merge')) or (not self.options.merge):
+            if entity.category == 'food':
+                matchers.add(self._places_matcher)
+            elif entity.category == 'film':
+                matchers.add(self._film_matcher)
+            elif entity.category == 'book':
+                matchers.add(self._book_matcher)
+            elif entity.category == 'music':
+                matchers.add(self._music_matcher)
         
         for k, v in matcher_map.iteritems():
             if k in entity:

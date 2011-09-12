@@ -13,7 +13,7 @@ from AEntitySink            import AEntitySink
 from Schemas                import Entity
 from pprint                 import pprint
 
-from match.IDBasedEntityMatchers import OpenTableEntityMatcher
+from match.EntityMatcher import EntityMatcher
 
 class MergeEntitySink(AEntitySink):
     
@@ -21,7 +21,8 @@ class MergeEntitySink(AEntitySink):
         AEntitySink.__init__(self, "MergeEntitySink")
         
         self.stampedAPI = MongoStampedAPI()
-        self.matcher    = OpenTableEntityMatcher(self.stampedAPI)
+        self.matcher    = EntityMatcher(self.stampedAPI)
+        self.matcher.options['merge'] = True
     
     def _processItem(self, item):
         assert isinstance(item, Entity)
