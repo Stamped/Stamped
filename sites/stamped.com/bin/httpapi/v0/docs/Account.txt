@@ -293,21 +293,25 @@ The user's screen name or email.
 
 
 ------------------------------------------------------------------------------
-## GET account/verify_credentials ##
+## POST account/linked_accounts ##
 
 ### Description ###
-Checks if the supplied credentials are valid.
+Store identifying properties from linked third-party accounts (e.g. Twitter, Facebook, etc.).
 
 ### Details ###
 * OAuth Token Required
-* **NOTE**: This function is not yet supported.
 
 ### Parameters ###
 
-_None_
+**twitter_id** _optional_
+The user's twitter id.
+
+**twitter_screen_name** _optional_
+The user's twitter screen_name.
 
 ### Sample Request ###
-	GET https://api.stamped.com/1/account/verify_credentials.json
+	POST https://api.stamped.com/v0/account/linked_accounts.json
+	oauth_token=1234567890123456789012&twitter_id=1234567890&twitter_screen_name=abcd
 
 ### Sample Result ###
 	true

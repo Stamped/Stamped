@@ -91,3 +91,18 @@ def findPhone(request):
     
     return transformOutput(output)
 
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def findTwitter(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFindUser(), request)
+
+    users       = stampedAPI.findUsersByTwitter(authUserId, schema.q.value)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(output)
+

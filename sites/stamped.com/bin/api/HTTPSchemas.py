@@ -150,6 +150,19 @@ class HTTPAccountCheck(Schema):
     def setSchema(self):
         self.login              = SchemaElement(basestring, required=True)
 
+class HTTPLinkedAccounts(Schema):
+    def setSchema(self):
+        self.twitter_id         = SchemaElement(basestring)
+        self.twitter_screen_name= SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'LinkedAccounts':
+            schema.twitter_id           = self.twitter_id
+            schema.twitter_screen_name  = self.twitter_screen_name
+        else:
+            raise NotImplementedError
+        return schema
+
 # ##### #
 # Users #
 # ##### #
@@ -165,6 +178,7 @@ class HTTPUser(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
+        self.identifier         = SchemaElement(basestring)
         self.num_stamps         = SchemaElement(int)
         self.num_stamps_left    = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
@@ -187,6 +201,8 @@ class HTTPUser(Schema):
             self.num_faves          = stats.pop('num_faves', 0)
             self.num_credits        = stats.pop('num_credits', 0)
             self.num_credits_given  = stats.pop('num_credits_given', 0)
+            self.num_likes          = stats.pop('num_credits', 0)
+            self.num_likes_given    = stats.pop('num_credits_given', 0)
         else:
             raise NotImplementedError
         return self

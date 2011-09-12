@@ -68,7 +68,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.favoritesArray = nil;
 }
 

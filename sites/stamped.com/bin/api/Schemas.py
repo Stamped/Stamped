@@ -49,15 +49,21 @@ class Account(Schema):
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True, default=False)
         self.locale             = LocaleSchema()
-        self.linked_accounts    = LinkedAccountSchema()
+        self.linked_accounts    = LinkedAccounts()
         self.devices            = DevicesSchema()
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema()
 
-class LinkedAccountSchema(Schema):
+class LinkedAccounts(Schema):
     def setSchema(self):
         self.itunes             = SchemaElement(basestring)
+        self.twitter            = TwitterAccountSchema()
+        
+class TwitterAccountSchema(Schema):
+    def setSchema(self):
+        self.twitter_id         = SchemaElement(basestring)
+        self.twitter_screen_name= SchemaElement(basestring)
         
 class DevicesSchema(Schema):
     def setSchema(self):
@@ -86,6 +92,7 @@ class User(Schema):
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema(required=True)
+        self.identifier         = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('UserMini', 'UserTiny'):

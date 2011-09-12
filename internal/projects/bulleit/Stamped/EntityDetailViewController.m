@@ -45,7 +45,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)dealloc {
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.titleLabel = nil;
   self.descriptionLabel = nil;
   self.mainActionLabel = nil;
@@ -109,7 +109,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.titleLabel = nil;
   self.descriptionLabel = nil;
   self.mainActionLabel = nil;
@@ -127,7 +127,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   viewIsVisible_ = NO;
 }
 

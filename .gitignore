@@ -6,7 +6,6 @@
 *.o
 *.old
 out
-Kevin.xcuserdatad*
 internal/projects/ios-fonts-test/FontTest/FontTest/FontTestAppDelegate.m
 
 internal/projects/ios-fonts-test/FontTest/FontTest/CreateImageViewController.m
@@ -17,10 +16,7 @@ internal/projects/ios-fonts-test/FontTest/FontTest.xcodeproj/project.xcworkspace
 
 internal/projects/ios-fonts-test/FontTest/FontTest.xcodeproj/project.pbxproj
 
-internal/projects/bulleit/Stamped.xcodeproj/xcuserdata/andybons.xcuserdatad*
+xcuserdata/
 
-internal/projects/bulleit/Stamped.xcodeproj/xcuserdata/andybons.xcuserdatad/xcdebugger/Breakpoints.xcbkptlist
+Breakpoints.xcbkptlist
 
-internal/projects/bulleit/RestKit
-
-internal/projects/bulleit/Stamped.xcodeproj/xcuserdata/andybons.xcuserdatad/xcschemes/xcschememanagement.plist

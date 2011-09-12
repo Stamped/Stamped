@@ -37,6 +37,7 @@ urlpatterns = patterns('',
     (r'v0/account/verify_credentials.json',     'v0.functions.account.verify_credentials'),
     (r'v0/account/reset_password.json',         'v0.functions.account.reset_password'),
     (r'v0/account/check.json',                  'v0.functions.account.check'),
+    (r'v0/account/linked_accounts.json',        'v0.functions.account.linked_accounts'),
 
     ### USERS
     (r'v0/users/show.json',             'v0.functions.users.show'),

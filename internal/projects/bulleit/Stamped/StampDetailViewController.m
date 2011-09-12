@@ -28,6 +28,7 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "StampDetailCommentView.h"
+#import "ShowImageViewController.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
 
@@ -44,6 +45,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpMainContentView;
 - (void)setUpCommentsView;
 - (void)handleTap:(UITapGestureRecognizer*)recognizer;
+- (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleCommentUserImageViewTap:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
@@ -83,7 +85,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)dealloc {
   [stamp_ release];
   [detailViewController_ release];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super dealloc];
 }
 
@@ -97,7 +99,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super viewWillDisappear:animated];
 }
 
@@ -153,7 +155,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.headerView = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
@@ -282,8 +284,14 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                       200, 200 * (height / width));
 
     mainCommentFrame.size.height += CGRectGetHeight(stampPhotoView_.bounds) + 10;
+    UITapGestureRecognizer* recognizer =
+        [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                action:@selector(handlePhotoTap:)];
+    stampPhotoView_.userInteractionEnabled = YES;
+    [stampPhotoView_ addGestureRecognizer:recognizer];
+    [recognizer release];
     [mainCommentContainer_ addSubview:stampPhotoView_];
-    [stampPhotoView_ release];
+    [self.stampPhotoView release];
   }
   
   User* creditedUser = [stamp_.credits anyObject];
@@ -324,7 +332,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                     range:NSMakeRange(0, full.length)];
     [string addAttribute:(NSString*)kCTFontAttributeName
                    value:(id)font 
-                   range:[full rangeOfString:user]];
+                   range:[full rangeOfString:user options:NSBackwardsSearch]];
     CFRelease(font);
     CFRelease(style);
     creditStringLayer.string = string;
@@ -418,7 +426,20 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
-  [addCommentField_ resignFirstResponder];
+  if ([addCommentField_ isFirstResponder]) {
+    [addCommentField_ resignFirstResponder];
+    return;
+  }
+}
+
+- (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  ShowImageViewController* viewController = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
+  viewController.image = stampPhotoView_.image;
+  [self.navigationController pushViewController:viewController animated:YES];
+  [viewController release];
 }
 
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer {

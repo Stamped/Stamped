@@ -26,7 +26,6 @@
   CAGradientLayer* ribbonGradientLayer_;
   CALayer* stampLayer_;
   User* creditedUser_;
-  CGRect originalCommentFrame_;
 }
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;

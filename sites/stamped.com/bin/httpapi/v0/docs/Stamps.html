@@ -598,6 +598,126 @@ The unique id of the stamp.</p>
 }
 </code></pre>
 
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="poststampslikescreate">POST stamps/likes/create</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Create a new &#8220;like&#8221; on a stamp.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+<li>After a &#8220;like&#8221; is created, the parameter &#8220;is_liked&#8221; will be true any time the authenticating user requests the stamp object.</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>stamp_id</strong> <em>required</em>
+The unique id of the stamp that the user &#8220;liking&#8221;. </p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v1/stamps/likes/create.json
+oauth_token=1234567890123456789012&amp;stamp_id=4e226ea84e61754161000000
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;blurb&quot;: &quot;Best place ever!&quot;, 
+    &quot;entity&quot;: {
+        &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+        &quot;title&quot;: &quot;Spotted Pig&quot;,
+        &quot;subtitle&quot;: &quot;New York, NY&quot;
+        &quot;category&quot;: &quot;food&quot;,
+        &quot;subcategory&quot;: &quot;restaurant&quot;
+        &quot;desc&quot;: &quot;Burger place&quot;,
+        &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+        &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+        &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+        &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+        &quot;phone&quot;: &quot;1235551234&quot;
+    }, 
+    &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;, 
+    &quot;created&quot;: &quot;2011-07-17 05:14:54.128641&quot;,
+    &quot;user&quot;: {
+        &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+        &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+        &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+        &quot;color_primary&quot;: &quot;333333&quot;,
+        &quot;color_secondary&quot;: &quot;999999&quot;,
+        &quot;screen_name&quot;: &quot;kevin&quot;,
+        &quot;privacy&quot;: false
+    }
+    &quot;comment_preview&quot;: []
+    &quot;num_comments&quot;: 0,
+    &quot;num_likes&quot;: 1,
+    &quot;is_liked&quot;: true
+}
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="poststampslikesremove">POST stamps/likes/remove</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Remove a &#8220;like&#8221; from a stamp.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><strong>stamp_id</strong> <em>required</em>
+The unique id of the stamp that the user &#8220;liking&#8221;. </p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>POST https://api.stamped.com/v1/stamps/likes/remove.json
+oauth_token=1234567890123456789012&amp;stamp_id=4e226ea84e61754161000000
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>{
+    &quot;blurb&quot;: &quot;Best place ever!&quot;, 
+    &quot;entity&quot;: {
+        &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+        &quot;title&quot;: &quot;Spotted Pig&quot;,
+        &quot;subtitle&quot;: &quot;New York, NY&quot;
+        &quot;category&quot;: &quot;food&quot;,
+        &quot;subcategory&quot;: &quot;restaurant&quot;
+        &quot;desc&quot;: &quot;Burger place&quot;,
+        &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+        &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+        &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+        &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+        &quot;phone&quot;: &quot;1235551234&quot;
+    }, 
+    &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;, 
+    &quot;created&quot;: &quot;2011-07-17 05:14:54.128641&quot;,
+    &quot;user&quot;: {
+        &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+        &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+        &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+        &quot;color_primary&quot;: &quot;333333&quot;,
+        &quot;color_secondary&quot;: &quot;999999&quot;,
+        &quot;screen_name&quot;: &quot;kevin&quot;,
+        &quot;privacy&quot;: false
+    }
+    &quot;comment_preview&quot;: []
+    &quot;num_comments&quot;: 0,
+    &quot;num_likes&quot;: 0
+}
+</code></pre>
+
     </div>
 </body>
 </html>

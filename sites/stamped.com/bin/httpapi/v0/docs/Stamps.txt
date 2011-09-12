@@ -372,3 +372,107 @@ The unique id of the stamp.
 	}
 
 
+------------------------------------------------------------------------------
+## POST stamps/likes/create ##
+
+### Description ###
+Create a new "like" on a stamp.
+
+### Details ###
+* OAuth Token Required
+* After a "like" is created, the parameter "is_liked" will be true any time the authenticating user requests the stamp object.
+
+### Parameters ###
+
+**stamp_id** _required_
+The unique id of the stamp that the user "liking". 
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/stamps/likes/create.json
+	oauth_token=1234567890123456789012&stamp_id=4e226ea84e61754161000000
+
+### Sample Result ###
+	{
+		"blurb": "Best place ever!", 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"created": "2011-07-17 05:14:54.128641",
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"profile_image": "http://img.stamped.com/u/kevin.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kevin",
+			"privacy": false
+		}
+		"comment_preview": []
+		"num_comments": 0,
+		"num_likes": 1,
+		"is_liked": true
+	}
+
+
+------------------------------------------------------------------------------
+## POST stamps/likes/remove ##
+
+### Description ###
+Remove a "like" from a stamp.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+
+**stamp_id** _required_
+The unique id of the stamp that the user "liking". 
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/stamps/likes/remove.json
+	oauth_token=1234567890123456789012&stamp_id=4e226ea84e61754161000000
+
+### Sample Result ###
+	{
+		"blurb": "Best place ever!", 
+		"entity": {
+			"entity_id": "4e226ea84e61754161000000",
+			"title": "Spotted Pig",
+			"subtitle": "New York, NY"
+			"category": "food",
+			"subcategory": "restaurant"
+			"desc": "Burger place",
+			"coordinates": "40.714623,-74.006605",
+			"address": "314 West 11th Street New York, NY 10014-2369",
+			"last_modified": "2011-07-17 19:03:22.354813",
+			"opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+			"phone": "1235551234"
+		}, 
+		"stamp_id": "4e226fcd4e18474561000000", 
+		"created": "2011-07-17 05:14:54.128641",
+		"user": {
+			"user_id": "47cc67093475061e3d95369d", 
+			"profile_image": "http://img.stamped.com/u/kevin.png", 
+			"display_name": "Kevin P.", 
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"screen_name": "kevin",
+			"privacy": false
+		}
+		"comment_preview": []
+		"num_comments": 0,
+		"num_likes": 0
+	}
+
+

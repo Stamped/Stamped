@@ -8,6 +8,7 @@
 
 #import "ProfileViewController.h"
 
+#import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
@@ -17,6 +18,7 @@
 #import "RelationshipsViewController.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"
+#import "ShowImageViewController.h"
 #import "STSectionHeaderView.h"
 #import "InboxTableViewCell.h"
 #import "User.h"
@@ -30,13 +32,16 @@ static NSString* const kFriendshipCreatePath = @"friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 @interface ProfileViewController ()
+- (void)userImageTapped:(id)sender;
 - (void)loadStampsFromNetwork;
 - (void)loadUserInfoFromNetwork;
 - (void)fillInUserData;
 - (void)loadRelationshipData;
+- (void)addStampsRemainingLayer;
 
 @property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, copy) NSArray* stampsArray;
+@property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
 @end
 
 @implementation ProfileViewController
@@ -58,13 +63,14 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 @synthesize unfollowButton = unfollowButton_;
 @synthesize followIndicator = followIndicator_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
+@synthesize stampsRemainingLayer = stampsRemainingLayer_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
 }
 
 - (void)dealloc {
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.user = nil;
   [super dealloc];
 }
@@ -74,6 +80,11 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   userImageView_.imageURL = user_.profileImageURL;
+  userImageView_.enabled = YES;
+  [userImageView_ addTarget:self 
+                     action:@selector(userImageTapped:)
+           forControlEvents:UIControlEventTouchUpInside];
+
   CALayer* stampLayer = [[CALayer alloc] init];
   stampLayer.frame = CGRectMake(57, -10, 61, 61);
   stampLayer.opacity = 0.95;
@@ -108,7 +119,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.userImageView = nil;
   self.cameraButton = nil;
   self.creditCountLabel = nil;
@@ -137,16 +148,25 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
 }
 
+- (void)userImageTapped:(id)sender {
+  ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
+  controller.image = userImageView_.imageView.image;
+  [self.navigationController pushViewController:controller animated:YES];
+  [controller release];
+}
+
+#pragma mark - IBActions
+
 - (IBAction)followButtonPressed:(id)sender {
   followButton_.hidden = YES;
-  followIndicator_.hidden = NO;
+  [followIndicator_ startAnimating];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendshipCreatePath 
@@ -159,7 +179,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (IBAction)unfollowButtonPressed:(id)sender {
   unfollowButton_.hidden = YES;
-  followIndicator_.hidden = NO;
+  [followIndicator_ startAnimating];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kFriendshipRemovePath 
@@ -251,7 +271,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
     self.stampsAreTemporary = NO;
-    followIndicator_.hidden = YES;
+    [followIndicator_ stopAnimating];
     unfollowButton_.hidden = NO;
     followButton_.hidden = YES;
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] + 1];
@@ -260,7 +280,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
     self.stampsAreTemporary = YES;
-    followIndicator_.hidden = YES;
+    [followIndicator_ stopAnimating];
     unfollowButton_.hidden = YES;
     followButton_.hidden = NO;
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] - 1];
@@ -288,7 +308,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if ([request.resourcePath rangeOfString:kFriendshipCheckPath].location != NSNotFound) {
-    followIndicator_.hidden = YES;
+    [followIndicator_ stopAnimating];
     if ([response.bodyAsString isEqualToString:@"false"]) {
       followButton_.hidden = NO;
       self.stampsAreTemporary = YES;
@@ -310,17 +330,59 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   }
 }
 
+- (void)addStampsRemainingLayer {
+  stampsRemainingLayer_ = [[CATextLayer alloc] init];
+  stampsRemainingLayer_.alignmentMode = kCAAlignmentCenter;
+  stampsRemainingLayer_.frame = CGRectMake(0, 
+                                           CGRectGetMaxY(self.view.frame) - 30,
+                                           CGRectGetWidth(self.view.frame),
+                                           CGRectGetHeight(self.view.frame));
+  stampsRemainingLayer_.fontSize = 12;
+  stampsRemainingLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
+  stampsRemainingLayer_.contentsScale = [[UIScreen mainScreen] scale];
+  stampsRemainingLayer_.shadowColor = [UIColor whiteColor].CGColor;
+  stampsRemainingLayer_.shadowOpacity = 1.0;
+  stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
+  stampsRemainingLayer_.shadowRadius = 0;
+  
+  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStamps stringValue];
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  CFIndex numSettings = 1;
+  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+  CTParagraphStyleSetting settings[1] = {
+    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+  };
+  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
+  NSString* full = [NSString stringWithFormat:@"You have %@ stamps remaining", stampsLeft];
+  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
+  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                         (id)style, (id)kCTParagraphStyleAttributeName,
+                         (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                  range:NSMakeRange(0, full.length)];
+  [string addAttribute:(NSString*)kCTFontAttributeName
+                 value:(id)font 
+                 range:[full rangeOfString:stampsLeft]];
+  CFRelease(font);
+  CFRelease(style);
+  stampsRemainingLayer_.string = string;
+  [string release];
+  [self.view.layer addSublayer:stampsRemainingLayer_];
+  [stampsRemainingLayer_ release];
+}
+
 - (void)loadRelationshipData {
   NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
   if (!currentUserID)
     return;
 
   if ([currentUserID isEqualToString:user_.userID]) {
-    followIndicator_.hidden = YES;
-    toolbarView_.hidden = YES;
+    [followIndicator_ stopAnimating];
+    followButton_.hidden = YES;
+    unfollowButton_.hidden = YES;
+    [self addStampsRemainingLayer];
     return;
   }
-  followIndicator_.hidden = NO;
+  [followIndicator_ startAnimating];
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kFriendshipCheckPath delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:currentUserID, @"user_id_a",
                                                               user_.userID, @"user_id_b", nil];
