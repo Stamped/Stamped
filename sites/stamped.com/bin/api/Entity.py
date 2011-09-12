@@ -112,14 +112,14 @@ def setSubtitle(entity):
         entity.subtitle = 'Artist'
 
     elif entity.category == 'music' and entity.subcategory == 'album':
-        if entity.artist != None:
-            entity.subtitle = "%s (Album)" % entity.artist
+        if entity.artist_display_name != None:
+            entity.subtitle = "%s (Album)" % entity.artist_display_name
         else:
             entity.subtitle = 'Album'
             
     elif entity.category == 'music' and entity.subcategory == 'song':
-        if entity.artist != None:
-            entity.subtitle = "%s (Song)" % entity.artist
+        if entity.artist_display_name != None:
+            entity.subtitle = "%s (Song)" % entity.artist_display_name
         else:
             entity.subtitle = 'Song'
 
