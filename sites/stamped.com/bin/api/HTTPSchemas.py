@@ -439,12 +439,6 @@ class HTTPEntity(Schema):
             self.artist_name    = schema.artist_display_name
             self.album_name     = schema.album_name
             self.label          = schema.label_studio
-
-            if self.subcategory == 'artist':
-                self.album_list     = schema.albums
-            if self.subcategory == 'album':
-                self.track_list     = schema.tracks
-            ### TODO
             
             # Affiliates
             if schema.sources.openTable.reserveURL != None:
@@ -463,7 +457,7 @@ class HTTPEntity(Schema):
 
                 self.itunes_url         = deep_url
                 self.itunes_short_url   = short_url
-
+            
             if schema.image is not None:
                 self.image = schema.image
             elif schema.large is not None:
@@ -477,7 +471,7 @@ class HTTPEntity(Schema):
                 songs = list(song.song_name for song in schema.songs)
                 self.songs = songs
             
-            if schema.subcategory == "album" and schema.albums is not None:
+            if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
                 try:
                     albums = list(album.album_name for album in schema.albums)
                     self.albums = albums
@@ -485,12 +479,11 @@ class HTTPEntity(Schema):
                     pass
             
             # if schema.sources.netflix
-
+            
             # if schema.sources.fandango.url != None:
-
+            
             # if schema.sources.barnesAndNoble
             
-
         else:
             raise NotImplementedError
         return self
