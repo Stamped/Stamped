@@ -1,0 +1,288 @@
+//
+//  CollapsibleViewController.m
+//  Stamped
+//
+//  Created by Jake Zien on 9/7/11.
+//  Copyright 2011 RISD. All rights reserved.
+//
+
+#import "CollapsibleViewController.h"
+#import "PairedLabel.h"
+#import "UIColor+Stamped.h"
+
+
+@implementation CollapsibleViewController
+
+@synthesize headerView      = headerView_;
+@synthesize contentView     = contentView_;
+@synthesize sectionLabel    = sectionLabel_;
+@synthesize arrowView       = arrowView_;
+@synthesize isCollapsed     = isCollapsed_;
+@synthesize contentDict     = contentDict_;
+@synthesize numLabel        = numLabel_;
+@synthesize iconView        = iconView_;
+@synthesize delegate        = delegate_;
+@synthesize collapsedHeight = collapsedHeight_;
+@synthesize footerView      = footerView_;
+@synthesize footerLabel     = footerLabel_;
+@synthesize collapsedFooterText = collapsedFooterText_;
+@synthesize expandedFooterText  = expandedFooterText_; 
+
+int const LABEL_HEIGHT          = 20;
+int const IMAGE_HEIGHT          = 40;
+int const SPACE_HEIGHT          = 10;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+      isCollapsed_ = YES;
+      collapsedHeight_ = 40.f;
+      
+      if ([nibNameOrNil isEqualToString:@"CollapsiblePreviewController"]) previewMode = YES;
+
+      NSMutableDictionary* dict = [NSMutableDictionary dictionary];
+      contentDict_ = dict;
+      [contentDict_ retain];
+      
+      maxNameLabelWidth = 0.f;
+    }
+    return self;
+}
+
+- (void)didReceiveMemoryWarning
+{
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    
+    // Release any cached data, images, etc that aren't in use.
+}
+
+#pragma mark - View lifecycle
+
+
+- (void)viewDidLoad
+{
+  self.arrowView.image = [UIImage imageNamed:@"eDetail-arrow-down"];
+}
+
+- (void)viewDidUnload
+{
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+  [contentDict_ removeAllObjects];
+  [contentDict_ release];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+
+#pragma mark - Collapsing and expanding
+
+- (void)collapse
+{
+  [self.delegate collapsibleViewController:self willChangeHeightBy:collapsedHeight_-self.view.bounds.size.height];
+  self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y,
+                               self.view.frame.size.width, collapsedHeight_);
+  
+  if (self.footerLabel)
+  {
+    self.footerLabel.text = self.collapsedFooterText;
+    CGFloat delta = CGRectGetMinX(self.footerLabel.frame) + [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
+    arrowView_.frame = CGRectOffset(arrowView_.frame, delta, 0);
+  }
+}
+
+- (void)expand
+{
+  CGFloat newHeight = 40.f + [self contentHeight] + SPACE_HEIGHT;
+  if (self.footerView) newHeight += self.footerView.frame.size.height - SPACE_HEIGHT;
+  
+  [self.delegate collapsibleViewController:self willChangeHeightBy:newHeight - self.view.bounds.size.height];
+  
+  self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y,
+                               self.view.frame.size.width, newHeight);
+  
+  if (self.footerLabel)
+  {
+    self.footerLabel.text = self.expandedFooterText;
+    CGFloat delta = CGRectGetMinX(self.footerLabel.frame) + [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
+    arrowView_.frame = CGRectOffset(arrowView_.frame, delta, 0);
+  }
+  
+}
+
+- (void)swapArrowImage  //so the shadow always comes from the top edge.
+{
+  if (isCollapsed_)
+  {
+    arrowView_.transform = CGAffineTransformMakeRotation(0);
+    arrowView_.image = [UIImage imageNamed:@"eDetail-arrow-down"]; 
+  }
+  
+  else
+  {
+    arrowView_.transform = CGAffineTransformMakeRotation(0);
+    arrowView_.image = [UIImage imageNamed:@"eDetail-arrow-up"]; 
+  }
+  
+}
+
+- (void)collapseAnimated
+{
+  
+  [UIView animateWithDuration:0.25 
+                   animations:^{ [self collapse];
+                                 arrowView_.transform = CGAffineTransformMakeRotation(M_PI);}
+                   completion:^(BOOL finished) { [self swapArrowImage]; } ];
+}
+
+- (void)expandAnimated
+{  
+  [UIView animateWithDuration:0.25
+                   animations:^{ [self expand];
+                                 arrowView_.transform = CGAffineTransformMakeRotation(M_PI); }
+                   completion:^(BOOL finished) { [self swapArrowImage]; } ];
+}
+
+
+- (void)setIsCollapsed:(BOOL)collapsed
+{
+  isCollapsed_=collapsed;
+  
+  if (isCollapsed_) [self collapseAnimated];
+  else [self expandAnimated];
+}
+
+
+#pragma mark - Adding content
+
+- (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key
+{
+  PairedLabel* newLabel = [[PairedLabel alloc] initWithNibName:@"PairedLabel" bundle:nil];
+
+  CGRect frame = newLabel.view.frame;
+  frame.origin = CGPointMake(sectionLabel_.frame.origin.x, [self contentHeight]);
+  newLabel.view.frame = frame;
+  
+  newLabel.nameLabel.text  = name;
+  newLabel.valueLabel.text = value;
+  
+  CGFloat newWidth = [newLabel.nameLabel.text sizeWithFont:newLabel.nameLabel.font].width;
+  if (newWidth > maxNameLabelWidth)
+  {
+    maxNameLabelWidth = newWidth;
+    
+    for (UIViewController* vc in self.contentDict.objectEnumerator)
+    {
+      if ([vc isKindOfClass:[PairedLabel class]])
+      {
+        ((PairedLabel*)vc).nameWidth = maxNameLabelWidth;
+      }                           
+    }
+  }
+  
+  newLabel.nameWidth = maxNameLabelWidth;
+  
+  [self addContent:newLabel forKey:key];
+}
+
+- (void)addNumberedListWithValues:(NSArray*)values
+{
+  NSUInteger itemNumber = 0;
+  
+  for (NSString* value in values) {
+    
+    PairedLabel* newLabel = [[PairedLabel alloc] initWithNibName:@"PairedLabel" bundle:nil];
+    
+    CGRect frame = newLabel.view.frame;
+    frame.origin = CGPointMake(sectionLabel_.frame.origin.x, [self contentHeight]);
+    frame.size   = CGSizeMake(contentView_.frame.size.width, 16.f); 
+    newLabel.view.frame = frame;
+    
+    //Change "label" field font for numbering.
+    newLabel.nameLabel.font      = [UIFont fontWithName:@"Helvetica-Bold" size:10.f];
+    newLabel.nameLabel.textColor = [UIColor stampedLightGrayColor];
+    
+    newLabel.nameLabel.text  = [NSString stringWithFormat:@"%d", ++itemNumber];
+    newLabel.valueLabel.text = value;
+    
+    
+    CGFloat newWidth = [newLabel.nameLabel.text sizeWithFont:newLabel.nameLabel.font].width;
+    if (newWidth > maxNameLabelWidth)
+    {
+      maxNameLabelWidth = newWidth;
+      
+      for (UIViewController* vc in self.contentDict.objectEnumerator)
+      {
+        if ([vc isKindOfClass:[PairedLabel class]])
+        {
+          ((PairedLabel*)vc).numberWidth = maxNameLabelWidth;
+        }                           
+      }
+    }
+    
+    newLabel.numberWidth = maxNameLabelWidth;
+    
+    [self addContent:newLabel forKey:[NSString stringWithFormat:@"%d", itemNumber]];
+  
+  }
+  
+}
+
+- (void)addText:(NSString*)text forKey:(NSString*)key;
+{
+  UITextView* textView = [[UITextView alloc] initWithFrame:contentView_.frame];
+  textView.font = [UIFont fontWithName:@"Helvetica" size:12.f];
+  textView.textColor = [UIColor stampedGrayColor];
+  textView.text = text;
+  textView.backgroundColor = [UIColor clearColor];
+  textView.userInteractionEnabled = NO;
+  textView.frame = CGRectMake(8.f, 0, contentView_.frame.size.width-30, 100.0);
+  
+  [self addContent:textView forKey:key];
+  CGRect frame = textView.frame;
+  frame.size.height = textView.contentSize.height;
+  textView.frame = frame;
+  
+}
+
+- (void)addContent:(id)content forKey:(NSString*)key
+{
+  [self.contentDict setObject:content forKey:key];
+  if ([content respondsToSelector:@selector(view)])
+      [contentView_ addSubview:((CollapsibleViewController*)content).view];
+  else [contentView_ addSubview:(UIView*)content];
+}
+
+- (float)contentHeight
+{
+  float contentHeight = 0.f;
+  
+  if (!contentDict_) return 0.f;
+  if (contentDict_.count == 0) return 0.f;
+  
+  for (id content in self.contentDict.objectEnumerator)
+  {
+    if ([content respondsToSelector:@selector(view)])
+          contentHeight += ((UIViewController*)content).view.frame.size.height;
+    else contentHeight += ((UIView*)content).frame.size.height;
+  }
+
+  return contentHeight;
+}
+
+#pragma mark - Touch events
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  self.isCollapsed = !isCollapsed_;
+}
+
+
+@end

@@ -18,6 +18,7 @@
 @dynamic city;
 @dynamic state;
 @dynamic zipcode;
+@dynamic neighborhood;
 @dynamic category;
 @dynamic entityID;
 @dynamic openTableURL;
@@ -31,10 +32,30 @@
 @dynamic artist;
 @dynamic desc;
 @dynamic album;
-@dynamic authors;
+@dynamic author;
 @dynamic cast;
 @dynamic director;
 @dynamic year;
+@dynamic hours;
+@dynamic cuisine;
+@dynamic price;
+@dynamic website;
+@dynamic itunesShortURL;
+@dynamic itunesURL;
+@dynamic releaseDate;
+@dynamic trackList;
+@dynamic genre;
+@dynamic label;
+@dynamic length;
+@dynamic rating;
+@dynamic format;
+@dynamic publisher;
+@dynamic isbn;
+@dynamic language;
+@dynamic amazonURL;
+@dynamic inTheaters;
+@dynamic fandangoURL;
+
 
 - (UIImage*)categoryImage {
   if (self.category)
@@ -58,8 +79,8 @@
     return EntityCategoryFilm;
   } else if ([cat isEqualToString:@"music"]) {
     return EntityCategoryMusic;
-  } else if ([cat isEqualToString:@"books"]) {
-    return EntityCategoryBooks;
+  } else if ([cat isEqualToString:@"book"]) {
+    return EntityCategoryBook;
   }
   return EntityCategoryOther;
 }

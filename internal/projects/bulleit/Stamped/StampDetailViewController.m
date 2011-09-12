@@ -18,6 +18,10 @@
 #import "Comment.h"
 #import "PlaceDetailViewController.h"
 #import "GenericItemDetailViewController.h"
+#import "MusicDetailViewController.h"
+#import "BookDetailViewController.h"
+#import "FilmDetailViewController.h"
+#import "OtherDetailViewController.h"
 #import "Entity.h"
 #import "Favorite.h"
 #import "Notifications.h"
@@ -415,6 +419,18 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   switch (stamp_.entityObject.entityCategory) {
     case EntityCategoryFood:
       detailViewController_ = [[PlaceDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
+      break;
+    case EntityCategoryMusic:
+      detailViewController_ = [[MusicDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
+      break;
+    case EntityCategoryBook:
+      detailViewController_ = [[BookDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
+      break;
+    case EntityCategoryFilm:
+      detailViewController_ = [[FilmDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
+      break;
+    case EntityCategoryOther:
+      detailViewController_ = [[OtherDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
     default:
       detailViewController_ = [[GenericItemDetailViewController alloc] initWithEntityObject:stamp_.entityObject];

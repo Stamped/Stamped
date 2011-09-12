@@ -10,4 +10,9 @@
 
 @interface GenericItemDetailViewController : EntityDetailViewController
 
+@property (nonatomic, retain) IBOutlet UIImageView* imageView;
+@property (nonatomic, retain) IBOutlet UIImageView* affiliateLogoView;
+
+
+
 @end

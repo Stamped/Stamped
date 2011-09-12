@@ -187,20 +187,18 @@ static AccountManager* sharedAccountManager_ = nil;
   if ([object isKindOfClass:[User class]]) {
     [self storeCurrentUser:object];
     return;
-  }
-
-  // Simple log in: store the OAuth token.
-  else if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
+  } else if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
+    // Simple log in: store the OAuth token.
     self.firstRunViewController.delegate = nil;
     [self.navController.parentViewController dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
 
     [self storeOAuthToken:object];
     [self sendUserInfoRequest];
-  }
-
-  // Register a new user.
-  else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
+  } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
+    [self storeOAuthToken:object];
+  } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
+    // Registering a new user.
     NSLog(@"did load object: %@", object);
     [self storeOAuthToken:[object objectForKey:@"token"]];
     [self sendUserInfoRequest];

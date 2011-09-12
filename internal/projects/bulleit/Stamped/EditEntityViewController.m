@@ -139,7 +139,7 @@ const CGFloat kKeyboardHeight = 217.0;
   } else if ([entityObject_.category isEqualToString:@"book"]) {
     [self showBookView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_book_icon"];
-    primaryTextField_.text = entityObject_.authors;
+    primaryTextField_.text = entityObject_.author;
     selectedCategory_ = STEditCategoryRowBooks;
   } else if ([entityObject_.category isEqualToString:@"food"]) {
     [self showFoodView];
@@ -489,9 +489,9 @@ const CGFloat kKeyboardHeight = 217.0;
     case STEditCategoryRowBooks:
       entityObject_.category = @"book";
       entityObject_.subcategory = @"book";
-      entityObject_.authors = primaryTextField_.text;
+      entityObject_.author = primaryTextField_.text;
       entityObject_.subtitle =
-          entityObject_.authors.length > 0 ? entityObject_.authors : @"Book";
+          entityObject_.author.length > 0 ? entityObject_.author : @"Book";
       break;
     case STEditCategoryRowFood:
       entityObject_.category = @"food";
