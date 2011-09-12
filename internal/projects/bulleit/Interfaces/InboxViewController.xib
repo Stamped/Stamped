@@ -245,6 +245,7 @@
 								<string key="NSFrame">{{282, -1}, {38, 48}}</string>
 								<reference key="NSSuperview" ref="566224778"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="IBUIContentStretch">{{0, 1.3877799999999999e-17}, {1, 1}}</string>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -307,7 +308,7 @@
 				<int key="IBUISeparatorStyle">1</int>
 				<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
 				<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
-				<float key="IBUIRowHeight">84</float>
+				<float key="IBUIRowHeight">96</float>
 				<float key="IBUISectionHeaderHeight">22</float>
 				<float key="IBUISectionFooterHeight">22</float>
 				<reference key="IBUITableHeaderView" ref="566224778"/>
