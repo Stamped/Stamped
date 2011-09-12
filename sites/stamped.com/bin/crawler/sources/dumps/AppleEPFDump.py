@@ -7,11 +7,15 @@ __license__ = "TODO"
 
 import Globals, utils
 import CSVUtils, epf, gzip, os, sqlite3, time
-import psycopg2
-import psycopg2.extensions
 
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+try:
+    import psycopg2
+    import psycopg2.extensions
+
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+except ImportError:
+    utils.log("Warning: missing required psycopg2 module")
 
 from utils          import lazyProperty, AttributeDict, Singleton
 from AEntitySource  import AExternalDumpEntitySource
@@ -141,9 +145,6 @@ class AAppleEPFDump(AExternalDumpEntitySource):
             utils.log(cmd)
         
         try:
-            #if not cmd.endswith(';'):
-            #    cmd += ';'
-            
             self.db.execute(cmd)
         #except sqlite3.OperationalError:
         except psycopg2.Error, e:

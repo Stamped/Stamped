@@ -7,11 +7,12 @@ __license__ = "TODO"
 
 import Globals, utils
 
-from AStampedAPI import AStampedAPI
-from utils       import abstract, AttributeDict
-from Schemas     import Entity
-from pprint      import pprint
-from errors      import *
+from AStampedAPI            import AStampedAPI
+from utils                  import abstract, AttributeDict
+from Schemas                import Entity
+from pprint                 import pprint
+from errors                 import *
+from GeocoderEntityProxy    import GeocoderEntityProxy
 
 __all__ = [
     "AEntityMatcher", 
@@ -29,10 +30,11 @@ class AEntityMatcher(object):
                 noop=False, 
             )
         
-        self.stamped_api   = stamped_api
-        self.options       = options
-        self.dead_entities = set()
-        self.numDuplicates = 0
+        self.stamped_api    = stamped_api
+        self.options        = options
+        self.dead_entities  = set()
+        self.numDuplicates  = 0
+        self._geocoderProxy = GeocoderEntityProxy(None)
     
     @property
     def _entityDB(self):
@@ -46,12 +48,15 @@ class AEntityMatcher(object):
     def _stampDB(self):
         return self.stamped_api._stampDB
     
-    def addOne(self, entity, force=False):
+    def addOne(self, entity, force=False, override=False):
         if not force:
-            result = self.dedupeOne(entity)
+            result = self.dedupeOne(entity, override=override)
             
             if result is not None:
                 return result
+        
+        if 'place' in entity and entity.lat is None:
+            entity = self._geocoderProxy._transform(entity)
         
         entity = self._entityDB.addEntity(entity)
         
@@ -60,17 +65,17 @@ class AEntityMatcher(object):
         
         return entity
     
-    def addMany(self, entities, force=False):
+    def addMany(self, entities, force=False, override=False):
         results = []
         for entity in entities or []:
-            result = self.addOne(entity, force)
+            result = self.addOne(entity, force=force, override=override)
             
             if result is not None:
                 results.append(result)
         
         return results
     
-    def dedupeOne(self, entity):
+    def dedupeOne(self, entity, override=False):
         try:
             if entity.entity_id in self.dead_entities:
                 return None
@@ -112,7 +117,7 @@ class AEntityMatcher(object):
                     self.dead_entities.add(dupe.entity_id)
                     utils.log("   %d) removing %s" % (i + 1, dupe.title))
             
-            self.mergeDuplicates(keep, dupes1)
+            self.mergeDuplicates(keep, dupes1, override=override)
             return keep
         except Fail:
             if 'entity_id' in entity:
@@ -234,12 +239,20 @@ class AEntityMatcher(object):
             
             def _addDict(src, dest, wrap):
                 for k, v in src.iteritems():
+                    stale = False
+                    
                     if not k in dest:
-                        dest[k] = v
-                        wrap['stale'] = True
+                        stale = True
+                    elif isinstance(v, list):
+                        if len(v) != len(dest[k]):
+                            stale = True
                     elif isinstance(v, dict):
                         _addDict(v, dest, wrap)
-                    elif override:
+                    
+                    if override and not isinstance(v, dict):
+                        stale = True
+                    
+                    if stale:
                         dest[k] = v
                         wrap['stale'] = True
             

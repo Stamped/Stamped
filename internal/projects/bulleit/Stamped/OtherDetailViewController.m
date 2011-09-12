@@ -166,18 +166,16 @@
 }
 
 
-- (void) setupMapView
-{
-  if (!entityObject_.coordinates)
-  {
+- (void)setupMapView {
+  if (!entityObject_.coordinates) {
     self.mapView.hidden = YES;
 
     CGRect frame = self.mainContentView.frame;
     frame = CGRectOffset(frame, 0, -CGRectGetHeight(self.mapView.frame));
     frame.size.height += CGRectGetHeight(self.mapView.frame);
-  }
     return;
-  
+  }
+
   NSArray* coordinates = [entityObject_.coordinates componentsSeparatedByString:@","]; 
   latitude_ = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   longitude_ = [(NSString*)[coordinates objectAtIndex:1] floatValue];
@@ -189,7 +187,6 @@
   
   if (viewIsVisible_ && !annotation_)
     [self addAnnotation];
-  
 }
 
 - (void) setupSectionViews {

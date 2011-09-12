@@ -270,7 +270,7 @@ class HTTPEntity(Schema):
         self.desc               = SchemaElement(basestring)
         self.image              = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
-
+        
         # Address
         self.address            = SchemaElement(basestring)
         self.address_street     = SchemaElement(basestring)
@@ -278,24 +278,24 @@ class HTTPEntity(Schema):
         self.address_state      = SchemaElement(basestring)
         self.address_country    = SchemaElement(basestring)
         self.address_zip        = SchemaElement(basestring)
-
+        
         self.neighborhood       = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
-
+        
         # Contact
         self.phone              = SchemaElement(basestring)
         self.site               = SchemaElement(basestring)
         self.hours              = SchemaElement(basestring)
-
+        
         # Cross-Category
         self.release_date       = SchemaElement(datetime)
         self.length             = SchemaElement(basestring)
         self.rating             = SchemaElement(basestring)
-
+        
         # Food
         self.cuisine            = SchemaElement(basestring)
         self.price_scale        = SchemaElement(float)
-
+        
         # Book
         self.author             = SchemaElement(basestring)
         self.isbn               = SchemaElement(basestring)
@@ -303,7 +303,7 @@ class HTTPEntity(Schema):
         self.format             = SchemaElement(basestring)
         self.language           = SchemaElement(basestring)
         self.edition            = SchemaElement(basestring)
-
+        
         # Film
         self.genre              = SchemaElement(basestring)
         self.cast               = SchemaElement(basestring)
@@ -311,12 +311,14 @@ class HTTPEntity(Schema):
         self.network            = SchemaElement(basestring)
         self.in_theaters        = SchemaElement(basestring)
         self.run_dates          = SchemaElement(basestring)
-
+        
         # Music
         self.artist_name        = SchemaElement(basestring)
         self.album_name         = SchemaElement(basestring)
         self.label              = SchemaElement(basestring)
-
+        self.albums             = SchemaList(SchemaElement(basestring))
+        self.songs              = SchemaList(SchemaElement(basestring))
+        
         # Affiliates
         self.opentable_url      = SchemaElement(basestring)
         self.itunes_url         = SchemaElement(basestring)
@@ -437,41 +439,62 @@ class HTTPEntity(Schema):
             self.artist_name    = schema.artist_display_name
             self.album_name     = schema.album_name
             self.label          = schema.label_studio
-
-            if self.subcategory == 'artist':
-                self.album_list     = schema.albums
-            if self.subcategory == 'album':
-                self.track_list     = schema.tracks
-            ### TODO
             
             # Affiliates
             if schema.sources.openTable.reserveURL != None:
                 url = "http://www.opentable.com/reserve/%s&ref=9166" % \
-                        (schema.sources.openTable.reserveURL)
+                        (schema.sources.openTable.reserveURL, )
                 self.opentable_url = url
             
             if schema.sources.apple.view_url != None:
                 itunes_url  = schema.sources.apple.view_url
                 base_url    = "http://click.linksynergy.com/fs-bin/stat"
                 params      = "id=%s&offerid=146261&type=3&subid=0&tmpid=1826" \
-                            % (LINKSHARE_TOKEN)
+                               % (LINKSHARE_TOKEN)
                 deep_url    = "%s?%s&RD_PARM1=%s" % (base_url, params, \
                                     _encodeLinkShareDeepURL(itunes_url))
                 short_url   = _encodeiTunesShortURL(itunes_url)
-
+                
                 self.itunes_url         = deep_url
                 self.itunes_short_url   = short_url
-
-            # if schema.sources.netflix
-
-            # if schema.sources.fandango.url != None:
-
-            # if schema.sources.barnesAndNoble
             
-
+            is_apple = 'apple' in schema
+            
+            # Image
+            if schema.image is not None:
+                self.image = self._handle_image(schema.image, is_apple)
+            elif schema.large is not None:
+                self.image = self._handle_image(schema.large, is_apple)
+            elif schema.small is not None:
+                self.image = self._handle_image(schema.small, is_apple)
+            elif schema.tiny is not None:
+                self.image = self._handle_image(schema.tiny, is_apple)
+            
+            if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
+                songs = schema.songs
+                
+                # for an artist, only return up to 10 songs
+                if schema.subcategory == "artist":
+                    songs = songs[0:min(10, len(songs))]
+                
+                songs = list(song.song_name for song in songs)
+                self.songs = songs
+            
+            if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
+                try:
+                    albums = list(album.album_name for album in schema.albums)
+                    self.albums = albums
+                except:
+                    pass
         else:
             raise NotImplementedError
         return self
+    
+    def _handle_image(self, url, is_apple):
+        if is_apple:
+            return url.replace('100x100', '200x200')
+        
+        return url
 
 class HTTPEntityNew(Schema):
     def setSchema(self):
