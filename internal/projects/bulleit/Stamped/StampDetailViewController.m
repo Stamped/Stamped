@@ -45,6 +45,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpMainContentView;
 - (void)setUpCommentsView;
 - (void)handleTap:(UITapGestureRecognizer*)recognizer;
+- (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleCommentUserImageViewTap:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
@@ -283,6 +284,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                       200, 200 * (height / width));
 
     mainCommentFrame.size.height += CGRectGetHeight(stampPhotoView_.bounds) + 10;
+    UITapGestureRecognizer* recognizer =
+        [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                action:@selector(handlePhotoTap:)];
+    stampPhotoView_.userInteractionEnabled = YES;
+    [stampPhotoView_ addGestureRecognizer:recognizer];
+    [recognizer release];
     [mainCommentContainer_ addSubview:stampPhotoView_];
     [self.stampPhotoView release];
   }
@@ -423,14 +430,16 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [addCommentField_ resignFirstResponder];
     return;
   }
-  
-  if (stampPhotoView_.image &&
-      CGRectContainsPoint(stampPhotoView_.frame, [recognizer locationInView:stampPhotoView_.superview])) {
-    ShowImageViewController* viewController = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
-    viewController.image = stampPhotoView_.image;
-    [self.navigationController pushViewController:viewController animated:YES];
-    [viewController release];
-  }
+}
+
+- (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  ShowImageViewController* viewController = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
+  viewController.image = stampPhotoView_.image;
+  [self.navigationController pushViewController:viewController animated:YES];
+  [viewController release];
 }
 
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer {

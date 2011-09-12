@@ -11,4 +11,5 @@
 @interface Util : NSObject
 + (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
 + (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img;
++ (NSString*)userReadableTimeSinceDate:(NSDate*)date;
 @end

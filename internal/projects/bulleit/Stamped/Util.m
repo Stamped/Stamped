@@ -48,4 +48,12 @@
   return maskedImage;
 }
 
++ (NSString*)userReadableTimeSinceDate:(NSDate*)date {
+  NSLog(@"Date: %@", date);
+  NSTimeInterval timeSince = [[NSDate date] timeIntervalSinceDate:date];
+  
+  NSString* result = [NSString stringWithFormat:@"%f", timeSince];
+  return result;
+}
+
 @end

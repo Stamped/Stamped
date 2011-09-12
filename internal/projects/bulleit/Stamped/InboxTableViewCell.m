@@ -293,7 +293,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                          58,
                                          CGRectGetWidth(numCommentsLabel_.frame),
                                          CGRectGetHeight(numCommentsLabel_.frame));
-    commentBubbleImageView_.frame = CGRectMake(CGRectGetMinX(numCommentsLabel_.frame) - CGRectGetWidth(commentBubbleImageView_.frame) - 2,
+    commentBubbleImageView_.frame = CGRectMake(CGRectGetMinX(numCommentsLabel_.frame) - CGRectGetWidth(commentBubbleImageView_.frame) - 3,
                                                60,
                                                CGRectGetWidth(commentBubbleImageView_.frame),
                                                CGRectGetHeight(commentBubbleImageView_.frame));
@@ -307,6 +307,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
   stamps_ = [stamps copy];
   Stamp* stamp = [stamps_ lastObject];
+  //NSLog(@"%@", [Util userReadableTimeSinceDate:stamp.created]);
+  
   cameraImageView_.hidden = stamp.imageURL ? NO : YES;
   disclosureImageView_.hidden = !cameraImageView_.hidden;
 
