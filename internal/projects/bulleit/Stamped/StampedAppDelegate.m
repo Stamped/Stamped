@@ -111,6 +111,10 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                         @"refresh_token", @"refreshToken",
                                         @"expires_in", @"lifetimeSecs", nil];
 
+  RKObjectMapping* registerMapping = [RKObjectMapping serializationMapping];
+  [registerMapping mapRelationship:@"user" withMapping:userMapping];
+  [registerMapping mapRelationship:@"token" withMapping:oauthMapping];
+
   // Example date string: 2011-07-19 20:49:42.037000
   [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss.SSSSSS" inTimeZone:nil];
   
@@ -121,6 +125,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [objectManager.mappingProvider setMapping:eventMapping forKeyPath:@"Event"];
   [objectManager.mappingProvider setMapping:favoriteMapping forKeyPath:@"Favorite"];
   [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
+  [objectManager.mappingProvider setMapping:registerMapping forKeyPath:@"Registration"];
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];
