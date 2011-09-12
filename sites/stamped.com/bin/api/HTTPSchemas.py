@@ -467,7 +467,7 @@ class HTTPEntity(Schema):
             elif schema.tiny is not None:
                 self.image = schema.tiny
             
-            if schema.subcategory == "song" and schema.songs is not None:
+            if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
                 songs = list(song.song_name for song in schema.songs)
                 self.songs = songs
             
