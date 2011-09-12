@@ -442,7 +442,7 @@ class HTTPEntity(Schema):
             
             # Affiliates
             if schema.sources.openTable.reserveURL != None:
-                url = "http://www.opentable.com/reserve/%s&ref=9166" % 
+                url = "http://www.opentable.com/reserve/%s&ref=9166" % \
                         (schema.sources.openTable.reserveURL, )
                 self.opentable_url = url
             
