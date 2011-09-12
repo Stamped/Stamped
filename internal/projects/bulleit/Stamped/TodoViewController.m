@@ -68,16 +68,16 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.favoritesArray = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [self loadFavoritesFromDataStore];
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  [self loadFavoritesFromDataStore];
   [super viewDidAppear:animated];
 }
 

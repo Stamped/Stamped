@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import copy, urllib, urlparse
-from datetime import datetime
+from datetime import datetime, date
 from schema import *
 from Schemas import *
 
@@ -93,6 +93,7 @@ class HTTPAccount(Schema):
         self.email              = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.privacy            = SchemaElement(bool, required=True)
+        self.phone              = SchemaElement(int)
         # self.language           = SchemaElement(basestring)
         # self.time_zone          = SchemaElement(basestring)
 
@@ -109,6 +110,7 @@ class HTTPAccountNew(Schema):
         self.email              = SchemaElement(basestring, required=True)
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
+        self.phone              = SchemaElement(int)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
@@ -123,6 +125,7 @@ class HTTPAccountSettings(Schema):
         self.password           = SchemaElement(basestring)
         self.screen_name        = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
+        self.phone              = SchemaElement(int)
         # self.language           = SchemaElement(basestring)
         # self.time_zone          = SchemaElement(basestring)
 
@@ -147,6 +150,19 @@ class HTTPAccountCheck(Schema):
     def setSchema(self):
         self.login              = SchemaElement(basestring, required=True)
 
+class HTTPLinkedAccounts(Schema):
+    def setSchema(self):
+        self.twitter_id         = SchemaElement(basestring)
+        self.twitter_screen_name= SchemaElement(basestring)
+
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'LinkedAccounts':
+            schema.twitter_id           = self.twitter_id
+            schema.twitter_screen_name  = self.twitter_screen_name
+        else:
+            raise NotImplementedError
+        return schema
+
 # ##### #
 # Users #
 # ##### #
@@ -162,6 +178,7 @@ class HTTPUser(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
+        self.identifier         = SchemaElement(basestring)
         self.num_stamps         = SchemaElement(int)
         self.num_stamps_left    = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
@@ -169,6 +186,8 @@ class HTTPUser(Schema):
         self.num_faves          = SchemaElement(int)
         self.num_credits        = SchemaElement(int)
         self.num_credits_given  = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.num_likes_given    = SchemaElement(int)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ in ('Account', 'User'):
@@ -182,6 +201,8 @@ class HTTPUser(Schema):
             self.num_faves          = stats.pop('num_faves', 0)
             self.num_credits        = stats.pop('num_credits', 0)
             self.num_credits_given  = stats.pop('num_credits_given', 0)
+            self.num_likes          = stats.pop('num_credits', 0)
+            self.num_likes_given    = stats.pop('num_credits_given', 0)
         else:
             raise NotImplementedError
         return self
@@ -223,6 +244,18 @@ class HTTPUserRelationship(Schema):
         self.user_id_b          = SchemaElement(basestring)
         self.screen_name_b      = SchemaElement(basestring)
 
+class HTTPFindUser(Schema):
+    def setSchema(self):
+        self.q                  = SchemaList(SchemaElement(basestring), delimiter=',')
+
+# ####### #
+# Invites #
+# ####### #
+
+class HTTPInvitation(Schema):
+    def setSchema(self):
+        self.email              = SchemaElement(basestring)
+
 # ######## #
 # Entities #
 # ######## #
@@ -238,33 +271,53 @@ class HTTPEntity(Schema):
         self.image              = SchemaElement(basestring)
         self.last_modified      = SchemaElement(basestring)
 
+        # Address
         self.address            = SchemaElement(basestring)
+        self.address_street     = SchemaElement(basestring)
+        self.address_city       = SchemaElement(basestring)
+        self.address_state      = SchemaElement(basestring)
+        self.address_country    = SchemaElement(basestring)
+        self.address_zip        = SchemaElement(basestring)
+
         self.neighborhood       = SchemaElement(basestring)
         self.coordinates        = SchemaElement(basestring)
 
+        # Contact
         self.phone              = SchemaElement(basestring)
         self.site               = SchemaElement(basestring)
         self.hours              = SchemaElement(basestring)
 
-        self.cuisine            = SchemaElement(basestring)
+        # Cross-Category
+        self.release_date       = SchemaElement(datetime)
+        self.length             = SchemaElement(basestring)
+        self.rating             = SchemaElement(basestring)
 
+        # Food
+        self.cuisine            = SchemaElement(basestring)
+        self.price_scale        = SchemaElement(float)
+
+        # Book
         self.author             = SchemaElement(basestring)
         self.isbn               = SchemaElement(basestring)
         self.publisher          = SchemaElement(basestring)
         self.format             = SchemaElement(basestring)
         self.language           = SchemaElement(basestring)
+        self.edition            = SchemaElement(basestring)
 
-        self.rating             = SchemaElement(basestring)
-        self.track_length       = SchemaElement(basestring)
-        self.release_date       = SchemaElement(basestring)
+        # Film
         self.genre              = SchemaElement(basestring)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
-        self.channel            = SchemaElement(basestring)
+        self.network            = SchemaElement(basestring)
+        self.in_theaters        = SchemaElement(basestring)
+        self.run_dates          = SchemaElement(basestring)
 
-        self.artist             = SchemaElement(basestring)
-        self.album              = SchemaElement(basestring)
+        # Music
+        self.artist_name        = SchemaElement(basestring)
+        self.album_name         = SchemaElement(basestring)
+        self.label              = SchemaElement(basestring)
 
+        # Affiliates
         self.opentable_url      = SchemaElement(basestring)
         self.itunes_url         = SchemaElement(basestring)
         self.itunes_short_url   = SchemaElement(basestring)
@@ -289,33 +342,106 @@ class HTTPEntity(Schema):
             self.neighborhood   = schema.neighborhood
             self.coordinates    = _coordinatesDictToFlat(coordinates)
 
+            if len(schema.address_components) > 0:
+                address = {}
+                for component in schema.address_components:
+                    for i in component['types']:
+                        address[i] = component['short_name']
+                    
+                if 'street_address' in address:
+                    self.address_street = address['street_address']
+                elif 'street_number' in address and 'route' in address:
+                    self.address_street = "%s %s" % \
+                        (address['street_number'], address['route'])
+
+                if 'locality' in address:
+                    self.address_city = address['locality']
+
+                if 'administrative_area_level_1' in address:
+                    self.address_state = address['administrative_area_level_1']
+
+                if 'country' in address:
+                    self.address_country = address['country']
+
+                if 'postal_code' in address:
+                    self.address_zip = address['postal_code']
+
             # Contact
             self.phone          = schema.phone
             self.site           = schema.site
             self.hours          = schema.hoursOfOperation
             
+            # Cross-Category
+
+            ### TODO: Unify these within Schemas.py where possible
+            if self.category == 'book':
+                self.release_date   = schema.publish_date
+                self.length         = schema.num_pages
+
+            elif self.category == 'film':
+                try:
+                    dateString = schema.original_release_date
+                    release_date = date(int(dateString[0:4]), \
+                                        int(dateString[5:7]), \
+                                        int(dateString[8:10]))
+                    self.release_date   = release_date
+                except:
+                    self.release_date   = None
+
+                self.length         = schema.track_length
+                self.rating         = schema.mpaa_rating
+
+                if schema.ngenres != None:
+                    for genre in schema.ngenres:
+                        if self.genre == None:
+                            self.genre = genre
+                        else:
+                            self.genre = "%s; %s" % (self.genre, genre)
+
+                if schema.short_description != None:
+                    self.desc = schema.short_description
+
+            elif self.category == 'music':
+                try:
+                    dateString = schema.original_release_date
+                    release_date = date(int(dateString[0:4]), \
+                                        int(dateString[5:7]), \
+                                        int(dateString[8:10]))
+                    self.release_date   = release_date
+                except:
+                    self.release_date   = None
+
+                self.length         = schema.track_length
+                if schema.parental_advisory_id == 1:
+                    self.rating         = "Parental Advisory"
+            
             # Food
             self.cuisine        = schema.cuisine
+            self.price_scale    = schema.priceScale
 
             # Book
             self.author         = schema.author
             self.isbn           = schema.isbn
             self.publisher      = schema.publisher
-            # self.format         = None
-            # self.language       = None
+            self.format         = schema.book_format
+            self.language       = schema.language
+            self.edition        = schema.edition
 
             # Film
-            self.rating         = schema.mpaa_rating
-            self.track_length   = schema.track_length
-            self.release_date   = schema.original_release_date
             self.cast           = schema.cast
             self.director       = schema.director
-            self.channel        = schema.channel
-            # self.genre          = None
+            self.network        = schema.network_name
+            self.in_theaters    = schema.in_theaters
 
             # Music
-            self.artist         = schema.artist_display_name
-            self.album          = schema.album_name
+            self.artist_name    = schema.artist_display_name
+            self.album_name     = schema.album_name
+            self.label          = schema.label_studio
+
+            if self.subcategory == 'artist':
+                self.album_list     = schema.albums
+            if self.subcategory == 'album':
+                self.track_list     = schema.tracks
             ### TODO
             
             # Affiliates
@@ -472,6 +598,10 @@ class HTTPStamp(Schema):
         self.image_url          = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
         self.num_comments       = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.like_threshold_hit = SchemaElement(bool)
+        self.is_liked           = SchemaElement(bool)
+        self.is_fav             = SchemaElement(bool)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
@@ -495,9 +625,13 @@ class HTTPStamp(Schema):
                 data['credit'] = credit
 
             self.importData(data, overflow=True)
-            self.num_comments = schema.stats.num_comments
-            self.entity.coordinates = _coordinatesDictToFlat(coordinates)
-            self.created = schema.timestamp.created
+            self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
+            self.num_comments           = schema.num_comments
+            self.num_likes              = schema.num_likes
+            self.like_threshold_hit     = schema.like_threshold_hit
+            self.created                = schema.timestamp.created
+            self.is_liked               = schema.is_liked
+            self.is_fav                 = schema.is_fav
 
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id

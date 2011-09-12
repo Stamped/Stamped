@@ -22,7 +22,7 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {

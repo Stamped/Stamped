@@ -13,7 +13,7 @@ from httpapi.v0.helpers import *
 def create(request):
     authUserId  = checkOAuth(request)
 
-    schema      = parseRequest(HTTPStampNew(), request)
+    schema      = parseFileUpload(HTTPStampNew(), request, 'image')
     entityId    = schema.entity_id
     data        = schema.exportSparse()
     del(data['entity_id'])
@@ -48,7 +48,7 @@ def update(request):
 @require_http_methods(["POST"])
 def update_image(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPImage(), request)
+    schema      = parseFileUpload(HTTPStampImage(), request, 'image')
     
     ret         = stampedAPI.updateStampImage(authUserId, schema.stamp_id, \
                                                 schema.image)
@@ -77,6 +77,30 @@ def remove(request):
     schema      = parseRequest(HTTPStampId(), request)
 
     stamp       = stampedAPI.removeStamp(authUserId, schema.stamp_id)
+    stamp       = HTTPStamp().importSchema(stamp)
+    
+    return transformOutput(stamp.exportSparse())
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def likesCreate(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampId(), request)
+
+    stamp       = stampedAPI.addLike(authUserId, schema.stamp_id)
+    stamp       = HTTPStamp().importSchema(stamp)
+    
+    return transformOutput(stamp.exportSparse())
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def likesRemove(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampId(), request)
+
+    stamp       = stampedAPI.removeLike(authUserId, schema.stamp_id)
     stamp       = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())

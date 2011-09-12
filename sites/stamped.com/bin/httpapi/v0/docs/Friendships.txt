@@ -342,3 +342,26 @@ The user id or screen name of the blocked user.
 	}
 
 
+------------------------------------------------------------------------------
+## POST friendships/invite ##
+
+### Description ###
+Invite a user to join the service.
+
+### Details ###
+* OAuth Token Required
+* Subsequent requests to invite the same user will result in failures.
+
+### Parameters ###
+
+**email** _required_
+The url-encoded email address of the user who should be invited.
+
+### Sample Request ###
+	POST https://api.stamped.com/v1/friendships/invite.json
+	oauth_token=1234567890123456789012&email=kevin%40stamped.com
+
+### Sample Result ###
+	True
+
+

@@ -113,6 +113,100 @@ class StampedAPIUsersPrivacy(StampedAPIUserTest):
         
         self.assertTrue(ret)
 
+class StampedAPIUsersFindContacts(StampedAPIUserTest):
+    def test_find_by_email(self):
+        path = "users/find/email.json"
+        emails = ['%s@stamped.com' % self.userA['screen_name'],
+                    '%s@stamped.com' % self.userB['screen_name']]
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": ','.join(emails)
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertIn(user['identifier'], [x.lower() for x in emails])
+
+    def test_find_by_phone(self):
+        # Set phone number
+        numbers = ['1235551111','1235551112']
+        path = "account/settings.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "phone": numbers[0],
+        }
+        result = self.handlePOST(path, data)
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "phone": numbers[1],
+        }
+        result = self.handlePOST(path, data)
+
+        path = "users/find/phone.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": ','.join(numbers)
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertIn(user['identifier'], numbers)
+
+    def test_find_by_phone_twofer(self):
+        # Set phone number
+        number = '1235551111'
+        path = "account/settings.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "phone": number,
+        }
+        result = self.handlePOST(path, data)
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "phone": number,
+        }
+        result = self.handlePOST(path, data)
+
+        path = "users/find/phone.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": number
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertTrue(user['identifier'] == number)
+
+
+class StampedAPIUsersFindTwitter(StampedAPIUserTest):
+    def test_find_by_twitter(self):
+        ids = ['1235551111','1235551112']
+        path = "account/linked_accounts.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "twitter_id": ids[0],
+        }
+        result = self.handlePOST(path, data)
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "twitter_id": ids[1],
+        }
+        result = self.handlePOST(path, data)
+
+        path = "users/find/twitter.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": ','.join(ids)
+        }
+        result = self.handleGET(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertIn(user['identifier'], ids)
+
 if __name__ == '__main__':
     main()
 

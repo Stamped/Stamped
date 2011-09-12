@@ -43,20 +43,27 @@ class Account(Schema):
         self.screen_name        = SchemaElement(basestring, required=True)
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
+        self.phone              = SchemaElement(int)
         self.bio                = SchemaElement(basestring)
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True, default=False)
         self.locale             = LocaleSchema()
-        self.linked_accounts    = LinkedAccountSchema()
+        self.linked_accounts    = LinkedAccounts()
         self.devices            = DevicesSchema()
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema()
 
-class LinkedAccountSchema(Schema):
+class LinkedAccounts(Schema):
     def setSchema(self):
         self.itunes             = SchemaElement(basestring)
+        self.twitter            = TwitterAccountSchema()
+        
+class TwitterAccountSchema(Schema):
+    def setSchema(self):
+        self.twitter_id         = SchemaElement(basestring)
+        self.twitter_screen_name= SchemaElement(basestring)
         
 class DevicesSchema(Schema):
     def setSchema(self):
@@ -85,6 +92,7 @@ class User(Schema):
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema(required=True)
+        self.identifier         = SchemaElement(basestring)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('UserMini', 'UserTiny'):
@@ -130,12 +138,16 @@ class UserStatsSchema(Schema):
         self.num_faves          = SchemaElement(int)
         self.num_credits        = SchemaElement(int)
         self.num_credits_given  = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.num_likes_given    = SchemaElement(int)
 
 class StampStatsSchema(Schema):
     def setSchema(self):
         self.num_comments       = SchemaElement(int)
         self.num_todos          = SchemaElement(int)
         self.num_credit         = SchemaElement(int)
+        self.num_likes          = SchemaElement(int)
+        self.like_threshold_hit = SchemaElement(bool)
 
 
 # ########## #
@@ -190,6 +202,7 @@ class Stamp(Schema):
         self.timestamp          = TimestampSchema()
         self.flags              = FlagsSchema()
         self.stats              = StampStatsSchema()
+        self.attributes         = StampAttributesSchema()
 
 class MentionSchema(Schema):
     def setSchema(self):
@@ -206,6 +219,11 @@ class CreditSchema(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
+
+class StampAttributesSchema(Schema):
+    def setSchema(self):
+        self.is_liked           = SchemaElement(bool)
+        self.is_fav             = SchemaElement(bool)
 
 
 # ######## #
@@ -375,6 +393,7 @@ class RestaurantSchema(Schema):
         self.chef               = SchemaElement(basestring)
         self.owner              = SchemaElement(basestring)
         self.reviewLinks        = SchemaElement(basestring)
+        self.priceScale         = SchemaElement(float)
 
 class AppSchema(Schema):
     def setSchema(self):
@@ -405,6 +424,9 @@ class BookSchema(Schema):
         self.sku_number         = SchemaElement(basestring)
         self.publisher          = SchemaElement(basestring)
         self.publish_date       = SchemaElement(basestring)
+        self.language           = SchemaElement(basestring)
+        self.book_format        = SchemaElement(basestring)
+        self.edition            = SchemaElement(basestring)
         self.num_pages          = SchemaElement(int)
 
 class VideoSchema(Schema):
@@ -417,7 +439,7 @@ class VideoSchema(Schema):
         ### TODO: modify ese based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
-        self.channel            = SchemaElement(basestring)
+        self.in_theaters        = SchemaElement(bool)
         
         self.v_retail_price     = SchemaElement(basestring)
         self.v_currency_code    = SchemaElement(basestring)
@@ -444,6 +466,7 @@ class SongSchema(Schema):
         self.preview_length     = SchemaElement(basestring)
         ### TODO: modify this based on crawler logic (only for custom entities currently)
         self.album_name         = SchemaElement(basestring) 
+        self.song_album_id      = SchemaElement(basestring) 
 
 class AlbumSchema(Schema):
     def setSchema(self):
@@ -486,6 +509,7 @@ class MediaSchema(Schema):
         self.media_type_id              = SchemaElement(basestring)
         self.artwork_url                = SchemaElement(basestring)
         self.mpaa_rating                = SchemaElement(basestring)
+        self.genre                      = SchemaElement(basestring)
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):

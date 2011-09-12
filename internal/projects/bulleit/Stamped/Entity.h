@@ -71,6 +71,7 @@ typedef enum {
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
+@property (nonatomic, readonly) UIImage* largeCategoryImage;
 @end
 
 @interface Entity (CoreDataGeneratedAccessors)

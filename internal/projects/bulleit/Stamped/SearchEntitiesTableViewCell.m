@@ -31,8 +31,8 @@
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
-    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 27, 32)];
-    categoryImageView_.contentMode = UIViewContentModeBottomRight;
+    categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(8, 0, 30, 32)];
+    categoryImageView_.contentMode = UIViewContentModeBottomLeft;
     [self addSubview:categoryImageView_];
     [categoryImageView_ release];
     
@@ -86,9 +86,9 @@
     if (entityObject) {
       customView_.titleLabel.text = entityObject.title;
       customView_.subtitleLabel.text = entityObject.subtitle;
-      customView_.categoryImageView.image = entityObject.categoryImage;
+      customView_.categoryImageView.image = entityObject.largeCategoryImage;
       customView_.categoryImageView.highlightedImage =
-          [Util whiteMaskedImageUsingImage:entityObject.categoryImage];
+          [Util whiteMaskedImageUsingImage:entityObject.largeCategoryImage];
 
     }
   }

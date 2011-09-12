@@ -9,7 +9,6 @@ import Globals, utils, logs, re, Blacklist
 from datetime import datetime
 from errors import *
 from auth import convertPasswordForStorage
-import base64
 
 from AStampedAPI import AStampedAPI
 
@@ -103,14 +102,55 @@ class StampedAPI(AStampedAPI):
             logs.warning(msg)
             raise InputError(msg)
 
+        # Create account
         account = self._accountDB.addAccount(account)
+
+        # Add activity if invitations were sent
+        invites = self._inviteDB.getInvites(account.email)
+        invitedBy = {}
+        for invite in invites:
+            invitedBy[invite['user_id']] = 1
+
+            activity                = Activity()
+            ### TODO: What genre are we picking for this activity item?
+            activity.genre          = 'invite_sent'
+            activity.user_id        = invite['user_id']
+            activity.link_user_id   = invite['user_id']
+            activity.created        = datetime.utcnow()
+            
+            self._activityDB.addActivity([account.user_id], activity)
+
+        if len(invitedBy) > 0:
+            activity                = Activity()
+            ### TODO: What genre are we picking for this activity item?
+            activity.genre          = 'invite_received'
+            activity.user_id        = account.user_id
+            activity.link_user_id   = account.user_id
+            activity.created        = datetime.utcnow()
+            
+            self._activityDB.addActivity(invitedBy.keys(), activity)
+        
+        self._inviteDB.join(account.email)
         
         return account
+    
+    def removeAccount(self, authUserId):
 
+        ### TODO: Remove all activity, stamps, entities, images, etc. for user
+        ### TODO: Verify w/ password?
+
+        account = self._accountDB.getAccount(authUserId)
+        self._accountDB.removeAccount(authUserId)
+
+        # Remove email address from invite list
+        self._inviteDB.remove(account.email)
+
+        return account
 
     def updateAccountSettings(self, authUserId, data):
         
         ### TODO: Reexamine how updates are done
+        ### TODO: Verify that email address is unique, confirm it
 
         account = self._accountDB.getAccount(authUserId)
 
@@ -119,6 +159,28 @@ class StampedAPI(AStampedAPI):
             if k == 'password':
                 v = convertPasswordForStorage(v)
             account[k] = v
+        
+        # Validate Screen Name
+        account.screen_name = account.screen_name.strip()
+        if not re.match("^[\w-]+$", account.screen_name) \
+            or len(account.screen_name) < 1 \
+            or len(account.screen_name) > 32:
+            msg = "Invalid format for screen name"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Check blacklist
+        if account.screen_name.lower() in Blacklist.screen_names:
+            msg = "Blacklisted screen name"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Validate email address
+        account.email = str(account.email).lower().strip()
+        if not utils.validate_email(account.email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
 
         self._accountDB.updateAccount(account)
 
@@ -157,43 +219,41 @@ class StampedAPI(AStampedAPI):
         return account
     
     def updateProfileImage(self, authUserId, data):
-        data = base64.urlsafe_b64decode(data.encode('ascii'))
-        
         image = self._imageDB.getImage(data)
         self._imageDB.addProfileImage(authUserId, image)
         
         return True
-    
-    def removeAccount(self, authUserId):
-
-        ### TODO: Remove all activity, stamps, entities, etc. for user
-        ### TODO: Verify w/ password?
-
-        account = self._accountDB.getAccount(authUserId)
-        self._accountDB.removeAccount(authUserId)
-        return account
 
     def checkAccount(self, login):
+        valid = False
         try:
             # Email
             if utils.validate_email(login):
+                valid = True
                 user = self._accountDB.getAccountByEmail(login)
             # Screen Name
             elif utils.validate_screen_name(login):
                 # Check blacklist
-                if login.lower() in Blacklist.screen_names:
-                    raise
-                user = self._accountDB.getAccountByScreenName(login)
+                if login.lower() not in Blacklist.screen_names:
+                    valid = True
+                    user = self._accountDB.getAccountByScreenName(login)
             else:
                 raise
             return user
         except:
-            msg = "Login info does not exist"
-            logs.debug(msg)
-            raise
-    
-    def verifyAccountCredentials(self, data, auth):
-        raise NotImplementedError
+            if valid == True:
+                msg = "Login info does not exist"
+                logs.debug(msg)
+                raise KeyError(msg)
+            else:
+                msg = "Invalid input"
+                logs.warning(msg)
+                raise InputError(msg)
+
+    def updateLinkedAccounts(self, authUserId, linkedAccounts):
+        self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
+
+        return True
     
     def resetPassword(self, params):
         raise NotImplementedError
@@ -255,6 +315,30 @@ class StampedAPI(AStampedAPI):
 
         users = self._userDB.lookupUsers(userIds, screenNames, limit=100)
 
+        return users
+    
+    def findUsersByEmail(self, authUserId, emails):
+
+        ### TODO: Add check for privacy settings?
+
+        users = self._userDB.findUsersByEmail(emails, limit=100)
+        
+        return users
+    
+    def findUsersByPhone(self, authUserId, phone):
+
+        ### TODO: Add check for privacy settings?
+
+        users = self._userDB.findUsersByPhone(phone, limit=100)
+        
+        return users
+    
+    def findUsersByTwitter(self, authUserId, twitterIds):
+
+        ### TODO: Add check for privacy settings?
+
+        users = self._userDB.findUsersByTwitter(twitterIds, limit=100)
+        
         return users
     
     def searchUsers(self, query, limit, authUserId):
@@ -456,6 +540,19 @@ class StampedAPI(AStampedAPI):
         ### TODO: Reenable activity items that were hidden before
 
         return user
+
+    def inviteFriend(self, authUserId, email):
+        # Validate email address
+        email = str(email).lower().strip()
+        if not utils.validate_email(email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Store email address linked to auth user id
+        self._inviteDB.inviteUser(email, authUserId)
+
+        return True
     
 
     """
@@ -613,16 +710,17 @@ class StampedAPI(AStampedAPI):
         return None
 
     
-    def _addUserObjects(self, stampData, userIds=None):
+    def _enrichStampObjects(self, stampData, **kwargs):
+        authUserId  = kwargs.pop('authUserId', None)
+        userIds     = kwargs.pop('userIds', {})
+
         singleStamp = False
         if not isinstance(stampData, list):
             singleStamp = True
             stampData = [stampData]
 
-        if userIds == None:
-            # Grab user data
-            userIds = {}
-
+        # Users
+        if len(userIds) == 0:
             for stamp in stampData:
                 # Grab user_id from stamp
                 userIds[stamp.user_id] = 1
@@ -634,11 +732,18 @@ class StampedAPI(AStampedAPI):
                 # Grab user_id from comments
                 for comment in stamp.comment_preview:
                     userIds[comment.user_id] = 1
-
+                
             users = self._userDB.lookupUsers(userIds.keys(), None)
 
             for user in users:
                 userIds[user.user_id] = user.exportSchema(UserMini())
+
+        if authUserId:
+            # Favorites
+            favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
+
+            # Likes
+            likes = self._stampDB.getUserLikes(authUserId)
 
         # Add user objects to stamps
         stamps = []
@@ -659,6 +764,15 @@ class StampedAPI(AStampedAPI):
                 for i in xrange(len(stamp.comment_preview)):
                     commentingUser = userIds[stamp.comment_preview[i].user_id]
                     stamp.comment_preview[i].user = commentingUser
+
+            if authUserId:
+                # Mark as favorited
+                if stamp.entity_id in favorites:
+                    stamp.is_fav = True
+
+                # Mark as liked
+                if stamp.stamp_id in likes:
+                    stamp.is_liked = True
 
             stamps.append(stamp)
 
@@ -754,7 +868,6 @@ class StampedAPI(AStampedAPI):
         # Add image to stamp
         ### TODO: Unwind stamp if this fails
         if imageData != None:
-            imageData = base64.urlsafe_b64decode(imageData.encode('ascii'))
             
             image = self._imageDB.getImage(imageData)
             self._imageDB.addStampImage(stamp.stamp_id, image)
@@ -765,7 +878,7 @@ class StampedAPI(AStampedAPI):
             stamp                   = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
-        stamp = self._addUserObjects(stamp, userIds=userIds)
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds)
 
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
@@ -959,7 +1072,7 @@ class StampedAPI(AStampedAPI):
         stamp = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
-        stamp = self._addUserObjects(stamp, userIds=userIds)
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds)
 
         # Give credit
         if stamp.credit != None and len(stamp.credit) > 0:
@@ -1035,7 +1148,7 @@ class StampedAPI(AStampedAPI):
     
     def removeStamp(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Verify user has permission to delete
         if stamp.user_id != authUserId:
@@ -1076,7 +1189,7 @@ class StampedAPI(AStampedAPI):
         
     def getStamp(self, stampId, authUserId):
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Check privacy of stamp
         if stamp.user_id != authUserId and stamp.user.privacy == True:
@@ -1111,15 +1224,13 @@ class StampedAPI(AStampedAPI):
     
     def updateStampImage(self, authUserId, stampId, data):
         stamp       = self._stampDB.getStamp(stampId)
-        stamp       = self._addUserObjects(stamp)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Verify user has permission to add image
         if stamp.user_id != authUserId:
             msg = "Insufficient privileges to update stamp image"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
-
-        data = base64.urlsafe_b64decode(data.encode('ascii'))
         
         image = self._imageDB.getImage(data)
         self._imageDB.addStampImage(stampId, image)
@@ -1145,6 +1256,7 @@ class StampedAPI(AStampedAPI):
     def addComment(self, authUserId, stampId, blurb):
         user    = self._userDB.getUser(authUserId)
         stamp   = self._stampDB.getStamp(stampId)
+        stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Verify user has the ability to comment on the stamp
         friendship = Friendship({
@@ -1260,7 +1372,8 @@ class StampedAPI(AStampedAPI):
             self._activityDB.addActivity(repliedUserIds, activity)
         
         # Increment comment count on stamp
-        self._stampDB.incrementStatsForStamp(stamp.stamp_id, 'num_comments', 1)
+        self._stampDB.updateStampStats( \
+            stamp.stamp_id, 'num_comments', increment=1)
 
         return comment
     
@@ -1287,7 +1400,8 @@ class StampedAPI(AStampedAPI):
         ### TODO: Remove activity?
 
         # Increment comment count on stamp
-        self._stampDB.incrementStatsForStamp(comment.stamp_id, 'num_comments', -1)
+        self._stampDB.updateStampStats( \
+            comment.stamp_id, 'num_comments', increment=-1)
 
         # Add user object
         user = self._userDB.getUser(comment.user_id)
@@ -1342,6 +1456,117 @@ class StampedAPI(AStampedAPI):
         comment.user    = user.exportSchema(UserMini())
 
         return comment
+
+    
+    """
+    #                              
+    #       # #    # ######  ####  
+    #       # #   #  #      #      
+    #       # ####   #####   ####  
+    #       # #  #   #           # 
+    #       # #   #  #      #    # 
+    ####### # #    # ######  ####  
+    """
+
+    def addLike(self, authUserId, stampId):
+        stamp       = self._stampDB.getStamp(stampId)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
+
+        # Verify user has the ability to 'like' the stamp
+        if stamp.user_id != authUserId:
+            friendship = Friendship({
+                'user_id':      stamp.user_id,
+                'friend_id':    authUserId,
+            })
+
+            # Check if stamp is private; if so, must be a follower
+            if stamp.user.privacy == True:
+                if not self._friendshipDB.checkFriendship(friendship):
+                    msg = "Insufficient privileges to add comment"
+                    logs.warning(msg)
+                    raise InsufficientPrivilegesError(msg)
+
+            # Check if block exists between user and stamp owner
+            if self._friendshipDB.blockExists(friendship) == True:
+                logs.info("Block exists")
+                raise Exception("Block exists")
+
+        # Check to verify that user hasn't already liked stamp
+        if self._stampDB.checkLike(authUserId, stampId):
+            msg = "'Like' exists for user (%s) on stamp (%s)" \
+                % (authUserId, stampId)
+            logs.warning(msg)
+            raise IllegalActionError(msg)
+
+        # Add like
+        self._stampDB.addLike(authUserId, stampId)
+
+        # Increment user stats by one
+        self._userDB.updateUserStats( \
+            stamp.user_id, 'num_likes', increment=1)
+        self._userDB.updateUserStats( \
+            authUserId, 'num_likes_given', increment=1)
+
+        # Increment stamp stats by one
+        self._stampDB.updateStampStats( \
+            stamp.stamp_id, 'num_likes', increment=1)
+        if stamp.num_likes == None:
+            stamp.num_likes = 0
+        stamp.num_likes += 1
+        stamp.is_liked = True
+
+        # Give credit once at five likes
+        if stamp.num_likes >= 5 and not stamp.like_threshold_hit:
+            # Update stamp stats
+            self._stampDB.giveLikeCredit(stamp.stamp_id)
+            stamp.like_threshold_hit = True
+
+            # Update user stats with new credit
+            self._userDB.updateUserStats( \
+                stamp.user_id, 'num_stamps_left', increment=1)
+
+        # Add activity for stamp owner (if not self)
+        ### TODO: Verify activity item doesn't already exist
+        if self._activity == True and stamp.user_id != authUserId:
+            activity                = Activity()
+            activity.genre          = 'like'
+            activity.user_id        = authUserId
+            activity.subject        = stamp.entity.title
+            activity.link_stamp_id  = stamp.stamp_id
+            activity.created        = datetime.utcnow()
+
+            self._activityDB.addActivity(stamp.user_id, activity)
+
+        return stamp
+    
+    def removeLike(self, authUserId, stampId):
+        # Remove like (if it exists)
+        if not self._stampDB.removeLike(authUserId, stampId):
+            msg = "'Like' does not exist for user (%s) on stamp (%s)" \
+                % (authUserId, stampId)
+            logs.warning(msg)
+            raise IllegalActionError(msg)
+
+        # Get stamp object
+        stamp       = self._stampDB.getStamp(stampId)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
+
+        # Increment user stats by one
+        self._userDB.updateUserStats( \
+            stamp.user_id, 'num_likes', increment=-1)
+        self._userDB.updateUserStats( \
+            authUserId, 'num_likes_given', increment=-1)
+
+        # Increment stamp stats by one
+        self._stampDB.updateStampStats( \
+            stamp.stamp_id, 'num_likes', increment=-1)
+        if stamp.num_likes == None:
+            stamp.num_likes = 0
+        stamp.num_likes -= 1
+
+        ### TODO: Remove activity item?
+
+        return stamp
     
 
     """
@@ -1376,7 +1601,7 @@ class StampedAPI(AStampedAPI):
         except:
             return cap
     
-    def _getStampCollection(self, stampIds, **kwargs):
+    def _getStampCollection(self, authUserId, stampIds, **kwargs):
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
         includeComments = kwargs.pop('includeComments', False)
@@ -1427,7 +1652,7 @@ class StampedAPI(AStampedAPI):
                     stamp.comment_preview = commentPreviews[stamp.stamp_id]
                 stamps.append(stamp)
 
-        stamps = self._addUserObjects(stamps)
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
         return stamps
     
@@ -1436,7 +1661,7 @@ class StampedAPI(AStampedAPI):
 
         kwargs['includeComments'] = True
 
-        return self._getStampCollection(stampIds, **kwargs)
+        return self._getStampCollection(authUserId, stampIds, **kwargs)
     
     def getUserStamps(self, userRequest, authUserId, **kwargs):
         user = self._getUserFromIdOrScreenName(userRequest)
@@ -1462,7 +1687,7 @@ class StampedAPI(AStampedAPI):
 
         kwargs['includeComments'] = True
 
-        return self._getStampCollection(stampIds, **kwargs)
+        return self._getStampCollection(authUserId, stampIds, **kwargs)
     
     def getCreditedStamps(self, userRequest, authUserId, **kwargs):
         ### TODO: Implement

@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import base64, os, utils, Image
+import base64, os, utils, Image, binascii
 
 from AStampedAPITestCase import *
 from MongoStampedAPI import MongoStampedAPI
@@ -63,7 +63,10 @@ class ImageDBTests(AImageTest):
             image2 = self.imageDB.getImage(f)
             
             self.assertEqual(image.size, image2.size)
-            self.assertEqual(image.mode, image2.mode)
+            # note: we convert all images to JPEG upon upload, which'll 
+            # convert RGBA to RGB, so the modes won't necessarily be 
+            # equal.
+            #self.assertEqual(image.mode, image2.mode)
     
     def tearDown(self):
         keys = self.imageDB.bucket.get_all_keys()
@@ -75,21 +78,33 @@ class StampedAPIImageTests(AImageTest):
         (self.user, self.token) = self.createAccount()
     
     def test_profile_images(self):
+
         for image in self.images:
             path = "account/update_profile_image.json"
             temp = 'temp.jpg'
             image.save(temp, optimize=True)
             
             f = open(temp, 'r')
-            data = f.read()
+            image = f.read()
+            # Send data ascii-encoded
+            #image = binascii.b2a_qp(image)
             f.close()
-            
+
+            path    = "account/update_profile_image.json"
+
             data = {
-                "oauth_token": self.token['access_token'],
-                "profile_image": base64.urlsafe_b64encode(data), 
+                "oauth_token": self.token['access_token']
             }
-            
-            result = self.handlePOST(path, data)
+
+            files = {
+                "profile_image": {
+                    "filename": temp,
+                    "data": image
+                }
+            }
+
+            result = self.handleMultiPart(path, data, files)
+
             self.assertIn('images', result)
     
     def tearDown(self):

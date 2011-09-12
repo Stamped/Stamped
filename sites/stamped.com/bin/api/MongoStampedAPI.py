@@ -24,7 +24,10 @@ from db.mongodb.MongoFavoriteCollection     import MongoFavoriteCollection
 from db.mongodb.MongoCollectionCollection   import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection   import MongoFriendshipCollection
 from db.mongodb.MongoActivityCollection     import MongoActivityCollection
+from db.mongodb.MongoInviteCollection       import MongoInviteCollection
 from db.mongodb.MongoEntitySearcher         import MongoEntitySearcher
+
+from db.mongodb.MongoLogsCollection         import MongoLogsCollection
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -77,6 +80,10 @@ class MongoStampedAPI(StampedAPI):
         return MongoActivityCollection()
     
     @lazyProperty
+    def _inviteDB(self):
+        return MongoInviteCollection()
+    
+    @lazyProperty
     def _entitySearcher(self):
         return MongoEntitySearcher(self)
     
@@ -87,6 +94,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _entityMatcher(self):
         return EntityMatcher(self)
+    
+    @lazyProperty
+    def _logsDB(self):
+        return MongoLogsCollection()
     
     def getStats(self):
         source_stats = { }

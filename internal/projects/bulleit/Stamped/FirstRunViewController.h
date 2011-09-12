@@ -13,7 +13,17 @@
 @class FirstRunViewController;
 
 @protocol FirstRunViewControllerDelegate
-- (void)viewController:(FirstRunViewController*)viewController didReceiveUsername:(NSString*)username password:(NSString*)password;
+
+- (void)viewController:(FirstRunViewController*)viewController
+    didReceiveUsername:(NSString*)username
+              password:(NSString*)password;
+
+- (void)viewController:(FirstRunViewController*)viewController
+willCreateUserWithName:(NSString*)name
+              username:(NSString*)handle
+              password:(NSString*)password
+                 email:(NSString*)email
+           phoneNumber:(NSString*)number;
 
 @end
 
@@ -51,6 +61,9 @@
 - (IBAction)takePhotoButtonPressed:(id)sender;
 
 - (void)signInFailed:(NSString*)reason;
+
+- (void)signUpSucess;
+- (void)signUpFailed:(NSString*)reason;
 
 @end
 

@@ -126,3 +126,14 @@ def blocksRemove(request):
     return transformOutput(user.exportSparse())
 
 
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def invite(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPInvitation(), request)
+
+    result      = stampedAPI.inviteFriend(authUserId, schema.email)
+
+    return transformOutput(True)
+
+

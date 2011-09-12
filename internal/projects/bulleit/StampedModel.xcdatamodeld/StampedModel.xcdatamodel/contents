@@ -78,7 +78,7 @@
         <attribute name="imageURL" optional="YES" attributeType="String"/>
         <attribute name="numComments" optional="YES" attributeType="Integer 16" defaultValueString="0"/>
         <attribute name="stampID" attributeType="String"/>
-        <attribute name="temporary" optional="YES" attributeType="Boolean" defaultValueString="NO"/>
+        <attribute name="temporary" optional="YES" attributeType="Boolean" defaultValueString="YES"/>
         <relationship name="comments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Comment" inverseName="stamp" inverseEntity="Comment"/>
         <relationship name="credits" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="User" inverseName="credits" inverseEntity="User"/>
         <relationship name="entityObject" optional="YES" minCount="1" maxCount="1" deletionRule="Nullify" destinationEntity="Entity" inverseName="stamps" inverseEntity="Entity"/>

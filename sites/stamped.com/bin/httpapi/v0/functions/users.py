@@ -61,3 +61,48 @@ def privacy(request):
 
     return transformOutput(privacy)
 
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def findEmail(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFindUser(), request)
+
+    users       = stampedAPI.findUsersByEmail(authUserId, schema.q.value)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(output)
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def findPhone(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFindUser(), request)
+
+    users       = stampedAPI.findUsersByPhone(authUserId, schema.q.value)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(output)
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def findTwitter(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFindUser(), request)
+
+    users       = stampedAPI.findUsersByTwitter(authUserId, schema.q.value)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(output)
+

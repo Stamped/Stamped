@@ -49,6 +49,8 @@ def main():
     
     pool = Pool(32)
     
+    utils.log("processing %d entities" % len(rs))
+    
     for result in rs:
         entity = placesDB._convertFromMongo(result)
         

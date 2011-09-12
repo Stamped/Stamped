@@ -19,6 +19,8 @@
 * GET users/lookup
 * GET users/search
 * GET users/privacy
+* GET users/find/email
+* GET users/find/phone
 
 ### [Friendships](friendships) ###
 * POST friendships/create
@@ -32,6 +34,7 @@
 * GET friendships/blocks/check 
 * GET friendships/blocking 
 * POST friendships/blocks/remove
+* POST friendships/invite
 
 ### [Entities](entities) ###
 * POST entities/create
@@ -46,6 +49,8 @@
 * POST stamps/update_image
 * POST stamps/remove
 * GET stamps/show
+* POST stamps/likes/create
+* POST stamps/likes/remove
 
 ### [Comments](comments) ###
 * POST comments/create

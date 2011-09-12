@@ -51,8 +51,8 @@ typedef enum {
 - (void)mapDisclosureTapped:(id)sender;
 
 @property (nonatomic, copy) NSArray* filterButtons;
-@property (nonatomic, copy) NSArray* entitiesArray;
-@property (nonatomic, copy) NSArray* filteredEntitiesArray;
+@property (nonatomic, retain) NSMutableArray* entitiesArray;
+@property (nonatomic, retain) NSMutableArray* filteredEntitiesArray;
 @property (nonatomic, retain) UIButton* selectedFilterButton;
 @end
 
@@ -146,7 +146,7 @@ typedef enum {
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
@@ -162,11 +162,11 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  [self loadStampsFromDataStore];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  [self loadStampsFromDataStore];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
@@ -193,7 +193,8 @@ typedef enum {
 	NSArray* results = [Stamp objectsWithFetchRequest:request];
   results = [results valueForKeyPath:@"@distinctUnionOfObjects.entityObject"];
   descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
-  self.entitiesArray = [results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+  self.entitiesArray =
+      [NSMutableArray arrayWithArray:[results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]]];
   [self filterStamps];
   self.tableView.contentOffset = scrollPosition_;
 }
@@ -256,13 +257,22 @@ typedef enum {
   }
   if (filterString) {
     NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"category == %@", filterString];
-    self.filteredEntitiesArray = [entitiesArray_ filteredArrayUsingPredicate:filterPredicate];
+    self.filteredEntitiesArray =
+        [NSMutableArray arrayWithArray:[entitiesArray_ filteredArrayUsingPredicate:filterPredicate]];
     [self.tableView reloadData];
   }
 }
 
 #pragma mark - Table view data source
-/*
+
+- (void)tableView:(UITableView*)tableView willBeginEditingRowAtIndexPath:(NSIndexPath*)indexPath {
+  //InboxTableViewCell* cell = (InboxTableViewCell*)[tableView cellForRowAtIndexPath:indexPath];
+}
+
+- (void)tableView:(UITableView*)tableView didEndEditingRowAtIndexPath:(NSIndexPath*)indexPath {
+  //UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+}
+
 - (UITableViewCellEditingStyle)tableView:(UITableView*)tableView
            editingStyleForRowAtIndexPath:(NSIndexPath*)indexPath {
   return UITableViewCellEditingStyleDelete;
@@ -270,9 +280,12 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
   if (editingStyle == UITableViewCellEditingStyleDelete) {
-    //add code here for when you hit delete
+    /*Entity* e = [filteredEntitiesArray_ objectAtIndex:indexPath.row];
+    [filteredEntitiesArray_ removeObjectAtIndex:indexPath.row];
+    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
+                          withRowAnimation:UITableViewRowAnimationBottom];*/
   }    
-}*/
+}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
   return 1;
@@ -300,6 +313,10 @@ typedef enum {
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"InboxLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
+  for (Stamp* stamp in objects) {
+    stamp.temporary = [NSNumber numberWithBool:NO];
+    [stamp.managedObjectContext save:NULL];
+  }
 	[self loadStampsFromDataStore];
   [self setIsLoading:NO];
 }

@@ -16,8 +16,7 @@
 extern NSString* const kInboxTableDidScrollNotification;
 
 @interface InboxTableViewCell : UITableViewCell <UIScrollViewDelegate> {
- @private  
-  InboxCellView* customView_;
+ @private
   UIView* stacksBackgroundView_;
   BOOL stackExpanded_;
   UIButton* stackCollapseButton_;
@@ -29,5 +28,6 @@ extern NSString* const kInboxTableDidScrollNotification;
 
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) Stamp* stamp;
+@property (nonatomic, readonly) InboxCellView* customView;
 
 @end

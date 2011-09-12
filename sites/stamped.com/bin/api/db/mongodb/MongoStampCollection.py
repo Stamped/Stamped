@@ -13,6 +13,8 @@ from utils import lazyProperty
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
+from MongoUserLikesCollection import MongoUserLikesCollection
+from MongoStampLikesCollection import MongoStampLikesCollection
 from MongoUserStampsCollection import MongoUserStampsCollection
 from MongoInboxStampsCollection import MongoInboxStampsCollection
 from MongoCreditGiversCollection import MongoCreditGiversCollection
@@ -47,6 +49,14 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     @lazyProperty
     def credit_received_collection(self):
         return MongoCreditReceivedCollection()
+    
+    @lazyProperty
+    def stamp_likes_collection(self):
+        return MongoStampLikesCollection()
+    
+    @lazyProperty
+    def user_likes_collection(self):
+        return MongoUserLikesCollection()
 
     
     def addStamp(self, stamp):
@@ -120,13 +130,22 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             raise
         except:
             return False
-        
-    def incrementStatsForStamp(self, stampId, stat, increment=1):
+    
+    def updateStampStats(self, stampId, stat, value=None, increment=1):
         key = 'stats.%s' % (stat)
-        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
-                                {'$inc': {key: increment}},
-                                upsert=True)
-        return True
+        if value != None:
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(stampId)}, 
+                {'$set': {key: value}},
+                upsert=True)
+        else:
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(stampId)}, 
+                {'$inc': {key: increment}},
+                upsert=True)
+        
+        return self._collection.find_one({'_id': \
+            self._getObjectIdFromString(stampId)})['stats'][stat]
 
     def getStampFromUserEntity(self, userId, entityId):
         try:
@@ -141,10 +160,52 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     def giveCredit(self, creditedUserId, stamp):
         # Add to 'credit received'
         ### TODO: Does this belong here?
-        self.credit_received_collection.addCredit(creditedUserId, stamp.stamp_id)
+        self.credit_received_collection.addCredit(creditedUserId, \
+                                                    stamp.stamp_id)
         
         # Add to 'credit givers'
         ### TODO: Does this belong here?
-        self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
+        self.credit_givers_collection.addGiver(creditedUserId, \
+                                                    stamp.user.user_id)
+
+    def giveLikeCredit(self, stampId):
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(stampId)}, 
+            {'$set': {'stats.like_threshold_hit': True}}
+        )
+        
+    def addLike(self, userId, stampId):
+        # Add a reference to the user in the stamp's 'like' collection
+        self.stamp_likes_collection.addStampLike(stampId, userId) 
+        # Add a reference to the stamp in the user's 'like' collection
+        self.user_likes_collection.addUserLike(userId, stampId) 
+        
+    def removeLike(self, userId, stampId):
+        # Remove a reference to the user in the stamp's 'like' collection
+        stampLike = self.stamp_likes_collection.removeStampLike(stampId, userId)
+        # Remove a reference to the stamp in the user's 'like' collection
+        userLike = self.user_likes_collection.removeUserLike(userId, stampId) 
+
+        if stampLike == True and userLike == True:
+            return True
+        return False
+        
+    def getStampLikes(self, stampId):
+        # Add a reference to the user in the stamp's 'like' collection
+        return self.stamp_likes_collection.getStampLikes(stampId) 
+        
+    def getUserLikes(self, userId):
+        # Add a reference to the user in the stamp's 'like' collection
+        return self.user_likes_collection.getUserLikes(userId) 
+
+    def checkLike(self, userId, stampId):
+        try:
+            likes = self.stamp_likes_collection.getStampLikes(stampId) 
+            if userId in likes:
+                return True
+            raise
+        except:
+            return False
+
         
             

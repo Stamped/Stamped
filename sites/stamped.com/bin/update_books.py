@@ -9,6 +9,7 @@ import init
 import re, time, utils
 
 from libs.AmazonAPI         import AmazonAPI
+from gevent.pool            import Pool
 from match.EntityMatcher    import EntityMatcher
 from MongoStampedAPI        import MongoStampedAPI
 from difflib                import SequenceMatcher
@@ -59,111 +60,112 @@ def main():
     entityDB   = stampedAPI._entityDB
     
     rs = entityDB._collection.find({"subcategory" : "book", 
-                                   "details.product" : {"$exists" : False }})
-    is_junk = " \t-,:'()".__contains__
+                                    "details.product" : {"$exists" : False }}, output=list)
     
-    num_processed = 0
-    num_converted = 0
-    num_failed    = 0
+    pool = Pool(16)
+    
+    utils.log("processing %d entities" % len(rs))
     
     for result in rs:
         entity = entityDB._convertFromMongo(result)
-        orig_title = entity.title
-        num_processed += 1
         
-        if 'asin' in entity:
+        pool.spawn(handle_entity, entity, amazonAPI, matcher)
+    
+    pool.join()
+
+def handle_entity(entity, amazonAPI, matcher):
+    orig_title = entity.title
+    is_junk = " \t-,:'()".__contains__
+    
+    if 'asin' in entity:
+        params = dict(
+            transform=True, 
+            SearchIndex='Books', 
+            ItemId=entity.asin, ResponseGroup='Large', 
+        )
+        
+        utils.log("searching...")
+        amazon_results = amazonAPI.item_lookup(**params)
+    else:
+        for i in xrange(0, 4):
+            if i != 0:
+                orig_title = strip_title(entity.title)
+            if i == 2:
+                orig_title = re.sub('series', '', orig_title)
+            
+            orig_title = orig_title.strip()
+            
             params = dict(
                 transform=True, 
                 SearchIndex='Books', 
-                ItemId=entity.asin, ResponseGroup='Large', 
+                Title=orig_title, 
             )
             
-            utils.log("searching...")
-            amazon_results = amazonAPI.item_lookup(**params)
-        else:
-            for i in xrange(0, 4):
-                if i != 0:
-                    orig_title = strip_title(entity.title)
+            if 'author' in entity and i < 3:
+                author = entity.author
+                if ',' in author:
+                    author = author.split(',')[0]
+                
                 if i == 2:
-                    orig_title = re.sub('series', '', orig_title)
+                    if '.' in author:
+                        author = author.split('.')[-1]
+                    elif ' ' in author:
+                        author = author.split(' ')[-1]
+                    else:
+                        author = None
                 
-                params = dict(
-                    transform=True, 
-                    SearchIndex='Books', 
-                    Title=orig_title, 
-                )
-                
-                if 'author' in entity and i < 3:
-                    author = entity.author
-                    if ',' in author:
-                        author = author.split(',')[0]
-                    
-                    if i == 2:
-                        if '.' in author:
-                            author = author.split('.')[-1]
-                        elif ' ' in author:
-                            author = author.split(' ')[-1]
-                        else:
-                            author = None
-                    
-                    if author is not None:
-                        params['Author'] = author.strip()
-                
-                utils.log("searching...")
-                amazon_results = amazonAPI.item_detail_search(**params)
-                
-                if len(amazon_results) > 0:
-                    break
-                
-                #time.sleep(i + 1)
-        
-        orig_titlel = strip_title(orig_title)
-        success = False
-        
-        # inspect amazon lookup results
-        for amazon_result in amazon_results:
-            amazon_titlel = amazon_result.title.lower()
+                if author is not None:
+                    params['Author'] = author.strip()
             
-            for i in xrange(0, 2):
-                if i != 0:
-                    amazon_titlel = strip_title(amazon_titlel)
+            utils.log("searching...")
+            amazon_results = amazonAPI.item_detail_search(**params)
+            
+            if len(amazon_results) > 0:
+                break
+            
+            time.sleep(i + 1)
+    
+    orig_titlel = strip_title(orig_title)
+    success = False
+    
+    # inspect amazon lookup results
+    for amazon_result in amazon_results:
+        amazon_titlel = amazon_result.title.lower()
+        
+        for i in xrange(0, 2):
+            if i != 0:
+                amazon_titlel = strip_title(amazon_titlel)
+            
+            if len(amazon_titlel) > len(orig_titlel):
+                success |= amazon_titlel.startswith(orig_titlel) or amazon_titlel.endswith(orig_titlel)
+            else:
+                success |= orig_titlel.startswith(amazon_titlel) or orig_titlel.endswith(amazon_titlel)
+            
+            if not success:
+                ratio = SequenceMatcher(is_junk, orig_titlel, amazon_titlel).ratio()
                 
-                if len(amazon_titlel) > len(orig_titlel):
-                    success |= amazon_titlel.startswith(orig_titlel) or amazon_titlel.endswith(orig_titlel)
-                else:
-                    success |= orig_titlel.startswith(amazon_titlel) or orig_titlel.endswith(amazon_titlel)
-                
-                if not success:
-                    ratio = SequenceMatcher(is_junk, orig_titlel, amazon_titlel).ratio()
-                    
-                    if ratio >= 0.75:
-                        success |= True
-                
-                if success:
-                    break
+                if ratio >= 0.75:
+                    success |= True
             
             if success:
                 break
-            else:
-                utils.log("%s vs %s" % (orig_title, amazon_result.title))
-                utils.log("%s vs %s" % (orig_titlel, amazon_titlel))
         
         if success:
-            entity = matcher.mergeDuplicates(entity, [ amazon_result ])
-            utils.log("Success: %s vs %s" % (orig_title, entity.title))
-            num_converted += 1
+            break
         else:
-            utils.log("Failure: %s" % entity.title)
-            pprint(params)
-            pprint(entity.value)
-            utils.log(len(amazon_results))
-            for r in amazon_results:
-                pprint(r.value)
-            num_failed += 1
+            utils.log("%s vs %s" % (orig_title, amazon_result.title))
+            utils.log("%s vs %s" % (orig_titlel, amazon_titlel))
     
-    print "num processed: %d" % num_processed
-    print "num converted: %d" % num_converted
-    print "num failed:    %d" % num_failed
+    if success:
+        entity = matcher.mergeDuplicates(entity, [ amazon_result ])
+        utils.log("Success: %s vs %s" % (orig_title, entity.title))
+    else:
+        utils.log("Failure: %s" % entity.title)
+        pprint(entity.value)
+        utils.log(len(amazon_results))
+        #pprint(params)
+        #for r in amazon_results:
+        #    pprint(r.value)
 
 if __name__ == '__main__':
     main()

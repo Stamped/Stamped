@@ -28,6 +28,7 @@ class StampedAPIAccountSettings(StampedAPIAccountTest):
             "oauth_token": self.token['access_token'],
             "screen_name": "UserA2",
             "privacy": False,
+            "phone": 1235551234,
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['privacy'], False)
@@ -63,20 +64,6 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['color_primary'], '333333')
         self.assertEqual(result['color_secondary'], '999999')
-
-# class StampedAPIAccountUpdateProfileImage(StampedAPIAccountTest):
-#     def test_update_profile_image(self):
-#         # TODO: this url is temporary!
-#         url = 'https://si0.twimg.com/profile_images/147088134/'
-#         url = url + 'twitter_profile_reasonably_small.jpg'
-        
-#         path = "account/update_profile_image.json"
-#         data = {
-#             "oauth_token": self.token['access_token'],
-#             "profile_image": url, 
-#         }
-#         result = self.handlePOST(path, data)
-#         self.assertEqual(result['profile_image'], url)
 
 class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
     def test_blacklist(self):
@@ -171,7 +158,7 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
         data = {
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
-            "login": 'usera@stamped.com',
+            "login": '%s@stamped.com' % self.user['screen_name'],
         }
         result = self.handlePOST(path, data)
         self.assertEqual(result['user_id'], self.user['user_id'])
@@ -187,11 +174,20 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
         self.assertEqual(result['user_id'], self.user['user_id'])
 
 
+class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
+    def test_twitter(self):
+        path = "account/linked_accounts.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "twitter_id": '1234567890',
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
+
 
 ### TESTS TO ADD:
 # Change bio from string to None
-# Make sure screen_name change propagates through system
-# Check how display name works if weird first name / last name things are sent
 # Upload image data for avatar
 # Test privacy settings
 

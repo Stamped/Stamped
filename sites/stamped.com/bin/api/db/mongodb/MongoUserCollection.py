@@ -95,3 +95,46 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         
         return self._collection.find_one({'_id': self._getObjectIdFromString(userId)})['stats'][stat]
 
+    def findUsersByEmail(self, emails, limit=0): 
+        queryEmails = []
+        for email in emails:
+            queryEmails.append(str(email).lower())
+
+        ### TODO: Add Index
+        data = self._collection.find({"email": {"$in": queryEmails}}).limit(limit)
+            
+        result = []
+        for item in data:
+            user = self._convertFromMongo(item)
+            user.identifier = item['email']
+            result.append(user)
+        return result
+
+    def findUsersByPhone(self, phone, limit=0): 
+        queryPhone = []
+        for number in phone:
+            queryPhone.append(int(number))
+
+        ### TODO: Add Index
+        data = self._collection.find({"phone": {"$in": queryPhone}}).limit(limit)
+            
+        result = []
+        for item in data:
+            user = self._convertFromMongo(item)
+            user.identifier = item['phone']
+            result.append(user)
+        return result
+
+    def findUsersByTwitter(self, twitterIds, limit=0): 
+        ### TODO: Add Index
+        data = self._collection.find(
+            {"linked_accounts.twitter.twitter_id": {"$in": twitterIds}}
+        ).limit(limit)
+            
+        result = []
+        for item in data:
+            user = self._convertFromMongo(item)
+            user.identifier = item['linked_accounts']['twitter']['twitter_id']
+            result.append(user)
+        return result
+

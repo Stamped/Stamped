@@ -31,13 +31,16 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+#if !TARGET_IPHONE_SIMULATOR
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
-
-  [RKRequestQueue sharedQueue].suspended = YES;
-  [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
-  [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
+#endif
+  
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
+  [RKClient sharedClient].requestQueue.suspended = YES;
+  [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
+  [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
+
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
                                        @"name", @"name",
@@ -47,7 +50,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                        @"num_credits", @"numCredits",
                                        @"num_followers", @"numFollowers",
                                        @"num_friends", @"numFriends",
-                                       @"num_stamps", @"numStamps",
+                                       @"num_stamps_left", @"numStamps",
                                        nil];
   userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapAttributes:@"bio", @"website", nil];
@@ -120,12 +123,12 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                         @"refresh_token", @"refreshToken",
                                         @"expires_in", @"lifetimeSecs", nil];
 
+  RKObjectMapping* registerMapping = [RKObjectMapping serializationMapping];
+  [registerMapping mapRelationship:@"user" withMapping:userMapping];
+  [registerMapping mapRelationship:@"token" withMapping:oauthMapping];
+
   // Example date string: 2011-07-19 20:49:42.037000
-  NSString* dateFormat = @"yyyy-MM-dd HH:mm:ss.SSSSSS";
-  [favoriteMapping.dateFormatStrings addObject:dateFormat];
-	[stampMapping.dateFormatStrings addObject:dateFormat];
-  [commentMapping.dateFormatStrings addObject:dateFormat];
-  [eventMapping.dateFormatStrings addObject:dateFormat];
+  [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss.SSSSSS" inTimeZone:nil];
   
   [objectManager.mappingProvider setMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setMapping:stampMapping forKeyPath:@"Stamp"];
@@ -134,6 +137,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [objectManager.mappingProvider setMapping:eventMapping forKeyPath:@"Event"];
   [objectManager.mappingProvider setMapping:favoriteMapping forKeyPath:@"Favorite"];
   [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
+  [objectManager.mappingProvider setMapping:registerMapping forKeyPath:@"Registration"];
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];

@@ -78,12 +78,6 @@ def update_profile(request):
     for k, v in data.iteritems():
         if v == '':
             data[k] = None
-
-    if 'color' in data:
-        color = data['color'].split(',')
-        data['color_primary']   = color[0]
-        data['color_secondary'] = color[-1]
-        del(data['color'])
     
     account     = stampedAPI.updateProfile(authUserId, data)
     user        = HTTPUser().importSchema(account)
@@ -95,7 +89,7 @@ def update_profile(request):
 @require_http_methods(["POST"])
 def update_profile_image(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPAccountProfileImage(), request)
+    schema      = parseFileUpload(HTTPAccountProfileImage(), request, 'profile_image')
     
     ret         = stampedAPI.updateProfileImage(authUserId, schema.profile_image)
     
@@ -153,11 +147,25 @@ def check(request):
         user    = HTTPUser().importSchema(user)
 
         return transformOutput(user.exportSparse())
-    except:
+    except KeyError:
         response = HttpResponse("not_found")
         response.status_code = 404
         return response
+    except Exception:
+        response = HttpResponse("invalid_request")
+        response.status_code = 400
+        return response
 
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def linked_accounts(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPLinkedAccounts(), request)
+    linked      = schema.exportSchema(LinkedAccounts())
+
+    result      = stampedAPI.updateLinkedAccounts(authUserId, linked)
+
+    return transformOutput(True)
 
 @handleHTTPRequest
 @require_http_methods(["POST"])

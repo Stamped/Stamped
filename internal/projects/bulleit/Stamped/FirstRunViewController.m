@@ -11,6 +11,7 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 
 #import "UserImageView.h"
+#import "WelcomeViewController.h"
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 144;
@@ -71,16 +72,23 @@ static const CGFloat kProfileImageSize = 144;
                                                 [UIImage imageNamed:@"learnmore_01"],
                                                 [UIImage imageNamed:@"learnmore_02"],
                                                 [UIImage imageNamed:@"learnmore_03"],
-                                                [UIImage imageNamed:@"learnmore_04"], nil];
+                                                [UIImage imageNamed:@"learnmore_04b"], nil];
   
   for (NSUInteger i = 0; i < bgImages.count; ++i) {
+    UIImageView* subview = [[UIImageView alloc] initWithImage:[bgImages objectAtIndex:i]];
+
     CGRect frame = self.scrollView.frame;
-    frame.origin.x = self.scrollView.frame.size.width * i;
+    frame.origin.x = CGRectGetWidth(frame) * i;
+    if (i == 4) {
+      UIImageView* learnMore = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"learnmore_04"]];
+      learnMore.frame = frame;
+      [self.scrollView addSubview:learnMore];
+      [learnMore release];
+    }
+    subview.frame = frame;
     
-    UIImageView* subview = [[UIImageView alloc] initWithFrame:frame];
-    subview.image = [bgImages objectAtIndex:i];
     subview.clipsToBounds = YES;
-    subview.contentMode = UIViewContentModeRight;
+    subview.contentMode = UIViewContentModeCenter;
     
     if (i == 1)
       [self setupSlide:subview];
@@ -174,6 +182,25 @@ static const CGFloat kProfileImageSize = 144;
   }
 }
 
+- (void)signUpSucess {
+  WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
+  [self.navigationController pushViewController:welcomeVC animated:YES];
+  [welcomeVC release];
+}
+
+- (void)signUpFailed:(NSString*)reason {
+  UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Sign Up Error"
+                                                  message:reason
+                                                 delegate:nil
+                                        cancelButtonTitle:@"OK"
+                                        otherButtonTitles:nil];
+  [alert show];
+  [alert release];
+
+  [activityIndicator_ stopAnimating];
+  confirmButton_.enabled = YES;
+}
+
 #pragma mark - Nib Actions.
 
 - (IBAction)createAccountButtonPressed:(id)sender {
@@ -248,6 +275,15 @@ static const CGFloat kProfileImageSize = 144;
     [confirmButton_ setTitle:nil forState:UIControlStateNormal];
     [activityIndicator_ startAnimating];
     [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
+  } else if (signUpScrollView_.superview) {
+    confirmButton_.enabled = NO;
+    [activityIndicator_ startAnimating];
+    [delegate_ viewController:self
+       willCreateUserWithName:signUpFullNameTextField_.text
+                     username:signUpUsernameTextField_.text
+                     password:signUpPasswordTextField_.text
+                        email:signUpEmailTextField_.text
+                  phoneNumber:signUpPhoneTextField_.text];
   }
 }
 
@@ -259,6 +295,7 @@ static const CGFloat kProfileImageSize = 144;
                                             otherButtonTitles:@"Take photo", @"Choose photo", nil];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   [sheet showInView:self.view];
+  [sheet release];
 }
 
 #pragma mark - UIActionSheetDelegate methods.

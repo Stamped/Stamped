@@ -26,6 +26,7 @@ def handleHTTPRequest(fn):
         try:
             print
             print
+            # logs.begin(stampedAPI._logsDB.addLog)
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
@@ -35,24 +36,28 @@ def handleHTTPRequest(fn):
             logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
             response = HttpResponse(e.msg)
             response.status_code = e.code
+            logs.error(response.status_code)
             return response
 
         except IllegalActionError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("illegal_action")
             response.status_code = 403
+            logs.error(response.status_code)
             return response
 
         except InsufficientPrivilegesError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("insufficient_privileges")
             response.status_code = 403
+            logs.error(response.status_code)
             return response
 
         except InputError as e:
             logs.warning("400 Error: %s" % (e.msg))
             response = HttpResponse("invalid_request")
             response.status_code = 400
+            logs.error(response.status_code)
             return response
 
         except Exception as e:
@@ -61,7 +66,11 @@ def handleHTTPRequest(fn):
             
             response = HttpResponse("error")
             response.status_code = 500
+            logs.error(response.status_code)
             return response
+
+        finally:
+            logs.save()
 
     return handleHTTPRequest
 
@@ -77,6 +86,7 @@ def checkClient(request):
 
     ### Validate Client Credentials
     try:
+        logs.client(client_id)
         if not stampedAuth.verifyClientCredentials(client_id, client_secret):
             raise
         return client_id
@@ -94,6 +104,7 @@ def checkOAuth(request):
             oauth_token = request.POST['oauth_token']
         else:
             raise
+        logs.token(oauth_token)
     except:
         msg = "Access token not included"
         logs.warning(msg)
@@ -104,6 +115,7 @@ def checkOAuth(request):
         authenticated_user_id = stampedAuth.verifyAccessToken(oauth_token)
         if authenticated_user_id == None:
             raise
+        logs.user(authenticated_user_id)
         return authenticated_user_id
     except StampedHTTPError:
         raise
@@ -115,6 +127,8 @@ def checkOAuth(request):
 def parseRequest(schema, request):
     ### Parse Request
     try:
+        logs.request(request)
+
         if request.method == 'GET':
             rawData = request.GET
         elif request.method == 'POST':
@@ -127,12 +141,11 @@ def parseRequest(schema, request):
         for k, v in rawData.iteritems():
             data[k] = v
 
-        logs.debug("Request url: %s" % request.path)
-        logs.debug("Request data: %s" % data)
-
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
+            
+        logs.form(data)
     
         if schema == None:
             if len(data) > 0:
@@ -141,7 +154,7 @@ def parseRequest(schema, request):
         
         schema.importData(data)
 
-        logs.debug("Parsed request data: %s" % schema)
+        logs.debug("Parsed request data")
 
         return schema
 
@@ -152,11 +165,64 @@ def parseRequest(schema, request):
         
         raise StampedHTTPError("bad_request", 400)
 
+def parseFileUpload(schema, request, fileName='image'):
+    ### Parse Request
+    try:
+        logs.request(request)
+
+        if request.method != 'POST':
+            raise
+        rawData = request.POST
+
+        # Build the dict because django sucks
+        data = {}
+        for k, v in rawData.iteritems():
+            data[k] = v
+
+        # Extract file
+        if fileName in request.FILES:
+            f = request.FILES[fileName]
+            max_size = 1048576 # 1 mb in bytes
+            
+            if f.size > max_size:
+                msg = "Uploaded file is too large (%s) (max size is %d)" % (f.size, max_size)
+                logs.warning(msg)
+                raise Exception(msg)
+            
+            data[fileName] = f.read()
+            logs.attachment(fileName, f.size)
+        
+        data.pop('oauth_token', None)
+        data.pop('client_id', None)
+        data.pop('client_secret', None)
+            
+        logs.form(data)
+        
+        if schema == None:
+            if len(data) > 0:
+                raise
+            return
+        
+        schema.importData(data)
+        
+        logs.debug("Parsed request data")
+        return schema
+    except Exception as e:
+        msg = "Unable to parse form (%s)" % e
+        logs.warning(msg)
+        utils.printException()
+        
+        raise StampedHTTPError("bad_request", 400)
+
 def transformOutput(value, **kwargs):
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
     kwargs.setdefault('mimetype', 'application/json')
+    
     output_json = json.dumps(value, sort_keys=True)
     output = HttpResponse(output_json, **kwargs)
-    logs.debug("Transform output: \"%s\"" % output_json)
+    
+    # pretty_output = json.dumps(value, sort_keys=True, indent=2)
+    logs.output(output_json)
+    
     return output
 

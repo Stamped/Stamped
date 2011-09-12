@@ -37,12 +37,16 @@ urlpatterns = patterns('',
     (r'v0/account/verify_credentials.json',     'v0.functions.account.verify_credentials'),
     (r'v0/account/reset_password.json',         'v0.functions.account.reset_password'),
     (r'v0/account/check.json',                  'v0.functions.account.check'),
+    (r'v0/account/linked_accounts.json',        'v0.functions.account.linked_accounts'),
 
     ### USERS
     (r'v0/users/show.json',             'v0.functions.users.show'),
     (r'v0/users/lookup.json',           'v0.functions.users.lookup'),
     (r'v0/users/search.json',           'v0.functions.users.search'),
     (r'v0/users/privacy.json',          'v0.functions.users.privacy'),
+    (r'v0/users/find/email.json',       'v0.functions.users.findEmail'),
+    (r'v0/users/find/phone.json',       'v0.functions.users.findPhone'),
+    (r'v0/users/find/twitter.json',     'v0.functions.users.findTwitter'),
 
     ### FRIENDS
     (r'v0/friendships/create.json',             'v0.functions.friendships.create'),
@@ -55,6 +59,7 @@ urlpatterns = patterns('',
     (r'v0/friendships/blocks/check.json',       'v0.functions.friendships.blocksCheck'),
     (r'v0/friendships/blocking.json',           'v0.functions.friendships.blocking'),
     (r'v0/friendships/blocks/remove.json',      'v0.functions.friendships.blocksRemove'),
+    (r'v0/friendships/invite.json',             'v0.functions.friendships.invite'),
 
     ### ENTITIES
     (r'v0/entities/create.json',        'v0.functions.entities.create'),
@@ -69,6 +74,8 @@ urlpatterns = patterns('',
     (r'v0/stamps/update_image.json',    'v0.functions.stamps.update_image'),
     (r'v0/stamps/show.json',            'v0.functions.stamps.show'),
     (r'v0/stamps/remove.json',          'v0.functions.stamps.remove'),
+    (r'v0/stamps/likes/create.json',    'v0.functions.stamps.likesCreate'),
+    (r'v0/stamps/likes/remove.json',    'v0.functions.stamps.likesRemove'),
 
     ### COMMENTS
     (r'v0/comments/create.json',        'v0.functions.comments.create'),

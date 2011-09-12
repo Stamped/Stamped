@@ -19,6 +19,7 @@
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet UITableViewCell* addStampCell;
 @property (nonatomic, retain) IBOutlet UILabel* addStampLabel;
+@property (nonatomic, retain) IBOutlet UIView* searchingIndicatorView;
 
 - (IBAction)cancelButtonTapped:(id)sender;
 

@@ -37,25 +37,26 @@ static NSString* const kActivityLookupPath = @"/temp/activity.json";
 #pragma mark - View lifecycle
 
 - (void)dealloc {
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.eventsArray = nil;
   [super dealloc];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [self loadEventsFromDataStore];  // Needed otherwise the counter won't update.
   [self loadEventsFromNetwork];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKRequestQueue sharedQueue] cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.eventsArray = nil;
 }
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   [self loadEventsFromDataStore];
-  [super viewWillAppear:animated];
 }
 
 - (void)loadEventsFromDataStore {

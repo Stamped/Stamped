@@ -83,7 +83,7 @@ const CGFloat kKeyboardHeight = 217.0;
   self.segmentedControl.tintColor = [UIColor colorWithWhite:0.9 alpha:1.0];
   self.segmentedControl.frame = CGRectMake(10, CGRectGetMinY(primaryTextField_.frame) - 2, 299, 33);
   [primaryTextField_.superview insertSubview:segmentedControl_ belowSubview:categoryDropdownTableView_];
-  [segmentedControl_ release];
+  [self.segmentedControl release];
   [segmentedControl_ addTarget:self
                         action:@selector(segmentedControlChanged:)
               forControlEvents:UIControlEventValueChanged];
@@ -440,11 +440,7 @@ const CGFloat kKeyboardHeight = 217.0;
 }
 
 - (void)dismissSelf {
-  UIViewController* vc = nil;
-  if ([self respondsToSelector:@selector(presentingViewController)])
-    vc = [self presentingViewController];
-  else
-    vc = self.parentViewController;
+  UIViewController* vc = self.parentViewController;
   if (vc && vc.modalViewController)
     [vc dismissModalViewControllerAnimated:YES];
 }

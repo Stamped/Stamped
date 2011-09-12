@@ -24,6 +24,7 @@ static NSString* const kClientID = @"stampedtest";
 static NSString* const kClientSecret = @"august1ftw";
 static NSString* const kLoginPath = @"/oauth2/login.json";
 static NSString* const kRefreshPath = @"/oauth2/token.json";
+static NSString* const kRegisterPath = @"/account/create.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
 static NSString* const kTokenExpirationUserDefaultsKey = @"TokenExpirationDate";
 static AccountManager* sharedAccountManager_ = nil;
@@ -34,7 +35,10 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)sendUserInfoRequest;
 - (void)showFirstRunViewController;
 - (void)refreshTimerFired:(NSTimer*)theTimer;
+- (void)storeCurrentUser:(User*)user;
+- (void)storeOAuthToken:(OAuthToken*)token;
 
+@property (nonatomic, retain) UINavigationController* navController;
 @property (nonatomic, retain) FirstRunViewController* firstRunViewController;
 @end
 
@@ -44,6 +48,7 @@ static AccountManager* sharedAccountManager_ = nil;
 @synthesize currentUser = currentUser_;
 @synthesize delegate = delegate_;
 @synthesize authenticated = authenticated_;
+@synthesize navController = navController_;
 @synthesize firstRunViewController = firstRunViewController_;
 
 + (AccountManager*)sharedManager {
@@ -95,7 +100,7 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)refreshToken {
-  [RKRequestQueue sharedQueue].suspended = YES;
+  [RKClient sharedClient].requestQueue.suspended = YES;
   [self sendTokenRefreshRequest];
 }
 
@@ -104,9 +109,15 @@ static AccountManager* sharedAccountManager_ = nil;
 
   self.firstRunViewController = [[FirstRunViewController alloc] initWithNibName:@"FirstRunViewController" bundle:nil];
   firstRunViewController_.delegate = self;
+
+  self.navController = [[UINavigationController alloc] initWithRootViewController:self.firstRunViewController];
+  self.navController.navigationBarHidden = YES;
+
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController presentModalViewController:firstRunViewController_ animated:YES];
-  [firstRunViewController_ release];
+  [delegate.navigationController presentModalViewController:self.navController animated:YES];
+
+  [self.navController release];
+  [self.firstRunViewController release];
 }
 
 - (void)authenticate {
@@ -144,7 +155,7 @@ static AccountManager* sharedAccountManager_ = nil;
                                                         selector:@selector(refreshTimerFired:)
                                                         userInfo:nil
                                                          repeats:YES];
-    [RKRequestQueue sharedQueue].suspended = NO;
+    [RKClient sharedClient].requestQueue.suspended = NO;
     [self sendUserInfoRequest];
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
@@ -163,53 +174,45 @@ static AccountManager* sharedAccountManager_ = nil;
 
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
     [self.firstRunViewController signInFailed:nil];
-    return;
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self sendLoginRequest];
+  } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
+    [self.firstRunViewController signUpFailed:@"Ooops!"];
+    NSLog(@"Registration error = %@", error);
   }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
+  // User information request.
   if ([object isKindOfClass:[User class]]) {
-    self.currentUser = (User*)object;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
-                                                        object:self];
+    [self storeCurrentUser:object];
     return;
-  }
-  
-  OAuthToken* token = object;
-  if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
+  } else if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
+    // Simple log in: store the OAuth token.
     self.firstRunViewController.delegate = nil;
-    [self.firstRunViewController.parentViewController dismissModalViewControllerAnimated:YES];
+    [self.navController.parentViewController dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
 
-    [refreshTokenKeychainItem_ setObject:@"RefreshToken" forKey:(id)kSecAttrAccount];
-    [refreshTokenKeychainItem_ setObject:token.refreshToken forKey:(id)kSecValueData];
-    self.authToken = token;
-  }
-  [refreshTokenKeychainItem_ setObject:@"AccessToken" forKey:(id)kSecAttrAccount];
-  [accessTokenKeychainItem_ setObject:token.accessToken forKey:(id)kSecValueData];
-  self.authToken.accessToken = token.accessToken;
+    [self storeOAuthToken:object];
+    [self sendUserInfoRequest];
+  } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
+    [self storeOAuthToken:object];
+  } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
+    // Registering a new user.
+    NSLog(@"did load object: %@", object);
+    [self storeOAuthToken:[object objectForKey:@"token"]];
+    [self sendUserInfoRequest];
+    //[self storeCurrentUser:[object objectForKey:@"user"]];
 
-  [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifetimeSecs]
-                                            forKey:kTokenExpirationUserDefaultsKey];
-  [[NSUserDefaults standardUserDefaults] synchronize];
-  if (oauthRefreshTimer_) {
-    [oauthRefreshTimer_ invalidate];
-    oauthRefreshTimer_ = nil;
+    [self.firstRunViewController signUpSucess];
   }
-  oauthRefreshTimer_ = [NSTimer scheduledTimerWithTimeInterval:token.lifetimeSecs
-                                                        target:self
-                                                      selector:@selector(refreshTimerFired:)
-                                                      userInfo:nil
-                                                       repeats:YES];
+
   if (firstRun_) {
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
     firstRun_ = NO;
   }
-  [RKRequestQueue sharedQueue].suspended = NO;
-  [self sendUserInfoRequest];
+  [RKClient sharedClient].requestQueue.suspended = NO;
 }
 
 - (void)sendLoginRequest {
@@ -267,9 +270,38 @@ static AccountManager* sharedAccountManager_ = nil;
   [self sendTokenRefreshRequest];
 }
 
+- (void)storeCurrentUser:(User*)user {
+  self.currentUser = user;
+  [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
+                                                      object:self];
+}
+
+- (void)storeOAuthToken:(OAuthToken*)token {
+  [refreshTokenKeychainItem_ setObject:@"RefreshToken" forKey:(id)kSecAttrAccount];
+  [refreshTokenKeychainItem_ setObject:token.refreshToken forKey:(id)kSecValueData];
+  self.authToken = token;
+
+  [refreshTokenKeychainItem_ setObject:@"AccessToken" forKey:(id)kSecAttrAccount];
+  [accessTokenKeychainItem_ setObject:token.accessToken forKey:(id)kSecValueData];
+  //self.authToken.accessToken = token.accessToken;
+
+  [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifetimeSecs]
+                                            forKey:kTokenExpirationUserDefaultsKey];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  if (oauthRefreshTimer_) {
+    [oauthRefreshTimer_ invalidate];
+    oauthRefreshTimer_ = nil;
+  }
+  oauthRefreshTimer_ = [NSTimer scheduledTimerWithTimeInterval:token.lifetimeSecs
+                                                        target:self
+                                                      selector:@selector(refreshTimerFired:)
+                                                      userInfo:nil
+                                                       repeats:YES];
+}
+
 #pragma mark - FirstRunViewControllerDelegate methods.
 
-- (void)viewController:(FirstRunViewController*)viewController 
+- (void)viewController:(FirstRunViewController*)viewController
     didReceiveUsername:(NSString*)username 
               password:(NSString*)password {
   if (username.length > 0 && password.length > 0) {
@@ -281,22 +313,65 @@ static AccountManager* sharedAccountManager_ = nil;
   }
 }
 
+- (void)viewController:(FirstRunViewController*)viewController
+willCreateUserWithName:(NSString*)name
+              username:(NSString*)handle
+              password:(NSString*)password
+                 email:(NSString*)email
+           phoneNumber:(NSString*)number {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
+
+  if (![name length] || ![handle length] || ![password length] || ![email length])
+    return [self.firstRunViewController signUpFailed:@"Please fill out all required fields."];
+  
+  [passwordKeychainItem_ setObject:handle forKey:(id)kSecAttrAccount];
+  [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];
+
+  RKObjectManager* manager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"Registration"];
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kRegisterPath
+                                                        delegate:self];
+  loader.method = RKRequestMethodPOST;
+  loader.objectMapping = mapping;
+
+  // Don't pass an empty string as a phone number.
+  if (![number length])
+    number = nil;
+
+  loader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+      name, @"name",
+      email, @"email",
+      handle, @"screen_name",
+      password, @"password",
+      kClientID, @"client_id",
+      kClientSecret, @"client_secret",
+      number, @"phone",  // Last so it can be nil.
+      nil
+  ];
+  [oAuthRequestQueue_ addRequest:loader];
+}
+
 #pragma mark - RKRequestQueueDelegate methods.
 
 - (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
   [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-
   if (queue == oAuthRequestQueue_) {
-    [RKRequestQueue sharedQueue].suspended = YES;
-  } else if (queue == [RKRequestQueue sharedQueue]) {
-    // Wrap shiz with the current oauth token.
-    NSMutableDictionary* params =
-        [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
-
+    [RKClient sharedClient].requestQueue.suspended = YES;
+  } else if (queue == [RKClient sharedClient].requestQueue) {
     if (!self.authToken.accessToken) {
       [self refreshToken];
       return;
     }
+
+    if ([request.params isKindOfClass:[RKParams class]]) {
+      [(RKParams*)request.params setValue:self.authToken.accessToken forParam:@"oauth_token"];
+      return;
+    }
+    
+    // Wrap shiz with the current oauth token.
+    NSMutableDictionary* params =
+        [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
 
     [params setObject:self.authToken.accessToken forKey:@"oauth_token"];
     request.params = params;
@@ -306,6 +381,7 @@ static AccountManager* sharedAccountManager_ = nil;
       request.params = nil;
     }
   }
+  NSLog(@"Request: %@", request.resourcePath);
 }
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {

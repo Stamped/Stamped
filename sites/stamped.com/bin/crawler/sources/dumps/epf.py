@@ -375,12 +375,12 @@ def parse_rows(f, table_format):
         if l.startswith('#'):
             continue
         
-        l = l[:-2]
+        l   = l[:-2].decode('utf8', 'ignore')
         row = l.split('\x01')
         
         # optional attributes at the end of a row may be cut off if they don't exist
         while len(row) < row_len:
-            row.append('')
+            row.append(u'')
         
         assert len(row) == row_len
         yield row

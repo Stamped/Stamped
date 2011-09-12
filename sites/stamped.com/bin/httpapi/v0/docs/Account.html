@@ -204,11 +204,8 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>first_name</strong> <em>required</em>
-The first name of the registering user. This field has a maximum of 80 characters.</p>
-
-<p><strong>last_name</strong> <em>required</em>
-The last name of the registering user. This field has a maximum of 80 characters.</p>
+<p><strong>name</strong> <em>required</em>
+The full name of the registering user. This field has a maximum of 80 characters.</p>
 
 <p><strong>email</strong> <em>required</em>
 The email address of the registering user. This must be in a valid format and must be unique within Stamped.</p>
@@ -218,6 +215,9 @@ The password for the new account. This must be a minimum of six characters.</p>
 
 <p><strong>screen_name</strong> <em>required</em>
 A unique string that acts as a handle for the user. This will be used for authentication and for account identification. The screen name must be unique within Stamped, and account creation will fail if it is not.</p>
+
+<p><strong>phone</strong> <em>optional</em>
+The user&#8217;s phone number. Data must be based as an integer with no formatting (e.g. 1235551234).</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
@@ -230,11 +230,10 @@ client_id=iPhoneApp&amp;client_secret=1234567890&amp;first_name=Kevin&amp;last_n
 <pre><code>{
     &quot;user&quot;: {
         &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
-        &quot;first_name&quot;: &quot;Kevin&quot;,
-        &quot;last_name&quot;: &quot;Palms&quot;,
+        &quot;name&quot;: &quot;Kevin Palms&quot;,
         &quot;email&quot;: &quot;kevin@stamped.com&quot;,
         &quot;screen_name&quot;: &quot;kevin&quot;,
-        &quot;display_name&quot;: &quot;Kevin P.&quot;
+        &quot;phone&quot;: &quot;1235551234&quot;
     },
     &quot;token&quot;: {
         &quot;access_token&quot;: &quot;1234567890123456789012&quot;,
@@ -273,6 +272,9 @@ A unique string that acts as a handle for the user. This will be used for authen
 <p><strong>privacy</strong> <em>optional</em>
 A Boolean value representing whether or not the account should be publicly visible. The default value is &#8216;true&#8217;. Only Boolean values are accepted, i.e. &#8216;true&#8217;, &#8216;1&#8217;, &#8216;false&#8217;, and &#8216;0&#8217;.</p>
 
+<p><strong>phone</strong> <em>optional</em>
+The user&#8217;s phone number. Data must be based as an integer with no formatting (e.g. 1235551234).</p>
+
 <h3 id="samplerequest">Sample Request</h3>
 
 <pre><code>POST https://api.stamped.com/v1/account/settings.json
@@ -283,11 +285,11 @@ oauth_token=1234567890123456789012&amp;screen_name=kpalms&amp;privacy=true
 
 <pre><code>{
     &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
-    &quot;first_name&quot;: &quot;Kevin&quot;,
-    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;name&quot;: &quot;Kevin Palms&quot;,
     &quot;email&quot;: &quot;kevin@stamped.com&quot;,
     &quot;screen_name&quot;: &quot;kpalms&quot;,
-    &quot;privacy&quot;: true
+    &quot;privacy&quot;: true,
+    &quot;phone&quot;: &quot;1235551234&quot;
 }
 </code></pre>
 
@@ -318,8 +320,7 @@ oauth_token=1234567890123456789012&amp;screen_name=kpalms&amp;privacy=true
 
 <pre><code>{
     &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
-    &quot;first_name&quot;: &quot;Kevin&quot;,
-    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;name&quot;: &quot;Kevin Palms&quot;,
     &quot;email&quot;: &quot;kevin@stamped.com&quot;,
     &quot;screen_name&quot;: &quot;kpalms&quot;,
     &quot;privacy&quot;: true
@@ -343,11 +344,8 @@ oauth_token=1234567890123456789012&amp;screen_name=kpalms&amp;privacy=true
 
 <h3 id="parameters">Parameters</h3>
 
-<p><strong>first_name</strong> <em>optional</em>
-The first name of the registering user. This field has a maximum of 80 characters.</p>
-
-<p><strong>last_name</strong> <em>optional</em>
-The last name of the registering user. This field has a maximum of 80 characters.</p>
+<p><strong>name</strong> <em>optional</em>
+The full name of the registering user. This field has a maximum of 80 characters.</p>
 
 <p><strong>bio</strong> <em>optional</em>
 A brief biography of the user. This section of the profile is optional but is strongly suggested. The maximum length is 200 characters, and no line breaks are allowed.</p>
@@ -368,11 +366,8 @@ oauth_token=1234567890123456789012&amp;color=333333,999999&amp;bio=The%20very%20
 
 <pre><code>{
     &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
-    &quot;first_name&quot;: &quot;Kevin&quot;,
-    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;name&quot;: &quot;Kevin Palms&quot;,
     &quot;screen_name&quot;: &quot;kevin&quot;,
-    &quot;display_name&quot;: &quot;Kevin P.&quot;,
-    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
     &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
     &quot;color_primary&quot;: &quot;333333&quot;,
     &quot;color_secondary&quot;: &quot;999999&quot;,
@@ -453,11 +448,8 @@ oauth_token=1234567890123456789012&amp;color_primary=333333&amp;color_secondary=
 
 <pre><code>{
     &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
-    &quot;first_name&quot;: &quot;Kevin&quot;,
-    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;name&quot;: &quot;Kevin Palms&quot;,
     &quot;screen_name&quot;: &quot;kevin&quot;,
-    &quot;display_name&quot;: &quot;Kevin P.&quot;,
-    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
     &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
     &quot;color_primary&quot;: &quot;333333&quot;,
     &quot;color_secondary&quot;: &quot;999999&quot;,
@@ -499,8 +491,7 @@ oauth_token=1234567890123456789012
 
 <pre><code>{
     &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
-    &quot;first_name&quot;: &quot;Kevin&quot;,
-    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;name&quot;: &quot;Kevin Palms&quot;,
     &quot;email&quot;: &quot;kevin@stamped.com&quot;,
     &quot;screen_name&quot;: &quot;kpalms&quot;,
     &quot;privacy&quot;: true
@@ -536,11 +527,8 @@ client_id=iPhoneApp&amp;client_secret=1234567890&amp;login=kevin
 
 <pre><code>{
     &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
-    &quot;first_name&quot;: &quot;Kevin&quot;,
-    &quot;last_name&quot;: &quot;Palms&quot;,
+    &quot;name&quot;: &quot;Kevin Palms&quot;,
     &quot;screen_name&quot;: &quot;kevin&quot;,
-    &quot;display_name&quot;: &quot;Kevin P.&quot;,
-    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;
     &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
     &quot;color_primary&quot;: &quot;333333&quot;,
     &quot;color_secondary&quot;: &quot;999999&quot;,
@@ -556,26 +544,30 @@ client_id=iPhoneApp&amp;client_secret=1234567890&amp;login=kevin
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getaccountverify_credentials">GET account/verify_credentials</h2>
+<h2 id="postaccountlinked_accounts">POST account/linked_accounts</h2>
 
 <h3 id="description">Description</h3>
 
-<p>Checks if the supplied credentials are valid.</p>
+<p>Store identifying properties from linked third-party accounts (e.g. Twitter, Facebook, etc.).</p>
 
 <h3 id="details">Details</h3>
 
 <ul>
 <li>OAuth Token Required</li>
-<li><strong>NOTE</strong>: This function is not yet supported.</li>
 </ul>
 
 <h3 id="parameters">Parameters</h3>
 
-<p><em>None</em></p>
+<p><strong>twitter_id</strong> <em>optional</em>
+The user&#8217;s twitter id.</p>
+
+<p><strong>twitter_screen_name</strong> <em>optional</em>
+The user&#8217;s twitter screen_name.</p>
 
 <h3 id="samplerequest">Sample Request</h3>
 
-<pre><code>GET https://api.stamped.com/1/account/verify_credentials.json
+<pre><code>POST https://api.stamped.com/v0/account/linked_accounts.json
+oauth_token=1234567890123456789012&amp;twitter_id=1234567890&amp;twitter_screen_name=abcd
 </code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
