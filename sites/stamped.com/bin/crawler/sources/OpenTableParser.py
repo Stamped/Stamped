@@ -129,10 +129,8 @@ def parseEntity(entity):
                 raw = elem.getText()
                 regex = re.compile(r'[^:]*:(.*)')
                 details[item] = regex.sub(r'\1', raw).strip()
-                
                 #utils.log("'%s' => '%s'" % (item, details[item]))
         
-        """
         imageWrapper = soup.find("div", {"class" : "restaurantImageWrapper"})
         
         if imageWrapper is not None:
@@ -143,11 +141,13 @@ def parseEntity(entity):
                 
                 if imageRelativeURL is not None:
                     imageAbsoluteURL = __BASE_URL + imageRelativeURL
-                    imageData = utils.getFile(imageAbsoluteURL)
-                    details['images'] = [ imageData ]
-        """
+                    details['image'] = imageAbsoluteURL
         
-        entity.add(details)
+        for k, v in details.iteritems():
+            if k == 'price':
+                k = 'priceScale'
+            
+            entity[k] = v
     except:
         utils.log("[OpenTable] Error crawling " + url)
         utils.printException()

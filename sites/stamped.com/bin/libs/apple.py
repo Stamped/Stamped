@@ -57,6 +57,9 @@ class AppleAPICall(object):
         url    = self._get_url(params)
         result = json.loads(utils.getFile(url))
         
+        #from pprint import pprint
+        #pprint(result)
+        
         if transform:
             return self.transform_result(result)
         else:
@@ -134,6 +137,8 @@ class AppleAPICall(object):
                 
                 if subcategory != 'artist':
                     entity.artist_display_name = result['artistName']
+                    if 'artistId' in result and result['artistId'] is not None:
+                        entity.artist_id       = result['artistId']
                 
                 entity_map = {
                     'previewUrl'            : 'preview_url', 

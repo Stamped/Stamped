@@ -165,6 +165,8 @@ def parseCommandLine():
     
     if options.sink == "test":
         options.sink = TestEntitySink()
+    elif options.sink == "merge":
+        options.sink = MergeEntitySink()
     else:
         options.sink = MongoStampedAPI(options.db)
     

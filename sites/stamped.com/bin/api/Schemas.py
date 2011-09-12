@@ -393,7 +393,7 @@ class RestaurantSchema(Schema):
         self.chef               = SchemaElement(basestring)
         self.owner              = SchemaElement(basestring)
         self.reviewLinks        = SchemaElement(basestring)
-        self.priceScale         = SchemaElement(float)
+        self.priceScale         = SchemaElement(basestring)
 
 class AppSchema(Schema):
     def setSchema(self):
@@ -453,12 +453,19 @@ class VideoSchema(Schema):
 class ArtistSchema(Schema):
     def setSchema(self):
         self.albums             = SchemaList(ArtistAlbumsSchema())
+        self.songs              = SchemaList(ArtistSongsSchema())
 
 class ArtistAlbumsSchema(Schema):
     def setSchema(self):
         self.album_id           = SchemaElement(int)
         self.rank               = SchemaElement(int)
         self.genre_id           = SchemaElement(int)
+        self.album_name         = SchemaElement(basestring)
+
+class ArtistSongsSchema(Schema):
+    def setSchema(self):
+        self.song_id           = SchemaElement(int)
+        self.song_name         = SchemaElement(basestring)
 
 class SongSchema(Schema):
     def setSchema(self):
@@ -511,6 +518,7 @@ class MediaSchema(Schema):
         self.artwork_url                = SchemaElement(basestring)
         self.mpaa_rating                = SchemaElement(basestring)
         self.genre                      = SchemaElement(basestring)
+        self.artist_id                  = SchemaElement(int)
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
