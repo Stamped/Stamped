@@ -61,6 +61,7 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 
 - (void)dealloc {
   self.authentication = nil;
+  [super dealloc];
 }
 
 #pragma mark - View Lifecycle
@@ -82,8 +83,8 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
     [self findFromContacts:self];
   else if (self.findSource == FindFriendsFromTwitter)
     [self findFromTwitter:self];
-  else
-    NSAssert(NO, @"Find source %d invalid", self.findSource);
+  //else
+  //  NSAssert(NO, @"Find source %d invalid", self.findSource);  // Causing an error on archive build!?
 }
 
 #pragma mark - Actions
