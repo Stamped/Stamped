@@ -6,7 +6,7 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import "PlaceDetailViewController.h"
+#import "OtherDetailViewController.h"
 
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
@@ -14,7 +14,7 @@
 #import "Entity.h"
 #import "STPlaceAnnotation.h"
 
-@interface PlaceDetailViewController ()
+@interface OtherDetailViewController ()
 - (void)confirmCall;
 - (void)addAnnotation;
 - (void)setupMainActionsContainer;
@@ -22,7 +22,7 @@
 - (void)setupSectionViews;
 @end
 
-@implementation PlaceDetailViewController
+@implementation OtherDetailViewController
 
 @synthesize callActionButton = callActionButton_;
 @synthesize callActionLabel = callActionLabel_;
@@ -33,9 +33,13 @@
 
 - (void)showContents
 {
-  self.descriptionLabel.text = [entityObject_.address stringByReplacingOccurrencesOfString:@", "
+  if (entityObject_.address)
+    self.descriptionLabel.text = [entityObject_.address stringByReplacingOccurrencesOfString:@", "
                                                                                 withString:@"\n"];
-//  NSLog(@"%@", entityObject_);
+  else 
+    self.descriptionLabel.text = entityObject_.subcategory;
+
+  //  NSLog(@"%@", entityObject_);
   
   [self setupMainActionsContainer];
   [self setupMapView];
@@ -53,7 +57,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_food_0"];
+  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_other_0"];
   if (dataLoaded_ && !annotation_)
     [self addAnnotation];
   
@@ -165,6 +169,13 @@
 - (void) setupMapView
 {
   if (!entityObject_.coordinates)
+  {
+    self.mapView.hidden = YES;
+
+    CGRect frame = self.mainContentView.frame;
+    frame = CGRectOffset(frame, 0, -CGRectGetHeight(self.mapView.frame));
+    frame.size.height += CGRectGetHeight(self.mapView.frame);
+  }
     return;
   
   NSArray* coordinates = [entityObject_.coordinates componentsSeparatedByString:@","]; 

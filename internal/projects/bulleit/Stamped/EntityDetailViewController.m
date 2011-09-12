@@ -22,6 +22,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @interface EntityDetailViewController ()
 - (void)loadEntityDataFromServer;
 - (void)showContents;
+- (void)setupSectionViews;
 @end
 
 @implementation EntityDetailViewController
@@ -34,12 +35,17 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize mainActionLabel = mainActionLabel_;
 @synthesize categoryImageView = categoryImageView_;
 @synthesize loadingView = loadingView_;
+@synthesize mainContentView = mainContentView_;
+
+
+
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     entityObject_ = [entity retain];
     [self loadEntityDataFromServer];
+    sectionsDict_ = [[NSMutableDictionary dictionary] retain];
   }
   return self;
 }
@@ -55,6 +61,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainActionsView = nil;
   self.loadingView = nil;
   [entityObject_ release];
+  [sectionsDict_ release];
   [super dealloc];
 }
 
@@ -71,7 +78,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
+  RKObjectLoader*   objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
                                                                     delegate:self];
   objectLoader.objectMapping = entityMapping;
   objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"entity_id", entityObject_.entityID, nil];
@@ -81,6 +88,10 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)showContents {
+  // Default does nothing. Override in subclasses.
+}
+
+- (void)setupSectionViews {
   // Default does nothing. Override in subclasses.
 }
 
@@ -118,6 +129,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.categoryImageView = nil;
   self.mainActionsView = nil;
   self.loadingView = nil;
+  
+  for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
+    vc.delegate = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -153,5 +167,91 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   }
   [self.loadingView stopAnimating];
 }
+
+
+#pragma mark - Section / collapsible view management.
+
+- (void)addSectionWithName:(NSString*)name
+{
+  CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
+                                              initWithNibName:@"CollapsibleViewController" bundle:nil];
+  
+  collapsibleVC.view.frame = CGRectMake(0, [self contentHeight], 
+                                        mainContentView_.frame.size.width, 
+                                        collapsibleVC.collapsedHeight);
+  
+  collapsibleVC.sectionLabel.text = name;
+  collapsibleVC.delegate = self;
+
+  [sectionsDict_ setObject:collapsibleVC forKey:name];
+  [mainContentView_ addSubview:collapsibleVC.view];
+}
+
+- (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight;
+{
+  CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
+                                              initWithNibName:@"CollapsiblePreviewController" bundle:nil];
+
+  collapsibleVC.collapsedHeight = previewHeight;
+  collapsibleVC.view.frame = CGRectMake(0, [self contentHeight], 
+                                        mainContentView_.frame.size.width, 
+                                        collapsibleVC.collapsedHeight);
+  collapsibleVC.sectionLabel.text = name;
+  collapsibleVC.delegate = self;
+  
+  [sectionsDict_ setObject:collapsibleVC forKey:name];
+  [mainContentView_ addSubview:collapsibleVC.view];
+}
+
+- (void)addSectionStampedBy
+{
+  [self addSectionWithName:@"Stamped by"];
+  CollapsibleViewController* collapsibleVC = [sectionsDict_ objectForKey:@"Stamped by"];
+  
+  collapsibleVC.iconView.image = [UIImage imageNamed:@"stamp_12pt_solid"];
+  collapsibleVC.iconView.alpha = 0.6;
+  collapsibleVC.sectionLabel.frame = CGRectOffset(collapsibleVC.sectionLabel.frame, collapsibleVC.iconView.frame.size.width, 0);
+  
+  collapsibleVC.numLabel.hidden = NO;
+  collapsibleVC.iconView.hidden = NO;
+}
+
+
+// Delegate method
+- (void)collapsibleViewController:(CollapsibleViewController *)collapsibleVC willChangeHeightBy:(CGFloat)delta
+{
+  for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
+  {
+    if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame))
+    {
+      [UIView animateWithDuration:0.25
+                       animations:^{vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);}];
+    }
+  }
+  
+  CGFloat newHeight = [self contentHeight];
+  if (delta > 0) newHeight += delta;
+  CGRect frame = mainContentView_.frame;
+  frame.size.height = newHeight;
+  mainContentView_.frame = frame;
+  
+}
+
+- (CGFloat)contentHeight
+{
+  CGFloat contentHeight = 0.f;
+  
+  if (!sectionsDict_) return 0.f;
+  if (sectionsDict_.count == 0) return 0.f;
+  
+  for (CollapsibleViewController* cvc in sectionsDict_.objectEnumerator)
+  {
+    contentHeight += cvc.collapsedHeight;
+  }
+  
+  return contentHeight;
+}
+
+
 
 @end

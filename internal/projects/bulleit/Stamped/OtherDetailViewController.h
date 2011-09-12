@@ -13,7 +13,7 @@
 
 @class STPlaceAnnotation;
 
-@interface PlaceDetailViewController : EntityDetailViewController <MKMapViewDelegate> {
+@interface OtherDetailViewController : EntityDetailViewController <MKMapViewDelegate> {
  @private
   STPlaceAnnotation* annotation_;
   CLLocationDegrees latitude_;

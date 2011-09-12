@@ -8,6 +8,9 @@
 
 #import "EntityDetailViewController.h"
 
-@interface MusicDetailViewController : EntityDetailViewController
+@interface MusicDetailViewController : EntityDetailViewController {}
+
+@property (nonatomic, retain) IBOutlet UIImageView* imageView;
+@property (nonatomic, retain) IBOutlet UIImageView* affiliateLogoView;
 
 @end

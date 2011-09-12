@@ -23,7 +23,7 @@
 #import "OAuthToken.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
-static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
+static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 
 @implementation StampedAppDelegate
 
@@ -36,7 +36,7 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
   [RKRequestQueue sharedQueue].suspended = YES;
   [RKRequestQueue sharedQueue].concurrentRequestsLimit = 1;
   [RKRequestQueue sharedQueue].delegate = [AccountManager sharedManager];
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
@@ -54,13 +54,25 @@ static NSString* const kDataBaseURL = @"http://api.stamped.com:5000/api/v1";
 
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
-                                         @"opentable_url", @"openTableURL", nil];
+                                         @"opentable_url", @"openTableURL", 
+                                         @"itunes_short_url", @"itunesShortURL",
+                                         @"itunes_url", @"itunesURL", 
+                                         @"artist_name", @"artist",
+                                         @"album_name", @"album", 
+                                         @"release_date", @"releaseDate", 
+                                         @"track_list", @"trackList", 
+                                         @"amazon_url", @"amazonURL",
+                                         @"in_theaters", @"inTheaters", 
+                                         @"fandango_url", @"fandangoURL", nil];
+  
   entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapAttributes:@"address", @"category", @"subtitle",
                                @"title", @"coordinates", @"phone", @"subcategory",
                                @"street", @"substreet", @"city", @"state", @"zipcode",
-                               @"desc", @"artist", @"album", @"authors",
-                               @"cast", @"director", @"year", nil];
+                               @"neighborhood", @"desc", @"genre", @"label", @"length", 
+                               @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
+                               @"price", @"website", @"rating", @"isbn", @"format", 
+                               @"publisher", @"language", nil];
 
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];

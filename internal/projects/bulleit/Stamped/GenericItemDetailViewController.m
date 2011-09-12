@@ -10,6 +10,9 @@
 
 @implementation GenericItemDetailViewController
 
+@synthesize imageView;
+@synthesize affiliateLogoView;
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
