@@ -470,9 +470,9 @@ class HTTPEntity(Schema):
             if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
                 songs = schema.songs
                 
-                # for an artist, only return up to 5 songs
+                # for an artist, only return up to 10 songs
                 if schema.subcategory == "artist":
-                    songs = songs[0:min(5, len(songs))]
+                    songs = songs[0:min(10, len(songs))]
                 
                 songs = list(song.song_name for song in songs)
                 self.songs = songs

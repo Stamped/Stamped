@@ -86,8 +86,13 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                 
                 col2  = table_format.cols[col]
                 col_type = col2['type']
+                
+                # perform mapping between some MySQL types that Apple uses and 
+                # their postgres equivalents
                 if col_type == 'DATETIME':
                     col_type = 'TIMESTAMP'
+                elif col_type == 'LONGTEXT':
+                    col_type = 'VARCHAR(4000)'
                 
                 text  = "%s %s%s" % (col, col_type, primary)
                 index = col2['index']
