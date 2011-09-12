@@ -9,13 +9,14 @@ import Globals
 import copy, json, urllib, utils
 
 from Schemas import Entity
+from utils   import AttributeDict
 
-__all__ = [ "Apple" ]
+__all__ = [ "AppleAPI", "AppleAPIError" ]
 
-class AppleError(Exception):
+class AppleAPIError(Exception):
     pass
 
-class AppleCall(object):
+class AppleAPICall(object):
     _wrapper_type_to_subcategory = {
         'artist'        : 'artist', 
         'collection'    : 'album', 
@@ -39,7 +40,7 @@ class AppleCall(object):
         try:
             return object.__getattr__(self, k)
         except:
-            return AppleCall(method=k, transform=self.transform)
+            return AppleAPICall(method=k, transform=self.transform)
     
     def __call__(self, **kwargs):
         assert self.method is not None
@@ -51,12 +52,13 @@ class AppleCall(object):
         
         if self.method == 'search':
             if 'term' not in params:
-                raise AppleError("required parameter 'term' missing to api method %s" % self.method)
+                raise AppleAPIError("required parameter 'term' missing to api method %s" % self.method)
         
-        url = self._get_url(params)
-        print url
-        
+        url    = self._get_url(params)
         result = json.loads(utils.getFile(url))
+        
+        #from pprint import pprint
+        #pprint(result)
         
         if transform:
             return self.transform_result(result)
@@ -67,100 +69,116 @@ class AppleCall(object):
         return "http://itunes.apple.com/%s?%s" % (self.method, urllib.urlencode(params))
     
     def transform_result(self, result):
-        output  = []
+        if result is None or not 'results' in result:
+            return result
+        
         results = result['results']
+        output  = []
         
         for result in results:
-            wrapperType = result['wrapperType']
-            
             try:
-                subcategory = self._wrapper_type_to_subcategory[wrapperType]
-            except KeyError:
-                continue
-            
-            if 'kind' in result:
+                wrapperType = result['wrapperType']
+                
                 try:
-                    subcategory = self._kind_to_subcategory[result['kind']]
+                    subcategory = self._wrapper_type_to_subcategory[wrapperType]
                 except KeyError:
                     continue
-            
-            entity = Entity()
-            entity.subcategory = subcategory
-            
-            if wrapperType == 'track':
-                entity.title    = result['trackName']
-                entity.aid      = result['trackId']
-                entity.view_url = result['trackViewUrl']
                 
-                if 'trackTimeMillis' in result:
-                    entity.track_length = result['trackTimeMillis'] / 1000.0
+                if 'kind' in result:
+                    try:
+                        subcategory = self._kind_to_subcategory[result['kind']]
+                    except KeyError:
+                        continue
                 
-                if 'trackPrice' in result:
-                    price = result['trackPrice']
-                    
-                    entity.currency_code   = result['currency']
-                    entity.amount          = int(price * 100)
-                    entity.formatted_price = "$%.2f" % price
+                entity = Entity()
+                entity.subcategory = subcategory
                 
-                if subcategory == 'song':
-                    album_name = result['collectionName']
+                if wrapperType == 'track':
+                    entity.title    = result['trackName']
+                    entity.aid      = result['trackId']
+                    entity.view_url = result['trackViewUrl']
                     
-                    if album_name is not None:
-                        entity.album_name  = album_name
+                    if 'trackTimeMillis' in result:
+                        entity.track_length = result['trackTimeMillis'] / 1000.0
                     
-                    album_id   = result['collectionId']
-                    if album_id is not None:
-                        entity.song_album_id = album_id
-            elif subcategory == 'album':
-                entity.title    = result['collectionName']
-                entity.aid      = result['collectionId']
-                entity.view_url = result['collectionViewUrl']
-            elif subcategory == 'artist':
-                entity.title    = result['artistName']
-                entity.aid      = result['artistId']
-                entity.view_url = result['artistViewUrl']
-            else:
-                # should never reach this point, but not raising an error just 
-                # in case i'm wrong for robustness purposes if we receive 
-                # an unexpected result
-                continue
-            
-            if subcategory != 'artist':
-                entity.artist_display_name = result['artistName']
-            
-            entity_map = {
-                'previewUrl'            : 'preview_url', 
-                'artworkUrl100'         : 'large', 
-                'artworkUrl60'          : 'small', 
-                'artworkUrl30'          : 'tiny', 
-                'longDescription'       : 'desc', 
-                'shortDescription'      : 'desc', 
-                'primaryGenreName'      : 'genre', 
-                'releaseDate'           : 'original_release_date', 
-                'contentAdvisoryRating' : 'mpaa_rating', 
-            }
-            
-            for key in entity_map:
-                if key in result:
-                    value = result[key]
+                    if 'trackPrice' in result:
+                        price = result['trackPrice']
+                        
+                        entity.currency_code   = result['currency']
+                        entity.amount          = int(price * 100)
+                        entity.formatted_price = "$%.2f" % price
                     
-                    if value is not None:
-                        entity[entity_map[key]] = result[key]
-            
-            if wrapperType == 'track':
-                try:
-                    entity.track_length = result['trackTimeMillis'] / 1000.0
-                except KeyError:
-                    pass
-            
-            output.append((result, entity))
+                    if subcategory == 'song':
+                        album_name = result['collectionName']
+                        
+                        if album_name is not None:
+                            entity.album_name  = album_name
+                        
+                        album_id   = result['collectionId']
+                        if album_id is not None:
+                            entity.song_album_id = album_id
+                elif subcategory == 'album':
+                    entity.title    = result['collectionName']
+                    entity.aid      = result['collectionId']
+                    entity.view_url = result['collectionViewUrl']
+                elif subcategory == 'artist':
+                    entity.title    = result['artistName']
+                    entity.aid      = result['artistId']
+                    
+                    try:
+                        entity.view_url = result['artistViewUrl']
+                    except:
+                        entity.view_url = result['artistLinkUrl']
+                else:
+                    # should never reach this point, but not raising an error just 
+                    # in case i'm wrong for robustness purposes if we receive 
+                    # an unexpected result
+                    continue
+                
+                if subcategory != 'artist':
+                    entity.artist_display_name = result['artistName']
+                    if 'artistId' in result and result['artistId'] is not None:
+                        entity.artist_id       = result['artistId']
+                
+                entity_map = {
+                    'previewUrl'            : 'preview_url', 
+                    'artworkUrl100'         : 'large', 
+                    'artworkUrl60'          : 'small', 
+                    'artworkUrl30'          : 'tiny', 
+                    'longDescription'       : 'desc', 
+                    'shortDescription'      : 'desc', 
+                    'primaryGenreName'      : 'genre', 
+                    'releaseDate'           : 'original_release_date', 
+                    'contentAdvisoryRating' : 'mpaa_rating', 
+                    'copyright'             : 'copyright', 
+                    'trackCount'            : 'track_count', 
+                }
+                
+                for key in entity_map:
+                    if key in result:
+                        value = result[key]
+                        
+                        if value is not None:
+                            entity[entity_map[key]] = result[key]
+                
+                if wrapperType == 'track':
+                    try:
+                        entity.track_length = result['trackTimeMillis'] / 1000.0
+                    except KeyError:
+                        pass
+                
+                output.append(AttributeDict(result=result, entity=entity))
+            except:
+                from pprint import pprint
+                pprint(result)
+                raise
         
         return output
 
-class Apple(AppleCall):
+class AppleAPI(AppleAPICall):
     
     def __init__(self, **kwargs):
-        AppleCall.__init__(self, **kwargs)
+        AppleAPICall.__init__(self, **kwargs)
     
     def __getattr__(self, k):
         try:
@@ -169,7 +187,7 @@ class Apple(AppleCall):
             valid_calls = set([ 'search', 'lookup' ])
             
             if k in valid_calls:
-                return AppleCall.__getattr__(self, k)
+                return AppleAPICall.__getattr__(self, k)
             else:
-                raise AppleError("undefined api method '%s'" % k)
+                raise AppleAPIError("undefined api method '%s'" % k)
 

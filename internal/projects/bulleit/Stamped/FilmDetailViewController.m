@@ -21,6 +21,7 @@
 
 @synthesize imageView         = imageView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
+@synthesize ratingView        = ratingView_;
 
 
 - (void)didReceiveMemoryWarning
@@ -35,8 +36,8 @@
 
 - (void)showContents
 {
-  if (!entityObject_.length) 
-    self.descriptionLabel.text = @"movie";
+  if (!entityObject_.length || entityObject_.length.intValue == 0) 
+    self.descriptionLabel.text = entityObject_.subtitle;
 
   else {
     NSNumber*  hours = [NSNumber numberWithFloat: entityObject_.length.floatValue / 3600.f];
@@ -49,16 +50,44 @@
     
     self.descriptionLabel.text = [NSString stringWithFormat:@"%d hr %d min", hours.intValue, minutes.intValue];
   }
+  
+  if (!entityObject_.rating || [entityObject_.rating isEqualToString:@"UR"]) {
+    CGRect frame = self.descriptionLabel.frame;
+    frame.origin.x = self.titleLabel.frame.origin.x;
+    self.descriptionLabel.frame = frame;
+  }
+  
+  else {
+    if ([entityObject_.rating isEqualToString:@"G"]) 
+      self.ratingView.image = [UIImage imageNamed:@"rating_G"];
+    if ([entityObject_.rating isEqualToString:@"PG"]) 
+      self.ratingView.image = [UIImage imageNamed:@"rating_PG"];
+    if ([entityObject_.rating isEqualToString:@"PG-13"]) 
+      self.ratingView.image = [UIImage imageNamed:@"rating_PG-13"];
+    if ([entityObject_.rating isEqualToString:@"R"]) 
+      self.ratingView.image = [UIImage imageNamed:@"rating_R"];
+    if ([entityObject_.rating isEqualToString:@"NC-17"]) 
+      self.ratingView.image = [UIImage imageNamed:@"rating_NC-17"];
     
-//  NSLog(@"%@", entityObject_);
+    [self.ratingView sizeToFit];
+    
+    CGRect frame = self.descriptionLabel.frame;
+    frame.origin.x = CGRectGetMaxX(self.ratingView.frame) + 6.f;
+    self.descriptionLabel.frame = frame;
+
+  }
+    
+    
+  NSLog(@"%@", entityObject_);
   
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-  //  if (entityObject_.artwork) {
-  //    self.imageView.image  = entityObject_.artwork; 
-  self.imageView.hidden = NO;
-  //  }
+  if (entityObject_.image) {
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
+                                                   [NSURL URLWithString:entityObject_.image]]];
+    self.imageView.hidden = NO;
+  }
   
 }
 

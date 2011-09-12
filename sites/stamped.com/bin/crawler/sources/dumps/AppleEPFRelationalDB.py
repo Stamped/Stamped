@@ -8,11 +8,15 @@ __license__ = "TODO"
 import Globals, utils
 import epf, sqlite3, string
 import CSVUtils
-import psycopg2
-import psycopg2.extensions
 
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+try:
+    import psycopg2
+    import psycopg2.extensions
+
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
+    psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+except ImportError:
+    utils.log("Warning: missing required psycopg2 module")
 
 from pprint       import pprint
 from utils        import AttributeDict
@@ -86,8 +90,13 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                 
                 col2  = table_format.cols[col]
                 col_type = col2['type']
+                
+                # perform mapping between some MySQL types that Apple uses and 
+                # their postgres equivalents
                 if col_type == 'DATETIME':
                     col_type = 'TIMESTAMP'
+                elif col_type == 'LONGTEXT':
+                    col_type = 'VARCHAR(4000)'
                 
                 text  = "%s %s%s" % (col, col_type, primary)
                 index = col2['index']
@@ -578,4 +587,10 @@ class AppleEPFSongPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
         
         # only retain us popularity metrics
         return storefront_id == self.us_storefront_id
+
+class AppleEPFAlbumToSong(AppleEPFRelationalDB):
+    def __init__(self):
+        AppleEPFRelationalDB.__init__(self, "Apple EPF Album to Song", 
+                                      filename="collection_song", 
+                                      index="collection_id")
 

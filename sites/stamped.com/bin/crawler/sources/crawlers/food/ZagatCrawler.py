@@ -114,16 +114,6 @@ class ZagatCrawler(AExternalEntitySource):
             utils.log("[%s] error downloading page %s" % (self, href))
             return
         
-        try:
-            # parse next page
-            next_page = soup.find("li", {"class" : re.compile("pager-next")}).find("a", {"class" : "active"})
-            if next_page is not None:
-                next_page_href = self.base + next_page.get("href")
-                pool.spawn(self._parseAllRestaurantsInCityPage, pool, region_name, city_name, next_page_href)
-        except AttributeError:
-            # no next paginated page for restaurants within this city
-            pass
-        
         # parse all zagat-rated restaurants on this page
         restaurants = soup.findAll("li", {"class" : "zr"})
         if restaurants is not None:
@@ -134,6 +124,16 @@ class ZagatCrawler(AExternalEntitySource):
                 
                 # asynchronously parse the current restaurant
                 pool.spawn(self._parseRestaurantPage, pool, region_name, city_name, restaurant_name, restaurant_href)
+        
+        try:
+            # parse next page
+            next_page = soup.find("li", {"class" : re.compile("pager-next")}).find("a", {"class" : "active"})
+            if next_page is not None:
+                next_page_href = self.base + next_page.get("href")
+                self._parseAllRestaurantsInCityPage(pool, region_name, city_name, next_page_href)
+        except AttributeError:
+            # no next paginated page for restaurants within this city
+            pass
     
     def _parseRestaurantPage(self, pool, region_name, city_name, restaurant_name, href):
         utils.log("[%s] parsing restaurant '%s.%s.%s' (%s)" % (self, region_name, city_name, restaurant_name, href))
@@ -161,9 +161,30 @@ class ZagatCrawler(AExternalEntitySource):
             'zurl' : self.base + href, 
         }
         
-        header = soup.find('div', {'class' : 'content'}).find('ul').find('li', {'class' : 'first'})
+        #self._globals['soup'] = soup
+        # parse cuisine
+        header = soup.find('div', {'id' : "block-zagat_restaurants-14"})
         if header is not None:
-            entity.cuisine = header.getText()
+            header = header.find('ul').find('li', {'class' : 'first'})
+            
+            if header is not None:
+                entity.cuisine = header.getText()
+        
+        # parse website
+        site = soup.find('span', {'class' : 'website'})
+        if site is not None:
+            site = site.find('a')
+            
+            if site is not None:
+                entity.site = site.get('href')
+        
+        # parse preview image
+        img = soup.find('div', {'id' : 'content'}).find('div', {'class' : 'photo'})
+        if img is not None:
+            img = img.find('img')
+            
+            if img is not None:
+                entity.image = img.get('src')
         
         self._output.put(entity)
 

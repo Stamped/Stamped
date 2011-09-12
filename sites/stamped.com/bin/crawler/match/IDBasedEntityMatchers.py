@@ -18,26 +18,26 @@ __all__ = [
 ]
 
 class AmazonEntityMatcher(AIDBasedEntityMatcher):
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.amazon.asin')
 
 class AppleEntityMatcher(AIDBasedEntityMatcher):
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.apple.aid')
 
 class GooglePlacesEntityMatcher(AIDBasedEntityMatcher):
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.googlePlaces.gid')
 
 class FandangoEntityMatcher(AIDBasedEntityMatcher):
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.fandango.fid')
 
 class OpenTableEntityMatcher(AIDBasedEntityMatcher):
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.openTable.rid')
 
 class FactualEntityMatcher(AIDBasedEntityMatcher):
-    def __init__(self, stamped_api, options):
+    def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.factual.faid')
 
