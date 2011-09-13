@@ -31,7 +31,8 @@
 @dynamic subcategory;
 @dynamic artist;
 @dynamic desc;
-@dynamic album;
+@dynamic albums;
+@dynamic songs;
 @dynamic author;
 @dynamic cast;
 @dynamic director;
@@ -43,7 +44,6 @@
 @dynamic itunesShortURL;
 @dynamic itunesURL;
 @dynamic releaseDate;
-@dynamic trackList;
 @dynamic genre;
 @dynamic label;
 @dynamic length;
@@ -55,6 +55,7 @@
 @dynamic amazonURL;
 @dynamic inTheaters;
 @dynamic fandangoURL;
+@dynamic image;
 
 
 - (UIImage*)categoryImage {

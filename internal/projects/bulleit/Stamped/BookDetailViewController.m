@@ -45,10 +45,11 @@
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-  //  if (entityObject_.artwork) {
-  //    self.imageView.image  = entityObject_.artwork; 
-  self.imageView.hidden = NO;
-  //  }
+  if (entityObject_.image) {
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
+                                                   [NSURL URLWithString:entityObject_.image]]];
+    self.imageView.hidden = NO;
+  }
   
 }
 
