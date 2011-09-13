@@ -91,6 +91,9 @@ def parseCommandLine():
         options.limit  = int(math.ceil(options.count / den) + 1)
         
         utils.log("ratio %s) offset=%d, limit=%d" % (options.ratio, options.offset, options.limit))
+    else:
+        if options.limit is None:
+            options.limit = options.count
     
     options.verbose = False
     return options
