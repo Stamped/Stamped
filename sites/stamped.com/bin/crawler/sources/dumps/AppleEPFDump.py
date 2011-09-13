@@ -151,16 +151,22 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         if verbose:
             utils.log(cmd)
         
-        try:
-            self.db.execute(cmd)
-        except (sqlite3.OperationalError, psycopg2.Error) as e:
-            if not error_okay:
-                utils.log('warning: error running db cmd "%s"' % (cmd, ))
-                if not self._sqlite:
+        if self._sqlite:
+            try:
+                self.db.execute(cmd)
+            except sqlite3.OperationalError, e:
+                if not error_okay:
+                    utils.log('warning: error running db cmd "%s"' % (cmd, ))
+                    raise
+        else:
+            try:
+                self.db.execute(cmd)
+            except psycopg2.Error, e:
+                if not error_okay:
+                    utils.log('warning: error running db cmd "%s"' % (cmd, ))
                     utils.log(e.pgerror)
-                raise
-            
-            if not self._sqlite:
+                    raise
+                
                 self.conn.rollback()
         
         return self.db
