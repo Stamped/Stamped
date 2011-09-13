@@ -41,7 +41,8 @@ class MongoLogsCollection(AMongoCollection):
         docs = self._collection.find(query).limit(limit).sort('_id', pymongo.DESCENDING)
         logs = []
         for doc in docs:
-            doc['form'] = ast.literal_eval(doc['form'])
+            if 'form' in doc:
+                doc['form'] = ast.literal_eval(doc['form'])
             logs.append(doc)
         return logs
 

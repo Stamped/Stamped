@@ -62,6 +62,7 @@ def main():
     errors  = options.pop('show_errors', False)
     path    = options.pop('path', False)
 
+    ### TODO: Get rid of dateutil dependency
     est = tz.gettz('America/New York')
     utc = tz.gettz('UTC')
 
