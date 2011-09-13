@@ -27,6 +27,7 @@ def handleHTTPRequest(fn):
             print
             print
             logs.begin(stampedAPI._logsDB.addLog)
+            logs.request(request)
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
@@ -127,8 +128,6 @@ def checkOAuth(request):
 def parseRequest(schema, request):
     ### Parse Request
     try:
-        logs.request(request)
-
         if request.method == 'GET':
             rawData = request.GET
         elif request.method == 'POST':
@@ -171,8 +170,6 @@ def parseRequest(schema, request):
 def parseFileUpload(schema, request, fileName='image'):
     ### Parse Request
     try:
-        logs.request(request)
-
         if request.method != 'POST':
             raise
         rawData = request.POST

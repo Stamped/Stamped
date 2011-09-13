@@ -85,7 +85,7 @@ def main():
         if 'path' in logs[i] and 'method' in logs[i]:
             print '%-10s %s %s' % (i+1, logs[i]['method'], logs[i]['path'])
         else:
-            print i
+            print i+1
 
         if 'result' in logs[i] and logs[i]['result'] != '200':
             print '%-10s %s ERROR' % ('', logs[i]['result'])
