@@ -26,7 +26,7 @@ def handleHTTPRequest(fn):
         try:
             print
             print
-            # logs.begin(stampedAPI._logsDB.addLog)
+            logs.begin(stampedAPI._logsDB.addLog)
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
@@ -144,8 +144,11 @@ def parseRequest(schema, request):
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
-            
-        logs.form(data)
+
+        logData = data.copy()
+        if 'password' in logData:
+            logData['password'] = '*****'
+        logs.form(logData)
     
         if schema == None:
             if len(data) > 0:

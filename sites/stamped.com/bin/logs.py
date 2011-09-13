@@ -51,17 +51,17 @@ def _log(level, msg, *args, **kwargs):
         fnc = "UNKNOWN FUNCTION"
     
     if localData.format == 'object':
-        item = (datetime.datetime.utcnow(), fnc, msg)
+        item = (datetime.datetime.utcnow(), level, fnc, msg)
         localData.log['log'].append(item)
 
+    # else:
+    msg = "%s | %-25s | %s" % (localData.logId[:6], fnc, msg)
+    if level == 'warning':
+        log.warning(msg, *args, **kwargs)
+    elif level == 'info':
+        log.info(msg, *args, **kwargs)
     else:
-        msg = "%s | %-25s | %s" % (localData.logId[:6], fnc, msg)
-        if level == 'warning':
-            log.warning(msg, *args, **kwargs)
-        elif level == 'info':
-            log.info(msg, *args, **kwargs)
-        else:
-            log.debug(msg, *args, **kwargs)
+        log.debug(msg, *args, **kwargs)
 
 
 def refresh(format=None):
@@ -105,7 +105,7 @@ def request(request):
     try:
         localData.log['path'] = request.path
         localData.log['method'] = request.method
-        localData.log['headers'] = request.META
+        localData.log['headers'] = str(request.META)
     except:
         localData.log['request'] = 'FAIL'
 

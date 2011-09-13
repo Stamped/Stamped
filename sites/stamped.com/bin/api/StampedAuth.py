@@ -116,9 +116,9 @@ class StampedAuth(AStampedAuth):
                 refreshToken.client_id = clientId
                 refreshToken.user_id = userId
                 refreshToken.timestamp.created = datetime.utcnow()
-                logs.debug("Refresh Token: %s" % refreshToken)
 
                 self._refreshTokenDB.addRefreshToken(refreshToken)
+                logs.debug("Refresh Token created")
                 break
             except:
                 if attempt >= max_attempts:

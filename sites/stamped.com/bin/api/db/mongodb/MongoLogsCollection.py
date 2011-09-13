@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, pickle
+import Globals, ast, pymongo
 
 from AMongoCollection import AMongoCollection
 
@@ -18,14 +18,30 @@ class MongoLogsCollection(AMongoCollection):
     
     def addLog(self, logData):
         try:
+            # print 'LOG DATA: %s' % logData
             if 'form' in logData:
-                logData['form'] = pickle.dumps(logData['form'])
+                logData['form'] = str(logData['form'])
 
-            if 'headers' in logData:
-                logData['headers'] = pickle.dumps(logData['headers'])
+            # if 'headers' in logData:
+            #     logData['headers'] = str(logData['headers'])#pickle.dumps(logData['headers'])
 
             self._collection.insert_one(logData, log=False)
         except Exception as e:
             print e
             raise
+
+    def getLogs(self, userId=None, limit=10, errors=False, path=None):
+        query = {}
+        if userId != None:
+            query['user_id'] = userId 
+        if errors == True:
+            query['result'] = {'$exists': True}
+        if path != None:
+            query['path'] = path
+        docs = self._collection.find(query).limit(limit).sort('_id', pymongo.DESCENDING)
+        logs = []
+        for doc in docs:
+            doc['form'] = ast.literal_eval(doc['form'])
+            logs.append(doc)
+        return logs
 

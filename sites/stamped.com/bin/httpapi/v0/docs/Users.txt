@@ -39,7 +39,7 @@ The user id or screen name of the requested user. If the user id does not match 
 
 
 ------------------------------------------------------------------------------
-## GET users/lookup ##
+## POST users/lookup ##
 
 ### Description ###
 Return detailed information for up to 100 users. Users can be specified by id, screen name, or a combination of the two.
@@ -92,7 +92,7 @@ The user ids or screen names of the requested users. Multiple values should be s
 
 
 ------------------------------------------------------------------------------
-## GET users/search ##
+## POST users/search ##
 
 ### Description ###
 Search users via their name, screen name, and bio. Returns a list of user objects, up to 20 at most.
@@ -155,7 +155,7 @@ The user id or screen name of the requested user.
 
 
 ------------------------------------------------------------------------------
-## GET users/find/email ##
+## POST users/find/email ##
 
 ### Description ###
 Match and return detailed information for up to 100 users based on their email addresses.
@@ -208,7 +208,7 @@ The url-encoded list of emails. Multiple values should be separated by commas.
 
 
 ------------------------------------------------------------------------------
-## GET users/find/phone ##
+## POST users/find/phone ##
 
 ### Description ###
 Match and return detailed information for up to 100 users based on their phone numbers. As phone numbers are not required to be unique, multiple results may be returned for the same number.
@@ -261,7 +261,7 @@ The url-encoded list of phone numbers. Multiple values should be separated by co
 
 
 ------------------------------------------------------------------------------
-## GET users/find/twitter ##
+## POST users/find/twitter ##
 
 ### Description ###
 Match and return detailed information for up to 100 users based on their twitter id.
