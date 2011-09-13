@@ -14,8 +14,10 @@ try:
 
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+    use_sqlite = True
 except ImportError:
     utils.log("Warning: missing required psycopg2 module")
+    use_sqlite = True
 
 from utils          import lazyProperty, AttributeDict, Singleton
 from AEntitySource  import AExternalDumpEntitySource
@@ -119,6 +121,9 @@ class AAppleEPFDump(AExternalDumpEntitySource):
     
     def __init__(self, name, entityMap, types, filename):
         AExternalDumpEntitySource.__init__(self, name, types, 512)
+        global use_sqlite
+        
+        self._sqlite    = use_sqlite
         self._filename  = filename
         self._columnMap = entityMap
         
@@ -130,11 +135,12 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         self.dbpath = "apple_epf.db"
         self.table  = filename
         
-        #self.conn   = sqlite3.connect(self.dbpath)
-        #self.db     = self.conn.cursor()
-        
-        self.conn = psycopg2.connect(host='localhost', database='stamped')
-        self.db   = self.conn.cursor()
+        if self._sqlite:
+            self.conn   = sqlite3.connect(self.dbpath)
+            self.db     = self.conn.cursor()
+        else:
+            self.conn = psycopg2.connect(host='localhost', database='stamped')
+            self.db   = self.conn.cursor()
     
     def close(self):
         if self.db is not None:
@@ -147,14 +153,15 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         
         try:
             self.db.execute(cmd)
-        #except sqlite3.OperationalError:
-        except psycopg2.Error, e:
+        except (sqlite3.OperationalError, psycopg2.Error) as e:
             if not error_okay:
                 utils.log('warning: error running db cmd "%s"' % (cmd, ))
-                utils.log(e.pgerror)
+                if not self._sqlite:
+                    utils.log(e.pgerror)
                 raise
             
-            self.conn.rollback()
+            if not self._sqlite:
+                self.conn.rollback()
         
         return self.db
     

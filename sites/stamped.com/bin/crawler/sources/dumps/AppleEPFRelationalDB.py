@@ -80,7 +80,7 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             
             for col in table_format.cols:
                 primary = ""
-                if not found_primary and col == self.primary:
+                if not found_primary and col == self.primary and not self._sqlite:
                 #if not found_primary and col in table_format.primary_keys:
                     # TODO: handle the common case of multiple primary keys, which sqlite3 does not support
                     # TODO: defining the primary key here as opposed to after insertion is much slower!
@@ -90,12 +90,13 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                 col2  = table_format.cols[col]
                 col_type = col2['type']
                 
-                # perform mapping between some MySQL types that Apple uses and 
-                # their postgres equivalents
-                if col_type == 'DATETIME':
-                    col_type = 'VARCHAR(100)'
-                elif col_type == 'LONGTEXT':
-                    col_type = 'VARCHAR(4000)'
+                if not self._sqlite:
+                    # perform mapping between some MySQL types that Apple uses and 
+                    # their postgres equivalents
+                    if col_type == 'DATETIME':
+                        col_type = 'VARCHAR(100)'
+                    elif col_type == 'LONGTEXT':
+                        col_type = 'VARCHAR(4000)'
                 
                 text  = "%s %s%s" % (col, col_type, primary)
                 index = col2['index']
@@ -105,7 +106,11 @@ class AppleEPFRelationalDB(AAppleEPFDump):
             self.execute("DROP TABLE %s" % (self.table, ), error_okay=True)
             self.execute("CREATE TABLE %s (%s)" % (self.table, args), verbose=True)
             
-            placeholder = '%s'
+            if self._sqlite:
+                placeholder = '?'
+            else:
+                placeholder = '%s'
+            
             values_str  = '(%s)' % string.joinfields((placeholder for col in table_format.cols), ', ')
             self._cmd   = 'INSERT INTO %s VALUES %s' % (self.table, values_str)
             
@@ -171,17 +176,27 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         for k in self._buffer:
             row, row_list = k
             
-            try:
-                self.db.execute(self._cmd, row_list)
-            except psycopg2.Error, e:
-                utils.log(e.pgerror)
-                utils.log(self._cmd)
-                
-                utils.log(row)
-                utils.log(row_list)
-                
-                self.conn.rollback()
-                raise
+            if self._sqlite:
+                try:
+                    self.db.execute(self._cmd, row_list)
+                except sqlite3.OperationalError, e:
+                    utils.log(self._cmd)
+                    
+                    utils.log(row)
+                    utils.log(row_list)
+                    raise
+            else:
+                try:
+                    self.db.execute(self._cmd, row_list)
+                except psycopg2.Error, e:
+                    utils.log(e.pgerror)
+                    
+                    utils.log(self._cmd)
+                    utils.log(row)
+                    utils.log(row_list)
+                    
+                    self.conn.rollback()
+                    raise
         
         """
         try:
