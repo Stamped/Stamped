@@ -471,6 +471,7 @@ class SongSchema(Schema):
     def setSchema(self):
         self.preview_url        = SchemaElement(basestring)
         self.preview_length     = SchemaElement(basestring)
+        
         ### TODO: modify this based on crawler logic (only for custom entities currently)
         self.album_name         = SchemaElement(basestring) 
         self.song_album_id      = SchemaElement(basestring) 

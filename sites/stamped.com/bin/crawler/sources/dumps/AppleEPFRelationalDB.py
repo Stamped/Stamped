@@ -43,10 +43,9 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         # determine if it's up-to-date s.t. we won't recalculate it if it'd 
         # be unnecessary.
         try:
-            row0  = self.execute('SELECT * FROM %s LIMIT 1' % (self.table, ), error_okay=True).fetchone()
-            count = self.execute('SELECT COUNT(*) FROM %s' % (self.table, ), error_okay=True).fetchone()[0]
+            row0 = self.execute('SELECT * FROM %s LIMIT 1' % (self.table, ), error_okay=True).fetchone()
             
-            if row0 is None or count is None or count <= 0:
+            if row0 is None:
                 stale = True
             elif len(row0) != len(dict(table_format.cols)):
                 stale = True
@@ -94,7 +93,7 @@ class AppleEPFRelationalDB(AAppleEPFDump):
                 # perform mapping between some MySQL types that Apple uses and 
                 # their postgres equivalents
                 if col_type == 'DATETIME':
-                    col_type = 'TIMESTAMP'
+                    col_type = 'VARCHAR(100)'
                 elif col_type == 'LONGTEXT':
                     col_type = 'VARCHAR(4000)'
                 
@@ -237,8 +236,9 @@ class AppleEPFArtistRelationalDB(AppleEPFRelationalDB):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Artists", 
                                       filename="artist", 
                                       index="artist_id")
-        
-        artist_type = AppleEPFArtistType()
+    
+    def _filter(self, row):
+        artist_type = AppleEPFArtistTypeDB()
         artist_type.start()
         
         self.artist_to_albums = AppleEPFArtistsToAlbumsRelationalDB()
@@ -264,8 +264,6 @@ class AppleEPFArtistRelationalDB(AppleEPFRelationalDB):
         self.genres.join()
         
         self.artist_type_id = int(artist_type.get_row('name', 'Artist')['artist_type_id'])
-    
-    def _filter(self, row):
         artist_type_id   = int(row.artist_type_id)
         is_actual_artist = int(row.is_actual_artist)
         
@@ -374,10 +372,10 @@ class AppleEPFAlbumRelationalDB(AppleEPFRelationalDB):
                                       filename="collection", 
                                       index="collection_id")
         
-        collection_type = AppleEPFCollectionType()
+        collection_type = AppleEPFCollectionTypeDB()
         collection_type.start()
         
-        media_type = AppleEPFMediaType()
+        media_type = AppleEPFMediaTypeDB()
         media_type.start()
         
         self.album_prices = AppleEPFAlbumPriceRelationalDB()
@@ -397,7 +395,7 @@ class AppleEPFAlbumRelationalDB(AppleEPFRelationalDB):
         if collection_type_id != self.album_type_id:
             return False
         
-        media_type_id = (row.media_type_id)
+        media_type_id = int(row.media_type_id)
         
         # only retain music collections
         if media_type_id != self.music_type_id:
@@ -408,6 +406,7 @@ class AppleEPFAlbumRelationalDB(AppleEPFRelationalDB):
             if s in name:
                 return False
         
+        return True
         collection_id = int(row.collection_id)
         
         # only retain albums which are available for purchase in the US storefront
@@ -425,7 +424,7 @@ class AppleEPFVideoDump(AppleEPFRelationalDB):
                                       filename="video", 
                                       index="video_id")
         
-        media_type = AppleEPFMediaType()
+        media_type = AppleEPFMediaTypeDB()
         media_type.start()
         
         self.video_prices = AppleEPFVideoPriceRelationalDB()
@@ -453,19 +452,19 @@ class AppleEPFVideoDump(AppleEPFRelationalDB):
         
         return True
 
-class AppleEPFCollectionType(AppleEPFRelationalDB):
+class AppleEPFCollectionTypeDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Collection Types", 
                                       filename="collection_type", 
                                       index="collection_type_id")
 
-class AppleEPFArtistType(AppleEPFRelationalDB):
+class AppleEPFArtistTypeDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Artist Types", 
                                       filename="artist_type", 
                                       index="artist_type_id")
 
-class AppleEPFMediaType(AppleEPFRelationalDB):
+class AppleEPFMediaTypeDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Media Types", 
                                       filename="media_type", 
@@ -481,7 +480,7 @@ class AppleEPFVideoPriceRelationalDB(AppleEPFRelationalDB):
                                       filename="video_price", 
                                       index="video_id")
         
-        g = AppleEPFStorefrontDump()
+        g = AppleEPFStorefrontDB()
         g.start()
         g.join()
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
@@ -498,7 +497,7 @@ class AppleEPFAlbumPriceRelationalDB(AppleEPFRelationalDB):
                                       filename="collection_price", 
                                       index="collection_id")
         
-        g = AppleEPFStorefrontDump()
+        g = AppleEPFStorefrontDB()
         g.start()
         g.join()
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
@@ -509,12 +508,12 @@ class AppleEPFAlbumPriceRelationalDB(AppleEPFRelationalDB):
         # only retain us prices
         return storefront_id == self.us_storefront_id
 
-class AppleEPFStorefrontDump(AppleEPFRelationalDB):
+class AppleEPFStorefrontDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Storefronts", 
                                       filename="storefront")
 
-class AppleEPFRoleDump(AppleEPFRelationalDB):
+class AppleEPFRoleDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Artist Roles", 
                                       filename="role")
@@ -525,7 +524,7 @@ class AppleEPFArtistsToAlbumsRelationalDB(AppleEPFRelationalDB):
                                       filename="artist_collection", 
                                       index="artist_id")
         
-        g = AppleEPFRoleDump()
+        g = AppleEPFRoleDB()
         g.start()
         g.join()
         
@@ -560,7 +559,7 @@ class AppleEPFAlbumPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
                                       filename="album_popularity_per_genre", 
                                       index="album_id")
         
-        g = AppleEPFStorefrontDump()
+        g = AppleEPFStorefrontDB()
         g.start()
         g.join()
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
@@ -577,7 +576,7 @@ class AppleEPFSongPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
                                       filename="song_popularity_per_genre", 
                                       index="song_id")
         
-        g = AppleEPFStorefrontDump()
+        g = AppleEPFStorefrontDB()
         g.start()
         g.join()
         self.us_storefront_id = g.get_row('country_code', 'USA')['storefront_id']
@@ -588,7 +587,7 @@ class AppleEPFSongPopularityPerGenreRelationalDB(AppleEPFRelationalDB):
         # only retain us popularity metrics
         return storefront_id == self.us_storefront_id
 
-class AppleEPFAlbumToSong(AppleEPFRelationalDB):
+class AppleEPFAlbumToSongDB(AppleEPFRelationalDB):
     def __init__(self):
         AppleEPFRelationalDB.__init__(self, "Apple EPF Album to Song", 
                                       filename="collection_song", 

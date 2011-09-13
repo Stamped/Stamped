@@ -492,7 +492,7 @@ class HTTPEntity(Schema):
     
     def _handle_image(self, url, is_apple):
         if is_apple:
-            return url.replace('100x100', '200x200')
+            return url.replace('100x100', '200x200').replace('170x170', '200x200')
         
         return url
 

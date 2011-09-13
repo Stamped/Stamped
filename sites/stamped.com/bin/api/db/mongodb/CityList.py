@@ -4788,6 +4788,7 @@ popular_cities = {
         'state' : 'California', 
     }, 
     'San Diego' : {
+        'synonyms' : [ 'sd', 's.d.', ], 
         'population' : 1309749, 
         'lat' : 32.81, 
         'lng' : -117.14, 
@@ -5671,6 +5672,7 @@ popular_cities = {
         'state' : 'Rhode Island', 
     }, 
     'Washington' : {
+        'synonyms' : [ 'dc', 'd.c.', 'washington dc'], 
         'population' : 597885, 
         'lat' : 38.91, 
         'lng' : -77.02, 

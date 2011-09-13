@@ -40,7 +40,8 @@ class AppleEPFDistro(Singleton):
                     return self._apple_data_dir
                 time.sleep(5)
         
-        if self.ec2:
+        if False:
+            #self.ec2:
             #self._volume = 'vol-52db3938'
             self._volume = 'vol-ccf832a6'
             
@@ -264,30 +265,56 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         cmd = 'SELECT * FROM %s WHERE %s=%s' % (self.table, k, v)
         return self.execute(cmd)
     
-    def _format_result(self, result):
+    def _format_result(self, result, transform=False):
         if result is not None:
-            ret = { }
             cols = self.table_format.cols
-            for col in cols:
-                index = cols[col].index
-                ret[col] = result[index]
-            
-            result = AttributeDict(ret)
+            if not transform:
+                ret = { }
+                for col in cols:
+                    index = cols[col].index
+                    ret[col] = result[index]
+                
+                result = AttributeDict(ret)
+            else:
+                entity = Entity()
+                
+                col_map = {
+                    'name' : 'title', 
+                    'collection_id' : 'aid', 
+                    'song_id' : 'aid', 
+                    'artist_id' : 'aid', 
+                    'movie_id' : 'aid', 
+                }
+                
+                for col in cols:
+                    index = cols[col].index
+                    if col in col_map:
+                        col2 = col_map[col]
+                    else:
+                        col2 = col
+                    
+                    try:
+                        entity[col2] = result[index]
+                    except:
+                        pass
+                
+                result = entity
         
         return result
     
-    def get_row(self, k, v):
+    def get_row(self, k, v, transform=False):
         result = self._get_cmd_results(k, v).fetchone()
         
-        return self._format_result(result)
+        return self._format_result(result, transform=transform)
     
-    def get_rows(self, k, v):
-        results = self._get_cmd_results(k, v).fetchmany()
+    def get_rows(self, k, v, transform=False):
+        results = self._get_cmd_results(k, v).fetchall()
         
         if results is None:
             return []
+        
         for i in xrange(len(results)):
-            results[i] = self._format_result(results[i])
+            results[i] = self._format_result(results[i], transform=transform)
         
         return results
 
