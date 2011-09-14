@@ -256,7 +256,7 @@ int const SPACE_HEIGHT          = 10;
 
 - (void)addWrappingText:(NSString*)text forKey:(NSString*)key {
   
-  CGRect frame = CGRectMake(15.f, 0.0, contentView_.frame.size.width-30.0, 100.0);
+  CGRect frame = CGRectMake(15.f, 0.0, contentView_.frame.size.width-30.0, 10.0);
   CGSize previewRectSize = CGSizeMake(0,0);
   
   if (self.imageView)
@@ -279,6 +279,45 @@ int const SPACE_HEIGHT          = 10;
   if ([content respondsToSelector:@selector(view)])
       [contentView_ addSubview:((CollapsibleViewController*)content).view];
   else [contentView_ addSubview:(UIView*)content];
+  
+  if (self.footerLabel.hidden == NO  &&  self.contentHeight <= self.contentView.frame.size.height) {
+    self.footerLabel.hidden = YES;
+    self.arrowView.hidden = YES;
+    self.collapsedHeight = self.headerView.frame.size.height + self.contentHeight;
+
+    CGRect footerFrame = self.footerView.frame;
+//    footerFrame.size.height = 20;
+//    footerFrame.origin.y -= 20;
+    self.footerView.frame = footerFrame;
+    
+    CGRect contentFrame = self.contentView.frame;
+    contentFrame.size.height +=20;
+    self.contentView.frame = contentFrame;
+    
+    CGRect viewFrame = self.view.frame;
+    viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) -20;
+    self.view.frame = viewFrame;
+    
+//    self.view.backgroundColor = [UIColor stampedLightGrayColor];
+//    self.footerView.backgroundColor = [UIColor stampedDarkGrayColor];
+        
+  }
+  
+  if (self.footerLabel.hidden == YES && self.contentHeight > self.contentView.frame.size.height) {
+    self.collapsedHeight = self.headerView.frame.size.height + self.contentHeight;
+    self.footerLabel.hidden = NO;
+    self.arrowView.hidden = NO;
+    
+    CGRect footerFrame = self.footerView.frame;
+    footerFrame.size.height = 20;
+    self.footerView.frame = footerFrame;
+    
+    CGRect contentFrame = self.contentView.frame;
+    contentFrame.size.height -= 20;
+    self.contentView.frame = contentFrame;
+    
+    
+  }
 }
 
 - (float)contentHeight
@@ -300,14 +339,10 @@ int const SPACE_HEIGHT          = 10;
 
 #pragma mark - Touch events
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-  NSLog(@"touched %@", self.sectionLabel.text);
-}
-
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  self.isCollapsed = !isCollapsed_;
+  if (self.arrowView.hidden == NO)
+    self.isCollapsed = !isCollapsed_;
 }
 
 

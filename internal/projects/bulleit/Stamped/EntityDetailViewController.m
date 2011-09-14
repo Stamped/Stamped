@@ -14,6 +14,7 @@
 #import "Entity.h"
 #import "Stamp.h"
 #import "UIColor+Stamped.h"
+#import "PlaceDetailViewController.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
@@ -238,7 +239,11 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   contentFrame.size.height = newHeight;
   self.mainContentView.frame = contentFrame;
   
+  
+  
   newHeight += CGRectGetMinY(self.mainContentView.frame);
+  if ([self isKindOfClass:[PlaceDetailViewController class]])
+    newHeight += ((PlaceDetailViewController*)self).mapView.frame.size.height + 8.0;
   
   self.scrollView.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);  
 }
