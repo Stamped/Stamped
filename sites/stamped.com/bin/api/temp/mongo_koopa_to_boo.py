@@ -21,16 +21,8 @@ def main():
         print 'RUN %s' % collection
 
         if collection == 'entities':
-            mongoExportJSON('entities')
-            convertEntityData('entities')
-            mongoImportJSON('entities')
-
-            rmExportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
-            rmImportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
-            cmd = "%s && %s" % (rmExportFile, rmImportFile)
-            pp = Popen(cmd, shell=True, stdout=PIPE)
-            pp.wait()
-
+            mongoExportImport(collection)
+            convertEntities()
             print 'COMPLETE'
         
         else:
@@ -67,25 +59,21 @@ def mongoImportJSON(collection):
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
 
+def convertEntities():
+    collection = new_database['entities']
+    entities = collection.find({'sources.userGenerated.user_id': {'$exists': True}})
 
-
-def convertEntityData(collection):
-
-    f = codecs.open('/stamped/tmp/stamped/%s.json' % collection, 'rU', 'utf-8')
-    o = codecs.open('/stamped/tmp/stamped/%s_out.json' % collection, 'w', 'utf-8')
-    for line in f:
-        data = json.loads(line)
-        
-        if 'sources' in data and 'userGenerated' in data['sources']:
-            data['sources']['userGenerated']['generated_by'] = \
-                data['sources']['userGenerated']['user_id']
-            del(data['sources']['userGenerated']['user_id'])
-
-        json.dump(data, o)
-        o.write("\n")
-
-    f.close()
-    o.close()
+    for entity in entities:
+        collection.update(
+            {'_id': entity['_id']}, 
+            {
+                '$set': {
+                    'sources.userGenerated.generated_by': entity['sources']['userGenerated']['user_id'],
+                },
+                '$unset': {
+                    'sources.userGenerated.user_id': 1
+                }
+            })
 
 if __name__ == '__main__':  
     main()
