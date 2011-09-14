@@ -14,10 +14,6 @@ from dateutil import tz
 from errors import Fail
 
 from db.mongodb.MongoLogsCollection import MongoLogsCollection
-    
-@lazyProperty
-def _logsDB(self):
-    return MongoLogsCollection()
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"

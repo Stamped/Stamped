@@ -623,14 +623,17 @@ class StampedAPI(AStampedAPI):
                        coords=None, 
                        authUserId=None, 
                        category_filter=None, 
-                       subcategory_filter=None):
+                       subcategory_filter=None, 
+                       limit=10, 
+                       prefix=False):
         coords  = self._parseCoords(coords)
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
-                                                        limit=10, 
+                                                        limit=limit, 
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
-                                                        full=True)
+                                                        full=False, 
+                                                        prefix=prefix)
         output  = []
         
         for result in results:

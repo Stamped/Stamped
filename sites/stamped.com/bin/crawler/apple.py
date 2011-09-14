@@ -174,13 +174,13 @@ def parse_album(row, appleAPI, sink, pool, all_artists, all_albums, all_songs):
     assert 1 >= len(artists)
     
     for artist in artists:
-        add_artist(artist.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, exhaustive=True)
+        add_artist(artist.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs)
     
     albums  = filter(lambda r: r.entity.subcategory == 'album', results)
     assert 1 >= len(albums)
     
     for album in albums:
-        add_album(album.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, exhaustive=False)
+        add_album(album.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs)
 
 def parse_song(row, appleAPI, sink, pool, all_artists, all_albums, all_songs):
     results = appleAPI.lookup(id=row.song_id, transform=True)
@@ -191,9 +191,9 @@ def parse_song(row, appleAPI, sink, pool, all_artists, all_albums, all_songs):
     assert 1 >= len(songs)
     song    = songs[0]
     
-    add_song(song.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, exhaustive=False)
+    add_song(song.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs)
 
-def add_album(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, exhaustive=False):
+def add_album(entity, appleAPI, sink, pool, all_artists, all_albums, all_songse):
     assert entity.subcategory == 'album'
     if int(entity.aid) in all_albums: return
     all_albums.add(int(entity.aid))
@@ -204,14 +204,12 @@ def add_album(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, 
     
     entity.tracks = list(result.entity.title for result in results)
     
-    if exhaustive:
-        for result in results:
-            assert result.entity.subcategory == 'song'
-            add_song(result.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, False)
+    #for result in results:
+    #    add_song(result.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs)
     
     sink._processItem(entity)
 
-def add_artist(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, exhaustive=False):
+def add_artist(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs):
     assert entity.subcategory == 'artist'
     if int(entity.aid) in all_artists: return
     all_artists.add(int(entity.aid))
@@ -220,9 +218,8 @@ def add_artist(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs,
     results = appleAPI.lookup(id=entity.aid, media='music', entity='album', limit=200, transform=True)
     results = filter(lambda r: r.entity.subcategory == 'album', results)
     
-    if False:
-        for result in results:
-            add_album(result.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, exhaustive=exhaustive)
+    for result in results:
+        add_album(result.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs)
     
     if len(results) > 0:
         albums = []
@@ -240,9 +237,8 @@ def add_artist(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs,
     results = appleAPI.lookup(id=entity.aid, media='music', entity='song', limit=200, transform=True)
     results = filter(lambda r: r.entity.subcategory == 'song', results)
     
-    if exhaustive:
-        for result in results:
-            add_song(result.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, False)
+    #for result in results:
+    #    add_song(result.entity, appleAPI, sink, pool, all_artists, all_albums, all_songs)
     
     songs = []
     for result in results:
@@ -258,7 +254,7 @@ def add_artist(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs,
         utils.printException()
         pprint(entity)
 
-def add_song(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs, exhaustive=False):
+def add_song(entity, appleAPI, sink, pool, all_artists, all_albums, all_songs):
     assert entity.subcategory == 'song'
     if int(entity.aid) in all_songs: return
     all_songs.add(int(entity.aid))

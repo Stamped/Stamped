@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import string, sys
+import string, sys, time
 
 from subprocess import Popen, PIPE
 from optparse   import OptionParser
@@ -62,6 +62,7 @@ def main():
         
         proc = Popen(cmd, shell=True)
         procs.append(proc)
+        time.sleep(i + 1)
     
     for proc in procs:
         proc.wait()
