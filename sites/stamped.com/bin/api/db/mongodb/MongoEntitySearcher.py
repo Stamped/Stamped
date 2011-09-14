@@ -356,7 +356,11 @@ class MongoEntitySearcher(EntitySearcher):
         if 'db_results' in wrapper:
             logs.debug('db_results: %d' % len(wrapper['db_results']))
             for doc in wrapper['db_results']:
-                e = self.entityDB._convertFromMongo(doc)
+                try:
+                    e = self.entityDB._convertFromMongo(doc)
+                except:
+                    utils.printException()
+                    continue
                 results[e.entity_id] = (e, -1)
         
         if 'place_results' in wrapper:
@@ -367,7 +371,11 @@ class MongoEntitySearcher(EntitySearcher):
             
             logs.debug('place_results: %d' % len(place_results))
             for doc in place_results:
-                e = self.placesDB._convertFromMongo(doc['obj'])
+                try:
+                    e = self.placesDB._convertFromMongo(doc['obj'])
+                except:
+                    utils.printException()
+                    continue
                 results[e.entity_id] = (e, doc['dis'])
         
         if 'google_place_results' in wrapper:

@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import aws, gzip, json, math, re, string, time
+import aws, gzip, json, math, re, string, time, sys
 
 from MongoStampedAPI    import MongoStampedAPI
 from HTTPSchemas        import *
@@ -280,6 +280,7 @@ def main():
             }
             
             pprint(data)
+            sys.stdout.flush()
             
             try:
                 autocompleteDB.add_key(name, value, content_type='application/json', apply_gzip=True)
