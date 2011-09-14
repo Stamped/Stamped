@@ -374,7 +374,7 @@ class StampedAPI(AStampedAPI):
 
         friendship = Friendship({
             'user_id':      authUserId,
-            'friend_id':    user['user_id']
+            'friend_id':    user.user_id
         })
 
         # Check if friendship already exists
@@ -395,7 +395,16 @@ class StampedAPI(AStampedAPI):
         # Create friendship
         self._friendshipDB.addFriendship(friendship)
 
-        ### TODO: Add activity item for receipient?
+        # Add activity for followed user
+        ### TODO: Rate limit this for repeated follow / unfollow?
+        if self._activity == True:
+            activity                = Activity()
+            activity.genre          = 'follower'
+            activity.user_id        = authUserId
+            activity.link_user_id   = authUserId
+            activity.created        = datetime.utcnow()
+            
+            self._activityDB.addActivity(user.user_id, activity)
 
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
