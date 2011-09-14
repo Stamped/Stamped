@@ -79,7 +79,8 @@ const CGFloat kMediumUserImageSize = 41.0;
 
 - (void)awakeFromFetch {
   [super awakeFromFetch];
-  [self generateStampImage];
+  if (!self.stampImage)
+    [self generateStampImage];
 }
 
 @end

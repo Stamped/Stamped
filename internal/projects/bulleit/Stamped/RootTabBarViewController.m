@@ -267,7 +267,7 @@
     newViewController = [viewControllers_ objectAtIndex:3];
     self.navigationItem.title = @"People";
   }
-    
+
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 
