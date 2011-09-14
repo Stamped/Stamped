@@ -50,6 +50,17 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
         
         return self._convertFromMongo(document)
     
+    def getEntities(self, entityIds):
+        documentIds = []
+        for entityId in entityIds:
+            documentIds.append(self._getObjectIdFromString(entityId))
+        data = self._getMongoDocumentsFromIds(documentIds)
+        
+        result = []
+        for item in data:
+            result.append(self._convertFromMongo(item))
+        return result
+    
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)
         document = self._updateMongoDocument(document)

@@ -697,7 +697,7 @@ class NetflixImageSchema(Schema):
 
 class UserGeneratedSchema(Schema):
     def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
+        self.generated_by       = SchemaElement(basestring, required=True)
 
 class BarnesAndNobleSchema(Schema):
     def setSchema(self):

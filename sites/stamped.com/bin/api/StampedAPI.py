@@ -600,7 +600,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityId, authUserId=None):
         entity = self._entityDB.getEntity(entityId)
         
-        ### TODO: Check if user has access to this entity
+        ### TODO: Check if user has access to this entity?
         return entity
     
     def updateCustomEntity(self, authUserId, entityId, data):
@@ -608,8 +608,8 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.getEntity(entityId)
         
         # Check if user has access to this entity
-        if entity.sources.userGenerated.user_id != authUserId \
-            or entity.sources.userGenerated.user_id == None:
+        if entity.generated_by != authUserId \
+            or entity.generated_by == None:
             msg = "Insufficient privileges to update custom entity"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
@@ -742,6 +742,7 @@ class StampedAPI(AStampedAPI):
     
     def _enrichStampObjects(self, stampData, **kwargs):
         authUserId  = kwargs.pop('authUserId', None)
+        entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
 
         singleStamp = False
@@ -768,6 +769,16 @@ class StampedAPI(AStampedAPI):
             for user in users:
                 userIds[user.user_id] = user.exportSchema(UserMini())
 
+        if len(entityIds) == 0:
+            for stamp in stampData:
+                # Grab entity_id from stamp
+                entityIds[stamp.entity_id] = 1
+                
+            entities = self._entityDB.getEntities(entityIds.keys())
+
+            for entity in entities:
+                entityIds[entity.entity_id] = entity
+
         if authUserId:
             # Favorites
             favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
@@ -780,6 +791,9 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             # Add stamp user
             stamp.user = userIds[stamp.user_id]
+
+            # Add entity
+            stamp.entity = entityIds[stamp.entity_id]
 
             # Add credited user(s)
             if stamp.credit != None:
