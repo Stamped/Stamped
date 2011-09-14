@@ -458,7 +458,26 @@ class StampedAPI(AStampedAPI):
                     'screen_name': userRequest.screen_name_b
                 })
 
-        ### TODO: If either account is private, make sure authUserId is friend
+        # If either account is private, make sure authUserId is friend
+        if userA.privacy == True and authUserId != userA.user_id:
+            check = Friendship({
+                'user_id':      authUserId,
+                'friend_id':    userA['user_id']
+            })
+            if not self._friendshipDB.checkFriendship(check):
+                msg = "Insufficient privileges to check friendship"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
+
+        if userB.privacy == True and authUserId != userB.user_id:
+            check = Friendship({
+                'user_id':      authUserId,
+                'friend_id':    userB['user_id']
+            })
+            if not self._friendshipDB.checkFriendship(check):
+                msg = "Insufficient privileges to check friendship"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
 
         friendship = Friendship({
             'user_id':      userA['user_id'],
