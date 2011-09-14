@@ -245,7 +245,7 @@ int const SPACE_HEIGHT          = 10;
   textView.text = text;
   textView.backgroundColor = [UIColor clearColor];
   textView.userInteractionEnabled = NO;
-  textView.frame = CGRectMake(15.f, 0.f, contentView_.frame.size.width-30.0, 100.0);
+  textView.frame = CGRectMake(8.f, 0.f, contentView_.frame.size.width-15.0, 100.0);
   
   [self addContent:textView forKey:key];
   CGRect frame = textView.frame;

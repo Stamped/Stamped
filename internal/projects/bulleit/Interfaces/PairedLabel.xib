@@ -45,7 +45,7 @@
 					<object class="IBUILabel" id="869991469">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">294</int>
-						<string key="NSFrameSize">{160, 15}</string>
+						<string key="NSFrameSize">{158, 15}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="482600493"/>
@@ -76,7 +76,7 @@
 					<object class="IBUILabel" id="482600493">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">294</int>
-						<string key="NSFrame">{{160, 0}, {160, 15}}</string>
+						<string key="NSFrame">{{160, 0}, {156, 15}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="1000826614"/>
@@ -107,17 +107,16 @@
 					<object class="IBUIView" id="1000826614">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">266</int>
-						<string key="NSFrame">{{0, 15}, {320, 10}}</string>
+						<string key="NSFrame">{{0, 15}, {316, 10}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<reference key="IBUIBackgroundColor" ref="532283727"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 					</object>
 				</object>
-				<string key="NSFrameSize">{320, 25}</string>
+				<string key="NSFrameSize">{316, 25}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="869991469"/>
@@ -169,8 +168,8 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="1000826614"/>
-							<reference ref="482600493"/>
 							<reference ref="869991469"/>
+							<reference ref="482600493"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
