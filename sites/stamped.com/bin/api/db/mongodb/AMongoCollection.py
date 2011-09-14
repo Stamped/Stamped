@@ -7,6 +7,7 @@ __license__ = "TODO"
 
 import Globals
 import bson, copy, math, os, pymongo, time, utils, atexit, logs
+from errors import *
 
 from pprint import pprint
 from errors import Fail
@@ -149,7 +150,7 @@ class AMongoCollection(object):
             return bson.objectid.ObjectId(string)
         except:
             logs.warning("Invalid ObjectID (%s)" % string)
-            raise
+            raise InputError
     
     def _convertToMongo(self, obj):
         if obj is None:
@@ -241,7 +242,7 @@ class AMongoCollection(object):
         document = self._collection.find_one(documentId)
         if document == None:
             logs.warning("Unable to find document (id = %s)" % documentId)
-            raise Exception("Document not found")
+            raise Unavailable("Document not found")
         return document
     
     def _updateMongoDocument(self, document):

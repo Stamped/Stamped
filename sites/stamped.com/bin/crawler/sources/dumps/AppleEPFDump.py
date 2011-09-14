@@ -14,8 +14,10 @@ try:
 
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
+    use_sqlite = True
 except ImportError:
     utils.log("Warning: missing required psycopg2 module")
+    use_sqlite = True
 
 from utils          import lazyProperty, AttributeDict, Singleton
 from AEntitySource  import AExternalDumpEntitySource
@@ -40,7 +42,8 @@ class AppleEPFDistro(Singleton):
                     return self._apple_data_dir
                 time.sleep(5)
         
-        if self.ec2:
+        if False:
+            #self.ec2:
             #self._volume = 'vol-52db3938'
             self._volume = 'vol-ccf832a6'
             
@@ -118,6 +121,9 @@ class AAppleEPFDump(AExternalDumpEntitySource):
     
     def __init__(self, name, entityMap, types, filename):
         AExternalDumpEntitySource.__init__(self, name, types, 512)
+        global use_sqlite
+        
+        self._sqlite    = use_sqlite
         self._filename  = filename
         self._columnMap = entityMap
         
@@ -129,11 +135,12 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         self.dbpath = "apple_epf.db"
         self.table  = filename
         
-        #self.conn   = sqlite3.connect(self.dbpath)
-        #self.db     = self.conn.cursor()
-        
-        self.conn = psycopg2.connect(host='localhost', database='stamped')
-        self.db   = self.conn.cursor()
+        if self._sqlite:
+            self.conn   = sqlite3.connect(self.dbpath)
+            self.db     = self.conn.cursor()
+        else:
+            self.conn = psycopg2.connect(host='localhost', database='stamped')
+            self.db   = self.conn.cursor()
     
     def close(self):
         if self.db is not None:
@@ -144,16 +151,23 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         if verbose:
             utils.log(cmd)
         
-        try:
-            self.db.execute(cmd)
-        #except sqlite3.OperationalError:
-        except psycopg2.Error, e:
-            if not error_okay:
-                utils.log('warning: error running db cmd "%s"' % (cmd, ))
-                utils.log(e.pgerror)
-                raise
-            
-            self.conn.rollback()
+        if self._sqlite:
+            try:
+                self.db.execute(cmd)
+            except sqlite3.OperationalError, e:
+                if not error_okay:
+                    utils.log('warning: error running db cmd "%s"' % (cmd, ))
+                    raise
+        else:
+            try:
+                self.db.execute(cmd)
+            except psycopg2.Error, e:
+                if not error_okay:
+                    utils.log('warning: error running db cmd "%s"' % (cmd, ))
+                    utils.log(e.pgerror)
+                    raise
+                
+                self.conn.rollback()
         
         return self.db
     
@@ -264,30 +278,56 @@ class AAppleEPFDump(AExternalDumpEntitySource):
         cmd = 'SELECT * FROM %s WHERE %s=%s' % (self.table, k, v)
         return self.execute(cmd)
     
-    def _format_result(self, result):
+    def _format_result(self, result, transform=False):
         if result is not None:
-            ret = { }
             cols = self.table_format.cols
-            for col in cols:
-                index = cols[col].index
-                ret[col] = result[index]
-            
-            result = AttributeDict(ret)
+            if not transform:
+                ret = { }
+                for col in cols:
+                    index = cols[col].index
+                    ret[col] = result[index]
+                
+                result = AttributeDict(ret)
+            else:
+                entity = Entity()
+                
+                col_map = {
+                    'name' : 'title', 
+                    'collection_id' : 'aid', 
+                    'song_id' : 'aid', 
+                    'artist_id' : 'aid', 
+                    'movie_id' : 'aid', 
+                }
+                
+                for col in cols:
+                    index = cols[col].index
+                    if col in col_map:
+                        col2 = col_map[col]
+                    else:
+                        col2 = col
+                    
+                    try:
+                        entity[col2] = result[index]
+                    except:
+                        pass
+                
+                result = entity
         
         return result
     
-    def get_row(self, k, v):
+    def get_row(self, k, v, transform=False):
         result = self._get_cmd_results(k, v).fetchone()
         
-        return self._format_result(result)
+        return self._format_result(result, transform=transform)
     
-    def get_rows(self, k, v):
-        results = self._get_cmd_results(k, v).fetchmany()
+    def get_rows(self, k, v, transform=False):
+        results = self._get_cmd_results(k, v).fetchall()
         
         if results is None:
             return []
+        
         for i in xrange(len(results)):
-            results[i] = self._format_result(results[i])
+            results[i] = self._format_result(results[i], transform=transform)
         
         return results
 

@@ -21,7 +21,7 @@ def show(request):
 
 
 @handleHTTPRequest
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def lookup(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPUserIds(), request)
@@ -37,7 +37,7 @@ def lookup(request):
 
 
 @handleHTTPRequest
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def search(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPUserSearch(), request)
@@ -63,7 +63,7 @@ def privacy(request):
 
 
 @handleHTTPRequest
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def findEmail(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPFindUser(), request)
@@ -78,7 +78,7 @@ def findEmail(request):
 
 
 @handleHTTPRequest
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def findPhone(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPFindUser(), request)
@@ -93,7 +93,7 @@ def findPhone(request):
 
 
 @handleHTTPRequest
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def findTwitter(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPFindUser(), request)

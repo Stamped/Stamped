@@ -374,7 +374,7 @@ class StampedAPI(AStampedAPI):
 
         friendship = Friendship({
             'user_id':      authUserId,
-            'friend_id':    user['user_id']
+            'friend_id':    user.user_id
         })
 
         # Check if friendship already exists
@@ -395,7 +395,15 @@ class StampedAPI(AStampedAPI):
         # Create friendship
         self._friendshipDB.addFriendship(friendship)
 
-        ### TODO: Add activity item for receipient?
+        # Add activity for followed user
+        if self._activity == True:
+            activity                = Activity()
+            activity.genre          = 'follower'
+            activity.user_id        = authUserId
+            activity.link_user_id   = authUserId
+            activity.created        = datetime.utcnow()
+            
+            self._activityDB.addActivity(user.user_id, activity)
 
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
@@ -449,7 +457,26 @@ class StampedAPI(AStampedAPI):
                     'screen_name': userRequest.screen_name_b
                 })
 
-        ### TODO: If either account is private, make sure authUserId is friend
+        # If either account is private, make sure authUserId is friend
+        if userA.privacy == True and authUserId != userA.user_id:
+            check = Friendship({
+                'user_id':      authUserId,
+                'friend_id':    userA['user_id']
+            })
+            if not self._friendshipDB.checkFriendship(check):
+                msg = "Insufficient privileges to check friendship"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
+
+        if userB.privacy == True and authUserId != userB.user_id:
+            check = Friendship({
+                'user_id':      authUserId,
+                'friend_id':    userB['user_id']
+            })
+            if not self._friendshipDB.checkFriendship(check):
+                msg = "Insufficient privileges to check friendship"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
 
         friendship = Friendship({
             'user_id':      userA['user_id'],
@@ -573,7 +600,7 @@ class StampedAPI(AStampedAPI):
     def getEntity(self, entityId, authUserId=None):
         entity = self._entityDB.getEntity(entityId)
         
-        ### TODO: Check if user has access to this entity
+        ### TODO: Check if user has access to this entity?
         return entity
     
     def updateCustomEntity(self, authUserId, entityId, data):
@@ -581,8 +608,8 @@ class StampedAPI(AStampedAPI):
         entity = self._entityDB.getEntity(entityId)
         
         # Check if user has access to this entity
-        if entity.sources.userGenerated.user_id != authUserId \
-            or entity.sources.userGenerated.user_id == None:
+        if entity.generated_by != authUserId \
+            or entity.generated_by == None:
             msg = "Insufficient privileges to update custom entity"
             logs.warning(msg)
             raise InsufficientPrivilegesError(msg)
@@ -623,14 +650,17 @@ class StampedAPI(AStampedAPI):
                        coords=None, 
                        authUserId=None, 
                        category_filter=None, 
-                       subcategory_filter=None):
+                       subcategory_filter=None, 
+                       limit=10, 
+                       prefix=False):
         coords  = self._parseCoords(coords)
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
-                                                        limit=10, 
+                                                        limit=limit, 
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
-                                                        full=True)
+                                                        full=False, 
+                                                        prefix=prefix)
         output  = []
         
         for result in results:
@@ -712,6 +742,7 @@ class StampedAPI(AStampedAPI):
     
     def _enrichStampObjects(self, stampData, **kwargs):
         authUserId  = kwargs.pop('authUserId', None)
+        entityIds   = kwargs.pop('entityIds', {})
         userIds     = kwargs.pop('userIds', {})
 
         singleStamp = False
@@ -738,6 +769,17 @@ class StampedAPI(AStampedAPI):
             for user in users:
                 userIds[user.user_id] = user.exportSchema(UserMini())
 
+        # Entities
+        if len(entityIds) == 0:
+            for stamp in stampData:
+                # Grab entity_id from stamp
+                entityIds[stamp.entity_id] = 1
+                
+            entities = self._entityDB.getEntities(entityIds.keys())
+
+            for entity in entities:
+                entityIds[entity.entity_id] = entity.exportSchema(EntityMini())
+
         if authUserId:
             # Favorites
             favorites = self._favoriteDB.getFavoriteEntityIds(authUserId)
@@ -750,6 +792,9 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             # Add stamp user
             stamp.user = userIds[stamp.user_id]
+
+            # Add entity
+            stamp.entity = entityIds[stamp.entity_id]
 
             # Add credited user(s)
             if stamp.credit != None:
@@ -805,7 +850,7 @@ class StampedAPI(AStampedAPI):
         # Build stamp
         stamp           = Stamp()
         stamp.user_id   = user.user_id
-        stamp.entity    = entity.exportSchema(EntityMini())
+        stamp.entity_id = entity.entity_id
         stamp.created   = datetime.utcnow()
 
         # Collect user ids
@@ -878,7 +923,8 @@ class StampedAPI(AStampedAPI):
             stamp                   = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
-        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds)
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
+            userIds=userIds, entityIds={entity.entity_id: entity})
 
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
@@ -1187,7 +1233,7 @@ class StampedAPI(AStampedAPI):
 
         return stamp
         
-    def getStamp(self, stampId, authUserId):
+    def getStamp(self, stampId, authUserId=None):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
@@ -1203,7 +1249,7 @@ class StampedAPI(AStampedAPI):
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
 
-        ### TODO: Add user object for credit
+        # Add user object for credit
         if len(stamp.credit) > 0:
             userIds = {}
             for i in xrange(len(stamp.credit)):
@@ -1526,7 +1572,6 @@ class StampedAPI(AStampedAPI):
                 stamp.user_id, 'num_stamps_left', increment=1)
 
         # Add activity for stamp owner (if not self)
-        ### TODO: Verify activity item doesn't already exist
         if self._activity == True and stamp.user_id != authUserId:
             activity                = Activity()
             activity.genre          = 'like'
@@ -1742,10 +1787,10 @@ class StampedAPI(AStampedAPI):
 
         favorite = self._favoriteDB.addFavorite(favorite)
 
-        # Add user object into stamp (if it exists)
+        # Enrich stamp
         if stampId != None:
-            user = self._userDB.getUser(favorite.stamp.user_id)
-            favorite.stamp.user = user.exportSchema(UserMini())
+            favorite.stamp = self._enrichStampObjects( \
+                                favorite.stamp, authUserId=authUserId)
 
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', \
@@ -1753,7 +1798,6 @@ class StampedAPI(AStampedAPI):
 
         # Add activity for stamp owner (if not self)
         ### TODO: Verify user isn't being blocked
-        ### TODO: Verify activity item doesn't already exist
         if self._activity == True and stampId != None \
             and stamp.user_id != authUserId:
             activity                = Activity()
@@ -1777,10 +1821,10 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Remove activity item?
 
-        # Add user object into stamp (if it exists)
-        if favorite.stamp.user_id != None:
-            user = self._userDB.getUser(favorite.stamp.user_id)
-            favorite.stamp.user = user.exportSchema(UserMini())
+        # Enrich stamp
+        if favorite.stamp_id != None:
+            favorite.stamp = self._enrichStampObjects( \
+                                favorite.stamp, authUserId=authUserId)
 
         return favorite
     
@@ -1790,20 +1834,20 @@ class StampedAPI(AStampedAPI):
 
         favoriteData = self._favoriteDB.getFavorites(authUserId)
 
-        userIds = {}
+        stamps = []
         for favorite in favoriteData:
-            if 'stamp' in favorite:
-                userIds[favorite.stamp.user_id] = 1
+            if favorite.stamp_id != None:
+                stamps.append(favorite['stamp'])
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
-        users = self._userDB.lookupUsers(userIds.keys(), None)
-
-        for user in users:
-            userIds[user.user_id] = user.exportSchema(UserMini())
+        stampIds = {}
+        for stamp in stamps:
+            stampIds[stamp.stamp_id] = stamp
 
         favorites = []
         for favorite in favoriteData:
-            if 'stamp' in favorite:
-                favorite.stamp.user = userIds[favorite.stamp.user_id]
+            if favorite.stamp_id != None:
+                favorite.stamp = stampIds[favorite.stamp.stamp_id]
             favorites.append(favorite)
 
         return favorites

@@ -26,7 +26,8 @@ def handleHTTPRequest(fn):
         try:
             print
             print
-            # logs.begin(stampedAPI._logsDB.addLog)
+            logs.begin(stampedAPI._logsDB.addLog)
+            logs.request(request)
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
@@ -36,6 +37,13 @@ def handleHTTPRequest(fn):
             logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
             response = HttpResponse(e.msg)
             response.status_code = e.code
+            logs.error(response.status_code)
+            return response
+
+        except InputError as e:
+            logs.warning("400 Error: %s" % (e.msg))
+            response = HttpResponse("invalid_request")
+            response.status_code = 400
             logs.error(response.status_code)
             return response
 
@@ -53,10 +61,10 @@ def handleHTTPRequest(fn):
             logs.error(response.status_code)
             return response
 
-        except InputError as e:
-            logs.warning("400 Error: %s" % (e.msg))
-            response = HttpResponse("invalid_request")
-            response.status_code = 400
+        except Unavailable as e:
+            logs.warning("404 Error: %s" % (e.msg))
+            response = HttpResponse("not_found")
+            response.status_code = 404
             logs.error(response.status_code)
             return response
 
@@ -95,6 +103,13 @@ def checkClient(request):
         logs.warning(msg)
         raise StampedHTTPError("access_denied", 401, msg)
 
+def optionalOAuth(request):
+    try:
+        authUserId = checkOAuth(request)
+    except:
+        authUserId = None
+    return authUserId
+
 def checkOAuth(request):
     ### Parse Request for Access Token
     try:
@@ -127,8 +142,6 @@ def checkOAuth(request):
 def parseRequest(schema, request):
     ### Parse Request
     try:
-        logs.request(request)
-
         if request.method == 'GET':
             rawData = request.GET
         elif request.method == 'POST':
@@ -144,8 +157,11 @@ def parseRequest(schema, request):
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
-            
-        logs.form(data)
+
+        logData = data.copy()
+        if 'password' in logData:
+            logData['password'] = '*****'
+        logs.form(logData)
     
         if schema == None:
             if len(data) > 0:
@@ -168,8 +184,6 @@ def parseRequest(schema, request):
 def parseFileUpload(schema, request, fileName='image'):
     ### Parse Request
     try:
-        logs.request(request)
-
         if request.method != 'POST':
             raise
         rawData = request.POST

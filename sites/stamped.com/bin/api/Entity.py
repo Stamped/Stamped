@@ -85,8 +85,16 @@ subcategories = {
 
 def setSubtitle(entity):
     if entity.category == 'food':
-        if entity.address != None:
-            entity.subtitle = entity.address
+
+        address = {}
+        if len(entity.address_components) > 0:
+            for component in entity.address_components:
+                for i in component['types']:
+                    address[i] = component['short_name']
+        
+        if 'locality' in address and 'administrative_area_level_1' in address:
+            entity.subtitle = '%s, %s' % (address['locality'], \
+                                        address['administrative_area_level_1'])
         else:
             entity.subtitle = str(entity.subcategory).title()
 

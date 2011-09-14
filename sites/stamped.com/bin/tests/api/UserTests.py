@@ -52,7 +52,7 @@ class StampedAPIUsersLookup(StampedAPIUserTest):
                 self.userB['user_id']
             )
         }
-        result = self.handleGET(path, data)
+        result = self.handlePOST(path, data)
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
@@ -66,7 +66,7 @@ class StampedAPIUsersLookup(StampedAPIUserTest):
                 self.userB['screen_name']
             )
         }
-        result = self.handleGET(path, data)
+        result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 2)
 
 class StampedAPIUsersSearch(StampedAPIUserTest):
@@ -76,7 +76,7 @@ class StampedAPIUsersSearch(StampedAPIUserTest):
             "oauth_token": self.tokenA['access_token'],
             "q": "%s" % self.userA['screen_name'][:3]
         }
-        result = self.handleGET(path, data)
+        result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 1)
 
 class StampedAPIUsersPrivacy(StampedAPIUserTest):
@@ -122,7 +122,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
             "oauth_token": self.tokenA['access_token'],
             "q": ','.join(emails)
         }
-        result = self.handleGET(path, data)
+        result = self.handlePOST(path, data)
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
@@ -148,7 +148,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
             "oauth_token": self.tokenA['access_token'],
             "q": ','.join(numbers)
         }
-        result = self.handleGET(path, data)
+        result = self.handlePOST(path, data)
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
@@ -174,7 +174,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
             "oauth_token": self.tokenA['access_token'],
             "q": number
         }
-        result = self.handleGET(path, data)
+        result = self.handlePOST(path, data)
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)
@@ -201,7 +201,7 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
             "oauth_token": self.tokenA['access_token'],
             "q": ','.join(ids)
         }
-        result = self.handleGET(path, data)
+        result = self.handlePOST(path, data)
         self.assertLength(result, 2)
         for user in result:
             self.assertIn(user['screen_name'], self.screen_names)

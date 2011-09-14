@@ -556,7 +556,7 @@ class Schema(SchemaElement):
                     pass
                 
                 msg = "Cannot Set Element (%s)" % name
-                logs.warning(msg)
+                #logs.warning(msg)
                 raise SchemaKeyError(msg)
     
     def __setitem__(self, key, value):

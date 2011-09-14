@@ -19,9 +19,23 @@ if not os.path.isdir('/stamped/tmp/stamped/'):
 def main():
     for collection in collections:
         print 'RUN %s' % collection
+
+        if collection == 'entities':
+            mongoExportJSON('entities')
+            convertEntityData('entities')
+            mongoImportJSON('entities')
+
+            rmExportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
+            rmImportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
+            cmd = "%s && %s" % (rmExportFile, rmImportFile)
+            pp = Popen(cmd, shell=True, stdout=PIPE)
+            pp.wait()
+
+            print 'COMPLETE'
         
-        mongoExportImport(collection)
-        print 'COMPLETE'
+        else:
+            mongoExportImport(collection)
+            print 'COMPLETE'
 
         print 
 
@@ -54,6 +68,24 @@ def mongoImportJSON(collection):
     pp.wait()
 
 
+
+def convertEntityData(collection):
+
+    f = codecs.open('/stamped/tmp/stamped/%s.json' % collection, 'rU', 'utf-8')
+    o = codecs.open('/stamped/tmp/stamped/%s_out.json' % collection, 'w', 'utf-8')
+    for line in f:
+        data = json.loads(line)
+        
+        if 'sources' in data and 'userGenerated' in data['sources']:
+            data['sources']['userGenerated']['generated_by'] = \
+                data['sources']['userGenerated']['user_id']
+            del(data['sources']['userGenerated']['user_id'])
+
+        json.dump(data, o)
+        o.write("\n")
+
+    f.close()
+    o.close()
 
 if __name__ == '__main__':  
     main()
