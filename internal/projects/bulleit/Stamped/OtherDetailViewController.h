@@ -26,6 +26,6 @@
 @property (nonatomic, retain) IBOutlet UIButton* callActionButton;
 @property (nonatomic, retain) IBOutlet UILabel* callActionLabel;
 @property (nonatomic, retain) IBOutlet MKMapView* mapView;
-@property (nonatomic, retain) IBOutlet UIView* contentContainerView;
+@property (nonatomic, retain) IBOutlet UIView* mapContainerView;
 
 @end
