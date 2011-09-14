@@ -15,7 +15,7 @@ def create(request):
     schema      = parseRequest(HTTPEntityNew(), request)
     entity      = schema.exportSchema(Entity())
 
-    entity.sources.userGenerated.user_id = authUserId
+    entity.generated_by = authUserId
     
     entity      = stampedAPI.addEntity(entity)
     entity      = HTTPEntity().importSchema(entity)

@@ -28,8 +28,8 @@
 static NSString* const kUserStampsPath = @"/collections/user.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
 static NSString* const kFriendshipCheckPath = @"/friendships/check.json";
-static NSString* const kFriendshipCreatePath = @"friendships/create.json";
-static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
+static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
+static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 @interface ProfileViewController ()
 - (void)userImageTapped:(id)sender;
@@ -264,7 +264,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  if ([objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
+  if ([objectLoader.resourcePath isEqualToString:kUserLookupPath]) {
     self.user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", user_.screenName]];
     [self fillInUserData];
   }
@@ -407,6 +407,7 @@ static NSString* const kFriendshipRemovePath = @"friendships/remove.json";
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* username = user_.screenName;
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = userMapping;
   objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username, nil];
   [objectLoader send];

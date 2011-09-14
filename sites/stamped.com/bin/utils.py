@@ -342,7 +342,7 @@ def getFile(url, opener=None):
             if delay > maxDelay:
                 raise
         
-        # encountered error GETing document. delay for a bit and try again
+        # encountered error fetching document. delay for a bit and try again
         #log("Attempting to recover with delay of %d" % delay)
         
         # put the current thread to sleep for a bit, increase the delay, 
@@ -357,6 +357,10 @@ def getFile(url, opener=None):
         data = f.read()
         buf.close()
     
+    if hasattr(response, 'fp') and hasattr(response.fp, '_sock') and hasattr(response.fp._sock, 'recv'):
+        response.fp._sock.recv = None
+    
+    response.close()
     # return the successfully downloaded file
     return data
 

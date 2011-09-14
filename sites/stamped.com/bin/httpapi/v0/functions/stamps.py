@@ -61,7 +61,7 @@ def update_image(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def show(request):
-    authUserId  = checkOAuth(request)
+    authUserId  = optionalOAuth(request)
     schema      = parseRequest(HTTPStampId(), request)
 
     stamp       = stampedAPI.getStamp(schema.stamp_id, authUserId)

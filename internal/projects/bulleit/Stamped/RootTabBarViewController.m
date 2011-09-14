@@ -18,6 +18,9 @@
 #import "STNavigationBar.h"
 #import "Util.h"
 
+#import "WelcomeViewController.h"
+#import "StampedAppDelegate.h"
+
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -119,6 +122,12 @@
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
+  
+/*  WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  delegate.navigationController.navigationBarHidden = YES;
+  [delegate.navigationController pushViewController:welcomeVC animated:YES];
+  [welcomeVC release];*/
 }
 
 - (void)ensureCorrectHeightOfViewControllers {

@@ -303,7 +303,7 @@
 										<int key="IBUITextAlignment">2</int>
 									</object>
 								</object>
-								<string key="NSFrame">{{0, 78}, {320, 54}}</string>
+								<string key="NSFrame">{{0, 78}, {320, 65}}</string>
 								<reference key="NSSuperview" ref="1008158405"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="974997728"/>

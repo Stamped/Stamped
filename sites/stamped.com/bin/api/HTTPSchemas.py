@@ -294,7 +294,7 @@ class HTTPEntity(Schema):
         
         # Food
         self.cuisine            = SchemaElement(basestring)
-        self.price_scale        = SchemaElement(float)
+        self.price_scale        = SchemaElement(basestring)
         
         # Book
         self.author             = SchemaElement(basestring)
@@ -415,7 +415,7 @@ class HTTPEntity(Schema):
 
                 self.length         = schema.track_length
                 if schema.parental_advisory_id == 1:
-                    self.rating         = "Parental Advisory"
+                    self.rating     = "Parental Advisory"
             
             # Food
             self.cuisine        = schema.cuisine

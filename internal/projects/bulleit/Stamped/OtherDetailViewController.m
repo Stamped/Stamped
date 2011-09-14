@@ -33,8 +33,9 @@
 
 - (void)showContents
 {
-  self.descriptionLabel.text = [entityObject_.address stringByReplacingOccurrencesOfString:@", "
-                                                                                withString:@"\n"];
+  self.descriptionLabel.text = entityObject_.subtitle;
+  
+  
   //  NSLog(@"%@", entityObject_);
   
   [self setupMainActionsContainer];
@@ -186,49 +187,48 @@
   // Information
   // TODO: What if there's no information?
   
-  [self addSectionWithName:@"Information"];
-  CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Information"];
-  
-  if (entityObject_.subcategory)  [section addPairedLabelWithName:@"Category:"
-                                                            value:entityObject_.subcategory
-                                                           forKey:@"subcategory"];
-  
-  if (entityObject_.cuisine)      [section addPairedLabelWithName:@"Cuisine:"      
-                                                            value:entityObject_.cuisine
-                                                           forKey:@"cuisine"];
-  
-  if (entityObject_.neighborhood) [section addPairedLabelWithName:@"Neighborhood:"
-                                                            value:entityObject_.neighborhood
-                                                           forKey:@"neighborhood"];
-  
-  if (entityObject_.hours)        [section addPairedLabelWithName:@"Hours:"
-                                                            value:entityObject_.hours
-                                                           forKey:@"hours"];
-  
-  if (entityObject_.price)        [section addPairedLabelWithName:@"Price Range:" 
-                                                            value:entityObject_.price
-                                                           forKey:@"price"];
-  
-  if (entityObject_.website)      [section addPairedLabelWithName:@"Website:"
-                                                            value:entityObject_.website
-                                                           forKey:@"website"];
-  
   //Description
+  
+  CollapsibleViewController* section;
+  
+  if (mapContainerView_.hidden == YES) 
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
+  
   
   if (entityObject_.desc)
   {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
-    
     [section addText:entityObject_.desc forKey:@"desc"];
   }
+
   
+  [self addSectionWithName:@"Information"];
+  section = [sectionsDict_ objectForKey:@"Information"];
+  
+  if (entityObject_.subcategory)  [section addPairedLabelWithName:@"Category:"
+                                                            value:entityObject_.subcategory
+                                                           forKey:@"subcategory"];
+  
+  
+  if (entityObject_.address)      [section addPairedLabelWithName:@"Address:"
+                                                            value:entityObject_.address
+                                                           forKey:@"address"];
+    
+  if (entityObject_.neighborhood) [section addPairedLabelWithName:@"Neighborhood:"
+                                                            value:entityObject_.neighborhood
+                                                           forKey:@"neighborhood"];
+  
+  if (entityObject_.website)      [section addPairedLabelWithName:@"Website:"
+                                                            value:entityObject_.website
+                                                           forKey:@"website"];
+  
+    
   NSSet* stamps = entityObject_.stamps;
   
   if (stamps && stamps.count > 0)
   {
     [self addSectionStampedBy];
-    
   }
   
 }

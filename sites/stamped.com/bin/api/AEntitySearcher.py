@@ -17,6 +17,7 @@ class AEntitySearcher(object):
                          limit=10, 
                          category_filter=None, 
                          subcategory_filter=None, 
-                         full=False):
+                         full=False, 
+                         prefix=False):
         pass
 

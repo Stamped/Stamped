@@ -16,11 +16,14 @@ typedef enum {
 } FindFriendsSource;
 
 @interface FindFriendsViewController : UIViewController<RKObjectLoaderDelegate,
-                                                        RKRequestDelegate>
+                                                        RKRequestDelegate,
+                                                        UITableViewDelegate,
+                                                        UITableViewDataSource>
 
 @property (nonatomic, retain) IBOutlet UIButton* contactsButton;
 @property (nonatomic, retain) IBOutlet UIButton* twitterButton;
 @property (nonatomic, retain) IBOutlet UIImageView* nipple;
+@property (nonatomic, retain) IBOutlet UITableView* tableView;
 
 - (id)initWithFindSource:(FindFriendsSource)source;
 

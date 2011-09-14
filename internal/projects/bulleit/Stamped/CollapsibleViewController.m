@@ -262,7 +262,7 @@ int const SPACE_HEIGHT          = 10;
   if (self.imageView)
     if (self.imageView.hidden == NO) {
       CGRect  imageViewFrame   = [self.contentView convertRect:self.imageView.frame fromView:self.imageView.superview];
-      previewRectSize = CGSizeMake( CGRectGetMinX(self.imageView.frame) - 22.0,  CGRectGetMaxY(imageViewFrame) + 10.0 );
+      previewRectSize = CGSizeMake( CGRectGetMinX(self.imageView.frame) - 25.0,  CGRectGetMaxY(imageViewFrame) + 12.0 );
     }
   
   WrappingTextView* wrapText = [[WrappingTextView alloc] initWithFrame:frame text:text];

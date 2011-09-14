@@ -211,7 +211,8 @@ class MongoEntitySearcher(EntitySearcher):
                          limit=10, 
                          category_filter=None, 
                          subcategory_filter=None, 
-                         full=False):
+                         full=False, 
+                         prefix=False):
         input_query = query.strip().lower()
         original_coords = True
         
@@ -246,28 +247,32 @@ class MongoEntitySearcher(EntitySearcher):
         query = query.replace(':', ':?')
         query = query.replace('&', ' & ')
         
-        # process individual words in query
-        words = query.split(' ')
-        if len(words) > 1:
-            for i in xrange(len(words)):
-                word = words[i]
-                
-                if word.endswith('s'):
-                    word += '?'
-                else:
-                    word += 's?'
-                
-                #word = "(%s)?" % word
-                words[i] = word
-            query = string.joinfields(words, ' ').strip()
+        if prefix:
+            query = "^%s" % query
+        else:
+            # process individual words in query
+            words = query.split(' ')
+            if len(words) > 1:
+                for i in xrange(len(words)):
+                    word = words[i]
+                    
+                    if word.endswith('s'):
+                        word += '?'
+                    else:
+                        word += 's?'
+                    
+                    #word = "(%s)?" % word
+                    words[i] = word
+                query = string.joinfields(words, ' ').strip()
+            
+            query = query.replace(' ands? ', ' (and|&)? ')
+            query = query.replace("$", "[$st]?")
+            query = query.replace("5", "[5s]?")
+            query = query.replace("!", "[!li]?")
         
-        query = query.replace(' ands? ', ' (and|&)? ')
         query = query.replace('-', '-?')
         query = query.replace(' ', '[ -]?')
         query = query.replace("'", "'?")
-        query = query.replace("$", "[$st]?")
-        query = query.replace("5", "[5s]?")
-        query = query.replace("!", "[!li]?")
         
         data = {}
         data['input']       = input_query
@@ -351,7 +356,11 @@ class MongoEntitySearcher(EntitySearcher):
         if 'db_results' in wrapper:
             logs.debug('db_results: %d' % len(wrapper['db_results']))
             for doc in wrapper['db_results']:
-                e = self.entityDB._convertFromMongo(doc)
+                try:
+                    e = self.entityDB._convertFromMongo(doc)
+                except:
+                    utils.printException()
+                    continue
                 results[e.entity_id] = (e, -1)
         
         if 'place_results' in wrapper:
@@ -362,7 +371,11 @@ class MongoEntitySearcher(EntitySearcher):
             
             logs.debug('place_results: %d' % len(place_results))
             for doc in place_results:
-                e = self.placesDB._convertFromMongo(doc['obj'])
+                try:
+                    e = self.placesDB._convertFromMongo(doc['obj'])
+                except:
+                    utils.printException()
+                    continue
                 results[e.entity_id] = (e, doc['dis'])
         
         if 'google_place_results' in wrapper:

@@ -40,6 +40,13 @@ def handleHTTPRequest(fn):
             logs.error(response.status_code)
             return response
 
+        except InputError as e:
+            logs.warning("400 Error: %s" % (e.msg))
+            response = HttpResponse("invalid_request")
+            response.status_code = 400
+            logs.error(response.status_code)
+            return response
+
         except IllegalActionError as e:
             logs.warning("403 Error: %s" % (e.msg))
             response = HttpResponse("illegal_action")
@@ -54,10 +61,10 @@ def handleHTTPRequest(fn):
             logs.error(response.status_code)
             return response
 
-        except InputError as e:
-            logs.warning("400 Error: %s" % (e.msg))
-            response = HttpResponse("invalid_request")
-            response.status_code = 400
+        except Unavailable as e:
+            logs.warning("404 Error: %s" % (e.msg))
+            response = HttpResponse("not_found")
+            response.status_code = 404
             logs.error(response.status_code)
             return response
 
@@ -95,6 +102,13 @@ def checkClient(request):
         msg = "Invalid client credentials"
         logs.warning(msg)
         raise StampedHTTPError("access_denied", 401, msg)
+
+def optionalOAuth(request):
+    try:
+        authUserId = checkOAuth(request)
+    except:
+        authUserId = None
+    return authUserId
 
 def checkOAuth(request):
     ### Parse Request for Access Token

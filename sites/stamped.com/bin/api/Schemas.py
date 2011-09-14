@@ -305,10 +305,10 @@ class Entity(Schema):
 class EntityMini(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
-        self.title              = SchemaElement(basestring, required=True)
-        self.subtitle           = SchemaElement(basestring, required=True)
-        self.category           = SchemaElement(basestring, required=True)
-        self.subcategory        = SchemaElement(basestring, required=True)
+        self.title              = SchemaElement(basestring)
+        self.subtitle           = SchemaElement(basestring)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
         self.coordinates        = CoordinatesSchema()
 
 class EntityPlace(Schema):
@@ -697,7 +697,7 @@ class NetflixImageSchema(Schema):
 
 class UserGeneratedSchema(Schema):
     def setSchema(self):
-        self.user_id            = SchemaElement(basestring, required=True)
+        self.generated_by       = SchemaElement(basestring, required=True)
 
 class BarnesAndNobleSchema(Schema):
     def setSchema(self):
