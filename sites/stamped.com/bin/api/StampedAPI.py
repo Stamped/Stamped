@@ -396,7 +396,6 @@ class StampedAPI(AStampedAPI):
         self._friendshipDB.addFriendship(friendship)
 
         # Add activity for followed user
-        ### TODO: Rate limit this for repeated follow / unfollow?
         if self._activity == True:
             activity                = Activity()
             activity.genre          = 'follower'
@@ -1218,7 +1217,7 @@ class StampedAPI(AStampedAPI):
 
         return stamp
         
-    def getStamp(self, stampId, authUserId):
+    def getStamp(self, stampId, authUserId=None):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
 
@@ -1234,7 +1233,7 @@ class StampedAPI(AStampedAPI):
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
 
-        ### TODO: Add user object for credit
+        # Add user object for credit
         if len(stamp.credit) > 0:
             userIds = {}
             for i in xrange(len(stamp.credit)):
@@ -1557,7 +1556,6 @@ class StampedAPI(AStampedAPI):
                 stamp.user_id, 'num_stamps_left', increment=1)
 
         # Add activity for stamp owner (if not self)
-        ### TODO: Verify activity item doesn't already exist
         if self._activity == True and stamp.user_id != authUserId:
             activity                = Activity()
             activity.genre          = 'like'
@@ -1784,7 +1782,6 @@ class StampedAPI(AStampedAPI):
 
         # Add activity for stamp owner (if not self)
         ### TODO: Verify user isn't being blocked
-        ### TODO: Verify activity item doesn't already exist
         if self._activity == True and stampId != None \
             and stamp.user_id != authUserId:
             activity                = Activity()
