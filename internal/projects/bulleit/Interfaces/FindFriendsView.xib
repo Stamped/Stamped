@@ -60,7 +60,6 @@
 						<bool key="IBUIAlwaysBounceVertical">YES</bool>
 						<int key="IBUISeparatorStyle">1</int>
 						<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
-						<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
 						<float key="IBUIRowHeight">51</float>
 						<float key="IBUISectionHeaderHeight">22</float>
 						<float key="IBUISectionFooterHeight">22</float>
@@ -324,16 +323,19 @@
 						<int key="objectID">6</int>
 						<reference key="object" ref="130722836"/>
 						<reference key="parent" ref="191373211"/>
+						<string key="objectName">Done Button</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">8</int>
 						<reference key="object" ref="121387732"/>
 						<reference key="parent" ref="191373211"/>
+						<string key="objectName">Contacts Button</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">9</int>
 						<reference key="object" ref="220664893"/>
 						<reference key="parent" ref="191373211"/>
+						<string key="objectName">Twitter Button</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">15</int>

@@ -123,11 +123,11 @@
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
   
-  WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
+/*  WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   delegate.navigationController.navigationBarHidden = YES;
   [delegate.navigationController pushViewController:welcomeVC animated:YES];
-  [welcomeVC release];
+  [welcomeVC release];*/
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
