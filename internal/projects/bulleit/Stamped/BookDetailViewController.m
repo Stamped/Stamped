@@ -119,7 +119,7 @@
   // Amazon Review
   if (entityObject_.desc) {
         
-    [self addSectionWithName:@"Amazon Review" previewHeight:120.f];
+    [self addSectionWithName:@"Amazon Review" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Amazon Review"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
     section.expandedFooterText = @"read less";

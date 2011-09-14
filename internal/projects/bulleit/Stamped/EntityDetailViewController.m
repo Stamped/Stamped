@@ -230,11 +230,17 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   }
   
   CGFloat newHeight = [self contentHeight];
-  if (delta > 0) newHeight += delta;
-  CGRect frame = mainContentView_.frame;
-  frame.size.height = newHeight;
-  mainContentView_.frame = frame;
+  newHeight += delta;
   
+  NSLog(@"newHeight: %f", newHeight);
+  
+  CGRect contentFrame = self.mainContentView.frame;
+  contentFrame.size.height = newHeight;
+  self.mainContentView.frame = contentFrame;
+  
+  newHeight += CGRectGetMinY(self.mainContentView.frame);
+  
+  self.scrollView.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);  
 }
 
 - (CGFloat)contentHeight
@@ -246,7 +252,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   for (CollapsibleViewController* cvc in sectionsDict_.objectEnumerator)
   {
-    contentHeight += cvc.collapsedHeight;
+    contentHeight += cvc.view.frame.size.height;
   }
   
   return contentHeight;

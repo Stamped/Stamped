@@ -156,7 +156,7 @@
   // Synopsis
   if (entityObject_.desc) {
         
-    [self addSectionWithName:@"Synopsis" previewHeight:124.f];
+    [self addSectionWithName:@"Synopsis" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Synopsis"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
     section.expandedFooterText = @"read less";

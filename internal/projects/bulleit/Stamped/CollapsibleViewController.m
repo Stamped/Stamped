@@ -300,6 +300,11 @@ int const SPACE_HEIGHT          = 10;
 
 #pragma mark - Touch events
 
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  NSLog(@"touched %@", self.sectionLabel.text);
+}
+
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
   self.isCollapsed = !isCollapsed_;
