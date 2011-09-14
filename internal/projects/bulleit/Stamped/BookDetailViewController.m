@@ -42,14 +42,16 @@
   
 //  NSLog(@"%@", entityObject_);
   
+  if (entityObject_.image) {
+    self.imageView.hidden = NO;
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
+                                                   [NSURL URLWithString:entityObject_.image]]];
+  }
+  
+  
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-  if (entityObject_.image) {
-    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:entityObject_.image]]];
-    self.imageView.hidden = NO;
-  }
   
 }
 
@@ -117,12 +119,13 @@
   // Amazon Review
   if (entityObject_.desc) {
         
-    [self addSectionWithName:@"Amazon Review" previewHeight:124.f];
+    [self addSectionWithName:@"Amazon Review" previewHeight:120.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Amazon Review"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
     section.expandedFooterText = @"read less";
     section.footerLabel.text = section.collapsedFooterText;
-    [section addText:entityObject_.desc forKey:@"desc"];
+    section.imageView = self.imageView;
+    [section addWrappingText:entityObject_.desc forKey:@"desc"];
     section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
     
@@ -137,7 +140,7 @@
     [self addSectionWithName:@"Details"];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Details"];
     
-    if (entityObject_.format && entityObject_.length)
+    if (entityObject_.format && (entityObject_.length && entityObject_.length.intValue > 0))
       [section addPairedLabelWithName:@"Format:" 
                                 value:[NSString stringWithFormat:@"%@, %@ pages", entityObject_.format, entityObject_.length] 
                                forKey:@"format"];
@@ -145,7 +148,7 @@
       [section addPairedLabelWithName:@"Format:" 
                                 value:entityObject_.format 
                                forKey:@"format"];
-    else if (entityObject_.length)
+    else if (entityObject_.length && (entityObject_.length && entityObject_.length.intValue > 0))
       [section addPairedLabelWithName:@"Length:" 
                                 value:[NSString stringWithFormat:@"%@ pages", entityObject_.length] 
                                forKey:@"length"];

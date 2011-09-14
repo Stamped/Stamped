@@ -78,16 +78,17 @@
   }
     
     
-  NSLog(@"%@", entityObject_);
+//  NSLog(@"%@", entityObject_);
+  
+  if (entityObject_.image) {
+    self.imageView.hidden = NO;
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
+                                                   [NSURL URLWithString:entityObject_.image]]];
+  }
   
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-  if (entityObject_.image) {
-    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:entityObject_.image]]];
-    self.imageView.hidden = NO;
-  }
   
 }
 
@@ -160,7 +161,8 @@
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
     section.expandedFooterText = @"read less";
     section.footerLabel.text = section.collapsedFooterText;
-    [section addText:entityObject_.desc forKey:@"desc"];
+    section.imageView = self.imageView;
+    [section addWrappingText:entityObject_.desc forKey:@"desc"];
     section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
     

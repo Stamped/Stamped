@@ -1,4 +1,4 @@
-//
+  //
 //  CollapsibleViewController.m
 //  Stamped
 //
@@ -8,9 +8,10 @@
 
 #import "CollapsibleViewController.h"
 #import "PairedLabel.h"
+#import "WrappingTextView.h"
 #import "UIColor+Stamped.h"
 
-
+ 
 @implementation CollapsibleViewController
 
 @synthesize headerView      = headerView_;
@@ -27,6 +28,7 @@
 @synthesize footerLabel     = footerLabel_;
 @synthesize collapsedFooterText = collapsedFooterText_;
 @synthesize expandedFooterText  = expandedFooterText_; 
+@synthesize imageView       = imageView_;
 
 int const LABEL_HEIGHT          = 20;
 int const IMAGE_HEIGHT          = 40;
@@ -235,7 +237,7 @@ int const SPACE_HEIGHT          = 10;
   
 }
 
-- (void)addText:(NSString*)text forKey:(NSString*)key;
+- (void)addText:(NSString*)text forKey:(NSString*)key
 {
   UITextView* textView = [[UITextView alloc] initWithFrame:contentView_.frame];
   textView.font = [UIFont fontWithName:@"Helvetica" size:12.f];
@@ -243,13 +245,32 @@ int const SPACE_HEIGHT          = 10;
   textView.text = text;
   textView.backgroundColor = [UIColor clearColor];
   textView.userInteractionEnabled = NO;
-  textView.frame = CGRectMake(8.f, 0, contentView_.frame.size.width-30, 100.0);
+  textView.frame = CGRectMake(15.f, 0.f, contentView_.frame.size.width-30.0, 100.0);
   
   [self addContent:textView forKey:key];
   CGRect frame = textView.frame;
   frame.size.height = textView.contentSize.height;
   textView.frame = frame;
+}
+
+
+- (void)addWrappingText:(NSString*)text forKey:(NSString*)key {
   
+  CGRect frame = CGRectMake(15.f, 0.0, contentView_.frame.size.width-30.0, 100.0);
+  CGSize previewRectSize = CGSizeMake(0,0);
+  
+  if (self.imageView)
+    if (self.imageView.hidden == NO) {
+      CGRect  imageViewFrame   = [self.contentView convertRect:self.imageView.frame fromView:self.imageView.superview];
+      previewRectSize = CGSizeMake( CGRectGetMinX(self.imageView.frame) - 22.0,  CGRectGetMaxY(imageViewFrame) + 10.0 );
+    }
+  
+  WrappingTextView* wrapText = [[WrappingTextView alloc] initWithFrame:frame text:text];
+  wrapText.previewRectSize = previewRectSize;
+//  NSLog(@"previewRectSize: %f %f", wrapText.previewRectSize.width, wrapText.previewRectSize.height);
+
+  
+  [self addContent:wrapText forKey:key];
 }
 
 - (void)addContent:(id)content forKey:(NSString*)key

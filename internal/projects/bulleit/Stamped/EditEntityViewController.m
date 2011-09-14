@@ -153,11 +153,12 @@ const CGFloat kKeyboardHeight = 217.0;
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_music_icon"];
     if ([entityObject_.subcategory isEqualToString:@"song"]) {
       segmentedControl_.selectedSegmentIndex = 1;
-    } else if ([entityObject_.subcategory isEqualToString:@"artist"]) {
+    } 
+    if ([entityObject_.subcategory isEqualToString:@"artist"]) {
       segmentedControl_.selectedSegmentIndex = 2;
-    }
+    }    
     primaryTextField_.text = entityObject_.artist;
-    secondaryTextField_.text = entityObject_.albums;
+    secondaryTextField_.text = [entityObject_.albums objectAtIndex:0];
     selectedCategory_ = STEditCategoryRowMusic;
   } else if ([entityObject_.category isEqualToString:@"other"]) {
     [self showOtherView];
@@ -509,7 +510,7 @@ const CGFloat kKeyboardHeight = 217.0;
       } else if (segmentedControl_.selectedSegmentIndex == 1) {
         entityObject_.subcategory = @"song";
         entityObject_.artist = primaryTextField_.text;
-        entityObject_.albums = secondaryTextField_.text;
+        entityObject_.albums = [NSArray arrayWithObject:(id)secondaryTextField_.text];
         entityObject_.subtitle =
             entityObject_.artist.length > 0 ? entityObject_.artist : @"Song";
       } else {

@@ -280,6 +280,9 @@
 		CB1B2211141EB5410001F932 /* rating_R@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB1B220C141EB5410001F932 /* rating_R@2x.png */; };
 		CB3725DA141DA5EF002A8F96 /* BookDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3725D9141DA5EE002A8F96 /* BookDetailViewController.m */; };
 		CB3725E1141DBC86002A8F96 /* FilmDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3725E0141DBC85002A8F96 /* FilmDetailViewController.m */; };
+		CB3C9ACE141FBCF5005F837A /* WrappingText.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3C9ACC141FBCF5005F837A /* WrappingText.m */; };
+		CB3C9ACF141FBCF5005F837A /* WrappingText.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB3C9ACD141FBCF5005F837A /* WrappingText.xib */; };
+		CB3C9AD2141FE6EB005F837A /* WrappingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */; };
 		CB4388FA141ABEF90086D1AE /* MusicDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */; };
 		CB958E8E141E438200BBCCBC /* OtherDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB958E8C141E438200BBCCBC /* OtherDetailViewController.m */; };
 		CBD125F914183C9A00CCBDD8 /* CollapsibleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD125F714183C9900CCBDD8 /* CollapsibleViewController.m */; };
@@ -747,6 +750,11 @@
 		CB3725D9141DA5EE002A8F96 /* BookDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookDetailViewController.m; sourceTree = "<group>"; };
 		CB3725DF141DBC84002A8F96 /* FilmDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FilmDetailViewController.h; sourceTree = "<group>"; };
 		CB3725E0141DBC85002A8F96 /* FilmDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FilmDetailViewController.m; sourceTree = "<group>"; };
+		CB3C9ACB141FBCF5005F837A /* WrappingText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WrappingText.h; sourceTree = "<group>"; };
+		CB3C9ACC141FBCF5005F837A /* WrappingText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WrappingText.m; sourceTree = "<group>"; };
+		CB3C9ACD141FBCF5005F837A /* WrappingText.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = WrappingText.xib; sourceTree = "<group>"; };
+		CB3C9AD0141FE6EA005F837A /* WrappingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WrappingTextView.h; sourceTree = "<group>"; };
+		CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WrappingTextView.m; sourceTree = "<group>"; };
 		CB4388F8141ABEF90086D1AE /* MusicDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicDetailViewController.h; sourceTree = "<group>"; };
 		CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicDetailViewController.m; sourceTree = "<group>"; };
 		CB958E8B141E438200BBCCBC /* OtherDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OtherDetailViewController.h; sourceTree = "<group>"; };
@@ -1492,6 +1500,11 @@
 				CBD1260E141A801100CCBDD8 /* PairedLabel.h */,
 				CBD1260F141A801100CCBDD8 /* PairedLabel.m */,
 				7ED60871141E8C8F001C499D /* PairedLabel.xib */,
+				CB3C9ACB141FBCF5005F837A /* WrappingText.h */,
+				CB3C9ACC141FBCF5005F837A /* WrappingText.m */,
+				CB3C9ACD141FBCF5005F837A /* WrappingText.xib */,
+				CB3C9AD0141FE6EA005F837A /* WrappingTextView.h */,
+				CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */,
 			);
 			name = "Interface Helper Classes";
 			sourceTree = "<group>";
@@ -1883,6 +1896,7 @@
 				CB1B220F141EB5410001F932 /* rating_PG-13@2x.png in Resources */,
 				CB1B2210141EB5410001F932 /* rating_PG@2x.png in Resources */,
 				CB1B2211141EB5410001F932 /* rating_R@2x.png in Resources */,
+				CB3C9ACF141FBCF5005F837A /* WrappingText.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1978,6 +1992,8 @@
 				7E68B919141AA51200D55021 /* ShowImageViewController.m in Sources */,
 				1E1A1B04141C004E00B7C627 /* FindFriendsViewController.m in Sources */,
 				1E1A1B63141C2A5E00B7C627 /* WelcomeViewController.m in Sources */,
+				CB3C9ACE141FBCF5005F837A /* WrappingText.m in Sources */,
+				CB3C9AD2141FE6EB005F837A /* WrappingTextView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

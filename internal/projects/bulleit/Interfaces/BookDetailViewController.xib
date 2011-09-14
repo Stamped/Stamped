@@ -52,7 +52,6 @@
 						<string key="NSFrame">{{150, 208}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<object class="NSColor" key="IBUIBackgroundColor" id="715238449">
 							<int key="NSColorSpace">3</int>
@@ -274,7 +273,7 @@
 							</object>
 							<object class="IBUIImageView" id="951634253">
 								<reference key="NSNextResponder" ref="582508261"/>
-								<int key="NSvFlags">-2147483356</int>
+								<int key="NSvFlags">-2147483359</int>
 								<string key="NSFrame">{{207, 44}, {98, 144}}</string>
 								<reference key="NSSuperview" ref="582508261"/>
 								<reference key="NSWindow"/>
@@ -282,10 +281,6 @@
 								<string key="NSReuseIdentifierKey">_NS:541</string>
 								<int key="IBUIContentMode">1</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<object class="NSCustomResource" key="IBUIImage">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">gradient_background.png</string>
-								</object>
 							</object>
 						</object>
 						<string key="NSFrameSize">{320, 416}</string>
@@ -787,13 +782,11 @@
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>gradient_background.png</string>
 				<string>main_action_button_bg@2x.png</string>
 				<string>shelf_background.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
-				<string>{320, 480}</string>
 				<string>{11, 50}</string>
 				<string>{320, 240}</string>
 			</object>
