@@ -769,6 +769,7 @@ class StampedAPI(AStampedAPI):
             for user in users:
                 userIds[user.user_id] = user.exportSchema(UserMini())
 
+        # Entities
         if len(entityIds) == 0:
             for stamp in stampData:
                 # Grab entity_id from stamp
@@ -777,7 +778,7 @@ class StampedAPI(AStampedAPI):
             entities = self._entityDB.getEntities(entityIds.keys())
 
             for entity in entities:
-                entityIds[entity.entity_id] = entity
+                entityIds[entity.entity_id] = entity.exportSchema(EntityMini())
 
         if authUserId:
             # Favorites
@@ -849,7 +850,7 @@ class StampedAPI(AStampedAPI):
         # Build stamp
         stamp           = Stamp()
         stamp.user_id   = user.user_id
-        stamp.entity    = entity.exportSchema(EntityMini())
+        stamp.entity_id = entity.entity_id
         stamp.created   = datetime.utcnow()
 
         # Collect user ids
@@ -922,7 +923,8 @@ class StampedAPI(AStampedAPI):
             stamp                   = self._stampDB.updateStamp(stamp)
 
         # Add user objects back into stamp
-        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, userIds=userIds)
+        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
+            userIds=userIds, entityIds={entity.entity_id: entity})
 
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
@@ -1785,10 +1787,10 @@ class StampedAPI(AStampedAPI):
 
         favorite = self._favoriteDB.addFavorite(favorite)
 
-        # Add user object into stamp (if it exists)
+        # Enrich stamp
         if stampId != None:
-            user = self._userDB.getUser(favorite.stamp.user_id)
-            favorite.stamp.user = user.exportSchema(UserMini())
+            favorite.stamp = self._enrichStampObjects( \
+                                favorite.stamp, authUserId=authUserId)
 
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', \
@@ -1819,10 +1821,10 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Remove activity item?
 
-        # Add user object into stamp (if it exists)
-        if favorite.stamp.user_id != None:
-            user = self._userDB.getUser(favorite.stamp.user_id)
-            favorite.stamp.user = user.exportSchema(UserMini())
+        # Enrich stamp
+        if favorite.stamp_id != None:
+            favorite.stamp = self._enrichStampObjects( \
+                                favorite.stamp, authUserId=authUserId)
 
         return favorite
     
@@ -1832,20 +1834,20 @@ class StampedAPI(AStampedAPI):
 
         favoriteData = self._favoriteDB.getFavorites(authUserId)
 
-        userIds = {}
+        stamps = []
         for favorite in favoriteData:
-            if 'stamp' in favorite:
-                userIds[favorite.stamp.user_id] = 1
+            if favorite.stamp_id != None:
+                stamps.append(favorite['stamp'])
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
-        users = self._userDB.lookupUsers(userIds.keys(), None)
-
-        for user in users:
-            userIds[user.user_id] = user.exportSchema(UserMini())
+        stampIds = {}
+        for stamp in stamps:
+            stampIds[stamp.stamp_id] = stamp
 
         favorites = []
         for favorite in favoriteData:
-            if 'stamp' in favorite:
-                favorite.stamp.user = userIds[favorite.stamp.user_id]
+            if favorite.stamp_id != None:
+                favorite.stamp = stampIds[favorite.stamp.stamp_id]
             favorites.append(favorite)
 
         return favorites
