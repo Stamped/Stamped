@@ -584,10 +584,24 @@ def validate_email(email):
 
 def validate_screen_name(screen_name):
     screen_name_re = re.compile("^[\w-]{1,32}$", re.IGNORECASE)
-
+    
     try:
         if screen_name_re.match(screen_name):
             return True
         raise
     except:
         return False
+
+def getNumLines(f):
+    numLines = 0
+    bufferSize = 1024 * 1024
+    read_f = f.read # loop optimization
+    
+    buf = read_f(bufferSize)
+    while buf:
+        numLines += buf.count('\n')
+        buf = read_f(bufferSize)
+    
+    f.seek(0)
+    return numLines
+

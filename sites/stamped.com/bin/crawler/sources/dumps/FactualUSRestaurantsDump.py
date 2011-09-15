@@ -84,14 +84,14 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
     
     def getMaxNumEntities(self):
         csvFile  = open(self._dumpFile, 'rb')
-        numLines = max(0, CSVUtils.getNumLines(csvFile) - 1)
+        numLines = max(0, utils.getNumLines(csvFile) - 1)
         csvFile.close()
         
         return numLines
     
     def _run(self):
         csvFile  = open(self._dumpFile, 'rb')
-        numLines = max(0, CSVUtils.getNumLines(csvFile) - 1)
+        numLines = max(0, utils.getNumLines(csvFile) - 1)
         if Globals.options.limit:
             numLines = max(0, min(Globals.options.limit, numLines - Globals.options.offset))
         

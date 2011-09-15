@@ -65,6 +65,9 @@ def parseCommandLine():
     (options, args) = parser.parse_args()
     Globals.options = options
     
+    options.verbose = False
+    options.mount   = True
+    
     if options.db:
         utils.init_db_config(options.db)
     
@@ -95,7 +98,6 @@ def parseCommandLine():
         if options.limit is None:
             options.limit = options.count
     
-    options.verbose = False
     return options
 
 def main():

@@ -222,7 +222,7 @@ def main():
     })
     
     print "pruning tree..."
-    trie.prune(max_depth=20, min_count=30)
+    trie.prune(max_depth=20, min_count=20)
     
     pprint({
         'num_nodes' : trie.num_nodes(), 
@@ -230,29 +230,34 @@ def main():
         'avg_depth' : trie.avg_depth(), 
     })
     
-    """
     def _print(tree):
         print "%s) %d" % (tree.full().encode('ascii', 'replace'), tree.count)
     trie.visit(_print)
-    return
-    """
     
     autocompleteDB = S3AutocompleteDB()
+    
+    out  = file('autocomplete.txt', 'w')
     names = set()
     
     def _add(tree):
         try:
             orig_name = tree.full()
-            
             if 0 == len(orig_name):
                 return
             
             name = encode_s3_name(orig_name)
-            name = "search/%s.json" % name
-            
             if 0 == len(name) or name in names:
                 return
+            
             names.add(name)
+            
+            out_name = orig_name.encode('ascii', 'replace')
+            if out_name == orig_name:
+                out.write(orig_name + "\n")
+            
+            return
+            
+            name = "search/%s.json" % name
             
             print "searching %s" % orig_name.encode('ascii', 'replace')
             try:
@@ -294,6 +299,7 @@ def main():
             return
     
     trie.visit(_add)
+    out.close()
 
 if __name__ == '__main__':
     main()

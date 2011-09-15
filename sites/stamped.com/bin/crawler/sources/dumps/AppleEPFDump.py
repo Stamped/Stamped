@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import CSVUtils, epf, gzip, os, sqlite3, time
+import epf, gzip, os, sqlite3, time
 
 try:
     import psycopg2
@@ -197,7 +197,7 @@ class AAppleEPFDump(AExternalDumpEntitySource):
             f = open(filename, 'r+b')
         
         if countLines:
-            numLines = max(0, CSVUtils.getNumLines(f) - 8)
+            numLines = max(0, utils.getNumLines(f) - 8)
         else:
             numLines = 0
         

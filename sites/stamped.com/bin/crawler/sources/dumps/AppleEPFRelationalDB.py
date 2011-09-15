@@ -63,7 +63,7 @@ class AppleEPFRelationalDB(AAppleEPFDump):
         else:
             utils.log("[%s] opening '%s'" % (self, self._filename))
             
-            numLines = max(0, CSVUtils.getNumLines(f) - 8)
+            numLines = max(0, utils.getNumLines(f) - 8)
             table_format = epf.parse_table_format(f, filename)
             self.table_format = table_format
             
