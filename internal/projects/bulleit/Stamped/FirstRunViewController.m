@@ -18,7 +18,6 @@ static const CGFloat kProfileImageSize = 144;
 
 @interface FirstRunViewController ()
 - (void)setupBottomView;
-- (void)setupSlide:(UIImageView*)imageView;
 - (void)setSecondaryButtonsVisible:(BOOL)visible;
 
 @property (nonatomic, assign) BOOL editing;
@@ -67,39 +66,6 @@ static const CGFloat kProfileImageSize = 144;
   [super viewDidLoad];
 
   [self setupBottomView];
-
-  NSArray* bgImages = [NSArray arrayWithObjects:[UIImage imageNamed:@"learnmore_00"],
-                                                [UIImage imageNamed:@"learnmore_01"],
-                                                [UIImage imageNamed:@"learnmore_02"],
-                                                [UIImage imageNamed:@"learnmore_03"],
-                                                [UIImage imageNamed:@"learnmore_04b"], nil];
-  
-  for (NSUInteger i = 0; i < bgImages.count; ++i) {
-    UIImageView* subview = [[UIImageView alloc] initWithImage:[bgImages objectAtIndex:i]];
-
-    CGRect frame = self.scrollView.frame;
-    frame.origin.x = CGRectGetWidth(frame) * i;
-    if (i == 4) {
-      UIImageView* learnMore = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"learnmore_04"]];
-      learnMore.frame = frame;
-      [self.scrollView addSubview:learnMore];
-      [learnMore release];
-    }
-    subview.frame = frame;
-    
-    subview.clipsToBounds = YES;
-    subview.contentMode = UIViewContentModeCenter;
-    
-    if (i == 1)
-      [self setupSlide:subview];
-
-    [self.scrollView addSubview:subview];
-    [subview release];
-  }
-  
-  self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.scrollView.frame) * bgImages.count,
-                                           CGRectGetHeight(self.scrollView.frame));
-  
   self.cancelButton.alpha = 0.0;
   self.confirmButton.alpha = 0.0;
   self.confirmButton.titleLabel.textAlignment = UITextAlignmentCenter;
@@ -150,18 +116,7 @@ static const CGFloat kProfileImageSize = 144;
   [bottomGradient release];
 }
 
-- (void)setupSlide:(UIImageView*)imageView {
-  UIImage* starImg = [UIImage imageNamed:@"learnmore_star"];
 
-  for (NSUInteger i = 0; i < 5; ++i) {
-    UIImageView* starView = [[UIImageView alloc] initWithImage:starImg];
-    CGRect frame = CGRectMake(26 + (i * starImg.size.width - 12), 95, starImg.size.width, starImg.size.height);
-    starView.frame = frame;
-    starView.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.5];
-    [imageView addSubview:starView];
-    [starView release];
-  }
-}
 
 #pragma mark - Transitions
 
