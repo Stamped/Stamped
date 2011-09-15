@@ -236,7 +236,7 @@ def main():
     
     autocompleteDB = S3AutocompleteDB()
     
-    out  = file('autocomplete.txt', 'w')
+    out   = file('autocomplete.txt', 'w')
     names = set()
     
     def _add(tree):
