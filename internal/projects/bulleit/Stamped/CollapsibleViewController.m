@@ -285,10 +285,10 @@ int const SPACE_HEIGHT          = 10;
     self.arrowView.hidden = YES;
     self.collapsedHeight = self.headerView.frame.size.height + self.contentHeight;
 
-    CGRect footerFrame = self.footerView.frame;
+//    CGRect footerFrame = self.footerView.frame;
 //    footerFrame.size.height = 20;
 //    footerFrame.origin.y -= 20;
-    self.footerView.frame = footerFrame;
+//    self.footerView.frame = footerFrame;
     
     CGRect contentFrame = self.contentView.frame;
     contentFrame.size.height +=20;
@@ -298,8 +298,6 @@ int const SPACE_HEIGHT          = 10;
     viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) -20;
     self.view.frame = viewFrame;
     
-//    self.view.backgroundColor = [UIColor stampedLightGrayColor];
-//    self.footerView.backgroundColor = [UIColor stampedDarkGrayColor];
         
   }
   
@@ -308,13 +306,15 @@ int const SPACE_HEIGHT          = 10;
     self.footerLabel.hidden = NO;
     self.arrowView.hidden = NO;
     
-    CGRect footerFrame = self.footerView.frame;
-    footerFrame.size.height = 20;
-    self.footerView.frame = footerFrame;
-    
     CGRect contentFrame = self.contentView.frame;
     contentFrame.size.height -= 20;
     self.contentView.frame = contentFrame;
+    
+    CGRect viewFrame = self.view.frame;
+    viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) +20;
+    self.view.frame = viewFrame;
+    
+//    self.contentView.backgroundColor = [UIColor redColor];
     
     
   }

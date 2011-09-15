@@ -233,7 +233,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   CGFloat newHeight = [self contentHeight];
   newHeight += delta;
   
-  NSLog(@"newHeight: %f", newHeight);
+ 
   
   CGRect contentFrame = self.mainContentView.frame;
   contentFrame.size.height = newHeight;
@@ -241,7 +241,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   newHeight += CGRectGetMinY(self.mainContentView.frame);
   
-  NSLog(@"%f", contentFrame.size.height);
   
   self.scrollView.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);  
 }

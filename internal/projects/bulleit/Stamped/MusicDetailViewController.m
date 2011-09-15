@@ -39,7 +39,7 @@
       self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", entityObject_.artist];
   }
   
-  NSLog(@"%@", entityObject_);
+//  NSLog(@"%@", entityObject_);
 
   if (entityObject_.image) {
     self.imageView.hidden = NO;
