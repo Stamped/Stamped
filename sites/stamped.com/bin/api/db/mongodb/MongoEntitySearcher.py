@@ -460,7 +460,7 @@ class MongoEntitySearcher(EntitySearcher):
         title  = entity.title.lower()
         weight = 1.0
         
-        if prefix:
+        # if prefix:
         if input_query == title:
             # if the title is an 'exact' query match (case-insensitive), weight it heavily
             return 500
