@@ -1,0 +1,105 @@
+<!doctype html> 
+<html lang="en" dir="ltr"> 
+    <head> 
+        <meta charset="utf-8"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+        
+        <title>Stamped</title> 
+        
+        <meta name="description" content="Stamped. Be the first to know."> 
+        <meta name="author" content="Stamped, Inc."> 
+        <meta name="copyright" content="Stamped, Inc."> 
+        <meta name="robots" content="index,follow"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        
+        <!-- Style --> 
+        <link href="http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css" rel="stylesheet" type="text/css" /> 
+        <link rel="stylesheet" href="http://zomgco.com/tramped/css/normalize.css" type="text/css" media="screen" /> 
+        <link rel="stylesheet" href="http://zomgco.com/tramped/css/style.css" type="text/css" media="screen" /> 
+        
+        <link rel="shortcut icon" href="http://zomgco.com/tramped/favicon.ico"/> 
+        <link rel="apple-touch-icon" href="http://zomgco.com/tramped/apple-touch-icon.png"/> 
+        <style type="text/css">
+        .card {
+            *background:#{{ user.color_primary }}; /* IE7 */
+            background:-webkit-gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
+            background:-moz-gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
+            background:-ms-gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
+            background:-o-gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
+            background:gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
+        }
+        </style>
+ 
+        <!-- Magic --> 
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script> 
+        <script type="text/javascript" src="http://zomgco.com/tramped/js/function.js"></script> 
+    </head> 
+    <body> 
+        <div id="entity" class="flood"> 
+            <div class="header"> 
+                <div class="inner"> 
+                    <div class="container"> 
+                        <a href="#" class="hide">Hide</a> 
+                    </div> 
+                    <div class="signup"> 
+                        <form action="http://stamped.createsend.com/t/r/s/fqjrk/" method="POST" id="subForm"> 
+                            <input autocomplete="off" name="cm-fqjrk-fqjrk" id="fqjrk-fqjrk" type="text" rel="Email address"/> 
+                            <button type="submit" class="replaced">Submit</button> 
+                        </form> 
+                    </div> 
+                    <p class="thanks replaced">Whoa. Thanks!</p> 
+                    <div class="message"> 
+                        <p><span class="user">{{ user.screen_name }}</span> is using a private beta of Stamped, a new way to put your stamp of approval on the world. <a href="#" class="signup-toggle">Sign up for launch</a>.</p> 
+                    </div> 
+                </div> 
+            </div> 
+            <div class="wrap"> 
+                <div class="brand replaced">Stamped</div> 
+                <div class="coming-soon replaced">Coming soon to the App Store</div> 
+                <div class="card"> 
+                    <div class="top-wave"></div> 
+                    <div class="inner"> 
+                        <div class="meta"> 
+                            <div class="thumb"> 
+                                <img src="http://static.stamped.com/users/{{ user.screen_name }}-92x92.jpg"/> 
+                            </div> 
+                            <div class="copy"> 
+                                <h1>{{ title }}</h1> 
+                                <span class="type {{ entity.category }}">{{ entity.subtitle }}</span> 
+                            </div> 
+                        </div> 
+                        <div class="main"> 
+                            <span class="author"><span class="user">{{ user.screen_name }}</span> stamped</span> 
+                            <p>{{ blurb }}</p> 
+                            {% if credit %}
+                            <div class="credit">Credit to 
+                            {% if credit|length >= 4 %}
+                            <span class="user">{{ credit.0.screen_name }}</span>,
+                            <span class="user">{{ credit.1.screen_name }}</span>
+                            and {{ credit|length|add:"-2" }} others
+                            {% else %}
+                            {% for item in credit %}
+                            <span class="user">{{ item.screen_name }}</span>{% if forloop.revcounter > 2 %}, {% else %}{% if forloop.revcounter == 2 %} and {% endif %}{% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            </div> 
+                            {% endif %}
+                            {% if num_likes and num_likes > 0 %}
+                            <div class="likes"><strong>{{ num_likes }}</strong> likes</div> 
+                            {% endif %}
+                        </div> 
+                    </div> 
+                    <div class="bottom-wave"></div> 
+                </div> 
+                
+                <div class="more"> 
+                    <span>&copy;2011 Stamped Inc.</span> 
+                </div> 
+            </div> <!-- /wrap --> 
+            
+        </div> <!-- /entity --> 
+        <script type="text/javascript"> 
+            stamped.init();
+        </script> 
+    </body> 
+</html>

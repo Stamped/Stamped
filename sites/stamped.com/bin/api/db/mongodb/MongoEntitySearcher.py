@@ -108,45 +108,6 @@ class MongoEntitySearcher(EntitySearcher):
         'netflix'           : 100, 
     }
     
-    google_subcategory_whitelist = set([
-        "amusement_park", 
-        "aquarium", 
-        "art_gallery", 
-        "bakery", 
-        "bar", 
-        "beauty_salon", 
-        "book_store", 
-        "bowling_alley", 
-        "cafe", 
-        "campground", 
-        "casino", 
-        "clothing_store", 
-        "department_store", 
-        "florist", 
-        "food", 
-        "grocery_or_supermarket", 
-        "market", 
-        "gym", 
-        "home_goods_store", 
-        "jewelry_store", 
-        "library", 
-        "liquor_store", 
-        "lodging", 
-        "movie_theater", 
-        "museum", 
-        "night_club", 
-        "park", 
-        "restaurant", 
-        "school", 
-        "shoe_store", 
-        "shopping_mall", 
-        "spa", 
-        "stadium", 
-        "store", 
-        "university", 
-        "zoo", 
-    ])
-    
     location_category_blacklist = set([
         'music', 
         'film', 
@@ -248,6 +209,9 @@ class MongoEntitySearcher(EntitySearcher):
         query = query.replace('&', ' & ')
         
         if prefix:
+            # perform a faster prefix-query by ensuring that any matching 
+            # results begin with the given string as opposed to matching 
+            # the given string anywhere in a result's title
             query = "^%s" % query
         else:
             # process individual words in query
@@ -274,6 +238,7 @@ class MongoEntitySearcher(EntitySearcher):
         query = query.replace(' ', '[ -]?')
         query = query.replace("'", "'?")
         
+        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -283,16 +248,27 @@ class MongoEntitySearcher(EntitySearcher):
         data['subcategory'] = subcategory_filter
         data['full']        = full
         logs.debug(pformat(data))
+        """
         
         entity_query = {"title": {"$regex": query, "$options": "i"}}
         
         results = {}
-        
-        pool = Pool(8)
         wrapper = {}
+        pool = Pool(8)
         
         def _find_entity(ret):
-            ret['db_results'] = self.entityDB._collection.find(entity_query, output=list)
+            # only select certain fields to return to reduce data transfer
+            fields = {
+                'title' : 1, 
+                'sources' : 1, 
+                'subcategory' : 1, 
+            }
+            
+            db_results = self.entityDB._collection.find(entity_query, fields=fields)
+            if prefix:
+                db_results = db_results.limit(100)
+            
+            ret['db_results'] = list(db_results)
         
         def _find_amazon(ret):
             try:
@@ -312,9 +288,26 @@ class MongoEntitySearcher(EntitySearcher):
         
         pool.spawn(_find_entity, wrapper)
         
+        # handle location-based search
         if coords is not None:
             earthRadius = 3959.0 # miles
-            q = SON([('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)])
+            q_params = [('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)]
+            
+            if prefix:
+                fields = {
+                    'title' : 1, 
+                    'sources' : 1, 
+                    'subcategory' : 1, 
+                    'coordinates' : 1, 
+                }
+                
+                # limit number of results returned
+                q_params.append(('num', 50))
+                
+                # only select certain fields to return to reduce data transfer
+                q_params.append(('fields', fields))
+            
+            q = SON(q_params)
             
             def _find_places(ret):
                 ret['place_results'] = self.placesDB._collection.command(q)
@@ -350,11 +343,17 @@ class MongoEntitySearcher(EntitySearcher):
             
             pool.spawn(_find_places, wrapper)
         
-        # perform the requests concurrently
+        # perform the requests concurrently, yielding several advantages:
+        #   1) fault isolation between separate requests s.t. if one query 
+        #      fails or takes too long to complete, we can still return 
+        #      results from the other queries.
+        #   2) speed gain from performing requests asynchronously
+        #   3) guarantee of the maximum amount of time any given search may take
         pool.join()
+        #timeout=10)
         
         if 'db_results' in wrapper:
-            logs.debug('db_results: %d' % len(wrapper['db_results']))
+            #logs.debug('db_results: %d' % len(wrapper['db_results']))
             for doc in wrapper['db_results']:
                 try:
                     e = self.entityDB._convertFromMongo(doc)
@@ -369,7 +368,7 @@ class MongoEntitySearcher(EntitySearcher):
             except KeyError:
                 place_results = []
             
-            logs.debug('place_results: %d' % len(place_results))
+            #logs.debug('place_results: %d' % len(place_results))
             for doc in place_results:
                 try:
                     e = self.placesDB._convertFromMongo(doc['obj'])
@@ -379,16 +378,17 @@ class MongoEntitySearcher(EntitySearcher):
                 results[e.entity_id] = (e, doc['dis'])
         
         if 'google_place_results' in wrapper:
-            logs.debug('google_place_results: %d' % len(wrapper['google_place_results']))
+            #logs.debug('google_place_results: %d' % len(wrapper['google_place_results']))
             for result in wrapper['google_place_results']:
                 results[result[0].entity_id] = result
         
         if 'amazon_results' in wrapper:
-            logs.debug('amazon_results: %d' % len(wrapper['amazon_results']))
+            #logs.debug('amazon_results: %d' % len(wrapper['amazon_results']))
             for result in wrapper['amazon_results']:
                 results[result[0].entity_id] = result
         
         results = results.values()
+        #utils.log("num_results: %d" % len(results))
         
         # apply category filter to results
         if category_filter is not None:
@@ -398,11 +398,12 @@ class MongoEntitySearcher(EntitySearcher):
         if subcategory_filter is not None:
             results = filter(lambda e: e[0].subcategory == subcategory_filter, results)
         
+        # early-exit if there are no results at this point
         if 0 == len(results):
             return results
         
         # sort the results based on a custom ranking function
-        results = sorted(results, key=self._get_entity_weight_func(input_query), reverse=True)
+        results = sorted(results, key=self._get_entity_weight_func(input_query, prefix), reverse=True)
         
         # optionally limit the number of results shown
         if limit is not None and limit >= 0:
@@ -414,12 +415,12 @@ class MongoEntitySearcher(EntitySearcher):
         
         return results
     
-    def _get_entity_weight_func(self, input_query):
+    def _get_entity_weight_func(self, input_query, prefix):
         def _get_entity_weight(result):
             entity   = result[0]
             distance = result[1]
             
-            title_value         = self._get_title_value(input_query, entity)
+            title_value         = self._get_title_value(input_query, entity, prefix)
             subcategory_value   = self._get_subcategory_value(entity)
             source_value        = self._get_source_value(entity)
             quality_value       = self._get_quality_value(entity)
@@ -455,10 +456,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         return _get_entity_weight
     
-    def _get_title_value(self, input_query, entity):
+    def _get_title_value(self, input_query, entity, prefix):
         title  = entity.title.lower()
         weight = 1.0
         
+        # if prefix:
         if input_query == title:
             # if the title is an 'exact' query match (case-insensitive), weight it heavily
             return 500

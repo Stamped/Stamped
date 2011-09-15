@@ -21,16 +21,8 @@ def main():
         print 'RUN %s' % collection
 
         if collection == 'entities':
-            mongoExportJSON('entities')
-            convertEntityData('entities')
-            mongoImportJSON('entities')
-
-            rmExportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
-            rmImportFile = "rm -rf /stamped/tmp/stamped/%s.json" % 'users'
-            cmd = "%s && %s" % (rmExportFile, rmImportFile)
-            pp = Popen(cmd, shell=True, stdout=PIPE)
-            pp.wait()
-
+            mongoExportImport(collection)
+            convertEntities()
             print 'COMPLETE'
         
         else:
@@ -38,6 +30,8 @@ def main():
             print 'COMPLETE'
 
         print 
+
+    convertStamps()
 
 
 def mongoExportImport(collection):
@@ -67,25 +61,42 @@ def mongoImportJSON(collection):
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
 
+def convertEntities():
+    collection = new_database['entities']
+    entities = collection.find({'sources.userGenerated.user_id': {'$exists': True}})
 
+    for entity in entities:
+        collection.update(
+            {'_id': entity['_id']}, 
+            {
+                '$set': {
+                    'sources.userGenerated.generated_by': entity['sources']['userGenerated']['user_id'],
+                },
+                '$unset': {
+                    'sources.userGenerated.user_id': 1
+                }
+            })
 
-def convertEntityData(collection):
+def convertStamps():
+    stamp_collection = new_database['stamps']
+    user_collection = new_database['users']
+    users = user_collection.find()
 
-    f = codecs.open('/stamped/tmp/stamped/%s.json' % collection, 'rU', 'utf-8')
-    o = codecs.open('/stamped/tmp/stamped/%s_out.json' % collection, 'w', 'utf-8')
-    for line in f:
-        data = json.loads(line)
-        
-        if 'sources' in data and 'userGenerated' in data['sources']:
-            data['sources']['userGenerated']['generated_by'] = \
-                data['sources']['userGenerated']['user_id']
-            del(data['sources']['userGenerated']['user_id'])
+    for user in users:
 
-        json.dump(data, o)
-        o.write("\n")
+        stamps = stamp_collection.find({'user.user_id': str(user['_id'])}).sort('_id', pymongo.ASCENDING)
+        count = 0
+        for stamp in stamps:
+            count += 1
+            stamp_collection.update(
+                {'_id': stamp['_id']},
+                {'$set': {'stats.stamp_num': count}}
+            )
 
-    f.close()
-    o.close()
+        user_collection.update(
+            {'_id': user['_id']},
+            {'$set': {'stats.num_stamps_total': count}}
+        )
 
 if __name__ == '__main__':  
     main()

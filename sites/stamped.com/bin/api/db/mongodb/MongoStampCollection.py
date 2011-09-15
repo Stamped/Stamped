@@ -149,9 +149,22 @@ class MongoStampCollection(AMongoCollection, AStampDB):
 
     def getStampFromUserEntity(self, userId, entityId):
         try:
+            ### TODO: Index
             document = self._collection.find_one({
                 'user.user_id': userId, 
                 'entity.entity_id': entityId,
+            })
+            return self._convertFromMongo(document)
+        except:
+            return None
+
+    def getStampFromUserStampNum(self, userId, stampNum):
+        try:
+            ### TODO: Index
+            stampNum = int(stampNum)
+            document = self._collection.find_one({
+                'user.user_id': userId, 
+                'stats.stamp_num': stampNum,
             })
             return self._convertFromMongo(document)
         except:
