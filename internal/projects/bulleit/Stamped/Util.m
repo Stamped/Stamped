@@ -94,10 +94,41 @@ NSString* const kKeychainTwitterToken = @"Twitter for Stamped";
 }
 
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date {
-  NSLog(@"Date: %@", date);
   NSTimeInterval timeSince = [[NSDate date] timeIntervalSinceDate:date];
-  
-  NSString* result = [NSString stringWithFormat:@"%f", timeSince];
+  NSString* result = nil;
+  if (timeSince > 2629743.83) {
+    CGFloat numYears = floorf(timeSince / 262629743.83);
+    if (numYears < 2) {
+      result = @"last year";
+    } else {
+      result = [NSString stringWithFormat:@"%.0f years ago", numYears];
+    }
+  } else if (timeSince > 604800) {
+    CGFloat numWeeks = floorf(timeSince / 604800);
+    if (numWeeks < 2) {
+      result = @"last week";
+    } else {
+      result = [NSString stringWithFormat:@"%.0f weeks ago", numWeeks];
+    }
+  } else if (timeSince > 86400) {
+    CGFloat numDays = floorf(timeSince / 86400);
+    if (numDays < 2) {
+      result = [NSString stringWithFormat:@"%.0f day ago", numDays];
+    } else {
+      result = [NSString stringWithFormat:@"%.0f days ago", numDays];
+    }
+  } else if (timeSince > 3600) {
+    CGFloat numHours = floorf(timeSince / 3600);
+    if (numHours < 2) {
+      result = [NSString stringWithFormat:@"%.0f hr ago", numHours];
+    } else {
+      result = [NSString stringWithFormat:@"%.0f hrs ago", numHours];
+    }
+  } else if (timeSince > 60) {
+    result = [NSString stringWithFormat:@"%.0f min ago", floorf(timeSince / 60)];
+  } else {
+    result = @"just now";
+  }
   return result;
 }
 
