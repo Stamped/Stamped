@@ -697,7 +697,11 @@ class NetflixImageSchema(Schema):
 
 class UserGeneratedSchema(Schema):
     def setSchema(self):
-        self.generated_by       = SchemaElement(basestring, required=True)
+        # TODO (tfischer) adding user_id in temporarily for koopa s.t. entities will 
+        # validate for search, and removing required=True from generated_by for the 
+        # same reason; this can be switched back after we migrate to boo.
+        self.generated_by       = SchemaElement(basestring)
+        self.user_id            = SchemaElement(basestring)
 
 class BarnesAndNobleSchema(Schema):
     def setSchema(self):
