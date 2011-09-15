@@ -250,6 +250,18 @@
 		7EE1194013CE0C8500378139 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193C13CE0C8500378139 /* CoreData.framework */; };
 		7EE1194113CE0C8500378139 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193D13CE0C8500378139 /* MobileCoreServices.framework */; };
 		7EE1194213CE0C8500378139 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1193E13CE0C8500378139 /* SystemConfiguration.framework */; };
+		7EE24A281421474C0027DBB6 /* customizer_cancel_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A251421474C0027DBB6 /* customizer_cancel_button@2x.png */; };
+		7EE24A291421474C0027DBB6 /* customizer_done_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A261421474C0027DBB6 /* customizer_done_button@2x.png */; };
+		7EE24A2A1421474C0027DBB6 /* customizer_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A271421474C0027DBB6 /* customizer_background@2x.png */; };
+		7EE24A2F142147BB0027DBB6 /* StampCustomizerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE24A2D142147BB0027DBB6 /* StampCustomizerViewController.m */; };
+		7EE24A30142147BB0027DBB6 /* StampCustomizerViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A2E142147BB0027DBB6 /* StampCustomizerViewController.xib */; };
+		7EE24A34142153120027DBB6 /* brightness_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A33142153120027DBB6 /* brightness_border@2x.png */; };
+		7EE24A36142159EC0027DBB6 /* hue_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A35142159EC0027DBB6 /* hue_background@2x.png */; };
+		7EE24A3914217E5B0027DBB6 /* stamp_270pt_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A3714217E5B0027DBB6 /* stamp_270pt_texture.png */; };
+		7EE24A3A14217E5B0027DBB6 /* stamp_270pt_texture@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A3814217E5B0027DBB6 /* stamp_270pt_texture@2x.png */; };
+		7EE24A3D14218E940027DBB6 /* color_dropshadow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A3B14218E940027DBB6 /* color_dropshadow@2x.png */; };
+		7EE24A3E14218E940027DBB6 /* selected_color_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A3C14218E940027DBB6 /* selected_color_button@2x.png */; };
+		7EE24A421421A02F0027DBB6 /* selected_color_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE24A411421A02F0027DBB6 /* selected_color_background@2x.png */; };
 		7EE482EC13FAA41400359EEA /* STSearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE482EB13FAA41400359EEA /* STSearchField.m */; };
 		7EE482EE13FAC2D000359EEA /* list_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EE482ED13FAC2D000359EEA /* list_button@2x.png */; };
 		7EE482F113FACFC400359EEA /* STPlaceAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE482F013FACFC300359EEA /* STPlaceAnnotation.m */; };
@@ -708,6 +720,19 @@
 		7EE1193C13CE0C8500378139 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		7EE1193D13CE0C8500378139 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		7EE1193E13CE0C8500378139 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		7EE24A251421474C0027DBB6 /* customizer_cancel_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "customizer_cancel_button@2x.png"; sourceTree = "<group>"; };
+		7EE24A261421474C0027DBB6 /* customizer_done_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "customizer_done_button@2x.png"; sourceTree = "<group>"; };
+		7EE24A271421474C0027DBB6 /* customizer_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "customizer_background@2x.png"; sourceTree = "<group>"; };
+		7EE24A2C142147BB0027DBB6 /* StampCustomizerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampCustomizerViewController.h; sourceTree = "<group>"; };
+		7EE24A2D142147BB0027DBB6 /* StampCustomizerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampCustomizerViewController.m; sourceTree = "<group>"; };
+		7EE24A2E142147BB0027DBB6 /* StampCustomizerViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampCustomizerViewController.xib; sourceTree = "<group>"; };
+		7EE24A33142153120027DBB6 /* brightness_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "brightness_border@2x.png"; sourceTree = "<group>"; };
+		7EE24A35142159EC0027DBB6 /* hue_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hue_background@2x.png"; sourceTree = "<group>"; };
+		7EE24A3714217E5B0027DBB6 /* stamp_270pt_texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stamp_270pt_texture.png; sourceTree = "<group>"; };
+		7EE24A3814217E5B0027DBB6 /* stamp_270pt_texture@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_270pt_texture@2x.png"; sourceTree = "<group>"; };
+		7EE24A3B14218E940027DBB6 /* color_dropshadow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "color_dropshadow@2x.png"; sourceTree = "<group>"; };
+		7EE24A3C14218E940027DBB6 /* selected_color_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "selected_color_button@2x.png"; sourceTree = "<group>"; };
+		7EE24A411421A02F0027DBB6 /* selected_color_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "selected_color_background@2x.png"; sourceTree = "<group>"; };
 		7EE482EA13FAA41400359EEA /* STSearchField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSearchField.h; sourceTree = "<group>"; };
 		7EE482EB13FAA41400359EEA /* STSearchField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSearchField.m; sourceTree = "<group>"; };
 		7EE482ED13FAC2D000359EEA /* list_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "list_button@2x.png"; sourceTree = "<group>"; };
@@ -1247,6 +1272,8 @@
 				7EC30B4F1401BBC50047D773 /* stamp_46pt_texture@2x.png */,
 				7EC30B501401BBC50047D773 /* stamp_60pt_texture_fade.png */,
 				7EC30B511401BBC50047D773 /* stamp_60pt_texture_fade@2x.png */,
+				7EE24A3714217E5B0027DBB6 /* stamp_270pt_texture.png */,
+				7EE24A3814217E5B0027DBB6 /* stamp_270pt_texture@2x.png */,
 			);
 			name = Stamps;
 			sourceTree = "<group>";
@@ -1254,6 +1281,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7EE24A24142147350027DBB6 /* Stamp Customizer */,
 				7E5406DF141550D000912463 /* First run */,
 				7EB29D831414657C003A8EA3 /* Inbox */,
 				7EC30B3B1401BB9B0047D773 /* Stamps */,
@@ -1396,6 +1424,31 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		7EE24A24142147350027DBB6 /* Stamp Customizer */ = {
+			isa = PBXGroup;
+			children = (
+				7EE24A251421474C0027DBB6 /* customizer_cancel_button@2x.png */,
+				7EE24A261421474C0027DBB6 /* customizer_done_button@2x.png */,
+				7EE24A271421474C0027DBB6 /* customizer_background@2x.png */,
+				7EE24A35142159EC0027DBB6 /* hue_background@2x.png */,
+				7EE24A33142153120027DBB6 /* brightness_border@2x.png */,
+				7EE24A3B14218E940027DBB6 /* color_dropshadow@2x.png */,
+				7EE24A3C14218E940027DBB6 /* selected_color_button@2x.png */,
+				7EE24A411421A02F0027DBB6 /* selected_color_background@2x.png */,
+			);
+			name = "Stamp Customizer";
+			sourceTree = "<group>";
+		};
+		7EE24A2B1421479E0027DBB6 /* Stamp Customizer */ = {
+			isa = PBXGroup;
+			children = (
+				7EE24A2C142147BB0027DBB6 /* StampCustomizerViewController.h */,
+				7EE24A2D142147BB0027DBB6 /* StampCustomizerViewController.m */,
+				7EE24A2E142147BB0027DBB6 /* StampCustomizerViewController.xib */,
+			);
+			name = "Stamp Customizer";
+			sourceTree = "<group>";
+		};
 		7EE70C5313FC6378008CCC15 /* Profile View */ = {
 			isa = PBXGroup;
 			children = (
@@ -1464,6 +1517,7 @@
 				7ED2EF5F13E0DBF8007F1AFB /* Todo */,
 				7ED2EF6D13E0DF83007F1AFB /* People */,
 				7EE70C5313FC6378008CCC15 /* Profile View */,
+				7EE24A2B1421479E0027DBB6 /* Stamp Customizer */,
 				7ED2EF6713E0DED5007F1AFB /* Root View */,
 				7EDA5FF213F56D7F00F23B13 /* Authentication */,
 				7E42FDE813EF3A64007B3C26 /* STReloadableTableViewController.h */,
@@ -1897,6 +1951,17 @@
 				CB1B220F141EB5410001F932 /* rating_PG-13@2x.png in Resources */,
 				CB1B2210141EB5410001F932 /* rating_PG@2x.png in Resources */,
 				CB1B2211141EB5410001F932 /* rating_R@2x.png in Resources */,
+				7EE24A281421474C0027DBB6 /* customizer_cancel_button@2x.png in Resources */,
+				7EE24A291421474C0027DBB6 /* customizer_done_button@2x.png in Resources */,
+				7EE24A2A1421474C0027DBB6 /* customizer_background@2x.png in Resources */,
+				7EE24A30142147BB0027DBB6 /* StampCustomizerViewController.xib in Resources */,
+				7EE24A34142153120027DBB6 /* brightness_border@2x.png in Resources */,
+				7EE24A36142159EC0027DBB6 /* hue_background@2x.png in Resources */,
+				7EE24A3914217E5B0027DBB6 /* stamp_270pt_texture.png in Resources */,
+				7EE24A3A14217E5B0027DBB6 /* stamp_270pt_texture@2x.png in Resources */,
+				7EE24A3D14218E940027DBB6 /* color_dropshadow@2x.png in Resources */,
+				7EE24A3E14218E940027DBB6 /* selected_color_button@2x.png in Resources */,
+				7EE24A421421A02F0027DBB6 /* selected_color_background@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1994,6 +2059,7 @@
 				1E1A1B63141C2A5E00B7C627 /* WelcomeViewController.m in Sources */,
 				CB3C9AD2141FE6EB005F837A /* WrappingTextView.m in Sources */,
 				7ED60895141FF7CB001C499D /* FriendshipTableViewCell.m in Sources */,
+				7EE24A2F142147BB0027DBB6 /* StampCustomizerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

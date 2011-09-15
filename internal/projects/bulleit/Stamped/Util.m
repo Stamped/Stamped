@@ -41,6 +41,40 @@ NSString* const kKeychainTwitterToken = @"Twitter for Stamped";
   *blue = b / 255.0f;
 }
 
++ (UIImage*)gradientImage:(UIImage*)img
+           withPrimaryRed:(CGFloat)pRed
+             primaryGreen:(CGFloat)pGreen
+              primaryBlue:(CGFloat)pBlue
+             secondaryRed:(CGFloat)sRed
+           secondaryGreen:(CGFloat)sGreen
+            secondaryBlue:(CGFloat)sBlue {
+  if (!img)
+    return nil;
+
+  CGFloat width = img.size.width;
+  CGFloat height = img.size.height;
+  
+  UIGraphicsBeginImageContextWithOptions(img.size, NO, 0.0);
+  CGContextRef context = UIGraphicsGetCurrentContext();
+  
+  CGContextClipToMask(context, CGRectMake(0, 0, width, height), img.CGImage);
+  CGFloat colors[] = {pRed, pGreen, pBlue, 1.0, sRed, sGreen, sBlue, 1.0};
+  CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+  CGGradientRef gradientRef = CGGradientCreateWithColorComponents(colorSpace, colors, NULL, 2);
+  CGPoint gradientStartPoint = CGPointZero;
+  CGPoint gradientEndPoint = CGPointMake(width, height);
+  CGContextDrawLinearGradient(context,
+                              gradientRef,
+                              gradientStartPoint,
+                              gradientEndPoint,
+                              kCGGradientDrawsAfterEndLocation);
+  CGGradientRelease(gradientRef);
+  CGColorSpaceRelease(colorSpace);
+  UIImage* finalStamp = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  return finalStamp;
+}
+
 + (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img {
   CGFloat width = img.size.width;
   CGFloat height = img.size.height;

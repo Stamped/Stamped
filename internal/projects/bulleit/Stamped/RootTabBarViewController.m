@@ -20,6 +20,7 @@
 
 #import "WelcomeViewController.h"
 #import "StampedAppDelegate.h"
+#import "StampCustomizerViewController.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
@@ -128,6 +129,9 @@
   delegate.navigationController.navigationBarHidden = YES;
   [delegate.navigationController pushViewController:welcomeVC animated:YES];
   [welcomeVC release];*/
+//  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithNibName:@"StampCustomizerViewController" bundle:nil];
+//  [self presentModalViewController:vc animated:YES];
+//  [vc release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
