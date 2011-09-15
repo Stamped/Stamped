@@ -79,6 +79,7 @@ class StampedAPI(AStampedAPI):
 
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
+        account.stats.num_stamps_total = 0
         
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
@@ -852,6 +853,7 @@ class StampedAPI(AStampedAPI):
         stamp.user_id   = user.user_id
         stamp.entity_id = entity.entity_id
         stamp.created   = datetime.utcnow()
+        stamp.stamp_num = user.num_stamps_total + 1
 
         # Collect user ids
         userIds = {}
@@ -939,6 +941,8 @@ class StampedAPI(AStampedAPI):
                     None, increment=1)
         self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
                     None, increment=-1)
+        self._userDB.updateUserStats(authUserId, 'num_stamps_total', \
+                    None, increment=1)
         
         # If stamped entity is on the to do list, mark as complete
         try:

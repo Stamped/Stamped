@@ -31,6 +31,8 @@ def main():
 
         print 
 
+    convertStamps()
+
 
 def mongoExportImport(collection):
 
@@ -74,6 +76,27 @@ def convertEntities():
                     'sources.userGenerated.user_id': 1
                 }
             })
+
+def convertStamps():
+    stamp_collection = new_database['stamps']
+    user_collection = new_database['users']
+    users = user_collection.find()
+
+    for user in users:
+
+        stamps = stamp_collection.find({'user.user_id': str(user['_id'])}).sort('_id', pymongo.ASCENDING)
+        count = 0
+        for stamp in stamps:
+            count += 1
+            stamp_collection.update(
+                {'_id': stamp['_id']},
+                {'$set': {'stats.stamp_num': count}}
+            )
+
+        user_collection.update(
+            {'_id': user['_id']},
+            {'$set': {'stats.num_stamps_total': count}}
+        )
 
 if __name__ == '__main__':  
     main()
