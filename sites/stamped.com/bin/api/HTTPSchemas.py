@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, urllib, urlparse
+import copy, urllib, urlparse, re
 from datetime import datetime, date
 from schema import *
 from Schemas import *
@@ -623,6 +623,7 @@ class HTTPStamp(Schema):
         self.like_threshold_hit = SchemaElement(bool)
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
+        self.url                = SchemaElement(basestring)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Stamp':
@@ -656,6 +657,11 @@ class HTTPStamp(Schema):
 
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
+
+            stamp_title = schema.entity.title.replace(' ', '_').encode('ascii', 'ignore')
+            stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
+            self.url = 'http://dev.stamped.com/%s/stamps/%s/%s' % \
+                (schema.user.user_id, schema.stamp_num, stamp_title)
 
         else:
             raise NotImplementedError

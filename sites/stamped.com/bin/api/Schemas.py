@@ -133,6 +133,7 @@ class UserStatsSchema(Schema):
     def setSchema(self):
         self.num_stamps         = SchemaElement(int)
         self.num_stamps_left    = SchemaElement(int)
+        self.num_stamps_total   = SchemaElement(int)
         self.num_friends        = SchemaElement(int)
         self.num_followers      = SchemaElement(int)
         self.num_faves          = SchemaElement(int)
@@ -148,6 +149,7 @@ class StampStatsSchema(Schema):
         self.num_credit         = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
         self.like_threshold_hit = SchemaElement(bool)
+        self.stamp_num          = SchemaElement(int)
 
 
 # ########## #
