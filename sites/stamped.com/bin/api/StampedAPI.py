@@ -787,13 +787,13 @@ class StampedAPI(AStampedAPI):
 
             # Likes
             likes = self._stampDB.getUserLikes(authUserId)
-
+            
         # Add user objects to stamps
         stamps = []
         for stamp in stampData:
             # Add stamp user
             stamp.user = userIds[stamp.user_id]
-
+            
             # Add entity
             stamp.entity = entityIds[stamp.entity_id]
 
@@ -1252,24 +1252,21 @@ class StampedAPI(AStampedAPI):
                 msg = "Insufficient privileges to view stamp"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
-        # Add user object for credit
-        if len(stamp.credit) > 0:
-            userIds = {}
-            for i in xrange(len(stamp.credit)):
-                userIds[stamp.credit[i].user_id] = 1
-
-            users = self._userDB.lookupUsers(userIds.keys(), None)
-
-            for user in users:
-                userIds[user.user_id] = user.exportSchema(UserMini())
-
-            for i in xrange(len(stamp.credit)):
-                creditedUser = userIds[stamp.credit[i].user_id]
-                stamp.credit[i].color_primary = creditedUser['color_primary']
-                stamp.credit[i].color_secondary = creditedUser['color_secondary']
-                stamp.credit[i].privacy = creditedUser['privacy']
       
+        return stamp
+
+    def getStampFromUser(self, screenName, stampNumber):
+        user = self._userDB.getUserByScreenName(screenName)
+        stamp = self._stampDB.getStampFromUserStampNum(user.user_id, \
+                                                        stampNumber)
+        print stamp
+        stamp = self._enrichStampObjects(stamp)
+
+        if stamp.user.privacy == True:
+            msg = "Insufficient privileges to view stamp"
+            logs.warning(msg)
+            raise InsufficientPrivilegesError(msg)
+
         return stamp
     
     def updateStampImage(self, authUserId, stampId, data):

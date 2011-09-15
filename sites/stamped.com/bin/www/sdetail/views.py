@@ -20,9 +20,10 @@ stampedAPI  = MongoStampedAPI()
 
 def show(request, **kwargs):
 
-    stampId = kwargs.pop('stamp_id', None)
+    screenName = kwargs.pop('screen_name', None)
+    stampNum = kwargs.pop('stamp_num', None)
     try:
-        stamp = stampedAPI.getStamp(stampId)
+        stamp = stampedAPI.getStampFromUser(screenName, stampNum)
         # stamp['credit'] = stamp['credit'][:1]
         return render_to_response('sdetail.html', stamp)
     except:
