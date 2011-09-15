@@ -187,7 +187,6 @@
 						<string key="NSFrame">{{0, 279}, {320, 1}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -411,6 +410,8 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>arrowView</string>
 							<string>contentView</string>
+							<string>footerLabel</string>
+							<string>footerView</string>
 							<string>headerView</string>
 							<string>iconView</string>
 							<string>numLabel</string>
@@ -419,6 +420,8 @@
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UIImageView</string>
+							<string>UIView</string>
+							<string>UILabel</string>
 							<string>UIView</string>
 							<string>UIView</string>
 							<string>UIImageView</string>
@@ -432,6 +435,8 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>arrowView</string>
 							<string>contentView</string>
+							<string>footerLabel</string>
+							<string>footerView</string>
 							<string>headerView</string>
 							<string>iconView</string>
 							<string>numLabel</string>
@@ -445,6 +450,14 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">contentView</string>
+								<string key="candidateClassName">UIView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">footerLabel</string>
+								<string key="candidateClassName">UILabel</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">footerView</string>
 								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">

@@ -27,18 +27,15 @@
 @synthesize callActionButton = callActionButton_;
 @synthesize callActionLabel = callActionLabel_;
 @synthesize mapView = mapView_;
-@synthesize contentContainerView = contentContainerView_;
+@synthesize mapContainerView = mapContainerView_;
 
 #pragma mark - View lifecycle
 
 - (void)showContents
 {
-  if (entityObject_.address)
-    self.descriptionLabel.text = [entityObject_.address stringByReplacingOccurrencesOfString:@", "
-                                                                                withString:@"\n"];
-  else 
-    self.descriptionLabel.text = entityObject_.subcategory;
-
+  self.descriptionLabel.text = entityObject_.subtitle;
+  
+  
   //  NSLog(@"%@", entityObject_);
   
   [self setupMainActionsContainer];
@@ -57,7 +54,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_other_0"];
+  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_food_0"];
   if (dataLoaded_ && !annotation_)
     [self addAnnotation];
   
@@ -82,7 +79,7 @@
 - (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
   if (![annotation isKindOfClass:[STPlaceAnnotation class]])
     return nil;
-
+  
   MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.animatesDrop = YES;
@@ -157,36 +154,32 @@
     self.mainActionsView.hidden = NO;
   }
   
-
+  
   if (!entityObject_.openTableURL && (!entityObject_.phone || entityObject_.phone.intValue == 0) ) {
-    contentContainerView_.frame = CGRectOffset(contentContainerView_.frame, 0,
-                                          -CGRectGetHeight(self.mainActionsView.frame));
+    mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }  
   
 }
 
 
-- (void)setupMapView {
-  if (!entityObject_.coordinates) {
-    self.mapView.hidden = YES;
-
-    CGRect frame = self.mainContentView.frame;
-    frame = CGRectOffset(frame, 0, -CGRectGetHeight(self.mapView.frame));
-    frame.size.height += CGRectGetHeight(self.mapView.frame);
+- (void) setupMapView
+{
+  if (!entityObject_.coordinates)
     return;
-  }
-
+  
   NSArray* coordinates = [entityObject_.coordinates componentsSeparatedByString:@","]; 
   latitude_ = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   longitude_ = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(latitude_, longitude_);
   MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
   MKCoordinateRegion region = MKCoordinateRegionMake(mapCoord, mapSpan);
-  contentContainerView_.hidden = NO;
+  mapContainerView_.hidden = NO;
   [self.mapView setRegion:region animated:YES];
   
   if (viewIsVisible_ && !annotation_)
     [self addAnnotation];
+  
 }
 
 - (void) setupSectionViews {
@@ -194,49 +187,48 @@
   // Information
   // TODO: What if there's no information?
   
-  [self addSectionWithName:@"Information"];
-  CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Information"];
-    
-  if (entityObject_.subcategory)  [section addPairedLabelWithName:@"Category:"
-                                                            value:entityObject_.subcategory
-                                                           forKey:@"subcategory"];
-  
-  if (entityObject_.cuisine)      [section addPairedLabelWithName:@"Cuisine:"      
-                                                            value:entityObject_.cuisine
-                                                          forKey:@"cuisine"];
-  
-  if (entityObject_.neighborhood) [section addPairedLabelWithName:@"Neighborhood:"
-                                                            value:entityObject_.neighborhood
-                                                           forKey:@"neighborhood"];
-  
-  if (entityObject_.hours)        [section addPairedLabelWithName:@"Hours:"
-                                                            value:entityObject_.hours
-                                                           forKey:@"hours"];
-  
-  if (entityObject_.price)        [section addPairedLabelWithName:@"Price Range:" 
-                                                            value:entityObject_.price
-                                                           forKey:@"price"];
-  
-  if (entityObject_.website)      [section addPairedLabelWithName:@"Website:"
-                                                            value:entityObject_.website
-                                                           forKey:@"website"];
-  
   //Description
+  
+  CollapsibleViewController* section;
+  
+  if (mapContainerView_.hidden == YES) 
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
+  
   
   if (entityObject_.desc)
   {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
-    
     [section addText:entityObject_.desc forKey:@"desc"];
   }
+
   
+  [self addSectionWithName:@"Information"];
+  section = [sectionsDict_ objectForKey:@"Information"];
+  
+  if (entityObject_.subcategory)  [section addPairedLabelWithName:@"Category:"
+                                                            value:entityObject_.subcategory
+                                                           forKey:@"subcategory"];
+  
+  
+  if (entityObject_.address)      [section addPairedLabelWithName:@"Address:"
+                                                            value:entityObject_.address
+                                                           forKey:@"address"];
+    
+  if (entityObject_.neighborhood) [section addPairedLabelWithName:@"Neighborhood:"
+                                                            value:entityObject_.neighborhood
+                                                           forKey:@"neighborhood"];
+  
+  if (entityObject_.website)      [section addPairedLabelWithName:@"Website:"
+                                                            value:entityObject_.website
+                                                           forKey:@"website"];
+  
+    
   NSSet* stamps = entityObject_.stamps;
   
   if (stamps && stamps.count > 0)
   {
     [self addSectionStampedBy];
-    
   }
   
 }

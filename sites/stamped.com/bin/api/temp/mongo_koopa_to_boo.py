@@ -19,9 +19,15 @@ if not os.path.isdir('/stamped/tmp/stamped/'):
 def main():
     for collection in collections:
         print 'RUN %s' % collection
+
+        if collection == 'entities':
+            mongoExportImport(collection)
+            convertEntities()
+            print 'COMPLETE'
         
-        mongoExportImport(collection)
-        print 'COMPLETE'
+        else:
+            mongoExportImport(collection)
+            print 'COMPLETE'
 
         print 
 
@@ -53,7 +59,21 @@ def mongoImportJSON(collection):
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
 
+def convertEntities():
+    collection = new_database['entities']
+    entities = collection.find({'sources.userGenerated.user_id': {'$exists': True}})
 
+    for entity in entities:
+        collection.update(
+            {'_id': entity['_id']}, 
+            {
+                '$set': {
+                    'sources.userGenerated.generated_by': entity['sources']['userGenerated']['user_id'],
+                },
+                '$unset': {
+                    'sources.userGenerated.user_id': 1
+                }
+            })
 
 if __name__ == '__main__':  
     main()

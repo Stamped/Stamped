@@ -27,7 +27,7 @@
 @synthesize callActionButton = callActionButton_;
 @synthesize callActionLabel = callActionLabel_;
 @synthesize mapView = mapView_;
-@synthesize contentContainerView = contentContainerView_;
+@synthesize mapContainerView = mapContainerView_;
 
 #pragma mark - View lifecycle
 
@@ -155,8 +155,8 @@
   
 
   if (!entityObject_.openTableURL && (!entityObject_.phone || entityObject_.phone.intValue == 0) ) {
-    contentContainerView_.frame = CGRectOffset(contentContainerView_.frame, 0,
-                                          -CGRectGetHeight(self.mainActionsView.frame));
+    mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }  
   
 }
@@ -173,7 +173,7 @@
   CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(latitude_, longitude_);
   MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
   MKCoordinateRegion region = MKCoordinateRegionMake(mapCoord, mapSpan);
-  contentContainerView_.hidden = NO;
+  mapContainerView_.hidden = NO;
   [self.mapView setRegion:region animated:YES];
   
   if (viewIsVisible_ && !annotation_)

@@ -78,16 +78,17 @@
   }
     
     
-  NSLog(@"%@", entityObject_);
+//  NSLog(@"%@", entityObject_);
+  
+  if (entityObject_.image) {
+    self.imageView.hidden = NO;
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
+                                                   [NSURL URLWithString:entityObject_.image]]];
+  }
   
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-  if (entityObject_.image) {
-    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:entityObject_.image]]];
-    self.imageView.hidden = NO;
-  }
   
 }
 
@@ -155,12 +156,13 @@
   // Synopsis
   if (entityObject_.desc) {
         
-    [self addSectionWithName:@"Synopsis" previewHeight:124.f];
+    [self addSectionWithName:@"Synopsis" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Synopsis"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
     section.expandedFooterText = @"read less";
     section.footerLabel.text = section.collapsedFooterText;
-    [section addText:entityObject_.desc forKey:@"desc"];
+    section.imageView = self.imageView;
+    [section addWrappingText:entityObject_.desc forKey:@"desc"];
     section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
     

@@ -15,8 +15,8 @@
 @synthesize nameWidth   = nameWidth_;
 @synthesize numberWidth = numberWidth_;
 
-static const CGFloat kTextLabelGutterWidth = 30.f;
-static const CGFloat kNumberLabelGutterWidth = 4.f;
+static const CGFloat kTextLabelGutterWidth = 20.f;
+static const CGFloat kNumberLabelGutterWidth = 8.f;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -40,8 +40,7 @@ static const CGFloat kNumberLabelGutterWidth = 4.f;
 
 - (void)viewDidLoad
 {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
+  [super viewDidLoad];
 }
 
 - (void)viewDidUnload
@@ -66,9 +65,27 @@ static const CGFloat kNumberLabelGutterWidth = 4.f;
   nameLabel_.frame = frame;
   
   frame = valueLabel_.frame;
-  frame.size.width += CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kTextLabelGutterWidth;
+  frame.size.width = CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kTextLabelGutterWidth;
   frame.origin.x = CGRectGetMaxX(nameLabel_.frame) + kTextLabelGutterWidth;
+  
+  CGSize valueLabelSize = [valueLabel_.text sizeWithFont:valueLabel_.font 
+                                       constrainedToSize:CGSizeMake(frame.size.width, HUGE_VAL)
+                                           lineBreakMode:UILineBreakModeWordWrap];
+  
+  frame.size = valueLabelSize;
+
+  if (valueLabelSize.height - 15.f > 0.f)
+  {
+    CGFloat newHeight = valueLabel_.frame.origin.y + valueLabelSize.height + 10.f;
+    CGRect viewFrame = self.view.frame;
+    viewFrame.size.height = newHeight;
+    self.view.frame = viewFrame;
+    
+    frame.origin.y = 0.0;
+  }
+  
   valueLabel_.frame = frame;
+
 }
 
 
@@ -79,11 +96,31 @@ static const CGFloat kNumberLabelGutterWidth = 4.f;
   CGRect frame = nameLabel_.frame;
   frame.size.width = numberWidth_;
   nameLabel_.frame = frame;
+  nameLabel_.contentMode = UIViewContentModeBottomLeft;
   
   frame = valueLabel_.frame;
-  frame.size.width += CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kNumberLabelGutterWidth;
+  frame.size.width = CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kNumberLabelGutterWidth;
   frame.origin.x = CGRectGetMaxX(nameLabel_.frame) + kNumberLabelGutterWidth;
+  
+  CGSize valueLabelSize = [valueLabel_.text sizeWithFont:valueLabel_.font 
+                                       constrainedToSize:CGSizeMake(frame.size.width, HUGE_VAL)
+                                           lineBreakMode:UILineBreakModeWordWrap];
+  frame.size.height = valueLabelSize.height;
+  
+  if (valueLabelSize.height - 15.f > 0.f)
+  {
+    CGFloat newHeight = valueLabel_.frame.origin.y + valueLabelSize.height + 10.f;
+    CGRect viewFrame = self.view.frame;
+    viewFrame.size.height = newHeight;
+    self.view.frame = viewFrame;
+    
+    frame.origin.y = 0.0;
+  }
+  
   valueLabel_.frame = frame;
+  
 }
+
+
 
 @end

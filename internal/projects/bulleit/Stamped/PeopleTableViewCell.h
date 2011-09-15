@@ -12,12 +12,13 @@
 @class User;
 
 @interface PeopleTableViewCell : UITableViewCell {
- @private
+ @protected
   PeopleCellView* customView_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
 @property (nonatomic, retain) User* user;
+@property (nonatomic, assign) BOOL disclosureArrowHidden;
 
 @end

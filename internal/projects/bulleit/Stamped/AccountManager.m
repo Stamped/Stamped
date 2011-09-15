@@ -167,7 +167,7 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   if ([objectLoader.response isUnauthorized] &&
-      [objectLoader.resourcePath rangeOfString:kUserLookupPath].location != NSNotFound) {
+      [objectLoader.resourcePath isEqualToString:kUserLookupPath]) {
     [self refreshToken];
     return;
   }
@@ -177,7 +177,7 @@ static AccountManager* sharedAccountManager_ = nil;
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self sendLoginRequest];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
-    [self.firstRunViewController signUpFailed:@"Ooops!"];
+    [self.firstRunViewController signUpFailed:@"Womp womp"];
     NSLog(@"Registration error = %@", error);
   }
 }
@@ -262,6 +262,7 @@ static AccountManager* sharedAccountManager_ = nil;
   NSString* username = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath delegate:self];
   objectLoader.objectMapping = userMapping;
+  objectLoader.method = RKRequestMethodPOST;
   objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username, nil];
   [objectLoader send];
 }
@@ -368,7 +369,7 @@ willCreateUserWithName:(NSString*)name
       [(RKParams*)request.params setValue:self.authToken.accessToken forParam:@"oauth_token"];
       return;
     }
-    
+
     // Wrap shiz with the current oauth token.
     NSMutableDictionary* params =
         [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];

@@ -230,6 +230,8 @@
 		7ED60830141E8655001C499D /* CollapsiblePreviewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6082F141E8655001C499D /* CollapsiblePreviewController.xib */; };
 		7ED60872141E8C8F001C499D /* PairedLabel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60871141E8C8F001C499D /* PairedLabel.xib */; };
 		7ED60874141E8C9E001C499D /* CollapsibleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60873141E8C9E001C499D /* CollapsibleViewController.xib */; };
+		7ED60895141FF7CB001C499D /* FriendshipTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */; };
+		7ED608971420F69B001C499D /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED608961420F69B001C499D /* AddressBook.framework */; };
 		7ED6E11A1403216300D84E03 /* newstamp_btn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1181403216200D84E03 /* newstamp_btn.png */; };
 		7ED6E11B1403216300D84E03 /* newstamp_btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
@@ -280,6 +282,7 @@
 		CB1B2211141EB5410001F932 /* rating_R@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB1B220C141EB5410001F932 /* rating_R@2x.png */; };
 		CB3725DA141DA5EF002A8F96 /* BookDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3725D9141DA5EE002A8F96 /* BookDetailViewController.m */; };
 		CB3725E1141DBC86002A8F96 /* FilmDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3725E0141DBC85002A8F96 /* FilmDetailViewController.m */; };
+		CB3C9AD2141FE6EB005F837A /* WrappingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */; };
 		CB4388FA141ABEF90086D1AE /* MusicDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */; };
 		CB958E8E141E438200BBCCBC /* OtherDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB958E8C141E438200BBCCBC /* OtherDetailViewController.m */; };
 		CBD125F914183C9A00CCBDD8 /* CollapsibleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD125F714183C9900CCBDD8 /* CollapsibleViewController.m */; };
@@ -684,6 +687,9 @@
 		7ED6082F141E8655001C499D /* CollapsiblePreviewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CollapsiblePreviewController.xib; path = Interfaces/CollapsiblePreviewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED60871141E8C8F001C499D /* PairedLabel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PairedLabel.xib; path = Interfaces/PairedLabel.xib; sourceTree = SOURCE_ROOT; };
 		7ED60873141E8C9E001C499D /* CollapsibleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CollapsibleViewController.xib; path = Interfaces/CollapsibleViewController.xib; sourceTree = SOURCE_ROOT; };
+		7ED60893141FF7CB001C499D /* FriendshipTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendshipTableViewCell.h; sourceTree = "<group>"; };
+		7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendshipTableViewCell.m; sourceTree = "<group>"; };
+		7ED608961420F69B001C499D /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		7ED6E1181403216200D84E03 /* newstamp_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newstamp_btn.png; sourceTree = "<group>"; };
 		7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newstamp_btn@2x.png"; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
@@ -747,6 +753,8 @@
 		CB3725D9141DA5EE002A8F96 /* BookDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookDetailViewController.m; sourceTree = "<group>"; };
 		CB3725DF141DBC84002A8F96 /* FilmDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FilmDetailViewController.h; sourceTree = "<group>"; };
 		CB3725E0141DBC85002A8F96 /* FilmDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FilmDetailViewController.m; sourceTree = "<group>"; };
+		CB3C9AD0141FE6EA005F837A /* WrappingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WrappingTextView.h; sourceTree = "<group>"; };
+		CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WrappingTextView.m; sourceTree = "<group>"; };
 		CB4388F8141ABEF90086D1AE /* MusicDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicDetailViewController.h; sourceTree = "<group>"; };
 		CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicDetailViewController.m; sourceTree = "<group>"; };
 		CB958E8B141E438200BBCCBC /* OtherDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OtherDetailViewController.h; sourceTree = "<group>"; };
@@ -766,6 +774,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7ED608971420F69B001C499D /* AddressBook.framework in Frameworks */,
 				1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */,
 				7EC1C65213F459B50070CE6D /* Security.framework in Frameworks */,
 				7EE1193F13CE0C8500378139 /* CFNetwork.framework in Frameworks */,
@@ -1017,6 +1026,8 @@
 				1E1A1B02141C004E00B7C627 /* FindFriendsViewController.h */,
 				1E1A1B03141C004E00B7C627 /* FindFriendsViewController.m */,
 				1E1A1B64141C3AC600B7C627 /* FindFriendsView.xib */,
+				7ED60893141FF7CB001C499D /* FriendshipTableViewCell.h */,
+				7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */,
 			);
 			name = "First run";
 			sourceTree = "<group>";
@@ -1149,6 +1160,7 @@
 		7EC0177413C3754300ABE6E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7ED608961420F69B001C499D /* AddressBook.framework */,
 				7EC1C65113F459B50070CE6D /* Security.framework */,
 				7EE1193B13CE0C8500378139 /* CFNetwork.framework */,
 				7EE1193C13CE0C8500378139 /* CoreData.framework */,
@@ -1492,6 +1504,8 @@
 				CBD1260E141A801100CCBDD8 /* PairedLabel.h */,
 				CBD1260F141A801100CCBDD8 /* PairedLabel.m */,
 				7ED60871141E8C8F001C499D /* PairedLabel.xib */,
+				CB3C9AD0141FE6EA005F837A /* WrappingTextView.h */,
+				CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */,
 			);
 			name = "Interface Helper Classes";
 			sourceTree = "<group>";
@@ -1978,6 +1992,8 @@
 				7E68B919141AA51200D55021 /* ShowImageViewController.m in Sources */,
 				1E1A1B04141C004E00B7C627 /* FindFriendsViewController.m in Sources */,
 				1E1A1B63141C2A5E00B7C627 /* WelcomeViewController.m in Sources */,
+				CB3C9AD2141FE6EB005F837A /* WrappingTextView.m in Sources */,
+				7ED60895141FF7CB001C499D /* FriendshipTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

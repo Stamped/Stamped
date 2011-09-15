@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, logs
+import Globals, logs, copy
 
 from datetime import datetime
 from utils import lazyProperty
@@ -68,10 +68,19 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         return activity
     
     def addActivity(self, recipientIds, activity):
-        activity = self._addObject(activity)
+        # activity = self._addObject(activity)
+        activity = activity.value
+        query = copy.copy(activity)
+        query.pop('timestamp')
+        # Note: I don't like doing safe=True, but it's necessary to get the _id
+        # back. We might want to explore different options here eventually.
+        result = self._collection.update(query, activity, upsert=True, safe=True)
+        if 'upserted' in result:
+            activity_id = self._getStringFromObjectId(result['upserted'])
         
-        for userId in recipientIds:
-            self.user_activity_collection.addUserActivity(userId, activity.activity_id)
+            for userId in recipientIds:
+                self.user_activity_collection.addUserActivity(userId, \
+                    activity_id)
         
     def removeActivity(self, userId, activityId):
         self.user_activity_collection.removeUserActivity(userId, activityId)

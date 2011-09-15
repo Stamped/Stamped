@@ -36,6 +36,9 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic numStamps;
 
 - (void)generateStampImage {
+  if (!self.primaryColor)
+    return;
+
   CGFloat r1, g1, b1, r2, g2, b2;
   [Util splitHexString:self.primaryColor toRed:&r1 green:&g1 blue:&b1];
   

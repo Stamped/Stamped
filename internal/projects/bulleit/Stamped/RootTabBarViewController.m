@@ -18,6 +18,9 @@
 #import "STNavigationBar.h"
 #import "Util.h"
 
+#import "WelcomeViewController.h"
+#import "StampedAppDelegate.h"
+
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -119,6 +122,12 @@
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
+  
+/*  WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  delegate.navigationController.navigationBarHidden = YES;
+  [delegate.navigationController pushViewController:welcomeVC animated:YES];
+  [welcomeVC release];*/
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
@@ -250,7 +259,6 @@
   } else if (item == activityTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"News";
-    NSLog(@"Setting badge value to nil...");
     activityTabBarItem_.badgeValue = nil;
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];
@@ -259,7 +267,7 @@
     newViewController = [viewControllers_ objectAtIndex:3];
     self.navigationItem.title = @"People";
   }
-    
+
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 

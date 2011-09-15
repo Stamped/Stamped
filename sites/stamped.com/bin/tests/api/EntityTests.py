@@ -65,7 +65,7 @@ class StampedAPIEntitiesSearch(StampedAPIEntityTest):
             "q": self.entity['title'][:3]
         }
         result = self.handleGET(path, data)
-        self.assertEqual(result[0]['title'][:3], self.entity['title'][:3])
+        self.assertEqual(result[0]['title'][:3].lower(), self.entity['title'][:3].lower())
 
 if __name__ == '__main__':
     main()

@@ -36,6 +36,7 @@
 
 - (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key;
 - (void)addText:(NSString*)text forKey:(NSString*)key;
+- (void)addWrappingText:(NSString*)text forKey:(NSString*)key;
 - (void)addNumberedListWithValues:(NSArray*)values;
 - (void)addContent:(id)content forKey:(NSString*)key;
 - (float)contentHeight;
@@ -49,6 +50,7 @@
 @property (nonatomic, retain) IBOutlet UILabel*     sectionLabel;
 @property (nonatomic, retain) IBOutlet UILabel*     numLabel;
 @property (nonatomic, retain) IBOutlet UILabel*     footerLabel;
+@property (nonatomic, assign) UIImageView*          imageView;
 
 @property (nonatomic, retain) NSString*             collapsedFooterText;
 @property (nonatomic, retain) NSString*             expandedFooterText;

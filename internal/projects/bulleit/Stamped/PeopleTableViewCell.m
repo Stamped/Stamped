@@ -19,6 +19,7 @@ static const CGFloat kUserImageSize = 41.0;
 
 @property (nonatomic, readonly) MediumUserImageView* userImageView;
 @property (nonatomic, readonly) UIImageView* stampImageView;
+@property (nonatomic, readonly) UIImageView* arrowImageView;
 @property (nonatomic, readonly) UILabel* fullNameLabel;
 @property (nonatomic, readonly) UILabel* usernameLabel;
 @end
@@ -29,6 +30,7 @@ static const CGFloat kUserImageSize = 41.0;
 @synthesize stampImageView = stampImageView_;
 @synthesize fullNameLabel = fullNameLabel_;
 @synthesize usernameLabel = usernameLabel_;
+@synthesize arrowImageView = arrowImageView_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -64,12 +66,12 @@ static const CGFloat kUserImageSize = 41.0;
     
     UIImage* arrowImage = [UIImage imageNamed:@"disclosure_arrow"];
     UIImage* highlightedArrowImage = [Util whiteMaskedImageUsingImage:arrowImage];
-    UIImageView* arrowImageView = [[UIImageView alloc] initWithImage:arrowImage
+    arrowImageView_ = [[UIImageView alloc] initWithImage:arrowImage
                                                     highlightedImage:highlightedArrowImage];
-    arrowImageView.contentMode = UIViewContentModeCenter;
-    arrowImageView.frame = CGRectMake(292, 21, 11, 11);
-    [self addSubview:arrowImageView];
-    [arrowImageView release];
+    arrowImageView_.contentMode = UIViewContentModeCenter;
+    arrowImageView_.frame = CGRectMake(292, 21, 11, 11);
+    [self addSubview:arrowImageView_];
+    [arrowImageView_ release];
   }
   return self;
 }
@@ -79,6 +81,7 @@ static const CGFloat kUserImageSize = 41.0;
 @implementation PeopleTableViewCell
 
 @synthesize user = user_;
+@synthesize disclosureArrowHidden = disclosureArrowHidden_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault 
@@ -92,6 +95,14 @@ static const CGFloat kUserImageSize = 41.0;
     [customView_ release];
   }
   return self;
+}
+
+- (void)setDisclosureArrowHidden:(BOOL)hidden {
+  if (disclosureArrowHidden_ == hidden)
+    return;
+  
+  disclosureArrowHidden_ = hidden;
+  customView_.arrowImageView.hidden = hidden;
 }
 
 - (void)setUser:(User*)user {

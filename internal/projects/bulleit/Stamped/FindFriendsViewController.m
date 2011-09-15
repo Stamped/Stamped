@@ -8,58 +8,76 @@
 
 #import "FindFriendsViewController.h"
 
+#import <AddressBook/AddressBook.h>
+
 #import "GTMOAuthAuthentication.h"
 #import "GTMOAuthViewControllerTouch.h"
 
 #import "STSectionHeaderView.h"
+#import "FriendshipTableViewCell.h"
 #import "Util.h"
+#import "User.h"
 
-// Constants ///////////////////////////////////////////////////////////////////
-
-NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
-NSString* const kTwitterFriendsURI = @"/friends/ids.json";
-NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
-
-// Private Interface ///////////////////////////////////////////////////////////
+static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
+static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
+static NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
+static NSString* const kStampedEmailFriendsURI = @"/users/find/email.json";
+static NSString* const kStampedPhoneFriendsURI = @"/users/find/phone.json";
+static NSString* const kStampedLinkedAccountsURI = @"/account/linked_accounts.json";
+static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
+static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 @interface FindFriendsViewController ()
+- (void)adjustNippleToView:(UIView*)view;
+- (GTMOAuthAuthentication*)createAuthentication;
+- (void)signInToTwitter;
+- (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user;
+- (void)followButtonPressed:(id)sender;
+- (void)unfollowButtonPressed:(id)sender;
+- (FriendshipTableViewCell*)friendshipCellFromSubview:(UIView*)view;
+- (void)viewController:(GTMOAuthViewControllerTouch*)authVC
+      finishedWithAuth:(GTMOAuthAuthentication*)auth
+                 error:(NSError*)error;
+- (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID;
+- (void)fetchCurrentUser;
+- (void)fetchFriendIDs:(NSString*)userIDString;
+- (void)findStampedFriendsFromTwitter:(NSArray*)twitterIDs;
+- (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
 @property (nonatomic, retain) RKClient* twitterClient;
-
-- (void)adjustNippleToView:(UIView*)view;
-- (GTMOAuthAuthentication*)createAuthentication;
-- (void)signInToTwitter;
-- (void)viewController:(GTMOAuthViewControllerTouch*)authVC
-      finishedWithAuth:(GTMOAuthAuthentication*)auth
-                 error:(NSError*)error;
-
-- (void)fetchCurrentUser;
-- (void)fetchFriendIDs:(NSString*)userIDString;
-- (void)findStampedFriendsFromTwitter:(NSArray*)twitterIDs;
+@property (nonatomic, copy) NSArray* twitterFriends;
+@property (nonatomic, copy) NSArray* contactFriends;
+@property (nonatomic, retain) NSMutableArray* followedUsers;
 @end
 
-// Implementation //////////////////////////////////////////////////////////////
 
 @implementation FindFriendsViewController
 
 @synthesize findSource = findSource_;
 @synthesize authentication = authentication_;
 @synthesize twitterClient = twitterClient_;
+@synthesize twitterFriends = twitterFriends_;
+@synthesize contactFriends = contactFriends_;
+@synthesize followedUsers = followedUsers_;
 
 @synthesize contactsButton = contactsButton_;
 @synthesize twitterButton = twitterButton_;
 @synthesize nipple = nipple_;
+@synthesize tableView = tableView_;
+
 
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
     self.findSource = source;
+    self.followedUsers = [NSMutableArray array];
   }
   return self;
 }
 
 - (void)dealloc {
+  self.followedUsers = nil;
   self.authentication = nil;
   [super dealloc];
 }
@@ -68,23 +86,23 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
-}
-
-- (void)viewDidUnload {
-  self.twitterClient = nil;
-
-  [super viewDidUnload];
-}
-
-- (void)viewWillAppear:(BOOL)animated {
   if (self.findSource == FindFriendsFromContacts)
     [self findFromContacts:self];
   else if (self.findSource == FindFriendsFromTwitter)
     [self findFromTwitter:self];
-  //else
-  //  NSAssert(NO, @"Find source %d invalid", self.findSource);  // Causing an error on archive build!?
+}
+
+- (void)viewDidUnload {
+  self.twitterClient = nil;
+  self.twitterFriends = nil;
+  self.contactFriends = nil;
+  self.contactsButton = nil;
+  self.twitterButton = nil;
+  self.nipple = nil;
+  self.tableView = nil;
+
+  [super viewDidUnload];
 }
 
 #pragma mark - Actions
@@ -99,6 +117,44 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   [self.twitterButton setImage:[UIImage imageNamed:@"twitter_icon_disabled"]
                       forState:UIControlStateNormal];
   [self adjustNippleToView:self.contactsButton];
+  self.findSource = FindFriendsFromContacts;
+  if (contactFriends_) {
+    [self.tableView reloadData];
+    return;
+  }
+  // Fetch the address book 
+  ABAddressBookRef addressBook = ABAddressBookCreate();
+  CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
+  CFIndex numPeople = ABAddressBookGetPersonCount(addressBook);
+  NSMutableArray* allNumbers = [NSMutableArray array];
+  NSMutableArray* allEmails = [NSMutableArray array];
+  for (NSUInteger i = 0; i < numPeople; ++i) {
+    ABRecordRef person = CFArrayGetValueAtIndex(people, i);
+    ABMultiValueRef phoneNumberProperty = ABRecordCopyValue(person, kABPersonPhoneProperty);
+    NSArray* phoneNumbers = (NSArray*)ABMultiValueCopyArrayOfAllValues(phoneNumberProperty);
+    CFRelease(phoneNumberProperty);
+    [allNumbers addObjectsFromArray:phoneNumbers];
+    [phoneNumbers release];
+    
+    ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
+    NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
+    CFRelease(emailProperty);
+    [allEmails addObjectsFromArray:emails];
+    [emails release];
+  }
+  CFRelease(addressBook);
+  CFRelease(people);
+  NSMutableArray* sanitizedNumbers = [NSMutableArray array];
+  for (NSString* num in allNumbers) {
+    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]] componentsJoinedByString: @""];
+    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet symbolCharacterSet]] componentsJoinedByString: @""];
+    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsJoinedByString: @""];
+    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
+    [sanitizedNumbers addObject:num];
+  }
+  NSLog(@"Phone numbers = %@", sanitizedNumbers);
+  NSLog(@"Emails = %@", allEmails);
+  [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
 }
 
 - (IBAction)findFromTwitter:(id)sender {
@@ -107,6 +163,12 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   [self.twitterButton setImage:[UIImage imageNamed:@"twitter_logo"]
                       forState:UIControlStateNormal];
   [self adjustNippleToView:self.twitterButton];
+  self.findSource = FindFriendsFromTwitter;
+
+  if (twitterFriends_) {
+    [self.tableView reloadData];
+    return;
+  }
 
   GTMOAuthAuthentication* auth = [self createAuthentication];
   if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
@@ -119,6 +181,87 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   }
 }
 
+- (FriendshipTableViewCell*)friendshipCellFromSubview:(UIView*)view {
+  UIView* superview = view.superview;
+  while (superview && ![superview isMemberOfClass:[FriendshipTableViewCell class]]) {
+    superview = superview.superview;
+  }
+  FriendshipTableViewCell* cell = (FriendshipTableViewCell*)superview;
+  return cell;
+}
+
+- (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user {
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path 
+                                                                    delegate:self];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = userMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user.userID, @"user_id", nil];
+  [objectLoader send];
+}
+
+- (void)followButtonPressed:(id)sender {
+  FriendshipTableViewCell* cell = [self friendshipCellFromSubview:sender];
+  [followedUsers_ addObject:cell.user];
+  cell.indicator.center = cell.followButton.center;
+  cell.followButton.hidden = YES;
+  [cell.indicator startAnimating];
+  [self sendRelationshipChangeRequestWithPath:kFriendshipCreatePath forUser:cell.user];
+}
+
+- (void)unfollowButtonPressed:(id)sender {
+  FriendshipTableViewCell* cell = [self friendshipCellFromSubview:sender];
+  [followedUsers_ removeObject:cell.user];
+  cell.indicator.center = cell.unfollowButton.center;
+  cell.unfollowButton.hidden = YES;
+  [cell.indicator startAnimating];
+  [self sendRelationshipChangeRequestWithPath:kFriendshipRemovePath forUser:cell.user];
+}
+
+#pragma mark - Table view data source.
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
+  return 1;
+}
+
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  if (self.findSource == FindFriendsFromContacts)
+    return self.contactFriends.count;
+  else if (self.findSource == FindFriendsFromTwitter)
+    return self.twitterFriends.count;
+
+  return 0;
+}
+
+- (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  static NSString* CellIdentifier = @"Cell";
+  FriendshipTableViewCell* cell =
+      (FriendshipTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  if (cell == nil) {
+    cell = [[[FriendshipTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+    [cell.followButton addTarget:self
+                          action:@selector(followButtonPressed:)
+                forControlEvents:UIControlEventTouchUpInside];
+    [cell.unfollowButton addTarget:self
+                           action:@selector(unfollowButtonPressed:)
+                 forControlEvents:UIControlEventTouchUpInside];
+  }
+
+  NSArray* friends = nil;
+  if (self.findSource == FindFriendsFromTwitter)
+    friends = self.twitterFriends;
+  else if (self.findSource == FindFriendsFromContacts)
+    friends = self.contactFriends;
+
+  User* user = [friends objectAtIndex:indexPath.row];
+  cell.followButton.hidden = [followedUsers_ containsObject:user];
+  cell.unfollowButton.hidden = !cell.followButton.hidden;
+  cell.user = user;
+  
+  return cell;
+}
+
 #pragma mark - Table View Delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
@@ -127,8 +270,12 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
-  view.leftLabel.text = @"Contacts using Stamped";
-  view.rightLabel.text = @"42";
+  NSString* leftText = @"Finding friends who use Stamped...";
+  if (twitterFriends_ || contactFriends_)
+    leftText = @"Friends using Stamped";
+
+  view.leftLabel.text = leftText;
+  view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
   return view;
 }
 
@@ -145,9 +292,12 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 
   nippleFrame.origin.x = targetMidX - (nippleMidX - nippleMinX);
 
-  [UIView animateWithDuration:0.1 animations:^(void) {
-    self.nipple.frame = nippleFrame;
-  }];
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationCurveEaseOut
+                   animations:^{
+                     self.nipple.frame = nippleFrame;
+                   } completion:nil];
 }
 
 - (GTMOAuthAuthentication*)createAuthentication {
@@ -181,8 +331,8 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
     NSLog(@"GTMOAuth error = %@", error);
     return;
   }
-  //NSAssert(!error, @"GTMOAuth error = %@", error);  // TODO: probably do something less bad.
   self.authentication = auth;
+  [self fetchCurrentUser];
 }
 
 #pragma mark - Twitter
@@ -194,7 +344,8 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 }
 
 - (void)fetchFriendIDs:(NSString*)userIDString {
-  NSString* path = [NSString stringWithFormat:@"%@?cursor=-1&user_id=%@", kTwitterFriendsURI, userIDString];
+  NSString* path =
+      [kTwitterFriendsURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
   RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
   [self.authentication authorizeRequest:request.URLRequest];
   [request send];
@@ -205,21 +356,57 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
 
-  NSString* path = [NSString stringWithFormat:@"%@?q=%@",
-      kStampedTwitterFriendsURI, [twitterIDs componentsJoinedByString:@","]];
-  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:path
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedTwitterFriendsURI
                                                         delegate:self];
+  loader.method = RKRequestMethodPOST;
+  loader.params = [NSDictionary dictionaryWithObject:[twitterIDs componentsJoinedByString:@","] forKey:@"q"];
   loader.objectMapping = mapping;
   [loader send];
 }
 
-#pragma mark - RestKit Delegate
+- (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI
+                                                               delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
+                                                              username, @"twitter_screen_name", nil];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}
 
-// Requests ////////////////////////////////////////////////////////////////////
+#pragma mark - Contacts.
+
+- (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers {
+  RKObjectManager* manager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedEmailFriendsURI
+                                                        delegate:self];
+  loader.method = RKRequestMethodPOST;
+  loader.params = [NSDictionary dictionaryWithObject:[emails componentsJoinedByString:@","] forKey:@"q"];
+  loader.objectMapping = mapping;
+  [loader send];
+  
+  loader = [manager objectLoaderWithResourcePath:kStampedPhoneFriendsURI delegate:self];
+  loader.method = RKRequestMethodPOST;
+  loader.params = [NSDictionary dictionaryWithObject:[numbers componentsJoinedByString:@","] forKey:@"q"];
+  loader.objectMapping = mapping;
+  [loader send];
+}
+
+#pragma mark - RKRequestDelegate Methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
     NSLog(@"HTTP error for request: %@, response: %@", request, response);
+    return;
+  }
+
+  if ([request.resourcePath isEqualToString:kStampedLinkedAccountsURI]) {
+    NSLog(@"Linked account successfully.");
+    return;
+  }
+  
+  if ([request.resourcePath isEqualToString:kFriendshipCreatePath] ||
+      [request.resourcePath isEqualToString:kFriendshipRemovePath]) {
     return;
   }
 
@@ -232,7 +419,7 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 
   // Response for getting the current user information.
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound) {
-    // TODO: send to Stamped server the username.
+    [self connectTwitterUserName:[body objectForKey:@"screen_name"] userID:[body objectForKey:@"id_str"]];
     // Fetch the list of all the users this user is following.
     [self fetchFriendIDs:[body objectForKey:@"id_str"]];
   }
@@ -242,25 +429,73 @@ NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
   else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
     [self findStampedFriendsFromTwitter:[body objectForKey:@"ids"]];
   }
-
-  // Catch-all.
-  else {
-    NSLog(@"Received respose %@ for unknown request %@", response, request);
-  }
 }
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
-  NSLog(@"Twitter error %@ for request %@", error, request);
+  NSLog(@"Error %@ for request %@", error, request.resourcePath);
 }
 
-// Object Loader ///////////////////////////////////////////////////////////////
+#pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  NSLog(@"got users: %@", objects);
+  if ([objectLoader.resourcePath isEqualToString:kStampedTwitterFriendsURI]) {
+    self.twitterFriends =
+        [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
+            [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    [self.tableView reloadData];
+  } else if ([objectLoader.resourcePath isEqualToString:kStampedPhoneFriendsURI] ||
+             [objectLoader.resourcePath isEqualToString:kStampedEmailFriendsURI]) {
+    if (objects.count == 0) {
+      if (!self.contactFriends)
+        self.contactFriends = objects;
+      return;
+    }
+
+    if (!self.contactFriends) {
+      self.contactFriends = objects;
+    } else {
+      self.contactFriends = [self.contactFriends arrayByAddingObjectsFromArray:objects];
+      self.contactFriends = [self.contactFriends valueForKeyPath:@"@distinctUnionOfObjects.userID"];
+    }
+    self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:
+        [NSSortDescriptor sortDescriptorWithKey:@"name"
+                                      ascending:YES 
+                                       selector:@selector(caseInsensitiveCompare:)]]];
+    [self.tableView reloadData];
+  } else if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath] ||
+             [objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
+    User* user = [objects objectAtIndex:0];
+    for (UITableViewCell* cell in tableView_.visibleCells) {
+      FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
+      if (friendCell.user == user) {
+        [friendCell.indicator stopAnimating];
+        if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
+          friendCell.unfollowButton.hidden = NO;
+        } else {
+          friendCell.followButton.hidden = NO;
+        }
+      }
+    }
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   NSLog(@"Object loader %@ did fail with error %@", objectLoader, error);
+  if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath] ||
+      [objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
+    for (UITableViewCell* cell in tableView_.visibleCells) {
+      FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
+      if (friendCell.indicator.isAnimating)
+        [friendCell.indicator stopAnimating];
+      if ([followedUsers_ containsObject:friendCell.user]) {
+        [followedUsers_ removeObject:friendCell.user];
+        friendCell.followButton.hidden = NO;
+      } else {
+        [followedUsers_ addObject:friendCell.user];
+        friendCell.unfollowButton.hidden = NO;
+      }
+    }
+  }
 }
 
 @end

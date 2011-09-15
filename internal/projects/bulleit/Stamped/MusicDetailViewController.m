@@ -40,14 +40,15 @@
   }
   
   NSLog(@"%@", entityObject_);
+
+  if (entityObject_.image) {
+    self.imageView.hidden = NO;
+    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
+                                                   [NSURL URLWithString:entityObject_.image]]];
   
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-  if (entityObject_.image) {
-    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:entityObject_.image]]];
-    self.imageView.hidden = NO;
   }
   
 }
@@ -113,8 +114,7 @@
   // Tracks
   if (entityObject_.songs) {
 
-    // *** HARDCODED ***
-//    NSString* tracks = [NSString stringWithFormat:(@"Dream Shake\nSup Outside\nIce Cream\nGaydream Nation\nKeyisha\nHeavy Pets\nJewel On It\nAll Day\nCabana Boys\nSun Roof Top")];
+
     NSArray* tracksArray = entityObject_.songs;
     
     [self addSectionWithName:@"Tracks" previewHeight:136.f];
