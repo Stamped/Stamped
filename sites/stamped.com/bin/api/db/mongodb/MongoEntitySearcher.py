@@ -288,6 +288,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         pool.spawn(_find_entity, wrapper)
         
+        # handle location-based search
         if coords is not None:
             earthRadius = 3959.0 # miles
             q_params = [('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)]
@@ -402,7 +403,7 @@ class MongoEntitySearcher(EntitySearcher):
             return results
         
         # sort the results based on a custom ranking function
-        results = sorted(results, key=self._get_entity_weight_func(input_query), reverse=True)
+        results = sorted(results, key=self._get_entity_weight_func(input_query, prefix), reverse=True)
         
         # optionally limit the number of results shown
         if limit is not None and limit >= 0:
@@ -414,12 +415,12 @@ class MongoEntitySearcher(EntitySearcher):
         
         return results
     
-    def _get_entity_weight_func(self, input_query):
+    def _get_entity_weight_func(self, input_query, prefix):
         def _get_entity_weight(result):
             entity   = result[0]
             distance = result[1]
             
-            title_value         = self._get_title_value(input_query, entity)
+            title_value         = self._get_title_value(input_query, entity, prefix)
             subcategory_value   = self._get_subcategory_value(entity)
             source_value        = self._get_source_value(entity)
             quality_value       = self._get_quality_value(entity)
@@ -455,10 +456,11 @@ class MongoEntitySearcher(EntitySearcher):
         
         return _get_entity_weight
     
-    def _get_title_value(self, input_query, entity):
+    def _get_title_value(self, input_query, entity, prefix):
         title  = entity.title.lower()
         weight = 1.0
         
+        if prefix:
         if input_query == title:
             # if the title is an 'exact' query match (case-insensitive), weight it heavily
             return 500
