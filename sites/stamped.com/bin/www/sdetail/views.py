@@ -30,8 +30,14 @@ def show(request, **kwargs):
         raise Http404
     #     return HttpResponse("Whoa that's messed up")
 
-    """
-    URL Regex:
-    name = name.lower().replace(' ', '_').encode('ascii', 'ignore')
-    name = re.sub('([^a-zA-Z0-9._-])', '', name)
-    """
+def mobile(request, **kwargs):
+
+    screenName = kwargs.pop('screen_name', None)
+    stampNum = kwargs.pop('stamp_num', None)
+    try:
+        stamp = stampedAPI.getStampFromUser(screenName, stampNum)
+        # stamp['credit'] = stamp['credit'][:1]
+        return render_to_response('sdetail-mobile.html', stamp)
+    except:
+        raise Http404
+    #     return HttpResponse("Whoa that's messed up")

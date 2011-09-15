@@ -658,7 +658,7 @@ class HTTPStamp(Schema):
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
 
-            stamp_title = schema.entity.title.replace(' ', '_').encode('ascii', 'ignore')
+            stamp_title = schema.entity.title.replace(' ', '-').encode('ascii', 'ignore')
             stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
             self.url = 'http://dev.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.user_id, schema.stamp_num, stamp_title)
