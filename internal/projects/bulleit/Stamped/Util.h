@@ -28,5 +28,12 @@ extern NSString* const kKeychainTwitterToken;
 @interface Util : NSObject
 + (void)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
 + (UIImage*)whiteMaskedImageUsingImage:(UIImage*)img;
++ (UIImage*)gradientImage:(UIImage*)img
+           withPrimaryRed:(CGFloat)pRed
+             primaryGreen:(CGFloat)pGreen
+              primaryBlue:(CGFloat)pBlue
+             secondaryRed:(CGFloat)sRed
+           secondaryGreen:(CGFloat)sGreen
+            secondaryBlue:(CGFloat)sBlue;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
 @end
