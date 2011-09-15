@@ -174,6 +174,11 @@ class MongoEntitySearcher(EntitySearcher):
                          subcategory_filter=None, 
                          full=False, 
                          prefix=False):
+        
+        # -------------------------------- #
+        # transform input query and coords #
+        # -------------------------------- #
+        
         input_query = query.strip().lower()
         original_coords = True
         
@@ -256,6 +261,10 @@ class MongoEntitySearcher(EntitySearcher):
         wrapper = {}
         pool = Pool(8)
         
+        # -------------------------------- #
+        # initiate external search queries #
+        # -------------------------------- #
+        
         def _find_entity(ret):
             # only select certain fields to return to reduce data transfer
             fields = {
@@ -288,7 +297,10 @@ class MongoEntitySearcher(EntitySearcher):
         
         pool.spawn(_find_entity, wrapper)
         
-        # handle location-based search
+        # ------------------------------ #
+        # handle location-based searches #
+        # ------------------------------ #
+        
         if coords is not None:
             earthRadius = 3959.0 # miles
             q_params = [('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)]
@@ -352,6 +364,10 @@ class MongoEntitySearcher(EntitySearcher):
         pool.join()
         #timeout=10)
         
+        # ----------------- #
+        # parse all results #
+        # ----------------- #
+        
         if 'db_results' in wrapper:
             #logs.debug('db_results: %d' % len(wrapper['db_results']))
             for doc in wrapper['db_results']:
@@ -386,6 +402,10 @@ class MongoEntitySearcher(EntitySearcher):
             #logs.debug('amazon_results: %d' % len(wrapper['amazon_results']))
             for result in wrapper['amazon_results']:
                 results[result[0].entity_id] = result
+        
+        # ----------------------- #
+        # filter and rank results #
+        # ----------------------- #
         
         results = results.values()
         #utils.log("num_results: %d" % len(results))
@@ -460,8 +480,11 @@ class MongoEntitySearcher(EntitySearcher):
         title  = entity.title.lower()
         weight = 1.0
         
-        # if prefix:
-        if input_query == title:
+        if prefix:
+            if len(title) > len(input_query):
+                title = title[:len(input_query)]
+        
+        if not prefix and input_query == title:
             # if the title is an 'exact' query match (case-insensitive), weight it heavily
             return 500
         elif input_query in title:

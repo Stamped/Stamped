@@ -74,6 +74,7 @@ def main():
             try:
                 raw_result = utils.getFile('http://static.stamped.com/search/%s.json.gz' % encode_s3_name(query))
             except urllib2.HTTPError:
+                # ignore errors in the (likely) event of a non-existent autocomplete file
                 continue
             
             if raw_result:

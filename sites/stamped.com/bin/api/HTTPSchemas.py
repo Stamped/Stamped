@@ -575,10 +575,8 @@ class HTTPEntityAutosuggest(Schema):
             setSubtitle(schema)
             self.importData(schema.value, overflow=True)
             
-            if schema.address is not None:
-                self.subtitle = schema.address
             if self.subtitle is None:
-                self.subtitle = schema.subcategory
+                entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
         else:
             raise NotImplementedError
         return self

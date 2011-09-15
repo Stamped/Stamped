@@ -5,6 +5,8 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import re
+
 categories = set([
     'food', 
     'music', 
@@ -83,7 +85,11 @@ subcategories = {
     'video_game'        : 'other', 
 }
 
+city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
+
 def setSubtitle(entity):
+    global city_state_re
+    
     if entity.category == 'food':
 
         address = {}
@@ -96,7 +102,20 @@ def setSubtitle(entity):
             entity.subtitle = '%s, %s' % (address['locality'], \
                                         address['administrative_area_level_1'])
         else:
-            entity.subtitle = str(entity.subcategory).title()
+            is_set = False
+            
+            if entity.address is not None:
+                # attempt to parse the city, state from the address
+                match = city_state_re.match(entity.address)
+                
+                if match is not None:
+                    # city, state
+                    entity.subtitle = "%s, %s" % match.groups()
+                    is_set = True
+            
+            if not is_set:
+                # else fall back to the generic subcategory
+                entity.subtitle = str(entity.subcategory).title()
 
     elif entity.category == 'book':
         if entity.author != None:
