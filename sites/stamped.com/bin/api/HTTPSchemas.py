@@ -661,7 +661,7 @@ class HTTPStamp(Schema):
             stamp_title = schema.entity.title.replace(' ', '-').encode('ascii', 'ignore')
             stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
             self.url = 'http://dev.stamped.com/%s/stamps/%s/%s' % \
-                (schema.user.user_id, schema.stamp_num, stamp_title)
+                (schema.user.screen_name, schema.stamp_num, stamp_title)
 
         else:
             raise NotImplementedError
