@@ -89,8 +89,8 @@ city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
 
 def setFields(entity):
     global city_state_re
-    logs.info(entity)
-    
+    logs.info('ENTITY: %s' % entity)
+
     try:
         entity.category = subcategories[entity.subcategory]
     except:
