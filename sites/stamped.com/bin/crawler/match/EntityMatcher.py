@@ -118,6 +118,7 @@ class EntityMatcher(AEntityMatcher):
             'factual'       : self._factual_matcher, 
         }
         
+        """
         if (not hasattr(self.options, 'merge')) or (not self.options.merge):
             if entity.category == 'food':
                 matchers.add(self._places_matcher)
@@ -127,6 +128,7 @@ class EntityMatcher(AEntityMatcher):
                 matchers.add(self._book_matcher)
             elif entity.category == 'music':
                 matchers.add(self._music_matcher)
+        """
         
         for k, v in matcher_map.iteritems():
             if k in entity:

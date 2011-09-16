@@ -20,4 +20,4 @@ class BookEntityMatcher(ATitleBasedEntityMatcher):
             "subcategory" : entity.subcategory, 
         })
         
-        return self._mongoToObj(results)
+        return self._convertFromMongo(results)
