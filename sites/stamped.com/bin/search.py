@@ -13,8 +13,6 @@ from optparse import OptionParser
 from pprint import pprint
 
 # TODO: AUTOSUGGEST
-    # only start searching after we have at least 3 characters
-    # \w{3,n}
     # after setting up CDN, going to have to run a cache-warming process
     # need a concrete benchmark to tune autosuggest against
     # possibly route geo-based searches to nearest edge location:
@@ -125,6 +123,9 @@ def parseCommandLine():
     parser.add_option("-f", "--full", default=False, action="store_true", 
         help="use full search")
     
+    parser.add_option("-p", "--prefix", default=False, action="store_true", 
+        help="use faster prefix-based search")
+    
     parser.add_option("-v", "--verbose", default=False, 
         action="store_true", 
         help="turn verbosity on")
@@ -164,7 +165,8 @@ def main():
                                          limit=options.limit, 
                                          category_filter=options.category, 
                                          subcategory_filter=options.subcategory, 
-                                         full=options.full)
+                                         full=options.full, 
+                                         prefix=options.prefix)
     
     # display all results
     for result in results:

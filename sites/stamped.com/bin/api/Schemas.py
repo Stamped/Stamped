@@ -653,27 +653,27 @@ class ChicagoMagSchema(Schema):
 class PhillyMagSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutChiSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutLASchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutLVSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutMIASchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutSFSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class SFGateSchema(Schema):
     def setSchema(self):
         pass
