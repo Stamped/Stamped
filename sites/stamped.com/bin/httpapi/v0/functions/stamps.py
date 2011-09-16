@@ -13,21 +13,21 @@ from httpapi.v0.helpers import *
 def create(request):
     authUserId  = checkOAuth(request)
     schema      = parseFileUpload(HTTPStampNew(), request, 'image')
-
+    
     if schema.search_id:
-        entityId = stampedAPI._convertSearchId(schema.search_id).entity_id
+        entityId = stampedAPI._convertSearchId(schema.search_id)
     elif schema.entity_id:
         entityId = schema.entity_id
     else:
         raise InputError
-
+    
     data        = schema.exportSparse()
     data.pop('entity_id', None)
     data.pop('search_id', None)
-
+    
     stamp       = stampedAPI.addStamp(authUserId, entityId, data)
     stamp       = HTTPStamp().importSchema(stamp)
-
+    
     return transformOutput(stamp.exportSparse())
 
 
