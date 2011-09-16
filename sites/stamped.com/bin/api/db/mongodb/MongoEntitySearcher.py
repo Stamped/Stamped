@@ -132,6 +132,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
+        self.tempDB._collection.ensure_index([("search_id", pymongo.ASCENDING)])
         
         self.pool = Pool(32)
         self._init_cities()
