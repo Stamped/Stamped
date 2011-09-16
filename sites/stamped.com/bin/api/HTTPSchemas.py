@@ -111,6 +111,7 @@ class HTTPAccountNew(Schema):
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.phone              = SchemaElement(int)
+        self.profile_image      = SchemaElement(basestring, normalize=False)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
