@@ -128,10 +128,12 @@ class MongoEntitySearcher(EntitySearcher):
         self.api = api
         self.entityDB = api._entityDB
         self.placesDB = api._placesEntityDB
+        self.tempDB   = api._tempEntityDB
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
         
+        self.pool = Pool(32)
         self._init_cities()
     
     def _init_cities(self):
@@ -302,14 +304,14 @@ class MongoEntitySearcher(EntitySearcher):
                     apple_results = self._appleAPI.search(country='us', 
                                                           term=input_query, 
                                                           media=media, 
-                                                          limit=10, 
+                                                          limit=5, 
                                                           transform=True)
                 else:
                     apple_results = self._appleAPI.search(country='us', 
                                                           term=input_query, 
                                                           media=media, 
                                                           entity=entity, 
-                                                          limit=10, 
+                                                          limit=5, 
                                                           transform=True)
                 
                 for result in apple_results:
@@ -355,10 +357,10 @@ class MongoEntitySearcher(EntitySearcher):
                 utils.printException()
 
         if full:
+            pool.spawn(_find_amazon, wrapper)
+            
             if category_filter is None or category_filter is 'music':
                 pool.spawn(_find_apple,  wrapper)
-            
-            pool.spawn(_find_amazon, wrapper)
         
         pool.spawn(_find_entity, wrapper)
         
@@ -522,7 +524,16 @@ class MongoEntitySearcher(EntitySearcher):
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
+        self.pool.spawn(self._add_temp, results)
         return results
+    
+    def _add_temp(self, results):
+        for result in results:
+            if result.entity_id.startswith('T_'):
+                try:
+                    self.tempDB.addEntity(result[0])
+                except:
+                    pass
     
     def _prune_results(self, results, limit):
         output = []
