@@ -19,7 +19,8 @@ def create(request):
         entityId = stampedAPI._convertSearchId(schema.search_id)
     elif schema.entity_id:
         entityId = schema.entity_id
-    else:
+    
+    if entityId == None:
         raise InputError
 
     logs.info('ENTITY ID: %s' % entityId)
