@@ -21,6 +21,8 @@ def create(request):
         entityId = schema.entity_id
     else:
         raise InputError
+
+    logs.info('ENTITY ID: %s' % entityId)
     
     data        = schema.exportSparse()
     data.pop('entity_id', None)
