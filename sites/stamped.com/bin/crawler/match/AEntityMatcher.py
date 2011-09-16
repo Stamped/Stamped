@@ -94,6 +94,8 @@ class AEntityMatcher(object):
             if 'entity_id' not in keep or keep.entity_id in self.dead_entities:
                 return None
             
+            assert keep.entity_id is not None
+            
             filter_func = (lambda e: e.entity_id != keep.entity_id and not e.entity_id in self.dead_entities)
             dupes1 = filter(filter_func, dupes1)
             
@@ -181,16 +183,22 @@ class AEntityMatcher(object):
     def getBestDuplicate(self, duplicates):
         # determine which one of the duplicates to keep
         must_keep = []
+        found_valid = False
         
         for i in xrange(len(duplicates)):
             entity = duplicates[i]
             
-            if 'entity_id' not in entity:
+            if 'entity_id' not in entity or entity.entity_id is None:
                 continue
             
-            has_stamp = self._stampDB._collection.find_one({ 'entity.entity_id' : entity.entity_id })
-            if has_stamp != None:
+            if i == len(duplicates) - 1 and not found_valid:
                 must_keep.append(i)
+            else:
+                found_valid = True
+                has_stamp = self._stampDB._collection.find_one({ 'entity.entity_id' : entity.entity_id })
+                
+                if has_stamp != None:
+                    must_keep.append(i)
         
         if 0 == len(must_keep):
             return self._getBestDuplicate(duplicates)
@@ -213,10 +221,11 @@ class AEntityMatcher(object):
             entity = duplicates[i]
             lmatch = len(entity.title)
             
-            if 'entity_id' not in entity:
+            if 'entity_id' not in entity or entity.entity_id is None:
                 continue
             
             if 'entity_id' not in shortest or \
+                shortest.entity_id is None or \
                 lmatch < lshortest or \
                 (lmatch == lshortest and 'openTable' in entity):
                 shortest  = entity

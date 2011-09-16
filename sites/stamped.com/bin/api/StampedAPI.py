@@ -1933,9 +1933,10 @@ class StampedAPI(AStampedAPI):
             del entity.search_id
             
             entity = self._entityMatcher.addOne(entity)
+            assert entity.entity_id is not None
             return entity.entity_id
         else:
-            # already an id
+            # already a valid entity id
             return search_id
     
     def _addEntity(self, entity):
