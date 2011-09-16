@@ -927,7 +927,7 @@ class StampedAPI(AStampedAPI):
 
         # Add user objects back into stamp
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
-            userIds=userIds, entityIds={entity.entity_id: entity})
+            userIds=userIds, entityIds={entity.entity_id: entity.exportSchema(EntityMini())})
 
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)

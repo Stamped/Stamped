@@ -7,6 +7,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from httpapi.v0.helpers import *
+import logs
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
@@ -26,6 +27,7 @@ def create(request):
     data.pop('search_id', None)
     
     stamp       = stampedAPI.addStamp(authUserId, entityId, data)
+    logs.info('STAMP: %s' % stamp)
     stamp       = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())

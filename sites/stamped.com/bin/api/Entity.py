@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import re
+import logs, re
 
 categories = set([
     'food', 
@@ -89,6 +89,7 @@ city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
 
 def setFields(entity):
     global city_state_re
+    logs.info('ENTITY: %s' % entity)
 
     try:
         entity.category = subcategories[entity.subcategory]
@@ -159,5 +160,12 @@ def setFields(entity):
     elif entity.category == 'other':
         entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
 
+    if entity.subtitle is None or len(entity.subtitle) == 0:
+        logs.warning('Invalid subtitle: %s' % entity)
+        entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+
+        if entity.subtitle is None or len(entity.subtitle) == 0:
+            entity.subtitle = "other"
+    
     return entity
 
