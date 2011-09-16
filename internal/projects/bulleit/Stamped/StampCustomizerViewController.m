@@ -23,6 +23,7 @@
 @synthesize stampImageView = stampImageView_;
 @synthesize primaryColorButton = primaryColorButton_;
 @synthesize secondaryColorButton = secondaryColorButton_;
+@synthesize delegate = delegate_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -208,7 +209,6 @@
 }
 
 - (IBAction)doneButtonPressed:(id)sender {
-  NSLog(@"Done...");
   NSInteger redIntValue = primaryRed_ * 255.99999f;
   NSInteger greenIntValue = primaryGreen_ * 255.99999f;
   NSInteger blueIntValue = primaryBlue_ * 255.99999f;
@@ -229,7 +229,8 @@
   
   NSString* secondaryColor = [NSString stringWithFormat:@"%@%@%@", redHexValue, greenHexValue, blueHexValue];
   
-  NSLog(@"Colors: %@, %@", primaryColor, secondaryColor);
+  [delegate_ stampCustomizer:self chosePrimaryColor:primaryColor secondaryColor:secondaryColor];
+  [self.parentViewController dismissModalViewControllerAnimated:YES];
 }
 
 @end

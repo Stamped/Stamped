@@ -152,8 +152,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
     [sanitizedNumbers addObject:num];
   }
-  NSLog(@"Phone numbers = %@", sanitizedNumbers);
-  NSLog(@"Emails = %@", allEmails);
   [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
 }
 

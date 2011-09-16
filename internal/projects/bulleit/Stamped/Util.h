@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class User;
+
 // Constants from Twitter's developer console.
 extern NSString* const kTwitterConsumerKey;
 extern NSString* const kTwitterConsumerSecret;
@@ -35,5 +37,7 @@ extern NSString* const kKeychainTwitterToken;
              secondaryRed:(CGFloat)sRed
            secondaryGreen:(CGFloat)sGreen
             secondaryBlue:(CGFloat)sBlue;
++ (UIImage*)stampImageForUser:(User*)user;
++ (UIImage*)stampImageWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
 @end
