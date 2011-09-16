@@ -579,7 +579,7 @@ class HTTPEntityAutosuggest(Schema):
                 self.search_id = schema.search_id
             else:
                 self.search_id = schema.entity_id
-            assert schema.search_id is not None
+            assert self.search_id is not None
 
             self.title = schema.title
             self.subtitle = schema.subtitle
