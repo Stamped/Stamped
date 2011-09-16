@@ -661,7 +661,7 @@ class StampedAPI(AStampedAPI):
                                                         limit=limit, 
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
-                                                        full=False, 
+                                                        full=True, 
                                                         prefix=prefix)
         output  = []
         
