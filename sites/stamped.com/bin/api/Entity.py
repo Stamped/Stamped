@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import re
+import logs, re
 
 categories = set([
     'food', 
@@ -89,7 +89,8 @@ city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
 
 def setFields(entity):
     global city_state_re
-
+    logs.info(entity)
+    
     try:
         entity.category = subcategories[entity.subcategory]
     except:
