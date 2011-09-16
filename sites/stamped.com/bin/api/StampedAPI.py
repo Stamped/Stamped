@@ -831,7 +831,7 @@ class StampedAPI(AStampedAPI):
     
     def addStamp(self, authUserId, entityId, data):
         user        = self._userDB.getUser(authUserId)
-        print 'ADD STAMP: %s | %s | %s' % (authUserId, entityId, data)
+        logs.info('ADD STAMP: %s | %s | %s' % (authUserId, entityId, data))
         entity      = self._entityDB.getEntity(entityId)
 
         blurbData   = data.pop('blurb', None)
