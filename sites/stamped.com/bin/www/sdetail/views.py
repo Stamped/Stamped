@@ -20,27 +20,19 @@ stampedAPI  = MongoStampedAPI()
 
 @detect_mobile
 def show(request, **kwargs):
-    screenName = kwargs.pop('screen_name', None)
-    stampNum = kwargs.pop('stamp_num', None)
+    screenName  = kwargs.pop('screen_name', None)
+    stampNum    = kwargs.pop('stamp_num', None)
+    mobile      = kwargs.pop('mobile', False)
     try:
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
         # stamp['credit'] = stamp['credit'][:1]
         template = 'sdetail.html'
-        if request.mobile:
+        if request.mobile or mobile:
             template = 'sdetail-mobile.html'
         return render_to_response(template, stamp)
     except:
         raise Http404
-    #     return HttpResponse("Whoa that's messed up")
 
 def mobile(request, **kwargs):
-
-    screenName = kwargs.pop('screen_name', None)
-    stampNum = kwargs.pop('stamp_num', None)
-    try:
-        stamp = stampedAPI.getStampFromUser(screenName, stampNum)
-        # stamp['credit'] = stamp['credit'][:1]
-        return render_to_response('sdetail-mobile.html', stamp)
-    except:
-        raise Http404
-    #     return HttpResponse("Whoa that's messed up")
+    kwargs['mobile'] = True
+    return show(request, **kwargs)
