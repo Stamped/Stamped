@@ -1923,11 +1923,16 @@ class StampedAPI(AStampedAPI):
     
     def _convertSearchId(self, search_id):
         if search_id.startswith('T_'):
-            entity = self._tempEntityDB.find({'search_id' : search_id})
+            doc = self._tempEntityDB._collection.find({'search_id' : search_id})
+            
+            if doc is None:
+                return None
+            
+            entity = self._tempEntityDB._convertFromMongo(doc)
             del entity.entity_id
             del entity.search_id
-            entity = self._entityMatcher.addOne(entity)
             
+            entity = self._entityMatcher.addOne(entity)
             return entity.entity_id
         else:
             # already an id
