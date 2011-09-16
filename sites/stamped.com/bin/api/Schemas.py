@@ -289,8 +289,8 @@ class Entity(Schema):
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
-            from Entity import setSubtitle
-            setSubtitle(self)
+            from Entity import setFields
+            setFields(self)
             schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError

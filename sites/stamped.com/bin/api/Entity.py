@@ -87,9 +87,15 @@ subcategories = {
 
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
 
-def setSubtitle(entity):
+def setFields(entity):
     global city_state_re
-    
+
+    try:
+        entity.category = subcategories[entity.subcategory]
+    except:
+        entity.category = 'other'
+
+    # Subtitle
     if entity.category == 'food':
 
         address = {}

@@ -330,8 +330,8 @@ class HTTPEntity(Schema):
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setSubtitle
-            setSubtitle(schema)
+            from Entity import setFields
+            setFields(schema)
             
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
@@ -572,14 +572,15 @@ class HTTPEntityAutosuggest(Schema):
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setSubtitle
-            setSubtitle(schema)
-            
+            from Entity import setFields
+            setFields(schema)
+
             if schema.search_id is not None:
                 self.search_id = schema.search_id
+
             else:
                 self.search_id = schema.entity_id
-            assert schema.search_id is not None
+            assert self.search_id is not None
 
             self.title = schema.title
             self.subtitle = schema.subtitle
