@@ -1259,7 +1259,6 @@ class StampedAPI(AStampedAPI):
         user = self._userDB.getUserByScreenName(screenName)
         stamp = self._stampDB.getStampFromUserStampNum(user.user_id, \
                                                         stampNumber)
-        print stamp
         stamp = self._enrichStampObjects(stamp)
 
         if stamp.user.privacy == True:
