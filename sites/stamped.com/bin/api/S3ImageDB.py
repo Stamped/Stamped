@@ -64,10 +64,10 @@ class S3ImageDB(AImageDB):
         
         return im
     
-    def addProfileImage(self, userId, image):
+    def addProfileImage(self, screenName, image):
         assert isinstance(image, Image.Image)
         
-        prefix = 'users/%s' % userId
+        prefix = 'users/%s' % screenName
         images = []
         
         width, height = image.size

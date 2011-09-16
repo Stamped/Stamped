@@ -111,6 +111,7 @@ class HTTPAccountNew(Schema):
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.phone              = SchemaElement(int)
+        self.profile_image      = SchemaElement(basestring, normalize=False)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
@@ -329,8 +330,8 @@ class HTTPEntity(Schema):
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setSubtitle
-            setSubtitle(schema)
+            from Entity import setFields
+            setFields(schema)
             
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
@@ -564,17 +565,27 @@ class HTTPEntityEdit(Schema):
 
 class HTTPEntityAutosuggest(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
+        self.search_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, required=True)
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setSubtitle
-            setSubtitle(schema)
-            self.importData(schema.value, overflow=True)
-            
+            from Entity import setFields
+            setFields(schema)
+
+            if schema.search_id is not None:
+                self.search_id = schema.search_id
+
+            else:
+                self.search_id = schema.entity_id
+            assert self.search_id is not None
+
+            self.title = schema.title
+            self.subtitle = schema.subtitle
+            self.category = schema.category
+
             if self.subtitle is None:
                 entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
         else:
@@ -669,7 +680,8 @@ class HTTPStamp(Schema):
 
 class HTTPStampNew(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
         self.image              = SchemaElement(basestring, normalize=False)

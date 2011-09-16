@@ -26,7 +26,7 @@ class ATitleSourceBasedEntityMatcher(ATitleBasedEntityMatcher):
     def getDuplicateCandidates(self, entity):
         results = self._entityDB._collection.find({ self.source : { "$exists" : True }})
         
-        return self._mongoToObj(results)
+        return self._convertFromMongo(results)
 
 class ZagatEntityMatcher(ATitleSourceBasedEntityMatcher):
     def __init__(self, stamped_api, options):

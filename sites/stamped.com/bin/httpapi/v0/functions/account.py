@@ -12,11 +12,14 @@ from httpapi.v0.helpers import *
 @require_http_methods(["POST"])
 def create(request):
     client_id   = checkClient(request)
-    schema      = parseRequest(HTTPAccountNew(), request)
+    schema      = parseFileUpload(HTTPAccountNew(), request, 'profile_image')
     account     = schema.exportSchema(Account())
 
     account     = stampedAPI.addAccount(account)
     user        = HTTPUser().importSchema(account)
+
+    if schema.profile_image:
+        stampedAPI.updateProfileImage(user.user_id, schema.profile_image)
 
     token       = stampedAuth.addRefreshToken(client_id, user.user_id)
 

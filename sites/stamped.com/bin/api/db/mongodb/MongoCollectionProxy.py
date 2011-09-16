@@ -23,13 +23,16 @@ class MongoCollectionProxy(object):
             logs.warning("Error: unable to set collection")
             raise
     
-    def find(self, spec=None, output=None, **kwargs):
+    def find(self, spec=None, output=None, limit=None, **kwargs):
         num_retries = 0
         max_retries = 5
         
         while True:
             try:
                 ret = self._collection.find(spec, **kwargs)
+                
+                if limit is not None:
+                    ret = ret.limit(limit)
                 
                 if output is not None:
                     if output == list:

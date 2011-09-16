@@ -7,20 +7,29 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 from httpapi.v0.helpers import *
+import logs
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def create(request):
     authUserId  = checkOAuth(request)
-
     schema      = parseFileUpload(HTTPStampNew(), request, 'image')
-    entityId    = schema.entity_id
+    
+    if schema.search_id:
+        entityId = stampedAPI._convertSearchId(schema.search_id)
+    elif schema.entity_id:
+        entityId = schema.entity_id
+    
+    if entityId == None:
+        raise InputError
+    
     data        = schema.exportSparse()
-    del(data['entity_id'])
-
+    data.pop('entity_id', None)
+    data.pop('search_id', None)
+    
     stamp       = stampedAPI.addStamp(authUserId, entityId, data)
     stamp       = HTTPStamp().importSchema(stamp)
-
+    
     return transformOutput(stamp.exportSparse())
 
 

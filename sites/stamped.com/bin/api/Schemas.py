@@ -272,6 +272,7 @@ class ActivityLink(Schema):
 class Entity(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
         #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)
@@ -288,8 +289,8 @@ class Entity(Schema):
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
-            from Entity import setSubtitle
-            setSubtitle(self)
+            from Entity import setFields
+            setFields(self)
             schema.importData(self.value, overflow=True)
         else:
             raise NotImplementedError
@@ -653,27 +654,27 @@ class ChicagoMagSchema(Schema):
 class PhillyMagSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutChiSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutLASchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutLVSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutMIASchema(Schema):
     def setSchema(self):
         pass
-        
+
 class TimeOutSFSchema(Schema):
     def setSchema(self):
         pass
-        
+
 class SFGateSchema(Schema):
     def setSchema(self):
         pass

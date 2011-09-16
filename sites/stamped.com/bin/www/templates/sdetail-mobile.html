@@ -10,7 +10,7 @@
         <meta name="author" content="Stamped, Inc."> 
         <meta name="copyright" content="Stamped, Inc."> 
         <meta name="robots" content="index,follow"> 
-        <meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5"> 
+        <meta name="viewport" content="width=620"> 
         
         <!-- Style --> 
         <link href="http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css" rel="stylesheet" type="text/css" /> 
@@ -28,137 +28,6 @@
             background:-o-gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
             background:gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
         }
-        /*@media screen and (max-device-width: 480px){
-
-            img{
-              max-width:100%;
-              height:auto;
-            }
-            body {
-                font-size: 8px;
-            }
-
-            #mobile-entity .wrap {
-                width: 100%;
-            }
-            #mobile-entity .card {
-                width: 98%;
-                margin: 25px auto 0;
-                border-top: 1px solid white;
-                border-bottom: 1px solid white;
-            }
-            #mobile-entity .card .top-wave {
-                -webkit-background-size: 330px 3px;
-                height: 1px;
-                margin-top: 2.5px;
-            }
-            #mobile-entity .card .bottom-wave {
-                -webkit-background-size: 330px 3px;
-                height: 1px;
-                margin-bottom: 2.5px;
-            }
-            #mobile-entity .brand {
-                width: 100px;
-                height: 100px;
-                -webkit-background-size: 100px 100px;
-                margin: -15px 10px 10px;
-            }
-            #mobile-entity .message {
-                margin-top: 15px;
-                margin-right: 5px;
-                line-height: 15px;
-                font-size: 11px;
-                width: 98%;
-            }
-            #mobile-entity .card .inner {
-                padding: 10px 10px 15px;
-            }
-            #mobile-entity .card .meta .thumb {
-                position: absolute;
-                -webkit-background-size: 53px 53px;
-                width: 53px;
-                height: 53px;
-            }
-            #mobile-entity .card .meta .thumb img {
-                margin: 3px 3.5px;
-                width: 46px;
-                height: 46px;
-                float: left;
-            }
-            #mobile-entity .card .meta h1 {
-                font-size: 36px;
-                line-height: 35px;
-                float: none;
-                margin-bottom: 5px;
-            }
-            #mobile-entity .card .meta .type {
-                margin-top: 5px;
-                padding-top: 1px;
-                width: auto;
-                float: none;
-            }
-            #mobile-entity .card .meta .food {
-                -webkit-background-size: 11px 9px;
-                width: 11px;
-                height: 9px;
-                padding-left: 14px;
-            }
-            #mobile-entity .card .copy {
-                width: auto;
-                margin-left: 60px;
-            }
-            #mobile-entity .card .type {
-                font-size: 11px;
-            }
-            #mobile-entity .card .main {
-                font-size: 14px;
-                margin-top: 15px;
-            }
-            #mobile-entity .card .main p {
-                line-height: 17px;
-            }
-            #mobile-entity .footer {
-                margin: 15px auto;
-            }
-            #mobile-entity .coming-soon {
-                margin: 0 auto 12.5px;
-                width: 80.5px;
-                height: 24.5px;
-                -webkit-background-size: 80.5px 24.5px;
-            }
-            #mobile-entity .signup p {
-                font-size: 12px;
-                margin-bottom: 2.5px;
-                margin-left: 4px;
-            }
-            #mobile-entity .signup form {
-                width: 225px;
-                height: 38.5px;
-                -webkit-background-size: 225px 77px;
-            }
-            #mobile-entity .signup input {
-                width: 220px;
-                height: 20px;
-                left: 15px;
-                top: 7.5px;
-            }
-            #mobile-entity .signup button {
-                width: 28.5px;
-                height: 22px;
-                -webkit-background-size: 28.5px 44px;
-                right: 7px;
-                top: 6px;
-            }
-            #mobile-entity .thanks {
-                width: 85px;
-                height: 14.5px;
-                -webkit-background-image: 85px 14.5px;
-            }
-            #mobile-entity .more {
-                font-size: 11px;
-                margin-top: 20px;
-            }
-        }*/
         </style>
  
         <!-- Magic --> 
@@ -191,7 +60,7 @@
                             {% if credit %}
                             <div class="credit">
                             <span class="stamp stamp-1 replaced">{{ credit.0.screen_name }}</span>
-                            <span class="stamp stamp-2 replaced">{{ user.scree_name }}</span>
+                            <span class="stamp stamp-2 replaced">{{ user.screen_name }}</span>
                             Credit to 
                             {% if credit|length >= 4 %}
                             <span class="user">{{ credit.0.screen_name }}</span>,
