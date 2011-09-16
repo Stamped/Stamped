@@ -574,13 +574,16 @@ class HTTPEntityAutosuggest(Schema):
         if schema.__class__.__name__ == 'Entity':
             from Entity import setSubtitle
             setSubtitle(schema)
-            self.importData(schema.value, overflow=True)
             
             if schema.search_id is not None:
                 self.search_id = schema.search_id
             else:
                 self.search_id = schema.entity_id
             assert schema.search_id is not None
+
+            self.title = schema.title
+            self.subtitle = schema.subtitle
+            self.category = schema.category
 
             if self.subtitle is None:
                 entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
