@@ -34,6 +34,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
     
     def getEntity(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
+        logs.info('DOCUMENT IT: %s' % documentId)
         document   = self._getMongoDocumentFromId(documentId)
         
         return self._convertFromMongo(document)
