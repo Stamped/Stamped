@@ -1923,7 +1923,7 @@ class StampedAPI(AStampedAPI):
     
     def _convertSearchId(self, search_id):
         if search_id.startswith('T_'):
-            doc = self._tempEntityDB._collection.find({'search_id' : search_id})
+            doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
             
             if doc is None:
                 return None
