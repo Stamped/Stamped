@@ -15,7 +15,7 @@ def create(request):
     schema      = parseFileUpload(HTTPStampNew(), request, 'image')
 
     if schema.search_id:
-        entityId = stampedAPI.convertSearchId(schema.search_id)
+        entityId = stampedAPI._convertSearchId(schema.search_id).entity_id
     elif schema.entity_id:
         entityId = schema.entity_id
     else:
