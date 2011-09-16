@@ -169,7 +169,7 @@
     <body>
         <div id="mobile-entity" class="flood">
             <div class="wrap">
-                <div class="brand replaced">Stamped</div>
+                <a href="/" class="brand replaced">Stamped</a>
                 <div class="message">
                     <p><span class="user">{{ user.screen_name }}</span> is using a private beta of Stamped, a new way to put your stamp of approval on the world.</p>
                 </div>
@@ -189,7 +189,10 @@
                             <span class="author"><span class="user">{{ user.screen_name }}</span> stamped</span>
                             <p>{{ blurb }}</p> 
                             {% if credit %}
-                            <div class="credit">Credit to 
+                            <div class="credit">
+                            <span class="stamp stamp-1 replaced">{{ credit.0.screen_name }}</span>
+                            <span class="stamp stamp-2 replaced">{{ user.scree_name }}</span>
+                            Credit to 
                             {% if credit|length >= 4 %}
                             <span class="user">{{ credit.0.screen_name }}</span>,
                             <span class="user">{{ credit.1.screen_name }}</span>
@@ -229,4 +232,5 @@
             stamped.init();
         </script>
     </body>
+    <script type="text/javascript">var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-24470954-1']);_gaq.push(['_trackPageview']);(function() {var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);})();</script>
 </html>
