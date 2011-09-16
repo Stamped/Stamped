@@ -159,5 +159,9 @@ def setFields(entity):
     elif entity.category == 'other':
         entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
 
+    if entity.subtitle is None or len(entity.subtitle) == 0:
+        logs.warning('Invalid subtitle: %s' % entity)
+        entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+    
     return entity
 
