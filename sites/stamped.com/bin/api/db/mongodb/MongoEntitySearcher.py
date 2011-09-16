@@ -518,21 +518,30 @@ class MongoEntitySearcher(EntitySearcher):
         results = sorted(results, key=self._get_entity_weight_func(input_query, prefix), reverse=True)
         
         # limit the number of results returned and remove obvious duplicates
-        self._prune_results(results, limit)
+        results = self._prune_results(results, limit)
         
         # strip out distance from results if not using original (user's) coordinates
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
-        self.pool.spawn(self._add_temp, results)
+        pool.spawn(self._add_temp, results)
+        pool.join(timeout=0.25)
+        
         return results
     
     def _add_temp(self, results):
         for result in results:
-            if result.entity_id.startswith('T_'):
+            entity = result[0]
+            
+            if entity.entity_id.startswith('T_'):
                 try:
-                    self.tempDB.addEntity(result[0])
+                    entity.search_id = entity.entity_id
+                    del entity.entity_id
+                    
+                    #utils.log("%s vs %s" % (entity.search_id, entity.entity_id))
+                    self.tempDB.addEntity(entity)
                 except:
+                    utils.printException()
                     pass
     
     def _prune_results(self, results, limit):
@@ -557,7 +566,7 @@ class MongoEntitySearcher(EntitySearcher):
                    entity1.title.lower() == entity2.title.lower():
                    prune.add(j)
             
-            output.append(entity1)
+            output.append(result1)
             if limit is not None and len(output) >= limit:
                 break
         

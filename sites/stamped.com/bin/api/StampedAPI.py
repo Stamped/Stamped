@@ -1921,6 +1921,13 @@ class StampedAPI(AStampedAPI):
     #       #    # #   ##   #    #   #   ###### 
     """
     
+    def _convertSearchId(self, search_id):
+        entity = self._tempEntityDB.find({'search_id' : search_id})
+        del entity.entity_id
+        entity = self._entityMatcher.addOne(entity)
+        
+        return entity
+    
     def _addEntity(self, entity):
         if entity is not None:
             utils.log("[%s] adding 1 entity" % (self, ))

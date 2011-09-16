@@ -272,6 +272,7 @@ class ActivityLink(Schema):
 class Entity(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
         #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)

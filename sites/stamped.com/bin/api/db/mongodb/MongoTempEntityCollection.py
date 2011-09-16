@@ -11,5 +11,5 @@ from MongoEntityCollection import MongoEntityCollection
 class MongoTempEntityCollection(MongoEntityCollection):
     
     def __init__(self):
-        MongoEntityCollection(collection='tempentities')
+        MongoEntityCollection.__init__(self, collection='tempentities')
 
