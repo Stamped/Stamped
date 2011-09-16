@@ -565,7 +565,7 @@ class HTTPEntityEdit(Schema):
 
 class HTTPEntityAutosuggest(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
+        self.search_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, required=True)
@@ -576,6 +576,12 @@ class HTTPEntityAutosuggest(Schema):
             setSubtitle(schema)
             self.importData(schema.value, overflow=True)
             
+            if schema.search_id is not None:
+                self.search_id = schema.search_id
+            else:
+                self.search_id = schema.entity_id
+            assert schema.search_id is not None
+
             if self.subtitle is None:
                 entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
         else:
