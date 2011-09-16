@@ -20,10 +20,8 @@ def create(request):
     elif schema.entity_id:
         entityId = schema.entity_id
     
-    # if entityId == None:
-    #     raise InputError
-
-    logs.info('ENTITY ID: %s' % entityId)
+    if entityId == None:
+        raise InputError
     
     data        = schema.exportSparse()
     data.pop('entity_id', None)
