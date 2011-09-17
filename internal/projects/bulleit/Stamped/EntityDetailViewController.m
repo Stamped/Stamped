@@ -38,7 +38,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize categoryImageView = categoryImageView_;
 @synthesize loadingView = loadingView_;
 @synthesize mainContentView = mainContentView_;
-@synthesize isWorthSeeing = isWorthSeeing_;
 
 
 - (id)initWithEntityObject:(Entity*)entity {
@@ -47,7 +46,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     entityObject_ = [entity retain];
     [self loadEntityDataFromServer];
     sectionsDict_ = [[NSMutableDictionary dictionary] retain];
-    isWorthSeeing_= NO;
   }
   return self;
 }
@@ -157,7 +155,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   dataLoaded_ = YES;
   [self showContents];
   [self.loadingView stopAnimating];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kEntityDetailDidFinishLoading object:self];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -174,8 +171,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 #pragma mark - Section / collapsible view management.
 
-- (void)addSectionWithName:(NSString*)name
-{
+- (void)addSectionWithName:(NSString*)name {
   CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
                                               initWithNibName:@"CollapsibleViewController" bundle:nil];
   

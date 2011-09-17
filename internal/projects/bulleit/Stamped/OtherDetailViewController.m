@@ -135,7 +135,7 @@
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
-- (void) setupMainActionsContainer {
+- (void)setupMainActionsContainer {
   
   callActionButton_.layer.masksToBounds = YES;
   callActionButton_.layer.cornerRadius = 2.0;
@@ -145,7 +145,6 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
-    self.isWorthSeeing = YES;
   }
   
   if (entityObject_.localizedPhoneNumber) {  
@@ -153,7 +152,6 @@
     callActionButton_.hidden    = NO;
     callActionLabel_.hidden     = NO;
     self.mainActionsView.hidden = NO;
-    self.isWorthSeeing = YES;
   }
   
   
@@ -165,8 +163,7 @@
 }
 
 
-- (void) setupMapView
-{
+- (void)setupMapView {
   if (!entityObject_.coordinates)
     return;
   
@@ -181,16 +178,13 @@
   
   if (viewIsVisible_ && !annotation_)
     [self addAnnotation];
-  
-  self.isWorthSeeing = YES;
 }
 
-- (void) setupSectionViews {
-  
+- (void)setupSectionViews {
   // Information
   // TODO: What if there's no information?
   
-  //Description
+  // Description
   
   CollapsibleViewController* section;
   
@@ -198,46 +192,46 @@
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
   
   
-  if (entityObject_.desc)
-  {
+  if (entityObject_.desc) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
     [section addText:entityObject_.desc forKey:@"desc"];
-    self.isWorthSeeing = YES;
   }
 
   
   [self addSectionWithName:@"Information"];
   section = [sectionsDict_ objectForKey:@"Information"];
   
-  if (entityObject_.subcategory)  [section addPairedLabelWithName:@"Category:"
-                                                            value:entityObject_.subcategory
-                                                           forKey:@"subcategory"];
-  
-  
-  if (entityObject_.address) {     [section addPairedLabelWithName:@"Address:"
-                                                            value:entityObject_.address
-                                                           forKey:@"address"];
-      self.isWorthSeeing = YES;
-  }
-    
-  if (entityObject_.neighborhood) [section addPairedLabelWithName:@"Neighborhood:"
-                                                            value:entityObject_.neighborhood
-                                                           forKey:@"neighborhood"];
-  
-  if (entityObject_.website) {     [section addPairedLabelWithName:@"Website:"
-                                                            value:entityObject_.website
-                                                           forKey:@"website"];
-      self.isWorthSeeing = YES;
+  if (entityObject_.subcategory) { 
+    [section addPairedLabelWithName:@"Category:"
+                              value:entityObject_.subcategory
+                             forKey:@"subcategory"];
   }
   
+  
+  if (entityObject_.address) {
+    [section addPairedLabelWithName:@"Address:"
+                              value:entityObject_.address
+                             forKey:@"address"];
+
+  }
     
+  if (entityObject_.neighborhood) {
+    [section addPairedLabelWithName:@"Neighborhood:"
+                              value:entityObject_.neighborhood
+                             forKey:@"neighborhood"];
+  }
+  
+  if (entityObject_.website) {
+    [section addPairedLabelWithName:@"Website:"
+                              value:entityObject_.website
+                             forKey:@"website"];
+  }
+
   NSSet* stamps = entityObject_.stamps;
   
   if (stamps && stamps.count > 0)
-  {
     [self addSectionStampedBy];
-  }
   
 }
 
