@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import datetime, logging, os, threading, hashlib, random, time
-import sys, traceback
+import sys, traceback, string
 import inspect, pprint
 
 # Log
