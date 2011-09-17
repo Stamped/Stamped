@@ -116,7 +116,7 @@
 						<string key="NSFrame">{{325, 0}, {310, 390}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="843209390"/>
+						<reference key="NSNextKeyView" ref="495996846"/>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -195,7 +195,7 @@
 						<string key="NSFrame">{{37, 62}, {248, 34}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="392099608"/>
+						<reference key="NSNextKeyView" ref="843209390"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<int key="IBUIContentMode">7</int>
@@ -293,7 +293,7 @@ A</string>
 						<string key="NSFrame">{{35, 194}, {251, 61}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="495996846"/>
+						<reference key="NSNextKeyView" ref="392099608"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUIContentMode">1</int>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -523,7 +523,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{720, 209}, {160, 58}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="892488891"/>
+						<reference key="NSNextKeyView" ref="378969406"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
@@ -728,6 +728,21 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<reference key="IBUIHighlightedImage" ref="886827276"/>
 						<reference key="IBUISelectedImage" ref="886827276"/>
 						<reference key="IBUINormalBackgroundImage" ref="367579248"/>
+					</object>
+					<object class="IBUIImageView" id="378969406">
+						<reference key="NSNextResponder" ref="676673607"/>
+						<int key="NSvFlags">292</int>
+						<string key="NSFrame">{{102, 353}, {117, 12}}</string>
+						<reference key="NSSuperview" ref="676673607"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="892488891"/>
+						<string key="NSReuseIdentifierKey">_NS:541</string>
+						<bool key="IBUIUserInteractionEnabled">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<object class="NSCustomResource" key="IBUIImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">temp_swipeContinue@2x.png</string>
+						</object>
 					</object>
 				</object>
 				<string key="NSFrameSize">{960, 390}</string>
@@ -1074,6 +1089,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<reference ref="495996846"/>
 							<reference ref="751015906"/>
 							<reference ref="923809995"/>
+							<reference ref="378969406"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Scroll View Contents</string>
@@ -1224,6 +1240,11 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<reference key="parent" ref="676673607"/>
 						<string key="objectName">Stamp 6</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">70</int>
+						<reference key="object" ref="378969406"/>
+						<reference key="parent" ref="676673607"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1274,6 +1295,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 					<string>53.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>6.IBPluginDependency</string>
 					<string>7.IBPluginDependency</string>
+					<string>70.IBPluginDependency</string>
 					<string>8.IBPluginDependency</string>
 					<string>8.IBUserGuides</string>
 					<string>9.IBPluginDependency</string>
@@ -1325,6 +1347,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="IBUserGuide">
@@ -1358,7 +1381,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">69</int>
+			<int key="maxID">70</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1585,6 +1608,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 				<string>stamp_46pt_texture.png</string>
 				<string>stamp_selection_check.png</string>
 				<string>temp_exampleUsersColors@2x.png</string>
+				<string>temp_swipeContinue@2x.png</string>
 				<string>twitter_logo.png</string>
 				<string>welcome_blank_stamp@2x.png</string>
 				<string>welcome_keyline@2x.png</string>
@@ -1601,6 +1625,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 				<string>{46, 46}</string>
 				<string>{16, 16}</string>
 				<string>{340, 182}</string>
+				<string>{234, 24}</string>
 				<string>{16, 16}</string>
 				<string>{56, 56}</string>
 				<string>{600, 8}</string>
