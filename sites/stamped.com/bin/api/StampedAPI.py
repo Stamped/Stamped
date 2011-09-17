@@ -212,8 +212,8 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
 
         # Import each item
-        account.color_primary   = data['color_primary']
-        account.color_secondary = data['color_secondary']
+        account.color_primary   = data['color_primary'].upper()
+        account.color_secondary = data['color_secondary'].upper()
 
         self._accountDB.updateAccount(account)
 
