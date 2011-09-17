@@ -99,7 +99,12 @@ def setFields(entity, detailed=False):
     if entity.category == 'food':
 
         if detailed:
-            entity.subtitle = entity.address
+            if entity.address is not None:
+                entity.subtitle = entity.address
+            elif entity.neighborhood is not None:
+                entity.subtitle = entity.neighborhood
+            else:
+                entity.subtitle = str(entity.subcategory).title()
         else:
             address = {}
             if len(entity.address_components) > 0:
@@ -167,7 +172,7 @@ def setFields(entity, detailed=False):
         entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
 
         if entity.subtitle is None or len(entity.subtitle) == 0:
-            entity.subtitle = "other"
+            entity.subtitle = "Other"
     
     return entity
 

@@ -165,7 +165,8 @@ class StampedAuth(AStampedAuth):
     def addAccessToken(self, clientId, authUserId, refreshToken):
         attempt = 1
         max_attempts = 5
-        expire = 3920
+        expire = 3920   # 1 hour
+        expire = 86720  # 24 hours
             
         while True:
             try:
