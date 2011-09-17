@@ -211,7 +211,7 @@ class StampedAPI(AStampedAPI):
 
         primary = data['color_primary'].upper()
         secondary = data['color_secondary'].upper()
-        
+
         # Validate inputs
         if not utils.validate_hex_color(primary) or \
             not utils.validate_hex_color(secondary):
@@ -803,10 +803,17 @@ class StampedAPI(AStampedAPI):
         stamps = []
         for stamp in stampData:
             # Add stamp user
+            ### TODO: Check that userIds != 1 (i.e. user still exists)?
             stamp.user = userIds[stamp.user_id]
             
             # Add entity
-            stamp.entity = entityIds[stamp.entity_id]
+            if entityIds[stamp.entity_id] == 1:
+                msg = 'Unable to match entity_id %s for stamp_id %s' % \
+                    (stamp.entity_id, stamp.stamp_id)
+                logs.warning(msg)
+                ### TODO: Raise?
+            else:
+                stamp.entity = entityIds[stamp.entity_id]
 
             # Add credited user(s)
             if stamp.credit != None:
