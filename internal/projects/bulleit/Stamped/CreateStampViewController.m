@@ -35,11 +35,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @implementation STCreditTextField
 
 - (CGRect)textRectForBounds:(CGRect)bounds {
-  return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
+  return CGRectOffset(CGRectInset(bounds, 40, 0), 40, 0);
 }
 
 - (CGRect)editingRectForBounds:(CGRect)bounds {    
-  return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
+  return CGRectOffset(CGRectInset(bounds, 40, 0), 40, 0);
 }
 
 @end
@@ -484,8 +484,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
   
-  self.creditLabel.text = @"Credit to";
-  
   self.firstResponder = creditTextField_;
   [UIView animateWithDuration:0.2 animations:^{
     self.scrollView.contentInset =
@@ -497,9 +495,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   if (textField != creditTextField_)
     return;
-
-  if ([textField.text isEqualToString:@""])
-    self.creditLabel.text = @"Who deserves credit?";
   
   self.firstResponder = nil;
   [UIView animateWithDuration:0.2 animations:^{
