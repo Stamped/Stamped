@@ -115,6 +115,9 @@ def setFields(entity, detailed=False):
             if 'locality' in address and 'administrative_area_level_1' in address:
                 entity.subtitle = '%s, %s' % (address['locality'], \
                                             address['administrative_area_level_1'])
+            elif 'sublocality' in address and 'administrative_area_level_1' in address:
+                entity.subtitle = '%s, %s' % (address['sublocality'], \
+                                            address['administrative_area_level_1'])
             else:
                 is_set = False
                 
