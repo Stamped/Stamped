@@ -6,10 +6,17 @@
 //  Copyright 2011 RISD. All rights reserved.
 //
 
+#import <QuartzCore/QuartzCore.h>
+
 #import "CollapsibleViewController.h"
 #import "PairedLabel.h"
 #import "WrappingTextView.h"
 #import "UIColor+Stamped.h"
+#import "Stamp.h"
+#import "User.h"
+#import "MediumUserImageButton.h"
+#import "StampDetailViewController.h"
+#import "StampedAppDelegate.h"
 
  
 @implementation CollapsibleViewController
@@ -29,6 +36,7 @@
 @synthesize collapsedFooterText = collapsedFooterText_;
 @synthesize expandedFooterText  = expandedFooterText_; 
 @synthesize imageView       = imageView_;
+@synthesize stamps          = stamps_;
 
 int const LABEL_HEIGHT          = 20;
 int const IMAGE_HEIGHT          = 40;
@@ -164,8 +172,7 @@ int const SPACE_HEIGHT          = 10;
 
 #pragma mark - Adding content
 
-- (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key
-{
+- (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key {
   PairedLabel* newLabel = [[PairedLabel alloc] initWithNibName:@"PairedLabel" bundle:nil];
 
   CGRect frame = newLabel.view.frame;
@@ -194,8 +201,7 @@ int const SPACE_HEIGHT          = 10;
   [self addContent:newLabel forKey:key];
 }
 
-- (void)addNumberedListWithValues:(NSArray*)values
-{
+- (void)addNumberedListWithValues:(NSArray*)values {
   NSUInteger itemNumber = 0;
   
   for (NSString* value in values) {
@@ -237,8 +243,7 @@ int const SPACE_HEIGHT          = 10;
   
 }
 
-- (void)addText:(NSString*)text forKey:(NSString*)key
-{
+- (void)addText:(NSString*)text forKey:(NSString*)key {
   UITextView* textView = [[UITextView alloc] initWithFrame:contentView_.frame];
   textView.font = [UIFont fontWithName:@"Helvetica" size:12.f];
   textView.textColor = [UIColor stampedGrayColor];
@@ -252,7 +257,6 @@ int const SPACE_HEIGHT          = 10;
   frame.size.height = textView.contentSize.height;
   textView.frame = frame;
 }
-
 
 - (void)addWrappingText:(NSString*)text forKey:(NSString*)key {
   
@@ -273,8 +277,62 @@ int const SPACE_HEIGHT          = 10;
   [self addContent:wrapText forKey:key];
 }
 
-- (void)addContent:(id)content forKey:(NSString*)key
+- (void)addImagesForStamps:(NSSet*)newStamps
 {
+  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+  NSArray* stampsArray = [newStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+  
+  stamps_ = stampsArray;
+  [stamps_ retain];
+  
+  UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:contentView_.frame];
+  scrollView.frame = CGRectMake(0.f, 0.f, contentView_.frame.size.width, 58.0);
+  scrollView.userInteractionEnabled = YES;
+  scrollView.bounces = YES;
+  scrollView.contentSize = CGSizeMake(scrollView.frame.size.width + 1.0, scrollView.frame.size.height);
+  scrollView.showsHorizontalScrollIndicator = NO;
+  scrollView.showsVerticalScrollIndicator = NO;
+  scrollView.pagingEnabled = YES;
+  
+  CGRect userImgFrame = CGRectMake(0.0, 0.0, 43.0, 43.0);
+  
+  Stamp* s = nil;
+  NSUInteger pageNum = 1;
+  for (NSUInteger i = 0; i < stamps_.count; ++i) {
+    s = [stamps_ objectAtIndex:i];
+    MediumUserImageButton* userImageButton = [[MediumUserImageButton alloc] initWithFrame:userImgFrame];
+    
+    if (i > 1  &&  i % 6 == 0) {
+      scrollView.contentSize = CGSizeMake(scrollView.contentSize.width + scrollView.frame.size.width, scrollView.contentSize.height);
+      pageNum++;
+    }
+    
+    CGFloat xOffset = i*(userImgFrame.size.width + 7.0) + 18.0 * (pageNum-1) + 14.0;
+    
+    userImageButton.frame = CGRectOffset(userImgFrame, xOffset, 0.0);
+    userImageButton.contentMode = UIViewContentModeCenter;
+    userImageButton.layer.shadowOffset = CGSizeMake(0.0, 1.0);
+    userImageButton.layer.shadowOpacity = 0.20;
+    userImageButton.layer.shadowRadius = 1.75;
+    userImageButton.imageURL = s.user.profileImageURL;
+    
+    [userImageButton addTarget:self
+                        action:@selector(userImageTapped:)
+              forControlEvents:UIControlEventTouchUpInside];
+    userImageButton.tag = i;
+    [scrollView addSubview:userImageButton];
+    [userImageButton release];
+    
+  }
+  
+  self.numLabel.text = [NSString stringWithFormat:@"(%d)", stamps_.count];
+  self.numLabel.hidden = NO;
+  
+  [self addContent:scrollView forKey:@"stamps"];
+}
+
+- (void)addContent:(id)content forKey:(NSString*)key {
   [self.contentDict setObject:content forKey:key];
   if ([content respondsToSelector:@selector(view)])
       [contentView_ addSubview:((CollapsibleViewController*)content).view];
@@ -285,10 +343,10 @@ int const SPACE_HEIGHT          = 10;
     self.arrowView.hidden = YES;
     self.collapsedHeight = self.headerView.frame.size.height + self.contentHeight;
 
-    CGRect footerFrame = self.footerView.frame;
+//    CGRect footerFrame = self.footerView.frame;
 //    footerFrame.size.height = 20;
 //    footerFrame.origin.y -= 20;
-    self.footerView.frame = footerFrame;
+//    self.footerView.frame = footerFrame;
     
     CGRect contentFrame = self.contentView.frame;
     contentFrame.size.height +=20;
@@ -298,8 +356,6 @@ int const SPACE_HEIGHT          = 10;
     viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) -20;
     self.view.frame = viewFrame;
     
-//    self.view.backgroundColor = [UIColor stampedLightGrayColor];
-//    self.footerView.backgroundColor = [UIColor stampedDarkGrayColor];
         
   }
   
@@ -308,20 +364,19 @@ int const SPACE_HEIGHT          = 10;
     self.footerLabel.hidden = NO;
     self.arrowView.hidden = NO;
     
-    CGRect footerFrame = self.footerView.frame;
-    footerFrame.size.height = 20;
-    self.footerView.frame = footerFrame;
-    
     CGRect contentFrame = self.contentView.frame;
     contentFrame.size.height -= 20;
     self.contentView.frame = contentFrame;
     
-    
+    CGRect viewFrame = self.view.frame;
+    viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) +20;
+    self.view.frame = viewFrame;
   }
+  
+  [content release];
 }
 
-- (float)contentHeight
-{
+- (float)contentHeight {
   float contentHeight = 0.f;
   
   if (!contentDict_) return 0.f;
@@ -339,10 +394,21 @@ int const SPACE_HEIGHT          = 10;
 
 #pragma mark - Touch events
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
-{
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
   if (self.arrowView.hidden == NO)
     self.isCollapsed = !isCollapsed_;
+}
+
+- (void)userImageTapped:(id)sender {
+  UIButton* button = sender;
+  Stamp* stamp = [stamps_ objectAtIndex:button.tag];
+  
+  StampDetailViewController* detailViewController =
+  [[StampDetailViewController alloc] initWithStamp:stamp];
+  
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
 }
 
 

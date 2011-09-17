@@ -54,6 +54,7 @@ typedef enum {
 @property (nonatomic, retain) NSMutableArray* entitiesArray;
 @property (nonatomic, retain) NSMutableArray* filteredEntitiesArray;
 @property (nonatomic, retain) UIButton* selectedFilterButton;
+
 @end
 
 @implementation InboxViewController
@@ -170,6 +171,7 @@ typedef enum {
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
+  
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -215,8 +217,8 @@ typedef enum {
   [objectLoader send];
 }
 
-- (void)stampWasCreated:(NSNotification*)notification {
-  [self loadStampsFromDataStore];
+- (void)stampWasCreated:(NSNotification*)notification {      
+    [self loadStampsFromDataStore];
 }
 
 #pragma mark - Filter stuff

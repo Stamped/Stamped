@@ -302,7 +302,7 @@
 									<object class="IBUILabel" id="249527600">
 										<reference key="NSNextResponder" ref="101741781"/>
 										<int key="NSvFlags">268</int>
-										<string key="NSFrame">{{34, 121}, {70, 17}}</string>
+										<string key="NSFrame">{{34, 121}, {119, 17}}</string>
 										<reference key="NSSuperview" ref="101741781"/>
 										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="464865782"/>
@@ -312,7 +312,7 @@
 										<int key="IBUIContentMode">7</int>
 										<bool key="IBUIUserInteractionEnabled">NO</bool>
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-										<string key="IBUIText">Credit to</string>
+										<string key="IBUIText">Who deserves credit?</string>
 										<reference key="IBUIFont" ref="461654039"/>
 										<object class="NSColor" key="IBUITextColor">
 											<int key="NSColorSpace">2</int>
@@ -325,7 +325,7 @@
 									<object class="IBUITextField" id="312603011">
 										<reference key="NSNextResponder" ref="101741781"/>
 										<int key="NSvFlags">268</int>
-										<string key="NSFrame">{{10, 114}, {300, 31}}</string>
+										<string key="NSFrame">{{10, 114}, {290, 31}}</string>
 										<reference key="NSSuperview" ref="101741781"/>
 										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="1027667012"/>
@@ -692,6 +692,14 @@
 					</object>
 					<int key="connectionID">109</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">creditLabel</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="249527600"/>
+					</object>
+					<int key="connectionID">110</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -983,7 +991,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">109</int>
+			<int key="maxID">110</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1037,6 +1045,7 @@
 							<string>backgroundImageView</string>
 							<string>bottomToolbar</string>
 							<string>categoryImageView</string>
+							<string>creditLabel</string>
 							<string>creditTextField</string>
 							<string>detailLabel</string>
 							<string>editButton</string>
@@ -1056,6 +1065,7 @@
 							<string>UIImageView</string>
 							<string>UIView</string>
 							<string>UIImageView</string>
+							<string>UILabel</string>
 							<string>STCreditTextField</string>
 							<string>UILabel</string>
 							<string>UIButton</string>
@@ -1078,6 +1088,7 @@
 							<string>backgroundImageView</string>
 							<string>bottomToolbar</string>
 							<string>categoryImageView</string>
+							<string>creditLabel</string>
 							<string>creditTextField</string>
 							<string>detailLabel</string>
 							<string>editButton</string>
@@ -1105,6 +1116,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">categoryImageView</string>
 								<string key="candidateClassName">UIImageView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">creditLabel</string>
+								<string key="candidateClassName">UILabel</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">creditTextField</string>
