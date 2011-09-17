@@ -15,6 +15,7 @@ def create(request):
     authUserId  = checkOAuth(request)
     schema      = parseFileUpload(HTTPStampNew(), request, 'image')
     
+    ### TODO: Deprecate entity_id
     if schema.search_id:
         entityId = stampedAPI._convertSearchId(schema.search_id)
     elif schema.entity_id:
