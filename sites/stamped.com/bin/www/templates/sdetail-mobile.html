@@ -28,6 +28,27 @@
             background:-o-gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
             background:gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
         }
+        #mobile-entity .brand {
+            background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-175x176.png') left top no-repeat;
+        }
+        {% if credit %}
+        .card .credit {
+            padding-left: 32px;
+        }
+        .credit .stamp {
+            position: absolute;
+            float: none;
+        }
+        .stamp-1 {
+            background:url('http://static.stamped.com/logos/{{ credit.0.color_primary }}-{{ credit.0.color_secondary }}-credit-18x18.png') left top no-repeat;
+            margin-left: -32px;
+        }
+        .stamp-2 {
+            background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png') left top no-repeat;
+            margin-left: -22px;
+            left: auto;
+        }
+        {% endif %}
         </style>
  
         <!-- Magic --> 
