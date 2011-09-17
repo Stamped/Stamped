@@ -26,6 +26,8 @@
   CGFloat collapsedHeight;
   NSString* collapsedFooterText;
   NSString* expandedFooterText;
+  
+  NSMutableArray* stamps;
 }
 
 - (void)setIsCollapsed:(BOOL)collapsed;
@@ -38,6 +40,7 @@
 - (void)addText:(NSString*)text forKey:(NSString*)key;
 - (void)addWrappingText:(NSString*)text forKey:(NSString*)key;
 - (void)addNumberedListWithValues:(NSArray*)values;
+- (void)addImagesForStamps:(NSSet*)stamps;
 - (void)addContent:(id)content forKey:(NSString*)key;
 - (float)contentHeight;
 
@@ -56,8 +59,9 @@
 @property (nonatomic, retain) NSString*             expandedFooterText;
 
 @property (nonatomic, retain) NSMutableDictionary*  contentDict;
-@property (nonatomic) BOOL isCollapsed;
-@property (nonatomic, assign) CGFloat collapsedHeight;
+@property (nonatomic) BOOL                          isCollapsed;
+@property (nonatomic, assign) CGFloat               collapsedHeight;
+@property (nonatomic, retain) NSArray*              stamps;
 
 @property (nonatomic, assign) id<CollapsibleViewControllerDelegate> delegate;
 

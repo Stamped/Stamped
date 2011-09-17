@@ -36,7 +36,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
 }
 
-- (CGRect)editingRectForBounds:(CGRect)bounds {
+- (CGRect)editingRectForBounds:(CGRect)bounds {    
   return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
 }
 
@@ -65,6 +65,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, assign) BOOL savePhoto;
 @property (nonatomic, retain) UIResponder* firstResponder;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
+@property (nonatomic, readonly) UIImageView* tooltipImageView;
 @end
 
 @implementation CreateStampViewController
@@ -94,6 +95,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize creditedUserText = creditedUserText_;
 @synthesize firstResponder = firstResponder_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
+@synthesize tooltipImageView = tooltipImageView_;
+@synthesize creditLabel = creditLabel_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -308,6 +311,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
   stampsRemainingLayer_ = nil;
+  tooltipImageView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -326,6 +330,22 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   [super viewWillAppear:animated];
 }
 
+
+
+- (void)viewDidAppear:(BOOL)animated {
+  if (!tooltipImageView_) {
+    tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_taphere"]];
+    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, (self.view.frame.size.width-tooltipImageView_.frame.size.width)/2, 140);
+    tooltipImageView_.alpha = 0.0;
+    [self.view addSubview:tooltipImageView_];
+    [tooltipImageView_ release];
+  }
+  
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
+      [UIView  animateWithDuration:0.3 delay:0.75 options:nil animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
+  
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
@@ -335,7 +355,10 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)textViewDidBeginEditing:(UITextView*)textView {
   if (textView != reasoningTextView_)
     return;
-
+  
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
+    [UIView animateWithDuration:0.15 animations:^{tooltipImageView_.alpha = 0.0;}];
+  
   self.firstResponder = reasoningTextView_;
   [self textViewDidChange:reasoningTextView_];
   reasoningTextView_.inputView = nil;
@@ -425,6 +448,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (textField != creditTextField_)
     return;
   
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
+    [UIView animateWithDuration:0.15 animations:^{tooltipImageView_.alpha = 0.0;}];
+  
+  self.creditLabel.text = @"Credit to";
+  
   self.firstResponder = creditTextField_;
   [UIView animateWithDuration:0.2 animations:^{
     self.scrollView.contentInset =
@@ -437,6 +465,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (textField != creditTextField_)
     return;
 
+  if ([textField.text isEqualToString:@""])
+    self.creditLabel.text = @"Who deserves credit?";
+  
   self.firstResponder = nil;
   [UIView animateWithDuration:0.2 animations:^{
     self.scrollView.contentInset = UIEdgeInsetsZero;

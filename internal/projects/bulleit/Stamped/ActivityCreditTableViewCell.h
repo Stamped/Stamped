@@ -19,5 +19,6 @@
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
 @property (nonatomic, retain) Event* event;
+@property (nonatomic, readonly) UIImageView* tooltipImageView;
 
 @end

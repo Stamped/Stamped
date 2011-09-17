@@ -21,6 +21,7 @@
 #import "WelcomeViewController.h"
 #import "StampedAppDelegate.h"
 #import "StampCustomizerViewController.h"
+#import "TooltipView.h"
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
@@ -31,7 +32,7 @@
 - (void)newsCountChanged:(NSNotification*)notification;
 - (void)reloadPanes:(NSNotification*)notification;
 
-@property (nonatomic, readonly) UIImageView* tooltipImageView;
+@property (nonatomic, readonly) TooltipView* tooltipImageView;
 
 @end
 
@@ -215,8 +216,8 @@
   [self.selectedViewController viewDidAppear:animated];
   
   if (!tooltipImageView_) {
-    tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
-    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, (self.view.frame.size.width-tooltipImageView_.frame.size.width)/2, 244);
+    tooltipImageView_ = [[TooltipView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
+    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, (self.view.frame.size.width-tooltipImageView_.frame.size.width)/2, 245);
     tooltipImageView_.alpha = 0.0;
     [self.view addSubview:tooltipImageView_];
     [tooltipImageView_ release];
@@ -315,6 +316,7 @@
   
   if (tooltipImageView_  &&  ![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"]) {
     if (self.selectedViewController == [viewControllers_ objectAtIndex:0])
+
       [UIView animateWithDuration:0.3 animations:^{tooltipImageView_.alpha = 1.0;}];
     else
       [UIView animateWithDuration:0.3 animations:^{tooltipImageView_.alpha = 0.0;}];

@@ -215,6 +215,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   collapsibleVC.numLabel.hidden = NO;
   collapsibleVC.iconView.hidden = NO;
+  
+  [collapsibleVC addImagesForStamps:entityObject_.stamps];
 }
 
 
@@ -234,7 +236,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   newHeight += delta;
   
  
-  
   CGRect contentFrame = self.mainContentView.frame;
   contentFrame.size.height = newHeight;
   self.mainContentView.frame = contentFrame;

@@ -556,6 +556,13 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                                    name:kInboxTableDidScrollNotification
                                                  object:nil];
       pageDotsView_.numDots = MIN(3, ceil(customView_.stamps.count / 5.0));
+      
+//      if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasSeenStack"]) {
+//        UIImageView* tooltipView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stack"]];
+//        [self.contentView addSubview:tooltipView];
+//      }
+      
+      
     } else {
       pageDotsView_.numDots = 0;
     }
