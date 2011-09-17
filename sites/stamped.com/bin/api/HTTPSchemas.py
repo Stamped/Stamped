@@ -350,7 +350,7 @@ class HTTPEntity(Schema):
                 address = {}
                 for component in schema.address_components:
                     for i in component['types']:
-                        address[i] = component['short_name']
+                        address[str(i)] = component['short_name']
                     
                 if 'street_address' in address:
                     self.address_street = address['street_address']

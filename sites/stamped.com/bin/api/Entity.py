@@ -110,7 +110,7 @@ def setFields(entity, detailed=False):
             if len(entity.address_components) > 0:
                 for component in entity.address_components:
                     for i in component['types']:
-                        address[i] = component['short_name']
+                        address[str(i)] = component['short_name']
             
             if 'locality' in address and 'administrative_area_level_1' in address:
                 entity.subtitle = '%s, %s' % (address['locality'], \
