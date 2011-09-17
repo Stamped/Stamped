@@ -437,7 +437,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
       detailViewController_ = [[GenericItemDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
   }
-  
 }
 
 - (void)handleTap:(UITapGestureRecognizer*)recognizer {
@@ -492,10 +491,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)loadCommentsFromServer {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
-
-  addCommentField_.hidden = YES;
-  currentUserImageView_.hidden = YES;
-  [loadingView_ startAnimating];
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];

@@ -31,13 +31,9 @@
 
 #pragma mark - View lifecycle
 
-- (void)showContents
-{
+- (void)showContents {
   self.descriptionLabel.text = entityObject_.subtitle;
-  
-  
-  //  NSLog(@"%@", entityObject_);
-  
+
   [self setupMainActionsContainer];
   [self setupMapView];
   [self setupSectionViews];
@@ -45,19 +41,18 @@
 
 - (void)viewDidLoad {
   self.mainActionButton.hidden = YES;
-  self.mainActionLabel.hidden  = YES;
-  self.mainActionsView.hidden  = YES;
-  callActionButton_.hidden    = YES;
-  callActionLabel_.hidden     = YES;
+  self.mainActionLabel.hidden = YES;
+  self.mainActionsView.hidden = YES;
+  callActionButton_.hidden = YES;
+  callActionLabel_.hidden = YES;
   [super viewDidLoad];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_food_0"];
+  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_other_0"];
   if (dataLoaded_ && !annotation_)
     [self addAnnotation];
-  
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -135,26 +130,24 @@
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
-- (void)setupMainActionsContainer {
-  
+- (void)setupMainActionsContainer {  
   callActionButton_.layer.masksToBounds = YES;
   callActionButton_.layer.cornerRadius = 2.0;
   callActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
   
   if (entityObject_.openTableURL) {
     self.mainActionButton.hidden = NO;
-    self.mainActionLabel.hidden  = NO;
-    self.mainActionsView.hidden  = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
   }
   
   if (entityObject_.localizedPhoneNumber) {  
     callActionLabel_.text = entityObject_.localizedPhoneNumber;
-    callActionButton_.hidden    = NO;
-    callActionLabel_.hidden     = NO;
+    callActionButton_.hidden = NO;
+    callActionLabel_.hidden = NO;
     self.mainActionsView.hidden = NO;
   }
-  
-  
+
   if (!entityObject_.openTableURL && (!entityObject_.phone || entityObject_.phone.intValue == 0) ) {
     mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
@@ -232,7 +225,6 @@
   
   if (stamps && stamps.count > 0)
     [self addSectionStampedBy];
-  
 }
 
 

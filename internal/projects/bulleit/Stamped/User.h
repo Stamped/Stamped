@@ -29,6 +29,7 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSNumber* numFollowers;
 @property (nonatomic, retain) NSNumber* numFriends;
 @property (nonatomic, retain) NSNumber* numStamps;
+@property (nonatomic, retain) NSNumber* numStampsLeft;
 
 @property (nonatomic, readonly) NSString* profileImageURL;
 @end

@@ -274,7 +274,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
   stampsRemainingLayer_.shadowRadius = 0;
   
-  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStamps stringValue];
+  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
@@ -722,16 +722,17 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [self sendSaveStampRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
     Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];
+    NSLog(@"stamp: %@", stamp);
     stamp.temporary = [NSNumber numberWithBool:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                         object:stamp];
-    
+
     stamp.entityObject.favorite.complete = [NSNumber numberWithBool:YES];
     [stamp.managedObjectContext save:NULL];
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                         object:stamp];
-    NSUInteger numStamps = [[AccountManager sharedManager].currentUser.numStamps unsignedIntegerValue];
-    [AccountManager sharedManager].currentUser.numStamps = [NSNumber numberWithUnsignedInteger:--numStamps];
+    NSUInteger numStampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft unsignedIntegerValue];
+    [AccountManager sharedManager].currentUser.numStampsLeft = [NSNumber numberWithUnsignedInteger:--numStampsLeft];
 
     [spinner_ stopAnimating];
     CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));

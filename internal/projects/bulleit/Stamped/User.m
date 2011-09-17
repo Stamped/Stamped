@@ -34,6 +34,7 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic numFriends;
 @dynamic numFollowers;
 @dynamic numStamps;
+@dynamic numStampsLeft;
 
 - (void)generateStampImage {
   if (!self.primaryColor)

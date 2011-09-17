@@ -371,31 +371,31 @@ static const CGFloat kProfileImageSize = 500;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
-  UIView* nextView = [textField.superview viewWithTag:textField.tag + 1];
-  if (nextView) {
-    [nextView becomeFirstResponder];
-  } else {
-    if (textField.superview == signUpScrollView_) {
-      confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
-                                signUpUsernameTextField_.text.length &&
-                                signUpEmailTextField_.text.length &&
-                                signUpPasswordTextField_.text.length);
-    } else if (textField.superview == signInScrollView_) {
+  if (textField.superview == signUpScrollView_) {
+    confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
+                              signUpUsernameTextField_.text.length &&
+                              signUpEmailTextField_.text.length &&
+                              signUpPasswordTextField_.text.length);
+  } else if (textField.superview == signInScrollView_) {
+    UIView* nextView = [textField.superview viewWithTag:textField.tag + 1];
+    if (nextView) {
+      [nextView becomeFirstResponder];
+    } else {
       confirmButton_.enabled = (usernameTextField_.text.length &&
                                 passwordTextField_.text.length);
     }
-    [textField resignFirstResponder];
   }
+  [textField resignFirstResponder];
   return YES;
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   CGFloat xOffset = scrollView.contentOffset.x;
   
-  if (xOffset>1450) 
-    [UIView animateWithDuration:0.35 animations:^{[createAccountButton_ setBackgroundImage:[UIImage imageNamed:@"create_account_button_active"] forState:normal];}];
-    
+  if (xOffset > 1450) 
+    [UIView animateWithDuration:0.35 animations:^{
+      [createAccountButton_ setBackgroundImage:[UIImage imageNamed:@"create_account_button_active"] forState:normal];
+    }];
 }
 
 
