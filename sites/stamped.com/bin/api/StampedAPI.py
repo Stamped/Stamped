@@ -209,11 +209,21 @@ class StampedAPI(AStampedAPI):
         
         ### TODO: Reexamine how updates are done
 
+        primary = data['color_primary'].upper()
+        secondary = data['color_secondary'].upper()
+        
+        # Validate inputs
+        if not utils.validate_hex_color(primary) or \
+            not utils.validate_hex_color(secondary):
+            msg = "Invalid format for colors"
+            logs.warning(msg)
+            raise InputError(msg)
+
         account = self._accountDB.getAccount(authUserId)
 
         # Import each item
-        account.color_primary   = data['color_primary'].upper()
-        account.color_secondary = data['color_secondary'].upper()
+        account.color_primary   = primary
+        account.color_secondary = secondary
 
         self._accountDB.updateAccount(account)
 

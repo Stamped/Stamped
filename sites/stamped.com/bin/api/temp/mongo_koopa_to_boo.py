@@ -110,7 +110,6 @@ def convertStamps():
                 
 
 if __name__ == '__main__':  
-    # main()
-    convertStamps()
+    main()
 
 

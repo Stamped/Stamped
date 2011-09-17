@@ -592,6 +592,16 @@ def validate_screen_name(screen_name):
     except:
         return False
 
+def validate_hex_color(color):
+    color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
+    
+    try:
+        if color_re.match(color):
+            return True
+        raise
+    except:
+        return False
+
 def getNumLines(f):
     numLines = 0
     bufferSize = 1024 * 1024
