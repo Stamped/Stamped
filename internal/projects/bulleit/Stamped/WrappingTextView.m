@@ -31,7 +31,6 @@
     contentHeight = 0.f;
     text_ = newText;
   }
-  
   return self;
 }
 
@@ -98,9 +97,7 @@
   return resizedBottomRect;
 }
 
-
 - (NSAttributedString*)attributedStringForText {
-
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:self.text];
   
 	CTFontRef helvetica = CTFontCreateWithName(CFSTR("Helvetica"), 12.0, NULL);
