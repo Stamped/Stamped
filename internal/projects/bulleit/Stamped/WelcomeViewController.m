@@ -29,7 +29,6 @@ NSString* const kStampColors[7][2] = {
 };
 
 @interface WelcomeViewController ()
-- (void)currentUserUpdated:(NSNotification*)notification;
 - (void)setUserStampColorPrimary:(NSString*)primary secondary:(NSString*)secondary;
 
 @property (nonatomic, retain) RKRequest* currentStampRequest;

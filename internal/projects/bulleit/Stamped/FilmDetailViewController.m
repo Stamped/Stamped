@@ -3,7 +3,7 @@
 //  Stamped
 //
 //  Created by Jake Zien on 9/11/11.
-//  Copyright 2011 RISD. All rights reserved.
+//  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
 #import "FilmDetailViewController.h"
