@@ -97,6 +97,26 @@ def convertStamps():
             {'_id': user['_id']},
             {'$set': {'stats.num_stamps_total': count}}
         )
+        if 'color_primary' in user:
+            user_collection.update(
+                {'_id': user['_id']},
+                {'$set': {'color_primary': user['color_primary'].upper()}}
+            )
+        if 'color_secondary' in user:
+            user_collection.update(
+                {'_id': user['_id']},
+                {'$set': {'color_secondary': user['color_secondary'].upper()}}
+            )
+        if user['screen_name_lower'] == 'ed':
+            user_collection.update(
+                {'_id': user['_id']},
+                {'$set': {'screen_name_lower': 'edmuki'}}
+            )
+            user_collection.update(
+                {'_id': user['_id']},
+                {'$set': {'screen_name': 'edmuki'}}
+            )
+                
 
 if __name__ == '__main__':  
     main()

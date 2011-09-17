@@ -46,27 +46,23 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
   [userImage_ release];
   CGFloat minHeight = CGRectGetMaxY(userImage_.frame) + 8;
 
-  UIFont* nameFont = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-  const CGFloat leftPadding = CGRectGetMaxX(userImage_.frame) + 8;
-  CGSize stringSize = [comment_.user.screenName sizeWithFont:nameFont
-                                                     forWidth:260
-                                                lineBreakMode:UILineBreakModeTailTruncation];
-  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(leftPadding, 8, stringSize.width, stringSize.height)];
+  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectZero];
   nameLabel.textColor = [UIColor stampedGrayColor];
   nameLabel.text = comment_.user.screenName;
-  nameLabel.font = nameFont;
+  nameLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  CGSize stringSize = [nameLabel sizeThatFits:CGSizeMake(260, MAXFLOAT)];
+  const CGFloat leftPadding = CGRectGetMaxX(userImage_.frame) + 8;
+  nameLabel.frame = CGRectMake(leftPadding, 8, stringSize.width, stringSize.height);
   [self addSubview:nameLabel];
   [nameLabel release];
   
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:12];
-  commentLabel.font = commentFont;
+  commentLabel.lineBreakMode = UILineBreakModeWordWrap;
+  commentLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
   commentLabel.text = comment_.blurb;
   commentLabel.textColor = [UIColor colorWithWhite:0.35 alpha:1.0];
   commentLabel.numberOfLines = 0;
-  stringSize = [comment_.blurb sizeWithFont:commentFont
-                          constrainedToSize:CGSizeMake(210, MAXFLOAT)
-                              lineBreakMode:commentLabel.lineBreakMode];
+  stringSize = [commentLabel sizeThatFits:CGSizeMake(220, MAXFLOAT)];
   commentLabel.frame = CGRectMake(leftPadding, 23, stringSize.width, stringSize.height);
   [self addSubview:commentLabel];
   [commentLabel release];

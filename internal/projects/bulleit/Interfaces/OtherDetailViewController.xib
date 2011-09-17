@@ -143,7 +143,7 @@
 								<reference key="NSSuperview" ref="1008158405"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="38975652"/>
-								<int key="IBUIContentMode">4</int>
+								<int key="IBUIContentMode">8</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>

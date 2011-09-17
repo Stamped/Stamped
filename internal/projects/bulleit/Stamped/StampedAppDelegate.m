@@ -51,7 +51,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                        @"num_credits", @"numCredits",
                                        @"num_followers", @"numFollowers",
                                        @"num_friends", @"numFriends",
-                                       @"num_stamps_left", @"numStamps",
+                                       @"num_stamps", @"numStamps",
+                                       @"num_stamps_left", @"numStampsLeft",
                                        nil];
   userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapAttributes:@"bio", @"website", nil];

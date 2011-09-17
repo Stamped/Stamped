@@ -98,17 +98,25 @@ def setFields(entity, detailed=False):
     # Subtitle
     if entity.category == 'food':
 
-        if detailed and 'address' in entity and entity.address is not None:
-            entity.subtitle = entity.address
+        if detailed:
+            if entity.address is not None:
+                entity.subtitle = entity.address
+            elif entity.neighborhood is not None:
+                entity.subtitle = entity.neighborhood
+            else:
+                entity.subtitle = str(entity.subcategory).title()
         else:
             address = {}
             if len(entity.address_components) > 0:
                 for component in entity.address_components:
                     for i in component['types']:
-                        address[i] = component['short_name']
+                        address[str(i)] = component['short_name']
             
             if 'locality' in address and 'administrative_area_level_1' in address:
                 entity.subtitle = '%s, %s' % (address['locality'], \
+                                              address['administrative_area_level_1'])
+            elif 'sublocality' in address and 'administrative_area_level_1' in address:
+                entity.subtitle = '%s, %s' % (address['sublocality'], \
                                               address['administrative_area_level_1'])
             else:
                 is_set = False
@@ -135,12 +143,12 @@ def setFields(entity, detailed=False):
     elif entity.category == 'film':
         if entity.subcategory == 'movie':
             if entity.original_release_date != None:
-                entity.subtitle = entity.original_release_date
+                entity.subtitle = 'Movie (%s)' % entity.original_release_date
             else:
                 entity.subtitle = 'Movie'
         elif entity.subcategory == 'tv':
             if entity.network_name != None:
-                entity.subtitle = entity.network_name
+                entity.subtitle = 'TV Show (%s)' % entity.network_name
             else:
                 entity.subtitle = 'TV Show'
     
@@ -167,7 +175,7 @@ def setFields(entity, detailed=False):
         entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
         
         if entity.subtitle is None or len(entity.subtitle) == 0:
-            entity.subtitle = "other"
+            entity.subtitle = "Other"
     
     return entity
 

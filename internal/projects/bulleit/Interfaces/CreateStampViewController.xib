@@ -302,7 +302,7 @@
 									<object class="IBUILabel" id="249527600">
 										<reference key="NSNextResponder" ref="101741781"/>
 										<int key="NSvFlags">268</int>
-										<string key="NSFrame">{{34, 121}, {119, 17}}</string>
+										<string key="NSFrame">{{34, 121}, {50, 17}}</string>
 										<reference key="NSSuperview" ref="101741781"/>
 										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="464865782"/>
@@ -312,7 +312,7 @@
 										<int key="IBUIContentMode">7</int>
 										<bool key="IBUIUserInteractionEnabled">NO</bool>
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-										<string key="IBUIText">Who deserves credit?</string>
+										<string key="IBUIText">Credit to?</string>
 										<reference key="IBUIFont" ref="461654039"/>
 										<object class="NSColor" key="IBUITextColor">
 											<int key="NSColorSpace">2</int>

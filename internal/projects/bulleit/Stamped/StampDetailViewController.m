@@ -57,7 +57,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
-- (void)eDetailDidLoad:(NSNotification*)notification;
 
 @property (nonatomic, retain) STImageView* stampPhotoView;
 @end
@@ -114,11 +113,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                            selector:@selector(handleCommentUserImageViewTap:)
                                                name:kCommentUserImageTappedNotification
                                              object:nil];
-  if (!detailViewController_)
-    self.eDetailArrowImageView.alpha = 0.4;
-  if (detailViewController_ && !detailViewController_.isWorthSeeing)
-    self.eDetailArrowImageView.hidden = YES;
-  
   [super viewWillAppear:animated];
 }
 
@@ -131,14 +125,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  if (detailViewController_ && detailViewController_.isWorthSeeing)
-    self.eDetailArrowImageView.alpha = 1.0;
-  else if (detailViewController_ && !detailViewController_.isWorthSeeing) {
-    [UIView animateWithDuration:0.3 animations:^{self.eDetailArrowImageView.alpha = 0.0;}];
-    eDetailArrowImageView_.hidden = YES;
-  }
-
-  
   UITapGestureRecognizer* gestureRecognizer =
       [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
   [self.view addGestureRecognizer:gestureRecognizer];
@@ -146,11 +132,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [gestureRecognizer release];
 
   scrollView_.contentSize = self.view.bounds.size;
-  
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(eDetailDidLoad:)
-                                               name:kEntityDetailDidFinishLoading
-                                             object:nil];
 
   [self setUpToolbar];
   [self setUpHeader];
@@ -456,16 +437,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
       detailViewController_ = [[GenericItemDetailViewController alloc] initWithEntityObject:stamp_.entityObject];
       break;
   }
-  
-}
-
-- (void)eDetailDidLoad:(NSNotification *)notification {
-  EntityDetailViewController* eDetail = notification.object;
-  if (eDetail.isWorthSeeing) 
-    [UIView animateWithDuration:0.3 animations:^{self.eDetailArrowImageView.alpha = 1.0;}];
-  else {
-    [UIView animateWithDuration:0.3 animations:^{self.eDetailArrowImageView.alpha = 0.0;}];
-  }
 }
 
 - (void)handleTap:(UITapGestureRecognizer*)recognizer {
@@ -493,9 +464,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     return;
 
   [addCommentField_ resignFirstResponder];
-  // Pass the selected object to the new view controller.
-  if (detailViewController_.isWorthSeeing)
-    [self.navigationController pushViewController:detailViewController_ animated:YES];
+  [self.navigationController pushViewController:detailViewController_ animated:YES];
 }
 
 - (void)handleUserImageViewTap:(id)sender {
@@ -522,10 +491,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)loadCommentsFromServer {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
-
-  addCommentField_.hidden = YES;
-  currentUserImageView_.hidden = YES;
-  [loadingView_ startAnimating];
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];

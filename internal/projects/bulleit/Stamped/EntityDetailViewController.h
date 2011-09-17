@@ -13,9 +13,6 @@
 @class Entity;
 
 @interface EntityDetailViewController : UIViewController <RKObjectLoaderDelegate, CollapsibleViewControllerDelegate> {
-
-  BOOL isWorthSeeing_;
-
  @protected
   Entity* entityObject_;
   BOOL viewIsVisible_;
@@ -38,7 +35,6 @@
 @property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIView* mainContentView;
-@property (nonatomic) BOOL isWorthSeeing;
 
 
 @end

@@ -94,6 +94,7 @@
         <attribute name="numFollowers" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="numFriends" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="numStamps" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
+        <attribute name="numStampsLeft" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="primaryColor" optional="YES" attributeType="String"/>
         <attribute name="screenName" optional="YES" attributeType="String"/>
         <attribute name="secondaryColor" optional="YES" attributeType="String"/>
@@ -111,6 +112,6 @@
         <element name="Event" positionX="88" positionY="135" width="128" height="135"/>
         <element name="Favorite" positionX="358" positionY="144" width="128" height="135"/>
         <element name="Stamp" positionX="252" positionY="333" width="128" height="240"/>
-        <element name="User" positionX="-101" positionY="102" width="128" height="330"/>
+        <element name="User" positionX="-101" positionY="102" width="128" height="300"/>
     </elements>
 </model>

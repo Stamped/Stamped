@@ -80,6 +80,10 @@ class StampedAPI(AStampedAPI):
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
         account.stats.num_stamps_total = 0
+
+        # Set default stamp colors
+        account.color_primary   = '004AB2'
+        account.color_secondary = '0057D1'
         
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
@@ -209,11 +213,21 @@ class StampedAPI(AStampedAPI):
         
         ### TODO: Reexamine how updates are done
 
+        primary = data['color_primary'].upper()
+        secondary = data['color_secondary'].upper()
+
+        # Validate inputs
+        if not utils.validate_hex_color(primary) or \
+            not utils.validate_hex_color(secondary):
+            msg = "Invalid format for colors"
+            logs.warning(msg)
+            raise InputError(msg)
+
         account = self._accountDB.getAccount(authUserId)
 
         # Import each item
-        account.color_primary   = data['color_primary']
-        account.color_secondary = data['color_secondary']
+        account.color_primary   = primary
+        account.color_secondary = secondary
 
         self._accountDB.updateAccount(account)
 
@@ -794,10 +808,17 @@ class StampedAPI(AStampedAPI):
         stamps = []
         for stamp in stampData:
             # Add stamp user
+            ### TODO: Check that userIds != 1 (i.e. user still exists)?
             stamp.user = userIds[stamp.user_id]
             
             # Add entity
-            stamp.entity = entityIds[stamp.entity_id]
+            if entityIds[stamp.entity_id] == 1:
+                msg = 'Unable to match entity_id %s for stamp_id %s' % \
+                    (stamp.entity_id, stamp.stamp_id)
+                logs.warning(msg)
+                ### TODO: Raise?
+            else:
+                stamp.entity = entityIds[stamp.entity_id]
 
             # Add credited user(s)
             if stamp.credit != None:

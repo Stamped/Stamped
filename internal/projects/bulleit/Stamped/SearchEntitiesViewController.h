@@ -22,5 +22,6 @@
 @property (nonatomic, retain) IBOutlet UIView* searchingIndicatorView;
 
 - (IBAction)cancelButtonTapped:(id)sender;
+- (void)clearSearchField;
 
 @end

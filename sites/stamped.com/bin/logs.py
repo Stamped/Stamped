@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import datetime, logging, os, threading, hashlib, random, time
+import sys, traceback, string
 import inspect, pprint
 
 # Log
@@ -151,6 +152,14 @@ def error(code):
         localData.log['result'] = code
     except:
         localData.log['result'] = 'FAIL'
+
+    try:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        f = string.joinfields(f, '')
+        localData.log['stack_trace'] = f
+    except:
+        localData.log['stack_trace'] = 'FAIL'
 
 def save():
     if localData.format != 'object':

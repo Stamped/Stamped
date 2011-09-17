@@ -29,7 +29,10 @@
             background:gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
         }
         #entity .brand {
-            background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-175x176.png') left top no-repeat;
+            background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-175x176.png') center center no-repeat;
+        }
+        .card .meta .thumb img {
+            margin: 5px 7px;
         }
         {% if credit %}
         .card .credit {

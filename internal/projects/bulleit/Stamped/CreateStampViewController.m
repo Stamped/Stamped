@@ -35,11 +35,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @implementation STCreditTextField
 
 - (CGRect)textRectForBounds:(CGRect)bounds {
-  return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
+  return CGRectOffset(CGRectInset(bounds, 40, 0), 40, 0);
 }
 
 - (CGRect)editingRectForBounds:(CGRect)bounds {    
-  return CGRectOffset(CGRectInset(bounds, 37, 0), 37, 0);
+  return CGRectOffset(CGRectInset(bounds, 40, 0), 40, 0);
 }
 
 @end
@@ -274,7 +274,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
   stampsRemainingLayer_.shadowRadius = 0;
   
-  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStamps stringValue];
+  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
@@ -484,8 +484,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
   
-  self.creditLabel.text = @"Credit to";
-  
   self.firstResponder = creditTextField_;
   [UIView animateWithDuration:0.2 animations:^{
     self.scrollView.contentInset =
@@ -497,9 +495,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   if (textField != creditTextField_)
     return;
-
-  if ([textField.text isEqualToString:@""])
-    self.creditLabel.text = @"Who deserves credit?";
   
   self.firstResponder = nil;
   [UIView animateWithDuration:0.2 animations:^{
@@ -727,16 +722,17 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [self sendSaveStampRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
     Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];
+    NSLog(@"stamp: %@", stamp);
     stamp.temporary = [NSNumber numberWithBool:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                         object:stamp];
-    
+
     stamp.entityObject.favorite.complete = [NSNumber numberWithBool:YES];
     [stamp.managedObjectContext save:NULL];
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                         object:stamp];
-    NSUInteger numStamps = [[AccountManager sharedManager].currentUser.numStamps unsignedIntegerValue];
-    [AccountManager sharedManager].currentUser.numStamps = [NSNumber numberWithUnsignedInteger:--numStamps];
+    NSUInteger numStampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft unsignedIntegerValue];
+    [AccountManager sharedManager].currentUser.numStampsLeft = [NSNumber numberWithUnsignedInteger:--numStampsLeft];
 
     [spinner_ stopAnimating];
     CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));

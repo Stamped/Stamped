@@ -101,6 +101,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   [self.navigationController setNavigationBarHidden:NO animated:animated];
   [self.locationManager stopUpdatingLocation];
   [super viewWillDisappear:animated];
@@ -236,6 +237,11 @@ static NSString* const kSearchPath = @"/entities/search.json";
   [detailViewController release];
 }
 
+- (void)clearSearchField {
+  self.searchField.text = nil;
+  [self textFieldDidChange:self.searchField];
+}
+
 - (void)textFieldDidChange:(id)sender {
   if (sender != self.searchField)
     return;
@@ -251,7 +257,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
   if (searchField_.text.length > 0) {
     [self sendFastSearchRequest];
-  } else if (searchField_.text.length == 0) {
+  } else {
     self.resultsArray = nil;
     [self.tableView reloadData];
     searchingIndicatorView_.hidden = YES;

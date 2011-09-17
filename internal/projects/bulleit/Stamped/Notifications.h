@@ -12,4 +12,3 @@ extern NSString* const kAppShouldReloadAllPanes;
 extern NSString* const kAppShouldReloadNewsPane;
 extern NSString* const kFavoriteHasChangedNotification;
 extern NSString* const kNewsItemCountHasChangedNotification;
-extern NSString* const kEntityDetailDidFinishLoading;

@@ -29,7 +29,6 @@ NSString* const kStampColors[7][2] = {
 };
 
 @interface WelcomeViewController ()
-- (void)currentUserUpdated:(NSNotification*)notification;
 - (void)setUserStampColorPrimary:(NSString*)primary secondary:(NSString*)secondary;
 
 @property (nonatomic, retain) RKRequest* currentStampRequest;
@@ -81,15 +80,10 @@ NSString* const kStampColors[7][2] = {
                                                              secondary:kStampColors[i][1]]
                              forState:UIControlStateNormal];
   }
-
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(currentUserUpdated:)
-                                               name:kCurrentUserHasUpdatedNotification
-                                             object:[AccountManager sharedManager]];
+  self.userImageView.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
 }
 
 - (void)viewDidUnload {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.contentView = nil;
   self.scrollView = nil;
   self.pageControl = nil;
@@ -111,10 +105,6 @@ NSString* const kStampColors[7][2] = {
 }
 
 #pragma mark - Private methods.
-
-- (void)currentUserUpdated:(NSNotification*)notification {
-  self.userImageView.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
-}
 
 - (void)setUserStampColorPrimary:(NSString*)primary secondary:(NSString*)secondary {
   User* user = [AccountManager sharedManager].currentUser;

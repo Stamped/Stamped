@@ -267,27 +267,27 @@ typedef enum {
 
 #pragma mark - Table view data source
 
-- (void)tableView:(UITableView*)tableView willBeginEditingRowAtIndexPath:(NSIndexPath*)indexPath {
-  //InboxTableViewCell* cell = (InboxTableViewCell*)[tableView cellForRowAtIndexPath:indexPath];
-}
-
-- (void)tableView:(UITableView*)tableView didEndEditingRowAtIndexPath:(NSIndexPath*)indexPath {
-  //UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
-}
-
-- (UITableViewCellEditingStyle)tableView:(UITableView*)tableView
-           editingStyleForRowAtIndexPath:(NSIndexPath*)indexPath {
-  return UITableViewCellEditingStyleDelete;
-}
-
-- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (editingStyle == UITableViewCellEditingStyleDelete) {
-    /*Entity* e = [filteredEntitiesArray_ objectAtIndex:indexPath.row];
-    [filteredEntitiesArray_ removeObjectAtIndex:indexPath.row];
-    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
-                          withRowAnimation:UITableViewRowAnimationBottom];*/
-  }    
-}
+//- (void)tableView:(UITableView*)tableView willBeginEditingRowAtIndexPath:(NSIndexPath*)indexPath {
+//  //InboxTableViewCell* cell = (InboxTableViewCell*)[tableView cellForRowAtIndexPath:indexPath];
+//}
+//
+//- (void)tableView:(UITableView*)tableView didEndEditingRowAtIndexPath:(NSIndexPath*)indexPath {
+//  //UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+//}
+//
+//- (UITableViewCellEditingStyle)tableView:(UITableView*)tableView
+//           editingStyleForRowAtIndexPath:(NSIndexPath*)indexPath {
+//  return UITableViewCellEditingStyleDelete;
+//}
+//
+//- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
+//  if (editingStyle == UITableViewCellEditingStyleDelete) {
+//    /*Entity* e = [filteredEntitiesArray_ objectAtIndex:indexPath.row];
+//    [filteredEntitiesArray_ removeObjectAtIndex:indexPath.row];
+//    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
+//                          withRowAnimation:UITableViewRowAnimationBottom];*/
+//  }    
+//}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
   return 1;

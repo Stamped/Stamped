@@ -38,6 +38,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)fillInUserData;
 - (void)loadRelationshipData;
 - (void)addStampsRemainingLayer;
+- (void)updateStampsRemainingLayer;
 
 @property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, copy) NSArray* stampsArray;
@@ -345,7 +346,16 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
   stampsRemainingLayer_.shadowRadius = 0;
   
-  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStamps stringValue];
+  [self updateStampsRemainingLayer];
+  [self.view.layer addSublayer:stampsRemainingLayer_];
+  [stampsRemainingLayer_ release];
+}
+
+- (void)updateStampsRemainingLayer {
+  if (!stampsRemainingLayer_)
+    return;
+
+  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
@@ -366,8 +376,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   CFRelease(style);
   stampsRemainingLayer_.string = string;
   [string release];
-  [self.view.layer addSublayer:stampsRemainingLayer_];
-  [stampsRemainingLayer_ release];
 }
 
 - (void)loadRelationshipData {
@@ -391,11 +399,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)fillInUserData {
   fullNameLabel_.text = user_.name;
-  usernameLocationLabel_.text = [NSString stringWithFormat:@"%@  /  %@", user_.screenName, @"Scranton, PA"];
+  usernameLocationLabel_.text = user_.screenName;
   bioLabel_.text = user_.bio;
   creditCountLabel_.text = [user_.numCredits stringValue];
   followerCountLabel_.text = [user_.numFollowers stringValue];
   followingCountLabel_.text = [user_.numFriends stringValue];
+  [self updateStampsRemainingLayer];
   [self.tableView reloadData];
 }
 

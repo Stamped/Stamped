@@ -131,6 +131,10 @@ def main():
                     print '%-10s %s | %-30s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3])
                     prefix = ''
 
+        if 'stack_trace' in logs[i]:
+            print '-' * 40
+            print logs[i]['stack_trace']
+
     print
     
 

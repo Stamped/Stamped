@@ -20,6 +20,10 @@
 #import "Notifications.h"
 #import "PlaceDetailViewController.h"
 #import "GenericItemDetailViewController.h"
+#import "MusicDetailViewController.h"
+#import "BookDetailViewController.h"
+#import "OtherDetailViewController.h"
+#import "FilmDetailViewController.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 #import "TodoTableViewCell.h"
@@ -122,6 +126,18 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
   switch (fave.entityObject.entityCategory) {
     case EntityCategoryFood:
       detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:fave.entityObject];
+      break;
+    case EntityCategoryMusic:
+      detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:fave.entityObject];
+      break;
+    case EntityCategoryBook:
+      detailViewController = [[BookDetailViewController alloc] initWithEntityObject:fave.entityObject];
+      break;
+    case EntityCategoryFilm:
+      detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:fave.entityObject];
+      break;
+    case EntityCategoryOther:
+      detailViewController = [[OtherDetailViewController alloc] initWithEntityObject:fave.entityObject];
       break;
     default:
       detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:fave.entityObject];

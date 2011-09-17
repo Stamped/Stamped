@@ -144,7 +144,6 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
-    self.isWorthSeeing = YES;
   }
   
   if (entityObject_.localizedPhoneNumber) {  
@@ -152,7 +151,6 @@
     callActionButton_.hidden    = NO;
     callActionLabel_.hidden     = NO;
     self.mainActionsView.hidden = NO;
-    self.isWorthSeeing = YES;
   }
   
 
@@ -164,8 +162,7 @@
 }
 
 
-- (void) setupMapView
-{
+- (void)setupMapView {
   if (!entityObject_.coordinates)
     return;
   
@@ -180,68 +177,63 @@
   
   if (viewIsVisible_ && !annotation_)
     [self addAnnotation];
-  
-  self.isWorthSeeing = YES;
 }
 
-- (void) setupSectionViews {
-  
+- (void)setupSectionViews {
   // Information
   // TODO: What if there's no information?
   
   [self addSectionWithName:@"Information"];
   CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Information"];
     
-  if (entityObject_.subcategory)  [section addPairedLabelWithName:@"Category:"
-                                                            value:entityObject_.subcategory
-                                                           forKey:@"subcategory"];
+  if (entityObject_.subcategory) {
+    [section addPairedLabelWithName:@"Category:"
+                              value:entityObject_.subcategory
+                             forKey:@"subcategory"];
+  }
   
-  if (entityObject_.cuisine)      [section addPairedLabelWithName:@"Cuisine:"      
-                                                            value:entityObject_.cuisine
-                                                          forKey:@"cuisine"];
+  if (entityObject_.cuisine) {
+    [section addPairedLabelWithName:@"Cuisine:"      
+                              value:entityObject_.cuisine
+                             forKey:@"cuisine"];
+  }
   
-  if (entityObject_.neighborhood) [section addPairedLabelWithName:@"Neighborhood:"
-                                                            value:entityObject_.neighborhood
-                                                           forKey:@"neighborhood"];
+  if (entityObject_.neighborhood) {
+    [section addPairedLabelWithName:@"Neighborhood:"
+                              value:entityObject_.neighborhood
+                             forKey:@"neighborhood"];
+  }
   
-  if (entityObject_.hours){        
-
+  if (entityObject_.hours) {   
     [section addPairedLabelWithName:@"Hours:"
                               value:entityObject_.hours
                               forKey:@"hours"];
-      self.isWorthSeeing = YES;
   }
   
-  if (entityObject_.price)        [section addPairedLabelWithName:@"Price Range:" 
-                                                            value:entityObject_.price
-                                                           forKey:@"price"];
-  
-  if (entityObject_.website){      [section addPairedLabelWithName:@"Website:"
-                                                             value:entityObject_.website
-                                                            forKey:@"website"];
-      self.isWorthSeeing = YES;
+  if (entityObject_.price) {
+    [section addPairedLabelWithName:@"Price Range:" 
+                              value:entityObject_.price
+                             forKey:@"price"];
   }
   
-  //Description
+  if (entityObject_.website) {
+    [section addPairedLabelWithName:@"Website:"
+                              value:entityObject_.website
+                             forKey:@"website"];
+  }
   
-  if (entityObject_.desc)
-  {
+  // Description
+  
+  if (entityObject_.desc) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
-    
     [section addText:entityObject_.desc forKey:@"desc"];
-    
-    self.isWorthSeeing = YES;
   }
   
   NSSet* stamps = entityObject_.stamps;
   
   if (stamps && stamps.count > 0)
-  {
-    [self addSectionStampedBy];
-    
-  }
-  
+    [self addSectionStampedBy];  
 }
 
 

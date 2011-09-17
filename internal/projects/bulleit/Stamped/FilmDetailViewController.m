@@ -3,7 +3,7 @@
 //  Stamped
 //
 //  Created by Jake Zien on 9/11/11.
-//  Copyright 2011 RISD. All rights reserved.
+//  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
 #import "FilmDetailViewController.h"
@@ -84,7 +84,6 @@
     self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
                                                    [NSURL URLWithString:entityObject_.image]]];
-    self.isWorthSeeing = YES;
   }
   
   [self setupMainActionsContainer];
@@ -145,7 +144,6 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
-    self.isWorthSeeing = YES;
   }
   
   else self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
@@ -169,7 +167,6 @@
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
     
     self.mainContentView.hidden = NO;
-    self.isWorthSeeing = YES;
   }
   
   
