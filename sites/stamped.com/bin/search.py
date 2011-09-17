@@ -9,8 +9,9 @@ import init, utils
 import sys
 
 from MongoStampedAPI import MongoStampedAPI
-from optparse import OptionParser
-from pprint import pprint
+from Entity          import setFields
+from optparse       import OptionParser
+from pprint         import pprint
 
 # TODO: AUTOSUGGEST
     # after setting up CDN, going to have to run a cache-warming process
@@ -172,6 +173,8 @@ def main():
     for result in results:
         entity   = result[0]
         distance = result[1]
+        
+        setFields(entity)
         
         if options.verbose:
             data = entity.getDataAsDict()
