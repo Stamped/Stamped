@@ -99,7 +99,6 @@ def parseCommandLine():
     if options.db:
         utils.init_db_config(options.db)
     
-    
     infile = file('autocomplete.txt', 'r')
     options.count = utils.getNumLines(infile)
     infile.close()
@@ -148,7 +147,7 @@ def main():
             
             print "searching %s" % orig_name.encode('ascii', 'replace')
             try:
-                results = stampedAPI.searchEntities(query=orig_name, limit=50, prefix=True)
+                results = stampedAPI.searchEntities(query=orig_name, limit=10, prefix=True)
             except:
                 utils.printException()
                 time.sleep(1)
@@ -186,7 +185,6 @@ def main():
             return
     
     infile = file('autocomplete.txt', 'r')
-    pool   = Pool(32)
     done   = 0
     offset = 0
     
@@ -201,7 +199,6 @@ def main():
         if options.limit <= 100 or ((done - 1) % (options.limit / 100)) == 0:
             utils.log("done processing %s" % (utils.getStatusStr(done, options.limit), ))
     
-    pool.join()
     infile.close()
 
 if __name__ == '__main__':
