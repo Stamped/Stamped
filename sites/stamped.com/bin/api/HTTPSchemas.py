@@ -319,6 +319,7 @@ class HTTPEntity(Schema):
         self.label              = SchemaElement(basestring)
         self.albums             = SchemaList(SchemaElement(basestring))
         self.songs              = SchemaList(SchemaElement(basestring))
+        self.preview_url        = SchemaElement(basestring)
         
         # Affiliates
         self.opentable_url      = SchemaElement(basestring)
@@ -440,6 +441,9 @@ class HTTPEntity(Schema):
             self.artist_name    = schema.artist_display_name
             self.album_name     = schema.album_name
             self.label          = schema.label_studio
+            
+            if 'preview_url' in schema:
+                self.preview_url = schema.preview_url
             
             # Affiliates
             if schema.sources.openTable.reserveURL != None:

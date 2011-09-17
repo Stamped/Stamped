@@ -1923,6 +1923,8 @@ class StampedAPI(AStampedAPI):
     
     def _convertSearchId(self, search_id):
         if search_id.startswith('T_'):
+            # temporary entity_id; lookup in tempentities collection and 
+            # merge result into primary entities db
             doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
             
             if doc is None:
