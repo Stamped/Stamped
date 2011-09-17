@@ -14,7 +14,7 @@
 #import "WelcomeViewController.h"
 
 static const CGFloat kKeyboardOffset = 216;
-static const CGFloat kProfileImageSize = 144;
+static const CGFloat kProfileImageSize = 500;
 
 @interface FirstRunViewController ()
 - (void)setupBottomView;
@@ -189,8 +189,9 @@ static const CGFloat kProfileImageSize = 144;
 }
 
 - (void)signUpFailed:(NSString*)reason {
-  UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Sign Up Error"
-                                                  message:reason
+  NSString* reasoning = @"Please check that all required fields are valid. Sorry. We're working on making this easier.";
+  UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Womp womp"
+                                                  message:reasoning
                                                  delegate:nil
                                         cancelButtonTitle:@"OK"
                                         otherButtonTitles:nil];
@@ -198,6 +199,7 @@ static const CGFloat kProfileImageSize = 144;
   [alert release];
 
   [activityIndicator_ stopAnimating];
+  [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   confirmButton_.enabled = YES;
 }
 
@@ -270,20 +272,26 @@ static const CGFloat kProfileImageSize = 144;
   if (sender != confirmButton_)
     return;
   
+  confirmButton_.enabled = NO;
+  [confirmButton_ setTitle:nil forState:UIControlStateNormal];
+  [activityIndicator_ startAnimating];
   if (signInScrollView_.superview) {
-    confirmButton_.enabled = NO;
-    [confirmButton_ setTitle:nil forState:UIControlStateNormal];
-    [activityIndicator_ startAnimating];
     [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
   } else if (signUpScrollView_.superview) {
-    confirmButton_.enabled = NO;
-    [activityIndicator_ startAnimating];
+    NSString* num = nil;
+    if (signUpPhoneTextField_.text) {
+      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]] componentsJoinedByString: @""];
+      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet symbolCharacterSet]] componentsJoinedByString: @""];
+      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsJoinedByString: @""];
+      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
+    }
     [delegate_ viewController:self
        willCreateUserWithName:signUpFullNameTextField_.text
                      username:signUpUsernameTextField_.text
                      password:signUpPasswordTextField_.text
                         email:signUpEmailTextField_.text
-                  phoneNumber:signUpPhoneTextField_.text];
+                 profileImage:userImageView_.imageView.image
+                  phoneNumber:num];
   }
 }
 

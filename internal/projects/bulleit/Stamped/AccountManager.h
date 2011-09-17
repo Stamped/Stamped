@@ -30,6 +30,7 @@ extern NSString* const kCurrentUserHasUpdatedNotification;
   RKRequestQueue* oAuthRequestQueue_;
   NSTimer* oauthRefreshTimer_;
   BOOL firstRun_;
+  BOOL firstInstall_;
 }
 
 + (AccountManager*)sharedManager;

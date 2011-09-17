@@ -8,6 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+@class StampCustomizerViewController;
+
+@protocol StampCustomizerViewControllerDelegate
+- (void)stampCustomizer:(StampCustomizerViewController*)customizer
+      chosePrimaryColor:(NSString*)primary
+         secondaryColor:(NSString*)secondary;
+@end
+
 @interface StampCustomizerViewController : UIViewController {
  @private
   CGFloat primaryRed_;
@@ -29,9 +37,12 @@
 @property (nonatomic, retain) IBOutlet UIButton* primaryColorButton;
 @property (nonatomic, retain) IBOutlet UIButton* secondaryColorButton;
 
+@property (nonatomic, assign) id<StampCustomizerViewControllerDelegate> delegate;
+
 - (IBAction)primaryColorButtonPressed:(id)sender;
 - (IBAction)secondaryColorButtonPressed:(id)sender;
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)doneButtonPressed:(id)sender;
 
 @end
+

@@ -28,7 +28,6 @@ def create(request):
     data.pop('search_id', None)
     
     stamp       = stampedAPI.addStamp(authUserId, entityId, data)
-    logs.info('STAMP: %s' % stamp)
     stamp       = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())
