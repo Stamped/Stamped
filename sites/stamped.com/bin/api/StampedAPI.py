@@ -80,6 +80,10 @@ class StampedAPI(AStampedAPI):
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
         account.stats.num_stamps_total = 0
+
+        # Set default stamp colors
+        account.color_primary   = '004AB2'
+        account.color_secondary = '0057D1'
         
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
