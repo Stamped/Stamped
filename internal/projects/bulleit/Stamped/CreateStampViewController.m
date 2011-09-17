@@ -342,7 +342,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   }
   
   if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
-      [UIView  animateWithDuration:0.3 delay:0.75 options:nil animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
+      [UIView  animateWithDuration:0.3 delay:0.75 options:0 animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
   
 }
 

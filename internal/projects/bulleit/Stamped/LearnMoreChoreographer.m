@@ -24,9 +24,9 @@
 @interface LearnMoreChoreographer ()
 
 - (NSUInteger)sceneForRange:(NSRange)range;
-- (NSUInteger)sceneforOffset:(CGFloat)offset;
+//- (NSUInteger)sceneforOffset:(CGFloat)offset;
 - (void)performForOffset:(CGFloat)offset;
-- (BOOL)scene:(NSUInteger)sceneNumber includesView:(UIView*)view;
+//- (BOOL)scene:(NSUInteger)sceneNumber includesView:(UIView*)view;
 
 @end
 

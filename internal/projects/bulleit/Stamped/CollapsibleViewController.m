@@ -308,7 +308,7 @@ int const SPACE_HEIGHT          = 10;
       pageNum++;
     }
     
-    CGFloat xOffset = i*(userImgFrame.size.width + 7.0) + 18.0 * (pageNum-1) + 13.0;
+    CGFloat xOffset = i*(userImgFrame.size.width + 7.0) + 18.0 * (pageNum-1) + 14.0;
     
     userImageButton.frame = CGRectOffset(userImgFrame, xOffset, 0.0);
     userImageButton.contentMode = UIViewContentModeCenter;

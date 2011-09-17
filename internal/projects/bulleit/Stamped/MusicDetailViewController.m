@@ -46,10 +46,13 @@
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
                                                    [NSURL URLWithString:entityObject_.image]]];
   
+    self.isWorthSeeing = YES;
+  }
+  
   [self setupMainActionsContainer];
   [self setupSectionViews];
   
-  }
+  
   
 }
 
@@ -102,6 +105,7 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
+    self.isWorthSeeing = YES;
   }
   
   else self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
@@ -127,6 +131,7 @@
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
     
     self.mainContentView.hidden = NO;
+    self.isWorthSeeing = YES;
   }
   
   
@@ -150,6 +155,7 @@
     [section addText:entityObject_.desc forKey:@"desc"];
     
     self.mainContentView.hidden = NO;
+    self.isWorthSeeing = YES;
   }
   
   

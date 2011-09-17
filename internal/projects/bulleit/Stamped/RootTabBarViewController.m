@@ -225,7 +225,7 @@
   
   if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
     if (self.selectedViewController == [viewControllers_ objectAtIndex:0])
-      [UIView  animateWithDuration:0.3 delay:1.0 options:nil animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
+      [UIView  animateWithDuration:0.3 delay:1.0 options:0 animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
 
 }
 
