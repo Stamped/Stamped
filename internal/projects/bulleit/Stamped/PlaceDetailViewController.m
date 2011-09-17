@@ -144,6 +144,7 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
+    self.isWorthSeeing = YES;
   }
   
   if (entityObject_.localizedPhoneNumber) {  
@@ -151,6 +152,7 @@
     callActionButton_.hidden    = NO;
     callActionLabel_.hidden     = NO;
     self.mainActionsView.hidden = NO;
+    self.isWorthSeeing = YES;
   }
   
 
@@ -179,6 +181,7 @@
   if (viewIsVisible_ && !annotation_)
     [self addAnnotation];
   
+  self.isWorthSeeing = YES;
 }
 
 - (void) setupSectionViews {
@@ -201,17 +204,23 @@
                                                             value:entityObject_.neighborhood
                                                            forKey:@"neighborhood"];
   
-  if (entityObject_.hours)        [section addPairedLabelWithName:@"Hours:"
-                                                            value:entityObject_.hours
-                                                           forKey:@"hours"];
+  if (entityObject_.hours){        
+
+    [section addPairedLabelWithName:@"Hours:"
+                              value:entityObject_.hours
+                              forKey:@"hours"];
+      self.isWorthSeeing = YES;
+  }
   
   if (entityObject_.price)        [section addPairedLabelWithName:@"Price Range:" 
                                                             value:entityObject_.price
                                                            forKey:@"price"];
   
-  if (entityObject_.website)      [section addPairedLabelWithName:@"Website:"
-                                                            value:entityObject_.website
-                                                           forKey:@"website"];
+  if (entityObject_.website){      [section addPairedLabelWithName:@"Website:"
+                                                             value:entityObject_.website
+                                                            forKey:@"website"];
+      self.isWorthSeeing = YES;
+  }
   
   //Description
   
@@ -221,6 +230,8 @@
     section = [sectionsDict_ objectForKey:@"Description"];
     
     [section addText:entityObject_.desc forKey:@"desc"];
+    
+    self.isWorthSeeing = YES;
   }
   
   NSSet* stamps = entityObject_.stamps;

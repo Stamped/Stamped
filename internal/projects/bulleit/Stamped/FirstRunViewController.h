@@ -28,8 +28,7 @@ willCreateUserWithName:(NSString*)name
 
 @end
 
-@interface FirstRunViewController : UIViewController <UIScrollViewDelegate,
-                                                      UITextFieldDelegate,
+@interface FirstRunViewController : UIViewController <UITextFieldDelegate,
                                                       UINavigationControllerDelegate,
                                                       UIImagePickerControllerDelegate,
                                                       UIActionSheetDelegate>

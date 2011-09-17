@@ -53,7 +53,6 @@
 						<string key="NSFrame">{{150, 208}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -304,7 +303,7 @@
 										<int key="IBUITextAlignment">2</int>
 									</object>
 								</object>
-								<string key="NSFrame">{{0, 78}, {320, 66}}</string>
+								<string key="NSFrame">{{0, 78}, {320, 54}}</string>
 								<reference key="NSSuperview" ref="1016267558"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="653870563"/>

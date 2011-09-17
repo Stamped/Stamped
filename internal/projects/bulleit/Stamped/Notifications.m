@@ -12,3 +12,4 @@ NSString* const kAppShouldReloadAllPanes = @"kAppShouldReloadAllPanes";
 NSString* const kAppShouldReloadNewsPane = @"kAppShouldReloadNewsPane";
 NSString* const kFavoriteHasChangedNotification = @"kFavoriteHasChangedNotification";
 NSString* const kNewsItemCountHasChangedNotification = @"kNewsItemCountHasChangedNotification";
+NSString* const kEntityDetailDidFinishLoading = @"kEntityDetailDidFinishLoading";

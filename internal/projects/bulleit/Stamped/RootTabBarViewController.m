@@ -16,7 +16,14 @@
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
 #import "STNavigationBar.h"
+#import "STSearchField.h"
 #import "Util.h"
+
+#import "WelcomeViewController.h"
+#import "StampedAppDelegate.h"
+#import "StampCustomizerViewController.h"
+#import "TooltipView.h"
+
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
@@ -26,7 +33,11 @@
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)newsCountChanged:(NSNotification*)notification;
 - (void)reloadPanes:(NSNotification*)notification;
+
+@property (nonatomic, readonly) TooltipView* tooltipImageView;
+
 @end
+
 
 @implementation RootTabBarViewController
 
@@ -39,6 +50,7 @@
 @synthesize mustDoTabBarItem = mustDoTabBarItem_;
 @synthesize peopleTabBarItem = peopleTabBarItem_;
 @synthesize userStampBackgroundImageView = userStampBackgroundImageView_;
+@synthesize tooltipImageView = tooltipImageView_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -99,6 +111,8 @@
 
   if ([AccountManager sharedManager].currentUser)
     [self fillStampImageView];
+  
+
 }
 
 - (void)finishViewInit {
@@ -182,6 +196,7 @@
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
+  tooltipImageView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -192,6 +207,19 @@
 - (void)viewDidAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   [self.selectedViewController viewDidAppear:animated];
+  
+  if (!tooltipImageView_) {
+    tooltipImageView_ = [[TooltipView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
+    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, (self.view.frame.size.width-tooltipImageView_.frame.size.width)/2, 245);
+    tooltipImageView_.alpha = 0.0;
+    [self.view addSubview:tooltipImageView_];
+    [tooltipImageView_ release];
+  }
+  
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
+    if (self.selectedViewController == [viewControllers_ objectAtIndex:0])
+      [UIView  animateWithDuration:0.3 delay:1.0 options:0 animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
+
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -210,14 +238,23 @@
 
 - (IBAction)createStamp:(id)sender {
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
+  SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
+  vc.searchField.text = nil;
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"]) {
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasStamped"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    tooltipImageView_.alpha = 0.0;
+  }
+  
   if (self.tabBar.selectedItem != mustDoTabBarItem_) {
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
+  
 }
 
 - (void)newsCountChanged:(NSNotification*)notification {
@@ -259,6 +296,7 @@
     self.navigationItem.title = @"People";
   }
 
+  
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 
@@ -270,6 +308,16 @@
   [self.view insertSubview:newViewController.view atIndex:0];
   [newViewController viewDidAppear:NO];
   self.selectedViewController = newViewController;
+  
+  if (tooltipImageView_  &&  ![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"]) {
+    if (self.selectedViewController == [viewControllers_ objectAtIndex:0])
+
+      [UIView animateWithDuration:0.3 animations:^{tooltipImageView_.alpha = 1.0;}];
+    else
+      [UIView animateWithDuration:0.3 animations:^{tooltipImageView_.alpha = 0.0;}];
+  }
+
+    
 }
 
 @end

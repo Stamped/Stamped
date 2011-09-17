@@ -42,5 +42,6 @@
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIButton* addFavoriteButton;
+@property (nonatomic, retain) IBOutlet UIImageView* eDetailArrowImageView;
 
 @end

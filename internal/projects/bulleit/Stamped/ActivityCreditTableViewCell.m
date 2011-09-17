@@ -91,6 +91,9 @@
     disclosureArrowImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureImage];
     [self addSubview:disclosureArrowImageView_];
     [disclosureArrowImageView_ release];
+    
+    
+    
   }
   return self;
 }
@@ -124,6 +127,7 @@
 @implementation ActivityCreditTableViewCell
 
 @synthesize event = event_;
+@synthesize tooltipImageView = tooltipImageView_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
@@ -135,6 +139,28 @@
 		customView_ = [[ActivityCreditCellView alloc] initWithFrame:customViewFrame];
 		[self.contentView addSubview:customView_];
     [customView_ release];
+    /*
+    if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasReceivedCredit"]) {
+      tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_firstcred"]];
+      
+      CGRect frame = customViewFrame;
+      frame.size.height = tooltipImageView_.image.size.height;
+      
+      tooltipImageView_.frame = CGRectOffset(frame, 0, customViewFrame.size.height+16.0);
+      tooltipImageView_.contentMode = UIViewContentModeCenter;
+      
+      [self.contentView addSubview:tooltipImageView_];
+      [tooltipImageView_ release];
+      
+      frame = self.contentView.frame;
+      frame.size.height = CGRectGetMaxY(tooltipImageView_.frame);
+      self.contentView.frame = frame;
+      
+      //    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasReceivedCredit"];
+      //    [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+     */
+
   }
   return self;
 }
@@ -197,5 +223,7 @@
   [CATransaction commit];
   [customView_ setNeedsDisplayInRect:oldFrame];
   [customView_ setNeedsDisplayInRect:secondLayerFrame];
+  
+  
 }
 @end
