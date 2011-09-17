@@ -17,7 +17,7 @@ from gevent.pool    import Pool
 from pprint         import pprint, pformat
 from utils          import lazyProperty
 
-# third-party search helpers
+# third-party search API wrappers
 from GooglePlaces   import GooglePlaces
 from libs.apple     import AppleAPI
 from libs.AmazonAPI import AmazonAPI
@@ -132,7 +132,6 @@ class MongoEntitySearcher(EntitySearcher):
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
-        self.tempDB._collection.ensure_index([("search_id", pymongo.ASCENDING)])
         
         self.pool = Pool(32)
         self._init_cities()
@@ -278,6 +277,7 @@ class MongoEntitySearcher(EntitySearcher):
         # initiate external search queries #
         # -------------------------------- #
         
+        # search built-in entities database
         def _find_entity(ret):
             # only select certain fields to return to reduce data transfer
             fields = {
@@ -299,6 +299,7 @@ class MongoEntitySearcher(EntitySearcher):
                 except:
                     utils.printException()
         
+        # search apple itunes API
         def _find_apple_specific(ret, media, entity):
             try:
                 if entity is None:
@@ -323,6 +324,7 @@ class MongoEntitySearcher(EntitySearcher):
             except:
                 utils.printException()
         
+        # search apple itunes API for multiple variants (artist, album, song, etc.)
         def _find_apple(ret):
             try:
                 apple_pool = Pool(4)
@@ -338,11 +340,11 @@ class MongoEntitySearcher(EntitySearcher):
                     apple_pool.spawn(_find_apple_specific, ret, media='all', entity='allArtist')
                 
                 apple_pool.spawn(_find_apple_specific, ret, media='all', entity=None)
-                
                 apple_pool.join()
             except:
                 utils.printException()
         
+        # search amazon product API
         def _find_amazon(ret):
             try:
                 amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
@@ -356,11 +358,11 @@ class MongoEntitySearcher(EntitySearcher):
                     ret['amazon_results'].append((entity, -1))
             except:
                 utils.printException()
-
+        
         if full:
             pool.spawn(_find_amazon, wrapper)
             
-            if category_filter is None or category_filter is 'music':
+            if category_filter is None or category_filter == 'music' or category_filter == 'movie':
                 pool.spawn(_find_apple,  wrapper)
         
         pool.spawn(_find_entity, wrapper)
@@ -395,6 +397,7 @@ class MongoEntitySearcher(EntitySearcher):
             
             q = SON(q_params)
             
+            # search built-in places database via proximity
             def _find_places(ret):
                 place_results = self.placesDB._collection.command(q)
                 
@@ -413,6 +416,7 @@ class MongoEntitySearcher(EntitySearcher):
                     
                     wrapper['place_results'][e.entity_id] = (e, doc['dis'])
             
+            # search Google Places API
             def _find_google_places(ret):
                 try:
                     params = {
@@ -491,6 +495,7 @@ class MongoEntitySearcher(EntitySearcher):
             'place_results', 
         ]
         
+        # aggregate all results
         for key in result_keys:
             if key in wrapper:
                 for result in wrapper[key]:
@@ -548,6 +553,12 @@ class MongoEntitySearcher(EntitySearcher):
     def _prune_results(self, results, limit):
         output = []
         prune  = set()
+        
+        if limit is not None:
+            soft_limit = int((3 * limit) / 2)
+            
+            if len(results) > soft_limit:
+                results = results[0 : soft_limit]
         
         for i in xrange(len(results)):
             if i in prune:

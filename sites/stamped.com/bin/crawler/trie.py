@@ -15,60 +15,7 @@ from gevent.pool        import Pool
 from optparse           import OptionParser
 from pprint             import pprint, pformat
 
-from boto.s3.connection import S3Connection
-from boto.s3.key        import Key
-
 #-----------------------------------------------------------
-
-class S3AutocompleteDB(object):
-    
-    def __init__(self, bucket_name='stamped.com.static.images'):
-        # find or create bucket
-        # ---------------------
-        conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
-        rs = conn.get_all_buckets()
-        rs = filter(lambda b: b.name == bucket_name, rs)
-        
-        if 1 == len(rs):
-            self.bucket = rs[0]
-        else:
-            self.bucket = conn.create_bucket(bucket_name)
-        
-        self.bucket.set_acl('public-read')
-        self.bucket_name = bucket_name
-    
-    def add_key(self, name, value, content_type=None, apply_gzip=False):
-        assert isinstance(value, basestring)
-        
-        if apply_gzip:
-            name += '.gz'
-            
-            # TODO: why does zlib compression not work?
-            #value = zlib.compress(value, 6)
-            f = gzip.open('temp.gz', 'wb')
-            f.write(value)
-            f.close()
-            f = open('temp.gz', 'rb')
-            value = f.read()
-            f.close()
-        
-        key = Key(self.bucket, name)
-        
-        meta = { }
-        if content_type is not None:
-            meta['Content-Type'] = content_type
-        
-        if apply_gzip:
-            meta['Content-Encoding'] = 'gzip'
-        
-        if len(meta) > 0:
-            key.update_metadata(meta)
-        
-        # note that the order of setting the key's metadata, contents, and 
-        # ACL is important for some seriously stupid boto reason...
-        key.set_contents_from_string(value)
-        key.set_acl('public-read')
-        key.close()
 
 class Trie(object):
     
@@ -204,13 +151,14 @@ def main():
     
     trie = Trie()
     _globals['t'] = trie
+    importance_threshold = 20
     
     # weight places results to count for more when pruning the trie tree
     # later on for less important subtrees
     entries = placesDB._collection.find(fields={'title' : 1})
-    add_entries(entries, 'places', trie, 5.0)
+    add_entries(entries, 'places', trie, importance_threshold)
     
-    for s in [ ('song', 0.5), ('album', 0.5), ('artist', 0.5), ('book', 4.0), ('movie', 3.0) ]:
+    for s in [ ('song', 1.0), ('album', 1.0), ('artist', importance_threshold), ('book', importance_threshold), ('movie', 3.0) ]:
         entries = entityDB._collection.find({"subcategory" : s[0]}, fields={'title' : 1})
         add_entries(entries, s[0], trie, s[1])
     
@@ -222,7 +170,7 @@ def main():
     })
     
     print "pruning tree..."
-    trie.prune(max_depth=20, min_count=20)
+    trie.prune(max_depth=15, min_count=importance_threshold)
     
     pprint({
         'num_nodes' : trie.num_nodes(), 
@@ -230,11 +178,9 @@ def main():
         'avg_depth' : trie.avg_depth(), 
     })
     
-    def _print(tree):
-        print "%s) %d" % (tree.full().encode('ascii', 'replace'), tree.count)
-    trie.visit(_print)
-    
-    autocompleteDB = S3AutocompleteDB()
+    #def _print(tree):
+    #    print "%s) %d" % (tree.full().encode('ascii', 'replace'), tree.count)
+    #trie.visit(_print)
     
     out   = file('autocomplete.txt', 'w')
     names = set()
@@ -254,45 +200,7 @@ def main():
             out_name = orig_name.encode('ascii', 'replace')
             if out_name == orig_name:
                 out.write(orig_name + "\n")
-            
             return
-            
-            name = "search/%s.json" % name
-            
-            print "searching %s" % orig_name.encode('ascii', 'replace')
-            try:
-                results = stampedAPI.searchEntities(query=orig_name, limit=50, prefix=True)
-            except:
-                utils.printException()
-                time.sleep(1)
-                return
-            
-            if 0 == len(results):
-                return False
-            
-            autosuggest = []
-            for item in results:
-                item = HTTPEntityAutosuggest().importSchema(item).exportSparse()
-                autosuggest.append(item)
-            
-            value = json.dumps(autosuggest, sort_keys=True)
-            
-            data  = {
-                'name1' : orig_name.encode('ascii', 'replace'), 
-                'name2' : name, 
-                'count' : tree.count, 
-                'num_r' : len(results)
-            }
-            
-            pprint(data)
-            sys.stdout.flush()
-            
-            try:
-                autocompleteDB.add_key(name, value, content_type='application/json', apply_gzip=True)
-            except:
-                utils.printException()
-                time.sleep(1)
-                return
         except:
             utils.printException()
             time.sleep(1)

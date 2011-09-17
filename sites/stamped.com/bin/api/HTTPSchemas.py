@@ -338,14 +338,14 @@ class HTTPEntity(Schema):
             coordinates         = data.pop('coordinates', None)
             
             self.importData(data, overflow=True)
-
+            
             self.last_modified  = schema.timestamp.created
             
             # Place
             self.address        = schema.address
             self.neighborhood   = schema.neighborhood
             self.coordinates    = _coordinatesDictToFlat(coordinates)
-
+            
             if len(schema.address_components) > 0:
                 address = {}
                 for component in schema.address_components:
@@ -357,31 +357,31 @@ class HTTPEntity(Schema):
                 elif 'street_number' in address and 'route' in address:
                     self.address_street = "%s %s" % \
                         (address['street_number'], address['route'])
-
+                
                 if 'locality' in address:
                     self.address_city = address['locality']
-
+                
                 if 'administrative_area_level_1' in address:
                     self.address_state = address['administrative_area_level_1']
-
+                
                 if 'country' in address:
                     self.address_country = address['country']
-
+                
                 if 'postal_code' in address:
                     self.address_zip = address['postal_code']
-
+            
             # Contact
             self.phone          = schema.phone
             self.site           = schema.site
             self.hours          = schema.hoursOfOperation
             
             # Cross-Category
-
+            
             ### TODO: Unify these within Schemas.py where possible
             if self.category == 'book':
                 self.release_date   = schema.publish_date
                 self.length         = schema.num_pages
-
+            
             elif self.category == 'film':
                 try:
                     dateString = schema.original_release_date
@@ -391,20 +391,20 @@ class HTTPEntity(Schema):
                     self.release_date   = release_date
                 except:
                     self.release_date   = None
-
+                
                 self.length         = schema.track_length
                 self.rating         = schema.mpaa_rating
-
+                
                 if schema.ngenres != None:
                     for genre in schema.ngenres:
                         if self.genre == None:
                             self.genre = genre
                         else:
                             self.genre = "%s; %s" % (self.genre, genre)
-
+                
                 if schema.short_description != None:
                     self.desc = schema.short_description
-
+            
             elif self.category == 'music':
                 try:
                     dateString = schema.original_release_date
@@ -414,7 +414,7 @@ class HTTPEntity(Schema):
                     self.release_date   = release_date
                 except:
                     self.release_date   = None
-
+                
                 self.length         = schema.track_length
                 if schema.parental_advisory_id == 1:
                     self.rating     = "Parental Advisory"
@@ -460,8 +460,8 @@ class HTTPEntity(Schema):
                                     _encodeLinkShareDeepURL(itunes_url))
                 short_url   = _encodeiTunesShortURL(itunes_url)
                 
-                self.itunes_url         = deep_url
-                self.itunes_short_url   = short_url
+                self.itunes_url       = deep_url
+                self.itunes_short_url = short_url
             
             is_apple = 'apple' in schema
             
@@ -480,7 +480,7 @@ class HTTPEntity(Schema):
                 
                 # for an artist, only return up to 10 songs
                 if schema.subcategory == "artist":
-                    songs = songs[0:min(10, len(songs))]
+                    songs = songs[0: min(10, len(songs))]
                 
                 songs = list(song.song_name for song in songs)
                 self.songs = songs
@@ -497,6 +497,8 @@ class HTTPEntity(Schema):
     
     def _handle_image(self, url, is_apple):
         if is_apple:
+            # try to return the maximum-resolution apple photo possible if we have 
+            # a lower-resolution version stored in our db
             return url.replace('100x100', '200x200').replace('170x170', '200x200')
         
         return url
