@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import datetime, logging, os, threading, hashlib, random, time, 
+import datetime, logging, os, threading, hashlib, random, time
 import sys, traceback
 import inspect, pprint
 
