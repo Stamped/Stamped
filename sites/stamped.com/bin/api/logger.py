@@ -9,7 +9,7 @@ import Globals, utils
 import os, sys, pymongo, json
 from optparse import OptionParser
 from utils import lazyProperty
-from dateutil import tz
+from datetime import *
 
 from errors import Fail
 
@@ -58,10 +58,6 @@ def main():
     errors  = options.pop('show_errors', False)
     path    = options.pop('path', False)
 
-    ### TODO: Get rid of dateutil dependency
-    est = tz.gettz('America/New York')
-    utc = tz.gettz('UTC')
-
     if options['level'].lower() == 'debug':
         levels = ['debug', 'info', 'warning', 'error', 'critical']
     elif options['level'].lower() == 'info':
@@ -91,12 +87,14 @@ def main():
             print '%-10s %s' % ('ID:', logs[i]['request_id'])
 
         if 'begin' in logs[i]:
-            begin = logs[i]['begin'].replace(tzinfo=utc)
-            print '%-10s %s UTC / %s EST' % ('Begin:', begin, begin.astimezone(est))
-            
-        if 'finish' in logs[i]:
-            finish = logs[i]['finish'].replace(tzinfo=utc)
-            print '%-10s %s UTC / %s EST' % ('Finish:', finish, finish.astimezone(est))
+            begin_utc = logs[i]['begin']
+            begin_est = begin_utc - timedelta(hours=4)
+            # print '%-10s %s UTC / %s EST' % ('Begin:', begin, begin.astimezone(est))
+            print '%-10s %s' % ('Begin:', begin_est.strftime("%a %b %d %H:%M:%S.%f"))
+
+            if 'finish' in logs[i]:
+                duration = logs[i]['finish'] - begin_utc
+                print '%-10s %s seconds' % ('Duration:', duration.microseconds / 1000000.0)
             
         if 'token' in logs[i]:
             print '%-10s %s' % ('Token:', logs[i]['token'])
