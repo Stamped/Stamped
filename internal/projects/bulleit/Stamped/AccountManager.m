@@ -385,8 +385,7 @@ static AccountManager* sharedAccountManager_ = nil;
 
     [params setObject:self.authToken.accessToken forKey:@"oauth_token"];
     request.params = params;
-    
-    if (request.isGET) {
+    if (request.isGET && [request.URL isKindOfClass:[RKURL class]]) {
       request.resourcePath = [request.resourcePath appendQueryParams:params];
       request.params = nil;
     }

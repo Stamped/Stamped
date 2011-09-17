@@ -155,6 +155,9 @@
 		7E7E5CB71423E1D1008F3E89 /* temp_exampleUsersColors@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E5CB61423E1D1008F3E89 /* temp_exampleUsersColors@2x.png */; };
 		7E7E5CB91423E447008F3E89 /* stamp_selection_check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E5CB81423E447008F3E89 /* stamp_selection_check@2x.png */; };
 		7E8A880114240B5B00B0092C /* SearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E8A880014240B5B00B0092C /* SearchResult.m */; };
+		7E8A88031424298100B0092C /* temp_swipeContinue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */; };
+		7E8A880914242A4C00B0092C /* icon1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8A880814242A4B00B0092C /* icon1@2x.png */; };
+		7E8A880B14242A5300B0092C /* icon1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8A880A14242A5300B0092C /* icon1.png */; };
 		7E8B1DEA13E5FF9C0060646D /* ActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE813E5FF9C0060646D /* ActivityViewController.m */; };
 		7E8B1DEB13E5FF9C0060646D /* ActivityViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */; };
 		7E90B03B13FF081900875522 /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E90B03913FF081900875522 /* TodoViewController.m */; };
@@ -628,6 +631,9 @@
 		7E7E5CB81423E447008F3E89 /* stamp_selection_check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_selection_check@2x.png"; sourceTree = "<group>"; };
 		7E8A87FF14240B5B00B0092C /* SearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchResult.h; sourceTree = "<group>"; };
 		7E8A880014240B5B00B0092C /* SearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchResult.m; sourceTree = "<group>"; };
+		7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "temp_swipeContinue@2x.png"; sourceTree = "<group>"; };
+		7E8A880814242A4B00B0092C /* icon1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon1@2x.png"; path = "../icon1@2x.png"; sourceTree = "<group>"; };
+		7E8A880A14242A5300B0092C /* icon1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon1.png; path = ../icon1.png; sourceTree = "<group>"; };
 		7E8B1DE713E5FF9C0060646D /* ActivityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityViewController.h; sourceTree = "<group>"; };
 		7E8B1DE813E5FF9C0060646D /* ActivityViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ActivityViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7E8B1DE913E5FF9C0060646D /* ActivityViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ActivityViewController.xib; path = ../Interfaces/ActivityViewController.xib; sourceTree = "<group>"; };
@@ -1107,6 +1113,7 @@
 			isa = PBXGroup;
 			children = (
 				7E530A2C141592C100DEF881 /* stamped_logo_large@2x.png */,
+				7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */,
 				7E0A87B1141672110013AC4D /* sign_up_header@2x.png */,
 				7E1E1078141571D700E6B980 /* create_account_button_active@2x.png */,
 				7E1E1079141571D700E6B980 /* create_account_button@2x.png */,
@@ -1334,6 +1341,8 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7E8A880A14242A5300B0092C /* icon1.png */,
+				7E8A880814242A4B00B0092C /* icon1@2x.png */,
 				7EE24A24142147350027DBB6 /* Stamp Customizer */,
 				7E5406DF141550D000912463 /* First run */,
 				7EB29D831414657C003A8EA3 /* Inbox */,
@@ -2042,6 +2051,9 @@
 				7E7E5CB51423B3B4008F3E89 /* welcome_blank_stamp@2x.png in Resources */,
 				7E7E5CB71423E1D1008F3E89 /* temp_exampleUsersColors@2x.png in Resources */,
 				7E7E5CB91423E447008F3E89 /* stamp_selection_check@2x.png in Resources */,
+				7E8A88031424298100B0092C /* temp_swipeContinue@2x.png in Resources */,
+				7E8A880914242A4C00B0092C /* icon1@2x.png in Resources */,
+				7E8A880B14242A5300B0092C /* icon1.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

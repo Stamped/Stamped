@@ -183,7 +183,8 @@ def main():
             data['title'] = utils.normalize(entity.title)
             data['subcategory'] = utils.normalize(entity.subcategory)
             if 'address' in entity:
-                data['addr'] = utils.normalize(entity.details.place.address)
+                data['addr'] = utils.normalize(entity.address)
+            #data['subtitle'] = utils.normalize(entity.subtitle)
         
         if distance >= 0:
             data['distance'] = distance

@@ -60,7 +60,6 @@
 
 @implementation SearchEntitiesTableViewCell
 
-@synthesize entityObject = entityObject_;
 @synthesize searchResult = searchResult_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
@@ -77,26 +76,11 @@
 }
 
 - (void)dealloc {
-  self.entityObject = nil;
+  self.searchResult = nil;
   [super dealloc];
 }
 
-- (void)setEntityObject:(Entity*)entityObject {
-  if (entityObject != entityObject_) {
-    [entityObject_ release];
-    entityObject_ = [entityObject retain];
-    if (entityObject) {
-      customView_.titleLabel.text = entityObject.title;
-      customView_.subtitleLabel.text = entityObject.subtitle;
-      //customView_.categoryImageView.image = entityObject.largeCategoryImage;
-      //customView_.categoryImageView.highlightedImage =
-      //    [Util whiteMaskedImageUsingImage:entityObject.largeCategoryImage];
-
-    }
-  }
-}
-
-- (void)setSearchResult:(SearchResult *)searchResult {
+- (void)setSearchResult:(SearchResult*)searchResult {
   if (searchResult_ != searchResult) {
     [searchResult_ release];
     searchResult_ = [searchResult retain];
