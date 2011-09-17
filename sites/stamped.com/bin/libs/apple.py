@@ -54,6 +54,11 @@ class AppleAPICall(object):
             if 'term' not in params:
                 raise AppleAPIError("required parameter 'term' missing to api method %s" % self.method)
         
+        if 'term' in params:
+            term = params['term']
+            term = term.replace(' ', '+')
+            params['term'] = term
+        
         url    = self._get_url(params)
         result = json.loads(utils.getFile(url))
         
@@ -70,7 +75,7 @@ class AppleAPICall(object):
     
     def transform_result(self, result):
         if result is None or not 'results' in result:
-            return result
+            return []
         
         results = result['results']
         output  = []
@@ -99,7 +104,9 @@ class AppleAPICall(object):
                     entity.view_url = result['trackViewUrl']
                     
                     if 'trackTimeMillis' in result:
-                        entity.track_length = result['trackTimeMillis'] / 1000.0
+                        length = result['trackTimeMillis']
+                        if length is not None:
+                            entity.track_length = length / 1000.0
                     
                     if 'trackPrice' in result:
                         price = result['trackPrice']
@@ -171,7 +178,6 @@ class AppleAPICall(object):
             except:
                 from pprint import pprint
                 pprint(result)
-                raise
         
         return output
 

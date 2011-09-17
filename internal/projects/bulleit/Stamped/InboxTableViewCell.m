@@ -36,6 +36,7 @@ static const CGFloat kCellTopPadding = 10.0;
 static const CGFloat kSubstringMaxWidth = 218.0;
 static const CGFloat kStampSize = 18.0;
 static const CGFloat kTitleMaxWidth = 210.0;
+static const CGFloat kSubtitleDefaultWidth = 192.0;
 static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 @interface InboxCellView : UIView {
@@ -47,6 +48,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   UILabel* userNameLabel_;
   UILabel* commentLabel_;
   UILabel* numCommentsLabel_;
+  UILabel* timestampLabel_;
   MediumUserImageView* topUserImageView_;
   MediumUserImageView* middleUserImageView_;
   MediumUserImageView* bottomUserImageView_;
@@ -61,6 +63,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
+- (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color;
+- (void)invertColors:(BOOL)inverted;
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated;
+- (void)stampChanged:(NSNotification*)notification;
+- (void)updateTimestamp;
 
 // This is magic with UITableViewCell. No need to set this explicitly.
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
@@ -74,13 +81,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @property (nonatomic, readonly) UILabel* subtitleLabel;
 @property (nonatomic, readonly) UIImageView* typeImageView;
 
-@end
-
-@interface InboxCellView ()
-- (NSAttributedString*)titleAttributedStringWithColor:(UIColor*)color;
-- (void)invertColors:(BOOL)inverted;
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated;
-- (void)stampChanged:(NSNotification*)notification;
 @end
 
 @implementation InboxCellView
@@ -111,13 +111,22 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     
     subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 4,
                                                                CGRectGetMinY(typeImageView_.frame) + 1, 
-                                                               175,
+                                                               kSubtitleDefaultWidth,
                                                                CGRectGetHeight(typeImageView_.frame))];
     subtitleLabel_.textColor = [UIColor stampedLightGrayColor];
     subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:10];
     [self addSubview:subtitleLabel_];
     [subtitleLabel_ release];
+
+    timestampLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    timestampLabel_.backgroundColor = [UIColor clearColor];
+    timestampLabel_.textAlignment = UITextAlignmentRight;
+    timestampLabel_.textColor = [UIColor stampedLightGrayColor];
+    timestampLabel_.highlightedTextColor = [UIColor whiteColor];
+    timestampLabel_.font = [UIFont fontWithName:@"Helvetica" size:10];
+    [self addSubview:timestampLabel_];
+    [timestampLabel_ release];
 
     cameraImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(293, 34, 17, 14)];
     cameraImageView_.contentMode = UIViewContentModeCenter;
@@ -210,10 +219,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)invertColors:(BOOL)inverted {
   UIColor* titleColor = [UIColor stampedDarkGrayColor];
-  UIColor* badgeColor = [UIColor lightGrayColor];
   if (inverted) {
     titleColor = [UIColor whiteColor];
-    badgeColor = [UIColor whiteColor];
   }
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
@@ -301,13 +308,25 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   [self setNeedsDisplay];
 }
 
+- (void)updateTimestamp {
+  timestampLabel_.text = [Util userReadableTimeSinceDate:[(Stamp*)stamps_.lastObject created]];
+  [timestampLabel_ sizeToFit];
+  CGRect timeFrame = timestampLabel_.frame;  // heh.
+  timeFrame.origin.x = 283 - timeFrame.size.width;
+  timeFrame.origin.y = 74;
+  timestampLabel_.frame = timeFrame;
+  CGRect subtitleFrame = subtitleLabel_.frame;
+  subtitleFrame.size.width = kSubtitleDefaultWidth - CGRectGetWidth(timeFrame);
+  subtitleLabel_.frame = subtitleFrame;
+  [self setNeedsDisplay];
+}
+
 - (void)setStamps:(NSArray*)stamps {
   if (stamps_ == stamps)
     return;
 
   stamps_ = [stamps copy];
   Stamp* stamp = [stamps_ lastObject];
-  //NSLog(@"%@", [Util userReadableTimeSinceDate:stamp.created]);
   
   cameraImageView_.hidden = stamp.imageURL ? NO : YES;
   disclosureImageView_.hidden = !cameraImageView_.hidden;
@@ -347,6 +366,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                                  name:kStampDidChangeNotification
                                                object:s];
   }
+  [self updateTimestamp];
 }
 
 - (void)setHidePhotos:(BOOL)hidePhotos {

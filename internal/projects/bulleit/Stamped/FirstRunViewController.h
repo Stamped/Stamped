@@ -23,6 +23,7 @@ willCreateUserWithName:(NSString*)name
               username:(NSString*)handle
               password:(NSString*)password
                  email:(NSString*)email
+          profileImage:(UIImage*)image
            phoneNumber:(NSString*)number;
 
 @end

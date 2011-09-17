@@ -16,12 +16,14 @@
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
 #import "STNavigationBar.h"
+#import "STSearchField.h"
 #import "Util.h"
 
 #import "WelcomeViewController.h"
 #import "StampedAppDelegate.h"
 #import "StampCustomizerViewController.h"
 #import "TooltipView.h"
+
 
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
@@ -131,15 +133,6 @@
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
-  
-/*  WelcomeViewController* welcomeVC = [[WelcomeViewController alloc] init];
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  delegate.navigationController.navigationBarHidden = YES;
-  [delegate.navigationController pushViewController:welcomeVC animated:YES];
-  [welcomeVC release];*/
-//  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithNibName:@"StampCustomizerViewController" bundle:nil];
-//  [self presentModalViewController:vc animated:YES];
-//  [vc release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
@@ -245,6 +238,8 @@
 
 - (IBAction)createStamp:(id)sender {
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
+  SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
+  vc.searchField.text = nil;
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 

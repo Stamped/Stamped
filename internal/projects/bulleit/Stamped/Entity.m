@@ -65,13 +65,6 @@
   return [UIImage imageNamed:@"cat_icon_other"];
 }
 
-- (UIImage*)largeCategoryImage {
-  if (self.category)
-    return [UIImage imageNamed:[NSString stringWithFormat:@"cat_icon_%@_large", [self.category lowercaseString]]];
-
-  return [UIImage imageNamed:@"cat_icon_other_large"];
-}
-
 - (EntityCategory)entityCategory {
   NSString* cat = self.category;
   if ([cat isEqualToString:@"food"]) {
@@ -105,6 +98,10 @@
   }
   
   return formattedNum;
+}
+
+- (id)valueForUndefinedKey:(NSString*)key {
+  return nil;
 }
 
 @end

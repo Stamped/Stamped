@@ -177,7 +177,7 @@ static AccountManager* sharedAccountManager_ = nil;
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self sendLoginRequest];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
-    [self.firstRunViewController signUpFailed:@"Womp womp"];
+    [self.firstRunViewController signUpFailed:nil];
     NSLog(@"Registration error = %@", error);
   }
 }
@@ -186,6 +186,10 @@ static AccountManager* sharedAccountManager_ = nil;
   // User information request.
   if ([object isKindOfClass:[User class]]) {
     [self storeCurrentUser:object];
+    if (firstInstall_) {
+      [self.firstRunViewController signUpSucess];
+      firstInstall_ = NO;
+    }
     return;
   } else if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
     // Simple log in: store the OAuth token.
@@ -202,9 +206,7 @@ static AccountManager* sharedAccountManager_ = nil;
     NSLog(@"did load object: %@", object);
     [self storeOAuthToken:[object objectForKey:@"token"]];
     [self sendUserInfoRequest];
-    //[self storeCurrentUser:[object objectForKey:@"user"]];
-
-    [self.firstRunViewController signUpSucess];
+    firstInstall_ = YES;
   }
 
   if (firstRun_) {
@@ -315,17 +317,18 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)viewController:(FirstRunViewController*)viewController
-willCreateUserWithName:(NSString*)name
-              username:(NSString*)handle
-              password:(NSString*)password
-                 email:(NSString*)email
-           phoneNumber:(NSString*)number {
+    willCreateUserWithName:(NSString*)name
+                  username:(NSString*)handle
+                  password:(NSString*)password
+                     email:(NSString*)email
+              profileImage:(UIImage*)image
+               phoneNumber:(NSString*)number {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
   if (![name length] || ![handle length] || ![password length] || ![email length])
     return [self.firstRunViewController signUpFailed:@"Please fill out all required fields."];
-  
+
   [passwordKeychainItem_ setObject:handle forKey:(id)kSecAttrAccount];
   [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];
 
@@ -340,16 +343,22 @@ willCreateUserWithName:(NSString*)name
   if (![number length])
     number = nil;
 
-  loader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-      name, @"name",
-      email, @"email",
-      handle, @"screen_name",
-      password, @"password",
-      kClientID, @"client_id",
-      kClientSecret, @"client_secret",
-      number, @"phone",  // Last so it can be nil.
-      nil
-  ];
+  RKParams* params = [RKParams paramsWithDictionary:
+      [NSDictionary dictionaryWithObjectsAndKeys:name, @"name",
+                                                 email, @"email",
+                                                 handle, @"screen_name",
+                                                 password, @"password",
+                                                 kClientID, @"client_id",
+                                                 kClientSecret, @"client_secret",
+                                                 number, @"phone",  // Last so it can be nil.
+                                                 nil]];
+  
+  if (image) {
+    NSData* imageData = UIImageJPEGRepresentation(image, 0.8);
+    [params setData:imageData MIMEType:@"image/jpeg" forParam:@"profile_image"];
+  }
+  loader.params = params;
+  
   [oAuthRequestQueue_ addRequest:loader];
 }
 

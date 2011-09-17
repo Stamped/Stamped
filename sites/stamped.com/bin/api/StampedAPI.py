@@ -220,8 +220,9 @@ class StampedAPI(AStampedAPI):
         return account
     
     def updateProfileImage(self, authUserId, data):
-        image = self._imageDB.getImage(data)
-        self._imageDB.addProfileImage(authUserId, image)
+        image   = self._imageDB.getImage(data)
+        user    = self._userDB.getUser(authUserId)
+        self._imageDB.addProfileImage(user.screen_name, image)
         
         return True
 
@@ -660,7 +661,7 @@ class StampedAPI(AStampedAPI):
                                                         limit=limit, 
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
-                                                        full=False, 
+                                                        full=True, 
                                                         prefix=prefix)
         output  = []
         
@@ -926,7 +927,7 @@ class StampedAPI(AStampedAPI):
 
         # Add user objects back into stamp
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
-            userIds=userIds, entityIds={entity.entity_id: entity})
+            userIds=userIds, entityIds={entity.entity_id: entity.exportSchema(EntityMini())})
 
         # Add a reference to the stamp in the user's collection
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
@@ -1259,7 +1260,6 @@ class StampedAPI(AStampedAPI):
         user = self._userDB.getUserByScreenName(screenName)
         stamp = self._stampDB.getStampFromUserStampNum(user.user_id, \
                                                         stampNumber)
-        print stamp
         stamp = self._enrichStampObjects(stamp)
 
         if stamp.user.privacy == True:
@@ -1920,6 +1920,26 @@ class StampedAPI(AStampedAPI):
     #       #   #  #  #  #  #    #   #   #      
     #       #    # #   ##   #    #   #   ###### 
     """
+    
+    def _convertSearchId(self, search_id):
+        if search_id.startswith('T_'):
+            # temporary entity_id; lookup in tempentities collection and 
+            # merge result into primary entities db
+            doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
+            
+            if doc is None:
+                return None
+            
+            entity = self._tempEntityDB._convertFromMongo(doc)
+            del entity.entity_id
+            del entity.search_id
+            
+            entity = self._entityMatcher.addOne(entity)
+            assert entity.entity_id is not None
+            return entity.entity_id
+        else:
+            # already a valid entity id
+            return search_id
     
     def _addEntity(self, entity):
         if entity is not None:

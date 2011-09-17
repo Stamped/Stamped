@@ -14,7 +14,7 @@ try:
 
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
     psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
-    use_sqlite = True
+    use_sqlite = False
 except ImportError:
     utils.log("Warning: missing required psycopg2 module")
     use_sqlite = True

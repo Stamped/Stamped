@@ -111,6 +111,7 @@ class HTTPAccountNew(Schema):
         self.password           = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
         self.phone              = SchemaElement(int)
+        self.profile_image      = SchemaElement(basestring, normalize=False)
 
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'Account':
@@ -318,6 +319,7 @@ class HTTPEntity(Schema):
         self.label              = SchemaElement(basestring)
         self.albums             = SchemaList(SchemaElement(basestring))
         self.songs              = SchemaList(SchemaElement(basestring))
+        self.preview_url        = SchemaElement(basestring)
         
         # Affiliates
         self.opentable_url      = SchemaElement(basestring)
@@ -329,8 +331,8 @@ class HTTPEntity(Schema):
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setSubtitle
-            setSubtitle(schema)
+            from Entity import setFields
+            setFields(schema)
             
             data                = schema.value
             coordinates         = data.pop('coordinates', None)
@@ -439,6 +441,9 @@ class HTTPEntity(Schema):
             self.artist_name    = schema.artist_display_name
             self.album_name     = schema.album_name
             self.label          = schema.label_studio
+            
+            if 'preview_url' in schema:
+                self.preview_url = schema.preview_url
             
             # Affiliates
             if schema.sources.openTable.reserveURL != None:
@@ -564,21 +569,29 @@ class HTTPEntityEdit(Schema):
 
 class HTTPEntityAutosuggest(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
+        self.search_id          = SchemaElement(basestring, required=True)
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, required=True)
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
-            from Entity import setSubtitle
-            setSubtitle(schema)
-            self.importData(schema.value, overflow=True)
-            
-            if schema.address is not None:
-                self.subtitle = schema.address
+            from Entity import setFields
+            setFields(schema)
+
+            if schema.search_id is not None:
+                self.search_id = schema.search_id
+
+            else:
+                self.search_id = schema.entity_id
+            assert self.search_id is not None
+
+            self.title = schema.title
+            self.subtitle = schema.subtitle
+            self.category = schema.category
+
             if self.subtitle is None:
-                self.subtitle = schema.subcategory
+                entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
         else:
             raise NotImplementedError
         return self
@@ -660,10 +673,10 @@ class HTTPStamp(Schema):
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
 
-            stamp_title = schema.entity.title.replace(' ', '_').encode('ascii', 'ignore')
+            stamp_title = schema.entity.title.replace(' ', '-').encode('ascii', 'ignore')
             stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
             self.url = 'http://dev.stamped.com/%s/stamps/%s/%s' % \
-                (schema.user.user_id, schema.stamp_num, stamp_title)
+                (schema.user.screen_name, schema.stamp_num, stamp_title)
 
         else:
             raise NotImplementedError
@@ -671,7 +684,8 @@ class HTTPStamp(Schema):
 
 class HTTPStampNew(Schema):
     def setSchema(self):
-        self.entity_id          = SchemaElement(basestring, required=True)
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring)
         self.credit             = SchemaList(SchemaElement(basestring), delimiter=',')
         self.image              = SchemaElement(basestring, normalize=False)

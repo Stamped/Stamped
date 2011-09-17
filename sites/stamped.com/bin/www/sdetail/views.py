@@ -14,24 +14,25 @@ from HTTPSchemas import *
 from api.MongoStampedAPI import MongoStampedAPI
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
+from plugins.minidetector import detect_mobile
 
 stampedAPI  = MongoStampedAPI()
 
-
+@detect_mobile
 def show(request, **kwargs):
-
-    screenName = kwargs.pop('screen_name', None)
-    stampNum = kwargs.pop('stamp_num', None)
+    screenName  = kwargs.pop('screen_name', None)
+    stampNum    = kwargs.pop('stamp_num', None)
+    mobile      = kwargs.pop('mobile', False)
     try:
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
         # stamp['credit'] = stamp['credit'][:1]
-        return render_to_response('sdetail.html', stamp)
+        template = 'sdetail.html'
+        if request.mobile or mobile:
+            template = 'sdetail-mobile.html'
+        return render_to_response(template, stamp)
     except:
         raise Http404
-    #     return HttpResponse("Whoa that's messed up")
 
-    """
-    URL Regex:
-    name = name.lower().replace(' ', '_').encode('ascii', 'ignore')
-    name = re.sub('([^a-zA-Z0-9._-])', '', name)
-    """
+def mobile(request, **kwargs):
+    kwargs['mobile'] = True
+    return show(request, **kwargs)

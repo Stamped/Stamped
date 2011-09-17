@@ -20,6 +20,7 @@
 #import "Favorite.h"
 #import "Stamp.h"
 #import "User.h"
+#import "SearchResult.h"
 #import "OAuthToken.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
@@ -125,7 +126,11 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   RKObjectMapping* registerMapping = [RKObjectMapping serializationMapping];
   [registerMapping mapRelationship:@"user" withMapping:userMapping];
   [registerMapping mapRelationship:@"token" withMapping:oauthMapping];
-
+  
+  RKManagedObjectMapping* searchResultMapping = [RKObjectMapping mappingForClass:[SearchResult class]];
+  [searchResultMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", @"search_id", @"searchID", nil];
+  [searchResultMapping mapAttributes:@"category", @"title", @"subtitle", nil];
+  
   // Example date string: 2011-07-19 20:49:42.037000
   [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss.SSSSSS" inTimeZone:nil];
   
@@ -137,6 +142,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [objectManager.mappingProvider setMapping:favoriteMapping forKeyPath:@"Favorite"];
   [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
   [objectManager.mappingProvider setMapping:registerMapping forKeyPath:@"Registration"];
+
+  [objectManager.mappingProvider setMapping:searchResultMapping forKeyPath:@"SearchResult"];
 
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];

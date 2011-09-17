@@ -10,6 +10,7 @@
 
 @class Entity;
 @class SearchEntitiesCellView;
+@class SearchResult;
 
 @interface SearchEntitiesTableViewCell : UITableViewCell {
  @private  
@@ -19,5 +20,6 @@
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
 @property (nonatomic, retain) Entity* entityObject;
+@property (nonatomic, retain) SearchResult* searchResult;
 
 @end

@@ -10,6 +10,7 @@
 
 #import <CoreText/CoreText.h>
 #import <MobileCoreServices/UTCoreTypes.h>
+#import <RestKit/CoreData/CoreData.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
@@ -19,6 +20,7 @@
 #import "STNavigationBar.h"
 #import "Notifications.h"
 #import "Stamp.h"
+#import "SearchResult.h"
 #import "UserImageView.h"
 #import "Util.h"
 #import "User.h"
@@ -66,9 +68,14 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, retain) UIResponder* firstResponder;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
+@property (nonatomic, retain) id objectToStamp;
 @end
 
 @implementation CreateStampViewController
+
+@synthesize entityObject = entityObject_;
+@synthesize creditedUser = creditedUser_;
+@synthesize newEntity = newEntity_;
 
 @synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
@@ -98,10 +105,13 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize tooltipImageView = tooltipImageView_;
 @synthesize creditLabel = creditLabel_;
 
+@synthesize objectToStamp = objectToStamp_;
+
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
-    entityObject_ = [entityObject retain];
+    self.entityObject = entityObject;
+    self.objectToStamp = entityObject;
   }
   return self;
 }
@@ -109,18 +119,34 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (id)initWithEntityObject:(Entity*)entityObject creditedTo:(User*)user {
   self = [self initWithEntityObject:entityObject];
   if (self) {
-    creditedUser_ = [user retain];
+    self.creditedUser = user;
+  }
+  return self;
+}
+
+- (id)initWithSearchResult:(SearchResult*)searchResult {
+  self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
+  if (self) {
+    if (!searchResult.entityID && !searchResult.searchID) {
+      newEntity_ = YES;
+      self.entityObject = [Entity object];
+      entityObject_.title = searchResult.title;
+      self.objectToStamp = entityObject_;
+    } else {
+      self.objectToStamp = searchResult;
+    }
   }
   return self;
 }
 
 - (void)dealloc {
-  [entityObject_ release];
-  [creditedUser_ release];
+  self.entityObject = nil;
+  self.creditedUser = nil;
   self.stampPhoto = nil;
   self.reasoningText = nil;
   self.creditedUserText = nil;
   self.firstResponder = nil;
+  self.objectToStamp = nil;
 
   [super dealloc];
 }
@@ -133,7 +159,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
 
-  editButton_.hidden = entityObject_.entityID != nil;
+  editButton_.hidden = !newEntity_;
   
   ribbonedContainerView_.layer.shadowOpacity = 0.1;
   ribbonedContainerView_.layer.shadowOffset = CGSizeMake(0, 1);
@@ -315,9 +341,10 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  titleLabel_.text = entityObject_.title;
-  detailLabel_.text = entityObject_.subtitle;
-  categoryImageView_.image = entityObject_.categoryImage;
+  
+  titleLabel_.text = [objectToStamp_ valueForKey:@"title"];
+  detailLabel_.text = [objectToStamp_ valueForKey:@"subtitle"];
+  categoryImageView_.image = [objectToStamp_ valueForKey:@"categoryImage"];
   CGSize stringSize = [titleLabel_.text sizeWithFont:titleLabel_.font
                                             forWidth:CGRectGetWidth(titleLabel_.frame)
                                        lineBreakMode:titleLabel_.lineBreakMode];
@@ -487,7 +514,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 - (IBAction)editButtonPressed:(id)sender {
   EditEntityViewController* editViewController =
-      [[EditEntityViewController alloc] initWithEntity:entityObject_];
+      [[EditEntityViewController alloc] initWithEntityObject:entityObject_];
   [self.navigationController presentModalViewController:editViewController animated:YES];
   [editViewController release];
 }
@@ -505,10 +532,10 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (savePhoto_ && self.stampPhoto)
     UIImageWriteToSavedPhotosAlbum(self.stampPhoto, nil, nil, nil);
 
-  if (entityObject_.entityID) {
-    [self sendSaveStampRequest];
-  } else {
+  if (entityObject_ && !entityObject_.entityID) {
     [self sendSaveEntityRequest];
+  } else {
+    [self sendSaveStampRequest];
   }
 }
 
@@ -626,10 +653,16 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 - (void)sendSaveStampRequest {
   NSString* credit = [creditTextField_.text stringByReplacingOccurrencesOfString:@" " withString:@""];
-  RKParams* params = [RKParams paramsWithDictionary:[NSDictionary dictionaryWithObjectsAndKeys:
-      reasoningTextView_.text, @"blurb",
-      credit, @"credit",
-      entityObject_.entityID, @"entity_id", nil]];
+  NSMutableDictionary* paramsDictionary = [NSMutableDictionary dictionary];
+  [paramsDictionary setValue:reasoningTextView_.text forKey:@"blurb"];
+  [paramsDictionary setValue:credit forKey:@"credit"];
+  if ([objectToStamp_ valueForKey:@"entityID"]) {
+    [paramsDictionary setValue:[objectToStamp_ valueForKey:@"entityID"] forKey:@"entity_id"];
+  } else if ([objectToStamp_ valueForKey:@"searchID"]) {
+    [paramsDictionary setValue:[objectToStamp_ valueForKey:@"searchID"] forKey:@"search_id"];
+  }
+  NSLog(@"Params dictionary: %@", paramsDictionary);
+  RKParams* params = [RKParams paramsWithDictionary:paramsDictionary];
 
   if (self.stampPhoto) {
     NSData* imageData = UIImageJPEGRepresentation(self.stampPhoto, 0.8);
@@ -687,13 +720,12 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [entityObject_.managedObjectContext save:NULL];
     [self sendSaveStampRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
-    Stamp* stamp = object;
+    Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];
     stamp.temporary = [NSNumber numberWithBool:NO];
-    [entityObject_ addStampsObject:stamp];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                         object:stamp];
-    entityObject_.favorite.complete = [NSNumber numberWithBool:YES];
-    entityObject_.favorite.stamp = stamp;
+    
+    stamp.entityObject.favorite.complete = [NSNumber numberWithBool:YES];
     [stamp.managedObjectContext save:NULL];
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                         object:stamp];

@@ -152,8 +152,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
     [sanitizedNumbers addObject:num];
   }
-  NSLog(@"Phone numbers = %@", sanitizedNumbers);
-  NSLog(@"Emails = %@", allEmails);
   [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
 }
 
@@ -270,12 +268,27 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
-  NSString* leftText = @"Finding friends who use Stamped...";
-  if (twitterFriends_ || contactFriends_)
-    leftText = @"Friends using Stamped";
 
-  view.leftLabel.text = leftText;
-  view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
+  if (findSource_ == FindFriendsFromTwitter && twitterFriends_) {
+    if (twitterFriends_.count == 0) {
+      view.leftLabel.text = @"No Twitter friends are using Stamped right now.";
+      view.rightLabel.text = nil;
+    } else {
+      view.leftLabel.text = @"Twitter friends using Stamped";
+      view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
+    }
+  } else if (findSource_ == FindFriendsFromContacts && contactFriends_) {
+    if (contactFriends_.count == 0) {
+      view.leftLabel.text = @"No phone contacts are using Stamped right now.";
+      view.rightLabel.text = nil;
+    } else {
+      view.leftLabel.text = @"Phone contacts using Stamped";
+      view.rightLabel.text = [NSString stringWithFormat:@"%u", contactFriends_.count];
+    }
+  } else {
+    view.leftLabel.text = @"Finding friends who use Stamped...";
+    view.rightLabel.text = @"...";
+  }
   return view;
 }
 
@@ -292,7 +305,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
   nippleFrame.origin.x = targetMidX - (nippleMidX - nippleMinX);
 
-  [UIView animateWithDuration:0.3
+  [UIView animateWithDuration:0.2
                         delay:0
                       options:UIViewAnimationCurveEaseOut
                    animations:^{
@@ -446,8 +459,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   } else if ([objectLoader.resourcePath isEqualToString:kStampedPhoneFriendsURI] ||
              [objectLoader.resourcePath isEqualToString:kStampedEmailFriendsURI]) {
     if (objects.count == 0) {
-      if (!self.contactFriends)
+      if (!self.contactFriends) {
         self.contactFriends = objects;
+        [self.tableView reloadData];
+      }
       return;
     }
 

@@ -10,14 +10,17 @@ import logs, math, pymongo, re, string
 import CityList
 
 from EntitySearcher import EntitySearcher
-from GooglePlaces   import GooglePlaces
-from libs.AmazonAPI import AmazonAPI
 from Schemas        import Entity
 from difflib        import SequenceMatcher
 from pymongo.son    import SON
 from gevent.pool    import Pool
 from pprint         import pprint, pformat
 from utils          import lazyProperty
+
+# third-party search helpers
+from GooglePlaces   import GooglePlaces
+from libs.apple     import AppleAPI
+from libs.AmazonAPI import AmazonAPI
 
 class MongoEntitySearcher(EntitySearcher):
     subcategory_weights = {
@@ -47,7 +50,7 @@ class MongoEntitySearcher(EntitySearcher):
         #           music
         # --------------------------
         'artist'            : 55, 
-        'song'              : 20, 
+        'song'              : 25, 
         'album'             : 25, 
         
         # --------------------------
@@ -95,7 +98,7 @@ class MongoEntitySearcher(EntitySearcher):
         'amazon'            : 90, 
         'openTable'         : 110, 
         'factual'           : 5, 
-        'apple'             : 75, 
+        'apple'             : 80, 
         'zagat'             : 95, 
         'urbanspoon'        : 80, 
         'nymag'             : 95, 
@@ -125,10 +128,13 @@ class MongoEntitySearcher(EntitySearcher):
         self.api = api
         self.entityDB = api._entityDB
         self.placesDB = api._placesEntityDB
+        self.tempDB   = api._tempEntityDB
         
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
+        self.tempDB._collection.ensure_index([("search_id", pymongo.ASCENDING)])
         
+        self.pool = Pool(32)
         self._init_cities()
     
     def _init_cities(self):
@@ -166,6 +172,10 @@ class MongoEntitySearcher(EntitySearcher):
     def _amazonAPI(self):
         return AmazonAPI()
     
+    @lazyProperty
+    def _appleAPI(self):
+        return AppleAPI()
+    
     def getSearchResults(self, 
                          query, 
                          coords=None, 
@@ -174,6 +184,11 @@ class MongoEntitySearcher(EntitySearcher):
                          subcategory_filter=None, 
                          full=False, 
                          prefix=False):
+        
+        # -------------------------------- #
+        # transform input query and coords #
+        # -------------------------------- #
+        
         input_query = query.strip().lower()
         original_coords = True
         
@@ -254,7 +269,14 @@ class MongoEntitySearcher(EntitySearcher):
         
         results = {}
         wrapper = {}
-        pool = Pool(8)
+        asins   = set()
+        gids    = set()
+        aids    = set()
+        pool    = Pool(8)
+        
+        # -------------------------------- #
+        # initiate external search queries #
+        # -------------------------------- #
         
         def _find_entity(ret):
             # only select certain fields to return to reduce data transfer
@@ -264,11 +286,62 @@ class MongoEntitySearcher(EntitySearcher):
                 'subcategory' : 1, 
             }
             
-            db_results = self.entityDB._collection.find(entity_query, fields=fields)
-            if prefix:
-                db_results = db_results.limit(100)
+            if prefix or len(input_query) < 3:
+                db_results = self.entityDB._collection.find(entity_query, output=list, limit=100)
+            else:
+                db_results = self.entityDB._collection.find(entity_query, output=list)
             
-            ret['db_results'] = list(db_results)
+            ret['db_results'] = []
+            for doc in db_results:
+                try:
+                    e = self.entityDB._convertFromMongo(doc)
+                    ret['db_results'].append((e, -1))
+                except:
+                    utils.printException()
+        
+        def _find_apple_specific(ret, media, entity):
+            try:
+                if entity is None:
+                    apple_results = self._appleAPI.search(country='us', 
+                                                          term=input_query, 
+                                                          media=media, 
+                                                          limit=5, 
+                                                          transform=True)
+                else:
+                    apple_results = self._appleAPI.search(country='us', 
+                                                          term=input_query, 
+                                                          media=media, 
+                                                          entity=entity, 
+                                                          limit=5, 
+                                                          transform=True)
+                
+                for result in apple_results:
+                    entity = result.entity
+                    
+                    entity.entity_id = 'T_APPLE_%s' % entity.aid
+                    ret['apple_results'].append((entity, -1))
+            except:
+                utils.printException()
+        
+        def _find_apple(ret):
+            try:
+                apple_pool = Pool(4)
+                ret['apple_results'] = []
+                
+                if subcategory_filter is None or subcategory_filter == 'song':
+                    apple_pool.spawn(_find_apple_specific, ret, media='music', entity='song')
+                
+                if subcategory_filter is None or subcategory_filter == 'album':
+                    apple_pool.spawn(_find_apple_specific, ret, media='music', entity='album')
+                
+                if subcategory_filter is None or subcategory_filter == 'artist':
+                    apple_pool.spawn(_find_apple_specific, ret, media='all', entity='allArtist')
+                
+                apple_pool.spawn(_find_apple_specific, ret, media='all', entity=None)
+                
+                apple_pool.join()
+            except:
+                utils.printException()
         
         def _find_amazon(ret):
             try:
@@ -277,21 +350,34 @@ class MongoEntitySearcher(EntitySearcher):
                                                                     Availability='Available', 
                                                                     transform=True)
                 
-                entities = self.api._entityMatcher.addMany(amazon_results)
-                ret['amazon_results'] = list((e, -1) for e in entities)
+                ret['amazon_results'] = []
+                for entity in amazon_results:
+                    entity.entity_id = 'T_AMAZON_%s' % entity.asin
+                    ret['amazon_results'].append((entity, -1))
             except:
                 utils.printException()
-                raise
-        
+
         if full:
             pool.spawn(_find_amazon, wrapper)
+            
+            if category_filter is None or category_filter is 'music':
+                pool.spawn(_find_apple,  wrapper)
         
         pool.spawn(_find_entity, wrapper)
         
-        # handle location-based search
+        # ------------------------------ #
+        # handle location-based searches #
+        # ------------------------------ #
+        
         if coords is not None:
             earthRadius = 3959.0 # miles
-            q_params = [('geoNear', 'places'), ('near', [float(coords[1]), float(coords[0])]), ('distanceMultiplier', earthRadius), ('spherical', True), ('query', entity_query)]
+            q_params = [
+                ('geoNear', 'places'), 
+                ('near', [float(coords[1]), float(coords[0])]), 
+                ('distanceMultiplier', earthRadius), 
+                ('spherical', True), 
+                ('query', entity_query), 
+            ]
             
             if prefix:
                 fields = {
@@ -305,12 +391,27 @@ class MongoEntitySearcher(EntitySearcher):
                 q_params.append(('num', 50))
                 
                 # only select certain fields to return to reduce data transfer
-                q_params.append(('fields', fields))
+                #q_params.append(('fields', fields))
             
             q = SON(q_params)
             
             def _find_places(ret):
-                ret['place_results'] = self.placesDB._collection.command(q)
+                place_results = self.placesDB._collection.command(q)
+                
+                try:
+                    place_results = wrapper['place_results']['results']
+                except KeyError:
+                    place_results = []
+                
+                wrapper['place_results'] = []
+                for doc in place_results:
+                    try:
+                        e = self.placesDB._convertFromMongo(doc['obj'])
+                    except:
+                        utils.printException()
+                        continue
+                    
+                    wrapper['place_results'][e.entity_id] = (e, doc['dis'])
             
             def _find_google_places(ret):
                 try:
@@ -318,25 +419,21 @@ class MongoEntitySearcher(EntitySearcher):
                         'name' : input_query, 
                     }
                     
-                    google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, True)
-                    
+                    google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, detailed=False)
                     entities = []
-                    output   = []
                     
                     if google_results is not None and len(google_results) > 0:
-                        entities = self.api._entityMatcher.addMany(google_results)
+                        ret['google_place_results'] = []
+                        #utils.log(len(google_results))
                         
-                        if entities is not None:
-                            for entity in entities:
-                                distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
-                                distance = distance * earthRadius
-                                
-                                output.append((entity, distance))
-                    
-                    ret['google_place_results'] = output
+                        for entity in google_results:
+                            distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
+                            distance = distance * earthRadius
+                            
+                            entity.entity_id = 'T_GOOGLE_%s' % entity.gid
+                            ret['google_place_results'].append((entity, distance))
                 except:
                     utils.printException()
-                    raise
             
             if full:
                 pool.spawn(_find_google_places, wrapper)
@@ -349,43 +446,59 @@ class MongoEntitySearcher(EntitySearcher):
         #      results from the other queries.
         #   2) speed gain from performing requests asynchronously
         #   3) guarantee of the maximum amount of time any given search may take
-        pool.join()
-        #timeout=10)
+        # 
+        # note: timeout is specified in seconds
+        pool.join(timeout=5)
         
-        if 'db_results' in wrapper:
-            #logs.debug('db_results: %d' % len(wrapper['db_results']))
-            for doc in wrapper['db_results']:
-                try:
-                    e = self.entityDB._convertFromMongo(doc)
-                except:
-                    utils.printException()
-                    continue
-                results[e.entity_id] = (e, -1)
+        # ----------------- #
+        # parse all results #
+        # ----------------- #
         
-        if 'place_results' in wrapper:
+        def _add_result(result):
             try:
-                place_results = wrapper['place_results']['results']
-            except KeyError:
-                place_results = []
-            
-            #logs.debug('place_results: %d' % len(place_results))
-            for doc in place_results:
-                try:
-                    e = self.placesDB._convertFromMongo(doc['obj'])
-                except:
-                    utils.printException()
-                    continue
-                results[e.entity_id] = (e, doc['dis'])
-        
-        if 'google_place_results' in wrapper:
-            #logs.debug('google_place_results: %d' % len(wrapper['google_place_results']))
-            for result in wrapper['google_place_results']:
+                # TODO: add an async task to merge these obvious dupes
+                
+                # dedupe entities from amazon
+                asin = result[0].asin
+                if asin is not None:
+                    if asin in asins:
+                        return
+                    asins.add(asin)
+                
+                # dedupe entities from google
+                gid = result[0].gid
+                if gid is not None:
+                    if gid in gids:
+                        return
+                    gids.add(gid)
+                
+                # dedupe entities from apple
+                aid = result[0].aid
+                if aid is not None:
+                    if aid in aids:
+                        return
+                    aids.add(aid)
+                
                 results[result[0].entity_id] = result
+            except:
+                utils.printException()
         
-        if 'amazon_results' in wrapper:
-            #logs.debug('amazon_results: %d' % len(wrapper['amazon_results']))
-            for result in wrapper['amazon_results']:
-                results[result[0].entity_id] = result
+        result_keys = [
+            'apple_results', 
+            'amazon_results', 
+            'google_place_results', 
+            'db_results', 
+            'place_results', 
+        ]
+        
+        for key in result_keys:
+            if key in wrapper:
+                for result in wrapper[key]:
+                    _add_result(result)
+        
+        # ----------------------- #
+        # filter and rank results #
+        # ----------------------- #
         
         results = results.values()
         #utils.log("num_results: %d" % len(results))
@@ -405,15 +518,60 @@ class MongoEntitySearcher(EntitySearcher):
         # sort the results based on a custom ranking function
         results = sorted(results, key=self._get_entity_weight_func(input_query, prefix), reverse=True)
         
-        # optionally limit the number of results shown
-        if limit is not None and limit >= 0:
-            results = results[0 : min(len(results), limit)]
+        # limit the number of results returned and remove obvious duplicates
+        results = self._prune_results(results, limit)
         
         # strip out distance from results if not using original (user's) coordinates
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
+        pool.spawn(self._add_temp, results)
+        pool.join(timeout=0.25)
+        
         return results
+    
+    def _add_temp(self, results):
+        for result in results:
+            entity = result[0]
+            
+            if entity.entity_id.startswith('T_'):
+                try:
+                    entity.search_id = entity.entity_id
+                    del entity.entity_id
+                    
+                    #utils.log("%s vs %s" % (entity.search_id, entity.entity_id))
+                    self.tempDB.addEntity(entity)
+                except:
+                    utils.printException()
+                    pass
+    
+    def _prune_results(self, results, limit):
+        output = []
+        prune  = set()
+        
+        for i in xrange(len(results)):
+            if i in prune:
+                continue
+            
+            result1 = results[i]
+            entity1 = result1[0]
+            
+            for j in xrange(i + 1, len(results)):
+                if j in prune:
+                    continue
+                
+                result2 = results[j]
+                entity2 = result2[0]
+                
+                if entity1.subcategory == entity2.subcategory and \
+                   entity1.title.lower() == entity2.title.lower():
+                   prune.add(j)
+            
+            output.append(result1)
+            if limit is not None and len(output) >= limit:
+                break
+        
+        return output
     
     def _get_entity_weight_func(self, input_query, prefix):
         def _get_entity_weight(result):
@@ -449,35 +607,55 @@ class MongoEntitySearcher(EntitySearcher):
             data['distance']    = distance
             data['totalv']      = aggregate_value
             
-            #from pprint import pprint
-            #pprint(data)
+            #if input_query.lower() == entity.title.lower():
+            #    from pprint import pprint
+            #    pprint(data)
+            #    pprint(entity.value)
             
             return aggregate_value
         
         return _get_entity_weight
     
     def _get_title_value(self, input_query, entity, prefix):
-        title  = entity.title.lower()
-        weight = 1.0
+        candidates = [ entity.title ]
         
-        # if prefix:
-        if input_query == title:
-            # if the title is an 'exact' query match (case-insensitive), weight it heavily
-            return 500
-        elif input_query in title:
-            if title.startswith(input_query):
-                # if the query is a prefix match for the title, weight it more
-                weight = 6
-            elif title.endswith(input_query):
-                weight = 4
+        if (entity.subcategory == 'song' or entity.subcategory == 'album') and \
+            'artist_display_name' in entity:
+            candidates.append(entity.artist_display_name)
+        
+        value_sum = 0.0
+        
+        for candidate in candidates:
+            title  = candidate.lower()
+            weight = 1.0
+            
+            if prefix:
+                # for prefix-based searches, only take into account how well the 
+                # equivalent prefix of the entity title matches, as opposed to the 
+                # entity title overall
+                if len(title) > len(input_query):
+                    title = title[:len(input_query)]
+            
+            if not prefix and input_query == title:
+                # if the title is an 'exact' query match (case-insensitive), weight it heavily
+                value = 10
             else:
-                weight = 1.4
+                if input_query in title:
+                    if title.startswith(input_query):
+                        # if the query is a prefix match for the title, weight it more
+                        weight = 6
+                    elif title.endswith(input_query):
+                        weight = 4
+                    elif 'remix' not in title:
+                        weight = 1.4
+                
+                is_junk = " \t-".__contains__ # characters for SequenceMatcher to disregard
+                ratio   = SequenceMatcher(is_junk, input_query, title).ratio()
+                value   = ratio * weight
+            
+            value_sum = max(value_sum, value)
         
-        is_junk = " \t-".__contains__ # characters for SequenceMatcher to disregard
-        ratio   = SequenceMatcher(is_junk, input_query, entity.title.lower()).ratio()
-        value   = ratio * weight
-        
-        return value
+        return value_sum
     
     def _get_subcategory_value(self, entity):
         subcat = entity.subcategory
@@ -496,6 +674,9 @@ class MongoEntitySearcher(EntitySearcher):
         source_value_sum = 0 #sum(self.source_weights[s] for s in sources)
         for source in sources:
             if source in self.source_weights:
+                if source == 'netflix' and not 'nid' in source:
+                    continue
+                
                 source_value_sum += self.source_weights[source]
             else:
                 # default source value
@@ -510,7 +691,7 @@ class MongoEntitySearcher(EntitySearcher):
         # Note: Disabling temporarily since it fails on multiple "popularity" items 
         # in schema
         if 'popularity' in entity:
-            # popularity is in the range [1,1000]
+            # popularity is in the range [1,1000] for iTunes entities
             #print 'POPULARITY: %d' % (entity['popularity'], )
             value *= 5 * ((2000 - int(entity['popularity'])) / 1000.0)
         """

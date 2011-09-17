@@ -17,22 +17,10 @@ from MongoPlacesEntityCollection import MongoPlacesEntityCollection
 from AEntityDB import AEntityDB
 from difflib import SequenceMatcher
 
-subcategory_indices = {
-    'restaurant' : 0, 
-    'bar' : 0, 
-    'book' : 3, 
-    'movie' : 2, 
-    'artist' : 1, 
-    'song' : 8, 
-    'album' : 7, 
-    'app' : 9, 
-    'other' : 10,
-}
-
 class MongoEntityCollection(AMongoCollection, AEntityDB):
     
-    def __init__(self):
-        AMongoCollection.__init__(self, collection='entities', primary_key='entity_id', obj=Entity)
+    def __init__(self, collection='entities'):
+        AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', obj=Entity)
         AEntityDB.__init__(self)
     
     @lazyProperty
