@@ -13,7 +13,6 @@
 @class STSearchField;
 
 @interface SearchEntitiesViewController : UITableViewController <RKObjectLoaderDelegate,
-                                                                 RKRequestDelegate,
                                                                  UITextFieldDelegate>
 
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;

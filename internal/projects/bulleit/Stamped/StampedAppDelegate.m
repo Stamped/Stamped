@@ -127,7 +127,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [registerMapping mapRelationship:@"user" withMapping:userMapping];
   [registerMapping mapRelationship:@"token" withMapping:oauthMapping];
   
-  RKManagedObjectMapping* searchResultMapping = [RKObjectMapping mappingForClass:[SearchResult class]];
+  RKObjectMapping* searchResultMapping = [RKObjectMapping mappingForClass:[SearchResult class]];
   [searchResultMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", @"search_id", @"searchID", nil];
   [searchResultMapping mapAttributes:@"category", @"title", @"subtitle", nil];
   

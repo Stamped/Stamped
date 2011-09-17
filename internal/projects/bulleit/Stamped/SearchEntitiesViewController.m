@@ -26,6 +26,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 @property (nonatomic, copy) NSArray* resultsArray;
 @property (nonatomic, retain) CLLocationManager* locationManager;
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
+@property (nonatomic, retain) RKRequest* currentRequest;
 @end
 
 @implementation SearchEntitiesViewController
@@ -38,6 +39,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 @synthesize addStampLabel = addStampLabel_;
 @synthesize tooltipImageView = tooltipImageView_;
 @synthesize searchingIndicatorView = searchingIndicatorView_;
+@synthesize currentRequest = currentRequest_;
 
 - (void)dealloc {
   self.resultsArray = nil;
@@ -70,13 +72,15 @@ static NSString* const kSearchPath = @"/entities/search.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  
   self.searchField = nil;
   self.locationManager.delegate = nil;
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
   self.searchingIndicatorView = nil;
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  self.currentRequest = nil;
   tooltipImageView_ = nil;
 }
 
@@ -156,16 +160,23 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (void)sendFastSearchRequest {
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
+  objectLoader.objectMapping = searchResultMapping;
   NSString* query = self.searchField.text;
+  query = [query lowercaseString];
+  query = [query stringByReplacingOccurrencesOfString:@" " withString:@"_"];
   
-  NSURL* searchURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://static.stamped.com/search/%@.json.gz", query]];
-  RKRequest* request = [RKRequest requestWithURL:searchURL delegate:self];
-  [[RKClient sharedClient].requestQueue addRequest:request];
+  objectLoader.URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://static.stamped.com/search/%@.json.gz", query]];
+  searchingIndicatorView_.hidden = NO;
+  [objectLoader send];
+  self.currentRequest = objectLoader;
 }
 
 - (void)sendSearchRequest {
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
@@ -179,50 +190,29 @@ static NSString* const kSearchPath = @"/entities/search.json";
   objectLoader.params = params;
   searchingIndicatorView_.hidden = NO;
   [objectLoader send];
+  self.currentRequest = objectLoader;
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   searchingIndicatorView_.hidden = YES;
-  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
   self.resultsArray = objects;
   [self.tableView reloadData];
+  self.currentRequest = nil;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-	NSLog(@"Hit error: %@", error);
-  searchingIndicatorView_.hidden = YES;
-
-  if ([objectLoader.response isUnauthorized])
+  if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
-
+  } else if ([objectLoader.response isNotFound]) {
+    self.currentRequest = nil;
+    [self sendSearchRequest];
+    return;
+  }
+  searchingIndicatorView_.hidden = YES;
   [searchField_ becomeFirstResponder];
-}
-
-#pragma mark - RKRequestDelegate Methods.
-
-- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  if (response.statusCode != 200) {
-    //[self sendSearchRequest];
-    return;
-  }
-  NSLog(@"request: %@", request);
-//  NSLog(@"base url: %@", request.URL.baseURL);
-
-  NSError* err = nil;
-  NSArray* results = (NSArray*)[response parsedBody:&err];
-  if (err) {
-    NSLog(@"Parse error for response %@: %@", response, err);
-    return;
-  }
-  self.resultsArray = results;
-  [self.tableView reloadData];
-  NSLog(@"Response: %@, error code: %d", response.bodyAsString, response.statusCode);
-}
-
-- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
-  
+  self.currentRequest = nil;
 }
 
 #pragma mark - UITableViewDelegate Methods.
@@ -262,7 +252,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
   if (searchField_.text.length > 0) {
     [self sendFastSearchRequest];
   } else if (searchField_.text.length == 0) {
-    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+    self.resultsArray = nil;
+    [self.tableView reloadData];
     searchingIndicatorView_.hidden = YES;
   }
 }
