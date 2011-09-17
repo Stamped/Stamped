@@ -579,7 +579,7 @@ class HTTPEntityAutosuggest(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
             from Entity import setFields
-            setFields(schema)
+            setFields(schema, detailed=True)
 
             if schema.search_id is not None:
                 self.search_id = schema.search_id

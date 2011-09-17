@@ -87,7 +87,7 @@ subcategories = {
 
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
 
-def setFields(entity):
+def setFields(entity, detailed=False):
     global city_state_re
 
     try:
@@ -98,30 +98,33 @@ def setFields(entity):
     # Subtitle
     if entity.category == 'food':
 
-        address = {}
-        if len(entity.address_components) > 0:
-            for component in entity.address_components:
-                for i in component['types']:
-                    address[i] = component['short_name']
-        
-        if 'locality' in address and 'administrative_area_level_1' in address:
-            entity.subtitle = '%s, %s' % (address['locality'], \
-                                        address['administrative_area_level_1'])
+        if detailed:
+            entity.subtitle = entity.address
         else:
-            is_set = False
+            address = {}
+            if len(entity.address_components) > 0:
+                for component in entity.address_components:
+                    for i in component['types']:
+                        address[i] = component['short_name']
             
-            if entity.address is not None:
-                # attempt to parse the city, state from the address
-                match = city_state_re.match(entity.address)
+            if 'locality' in address and 'administrative_area_level_1' in address:
+                entity.subtitle = '%s, %s' % (address['locality'], \
+                                            address['administrative_area_level_1'])
+            else:
+                is_set = False
                 
-                if match is not None:
-                    # city, state
-                    entity.subtitle = "%s, %s" % match.groups()
-                    is_set = True
-            
-            if not is_set:
-                # else fall back to the generic subcategory
-                entity.subtitle = str(entity.subcategory).title()
+                if entity.address is not None:
+                    # attempt to parse the city, state from the address
+                    match = city_state_re.match(entity.address)
+                    
+                    if match is not None:
+                        # city, state
+                        entity.subtitle = "%s, %s" % match.groups()
+                        is_set = True
+                
+                if not is_set:
+                    # else fall back to the generic subcategory
+                    entity.subtitle = str(entity.subcategory).title()
 
     elif entity.category == 'book':
         if entity.author != None:

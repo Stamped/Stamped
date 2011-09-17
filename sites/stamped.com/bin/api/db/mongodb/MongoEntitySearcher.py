@@ -118,8 +118,41 @@ class MongoEntitySearcher(EntitySearcher):
     ])
     
     location_subcategory_blacklist = set([
+        'book', 
+        'movie', 
+        'tv', 
+        'artist', 
+        'song', 
+        'album', 
         'app', 
         'video_game', 
+    ])
+    
+    amazon_category_blacklist = set([
+        'food', 
+    ])
+    
+    amazon_subcategory_whitelist = set([
+        'book', 
+        'movie', 
+        'tv', 
+        'artist', 
+        'song', 
+        'album', 
+        'video_game', 
+    ])
+    
+    apple_category_whitelist = set([
+        'music', 
+        'film', 
+    ])
+    
+    apple_subcategory_whitelist = set([
+        'movie', 
+        'tv', 
+        'artist', 
+        'song', 
+        'album', 
     ])
     
     def __init__(self, api):
@@ -360,9 +393,10 @@ class MongoEntitySearcher(EntitySearcher):
                 utils.printException()
         
         if full:
-            pool.spawn(_find_amazon, wrapper)
+            if self._is_possible_amazon_query(category_filter, subcategory_filter):
+                pool.spawn(_find_amazon, wrapper)
             
-            if category_filter is None or category_filter == 'music' or category_filter == 'movie':
+            if self._is_possible_apple_query(category_filter, subcategory_filter):
                 pool.spawn(_find_apple,  wrapper)
         
         pool.spawn(_find_entity, wrapper)
@@ -452,6 +486,7 @@ class MongoEntitySearcher(EntitySearcher):
         #   3) guarantee of the maximum amount of time any given search may take
         # 
         # note: timeout is specified in seconds
+        # TODO: drive this timout number down to speed up search results!
         pool.join(timeout=5)
         
         # ----------------- #
@@ -536,6 +571,8 @@ class MongoEntitySearcher(EntitySearcher):
         return results
     
     def _add_temp(self, results):
+        """ retain a copy of all external entities in the 'tempentities' collection """
+        
         for result in results:
             entity = result[0]
             
@@ -551,6 +588,8 @@ class MongoEntitySearcher(EntitySearcher):
                     pass
     
     def _prune_results(self, results, limit):
+        """ limit the number of results returned and remove obvious duplicates """
+        
         output = []
         prune  = set()
         
@@ -585,7 +624,17 @@ class MongoEntitySearcher(EntitySearcher):
         return output
     
     def _get_entity_weight_func(self, input_query, prefix):
+        """ 
+            this wrapper func only exists to capture args for the 
+            _get_entity_weight weighting function 
+        """
+        
         def _get_entity_weight(result):
+            """
+                returns a single floating point number representing the weighted 
+                rank of this entity w.r.t. quality in this set of search results
+            """
+            
             entity   = result[0]
             distance = result[1]
             
@@ -738,13 +787,28 @@ class MongoEntitySearcher(EntitySearcher):
         return value
     
     def _is_possible_location_query(self, category_filter, subcategory_filter):
-        if category_filter is None and subcategory_filter is None:
-            return True
-        
-        if category_filter in self.location_category_blacklist:
+        if category_filter is not None and category_filter in self.location_category_blacklist:
             return False
         
-        if subcategory_filter in self.location_subcategory_blacklist:
+        if subcategory_filter is not None and subcategory_filter in self.location_subcategory_blacklist:
+            return False
+        
+        return True
+    
+    def _is_possible_amazon_query(self, category_filter, subcategory_filter):
+        if category_filter is not None and category_filter in self.amazon_category_blacklist:
+            return False
+        
+        if subcategory_filter is not None and subcategory_filter not in self.amazon_subcategory_whitelist:
+            return False
+        
+        return True
+    
+    def _is_possible_apple_query(self, category_filter, subcategory_filter):
+        if category_filter is not None and category_filter not in self.apple_category_whitelist:
+            return False
+        
+        if subcategory_filter is not None and subcategory_filter not in self.apple_subcategory_whitelist:
             return False
         
         return True
