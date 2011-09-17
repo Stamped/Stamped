@@ -52,7 +52,7 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize segmentedControl = segmentedControl_;
 
 
-- (id)initWithEntity:(Entity*)entityObject {
+- (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:@"EditEntityViewController" bundle:nil];
   if (self) {
     self.entityObject = entityObject;

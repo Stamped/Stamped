@@ -9,32 +9,27 @@
 #import "SearchEntitiesViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
-#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
 #import "SearchEntitiesTableViewCell.h"
 #import "STSearchField.h"
-#import "Entity.h"
+#import "SearchResult.h"
 
 static NSString* const kSearchPath = @"/entities/search.json";
 
 @interface SearchEntitiesViewController ()
-- (void)loadEntitiesFromDataStore;
-- (void)searchDataStoreFor:(NSString*)searchText;
 - (void)textFieldDidChange:(id)sender;
 - (void)sendSearchRequest;
 
-@property (nonatomic, copy) NSArray* entitiesArray;
-@property (nonatomic, copy) NSArray* filteredEntitiesArray;
+@property (nonatomic, copy) NSArray* resultsArray;
 @property (nonatomic, retain) CLLocationManager* locationManager;
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @end
 
 @implementation SearchEntitiesViewController
 
-@synthesize entitiesArray = entitiesArray_;
-@synthesize filteredEntitiesArray = filteredEntitiesArray_;
+@synthesize resultsArray = resultsArray_;
 @synthesize searchField = searchField_;
 @synthesize cancelButton = cancelButton_;
 @synthesize locationManager = locationManager_;
@@ -50,18 +45,6 @@ static NSString* const kSearchPath = @"/entities/search.json";
   // Release any cached data, images, etc that aren't in use.
 }
 
-- (void)dealloc {
-  self.searchField = nil;
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
-  self.entitiesArray = nil;
-  self.locationManager.delegate = nil;
-  self.locationManager = nil;
-  self.addStampCell = nil;
-  self.addStampLabel = nil;
-  [super dealloc];
-}
-
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -73,7 +56,6 @@ static NSString* const kSearchPath = @"/entities/search.json";
   self.cancelButton.layer.cornerRadius = 5.0;
   self.cancelButton.layer.shadowOpacity = 1.0;
 
-  [self loadEntitiesFromDataStore];
   [self.searchField addTarget:self
                        action:@selector(textFieldDidChange:)
              forControlEvents:UIControlEventEditingChanged];
@@ -91,9 +73,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.searchField = nil;
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
-  self.entitiesArray = nil;
+  self.locationManager.delegate = nil;
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
@@ -135,13 +115,6 @@ static NSString* const kSearchPath = @"/entities/search.json";
   [self.parentViewController dismissModalViewControllerAnimated:YES];
 }
 
-#pragma mark - Core Data Shiz.
-
-- (void)loadEntitiesFromDataStore {
-  self.entitiesArray = nil;
-  self.entitiesArray = [Entity objectsWithFetchRequest:[Entity fetchRequest]];
-}
-
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
@@ -150,7 +123,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   // Return the number of rows in the section.
-  NSInteger numRows = [filteredEntitiesArray_ count];
+  NSInteger numRows = [resultsArray_ count];
   if (self.searchField.text.length > 0)
     ++numRows;  // One more for the 'Add new entity' cell.
 
@@ -158,16 +131,16 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.row == [filteredEntitiesArray_ count])
+  if (indexPath.row == [resultsArray_ count])
     return self.addStampCell;
   
-  static NSString* CellIdentifier = @"EntityCell";
+  static NSString* CellIdentifier = @"ResultCell";
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     cell = [[[SearchEntitiesTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
   
-  [(SearchEntitiesTableViewCell*)cell setEntityObject:((Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row])];
+  [(SearchEntitiesTableViewCell*)cell setSearchResult:((SearchResult*)[resultsArray_ objectAtIndex:indexPath.row])];
   
   return cell;
 }
@@ -186,16 +159,15 @@ static NSString* const kSearchPath = @"/entities/search.json";
 - (void)sendSearchRequest {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
+  RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
-  objectLoader.objectMapping = entityMapping;
-  NSMutableDictionary* params =
-  [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", searchField_.text, nil];
+  objectLoader.objectMapping = searchResultMapping;
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", searchField_.text, nil];
   if (self.locationManager.location) {
     CLLocationCoordinate2D coordinate = self.locationManager.location.coordinate;
     NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
     [params setObject:coordString forKey:@"coordinates"];
-  }  
+  }
   objectLoader.params = params;
   searchingIndicatorView_.hidden = NO;
   [objectLoader send];
@@ -205,11 +177,8 @@ static NSString* const kSearchPath = @"/entities/search.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   searchingIndicatorView_.hidden = YES;
-  
-  self.entitiesArray = nil;
-  self.entitiesArray = objects;
-  self.filteredEntitiesArray = nil;
-  self.filteredEntitiesArray = objects;
+  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
+  self.resultsArray = objects;
   [self.tableView reloadData];
 }
 
@@ -230,24 +199,18 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Entity* entityObject = nil;
-  if (indexPath.row == [filteredEntitiesArray_ count]) {
-    entityObject = [Entity object];
-    entityObject.title = self.searchField.text;
+  SearchResult* result = nil;
+  if (indexPath.row == [resultsArray_ count]) {
+    result = [[[SearchResult alloc] init] autorelease];
+    result.title = self.searchField.text;
   } else {
-    entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
+    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   }
+  
   CreateStampViewController* detailViewController =
-      [[CreateStampViewController alloc] initWithEntityObject:entityObject];
+      [[CreateStampViewController alloc] initWithSearchResult:result];
   [self.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
-}
-
-- (void)searchDataStoreFor:(NSString*)searchText {
-  NSPredicate* searchPredicate = [NSPredicate predicateWithFormat:@"title contains[cd] %@", searchText];
-  self.filteredEntitiesArray = nil;
-  self.filteredEntitiesArray = [self.entitiesArray filteredArrayUsingPredicate:searchPredicate];
-  [self.tableView reloadData];
 }
 
 - (void)textFieldDidChange:(id)sender {
@@ -262,7 +225,6 @@ static NSString* const kSearchPath = @"/entities/search.json";
                    }
                    completion:nil];
 
-  [self searchDataStoreFor:self.searchField.text];
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
   if (searchField_.text.length > 3) {
     [self sendSearchRequest];

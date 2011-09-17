@@ -16,6 +16,7 @@
 #import "TodoViewController.h"
 #import "PeopleViewController.h"
 #import "STNavigationBar.h"
+#import "STSearchField.h"
 #import "Util.h"
 
 @interface RootTabBarViewController ()
@@ -210,6 +211,8 @@
 
 - (IBAction)createStamp:(id)sender {
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
+  SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
+  vc.searchField.text = nil;
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 

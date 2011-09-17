@@ -9,6 +9,7 @@
 #import "SearchEntitiesTableViewCell.h"
 
 #import "Entity.h"
+#import "SearchResult.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
 
@@ -60,6 +61,7 @@
 @implementation SearchEntitiesTableViewCell
 
 @synthesize entityObject = entityObject_;
+@synthesize searchResult = searchResult_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
@@ -86,10 +88,24 @@
     if (entityObject) {
       customView_.titleLabel.text = entityObject.title;
       customView_.subtitleLabel.text = entityObject.subtitle;
-      customView_.categoryImageView.image = entityObject.largeCategoryImage;
-      customView_.categoryImageView.highlightedImage =
-          [Util whiteMaskedImageUsingImage:entityObject.largeCategoryImage];
+      //customView_.categoryImageView.image = entityObject.largeCategoryImage;
+      //customView_.categoryImageView.highlightedImage =
+      //    [Util whiteMaskedImageUsingImage:entityObject.largeCategoryImage];
 
+    }
+  }
+}
+
+- (void)setSearchResult:(SearchResult *)searchResult {
+  if (searchResult_ != searchResult) {
+    [searchResult_ release];
+    searchResult_ = [searchResult retain];
+    if (searchResult) {
+      customView_.titleLabel.text = searchResult.title;
+      customView_.subtitleLabel.text = searchResult.subtitle;
+      customView_.categoryImageView.image = searchResult.largeCategoryImage;
+      customView_.categoryImageView.highlightedImage =
+          [Util whiteMaskedImageUsingImage:searchResult.largeCategoryImage];
     }
   }
 }

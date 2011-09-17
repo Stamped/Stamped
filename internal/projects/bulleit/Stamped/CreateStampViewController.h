@@ -13,6 +13,7 @@
 @class UserImageView;
 @class CAGradientLayer;
 @class User;
+@class SearchResult;
 @class STCreditTextField;
 
 @interface CreateStampViewController : UIViewController<UITextFieldDelegate,
@@ -22,11 +23,13 @@
                                                         UIImagePickerControllerDelegate,
                                                         UIActionSheetDelegate> {
  @private
-  Entity* entityObject_;
   CAGradientLayer* ribbonGradientLayer_;
   CALayer* stampLayer_;
-  User* creditedUser_;
 }
+
+@property (nonatomic, assign) BOOL newEntity;
+@property (nonatomic, retain) Entity* entityObject;
+@property (nonatomic, retain) User* creditedUser;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;
@@ -49,6 +52,7 @@
 - (IBAction)backButtonPressed:(id)sender; 
 - (IBAction)saveStampButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;
+- (id)initWithSearchResult:(SearchResult*)searchResult;
 - (id)initWithEntityObject:(Entity*)entityObject creditedTo:(User*)user;
 
 @end

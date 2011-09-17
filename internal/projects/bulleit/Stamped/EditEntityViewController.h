@@ -41,7 +41,7 @@
 
 @property (nonatomic, retain) UISegmentedControl* segmentedControl;
 
-- (id)initWithEntity:(Entity*)entityObject;
+- (id)initWithEntityObject:(Entity*)entityObject;
 
 @property (nonatomic, retain) Entity* entityObject;
 
