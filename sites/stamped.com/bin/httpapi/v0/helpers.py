@@ -63,7 +63,6 @@ def handleHTTPRequest(fn):
 
         except Unavailable as e:
             logs.warning("404 Error: %s" % (e.msg))
-            utils.printException()
             response = HttpResponse("not_found")
             response.status_code = 404
             logs.error(response.status_code)
@@ -71,8 +70,6 @@ def handleHTTPRequest(fn):
 
         except Exception as e:
             logs.warning("500 Error: %s" % e)
-            utils.printException()
-            
             response = HttpResponse("error")
             response.status_code = 500
             logs.error(response.status_code)

@@ -149,6 +149,10 @@ def output(data):
 def error(code):
     try:
         localData.log['result'] = code
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        f = string.joinfields(f, '')
+        localData.log['stack_trace'] = f
     except:
         localData.log['result'] = 'FAIL'
 
