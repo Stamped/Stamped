@@ -141,9 +141,8 @@ static NSString* const kActivityLookupPath = @"/temp/activity.json";
     return fmaxf(60.0, stringSize.height + 40);
   }
 
-//  if ([event.genre isEqualToString:@"restamp"])
-//    if ([event.eventID isEqualToString:[[NSUserDefaults standardUserDefaults] valueForKey:@"firstCreditEventID"]])
-//      return 136.0;
+  if ([event.genre isEqualToString:@"restamp"])
+    return 82.0;
   
   return 63.0;
 }

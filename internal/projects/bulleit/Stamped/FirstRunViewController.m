@@ -389,5 +389,14 @@ static const CGFloat kProfileImageSize = 500;
   return YES;
 }
 
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+
+  CGFloat xOffset = scrollView.contentOffset.x;
+  
+  if (xOffset>1450) 
+    [UIView animateWithDuration:0.35 animations:^{[createAccountButton_ setBackgroundImage:[UIImage imageNamed:@"create_account_button_active"] forState:normal];}];
+    
+}
+
 
 @end

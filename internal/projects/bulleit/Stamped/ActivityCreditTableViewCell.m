@@ -32,6 +32,7 @@
 @property (nonatomic, readonly) UILabel* entityTitleLabel;
 @property (nonatomic, readonly) CALayer* firstStampLayer;
 @property (nonatomic, readonly) CALayer* secondStampLayer;
+@property (nonatomic, readonly) CATextLayer* plusStampsLayer;
 @end
 
 @implementation ActivityCreditCellView
@@ -44,6 +45,7 @@
 @synthesize firstStampLayer = firstStampLayer_;
 @synthesize secondStampLayer = secondStampLayer_;
 @synthesize disclosureArrowImageView = disclosureArrowImageView_;
+@synthesize plusStampsLayer = plusStampsLayer_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -62,7 +64,6 @@
     headerTextLayer_.frame = CGRectMake(70, 13, 220, 16);
     NSDictionary* actions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
     headerTextLayer_.actions = actions;
-    [actions release];
     [self.layer addSublayer:headerTextLayer_];
     [headerTextLayer_ release];
     
@@ -91,6 +92,17 @@
     disclosureArrowImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureImage];
     [self addSubview:disclosureArrowImageView_];
     [disclosureArrowImageView_ release];
+    
+    plusStampsLayer_ = [[CATextLayer alloc] init];
+    plusStampsLayer_.contentsScale = [[UIScreen mainScreen] scale];
+    plusStampsLayer_.fontSize = 10.0;
+    plusStampsLayer_.foregroundColor = [UIColor stampedLightGrayColor].CGColor;
+    plusStampsLayer_.frame = CGRectMake(70, 58, 200, 12);
+    plusStampsLayer_.actions = actions;
+    plusStampsLayer_.font = @"Helvetica-Bold";
+    [self.layer addSublayer:plusStampsLayer_];
+    [actions release];
+    [plusStampsLayer_ release];
     
     
     
@@ -139,6 +151,7 @@
 		customView_ = [[ActivityCreditCellView alloc] initWithFrame:customViewFrame];
 		[self.contentView addSubview:customView_];
     [customView_ release];
+    
     /*
     if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasReceivedCredit"]) {
       tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_firstcred"]];
@@ -204,6 +217,7 @@
   User* currentUser = [[AccountManager sharedManager] currentUser];
   customView_.firstStampLayer.contents = (id)currentUser.stampImage.CGImage;
   customView_.secondStampLayer.contents = (id)event.user.stampImage.CGImage;
+  customView_.plusStampsLayer.string = @"+2 stamps";
 
   CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27]
                                 forWidth:200

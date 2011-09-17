@@ -241,14 +241,16 @@
   SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
   vc.searchField.text = nil;
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
-}
-
-- (void)stampWasCreated:(NSNotification*)notification {
+  
   if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"]) {
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasStamped"];
     [[NSUserDefaults standardUserDefaults] synchronize];
     tooltipImageView_.alpha = 0.0;
   }
+}
+
+- (void)stampWasCreated:(NSNotification*)notification {
+
   
   if (self.tabBar.selectedItem != mustDoTabBarItem_) {
     self.tabBar.selectedItem = stampsTabBarItem_;

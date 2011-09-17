@@ -368,7 +368,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [tooltipImageView_ release];
   }
   
-  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasTappedHere"])
       [UIView  animateWithDuration:0.3 delay:0.75 options:0 animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
   
 }
@@ -383,8 +383,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (textView != reasoningTextView_)
     return;
   
-  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasTappedHere"]) {
     [UIView animateWithDuration:0.15 animations:^{tooltipImageView_.alpha = 0.0;}];
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasTappedHere"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
   
   self.firstResponder = reasoningTextView_;
   [self textViewDidChange:reasoningTextView_];
@@ -475,8 +478,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (textField != creditTextField_)
     return;
   
-  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasStamped"])
-    [UIView animateWithDuration:0.15 animations:^{tooltipImageView_.alpha = 0.0;}];
+  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasTappedHere"]) {
+    [UIView animateWithDuration:0.3 animations:^{tooltipImageView_.alpha = 0.0;}];
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasTappedHere"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
   
   self.creditLabel.text = @"Credit to";
   

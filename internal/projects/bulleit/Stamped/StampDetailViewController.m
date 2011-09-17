@@ -133,6 +133,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
   if (detailViewController_ && detailViewController_.isWorthSeeing)
     self.eDetailArrowImageView.alpha = 1.0;
+  else if (detailViewController_ && !detailViewController_.isWorthSeeing) {
+    [UIView animateWithDuration:0.3 animations:^{self.eDetailArrowImageView.alpha = 0.0;}];
+    eDetailArrowImageView_.hidden = YES;
+  }
 
   
   UITapGestureRecognizer* gestureRecognizer =
@@ -460,8 +464,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if (eDetail.isWorthSeeing) 
     [UIView animateWithDuration:0.3 animations:^{self.eDetailArrowImageView.alpha = 1.0;}];
   else {
-    [UIView animateWithDuration:0.15 animations:^{self.eDetailArrowImageView.alpha = 0.0;}];
-    self.eDetailArrowImageView.hidden = YES;
+    [UIView animateWithDuration:0.3 animations:^{self.eDetailArrowImageView.alpha = 0.0;}];
   }
 }
 
@@ -534,8 +537,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)renderComments {
   NSArray* sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]];
-  for (Comment* c in [stamp_.comments sortedArrayUsingDescriptors:sortDescriptors])
-    [self addComment:c];
+  for (Comment* c in [stamp_.comments sortedArrayUsingDescriptors:sortDescriptors]) {
+    if (c.restampID == nil)
+      [self addComment:c];
+  }
 }
 
 - (void)addComment:(Comment*)comment {

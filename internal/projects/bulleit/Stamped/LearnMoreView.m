@@ -39,7 +39,7 @@
 - (void)awakeFromNib {
   
   choreographer_ = [[LearnMoreChoreographer alloc] init];
-  self.scrollView.delegate = self.choreographer;
+//  self.scrollView.delegate = self.choreographer;
   
   NSArray* bgImages = [NSArray arrayWithObjects:[UIImage imageNamed:@"learnmore_00"],
                        [UIImage imageNamed:@"learnmore_01_stars"],

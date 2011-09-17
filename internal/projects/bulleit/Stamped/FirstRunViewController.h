@@ -31,7 +31,8 @@ willCreateUserWithName:(NSString*)name
 @interface FirstRunViewController : UIViewController <UITextFieldDelegate,
                                                       UINavigationControllerDelegate,
                                                       UIImagePickerControllerDelegate,
-                                                      UIActionSheetDelegate>
+                                                      UIActionSheetDelegate,
+                                                      UIScrollViewDelegate>
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* bottomView;
