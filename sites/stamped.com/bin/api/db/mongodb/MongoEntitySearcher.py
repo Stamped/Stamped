@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__ = "Stamped (dev@stamped.com)"
 __version__ = "1.0"
@@ -7,6 +8,7 @@ __license__ = "TODO"
 
 import Globals, utils
 import logs, math, pymongo, re, string
+import unicodedata
 import CityList
 
 from EntitySearcher import EntitySearcher
@@ -217,6 +219,9 @@ class MongoEntitySearcher(EntitySearcher):
                          full=False, 
                          prefix=False):
         
+        if prefix:
+            assert not full
+        
         # -------------------------------- #
         # transform input query and coords #
         # -------------------------------- #
@@ -245,6 +250,9 @@ class MongoEntitySearcher(EntitySearcher):
                         coords = [ region['lat'], region['lng'], ]
                         original_coords = False
                         break
+        
+        # attempt to replace accented characters with their ascii equivalents
+        query = unicodedata.normalize('NFKD', unicode(query)).encode('ascii', 'ignore')
         
         query = query.replace('[', '\[?')
         query = query.replace(']', '\]?')
@@ -281,6 +289,7 @@ class MongoEntitySearcher(EntitySearcher):
             query = query.replace("5", "[5s]?")
             query = query.replace("!", "[!li]?")
         
+        query = query.replace('cafe', "caf[eé]")
         query = query.replace('-', '-?')
         query = query.replace(' ', '[ -]?')
         query = query.replace("'", "'?")
@@ -565,8 +574,9 @@ class MongoEntitySearcher(EntitySearcher):
         if not original_coords:
             results = list((result[0], -1) for result in results)
         
-        pool.spawn(self._add_temp, results)
-        pool.join(timeout=0.25)
+        if not prefix:
+            pool.spawn(self._add_temp, results)
+            pool.join(timeout=0.25)
         
         return results
     
@@ -584,6 +594,7 @@ class MongoEntitySearcher(EntitySearcher):
                     #utils.log("%s vs %s" % (entity.search_id, entity.entity_id))
                     self.tempDB.addEntity(entity)
                 except:
+                    # TODO: why is this occasionally failing?
                     utils.printException()
                     pass
     
@@ -615,7 +626,13 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 if entity1.subcategory == entity2.subcategory and \
                    entity1.title.lower() == entity2.title.lower():
-                   prune.add(j)
+                   
+                   if entity1.entity_id.startswith('T_'):
+                       output.append(result2)
+                       prune.add(j)
+                       break
+                   else:
+                       prune.add(j)
             
             output.append(result1)
             if limit is not None and len(output) >= limit:

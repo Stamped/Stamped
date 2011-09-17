@@ -111,9 +111,12 @@ class AppleAPICall(object):
                     if 'trackPrice' in result:
                         price = result['trackPrice']
                         
-                        entity.currency_code   = result['currency']
-                        entity.amount          = int(price * 100)
-                        entity.formatted_price = "$%.2f" % price
+                        if result['currency'] is not None:
+                            entity.currency_code   = result['currency']
+                        
+                        if price is not None:
+                            entity.amount          = int(price * 100)
+                            entity.formatted_price = "$%.2f" % price
                     
                     if subcategory == 'song':
                         album_name = result['collectionName']
@@ -135,7 +138,10 @@ class AppleAPICall(object):
                     try:
                         entity.view_url = result['artistViewUrl']
                     except:
-                        entity.view_url = result['artistLinkUrl']
+                        try:
+                            entity.view_url = result['artistLinkUrl']
+                        except:
+                            pass
                 else:
                     # should never reach this point, but not raising an error just 
                     # in case i'm wrong for robustness purposes if we receive 
@@ -169,14 +175,16 @@ class AppleAPICall(object):
                             entity[entity_map[key]] = result[key]
                 
                 if wrapperType == 'track':
-                    try:
-                        entity.track_length = result['trackTimeMillis'] / 1000.0
-                    except KeyError:
-                        pass
+                    if 'trackTimeMillis' in result:
+                        length = result['trackTimeMillis']
+                        
+                        if length is not None:
+                            entity.track_length = length / 1000.0
                 
                 output.append(AttributeDict(result=result, entity=entity))
             except:
                 from pprint import pprint
+                utils.printException()
                 pprint(result)
         
         return output

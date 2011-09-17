@@ -98,7 +98,7 @@ def setFields(entity, detailed=False):
     # Subtitle
     if entity.category == 'food':
 
-        if detailed:
+        if detailed and 'address' in entity and entity.address is not None:
             entity.subtitle = entity.address
         else:
             address = {}
@@ -109,7 +109,7 @@ def setFields(entity, detailed=False):
             
             if 'locality' in address and 'administrative_area_level_1' in address:
                 entity.subtitle = '%s, %s' % (address['locality'], \
-                                            address['administrative_area_level_1'])
+                                              address['administrative_area_level_1'])
             else:
                 is_set = False
                 
@@ -125,13 +125,13 @@ def setFields(entity, detailed=False):
                 if not is_set:
                     # else fall back to the generic subcategory
                     entity.subtitle = str(entity.subcategory).title()
-
+    
     elif entity.category == 'book':
         if entity.author != None:
             entity.subtitle = entity.author
         else:
             entity.subtitle = str(entity.subcategory).title()
-
+    
     elif entity.category == 'film':
         if entity.subcategory == 'movie':
             if entity.original_release_date != None:
@@ -143,10 +143,10 @@ def setFields(entity, detailed=False):
                 entity.subtitle = entity.network_name
             else:
                 entity.subtitle = 'TV Show'
-
+    
     elif entity.category == 'music' and entity.subcategory == 'artist':
         entity.subtitle = 'Artist'
-
+    
     elif entity.category == 'music' and entity.subcategory == 'album':
         if entity.artist_display_name != None:
             entity.subtitle = "%s (Album)" % entity.artist_display_name
@@ -158,14 +158,14 @@ def setFields(entity, detailed=False):
             entity.subtitle = "%s (Song)" % entity.artist_display_name
         else:
             entity.subtitle = 'Song'
-
+    
     elif entity.category == 'other':
         entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
-
+    
     if entity.subtitle is None or len(entity.subtitle) == 0:
         logs.warning('Invalid subtitle: %s' % entity)
         entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
-
+        
         if entity.subtitle is None or len(entity.subtitle) == 0:
             entity.subtitle = "other"
     

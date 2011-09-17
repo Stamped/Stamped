@@ -147,7 +147,7 @@ def main():
             
             print "searching %s" % orig_name.encode('ascii', 'replace')
             try:
-                results = stampedAPI.searchEntities(query=orig_name, limit=10, prefix=True)
+                results = stampedAPI.searchEntities(query=orig_name, limit=10, prefix=True, full=False)
             except:
                 utils.printException()
                 time.sleep(1)
@@ -185,6 +185,7 @@ def main():
             return
     
     infile = file('autocomplete.txt', 'r')
+    pool   = Pool(4)
     done   = 0
     offset = 0
     
@@ -193,12 +194,13 @@ def main():
         if options.limit is not None and done > options.limit: break
         
         line = line[:-1]
-        _add(line)
+        pool.spawn(_add, line)
         
         done += 1
         if options.limit <= 100 or ((done - 1) % (options.limit / 100)) == 0:
             utils.log("done processing %s" % (utils.getStatusStr(done, options.limit), ))
     
+    pool.join()
     infile.close()
 
 if __name__ == '__main__':

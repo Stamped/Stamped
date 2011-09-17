@@ -654,14 +654,15 @@ class StampedAPI(AStampedAPI):
                        category_filter=None, 
                        subcategory_filter=None, 
                        limit=10, 
-                       prefix=False):
+                       prefix=False, 
+                       full=True):
         coords  = self._parseCoords(coords)
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
                                                         limit=limit, 
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
-                                                        full=True, 
+                                                        full=full, 
                                                         prefix=prefix)
         output  = []
         
@@ -1928,6 +1929,7 @@ class StampedAPI(AStampedAPI):
             doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
             
             if doc is None:
+                # TODO: attempt to lookup entity with associated third-party source
                 return None
             
             entity = self._tempEntityDB._convertFromMongo(doc)
