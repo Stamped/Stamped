@@ -89,7 +89,6 @@ def main():
         if 'begin' in logs[i]:
             begin_utc = logs[i]['begin']
             begin_est = begin_utc - timedelta(hours=4)
-            # print '%-10s %s UTC / %s EST' % ('Begin:', begin, begin.astimezone(est))
             print '%-10s %s' % ('Begin:', begin_est.strftime("%a %b %d %H:%M:%S.%f"))
 
             if 'finish' in logs[i]:
