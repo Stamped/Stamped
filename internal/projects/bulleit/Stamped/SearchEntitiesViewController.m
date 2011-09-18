@@ -14,9 +14,17 @@
 #import "CreateStampViewController.h"
 #import "SearchEntitiesTableViewCell.h"
 #import "STSearchField.h"
+#import "STSectionHeaderView.h"
 #import "SearchResult.h"
+#import "UIColor+Stamped.h"
 
 static NSString* const kSearchPath = @"/entities/search.json";
+static NSString* const kFastSearchURI = @"http://static.stamped.com/search/";
+
+typedef enum {
+  ResultTypeFast,
+  ResultTypeFull
+} ResultType;
 
 @interface SearchEntitiesViewController ()
 - (void)textFieldDidChange:(id)sender;
@@ -27,6 +35,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 @property (nonatomic, retain) CLLocationManager* locationManager;
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, retain) RKRequest* currentRequest;
+@property (nonatomic, assign) ResultType currentResultType;
 @end
 
 @implementation SearchEntitiesViewController
@@ -40,6 +49,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 @synthesize tooltipImageView = tooltipImageView_;
 @synthesize searchingIndicatorView = searchingIndicatorView_;
 @synthesize currentRequest = currentRequest_;
+@synthesize currentResultType = currentResultType_;
 
 - (void)dealloc {
   self.resultsArray = nil;
@@ -128,7 +138,7 @@ static NSString* const kSearchPath = @"/entities/search.json";
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   // Return the number of rows in the section.
   NSInteger numRows = [resultsArray_ count];
-  if (self.searchField.text.length > 0)
+  if (self.searchField.text.length > 0 && currentResultType_ == ResultTypeFull)
     ++numRows;  // One more for the 'Add new entity' cell.
 
   return numRows;
@@ -139,12 +149,13 @@ static NSString* const kSearchPath = @"/entities/search.json";
     return self.addStampCell;
   
   static NSString* CellIdentifier = @"ResultCell";
-  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  SearchEntitiesTableViewCell* cell =
+      (SearchEntitiesTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     cell = [[[SearchEntitiesTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  
-  [(SearchEntitiesTableViewCell*)cell setSearchResult:((SearchResult*)[resultsArray_ objectAtIndex:indexPath.row])];
+
+  [cell setSearchResult:(SearchResult*)[resultsArray_ objectAtIndex:indexPath.row]];
   
   return cell;
 }
@@ -162,18 +173,14 @@ static NSString* const kSearchPath = @"/entities/search.json";
 
 - (void)sendFastSearchRequest {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
-  RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
-  objectLoader.objectMapping = searchResultMapping;
   NSString* query = self.searchField.text;
   query = [query lowercaseString];
   query = [query stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-  
-  objectLoader.URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://static.stamped.com/search/%@.json.gz", query]];
+  NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@.json.gz", kFastSearchURI, query]];
+  RKRequest* request = [[RKRequest alloc] initWithURL:url delegate:self];
   searchingIndicatorView_.hidden = NO;
-  [objectLoader send];
-  self.currentRequest = objectLoader;
+  [[RKClient sharedClient].requestQueue addRequest:request];
+  self.currentRequest = request;
 }
 
 - (void)sendSearchRequest {
@@ -194,10 +201,43 @@ static NSString* const kSearchPath = @"/entities/search.json";
   self.currentRequest = objectLoader;
 }
 
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  NSLog(@"Fast search url: %@", request.URL.absoluteString);
+  if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
+    return;
+
+  if (response.isOK) {
+    NSError* err = nil;
+    id body = [response parsedBody:&err];
+    if (err) {
+      NSLog(@"Parse error for response %@: %@", response, err);
+      return;
+    }
+    NSMutableArray* array = [NSMutableArray arrayWithCapacity:10];
+    for (NSUInteger i = 0; i < MIN(10, [body count]); ++i) {
+      id object = [body objectAtIndex:i];
+      SearchResult* result = [[[SearchResult alloc] init] autorelease];
+      result.title = [object valueForKey:@"title"];
+      result.category = [object valueForKey:@"category"];
+      result.subtitle = [object valueForKey:@"subtitle"];
+      result.searchID = [object valueForKey:@"search_id"];
+      result.entityID = [object valueForKey:@"entity_id"];
+      [array addObject:result];
+    }
+    self.currentResultType = ResultTypeFast;
+    self.resultsArray = array;
+    [self.tableView reloadData];
+  }
+  searchingIndicatorView_.hidden = YES;
+}
+
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   searchingIndicatorView_.hidden = YES;
+  self.currentResultType = ResultTypeFull;
   self.resultsArray = objects;
   [self.tableView reloadData];
   self.currentRequest = nil;
@@ -217,6 +257,29 @@ static NSString* const kSearchPath = @"/entities/search.json";
 }
 
 #pragma mark - UITableViewDelegate Methods.
+
+- (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
+  return 25;
+}
+
+- (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
+  if (self.resultsArray.count == 0)
+    return nil;
+
+  STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
+  CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
+  gradientLayer.frame = view.frame;
+  gradientLayer.colors =
+      [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.70 alpha:1.0].CGColor,
+                                (id)[UIColor colorWithWhite:0.76 alpha:1.0].CGColor, nil];
+  [view.layer insertSublayer:gradientLayer below:view.leftLabel.layer];
+  [gradientLayer release];
+  view.leftLabel.textColor = view.leftLabel.shadowColor;
+  view.leftLabel.shadowColor = [UIColor stampedGrayColor];
+  view.leftLabel.shadowOffset = CGSizeMake(0, -1);
+  view.leftLabel.text = self.currentResultType == ResultTypeFull ? @"All results" : @"Popular results";
+  return view;
+}
 
 - (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
   cell.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];

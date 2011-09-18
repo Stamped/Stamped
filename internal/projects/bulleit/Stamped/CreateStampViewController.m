@@ -67,7 +67,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, assign) BOOL savePhoto;
 @property (nonatomic, retain) UIResponder* firstResponder;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
-@property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, retain) id objectToStamp;
 @end
 
@@ -102,7 +101,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize creditedUserText = creditedUserText_;
 @synthesize firstResponder = firstResponder_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
-@synthesize tooltipImageView = tooltipImageView_;
 @synthesize creditLabel = creditLabel_;
 
 @synthesize objectToStamp = objectToStamp_;
@@ -337,7 +335,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
   stampsRemainingLayer_ = nil;
-  tooltipImageView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -357,22 +354,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   [super viewWillAppear:animated];
 }
 
-
-
-- (void)viewDidAppear:(BOOL)animated {
-  if (!tooltipImageView_) {
-    tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_taphere"]];
-    tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, (self.view.frame.size.width-tooltipImageView_.frame.size.width)/2, 140);
-    tooltipImageView_.alpha = 0.0;
-    [self.view addSubview:tooltipImageView_];
-    [tooltipImageView_ release];
-  }
-  
-  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasTappedHere"])
-      [UIView  animateWithDuration:0.3 delay:0.75 options:0 animations:^{tooltipImageView_.alpha = 1.0;} completion:nil];
-  
-}
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
@@ -382,12 +363,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)textViewDidBeginEditing:(UITextView*)textView {
   if (textView != reasoningTextView_)
     return;
-  
-  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasTappedHere"]) {
-    [UIView animateWithDuration:0.15 animations:^{tooltipImageView_.alpha = 0.0;}];
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasTappedHere"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-  }
   
   self.firstResponder = reasoningTextView_;
   [self textViewDidChange:reasoningTextView_];
@@ -477,12 +452,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   if (textField != creditTextField_)
     return;
-  
-  if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasTappedHere"]) {
-    [UIView animateWithDuration:0.3 animations:^{tooltipImageView_.alpha = 0.0;}];
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasTappedHere"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-  }
   
   self.firstResponder = creditTextField_;
   [UIView animateWithDuration:0.2 animations:^{

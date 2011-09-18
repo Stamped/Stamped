@@ -399,6 +399,11 @@ class StampedAPI(AStampedAPI):
             'friend_id':    user.user_id
         })
 
+        # Verify that you're not following yourself :)
+        if user.user_id == authUserId:
+            logs.warning("You can't follow yourself!")
+            raise Exception("Illegal friendship")
+
         # Check if friendship already exists
         if self._friendshipDB.checkFriendship(friendship) == True:
             logs.info("Friendship exists")

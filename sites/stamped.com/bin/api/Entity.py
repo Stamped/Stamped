@@ -118,6 +118,8 @@ def setFields(entity, detailed=False):
             elif 'sublocality' in address and 'administrative_area_level_1' in address:
                 entity.subtitle = '%s, %s' % (address['sublocality'], \
                                               address['administrative_area_level_1'])
+            elif entity.neighborhood is not None:
+                entity.subtitle = entity.neighborhood
             else:
                 is_set = False
                 
