@@ -1986,8 +1986,8 @@ class StampedAPI(AStampedAPI):
             results = self._appleAPI.lookup(id=aid, transform=True)
             
             for result in results:
-                if result.aid == aid:
-                    entity = result
+                if result.entity.aid == aid:
+                    entity = result.entity
                     break
             
             if entity is not None:
