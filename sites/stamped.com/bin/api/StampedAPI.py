@@ -1978,7 +1978,7 @@ class StampedAPI(AStampedAPI):
             results = self._amazonAPI.item_lookup(ItemId=asin, ResponseGroup='Large', transform=True)
             
             for result in results:
-                if result.aid == aid:
+                if result.asin == asin:
                     entity = result
                     break
         elif search_id.startswith('T_APPLE_'):
