@@ -2039,7 +2039,6 @@ class StampedAPI(AStampedAPI):
                     entity.songs = songs
         elif search_id.startswith('T_GOOGLE_'):
             gref = search_id[9:]
-            
             details = self._googlePlaces.getPlaceDetails(gref)
             
             if entity is None:
