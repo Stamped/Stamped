@@ -9,6 +9,7 @@ import Globals, utils, logs, re, Blacklist
 from datetime import datetime
 from errors import *
 from auth import convertPasswordForStorage
+from utils import lazyProperty
 
 from AStampedAPI import AStampedAPI
 
