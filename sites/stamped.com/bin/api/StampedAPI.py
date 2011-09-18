@@ -835,6 +835,7 @@ class StampedAPI(AStampedAPI):
             if stamp.credit != None:
                 for i in xrange(len(stamp.credit)):
                     creditedUser = userIds[stamp.credit[i].user_id]
+                    stamp.credit[i].screen_name = creditedUser['screen_name']
                     stamp.credit[i].color_primary = creditedUser['color_primary']
                     stamp.credit[i].color_secondary = creditedUser['color_secondary']
                     stamp.credit[i].privacy = creditedUser['privacy']
