@@ -29,8 +29,6 @@ def main():
 
         print 
 
-    convertStamps()
-
 
 def mongoExportImport(collection):
 
