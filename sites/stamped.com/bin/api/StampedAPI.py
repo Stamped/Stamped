@@ -25,6 +25,11 @@ from AActivityDB import AActivityDB
 
 from Schemas import *
 
+# third-party search API wrappers
+from GooglePlaces   import GooglePlaces
+from libs.apple     import AppleAPI
+from libs.AmazonAPI import AmazonAPI
+
 EARNED_CREDIT_MULTIPLIER = 2
 
 # TODO: input validation and output formatting
@@ -1932,7 +1937,6 @@ class StampedAPI(AStampedAPI):
         
         return activity
     
-    
     """
     ######                                      
     #     # #####  # #    #   ##   ##### ###### 
@@ -1943,26 +1947,93 @@ class StampedAPI(AStampedAPI):
     #       #    # #   ##   #    #   #   ###### 
     """
     
+    @lazyProperty
+    def _googlePlaces(self):
+        return GooglePlaces()
+    
+    @lazyProperty
+    def _amazonAPI(self):
+        return AmazonAPI()
+    
+    @lazyProperty
+    def _appleAPI(self):
+        return AppleAPI()
+    
     def _convertSearchId(self, search_id):
-        if search_id.startswith('T_'):
-            # temporary entity_id; lookup in tempentities collection and 
-            # merge result into primary entities db
-            doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
-            
-            if doc is None:
-                # TODO: attempt to lookup entity with associated third-party source
-                return None
-            
-            entity = self._tempEntityDB._convertFromMongo(doc)
-            del entity.entity_id
-            del entity.search_id
-            
-            entity = self._entityMatcher.addOne(entity)
-            assert entity.entity_id is not None
-            return entity.entity_id
-        else:
+        if not search_id.startswith('T_'):
             # already a valid entity id
             return search_id
+        
+        # temporary entity_id; lookup in tempentities collection and 
+        # merge result into primary entities db
+        doc = self._tempEntityDB._collection.find_one({'search_id' : search_id})
+        entity = None
+        
+        if doc is not None:
+            entity = self._tempEntityDB._convertFromMongo(doc)
+        
+        if search_id.startswith('T_AMAZON_'):
+            asin = search_id[9:]
+            entity = self._amazonAPI.item_lookup(ItemId=asin, ResponseGroup='Large', transform=True)
+        elif search_id.startswith('T_APPLE_'):
+            aid = search_id[8:]
+            results = self._appleAPI.lookup(id=aid, transform=True)
+            for result in results:
+                if result.aid == aid:
+                    entity = result
+                    break
+            
+            if entity is not None:
+                if entity.subcategory == 'album':
+                    results = self._appleAPI.lookup(id=entity.aid, media='music', entity='song', transform=True)
+                    results = filter(lambda r: r.entity.subcategory == 'song', results)
+                    
+                    entity.tracks = list(result.entity.title for result in results)
+                elif entity.subcategory == 'artist':
+                    results = self._appleAPI.lookup(id=entity.aid, 
+                                                    media='music', 
+                                                    entity='album', 
+                                                    limit=200, 
+                                                    transform=True)
+                    results = filter(lambda r: r.entity.subcategory == 'album', results)
+                    
+                    if len(results) > 0:
+                        albums = []
+                        for result in results:
+                            schema = ArtistAlbumsSchema()
+                            schema.album_name = result.entity.title
+                            schema.album_id   = result.entity.aid
+                            albums.append(schema)
+                        
+                        entity.albums = albums
+                        images = results[0].entity.images
+                        for k in images:
+                            entity[k] = images[k]
+                    
+                    results = self._appleAPI.lookup(id=entity.aid, 
+                                                    media='music', 
+                                                    entity='song', 
+                                                    limit=200, 
+                                                    transform=True)
+                    results = filter(lambda r: r.entity.subcategory == 'song', results)
+                    
+                    songs = []
+                    for result in results:
+                        schema = ArtistSongsSchema()
+                        schema.song_id   = result.entity.aid
+                        schema.song_name = result.entity.title
+                        songs.append(schema)
+                    
+                    entity.songs = songs
+        #elif search_id.startswith('T_GOOGLE_'):
+        #    gid = search_id[9:]
+        
+        if entity is None:
+            logs.warning("ERROR: could not match temp entity id %s" % search_id)
+            return None
+        
+        entity = self._entityMatcher.addOne(entity)
+        return entity.entity_id
     
     def _addEntity(self, entity):
         if entity is not None:

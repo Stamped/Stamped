@@ -168,7 +168,6 @@ class MongoEntitySearcher(EntitySearcher):
         self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
         
-        self.pool = Pool(32)
         self._init_cities()
     
     def _init_cities(self):
@@ -662,10 +661,10 @@ class MongoEntitySearcher(EntitySearcher):
             distance_value      = self._get_distance_value(distance)
             
             title_weight        = 1.0
-            subcategory_weight  = 0.5
+            subcategory_weight  = 0.8
             source_weight       = 0.4
             quality_weight      = 1.0
-            distance_weight     = 1.5
+            distance_weight     = 1.0
             
             # TODO: revisit and iterate on this simple linear ranking formula
             aggregate_value     = title_value * title_weight + \
@@ -685,9 +684,9 @@ class MongoEntitySearcher(EntitySearcher):
             data['totalv']      = aggregate_value
             
             #if input_query.lower() == entity.title.lower():
-            #    from pprint import pprint
-            #    pprint(data)
-            #    pprint(entity.value)
+            #from pprint import pprint
+            #pprint(entity.title)
+            #pprint(data)
             
             return aggregate_value
         
