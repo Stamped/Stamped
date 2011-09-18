@@ -21,8 +21,8 @@ def create(request):
     elif schema.entity_id:
         entityId = schema.entity_id
     
-    if entityId == None:
-        raise InputError
+    if entityId is None:
+        raise InputError("could not map temp entity id %s" % schema.search_id)
     
     data        = schema.exportSparse()
     data.pop('entity_id', None)

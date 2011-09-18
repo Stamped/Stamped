@@ -1978,6 +1978,7 @@ class StampedAPI(AStampedAPI):
         elif search_id.startswith('T_APPLE_'):
             aid = search_id[8:]
             results = self._appleAPI.lookup(id=aid, transform=True)
+            
             for result in results:
                 if result.aid == aid:
                     entity = result
