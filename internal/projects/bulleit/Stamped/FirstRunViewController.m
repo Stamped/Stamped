@@ -22,6 +22,11 @@ static const CGFloat kProfileImageSize = 500;
 
 @property (nonatomic, assign) BOOL editing;
 @property (nonatomic, retain) UIImage* profilePhoto;
+@property (nonatomic, copy) NSString* fullName;
+@property (nonatomic, copy) NSString* username;
+@property (nonatomic, copy) NSString* email;
+@property (nonatomic, copy) NSString* password;
+@property (nonatomic, copy) NSString* phone;
 @end
 
 @implementation FirstRunViewController
@@ -49,6 +54,12 @@ static const CGFloat kProfileImageSize = 500;
 @synthesize activityIndicator = activityIndicator_;
 @synthesize delegate = delegate_;
 
+@synthesize fullName = fullName_;
+@synthesize username = username_;
+@synthesize email = email_;
+@synthesize password = password_;
+@synthesize phone = phone_;
+
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
@@ -56,7 +67,7 @@ static const CGFloat kProfileImageSize = 500;
 
 - (void)dealloc {
   self.delegate = nil;
-
+  self.profilePhoto = nil;
   [super dealloc];
 }
 
@@ -94,7 +105,6 @@ static const CGFloat kProfileImageSize = 500;
   self.signUpPasswordTextField = nil;
   self.signUpUsernameTextField = nil;
   self.userImageView = nil;
-  self.profilePhoto = nil;
   self.activityIndicator = nil;
 }
 
@@ -161,10 +171,7 @@ static const CGFloat kProfileImageSize = 500;
 #pragma mark - Nib Actions.
 
 - (IBAction)createAccountButtonPressed:(id)sender {
-  if (sender != createAccountButton_)
-    return;
-  
-  confirmButton_.enabled = NO;
+  confirmButton_.enabled = fullName_ && username_ && email_ && password_;
   [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   [self setSecondaryButtonsVisible:YES];
   [self.view insertSubview:signUpScrollView_ atIndex:0];
@@ -251,6 +258,12 @@ static const CGFloat kProfileImageSize = 500;
 }
 
 - (IBAction)takePhotoButtonPressed:(id)sender {
+  // Save state.
+  self.fullName = signUpFullNameTextField_.text;
+  self.username = signUpUsernameTextField_.text;
+  self.email = signUpEmailTextField_.text;
+  self.password = signUpPasswordTextField_.text;
+  self.phone = signUpPhoneTextField_.text;
   UIActionSheet* sheet = [[UIActionSheet alloc] initWithTitle:nil
                                                      delegate:self
                                             cancelButtonTitle:@"Cancel"
@@ -284,6 +297,14 @@ static const CGFloat kProfileImageSize = 500;
 #pragma mark - UIImagePickerControllerDelegate methods.
 
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info {
+  [self view];
+  [self createAccountButtonPressed:createAccountButton_];
+  signUpFullNameTextField_.text = self.fullName;
+  signUpUsernameTextField_.text = self.username;
+  signUpEmailTextField_.text = self.email;
+  signUpPasswordTextField_.text = self.password;
+  signUpPhoneTextField_.text = self.phone;
+
   NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
 
   if (CFStringCompare((CFStringRef)mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
@@ -295,6 +316,19 @@ static const CGFloat kProfileImageSize = 500;
     UIGraphicsEndImageContext();
     userImageView_.imageView.image = profilePhoto_;
   }
+
+  [self dismissModalViewControllerAnimated:YES];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController*)picker {
+  [self view];
+  [self createAccountButtonPressed:createAccountButton_];
+  signUpFullNameTextField_.text = self.fullName;
+  signUpUsernameTextField_.text = self.username;
+  signUpEmailTextField_.text = self.email;
+  signUpPasswordTextField_.text = self.password;
+  signUpPhoneTextField_.text = self.phone;
+  userImageView_.imageView.image = self.profilePhoto;
   [self dismissModalViewControllerAnimated:YES];
 }
 

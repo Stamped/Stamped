@@ -286,7 +286,6 @@ static AccountManager* sharedAccountManager_ = nil;
 
   [refreshTokenKeychainItem_ setObject:@"AccessToken" forKey:(id)kSecAttrAccount];
   [accessTokenKeychainItem_ setObject:token.accessToken forKey:(id)kSecValueData];
-  //self.authToken.accessToken = token.accessToken;
 
   [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifetimeSecs]
                                             forKey:kTokenExpirationUserDefaultsKey];
@@ -390,7 +389,8 @@ static AccountManager* sharedAccountManager_ = nil;
       request.params = nil;
     }
   }
-  NSLog(@"Request: %@", request.resourcePath);
+  if (request.resourcePath)
+    NSLog(@"Request: %@", request.resourcePath);
 }
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
