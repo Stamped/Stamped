@@ -19,10 +19,6 @@
 #import "STSearchField.h"
 #import "Util.h"
 
-#import "WelcomeViewController.h"
-#import "StampedAppDelegate.h"
-#import "StampCustomizerViewController.h"
-
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -109,8 +105,6 @@
 
   if ([AccountManager sharedManager].currentUser)
     [self fillStampImageView];
-  
-
 }
 
 - (void)finishViewInit {
