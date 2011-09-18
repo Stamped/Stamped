@@ -513,7 +513,7 @@ class MongoEntitySearcher(EntitySearcher):
                     asins.add(asin)
                 
                 # dedupe entities from google
-                gref = result[0].gref
+                gref = result[0].reference
                 if gref is not None:
                     if gref in grefs:
                         return
