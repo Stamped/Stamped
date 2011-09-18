@@ -11,25 +11,25 @@ from errors import *
 from auth import convertPasswordForStorage
 from utils import lazyProperty
 
-from AStampedAPI import AStampedAPI
+from AStampedAPI     import AStampedAPI
 
-from AAccountDB import AAccountDB
-from AEntityDB import AEntityDB
+from AAccountDB      import AAccountDB
+from AEntityDB       import AEntityDB
 from APlacesEntityDB import APlacesEntityDB
-from AUserDB import AUserDB
-from AStampDB import AStampDB
-from ACommentDB import ACommentDB
-from AFavoriteDB import AFavoriteDB
-from ACollectionDB import ACollectionDB
-from AFriendshipDB import AFriendshipDB
-from AActivityDB import AActivityDB
+from AUserDB         import AUserDB
+from AStampDB        import AStampDB
+from ACommentDB      import ACommentDB
+from AFavoriteDB     import AFavoriteDB
+from ACollectionDB   import ACollectionDB
+from AFriendshipDB   import AFriendshipDB
+from AActivityDB     import AActivityDB
 
-from Schemas import *
+from Schemas         import *
 
 # third-party search API wrappers
-from GooglePlaces   import GooglePlaces
-from libs.apple     import AppleAPI
-from libs.AmazonAPI import AmazonAPI
+from GooglePlaces    import GooglePlaces
+from libs.apple      import AppleAPI
+from libs.AmazonAPI  import AmazonAPI
 
 EARNED_CREDIT_MULTIPLIER = 2
 
@@ -1975,7 +1975,12 @@ class StampedAPI(AStampedAPI):
         
         if search_id.startswith('T_AMAZON_'):
             asin = search_id[9:]
-            entity = self._amazonAPI.item_lookup(ItemId=asin, ResponseGroup='Large', transform=True)
+            results = self._amazonAPI.item_lookup(ItemId=asin, ResponseGroup='Large', transform=True)
+            
+            for result in results:
+                if result.aid == aid:
+                    entity = result
+                    break
         elif search_id.startswith('T_APPLE_'):
             aid = search_id[8:]
             results = self._appleAPI.lookup(id=aid, transform=True)
