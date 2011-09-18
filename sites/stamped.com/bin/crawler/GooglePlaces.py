@@ -139,6 +139,17 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         if result is None:
             return None
         
+        entity = self.parseEntity(result)
+        
+        if detailed:
+            # fetch a google places details request to fill in any missing data
+            details = self.getPlaceDetails(result['reference'])
+            
+            self.parseEntityDetail(details, entity)
+        
+        return entity
+    
+    def parseEntity(self, result):
         subcategory  = self.getSubcategoryFromTypes(result['types'])
         if subcategory not in self.google_subcategory_whitelist:
             return None
@@ -158,17 +169,16 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         if 'vicinity' in result:
             entity.neighborhood = result['vicinity']
         
-        if detailed:
-            # fetch a google places details request to fill in any missing data
-            details = self.getPlaceDetails(result['reference'])
-            
-            if details is not None:
-                if 'formatted_phone_number' in details:
-                    entity.phone = details['formatted_phone_number']
-                if 'formatted_address' in details:
-                    entity.address = details['formatted_address']
-                if 'address_components' in details:
-                    entity.address_components = details['address_components']
+        return entity
+    
+    def parseEntityDetail(self, result, entity):
+        if result is not None:
+            if 'formatted_phone_number' in result:
+                entity.phone = result['formatted_phone_number']
+            if 'formatted_address' in result:
+                entity.address = result['formatted_address']
+            if 'address_components' in result:
+                entity.address_components = result['address_components']
         
         return entity
     

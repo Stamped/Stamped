@@ -2032,8 +2032,15 @@ class StampedAPI(AStampedAPI):
                         songs.append(schema)
                     
                     entity.songs = songs
-        #elif search_id.startswith('T_GOOGLE_'):
-        #    gid = search_id[9:]
+        elif search_id.startswith('T_GOOGLE_'):
+            gref = search_id[9:]
+            
+            details = self._googlePlaces.getPlaceDetails(gref)
+            
+            if entity is None:
+                entity = self._googlePlaces.parseEntity(details)
+            
+            self._googlePlaces.parseEntityDetail(details, entity)
         
         if entity is None:
             logs.warning("ERROR: could not match temp entity id %s" % search_id)

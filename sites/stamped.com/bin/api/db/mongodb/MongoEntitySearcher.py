@@ -310,7 +310,7 @@ class MongoEntitySearcher(EntitySearcher):
         results = {}
         wrapper = {}
         asins   = set()
-        gids    = set()
+        grefs   = set()
         aids    = set()
         pool    = Pool(8)
         
@@ -476,7 +476,7 @@ class MongoEntitySearcher(EntitySearcher):
                             distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
                             distance = distance * earthRadius
                             
-                            entity.entity_id = 'T_GOOGLE_%s' % entity.gid
+                            entity.entity_id = 'T_GOOGLE_%s' % entity.reference
                             ret['google_place_results'].append((entity, distance))
                 except:
                     utils.printException()
@@ -513,11 +513,11 @@ class MongoEntitySearcher(EntitySearcher):
                     asins.add(asin)
                 
                 # dedupe entities from google
-                gid = result[0].gid
-                if gid is not None:
-                    if gid in gids:
+                gref = result[0].gref
+                if gref is not None:
+                    if gref in grefs:
                         return
-                    gids.add(gid)
+                    grefs.add(gref)
                 
                 # dedupe entities from apple
                 aid = result[0].aid

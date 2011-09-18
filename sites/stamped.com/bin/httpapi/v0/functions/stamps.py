@@ -33,7 +33,6 @@ def create(request):
     
     return transformOutput(stamp.exportSparse())
 
-
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def update(request):
