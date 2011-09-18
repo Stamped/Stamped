@@ -615,6 +615,7 @@ class MongoEntitySearcher(EntitySearcher):
             
             result1 = results[i]
             entity1 = result1[0]
+            keep1   = True
             
             for j in xrange(i + 1, len(results)):
                 if j in prune:
@@ -625,15 +626,16 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 if entity1.subcategory == entity2.subcategory and \
                    entity1.title.lower() == entity2.title.lower():
+                   prune.add(j)
                    
                    if entity1.entity_id.startswith('T_'):
                        output.append(result2)
-                       prune.add(j)
+                       keep1 = False
                        break
-                   else:
-                       prune.add(j)
             
-            output.append(result1)
+            if keep1:
+                output.append(result1)
+            
             if limit is not None and len(output) >= limit:
                 break
         
