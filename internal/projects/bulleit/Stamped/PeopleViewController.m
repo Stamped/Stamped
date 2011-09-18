@@ -220,7 +220,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     return;
   }
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
-  profileViewController.user = [self.friendsArray objectAtIndex:indexPath.row];
+  profileViewController.user = [self.friendsArray objectAtIndex:(indexPath.row - 1)];
   
   [delegate.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
