@@ -24,6 +24,9 @@ def main():
             mongoExportImport(collection)
             convertEntities()
             print 'COMPLETE'
+
+        elif collection == 'tempentities':
+            print 'PASS'
         
         else:
             mongoExportImport(collection)
