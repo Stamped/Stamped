@@ -13,6 +13,7 @@
 
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
+#import "FindFriendsViewController.h"
 #import "STSectionHeaderView.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
@@ -74,6 +75,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  if (delegate.navigationController.navigationBarHidden)
+    [delegate.navigationController setNavigationBarHidden:NO animated:YES];
+
   [self loadFriendsFromNetwork];
   [super viewWillAppear:animated];
 }
@@ -161,10 +166,24 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.friendsArray.count;
+  if (friendsArray_ != nil)
+    return self.friendsArray.count + 1;  // One more for adding friends.
+
+  return 0;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.row == 0 && friendsArray_ != nil) {
+    UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                                    reuseIdentifier:nil] autorelease];
+    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button_addFriends"]];
+    addFriendsImageView.center = cell.contentView.center;
+    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 0, 3);
+    [cell addSubview:addFriendsImageView];
+    [addFriendsImageView release];
+    return cell;
+  }
+  
   static NSString* CellIdentifier = @"Cell";
   
   PeopleTableViewCell* cell = (PeopleTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -172,7 +191,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
 
-  cell.user = [self.friendsArray objectAtIndex:indexPath.row];
+  cell.user = [self.friendsArray objectAtIndex:indexPath.row - 1];
 
   return cell;
 }
@@ -191,10 +210,18 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+
+  if (indexPath.row == 0) {
+    FindFriendsViewController* vc = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromTwitter];
+    vc.followedUsers = [NSMutableArray arrayWithArray:self.friendsArray];
+    [delegate.navigationController pushViewController:vc animated:YES];
+    [vc release];
+    return;
+  }
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
   profileViewController.user = [self.friendsArray objectAtIndex:indexPath.row];
   
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
 }

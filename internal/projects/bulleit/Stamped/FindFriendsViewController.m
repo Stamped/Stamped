@@ -49,9 +49,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @property (nonatomic, retain) RKClient* twitterClient;
 @property (nonatomic, copy) NSArray* twitterFriends;
 @property (nonatomic, copy) NSArray* contactFriends;
-@property (nonatomic, retain) NSMutableArray* followedUsers;
 @end
-
 
 @implementation FindFriendsViewController
 
@@ -83,6 +81,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 #pragma mark - View Lifecycle
+
+- (void)viewWillAppear:(BOOL)animated {
+  [self.navigationController setNavigationBarHidden:YES animated:animated];
+  [super viewWillAppear:animated];
+}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
