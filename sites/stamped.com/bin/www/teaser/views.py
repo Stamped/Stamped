@@ -13,7 +13,8 @@ from django.shortcuts import render_to_response
 
 def about(request):
     try:
-        return render_to_response('about.html', None)
+        # return render_to_response('about.html', None)
+        return render_to_response('index.html', None)
     except:
         raise Http404
 
