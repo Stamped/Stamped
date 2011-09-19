@@ -19,22 +19,20 @@
 
 @implementation BookDetailViewController
 
-@synthesize imageView         = imageView_;
+@synthesize imageView = imageView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
 
 
-- (void)didReceiveMemoryWarning
-{
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
+- (void)didReceiveMemoryWarning {
+  // Releases the view if it doesn't have a superview.
+  [super didReceiveMemoryWarning];
+  
+  // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
 
-- (void)showContents
-{
+- (void)showContents {
   if (!entityObject_.author) 
     self.descriptionLabel.text = @"book";
   else
@@ -47,12 +45,9 @@
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
                                                    [NSURL URLWithString:entityObject_.image]]];
   }
-  
-  
+
   [self setupMainActionsContainer];
   [self setupSectionViews];
-  
-  
 }
 
 - (void)viewDidLoad {
@@ -91,18 +86,14 @@
   [super viewDidDisappear:animated];
 }
 
-
 - (IBAction)mainActionButtonPressed:(id)sender {
   [[UIApplication sharedApplication] openURL:
    [NSURL URLWithString:entityObject_.amazonURL]];
 }
 
-
-
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
 - (void) setupMainActionsContainer {
-  
   if (!entityObject_.amazonURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
@@ -130,8 +121,7 @@
     
     self.mainContentView.hidden = NO;
   }
-  
-  
+
   // Details
   if (entityObject_.format || entityObject_.length || entityObject_.language || entityObject_.releaseDate ||
       entityObject_.publisher || entityObject_.isbn) {
@@ -170,13 +160,11 @@
     
     self.mainContentView.hidden = NO;
   }
-  
-  
-  // Stamped by  
+
+  // Stamped by.
   NSSet* stamps = entityObject_.stamps;
-  
-  if (stamps && stamps.count > 0)
-  {
+
+  if (stamps && stamps.count > 0) {
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO; 
   }

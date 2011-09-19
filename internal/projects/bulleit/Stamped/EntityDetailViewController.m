@@ -45,7 +45,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   if (self) {
     entityObject_ = [entity retain];
     [self loadEntityDataFromServer];
-    sectionsDict_ = [[NSMutableDictionary dictionary] retain];
+    sectionsDict_ = [[NSMutableDictionary alloc] init];
   }
   return self;
 }
