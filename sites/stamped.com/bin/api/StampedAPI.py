@@ -835,6 +835,7 @@ class StampedAPI(AStampedAPI):
             if stamp.credit != None:
                 for i in xrange(len(stamp.credit)):
                     creditedUser = userIds[stamp.credit[i].user_id]
+                    stamp.credit[i].screen_name = creditedUser['screen_name']
                     stamp.credit[i].color_primary = creditedUser['color_primary']
                     stamp.credit[i].color_secondary = creditedUser['color_secondary']
                     stamp.credit[i].privacy = creditedUser['privacy']
@@ -1798,8 +1799,7 @@ class StampedAPI(AStampedAPI):
         favorite.timestamp.created = datetime.utcnow()
 
         if stampId != None:
-            stamp   = self._stampDB.getStamp(stampId)
-            favorite.stamp = stamp
+            favorite.stamp = self._stampDB.getStamp(stampId)
 
         # Check to verify that user hasn't already favorited entity
         try:
@@ -1823,8 +1823,9 @@ class StampedAPI(AStampedAPI):
 
         # Enrich stamp
         if stampId != None:
-            favorite.stamp = self._enrichStampObjects( \
-                                favorite.stamp, authUserId=authUserId)
+            entityIds = {entity.entity_id: entity.exportSchema(EntityMini())}
+            favorite.stamp  = self._enrichStampObjects(favorite.stamp, \
+                                authUserId=authUserId, entityIds=entityIds)
 
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', \
@@ -1833,15 +1834,15 @@ class StampedAPI(AStampedAPI):
         # Add activity for stamp owner (if not self)
         ### TODO: Verify user isn't being blocked
         if self._activity == True and stampId != None \
-            and stamp.user_id != authUserId:
+            and favorite.stamp.user_id != authUserId:
             activity                = Activity()
             activity.genre          = 'favorite'
             activity.user_id        = authUserId
-            activity.subject        = stamp.entity.title
-            activity.link_stamp_id  = stamp.stamp_id
+            activity.subject        = favorite.stamp.entity.title
+            activity.link_stamp_id  = favorite.stamp.stamp_id
             activity.created        = datetime.utcnow()
 
-            self._activityDB.addActivity(stamp.user_id, activity)
+            self._activityDB.addActivity(favorite.stamp.user_id, activity)
 
         return favorite
     
@@ -1857,8 +1858,9 @@ class StampedAPI(AStampedAPI):
 
         # Enrich stamp
         if favorite.stamp_id != None:
-            favorite.stamp = self._enrichStampObjects( \
-                                favorite.stamp, authUserId=authUserId)
+            stamp           = self._stampDB.getStamp(favorite.stamp_id)
+            favorite.stamp  = self._enrichStampObjects( \
+                                stamp, authUserId=authUserId)
 
         return favorite
     
@@ -1868,20 +1870,42 @@ class StampedAPI(AStampedAPI):
 
         favoriteData = self._favoriteDB.getFavorites(authUserId)
 
-        stamps = []
+        # Extract entities & stamps
+        entityIds   = {}
+        stampIds    = {}
         for favorite in favoriteData:
+            entityIds[str(favorite.entity.entity_id)] = 1
             if favorite.stamp_id != None:
-                stamps.append(favorite['stamp'])
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
+                stampIds[str(favorite.stamp_id)] = 1
 
-        stampIds = {}
+
+        # Enrich entities
+        entities = self._entityDB.getEntities(entityIds.keys())
+
+        for entity in entities:
+            entityIds[str(entity.entity_id)] = entity.exportSchema(EntityMini())
+
+        # Enrich stamps
+        stamps = self._stampDB.getStamps(stampIds.keys())
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, \
+                    entityIds=entityIds)
+
         for stamp in stamps:
-            stampIds[stamp.stamp_id] = stamp
+            stampIds[str(stamp.stamp_id)] = stamp
 
         favorites = []
         for favorite in favoriteData:
+            # Enrich Entity
+            if entityIds[favorite.entity.entity_id] != 1:
+                favorite.entity = entityIds[favorite.entity.entity_id]
+            else:
+                logs.warning('FAV MISSING ENTITY: %s' % favorite.entity)
+            # Add Stamp
             if favorite.stamp_id != None:
-                favorite.stamp = stampIds[favorite.stamp.stamp_id]
+                if stampIds[favorite.stamp_id] != 1:
+                    favorite.stamp = stampIds[favorite.stamp_id]
+                else:
+                    logs.warning('FAV MISSING STAMP: %s' % favorite)
             favorites.append(favorite)
 
         return favorites

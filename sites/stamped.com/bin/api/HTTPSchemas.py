@@ -491,6 +491,11 @@ class HTTPEntity(Schema):
                     self.albums = albums
                 except:
                     pass
+        elif schema.__class__.__name__ == 'EntityMini':
+            data                = schema.value
+            coordinates         = data.pop('coordinates', None)
+            self.importData(data, overflow=True)
+            self.coordinates    = _coordinatesDictToFlat(coordinates)
         else:
             raise NotImplementedError
         return self
@@ -779,7 +784,7 @@ class HTTPFavorite(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Favorite':
             data                = schema.exportSparse()
-            entity              = Entity(data.pop('entity', None))
+            entity              = EntityMini(data.pop('entity', None))
             stamp               = Stamp(data.pop('stamp', None))
             data['entity']      = HTTPEntity().importSchema(entity).exportSparse()
 

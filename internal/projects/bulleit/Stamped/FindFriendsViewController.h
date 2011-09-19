@@ -24,6 +24,7 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UIButton* twitterButton;
 @property (nonatomic, retain) IBOutlet UIImageView* nipple;
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
+@property (nonatomic, retain) NSMutableArray* followedUsers;
 
 - (id)initWithFindSource:(FindFriendsSource)source;
 

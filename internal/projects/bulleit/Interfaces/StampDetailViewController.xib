@@ -390,10 +390,6 @@
 							<double key="NSSize">10</double>
 							<int key="NSfFlags">16</int>
 						</object>
-						<double key="IBUIImageEdgeInsets.top">-8</double>
-						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
-						<double key="IBUIImageEdgeInsets.left">0.0</double>
-						<double key="IBUIImageEdgeInsets.right">0.0</double>
 						<reference key="IBUIHighlightedTitleColor" ref="140928236"/>
 						<object class="NSColor" key="IBUINormalTitleColor" id="577811154">
 							<int key="NSColorSpace">3</int>
@@ -405,11 +401,11 @@
 						</object>
 						<object class="NSCustomResource" key="IBUIHighlightedImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_icon_restamp_active.png</string>
+							<string key="NSResourceName">toolbar_stampButton_highlighted.png</string>
 						</object>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_icon_restamp.png</string>
+							<string key="NSResourceName">toolbar_stampButton.png</string>
 						</object>
 					</object>
 					<object class="IBUIButton" id="358418181">
@@ -425,25 +421,20 @@
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="663283930"/>
-						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
-						<double key="IBUIImageEdgeInsets.top">-8</double>
-						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
-						<double key="IBUIImageEdgeInsets.left">-3</double>
-						<double key="IBUIImageEdgeInsets.right">0.0</double>
 						<reference key="IBUIHighlightedTitleColor" ref="140928236"/>
 						<reference key="IBUINormalTitleColor" ref="577811154"/>
 						<reference key="IBUINormalTitleShadowColor" ref="508534976"/>
 						<object class="NSCustomResource" key="IBUIHighlightedImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_icon_favorite_active.png</string>
+							<string key="NSResourceName">toolbar_todoButton_highlighted.png</string>
 						</object>
 						<object class="NSCustomResource" key="IBUISelectedImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_icon_favorited.png</string>
+							<string key="NSResourceName">toolbar_todoButton_selected.png</string>
 						</object>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_icon_favorite.png</string>
+							<string key="NSResourceName">toolbar_todoButton.png</string>
 						</object>
 					</object>
 					<object class="IBUIButton" id="537858746">
@@ -459,20 +450,20 @@
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="663283930"/>
-						<double key="IBUIContentEdgeInsets.top">-12</double>
-						<double key="IBUIContentEdgeInsets.bottom">0.0</double>
-						<double key="IBUIContentEdgeInsets.left">0.0</double>
-						<double key="IBUIContentEdgeInsets.right">-4</double>
+						<double key="IBUIImageEdgeInsets.top">1</double>
+						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
+						<double key="IBUIImageEdgeInsets.left">0.0</double>
+						<double key="IBUIImageEdgeInsets.right">0.0</double>
 						<reference key="IBUIHighlightedTitleColor" ref="140928236"/>
 						<reference key="IBUINormalTitleColor" ref="577811154"/>
 						<reference key="IBUINormalTitleShadowColor" ref="508534976"/>
 						<object class="NSCustomResource" key="IBUIHighlightedImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_icon_share_active.png</string>
+							<string key="NSResourceName">toolbar_shareButton_highlighted.png</string>
 						</object>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">tab_icon_share.png</string>
+							<string key="NSResourceName">toolbar_shareButton.png</string>
 						</object>
 					</object>
 					<object class="IBUILabel" id="763577215">
@@ -710,15 +701,6 @@
 					<int key="connectionID">64</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">handleTodoButtonTap:</string>
-						<reference key="source" ref="358418181"/>
-						<reference key="destination" ref="372490531"/>
-						<int key="IBEventType">1</int>
-					</object>
-					<int key="connectionID">66</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">addFavoriteButton</string>
 						<reference key="source" ref="372490531"/>
@@ -733,6 +715,15 @@
 						<reference key="destination" ref="387020970"/>
 					</object>
 					<int key="connectionID">74</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">handleTodoButtonTap:</string>
+						<reference key="source" ref="358418181"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">75</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -985,6 +976,7 @@
 					<string>17.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
 					<string>17.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>19.IBPluginDependency</string>
+					<string>19.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
 					<string>19.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>23.IBPluginDependency</string>
 					<string>23.IBUserGuides</string>
@@ -1054,7 +1046,8 @@
 					<real value="2"/>
 					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="1"/>
+					<real value="2"/>
+					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1096,7 +1089,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">74</int>
+			<int key="maxID">75</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1295,13 +1288,13 @@
 				<string>shelf_background.png</string>
 				<string>stamp_detail_ripple_bottom</string>
 				<string>stamp_detail_ripple_top</string>
-				<string>tab_icon_favorite.png</string>
-				<string>tab_icon_favorite_active.png</string>
-				<string>tab_icon_favorited.png</string>
-				<string>tab_icon_restamp.png</string>
-				<string>tab_icon_restamp_active.png</string>
-				<string>tab_icon_share.png</string>
-				<string>tab_icon_share_active.png</string>
+				<string>toolbar_shareButton.png</string>
+				<string>toolbar_shareButton_highlighted.png</string>
+				<string>toolbar_stampButton.png</string>
+				<string>toolbar_stampButton_highlighted.png</string>
+				<string>toolbar_todoButton.png</string>
+				<string>toolbar_todoButton_highlighted.png</string>
+				<string>toolbar_todoButton_selected.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1310,13 +1303,13 @@
 				<string>{320, 240}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
+				<string>{52, 48}</string>
+				<string>{52, 48}</string>
+				<string>{52, 48}</string>
+				<string>{52, 48}</string>
+				<string>{52, 48}</string>
+				<string>{52, 48}</string>
+				<string>{52, 48}</string>
 			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">534</string>

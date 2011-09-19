@@ -126,8 +126,6 @@ static const CGFloat kProfileImageSize = 500;
   [bottomGradient release];
 }
 
-
-
 #pragma mark - Transitions
 
 - (void)setSecondaryButtonsVisible:(BOOL)visible {
@@ -154,6 +152,9 @@ static const CGFloat kProfileImageSize = 500;
 }
 
 - (void)signUpFailed:(NSString*)reason {
+  [activityIndicator_ stopAnimating];
+  [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
+  confirmButton_.enabled = YES;
   NSString* reasoning = @"Please check that all required fields are valid. Sorry. We're working on making this easier.";
   UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Womp womp"
                                                   message:reasoning
@@ -162,10 +163,6 @@ static const CGFloat kProfileImageSize = 500;
                                         otherButtonTitles:nil];
   [alert show];
   [alert release];
-
-  [activityIndicator_ stopAnimating];
-  [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
-  confirmButton_.enabled = YES;
 }
 
 #pragma mark - Nib Actions.

@@ -111,10 +111,13 @@ typedef enum {
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+  if (self.searchField.text.length == 0)
+    tooltipImageView_.alpha = 0.0;
+
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   [self.navigationController setNavigationBarHidden:NO animated:animated];
   [self.locationManager stopUpdatingLocation];
-  [super viewWillDisappear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
