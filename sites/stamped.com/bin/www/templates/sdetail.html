@@ -82,6 +82,11 @@
                         <div class="main"> 
                             <span class="author"><span class="user">{{ user.screen_name }}</span> stamped</span> 
                             <p>{{ blurb }}</p> 
+                            {% if image_dimensions %}
+                            <div class="photo">
+                                <img src="http://static.stamped.com/stamps/{{ stamp_id }}.jpg" alt="{{ title }}" width="580px"/>
+                            </div>
+                            {% endif %}
                             {% if credit %}
                             <div class="credit">
                             <span class="stamp stamp-1 replaced">{{ credit.0.screen_name }}</span>
