@@ -5,7 +5,7 @@ height:100%;
 }
 
 body{
-background:url(../img/main-noise.png) left top repeat;
+background:url(http://static.stamped.com/assets/img/main-noise.png) left top repeat;
 font-family:'arial',sans-serif;
 color:#666;
 font-size:16px;
@@ -22,7 +22,7 @@ text-decoration: underline;
 
 /* COMMON CLASSES */
 .flood{
-background:url(../img/noisegradient.png) center top no-repeat;
+background:url(http://static.stamped.com/assets/img/noisegradient.png) center top no-repeat;
 }
 
 .replaced{
@@ -32,9 +32,9 @@ overflow:hidden;
 }
 
 .wrap{
-width:940px;
+width:920px;
 margin:0 auto;
-background:url(../img/noisegradient.png) center top no-repeat;
+background:url(http://static.stamped.com/assets/img/noisegradient.png) center top no-repeat;
 height:100%;
 position:relative;
 }
@@ -48,7 +48,7 @@ font-weight:bold;
 position:relative;
 width:450px;
 height:77px;
-background:url(../img/textinput-sprite.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/textinput-sprite.png) left top no-repeat;
 }
 
 .signup p{
@@ -76,7 +76,7 @@ top:12px;
 }
 
 .signup button{
-background:url(../img/submitbutton-sprite.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/submitbutton-sprite.png) left top no-repeat;
 width:57px;
 height:44px;
 border:0;
@@ -102,7 +102,7 @@ color:#666;
 }
 
 .thanks{
-background:url(../img/whoa-thanks.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/whoa-thanks.png) left top no-repeat;
 width:170px;
 height:29px;
 clear:both;
@@ -116,7 +116,7 @@ position:relative;
 
 #home .iphone{
 height:750px;
-background:url(../img/iphonebg.png) left -30px no-repeat;
+background:url(http://static.stamped.com/assets/img/iphonebg.png) left -30px no-repeat;
 padding-left:45px;
 width:940px;
 }
@@ -135,7 +135,7 @@ margin-top:-405px;
 }
 
 #home .brand{
-background:url(../img/stamped-logo.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamped-logo.png) left top no-repeat;
 width:180px;
 height:180px;
 margin-top:80px;
@@ -144,7 +144,7 @@ float:left;
 }
 
 #home .pitch{
-background:url(../img/building-message.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/building-message.png) left top no-repeat;
 width:544px;
 height:96px;
 clear:both;
@@ -174,7 +174,7 @@ height:83px;
 }
 
 #entity .header{
-background:url(../img/tweet_header_ribbon_90pct_noShdw.png) left bottom repeat-x;
+background:url(http://static.stamped.com/assets/img/tweet_header_ribbon_90pct_noShdw.png) left bottom repeat-x;
 padding-bottom:8px;
 position:relative;
 z-index:10;
@@ -212,7 +212,7 @@ width:450px;
 }
 
 #entity .header .hide{
-background:url(../img/hide-x.png) right center no-repeat;
+background:url(http://static.stamped.com/assets/img/hide-x.png) right center no-repeat;
 padding-right:15px;
 position:absolute;
 right:0;
@@ -225,20 +225,20 @@ font-weight:bold;
 }
 
 #entity .brand{
-background:url(../img/sample-user-stamp.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/sample-user-stamp.png) left top no-repeat;
 width:200px;
 height:200px;
 position:absolute;
 z-index:2;
 left:0;
-top:-158px;
+top:-150px;
 }
 
 
 #entity .coming-soon{
 position:absolute;
-right:140px;
-top:-80px;
+right:130px;
+top:-76px;
 }
 
 .card{
@@ -251,7 +251,7 @@ background:-ms-gradient(linear, left top, right bottom, from(#3cf), to(#911));
 background:-o-gradient(linear, left top, right bottom, from(#3cf), to(#911));
 background:gradient(linear, left top, right bottom, from(#3cf), to(#911));
 width:660px;
-margin:120px auto 0;
+margin:112px auto 0;
 -webkit-box-shadow:0 5px 10px rgba(0,0,0,0.15);
 -moz-box-shadow:0 5px 10px rgba(0,0,0,0.15);
 -ms-box-shadow:0 5px 10px rgba(0,0,0,0.15);
@@ -266,13 +266,13 @@ overflow:hidden;
 }
 
 .card .top-wave{
-background:url(../img/tweet_main_ribbon_top.png) left bottom no-repeat;
+background:url(http://static.stamped.com/assets/img/tweet_main_ribbon_top.png) left bottom no-repeat;
 height:2px;
 margin-top:5px;
 }
 
 .card .bottom-wave{
-background:url(../img/tweet_main_ribbon_bot.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/tweet_main_ribbon_bot.png) left top no-repeat;
 height:2px;
 margin-bottom:5px;
 }
@@ -283,7 +283,7 @@ overflow:hidden;
 
 .card .meta .thumb{
 float:left;
-background:url(../img/user-photo-frame.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/user-photo-frame.png) left top no-repeat;
 width:106px;
 height:106px;
 }
@@ -294,12 +294,12 @@ margin-left:15px;
 }
 
 .card .meta .thumb img{
-margin:6px 7px;
+margin:5px 7px;
 }
 
 .card .meta h1{
 margin:0;
-font-family: TitlingGothicFB;
+font-family: TitlingGothicFB, 'Helvetica', arial, sans-serif;
 font-style: normal;
 font-weight: normal;
 font-size:72px;
@@ -316,36 +316,38 @@ overflow:hidden;
 color:#999;
 float:left;
 margin-top:6px;
-padding-top:2px;
 font-size:14px;
 width:430px;
 overflow:hidden;
+padding-left:28px;
 }
 
 .card .meta .food{
-background:url(../img/entity-type-food.png) left center no-repeat;
-padding-left:28px;
-}
-
-.card .meta .book{
-background:url(../img/entity-type-book.png) left center no-repeat;
-padding-left:28px;
+background:url(http://static.stamped.com/assets/img/entity-type-food.png) left top no-repeat;
+padding-left: 28px;
 }
 
 .card .meta .film{
-background:url(../img/entity-type-film.png) left center no-repeat;
-padding-left:28px;
+background:url(http://static.stamped.com/assets/img/entity-type-film.png) left top no-repeat;
+padding-left: 22px;
+}
+
+.card .meta .book{
+background:url(http://static.stamped.com/assets/img/entity-type-book.png) left top no-repeat;
+padding-left: 26px;
 }
 
 .card .meta .music{
-background:url(../img/entity-type-music.png) left center no-repeat;
-padding-left:28px;
+background:url(http://static.stamped.com/assets/img/entity-type-music.png) left top no-repeat;
+padding-left: 22px;
 }
 
 .card .meta .other{
-background:url(../img/entity-type-other.png) left center no-repeat;
-padding-left:28px;
+background:url(http://static.stamped.com/assets/img/entity-type-other.png) left top no-repeat;
+padding-left: 19px;
 }
+
+
 
 .card .main{
 clear:both;
@@ -362,23 +364,38 @@ margin:1px;
 line-height:27px;
 }
 
+.card .main .photo{
+-webkit-box-shadow:0 5px 10px rgba(0,0,0,0.15);
+-moz-box-shadow:0 5px 10px rgba(0,0,0,0.15);
+-ms-box-shadow:0 5px 10px rgba(0,0,0,0.15);
+-o-box-shadow:0 5px 10px rgba(0,0,0,0.15);
+box-shadow:0 5px 10px rgba(0,0,0,0.15);
+line-height:0;
+margin-top:20px;
+}
+
 .card .credit{
 float:left;
 margin-top:30px;
 font-size:14px;
 color:#999;
 line-height:20px;
+padding-left: 36px;
 }
 
 .credit .stamp{
-position:relative;
+position: absolute;
+float: none;
 width:20px;
 height:20px;
-float:left;
 }
 
-.stamp-2{
-left:-14px;
+.card .stamp-1 {
+margin-left:-34px;
+}
+
+.card .stamp-2 {
+margin-left:-24px;
 }
 
 .card .likes{
@@ -386,7 +403,7 @@ float:right;
 margin-top:30px;
 font-size:14px;
 color:#999;
-background:url(../img/likes-icon.png) left center no-repeat;
+background:url(http://static.stamped.com/assets/img/likes-icon.png) left center no-repeat;
 padding-left:25px;
 line-height:20px;
 }
@@ -402,7 +419,7 @@ padding-top:60px;
 }
 
 #page .mission{
-background:url(../img/mission-statement.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/mission-statement.png) left top no-repeat;
 width:747px;
 height:176px;
 clear:both;
@@ -429,17 +446,17 @@ box-shadow:0 5px 10px rgba(0,0,0,0.15);
 }
 
 .sheet .top-wave{
-background:url(../img/top-wave-plain.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/top-wave-plain.png) left top no-repeat;
 height:9px;
 }
 
 .sheet .bottom-wave{
-background:url(../img/bottom-wave-plain.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/bottom-wave-plain.png) left top no-repeat;
 height:9px;
 }
 
 .sheet .brand{
-background:url(../img/stamped-logo.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamped-logo.png) left top no-repeat;
 width:180px;
 height:180px;
 position:relative;
@@ -489,36 +506,36 @@ margin-left:178px;
 .team .person{
 margin-top:5px;
 padding:3px 0 3px 50px;
-background:url(../img/stamp-robby.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-robby.png) left top no-repeat;
 min-height:42px;
 }
 
 .person.robby{
-background:url(../img/stamp-robby.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-robby.png) left top no-repeat;
 }
 
 .person.kevin{
-background:url(../img/stamp-kevin.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-kevin.png) left top no-repeat;
 }
 
 .person.bart{
-background:url(../img/stamp-bart.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-bart.png) left top no-repeat;
 }
 
 .person.ed{
-background:url(../img/stamp-ed.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-ed.png) left top no-repeat;
 }
 
 .person.travis{
-background:url(../img/stamp-travis.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-travis.png) left top no-repeat;
 }
 
 .person.bons{
-background:url(../img/stamp-bons.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-bons.png) left top no-repeat;
 }
 
 .person.jake{
-background:url(../img/stamp-jake.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/stamp-jake.png) left top no-repeat;
 }
 
 .team .person .name{
@@ -544,7 +561,7 @@ line-height:18px;
 }
 
 .team .follow{
-background:url(../img/icon-twitter.png) left center no-repeat;
+background:url(http://static.stamped.com/assets/img/icon-twitter.png) left center no-repeat;
 padding-left:25px;
 font-size:12px;
 display:inline-block;
@@ -560,7 +577,7 @@ font-size:14px;
 }
 
 .investor-contact .bain-ventures{
-background:url(../img/vc-bain.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/vc-bain.png) left top no-repeat;
 width:224px;
 height:28px;
 display:block;
@@ -568,7 +585,7 @@ margin-bottom:10px;
 }
 
 .investor-contact .google-ventures{
-background:url(../img/vc-google.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/vc-google.png) left top no-repeat;
 width:143px;
 height:52px;
 display:block;
@@ -581,7 +598,7 @@ margin-bottom:3px;
 }
 
 .investor-contact .follow-us{
-background:url(../img/follow-us-on-twitter.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/follow-us-on-twitter.png) left top no-repeat;
 width:223px;
 height:40px;
 display:block;
@@ -595,7 +612,7 @@ overflow:hidden;
 }
 
 #mobile-entity .brand{
-background:url(../img/sample-user-stamp.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/sample-user-stamp.png) left top no-repeat;
 width:200px;
 height:200px;
 float:left;
@@ -603,7 +620,7 @@ margin:-30px 20px 20px;
 }
 
 #mobile-entity .message{
-margin-top:38px;
+margin-top:42px;
 margin-right:10px;
 line-height:30px;
 font-size:22px;
@@ -627,7 +644,6 @@ padding:20px 20px 30px;
 
 #mobile-entity .card .type{
 font-size:22px;
-margin-top:0;
 }
 
 #mobile-entity .card .copy{
@@ -643,9 +659,31 @@ line-height:34px;
 color:#333;
 }
 
+#mobile-entity .card .main .photo{
+max-width:572px;
+overflow:hidden;
+}
+
+#mobile-entity .card .main .photo img{
+max-width:572px;
+}
+
 #mobile-entity .card .credit, #mobile-entity .card .likes{
 font-size:24px;
 margin-top:50px;
+padding-left: 36px;
+}
+
+#mobile-entity .card .credit .stamp {
+margin-top:2px;
+}
+
+#mobile-entity .card .credit .stamp-1 {
+margin-left:-34px;
+}
+
+#mobile-entity .card .credit .stamp-2 {
+margin-left:-24px;
 }
 
 #mobile-entity .footer{
@@ -671,29 +709,35 @@ font-size:22px;
 margin-top:20px;
 }
 
-#mobile-entity .card .meta .food{
-background:url(../img/entity-type-food-mobile.png) left center no-repeat;
-padding-left:38px;
-}
-
-#mobile-entity .card .meta .book{
-background:url(../img/entity-type-book-mobile.png) left center no-repeat;
-padding-left:38px;
+#mobile-entity .card .meta .type{
+padding-left:29px;
+padding-top: 2px;
+margin-top: 0;
 }
 
 #mobile-entity .card .meta .film{
-background:url(../img/entity-type-film-mobile.png) left center no-repeat;
-padding-left:38px;
+background:url(http://static.stamped.com/assets/img/entity-type-film-mobile.png) left center no-repeat;
+padding-left: 29px;
+}
+
+#mobile-entity .card .meta .food{
+background:url(http://static.stamped.com/assets/img/entity-type-food-mobile.png) left center no-repeat;
+padding-left: 37px;
+}
+
+#mobile-entity .card .meta .book{
+background:url(http://static.stamped.com/assets/img/entity-type-book-mobile.png) left center no-repeat;
+padding-left: 33px;
 }
 
 #mobile-entity .card .meta .music{
-background:url(../img/entity-type-music-mobile.png) left center no-repeat;
-padding-left:38px;
+background:url(http://static.stamped.com/assets/img/entity-type-music-mobile.png) left center no-repeat;
+padding-left: 29px;
 }
 
 #mobile-entity .card .meta .other{
-background:url(../img/entity-type-other-mobile.png) left center no-repeat;
-padding-left:38px;
+background:url(http://static.stamped.com/assets/img/entity-type-other-mobile.png) left center no-repeat;
+padding-left: 23px;
 }
 
 #mobile-entity .thanks{
@@ -709,7 +753,7 @@ top:auto;
 
 /* MISC */
 .coming-soon{
-background:url(../img/app-store-coming-soon.png) left top no-repeat;
+background:url(http://static.stamped.com/assets/img/app-store-coming-soon.png) left top no-repeat;
 width:161px;
 height:49px;
 }
@@ -729,3 +773,4 @@ display:inline-block;
 .italics { 
 font-style: italic;
 }
+
