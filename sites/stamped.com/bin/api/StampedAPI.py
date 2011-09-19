@@ -1869,20 +1869,39 @@ class StampedAPI(AStampedAPI):
 
         favoriteData = self._favoriteDB.getFavorites(authUserId)
 
+        # Enrich entities / extract stamps
+        entityIds = {}
         stamps = []
         for favorite in favoriteData:
+            entityIds[str(favorite.entity.entity_id)] = 1
             if favorite.stamp_id != None:
                 stamps.append(favorite['stamp'])
+
+        entities = self._entityDB.getEntities(entityIds.keys())
+
+        for entity in entities:
+            entityIds[str(entity.entity_id)] = entity.exportSchema(EntityMini())
+
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
         stampIds = {}
         for stamp in stamps:
-            stampIds[stamp.stamp_id] = stamp
+            stampIds[str(stamp.stamp_id)] = stamp
 
         favorites = []
         for favorite in favoriteData:
+            # Enrich Entity
+            if entityIds[favorite.entity.entity_id] != 1:
+                print entityIds[favorite.entity.entity_id]
+                favorite.entity = entityIds[favorite.entity.entity_id]
+            else:
+                logs.warning('MISSING ENTITY: %s' % favorite.entity)
+            # Add Stamp
+            print 'FAVORITE A: %s' % favorite
             if favorite.stamp_id != None:
                 favorite.stamp = stampIds[favorite.stamp.stamp_id]
+            print 'FAVORITE B: %s' % favorite
+            print
             favorites.append(favorite)
 
         return favorites
