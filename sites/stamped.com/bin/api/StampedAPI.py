@@ -237,6 +237,9 @@ class StampedAPI(AStampedAPI):
 
         self._accountDB.updateAccount(account)
 
+        # Generate file
+        self._imageDB.generateStamp(primary, secondary)
+
         return account
     
     def updateProfileImage(self, authUserId, data):
