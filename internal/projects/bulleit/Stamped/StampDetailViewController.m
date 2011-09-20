@@ -91,6 +91,18 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [stamp_ release];
   [detailViewController_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  self.headerView = nil;
+  self.bottomToolbar = nil;
+  self.activityView = nil;
+  self.mainCommentContainer = nil;
+  self.scrollView = nil;
+  self.currentUserImageView = nil;
+  self.commenterImageView = nil;
+  self.commenterNameLabel = nil;
+  self.stampedLabel = nil;
+  self.loadingView = nil;
+  self.addFavoriteButton = nil;
+  self.stampPhotoView = nil;
   [super dealloc];
 }
 

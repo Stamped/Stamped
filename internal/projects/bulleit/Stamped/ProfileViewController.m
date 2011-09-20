@@ -73,6 +73,20 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.user = nil;
+  self.userImageView = nil;
+  self.cameraButton = nil;
+  self.creditCountLabel = nil;
+  self.followerCountLabel = nil;
+  self.followingCountLabel = nil;
+  self.fullNameLabel = nil;
+  self.usernameLocationLabel = nil;
+  self.bioLabel = nil;
+  self.shelfImageView = nil;
+  self.toolbarView = nil;
+  self.tableView = nil;
+  self.followIndicator = nil;
+  self.followButton = nil;
+  self.unfollowButton = nil;
   [super dealloc];
 }
 

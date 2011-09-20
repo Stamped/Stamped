@@ -60,6 +60,30 @@ const CGFloat kKeyboardHeight = 217.0;
   return self;
 }
 
+- (void)dealloc {
+  self.navBar = nil;
+  self.scrollView = nil;
+  self.categoryDropdownTableView = nil;
+  self.categoryDropdownButton = nil;
+  self.categoryDropdownImageView = nil;
+  self.entityNameTextField = nil;
+  self.primaryTextField = nil;
+  self.secondaryTextField = nil;
+  self.tertiaryTextField = nil;
+  self.addLocationButton = nil;
+  self.addDescriptionButton = nil;
+  self.addLocationView = nil;
+  self.streetTextField = nil;
+  self.secondStreetTextField = nil;
+  self.cityTextField = nil;
+  self.stateTextField = nil;
+  self.zipTextField = nil;
+  self.segmentedControl = nil;
+  self.menuArrow = nil;
+  self.descriptionTextField = nil;
+  [super dealloc];
+}
+
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];

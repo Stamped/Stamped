@@ -72,16 +72,17 @@ typedef enum {
 @synthesize selectedFilterButton = selectedFilterButton_;
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.filterButtons = nil;
+  self.entitiesArray = nil;
+  self.filteredEntitiesArray = nil;
   self.filterView = nil;
+  self.filterButtons = nil;
   self.foodFilterButton = nil;
   self.booksFilterButton = nil;
   self.filmFilterButton = nil;
   self.musicFilterButton = nil;
   self.otherFilterButton = nil;
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
   self.selectedFilterButton = nil;
   [super dealloc];
 }

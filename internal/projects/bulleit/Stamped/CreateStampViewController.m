@@ -138,6 +138,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 }
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.entityObject = nil;
   self.creditedUser = nil;
   self.stampPhoto = nil;
@@ -145,6 +146,25 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.creditedUserText = nil;
   self.firstResponder = nil;
   self.objectToStamp = nil;
+  self.scrollView = nil;
+  self.titleLabel = nil;
+  self.detailLabel = nil;
+  self.categoryImageView = nil;
+  self.reasoningLabel = nil;
+  self.userImageView = nil;
+  self.reasoningTextView = nil;
+  self.ribbonedContainerView = nil;
+  self.bottomToolbar = nil;
+  self.shelfBackground = nil;
+  self.spinner = nil;
+  self.stampItButton = nil;
+  self.creditTextField = nil;
+  self.editButton = nil;
+  self.mainCommentContainer = nil;
+  self.backgroundImageView = nil;
+  self.takePhotoButton = nil;
+  self.deletePhotoButton = nil;
+  stampsRemainingLayer_ = nil;
 
   [super dealloc];
 }

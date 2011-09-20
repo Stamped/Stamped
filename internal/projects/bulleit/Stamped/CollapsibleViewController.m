@@ -45,17 +45,29 @@ int const SPACE_HEIGHT = 10;
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   if (self) {
     isCollapsed_ = YES;
-    collapsedHeight_ = 40.f;
-    
-    if ([nibNameOrNil isEqualToString:@"CollapsiblePreviewController"]) previewMode = YES;
+    collapsedHeight_ = 40.0f;
 
-    NSMutableDictionary* dict = [NSMutableDictionary dictionary];
-    contentDict_ = dict;
-    [contentDict_ retain];
-    
+    if ([nibNameOrNil isEqualToString:@"CollapsiblePreviewController"])
+      previewMode = YES;
+
+    contentDict_ = [[NSMutableDictionary alloc] init];
+
     maxNameLabelWidth = 0.f;
   }
   return self;
+}
+
+- (void)dealloc {
+  self.headerView = nil;
+  self.footerView = nil;
+  self.contentView = nil;
+  self.arrowView = nil;
+  self.iconView = nil;
+  self.sectionLabel = nil;
+  self.numLabel = nil;
+  self.footerLabel = nil;
+  [contentDict_ release];
+  [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -71,9 +83,6 @@ int const SPACE_HEIGHT = 10;
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-#warning This doesn't appear to be called.
-  // Release any retained subviews of the main view.
-  // e.g. self.myOutlet = nil;
   self.headerView = nil;
   self.footerView = nil;
   self.contentView = nil;
@@ -82,8 +91,6 @@ int const SPACE_HEIGHT = 10;
   self.sectionLabel = nil;
   self.numLabel = nil;
   self.footerLabel = nil;
-  [contentDict_ removeAllObjects];
-  [contentDict_ release];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

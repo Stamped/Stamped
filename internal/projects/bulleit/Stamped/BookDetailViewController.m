@@ -22,24 +22,27 @@
 @synthesize imageView = imageView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
 
-
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-  
-  // Release any cached data, images, etc that aren't in use.
+}
+
+- (void)dealloc {
+  self.imageView = nil;
+  self.affiliateLogoView = nil;
+  self.mainContentView = nil;
+  [super dealloc];
 }
 
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  if (!entityObject_.author) 
+  if (!entityObject_.author) {
     self.descriptionLabel.text = @"book";
-  else
+  } else {
     self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", entityObject_.author];
-  
-//  NSLog(@"%@", entityObject_);
-  
+  }
+
   if (entityObject_.image) {
     self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
@@ -54,12 +57,14 @@
   [super viewDidLoad];
   self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width, 480);
   self.mainActionButton.hidden = YES;
-  self.mainActionLabel.hidden  = YES;
-  self.mainActionsView.hidden  = YES;
-  
+  self.mainActionLabel.hidden = YES;
+  self.mainActionsView.hidden = YES;
 }
 
 - (void)viewDidUnload {
+  [super viewDidUnload];
+  self.imageView = nil;
+  self.affiliateLogoView = nil;
   self.mainContentView = nil;
 }
 
@@ -67,9 +72,9 @@
   self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_book_0"];
   self.affiliateLogoView.image = [UIImage imageNamed:@"logo_amazon"];
   
-  self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);
-  self.imageView.layer.shadowRadius  = 4.0;
-  self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
+  self.imageView.layer.shadowOffset = CGSizeMake(0.0, 4.0);
+  self.imageView.layer.shadowRadius = 4.0;
+  self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
   self.imageView.frame = CGRectMake(self.imageView.frame.origin.x, self.imageView.frame.origin.y,
                                     self.imageView.frame.size.width, 144.0);
@@ -87,21 +92,18 @@
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {
-  [[UIApplication sharedApplication] openURL:
-   [NSURL URLWithString:entityObject_.amazonURL]];
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:entityObject_.amazonURL]];
 }
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
-- (void) setupMainActionsContainer {
+- (void)setupMainActionsContainer {
   if (!entityObject_.amazonURL) {
     self.mainActionButton.hidden = NO;
-    self.mainActionLabel.hidden  = NO;
-    self.mainActionsView.hidden  = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
   }
-  
   else self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
-  
 }
 
 
@@ -168,8 +170,6 @@
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO; 
   }
-  
 }
-
 
 @end
