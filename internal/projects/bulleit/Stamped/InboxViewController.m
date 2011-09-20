@@ -143,6 +143,7 @@ typedef enum {
                                 (id)otherFilterButton_, nil];
   
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
+  [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
 }
 
@@ -219,7 +220,7 @@ typedef enum {
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {      
-    [self loadStampsFromDataStore];
+  [self loadStampsFromDataStore];
 }
 
 #pragma mark - Filter stuff
