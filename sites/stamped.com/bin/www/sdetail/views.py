@@ -31,6 +31,9 @@ def show(request, **kwargs):
             template = 'sdetail-mobile.html'
         return render_to_response(template, stamp)
     except:
+        logs.begin(stampedAPI._logsDB.addLog)
+        logs.request(request)
+        logs.error(500)
         raise #Http404
 
 def mobile(request, **kwargs):
