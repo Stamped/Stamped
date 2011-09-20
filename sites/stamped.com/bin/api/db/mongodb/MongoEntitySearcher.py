@@ -165,8 +165,8 @@ class MongoEntitySearcher(EntitySearcher):
         self.placesDB = api._placesEntityDB
         self.tempDB   = api._tempEntityDB
         
-        self.entityDB._collection.ensure_index([("title", pymongo.ASCENDING)])
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
+        self.entityDB._collection.ensure_index([("titlel", pymongo.ASCENDING)])
         
         self._init_cities()
     
@@ -305,12 +305,13 @@ class MongoEntitySearcher(EntitySearcher):
         logs.debug(pformat(data))
         """
         
-        entity_query = {"title": {"$regex": query, "$options": "i"}}
+        #entity_query = {"title": {"$regex": query, "$options": "i"}}
+        entity_query = {"titlel": {"$regex": query }}
         
         results = {}
         wrapper = {}
         asins   = set()
-        grefs   = set()
+        gids    = set()
         aids    = set()
         pool    = Pool(8)
         
@@ -343,19 +344,18 @@ class MongoEntitySearcher(EntitySearcher):
         # search apple itunes API
         def _find_apple_specific(ret, media, entity):
             try:
-                if entity is None:
-                    apple_results = self._appleAPI.search(country='us', 
-                                                          term=input_query, 
-                                                          media=media, 
-                                                          limit=5, 
-                                                          transform=True)
-                else:
-                    apple_results = self._appleAPI.search(country='us', 
-                                                          term=input_query, 
-                                                          media=media, 
-                                                          entity=entity, 
-                                                          limit=5, 
-                                                          transform=True)
+                params = dict(
+                    country='us', 
+                    term=input_query, 
+                    media=media, 
+                    limit=5, 
+                    transform=True
+                )
+                
+                if entity is not None:
+                    params['entity'] = entity
+                
+                apple_results = self._appleAPI.search(**params)
                 
                 for result in apple_results:
                     entity = result.entity
@@ -513,11 +513,11 @@ class MongoEntitySearcher(EntitySearcher):
                     asins.add(asin)
                 
                 # dedupe entities from google
-                gref = result[0].reference
-                if gref is not None:
-                    if gref in grefs:
+                gid = result[0].gid
+                if gid is not None:
+                    if gid in gids:
                         return
-                    grefs.add(gref)
+                    gids.add(gid)
                 
                 # dedupe entities from apple
                 aid = result[0].aid
