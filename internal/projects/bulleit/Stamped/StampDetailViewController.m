@@ -83,6 +83,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     stamp_ = [stamp retain];
+    NSLog(@"Stamp url: %@", stamp.URL);
   }
   return self;
 }

@@ -10,14 +10,14 @@
 
 #import "User.h"
 
-NSString* const kTwitterConsumerKey = @"qGrQ7CoKq00upjxoSSJA";
-NSString* const kTwitterConsumerSecret = @"1DQI3LDZiFiDsAorLlu02ZWaHAnuPtbDdaUbvZkPc";
+NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
+NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
 NSString* const kTwitterRequestTokenURL = @"https://api.twitter.com/oauth/request_token";
 NSString* const kTwitterAuthorizeURL = @"https://api.twitter.com/oauth/authorize";
 NSString* const kTwitterAccessTokenURL = @"https://api.twitter.com/oauth/access_token";
 
-NSString* const kOAuthCallbackURL = @"http://stamped.com/oauth_callback";
-NSString* const kTwitterScope = @"http://stamped.com/oauth_scope";
+NSString* const kOAuthCallbackURL = @"http://www.example.com/oauth_callback";
+NSString* const kTwitterScope = @"http://www.example.com/oauth_scope";
 
 NSString* const kKeychainTwitterToken = @"Twitter for Stamped";
 

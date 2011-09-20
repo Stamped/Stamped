@@ -17,6 +17,8 @@
 #import "EditEntityViewController.h"
 #import "Entity.h"
 #import "Favorite.h"
+#import "GTMOAuthAuthentication.h"
+#import "GTMOAuthViewControllerTouch.h"
 #import "STNavigationBar.h"
 #import "Notifications.h"
 #import "Stamp.h"
@@ -26,6 +28,7 @@
 #import "User.h"
 #import "UIColor+Stamped.h"
 
+static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kCreateStampPath = @"/stamps/create.json";
 static NSString* const kCreateEntityPath = @"/entities/create.json";
 
@@ -67,6 +70,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, assign) BOOL savePhoto;
 @property (nonatomic, retain) UIResponder* firstResponder;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
+@property (nonatomic, retain) RKClient* twitterClient;
+@property (nonatomic, retain) GTMOAuthAuthentication* twitterAuth;
 @property (nonatomic, retain) id objectToStamp;
 @end
 
@@ -102,6 +107,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize firstResponder = firstResponder_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
 @synthesize creditLabel = creditLabel_;
+@synthesize tweetButton = tweetButton_;
+@synthesize twitterAuth = twitterAuth_;
+@synthesize twitterClient = twitterClient_;
 
 @synthesize objectToStamp = objectToStamp_;
 
@@ -139,6 +147,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   self.entityObject = nil;
   self.creditedUser = nil;
   self.stampPhoto = nil;
@@ -164,6 +173,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.backgroundImageView = nil;
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
+  self.twitterAuth = nil;
+  self.twitterClient = nil;
   stampsRemainingLayer_ = nil;
 
   [super dealloc];
@@ -173,6 +184,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   User* currentUser = [AccountManager sharedManager].currentUser;
   self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
@@ -275,6 +287,27 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
   [self addStampsRemainingLayer];
   [self restoreViewState];
+  
+  // Twitter shit.
+  GTMOAuthAuthentication* auth =
+      [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
+                                                  consumerKey:kTwitterConsumerKey
+                                                   privateKey:kTwitterConsumerSecret] autorelease];
+  auth.callback = kOAuthCallbackURL;
+  if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
+                                                 authentication:auth]) {
+    self.twitterAuth = auth;
+    if (self.twitterAuth) {
+      tweetButton_.enabled = YES;
+    
+      RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterUpdateStatusPath
+                                                              delegate:self];
+      request.method = RKRequestMethodPOST;
+      request.params = [NSDictionary dictionaryWithObjectsAndKeys:@"Sigh", @"status", nil];
+      [self.twitterAuth authorizeRequest:request.URLRequest];
+      [request send];
+    }
+  }
 }
 
 - (void)addStampsRemainingLayer {
@@ -336,6 +369,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
+  self.twitterAuth = nil;
+  self.twitterClient = nil;
   self.scrollView = nil;
   self.titleLabel = nil;
   self.detailLabel = nil;
@@ -358,7 +394,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  
   titleLabel_.text = [objectToStamp_ valueForKey:@"title"];
   detailLabel_.text = [objectToStamp_ valueForKey:@"subtitle"];
   categoryImageView_.image = [objectToStamp_ valueForKey:@"categoryImage"];
@@ -501,6 +536,10 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 }
 
 #pragma mark - Actions.
+
+- (IBAction)tweetButtonPressed:(id)sender {
+  tweetButton_.selected = !tweetButton_.selected;
+}
 
 - (IBAction)editButtonPressed:(id)sender {
   EditEntityViewController* editViewController =
@@ -698,6 +737,20 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [vc dismissModalViewControllerAnimated:YES];
   } else {
     [self.navigationController popToRootViewControllerAnimated:YES];
+  }
+}
+
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  if (request.resourcePath == kTwitterUpdateStatusPath) {
+    NSLog(@"twitter response: %@", response.bodyAsString);
+  }
+}
+
+- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  if (request.resourcePath == kTwitterUpdateStatusPath) {
+    NSLog(@"twitter error: %@", error);
   }
 }
 

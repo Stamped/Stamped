@@ -32,6 +32,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  RKLogConfigureByName("RestKit/Network", RKLogLevelTrace);
+
 #if !TARGET_IPHONE_SIMULATOR
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
@@ -91,7 +93,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                         @"created", @"created",
                                         @"num_comments", @"numComments",
                                         @"image_dimensions", @"imageDimensions",
-                                        @"image_url", @"imageURL", nil];
+                                        @"image_url", @"imageURL",
+                                        @"url", @"URL", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
   [stampMapping mapAttributes:@"blurb", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
