@@ -45,7 +45,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   if (self) {
     entityObject_ = [entity retain];
     [self loadEntityDataFromServer];
-    sectionsDict_ = [[NSMutableDictionary dictionary] retain];
+    sectionsDict_ = [[NSMutableDictionary alloc] init];
   }
   return self;
 }
@@ -59,7 +59,12 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.scrollView = nil;
   self.categoryImageView = nil;
   self.mainActionsView = nil;
+  self.mainContentView = nil;
   self.loadingView = nil;
+  
+  for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
+    vc.delegate = nil;
+
   [entityObject_ release];
   [sectionsDict_ release];
   [super dealloc];
@@ -78,7 +83,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
-  RKObjectLoader*   objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
                                                                     delegate:self];
   objectLoader.objectMapping = entityMapping;
   objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"entity_id", entityObject_.entityID, nil];
@@ -129,6 +134,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.categoryImageView = nil;
   self.mainActionsView = nil;
   self.loadingView = nil;
+  self.mainContentView = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
@@ -187,8 +193,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [mainContentView_ addSubview:collapsibleVC.view];
 }
 
-- (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight;
-{
+- (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight {
   CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
                                               initWithNibName:@"CollapsiblePreviewController" bundle:nil];
 
@@ -203,8 +208,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [mainContentView_ addSubview:collapsibleVC.view];
 }
 
-- (void)addSectionStampedBy
-{
+- (void)addSectionStampedBy {
   [self addSectionWithName:@"Stamped by"];
   CollapsibleViewController* collapsibleVC = [sectionsDict_ objectForKey:@"Stamped by"];
   
@@ -218,10 +222,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [collapsibleVC addImagesForStamps:entityObject_.stamps];
 }
 
-
 // Delegate method
-- (void)collapsibleViewController:(CollapsibleViewController *)collapsibleVC willChangeHeightBy:(CGFloat)delta
-{
+- (void)collapsibleViewController:(CollapsibleViewController*)collapsibleVC willChangeHeightBy:(CGFloat)delta {
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
   {
     if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame))
@@ -245,15 +247,13 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.scrollView.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);  
 }
 
-- (CGFloat)contentHeight
-{
+- (CGFloat)contentHeight {
   CGFloat contentHeight = 0.f;
   
   if (!sectionsDict_) return 0.f;
   if (sectionsDict_.count == 0) return 0.f;
   
-  for (CollapsibleViewController* cvc in sectionsDict_.objectEnumerator)
-  {
+  for (CollapsibleViewController* cvc in sectionsDict_.objectEnumerator) {
     contentHeight += cvc.view.frame.size.height;
   }
   

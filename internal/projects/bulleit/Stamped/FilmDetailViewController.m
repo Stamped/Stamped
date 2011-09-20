@@ -19,23 +19,28 @@
 
 @implementation FilmDetailViewController
 
-@synthesize imageView         = imageView_;
+@synthesize imageView = imageView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
-@synthesize ratingView        = ratingView_;
+@synthesize ratingView = ratingView_;
 
 
-- (void)didReceiveMemoryWarning
-{
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
+- (void)dealloc {
+  self.imageView = nil;
+  self.affiliateLogoView = nil;
+  self.ratingView = nil;
+  [super dealloc];
+}
+
+- (void)didReceiveMemoryWarning {
+  // Releases the view if it doesn't have a superview.
+  [super didReceiveMemoryWarning];
+  
+  // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
 
-- (void)showContents
-{
+- (void)showContents {
   if (!entityObject_.length || entityObject_.length.intValue == 0) 
     self.descriptionLabel.text = entityObject_.subtitle;
 
@@ -76,33 +81,31 @@
     self.descriptionLabel.frame = frame;
 
   }
-    
-    
-//  NSLog(@"%@", entityObject_);
-  
+
   if (entityObject_.image) {
     self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
                                                    [NSURL URLWithString:entityObject_.image]]];
   }
-  
+
   [self setupMainActionsContainer];
   [self setupSectionViews];
-  
-  
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width, 480);
   self.mainActionButton.hidden = YES;
-  self.mainActionLabel.hidden  = YES;
-  self.mainActionsView.hidden  = YES;
+  self.mainActionLabel.hidden = YES;
+  self.mainActionsView.hidden = YES;
   
 }
 
 - (void)viewDidUnload {
-  self.mainContentView = nil;
+  [super viewDidUnload];
+  self.imageView = nil;
+  self.affiliateLogoView = nil;
+  self.ratingView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {

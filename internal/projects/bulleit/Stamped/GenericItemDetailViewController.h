@@ -14,5 +14,4 @@
 @property (nonatomic, retain) IBOutlet UIImageView* affiliateLogoView;
 
 
-
 @end

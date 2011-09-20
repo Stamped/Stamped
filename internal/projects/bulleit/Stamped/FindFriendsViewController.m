@@ -77,6 +77,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)dealloc {
   self.followedUsers = nil;
   self.authentication = nil;
+  self.twitterClient = nil;
+  self.twitterFriends = nil;
+  self.contactFriends = nil;
+  self.contactsButton = nil;
+  self.twitterButton = nil;
+  self.nipple = nil;
+  self.tableView = nil;
   [super dealloc];
 }
 

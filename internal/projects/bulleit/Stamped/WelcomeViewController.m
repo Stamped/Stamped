@@ -61,6 +61,26 @@ NSString* const kStampColors[7][2] = {
   return self;
 }
 
+- (void)dealloc {
+  self.contentView = nil;
+  self.scrollView = nil;
+  self.pageControl = nil;
+  self.page1Title = nil;
+  self.page2Title = nil;
+  self.page3Title = nil;
+  self.galleryStamp0 = nil;
+  self.galleryStamp1 = nil;
+  self.galleryStamp2 = nil;
+  self.galleryStamp3 = nil;
+  self.galleryStamp4 = nil;
+  self.galleryStamp5 = nil;
+  self.galleryStamp6 = nil;
+  self.currentStampRequest = nil;
+  self.userStampImageView = nil;
+  self.userImageView = nil;
+  [super dealloc];
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -84,6 +104,7 @@ NSString* const kStampColors[7][2] = {
 }
 
 - (void)viewDidUnload {
+  [super viewDidUnload];
   self.contentView = nil;
   self.scrollView = nil;
   self.pageControl = nil;
@@ -98,10 +119,8 @@ NSString* const kStampColors[7][2] = {
   self.galleryStamp5 = nil;
   self.galleryStamp6 = nil;
   self.currentStampRequest = nil;
-
   self.userStampImageView = nil;
   self.userImageView = nil;
-  [super viewDidUnload];
 }
 
 #pragma mark - Private methods.

@@ -23,11 +23,15 @@
 @synthesize imageView;
 @synthesize affiliateLogoView;
 
+- (void)dealloc {
+  self.imageView = nil;
+  self.affiliateLogoView = nil;
+  [super dealloc];
+}
 
 #pragma mark - View lifecycle
 
-- (void)showContents
-{
+- (void)showContents {
   if ([entityObject_.subcategory isEqualToString:@"artist"])
       self.descriptionLabel.text = entityObject_.subcategory;
 
@@ -38,8 +42,6 @@
     else
       self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", entityObject_.artist];
   }
-  
-//  NSLog(@"%@", entityObject_);
 
   if (entityObject_.image) {
     self.imageView.hidden = NO;
@@ -49,9 +51,6 @@
   
   [self setupMainActionsContainer];
   [self setupSectionViews];
-  
-  
-  
 }
 
 - (void)viewDidLoad {
@@ -64,7 +63,9 @@
 }
 
 - (void)viewDidUnload {
-  self.mainContentView = nil;
+  [super viewDidUnload];
+  self.imageView = nil;
+  self.affiliateLogoView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -97,8 +98,7 @@
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
-- (void) setupMainActionsContainer {
-    
+- (void)setupMainActionsContainer {
   if (entityObject_.itunesShortURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
@@ -106,16 +106,11 @@
   }
   
   else self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
-
 }
 
-
-- (void) setupSectionViews {
-  
+- (void)setupSectionViews {
   // Tracks
   if (entityObject_.songs) {
-
-
     NSArray* tracksArray = entityObject_.songs;
     
     [self addSectionWithName:@"Tracks" previewHeight:136.f];
@@ -126,12 +121,9 @@
     [section addNumberedListWithValues:tracksArray];
     section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
-    
     self.mainContentView.hidden = NO;
-
   }
-  
-  
+
   // Details
   if (entityObject_.genre || entityObject_.releaseDate) {
     
@@ -158,12 +150,10 @@
   // Stamped by  
   NSSet* stamps = entityObject_.stamps;
   
-  if (stamps && stamps.count > 0)
-  {
+  if (stamps && stamps.count > 0) {
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO; 
   }
-  
 }
 
 @end

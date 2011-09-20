@@ -43,6 +43,13 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 @synthesize favoritesArray = favoritesArray_;
 
+- (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  self.favoritesArray = nil;
+  [super dealloc];
+}
+
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];

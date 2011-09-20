@@ -13,6 +13,13 @@
 @synthesize imageView;
 @synthesize affiliateLogoView;
 
+- (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  self.imageView = nil;
+  self.affiliateLogoView = nil;
+  [super dealloc];
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {

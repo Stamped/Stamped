@@ -92,6 +92,7 @@
 }
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.mainContentView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
