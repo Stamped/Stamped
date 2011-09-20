@@ -101,40 +101,40 @@ def setFields(entity, detailed=False):
         if detailed:
             if entity.address is not None:
                 entity.subtitle = entity.address
-            elif entity.neighborhood is not None:
-                entity.subtitle = entity.neighborhood
+            # elif entity.neighborhood is not None:
+            #     entity.subtitle = entity.neighborhood
             else:
                 entity.subtitle = str(entity.subcategory).title()
         else:
-            address = {}
-            if len(entity.address_components) > 0:
-                for component in entity.address_components:
-                    for i in component['types']:
-                        address[str(i)] = component['short_name']
+            # address = {}
+            # if len(entity.address_components) > 0:
+            #     for component in entity.address_components:
+            #         for i in component['types']:
+            #             address[str(i)] = component['short_name']
             
-            if 'locality' in address and 'administrative_area_level_1' in address:
-                entity.subtitle = '%s, %s' % (address['locality'], \
-                                              address['administrative_area_level_1'])
-            elif 'sublocality' in address and 'administrative_area_level_1' in address:
-                entity.subtitle = '%s, %s' % (address['sublocality'], \
-                                              address['administrative_area_level_1'])
-            elif entity.neighborhood is not None:
-                entity.subtitle = entity.neighborhood
-            else:
-                is_set = False
+            # if 'locality' in address and 'administrative_area_level_1' in address:
+            #     entity.subtitle = '%s, %s' % (address['locality'], \
+            #                                   address['administrative_area_level_1'])
+            # elif 'sublocality' in address and 'administrative_area_level_1' in address:
+            #     entity.subtitle = '%s, %s' % (address['sublocality'], \
+            #                                   address['administrative_area_level_1'])
+            # elif entity.neighborhood is not None:
+            #     entity.subtitle = entity.neighborhood
+            # else:
+            is_set = False
+            
+            if entity.address is not None:
+                # attempt to parse the city, state from the address
+                match = city_state_re.match(entity.address)
                 
-                if entity.address is not None:
-                    # attempt to parse the city, state from the address
-                    match = city_state_re.match(entity.address)
-                    
-                    if match is not None:
-                        # city, state
-                        entity.subtitle = "%s, %s" % match.groups()
-                        is_set = True
-                
-                if not is_set:
-                    # else fall back to the generic subcategory
-                    entity.subtitle = str(entity.subcategory).title()
+                if match is not None:
+                    # city, state
+                    entity.subtitle = "%s, %s" % match.groups()
+                    is_set = True
+            
+            if not is_set:
+                # else fall back to the generic subcategory
+                entity.subtitle = str(entity.subcategory).title()
     
     elif entity.category == 'book':
         if entity.author != None:
