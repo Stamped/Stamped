@@ -19,7 +19,7 @@
 #import "UIColor+Stamped.h"
 
 static NSString* const kSearchPath = @"/entities/search.json";
-static NSString* const kFastSearchURI = @"http://static.stamped.com/search/";
+static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v1/";
 
 typedef enum {
   ResultTypeFast,

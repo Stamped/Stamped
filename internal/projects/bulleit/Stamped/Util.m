@@ -136,7 +136,7 @@ NSString* const kKeychainTwitterToken = @"Twitter for Stamped";
   } else if (timeSince > 604800) {
     CGFloat numWeeks = floorf(timeSince / 604800);
     if (numWeeks < 2) {
-      result = @"last week";
+      result = @"a week ago";
     } else {
       result = [NSString stringWithFormat:@"%.0f weeks ago", numWeeks];
     }
