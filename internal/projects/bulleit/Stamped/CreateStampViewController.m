@@ -56,6 +56,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)adjustTextViewContentSize;
 - (void)sendSaveStampRequest;
 - (void)sendSaveEntityRequest;
+- (void)sendTweetRequest:(Stamp*)stamp;
 - (void)dismissSelf;
 - (void)addStampPhotoView;
 - (void)restoreViewState;
@@ -110,6 +111,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize tweetButton = tweetButton_;
 @synthesize twitterAuth = twitterAuth_;
 @synthesize twitterClient = twitterClient_;
+@synthesize shareLabel = shareLabel_;
 
 @synthesize objectToStamp = objectToStamp_;
 
@@ -287,25 +289,19 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
   [self addStampsRemainingLayer];
   [self restoreViewState];
-  
   // Twitter shit.
   GTMOAuthAuthentication* auth =
-      [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
-                                                  consumerKey:kTwitterConsumerKey
-                                                   privateKey:kTwitterConsumerSecret] autorelease];
+  [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
+                                               consumerKey:kTwitterConsumerKey
+                                                privateKey:kTwitterConsumerSecret] autorelease];
   auth.callback = kOAuthCallbackURL;
   if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
                                                  authentication:auth]) {
     self.twitterAuth = auth;
     if (self.twitterAuth) {
       tweetButton_.enabled = YES;
-    
-      RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterUpdateStatusPath
-                                                              delegate:self];
-      request.method = RKRequestMethodPOST;
-      request.params = [NSDictionary dictionaryWithObjectsAndKeys:@"Sigh", @"status", nil];
-      [self.twitterAuth authorizeRequest:request.URLRequest];
-      [request send];
+    } else {
+      shareLabel_.textColor = [UIColor stampedLightGrayColor];
     }
   }
 }
@@ -456,12 +452,24 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   CGRect newCommentFrame = CGRectMake(0, 4, 310, fmaxf(104, contentSize.height));
   CGRect convertedFrame = [self.view convertRect:newCommentFrame fromView:ribbonedContainerView_];  
   CGRect newContainerFrame = ribbonedContainerView_.frame;
-  newContainerFrame.size.height = CGRectGetHeight(convertedFrame) + 58.0;
+  newContainerFrame.size.height = CGRectGetHeight(convertedFrame) + 60.0;
+  
   CGSize newContentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
-                                     CGRectGetMaxY(newContainerFrame) + 65);
+                                     CGRectGetMaxY(newContainerFrame) + 145);
   [scrollView_ setContentSize:newContentSize];
   ribbonedContainerView_.frame = newContainerFrame;
   ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+  
+  shareLabel_.frame = CGRectMake(shareLabel_.frame.origin.x,
+                                 CGRectGetMaxY(newContainerFrame) + 22,
+                                 CGRectGetWidth(shareLabel_.frame),
+                                 CGRectGetHeight(shareLabel_.frame));
+  [shareLabel_ setNeedsDisplay];
+  tweetButton_.frame = CGRectMake(tweetButton_.frame.origin.x,
+                                  CGRectGetMaxY(newContainerFrame) + 9,
+                                  CGRectGetWidth(tweetButton_.frame),
+                                  CGRectGetHeight(tweetButton_.frame));
+  [tweetButton_ setNeedsDisplay];
 
   [UIView animateWithDuration:0.2 animations:^{
     mainCommentContainer_.frame = convertedFrame;
@@ -654,10 +662,10 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     return;
 
   UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Remove the photo?"
-                                                     delegate:self
-                                            cancelButtonTitle:@"Cancel"
-                                       destructiveButtonTitle:@"Remove"
-                                            otherButtonTitles:nil] autorelease];
+                                                      delegate:self
+                                             cancelButtonTitle:@"Cancel"
+                                        destructiveButtonTitle:@"Remove"
+                                             otherButtonTitles:nil] autorelease];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   [sheet showInView:self.view];
 }
@@ -731,6 +739,34 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   [objectLoader send];
 }
 
+- (void)sendTweetRequest:(Stamp*)stamp {
+  if (self.twitterAuth && tweetButton_.selected) {
+    RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterUpdateStatusPath
+                                                            delegate:nil];
+    request.method = RKRequestMethodPOST;
+    [request.URLRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [request.URLRequest setHTTPMethod:@"POST"];
+
+    NSString* blurb = stamp.blurb;
+    if (blurb.length == 0)
+      blurb = [stamp.entityObject.title stringByAppendingString:@"."];
+    
+    NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
+    if (blurb.length > substring.length)
+      blurb = [substring stringByAppendingString:@"..."];
+    
+    blurb = [blurb stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+
+    // Stamped. [blurb] [link]
+    NSString* tweet = [NSString stringWithFormat:@"Stamped. %@ %@", blurb, stamp.URL];
+
+    NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
+    [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
+    [self.twitterAuth authorizeRequest:request.URLRequest];
+    [request send];
+  }
+}
+
 - (void)dismissSelf {
   UIViewController* vc = self.navigationController.parentViewController;
   if (vc && vc.modalViewController) {
@@ -764,7 +800,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [self sendSaveStampRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
     Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];
-    NSLog(@"stamp: %@", stamp);
+    if (tweetButton_.selected)
+      [self sendTweetRequest:stamp];
+    
     stamp.temporary = [NSNumber numberWithBool:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                         object:stamp];

@@ -50,6 +50,7 @@
 @property (nonatomic, retain) IBOutlet UIImageView* backgroundImageView;
 @property (nonatomic, retain) IBOutlet UILabel* creditLabel;
 @property (nonatomic, retain) IBOutlet UIButton* tweetButton;
+@property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 
 - (IBAction)tweetButtonPressed:(id)sender;
 - (IBAction)editButtonPressed:(id)sender;

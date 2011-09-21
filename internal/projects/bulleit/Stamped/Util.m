@@ -19,7 +19,7 @@ NSString* const kTwitterAccessTokenURL = @"https://api.twitter.com/oauth/access_
 NSString* const kOAuthCallbackURL = @"http://www.example.com/oauth_callback";
 NSString* const kTwitterScope = @"http://www.example.com/oauth_scope";
 
-NSString* const kKeychainTwitterToken = @"Twitter for Stamped";
+NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
 @implementation Util
 
