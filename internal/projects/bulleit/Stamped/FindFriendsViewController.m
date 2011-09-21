@@ -183,7 +183,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                  authentication:auth]) {
     self.authentication = auth;
     [self fetchCurrentUser];
-    // TODO: kick off friend request
   } else {
     [self signInToTwitter];
   }

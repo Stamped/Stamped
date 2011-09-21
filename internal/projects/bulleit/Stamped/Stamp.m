@@ -31,5 +31,6 @@ NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 @dynamic image;
 @dynamic imageURL;
 @dynamic imageDimensions;
+@dynamic URL;
 
 @end
