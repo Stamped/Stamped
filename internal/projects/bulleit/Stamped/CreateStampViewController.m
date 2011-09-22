@@ -759,7 +759,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
     // Stamped. [blurb] [link]
     NSString* tweet = [NSString stringWithFormat:@"Stamped. %@ %@", blurb, stamp.URL];
-
     NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
     [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
     [self.twitterAuth authorizeRequest:request.URLRequest];

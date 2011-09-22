@@ -323,25 +323,40 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (GTMOAuthAuthentication*)createAuthentication {
-  GTMOAuthAuthentication* auth =
-      [[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
-                                                  consumerKey:kTwitterConsumerKey
-                                                   privateKey:kTwitterConsumerSecret];
-  auth.callback = kOAuthCallbackURL;
-  return [auth autorelease];
+  NSString *myConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
+  NSString *myConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
+
+  if ([myConsumerKey length] == 0 || [myConsumerSecret length] == 0) {
+    return nil;
+  }
+
+  GTMOAuthAuthentication* auth;
+  auth = [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
+                                                      consumerKey:myConsumerKey
+                                                       privateKey:myConsumerSecret] autorelease];
+
+  [auth setServiceProvider:@"Twitter"];
+  [auth setCallback:kOAuthCallbackURL];
+  return auth;
 }
 
 - (void)signInToTwitter {
+  GTMOAuthAuthentication *auth = [self createAuthentication];
+  if (auth == nil) {
+    NSAssert(NO, @"A valid consumer key and consumer secret are required for signing in to Twitter");
+  }
+
   GTMOAuthViewControllerTouch* authVC =
       [[GTMOAuthViewControllerTouch alloc] initWithScope:kTwitterScope
                                                 language:nil
                                          requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
                                        authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
                                           accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
-                                          authentication:[self createAuthentication]
+                                          authentication:auth
                                           appServiceName:kKeychainTwitterToken
                                                 delegate:self
                                         finishedSelector:@selector(viewController:finishedWithAuth:error:)];
+  [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
   [self.navigationController pushViewController:authVC animated:YES];
   [authVC release];
 }
@@ -361,6 +376,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)fetchCurrentUser {
   RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterCurrentUserURI delegate:self];
+  request.cachePolicy = RKRequestCachePolicyNone;
+  [request prepareURLRequest];
   [self.authentication authorizeRequest:request.URLRequest];
   [request send];
 }
@@ -418,7 +435,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
-    NSLog(@"HTTP error for request: %@, response: %@", request, response);
+    NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
     return;
   }
 

@@ -32,7 +32,6 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 @synthesize navigationController = navigationController_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  //RKLogConfigureByName("RestKit/Network", RKLogLevelTrace);
 #if !TARGET_IPHONE_SIMULATOR
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
