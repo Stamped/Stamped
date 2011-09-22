@@ -12,10 +12,17 @@
 @interface LearnMoreView ()
 
 - (void)setupSlide:(UIImageView*)imageView;
+- (void)setupLayersForUIImageView:(UIImageView*)imageView;
 
 
 @end
 
+static CGFloat const kSlide0X = 0;
+static CGFloat const kSlide1X = 380;
+static CGFloat const kSlide2X = 760;
+static CGFloat const kSlide3X = 1140;
+static CGFloat const kSlide4X = 1520;
+static CGFloat const kSlideWidth = 380;
 
 @implementation LearnMoreView
 
@@ -39,10 +46,10 @@
 - (void)awakeFromNib {
   
   choreographer_ = [[LearnMoreChoreographer alloc] init];
-//  self.scrollView.delegate = self.choreographer;
+  self.scrollView.delegate = self.choreographer;
   
   NSArray* bgImages = [NSArray arrayWithObjects:[UIImage imageNamed:@"learnmore_00"],
-                       [UIImage imageNamed:@"learnmore_01_stars"],
+                       [UIImage imageNamed:@"learnmore_01"],
                        [UIImage imageNamed:@"learnmore_02_stamp"],
                        [UIImage imageNamed:@"learnmore_03"],
                        [UIImage imageNamed:@"learnmore_04_stamps"], nil];
@@ -53,22 +60,112 @@
     CGRect frame = self.scrollView.frame;
     frame.origin.x = CGRectGetWidth(frame) * i;
     subview.frame = frame;
-    subview.clipsToBounds = YES;
+    subview.clipsToBounds = NO;
     subview.contentMode = UIViewContentModeCenter;
     
-    [self.scrollView addSubview:subview];
+    [self setupLayersForUIImageView:subview];
     
-    if (i==1)   [self setupSlide:subview];
+    [self.scrollView addSubview:subview];
     
     [subview release];
   }
   
   self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.scrollView.frame) * bgImages.count,
-                                           CGRectGetHeight(self.scrollView.frame));  
+                                           CGRectGetHeight(self.scrollView.frame)); 
   
-//  NSLog(@"%@", self.choreographer);
+  
+}
 
+
+
+- (void)setupLayersForUIImageView:(UIImageView*)imageView
+{
+  if (imageView.image == [UIImage imageNamed:@"learnmore_01"]) {
   
+    // Second slide (5 stars)    
+    UIImage* greyStarImg   = [UIImage imageNamed:@"learnmore_star_grey"];
+    UIImage* yellowStarImg = [UIImage imageNamed:@"learnmore_star_yellow"];
+
+    for (NSUInteger i = 0; i < 5; ++i) {
+      CALayer* greyStar   = [CALayer layer];
+      CALayer* yellowStar = [CALayer layer];
+      greyStar.contents   = (id)greyStarImg.CGImage;
+      yellowStar.contents = (id)yellowStarImg.CGImage;
+      CGRect frame = CGRectMake(90 + (i * greyStarImg.size.width), 169, greyStarImg.size.width, greyStarImg.size.height);
+      greyStar.frame   = frame;
+      yellowStar.frame = frame;
+      yellowStar.opacity = 0.0;
+      
+      // Add Animations 
+      NSMutableArray*   choreoArray = [NSMutableArray array];
+      
+      NSMutableDictionary* animDict = [NSMutableDictionary dictionary];
+      
+      // // Fade in
+      NSRange range = NSMakeRange(260.0 + (20*i), 30.0);
+      [animDict setObject:@"opacity"                     forKey:@"property"];
+      [animDict setValue:[NSNumber numberWithFloat:0.0]  forKey:@"startValue"];
+      [animDict setValue:[NSNumber numberWithFloat:1.0]  forKey:@"endValue"];
+      [animDict setValue:[NSValue valueWithRange:range]  forKey:@"range"];
+      [choreoArray addObject:animDict];
+      
+      animDict = [NSMutableDictionary dictionary];
+      range = NSMakeRange(0, range.location-1);
+      [animDict setObject:@"opacity"                     forKey:@"property"];
+      [animDict setValue:[NSNumber numberWithFloat:0.0]  forKey:@"startValue"];
+      [animDict setValue:[NSNumber numberWithFloat:0.0]  forKey:@"endValue"];
+      [animDict setValue:[NSValue valueWithRange:range]  forKey:@"range"];
+      [choreoArray addObject:animDict];
+      
+      animDict = [NSMutableDictionary dictionary];
+      range = NSMakeRange(range.length+32, 100.0);
+      NSLog(@"%d %d", range.location, range.location+range.length);
+      [animDict setObject:@"opacity"                     forKey:@"property"];
+      [animDict setValue:[NSNumber numberWithFloat:1.0]  forKey:@"startValue"];
+      [animDict setValue:[NSNumber numberWithFloat:1.0]  forKey:@"endValue"];
+      [animDict setValue:[NSValue valueWithRange:range]  forKey:@"range"];
+      [choreoArray addObject:animDict];
+      
+/*      
+      // // Jump
+      range = NSMakeRange(400.0 + (30*i), 40.0);
+      CGPoint  startPt = CGPointMake(frame.origin.x, frame.origin.y);
+      CGPoint    endPt = CGPointMake(440.0, frame.origin.y);
+      CGSize      size = CGSizeMake(frame.size.width, frame.size.height);
+      CGRect startRect = CGRectMake(startPt.x, startPt.y, size.width, size.height);
+      CGRect   endRect = CGRectMake(endPt.x, endPt.y, size.width, size.height);
+      
+      animDict = [NSMutableDictionary dictionary];
+      [animDict setObject:@"jump"                            forKey:@"property"];
+      [animDict setValue:[NSValue valueWithCGRect:startRect] forKey:@"startValue"];
+      [animDict setValue:[NSValue valueWithCGRect:endRect]   forKey:@"endValue"];
+      [animDict setValue:[NSValue valueWithRange:range]      forKey:@"range"];
+      [choreoArray addObject:animDict];
+      
+      animDict = [NSMutableDictionary dictionary];
+      range = NSMakeRange(300, 81);
+      [animDict setObject:@"frame"                       forKey:@"property"];
+      [animDict setValue:[NSValue valueWithCGRect:frame] forKey:@"startValue"];
+      [animDict setValue:[NSValue valueWithCGRect:frame] forKey:@"endValue"];
+      [animDict setValue:[NSValue valueWithRange:range]  forKey:@"range"];
+      [choreoArray addObject:animDict];
+      
+//      animDict = [NSMutableDictionary dictionary];
+//      range = NSMakeRange(range.length + 30.0, 200.0);
+//      [animDict setObject:@"frame"                       forKey:@"property"];
+//      [animDict setValue:[NSNumber numberWithFloat:1.0]  forKey:@"startValue"];
+//      [animDict setValue:[NSNumber numberWithFloat:1.0]  forKey:@"endValue"];
+//      [animDict setValue:[NSValue valueWithRange:range]  forKey:@"range"];
+//      [choreoArray addObject:animDict];
+*/
+      [yellowStar setValue:choreoArray forKey:@"choreoArray"];
+
+      [imageView.layer addSublayer:greyStar];
+      [imageView.layer addSublayer:yellowStar];
+    }
+    
+    self.choreographer.slide1Layers = imageView.layer.sublayers;
+  }
 }
 
 
