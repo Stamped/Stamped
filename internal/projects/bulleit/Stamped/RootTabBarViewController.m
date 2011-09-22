@@ -200,7 +200,7 @@
 - (void)viewDidAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   [self.selectedViewController viewDidAppear:animated];
-  
+
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"]) {
     if (!tooltipImageView_) {
       tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
@@ -315,7 +315,6 @@
     self.navigationItem.title = @"People";
   }
 
-  
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 
