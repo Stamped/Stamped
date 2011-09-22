@@ -76,6 +76,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize stampedLabel = stampedLabel_;
 @synthesize loadingView = loadingView_;
 @synthesize addFavoriteButton = addFavoriteButton_;
+@synthesize addFavoriteLabel = addFavoriteLabel_;
+@synthesize likeButton = likeButton_;
+@synthesize likeLabel = likeLabel_;
 @synthesize stampPhotoView = stampPhotoView_;
 @synthesize eDetailArrowImageView = eDetailArrowImageView_;
 
@@ -102,6 +105,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.stampedLabel = nil;
   self.loadingView = nil;
   self.addFavoriteButton = nil;
+  self.addFavoriteLabel = nil;
+  self.likeButton = nil;
+  self.likeLabel = nil;
   self.stampPhotoView = nil;
   [super dealloc];
 }
@@ -184,6 +190,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.stampedLabel = nil;
   self.loadingView = nil;
   self.addFavoriteButton = nil;
+  self.addFavoriteButton = nil;
+  self.addFavoriteLabel = nil;
+  self.likeButton = nil;
+  self.likeLabel = nil;
   self.stampPhotoView = nil;
 }
 
@@ -407,6 +417,11 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   UIButton* button = sender;
   BOOL shouldDelete = button.selected;
   [button setSelected:!shouldDelete];
+  if (button.selected) {
+    addFavoriteLabel_.text = @"To-Do'd";
+  } else {
+    addFavoriteLabel_.text = @"To-Do";
+  }
   NSString* path = shouldDelete ? kRemoveFavoritePath : kCreateFavoritePath;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
@@ -421,6 +436,17 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (IBAction)handleSendButtonTap:(id)sender {
   
+}
+
+- (IBAction)handleLikeButtonTap:(id)sender {
+  UIButton* button = sender;
+  if (button.selected) {
+    button.selected = NO;
+    likeLabel_.text = @"Like";
+  } else {
+    button.selected = YES;
+    likeLabel_.text = @"Liked";
+  }
 }
 
 #pragma mark -

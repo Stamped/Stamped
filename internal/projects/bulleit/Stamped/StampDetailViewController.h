@@ -28,6 +28,7 @@
 - (IBAction)handleRestampButtonTap:(id)sender;
 - (IBAction)handleTodoButtonTap:(id)sender;
 - (IBAction)handleSendButtonTap:(id)sender;
+- (IBAction)handleLikeButtonTap:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* headerView;
@@ -42,6 +43,9 @@
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIButton* addFavoriteButton;
+@property (nonatomic, retain) IBOutlet UILabel* addFavoriteLabel;
+@property (nonatomic, retain) IBOutlet UIButton* likeButton;
+@property (nonatomic, retain) IBOutlet UILabel* likeLabel;
 @property (nonatomic, retain) IBOutlet UIImageView* eDetailArrowImageView;
 
 @end
