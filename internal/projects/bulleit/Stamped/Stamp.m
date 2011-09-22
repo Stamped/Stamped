@@ -20,6 +20,8 @@ NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 @dynamic blurb;
 @dynamic created;
 @dynamic numComments;
+@dynamic numLikes;
+@dynamic isLiked;
 @dynamic stampID;
 @dynamic entityObject;
 @dynamic user;

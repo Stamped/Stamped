@@ -48,6 +48,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpToolbar;
 - (void)setUpMainContentView;
 - (void)setUpCommentsView;
+- (void)updateNumberOfLikes;
 - (void)handleTap:(UITapGestureRecognizer*)recognizer;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
@@ -164,9 +165,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   mainCommentContainer_.layer.shadowRadius = 2;
   mainCommentContainer_.layer.shadowPath =
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
-
-  if (stamp_.entityObject.favorite)
-    self.addFavoriteButton.selected = YES;
   
   [self setUpMainContentView];
   [self setUpCommentsView];
@@ -258,6 +256,22 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   bottomToolbar_.layer.shadowOpacity = 0.2;
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
   bottomToolbar_.alpha = 0.9;
+  
+  if (stamp_.entityObject.favorite) {
+    addFavoriteLabel_.text = @"To-Do'd";
+    addFavoriteButton_.selected = YES;
+  }
+  
+  if ([stamp_.isLiked boolValue]) {
+    likeLabel_.text = @"Liked";
+    likeButton_.selected = YES;
+  }
+}
+
+- (void)updateNumberOfLikes {
+  // If there is a credited user then we already have the room.
+  User* creditedUser = [stamp_.credits anyObject];
+#warning incomplete.
 }
 
 - (void)setUpMainContentView {
@@ -320,7 +334,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [mainCommentContainer_ addSubview:stampPhotoView_];
     [self.stampPhotoView release];
   }
-  
+
   User* creditedUser = [stamp_.credits anyObject];
   if (creditedUser) {
     mainCommentFrame.size.height += 35;
@@ -367,6 +381,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [mainCommentContainer_.layer addSublayer:creditStringLayer];
     [creditStringLayer release];
   }
+
   mainCommentContainer_.frame = mainCommentFrame;
   mainCommentContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
   CGRect activityFrame = activityView_.frame;
@@ -440,13 +455,15 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (IBAction)handleLikeButtonTap:(id)sender {
   UIButton* button = sender;
-  if (button.selected) {
-    button.selected = NO;
-    likeLabel_.text = @"Like";
-  } else {
-    button.selected = YES;
-    likeLabel_.text = @"Liked";
-  }
+  BOOL liked = !button.selected;
+  button.selected = liked;
+  likeLabel_.text = liked ? @"Liked" : @"Like";
+  stamp_.isLiked = [NSNumber numberWithBool:liked];
+  NSUInteger numLikesValue = [stamp_.numLikes unsignedIntegerValue];
+  NSUInteger delta = liked ? 1 : -1;
+  numLikesValue += delta;
+  stamp_.numLikes = [NSNumber numberWithUnsignedInteger:numLikesValue];
+  [stamp_.managedObjectContext save:NULL];
 }
 
 #pragma mark -

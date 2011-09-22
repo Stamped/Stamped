@@ -19,6 +19,8 @@ extern NSString* kStampWasCreatedNotification;
 @property (nonatomic, retain) NSString* blurb;
 @property (nonatomic, retain) NSDate* created;
 @property (nonatomic, retain) NSNumber* numComments;
+@property (nonatomic, retain) NSNumber* numLikes;
+@property (nonatomic, retain) NSNumber* isLiked;
 @property (nonatomic, retain) NSNumber* temporary;
 @property (nonatomic, retain) NSString* stampID;
 @property (nonatomic, retain) NSString* imageDimensions;

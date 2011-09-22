@@ -90,6 +90,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
                                         @"created", @"created",
                                         @"num_comments", @"numComments",
+                                        @"num_likes", @"numLikes",
+                                        @"is_liked", @"isLiked",
                                         @"image_dimensions", @"imageDimensions",
                                         @"image_url", @"imageURL",
                                         @"url", @"URL", nil];
