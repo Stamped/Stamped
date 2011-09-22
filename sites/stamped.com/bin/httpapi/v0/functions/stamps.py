@@ -15,20 +15,13 @@ def create(request):
     authUserId  = checkOAuth(request)
     schema      = parseFileUpload(HTTPStampNew(), request, 'image')
     
-    ### TODO: Deprecate entity_id
-    if schema.search_id:
-        entityId = stampedAPI._convertSearchId(schema.search_id)
-    elif schema.entity_id:
-        entityId = schema.entity_id
-    
-    if entityId is None:
-        raise InputError("could not map temp entity id %s" % schema.search_id)
-    
     data        = schema.exportSparse()
-    data.pop('entity_id', None)
-    data.pop('search_id', None)
+    entityRequest = {
+        'entity_id': data.pop('entity_id', None),
+        'search_id': data.pop('search_id', None)
+    }
     
-    stamp       = stampedAPI.addStamp(authUserId, entityId, data)
+    stamp       = stampedAPI.addStamp(authUserId, entityRequest, data)
     stamp       = HTTPStamp().importSchema(stamp)
     
     return transformOutput(stamp.exportSparse())

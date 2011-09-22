@@ -621,14 +621,29 @@ class StampedAPI(AStampedAPI):
     #       #   ##   #   #   #   # #      #    # 
     ####### #    #   #   #   #   # ######  ####  
     """
+
+    def _getEntityFromRequest(self, entityRequest):
+        if isinstance(entityRequest, SchemaElement):
+            entityRequest = entityRequest.value
+        entityId    = entityRequest.pop('entity_id', None)
+        searchId    = entityRequest.pop('search_id', None)
+
+        if entityId == None and searchId == None:
+            msg = "Required field missing (entityId or search_id)"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        if searchId != None and searchId.startswith('T_'):
+            return self._convertSearchId(searchId)
+        return self._entityDB.getEntity(entityId)
     
     def addEntity(self, entity):
         entity.timestamp.created = datetime.utcnow()
         entity = self._entityDB.addEntity(entity)
         return entity
     
-    def getEntity(self, entityId, authUserId=None):
-        entity = self._entityDB.getEntity(entityId)
+    def getEntity(self, entityRequest, authUserId=None):
+        entity = self._getEntityFromRequest(entityRequest)
         
         ### TODO: Check if user has access to this entity?
         return entity
@@ -866,9 +881,9 @@ class StampedAPI(AStampedAPI):
         return stamps
 
     
-    def addStamp(self, authUserId, entityId, data):
+    def addStamp(self, authUserId, entityRequest, data):
         user        = self._userDB.getUser(authUserId)
-        entity      = self._entityDB.getEntity(entityId)
+        entity      = self._getEntityFromRequest(entityRequest)
 
         blurbData   = data.pop('blurb', None)
         creditData  = data.pop('credit', None)
@@ -921,7 +936,8 @@ class StampedAPI(AStampedAPI):
                 userIds[userId] = creditedUser.exportSchema(UserMini())
 
                 # Assign credit
-                creditedStamp = self._stampDB.getStampFromUserEntity(userId, entityId)
+                creditedStamp = self._stampDB.getStampFromUserEntity(userId, \
+                    entity.entity_id)
                 if creditedStamp != None:
                     result.stamp_id = creditedStamp.stamp_id
 
