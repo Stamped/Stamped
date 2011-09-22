@@ -23,6 +23,7 @@
 }
 
 - (void)dealloc {
+  self.imageView = nil;
   self.image = nil;
   [super dealloc];
 }

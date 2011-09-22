@@ -19,6 +19,7 @@
 @interface CreateStampViewController : UIViewController<UITextFieldDelegate,
                                                         UITextViewDelegate,
                                                         RKObjectLoaderDelegate,
+                                                        RKRequestDelegate,
                                                         UINavigationControllerDelegate,
                                                         UIImagePickerControllerDelegate,
                                                         UIActionSheetDelegate> {
@@ -48,9 +49,12 @@
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
 @property (nonatomic, retain) IBOutlet UIImageView* backgroundImageView;
 @property (nonatomic, retain) IBOutlet UILabel* creditLabel;
+@property (nonatomic, retain) IBOutlet UIButton* tweetButton;
+@property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 
+- (IBAction)tweetButtonPressed:(id)sender;
 - (IBAction)editButtonPressed:(id)sender;
-- (IBAction)backButtonPressed:(id)sender; 
+- (IBAction)backButtonPressed:(id)sender;
 - (IBAction)saveStampButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;
 - (id)initWithSearchResult:(SearchResult*)searchResult;

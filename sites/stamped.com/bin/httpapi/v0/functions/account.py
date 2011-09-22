@@ -133,7 +133,7 @@ def customize_stamp(request):
     schema      = parseRequest(HTTPCustomizeStamp(), request)
     data        = schema.exportSparse()
     
-    account     = stampedAPI.updateProfile(authUserId, data)
+    account     = stampedAPI.customizeStamp(authUserId, data)
     user        = HTTPUser().importSchema(account)
 
     return transformOutput(user.exportSparse())

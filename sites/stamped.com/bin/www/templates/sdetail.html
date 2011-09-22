@@ -15,7 +15,7 @@
         <!-- Style --> 
         <link href="http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css" rel="stylesheet" type="text/css" /> 
         <link rel="stylesheet" href="http://static.stamped.com/assets/css/normalize.css" type="text/css" media="screen" /> 
-        <link rel="stylesheet" href="http://static.stamped.com/assets/css/style.css" type="text/css" media="screen" /> 
+        <link rel="stylesheet" href="http://static.stamped.com/assets/css/styles.css" type="text/css" media="screen" /> 
         
         <link rel="shortcut icon" href="http://static.stamped.com/assets/img/favicon.ico"/> 
         <link rel="apple-touch-icon" href="http://static.stamped.com/assets/img/apple-touch-icon.png"/> 
@@ -29,27 +29,14 @@
             background:gradient(linear, left top, right bottom, from(#{{ user.color_primary }}), to(#{{ user.color_secondary }}));
         }
         #entity .brand {
-            background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-175x176.png') center center no-repeat;
-        }
-        .card .meta .thumb img {
-            margin: 5px 7px;
+            background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-logo-195x195.png') center center no-repeat;
         }
         {% if credit %}
-        .card .credit {
-            padding-left: 32px;
-        }
-        .credit .stamp {
-            position: absolute;
-            float: none;
-        }
         .stamp-1 {
             background:url('http://static.stamped.com/logos/{{ credit.0.color_primary }}-{{ credit.0.color_secondary }}-credit-18x18.png') left top no-repeat;
-            margin-left: -32px;
         }
         .stamp-2 {
             background:url('http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png') left top no-repeat;
-            margin-left: -22px;
-            left: auto;
         }
         {% endif %}
         </style>
@@ -95,6 +82,11 @@
                         <div class="main"> 
                             <span class="author"><span class="user">{{ user.screen_name }}</span> stamped</span> 
                             <p>{{ blurb }}</p> 
+                            {% if image_dimensions %}
+                            <div class="photo">
+                                <img src="http://static.stamped.com/stamps/{{ stamp_id }}.jpg" alt="{{ title }}" width="580px"/>
+                            </div>
+                            {% endif %}
                             {% if credit %}
                             <div class="credit">
                             <span class="stamp stamp-1 replaced">{{ credit.0.screen_name }}</span>

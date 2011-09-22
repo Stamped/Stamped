@@ -72,16 +72,17 @@ typedef enum {
 @synthesize selectedFilterButton = selectedFilterButton_;
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.filterButtons = nil;
+  self.entitiesArray = nil;
+  self.filteredEntitiesArray = nil;
   self.filterView = nil;
+  self.filterButtons = nil;
   self.foodFilterButton = nil;
   self.booksFilterButton = nil;
   self.filmFilterButton = nil;
   self.musicFilterButton = nil;
   self.otherFilterButton = nil;
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
   self.selectedFilterButton = nil;
   [super dealloc];
 }
@@ -142,6 +143,7 @@ typedef enum {
                                 (id)otherFilterButton_, nil];
   
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
+  [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
 }
 
@@ -218,7 +220,7 @@ typedef enum {
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {      
-    [self loadStampsFromDataStore];
+  [self loadStampsFromDataStore];
 }
 
 #pragma mark - Filter stuff

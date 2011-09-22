@@ -6,6 +6,7 @@
 *.o
 *.old
 out
+out.xml
 internal/projects/ios-fonts-test/FontTest/FontTest/FontTestAppDelegate.m
 
 internal/projects/ios-fonts-test/FontTest/FontTest/CreateImageViewController.m

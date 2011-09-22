@@ -24,6 +24,7 @@ extern NSString* kStampWasCreatedNotification;
 @property (nonatomic, retain) NSString* imageDimensions;
 @property (nonatomic, retain) NSString* imageURL;
 @property (nonatomic, retain) NSString* image;
+@property (nonatomic, retain) NSString* URL;
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) Event* event;

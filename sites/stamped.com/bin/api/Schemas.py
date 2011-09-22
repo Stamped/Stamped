@@ -274,6 +274,7 @@ class Entity(Schema):
         self.entity_id          = SchemaElement(basestring)
         self.search_id          = SchemaElement(basestring)
         self.title              = SchemaElement(basestring, required=True)
+        self.titlel             = SchemaElement(basestring)
         #self.titles             = SchemaList(SchemaElement(basestring))
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, derivedFrom='subcategory', derivedFn=self.set_category)

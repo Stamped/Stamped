@@ -44,6 +44,11 @@
 		7E2267D413D501CB00657A66 /* StampedModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */; };
 		7E22D6AF13DDA34100C4005E /* CreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */; };
 		7E22D6B013DDA34100C4005E /* CreateStampViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */; };
+		7E26889014290A95001BC95D /* create_share_text@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E26888B14290A95001BC95D /* create_share_text@2x.png */; };
+		7E26890F14295D93001BC95D /* create_share_button_highlighted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E26890E14295D93001BC95D /* create_share_button_highlighted@2x.png */; };
+		7E26891114295DD0001BC95D /* create_share_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E26891014295DD0001BC95D /* create_share_button_selected@2x.png */; };
+		7E2689311429603E001BC95D /* create_share_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E2689301429603E001BC95D /* create_share_button@2x.png */; };
+		7E26893314296048001BC95D /* create_share_button_inactive@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E26893214296048001BC95D /* create_share_button_inactive@2x.png */; };
 		7E29C874141D5D51005D60CE /* inbox_chat_bubble@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E29C873141D5D51005D60CE /* inbox_chat_bubble@2x.png */; };
 		7E2B33A0140F29F300AFC384 /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E2B339C140F29F300AFC384 /* libTestFlight.a */; };
 		7E2B33A1140F29F300AFC384 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7E2B339D140F29F300AFC384 /* README.txt */; };
@@ -511,6 +516,12 @@
 		7E22D6AC13DDA34100C4005E /* CreateStampViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CreateStampViewController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7E22D6AD13DDA34100C4005E /* CreateStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CreateStampViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7E22D6AE13DDA34100C4005E /* CreateStampViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CreateStampViewController.xib; path = ../Interfaces/CreateStampViewController.xib; sourceTree = "<group>"; };
+		7E26888614290738001BC95D /* StampedModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 2.xcdatamodel"; sourceTree = "<group>"; };
+		7E26888B14290A95001BC95D /* create_share_text@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_share_text@2x.png"; sourceTree = "<group>"; };
+		7E26890E14295D93001BC95D /* create_share_button_highlighted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_share_button_highlighted@2x.png"; sourceTree = "<group>"; };
+		7E26891014295DD0001BC95D /* create_share_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_share_button_selected@2x.png"; sourceTree = "<group>"; };
+		7E2689301429603E001BC95D /* create_share_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_share_button@2x.png"; sourceTree = "<group>"; };
+		7E26893214296048001BC95D /* create_share_button_inactive@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "create_share_button_inactive@2x.png"; sourceTree = "<group>"; };
 		7E29C873141D5D51005D60CE /* inbox_chat_bubble@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_chat_bubble@2x.png"; sourceTree = "<group>"; };
 		7E2B339C140F29F300AFC384 /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libTestFlight.a; sourceTree = "<group>"; };
 		7E2B339D140F29F300AFC384 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
@@ -1038,6 +1049,11 @@
 		7E42DCC913DB72B700AF63BE /* Create Stamp */ = {
 			isa = PBXGroup;
 			children = (
+				7E26891014295DD0001BC95D /* create_share_button_selected@2x.png */,
+				7E26893214296048001BC95D /* create_share_button_inactive@2x.png */,
+				7E26890E14295D93001BC95D /* create_share_button_highlighted@2x.png */,
+				7E2689301429603E001BC95D /* create_share_button@2x.png */,
+				7E26888B14290A95001BC95D /* create_share_text@2x.png */,
 				7E52B5361412C9DF00B46A55 /* take_photo_button@2x.png */,
 				7E52B53A1412CA1F00B46A55 /* pressed_photo_button@2x.png */,
 				7E47E93D1409B0D900130B32 /* edit_pencil@2x.png */,
@@ -2097,6 +2113,11 @@
 				7E86285514259A3B00E6FA3D /* toolbar_todoButton@2x.png in Resources */,
 				CB0DCB571427AC95009CB682 /* learnmore_star_grey@2x.png in Resources */,
 				CB0DCB581427AC95009CB682 /* learnmore_star_yellow@2x.png in Resources */,
+				7E26889014290A95001BC95D /* create_share_text@2x.png in Resources */,
+				7E26890F14295D93001BC95D /* create_share_button_highlighted@2x.png in Resources */,
+				7E26891114295DD0001BC95D /* create_share_button_selected@2x.png in Resources */,
+				7E2689311429603E001BC95D /* create_share_button@2x.png in Resources */,
+				7E26893314296048001BC95D /* create_share_button_inactive@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2453,9 +2474,10 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E26888614290738001BC95D /* StampedModel 2.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */;
+			currentVersion = 7E26888614290738001BC95D /* StampedModel 2.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

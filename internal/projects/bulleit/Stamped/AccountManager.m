@@ -10,10 +10,12 @@
 
 #import <RestKit/CoreData/CoreData.h>
 
+#import "GTMOAuthViewControllerTouch.h"
 #import "StampedAppDelegate.h"
 #import "FirstRunViewController.h"
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
+#import "Util.h"
 
 NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
 
@@ -131,6 +133,7 @@ static AccountManager* sharedAccountManager_ = nil;
   NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
   // Fresh install.
   if (!tokenExpirationDate) {
+    [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
     [self showFirstRunViewController];
     return;
   }

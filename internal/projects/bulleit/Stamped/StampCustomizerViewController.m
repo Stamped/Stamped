@@ -31,6 +31,15 @@
   // Release any cached data, images, etc that aren't in use.
 }
 
+- (void)dealloc {
+  self.brightnessSlider = nil;
+  self.hueSlider = nil;
+  self.stampImageView = nil;
+  self.primaryColorButton = nil;
+  self.secondaryColorButton = nil;
+  [super dealloc];
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {

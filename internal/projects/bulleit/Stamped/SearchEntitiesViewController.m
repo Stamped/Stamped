@@ -19,7 +19,7 @@
 #import "UIColor+Stamped.h"
 
 static NSString* const kSearchPath = @"/entities/search.json";
-static NSString* const kFastSearchURI = @"http://static.stamped.com/search/";
+static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v1/";
 
 typedef enum {
   ResultTypeFast,
@@ -52,7 +52,16 @@ typedef enum {
 @synthesize currentResultType = currentResultType_;
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.resultsArray = nil;
+  self.searchField = nil;
+  self.locationManager.delegate = nil;
+  self.locationManager = nil;
+  self.addStampCell = nil;
+  self.addStampLabel = nil;
+  self.searchingIndicatorView = nil;
+  self.currentRequest = nil;
+  tooltipImageView_ = nil;
   [super dealloc];
 }
 
@@ -82,7 +91,7 @@ typedef enum {
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  
+
   self.searchField = nil;
   self.locationManager.delegate = nil;
   self.locationManager = nil;

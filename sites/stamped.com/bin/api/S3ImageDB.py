@@ -8,6 +8,7 @@ __license__ = "TODO"
 import Globals
 import Image, ImageFile
 import aws, logs, os, utils
+import zlib, struct, array, random
 
 from AImageDB import AImageDB
 from StringIO import StringIO
@@ -208,6 +209,7 @@ class S3ImageDB(AImageDB):
     def _addImage(self, name, image):
         assert isinstance(image, Image.Image)
         
+        # if 
         suffix = ".jpg"
         name   = "%s%s" % (name, suffix)
         temp   = "temp%s" % (suffix, )
@@ -221,6 +223,26 @@ class S3ImageDB(AImageDB):
         key = Key(self.bucket, name)
         key.set_contents_from_filename(temp)
         key.set_acl('public-read')
+        key.close()
+        
+        return name
+    
+    def _addPNG(self, name, image):
+        assert isinstance(image, Image.Image)
+        
+        suffix  = ".png"
+        name    = "%s%s" % (name, suffix)
+
+        out     = StringIO()
+        image.save(out, 'png')
+        
+        logs.info('[%s] adding image %s (%dx%d)' % \
+            (self, name, image.size[0], image.size[1]))
+        
+        key = Key(self.bucket, name)
+        key.set_acl('public-read')
+        key.set_metadata('Content-Type', 'image/png')
+        key.set_contents_from_string(out.getvalue())
         key.close()
         
         return name
@@ -240,4 +262,80 @@ class S3ImageDB(AImageDB):
         
         template = Template(source)
         return template.render(params)
+
+
+    def generateStamp(self, primary_color, secondary_color):
+        def output_chunk(out, chunk_type, data):
+            out.write(struct.pack("!I", len(data)))
+            out.write(chunk_type)
+            out.write(data)
+            checksum = zlib.crc32(data, zlib.crc32(chunk_type))
+            out.write(struct.pack("!i", checksum))
+
+        def get_data(width, height, rgb_func):
+            fw = float(width)
+            fh = float(height)
+            compressor = zlib.compressobj()
+            data = array.array("B")
+            for y in range(height):
+                data.append(0)
+                fy = float(y)
+                for x in range(width):
+                    fx = float(x)
+                    data.extend([min(255, max(0, int(v * 255))) \
+                        for v in rgb_func(fx / fw, fy / fh)])
+            compressed = compressor.compress(data.tostring())
+            flushed = compressor.flush()
+            return compressed + flushed
+
+        def linear_gradient(start_value, stop_value, start_offset=0.0, stop_offset=1.0):
+            return lambda offset: (start_value + ((offset - start_offset) / \
+                                    (stop_offset - start_offset) * \
+                                    (stop_value - start_value))) / 255.0
+
+        def gradient(DATA):
+            def gradient_function(x, y):
+                initial_offset = 0.0
+                v = x + y
+                for offset, start, end in DATA:
+                    if v < offset:
+                        r = linear_gradient(start[0], end[0], initial_offset, offset)(v)
+                        g = linear_gradient(start[1], end[1], initial_offset, offset)(v)
+                        b = linear_gradient(start[2], end[2], initial_offset, offset)(v)
+                        return r, g, b
+                    initial_offset = offset
+                return end[0] / 255.0, end[1] / 255.0, end[2] / 255.0
+            return gradient_function
+
+        def rgb(c):
+            split = (c[0:2], c[2:4], c[4:6])
+            return [int(x, 16) for x in split]
+
+        def write_png(filename, mask, width, height, rgb_func):
+            out = StringIO()
+            out.write(struct.pack("8B", 137, 80, 78, 71, 13, 10, 26, 10))
+            output_chunk(out, "IHDR", struct.pack("!2I5B", width, height, 8, 2, 0, 0, 0))
+            output_chunk(out, "IDAT", get_data(width, height, rgb_func))
+            output_chunk(out, "IEND", "")
+            out.seek(0)
+
+            image = Image.open(out)
+            __dir__ = os.path.dirname(os.path.abspath(__file__))
+            filepath = os.path.join(__dir__, mask)
+            mask = Image.open(filepath).convert('RGBA').split()[3]
+            image.putalpha(mask)
+
+            self._addPNG('logos/%s' % filename, image)
+        
+        output = [
+            (195, 195, 'stamped_logo_mask.png', 'logo'),
+            (18, 18, 'stamped_credit_mask.png', 'credit'),
+        ]
+        
+        for width, height, mask, suffix in output:
+            filename = '%s-%s-%s-%sx%s' % (primary_color.upper(), \
+                secondary_color.upper(), suffix, width, height)
+            write_png(filename, mask, width, height, gradient([
+                (2.0, rgb(primary_color), rgb(secondary_color)),
+            ]))
 

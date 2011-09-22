@@ -10,16 +10,28 @@ import init
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
+import datetime
 
 def about(request):
     try:
-        return render_to_response('about.html', None)
+        # return render_to_response('about.html', None)
+        response = render_to_response('index.html', None)
+
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
     except:
         raise Http404
 
 def index(request):
     try:
-        return render_to_response('index.html', None)
+        response = render_to_response('index.html', None)
+
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
     except:
         raise Http404
     

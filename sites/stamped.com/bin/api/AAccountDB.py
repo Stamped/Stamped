@@ -33,4 +33,4 @@ class AAccountDB(object):
     @abstract
     def verifyAccountCredentials(self, screen_name, password):
         pass
-        
+

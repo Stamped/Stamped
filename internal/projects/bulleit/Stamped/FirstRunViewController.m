@@ -68,6 +68,26 @@ static const CGFloat kProfileImageSize = 500;
 - (void)dealloc {
   self.delegate = nil;
   self.profilePhoto = nil;
+  [self.signInScrollView removeFromSuperview];
+  [self.signUpScrollView removeFromSuperview];
+  
+  self.bottomView = nil;
+  self.scrollView = nil;
+  self.animationContentView = nil;
+  self.createAccountButton = nil;
+  self.signInButton = nil;
+  self.cancelButton = nil;
+  self.confirmButton = nil;
+  self.signInScrollView = nil;
+  self.stampedLogo = nil;
+  self.signUpScrollView = nil;
+  self.signUpEmailTextField = nil;
+  self.signUpPhoneTextField = nil;
+  self.signUpFullNameTextField = nil;
+  self.signUpPasswordTextField = nil;
+  self.signUpUsernameTextField = nil;
+  self.userImageView = nil;
+  self.activityIndicator = nil;
   [super dealloc];
 }
 

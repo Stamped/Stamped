@@ -207,8 +207,11 @@ def parseFileUpload(schema, request, fileName='image'):
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
-            
-        logs.form(data)
+
+        logData = data.copy()
+        if fileName in logData:
+            logData[fileName] = 'FILE (SIZE: %s)' % f.size
+        logs.form(logData)
         
         if schema == None:
             if len(data) > 0:

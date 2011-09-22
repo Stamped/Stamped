@@ -48,6 +48,7 @@
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [AccountManager sharedManager].delegate = nil;
   self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
   self.viewControllers = nil;
@@ -57,7 +58,7 @@
   self.mustDoTabBarItem = nil;
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
-
+  tooltipImageView_ = nil;
   [super dealloc];
 }
 

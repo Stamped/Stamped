@@ -143,7 +143,7 @@ def main():
             if 0 == len(name):
                 return
             
-            name = "search/%s.json" % name
+            name = "search/v1/%s.json" % name
             
             print "searching %s" % orig_name.encode('ascii', 'replace')
             try:
@@ -185,7 +185,7 @@ def main():
             return
     
     infile = file('autocomplete.txt', 'r')
-    pool   = Pool(4)
+    pool   = Pool(8)
     done   = 0
     offset = 0
     
