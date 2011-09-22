@@ -74,7 +74,7 @@ class S3ImageDB(AImageDB):
         width, height = image.size
         
         if width != height:
-            # extract a square aspect ratio image by cropping the longer side
+            # Extract a square aspect ratio image by cropping the longer side
             diff = abs(height - width) / 2
             
             if width > height:
@@ -86,99 +86,70 @@ class S3ImageDB(AImageDB):
         else:
             # image is already square
             square = image
+
+        maxSize = (500, 500)
         
-        sizes = [
+        sizes = {
             # shown in user's profile
-            144, # 2x
-            72,  # 1x
+            '144x144': (144, 144), # 2x
+            '72x72': (72, 72),  # 1x
             
             # shown in sDetail, sCreate, people tab (me)
-            110, # 2x
-            55,  # 1x
+            '110x110': (110, 110), # 2x
+            '55x55': (55, 55),  # 1x
             
             # shown in sDetail (also stamped by), eDetail (stamped by)
-            92,  # 2x
-            46,  # 1x
+            '92x92': (92, 92),  # 2x
+            '46x46': (46, 46),  # 1x
             
             # shown in inbox, activity (restamp), people (list)
-            74,  # 2x
-            37,  # 1x
+            '74x74': (74, 74),  # 2x
+            '37x37': (37, 37),  # 1x
             
             # shown in activity, sDetail (comments)
-            62,  # 2x
-            31,  # 1x
-        ]
-        
-        # add original image
-        images.append((self._addImage(prefix, image), 'original'))
-        
-        # add cache of resized images
-        for size in sizes:
-            resized = square.resize((size, size), Image.ANTIALIAS)
-            name = '%s-%dx%d' % (prefix, size, size)
-            
-            images.append((self._addImage(name, resized), '%dx%d' % (size, size)))
-        
-        # save an html index file of all the images
-        """
-        images = map(lambda i: ("http://static.stamped.com/%s" % i[0], i[1]), images)
-        images = map(lambda i: { 'url' : i[0], 'size' : i[1] }, images)
-        
-        params = {
-            "name" : userId, 
-            "images" : images, 
+            '62x62': (62, 62),  # 2x
+            '31x31': (31, 31),  # 1x
         }
-        
-        base = os.path.dirname(os.path.abspath(__file__))
-        path = os.path.join(base, 'template.html')
-        
-        f = open(path, 'r')
-        source = f.read()
-        f.close()
-        
-        html = self._parse(source, params)
-        self._addKeyFromString("%s.html" % prefix, html)
-        """
+
+        # Add images in all sizes
+        self._addImageSizes(prefix, image, maxSize, sizes)
     
     def addEntityImage(self, entityId, image):
         assert isinstance(image, Image.Image)
         
         prefix = 'entities/%s' % entityId
         
-        sizes = [
-            (196, 288), # 2x
-            (96,  144), # 1x
-        ]
+        maxSize = (960, 960)
+
+        sizes = {
+            'ios1x': (196, 288),
+            'ios2x': (96, 144),
+        }
         
-        # add original image
-        self._addImage(prefix, image)
-        
-        # add cache of resized images
-        self._addResizedImages(prefix, image, sizes)
+        # Add images in all sizes
+        self._addImageSizes(prefix, image, maxSize, sizes)
     
     def addStampImage(self, stampId, image):
         assert isinstance(image, Image.Image)
         
         prefix = 'stamps/%s' % stampId
+
+        maxSize = (960, 960)
+
+        sizes = {
+            'ios1x': (200, None),
+            'ios2x': (400, None),
+            'web': (580, None),
+            'mobile': (572, None),
+        }
         
-        sizes = [
-            (400, None), # 2x
-            (200, None), # 1x
-            
-            (640, 960), # 2x
-            (320, 480), # 1x
-        ]
-        
-        # add original image
-        self._addImage(prefix, image)
-        
-        # add cache of resized images
-        self._addResizedImages(prefix, image, sizes)
+        # Add images in all sizes
+        self._addImageSizes(prefix, image, maxSize, sizes)
     
-    def _addResizedImages(self, prefix, image, sizes):
+    def _addImageSizes(self, prefix, image, maxSize, sizes=None):
         assert isinstance(image, Image.Image)
-        
-        for size in sizes:
+
+        def resizeImage(image, size):
             ratio = 1.0
             
             if size[0] is not None:
@@ -188,7 +159,7 @@ class S3ImageDB(AImageDB):
                 ratio = min(ratio, float(size[1]) / image.size[1])
             
             if ratio < 1.0:
-                # maintain aspect ratio
+                # Maintain aspect ratio
                 width  = int(image.size[0] * ratio)
                 height = int(image.size[1] * ratio)
                 
@@ -200,29 +171,34 @@ class S3ImageDB(AImageDB):
                 size    = (width, height)
                 resized = image.resize(size, Image.ANTIALIAS)
             else:
-                size    = image.size
                 resized = image
-            
-            name = '%s-%dx%d' % (prefix, size[0], size[1])
-            self._addImage(name, resized)
+            return resized
+        
+        # Save original
+        original = resizeImage(image, maxSize)
+        self._addJPG(prefix, original)
+
+        # Save resized versions
+        for name, size in sizes.iteritems():
+            resized = resizeImage(image, size)
+            name = '%s-%s' % (prefix, name)
+            self._addJPG(name, resized)
     
-    def _addImage(self, name, image):
+    def _addJPG(self, name, image):
         assert isinstance(image, Image.Image)
         
-        # if 
-        suffix = ".jpg"
-        name   = "%s%s" % (name, suffix)
-        temp   = "temp%s" % (suffix, )
+        name    = "%s.jpg" % name
+
+        out     = StringIO()
+        image.save(out, 'jpg')
         
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
         
-        # rely on JPEG encoder to save image to temporary file
-        image.save(temp, optimize=True)
-        
         key = Key(self.bucket, name)
-        key.set_contents_from_filename(temp)
         key.set_acl('public-read')
+        key.set_metadata('Content-Type', 'image/jpeg')
+        key.set_contents_from_string(out.getvalue())
         key.close()
         
         return name
@@ -230,8 +206,7 @@ class S3ImageDB(AImageDB):
     def _addPNG(self, name, image):
         assert isinstance(image, Image.Image)
         
-        suffix  = ".png"
-        name    = "%s%s" % (name, suffix)
+        name    = "%s.png" % name
 
         out     = StringIO()
         image.save(out, 'png')
@@ -246,12 +221,6 @@ class S3ImageDB(AImageDB):
         key.close()
         
         return name
-    
-    def _addKeyFromString(self, name, value):
-        key = Key(self.bucket, name)
-        key.set_contents_from_string(value)
-        key.set_acl('public-read')
-        key.close()
     
     def _parse(self, source, params):
         try:
@@ -311,7 +280,7 @@ class S3ImageDB(AImageDB):
             split = (c[0:2], c[2:4], c[4:6])
             return [int(x, 16) for x in split]
 
-        def write_png(filename, mask, width, height, rgb_func):
+        def generateImage(filename, mask, width, height, rgb_func):
             out = StringIO()
             out.write(struct.pack("8B", 137, 80, 78, 71, 13, 10, 26, 10))
             output_chunk(out, "IHDR", struct.pack("!2I5B", width, height, 8, 2, 0, 0, 0))
@@ -335,7 +304,7 @@ class S3ImageDB(AImageDB):
         for width, height, mask, suffix in output:
             filename = '%s-%s-%s-%sx%s' % (primary_color.upper(), \
                 secondary_color.upper(), suffix, width, height)
-            write_png(filename, mask, width, height, gradient([
+            generateImage(filename, mask, width, height, gradient([
                 (2.0, rgb(primary_color), rgb(secondary_color)),
             ]))
 
