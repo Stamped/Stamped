@@ -159,16 +159,18 @@ def check(request):
         response.status_code = 400
         return response
 
+
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def linked_accounts(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPLinkedAccounts(), request)
     linked      = schema.exportSchema(LinkedAccounts())
-
+    
     result      = stampedAPI.updateLinkedAccounts(authUserId, linked)
-
+    
     return transformOutput(True)
+
 
 @handleHTTPRequest
 @require_http_methods(["POST"])

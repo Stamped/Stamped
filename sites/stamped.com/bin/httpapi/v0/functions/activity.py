@@ -22,5 +22,3 @@ def show(request):
 
     return transformOutput(result)
 
-
-

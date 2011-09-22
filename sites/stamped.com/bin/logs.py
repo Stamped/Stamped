@@ -98,7 +98,7 @@ def warn(msg, *args, **kwargs):
 
 
 # HTTP Log Requests
-def begin(output=None):
+def begin(output=None, request=None):
     refresh(format='object')
     localData.output = output
 
@@ -152,7 +152,7 @@ def error(code):
         localData.log['result'] = code
     except:
         localData.log['result'] = 'FAIL'
-
+    
     try:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         f = traceback.format_exception(exc_type, exc_value, exc_traceback)

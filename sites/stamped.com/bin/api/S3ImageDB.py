@@ -270,7 +270,7 @@ class S3ImageDB(AImageDB):
             out.write(data)
             checksum = zlib.crc32(data, zlib.crc32(chunk_type))
             out.write(struct.pack("!i", checksum))
-
+        
         def get_data(width, height, rgb_func):
             fw = float(width)
             fh = float(height)
@@ -286,12 +286,12 @@ class S3ImageDB(AImageDB):
             compressed = compressor.compress(data.tostring())
             flushed = compressor.flush()
             return compressed + flushed
-
+        
         def linear_gradient(start_value, stop_value, start_offset=0.0, stop_offset=1.0):
             return lambda offset: (start_value + ((offset - start_offset) / \
                                     (stop_offset - start_offset) * \
                                     (stop_value - start_value))) / 255.0
-
+        
         def gradient(DATA):
             def gradient_function(x, y):
                 initial_offset = 0.0
@@ -305,11 +305,11 @@ class S3ImageDB(AImageDB):
                     initial_offset = offset
                 return end[0] / 255.0, end[1] / 255.0, end[2] / 255.0
             return gradient_function
-
+        
         def rgb(c):
             split = (c[0:2], c[2:4], c[4:6])
             return [int(x, 16) for x in split]
-
+        
         def write_png(filename, mask, width, height, rgb_func):
             out = StringIO()
             out.write(struct.pack("8B", 137, 80, 78, 71, 13, 10, 26, 10))
@@ -317,23 +317,24 @@ class S3ImageDB(AImageDB):
             output_chunk(out, "IDAT", get_data(width, height, rgb_func))
             output_chunk(out, "IEND", "")
             out.seek(0)
-
+            
             image = Image.open(out)
             __dir__ = os.path.dirname(os.path.abspath(__file__))
             filepath = os.path.join(__dir__, mask)
             mask = Image.open(filepath).convert('RGBA').split()[3]
             image.putalpha(mask)
-
+            
             self._addPNG('logos/%s' % filename, image)
         
         output = [
-            (195, 195, 'stamped_logo_mask.png', 'logo'),
-            (18, 18, 'stamped_credit_mask.png', 'credit'),
+            (195, 195, 'stamped_logo_mask.png',   'logo'),
+            (18,  18,  'stamped_credit_mask.png', 'credit'),
         ]
         
         for width, height, mask, suffix in output:
-            filename = '%s-%s-%s-%sx%s' % (primary_color.upper(), \
+            filename = '%s-%s-%s-%sx%s' % (primary_color.upper(), 
                 secondary_color.upper(), suffix, width, height)
+            
             write_png(filename, mask, width, height, gradient([
                 (2.0, rgb(primary_color), rgb(secondary_color)),
             ]))

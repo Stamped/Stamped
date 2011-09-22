@@ -17,8 +17,8 @@ class TestEntitySink(AEntitySink):
     
     def _processItem(self, item):
         assert isinstance(item, Entity)
-        pprint(item.value)
-        return
+        #pprint(item.value)
+        #return
         
         utils.log("%s" % (item.title, ))
     

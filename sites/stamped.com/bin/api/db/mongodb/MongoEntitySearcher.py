@@ -8,7 +8,7 @@ __license__ = "TODO"
 
 import Globals, utils
 import logs, math, pymongo, re, string
-import unicodedata
+import unicodedata, gevent
 import CityList
 
 from EntitySearcher import EntitySearcher
@@ -253,21 +253,28 @@ class MongoEntitySearcher(EntitySearcher):
         # attempt to replace accented characters with their ascii equivalents
         query = unicodedata.normalize('NFKD', unicode(query)).encode('ascii', 'ignore')
         
-        query = query.replace('[', '\[?')
-        query = query.replace(']', '\]?')
-        query = query.replace('(', '\(?')
-        query = query.replace(')', '\)?')
-        query = query.replace('|', '\|')
-        query = query.replace('.', '\.?')
-        query = query.replace(':', ':?')
-        query = query.replace('&', ' & ')
-        
         if prefix:
             # perform a faster prefix-query by ensuring that any matching 
             # results begin with the given string as opposed to matching 
             # the given string anywhere in a result's title
             query = "^%s" % query
+            
+            query = query.replace('[', '\[')
+            query = query.replace(']', '\]')
+            query = query.replace('(', '\(')
+            query = query.replace(')', '\)')
+            query = query.replace('|', '\|')
+            query = query.replace('.', '\.')
         else:
+            query = query.replace('[', '\[?')
+            query = query.replace(']', '\]?')
+            query = query.replace('(', '\(?')
+            query = query.replace(')', '\)?')
+            query = query.replace('|', '\|')
+            query = query.replace('.', '\.?')
+            query = query.replace(':', ':?')
+            query = query.replace('&', ' & ')
+            
             # process individual words in query
             words = query.split(' ')
             if len(words) > 1:
@@ -287,11 +294,11 @@ class MongoEntitySearcher(EntitySearcher):
             query = query.replace("$", "[$st]?")
             query = query.replace("5", "[5s]?")
             query = query.replace("!", "[!li]?")
+            query = query.replace('-', '[ -]?')
+            query = query.replace(' ', '[ -]?')
+            query = query.replace("'", "'?")
         
         query = query.replace('cafe', "caf[eé]")
-        query = query.replace('-', '-?')
-        query = query.replace(' ', '[ -]?')
-        query = query.replace("'", "'?")
         
         """
         data = {}
@@ -495,7 +502,7 @@ class MongoEntitySearcher(EntitySearcher):
         # 
         # note: timeout is specified in seconds
         # TODO: drive this timout number down to speed up search results!
-        pool.join(timeout=5)
+        pool.join(timeout=4)
         
         # ----------------- #
         # parse all results #
@@ -531,11 +538,11 @@ class MongoEntitySearcher(EntitySearcher):
                 utils.printException()
         
         result_keys = [
+            'place_results', 
+            'db_results', 
             'apple_results', 
             'amazon_results', 
             'google_place_results', 
-            'db_results', 
-            'place_results', 
         ]
         
         # aggregate all results
@@ -574,8 +581,7 @@ class MongoEntitySearcher(EntitySearcher):
             results = list((result[0], -1) for result in results)
         
         if not prefix:
-            pool.spawn(self._add_temp, results)
-            pool.join(timeout=0.25)
+            gevent.spawn(self._add_temp, results)
         
         return results
     
@@ -600,11 +606,14 @@ class MongoEntitySearcher(EntitySearcher):
     def _prune_results(self, results, limit):
         """ limit the number of results returned and remove obvious duplicates """
         
+        #results = results[0: limit]
+        #return results
+        
         output = []
         prune  = set()
         
         if limit is not None:
-            soft_limit = int((3 * limit) / 2)
+            soft_limit = max(20, 2 * limit)
             
             if len(results) > soft_limit:
                 results = results[0 : soft_limit]
@@ -628,10 +637,10 @@ class MongoEntitySearcher(EntitySearcher):
                    entity1.title.lower() == entity2.title.lower():
                    prune.add(j)
                    
-                   if entity1.entity_id.startswith('T_'):
+                   if keep1 and entity1.entity_id.startswith('T_') and not \
+                       entity2.entity_id.startswith('T_'):
                        output.append(result2)
                        keep1 = False
-                       break
             
             if keep1:
                 output.append(result1)
@@ -700,6 +709,12 @@ class MongoEntitySearcher(EntitySearcher):
         if (entity.subcategory == 'song' or entity.subcategory == 'album') and \
             'artist_display_name' in entity:
             candidates.append(entity.artist_display_name)
+        
+        try:
+            if entity.subcategory == 'song' and entity.details.song.album_name is not None:
+                candidates.append(entity.details.song.album_name)
+        except:
+            pass
         
         value_sum = 0.0
         

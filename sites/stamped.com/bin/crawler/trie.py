@@ -7,6 +7,7 @@ __license__ = "TODO"
 
 import Globals, utils
 import aws, gzip, json, math, re, string, time, sys
+import unicodedata
 
 from MongoStampedAPI    import MongoStampedAPI
 from HTTPSchemas        import *
@@ -26,12 +27,11 @@ class Trie(object):
         self.children  = {}
     
     def add(self, key, scale_factor):
+        self.count += scale_factor
         if len(key) <= 0:
             return
         
-        self.count += scale_factor
         l = key[0]
-        
         if not l in self.children:
             self.children[l] = Trie(key=l, parent=self)
         
@@ -83,15 +83,20 @@ class Trie(object):
             return depths
     
     def prune(self, max_depth, min_count=0):
-        if max_depth <= 1 or self.count <= min_count:
+        return self._prune(max_depth, max_depth, min_count)
+    
+    def _prune(self, max_depth, orig_max_depth, min_count=0):
+        if max_depth <= 1 or self.count < min_count:
+            self.children = {}
+        elif orig_max_depth > max_depth + 4 and self.count == min_count:
             self.children = {}
         else:
             to_delete = []
             for child in self.children:
-                if self.children[child].count <= min_count:
+                if self.children[child].count < min_count:
                     to_delete.append(child)
                 else:
-                    self.children[child].prune(max_depth - 1, min_count)
+                    self.children[child]._prune(max_depth - 1, orig_max_depth, min_count)
             
             for d in to_delete:
                 del self.children[d]
@@ -130,7 +135,14 @@ def add_entries(entries, hint, output, scale_factor=1.0):
     utils.log("[%s] processing %d entity titles..." % (hint, count, ))
     for entry in entries:
         if 'title' in entry:
-            output.add(entry['title'].lower(), scale_factor)
+            key = entry['title'].lower()
+            
+            # attempt to replace accented characters with their ascii equivalents
+            key = unicodedata.normalize('NFKD', unicode(key)).encode('ascii', 'ignore')
+            key = re.sub('([^a-zA-Z0-9._ -])', '', key)
+            key = key.strip()
+            
+            output.add(key, scale_factor)
             
             done += 1
             if count <= 100 or ((done - 1) % (count / 100)) == 0:
@@ -158,7 +170,7 @@ def main():
     entries = placesDB._collection.find(fields={'title' : 1})
     add_entries(entries, 'places', trie, importance_threshold)
     
-    for s in [ ('song', 1.0), ('album', 1.0), ('artist', importance_threshold), ('book', importance_threshold), ('movie', 3.0) ]:
+    for s in [ ('song', 1.0), ('album', 1.0), ('artist', importance_threshold), ('book', importance_threshold), ('movie', importance_threshold / 4.0) ]:
         entries = entityDB._collection.find({"subcategory" : s[0]}, fields={'title' : 1})
         add_entries(entries, s[0], trie, s[1])
     

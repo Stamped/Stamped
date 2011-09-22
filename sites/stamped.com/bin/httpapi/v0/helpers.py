@@ -26,58 +26,53 @@ def handleHTTPRequest(fn):
         try:
             print
             print
+            
             logs.begin(stampedAPI._logsDB.addLog)
             logs.request(request)
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")
             return ret
-
+        
         except StampedHTTPError as e:
             logs.warning("%s Error: %s (%s)" % (e.code, e.msg, e.desc))
-            response = HttpResponse(e.msg)
-            response.status_code = e.code
+            response = HttpResponse(e.msg, status=e.code)
             logs.error(response.status_code)
             return response
-
+        
         except InputError as e:
             logs.warning("400 Error: %s" % (e.msg))
-            response = HttpResponse("invalid_request")
-            response.status_code = 400
+            response = HttpResponse("invalid_request: %s" % e.msg, status=e.code)
             logs.error(response.status_code)
             return response
-
+        
         except IllegalActionError as e:
             logs.warning("403 Error: %s" % (e.msg))
-            response = HttpResponse("illegal_action")
-            response.status_code = 403
+            response = HttpResponse("illegal_action: %s" % e.gmsg, status=403)
             logs.error(response.status_code)
             return response
-
+        
         except InsufficientPrivilegesError as e:
             logs.warning("403 Error: %s" % (e.msg))
-            response = HttpResponse("insufficient_privileges")
-            response.status_code = 403
+            response = HttpResponse("insufficient_privileges: %s" % e.msg, status=403)
             logs.error(response.status_code)
             return response
-
+        
         except Unavailable as e:
             logs.warning("404 Error: %s" % (e.msg))
-            response = HttpResponse("not_found")
-            response.status_code = 404
+            response = HttpResponse("not_found: %s" % e.msg, status=404)
             logs.error(response.status_code)
             return response
-
+        
         except Exception as e:
             logs.warning("500 Error: %s" % e)
-            response = HttpResponse("error")
-            response.status_code = 500
+            response = HttpResponse("internal server error: %s" % e, status=500)
             logs.error(response.status_code)
             return response
-
+        
         finally:
             logs.save()
-
+    
     return handleHTTPRequest
 
 def checkClient(request):
@@ -89,12 +84,13 @@ def checkClient(request):
         msg = "Client credentials not included"
         logs.warning(msg)
         raise StampedHTTPError("invalid_request", 401, msg)
-
+    
     ### Validate Client Credentials
     try:
         logs.client(client_id)
         if not stampedAuth.verifyClientCredentials(client_id, client_secret):
             raise
+        
         return client_id
     except:
         msg = "Invalid client credentials"
@@ -106,6 +102,7 @@ def optionalOAuth(request):
         authUserId = checkOAuth(request)
     except:
         authUserId = None
+    
     return authUserId
 
 def checkOAuth(request):
@@ -117,9 +114,10 @@ def checkOAuth(request):
             oauth_token = request.POST['oauth_token']
         else:
             raise
+        
         logs.token(oauth_token)
     except:
-        msg = "Access token not included"
+        msg = "Access token not found"
         logs.warning(msg)
         raise StampedHTTPError("invalid_request", 401, msg)
     
@@ -128,6 +126,7 @@ def checkOAuth(request):
         authenticated_user_id = stampedAuth.verifyAccessToken(oauth_token)
         if authenticated_user_id == None:
             raise
+        
         logs.user(authenticated_user_id)
         return authenticated_user_id
     except StampedHTTPError:
@@ -151,25 +150,24 @@ def parseRequest(schema, request):
         data = {}
         for k, v in rawData.iteritems():
             data[k] = v
-
+        
         data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
-
+        
         logData = data.copy()
         if 'password' in logData:
             logData['password'] = '*****'
         logs.form(logData)
-    
-        if schema == None:
+        
+        if schema is None:
             if len(data) > 0:
                 raise
             return
         
         schema.importData(data)
-
+        
         logs.debug("Parsed request data")
-
         return schema
 
     except Exception as e:
@@ -194,7 +192,7 @@ def parseFileUpload(schema, request, fileName='image'):
         # Extract file
         if fileName in request.FILES:
             f = request.FILES[fileName]
-            max_size = 1048576 # 1 mb in bytes
+            max_size = 1048576 # 1 MB
             
             if f.size > max_size:
                 msg = "Uploaded file is too large (%s) (max size is %d)" % (f.size, max_size)

@@ -33,4 +33,4 @@ class AUserDB(object):
     @abstract
     def updateUserStats(self, userId, stat, value=None, increment=1):
         pass
-        
+

@@ -5,14 +5,15 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, utils, logs, re, Blacklist
-from datetime import datetime
-from errors import *
-from auth import convertPasswordForStorage
-from utils import lazyProperty
+import Globals, utils
+import logs, re, Blacklist
+
+from datetime        import datetime
+from errors          import *
+from auth            import convertPasswordForStorage
+from utils           import lazyProperty
 
 from AStampedAPI     import AStampedAPI
-
 from AAccountDB      import AAccountDB
 from AEntityDB       import AEntityDB
 from APlacesEntityDB import APlacesEntityDB
@@ -33,17 +34,6 @@ from libs.AmazonAPI  import AmazonAPI
 
 EARNED_CREDIT_MULTIPLIER = 2
 
-# TODO: input validation and output formatting
-# NOTE: this is the place where all input validation should occur. any 
-# db-specific validation should occur elsewhere. This validation includes 
-# but is not limited to:
-#    * ensuring that a given ID is "valid"
-#    * ensuring that a given relationship is "valid"
-#    * ensuring that for methods which accept a user ID and should be 
-#      considered "priveleged", then the request is coming from properly 
-#      authenticated user. e.g., either an administrator or the user who is 
-#      currently logged into the application.
-
 class StampedAPI(AStampedAPI):
     """
         Database-agnostic implementation of the internal API for accessing 
@@ -52,19 +42,9 @@ class StampedAPI(AStampedAPI):
     
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
-        self._validated = False
-
-        ### TODO: Implement this!
+        
         # Enable / Disable Functionality
-        self._activity      = True
-        self._comments      = True
-        self._stamps        = True
-        self._friends       = True
-        self._users         = True
-        self._favorites     = True
-    
-    def _validate(self):
-        self._validated = True
+        self._activity = True
     
     """
        #                                                    
@@ -77,16 +57,15 @@ class StampedAPI(AStampedAPI):
     """
     
     def addAccount(self, account):
-
         ### TODO: Check if email already exists?
-
+        
         account.timestamp.created = datetime.utcnow()
         account.password = convertPasswordForStorage(account['password'])
-
+        
         # Set initial stamp limit
         account.stats.num_stamps_left = 100
         account.stats.num_stamps_total = 0
-
+        
         # Set default stamp colors
         account.color_primary   = '004AB2'
         account.color_secondary = '0057D1'
@@ -99,29 +78,29 @@ class StampedAPI(AStampedAPI):
             msg = "Invalid format for screen name"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
             msg = "Blacklisted screen name"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         # Validate email address
         account.email = str(account.email).lower().strip()
         if not utils.validate_email(account.email):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         # Create account
         account = self._accountDB.addAccount(account)
-
+        
         # Add activity if invitations were sent
         invites = self._inviteDB.getInvites(account.email)
         invitedBy = {}
         for invite in invites:
             invitedBy[invite['user_id']] = 1
-
+            
             activity                = Activity()
             ### TODO: What genre are we picking for this activity item?
             activity.genre          = 'invite_sent'
@@ -130,7 +109,7 @@ class StampedAPI(AStampedAPI):
             activity.created        = datetime.utcnow()
             
             self._activityDB.addActivity([account.user_id], activity)
-
+        
         if len(invitedBy) > 0:
             activity                = Activity()
             ### TODO: What genre are we picking for this activity item?
@@ -146,25 +125,25 @@ class StampedAPI(AStampedAPI):
         return account
     
     def removeAccount(self, authUserId):
-
+        
         ### TODO: Remove all activity, stamps, entities, images, etc. for user
         ### TODO: Verify w/ password?
-
+        
         account = self._accountDB.getAccount(authUserId)
         self._accountDB.removeAccount(authUserId)
-
+        
         # Remove email address from invite list
         self._inviteDB.remove(account.email)
-
+        
         return account
-
+    
     def updateAccountSettings(self, authUserId, data):
         
         ### TODO: Reexamine how updates are done
         ### TODO: Verify that email address is unique, confirm it
-
+        
         account = self._accountDB.getAccount(authUserId)
-
+        
         # Import each item
         for k, v in data.iteritems():
             if k == 'password':
@@ -179,7 +158,7 @@ class StampedAPI(AStampedAPI):
             msg = "Invalid format for screen name"
             logs.warning(msg)
             raise InputError(msg)
-
+        
         # Check blacklist
         if account.screen_name.lower() in Blacklist.screen_names:
             msg = "Blacklisted screen name"
@@ -216,7 +195,6 @@ class StampedAPI(AStampedAPI):
         return account
     
     def customizeStamp(self, authUserId, data):
-        
         ### TODO: Reexamine how updates are done
 
         primary = data['color_primary'].upper()
@@ -283,7 +261,7 @@ class StampedAPI(AStampedAPI):
     def resetPassword(self, params):
         raise NotImplementedError
     
-
+    
     """
     #     #                             
     #     #  ####  ###### #####   ####  
@@ -293,9 +271,9 @@ class StampedAPI(AStampedAPI):
     #     # #    # #      #   #  #    # 
      #####   ####  ###### #    #  ####  
     """
-
+    
     ### PRIVATE
-
+    
     def _getUserFromIdOrScreenName(self, userRequest):
         if isinstance(userRequest, SchemaElement):
             userRequest = userRequest.value
@@ -343,9 +321,9 @@ class StampedAPI(AStampedAPI):
         return users
     
     def findUsersByEmail(self, authUserId, emails):
-
+        
         ### TODO: Add check for privacy settings?
-
+        
         users = self._userDB.findUsersByEmail(emails, limit=100)
         
         return users
@@ -396,35 +374,35 @@ class StampedAPI(AStampedAPI):
     
     def addFriendship(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
-
+        
         friendship = Friendship({
             'user_id':      authUserId,
             'friend_id':    user.user_id
         })
-
+        
         # Verify that you're not following yourself :)
         if user.user_id == authUserId:
             logs.warning("You can't follow yourself!")
             raise Exception("Illegal friendship")
-
+        
         # Check if friendship already exists
         if self._friendshipDB.checkFriendship(friendship) == True:
             logs.info("Friendship exists")
             return user
-
+        
         # Check if block exists between authenticating user and user
         if self._friendshipDB.blockExists(friendship) == True:
             logs.info("Block exists")
             raise Exception("Block exists")
-
+        
         # Check if friend has private account
         if user.privacy == True:
             ### TODO: Create queue for friendship requests
             raise NotImplementedError
-
+        
         # Create friendship
         self._friendshipDB.addFriendship(friendship)
-
+        
         # Add activity for followed user
         if self._activity == True:
             activity                = Activity()
@@ -434,11 +412,11 @@ class StampedAPI(AStampedAPI):
             activity.created        = datetime.utcnow()
             
             self._activityDB.addActivity(user.user_id, activity)
-
+        
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
         self._stampDB.addInboxStampReferencesForUser(authUserId, stampIds)
-
+        
         # Increment stats for both users
         self._userDB.updateUserStats(authUserId, 'num_friends', \
                     None, increment=1)
@@ -449,29 +427,29 @@ class StampedAPI(AStampedAPI):
     
     def removeFriendship(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
-
+        
         friendship = Friendship({
             'user_id':      authUserId,
             'friend_id':    user['user_id']
         })
-
+        
         # Check if friendship doesn't exist
         if self._friendshipDB.checkFriendship(friendship) == False:
             logs.info("Friendship does not exist")
             return user
             
         self._friendshipDB.removeFriendship(friendship)
-
+        
         # Increment stats for both users
         self._userDB.updateUserStats(authUserId, 'num_friends', \
                     None, increment=-1)
         self._userDB.updateUserStats(user.user_id, 'num_followers', \
                     None, increment=-1)
-
+        
         # Remove stamps from Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
-
+        
         return user
     
     def approveFriendship(self, data, auth):
@@ -486,7 +464,7 @@ class StampedAPI(AStampedAPI):
                     'user_id': userRequest.user_id_b,
                     'screen_name': userRequest.screen_name_b
                 })
-
+        
         # If either account is private, make sure authUserId is friend
         if userA.privacy == True and authUserId != userA.user_id:
             check = Friendship({
@@ -497,7 +475,7 @@ class StampedAPI(AStampedAPI):
                 msg = "Insufficient privileges to check friendship"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
+        
         if userB.privacy == True and authUserId != userB.user_id:
             check = Friendship({
                 'user_id':      authUserId,
@@ -507,15 +485,13 @@ class StampedAPI(AStampedAPI):
                 msg = "Insufficient privileges to check friendship"
                 logs.warning(msg)
                 raise InsufficientPrivilegesError(msg)
-
+        
         friendship = Friendship({
             'user_id':      userA['user_id'],
             'friend_id':    userB['user_id']
         })
-
-        if self._friendshipDB.checkFriendship(friendship):
-            return True
-        return False
+        
+        return self._friendshipDB.checkFriendship(friendship)
     
     def getFriends(self, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
@@ -1741,9 +1717,9 @@ class StampedAPI(AStampedAPI):
     
     def getInboxStamps(self, authUserId, **kwargs):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
-
+        
         kwargs['includeComments'] = True
-
+        
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     
     def getUserStamps(self, userRequest, authUserId, **kwargs):

@@ -43,12 +43,12 @@ def main():
     stampedAPI = MongoStampedAPI()
     matcher    = GooglePlacesEntityMatcher()
     matcher2   = EntityMatcher(stampedAPI, options)
-    placesDB   = stampedAPI._placesEntityDB
+    entityDB   = stampedAPI._entityDB
     
-    rs = placesDB._collection.find({"sources.googlePlaces" : { "$exists" : False }}, output=list)
+    # Note: we could just remove all apple movies...
+    rs = entityDB._collection.find({"sources.apple" : { "$exists" : False }, "subcategory" : "movie"}, output=list)
     
     pool = Pool(32)
-    
     utils.log("processing %d entities" % len(rs))
     
     for result in rs:

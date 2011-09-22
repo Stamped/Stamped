@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import aws, gzip, json, math, re, string, time, sys
+import aws, gzip, json, math, re, string, time, sys, threading
 
 from MongoStampedAPI    import MongoStampedAPI
 from HTTPSchemas        import *
@@ -37,20 +37,35 @@ class S3AutocompleteDB(object):
         self.bucket.set_acl('public-read')
         self.bucket_name = bucket_name
     
-    def add_key(self, name, value, content_type=None, apply_gzip=False):
+    def add_key(self, name, value, content_type=None, apply_gzip=False, temp_prefix=None):
         assert isinstance(value, basestring)
         
         if apply_gzip:
             name += '.gz'
             
+            if temp_prefix is None:
+                temp_prefix = threading.currentThread().getName()
+            
             # TODO: why does zlib compression not work?
             #value = zlib.compress(value, 6)
-            f = gzip.open('temp.gz', 'wb')
-            f.write(value)
-            f.close()
-            f = open('temp.gz', 'rb')
-            value = f.read()
-            f.close()
+            temp = 'temp.%s.gz' % temp_prefix
+            
+            tries = 0
+            
+            while True:
+                try:
+                    f = gzip.open(temp, 'wb')
+                    f.write(value)
+                    f.close()
+                    f = open(temp, 'rb')
+                    value = f.read()
+                    f.close()
+                    break
+                except:
+                    tries += 1
+                    
+                    if tries >= 5:
+                        raise
         
         key = Key(self.bucket, name)
         
@@ -134,9 +149,11 @@ def main():
     
     autocompleteDB = S3AutocompleteDB()
     
+    prefixes = set()
+    
     def _add(orig_name):
         try:
-            if 0 == len(orig_name):
+            if 0 == len(orig_name) or orig_name in prefixes:
                 return
             
             name = encode_s3_name(orig_name)
@@ -146,15 +163,30 @@ def main():
             name = "search/v1/%s.json" % name
             
             print "searching %s" % orig_name.encode('ascii', 'replace')
-            try:
-                results = stampedAPI.searchEntities(query=orig_name, limit=10, prefix=True, full=False)
-            except:
-                utils.printException()
-                time.sleep(1)
-                return
+            tries = 0
             
-            if 0 == len(results):
-                return False
+            while True:
+                try:
+                    results = stampedAPI.searchEntities(query=orig_name, limit=10, prefix=True, full=False)
+                    break
+                except:
+                    tries += 1
+                    
+                    if tries >= 3:
+                        utils.printException()
+                        time.sleep(1)
+                        return
+                    
+                    time.sleep(1)
+            
+            if len(results) <= 1:
+                i = len(orig_name)
+                while i > 0:
+                    prefixes.add(orig_name[0:i])
+                    i -= 1
+                
+                if 0 == len(results):
+                    return False
             
             autosuggest = []
             for item in results:
@@ -185,7 +217,7 @@ def main():
             return
     
     infile = file('autocomplete.txt', 'r')
-    pool   = Pool(8)
+    pool   = Pool(4)
     done   = 0
     offset = 0
     

@@ -1,21 +1,12 @@
 
-* autogenerate docs and REST API from lower-level API?
-* decouple API implementation from HTTP (e.g., 400 errors)
+* autogenerate docs and REST API from lower-level API
+
 * consistent input validation
-* consistent security strategy
-    * authentication
-    * permissions
 * consistent error handling
-    * raise errors at python level
-    * convert to appropriate HTTP error code and error message at REST level
     * multi-level unit testing targeting lower-level API in addition to REST API
-        * ensure using the API at all levels has the same result
+        * ensure that we're using the API at all levels has the same result
 * clean up StampedAPI implementation
-* support utf-8
 * second pass over API methods
-* Nth pass over API methods
-* remove schema duplication in mongo-specific and mongo-agnostic classes
-    * incorporate validation into the schema itself for required / optional / type-checking, etc.
 * reassess naming conventions for mongo-specific versus mongo-agnostic glue classes
 
 MongoDB
@@ -24,12 +15,91 @@ MongoDB
         * evaluate possible race conditions and TEST them!
         * rollback strategy
 
-ASchemaObject:
-    * convert to using extended AttributeDict
-    * remove unique name constraint?
-Entity:
-    * consistent categories for entities
+TESTING
+* Expand / rewrite unit tests
+* Add stress tests to simulate load and lots of simultaneous users
+* Add isolation tests to simulate parts of the system failing (e.g., MongoDB)
 
-* Create and mount volume
-* Create SQL database as initial crawler process which facilitates subsequent epf detail lookups
+DEPLOYMENT
+* Continuous integration
+* Upstart / Green Unicorn
+* Plan for incremental deployment
+    * Ability to add machines after initial deployment
+
+SERVER
+* Firewall tuning (restrict to other instances, close 27017, etc.)
+* Test SSL cost
+* nginx caching
+
+API
+* Implement digest (i.e. find way to efficiently pass updates to client)
+* Finish schema work
+* Fully implement slicing
+* Change password / Reset password
+* Additional activity types
+* Suggested users
+* Stamp images and privacy
+* Delete stamp image
+* Friend Finder: send email invitations
+* Friend Finder: parse "1" in phone number
+
+IMAGES
+* Upload full-size image properly
+* Default avatar strategy
+* Resize photos for web / mobile
+* Save full-sized image to phone
+
+DATABASE
+* Index tuning
+* Rollback strategy
+* Deploy capped collections for tempentities
+* Backups
+* Make replica set prod-ready
+    * Address single-AWS-zone reliance
+    * Add at least one arbiter
+    * Add ability for reads to access any node in replica set as opposed to just the primary
+
+MONITORING & LOGGING
+* Aggregate statistics in stats.py
+* Clean up user logs
+* Store verbose logs in separate Mongo instance
+* Ganglia
+* Nagios
+* Notification system for vital API & site processes
+    * Should send email and/or text depending on severity of problem
+    * Would love to see daily digest email of system activity & health
+
+* Internal site where you can view BE status, logs, and stats
+    * Switch between stacks
+
+DATA
+* Expand missing Entity data
+* Fix Google Places cross-referencing
+* Add more source-specific crawlers
+* Deduplication tuning
+
+WEBSITE
+* Host stamped.com on Amazon
+* ToS & Privacy as txt
+
+IPHONE
+* Activity
+* Incremental loading
+* Casual feedback / likes
+* Revamped Consumption / "Other" subcategories
+* Inbox search
+* Syndicate to Twitter / Email
+* Settings
+* Invite
+* Credit picker
+* Edit / Delete
+* Error messages
+* Asynchronous uploads
+* To Do link back to stamp
+* Push notification
+* Search filters
+* To Do entity search
+* Refactor "profile" page (all stamps + filters, credit)
+* Refactor sDetail (timestamps, credit, restamps-as-comments, also-stamped-by)
+* Friend Finder: Stamped users, popular users
 

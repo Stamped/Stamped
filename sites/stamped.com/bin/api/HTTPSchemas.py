@@ -395,12 +395,8 @@ class HTTPEntity(Schema):
                 self.length         = schema.track_length
                 self.rating         = schema.mpaa_rating
                 
-                if schema.ngenres != None:
-                    for genre in schema.ngenres:
-                        if self.genre == None:
-                            self.genre = genre
-                        else:
-                            self.genre = "%s; %s" % (self.genre, genre)
+                if schema.ngenres is not None:
+                    self.genre = strings.joinfields(schema.ngenres, '; ')
                 
                 if schema.short_description != None:
                     self.desc = schema.short_description
@@ -436,7 +432,7 @@ class HTTPEntity(Schema):
             self.director       = schema.director
             self.network        = schema.network_name
             self.in_theaters    = schema.in_theaters
-
+            
             # Music
             self.artist_name    = schema.artist_display_name
             self.album_name     = schema.album_name
@@ -474,6 +470,8 @@ class HTTPEntity(Schema):
                 self.image = self._handle_image(schema.small, is_apple)
             elif schema.tiny is not None:
                 self.image = self._handle_image(schema.tiny, is_apple)
+            elif schema.artwork_url is not None:
+                self.image = self._handle_image(schema.artwork_url, is_apple)
             
             if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.songs is not None:
                 songs = schema.songs

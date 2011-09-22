@@ -107,15 +107,25 @@ class NetflixDump(AExternalDumpEntitySource):
                         continue
                     
                     entity.title = title
-                    entity.subcategory = 'movie'
                     entity.nid = nid
                     entity.desc = elem.find('.//synopsis').text
                     entity.nrating = float(rating_elem.text)
                     
                     categories = elem.findall('category')
                     
-                    genres  = map(lambda c: c.get('label'), filter(match_genre_func, categories))
+                    genres = map(lambda c: c.get('label'), filter(match_genre_func, categories))
                     entity.ngenres = genres
+                    
+                    tv = False
+                    for genre in genres:
+                        if 'tv' in genre.lower():
+                            tv = True
+                            break
+                    
+                    if tv:
+                        entity.subcategory = 'tv'
+                    else:
+                        entity.subcategory = 'movie'
                     
                     ratings = map(lambda c: c.get('label'), filter(match_ratings_func, categories))
                     if 1 == len(ratings):
@@ -154,6 +164,13 @@ class NetflixDump(AExternalDumpEntitySource):
                     
                     #utils.log(entity.title)
                     #pprint(entity.getDataAsDict())
+                    
+                    """
+                    self._globals['n'] = elem
+                    self._globals['s'] = etree.tostring(elem, pretty_print=True)
+                    self._globals['e'] = entity
+                    break
+                    """
                     
                     self._output.put(entity)
                     count += 1

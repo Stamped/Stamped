@@ -13,14 +13,14 @@ from httpapi.v0.helpers import *
 def inbox(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPGenericSlice(), request)
-
+    
     data        = schema.exportSparse()
     stamps      = stampedAPI.getInboxStamps(authUserId, **data)
-
+    
     result = []
     for stamp in stamps:
         result.append(HTTPStamp().importSchema(stamp).exportSparse())
-
+    
     return transformOutput(result)
 
 
@@ -29,19 +29,17 @@ def inbox(request):
 def user(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPUserCollectionSlice(), request)
-
+    
     data        = schema.exportSparse()
     userRequest = {
                     'user_id':      data.pop('user_id', None),
                     'screen_name':  data.pop('screen_name', None)
                   }
     stamps      = stampedAPI.getUserStamps(userRequest, authUserId, **data)
-
+    
     result = []
     for stamp in stamps:
         result.append(HTTPStamp().importSchema(stamp).exportSparse())
-
+    
     return transformOutput(result)
-
-
 
