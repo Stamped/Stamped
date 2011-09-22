@@ -190,15 +190,15 @@ class S3ImageDB(AImageDB):
         name    = "%s.jpg" % name
 
         out     = StringIO()
-        image.save(out, 'jpg')
+        image.save(out, 'jpeg', optimize=True)
         
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
         
         key = Key(self.bucket, name)
-        key.set_acl('public-read')
         key.set_metadata('Content-Type', 'image/jpeg')
         key.set_contents_from_string(out.getvalue())
+        key.set_acl('public-read')
         key.close()
         
         return name
@@ -215,9 +215,9 @@ class S3ImageDB(AImageDB):
             (self, name, image.size[0], image.size[1]))
         
         key = Key(self.bucket, name)
-        key.set_acl('public-read')
         key.set_metadata('Content-Type', 'image/png')
         key.set_contents_from_string(out.getvalue())
+        key.set_acl('public-read')
         key.close()
         
         return name

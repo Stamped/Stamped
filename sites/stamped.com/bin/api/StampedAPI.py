@@ -245,7 +245,7 @@ class StampedAPI(AStampedAPI):
     def updateProfileImage(self, authUserId, data):
         image   = self._imageDB.getImage(data)
         user    = self._userDB.getUser(authUserId)
-        self._imageDB.addProfileImage(user.screen_name, image)
+        self._imageDB.addProfileImage(user.screen_name.lower(), image)
         
         return True
 
