@@ -230,18 +230,19 @@ class S3ImageDB(AImageDB):
     def _addPNG(self, name, image):
         assert isinstance(image, Image.Image)
         
-        suffix = ".png"
-        name   = "%s%s" % (name, suffix)
-        temp   = "temp%s%s" % (random.random(), suffix)
+        suffix  = ".png"
+        name    = "%s%s" % (name, suffix)
+
+        out     = StringIO()
+        image.save(out, 'png')
         
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
         
-        image.save(temp)
-        
         key = Key(self.bucket, name)
-        key.set_contents_from_filename(temp)
         key.set_acl('public-read')
+        key.set_metadata('Content-Type', 'image/png')
+        key.set_contents_from_string(out.getvalue())
         key.close()
         
         return name
