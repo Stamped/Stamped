@@ -1107,8 +1107,6 @@ class StampedAPI(AStampedAPI):
                     
                     ### TODO: Rollback: Remove activity
                     self._activityDB.addActivity(mentionedUserIds, activity)
-
-            print 1 / 0
             
             return stamp
         except:
