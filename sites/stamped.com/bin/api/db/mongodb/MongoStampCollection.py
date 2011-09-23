@@ -103,7 +103,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             'since':    kwargs.pop('since', None),
             'before':   kwargs.pop('before', None), 
             'limit':    kwargs.pop('limit', 20),
-            'sort':     'timestamp.created',
+            'sort':     'timestamp.modified',
         }
 
         documentIds = []
@@ -136,12 +136,13 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         if value != None:
             self._collection.update(
                 {'_id': self._getObjectIdFromString(stampId)}, 
-                {'$set': {key: value}},
+                {'$set': {key: value, 'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
         else:
             self._collection.update(
                 {'_id': self._getObjectIdFromString(stampId)}, 
-                {'$inc': {key: increment}},
+                {'$inc': {key: increment}, 
+                 '$set': {'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
         
         return self._collection.find_one({'_id': \
@@ -203,6 +204,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         self.stamp_likes_collection.addStampLike(stampId, userId) 
         # Add a reference to the stamp in the user's 'like' collection
         self.user_likes_collection.addUserLike(userId, stampId) 
+        # Update the modified timestamp
+        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, 
+            {'$set': {'timestamp.modified': datetime.utcnow()}})
+
         
     def removeLike(self, userId, stampId):
         # Remove a reference to the user in the stamp's 'like' collection

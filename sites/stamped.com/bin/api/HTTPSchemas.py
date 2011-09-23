@@ -666,6 +666,7 @@ class HTTPStamp(Schema):
         self.image_dimensions   = SchemaElement(basestring)
         self.image_url          = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
+        self.modified           = SchemaElement(basestring)
         self.num_comments       = SchemaElement(int)
         self.num_likes          = SchemaElement(int)
         self.like_threshold_hit = SchemaElement(bool)
@@ -700,6 +701,7 @@ class HTTPStamp(Schema):
             self.num_likes              = schema.num_likes
             self.like_threshold_hit     = schema.like_threshold_hit
             self.created                = schema.timestamp.created
+            self.modified               = schema.timestamp.modified
             self.is_liked               = schema.is_liked
             self.is_fav                 = schema.is_fav
 

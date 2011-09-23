@@ -108,6 +108,7 @@ class UserMini(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool)
+        self.timestamp          = TimestampSchema()
 
 class UserTiny(Schema):
     def setSchema(self):
