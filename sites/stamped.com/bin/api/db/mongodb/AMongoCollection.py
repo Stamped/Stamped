@@ -260,17 +260,17 @@ class AMongoCollection(object):
     def _getMongoDocumentsFromIds(self, documentIds, **kwargs):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
-        sort        = kwargs.pop('sort', None)
+        sort        = kwargs.pop('sort', 'timestamp.created')
         limit       = kwargs.pop('limit', 0)
 
         params = {'_id': {'$in': documentIds}}
         
         if since != None and before != None:
-            params['timestamp.created'] = {'$gte': since, '$lte': before}
+            params[sort] = {'$gte': since, '$lte': before}
         elif since != None:
-            params['timestamp.created'] = {'$gte': since}
+            params[sort] = {'$gte': since}
         elif before != None:
-            params['timestamp.created'] = {'$lte': before}
+            params[sort] = {'$lte': before}
         
         if sort != None:
             documents = self._collection.find(params).sort(sort, \
