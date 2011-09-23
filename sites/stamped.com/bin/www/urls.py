@@ -14,8 +14,8 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
-    url(R'^(?P<screen_name>[\w-]{1,32})/stamps/(?P<stamp_num>\d+)/', 'sdetail.views.show'),
-    url(R'^(?P<screen_name>[\w-]{1,32})/mobile/(?P<stamp_num>\d+)/', 'sdetail.views.mobile'),
+    url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/', 'sdetail.views.show'),
+    url(R'^(?P<screen_name>[\w-]{1,20})/mobile/(?P<stamp_num>\d+)/', 'sdetail.views.mobile'),
     url(R'^about$', 'teaser.views.about'),
     url(R'$', 'teaser.views.index'),
 )

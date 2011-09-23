@@ -94,9 +94,7 @@ class StampedAPI(AStampedAPI):
         
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
-        if not re.match("^[\w-]+$", account.screen_name) \
-            or len(account.screen_name) < 1 \
-            or len(account.screen_name) > 32:
+        if not utils.validate_screen_name(account.screen_name):
             msg = "Invalid format for screen name"
             logs.warning(msg)
             raise InputError(msg)
@@ -150,7 +148,7 @@ class StampedAPI(AStampedAPI):
             self._activityDB.addActivity(invitedBy.keys(), activity)
         
         self._inviteDB.join(account.email)
-        
+
         return account
     
     def removeAccount(self, authUserId):
@@ -181,9 +179,7 @@ class StampedAPI(AStampedAPI):
         
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
-        if not re.match("^[\w-]+$", account.screen_name) \
-            or len(account.screen_name) < 1 \
-            or len(account.screen_name) > 32:
+        if not utils.validate_screen_name(account.screen_name):
             msg = "Invalid format for screen name"
             logs.warning(msg)
             raise InputError(msg)
