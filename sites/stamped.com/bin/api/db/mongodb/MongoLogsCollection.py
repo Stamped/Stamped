@@ -38,7 +38,7 @@ class MongoLogsCollection(AMongoCollection):
             query['result'] = {'$exists': True}
         if path != None:
             query['path'] = path
-        docs = self._collection.find(query).limit(limit).sort('_id', pymongo.DESCENDING)
+        docs = self._collection.find(query).limit(limit).sort('begin', pymongo.DESCENDING)
         logs = []
         for doc in docs:
             if 'form' in doc:

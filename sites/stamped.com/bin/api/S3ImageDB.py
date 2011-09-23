@@ -195,11 +195,7 @@ class S3ImageDB(AImageDB):
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
         
-        key = Key(self.bucket, name)
-        key.set_metadata('Content-Type', 'image/jpeg')
-        key.set_contents_from_string(out.getvalue())
-        key.set_acl('public-read')
-        key.close()
+        self._addDataToS3(name, out.getvalue(), 'image/jpeg')
         
         return name
     
@@ -214,13 +210,32 @@ class S3ImageDB(AImageDB):
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
         
-        key = Key(self.bucket, name)
-        key.set_metadata('Content-Type', 'image/png')
-        key.set_contents_from_string(out.getvalue())
-        key.set_acl('public-read')
-        key.close()
+        self._addDataToS3(name, out.getvalue(), 'image/png')
         
         return name
+
+    def _addDataToS3(self, name, data, contentType):
+        num_retries = 0
+        max_retries = 5
+        
+        while True:
+            try:
+                key = Key(self.bucket, name)
+                key.set_metadata('Content-Type', contentType)
+                key.set_contents_from_string(data)
+                key.set_acl('public-read')
+                key.close()
+                return key
+            except:
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "Unable to connect to S3 after %d retries (%s)" % \
+                        (max_retries, self._parent.__class__.__name__)
+                    logs.warning(msg)
+                    raise Exception(msg)
+                
+                logs.info("Retrying (%s)" % (num_retries))
+                time.sleep(0.5)
     
     def _parse(self, source, params):
         try:
