@@ -48,7 +48,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpToolbar;
 - (void)setUpMainContentView;
 - (void)setUpCommentsView;
-- (void)updateNumberOfLikes;
+- (void)addUserGradientBackground;
+- (NSAttributedString*)creditAttributedString:(User*)creditedUser;
+- (void)setNumLikes:(NSUInteger)likes;
+- (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
 - (void)handleTap:(UITapGestureRecognizer*)recognizer;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
@@ -59,7 +62,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
 
-@property (nonatomic, retain) STImageView* stampPhotoView;
+@property (nonatomic, readonly) STImageView* stampPhotoView;
+@property (nonatomic, readonly) UIImageView* likeFaceImageView;
+@property (nonatomic, readonly) UILabel* numLikesLabel;
 @end
 
 @implementation StampDetailViewController
@@ -82,6 +87,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize likeLabel = likeLabel_;
 @synthesize stampPhotoView = stampPhotoView_;
 @synthesize eDetailArrowImageView = eDetailArrowImageView_;
+@synthesize likeFaceImageView = likeFaceImageView_;
+@synthesize numLikesLabel = numLikesLabel_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -109,7 +116,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.addFavoriteLabel = nil;
   self.likeButton = nil;
   self.likeLabel = nil;
-  self.stampPhotoView = nil;
   [super dealloc];
 }
 
@@ -137,7 +143,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [self preloadEntityView];
-  self.stampPhotoView.imageURL = stamp_.imageURL;
+  stampPhotoView_.imageURL = stamp_.imageURL;
   [super viewDidAppear:animated];
 }
 
@@ -192,7 +198,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.addFavoriteLabel = nil;
   self.likeButton = nil;
   self.likeLabel = nil;
-  self.stampPhotoView = nil;
 }
 
 - (void)setUpHeader {
@@ -268,10 +273,32 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   }
 }
 
-- (void)updateNumberOfLikes {
+- (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame {
+  mainCommentContainer_.frame = mainCommentFrame;
+  mainCommentContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
+  CGRect activityFrame = activityView_.frame;
+  activityFrame.size.height = CGRectGetMaxY(mainCommentContainer_.frame) + CGRectGetHeight(commentsView_.bounds) + 5;
+  activityView_.frame = activityFrame;
+  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
+  activityGradientLayer_.frame = activityView_.bounds;
+}
+
+- (void)setNumLikes:(NSUInteger)likes {
+  stamp_.numLikes = [NSNumber numberWithUnsignedInteger:likes];
+  [stamp_.managedObjectContext save:NULL];
+
   // If there is a credited user then we already have the room.
-  User* creditedUser = [stamp_.credits anyObject];
-#warning incomplete.
+  if (stamp_.credits.count > 0)
+    return;
+  
+  CGRect mainCommentFrame = mainCommentContainer_.frame;
+  CGFloat heightDelta = 35;
+  if ([stamp_.numLikes unsignedIntegerValue] == 0)
+    heightDelta *= -1;
+
+  mainCommentFrame.size.height += heightDelta;
+  [self setMainCommentContainerFrame:mainCommentFrame];
 }
 
 - (void)setUpMainContentView {
@@ -280,42 +307,38 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [commenterImageView_ addTarget:self 
                           action:@selector(handleUserImageViewTap:)
                 forControlEvents:UIControlEventTouchUpInside];
-  const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
-  CGSize stringSize = [stamp_.user.screenName sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:14]
-                                                   forWidth:218
-                                              lineBreakMode:UILineBreakModeTailTruncation];
-  CGRect nameLabelFrame = commenterNameLabel_.frame;
-  nameLabelFrame.size = stringSize;
-  commenterNameLabel_.frame = nameLabelFrame;
+
   commenterNameLabel_.textColor = [UIColor stampedGrayColor];
   commenterNameLabel_.text = stamp_.user.screenName;
+  [commenterNameLabel_ sizeToFit];
 
-  stringSize = [@"stamped" sizeWithFont:[UIFont fontWithName:@"Helvetica" size:14]
-                               forWidth:60
-                          lineBreakMode:UILineBreakModeTailTruncation];
+  [stampedLabel_ sizeToFit];
   CGRect stampedFrame = stampedLabel_.frame;
-  stampedFrame.origin.x = CGRectGetMaxX(nameLabelFrame) + 3;
-  stampedFrame.size = stringSize;
+  stampedFrame.origin.x = CGRectGetMaxX(commenterNameLabel_.frame) + 3;
   stampedLabel_.frame = stampedFrame;
   stampedLabel_.textColor = [UIColor stampedGrayColor];
 
-  // TODO(andybons): Use this pattern for labels.
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
   UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.font = commentFont;
   commentLabel.textColor = [UIColor colorWithWhite:0.2 alpha:1.0];
   commentLabel.text = stamp_.blurb;
   commentLabel.numberOfLines = 0;
-  stringSize = [stamp_.blurb sizeWithFont:commentFont
-                        constrainedToSize:CGSizeMake(210, MAXFLOAT)
-                            lineBreakMode:commentLabel.lineBreakMode];
+  CGSize stringSize = [stamp_.blurb sizeWithFont:commentFont
+                               constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                   lineBreakMode:commentLabel.lineBreakMode];
+
+  const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
+
   commentLabel.frame = CGRectMake(leftPadding, 25, stringSize.width, stringSize.height);
   [mainCommentContainer_ addSubview:commentLabel];
+  [commentLabel release];
+  
   CGRect mainCommentFrame = mainCommentContainer_.frame;
   mainCommentFrame.size.height = fmaxf(kMainCommentFrameMinHeight, CGRectGetMaxY(commentLabel.frame) + 10);
   
   if (stamp_.imageURL) {
-    self.stampPhotoView = [[STImageView alloc] initWithFrame:CGRectZero];
+    stampPhotoView_ = [[STImageView alloc] initWithFrame:CGRectZero];
     NSArray* coordinates = [stamp_.imageDimensions componentsSeparatedByString:@","]; 
     CGFloat width = [(NSString*)[coordinates objectAtIndex:0] floatValue];
     CGFloat height = [(NSString*)[coordinates objectAtIndex:1] floatValue];
@@ -332,7 +355,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [stampPhotoView_ addGestureRecognizer:recognizer];
     [recognizer release];
     [mainCommentContainer_ addSubview:stampPhotoView_];
-    [self.stampPhotoView release];
+    [stampPhotoView_ release];
   }
 
   User* creditedUser = [stamp_.credits anyObject];
@@ -357,41 +380,29 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     creditStringLayer.contentsScale = [[UIScreen mainScreen] scale];
     creditStringLayer.fontSize = 12.0;
     creditStringLayer.foregroundColor = [UIColor stampedGrayColor].CGColor;
-    CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
-    CFIndex numSettings = 1;
-    CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
-    CTParagraphStyleSetting settings[1] = {
-      {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
-    };
-    CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-    NSString* user = creditedUser.screenName;
-    NSString* full = [NSString stringWithFormat:@"%@ %@", @"Credit to", user];
-    NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
-    [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
-                           (id)style, (id)kCTParagraphStyleAttributeName,
-                           (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
-                    range:NSMakeRange(0, full.length)];
-    [string addAttribute:(NSString*)kCTFontAttributeName
-                   value:(id)font 
-                   range:[full rangeOfString:user options:NSBackwardsSearch]];
-    CFRelease(font);
-    CFRelease(style);
-    creditStringLayer.string = string;
-    [string release];
+    creditStringLayer.string = [self creditAttributedString:creditedUser];
     [mainCommentContainer_.layer addSublayer:creditStringLayer];
     [creditStringLayer release];
   }
 
-  mainCommentContainer_.frame = mainCommentFrame;
-  mainCommentContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
-  CGRect activityFrame = activityView_.frame;
-  activityFrame.size.height = CGRectGetMaxY(mainCommentContainer_.frame) + CGRectGetHeight(commentsView_.bounds) + 5;
-  [commentLabel release];
-  activityView_.frame = activityFrame;
+  numLikesLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(mainCommentFrame) - 10,
+                                                             CGRectGetMaxY(mainCommentFrame),
+                                                             0, 0)];
+  numLikesLabel_.text = @"1";
+  numLikesLabel_.textAlignment = UITextAlignmentRight;
+  numLikesLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  numLikesLabel_.textColor = [UIColor stampedGrayColor];
+  [mainCommentContainer_ addSubview:numLikesLabel_];
+  [numLikesLabel_ release];
+  [numLikesLabel_ sizeToFit];
+  if ([stamp_.numLikes unsignedIntegerValue] > 0 && !creditedUser)
+    mainCommentFrame.size.height += 35;
   
-  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+  [self addUserGradientBackground];
+  [self setMainCommentContainerFrame:mainCommentFrame];
+}
 
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
+- (void)addUserGradientBackground {
   activityGradientLayer_ = [[CAGradientLayer alloc] init];
   CGFloat r1, g1, b1, r2, g2, b2;
   [Util splitHexString:stamp_.user.primaryColor toRed:&r1 green:&g1 blue:&b1];
@@ -407,11 +418,34 @@ static NSString* const kCommentsPath = @"/comments/show.json";
       [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:0.9].CGColor,
                                 (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:0.9].CGColor,
                                 nil];
-  activityGradientLayer_.frame = activityView_.bounds;
+  
   activityGradientLayer_.startPoint = CGPointMake(0.0, 0.0);
   activityGradientLayer_.endPoint = CGPointMake(1.0, 1.0);
   [activityView_.layer insertSublayer:activityGradientLayer_ atIndex:0];
   [activityGradientLayer_ release];
+}
+
+- (NSAttributedString*)creditAttributedString:(User*)creditedUser {
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  CFIndex numSettings = 1;
+  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+  CTParagraphStyleSetting settings[1] = {
+    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+  };
+  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
+  NSString* user = creditedUser.screenName;
+  NSString* full = [NSString stringWithFormat:@"%@ %@", @"Credit to", user];
+  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
+  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                         (id)style, (id)kCTParagraphStyleAttributeName,
+                         (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                  range:NSMakeRange(0, full.length)];
+  [string addAttribute:(NSString*)kCTFontAttributeName
+                 value:(id)font 
+                 range:[full rangeOfString:user options:NSBackwardsSearch]];
+  CFRelease(font);
+  CFRelease(style);
+  return [string autorelease];
 }
 
 - (void)setUpCommentsView {
@@ -462,8 +496,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   NSUInteger numLikesValue = [stamp_.numLikes unsignedIntegerValue];
   NSUInteger delta = liked ? 1 : -1;
   numLikesValue += delta;
-  stamp_.numLikes = [NSNumber numberWithUnsignedInteger:numLikesValue];
-  [stamp_.managedObjectContext save:NULL];
+  [self setNumLikes:numLikesValue];
 }
 
 #pragma mark -
