@@ -54,6 +54,7 @@ def _log(level, msg, *args, **kwargs):
     if localData.format == 'object':
         item = (datetime.datetime.utcnow(), level, fnc, msg)
         localData.log['log'].append(item)
+        localData.log[level] = True
 
     # else:
     msg = "%s | %-25s | %s" % (localData.logId[:6], fnc, msg)
