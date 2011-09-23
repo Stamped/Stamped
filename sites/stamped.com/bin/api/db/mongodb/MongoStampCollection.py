@@ -181,6 +181,17 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         self.credit_givers_collection.addGiver(creditedUserId, \
                                                     stamp.user.user_id)
 
+    def removeCredit(self, creditedUserId, stamp):
+        # Add to 'credit received'
+        ### TODO: Does this belong here?
+        self.credit_received_collection.removeCredit(creditedUserId, \
+                                                    stamp.stamp_id)
+        
+        # Add to 'credit givers'
+        ### TODO: Does this belong here?
+        self.credit_givers_collection.removeGiver(creditedUserId, \
+                                                    stamp.user.user_id)
+
     def giveLikeCredit(self, stampId):
         self._collection.update(
             {'_id': self._getObjectIdFromString(stampId)}, 
