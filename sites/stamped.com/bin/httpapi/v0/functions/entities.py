@@ -27,8 +27,8 @@ def create(request):
 @require_http_methods(["GET"])
 def show(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPEntityId(), request)
-    entity      = stampedAPI.getEntity(schema.entity_id, authUserId)
+    schema      = parseRequest(HTTPEntityIdSearchId(), request)
+    entity      = stampedAPI.getEntity(schema, authUserId)
     entity      = HTTPEntity().importSchema(entity)
 
     return transformOutput(entity.exportSparse())

@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, urllib, urlparse, re
+import copy, urllib, urlparse, re, logs
 from datetime import datetime, date
 from schema import *
 from Schemas import *
@@ -16,6 +16,7 @@ from Schemas import *
 
 LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
+AMAZON_TOKEN    = 'stamped01-20'
 
 def _coordinatesDictToFlat(coordinates):
     try:
@@ -66,6 +67,24 @@ def _encodeiTunesShortURL(raw_url):
                         parsed_url.fragment
                     ))
     return url
+
+def _encodeAmazonURL(raw_url):
+    try:
+        parsed_url  = urlparse.urlparse(raw_url)
+        query       = "tag=%s" % AMAZON_TOKEN
+        new_query   = (parsed_url.query+'&'+query) if parsed_url.query else query
+        url         = urlparse.urlunparse((
+                            parsed_url.scheme,
+                            parsed_url.netloc,
+                            parsed_url.path,
+                            parsed_url.params,
+                            new_query,
+                            parsed_url.fragment
+                        ))
+        return url
+    except:
+        logs.warning('Unable to encode Amazon URL: %s' % raw_url)
+        return None
 
 
 # ######### #
@@ -328,6 +347,7 @@ class HTTPEntity(Schema):
         self.netflix_url        = SchemaElement(basestring)
         self.fandango_url       = SchemaElement(basestring)
         self.barnesnoble_url    = SchemaElement(basestring)
+        self.amazon_url         = SchemaElement(basestring)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
@@ -458,6 +478,9 @@ class HTTPEntity(Schema):
                 
                 self.itunes_url       = deep_url
                 self.itunes_short_url = short_url
+            
+            if schema.amazon_link != None:
+                self.amazon_url = _encodeAmazonURL(schema.amazon_link)
             
             is_apple = 'apple' in schema
             
@@ -604,6 +627,11 @@ class HTTPEntityAutosuggest(Schema):
 class HTTPEntityId(Schema):
     def setSchema(self):
         self.entity_id          = SchemaElement(basestring, required=True)
+
+class HTTPEntityIdSearchId(Schema):
+    def setSchema(self):
+        self.entity_id          = SchemaElement(basestring)
+        self.search_id          = SchemaElement(basestring)
 
 class HTTPEntitySearch(Schema):
     def setSchema(self):

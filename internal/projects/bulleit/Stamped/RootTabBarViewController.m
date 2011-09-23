@@ -200,7 +200,7 @@
 - (void)viewDidAppear:(BOOL)animated {
   [super viewWillAppear:animated];
   [self.selectedViewController viewDidAppear:animated];
-  
+
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"]) {
     if (!tooltipImageView_) {
       tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
@@ -309,13 +309,14 @@
     activityTabBarItem_.badgeValue = nil;
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];
-    self.navigationItem.title = @"Todo";
+    self.navigationItem.title = @"To Do";
   } else if (item == peopleTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:3];
     self.navigationItem.title = @"People";
   }
-
   
+  [self.navigationController.navigationBar setNeedsDisplay];
+
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 

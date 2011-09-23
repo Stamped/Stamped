@@ -88,6 +88,7 @@
                                                                       &fitRange);
   CGRect resizedBottomRect = botRect;
   resizedBottomRect.size.height = ceilf(suggestedSize.height);
+  resizedBottomRect.size.height += resizedBottomRect.size.height * 0.1;
   
   CGFloat newHeight = topRect.size.height + resizedBottomRect.size.height;
   CGRect newFrame = self.frame;
