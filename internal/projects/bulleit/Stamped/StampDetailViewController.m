@@ -40,6 +40,8 @@ static const CGFloat kMainCommentFrameMinHeight = 75.0;
 static const CGFloat kKeyboardHeight = 216.0;
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
+static NSString* const kCreateLikePath = @"/stamps/likes/create.json";
+static NSString* const kRemoveLikePath = @"/stamps/likes/remove.json";
 static NSString* const kCreateCommentPath = @"/comments/create.json";
 static NSString* const kCommentsPath = @"/comments/show.json";
 
@@ -49,6 +51,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpMainContentView;
 - (void)setUpCommentsView;
 - (void)addUserGradientBackground;
+- (void)addCreditedUser:(User*)creditedUser;
 - (NSAttributedString*)creditAttributedString:(User*)creditedUser;
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
@@ -285,20 +288,29 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)setNumLikes:(NSUInteger)likes {
-  stamp_.numLikes = [NSNumber numberWithUnsignedInteger:likes];
-  [stamp_.managedObjectContext save:NULL];
+  numLikesLabel_.hidden = likes == 0;
+  likeFaceImageView_.hidden = likes == 0;
+  numLikesLabel_.text = [NSNumber numberWithUnsignedInteger:likes].stringValue;
 
   // If there is a credited user then we already have the room.
   if (stamp_.credits.count > 0)
     return;
   
-  CGRect mainCommentFrame = mainCommentContainer_.frame;
-  CGFloat heightDelta = 35;
-  if ([stamp_.numLikes unsignedIntegerValue] == 0)
+  CGFloat heightDelta = 21;
+  if (likes == 0)
     heightDelta *= -1;
 
+  CGRect mainCommentFrame = mainCommentContainer_.frame;
   mainCommentFrame.size.height += heightDelta;
   [self setMainCommentContainerFrame:mainCommentFrame];
+  numLikesLabel_.frame = CGRectMake(CGRectGetMaxX(mainCommentFrame) - CGRectGetWidth(numLikesLabel_.frame) - 10,
+                                    CGRectGetMaxY(mainCommentFrame) - 30,
+                                    CGRectGetWidth(numLikesLabel_.frame),
+                                    CGRectGetHeight(numLikesLabel_.frame));
+  likeFaceImageView_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceImageView_.frame) - 2,
+                                        CGRectGetMinY(numLikesLabel_.frame) + 1,
+                                        CGRectGetWidth(likeFaceImageView_.frame),
+                                        CGRectGetHeight(likeFaceImageView_.frame));
 }
 
 - (void)setUpMainContentView {
@@ -359,47 +371,40 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   }
 
   User* creditedUser = [stamp_.credits anyObject];
-  if (creditedUser) {
-    mainCommentFrame.size.height += 35;
-    CALayer* firstStampLayer = [[CALayer alloc] init];
-    firstStampLayer.contents = (id)creditedUser.stampImage.CGImage;
-    firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentFrame) - 30, 12, 12);
-    [mainCommentContainer_.layer addSublayer:firstStampLayer];
-    [firstStampLayer release];
+  if (creditedUser)
+    mainCommentFrame.size.height += 33;
 
-    CALayer* secondStampLayer = [[CALayer alloc] init];
-    secondStampLayer.contents = (id)stamp_.user.stampImage.CGImage;
-    secondStampLayer.frame = CGRectOffset(firstStampLayer.frame, CGRectGetWidth(firstStampLayer.frame) / 2, 0);
-    [mainCommentContainer_.layer addSublayer:secondStampLayer];
-    [secondStampLayer release];
-    
-    CATextLayer* creditStringLayer = [[CATextLayer alloc] init];
-    creditStringLayer.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
-                                         CGRectGetMinY(secondStampLayer.frame) + 1, 200, 14);
-    creditStringLayer.truncationMode = kCATruncationEnd;
-    creditStringLayer.contentsScale = [[UIScreen mainScreen] scale];
-    creditStringLayer.fontSize = 12.0;
-    creditStringLayer.foregroundColor = [UIColor stampedGrayColor].CGColor;
-    creditStringLayer.string = [self creditAttributedString:creditedUser];
-    [mainCommentContainer_.layer addSublayer:creditStringLayer];
-    [creditStringLayer release];
-  }
-
-  numLikesLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(mainCommentFrame) - 10,
-                                                             CGRectGetMaxY(mainCommentFrame),
-                                                             0, 0)];
-  numLikesLabel_.text = @"1";
+  numLikesLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  numLikesLabel_.text = [stamp_.numLikes stringValue];
   numLikesLabel_.textAlignment = UITextAlignmentRight;
   numLikesLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   numLikesLabel_.textColor = [UIColor stampedGrayColor];
   [mainCommentContainer_ addSubview:numLikesLabel_];
   [numLikesLabel_ release];
   [numLikesLabel_ sizeToFit];
-  if ([stamp_.numLikes unsignedIntegerValue] > 0 && !creditedUser)
-    mainCommentFrame.size.height += 35;
-  
+
+  NSUInteger numLikes = stamp_.numLikes.unsignedIntegerValue;
+  if (numLikes > 0 && !creditedUser)
+    mainCommentFrame.size.height += 21;
+
+  numLikesLabel_.frame = CGRectMake(CGRectGetMaxX(mainCommentFrame) - CGRectGetWidth(numLikesLabel_.frame) - 10,
+                                    CGRectGetMaxY(mainCommentFrame) - 30,
+                                    CGRectGetWidth(numLikesLabel_.frame),
+                                    CGRectGetHeight(numLikesLabel_.frame));
+  likeFaceImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"small_like_icon"]];
+  likeFaceImageView_.frame = CGRectMake(CGRectGetMinX(numLikesLabel_.frame) - CGRectGetWidth(likeFaceImageView_.frame) - 2,
+                                        CGRectGetMinY(numLikesLabel_.frame) + 1,
+                                        CGRectGetWidth(likeFaceImageView_.frame),
+                                        CGRectGetHeight(likeFaceImageView_.frame));
+  [mainCommentContainer_ addSubview:likeFaceImageView_];
+  [likeFaceImageView_ release];
+
+  numLikesLabel_.hidden = numLikes == 0;
+  likeFaceImageView_.hidden = numLikes == 0;
+
   [self addUserGradientBackground];
   [self setMainCommentContainerFrame:mainCommentFrame];
+  [self addCreditedUser:creditedUser];
 }
 
 - (void)addUserGradientBackground {
@@ -423,6 +428,34 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   activityGradientLayer_.endPoint = CGPointMake(1.0, 1.0);
   [activityView_.layer insertSublayer:activityGradientLayer_ atIndex:0];
   [activityGradientLayer_ release];
+}
+
+- (void)addCreditedUser:(User*)creditedUser {
+  if (!creditedUser)
+    return;
+
+  CALayer* firstStampLayer = [[CALayer alloc] init];
+  firstStampLayer.contents = (id)creditedUser.stampImage.CGImage;
+  firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentContainer_.frame) - 29, 12, 12);
+  [mainCommentContainer_.layer addSublayer:firstStampLayer];
+  [firstStampLayer release];
+  
+  CALayer* secondStampLayer = [[CALayer alloc] init];
+  secondStampLayer.contents = (id)stamp_.user.stampImage.CGImage;
+  secondStampLayer.frame = CGRectOffset(firstStampLayer.frame, CGRectGetWidth(firstStampLayer.frame) / 2, 0);
+  [mainCommentContainer_.layer addSublayer:secondStampLayer];
+  [secondStampLayer release];
+  
+  CATextLayer* creditStringLayer = [[CATextLayer alloc] init];
+  creditStringLayer.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
+                                       CGRectGetMinY(secondStampLayer.frame) + 1, 200, 14);
+  creditStringLayer.truncationMode = kCATruncationEnd;
+  creditStringLayer.contentsScale = [[UIScreen mainScreen] scale];
+  creditStringLayer.fontSize = 12.0;
+  creditStringLayer.foregroundColor = [UIColor stampedGrayColor].CGColor;
+  creditStringLayer.string = [self creditAttributedString:creditedUser];
+  [mainCommentContainer_.layer addSublayer:creditStringLayer];
+  [creditStringLayer release];
 }
 
 - (NSAttributedString*)creditAttributedString:(User*)creditedUser {
@@ -492,11 +525,21 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   BOOL liked = !button.selected;
   button.selected = liked;
   likeLabel_.text = liked ? @"Liked" : @"Like";
-  stamp_.isLiked = [NSNumber numberWithBool:liked];
   NSUInteger numLikesValue = [stamp_.numLikes unsignedIntegerValue];
   NSUInteger delta = liked ? 1 : -1;
   numLikesValue += delta;
   [self setNumLikes:numLikesValue];
+  
+  NSString* path = liked ? kCreateLikePath : kRemoveLikePath;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = stampMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:stamp_.stampID, @"stamp_id", nil];
+  NSLog(@"Params: %@", objectLoader.params);
+  
+  [objectLoader send];
 }
 
 #pragma mark -
@@ -675,15 +718,27 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                         object:nil];
+    NSLog(@"response: %@", objectLoader.response.bodyAsString);
     return;
   }
 
   if ([objectLoader.resourcePath isEqualToString:kRemoveFavoritePath]) {
+    NSLog(@"response: %@", objectLoader.response.bodyAsString);
     Favorite* fav = [objects lastObject];
-    [fav deleteEntity];
-    [[fav managedObjectContext] save:NULL];
+    Favorite* storedFavorite =
+        [Favorite objectWithPredicate:[NSPredicate predicateWithFormat:@"favoriteID == %@", fav.favoriteID]];
+    if (storedFavorite) {
+      [storedFavorite deleteEntity];
+      [storedFavorite.managedObjectContext save:NULL];
+    }
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification 
                                                         object:nil];
+    return;
+  }
+  
+  if ([objectLoader.resourcePath isEqualToString:kCreateLikePath] ||
+      [objectLoader.resourcePath isEqualToString:kRemoveLikePath]) {
+    NSLog(@"Like action: %@: %@", objectLoader.resourcePath, objectLoader.response.bodyAsString);
     return;
   }
   

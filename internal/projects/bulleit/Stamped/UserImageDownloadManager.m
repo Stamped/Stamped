@@ -242,7 +242,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
     [imageCache_ setObject:img forKey:imageURL];
     return img;
   }
-  
+
   [self downloadImageAtURL:imageURL];
 
   if (!cachedPlaceHolder_)
