@@ -880,201 +880,243 @@ class StampedAPI(AStampedAPI):
 
         return stamps
 
-    
     def addStamp(self, authUserId, entityRequest, data):
-        user        = self._userDB.getUser(authUserId)
-        entity      = self._getEntityFromRequest(entityRequest)
-
-        blurbData   = data.pop('blurb', None)
-        creditData  = data.pop('credit', None)
-        imageData   = data.pop('image', None)
-
-        # Check to make sure the user has stamps left
-        if user.num_stamps_left <= 0:
-            msg = "No more stamps remaining"
-            logs.warning(msg)
-            raise IllegalActionError(msg)
-
-        # Check to make sure the user hasn't already stamped this entity
-        if self._stampDB.checkStamp(user.user_id, entity.entity_id):
-            msg = "Cannot stamp same entity twice"
-            logs.warning(msg)
-            raise IllegalActionError(msg)
-
-        # Build stamp
-        stamp           = Stamp()
-        stamp.user_id   = user.user_id
-        stamp.entity_id = entity.entity_id
-        stamp.created   = datetime.utcnow()
-        stamp.stamp_num = user.num_stamps_total + 1
-
-        # Collect user ids
-        userIds = {}
-        userIds[user.user_id] = user.exportSchema(UserMini())
-
-        # Extract mentions
-        if blurbData != None:
-            stamp.blurb = blurbData.strip()
-            stamp.mentions = self._extractMentions(blurbData)
-                
-        # Extract credit
-        credit = []
-        creditedUserIds = []
-        if creditData != None:
-            creditedUsers = self._userDB.lookupUsers(None, creditData)
-
-            for creditedUser in creditedUsers:
-                userId = creditedUser['user_id']
-                if userId == user.user_id or userId in creditedUserIds:
-                    continue
-                
-                result = CreditSchema()
-                result.user_id      = creditedUser['user_id']
-                result.screen_name  = creditedUser['screen_name']
-
-                # Add to user ids
-                userIds[userId] = creditedUser.exportSchema(UserMini())
-
-                # Assign credit
-                creditedStamp = self._stampDB.getStampFromUserEntity(userId, \
-                    entity.entity_id)
-                if creditedStamp != None:
-                    result.stamp_id = creditedStamp.stamp_id
-
-                credit.append(result)
-
-                # Check if block exists between user and credited user
-                friendship = Friendship({
-                    'user_id':      user.user_id,
-                    'friend_id':    userId,
-                })
-                if self._friendshipDB.blockExists(friendship) == True:
-                    logs.debug("Block exists")
-                    continue
-
-                ### NOTE:
-                # For now, if a block exists then no comment or activity is
-                # created. This may change ultimately (i.e. we create the
-                # 'comment' and hide it from the recipient until they're
-                # unblocked), but for now we're not going to do anything.
-
-                creditedUserIds.append(result.user_id)
-
-            ### TODO: How do we handle credited users that have not yet joined?
-            stamp.credit = credit
-            
-        # Add the stamp data to the database
-        stamp = self._stampDB.addStamp(stamp)
-
-        # Add image to stamp
-        ### TODO: Unwind stamp if this fails
-        if imageData != None:
-            
-            image = self._imageDB.getImage(imageData)
-            self._imageDB.addStampImage(stamp.stamp_id, image)
-
-            # Add image dimensions to stamp object (width,height)
-            width, height           = image.size
-            stamp.image_dimensions  = "%s,%s" % (width, height)
-            stamp                   = self._stampDB.updateStamp(stamp)
-
-        # Add user objects back into stamp
-        stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
-            userIds=userIds, entityIds={entity.entity_id: entity.exportSchema(EntityMini())})
-
-        # Add a reference to the stamp in the user's collection
-        self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
-        
-        # Add a reference to the stamp in followers' inbox
-        followers = self._friendshipDB.getFollowers(user.user_id)
-        followers.append(user.user_id)
-        self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
-
-        # Update user stats 
-        self._userDB.updateUserStats(authUserId, 'num_stamps', \
-                    None, increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
-                    None, increment=-1)
-        self._userDB.updateUserStats(authUserId, 'num_stamps_total', \
-                    None, increment=1)
-        
-        # If stamped entity is on the to do list, mark as complete
         try:
-            self._favoriteDB.completeFavorite(entity.entity_id, user.user_id)
-        except:
-            pass
-        
-        # Give credit
-        if stamp.credit != None and len(stamp.credit) > 0:
-            for item in credit:
+            rollback = []
+            user        = self._userDB.getUser(authUserId)
+            entity      = self._getEntityFromRequest(entityRequest)
 
-                # Only run if user is flagged as credited
-                if item.user_id not in creditedUserIds:
-                    continue
+            blurbData   = data.pop('blurb', None)
+            creditData  = data.pop('credit', None)
+            imageData   = data.pop('image', None)
 
-                # Assign credit
-                self._stampDB.giveCredit(item.user_id, stamp)
-                
-                # Add restamp as comment (if prior stamp exists)
-                if 'stamp_id' in item and item['stamp_id'] != None:
-                    # Build comment
-                    comment                 = Comment()
-                    comment.user.user_id    = user.user_id
-                    comment.stamp_id        = item.stamp_id
-                    comment.restamp_id      = stamp.stamp_id
-                    comment.blurb           = stamp.blurb
-                    comment.mentions        = stamp.mentions
-                    comment.created         = datetime.utcnow()
+            # Check to make sure the user has stamps left
+            if user.num_stamps_left <= 0:
+                msg = "No more stamps remaining"
+                logs.warning(msg)
+                raise IllegalActionError(msg)
+
+            # Check to make sure the user hasn't already stamped this entity
+            if self._stampDB.checkStamp(user.user_id, entity.entity_id):
+                msg = "Cannot stamp same entity twice"
+                logs.warning(msg)
+                raise IllegalActionError(msg)
+
+            # Build stamp
+            stamp           = Stamp()
+            stamp.user_id   = user.user_id
+            stamp.entity_id = entity.entity_id
+            stamp.created   = datetime.utcnow()
+            stamp.stamp_num = user.num_stamps_total + 1
+
+            # Collect user ids
+            userIds = {}
+            userIds[user.user_id] = user.exportSchema(UserMini())
+
+            # Extract mentions
+            if blurbData != None:
+                stamp.blurb = blurbData.strip()
+                stamp.mentions = self._extractMentions(blurbData)
                     
-                    # Add the comment data to the database
-                    self._commentDB.addComment(comment)
+            # Extract credit
+            credit = []
+            creditedUserIds = []
+            if creditData != None:
+                creditedUsers = self._userDB.lookupUsers(None, creditData)
 
-                # Update credited user stats
-                self._userDB.updateUserStats(item.user_id, 'num_credits', \
-                    None, increment=1)
-                self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
-                    None, increment=EARNED_CREDIT_MULTIPLIER)
+                for creditedUser in creditedUsers:
+                    userId = creditedUser['user_id']
+                    if userId == user.user_id or userId in creditedUserIds:
+                        continue
+                    
+                    result = CreditSchema()
+                    result.user_id      = creditedUser['user_id']
+                    result.screen_name  = creditedUser['screen_name']
 
-        # Note: No activity should be generated for the user creating the stamp
+                    # Add to user ids
+                    userIds[userId] = creditedUser.exportSchema(UserMini())
 
-        # Add activity for credited users
-        if self._activity == True and len(creditedUserIds) > 0:
-            
-            activity                = Activity()
-            activity.genre          = 'restamp'
-            activity.user_id        = user.user_id
-            activity.subject        = stamp.entity.title
-            activity.link_stamp_id  = stamp.stamp_id
-            activity.created        = datetime.utcnow()
-            
-            self._activityDB.addActivity(creditedUserIds, activity)
-        
-        # Add activity for mentioned users
-        if self._activity == True and stamp.mentions != None and len(stamp.mentions) > 0:
-            mentionedUserIds = []
-            for mention in stamp.mentions:
-                if 'user_id' in mention \
-                    and mention['user_id'] not in creditedUserIds \
-                    and mention['user_id'] != user.user_id:
-                    # Check if block exists between user and mentioned user
+                    # Assign credit
+                    creditedStamp = self._stampDB.getStampFromUserEntity(userId, \
+                        entity.entity_id)
+                    if creditedStamp != None:
+                        result.stamp_id = creditedStamp.stamp_id
+
+                    credit.append(result)
+
+                    # Check if block exists between user and credited user
                     friendship = Friendship({
                         'user_id':      user.user_id,
-                        'friend_id':    mention['user_id'],
+                        'friend_id':    userId,
                     })
-                    if self._friendshipDB.blockExists(friendship) == False:
-                        mentionedUserIds.append(mention['user_id'])
-            if len(mentionedUserIds) > 0:
+                    if self._friendshipDB.blockExists(friendship) == True:
+                        logs.debug("Block exists")
+                        continue
+
+                    ### NOTE:
+                    # For now, if a block exists then no comment or activity is
+                    # created. This may change ultimately (i.e. we create the
+                    # 'comment' and hide it from the recipient until they're
+                    # unblocked), but for now we're not going to do anything.
+
+                    creditedUserIds.append(result.user_id)
+
+                ### TODO: How do we handle credited users that have not yet joined?
+                stamp.credit = credit
+                
+            # Add the stamp data to the database
+            stamp = self._stampDB.addStamp(stamp)
+            rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
+
+            # Add image to stamp
+            ### TODO: Unwind stamp if this fails
+            if imageData != None:
+                
+                ### TODO: Rollback: Delete Image
+                image = self._imageDB.getImage(imageData)
+                self._imageDB.addStampImage(stamp.stamp_id, image)
+
+                # Add image dimensions to stamp object (width,height)
+                width, height           = image.size
+                stamp.image_dimensions  = "%s,%s" % (width, height)
+                stamp                   = self._stampDB.updateStamp(stamp)
+
+            # Add user objects back into stamp
+            entityIds = {entity.entity_id: entity.exportSchema(EntityMini())}
+            stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
+                userIds=userIds, entityIds=entityIds)
+
+            # Add a reference to the stamp in the user's collection
+            rollback.append((self._stampDB.removeUserStampReference, \
+                {'stampId': stamp.stamp_id, 'userId': user.user_id}))
+            self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
+            
+            # Add a reference to the stamp in followers' inbox
+            followers = self._friendshipDB.getFollowers(user.user_id)
+            followers.append(user.user_id)
+            rollback.append((self._stampDB.removeInboxStampReference, \
+                {'stampId': stamp.stamp_id, 'userIds': followers}))
+            self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
+
+            # Update user stats 
+            ### TODO: Should rollback go before or after?
+            self._userDB.updateUserStats(authUserId, 'num_stamps', \
+                        None, increment=1)
+            rollback.append((self._userDB.updateUserStats, \
+                {'userId': authUserId, 'stat': 'num_stamps', 'increment': -1}))
+
+            self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
+                        None, increment=-1)
+            rollback.append((self._userDB.updateUserStats, \
+                {'userId': authUserId, 'stat': 'num_stamps_left', 'increment': 1}))
+
+            self._userDB.updateUserStats(authUserId, 'num_stamps_total', \
+                        None, increment=1)
+            rollback.append((self._userDB.updateUserStats, \
+                {'userId': authUserId, 'stat': 'num_stamps_total', 'increment': -1}))
+            
+            # If stamped entity is on the to do list, mark as complete
+            try:
+                self._favoriteDB.completeFavorite(entity.entity_id, user.user_id)
+                rollback.append((self._favoriteDB.completeFavorite, \
+                    {'entityId': entity.entity_id, 'userId': user.user_id, \
+                    'complete': False}))
+            except:
+                pass
+            
+            # Give credit
+            if stamp.credit != None and len(stamp.credit) > 0:
+                for item in credit:
+
+                    # Only run if user is flagged as credited
+                    if item.user_id not in creditedUserIds:
+                        continue
+
+                    # Assign credit
+                    rollback.append((self._stampDB.removeCredit, \
+                        {'creditedUserId': item.user_id, 'stamp': stamp}))
+                    self._stampDB.giveCredit(item.user_id, stamp)
+                    
+                    # Add restamp as comment (if prior stamp exists)
+                    if 'stamp_id' in item and item['stamp_id'] != None:
+                        # Build comment
+                        comment                 = Comment()
+                        comment.user.user_id    = user.user_id
+                        comment.stamp_id        = item.stamp_id
+                        comment.restamp_id      = stamp.stamp_id
+                        comment.blurb           = stamp.blurb
+                        comment.mentions        = stamp.mentions
+                        comment.created         = datetime.utcnow()
+                        
+                        # Add the comment data to the database
+                        comment = self._commentDB.addComment(comment)
+                        rollback.append((self._commentDB.removeComment, \
+                            {'commentId': comment.comment_id}))
+
+                    # Update credited user stats
+                    self._userDB.updateUserStats(item.user_id, 'num_credits', \
+                        None, increment=1)
+                    rollback.append((self._userDB.updateUserStats, \
+                        {'userId': item.user_id, 'stat': 'num_credits', \
+                        'increment': -1}))
+
+                    self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
+                        None, increment=EARNED_CREDIT_MULTIPLIER)
+                    rollback.append((self._userDB.updateUserStats, \
+                        {'userId': item.user_id, 'stat': 'num_stamps_left', \
+                        'increment': -EARNED_CREDIT_MULTIPLIER}))
+
+            # Note: No activity should be generated for the user creating the stamp
+
+            # Add activity for credited users
+            if self._activity == True and len(creditedUserIds) > 0:
+                
                 activity                = Activity()
-                activity.genre          = 'mention'
+                activity.genre          = 'restamp'
                 activity.user_id        = user.user_id
                 activity.subject        = stamp.entity.title
-                activity.blurb          = stamp.blurb
                 activity.link_stamp_id  = stamp.stamp_id
                 activity.created        = datetime.utcnow()
                 
-                self._activityDB.addActivity(mentionedUserIds, activity)
-        
-        return stamp
+                ### TODO: Rollback: Remove activity
+                self._activityDB.addActivity(creditedUserIds, activity)
+            
+            # Add activity for mentioned users
+            if self._activity == True and stamp.mentions != None \
+                and len(stamp.mentions) > 0:
+                mentionedUserIds = []
+                for mention in stamp.mentions:
+                    if 'user_id' in mention \
+                        and mention['user_id'] not in creditedUserIds \
+                        and mention['user_id'] != user.user_id:
+                        # Check if block exists between user and mentioned user
+                        friendship = Friendship({
+                            'user_id':      user.user_id,
+                            'friend_id':    mention['user_id'],
+                        })
+                        if self._friendshipDB.blockExists(friendship) == False:
+                            mentionedUserIds.append(mention['user_id'])
+                if len(mentionedUserIds) > 0:
+                    activity                = Activity()
+                    activity.genre          = 'mention'
+                    activity.user_id        = user.user_id
+                    activity.subject        = stamp.entity.title
+                    activity.blurb          = stamp.blurb
+                    activity.link_stamp_id  = stamp.stamp_id
+                    activity.created        = datetime.utcnow()
+                    
+                    ### TODO: Rollback: Remove activity
+                    self._activityDB.addActivity(mentionedUserIds, activity)
+
+            print 1 / 0
+            
+            return stamp
+        except:
+            rollback.reverse()
+            for fn, params in rollback:
+                logs.info('Rollback: %s(%s)' % (fn.__name__, params))
+                fn(**params)
+            raise
 
             
     def updateStamp(self, authUserId, stampId, data):        
