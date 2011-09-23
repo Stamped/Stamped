@@ -15,11 +15,8 @@ def create(request):
     schema      = parseFileUpload(HTTPAccountNew(), request, 'profile_image')
     account     = schema.exportSchema(Account())
 
-    account     = stampedAPI.addAccount(account)
+    account     = stampedAPI.addAccount(account, schema.profile_image)
     user        = HTTPUser().importSchema(account)
-
-    if schema.profile_image:
-        stampedAPI.updateProfileImage(user.user_id, schema.profile_image)
 
     token       = stampedAuth.addRefreshToken(client_id, user.user_id)
 
