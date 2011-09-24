@@ -336,6 +336,7 @@ typedef enum {
   if (searchField_.text.length > 0) {
     [self sendFastSearchRequest];
   } else {
+    [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
     self.resultsArray = nil;
     [self.tableView reloadData];
     searchingIndicatorView_.hidden = YES;
