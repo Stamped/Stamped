@@ -86,7 +86,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-  
+
   // Release any cached data, images, etc that aren't in use.
 }
 
@@ -252,42 +252,35 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 // Delegate method
 - (void)collapsibleViewController:(CollapsibleViewController*)collapsibleVC willChangeHeightBy:(CGFloat)delta {
-  for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
-  {
-    if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame))
-    {
+  for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator) {
+    if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame)) {
       [UIView animateWithDuration:0.25
-                       animations:^{vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);}];
+                       animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta); }];
     }
   }
   
   CGFloat newHeight = [self contentHeight];
   newHeight += delta;
-  
- 
+
   CGRect contentFrame = self.mainContentView.frame;
   contentFrame.size.height = newHeight;
   self.mainContentView.frame = contentFrame;
   
   newHeight += CGRectGetMinY(self.mainContentView.frame);
-  
-  
+
   self.scrollView.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);  
 }
 
 - (CGFloat)contentHeight {
-  CGFloat contentHeight = 0.f;
-  
-  if (!sectionsDict_) return 0.f;
-  if (sectionsDict_.count == 0) return 0.f;
-  
+  if (sectionsDict_.count == 0)
+    return 0.0f;
+
+  CGFloat contentHeight = 0.0f;
   for (CollapsibleViewController* cvc in sectionsDict_.objectEnumerator) {
     contentHeight += cvc.view.frame.size.height;
   }
   
   return contentHeight;
 }
-
-
 
 @end
