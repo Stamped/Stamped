@@ -241,6 +241,9 @@ typedef enum {
     self.currentResultType = ResultTypeFast;
     self.resultsArray = array;
     [self.tableView reloadData];
+  } else if (response.isNotFound) {
+    self.resultsArray = nil;
+    [self.tableView reloadData];
   }
   searchingIndicatorView_.hidden = YES;
 }
