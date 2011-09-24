@@ -57,6 +57,9 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   
   if (hideLogo_) {
     CGPathRef textPath = [self newPathForTitle];
+    if (!textPath)
+      return;
+
     CGRect textPathBounds = CGPathGetBoundingBox(textPath);
     
     CGColorRef color1 = [UIColor colorWithWhite:0.90 alpha:1.0].CGColor;
@@ -171,6 +174,9 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
 }
 
 - (CGPathRef)newPathForTitle {
+  if (!self.topItem.title)
+    return nil;
+
   CGContextRef ctx = UIGraphicsGetCurrentContext(); 
   
   // Flip the coordinate system for right-reading text.
@@ -190,7 +196,7 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   NSAssert(attributes != nil, @"Font attributes are nil!");
   
   NSAttributedString* nsAttStr = [[[NSAttributedString alloc] initWithString:self.topItem.title
-                                                                 attributes:attributes] autorelease];
+                                                                  attributes:attributes] autorelease];
   attStr = (CFAttributedStringRef)nsAttStr; 
   
   // Make a path from each glyph of the attributed string ref.

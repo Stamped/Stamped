@@ -68,6 +68,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
 @property (nonatomic, readonly) UILabel* numLikesLabel;
+@property (nonatomic, assign) NSUInteger numLikes;
 @end
 
 @implementation StampDetailViewController
@@ -92,6 +93,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize eDetailArrowImageView = eDetailArrowImageView_;
 @synthesize likeFaceImageView = likeFaceImageView_;
 @synthesize numLikesLabel = numLikesLabel_;
+@synthesize numLikes = numLikes_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -269,8 +271,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     addFavoriteLabel_.text = @"To-Do'd";
     addFavoriteButton_.selected = YES;
   }
-  
-  if ([stamp_.isLiked boolValue]) {
+
+  if (stamp_.isLiked.boolValue && stamp_.numLikes.unsignedIntValue > 0) {
     likeLabel_.text = @"Liked";
     likeButton_.selected = YES;
   }
@@ -288,9 +290,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)setNumLikes:(NSUInteger)likes {
+  numLikes_ = likes;
+
   numLikesLabel_.hidden = likes == 0;
   likeFaceImageView_.hidden = likes == 0;
   numLikesLabel_.text = [NSNumber numberWithUnsignedInteger:likes].stringValue;
+  [numLikesLabel_ sizeToFit];
 
   // If there is a credited user then we already have the room.
   if (stamp_.credits.count > 0)
@@ -376,6 +381,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
   numLikesLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
   numLikesLabel_.text = [stamp_.numLikes stringValue];
+  numLikes_ = stamp_.numLikes.unsignedIntValue;
   numLikesLabel_.textAlignment = UITextAlignmentRight;
   numLikesLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   numLikesLabel_.textColor = [UIColor stampedGrayColor];
@@ -399,8 +405,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [mainCommentContainer_ addSubview:likeFaceImageView_];
   [likeFaceImageView_ release];
 
-  numLikesLabel_.hidden = numLikes == 0;
-  likeFaceImageView_.hidden = numLikes == 0;
+  numLikesLabel_.hidden = (numLikes == 0);
+  likeFaceImageView_.hidden = (numLikes == 0);
 
   [self addUserGradientBackground];
   [self setMainCommentContainerFrame:mainCommentFrame];
@@ -525,11 +531,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   BOOL liked = !button.selected;
   button.selected = liked;
   likeLabel_.text = liked ? @"Liked" : @"Like";
-  NSUInteger numLikesValue = [stamp_.numLikes unsignedIntegerValue];
-  NSUInteger delta = liked ? 1 : -1;
-  numLikesValue += delta;
-  [self setNumLikes:numLikesValue];
-  
+  self.numLikes += liked ? 1 : -1;
   NSString* path = liked ? kCreateLikePath : kRemoveLikePath;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
@@ -537,7 +539,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:stamp_.stampID, @"stamp_id", nil];
-  NSLog(@"Params: %@", objectLoader.params);
   
   [objectLoader send];
 }
