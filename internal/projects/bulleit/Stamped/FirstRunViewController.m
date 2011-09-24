@@ -269,7 +269,7 @@ static const CGFloat kProfileImageSize = 500;
                      username:signUpUsernameTextField_.text
                      password:signUpPasswordTextField_.text
                         email:signUpEmailTextField_.text
-                 profileImage:userImageView_.imageView.image
+                 profileImage:self.profilePhoto
                   phoneNumber:num];
   }
 }
@@ -345,7 +345,11 @@ static const CGFloat kProfileImageSize = 500;
   signUpEmailTextField_.text = self.email;
   signUpPasswordTextField_.text = self.password;
   signUpPhoneTextField_.text = self.phone;
-  userImageView_.imageView.image = self.profilePhoto;
+  if (self.profilePhoto) {
+    userImageView_.imageView.image = self.profilePhoto;
+  } else {
+    userImageView_.imageView.image = [UIImage imageNamed:@"profile_placeholder"];
+  }
   [self dismissModalViewControllerAnimated:YES];
 }
 
