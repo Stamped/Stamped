@@ -166,7 +166,6 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
-  [self loadStampsFromDataStore];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
