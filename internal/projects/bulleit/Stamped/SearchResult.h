@@ -8,6 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum {
+  SearchCategoryOther,
+  SearchCategoryBook,
+  SearchCategoryFilm,
+  SearchCategoryMusic,
+  SearchCategoryFood
+} SearchCategory;
+
 @interface SearchResult : NSObject
 
 @property (nonatomic, copy) NSString* title;
@@ -16,6 +24,7 @@
 @property (nonatomic, copy) NSString* searchID;
 @property (nonatomic, copy) NSString* entityID;
 
+@property (nonatomic, readonly) SearchCategory searchCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
 @property (nonatomic, readonly) UIImage* largeCategoryImage;
 

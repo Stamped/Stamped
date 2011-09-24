@@ -7,8 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class User;
+@class Entity;
+@class SearchResult;
 
 // Constants from Twitter's developer console.
 extern NSString* const kTwitterConsumerKey;
@@ -40,4 +43,7 @@ extern NSString* const kKeychainTwitterToken;
 + (UIImage*)stampImageForUser:(User*)user;
 + (UIImage*)stampImageWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
+
++ (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject;
++ (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult;
 @end

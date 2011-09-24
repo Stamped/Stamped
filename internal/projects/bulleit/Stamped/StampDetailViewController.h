@@ -10,7 +10,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
-@class EntityDetailViewController;
 @class UserImageView;
 @class Stamp;
 
@@ -21,7 +20,7 @@
   // Managed by the view system.
   CAGradientLayer* activityGradientLayer_;
   // Preloaded Entity View.
-  EntityDetailViewController* detailViewController_;
+  UIViewController* detailViewController_;
 }
 
 - (id)initWithStamp:(Stamp*)stamp;

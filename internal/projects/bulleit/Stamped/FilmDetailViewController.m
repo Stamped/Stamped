@@ -23,7 +23,6 @@
 @synthesize affiliateLogoView = affiliateLogoView_;
 @synthesize ratingView = ratingView_;
 
-
 - (void)dealloc {
   self.imageView = nil;
   self.affiliateLogoView = nil;
@@ -98,7 +97,6 @@
   self.mainActionButton.hidden = YES;
   self.mainActionLabel.hidden = YES;
   self.mainActionsView.hidden = YES;
-  
 }
 
 - (void)viewDidUnload {
@@ -131,30 +129,25 @@
   [super viewDidDisappear:animated];
 }
 
-
 - (IBAction)mainActionButtonPressed:(id)sender {
   [[UIApplication sharedApplication] openURL:
    [NSURL URLWithString:entityObject_.fandangoURL]];
 }
 
-
-
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
-- (void) setupMainActionsContainer {
-  
+- (void)setupMainActionsContainer {
   if (entityObject_.fandangoURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
+  } else {
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, 
+                                              -CGRectGetHeight(self.mainActionsView.frame));
   }
-  
-  else self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
-  
 }
 
-
-- (void) setupSectionViews {
+- (void)setupSectionViews {
   
   // Synopsis
   if (entityObject_.desc) {
@@ -171,8 +164,7 @@
     
     self.mainContentView.hidden = NO;
   }
-  
-  
+
   // Information
   if (entityObject_.genre || entityObject_.cast || entityObject_.director || 
       entityObject_.inTheaters || entityObject_.releaseDate ) {
@@ -204,16 +196,13 @@
     self.mainContentView.hidden = NO;
   }
   
-  
   // Stamped by  
   NSSet* stamps = entityObject_.stamps;
   
-  if (stamps && stamps.count > 0)
-  {
+  if (stamps.count > 0) {
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO; 
   }
-  
 }
 
 

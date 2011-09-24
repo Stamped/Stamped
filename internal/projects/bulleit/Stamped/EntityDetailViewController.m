@@ -9,10 +9,12 @@
 #import "EntityDetailViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
 #import "Entity.h"
 #import "Stamp.h"
+#import "SearchResult.h"
 #import "UIColor+Stamped.h"
 #import "PlaceDetailViewController.h"
 #import "Notifications.h"
@@ -50,6 +52,16 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   return self;
 }
 
+- (id)initWithSearchResult:(SearchResult*)searchResult {
+  self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
+  if (self) {
+    searchResult_ = [searchResult retain];
+    [self loadEntityDataFromServer];
+    sectionsDict_ = [[NSMutableDictionary alloc] init];
+  }
+  return self;
+}
+
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.titleLabel = nil;
@@ -66,6 +78,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     vc.delegate = nil;
 
   [entityObject_ release];
+  [searchResult_ release];
   [sectionsDict_ release];
   [super dealloc];
 }
@@ -86,7 +99,20 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
                                                                     delegate:self];
   objectLoader.objectMapping = entityMapping;
-  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"entity_id", entityObject_.entityID, nil];
+  NSString* key = @"entity_id";
+  id objectForKey = nil;
+  if (entityObject_) {
+    objectForKey = entityObject_.entityID;
+  } else if (searchResult_) {
+    if (searchResult_.entityID) {
+      objectForKey = searchResult_.entityID;
+    } else if (searchResult_.searchID) {
+      key = @"search_id";
+      objectForKey = searchResult_.searchID;
+    }
+  }
+  NSAssert(objectForKey, @"Must provide a valid search of entity ID to fetch data");
+  objectLoader.params = [NSDictionary dictionaryWithObject:objectForKey forKey:key];
   [objectLoader send];
   [self view];
   [self.loadingView startAnimating];
@@ -160,6 +186,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
   dataLoaded_ = YES;
+  [entityObject_ release];
+  entityObject_ = [(Entity*)object retain];
   [self showContents];
   [self.loadingView stopAnimating];
 }

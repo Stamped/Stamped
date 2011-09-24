@@ -9,6 +9,14 @@
 #import "Util.h"
 
 #import "User.h"
+#import "Entity.h"
+#import "SearchResult.h"
+#import "PlaceDetailViewController.h"
+#import "GenericItemDetailViewController.h"
+#import "MusicDetailViewController.h"
+#import "BookDetailViewController.h"
+#import "OtherDetailViewController.h"
+#import "FilmDetailViewController.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -160,6 +168,58 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     result = @"just now";
   }
   return result;
+}
+
++ (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject {
+  UIViewController* detailViewController = nil;
+  switch (entityObject.entityCategory) {
+    case EntityCategoryFood:
+      detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:entityObject];
+      break;
+    case EntityCategoryMusic:
+      detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:entityObject];
+      break;
+    case EntityCategoryBook:
+      detailViewController = [[BookDetailViewController alloc] initWithEntityObject:entityObject];
+      break;
+    case EntityCategoryFilm:
+      detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:entityObject];
+      break;
+    case EntityCategoryOther:
+      detailViewController = [[OtherDetailViewController alloc] initWithEntityObject:entityObject];
+      break;
+    default:
+      detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:entityObject];
+      break;
+  }
+
+  return [detailViewController autorelease];
+}
+
++ (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult {
+  UIViewController* detailViewController = nil;
+  switch (searchResult.searchCategory) {
+    case SearchCategoryFood:
+      detailViewController = [[PlaceDetailViewController alloc] initWithSearchResult:searchResult];
+      break;
+    case SearchCategoryMusic:
+      detailViewController = [[MusicDetailViewController alloc] initWithSearchResult:searchResult];
+      break;
+    case SearchCategoryBook:
+      detailViewController = [[BookDetailViewController alloc] initWithSearchResult:searchResult];
+      break;
+    case SearchCategoryFilm:
+      detailViewController = [[FilmDetailViewController alloc] initWithSearchResult:searchResult];
+      break;
+    case SearchCategoryOther:
+      detailViewController = [[OtherDetailViewController alloc] initWithSearchResult:searchResult];
+      break;
+    default:
+      detailViewController = [[GenericItemDetailViewController alloc] initWithSearchResult:searchResult];
+      break;
+  }
+
+  return [detailViewController autorelease];
 }
 
 @end

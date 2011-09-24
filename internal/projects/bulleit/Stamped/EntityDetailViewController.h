@@ -11,16 +11,19 @@
 #import "UIColor+Stamped.h"
 
 @class Entity;
+@class SearchResult;
 
 @interface EntityDetailViewController : UIViewController <RKObjectLoaderDelegate, CollapsibleViewControllerDelegate> {
  @protected
   Entity* entityObject_;
+  SearchResult* searchResult_;
   BOOL viewIsVisible_;
   BOOL dataLoaded_;
   NSMutableDictionary* sectionsDict_;
 }
 
 - (id)initWithEntityObject:(Entity*)entity;
+- (id)initWithSearchResult:(SearchResult*)searchResult;
 - (void)addSectionWithName:(NSString*)name;
 - (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight;
 - (void)addSectionStampedBy;

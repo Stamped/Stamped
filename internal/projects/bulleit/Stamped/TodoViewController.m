@@ -18,16 +18,11 @@
 #import "EntityDetailViewController.h"
 #import "Favorite.h"
 #import "Notifications.h"
-#import "PlaceDetailViewController.h"
-#import "GenericItemDetailViewController.h"
-#import "MusicDetailViewController.h"
-#import "BookDetailViewController.h"
-#import "OtherDetailViewController.h"
-#import "FilmDetailViewController.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 #import "TodoTableViewCell.h"
 #import "User.h"
+#import "Util.h"
 
 static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
@@ -129,31 +124,9 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row];
-  EntityDetailViewController* detailViewController = nil;
-  switch (fave.entityObject.entityCategory) {
-    case EntityCategoryFood:
-      detailViewController = [[PlaceDetailViewController alloc] initWithEntityObject:fave.entityObject];
-      break;
-    case EntityCategoryMusic:
-      detailViewController = [[MusicDetailViewController alloc] initWithEntityObject:fave.entityObject];
-      break;
-    case EntityCategoryBook:
-      detailViewController = [[BookDetailViewController alloc] initWithEntityObject:fave.entityObject];
-      break;
-    case EntityCategoryFilm:
-      detailViewController = [[FilmDetailViewController alloc] initWithEntityObject:fave.entityObject];
-      break;
-    case EntityCategoryOther:
-      detailViewController = [[OtherDetailViewController alloc] initWithEntityObject:fave.entityObject];
-      break;
-    default:
-      detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:fave.entityObject];
-      break;
-  }
-
+  UIViewController* detailViewController = [Util detailViewControllerForEntity:fave.entityObject];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.

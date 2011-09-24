@@ -1,4 +1,4 @@
-  //
+//
 //  CreateStampViewController.m
 //  Stamped
 //
@@ -16,6 +16,7 @@
 #import "AccountManager.h"
 #import "EditEntityViewController.h"
 #import "Entity.h"
+#import "EntityDetailViewController.h"
 #import "Favorite.h"
 #import "GTMOAuthAuthentication.h"
 #import "GTMOAuthViewControllerTouch.h"
@@ -96,6 +97,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize stampItButton = stampItButton_;
 @synthesize creditTextField = creditTextField_;
 @synthesize editButton = editButton_;
+@synthesize disclosureButton = disclosureButton_;
 @synthesize mainCommentContainer = mainCommentContainer_;
 @synthesize backgroundImageView = backgroundImageView_;
 @synthesize stampPhoto = stampPhoto_;
@@ -177,6 +179,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.deletePhotoButton = nil;
   self.twitterAuth = nil;
   self.twitterClient = nil;
+  self.disclosureButton = nil;
   stampsRemainingLayer_ = nil;
 
   [super dealloc];
@@ -192,6 +195,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   scrollView_.contentSize = self.view.bounds.size;
 
   editButton_.hidden = !newEntity_;
+  disclosureButton_.hidden = newEntity_;
   
   ribbonedContainerView_.layer.shadowOpacity = 0.1;
   ribbonedContainerView_.layer.shadowOffset = CGSizeMake(0, 1);
@@ -386,6 +390,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.backgroundImageView = nil;
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
+  self.disclosureButton = nil;
   stampsRemainingLayer_ = nil;
 }
 
@@ -544,6 +549,16 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 }
 
 #pragma mark - Actions.
+
+- (IBAction)disclosureButtonPressed:(id)sender {
+  UIViewController* vc = nil;
+  if (entityObject_) {
+    vc = [Util detailViewControllerForEntity:entityObject_];
+  } else {
+    vc = [Util detailViewControllerForSearchResult:(SearchResult*)objectToStamp_];
+  }
+  [self.navigationController pushViewController:vc animated:YES];
+}
 
 - (IBAction)tweetButtonPressed:(id)sender {
   tweetButton_.selected = !tweetButton_.selected;
