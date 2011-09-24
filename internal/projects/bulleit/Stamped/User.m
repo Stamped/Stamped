@@ -44,7 +44,8 @@ const CGFloat kMediumUserImageSize = 41.0;
 }
 
 - (NSString*)profileImageURL {
-  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg", self.screenName];
+  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg",
+      self.screenName.lowercaseString];
 }
 
 - (void)awakeFromFetch {
