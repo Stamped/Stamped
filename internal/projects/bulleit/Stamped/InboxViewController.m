@@ -42,6 +42,7 @@ typedef enum {
 @interface InboxViewController ()
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
+- (void)removeTemporaryStamps;
 - (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)mapButtonWasPressed:(NSNotification*)notification;
@@ -165,15 +166,14 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self loadStampsFromDataStore];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self loadStampsFromDataStore];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
-  
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -188,7 +188,16 @@ typedef enum {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (void)removeTemporaryStamps {
+  NSArray* tempStamps = [Stamp objectsWithPredicate:[NSPredicate predicateWithFormat:@"temporary == YES"]];
+  for (Stamp* stamp in tempStamps) {
+    [stamp deleteEntity];
+    [stamp.managedObjectContext save:NULL];
+  }
+}
+
 - (void)loadStampsFromDataStore {
+  [self removeTemporaryStamps];
   self.entitiesArray = nil;
 	NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
