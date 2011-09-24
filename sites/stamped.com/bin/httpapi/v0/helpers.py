@@ -42,31 +42,31 @@ def handleHTTPRequest(fn):
         
         except InputError as e:
             logs.warning("400 Error: %s" % (e.msg))
-            response = HttpResponse("invalid_request: %s" % e.msg, status=e.code)
+            response = HttpResponse("invalid_request", status=e.code)
             logs.error(response.status_code)
             return response
         
         except IllegalActionError as e:
             logs.warning("403 Error: %s" % (e.msg))
-            response = HttpResponse("illegal_action: %s" % e.gmsg, status=403)
+            response = HttpResponse("illegal_action", status=403)
             logs.error(response.status_code)
             return response
         
         except InsufficientPrivilegesError as e:
             logs.warning("403 Error: %s" % (e.msg))
-            response = HttpResponse("insufficient_privileges: %s" % e.msg, status=403)
+            response = HttpResponse("insufficient_privileges", status=403)
             logs.error(response.status_code)
             return response
         
         except Unavailable as e:
             logs.warning("404 Error: %s" % (e.msg))
-            response = HttpResponse("not_found: %s" % e.msg, status=404)
+            response = HttpResponse("not_found", status=404)
             logs.error(response.status_code)
             return response
         
         except Exception as e:
             logs.warning("500 Error: %s" % e)
-            response = HttpResponse("internal server error: %s" % e, status=500)
+            response = HttpResponse("internal server error", status=500)
             logs.error(response.status_code)
             return response
         

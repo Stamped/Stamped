@@ -90,9 +90,8 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
             "quality": 1
         }
         result = self.handleGET(path, data)
-        
         self.assertEqual(len(result), 3)
-        self.assertEqual(len(result[-1]['comment_preview']), 11)
+        self.assertEqual(len(result[0]['comment_preview']), 11)
 
         path = "collections/inbox.json"
         data = { 
@@ -101,7 +100,7 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 3)
-        self.assertEqual(len(result[-1]['comment_preview']), 10)
+        self.assertEqual(len(result[0]['comment_preview']), 10)
 
         path = "collections/inbox.json"
         data = { 
@@ -110,7 +109,7 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 3)
-        self.assertEqual(len(result[-1]['comment_preview']), 4)
+        self.assertEqual(len(result[0]['comment_preview']), 4)
 
         self.deleteComment(self.tokenA, self.commentC['comment_id'])
         self.deleteComment(self.tokenA, self.commentD['comment_id'])
