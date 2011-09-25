@@ -7,17 +7,15 @@
 //
 
 #import "Comment.h"
-#import "Event.h"
 #import "User.h"
 
-
 @implementation Comment
+
 @dynamic blurb;
 @dynamic commentID;
 @dynamic stampID;
 @dynamic restampID;
 @dynamic created;
 @dynamic user;
-@dynamic event;
 
 @end

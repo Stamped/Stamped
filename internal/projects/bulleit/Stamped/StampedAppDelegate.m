@@ -105,11 +105,12 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [userMapping mapRelationship:@"credits" withMapping:stampMapping];
   
   RKManagedObjectMapping* eventMapping = [RKManagedObjectMapping mappingForClass:[Event class]];
-  [eventMapping mapAttributes:@"created", @"genre", nil];
+  [eventMapping mapAttributes:@"created", @"genre", @"subject", @"blurb", @"benefit", nil];
   [eventMapping mapKeyPath:@"activity_id" toAttribute:@"eventID"];
+  [eventMapping mapKeyPath:@"linked_url" toAttribute:@"URL"];
   eventMapping.primaryKeyAttribute = @"eventID";
-  [eventMapping mapRelationship:@"comment" withMapping:commentMapping];
-  [eventMapping mapRelationship:@"stamp" withMapping:stampMapping];
+  [eventMapping mapKeyPath:@"linked_entity" toRelationship:@"entityObject" withMapping:entityMapping];
+  [eventMapping mapKeyPath:@"linked_stamp" toRelationship:@"stamp" withMapping:stampMapping];
   [eventMapping mapRelationship:@"user" withMapping:userMapping];
   
   RKManagedObjectMapping* favoriteMapping = [RKManagedObjectMapping mappingForClass:[Favorite class]];

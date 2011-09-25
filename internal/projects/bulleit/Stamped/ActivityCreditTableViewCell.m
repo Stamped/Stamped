@@ -20,22 +20,21 @@
 #import "Util.h"
 #import "UIColor+Stamped.h"
 
-@interface ActivityCreditCellView : UIView
+@interface ActivityCreditTableViewCell ()
 - (void)invertColors:(BOOL)inverted;
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated;
+- (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color;
 
-@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
-@property (nonatomic, assign) BOOL selected;
 @property (nonatomic, readonly) UserImageView* userImageView;
 @property (nonatomic, readonly) UIImageView* disclosureArrowImageView;
 @property (nonatomic, readonly) CATextLayer* headerTextLayer;
 @property (nonatomic, readonly) UILabel* entityTitleLabel;
 @property (nonatomic, readonly) CALayer* firstStampLayer;
 @property (nonatomic, readonly) CALayer* secondStampLayer;
-@property (nonatomic, readonly) CATextLayer* plusStampsLayer;
+@property (nonatomic, readonly) UILabel* plusStampsLabel;
+
 @end
 
-@implementation ActivityCreditCellView
+@implementation ActivityCreditTableViewCell
 
 @synthesize highlighted = highlighted_;
 @synthesize selected = selected_;
@@ -45,26 +44,27 @@
 @synthesize firstStampLayer = firstStampLayer_;
 @synthesize secondStampLayer = secondStampLayer_;
 @synthesize disclosureArrowImageView = disclosureArrowImageView_;
-@synthesize plusStampsLayer = plusStampsLayer_;
+@synthesize plusStampsLabel = plusStampsLabel_;
 
-- (id)initWithFrame:(CGRect)frame {
-  self = [super initWithFrame:frame];
+@synthesize event = event_;
+
+- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
+  self = [super initWithStyle:UITableViewCellStyleDefault
+              reuseIdentifier:reuseIdentifier];
   if (self) {
-    self.autoresizingMask = (UIViewAutoresizingFlexibleWidth |
-                             UIViewAutoresizingFlexibleHeight);
+    self.accessoryType = UITableViewCellAccessoryNone;
     userImageView_ = [[UserImageView alloc] initWithFrame:CGRectMake(15, 10, 41, 41)];
     [self addSubview:userImageView_];
     [userImageView_ release];
-
+    
     headerTextLayer_ = [[CATextLayer alloc] init];
     headerTextLayer_.truncationMode = kCATruncationEnd;
     headerTextLayer_.contentsScale = [[UIScreen mainScreen] scale];
     headerTextLayer_.fontSize = 12.0;
     headerTextLayer_.foregroundColor = [UIColor stampedGrayColor].CGColor;
     headerTextLayer_.frame = CGRectMake(70, 13, 220, 16);
-    NSDictionary* actions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null], @"contents", nil];
-    headerTextLayer_.actions = actions;
-    [self.layer addSublayer:headerTextLayer_];
+    headerTextLayer_.actions = [NSDictionary dictionaryWithObjectsAndKeys:[NSNull null], @"contents", nil];
+    [self.contentView.layer addSublayer:headerTextLayer_];
     [headerTextLayer_ release];
     
     entityTitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 25, 200, 40)];
@@ -72,115 +72,50 @@
     entityTitleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
     entityTitleLabel_.highlightedTextColor = [UIColor whiteColor];
     entityTitleLabel_.backgroundColor = [UIColor clearColor];
-    [self addSubview:entityTitleLabel_];
+    [self.contentView addSubview:entityTitleLabel_];
     [entityTitleLabel_ release];
     
     firstStampLayer_ = [[CALayer alloc] init];
     firstStampLayer_.frame = CGRectMake(70, 28, 18, 18);
-    [self.layer addSublayer:firstStampLayer_];
+    [self.contentView.layer addSublayer:firstStampLayer_];
     [firstStampLayer_ release];
     
     secondStampLayer_ = [[CALayer alloc] init];
     secondStampLayer_.frame = CGRectOffset(firstStampLayer_.frame, CGRectGetWidth(firstStampLayer_.frame) / 2, 0);
-    [self.layer addSublayer:secondStampLayer_];
+    [self.contentView.layer addSublayer:secondStampLayer_];
     [secondStampLayer_ release];
-    
     UIImage* disclosureImage = [UIImage imageNamed:@"disclosure_arrow"];
-    disclosureArrowImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(290, 26, 8, 11)];
+    disclosureArrowImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(290, 33, 8, 11)];
     disclosureArrowImageView_.contentMode = UIViewContentModeCenter;
     disclosureArrowImageView_.image = disclosureImage;
     disclosureArrowImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureImage];
-    [self addSubview:disclosureArrowImageView_];
+    [self.contentView addSubview:disclosureArrowImageView_];
     [disclosureArrowImageView_ release];
     
-    plusStampsLayer_ = [[CATextLayer alloc] init];
-    plusStampsLayer_.contentsScale = [[UIScreen mainScreen] scale];
-    plusStampsLayer_.fontSize = 10.0;
-    plusStampsLayer_.foregroundColor = [UIColor stampedLightGrayColor].CGColor;
-    plusStampsLayer_.frame = CGRectMake(70, 58, 200, 12);
-    plusStampsLayer_.actions = actions;
-    plusStampsLayer_.font = @"Helvetica-Bold";
-    [self.layer addSublayer:plusStampsLayer_];
-    [actions release];
-    [plusStampsLayer_ release];
-    
-    
-    
-  }
-  return self;
-}
-
-- (void)invertColors:(BOOL)inverted {
-  NSMutableAttributedString* headerAttributedString =
-      [[NSMutableAttributedString alloc] initWithAttributedString:headerTextLayer_.string];
-  CGColorRef color = inverted ? [UIColor whiteColor].CGColor :
-                                [UIColor stampedGrayColor].CGColor;
-  [headerAttributedString setAttributes:
-      [NSDictionary dictionaryWithObject:(id)color 
-                                  forKey:(id)kCTForegroundColorAttributeName] 
-                                  range:NSMakeRange(0, headerAttributedString.length)];
-  headerTextLayer_.string = headerAttributedString;
-  [headerAttributedString release];
-  [self setNeedsDisplayInRect:headerTextLayer_.frame];
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-  selected_ = selected;
-  [self invertColors:selected];
-}
-
-- (void)setHighlighted:(BOOL)highlighted {
-  highlighted_ = highlighted;
-  [self invertColors:highlighted];
-}
-
-@end
-
-@implementation ActivityCreditTableViewCell
-
-@synthesize event = event_;
-@synthesize tooltipImageView = tooltipImageView_;
-
-- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
-  self = [super initWithStyle:UITableViewCellStyleDefault
-              reuseIdentifier:reuseIdentifier];
-  if (self) {
-    self.accessoryType = UITableViewCellAccessoryNone;
-    CGRect customViewFrame = CGRectMake(0, 0, self.contentView.bounds.size.width,
-                                        self.contentView.bounds.size.height);
-		customView_ = [[ActivityCreditCellView alloc] initWithFrame:customViewFrame];
-		[self.contentView addSubview:customView_];
-    [customView_ release];
-    
-    /*
-    if (![[NSUserDefaults standardUserDefaults] valueForKey:@"hasReceivedCredit"]) {
-      tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_firstcred"]];
-      
-      CGRect frame = customViewFrame;
-      frame.size.height = tooltipImageView_.image.size.height;
-      
-      tooltipImageView_.frame = CGRectOffset(frame, 0, customViewFrame.size.height+16.0);
-      tooltipImageView_.contentMode = UIViewContentModeCenter;
-      
-      [self.contentView addSubview:tooltipImageView_];
-      [tooltipImageView_ release];
-      
-      frame = self.contentView.frame;
-      frame.size.height = CGRectGetMaxY(tooltipImageView_.frame);
-      self.contentView.frame = frame;
-      
-      //    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasReceivedCredit"];
-      //    [[NSUserDefaults standardUserDefaults] synchronize];
-    }
-     */
-
+    plusStampsLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 58, 200, 12)];
+    plusStampsLabel_.textColor = [UIColor stampedLightGrayColor];
+    plusStampsLabel_.highlightedTextColor = [UIColor whiteColor];
+    plusStampsLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
+    [self.contentView addSubview:plusStampsLabel_];
+    [plusStampsLabel_ release];
   }
   return self;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
   [super setSelected:selected animated:animated];
-  [customView_ setSelected:selected animated:animated];
+  [self invertColors:selected];
+}
+
+- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
+  [super setHighlighted:highlighted animated:animated];
+  [self invertColors:highlighted];
+}
+
+- (void)invertColors:(BOOL)inverted {
+  UIColor* color = inverted ? [UIColor whiteColor] : [UIColor stampedGrayColor];
+  headerTextLayer_.string = [self headerAttributedStringWithColor:color];
+  [self setNeedsDisplayInRect:headerTextLayer_.frame];
 }
 
 - (void)setEvent:(Event*)event {
@@ -192,7 +127,36 @@
   if (!event)
     return;
 
-  customView_.userImageView.imageURL = event.user.profileImageURL;
+  userImageView_.imageURL = event.user.profileImageURL;
+  headerTextLayer_.string = [self headerAttributedStringWithColor:[UIColor stampedGrayColor]];
+  NSString* title = event.stamp.entityObject.title;
+  entityTitleLabel_.text = title;
+  User* currentUser = [[AccountManager sharedManager] currentUser];
+  firstStampLayer_.contents = (id)currentUser.stampImage.CGImage;
+  secondStampLayer_.contents = (id)event.user.stampImage.CGImage;
+  plusStampsLabel_.text = [NSString stringWithFormat:@"+%d stamps", event_.benefit.integerValue];
+
+  CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27]
+                                forWidth:200
+                           lineBreakMode:UILineBreakModeTailTruncation];
+  CGRect stampFrame = firstStampLayer_.frame;
+  stampFrame.origin.x = CGRectGetMinX(headerTextLayer_.frame) +
+      titleSize.width - (CGRectGetWidth(stampFrame) / 2);
+  CGRect oldFrame = firstStampLayer_.frame;
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+  firstStampLayer_.frame = stampFrame;
+  [self.contentView setNeedsDisplayInRect:oldFrame];
+  [self.contentView setNeedsDisplayInRect:stampFrame];
+  oldFrame = secondStampLayer_.frame;
+  CGRect secondLayerFrame = CGRectOffset(stampFrame, CGRectGetWidth(stampFrame) / 2, 0);
+  secondStampLayer_.frame = secondLayerFrame;
+  [CATransaction commit];
+  [self.contentView setNeedsDisplayInRect:oldFrame];
+  [self.contentView setNeedsDisplayInRect:secondLayerFrame];
+}
+
+- (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color {
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
@@ -200,44 +164,17 @@
     {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
   };
   CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* user = event.user.screenName;
+  NSString* user = event_.user.screenName;
   NSString* full = [NSString stringWithFormat:@"%@ %@", user, @"gave you credit for"];
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
   [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                          (id)style, (id)kCTParagraphStyleAttributeName,
-                         (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                         (id)color.CGColor, (id)kCTForegroundColorAttributeName, nil]
                   range:NSMakeRange(0, full.length)];
   [string addAttribute:(NSString*)kCTFontAttributeName value:(id)font range:NSMakeRange(0, user.length)];
   CFRelease(font);
   CFRelease(style);
-  customView_.headerTextLayer.string = string;
-  [string release];
-  NSString* title = event.stamp.entityObject.title;
-  customView_.entityTitleLabel.text = title;
-  User* currentUser = [[AccountManager sharedManager] currentUser];
-  customView_.firstStampLayer.contents = (id)currentUser.stampImage.CGImage;
-  customView_.secondStampLayer.contents = (id)event.user.stampImage.CGImage;
-  customView_.plusStampsLayer.string = @"+2 stamps";
-
-  CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27]
-                                forWidth:200
-                           lineBreakMode:UILineBreakModeTailTruncation];
-  CGRect stampFrame = customView_.firstStampLayer.frame;
-  stampFrame.origin.x = CGRectGetMinX(customView_.headerTextLayer.frame) +
-      titleSize.width - (CGRectGetWidth(stampFrame) / 2);
-  CGRect oldFrame = customView_.firstStampLayer.frame;
-  [CATransaction begin];
-  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
-  customView_.firstStampLayer.frame = stampFrame;
-  [customView_ setNeedsDisplayInRect:oldFrame];
-  [customView_ setNeedsDisplayInRect:stampFrame];
-  oldFrame = customView_.secondStampLayer.frame;
-  CGRect secondLayerFrame = CGRectOffset(stampFrame, CGRectGetWidth(stampFrame) / 2, 0);
-  customView_.secondStampLayer.frame = secondLayerFrame;
-  [CATransaction commit];
-  [customView_ setNeedsDisplayInRect:oldFrame];
-  [customView_ setNeedsDisplayInRect:secondLayerFrame];
-  
-  
+  return [string autorelease];
 }
+
 @end

@@ -7,6 +7,7 @@
 //
 
 #import "Entity.h"
+#import "Event.h"
 #import "Favorite.h"
 #import "Stamp.h"
 
@@ -56,6 +57,7 @@
 @dynamic inTheaters;
 @dynamic fandangoURL;
 @dynamic image;
+@dynamic events;
 
 - (UIImage*)categoryImage {
   if (self.category)

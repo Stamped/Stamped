@@ -9,17 +9,15 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class User, Event;
+@class User;
 
-@interface Comment : NSManagedObject {
-@private
-}
+@interface Comment : NSManagedObject
+
 @property (nonatomic, retain) NSString* blurb;
 @property (nonatomic, retain) NSString* commentID;
 @property (nonatomic, retain) NSString* stampID;
 @property (nonatomic, retain) NSString* restampID;
 @property (nonatomic, retain) NSDate* created;
 @property (nonatomic, retain) User* user;
-@property (nonatomic, retain) Event* event;
 
 @end

@@ -8,17 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@class ActivityCreditCellView;
 @class Event;
 
-@interface ActivityCreditTableViewCell : UITableViewCell {
- @private
-  ActivityCreditCellView* customView_;
-}
+@interface ActivityCreditTableViewCell : UITableViewCell
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
 @property (nonatomic, retain) Event* event;
-@property (nonatomic, readonly) UIImageView* tooltipImageView;
 
 @end

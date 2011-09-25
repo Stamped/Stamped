@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+@class Event;
 @class Favorite;
 @class Stamp;
 
@@ -45,6 +46,7 @@ typedef enum {
 @property (nonatomic, retain) NSString* director;
 @property (nonatomic, retain) NSString* year;
 @property (nonatomic, retain) NSSet* stamps;
+@property (nonatomic, retain) NSSet* events;
 @property (nonatomic, retain) NSString* phone;
 @property (nonatomic, retain) Favorite* favorite;
 @property (nonatomic, retain) NSString* hours;

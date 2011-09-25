@@ -22,7 +22,7 @@
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
 
-static NSString* const kActivityLookupPath = @"/temp/activity.json";
+static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 @interface ActivityViewController ()
 - (void)loadEventsFromDataStore;
@@ -135,9 +135,9 @@ static NSString* const kActivityLookupPath = @"/temp/activity.json";
   if ([event.genre isEqualToString:@"comment"] ||
       [event.genre isEqualToString:@"reply"] ||
       [event.genre isEqualToString:@"mention"]) {
-    CGSize stringSize = [event.comment.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
-                                        constrainedToSize:CGSizeMake(210, MAXFLOAT)
-                                            lineBreakMode:UILineBreakModeWordWrap];
+    CGSize stringSize = [event.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
+                                constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                    lineBreakMode:UILineBreakModeWordWrap];
     return fmaxf(60.0, stringSize.height + 40);
   }
 

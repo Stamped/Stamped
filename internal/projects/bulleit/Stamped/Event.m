@@ -7,7 +7,7 @@
 //
 
 #import "Event.h"
-#import "Comment.h"
+#import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
 
@@ -15,9 +15,13 @@
 
 @dynamic created;
 @dynamic genre;
-@dynamic comment;
+@dynamic URL;
+@dynamic blurb;
+@dynamic benefit;
+@dynamic subject;
 @dynamic eventID;
 @dynamic stamp;
 @dynamic user;
+@dynamic entityObject;
 
 @end

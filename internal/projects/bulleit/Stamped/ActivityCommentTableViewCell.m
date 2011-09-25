@@ -128,10 +128,10 @@ static const CGFloat kBadgeSize = 21.0;
     badgeImageView_.image = [UIImage imageNamed:@"activity_chat_badge"];
   }
   
-  textLabel_.text = event.comment.blurb;
-  CGSize stringSize = [event.comment.blurb sizeWithFont:textLabel_.font
-                                      constrainedToSize:CGSizeMake(210, MAXFLOAT)
-                                          lineBreakMode:UILineBreakModeWordWrap];
+  textLabel_.text = event.blurb;
+  CGSize stringSize = [event.blurb sizeWithFont:textLabel_.font
+                              constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                  lineBreakMode:UILineBreakModeWordWrap];
   CGRect textFrame = textLabel_.frame;
   textFrame.size = stringSize;
   textLabel_.frame = textFrame;
