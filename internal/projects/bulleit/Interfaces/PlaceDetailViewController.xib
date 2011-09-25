@@ -53,6 +53,7 @@
 						<string key="NSFrame">{{150, 208}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -146,6 +147,10 @@
 								<int key="IBUIContentMode">4</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<object class="NSCustomResource" key="IBUIImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">cat_icon_food_large.png</string>
+								</object>
 							</object>
 							<object class="IBUIView" id="728574616">
 								<reference key="NSNextResponder" ref="1016267558"/>
@@ -1028,6 +1033,7 @@
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>call_action_button_bg@2x.png</string>
+				<string>cat_icon_food_large.png</string>
 				<string>logo_opentable.png</string>
 				<string>main_action_button_bg@2x.png</string>
 				<string>map_inner_shadow.png</string>
@@ -1036,6 +1042,7 @@
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{23, 50}</string>
+				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{11, 50}</string>
 				<string>{16, 16}</string>

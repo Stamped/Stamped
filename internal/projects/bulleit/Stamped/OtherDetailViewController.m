@@ -49,7 +49,6 @@
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_other_0"];
   if (dataLoaded_ && !annotation_)
     [self addAnnotation];
 }

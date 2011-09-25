@@ -138,10 +138,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   backgroundGradient.frame = self.view.bounds;
   [self.view.layer insertSublayer:backgroundGradient atIndex:0];
   [backgroundGradient release];
-  titleLabel_.text = entityObject_.title;
+
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
   titleLabel_.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
-  categoryImageView_.image = entityObject_.categoryImage;
+  if (entityObject_) {
+    titleLabel_.text = entityObject_.title;
+  } else if (searchResult_) {
+    titleLabel_.text = searchResult_.title;
+  }
   descriptionLabel_.text = nil;
   descriptionLabel_.textColor = [UIColor stampedGrayColor];
   mainActionButton_.layer.masksToBounds = YES;

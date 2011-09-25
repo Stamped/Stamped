@@ -51,7 +51,6 @@
   openTableImageView_.hidden = YES;
   callActionButton_.hidden = YES;
   callActionLabel_.hidden = YES;
-  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_food_0"];
 }
 
 - (void)viewDidAppear:(BOOL)animated {

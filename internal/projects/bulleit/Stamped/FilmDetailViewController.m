@@ -107,7 +107,6 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_film_0"];
   self.affiliateLogoView.image = [UIImage imageNamed:@"logo_fandango"];
   
   self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);

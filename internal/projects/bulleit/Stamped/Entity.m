@@ -57,7 +57,6 @@
 @dynamic fandangoURL;
 @dynamic image;
 
-
 - (UIImage*)categoryImage {
   if (self.category)
     return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
