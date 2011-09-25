@@ -33,7 +33,8 @@ from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 
-EARNED_CREDIT_MULTIPLIER = 2
+CREDIT_BENEFIT  = 2 # Per credit
+LIKE_BENEFIT    = 1 # Per 5 stamps
 
 class StampedAPI(AStampedAPI):
     """
@@ -131,8 +132,8 @@ class StampedAPI(AStampedAPI):
             activity                = Activity()
             ### TODO: What genre are we picking for this activity item?
             activity.genre              = 'invite_sent'
-            activity.user_id            = invite['user_id']
-            activity.link_user_id       = invite['user_id']
+            activity.user.user_id       = invite['user_id']
+            activity.linked_user_id     = invite['user_id']
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity([account.user_id], activity)
@@ -141,8 +142,8 @@ class StampedAPI(AStampedAPI):
             activity                = Activity()
             ### TODO: What genre are we picking for this activity item?
             activity.genre              = 'invite_received'
-            activity.user_id            = account.user_id
-            activity.link_user_id       = account.user_id
+            activity.user.user_id       = account.user_id
+            activity.linked_user_id     = account.user_id
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity(invitedBy.keys(), activity)
@@ -432,8 +433,8 @@ class StampedAPI(AStampedAPI):
         if self._activity == True:
             activity                    = Activity()
             activity.genre              = 'follower'
-            activity.user_id            = authUserId
-            activity.link_user_id       = authUserId
+            activity.user.user_id       = authUserId
+            activity.linked_user_id     = authUserId
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity(user.user_id, activity)
@@ -1064,10 +1065,10 @@ class StampedAPI(AStampedAPI):
                     'increment': -1}))
 
                 self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
-                    None, increment=EARNED_CREDIT_MULTIPLIER)
+                    None, increment=CREDIT_BENEFIT)
                 self._rollback.append((self._userDB.updateUserStats, \
                     {'userId': item.user_id, 'stat': 'num_stamps_left', \
-                    'increment': -EARNED_CREDIT_MULTIPLIER}))
+                    'increment': -CREDIT_BENEFIT}))
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -1075,10 +1076,11 @@ class StampedAPI(AStampedAPI):
         if self._activity == True and len(creditedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'restamp'
-            activity.user_id            = user.user_id
+            activity.user.user_id       = user.user_id
             activity.subject            = stamp.entity.title
-            activity.link_stamp_id      = stamp.stamp_id
+            activity.linked_stamp_id    = stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
+            activity.benefit            = CREDIT_BENEFIT
             
             ### TODO: Rollback: Remove activity
             self._activityDB.addActivity(creditedUserIds, activity)
@@ -1101,10 +1103,10 @@ class StampedAPI(AStampedAPI):
             if len(mentionedUserIds) > 0:
                 activity                    = Activity()
                 activity.genre              = 'mention'
-                activity.user_id            = user.user_id
+                activity.user.user_id       = user.user_id
                 activity.subject            = stamp.entity.title
                 activity.blurb              = stamp.blurb
-                activity.link_stamp_id      = stamp.stamp_id
+                activity.linked_stamp_id    = stamp.stamp_id
                 activity.timestamp.created  = datetime.utcnow()
                 
                 ### TODO: Rollback: Remove activity
@@ -1242,7 +1244,7 @@ class StampedAPI(AStampedAPI):
                 self._userDB.updateUserStats(item.user_id, 'num_credits', \
                     None, increment=1)
                 self._userDB.updateUserStats(item.user_id, 'num_stamps_left', \
-                    None, increment=EARNED_CREDIT_MULTIPLIER)
+                    None, increment=CREDIT_BENEFIT)
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -1250,10 +1252,11 @@ class StampedAPI(AStampedAPI):
         if self._activity == True and len(creditedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'restamp'
-            activity.user_id            = user.user_id
+            activity.user.user_id       = user.user_id
             activity.subject            = stamp.entity.title
-            activity.link_stamp_id      = stamp.stamp_id
+            activity.linked_stamp_id    = stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
+            activity.benefit            = CREDIT_BENEFIT
             
             self._activityDB.addActivity(creditedUserIds, activity)
         
@@ -1275,10 +1278,10 @@ class StampedAPI(AStampedAPI):
             if len(mentionedUserIds) > 0:
                 activity                    = Activity()
                 activity.genre              = 'mention'
-                activity.user_id            = user.user_id
+                activity.user.user_id       = user.user_id
                 activity.subject            = stamp.entity.title
                 activity.blurb              = stamp.blurb
-                activity.link_stamp_id      = stamp.stamp_id
+                activity.linked_stamp_id    = stamp.stamp_id
                 activity.timestamp.created  = datetime.utcnow()
 
                 self._activityDB.addActivity(mentionedUserIds, activity)
@@ -1454,11 +1457,11 @@ class StampedAPI(AStampedAPI):
             if len(mentionedUserIds) > 0:
                 activity                    = Activity()
                 activity.genre              = 'mention'
-                activity.user_id            = user.user_id
+                activity.user.user_id       = user.user_id
                 activity.subject            = stamp.entity.title
                 activity.blurb              = comment.blurb
-                activity.link_stamp_id      = stamp.stamp_id
-                activity.link_comment_id    = comment.comment_id
+                activity.linked_stamp_id    = stamp.stamp_id
+                activity.linked_comment_id  = comment.comment_id
                 activity.timestamp.created  = datetime.utcnow()
 
                 ### TODO: Rollback: Remove Activity
@@ -1472,11 +1475,11 @@ class StampedAPI(AStampedAPI):
         if len(commentedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'comment'
-            activity.user_id            = user.user_id
+            activity.user.user_id       = user.user_id
             activity.subject            = stamp.entity.title
             activity.blurb              = comment.blurb
-            activity.link_stamp_id      = stamp.stamp_id
-            activity.link_comment_id    = comment.comment_id
+            activity.linked_stamp_id    = stamp.stamp_id
+            activity.linked_comment_id  = comment.comment_id
             activity.timestamp.created  = datetime.utcnow()
             
             ### TODO: Rollback: Remove Activity
@@ -1505,11 +1508,11 @@ class StampedAPI(AStampedAPI):
         if len(repliedUserIds) > 0:
             activity                    = Activity()
             activity.genre              = 'reply'
-            activity.user_id            = user.user_id
+            activity.user.user_id       = user.user_id
             activity.subject            = stamp.entity.title
             activity.blurb              = comment.blurb
-            activity.link_stamp_id      = stamp.stamp_id
-            activity.link_comment_id    = comment.comment_id
+            activity.linked_stamp_id    = stamp.stamp_id
+            activity.linked_comment_id  = comment.comment_id
             activity.timestamp.created  = datetime.utcnow()
 
             ### TODO: Rollback: Remove Activity
@@ -1662,23 +1665,29 @@ class StampedAPI(AStampedAPI):
         stamp.is_liked = True
 
         # Give credit once at five likes
+        benefit = False
         if stamp.num_likes >= 5 and not stamp.like_threshold_hit:
+            benefit = True
+
             # Update stamp stats
             self._stampDB.giveLikeCredit(stamp.stamp_id)
             stamp.like_threshold_hit = True
 
             # Update user stats with new credit
             self._userDB.updateUserStats( \
-                stamp.user_id, 'num_stamps_left', increment=1)
+                stamp.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
 
         # Add activity for stamp owner (if not self)
         if self._activity == True and stamp.user_id != authUserId:
             activity                    = Activity()
             activity.genre              = 'like'
-            activity.user_id            = authUserId
+            activity.user.user_id       = authUserId
             activity.subject            = stamp.entity.title
-            activity.link_stamp_id      = stamp.stamp_id
+            activity.linked_stamp_id    = stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
+
+            if benefit:
+                activity.benefit        = LIKE_BENEFIT
 
             self._activityDB.addActivity(stamp.user_id, activity)
 
@@ -1902,9 +1911,9 @@ class StampedAPI(AStampedAPI):
             and favorite.stamp.user_id != authUserId:
             activity                    = Activity()
             activity.genre              = 'favorite'
-            activity.user_id            = authUserId
+            activity.user.user_id       = authUserId
             activity.subject            = favorite.stamp.entity.title
-            activity.link_stamp_id      = favorite.stamp.stamp_id
+            activity.linked_stamp_id    = favorite.stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
 
             self._activityDB.addActivity(favorite.stamp.user_id, activity)
@@ -2015,19 +2024,36 @@ class StampedAPI(AStampedAPI):
 
         # Append user objects
         userIds = {}
+        stampIds = {}
         for item in activityData:
             if item.user.user_id != None:
                 userIds[item.user.user_id] = 1
+            if item.linked_user_id != None:
+                userIds[item.linked_user_id] = 1
+            if item.linked_stamp_id != None:
+                stampIds[item.linked_stamp_id] = 1
 
+        # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
 
         for user in users:
-            userIds[user.user_id] = user.exportSchema(UserMini())
+            userIds[str(user.user_id)] = user.exportSchema(UserMini())
+
+        # Enrich stamps
+        stamps = self._stampDB.getStamps(stampIds.keys())
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
+
+        for stamp in stamps:
+            stampIds[str(stamp.stamp_id)] = stamp
 
         activity = []
         for item in activityData:
             if item.user.user_id != None:
                 item.user = userIds[item.user.user_id]
+            if item.linked_user_id != None:
+                item.linked_user = userIds[item.linked_user_id]
+            if item.linked_stamp_id != None:
+                item.linked_stamp = stampIds[item.linked_stamp_id]
             activity.append(item)
         
         return activity

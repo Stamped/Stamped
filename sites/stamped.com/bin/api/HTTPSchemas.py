@@ -839,15 +839,16 @@ class HTTPActivity(Schema):
     def setSchema(self):
         self.activity_id        = SchemaElement(basestring, required=True)
         self.genre              = SchemaElement(basestring, required=True)
-        self.user               = HTTPUserMini(required=True)
+        self.user               = HTTPUserMini()
         self.image              = SchemaElement(basestring)
         self.subject            = SchemaElement(basestring)
         self.blurb              = SchemaElement(basestring)
-        self.link_user_id       = SchemaElement(basestring)
-        self.link_stamp_id      = SchemaElement(basestring)
-        self.link_entity_id     = SchemaElement(basestring)
-        self.link_url           = SchemaElement(basestring)
+        self.linked_user        = HTTPUserMini()
+        self.linked_stamp       = HTTPStamp()
+        self.linked_entity      = HTTPEntity()
+        self.linked_url         = SchemaElement(basestring)
         self.created            = SchemaElement(basestring)
+        self.benefit            = SchemaElement(int)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Activity':
@@ -857,14 +858,14 @@ class HTTPActivity(Schema):
 
             self.importData(data, overflow=True)
             
-            if schema.link_stamp_id != None:
-                self.link_stamp_id = schema.link_stamp_id
-            elif schema.link_user_id != None:
-                self.link_user_id = schema.link_user_id
-            elif schema.link_entity_id != None:
-                self.link_entity_id = schema.link_entity_id
-            elif schema.link_url != None:
-                self.link_url = schema.link_url
+            if schema.linked_stamp != None:
+                self.linked_stamp = HTTPStamp().importSchema(schema.linked_stamp).value
+            elif schema.linked_user != None:
+                self.linked_user = HTTPUserMini().importSchema(schema.linked_user).value
+            elif schema.linked_entity != None:
+                self.linked_entity = HTTPEntity().importSchema(schema.linked_entity).value
+            elif schema.linked_url != None:
+                self.linked_url = schema.linked_url
 
             self.created = schema.timestamp.created
         else:

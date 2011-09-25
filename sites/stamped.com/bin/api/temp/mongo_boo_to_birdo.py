@@ -29,6 +29,8 @@ def main():
 
         print 
 
+    convertStamps()
+
 
 def mongoExportImport(collection):
 
@@ -57,6 +59,56 @@ def mongoImportJSON(collection):
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
 
+def convertStamps():
+    activity_collection = new_database['activity']
+    activity = activity_collection.find()
+
+    for item in activity:
+
+        if 'link_stamp_id' in item['link']:
+            activity_collection.update(
+                {'_id': item['_id']},
+                {
+                    '$set': {'link.linked_stamp_id': item['link']['link_stamp_id']},
+                    '$unset': {'link.link_stamp_id': 1}
+                }
+            )
+
+        if 'link_user_id' in item['link']:
+            activity_collection.update(
+                {'_id': item['_id']},
+                {
+                    '$set': {'link.linked_user_id': item['link']['link_user_id']},
+                    '$unset': {'link.link_user_id': 1}
+                }
+            )
+
+        if 'link_entity_id' in item['link']:
+            activity_collection.update(
+                {'_id': item['_id']},
+                {
+                    '$set': {'link.linked_entity_id': item['link']['link_entity_id']},
+                    '$unset': {'link.link_entity_id': 1}
+                }
+            )
+
+        if 'link_comment_id' in item['link']:
+            activity_collection.update(
+                {'_id': item['_id']},
+                {
+                    '$set': {'link.linked_comment_id': item['link']['link_comment_id']},
+                    '$unset': {'link.link_comment_id': 1}
+                }
+            )
+
+        if 'link_url' in item['link']:
+            activity_collection.update(
+                {'_id': item['_id']},
+                {
+                    '$set': {'link.linked_url': item['link']['link_url']},
+                    '$unset': {'link.link_url': 1}
+                }
+            )
 
 if __name__ == '__main__':  
     main()

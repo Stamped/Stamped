@@ -257,14 +257,19 @@ class Activity(Schema):
         self.blurb              = SchemaElement(basestring)
         self.link               = ActivityLink()
         self.timestamp          = TimestampSchema()
+        self.benefit            = SchemaElement(int)
 
 class ActivityLink(Schema):
     def setSchema(self):
-        self.link_user_id       = SchemaElement(basestring)
-        self.link_stamp_id      = SchemaElement(basestring)
-        self.link_entity_id     = SchemaElement(basestring)
-        self.link_comment_id    = SchemaElement(basestring)
-        self.link_url           = SchemaElement(basestring)
+        self.linked_user        = UserMini()
+        self.linked_user_id     = SchemaElement(basestring)
+        self.linked_stamp       = Stamp()
+        self.linked_stamp_id    = SchemaElement(basestring)
+        self.linked_entity      = Entity()
+        self.linked_entity_id   = SchemaElement(basestring)
+        self.linked_comment     = Comment()
+        self.linked_comment_id  = SchemaElement(basestring)
+        self.linked_url         = SchemaElement(basestring)
 
 # ######## #
 # Entities #
