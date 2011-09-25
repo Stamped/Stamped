@@ -509,9 +509,14 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-      stamp_.entityObject.entityID, @"entity_id", nil];
-
+  if (shouldDelete) {
+    objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+        stamp_.entityObject.entityID, @"entity_id", nil];
+  } else {
+    objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+        stamp_.entityObject.entityID, @"entity_id",
+        stamp_.stampID, @"stamp_id", nil];
+  }
   [objectLoader send];
 }
 

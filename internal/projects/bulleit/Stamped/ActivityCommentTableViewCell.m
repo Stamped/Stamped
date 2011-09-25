@@ -107,6 +107,11 @@ static const CGFloat kBadgeSize = 21.0;
   [self invertColors:selected];
 }
 
+- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
+  [super setHighlighted:highlighted animated:animated];
+  [self invertColors:highlighted];
+}
+
 - (void)setEvent:(Event*)event {
   if (event == event_)
     return;
@@ -156,7 +161,6 @@ static const CGFloat kBadgeSize = 21.0;
     {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
   };
   CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSLog(@"Event: %@", event_);
   if (!event_.stamp)
     return nil;
   NSString* entityTitle = event_.stamp.entityObject.title;

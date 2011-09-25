@@ -42,7 +42,6 @@ typedef enum {
 @interface InboxViewController ()
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
-- (void)removeTemporaryStamps;
 - (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)mapButtonWasPressed:(NSNotification*)notification;
@@ -187,26 +186,19 @@ typedef enum {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)removeTemporaryStamps {
-  NSArray* tempStamps = [Stamp objectsWithPredicate:[NSPredicate predicateWithFormat:@"temporary == YES"]];
-  for (Stamp* stamp in tempStamps) {
-    [stamp deleteEntity];
-    [stamp.managedObjectContext save:NULL];
-  }
-}
-
 - (void)loadStampsFromDataStore {
-  [self removeTemporaryStamps];
   self.entitiesArray = nil;
 	NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
   [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
 	NSArray* results = [Stamp objectsWithFetchRequest:request];
-  results = [results valueForKeyPath:@"@distinctUnionOfObjects.entityObject"];
-  descriptor = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@max.created" ascending:NO];
-  self.entitiesArray =
-      [NSMutableArray arrayWithArray:[results sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]]];
+  NSMutableArray* sortedEntities = [NSMutableArray arrayWithCapacity:results.count];
+  for (Stamp* s in results) {
+    if (![sortedEntities containsObject:s.entityObject])
+      [sortedEntities addObject:s.entityObject];
+  }
+  self.entitiesArray = sortedEntities;
   [self filterStamps];
   self.tableView.contentOffset = scrollPosition_;
 }
