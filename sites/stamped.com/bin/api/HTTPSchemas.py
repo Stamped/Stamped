@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, urllib, urlparse, re, logs
+import copy, urllib, urlparse, re, logs, string
 from datetime import datetime, date
 from schema import *
 from Schemas import *
@@ -416,7 +416,7 @@ class HTTPEntity(Schema):
                 self.rating         = schema.mpaa_rating
                 
                 if schema.ngenres is not None:
-                    self.genre = strings.joinfields(schema.ngenres, '; ')
+                    self.genre = string.join(schema.ngenres, '; ')
                 
                 if schema.short_description != None:
                     self.desc = schema.short_description
