@@ -636,6 +636,8 @@ class StampedAPI(AStampedAPI):
 
         if searchId != None and searchId.startswith('T_'):
             return self._convertSearchId(searchId)
+        if not entityId:
+            entityId = searchId
         return self._entityDB.getEntity(entityId)
     
     def addEntity(self, entity):
