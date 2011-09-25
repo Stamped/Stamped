@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, urllib, urlparse, re, logs
+import copy, urllib, urlparse, re, logs, string
 from datetime import datetime, date
 from schema import *
 from Schemas import *
