@@ -77,7 +77,10 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         result = self._collection.update(query, activity, upsert=True, safe=True)
         if 'upserted' in result:
             activity_id = self._getStringFromObjectId(result['upserted'])
-        
+            if not isinstance(recipientIds, list):
+                msg = 'Must pass recipients as list'
+                logs.warning(msg)
+                raise Exception(msg)
             for userId in recipientIds:
                 self.user_activity_collection.addUserActivity(userId, \
                     activity_id)
