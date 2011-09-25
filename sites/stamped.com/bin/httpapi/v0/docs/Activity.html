@@ -209,8 +209,9 @@ figcaption:hover {background:rgba(0,0,0,.56);color:rgba(255,255,255,1);}
 <li><strong>image</strong>: The image to use in the activity cell. This should only apply for <em>custom</em> types.</li>
 <li><strong>subject</strong>: The subject of the activity. This will most likely be the entity title (for a stamp, a comment on a stamp, etc.) and should be used as such in any templates. In the event of a <em>custom</em> activity item, this will be the entire field.</li>
 <li><strong>blurb</strong>: The main body of the activity cell. This will often be the comment text or the stamp blurb. Different templates should treat this field differently.</li>
-<li><strong>links</strong>: Links to various ids. This is actually four separate fields: <strong>link_user_id</strong>, <strong>link_stamp_id</strong>, <strong>link_entity_id</strong>, and <strong>link_url</strong>. This link dictates where (if anywhere) tapping on the cell should take the user.</li>
-<li><strong>created</strong>: The timestamp of the activity item. Note that this may not match the timestamp of the underlying item, e.g. the timestamp of the activity item for a comment will be slightly delayed from the timestamp on the comment itself.</li>
+<li><strong>links</strong>: Links to various objects. This can be one of four types: <strong>linked_user</strong>, <strong>linked_stamp</strong>, <strong>linked_entity</strong>, and <strong>linked_url</strong>. This link dictates where (if anywhere) tapping on the cell should take the user.</li>
+<li><strong>benefit</strong>: An integer describe how many stamps the user earned in the activity item (if applicable).</li>
+<li><strong>created</strong>: The timestamp of the activity item. Note that this may not match the timestamp of the underlying item, e.g. the timestamp of the activity item for a comment may be slightly delayed from the timestamp on the comment itself.</li>
 </ul></li>
 </ul>
 
@@ -238,8 +239,55 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
         &quot;created&quot;: &quot;2011-07-27 16:02:15.394000&quot;, 
         &quot;genre&quot;: &quot;mention&quot;, 
         &quot;blurb&quot;: &quot;Great date spot. Thanks @rmstein!&quot;, 
-        &quot;title&quot;: &quot;Spotted Pig&quot;,
-        &quot;link_stamp_id&quot;: &quot;4e30368732a7ba613b000007&quot;, 
+        &quot;subject&quot;: &quot;Spotted Pig&quot;,
+        &quot;linked_stamp&quot;: {
+            &quot;blurb&quot;: &quot;Best place ever!&quot;, 
+            &quot;entity&quot;: {
+                &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+                &quot;title&quot;: &quot;Spotted Pig&quot;,
+                &quot;subtitle&quot;: &quot;New York, NY&quot;
+                &quot;category&quot;: &quot;food&quot;,
+                &quot;subcategory&quot;: &quot;restaurant&quot;
+                &quot;desc&quot;: &quot;Burger place&quot;,
+                &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+                &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+                &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+                &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+                &quot;phone&quot;: &quot;1235551234&quot;
+            }, 
+            &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;, 
+            &quot;credit&quot;: [
+                {
+                    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+                    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;, 
+                    &quot;screen_name&quot;: &quot;robby&quot;,
+                    &quot;display_name&quot;: &quot;Robby S.&quot;,
+                    &quot;color_primary&quot;: &quot;333333&quot;,
+                    &quot;color_secondary&quot;: &quot;999999&quot;,
+                    &quot;privacy&quot;: false
+                },
+                {
+                    &quot;user_id&quot;: &quot;4e226fcd4e61754161000008&quot;,
+                    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/bart.png&quot;, 
+                    &quot;screen_name&quot;: &quot;bart&quot;,
+                    &quot;display_name&quot;: &quot;Bart S.&quot;,
+                    &quot;color_primary&quot;: &quot;333333&quot;,
+                    &quot;color_secondary&quot;: &quot;999999&quot;,
+                    &quot;privacy&quot;: false
+                }
+            ], 
+            &quot;created&quot;: &quot;2011-07-17 05:14:54.128641&quot;,
+            &quot;user&quot;: {
+                &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+                &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+                &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+                &quot;color_primary&quot;: &quot;333333&quot;,
+                &quot;color_secondary&quot;: &quot;999999&quot;,
+                &quot;screen_name&quot;: &quot;kevin&quot;,
+                &quot;privacy&quot;: false
+            }
+            &quot;num_comments&quot;: 0
+        }, 
         &quot;user&quot;: {
             &quot;color_primary&quot;: &quot;333333&quot;, 
             &quot;color_secondary&quot;: &quot;999999&quot;, 
@@ -256,7 +304,54 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
         &quot;subject&quot;: &quot;Spotted Pig&quot;,
         &quot;created&quot;: &quot;2011-07-27 16:02:14.203000&quot;, 
         &quot;genre&quot;: &quot;comment&quot;, 
-        &quot;link_stamp_id&quot;: &quot;4e30368532a7ba613b000004&quot;, 
+        &quot;linked_stamp&quot;: {
+            &quot;blurb&quot;: &quot;Best place ever!&quot;, 
+            &quot;entity&quot;: {
+                &quot;entity_id&quot;: &quot;4e226ea84e61754161000000&quot;,
+                &quot;title&quot;: &quot;Spotted Pig&quot;,
+                &quot;subtitle&quot;: &quot;New York, NY&quot;
+                &quot;category&quot;: &quot;food&quot;,
+                &quot;subcategory&quot;: &quot;restaurant&quot;
+                &quot;desc&quot;: &quot;Burger place&quot;,
+                &quot;coordinates&quot;: &quot;40.714623,-74.006605&quot;,
+                &quot;address&quot;: &quot;314 West 11th Street New York, NY 10014-2369&quot;,
+                &quot;last_modified&quot;: &quot;2011-07-17 19:03:22.354813&quot;,
+                &quot;opentable_url&quot;: &quot;http://www.opentable.com/reserve/spottedpig&amp;ref=9166&quot;,
+                &quot;phone&quot;: &quot;1235551234&quot;
+            }, 
+            &quot;stamp_id&quot;: &quot;4e226fcd4e18474561000000&quot;, 
+            &quot;credit&quot;: [
+                {
+                    &quot;user_id&quot;: &quot;4e226fcd4e61754161000007&quot;,
+                    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/robby.png&quot;, 
+                    &quot;screen_name&quot;: &quot;robby&quot;,
+                    &quot;display_name&quot;: &quot;Robby S.&quot;,
+                    &quot;color_primary&quot;: &quot;333333&quot;,
+                    &quot;color_secondary&quot;: &quot;999999&quot;,
+                    &quot;privacy&quot;: false
+                },
+                {
+                    &quot;user_id&quot;: &quot;4e226fcd4e61754161000008&quot;,
+                    &quot;profile_image&quot;: &quot;http://img.stamped.com/u/bart.png&quot;, 
+                    &quot;screen_name&quot;: &quot;bart&quot;,
+                    &quot;display_name&quot;: &quot;Bart S.&quot;,
+                    &quot;color_primary&quot;: &quot;333333&quot;,
+                    &quot;color_secondary&quot;: &quot;999999&quot;,
+                    &quot;privacy&quot;: false
+                }
+            ], 
+            &quot;created&quot;: &quot;2011-07-17 05:14:54.128641&quot;,
+            &quot;user&quot;: {
+                &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;, 
+                &quot;profile_image&quot;: &quot;http://img.stamped.com/u/kevin.png&quot;, 
+                &quot;display_name&quot;: &quot;Kevin P.&quot;, 
+                &quot;color_primary&quot;: &quot;333333&quot;,
+                &quot;color_secondary&quot;: &quot;999999&quot;,
+                &quot;screen_name&quot;: &quot;kevin&quot;,
+                &quot;privacy&quot;: false
+            }
+            &quot;num_comments&quot;: 1
+        }, 
         &quot;user&quot;: {
             &quot;color_primary&quot;: &quot;333333&quot;, 
             &quot;color_secondary&quot;: &quot;999999&quot;, 
