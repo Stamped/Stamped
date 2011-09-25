@@ -8,12 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class Event;
+#import "ActivityTableViewCell.h"
 
-@interface ActivityCreditTableViewCell : UITableViewCell
-
-- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
-
-@property (nonatomic, retain) Event* event;
-
+@interface ActivityCreditTableViewCell : ActivityTableViewCell
 @end

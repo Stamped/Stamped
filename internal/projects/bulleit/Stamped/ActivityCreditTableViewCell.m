@@ -13,20 +13,13 @@
 
 #import "AccountManager.h"
 #import "Entity.h"
-#import "Event.h"
 #import "Stamp.h"
 #import "User.h"
-#import "UserImageView.h"
 #import "Util.h"
 #import "UIColor+Stamped.h"
 
 @interface ActivityCreditTableViewCell ()
-- (void)invertColors:(BOOL)inverted;
-- (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color;
 
-@property (nonatomic, readonly) UserImageView* userImageView;
-@property (nonatomic, readonly) UIImageView* disclosureArrowImageView;
-@property (nonatomic, readonly) CATextLayer* headerTextLayer;
 @property (nonatomic, readonly) UILabel* entityTitleLabel;
 @property (nonatomic, readonly) CALayer* firstStampLayer;
 @property (nonatomic, readonly) CALayer* secondStampLayer;
@@ -36,37 +29,16 @@
 
 @implementation ActivityCreditTableViewCell
 
-@synthesize highlighted = highlighted_;
-@synthesize selected = selected_;
-@synthesize userImageView = userImageView_;
-@synthesize headerTextLayer = headerTextLayer_;
 @synthesize entityTitleLabel = entityTitleLabel_;
 @synthesize firstStampLayer = firstStampLayer_;
 @synthesize secondStampLayer = secondStampLayer_;
-@synthesize disclosureArrowImageView = disclosureArrowImageView_;
 @synthesize plusStampsLabel = plusStampsLabel_;
 
-@synthesize event = event_;
-
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
-  self = [super initWithStyle:UITableViewCellStyleDefault
-              reuseIdentifier:reuseIdentifier];
+  self = [super initWithReuseIdentifier:reuseIdentifier];
   if (self) {
-    self.accessoryType = UITableViewCellAccessoryNone;
-    userImageView_ = [[UserImageView alloc] initWithFrame:CGRectMake(15, 10, 41, 41)];
-    [self addSubview:userImageView_];
-    [userImageView_ release];
-    
-    headerTextLayer_ = [[CATextLayer alloc] init];
-    headerTextLayer_.truncationMode = kCATruncationEnd;
-    headerTextLayer_.contentsScale = [[UIScreen mainScreen] scale];
-    headerTextLayer_.fontSize = 12.0;
-    headerTextLayer_.foregroundColor = [UIColor stampedGrayColor].CGColor;
-    headerTextLayer_.frame = CGRectMake(70, 13, 220, 16);
-    headerTextLayer_.actions = [NSDictionary dictionaryWithObjectsAndKeys:[NSNull null], @"contents", nil];
-    [self.contentView.layer addSublayer:headerTextLayer_];
-    [headerTextLayer_ release];
-    
+    userImageView_.frame = CGRectMake(15, 10, 41, 41);
+
     entityTitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 25, 200, 40)];
     entityTitleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27];
     entityTitleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
@@ -84,13 +56,6 @@
     secondStampLayer_.frame = CGRectOffset(firstStampLayer_.frame, CGRectGetWidth(firstStampLayer_.frame) / 2, 0);
     [self.contentView.layer addSublayer:secondStampLayer_];
     [secondStampLayer_ release];
-    UIImage* disclosureImage = [UIImage imageNamed:@"disclosure_arrow"];
-    disclosureArrowImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(290, 33, 8, 11)];
-    disclosureArrowImageView_.contentMode = UIViewContentModeCenter;
-    disclosureArrowImageView_.image = disclosureImage;
-    disclosureArrowImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureImage];
-    [self.contentView addSubview:disclosureArrowImageView_];
-    [disclosureArrowImageView_ release];
     
     plusStampsLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 58, 200, 12)];
     plusStampsLabel_.textColor = [UIColor stampedLightGrayColor];
@@ -102,28 +67,8 @@
   return self;
 }
 
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-  [super setSelected:selected animated:animated];
-  [self invertColors:selected];
-}
-
-- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
-  [super setHighlighted:highlighted animated:animated];
-  [self invertColors:highlighted];
-}
-
-- (void)invertColors:(BOOL)inverted {
-  UIColor* color = inverted ? [UIColor whiteColor] : [UIColor stampedGrayColor];
-  headerTextLayer_.string = [self headerAttributedStringWithColor:color];
-  [self setNeedsDisplayInRect:headerTextLayer_.frame];
-}
-
 - (void)setEvent:(Event*)event {
-  if (event == event_)
-    return;
-  
-  [event_ release];
-  event_ = [event retain];
+  [super setEvent:event];
   if (!event)
     return;
 
@@ -134,7 +79,7 @@
   User* currentUser = [[AccountManager sharedManager] currentUser];
   firstStampLayer_.contents = (id)currentUser.stampImage.CGImage;
   secondStampLayer_.contents = (id)event.user.stampImage.CGImage;
-  plusStampsLabel_.text = [NSString stringWithFormat:@"+%d stamps", event_.benefit.integerValue];
+  plusStampsLabel_.text = [NSString stringWithFormat:@"+%d stamps", event.benefit.integerValue];
 
   CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:27]
                                 forWidth:200
@@ -164,7 +109,7 @@
     {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
   };
   CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* user = event_.user.screenName;
+  NSString* user = self.event.user.screenName;
   NSString* full = [NSString stringWithFormat:@"%@ %@", user, @"gave you credit for"];
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
   [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:

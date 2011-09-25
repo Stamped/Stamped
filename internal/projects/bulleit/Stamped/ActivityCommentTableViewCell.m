@@ -12,9 +12,6 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
-#import "UserImageView.h"
-#import "Event.h"
-#import "Comment.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
@@ -24,38 +21,23 @@
 static const CGFloat kBadgeSize = 21.0;
 
 @interface ActivityCommentTableViewCell ()
-- (void)invertColors:(BOOL)inverted;
-- (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color;
 
-@property (nonatomic, readonly) UserImageView* userImageView;
 @property (nonatomic, readonly) UILabel* mainLabel;
 @property (nonatomic, readonly) UIImageView* badgeImageView;
-@property (nonatomic, readonly) UIImageView* disclosureArrowImageView;
-@property (nonatomic, readonly) CATextLayer* headerTextLayer;
 @property (nonatomic, readonly) UILabel* textLabel;
 @end
 
 @implementation ActivityCommentTableViewCell
 
-@synthesize userImageView = userImageView_;
 @synthesize mainLabel = mainLabel_;
 @synthesize badgeImageView = badgeImageView_;
-@synthesize disclosureArrowImageView = disclosureArrowImageView_;
-@synthesize headerTextLayer = headerTextLayer_;
 @synthesize textLabel = textLabel_;
 
-@synthesize event = event_;
-
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
-  self = [super initWithStyle:UITableViewCellStyleDefault
-              reuseIdentifier:reuseIdentifier];
-  if (self) {
-    self.accessoryType = UITableViewCellAccessoryNone;
-    
-    userImageView_ = [[UserImageView alloc] initWithFrame:CGRectMake(15, 10, 33, 33)];
-    userImageView_.backgroundColor = [UIColor whiteColor];
-    [self.contentView addSubview:userImageView_];
-    [userImageView_ release];
+  self = [super initWithReuseIdentifier:reuseIdentifier];
+  if (self) {    
+    userImageView_.frame = CGRectMake(15, 10, 33, 33);
+
     CGRect badgeFrame = CGRectMake(CGRectGetMaxX(userImageView_.frame) - kBadgeSize + 10,
                                    CGRectGetMaxY(userImageView_.frame) - kBadgeSize + 6,
                                    kBadgeSize, kBadgeSize);
@@ -63,18 +45,7 @@ static const CGFloat kBadgeSize = 21.0;
     badgeImageView_.contentMode = UIViewContentModeCenter;
     [self.contentView addSubview:badgeImageView_];
     [badgeImageView_ release];
-    
-    headerTextLayer_ = [[CATextLayer alloc] init];
-    headerTextLayer_.truncationMode = kCATruncationEnd;
-    headerTextLayer_.contentsScale = [[UIScreen mainScreen] scale];
-    headerTextLayer_.fontSize = 12.0;
-    headerTextLayer_.foregroundColor = [UIColor stampedGrayColor].CGColor;
-    headerTextLayer_.frame = CGRectMake(70, 13, 210, 16);
-    headerTextLayer_.actions = [NSDictionary dictionaryWithObject:[NSNull null]
-                                                           forKey:@"contents"];
-    [self.contentView.layer addSublayer:headerTextLayer_];
-    [headerTextLayer_ release];
-    
+
     textLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 27, 210, 20)];
     textLabel_.numberOfLines = 0;
     textLabel_.backgroundColor = [UIColor clearColor];
@@ -84,40 +55,12 @@ static const CGFloat kBadgeSize = 21.0;
     textLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
     [self.contentView addSubview:textLabel_];
     [textLabel_ release];
-    
-    UIImage* disclosureImage = [UIImage imageNamed:@"disclosure_arrow"];
-    disclosureArrowImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(290, 24, 8, 11)];
-    disclosureArrowImageView_.contentMode = UIViewContentModeCenter;
-    disclosureArrowImageView_.image = disclosureImage;
-    disclosureArrowImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureImage];
-    [self.contentView addSubview:disclosureArrowImageView_];
-    [disclosureArrowImageView_ release];
   }
   return self;
 }
 
-- (void)invertColors:(BOOL)inverted {
-  UIColor* color = inverted ? [UIColor whiteColor] : [UIColor stampedGrayColor];
-  headerTextLayer_.string = [self headerAttributedStringWithColor:color];
-  [self setNeedsDisplayInRect:headerTextLayer_.frame];
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-  [super setSelected:selected animated:animated];
-  [self invertColors:selected];
-}
-
-- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
-  [super setHighlighted:highlighted animated:animated];
-  [self invertColors:highlighted];
-}
-
 - (void)setEvent:(Event*)event {
-  if (event == event_)
-    return;
-
-  [event_ release];
-  event_ = [event retain];
+  [super setEvent:event];
   if (!event)
     return;
 
@@ -140,17 +83,17 @@ static const CGFloat kBadgeSize = 21.0;
 - (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color {
   NSString* user = @"";
   User* currentUser = [[AccountManager sharedManager] currentUser];
-  if ([event_.user.userID isEqualToString:currentUser.userID]) {
+  if ([self.event.user.userID isEqualToString:currentUser.userID]) {
     user = @"You";
   } else {
-    user = event_.user.screenName;
+    user = self.event.user.screenName;
   }
   NSString* actionString = @"";
-  if ([event_.genre isEqualToString:@"reply"]) {
+  if ([self.event.genre isEqualToString:@"reply"]) {
     actionString = @"replied on";
-  } else if ([event_.genre isEqualToString:@"comment"]) {
+  } else if ([self.event.genre isEqualToString:@"comment"]) {
     actionString = @"commented on";
-  } else if ([event_.genre isEqualToString:@"mention"]) {
+  } else if ([self.event.genre isEqualToString:@"mention"]) {
     actionString = @"mentioned you on";
   }
 
@@ -161,9 +104,9 @@ static const CGFloat kBadgeSize = 21.0;
     {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
   };
   CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  if (!event_.stamp)
+  if (!self.event.stamp)
     return nil;
-  NSString* entityTitle = event_.stamp.entityObject.title;
+  NSString* entityTitle = self.event.stamp.entityObject.title;
   NSString* full = [NSString stringWithFormat:@"%@ %@ %@", user, actionString, entityTitle];
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
   [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:

@@ -8,12 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class Event;
+#import "ActivityTableViewCell.h"
 
-@interface ActivityCommentTableViewCell : UITableViewCell
-
-- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
-
-@property (nonatomic, retain) Event* event;
-
+@interface ActivityCommentTableViewCell : ActivityTableViewCell
 @end
