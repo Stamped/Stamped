@@ -23,6 +23,8 @@
 - (IBAction)reservationButtonPressed:(id)sender;
 - (IBAction)callButtonPressed:(id)sender;
 
+@property (nonatomic, retain) IBOutlet UILabel* openTableLabel;
+@property (nonatomic, retain) IBOutlet UIImageView* openTableImageView;
 @property (nonatomic, retain) IBOutlet UIButton* callActionButton;
 @property (nonatomic, retain) IBOutlet UILabel* callActionLabel;
 @property (nonatomic, retain) IBOutlet MKMapView* mapView;

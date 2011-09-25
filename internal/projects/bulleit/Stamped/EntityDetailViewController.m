@@ -185,6 +185,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
+  NSLog(@"Entity response: %@", objectLoader.response.bodyAsString);
   dataLoaded_ = YES;
   [entityObject_ release];
   entityObject_ = [(Entity*)object retain];

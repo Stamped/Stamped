@@ -13,6 +13,7 @@
 
 #import "Entity.h"
 #import "STPlaceAnnotation.h"
+#import "Util.h"
 
 @interface PlaceDetailViewController ()
 - (void)confirmCall;
@@ -26,6 +27,8 @@
 
 @synthesize callActionButton = callActionButton_;
 @synthesize callActionLabel = callActionLabel_;
+@synthesize openTableLabel = openTableLabel_;
+@synthesize openTableImageView = openTableImageView_;
 @synthesize mapView = mapView_;
 @synthesize mapContainerView = mapContainerView_;
 
@@ -44,6 +47,8 @@
   self.mainActionButton.hidden = YES;
   self.mainActionLabel.hidden = YES;
   self.mainActionsView.hidden = YES;
+  openTableLabel_.hidden = YES;
+  openTableImageView_.hidden = YES;
   callActionButton_.hidden = YES;
   callActionLabel_.hidden = YES;
   self.categoryImageView.image = [UIImage imageNamed:@"sort_icon_food_0"];
@@ -88,6 +93,8 @@
   self.mainContentView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
+  self.openTableImageView = nil;
+  self.openTableLabel = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
 }
@@ -97,6 +104,8 @@
   self.mainContentView = nil;
   self.callActionButton = nil;
   self.callActionLabel = nil;
+  self.openTableImageView = nil;
+  self.openTableLabel = nil;
   self.mapView.delegate = nil;
   self.mapView = nil;
   [super dealloc];
@@ -114,7 +123,7 @@
 
 - (void)confirmCall {
   UIAlertView* alert = [[UIAlertView alloc] init];
-	[alert setTitle:[entityObject_ localizedPhoneNumber]];
+	[alert setTitle:entityObject_.phone];
 	[alert setDelegate:self];
 	[alert addButtonWithTitle:@"Cancel"];
 	[alert addButtonWithTitle:@"Call"];
@@ -124,11 +133,11 @@
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if (buttonIndex == 1) {
-    NSString* telURL = [NSString stringWithFormat:@"tel://%i", entityObject_.phone];
+    NSString* telURL = [NSString stringWithFormat:@"tel://%@",
+        [Util sanitizedPhoneNumberFromString:entityObject_.phone]];
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
   }
 }
-
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
@@ -139,18 +148,29 @@
   
   if (entityObject_.openTableURL) {
     self.mainActionButton.hidden = NO;
-    self.mainActionLabel.hidden  = NO;
-    self.mainActionsView.hidden  = NO;
-  }
-  
-  if (entityObject_.localizedPhoneNumber) {  
-    callActionLabel_.text = entityObject_.localizedPhoneNumber;
-    callActionButton_.hidden    = NO;
-    callActionLabel_.hidden     = NO;
+    self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
+    openTableImageView_.hidden = NO;
+    openTableLabel_.hidden = NO;
   }
 
-  if (!entityObject_.openTableURL && (!entityObject_.phone || entityObject_.phone.intValue == 0) ) {
+  if (entityObject_.phone) {
+    callActionLabel_.text = entityObject_.phone;
+    callActionButton_.hidden = NO;
+    callActionLabel_.hidden = NO;
+    self.mainActionsView.hidden = NO;
+    if (!entityObject_.openTableURL) {
+      callActionLabel_.frame = CGRectOffset(callActionLabel_.frame, -150, 0);
+      callActionButton_.frame = CGRectOffset(callActionButton_.frame, -150, 0);
+      CGRect mainActionsFrame = self.mainActionsView.frame;
+      mainActionsFrame.size.height -= 13;
+      self.mainActionsView.frame = mainActionsFrame;
+      mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -13);
+      self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -13);
+    }
+  }
+
+  if (!entityObject_.openTableURL && !entityObject_.phone) {
     mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }

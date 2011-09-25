@@ -13,6 +13,7 @@
 
 #import "Entity.h"
 #import "STPlaceAnnotation.h"
+#import "Util.h"
 
 @interface OtherDetailViewController ()
 - (void)confirmCall;
@@ -40,8 +41,6 @@
 }
 
 - (void)viewDidLoad {
-  self.mainActionButton.hidden = YES;
-  self.mainActionLabel.hidden = YES;
   self.mainActionsView.hidden = YES;
   callActionButton_.hidden = YES;
   callActionLabel_.hidden = YES;
@@ -103,17 +102,13 @@
 
 #pragma mark - Actions
 
-- (IBAction)reservationButtonPressed:(id)sender {
-  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:entityObject_.openTableURL]];
-}
-
 - (IBAction)callButtonPressed:(id)sender {
   [self confirmCall];
 }
 
 - (void)confirmCall {
   UIAlertView* alert = [[UIAlertView alloc] init];
-	[alert setTitle:[entityObject_ localizedPhoneNumber]];
+	[alert setTitle:entityObject_.phone];
 	[alert setDelegate:self];
 	[alert addButtonWithTitle:@"Cancel"];
 	[alert addButtonWithTitle:@"Call"];
@@ -123,11 +118,11 @@
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if (buttonIndex == 1) {
-    NSString* telURL = [NSString stringWithFormat:@"tel://%i", entityObject_.phone];
+    NSString* telURL = [NSString stringWithFormat:@"tel://%i",
+        [Util sanitizedPhoneNumberFromString:entityObject_.phone]];
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
   }
 }
-
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
@@ -136,31 +131,24 @@
   callActionButton_.layer.cornerRadius = 2.0;
   callActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
   
-  if (entityObject_.openTableURL) {
-    self.mainActionButton.hidden = NO;
-    self.mainActionLabel.hidden = NO;
-    self.mainActionsView.hidden = NO;
-  }
-  
-  if (entityObject_.localizedPhoneNumber) {  
-    callActionLabel_.text = entityObject_.localizedPhoneNumber;
+  if (entityObject_.phone) {  
+    callActionLabel_.text = entityObject_.phone;
     callActionButton_.hidden = NO;
     callActionLabel_.hidden = NO;
     self.mainActionsView.hidden = NO;
   }
 
-  if (!entityObject_.openTableURL && (!entityObject_.phone || entityObject_.phone.intValue == 0) ) {
+  // TODO(andybons): Will there EVER be a phone property for Other category?
+  if (!entityObject_.phone) {
     mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }  
-  
 }
-
 
 - (void)setupMapView {
   if (!entityObject_.coordinates)
     return;
-  
+
   NSArray* coordinates = [entityObject_.coordinates componentsSeparatedByString:@","]; 
   latitude_ = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   longitude_ = [(NSString*)[coordinates objectAtIndex:1] floatValue];

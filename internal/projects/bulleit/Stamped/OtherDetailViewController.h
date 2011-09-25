@@ -8,7 +8,6 @@
 
 #import "EntityDetailViewController.h"
 
-
 #import <MapKit/MapKit.h>
 
 @class STPlaceAnnotation;
@@ -20,7 +19,6 @@
   CLLocationDegrees longitude_;
 }
 
-- (IBAction)reservationButtonPressed:(id)sender;
 - (IBAction)callButtonPressed:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIButton* callActionButton;

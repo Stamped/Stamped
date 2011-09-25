@@ -46,4 +46,6 @@ extern NSString* const kKeychainTwitterToken;
 
 + (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject;
 + (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult;
+
++ (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum;
 @end

@@ -38,7 +38,7 @@
         <attribute name="length" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
         <attribute name="neighborhood" optional="YES" attributeType="String"/>
         <attribute name="openTableURL" optional="YES" attributeType="String"/>
-        <attribute name="phone" optional="YES" attributeType="Integer 64" defaultValueString="0"/>
+        <attribute name="phone" optional="YES" attributeType="String"/>
         <attribute name="price" optional="YES" attributeType="String"/>
         <attribute name="publisher" optional="YES" attributeType="String"/>
         <attribute name="rating" optional="YES" attributeType="String"/>

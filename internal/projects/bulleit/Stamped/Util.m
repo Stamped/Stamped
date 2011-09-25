@@ -222,4 +222,16 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
   return [detailViewController autorelease];
 }
 
++ (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum {
+  if (!originalNum)
+    return nil;
+
+  NSString* num = originalNum;
+  num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]] componentsJoinedByString: @""];
+  num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet symbolCharacterSet]] componentsJoinedByString: @""];
+  num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsJoinedByString: @""];
+  num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
+  return num;
+}
+
 @end

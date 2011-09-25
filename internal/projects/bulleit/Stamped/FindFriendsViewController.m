@@ -155,13 +155,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   CFRelease(addressBook);
   CFRelease(people);
   NSMutableArray* sanitizedNumbers = [NSMutableArray array];
-  for (NSString* num in allNumbers) {
-    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]] componentsJoinedByString: @""];
-    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet symbolCharacterSet]] componentsJoinedByString: @""];
-    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsJoinedByString: @""];
-    num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
-    [sanitizedNumbers addObject:num];
-  }
+  for (NSString* num in allNumbers)
+    [sanitizedNumbers addObject:[Util sanitizedPhoneNumberFromString:num]];
+
   [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
 }
 

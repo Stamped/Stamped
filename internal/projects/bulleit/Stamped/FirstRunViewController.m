@@ -12,6 +12,7 @@
 
 #import "UserImageView.h"
 #import "WelcomeViewController.h"
+#import "Util.h"
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 500;
@@ -257,13 +258,7 @@ static const CGFloat kProfileImageSize = 500;
   if (signInScrollView_.superview) {
     [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
   } else if (signUpScrollView_.superview) {
-    NSString* num = nil;
-    if (signUpPhoneTextField_.text) {
-      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet punctuationCharacterSet]] componentsJoinedByString: @""];
-      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet symbolCharacterSet]] componentsJoinedByString: @""];
-      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsJoinedByString: @""];
-      num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
-    }
+    NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
     [delegate_ viewController:self
        willCreateUserWithName:signUpFullNameTextField_.text
                      username:signUpUsernameTextField_.text

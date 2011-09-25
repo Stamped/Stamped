@@ -22,8 +22,6 @@ typedef enum {
 
 @interface Entity : NSManagedObject
 
-- (NSString*)localizedPhoneNumber;
-
 @property (nonatomic, retain) NSString* address;
 @property (nonatomic, retain) NSString* street;
 @property (nonatomic, retain) NSString* substreet;
@@ -47,7 +45,7 @@ typedef enum {
 @property (nonatomic, retain) NSString* director;
 @property (nonatomic, retain) NSString* year;
 @property (nonatomic, retain) NSSet* stamps;
-@property (nonatomic, retain) NSNumber* phone;
+@property (nonatomic, retain) NSString* phone;
 @property (nonatomic, retain) Favorite* favorite;
 @property (nonatomic, retain) NSString* hours;
 @property (nonatomic, retain) NSString* cuisine;
