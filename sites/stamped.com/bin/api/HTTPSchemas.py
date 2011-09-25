@@ -863,11 +863,11 @@ class HTTPActivity(Schema):
             self.importData(data, overflow=True)
             
             if linked_stamp != None:
-                self.linked_stamp = HTTPStamp().importSchema(linked_stamp).value
+                self.linked_stamp = HTTPStamp().importSchema(Stamp(linked_stamp)).value
             elif linked_user != None:
-                self.linked_user = HTTPUserMini().importSchema(linked_user).value
+                self.linked_user = HTTPUserMini().importSchema(UserMini(linked_user)).value
             elif linked_entity != None:
-                self.linked_entity = HTTPEntity().importSchema(linked_entity).value
+                self.linked_entity = HTTPEntity().importSchema(Entity(linked_entity)).value
             elif linked_url != None:
                 self.linked_url = linked_url
 
