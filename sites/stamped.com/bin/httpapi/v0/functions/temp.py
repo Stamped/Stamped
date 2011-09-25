@@ -54,12 +54,12 @@ def activity(request):
         
         ### TEMP
         stamp = None
-        if item.link_stamp_id != None:
-            stamp = stampedAPI.getStamp(item.link_stamp_id, authUserId)
+        if item.linked_stamp != None:
+            stamp = item.linked_stamp
 
         comment = None
-        if item.link_comment_id != None:
-            comment = stampedAPI._getComment(item.link_comment_id)
+        if item.linked_comment_id != None:
+            comment = stampedAPI._getComment(item.linked_comment_id)
 
         result.append(HTTPActivityOld().importSchema(item, stamp, comment).exportSparse())
 

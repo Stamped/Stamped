@@ -17,8 +17,9 @@ Display activity data for the authenticating user. This is a generic(-ish) resul
     * **image**: The image to use in the activity cell. This should only apply for _custom_ types.
     * **subject**: The subject of the activity. This will most likely be the entity title (for a stamp, a comment on a stamp, etc.) and should be used as such in any templates. In the event of a _custom_ activity item, this will be the entire field.
     * **blurb**: The main body of the activity cell. This will often be the comment text or the stamp blurb. Different templates should treat this field differently.
-    * **links**: Links to various ids. This is actually four separate fields: **link_user_id**, **link_stamp_id**, **link_entity_id**, and **link_url**. This link dictates where (if anywhere) tapping on the cell should take the user. 
-    * **created**: The timestamp of the activity item. Note that this may not match the timestamp of the underlying item, e.g. the timestamp of the activity item for a comment will be slightly delayed from the timestamp on the comment itself.
+    * **links**: Links to various objects. This can be one of four types: **linked_user**, **linked_stamp**, **linked_entity**, and **linked_url**. This link dictates where (if anywhere) tapping on the cell should take the user. 
+    * **benefit**: An integer describe how many stamps the user earned in the activity item (if applicable). 
+    * **created**: The timestamp of the activity item. Note that this may not match the timestamp of the underlying item, e.g. the timestamp of the activity item for a comment may be slightly delayed from the timestamp on the comment itself.
 
 ### Parameters ###
 
@@ -41,8 +42,55 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
             "created": "2011-07-27 16:02:15.394000", 
             "genre": "mention", 
             "blurb": "Great date spot. Thanks @rmstein!", 
-            "title": "Spotted Pig",
-            "link_stamp_id": "4e30368732a7ba613b000007", 
+            "subject": "Spotted Pig",
+            "linked_stamp": {
+                "blurb": "Best place ever!", 
+                "entity": {
+                    "entity_id": "4e226ea84e61754161000000",
+                    "title": "Spotted Pig",
+                    "subtitle": "New York, NY"
+                    "category": "food",
+                    "subcategory": "restaurant"
+                    "desc": "Burger place",
+                    "coordinates": "40.714623,-74.006605",
+                    "address": "314 West 11th Street New York, NY 10014-2369",
+                    "last_modified": "2011-07-17 19:03:22.354813",
+                    "opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+                    "phone": "1235551234"
+                }, 
+                "stamp_id": "4e226fcd4e18474561000000", 
+                "credit": [
+                    {
+                        "user_id": "4e226fcd4e61754161000007",
+                        "profile_image": "http://img.stamped.com/u/robby.png", 
+                        "screen_name": "robby",
+                        "display_name": "Robby S.",
+                        "color_primary": "333333",
+                        "color_secondary": "999999",
+                        "privacy": false
+                    },
+                    {
+                        "user_id": "4e226fcd4e61754161000008",
+                        "profile_image": "http://img.stamped.com/u/bart.png", 
+                        "screen_name": "bart",
+                        "display_name": "Bart S.",
+                        "color_primary": "333333",
+                        "color_secondary": "999999",
+                        "privacy": false
+                    }
+                ], 
+                "created": "2011-07-17 05:14:54.128641",
+                "user": {
+                    "user_id": "47cc67093475061e3d95369d", 
+                    "profile_image": "http://img.stamped.com/u/kevin.png", 
+                    "display_name": "Kevin P.", 
+                    "color_primary": "333333",
+                    "color_secondary": "999999",
+                    "screen_name": "kevin",
+                    "privacy": false
+                }
+                "num_comments": 0
+            }, 
             "user": {
                 "color_primary": "333333", 
                 "color_secondary": "999999", 
@@ -59,7 +107,54 @@ A UNIX timestamp stating the end of the time slice desired. This enables a certa
             "subject": "Spotted Pig",
             "created": "2011-07-27 16:02:14.203000", 
             "genre": "comment", 
-            "link_stamp_id": "4e30368532a7ba613b000004", 
+            "linked_stamp": {
+                "blurb": "Best place ever!", 
+                "entity": {
+                    "entity_id": "4e226ea84e61754161000000",
+                    "title": "Spotted Pig",
+                    "subtitle": "New York, NY"
+                    "category": "food",
+                    "subcategory": "restaurant"
+                    "desc": "Burger place",
+                    "coordinates": "40.714623,-74.006605",
+                    "address": "314 West 11th Street New York, NY 10014-2369",
+                    "last_modified": "2011-07-17 19:03:22.354813",
+                    "opentable_url": "http://www.opentable.com/reserve/spottedpig&ref=9166",
+                    "phone": "1235551234"
+                }, 
+                "stamp_id": "4e226fcd4e18474561000000", 
+                "credit": [
+                    {
+                        "user_id": "4e226fcd4e61754161000007",
+                        "profile_image": "http://img.stamped.com/u/robby.png", 
+                        "screen_name": "robby",
+                        "display_name": "Robby S.",
+                        "color_primary": "333333",
+                        "color_secondary": "999999",
+                        "privacy": false
+                    },
+                    {
+                        "user_id": "4e226fcd4e61754161000008",
+                        "profile_image": "http://img.stamped.com/u/bart.png", 
+                        "screen_name": "bart",
+                        "display_name": "Bart S.",
+                        "color_primary": "333333",
+                        "color_secondary": "999999",
+                        "privacy": false
+                    }
+                ], 
+                "created": "2011-07-17 05:14:54.128641",
+                "user": {
+                    "user_id": "47cc67093475061e3d95369d", 
+                    "profile_image": "http://img.stamped.com/u/kevin.png", 
+                    "display_name": "Kevin P.", 
+                    "color_primary": "333333",
+                    "color_secondary": "999999",
+                    "screen_name": "kevin",
+                    "privacy": false
+                }
+                "num_comments": 1
+            }, 
             "user": {
                 "color_primary": "333333", 
                 "color_secondary": "999999", 
