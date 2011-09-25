@@ -405,9 +405,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)stampChanged:(NSNotification*)notification {
-  // Comments may have changed...
-  Stamp* stamp = [notification object];
-  self.numComments = [stamp.numComments unsignedIntegerValue];
+  // Comments may have changed. Only update the most recent stamp, though.
+  Stamp* stamp = stamps_.lastObject;
+  self.numComments = stamp.numComments.unsignedIntegerValue;
 }
 
 @end
