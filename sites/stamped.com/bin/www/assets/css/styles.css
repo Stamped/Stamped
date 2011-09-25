@@ -671,7 +671,11 @@ max-width:572px;
 #mobile-entity .card .credit, #mobile-entity .card .likes{
 font-size:24px;
 margin-top:50px;
-padding-left: 36px;
+padding-left:36px;
+}
+
+#mobile-entity .card .likes{
+padding-left:28px;
 }
 
 #mobile-entity .card .credit .stamp {

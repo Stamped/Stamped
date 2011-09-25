@@ -103,8 +103,11 @@
                             {% endif %}
                             </div> 
                             {% endif %}
-                            {% if num_likes and num_likes > 0 %}
+                            {% if num_likes and num_likes > 1 %}
                             <div class="likes"><strong>{{ num_likes }}</strong> likes</div> 
+                            {% endif %}
+                            {% if num_likes and num_likes == 1 %}
+                            <div class="likes"><strong>{{ num_likes }}</strong> like</div> 
                             {% endif %}
                         </div> 
                     </div> 
