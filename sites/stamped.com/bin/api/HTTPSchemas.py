@@ -853,19 +853,23 @@ class HTTPActivity(Schema):
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Activity':
             data                = schema.value
+            linked_entity       = data.pop('linked_entity', None)
+            linked_stamp        = data.pop('linked_stamp', None)
+            linked_user         = data.pop('linked_user', None)
+            linked_url          = data.pop('linked_url', None)
             user                = UserMini(data.pop('user', None))
-            data['user']        = HTTPUserMini().importSchema(user).value
+            data['user']        = HTTPUserMini().importSchema(user).value 
 
             self.importData(data, overflow=True)
             
-            if schema.linked_stamp != None:
-                self.linked_stamp = HTTPStamp().importSchema(schema.linked_stamp).value
-            elif schema.linked_user != None:
-                self.linked_user = HTTPUserMini().importSchema(schema.linked_user).value
-            elif schema.linked_entity != None:
-                self.linked_entity = HTTPEntity().importSchema(schema.linked_entity).value
-            elif schema.linked_url != None:
-                self.linked_url = schema.linked_url
+            if linked_stamp != None:
+                self.linked_stamp = HTTPStamp().importSchema(linked_stamp).value
+            elif linked_user != None:
+                self.linked_user = HTTPUserMini().importSchema(linked_user).value
+            elif linked_entity != None:
+                self.linked_entity = HTTPEntity().importSchema(linked_entity).value
+            elif linked_url != None:
+                self.linked_url = linked_url
 
             self.created = schema.timestamp.created
         else:

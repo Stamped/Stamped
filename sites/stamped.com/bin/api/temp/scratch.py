@@ -21,7 +21,7 @@ client_auth = {
     'client_secret': 'august1ftw'
 }
 
-_baseurl = "http://localhost:18000/v0"
+_baseurl = "https://dev.stamped.com/v0"
 
 def handleGET(path, data):
     params = urllib.urlencode(data)
@@ -50,10 +50,10 @@ data = {
 token = handlePOST(path, data)
 
 
-print 'FAVORITES:'
-path = "favorites/show.json"
+print 'ACTIVITY'
+path = "activity/show.json"
 data = { 
-    "oauth_token": token['access_token'],
+    "oauth_token": token['access_token']
 }
 result = handleGET(path, data)
 pprint.pprint(result)
