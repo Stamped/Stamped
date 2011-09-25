@@ -37,6 +37,8 @@ def handlePOST(path, data):
     
     return result
 
+
+
 USER = 'kevin'
 PASS = '12345'
 
@@ -49,8 +51,53 @@ data = {
 }
 token = handlePOST(path, data)
 
+# path = "stamps/likes/create.json"
+# data = { 
+#     "oauth_token": token['access_token'],
+#     "stamp_id": "4e7f8a9ed35f7313f500000e",
+# }
+# result = handlePOST(path, data)
 
-print 'ACTIVITY'
+# path = "favorites/create.json"
+# data = { 
+#     "oauth_token": token['access_token'],
+#     "entity_id": "4e4c684df15dd72f5300023c",
+#     "stamp_id": "4e7f8a9ed35f7313f500000e",
+# }
+# result = handlePOST(path, data)
+
+path = "friendships/remove.json"
+data = {
+    "oauth_token": token['access_token'],
+    "screen_name": 'zoe'
+}
+result = handlePOST(path, data)
+
+path = "friendships/create.json"
+data = {
+    "oauth_token": token['access_token'],
+    "screen_name": 'zoe'
+}
+friend = handlePOST(path, data)
+
+print 'COMPLETE'
+
+
+
+USER = 'zoe'
+PASS = '12345'
+
+path = "oauth2/login.json"
+data = { 
+    "client_id": CLIENT_ID,
+    "client_secret": CLIENT_SECRET,
+    "login": USER,
+    "password": PASS
+}
+token = handlePOST(path, data)
+
+
+print 'ACTIVITY:'
 path = "activity/show.json"
 data = { 
     "oauth_token": token['access_token']

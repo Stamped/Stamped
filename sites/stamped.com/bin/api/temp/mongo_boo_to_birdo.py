@@ -29,6 +29,7 @@ def main():
 
         print 
 
+    convertActivity()
     convertStamps()
 
 
@@ -59,7 +60,7 @@ def mongoImportJSON(collection):
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
 
-def convertStamps():
+def convertActivity():
     activity_collection = new_database['activity']
     activity = activity_collection.find()
 
@@ -116,6 +117,17 @@ def convertStamps():
                 {'$set': {'benefit': 2}}
             )
 
+def convertStamps():
+    stamp_collection = new_database['stamp']
+    stamps = stamp_collection.find()
+
+    for stamp in stamps:
+
+        if 'modified' not in stamp['timestamp']:
+            stamp_collection.update(
+                {'_id': stamp['_id']},
+                {'$set': {'timestamp.modified': stamp['timestamp']['created']}}
+            )
 
 if __name__ == '__main__':  
     main()

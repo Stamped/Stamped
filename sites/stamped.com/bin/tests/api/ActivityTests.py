@@ -49,7 +49,7 @@ class StampedAPIActivityShow(StampedAPIActivityTest):
             "oauth_token": self.tokenA['access_token'],
         }
         result = self.handleGET(path, data)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 2)
 
 class StampedAPIActivityMentions(StampedAPIActivityTest):
     def test_show_stamp_mention(self):

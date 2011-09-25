@@ -130,7 +130,7 @@ class StampedAPIBlockComments(StampedAPIBlockTest):
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
-        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), 1)
 
         self.deleteComment(self.tokenA, comment['comment_id'])
         self.deleteStamp(self.tokenC, stamp['stamp_id'])
@@ -171,7 +171,7 @@ class StampedAPIBlockComments(StampedAPIBlockTest):
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
-        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), 1)
 
         self.deleteComment(self.tokenA, commentB['comment_id'])
         self.deleteComment(self.tokenB, commentA['comment_id'])
@@ -238,7 +238,7 @@ class StampedAPIBlockStamps(StampedAPIBlockTest):
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
-        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), 1)
 
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
@@ -278,7 +278,7 @@ class StampedAPIBlockStamps(StampedAPIBlockTest):
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
-        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), 1)
 
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
@@ -325,7 +325,7 @@ class StampedAPIBlockStamps(StampedAPIBlockTest):
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
-        self.assertEqual(len(result), 0)
+        self.assertEqual(len(result), 1)
 
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
