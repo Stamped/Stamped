@@ -437,7 +437,7 @@ class StampedAPI(AStampedAPI):
             activity.linked_user_id     = authUserId
             activity.timestamp.created  = datetime.utcnow()
             
-            self._activityDB.addActivity(user.user_id, activity)
+            self._activityDB.addActivity([user.user_id], activity)
         
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
@@ -1689,7 +1689,7 @@ class StampedAPI(AStampedAPI):
             if benefit:
                 activity.benefit        = LIKE_BENEFIT
 
-            self._activityDB.addActivity(stamp.user_id, activity)
+            self._activityDB.addActivity([stamp.user_id], activity)
 
         return stamp
     
@@ -1916,7 +1916,7 @@ class StampedAPI(AStampedAPI):
             activity.linked_stamp_id    = favorite.stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
 
-            self._activityDB.addActivity(favorite.stamp.user_id, activity)
+            self._activityDB.addActivity([favorite.stamp.user_id], activity)
 
         return favorite
     

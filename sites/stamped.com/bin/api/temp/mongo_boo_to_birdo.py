@@ -110,6 +110,13 @@ def convertStamps():
                 }
             )
 
+        if item['genre'] == 'restamp':
+            activity_collection.update(
+                {'_id': item['_id']},
+                {'$set': {'benefit': 2}}
+            )
+
+
 if __name__ == '__main__':  
     main()
 
