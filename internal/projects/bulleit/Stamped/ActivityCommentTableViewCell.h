@@ -8,13 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@class ActivityCommentCellView;
 @class Event;
 
-@interface ActivityCommentTableViewCell : UITableViewCell {
- @private
-  ActivityCommentCellView* customView_;
-}
+@interface ActivityCommentTableViewCell : UITableViewCell
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
