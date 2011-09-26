@@ -435,6 +435,7 @@ class StampedAPI(AStampedAPI):
             activity.genre              = 'follower'
             activity.user.user_id       = authUserId
             activity.linked_user_id     = authUserId
+            activity.linked_friend_id   = user.user_id
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity([user.user_id], activity)

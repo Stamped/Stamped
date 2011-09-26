@@ -39,7 +39,7 @@ def handlePOST(path, data):
 
 
 
-USER = 'kevin'
+USER = 'zoe'
 PASS = '12345'
 
 path = "oauth2/login.json"
@@ -66,43 +66,79 @@ token = handlePOST(path, data)
 # }
 # result = handlePOST(path, data)
 
-path = "friendships/remove.json"
-data = {
-    "oauth_token": token['access_token'],
-    "screen_name": 'zoe'
-}
-result = handlePOST(path, data)
+# path = "friendships/remove.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "screen_name": 'zoe'
+# }
+# result = handlePOST(path, data)
 
 path = "friendships/create.json"
 data = {
     "oauth_token": token['access_token'],
-    "screen_name": 'zoe'
+    "screen_name": 'robby'
+}
+friend = handlePOST(path, data)
+
+path = "friendships/create.json"
+data = {
+    "oauth_token": token['access_token'],
+    "screen_name": 'bart'
+}
+friend = handlePOST(path, data)
+
+path = "friendships/create.json"
+data = {
+    "oauth_token": token['access_token'],
+    "screen_name": 'edmuki'
+}
+friend = handlePOST(path, data)
+
+path = "friendships/create.json"
+data = {
+    "oauth_token": token['access_token'],
+    "screen_name": 'stamped'
+}
+friend = handlePOST(path, data)
+
+path = "friendships/create.json"
+data = {
+    "oauth_token": token['access_token'],
+    "screen_name": 'stampedapp'
+}
+friend = handlePOST(path, data)
+
+path = "friendships/create.json"
+data = {
+    "oauth_token": token['access_token'],
+    "screen_name": 'stampedteam'
 }
 friend = handlePOST(path, data)
 
 print 'COMPLETE'
+print friend
 
 
 
-USER = 'zoe'
-PASS = '12345'
+# USER = 'biggity'
+# PASS = '12345'
 
-path = "oauth2/login.json"
-data = { 
-    "client_id": CLIENT_ID,
-    "client_secret": CLIENT_SECRET,
-    "login": USER,
-    "password": PASS
-}
-token = handlePOST(path, data)
+# path = "oauth2/login.json"
+# data = { 
+#     "client_id": CLIENT_ID,
+#     "client_secret": CLIENT_SECRET,
+#     "login": USER,
+#     "password": PASS
+# }
+# token = handlePOST(path, data)
 
 
-print 'ACTIVITY:'
-path = "activity/show.json"
-data = { 
-    "oauth_token": token['access_token']
-}
-result = handleGET(path, data)
-pprint.pprint(result)
+# print 'ACTIVITY:'
+# path = "activity/show.json"
+# data = { 
+#     "oauth_token": token['access_token']
+# }
+# result = handleGET(path, data)
+# pprint.pprint(result)
 
 

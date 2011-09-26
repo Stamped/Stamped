@@ -74,6 +74,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         query.pop('timestamp')
         # Note: I don't like doing safe=True, but it's necessary to get the _id
         # back. We might want to explore different options here eventually.
+        ### TODO: Add Mongo Index on all major fields
         result = self._collection.update(query, activity, upsert=True, safe=True)
         if 'upserted' in result:
             activity_id = self._getStringFromObjectId(result['upserted'])
