@@ -166,6 +166,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"ActivityLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
+
 	[self loadEventsFromDataStore];
   [self setIsLoading:NO];
 }
