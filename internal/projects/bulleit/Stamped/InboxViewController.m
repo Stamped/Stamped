@@ -195,7 +195,7 @@ typedef enum {
 	NSArray* results = [Stamp objectsWithFetchRequest:request];
   NSMutableArray* sortedEntities = [NSMutableArray arrayWithCapacity:results.count];
   for (Stamp* s in results) {
-    if (![sortedEntities containsObject:s.entityObject])
+    if (s.entityObject && ![sortedEntities containsObject:s.entityObject])
       [sortedEntities addObject:s.entityObject];
   }
   self.entitiesArray = sortedEntities;

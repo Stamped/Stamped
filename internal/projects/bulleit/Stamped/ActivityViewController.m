@@ -14,6 +14,10 @@
 #import "AccountManager.h"
 #import "ActivityCommentTableViewCell.h"
 #import "ActivityCreditTableViewCell.h"
+#import "ActivityLikeTableViewCell.h"
+#import "ActivityTodoTableViewCell.h"
+#import "ActivityFollowTableViewCell.h"
+#import "ProfileViewController.h"
 #import "Comment.h"
 #import "Notifications.h"
 #import "Event.h"
@@ -103,17 +107,31 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
   Event* event = [eventsArray_ objectAtIndex:indexPath.row];
   NSString* reuseIdentifier = @"CommentIdentifier";
-  if ([event.genre isEqualToString:@"restamp"])
+  if ([event.genre isEqualToString:@"restamp"]) {
     reuseIdentifier = @"RestampIdentifier";
+  } else if ([event.genre isEqualToString:@"like"]) {
+    reuseIdentifier = @"LikeIdentifier";
+  } else if ([event.genre isEqualToString:@"favorite"]) {
+    reuseIdentifier = @"TodoIdentifier";
+  } else if ([event.genre isEqualToString:@"follower"]) {
+    reuseIdentifier = @"FollowIdentifier";
+  }
 
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
   if (cell == nil) {
     if ([reuseIdentifier isEqualToString:@"RestampIdentifier"]) {
       cell = [[[ActivityCreditTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
-    } else {
+    } else if ([reuseIdentifier isEqualToString:@"CommentIdentifier"]) {
       cell = [[[ActivityCommentTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+    } else if ([reuseIdentifier isEqualToString:@"LikeIdentifier"]) {
+      cell = [[[ActivityLikeTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+    } else if ([reuseIdentifier isEqualToString:@"TodoIdentifier"]) {
+      cell = [[[ActivityTodoTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+    } else if ([reuseIdentifier isEqualToString:@"FollowIdentifier"]) {
+      cell = [[[ActivityFollowTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
     }
   }
+
   if ([cell respondsToSelector:@selector(setEvent:)])
     [(id)cell setEvent:event];
 
@@ -123,10 +141,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
-  if ([cell isMemberOfClass:[ActivityCommentTableViewCell class]]) {
-    cell.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
-  } else {
+  if ([cell isMemberOfClass:[ActivityCreditTableViewCell class]]) {
     cell.backgroundColor = [UIColor whiteColor];
+  } else {
+    cell.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
   }
 }
 
@@ -138,13 +156,12 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     CGSize stringSize = [event.blurb sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
                                 constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                     lineBreakMode:UILineBreakModeWordWrap];
-    return fmaxf(60.0, stringSize.height + 40);
+    return fmaxf(52.0, stringSize.height + 57);
+  } else if ([event.genre isEqualToString:@"restamp"]) {
+    return 80.0;
   }
 
-  if ([event.genre isEqualToString:@"restamp"])
-    return 82.0;
-  
-  return 63.0;
+  return 55.0;
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -152,9 +169,13 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   if (!event)
     return;
 
-  StampDetailViewController* detailViewController =
-      [[StampDetailViewController alloc] initWithStamp:event.stamp];
-
+  UIViewController* detailViewController = nil;
+  if ([event.genre isEqualToString:@"follower"]) {
+    detailViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+    [(ProfileViewController*)detailViewController setUser:event.user];
+  } else {
+    detailViewController = [[StampDetailViewController alloc] initWithStamp:event.stamp];
+  }
   // Pass the selected object to the new view controller.
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];

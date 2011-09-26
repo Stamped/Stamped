@@ -18,6 +18,9 @@
   UserImageView* userImageView_;
   CATextLayer* headerTextLayer_;
   UIImageView* disclosureArrowImageView_;
+  UIImageView* badgeImageView_;
+  UILabel* timestampLabel_;
+  UILabel* addedStampsLabel_;
 }
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
