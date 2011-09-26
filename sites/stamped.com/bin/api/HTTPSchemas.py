@@ -756,6 +756,20 @@ class HTTPStampImage(Schema):
         self.stamp_id           = SchemaElement(basestring, required=True)
         self.image              = SchemaElement(basestring, required=True, normalize=False)
 
+class HTTPDeletedStamp(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring, required=True)
+        self.modified           = SchemaElement(basestring)
+        self.deleted            = SchemaElement(bool)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'DeletedStamp':
+            self.importData(schema.exportSparse(), overflow=True)
+            self.modified       = schema.timestamp.modified
+        else:
+            raise NotImplementedError
+        return self
+
 # ######## #
 # Comments #
 # ######## #

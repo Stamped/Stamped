@@ -228,6 +228,16 @@ class StampAttributesSchema(Schema):
         self.is_liked           = SchemaElement(bool)
         self.is_fav             = SchemaElement(bool)
 
+class DeletedStamp(Schema):
+    def setSchema(self):
+        self.stamp_id           = SchemaElement(basestring)
+        self.timestamp          = ModifiedTimestampSchema()
+        self.deleted            = SchemaElement(bool)
+
+class ModifiedTimestampSchema(Schema):
+    def setSchema(self):
+        self.modified           = SchemaElement(datetime)
+
 
 # ######## #
 # Comments #

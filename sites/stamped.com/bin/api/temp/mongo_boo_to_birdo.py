@@ -118,7 +118,7 @@ def convertActivity():
             )
 
 def convertStamps():
-    stamp_collection = new_database['stamp']
+    stamp_collection = new_database['stamps']
     stamps = stamp_collection.find()
 
     for stamp in stamps:
