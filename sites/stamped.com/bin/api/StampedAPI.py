@@ -1303,12 +1303,12 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeStamp(stamp.stamp_id)
 
         # Remove from user collection
-        self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
+        # self._stampDB.removeUserStampReference(authUserId, stamp.stamp_id)
         
         # Remove from followers' inbox collections
-        followers = self._friendshipDB.getFollowers(authUserId)
-        followers.append(authUserId)
-        self._stampDB.removeInboxStampReference(followers, stamp.stamp_id)
+        # followers = self._friendshipDB.getFollowers(authUserId)
+        # followers.append(authUserId)
+        # self._stampDB.removeInboxStampReference(followers, stamp.stamp_id)
 
         ### NOTE: 
         # This only removes the stamp from people who follow the user.
@@ -1809,12 +1809,20 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
-        return stamps
+        if kwargs.pop('includeDeleted', False):
+            deleted = self._stampDB.getDeletedStamps(stampIds, **params)
+            if len(deleted) > 0:
+                stamps = stamps + deleted
+
+        stamps.sort(key=lambda k:k.timestamp.modified, reverse=True)
+
+        return stamps[:limit]
     
     def getInboxStamps(self, authUserId, **kwargs):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
         
         kwargs['includeComments'] = True
+        kwargs['includeDeleted'] = True
         
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     
@@ -1841,6 +1849,7 @@ class StampedAPI(AStampedAPI):
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
 
         kwargs['includeComments'] = True
+        kwargs['includeDeleted'] = True
 
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     

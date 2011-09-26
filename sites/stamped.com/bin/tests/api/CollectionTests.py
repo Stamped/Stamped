@@ -184,6 +184,26 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
 
         self.deleteFavorite(self.tokenB, self.entityA['entity_id'])
 
+
+class StampedAPICollectionsDeleted(StampedAPICollectionTest):
+    def test_deleted(self):
+
+        entityD = self.createEntity(self.tokenA)
+        stampD = self.createStamp(self.tokenA, entityD['entity_id'])
+        self.deleteStamp(self.tokenA, stampD['stamp_id'])
+        self.deleteEntity(self.tokenA, entityD['entity_id'])
+
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": self.tokenB['access_token'],
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 4)
+        self.assertTrue(result[-1]['blurb'] == self.stampA['blurb'])
+        self.assertTrue('deleted' in result[0])
+
+        
+
 if __name__ == '__main__':
     main()
 

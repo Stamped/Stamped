@@ -17,6 +17,7 @@ from MongoUserLikesCollection import MongoUserLikesCollection
 from MongoStampLikesCollection import MongoStampLikesCollection
 from MongoUserStampsCollection import MongoUserStampsCollection
 from MongoInboxStampsCollection import MongoInboxStampsCollection
+from MongoDeletedStampCollection import MongoDeletedStampCollection
 from MongoCreditGiversCollection import MongoCreditGiversCollection
 from MongoCreditReceivedCollection import MongoCreditReceivedCollection
 
@@ -57,6 +58,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     @lazyProperty
     def user_likes_collection(self):
         return MongoUserLikesCollection()
+    
+    @lazyProperty
+    def deleted_stamp_collection(self):
+        return MongoDeletedStampCollection()
 
     
     def addStamp(self, stamp):
@@ -74,7 +79,11 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     
     def removeStamp(self, stampId):
         documentId = self._getObjectIdFromString(stampId)
-        return self._removeMongoDocument(documentId)
+        result = self._removeMongoDocument(documentId)
+
+        self.deleted_stamp_collection.addStamp(stampId)
+
+        return result
         
     def addUserStampReference(self, userId, stampId):
         # Add a reference to the stamp in the user's collection
@@ -118,6 +127,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             stamps.append(self._convertFromMongo(document))
 
         return stamps
+
+    def getDeletedStamps(self, stampIds, **kwargs):
+        return self.deleted_stamp_collection.getStamps(stampIds, **kwargs)
 
     def checkStamp(self, userId, entityId):
         try:
