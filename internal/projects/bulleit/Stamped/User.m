@@ -13,7 +13,7 @@
 const CGFloat kMediumUserImageSize = 41.0;
 
 @interface User ()
-- (void)generateStampImage;
+- (void)refreshStampImage;
 @end
 
 @implementation User
@@ -36,7 +36,27 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic numStamps;
 @dynamic numStampsLeft;
 
-- (void)generateStampImage {
+- (void)setPrimaryColor:(NSString*)primaryColor {
+  [self willChangeValueForKey:@"primaryColor"];
+  BOOL refreshImage = ![self.primaryColor isEqualToString:primaryColor];
+  [self setPrimitiveValue:primaryColor forKey:@"primaryColor"];
+  if (refreshImage)
+    [self refreshStampImage];
+
+  [self didChangeValueForKey:@"primaryColor"];
+}
+
+- (void)setSecondaryColor:(NSString*)secondaryColor {
+  [self willChangeValueForKey:@"secondaryColor"];
+  BOOL refreshImage = ![self.secondaryColor isEqualToString:secondaryColor];
+  [self setPrimitiveValue:secondaryColor forKey:@"secondaryColor"];
+  if (refreshImage)
+    [self refreshStampImage];
+
+  [self didChangeValueForKey:@"secondaryColor"];
+}
+
+- (void)refreshStampImage {
   if (!self.primaryColor)
     return;
 
@@ -48,10 +68,5 @@ const CGFloat kMediumUserImageSize = 41.0;
       self.screenName.lowercaseString];
 }
 
-- (void)awakeFromFetch {
-  [super awakeFromFetch];
-  if (!self.stampImage)
-    [self generateStampImage];
-}
 
 @end

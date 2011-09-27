@@ -133,7 +133,7 @@ static AccountManager* sharedAccountManager_ = nil;
   NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
   // Fresh install.
   if (!tokenExpirationDate) {
-    [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
+    //[GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
     [self showFirstRunViewController];
     return;
   }

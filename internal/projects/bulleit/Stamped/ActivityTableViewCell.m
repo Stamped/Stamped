@@ -105,7 +105,6 @@ static const CGFloat kActivityBadgeSize = 21.0;
   if (event) {
     userImageView_.imageURL = event.user.profileImageURL;
     timestampLabel_.text = [Util userReadableTimeSinceDate:event.created];
-    NSLog(@"Event genre: %@, timestamp: %@", event.genre, timestampLabel_.text);
     [timestampLabel_ sizeToFit];
     NSInteger benefit = event.benefit.integerValue;
     if (benefit > 0) {

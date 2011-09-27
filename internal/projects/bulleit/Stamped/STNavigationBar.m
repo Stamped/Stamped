@@ -48,7 +48,7 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
   CGContextFillRect(ctx, rect);
   
-  hideLogo_ = ![self.topItem.title isEqualToString:@"Stamps"];
+  //hideLogo_ = ![self.topItem.title isEqualToString:@"Stamps"];
   
   if (hideLogo_)
     [[UIImage imageNamed:@"nav_bar_no_logo"] drawInRect:rect];
