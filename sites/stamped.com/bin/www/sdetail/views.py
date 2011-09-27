@@ -27,8 +27,8 @@ def show(request, **kwargs):
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
         # stamp['credit'] = stamp['credit'][:1]
         template = 'sdetail.html'
-        if request.mobile or mobile:
-            template = 'sdetail-mobile.html'
+        # if request.mobile or mobile:
+        #     template = 'sdetail-mobile.html'
         return render_to_response(template, stamp)
     except:
         logs.begin(stampedAPI._logsDB.addLog)
