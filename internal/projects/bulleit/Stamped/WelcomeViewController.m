@@ -25,7 +25,7 @@ NSString* const kStampColors[7][2] = {
   { @"ff7e00", @"ffea00" },
   { @"51c4bb", @"91ede8" },
   { @"42ff00", @"fc2599" },
-  { @"5700ce", @"ff6000v" }
+  { @"5700ce", @"ff6000" }
 };
 
 @interface WelcomeViewController ()

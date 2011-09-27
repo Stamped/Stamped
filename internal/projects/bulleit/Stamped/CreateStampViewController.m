@@ -762,18 +762,18 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [request.URLRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     [request.URLRequest setHTTPMethod:@"POST"];
 
-    NSString* blurb = stamp.blurb;
-    if (blurb.length == 0)
+    NSString* blurb = [NSString stringWithFormat:@"\u201c%@\u201d", stamp.blurb];
+    if (stamp.blurb.length == 0)
       blurb = [stamp.entityObject.title stringByAppendingString:@"."];
-    
+
     NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
     if (blurb.length > substring.length)
       blurb = [substring stringByAppendingString:@"..."];
     
     blurb = [blurb stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 
-    // Stamped. [blurb] [link]
-    NSString* tweet = [NSString stringWithFormat:@"Stamped. %@ %@", blurb, stamp.URL];
+    // Stamped: [blurb] [link]
+    NSString* tweet = [NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp.URL];
     NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
     [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
     [self.twitterAuth authorizeRequest:request.URLRequest];

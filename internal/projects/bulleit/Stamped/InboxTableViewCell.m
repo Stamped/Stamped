@@ -776,6 +776,9 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)userImageTapped:(id)sender {
   UIButton* button = sender;
+  if (button.tag >= customView_.stamps.count)
+    return;
+
   Stamp* stamp = [customView_.stamps objectAtIndex:button.tag];
 
   StampDetailViewController* detailViewController =

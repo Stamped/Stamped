@@ -134,12 +134,19 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date {
   NSTimeInterval timeSince = [[NSDate date] timeIntervalSinceDate:date];
   NSString* result = nil;
-  if (timeSince > 2629743.83) {
-    CGFloat numYears = floorf(timeSince / 262629743.83);
+  if (timeSince > 31556926) {
+    CGFloat numYears = floorf(timeSince / 31556926);
     if (numYears < 2) {
-      result = @"last year";
+      result = @"a year ago";
     } else {
       result = [NSString stringWithFormat:@"%.0f years ago", numYears];
+    }
+  } else if (timeSince > 2629743.83) {
+    CGFloat numMonths = floorf(timeSince / 2629743.83);
+    if (numMonths < 2) {
+      result = @"a month ago";
+    } else {
+      result = [NSString stringWithFormat:@"%.0f months ago", numMonths];
     }
   } else if (timeSince > 604800) {
     CGFloat numWeeks = floorf(timeSince / 604800);

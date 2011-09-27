@@ -139,7 +139,7 @@
 								<string key="NSFrame">{{0, -231}, {320, 240}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="9764505"/>
+								<reference key="NSNextKeyView" ref="110642938"/>
 								<string key="NSReuseIdentifierKey">_NS:363</string>
 								<int key="IBUIContentMode">2</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -390,7 +390,7 @@
 								<string key="NSFrame">{{261, 16}, {50, 30}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="110642938"/>
+								<reference key="NSNextKeyView" ref="715334343"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
 								<reference key="IBUIBackgroundColor" ref="343956617"/>
 								<bool key="IBUIOpaque">NO</bool>
@@ -503,14 +503,15 @@
 							<object class="IBUIButton" id="110642938">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{281, 0}, {39, 73}}</string>
+								<string key="NSFrameSize">{311, 73}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="715334343"/>
+								<reference key="NSNextKeyView" ref="9764505"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
 								<bool key="IBUIOpaque">NO</bool>
+								<int key="IBUIContentMode">8</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<int key="IBUIContentHorizontalAlignment">0</int>
+								<int key="IBUIContentHorizontalAlignment">2</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<reference key="IBUIFont" ref="32402340"/>
 								<reference key="IBUIHighlightedTitleColor" ref="935530847"/>
@@ -1078,6 +1079,7 @@
 					<string>111.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>112.IBPluginDependency</string>
 					<string>119.IBPluginDependency</string>
+					<string>119.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
 					<string>36.IBPluginDependency</string>
 					<string>36.IBUserGuides</string>
 					<string>37.IBPluginDependency</string>
@@ -1118,6 +1120,7 @@
 					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<real value="2"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
