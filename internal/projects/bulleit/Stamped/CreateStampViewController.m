@@ -764,7 +764,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
     NSString* blurb = [NSString stringWithFormat:@"\u201c%@\u201d", stamp.blurb];
     if (stamp.blurb.length == 0)
-      blurb = [stamp.entityObject.title stringByAppendingString:@"."];
+      blurb = stamp.entityObject.title;
 
     NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
     if (blurb.length > substring.length)
