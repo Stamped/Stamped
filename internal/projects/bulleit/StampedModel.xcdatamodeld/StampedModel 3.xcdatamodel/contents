@@ -79,6 +79,7 @@
     <entity name="Stamp" representedClassName="Stamp">
         <attribute name="blurb" optional="YES" attributeType="String"/>
         <attribute name="created" optional="YES" attributeType="Date"/>
+        <attribute name="deleted" optional="YES" attributeType="Boolean"/>
         <attribute name="imageDimensions" optional="YES" attributeType="String"/>
         <attribute name="imageURL" optional="YES" attributeType="String"/>
         <attribute name="isLiked" optional="YES" attributeType="Boolean"/>

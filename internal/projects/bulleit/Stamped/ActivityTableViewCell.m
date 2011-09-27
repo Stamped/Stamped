@@ -97,26 +97,27 @@ static const CGFloat kActivityBadgeSize = 21.0;
 }
 
 - (void)setEvent:(Event*)event {
-  if (event == event_)
-    return;
-  
-  [event_ release];
-  event_ = [event retain];
+  if (event != event_) {
+    [event_ release];
+    event_ = [event retain];
+  }
+
   if (event) {
     userImageView_.imageURL = event.user.profileImageURL;
     timestampLabel_.text = [Util userReadableTimeSinceDate:event.created];
+    NSLog(@"Event genre: %@, timestamp: %@", event.genre, timestampLabel_.text);
     [timestampLabel_ sizeToFit];
     NSInteger benefit = event.benefit.integerValue;
     if (benefit > 0) {
       NSString* label = @"stamps";
       if (benefit == 1)
         label = @"stamp";
-      addedStampsLabel_.text = [NSString stringWithFormat:@"+%d %@", event.benefit.integerValue, label];
+      addedStampsLabel_.text = [NSString stringWithFormat:@"+%d %@", benefit, label];
       [addedStampsLabel_ sizeToFit];
-    } else {
-      addedStampsLabel_.hidden = YES;
     }
+    addedStampsLabel_.hidden = (benefit == 0);
   }
+  [self.contentView setNeedsDisplay];
 }
 
 - (void)dealloc {

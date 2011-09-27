@@ -49,7 +49,6 @@
   if (!event)
     return;
 
-  userImageView_.imageURL = event.user.profileImageURL;
   if ([event.genre isEqualToString:@"mention"]) {
     badgeImageView_.image = [UIImage imageNamed:@"activity_mention_badge"];
   } else {
@@ -63,6 +62,7 @@
   CGRect textFrame = textLabel_.frame;
   textFrame.size = stringSize;
   textLabel_.frame = textFrame;
+  [self.contentView setNeedsDisplay];
 }
 
 - (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color {
