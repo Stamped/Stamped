@@ -630,16 +630,24 @@ class StampedAPI(AStampedAPI):
             entityRequest = entityRequest.value
         entityId    = entityRequest.pop('entity_id', None)
         searchId    = entityRequest.pop('search_id', None)
-
-        if entityId == None and searchId == None:
-            msg = "Required field missing (entityId or search_id)"
+        
+        if entityId is None and searchId is None:
+            msg = "Required field missing (entity_id or search_id)"
             logs.warning(msg)
             raise InputError(msg)
-
-        if searchId != None and searchId.startswith('T_'):
-            return self._convertSearchId(searchId)
+        
+        if searchId is not None and searchId.startswith('T_'):
+            entityId = self._convertSearchId(searchId)
+        
         if not entityId:
             entityId = searchId
+        
+        return self._getEntity(entityId)
+    
+    def _getEntity(self, entityId):
+        if entityId is not None and entityId.startswith('T_'):
+            entityId = self._convertSearchId(searchId)
+        
         return self._entityDB.getEntity(entityId)
     
     def addEntity(self, entity):
