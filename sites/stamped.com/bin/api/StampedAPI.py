@@ -2183,7 +2183,10 @@ class StampedAPI(AStampedAPI):
             logs.warning("ERROR: could not match temp entity id %s" % search_id)
             return None
         
+        del entity.entity_id
         entity = self._entityMatcher.addOne(entity)
+        assert entity.entity_id is not None
+        
         return entity.entity_id
     
     def _addEntity(self, entity):
