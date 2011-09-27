@@ -77,6 +77,9 @@ def inbox(request):
 
     result = []
     for stamp in stamps:
-        result.append(HTTPStamp().importSchema(stamp).exportSparse())
+        if 'deleted' in stamp:
+            result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
+        else:
+            result.append(HTTPStamp().importSchema(stamp).exportSparse())
 
     return transformOutput(result)
