@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, utils
-import logs, re, Blacklist
+import logs, re, time, Blacklist
 
 from datetime        import datetime
 from errors          import *
@@ -48,7 +48,33 @@ class StampedAPI(AStampedAPI):
         # Enable / Disable Functionality
         self._activity = True
         self._rollback = []
-
+    
+    def API_CALL(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            t1 = time.time()
+            error = False
+            
+            try:
+                ret = f(*args, **kwargs)
+            except Exception, e:
+                error = True
+                raise
+            finally:
+                t2 = time.time()
+                
+                duration = (t2 - t1) * 1000.0
+                stat = 'stamped.api.methods.%s' % f.func_name
+                self = args[0]
+                self._statsSink.time(stat, duration)
+                
+                if error:
+                    stat = 'stamped.api.methods.errors.%s' % f.func_name
+                    self._statsSink.increment(stat)
+            
+            return ret
+        return wrapper
+    
     def HandleRollback(f):
         @wraps(f)
         def rollbackWrapper(*args, **kwargs):
@@ -78,6 +104,7 @@ class StampedAPI(AStampedAPI):
     #     #  ####   ####   ####   ####  #    #   #    ####  
     """
     
+    @API_CALL
     @HandleRollback
     def addAccount(self, account, imageData=None):
         ### TODO: Check if email already exists?
@@ -116,7 +143,7 @@ class StampedAPI(AStampedAPI):
         # Create account
         account = self._accountDB.addAccount(account)
         self._rollback.append((self._accountDB.removeAccount, [account.user_id]))
-
+        
         # Add profile image
         if imageData:
             image   = self._imageDB.getImage(imageData)
@@ -152,6 +179,7 @@ class StampedAPI(AStampedAPI):
 
         return account
     
+    @API_CALL
     def removeAccount(self, authUserId):
         
         ### TODO: Remove all activity, stamps, entities, images, etc. for user
@@ -165,6 +193,7 @@ class StampedAPI(AStampedAPI):
         
         return account
     
+    @API_CALL
     def updateAccountSettings(self, authUserId, data):
         
         ### TODO: Reexamine how updates are done
@@ -202,10 +231,12 @@ class StampedAPI(AStampedAPI):
 
         return account
     
+    @API_CALL
     def getAccount(self, authUserId):
         account = self._accountDB.getAccount(authUserId)
         return account
     
+    @API_CALL
     def updateProfile(self, authUserId, data):
         
         ### TODO: Reexamine how updates are done
@@ -220,6 +251,7 @@ class StampedAPI(AStampedAPI):
 
         return account
     
+    @API_CALL
     def customizeStamp(self, authUserId, data):
         ### TODO: Reexamine how updates are done
 
@@ -246,13 +278,14 @@ class StampedAPI(AStampedAPI):
 
         return account
     
+    @API_CALL
     def updateProfileImage(self, authUserId, data):
         image   = self._imageDB.getImage(data)
         user    = self._userDB.getUser(authUserId)
         self._imageDB.addProfileImage(user.screen_name.lower(), image)
         
         return True
-
+    
     def checkAccount(self, login):
         valid = False
         try:
@@ -278,12 +311,14 @@ class StampedAPI(AStampedAPI):
                 msg = "Invalid input"
                 logs.warning(msg)
                 raise InputError(msg)
-
+    
+    @API_CALL
     def updateLinkedAccounts(self, authUserId, linkedAccounts):
         self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
-
+        
         return True
     
+    @API_CALL
     def resetPassword(self, params):
         raise NotImplementedError
     
@@ -317,6 +352,7 @@ class StampedAPI(AStampedAPI):
 
     ### PUBLIC
     
+    @API_CALL
     def getUser(self, userRequest, authUserId):
         user = self._getUserFromIdOrScreenName(userRequest)
         
@@ -338,6 +374,7 @@ class StampedAPI(AStampedAPI):
         
         return user
     
+    @API_CALL
     def getUsers(self, userIds, screenNames, authUserId):
 
         ### TODO: Add check for privacy settings
@@ -346,6 +383,7 @@ class StampedAPI(AStampedAPI):
 
         return users
     
+    @API_CALL
     def findUsersByEmail(self, authUserId, emails):
         
         ### TODO: Add check for privacy settings?
@@ -354,6 +392,7 @@ class StampedAPI(AStampedAPI):
         
         return users
     
+    @API_CALL
     def findUsersByPhone(self, authUserId, phone):
 
         ### TODO: Add check for privacy settings?
@@ -362,6 +401,7 @@ class StampedAPI(AStampedAPI):
         
         return users
     
+    @API_CALL
     def findUsersByTwitter(self, authUserId, twitterIds):
 
         ### TODO: Add check for privacy settings?
@@ -370,6 +410,7 @@ class StampedAPI(AStampedAPI):
         
         return users
     
+    @API_CALL
     def searchUsers(self, query, limit, authUserId):
 
         limit = self._setLimit(limit, cap=20)
@@ -380,6 +421,7 @@ class StampedAPI(AStampedAPI):
 
         return users
     
+    @API_CALL
     def getPrivacy(self, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
         
@@ -398,6 +440,7 @@ class StampedAPI(AStampedAPI):
     #       #    # # ###### #    # #####   ####  
     """
     
+    @API_CALL
     def addFriendship(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
         
@@ -452,6 +495,7 @@ class StampedAPI(AStampedAPI):
         
         return user
     
+    @API_CALL
     def removeFriendship(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
         
@@ -479,9 +523,11 @@ class StampedAPI(AStampedAPI):
         
         return user
     
+    @API_CALL
     def approveFriendship(self, data, auth):
         raise NotImplementedError
     
+    @API_CALL
     def checkFriendship(self, authUserId, userRequest):
         userA = self._getUserFromIdOrScreenName({
                     'user_id': userRequest.user_id_a,
@@ -520,6 +566,7 @@ class StampedAPI(AStampedAPI):
         
         return self._friendshipDB.checkFriendship(friendship)
     
+    @API_CALL
     def getFriends(self, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
 
@@ -529,6 +576,7 @@ class StampedAPI(AStampedAPI):
 
         return friends
     
+    @API_CALL
     def getFollowers(self, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
 
@@ -538,6 +586,7 @@ class StampedAPI(AStampedAPI):
 
         return followers
     
+    @API_CALL
     def addBlock(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
         
@@ -565,6 +614,7 @@ class StampedAPI(AStampedAPI):
 
         return user
     
+    @API_CALL
     def checkBlock(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
         
@@ -577,11 +627,13 @@ class StampedAPI(AStampedAPI):
             return True
         return False
     
+    @API_CALL
     def getBlocks(self, authUserId):
         blocks = self._friendshipDB.getBlocks(authUserId)
 
         return blocks
     
+    @API_CALL
     def removeBlock(self, authUserId, userRequest):
         user = self._getUserFromIdOrScreenName(userRequest)
 
@@ -600,7 +652,8 @@ class StampedAPI(AStampedAPI):
         ### TODO: Reenable activity items that were hidden before
 
         return user
-
+    
+    @API_CALL
     def inviteFriend(self, authUserId, email):
         # Validate email address
         email = str(email).lower().strip()
@@ -650,6 +703,7 @@ class StampedAPI(AStampedAPI):
         
         return self._entityDB.getEntity(entityId)
     
+    @API_CALL
     def addEntity(self, entity):
         entity.timestamp.created = datetime.utcnow()
         entity = self._entityDB.addEntity(entity)
@@ -661,6 +715,7 @@ class StampedAPI(AStampedAPI):
         ### TODO: Check if user has access to this entity?
         return entity
     
+    @API_CALL
     def updateCustomEntity(self, authUserId, entityId, data):
         ### TODO: Reexamine how updates are done
         entity = self._entityDB.getEntity(entityId)
@@ -681,6 +736,7 @@ class StampedAPI(AStampedAPI):
         
         return entity
 
+    @API_CALL
     def updateEntity(self, data, auth):
         entity = self._entityDB.getEntity(data['entity_id'])
         
@@ -693,9 +749,11 @@ class StampedAPI(AStampedAPI):
         
         return entity
     
+    @API_CALL
     def removeEntity(self, entityId):
         return self._entityDB.removeEntity(entityId)
     
+    @API_CALL
     def removeCustomEntity(self, authUserId, entityId):
         entity = self._entityDB.getEntity(entityId)
 
@@ -703,6 +761,7 @@ class StampedAPI(AStampedAPI):
 
         return entity
     
+    @API_CALL
     def searchEntities(self, 
                        query, 
                        coords=None, 
@@ -893,6 +952,7 @@ class StampedAPI(AStampedAPI):
 
         return stamps
 
+    @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
         user        = self._userDB.getUser(authUserId)
@@ -976,7 +1036,7 @@ class StampedAPI(AStampedAPI):
 
             ### TODO: How do we handle credited users that have not yet joined?
             stamp.credit = credit
-            
+        
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
         self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
@@ -1040,11 +1100,11 @@ class StampedAPI(AStampedAPI):
         # Give credit
         if stamp.credit != None and len(stamp.credit) > 0:
             for item in credit:
-
+                
                 # Only run if user is flagged as credited
                 if item.user_id not in creditedUserIds:
                     continue
-
+                
                 # Assign credit
                 self._rollback.append((self._stampDB.removeCredit, \
                     {'creditedUserId': item.user_id, 'stamp': stamp}))
@@ -1122,7 +1182,8 @@ class StampedAPI(AStampedAPI):
                 self._activityDB.addActivity(mentionedUserIds, activity)
 
         return stamp
-            
+    
+    @API_CALL
     def updateStamp(self, authUserId, stampId, data):        
         stamp       = self._stampDB.getStamp(stampId)       
         user        = self._userDB.getUser(authUserId)
@@ -1297,6 +1358,7 @@ class StampedAPI(AStampedAPI):
 
         return stamp
     
+    @API_CALL
     def removeStamp(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
@@ -1340,7 +1402,8 @@ class StampedAPI(AStampedAPI):
         stamp.timestamp.modified = datetime.utcnow()
 
         return stamp
-        
+    
+    @API_CALL
     def getStamp(self, stampId, authUserId=None):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
@@ -1358,7 +1421,8 @@ class StampedAPI(AStampedAPI):
                 raise InsufficientPrivilegesError(msg)
       
         return stamp
-
+    
+    @API_CALL
     def getStampFromUser(self, screenName, stampNumber):
         user = self._userDB.getUserByScreenName(screenName)
         stamp = self._stampDB.getStampFromUserStampNum(user.user_id, \
@@ -1372,6 +1436,7 @@ class StampedAPI(AStampedAPI):
 
         return stamp
     
+    @API_CALL
     def updateStampImage(self, authUserId, stampId, data):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
@@ -1403,6 +1468,7 @@ class StampedAPI(AStampedAPI):
      #####   ####  #    # #    # ###### #    #   #    ####  
     """
 
+    @API_CALL
     @HandleRollback
     def addComment(self, authUserId, stampId, blurb):
         user    = self._userDB.getUser(authUserId)
@@ -1535,6 +1601,7 @@ class StampedAPI(AStampedAPI):
 
         return comment
     
+    @API_CALL
     def removeComment(self, authUserId, commentId):
         comment = self._commentDB.getComment(commentId)
 
@@ -1567,6 +1634,7 @@ class StampedAPI(AStampedAPI):
 
         return comment
     
+    @API_CALL
     def getComments(self, stampId, authUserId, **kwargs): 
         stamp = self._stampDB.getStamp(stampId)
 
@@ -1626,6 +1694,7 @@ class StampedAPI(AStampedAPI):
     ####### # #    # ######  ####  
     """
 
+    @API_CALL
     def addLike(self, authUserId, stampId):
         stamp       = self._stampDB.getStamp(stampId)
         stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
@@ -1702,6 +1771,7 @@ class StampedAPI(AStampedAPI):
 
         return stamp
     
+    @API_CALL
     def removeLike(self, authUserId, stampId):
         # Remove like (if it exists)
         if not self._stampDB.removeLike(authUserId, stampId):
@@ -1826,6 +1896,7 @@ class StampedAPI(AStampedAPI):
 
         return stamps[:limit]
     
+    @API_CALL
     def getInboxStamps(self, authUserId, **kwargs):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
         
@@ -1834,6 +1905,7 @@ class StampedAPI(AStampedAPI):
         
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     
+    @API_CALL
     def getUserStamps(self, userRequest, authUserId, **kwargs):
         user = self._getUserFromIdOrScreenName(userRequest)
 
@@ -1861,10 +1933,12 @@ class StampedAPI(AStampedAPI):
 
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     
+    @API_CALL
     def getCreditedStamps(self, userRequest, authUserId, **kwargs):
         ### TODO: Implement
         raise NotImplementedError
     
+    @API_CALL
     def getUserMentions(self, userID, limit=None):
         ### TODO: Implement
         raise NotImplementedError
@@ -1881,6 +1955,7 @@ class StampedAPI(AStampedAPI):
     #       #    #   ##   ######  ####  
     """
 
+    @API_CALL
     def addFavorite(self, authUserId, entityId, stampId=None):
         entity  = self._entityDB.getEntity(entityId)
 
@@ -1938,6 +2013,7 @@ class StampedAPI(AStampedAPI):
 
         return favorite
     
+    @API_CALL
     def removeFavorite(self, authUserId, entityId):
         favorite = self._favoriteDB.getFavorite(authUserId, entityId)
         self._favoriteDB.removeFavorite(authUserId, entityId)
@@ -1956,6 +2032,7 @@ class StampedAPI(AStampedAPI):
 
         return favorite
     
+    @API_CALL
     def getFavorites(self, authUserId, **kwargs):        
 
         ### TODO: Add slicing (before, since, limit, quality)
@@ -2012,6 +2089,7 @@ class StampedAPI(AStampedAPI):
     #     #  ####    #   #   ##   #   #     #   
     """
     
+    @API_CALL
     def getActivity(self, authUserId, **kwargs):
         quality     = kwargs.pop('quality', 3)
         limit       = kwargs.pop('limit', None)
