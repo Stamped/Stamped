@@ -424,7 +424,7 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def searchUsers(self, query, limit, authUserId):
 
-        limit = self._setLimit(limit, cap=20)
+        limit = self._setLimit(limit, cap=10)
 
         ### TODO: Add check for privacy settings
         

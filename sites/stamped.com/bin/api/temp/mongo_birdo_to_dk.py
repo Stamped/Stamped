@@ -29,6 +29,8 @@ def main():
 
         print 
 
+    convertUsers()
+
 
 def mongoExportImport(collection):
 
@@ -58,7 +60,19 @@ def mongoImportJSON(collection):
     pp.wait()
 
 
+def convertUsers():
+    user_collection = new_database['users']
+    users = user_collection.find()
+
+    for user in users:
+
+        if 'name_lower' not in user:
+            name = user['name'].lower()
+            user_collection.update(
+                {'_id': user['_id']},
+                {'$set': {'name_lower': name}}
+            )
+
 if __name__ == '__main__':  
     main()
-
 

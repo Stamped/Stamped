@@ -5,8 +5,9 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals
+import Globals, re
 from datetime import datetime
+from math import log10
 
 from Schemas import *
 from AMongoCollection import AMongoCollection
@@ -67,14 +68,69 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         return result
 
     def searchUsers(self, query, limit=0):
-        ### TODO: Using a simple regex here. Need to rank results at some point...
-        query = {"screen_name": {"$regex": '^%s' % query, "$options": "i"}}
-        data = self._collection.find(query).limit(limit)
+        query = query.lower()
+        query = query.replace('[', '\[?')
+        query = query.replace(']', '\]?')
+        query = query.replace('(', '\(?')
+        query = query.replace(')', '\)?')
+        query = query.replace('|', '\|')
+        query = query.replace('.', '\.?')
+        query = query.replace(':', ':?')
+        query = query.replace('&', ' & ')
+        
+        # process individual words in query
+        words = query.split(' ')
+        if len(words) > 1:
+            for i in xrange(len(words)):
+                word = words[i]
+                
+                if word.endswith('s'):
+                    word += '?'
+                else:
+                    word += 's?'
+                
+                words[i] = word
+            query = ' '.join(words).strip()
+        
+        query = query.replace(' ands? ', ' (and|&)? ')
+        query = query.replace("$", "[$st]?")
+        query = query.replace("5", "[5s]?")
+        query = query.replace("!", "[!li]?")
+        query = query.replace('-', '[ -]?')
+        query = query.replace(' ', '[ -]?')
+        query = query.replace("'", "'?")
 
-        result = []
+        user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
+                              {"name_lower": {"$regex": query}}]}
+        data = self._collection.find(user_query).limit(min(50, limit*4))
+
+        prefix_re = re.compile(r"^%s" % query, re.IGNORECASE)
+
+        results = []
         for item in data:
-            result.append(self._convertFromMongo(item))
-        return result
+            user = self._convertFromMongo(item)
+            
+            # length of screen name (shorter = better)
+            score = (20.0 - len(user.screen_name)) / 20.0 / 2.0
+
+            # number of stamps
+            score += log10(user.num_stamps) / 4.0
+
+            # number of followers
+            score += log10(user.num_followers) / 8.0
+            
+            # boost 'em if it's a prefix match
+            if prefix_re.match(user.screen_name):
+                score += 10
+
+            results.append((score, user))
+
+        results = sorted(results, key=lambda k: -k[0])
+        users = []
+        for i in xrange(min(limit, len(results))):
+            users.append(results[i][1])
+
+        return users
     
     def flagUser(self, user):
         ### TODO
