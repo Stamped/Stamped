@@ -32,17 +32,20 @@ def parseCommandLine():
     parser.add_option("-e", "--errors", action="store_true", dest="show_errors", 
         default=False, help="Only display errors in results")
     
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", 
+        default=False, help="Set verbosity of logs")
+    
     parser.add_option("-u", "--user-id", dest="user_id", 
         default=None, type="string", help="Filter results on user id")
     
     parser.add_option("-l", "--limit", dest="limit", 
         default=10, type="int", help="Limit number of results returned")
     
-    parser.add_option("-v", "--level", dest="level", 
-        default='info', type="string", help="Set log level for display (debug, info, warning, error, or critical)")
-    
     parser.add_option("-p", "--path", dest="path", 
         default=None, type="string", help="Filter results on url path")
+    
+    parser.add_option("-t", "--severity", dest="severity", 
+        default=None, type="string", help="Filter results on severity (debug, info, warning, error, critical)")
     
     (options, args) = parser.parse_args()
 
@@ -50,26 +53,26 @@ def parseCommandLine():
 
 def main():
     # parse commandline
-    options = parseCommandLine()
-    options = options.__dict__
+    options     = parseCommandLine()
+    options     = options.__dict__
 
-    user_id = options.pop('user_id', None)
-    limit   = options.pop('limit', 10)
-    errors  = options.pop('show_errors', False)
-    path    = options.pop('path', False)
+    user_id     = options.pop('user_id', None)
+    limit       = options.pop('limit', 10)
+    errors      = options.pop('show_errors', False)
+    path        = options.pop('path', False)
+    severity    = options.pop('severity', None)
+    verbose     = options.pop('verbose', False)
 
-    if options['level'].lower() == 'debug':
+    if severity not in ['debug', 'info', 'warning', 'error', 'critical']:
+        severity = None
+
+    if verbose:
         levels = ['debug', 'info', 'warning', 'error', 'critical']
-    elif options['level'].lower() == 'info':
-        levels = ['info', 'warning', 'error', 'critical']
-    elif options['level'].lower() == 'warning':
-        levels = ['warning', 'error', 'critical']
-    elif options['level'].lower() == 'error':
-        levels = ['error', 'critical']
     else:
-        levels = ['critical']
+        levels = ['info', 'warning', 'error', 'critical']
 
-    logs = MongoLogsCollection().getLogs(userId=user_id, limit=limit, errors=errors, path=path)
+    logs = MongoLogsCollection().getLogs(userId=user_id, limit=limit, errors=errors, \
+                                            path=path, severity=severity)
     for i in xrange(len(logs)):
         print 
         print

@@ -323,7 +323,7 @@ class StampedAPILikesPass(StampedAPIStampLikesTest):
             self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
             self.assertEqual(result['num_likes'], i + 1)
 
-            if i + 1 >= 5:
+            if i + 1 >= 3:
                 self.assertTrue(result['like_threshold_hit'])
             else:
                 if 'like_threshold_hit' in result:

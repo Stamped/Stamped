@@ -286,6 +286,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)setNumLikes:(NSUInteger)likes {
+  BOOL adding = numLikes_ < likes;
+
   numLikes_ = likes;
 
   numLikesLabel_.hidden = likes == 0;
@@ -293,10 +295,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   numLikesLabel_.text = [NSNumber numberWithUnsignedInteger:likes].stringValue;
   [numLikesLabel_ sizeToFit];
 
-  // If there is a credited user then we already have the room.
-  if (stamp_.credits.count > 0)
+  // If there is a credited user or an existing like then we already have the room.
+  if (stamp_.credits.count > 0 || (adding && numLikes_ > 1) || (!adding && numLikes_ > 0))
     return;
-  
+
   CGFloat heightDelta = 21;
   if (likes == 0)
     heightDelta *= -1;

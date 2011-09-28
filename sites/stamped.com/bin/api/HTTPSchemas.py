@@ -703,10 +703,11 @@ class HTTPStamp(Schema):
             self.created                = schema.timestamp.created
             self.modified               = schema.timestamp.modified
 
-            self.is_liked               = False
-            self.is_fav                 = False
+            self.is_liked = False
             if schema.is_liked:
                 self.is_liked = True
+
+            self.is_fav = False
             if schema.is_fav:
                 self.is_fav = True
 
@@ -834,7 +835,7 @@ class HTTPFavorite(Schema):
             entity              = EntityMini(data.pop('entity', None))
             stamp               = Stamp(data.pop('stamp', None))
             data['entity']      = HTTPEntity().importSchema(entity).exportSparse()
-
+            
             if stamp.stamp_id != None:
                 data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
 
@@ -896,36 +897,3 @@ class HTTPActivity(Schema):
         return self
 
 
-### TEMPORARY
-class HTTPActivityOld(Schema):
-    def setSchema(self):
-        self.activity_id        = SchemaElement(basestring, required=True)
-        self.genre              = SchemaElement(basestring, required=True)
-        self.user               = HTTPUserMini(required=True)
-        self.comment            = HTTPComment()
-        self.stamp              = HTTPStamp()
-        self.favorite           = HTTPFavorite()
-        self.created            = SchemaElement(basestring)
-
-    def importSchema(self, schema, stamp=None, comment=None, favorite=None):
-        if schema.__class__.__name__ == 'Activity':
-            data                = schema.exportSparse()
-            user                = UserMini(data.pop('user', None))
-
-            data['user']        = HTTPUserMini().importSchema(user).exportSparse()
-
-            if stamp != None and stamp.stamp_id != None:
-                data['stamp']   = HTTPStamp().importSchema(stamp).exportSparse()
-                if 'num_comments' in data['stamp']:
-                    del(data['stamp']['num_comments'])
-            if comment != None and comment.comment_id != None:
-                data['comment'] = HTTPComment().importSchema(comment).exportSparse()
-            if favorite != None and favorite.favorite_id != None:
-                data['favorite']= HTTPFavorite().importSchema(favorite).exportSparse()
- 
-            self.importData(data, overflow=True)
-
-            self.created = schema.timestamp.created
-        else:
-            raise NotImplementedError
-        return self

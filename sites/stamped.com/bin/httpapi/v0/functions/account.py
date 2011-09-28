@@ -17,6 +17,7 @@ def create(request):
 
     account     = stampedAPI.addAccount(account, schema.profile_image)
     user        = HTTPUser().importSchema(account)
+    logs.user(user.user_id)
 
     token       = stampedAuth.addRefreshToken(client_id, user.user_id)
 

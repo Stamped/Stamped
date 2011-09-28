@@ -30,8 +30,9 @@ class StampedAPIOAuthLogin(StampedAPIOAuthTest):
             "password": "12345"
         }
         result = self.handlePOST(path, data)
-        self.assertTrue(len(result['access_token']) == 22)
-        self.assertTrue(len(result['refresh_token']) == 43)
+        self.assertTrue(len(result['token']['access_token']) == 22)
+        self.assertTrue(len(result['token']['refresh_token']) == 43)
+        self.assertTrue(result['user']['screen_name'] == self.userA['screen_name'])
 
     def test_login_email(self):
         path = "oauth2/login.json"
@@ -42,8 +43,9 @@ class StampedAPIOAuthLogin(StampedAPIOAuthTest):
             "password": "12345"
         }
         result = self.handlePOST(path, data)
-        self.assertTrue(len(result['access_token']) == 22)
-        self.assertTrue(len(result['refresh_token']) == 43)
+        self.assertTrue(len(result['token']['access_token']) == 22)
+        self.assertTrue(len(result['token']['refresh_token']) == 43)
+        self.assertTrue(len(result['user']['color_primary']) == 6)
 
     def test_failed_login_screen_name(self):
         path = "oauth2/login.json"

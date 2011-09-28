@@ -153,7 +153,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         for stamp in result:
             if stamp['stamp_id'] == self.stampA['stamp_id']:
                 self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
-                self.assertTrue('is_liked' not in stamp)
+                self.assertTrue(stamp['is_liked'] == False)
 
     def test_fav(self):
         favorite = self.createFavorite(self.tokenB, self.entityA['entity_id'])
@@ -180,7 +180,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
         for stamp in result:
             if stamp['stamp_id'] == self.stampA['stamp_id']:
                 self.assertTrue(stamp['blurb'] == self.stampA['blurb'])
-                self.assertTrue('is_fav' not in stamp)
+                self.assertTrue(stamp['is_fav'] == False)
 
         self.deleteFavorite(self.tokenB, self.entityA['entity_id'])
 
