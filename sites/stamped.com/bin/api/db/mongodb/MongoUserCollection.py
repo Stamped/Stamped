@@ -114,14 +114,16 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             score = (20.0 - len(user.screen_name)) / 20.0 / 2.0
 
             # number of stamps
-            score += log10(user.num_stamps) / 4.0
+            if user.num_stamps > 0:
+                score += (log10(user.num_stamps) / 4.0)
 
             # number of followers
-            score += log10(user.num_followers) / 8.0
+            if user.num_followers > 0:
+                score += (log10(user.num_followers) / 8.0)
             
             # boost 'em if it's a prefix match
             if prefix_re.match(user.screen_name):
-                score += 10
+                score += 10.0
 
             results.append((score, user))
 
