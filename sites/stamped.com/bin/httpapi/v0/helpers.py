@@ -136,7 +136,7 @@ def checkOAuth(request):
         logs.warning(msg)
         raise StampedHTTPError("invalid_token", 401, msg)
 
-def parseRequest(schema, request):
+def parseRequest(schema, request, **kwargs):
     ### Parse Request
     try:
         if request.method == 'GET':
@@ -156,8 +156,12 @@ def parseRequest(schema, request):
         data.pop('client_secret', None)
         
         logData = data.copy()
-        if 'password' in logData:
-            logData['password'] = '*****'
+
+        obfuscate = kwargs.pop('obfuscate', [])
+        obfuscate.append('password')
+        for item in obfuscate:
+            if item in logData:
+                logData[item] = '*****'
         logs.form(logData)
         
         if schema is None:
@@ -177,7 +181,7 @@ def parseRequest(schema, request):
         
         raise StampedHTTPError("bad_request", 400)
 
-def parseFileUpload(schema, request, fileName='image'):
+def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
     try:
         if request.method != 'POST':
@@ -207,6 +211,12 @@ def parseFileUpload(schema, request, fileName='image'):
         data.pop('client_secret', None)
 
         logData = data.copy()
+
+        obfuscate = kwargs.pop('obfuscate', [])
+        obfuscate.append('password')
+        for item in obfuscate:
+            if item in logData:
+                logData[item] = '*****'
         if fileName in logData:
             logData[fileName] = 'FILE (SIZE: %s)' % f.size
         logs.form(logData)
