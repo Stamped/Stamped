@@ -8,11 +8,12 @@ __license__ = "TODO"
 import Globals, utils
 
 from Entity                 import *
+from Schemas                import *
 from utils                  import lazyProperty
 from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
+from StatsDSink             import StatsDSink
 from match.EntityMatcher    import EntityMatcher
-from Schemas                import *
 
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoEntityCollection       import MongoEntityCollection
@@ -98,6 +99,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _logsDB(self):
         return MongoLogsCollection()
+    
+    @lazyProperty
+    def _statsSink(self):
+        return StatsDSink()
     
     @lazyProperty
     def _tempEntityDB(self):
