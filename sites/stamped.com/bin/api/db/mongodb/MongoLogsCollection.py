@@ -30,7 +30,13 @@ class MongoLogsCollection(AMongoCollection):
             print e
             raise
 
-    def getLogs(self, userId=None, limit=10, errors=False, path=None):
+    def getLogs(self, userId=None, **kwargs):
+        limit       = kwargs.pop('limit', 10)
+        errors      = kwargs.pop('errors', False)
+        path        = kwargs.pop('path', None)
+        severity    = kwargs.pop('severity', None)
+        logId       = kwargs.pop('log_id', None)
+
         query = {}
         if userId != None:
             query['user_id'] = userId 
@@ -38,11 +44,16 @@ class MongoLogsCollection(AMongoCollection):
             query['result'] = {'$exists': True}
         if path != None:
             query['path'] = path
+        if severity != None:
+            query[severity] = True
+
         docs = self._collection.find(query).limit(limit).sort('begin', pymongo.DESCENDING)
+        
         logs = []
         for doc in docs:
             if 'form' in doc:
                 doc['form'] = ast.literal_eval(doc['form'])
             logs.append(doc)
+        
         return logs
 

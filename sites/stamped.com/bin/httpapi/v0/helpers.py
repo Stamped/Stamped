@@ -42,7 +42,7 @@ def handleHTTPRequest(fn):
         
         except InputError as e:
             logs.warning("400 Error: %s" % (e.msg))
-            response = HttpResponse("invalid_request", status=e.code)
+            response = HttpResponse("invalid_request", status=400)
             logs.error(response.status_code)
             return response
         
