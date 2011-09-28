@@ -353,6 +353,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                 delegate:self
                                         finishedSelector:@selector(viewController:finishedWithAuth:error:)];
   [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
+  NSString* html = @"<html><body style='background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAMAAACelLz8AAAAq1BMVEXm5uXp6unm5ubm5ebp6erl5ebk5OTk5OPn5+fo5+fl5eXp6eno5+jq6erj4uLo6ejo6Onl5ubp6Onn6Ojn5ufo6eni4uLi4+Pq6unm5eXj4+Pk5eTk5eXk4+To6Ojl5eTl5OTn5+bk5OXj5OPn5+jj4uPm5+fl5OXj5OTm5ufi4+Lk4+Pn6Ofn5ubp6ejp6Ojq6enm5+bj4+Lq6uro6Ofl5uXp6uri4uPj4+RSUFBuAAACFklEQVQYGQXBC4KCIBQAwBcmIJj5L0Hwm2Kapmnb/U+2MwAnZJ1tGxNqOYwT9+JdfdcOwsiBOInT2z0TMsdKa3ErSiFTESG/Ag12WBdNG9Yi0po+eNL1NiDvkgDzDdHJaXhSxEeT12nBJv1yZFZDS19hOqPMHi7lYnNWvF1d9mG7KsD5VbGBY+neO7a99Icn6W4wZ2/Yypo0TxSEtvTVY7EVbth5i4kvAI2n8WysyTrMeHravkWPlRBzUAbsLbX/naxd2e2WbqWZPbRUz0p4MGdzR2scSqXldHNfaZ9lnyh/5xs0gcHqir9TNePWxHSosIzN9rduYMnTVVCR1imuBjr3GE1Y97HxBngOgcBRna5os0QWeETNQUsFnySYlQ2tdlxiogn7zlLsykg+dbcvvB2a34/xd21E/JvtfqPaRVG/fxMQK5VLKKqHrH4BCaJD010d9Dc84Gfu0WQ6c2msFHVFz5cd4WBgXgnttPQZFjQWHbpnxyMc84T5J5QzoGsypO3O+MpbZSw9R6hCsdafB/zMrrhafFmJt1vGInbUfilUfu+g2uLCOgKceBsJDGo82c9G4PMLw84evjPP17XztVIjr3U+D05HVwxIh/hnW3ciuMFbFXwplgbv5NwDwqbzut5C0ITen7FUJdKeaTGOQISmxcUXE0NLvgqHNevgwrt1CSQ7lbq7ttTJtjDRtN+POug+gy7/AT1WRIG2q/GCAAAAAElFTkSuQmCC);font:14px Helvetica-Bold;color:#666;text-shadow:#fff 0px 1px'><div style='padding-top:180px;' align=center>Loading Twitter sign-in page...</div></body></html>";
+  [authVC setInitialHTMLString:html];
   [self.navigationController pushViewController:authVC animated:YES];
   [authVC release];
 }

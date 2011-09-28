@@ -279,7 +279,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   activityGradientLayer_.frame = activityView_.bounds;
+  [CATransaction commit];
 }
 
 - (void)setNumLikes:(NSUInteger)likes {
@@ -650,7 +653,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   frame = activityView_.frame;
   frame.size.height += CGRectGetHeight(commentView.frame);
   activityView_.frame = frame;
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   activityGradientLayer_.frame = activityView_.bounds;
+  [CATransaction commit];
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + 60);

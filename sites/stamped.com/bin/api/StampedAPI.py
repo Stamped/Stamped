@@ -1744,7 +1744,7 @@ class StampedAPI(AStampedAPI):
 
         # Give credit once at five likes
         benefit = False
-        if stamp.num_likes >= 5 and not stamp.like_threshold_hit:
+        if stamp.num_likes >= 3 and not stamp.like_threshold_hit:
             benefit = True
 
             # Update stamp stats

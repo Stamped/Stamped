@@ -702,8 +702,13 @@ class HTTPStamp(Schema):
             self.like_threshold_hit     = schema.like_threshold_hit
             self.created                = schema.timestamp.created
             self.modified               = schema.timestamp.modified
-            self.is_liked               = schema.is_liked
-            self.is_fav                 = schema.is_fav
+
+            self.is_liked               = False
+            self.is_fav                 = False
+            if schema.is_liked:
+                self.is_liked = True
+            if schema.is_fav:
+                self.is_fav = True
 
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
