@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
 import htmlentitydefs, traceback, urllib, urllib2
-import aws, logs, math
+import aws, logs, math, random
 
 from boto.ec2.connection import EC2Connection
 from subprocess          import Popen, PIPE
@@ -614,4 +614,22 @@ def getNumLines(f):
     
     f.seek(0)
     return numLines
+
+def sampleCDF(cdf, item_func=lambda i: i):
+    total = 0.0
+    
+    for item in cdf:
+        total += item_func(item)
+    
+    x = random.random() * total
+    i = 0
+    for item in cdf:
+        x -= item_func(item)
+        
+        if x <= 0:
+            return i
+        
+        i += 1
+    
+    return i - 1
 

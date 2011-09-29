@@ -69,12 +69,8 @@ class StampedAPIFavoritesAlreadyComplete(StampedAPIFavoriteTest):
 
 class StampedAPIFavoritesAlreadyOnList(StampedAPIFavoriteTest):
     def test_already_on_list(self):
-        try:
+        with expected_exception():
             self.favoriteB = self.createFavorite(self.tokenB, self.entity['entity_id'])
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
 class StampedAPIFavoritesViaStamp(StampedAPIFavoriteTest):
     def test_show_via_stamp(self):

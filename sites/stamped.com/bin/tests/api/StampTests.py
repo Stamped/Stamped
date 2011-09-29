@@ -205,7 +205,7 @@ class StampedAPIStampsLimits(StampedAPIStampTest):
         self.assertEqual(result['num_stamps'], self.userA['num_stamps_left'])
 
         # User should now be over their limit
-        try:
+        with expected_exception():
             data = {
                 "oauth_token": self.tokenA['access_token'],
                 "title": "Entity 100!",
@@ -218,12 +218,7 @@ class StampedAPIStampsLimits(StampedAPIStampTest):
             entity_ids.append(entity['entity_id'])
             stamp = self.createStamp(self.tokenA, entity['entity_id'])
             stamp_ids.append(stamp['stamp_id'])
-            result = False
-        except:
-            result = True
         
-        self.assertTrue(result)
-
         # Delete everything
         for stamp_id in stamp_ids:
             self.deleteStamp(self.tokenA, stamp_id)
@@ -347,13 +342,10 @@ class StampedAPILikesFail(StampedAPIStampLikesTest):
             "oauth_token": self.tokenB['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
-
+    
     def test_like_twice(self):
         path = "stamps/likes/create.json"
         data = { 
@@ -363,14 +355,10 @@ class StampedAPILikesFail(StampedAPIStampLikesTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['stamp_id'], self.stamp['stamp_id'])
         self.assertEqual(result['num_likes'], 1)
-
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
-
+        
         path = "stamps/likes/remove.json"
         data = { 
             "oauth_token": self.tokenB['access_token'],

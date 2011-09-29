@@ -80,12 +80,8 @@ class SimpleSchemaTest(ASchemaTestCase):
             self.sampleDatetime,
         ]
         for i in values:
-            try:
+            with expected_exception():
                 self.schema.float = i
-                ret = False
-            except:
-                ret = True
-            self.assertTrue(ret)
 
     def test_valid_int(self):
         values = [
@@ -110,12 +106,8 @@ class SimpleSchemaTest(ASchemaTestCase):
             self.sampleDatetime,
         ]
         for i in values:
-            try:
+            with expected_exception():
                 self.schema.integer = i
-                ret = False
-            except:
-                ret = True
-            self.assertTrue(ret)
 
     def test_valid_string(self):
         values = [
@@ -142,12 +134,8 @@ class SimpleSchemaTest(ASchemaTestCase):
             self.sampleDict,
         ]
         for i in values:
-            try:
+            with expected_exception():
                 self.schema.basestring = i
-                ret = False
-            except:
-                ret = True
-            self.assertTrue(ret)
 
     def test_valid_long(self):
         values = [
@@ -172,12 +160,8 @@ class SimpleSchemaTest(ASchemaTestCase):
             self.sampleDatetime,
         ]
         for i in values:
-            try:
+            with expected_exception():
                 self.schema.long = i
-                ret = False
-            except:
-                ret = True
-            self.assertTrue(ret)
 
     def test_valid_bool(self):
         values = [
@@ -204,12 +188,8 @@ class SimpleSchemaTest(ASchemaTestCase):
             self.sampleDatetime,
         ]
         for i in values:
-            try:
+            with expected_exception():
                 self.schema.bool = i
-                ret = False
-            except:
-                ret = True
-            self.assertTrue(ret)
 
     def test_valid_datetime(self):
         values = [
@@ -234,20 +214,12 @@ class SimpleSchemaTest(ASchemaTestCase):
             self.sampleBool2,
         ]
         for i in values:
-            try:
+            with expected_exception():
                 self.schema.datetime = i
-                ret = False
-            except:
-                ret = True
-            self.assertTrue(ret)
 
     def test_required(self):
-        try:
+        with expected_exception():
             self.schema.required = None
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_iter(self):
         for i in self.schema:
@@ -301,12 +273,8 @@ class NestedSchemaTest(ASchemaTestCase):
         self.assertIn('item', self.schema)
 
     def test_contain_invalid(self):
-        try:
+        with expected_exception():
             'basestring' in self.schema
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_iter(self):
         n = 0
@@ -329,12 +297,8 @@ class NestedSchemaTest(ASchemaTestCase):
         self.assertIn('item', self.schema)
 
     def test_required(self):
-        try:
+        with expected_exception():
             self.schema.inner.required = None
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_set_element(self):
         self.schema.setElement('schema', {'inner': {'required': self.sampleString}})
@@ -415,12 +379,8 @@ class DoubleNestedSchemaTest(ASchemaTestCase):
         self.inner = {}
     
     def test_path_shortcut_fail(self):
-        try:
+        with expected_exception():
             self.schema.basestring = 'Set basestring'
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
 class SparseSchemaTest(ASchemaTestCase):
 
@@ -578,19 +538,11 @@ class ContainsSchemaTest(ASchemaTestCase):
         self.assertIn('required', self.schema)
         
     def test_not_set(self):
-        try:
+        with expected_exception():
             self.assertIn('long', self.schema)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
-
-        try:
+        
+        with expected_exception():
             self.assertIn('madeupstring', self.schema)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
 class DerivedBasicSchemaTest(ASchemaTestCase):
     def setUp(self):
@@ -617,12 +569,9 @@ class DerivedCategorySchemaFail(ASchemaTestCase):
         self.sampleData = {
             'subcategory': 'something else'
         }
-        try:
+        
+        with expected_exception():
             self.schema = DerivedCategorySchema(self.sampleData)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
 if __name__ == '__main__':
     StampedTestRunner().run()
