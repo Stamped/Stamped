@@ -234,7 +234,7 @@ oauth_token=1234567890123456789012&amp;user_id=47cc67093475061e3d95369d
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getuserslookup">GET users/lookup</h2>
+<h2 id="postuserslookup">POST users/lookup</h2>
 
 <h3 id="description">Description</h3>
 
@@ -295,7 +295,7 @@ oauth_token=1234567890123456789012&amp;user_ids=47cc67093475061e3d95369d,4e226fc
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getuserssearch">GET users/search</h2>
+<h2 id="postuserssearch">POST users/search</h2>
 
 <h3 id="description">Description</h3>
 
@@ -319,6 +319,51 @@ The number of results to return. Default is 20.</p>
 
 <pre><code>GET https://api.stamped.com/1/users/search.json
 oauth_token=1234567890123456789012&amp;q=Kevin%20Palms
+</code></pre>
+
+<h3 id="sampleresult">Sample Result</h3>
+
+<pre><code>[
+    {
+        &quot;user_id&quot;: &quot;47cc67093475061e3d95369d&quot;,
+        &quot;name&quot;: &quot;Kevin Palms&quot;,
+        &quot;screen_name&quot;: &quot;kevin&quot;,
+        &quot;bio&quot;: &quot;The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.&quot;,
+        &quot;color_primary&quot;: &quot;333333&quot;,
+        &quot;color_secondary&quot;: &quot;999999&quot;,
+        &quot;privacy&quot;: false,
+        &quot;num_stamps&quot;: 0,
+        &quot;num_friends&quot;: 0,
+        &quot;num_followers&quot;: 0,
+        &quot;num_faves&quot;: 0,
+        &quot;num_credits&quot;: 0,
+        &quot;num_credits_given&quot;: 0
+    }
+]
+</code></pre>
+
+<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
+
+<h2 id="postuserssuggested">POST users/suggested</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Return user objects for suggested users.</p>
+
+<h3 id="details">Details</h3>
+
+<ul>
+<li>OAuth Token Required</li>
+</ul>
+
+<h3 id="parameters">Parameters</h3>
+
+<p><em>None</em></p>
+
+<h3 id="samplerequest">Sample Request</h3>
+
+<pre><code>GET https://api.stamped.com/1/users/search.json
+oauth_token=1234567890123456789012
 </code></pre>
 
 <h3 id="sampleresult">Sample Result</h3>
@@ -374,7 +419,7 @@ oauth_token=1234567890123456789012&amp;user_id=47cc67093475061e3d95369d
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getusersfindemail">GET users/find/email</h2>
+<h2 id="postusersfindemail">POST users/find/email</h2>
 
 <h3 id="description">Description</h3>
 
@@ -435,7 +480,7 @@ oauth_token=1234567890123456789012&amp;q=kevin%40stamped.com,robby%40stamped.com
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getusersfindphone">GET users/find/phone</h2>
+<h2 id="postusersfindphone">POST users/find/phone</h2>
 
 <h3 id="description">Description</h3>
 
@@ -496,7 +541,7 @@ oauth_token=1234567890123456789012&amp;q=1235551111,1235551112
 
 <p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
 
-<h2 id="getusersfindtwitter">GET users/find/twitter</h2>
+<h2 id="postusersfindtwitter">POST users/find/twitter</h2>
 
 <h3 id="description">Description</h3>
 

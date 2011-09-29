@@ -106,8 +106,6 @@
 
   if ([AccountManager sharedManager].currentUser)
     [self fillStampImageView];
-
-  NSLog(@"Test string: %@", [Util sanitizedPhoneNumberFromString:@"\u200e2123343774"]);
 }
 
 - (void)finishViewInit {

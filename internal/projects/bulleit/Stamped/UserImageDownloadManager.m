@@ -58,11 +58,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 }
 
 - (void)dealloc {
-  active_ = NO;
-  self.delegate = nil;
-  self.connection = nil;
-  self.downloadData = nil;
-  self.imageURL = nil;
+  [self.connection cancel];
   [super dealloc];
 }
 
@@ -136,6 +132,15 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 }
 
 #pragma mark - Begin custom implementation.
+
+- (void)purgeCache {
+  [downloads_ release];
+  downloads_ = nil;
+  [mediumImageCache_ release];
+  mediumImageCache_ = nil;
+  [imageCache_ release];
+  imageCache_ = nil;
+}
 
 - (UIImage*)generateMediumProfileImage:(UIImage*)image {
   CGFloat width = kMediumImageSize + 4;

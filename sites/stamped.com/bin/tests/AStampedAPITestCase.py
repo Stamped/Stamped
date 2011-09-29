@@ -213,7 +213,7 @@ class AStampedAPITestCase(AStampedTestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
     
-    def createStamp(self, token, entityId, data=None, blurb="Best restaurant in America"):
+    def createStamp(self, token, entityId, data=None, blurb="Best restaurant in America", credit=None):
         path = "stamps/create.json"
         if data == None:
             data = {
@@ -224,6 +224,9 @@ class AStampedAPITestCase(AStampedTestCase):
         
         if "oauth_token" not in data:
             data['oauth_token'] = token['access_token']
+
+        if credit:
+            data['credit'] = credit
         
         stamp = self.handlePOST(path, data)
         self.assertValidKey(stamp['stamp_id'])

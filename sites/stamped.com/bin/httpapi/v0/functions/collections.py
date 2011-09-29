@@ -49,3 +49,26 @@ def user(request):
     
     return transformOutput(result)
 
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def credit(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPUserCollectionSlice(), request)
+    
+    data        = schema.exportSparse()
+    userRequest = {
+                    'user_id':      data.pop('user_id', None),
+                    'screen_name':  data.pop('screen_name', None)
+                  }
+    stamps      = stampedAPI.getCreditedStamps(userRequest, authUserId, **data)
+    
+    result = []
+    for stamp in stamps:
+        if 'deleted' in stamp:
+            result.append(HTTPDeletedStamp().importSchema(stamp).exportSparse())
+        else:
+            result.append(HTTPStamp().importSchema(stamp).exportSparse())
+    
+    return transformOutput(result)
+

@@ -1909,23 +1909,24 @@ class StampedAPI(AStampedAPI):
         }
 
         stampData = self._stampDB.getStamps(stampIds, **params)
+        
+        commentPreviews = {}
 
         if includeComments == True:
             commentData = self._commentDB.getCommentsAcrossStamps(stampIds, commentCap)
 
             # Group previews by stamp_id
-            commentPreviews = {}
             for comment in commentData:
                 if comment.stamp_id not in commentPreviews:
                     commentPreviews[comment.stamp_id] = []
                 commentPreviews[comment.stamp_id].append(comment)
 
-            # Add user object and preview to stamps
-            stamps = []
-            for stamp in stampData:
-                if stamp.stamp_id in commentPreviews:
-                    stamp.comment_preview = commentPreviews[stamp.stamp_id]
-                stamps.append(stamp)
+        # Add user object and preview to stamps
+        stamps = []
+        for stamp in stampData:
+            if stamp.stamp_id in commentPreviews:
+                stamp.comment_preview = commentPreviews[stamp.stamp_id]
+            stamps.append(stamp)
 
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
@@ -1977,8 +1978,29 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getCreditedStamps(self, userRequest, authUserId, **kwargs):
-        ### TODO: Implement
-        raise NotImplementedError
+        user = self._getUserFromIdOrScreenName(userRequest)
+
+        # Check privacy
+        if user.privacy == True:
+            if authUserId == None:
+                msg = "Must be logged in to view account"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
+
+            friendship = Friendship({
+                'user_id':      authUserId,
+                'friend_id':    user['user_id']
+            })
+
+            if not self._friendshipDB.checkFriendship(friendship):
+                msg = "Insufficient privileges to view user"
+                logs.warning(msg)
+                raise InsufficientPrivilegesError(msg)
+
+        stampIds = self._collectionDB.getUserCreditStampIds(user.user_id)
+        logs.info("STAMP IDS: %s" % stampIds)
+
+        return self._getStampCollection(authUserId, stampIds, **kwargs)
     
     @API_CALL
     def getUserMentions(self, userID, limit=None):
