@@ -55,12 +55,9 @@ class StampedAPIOAuthLogin(StampedAPIOAuthTest):
             "login": self.userA['screen_name'],
             "password": "123456"
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_failed_login_email(self):
         path = "oauth2/login.json"
@@ -70,12 +67,9 @@ class StampedAPIOAuthLogin(StampedAPIOAuthTest):
             "login": "UserA@stamped.com",
             "password": "123456"
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_failed_login_empty_password(self):
         path = "oauth2/login.json"
@@ -85,12 +79,9 @@ class StampedAPIOAuthLogin(StampedAPIOAuthTest):
             "login": "UserA@stamped.com",
             "password": ""
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_failed_login_star_password(self):
         path = "oauth2/login.json"
@@ -100,12 +91,9 @@ class StampedAPIOAuthLogin(StampedAPIOAuthTest):
             "login": "UserA@stamped.com",
             "password": "*"
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_token(self):
         path = "oauth2/token.json"

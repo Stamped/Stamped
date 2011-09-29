@@ -54,12 +54,9 @@ class StampedAPICommentsRemovePermissions(StampedAPICommentTest):
             "oauth_token": self.tokenB['access_token'],
             "comment_id": self.commentB['comment_id']
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
 class StampedAPICommentsRemoveStampOwner(StampedAPICommentTest):
     def test_show(self):

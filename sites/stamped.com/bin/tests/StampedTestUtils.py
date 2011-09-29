@@ -114,3 +114,20 @@ class StampedTestRunner(object):
         
         return os.path.dirname(os.path.abspath(module.__file__))
 
+class expected_exception:
+    def __init__(self, e=Exception):
+        if isinstance(e, Exception):
+            self._t, self._v = e.__class__, str(e)
+        elif isinstance(e, type) and issubclass(e, Exception):
+            self._t, self._v = e, None
+        else:
+            raise Exception("usage: with expected(Exception): or with expected(Exception(\"text\"))")
+        
+    def __enter__(self):
+        import sys
+        sys.exc_clear()
+    
+    def __exit__(self, t, v, tb):
+        assert t is not None, "expected {0:s} to have been thrown".format(self._t.__name__)
+        return issubclass(t, self._t) and (self._v is None or str(v).startswith(self._v))
+
