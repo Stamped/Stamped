@@ -250,6 +250,10 @@
 		7EC38CC1141C14900069B892 /* cat_icon_other_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC38CBC141C14900069B892 /* cat_icon_other_large@2x.png */; };
 		7EC7A9D313F1DE3800048944 /* sort_icon_search_0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */; };
 		7EC7A9D413F1DE3800048944 /* sort_icon_search_1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */; };
+		7ECCB93B14351EEE006575D1 /* stamped_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECCB93914351EED006575D1 /* stamped_icon@2x.png */; };
+		7ECCB93C14351EEE006575D1 /* stamped_icon_disabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECCB93A14351EED006575D1 /* stamped_icon_disabled@2x.png */; };
+		7ECCB93F14351F12006575D1 /* facebook_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECCB93D14351F11006575D1 /* facebook_icon@2x.png */; };
+		7ECCB94014351F12006575D1 /* facebook_icon_disabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECCB93E14351F12006575D1 /* facebook_icon_disabled@2x.png */; };
 		7ED60828141E85B8001C499D /* BookDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60827141E85B8001C499D /* BookDetailViewController.xib */; };
 		7ED6082B141E85E7001C499D /* MusicDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60829141E85E7001C499D /* MusicDetailViewController.xib */; };
 		7ED6082C141E85E7001C499D /* OtherDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */; };
@@ -768,6 +772,10 @@
 		7EC38CBC141C14900069B892 /* cat_icon_other_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_other_large@2x.png"; sourceTree = "<group>"; };
 		7EC7A9D113F1DE3800048944 /* sort_icon_search_0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_0@2x.png"; sourceTree = "<group>"; };
 		7EC7A9D213F1DE3800048944 /* sort_icon_search_1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sort_icon_search_1@2x.png"; sourceTree = "<group>"; };
+		7ECCB93914351EED006575D1 /* stamped_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamped_icon@2x.png"; sourceTree = "<group>"; };
+		7ECCB93A14351EED006575D1 /* stamped_icon_disabled@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamped_icon_disabled@2x.png"; sourceTree = "<group>"; };
+		7ECCB93D14351F11006575D1 /* facebook_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "facebook_icon@2x.png"; sourceTree = "<group>"; };
+		7ECCB93E14351F12006575D1 /* facebook_icon_disabled@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "facebook_icon_disabled@2x.png"; sourceTree = "<group>"; };
 		7ED60827141E85B8001C499D /* BookDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = BookDetailViewController.xib; path = Interfaces/BookDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED60829141E85E7001C499D /* MusicDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MusicDetailViewController.xib; path = Interfaces/MusicDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = OtherDetailViewController.xib; path = Interfaces/OtherDetailViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -1160,11 +1168,6 @@
 				1E1A1B61141C2A5D00B7C627 /* WelcomeViewController.h */,
 				1E1A1B62141C2A5D00B7C627 /* WelcomeViewController.m */,
 				1E1A1B05141C007700B7C627 /* WelcomeView.xib */,
-				1E1A1B02141C004E00B7C627 /* FindFriendsViewController.h */,
-				1E1A1B03141C004E00B7C627 /* FindFriendsViewController.m */,
-				1E1A1B64141C3AC600B7C627 /* FindFriendsView.xib */,
-				7ED60893141FF7CB001C499D /* FriendshipTableViewCell.h */,
-				7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */,
 				CBA08C411421A888005F2D84 /* LearnMoreView.h */,
 				CBA08C421421A888005F2D84 /* LearnMoreView.m */,
 			);
@@ -1188,15 +1191,6 @@
 				1E1A1B0B141C023400B7C627 /* first_run_bg@2x.png */,
 				1E1A1B0D141C025600B7C627 /* first_run_button_bg@2x.png */,
 				1E1A1B6A141C41F900B7C627 /* first_run_button_done_bg@2x.png */,
-				1E1A1B10141C026300B7C627 /* contacts_icon_disabled@2x.png */,
-				1E1A1B11141C026300B7C627 /* contacts_icon@2x.png */,
-				1E1A1B07141C022200B7C627 /* twitter_icon_disabled@2x.png */,
-				1E1A1B08141C022200B7C627 /* twitter_logo@2x.png */,
-				1E1A1B66141C41DA00B7C627 /* add_friends_done_button@2x.png */,
-				1E1A1B67141C41DA00B7C627 /* add_friends_toolbar@2x.png */,
-				1E6C3DB8141D8EF800AFEAFB /* add_friends_follow_button@2x.png */,
-				1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */,
-				1E6C3DBA141D8EF800AFEAFB /* add_friends_unfollow_button@2x.png */,
 				1E6C3DBE141D8F0700AFEAFB /* welcome_stamp_logo@2x.png */,
 				1E6C3DC0141D8F1F00AFEAFB /* first_run_ready_button@2x.png */,
 				CBA08C6914226F8E005F2D84 /* learnmore_00@2x.png */,
@@ -1407,6 +1401,7 @@
 				7E8A880A14242A5300B0092C /* icon1.png */,
 				7E8A880814242A4B00B0092C /* icon1@2x.png */,
 				7EE24A24142147350027DBB6 /* Stamp Customizer */,
+				7ECCB93714351A7B006575D1 /* Friend Finder */,
 				7E5406DF141550D000912463 /* First run */,
 				7EB29D831414657C003A8EA3 /* Inbox */,
 				7EC30B3B1401BB9B0047D773 /* Stamps */,
@@ -1469,6 +1464,38 @@
 				7E303F8513F0BE2300C1F794 /* sort_icon_other_1@2x.png */,
 			);
 			name = "Stamp List Filter";
+			sourceTree = "<group>";
+		};
+		7ECCB93714351A7B006575D1 /* Friend Finder */ = {
+			isa = PBXGroup;
+			children = (
+				7ECCB93914351EED006575D1 /* stamped_icon@2x.png */,
+				7ECCB93A14351EED006575D1 /* stamped_icon_disabled@2x.png */,
+				7ECCB93D14351F11006575D1 /* facebook_icon@2x.png */,
+				7ECCB93E14351F12006575D1 /* facebook_icon_disabled@2x.png */,
+				1E1A1B10141C026300B7C627 /* contacts_icon_disabled@2x.png */,
+				1E1A1B11141C026300B7C627 /* contacts_icon@2x.png */,
+				1E1A1B07141C022200B7C627 /* twitter_icon_disabled@2x.png */,
+				1E1A1B08141C022200B7C627 /* twitter_logo@2x.png */,
+				1E1A1B66141C41DA00B7C627 /* add_friends_done_button@2x.png */,
+				1E1A1B67141C41DA00B7C627 /* add_friends_toolbar@2x.png */,
+				1E6C3DB8141D8EF800AFEAFB /* add_friends_follow_button@2x.png */,
+				1E6C3DB9141D8EF800AFEAFB /* add_friends_nipple_bar@2x.png */,
+				1E6C3DBA141D8EF800AFEAFB /* add_friends_unfollow_button@2x.png */,
+			);
+			name = "Friend Finder";
+			sourceTree = "<group>";
+		};
+		7ECCB93814351AFE006575D1 /* Friend Finder */ = {
+			isa = PBXGroup;
+			children = (
+				1E1A1B02141C004E00B7C627 /* FindFriendsViewController.h */,
+				1E1A1B03141C004E00B7C627 /* FindFriendsViewController.m */,
+				1E1A1B64141C3AC600B7C627 /* FindFriendsView.xib */,
+				7ED60893141FF7CB001C499D /* FriendshipTableViewCell.h */,
+				7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */,
+			);
+			name = "Friend Finder";
 			sourceTree = "<group>";
 		};
 		7ED2EF5C13E0DA48007F1AFB /* Activity */ = {
@@ -1645,6 +1672,7 @@
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E2267D813D52FF500657A66 /* Model */,
 				7E5406D91415507300912463 /* First run */,
+				7ECCB93814351AFE006575D1 /* Friend Finder */,
 				7EE24A2B1421479E0027DBB6 /* Stamp Customizer */,
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
 				7E0BC47413E4A07F008CC076 /* Search Entities */,
@@ -2150,6 +2178,10 @@
 				7E806FF814312DFC003AF77D /* activity_todo_badge@2x.png in Resources */,
 				7E806FF914312DFC003AF77D /* activity_follow_badge@2x.png in Resources */,
 				7E806FFC14312E38003AF77D /* activity_comment_badge@2x.png in Resources */,
+				7ECCB93B14351EEE006575D1 /* stamped_icon@2x.png in Resources */,
+				7ECCB93C14351EEE006575D1 /* stamped_icon_disabled@2x.png in Resources */,
+				7ECCB93F14351F12006575D1 /* facebook_icon@2x.png in Resources */,
+				7ECCB94014351F12006575D1 /* facebook_icon_disabled@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
