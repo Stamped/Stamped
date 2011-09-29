@@ -47,7 +47,7 @@ class AStampedAPITestCase(AStampedTestCase):
         result = json.load(self._opener.open(url, params))
         
         return result
-
+    
     def handleMultiPart(self, path, fields, files, file_type='image/jpeg'):
         url             = "%s/%s" % (self._baseurl, path)
         headers, data   = self.encodeMultiPart(fields, files, file_type)
@@ -55,18 +55,17 @@ class AStampedAPITestCase(AStampedTestCase):
         request         = urllib2.Request(url, data, headers)
         result          = urllib2.urlopen(request)
         json_result     = json.load(result)
-
-        return json_result
         
+        return json_result
+    
     def encodeMultiPart(self, fields, files, file_type='image/jpeg'):
-
         # Inspired by http://code.google.com/apis/cloudprint/docs/pythonCode.html
-
+        
         CRLF = '\r\n'
         BOUNDARY = mimetools.choose_boundary()
-
+        
         """Encodes list of parameters and files for HTTP multipart format.
-
+        
         Args:
           fields: list of tuples containing name and value of parameters.
           files: list of tuples containing param name, filename, and file contents.
@@ -99,9 +98,8 @@ class AStampedAPITestCase(AStampedTestCase):
             'Content-Length': len(data), 
             'Content-Type': 'multipart/form-data; boundary=%s' % BOUNDARY
         }
-
+        
         return headers, data
-
     
     ### CUSTOM ASSERTIONS
     def assertValidKey(self, key, length=24):
@@ -109,7 +107,7 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertLength(key, length)
     
     ### HELPER FUNCTIONS
-    def createAccount(self, name='TestUser'):
+    def createAccount(self, name='TestUser', password="12345"):
         global _test_case, _accounts
         _test_case = self
         
@@ -119,7 +117,7 @@ class AStampedAPITestCase(AStampedTestCase):
             "client_secret": CLIENT_SECRET,
             "name": name,
             "email": "%s@stamped.com" % name, 
-            "password": "12345",
+            "password": password,
             "screen_name": name
         }
         response = self.handlePOST(path, data)
@@ -155,7 +153,7 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertValidKey(friend['user_id'])
 
         return friend
-
+    
     def deleteFriendship(self, token, friend):
         path = "friendships/remove.json"
         data = {
@@ -164,8 +162,7 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-
-
+    
     def createEntity(self, token, data=None):
         path = "entities/create.json"
         if data == None:
@@ -183,7 +180,7 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertValidKey(entity['entity_id'])
 
         return entity
-
+    
     def createPlaceEntity(self, token, data=None):
         path = "entities/create.json"
         if data == None:
@@ -215,13 +212,13 @@ class AStampedAPITestCase(AStampedTestCase):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
     
-    def createStamp(self, token, entityId, data=None, credit=None):
+    def createStamp(self, token, entityId, data=None, blurb="Best restaurant in America", credit=None):
         path = "stamps/create.json"
         if data == None:
             data = {
                 "oauth_token": token['access_token'],
                 "entity_id": entityId,
-                "blurb": "Best restaurant in America",
+                "blurb": blurb,
             }
         
         if "oauth_token" not in data:
@@ -234,7 +231,7 @@ class AStampedAPITestCase(AStampedTestCase):
         self.assertValidKey(stamp['stamp_id'])
         
         return stamp
-
+    
     def deleteStamp(self, token, stampId):
         path = "stamps/remove.json"
         data = { 
@@ -288,6 +285,13 @@ class AStampedAPITestCase(AStampedTestCase):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
+    
+    def getInbox(self, token):
+        path = "collections/inbox.json"
+        data = { 
+            "oauth_token": token, 
+        }
+        return self.handleGET(path, data)
 
 def __cleanup():
     global _test_case, _accounts
