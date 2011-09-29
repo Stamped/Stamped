@@ -125,7 +125,42 @@ def findTwitter(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
-    users       = stampedAPI.findUsersByTwitter(authUserId, schema.q.value)
+    q = schema.q.value
+    twitterIds = []
+
+    for item in q:
+        if not isinstance(int(item), int):
+            msg = 'Invalid twitter id: %s' % item
+            logs.warning(msg)
+            raise InputError(msg)
+        twitterIds.append(item)
+
+    users       = stampedAPI.findUsersByTwitter(authUserId, twitterIds)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(output)
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def findFacebook(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
+
+    q = schema.q.value
+    facebookIds = []
+
+    for item in q:
+        if not isinstance(int(item), int):
+            msg = 'Invalid facebook id: %s' % item
+            logs.warning(msg)
+            raise InputError(msg)
+        facebookIds.append(item)
+
+    users       = stampedAPI.findUsersByFacebook(authUserId, facebookIds)
 
     output = []
     for user in users:

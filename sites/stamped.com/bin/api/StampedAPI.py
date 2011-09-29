@@ -422,6 +422,15 @@ class StampedAPI(AStampedAPI):
         return users
     
     @API_CALL
+    def findUsersByFacebook(self, authUserId, facebookIds):
+
+        ### TODO: Add check for privacy settings?
+
+        users = self._userDB.findUsersByFacebook(facebookIds, limit=100)
+        
+        return users
+    
+    @API_CALL
     def searchUsers(self, query, limit, authUserId):
 
         limit = self._setLimit(limit, cap=10)
