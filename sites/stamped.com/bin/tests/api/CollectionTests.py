@@ -27,7 +27,7 @@ class StampedAPICollectionTest(AStampedAPITestCase):
         self.commentA = self.createComment(self.tokenB, self.stampA['stamp_id'], self.blurbA)
         self.commentB = self.createComment(self.tokenA, self.stampA['stamp_id'], self.blurbB)
         self.stampB = self.createStamp(self.tokenA, self.entityB['entity_id'])
-        self.stampC = self.createStamp(self.tokenA, self.entityC['entity_id'])
+        self.stampC = self.createStamp(self.tokenA, self.entityC['entity_id'], credit=self.userB['screen_name'])
 
     def tearDown(self):
         self.deleteComment(self.tokenA, self.commentB['comment_id'])
@@ -71,6 +71,27 @@ class StampedAPICollectionsShow(StampedAPICollectionTest):
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 3)
         self.assertTrue(result[0]['blurb'] == self.stampA['blurb'])
+
+    def test_credit_user_screen_name(self):
+        path = "collections/credit.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "screen_name": self.userB['screen_name']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 1)
+        self.assertTrue(result[0]['blurb'] == self.stampC['blurb'])
+
+    def test_credit_user_id(self):
+        path = "collections/credit.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "user_id": self.userB['user_id']
+        }
+        result = self.handleGET(path, data)
+        self.assertEqual(len(result), 1)
+        self.assertTrue(result[0]['blurb'] == self.stampC['blurb'])
+
 
 class StampedAPICollectionsQuality(StampedAPICollectionTest):
     def test_show(self):

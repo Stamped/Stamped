@@ -133,6 +133,42 @@ The number of results to return. Default is 20.
 
 
 ------------------------------------------------------------------------------
+## POST users/suggested ##
+
+### Description ###
+Return user objects for suggested users.
+
+### Details ###
+* OAuth Token Required
+
+### Parameters ###
+_None_
+
+### Sample Request ###
+	GET https://api.stamped.com/1/users/search.json
+	oauth_token=1234567890123456789012
+
+### Sample Result ###
+	[
+		{
+			"user_id": "47cc67093475061e3d95369d",
+			"name": "Kevin Palms",
+			"screen_name": "kevin",
+			"bio": "The very purpose of existence is to reconcile the glowing opinion we have of ourselves with the appalling things that other people think about us.",
+			"color_primary": "333333",
+			"color_secondary": "999999",
+			"privacy": false,
+			"num_stamps": 0,
+			"num_friends": 0,
+			"num_followers": 0,
+			"num_faves": 0,
+			"num_credits": 0,
+			"num_credits_given": 0
+		}
+	]
+
+
+------------------------------------------------------------------------------
 ## GET users/privacy ##
 
 ### Description ###

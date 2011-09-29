@@ -100,7 +100,17 @@ def findPhone(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
-    users       = stampedAPI.findUsersByPhone(authUserId, schema.q.value)
+    q = schema.q.value
+    phoneNumbers = []
+
+    for item in q:
+        if not isinstance(int(item), int):
+            msg = 'Invalid phone number: %s' % item
+            logs.warning(msg)
+            raise InputError(msg)
+        phoneNumbers.append(item)
+
+    users       = stampedAPI.findUsersByPhone(authUserId, phoneNumbers)
 
     output = []
     for user in users:

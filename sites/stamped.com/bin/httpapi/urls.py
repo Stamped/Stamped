@@ -86,6 +86,7 @@ urlpatterns = patterns('',
     ### COLLECTIONS
     (r'v0/collections/inbox.json',      'v0.functions.collections.inbox'),
     (r'v0/collections/user.json',       'v0.functions.collections.user'),
+    (r'v0/collections/credit.json',     'v0.functions.collections.credit'),
     
     ### FAVORITES
     (r'v0/favorites/create.json',       'v0.functions.favorites.create'),
