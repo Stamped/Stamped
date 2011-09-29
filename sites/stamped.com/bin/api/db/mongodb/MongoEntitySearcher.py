@@ -164,6 +164,7 @@ class MongoEntitySearcher(EntitySearcher):
         self.entityDB = api._entityDB
         self.placesDB = api._placesEntityDB
         self.tempDB   = api._tempEntityDB
+        self._statsSink = api._statsSink
         
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
         self.entityDB._collection.ensure_index([("titlel", pymongo.ASCENDING)])
@@ -362,6 +363,7 @@ class MongoEntitySearcher(EntitySearcher):
                 if entity is not None:
                     params['entity'] = entity
                 
+                self._statsSink.increment('stamped.api.search.third-party.apple')
                 apple_results = self._appleAPI.search(**params)
                 
                 for result in apple_results:
@@ -395,6 +397,7 @@ class MongoEntitySearcher(EntitySearcher):
         # search amazon product API
         def _find_amazon(ret):
             try:
+                self._statsSink.increment('stamped.api.search.third-party.amazon')
                 amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
                                                                     SearchIndex='All', 
                                                                     Availability='Available', 
@@ -472,6 +475,7 @@ class MongoEntitySearcher(EntitySearcher):
                         'name' : input_query, 
                     }
                     
+                    self._statsSink.increment('stamped.api.search.third-party.googlePlaces')
                     google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, detailed=False)
                     entities = []
                     

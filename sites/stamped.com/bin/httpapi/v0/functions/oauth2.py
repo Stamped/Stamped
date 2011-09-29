@@ -30,10 +30,15 @@ def login(request):
     client_id   = checkClient(request)
     schema      = parseRequest(OAuthLogin(), request)
 
-    token       = stampedAuth.verifyUserCredentials(client_id, \
+    user, token = stampedAuth.verifyUserCredentials(client_id, \
                                                     schema.login, \
                                                     schema.password)
 
-    return transformOutput(token)
+    user        = HTTPUser().importSchema(user)
+    logs.user(user.user_id)
+
+    output      = { 'user': user.exportSparse(), 'token': token }
+
+    return transformOutput(output)
 
 

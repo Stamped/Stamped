@@ -20,10 +20,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         
         ### TEMP: For now, verify that no duplicates can occur via index
         self._collection.ensure_index('screen_name_lower', unique=True)
+        self._collection.ensure_index('name_lower')
 
     def _convertFromMongo(self, document):
         if 'screen_name_lower' in document:
             del(document['screen_name_lower'])
+        if 'name_lower' in document:
+            del(document['name_lower'])
         
         return AMongoCollection._convertFromMongo(self, document)
     
@@ -32,6 +35,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         
         if 'screen_name' in document:
             document['screen_name_lower'] = str(document['screen_name']).lower()
+        if 'name' in document:
+            document['name_lower'] = str(document['name']).lower()
         
         return document
 

@@ -93,7 +93,7 @@ class StampedAuth(AStampedAuth):
 
             logs.info("Token created")
 
-            return token
+            return user, token
         except:
             msg = "Invalid user credentials"
             logs.warning(msg)

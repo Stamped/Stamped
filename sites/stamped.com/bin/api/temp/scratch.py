@@ -22,6 +22,7 @@ client_auth = {
 }
 
 _baseurl = "https://dev.stamped.com/v0"
+_baseurl = "http://localhost:18000/v0"
 
 def handleGET(path, data):
     params = urllib.urlencode(data)
@@ -51,20 +52,17 @@ data = {
 }
 token = handlePOST(path, data)
 
-path = "stamps/create.json"
+path = "users/search.json"
 data = { 
-    "oauth_token": token['access_token'],
-    "entity_id": "4e5eaf41ccc217205900000c",
-    "blurb": "Sample stamp"
-}
-stamp = handlePOST(path, data)
-
-path = "stamps/remove.json"
-data = { 
-    "oauth_token": token['access_token'],
-    "stamp_id": stamp['stamp_id']
+    "oauth_token": token['token']['access_token'],
+    "q": 'e'
 }
 result = handlePOST(path, data)
+
+print
+print
+for i in xrange(len(result)):
+    print '%2s | %14s | %s' % (i+1, result[i]['screen_name'], result[i]['name'])
 
 # path = "favorites/create.json"
 # data = { 
@@ -81,8 +79,9 @@ result = handlePOST(path, data)
 # }
 # result = handlePOST(path, data)
 
-print result
+# print result
 
-print 'COMPLETE'
+print
+print
 
 

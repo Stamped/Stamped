@@ -207,6 +207,17 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
             self.assertIn(user['screen_name'], self.screen_names)
             self.assertIn(user['identifier'], ids)
 
+
+class StampedAPISuggested(StampedAPIUserTest):
+    def test_suggested(self):
+        path = "users/suggested.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token']
+        }
+        result = self.handleGET(path, data)
+        for user in result:
+            self.assertTrue('screen_name' in user)
+
 if __name__ == '__main__':
     main()
 

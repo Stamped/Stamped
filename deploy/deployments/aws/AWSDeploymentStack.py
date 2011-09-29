@@ -165,11 +165,13 @@ class AWSDeploymentStack(ADeploymentStack):
             {
                 'sources' : [ 
                     'zagat', 
-                    'sfmag', 
+                    #'sfmag', 
                 ], 
                 'numInstances' : 1, 
                 'mapSourceToProcess' : True, 
             }, 
+        ]
+        """
             {
                 'sources' : [ 
                     'nymag', 
@@ -188,6 +190,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 'mapSourceToProcess' : True, 
             }, 
         ]
+        """
         
         #crawler_instances = self.crawler_instances
         crawler_instances = []
@@ -315,7 +318,7 @@ class AWSDeploymentStack(ADeploymentStack):
                         crawler_path = '/stamped/stamped/sites/stamped.com/bin/crawler/crawler.py'
                         
                         log = "/stamped/logs/crawler%d.log" % index
-                        cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s --db %s -g %s --ratio %s %s' >& %s < /dev/null &" % (crawler_path, host, mount, ratio, sources, log)
+                        cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s --db %s -s merge -g %s --ratio %s %s' >& %s < /dev/null &" % (crawler_path, host, mount, ratio, sources, log)
                         index += 1
                         
                         num_retries = 5

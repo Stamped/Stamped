@@ -5,6 +5,11 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+try:
+    import gevent
+except ImportError:
+    raise Exception("required import gevent not found! have you activated the required virtualenv?")
+
 # note: in order for gevent to work properly, this *must* be the first module 
 # imported from any other python file which needs stdlib to play well with 
 # gevent / greenlets (e.g., best practice is to always include this file first 
