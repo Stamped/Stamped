@@ -24,7 +24,8 @@ class StampedAPIURLOpener(urllib.FancyURLopener):
 class AStampedAPITestCase(AStampedTestCase):
     
     #_baseurl = "http://0.0.0.0:5000/api/v1"
-    _baseurl = "http://localhost:18000/v0"
+    #_baseurl = "http://localhost:18000/v0"
+    _baseurl = "http://ec2-50-19-138-154.compute-1.amazonaws.com:5000/v0"
     #_baseurl = "https://dev.stamped.com/v0"
     #_baseurl = "http://dev.stamped.com:5000/v0"
     
@@ -205,7 +206,7 @@ class AStampedAPITestCase(AStampedTestCase):
     
     def deleteEntity(self, token, entityId):
         path = "entities/remove.json"
-        data = { 
+        data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId
         }
@@ -234,7 +235,7 @@ class AStampedAPITestCase(AStampedTestCase):
     
     def deleteStamp(self, token, stampId):
         path = "stamps/remove.json"
-        data = { 
+        data = {
             "oauth_token": token['access_token'],
             "stamp_id": stampId
         }
@@ -255,7 +256,7 @@ class AStampedAPITestCase(AStampedTestCase):
     
     def deleteComment(self, token, commentId):
         path = "comments/remove.json"
-        data = { 
+        data = {
             "oauth_token": token['access_token'],
             "comment_id": commentId
         }
@@ -279,19 +280,12 @@ class AStampedAPITestCase(AStampedTestCase):
     
     def deleteFavorite(self, token, entityId):
         path = "favorites/remove.json"
-        data = { 
+        data = {
             "oauth_token": token['access_token'],
             "entity_id": entityId
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-    
-    def getInbox(self, token):
-        path = "collections/inbox.json"
-        data = { 
-            "oauth_token": token, 
-        }
-        return self.handleGET(path, data)
 
 def __cleanup():
     global _test_case, _accounts

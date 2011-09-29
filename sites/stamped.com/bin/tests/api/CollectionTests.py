@@ -146,7 +146,7 @@ class StampedAPICollectionsQuality(StampedAPICollectionTest):
 class StampedAPICollectionsActions(StampedAPICollectionTest):
     def test_like(self):
         path = "stamps/likes/create.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenB['access_token'],
             "stamp_id": self.stampA['stamp_id']
         }
@@ -154,7 +154,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
 
         # User B should have "is_liked=True" 
         path = "collections/inbox.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
@@ -166,7 +166,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
 
         # User A should not have "is_liked"
         path = "collections/inbox.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenA['access_token'],
         }
         result = self.handleGET(path, data)
@@ -181,7 +181,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
 
         # User B should have "is_fav=True" 
         path = "collections/inbox.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
@@ -193,7 +193,7 @@ class StampedAPICollectionsActions(StampedAPICollectionTest):
 
         # User A should not have "is_fav"
         path = "collections/inbox.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenA['access_token'],
         }
         result = self.handleGET(path, data)
@@ -215,15 +215,13 @@ class StampedAPICollectionsDeleted(StampedAPICollectionTest):
         self.deleteEntity(self.tokenA, entityD['entity_id'])
 
         path = "collections/inbox.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenB['access_token'],
         }
         result = self.handleGET(path, data)
         self.assertEqual(len(result), 4)
         self.assertTrue(result[-1]['blurb'] == self.stampA['blurb'])
         self.assertTrue('deleted' in result[0])
-
-        
 
 if __name__ == '__main__':
     main()

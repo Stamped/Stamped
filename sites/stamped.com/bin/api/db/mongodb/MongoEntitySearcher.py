@@ -469,23 +469,26 @@ class MongoEntitySearcher(EntitySearcher):
                     wrapper['place_results'][e.entity_id] = (e, doc['dis'])
             
             # search Google Places API
-            def _find_google_places(ret):
+            def _find_google_places(ret, specific_coords, radius, use_distance):
                 try:
                     params = {
-                        'name' : input_query, 
+                        'name'   : input_query, 
+                        'radius' : radius, 
                     }
                     
                     self._statsSink.increment('stamped.api.search.third-party.googlePlaces')
-                    google_results = self._googlePlaces.getEntityResultsByLatLng(coords, params, detailed=False)
+                    google_results = self._googlePlaces.getEntityResultsByLatLng(specific_coords, params, detailed=False)
                     entities = []
                     
                     if google_results is not None and len(google_results) > 0:
-                        ret['google_place_results'] = []
                         #utils.log(len(google_results))
                         
                         for entity in google_results:
-                            distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
-                            distance = distance * earthRadius
+                            if use_distance:
+                                distance = utils.get_spherical_distance(coords, (entity.lat, entity.lng))
+                                distance = distance * earthRadius
+                            else:
+                                distance = -1
                             
                             entity.entity_id = 'T_GOOGLE_%s' % entity.reference
                             ret['google_place_results'].append((entity, distance))
@@ -493,7 +496,12 @@ class MongoEntitySearcher(EntitySearcher):
                     utils.printException()
             
             if full:
-                pool.spawn(_find_google_places, wrapper)
+                wrapper['google_place_results'] = []
+                pool.spawn(_find_google_places, wrapper, coords, 500, True)
+                
+                us_center_coords = [ 39.5, -98.35 ]
+                us_search_radius = 5000000
+                pool.spawn(_find_google_places, wrapper, us_center_coords, us_search_radius, False)
             
             pool.spawn(_find_places, wrapper)
         
