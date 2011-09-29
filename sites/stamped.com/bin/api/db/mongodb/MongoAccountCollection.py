@@ -81,6 +81,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if 'twitter_screen_name' in data:
             fields['linked_accounts.twitter.twitter_screen_name'] =\
                 data['twitter_screen_name']
+        if 'facebook_id' in data:
+            fields['linked_accounts.facebook.facebook_id'] = data['facebook_id']
+        if 'facebook_screen_name' in data:
+            fields['linked_accounts.facebook.facebook_name'] = \
+            data['facebook_name']
+        if 'facebook_screen_name' in data:
+            fields['linked_accounts.facebook.facebook_screen_name'] = \
+                data['facebook_screen_name']
         
         if len(fields) > 0:
             self._collection.update(

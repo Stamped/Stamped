@@ -225,6 +225,33 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
             self.assertIn(user['identifier'], ids)
 
 
+class StampedAPIUsersFindFacebook(StampedAPIUserTest):
+    def test_find_by_facebook(self):
+        ids = ['1235551111','1235551112']
+        path = "account/linked_accounts.json"
+        data = {
+            "oauth_token": self.tokenA['access_token'],
+            "facebook_id": ids[0],
+        }
+        result = self.handlePOST(path, data)
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "facebook_id": ids[1],
+        }
+        result = self.handlePOST(path, data)
+
+        path = "users/find/facebook.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "q": ','.join(ids)
+        }
+        result = self.handlePOST(path, data)
+        self.assertLength(result, 2)
+        for user in result:
+            self.assertIn(user['screen_name'], self.screen_names)
+            self.assertIn(user['identifier'], ids)
+
+
 class StampedAPISuggested(StampedAPIUserTest):
     def test_suggested(self):
         path = "users/suggested.json"

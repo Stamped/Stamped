@@ -59,11 +59,18 @@ class LinkedAccounts(Schema):
     def setSchema(self):
         self.itunes             = SchemaElement(basestring)
         self.twitter            = TwitterAccountSchema()
+        self.facebook           = FacebookAccountSchema()
         
 class TwitterAccountSchema(Schema):
     def setSchema(self):
-        self.twitter_id         = SchemaElement(basestring)
-        self.twitter_screen_name= SchemaElement(basestring)
+        self.twitter_id             = SchemaElement(basestring)
+        self.twitter_screen_name    = SchemaElement(basestring)
+        
+class FacebookAccountSchema(Schema):
+    def setSchema(self):
+        self.facebook_id            = SchemaElement(basestring)
+        self.facebook_name          = SchemaElement(basestring)
+        self.facebook_screen_name   = SchemaElement(basestring)
         
 class DevicesSchema(Schema):
     def setSchema(self):
