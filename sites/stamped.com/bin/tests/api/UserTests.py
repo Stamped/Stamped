@@ -105,13 +105,8 @@ class StampedAPIUsersPrivacy(StampedAPIUserTest):
             "screen_name": 'unknownUserName'
         }
         
-        try:
+        with expected_exception():
             result = self.handleGET(path, data)
-            ret = False
-        except:
-            ret = True
-        
-        self.assertTrue(ret)
 
 class StampedAPIUsersFindContacts(StampedAPIUserTest):
     def test_find_by_email(self):

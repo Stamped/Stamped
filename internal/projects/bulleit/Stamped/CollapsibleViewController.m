@@ -177,8 +177,7 @@ int const SPACE_HEIGHT = 10;
   newLabel.valueLabel.text = value;
   
   CGFloat newWidth = [newLabel.nameLabel.text sizeWithFont:newLabel.nameLabel.font].width;
-  if (newWidth > maxNameLabelWidth)
-  {
+  if (newWidth > maxNameLabelWidth) {
     maxNameLabelWidth = newWidth;
     
     for (UIViewController* vc in self.contentDict.objectEnumerator) {
@@ -191,6 +190,7 @@ int const SPACE_HEIGHT = 10;
   newLabel.nameWidth = maxNameLabelWidth;
   
   [self addContent:newLabel forKey:key];
+  [newLabel release];
 }
 
 - (void)addNumberedListWithValues:(NSArray*)values {
@@ -203,14 +203,13 @@ int const SPACE_HEIGHT = 10;
     frame.size   = CGSizeMake(contentView_.frame.size.width, 16.f); 
     newLabel.view.frame = frame;
     
-    //Change "label" field font for numbering.
-    newLabel.nameLabel.font      = [UIFont fontWithName:@"Helvetica-Bold" size:10.f];
+    // Change "label" field font for numbering.
+    newLabel.nameLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:10.f];
     newLabel.nameLabel.textColor = [UIColor stampedLightGrayColor];
     
-    newLabel.nameLabel.text  = [NSString stringWithFormat:@"%d", ++itemNumber];
+    newLabel.nameLabel.text = [NSString stringWithFormat:@"%d", ++itemNumber];
     newLabel.valueLabel.text = value;
-    
-    
+
     CGFloat newWidth = [newLabel.nameLabel.text sizeWithFont:newLabel.nameLabel.font].width;
     if (newWidth > maxNameLabelWidth) {
       maxNameLabelWidth = newWidth;
@@ -224,6 +223,7 @@ int const SPACE_HEIGHT = 10;
     newLabel.numberWidth = maxNameLabelWidth;
     
     [self addContent:newLabel forKey:[NSString stringWithFormat:@"%d", itemNumber]];
+    [newLabel release];
   }
 }
 
@@ -237,6 +237,7 @@ int const SPACE_HEIGHT = 10;
   textView.frame = CGRectMake(8.f, 0.f, contentView_.frame.size.width-15.0, 100.0);
   
   [self addContent:textView forKey:key];
+  [textView release];
   CGRect frame = textView.frame;
   frame.size.height = textView.contentSize.height;
   textView.frame = frame;
@@ -247,7 +248,7 @@ int const SPACE_HEIGHT = 10;
   CGSize previewRectSize = CGSizeMake(0,0);
   
   if (self.imageView && self.imageView.hidden == NO) {
-    CGRect  imageViewFrame   = [self.contentView convertRect:self.imageView.frame fromView:self.imageView.superview];
+    CGRect  imageViewFrame = [self.contentView convertRect:self.imageView.frame fromView:self.imageView.superview];
     previewRectSize = CGSizeMake(CGRectGetMinX(self.imageView.frame) - 25.0, CGRectGetMaxY(imageViewFrame) + 12.0);
   }
   
@@ -255,6 +256,7 @@ int const SPACE_HEIGHT = 10;
   wrapText.previewRectSize = previewRectSize;
   
   [self addContent:wrapText forKey:key];
+  [wrapText release];
 }
 
 - (void)addImagesForStamps:(NSSet*)newStamps {
@@ -262,8 +264,8 @@ int const SPACE_HEIGHT = 10;
   NSArray* stampsArray = [newStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
   stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
   
-  stamps_ = stampsArray;
-  [stamps_ retain];
+  [stamps_ release];
+  stamps_ = [stampsArray retain];
   
   UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:contentView_.frame];
   scrollView.frame = CGRectMake(0.f, 0.f, contentView_.frame.size.width, 58.0);
@@ -308,6 +310,7 @@ int const SPACE_HEIGHT = 10;
   self.numLabel.hidden = NO;
   
   [self addContent:scrollView forKey:@"stamps"];
+  [scrollView release];
 }
 
 - (void)addContent:(id)content forKey:(NSString*)key {

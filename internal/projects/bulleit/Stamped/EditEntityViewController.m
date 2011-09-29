@@ -101,13 +101,13 @@ const CGFloat kKeyboardHeight = 217.0;
   secondaryTextField_.alpha = 0.0;
   tertiaryTextField_.alpha = 0.0;
   descriptionTextField_.alpha = 0.0;
-  self.segmentedControl = [[UISegmentedControl alloc] initWithItems:
+  segmentedControl_ = [[UISegmentedControl alloc] initWithItems:
       [NSArray arrayWithObjects:@"Restaurant", @"Bar", nil]];
-  self.segmentedControl.alpha = 0.0;
-  self.segmentedControl.tintColor = [UIColor colorWithWhite:0.9 alpha:1.0];
-  self.segmentedControl.frame = CGRectMake(10, CGRectGetMinY(primaryTextField_.frame) - 2, 299, 33);
+  segmentedControl_.alpha = 0.0;
+  segmentedControl_.tintColor = [UIColor colorWithWhite:0.9 alpha:1.0];
+  segmentedControl_.frame = CGRectMake(10, CGRectGetMinY(primaryTextField_.frame) - 2, 299, 33);
   [primaryTextField_.superview insertSubview:segmentedControl_ belowSubview:categoryDropdownTableView_];
-  [self.segmentedControl release];
+  [segmentedControl_ release];
   [segmentedControl_ addTarget:self
                         action:@selector(segmentedControlChanged:)
               forControlEvents:UIControlEventValueChanged];

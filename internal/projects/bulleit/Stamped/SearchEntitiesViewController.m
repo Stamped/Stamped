@@ -193,6 +193,7 @@ typedef enum {
   searchingIndicatorView_.hidden = NO;
   [[RKClient sharedClient].requestQueue addRequest:request];
   self.currentRequest = request;
+  [request release];
 }
 
 - (void)sendSearchRequest {

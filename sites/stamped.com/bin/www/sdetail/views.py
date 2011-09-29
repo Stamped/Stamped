@@ -14,11 +14,10 @@ from HTTPSchemas import *
 from api.MongoStampedAPI import MongoStampedAPI
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
-from plugins.minidetector import detect_mobile
+import datetime
 
 stampedAPI  = MongoStampedAPI()
 
-@detect_mobile
 def show(request, **kwargs):
     screenName  = kwargs.pop('screen_name', None)
     stampNum    = kwargs.pop('stamp_num', None)
@@ -27,14 +26,20 @@ def show(request, **kwargs):
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
         # stamp['credit'] = stamp['credit'][:1]
         template = 'sdetail.html'
-        # if request.mobile or mobile:
-        #     template = 'sdetail-mobile.html'
-        return render_to_response(template, stamp)
+        if mobile:
+            template = 'sdetail-mobile.html'
+
+        response = render_to_response(template, stamp)
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
+
     except:
         logs.begin(stampedAPI._logsDB.addLog)
         logs.request(request)
         logs.error(500)
-        raise #Http404
+        raise Http404
 
 def mobile(request, **kwargs):
     kwargs['mobile'] = True

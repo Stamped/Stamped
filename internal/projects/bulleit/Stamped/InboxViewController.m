@@ -169,6 +169,7 @@ typedef enum {
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  [self loadStampsFromDataStore];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
@@ -188,7 +189,8 @@ typedef enum {
 
 - (void)loadStampsFromDataStore {
   self.entitiesArray = nil;
-	NSFetchRequest* request = [Stamp fetchRequest];
+
+  NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
   [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
@@ -199,6 +201,7 @@ typedef enum {
       [sortedEntities addObject:s.entityObject];
   }
   self.entitiesArray = sortedEntities;
+
   [self filterStamps];
   self.tableView.contentOffset = scrollPosition_;
 }
@@ -242,7 +245,7 @@ typedef enum {
 - (void)filterStamps {
   if (!self.selectedFilterButton) {
     // No need to filter.
-    self.filteredEntitiesArray = entitiesArray_;
+    self.filteredEntitiesArray = [NSMutableArray arrayWithArray:entitiesArray_];
     [self.tableView reloadData];
     return;
   }

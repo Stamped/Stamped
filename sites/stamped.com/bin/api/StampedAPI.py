@@ -1601,12 +1601,16 @@ class StampedAPI(AStampedAPI):
         ### TODO: Limit this to the last 20 comments or so
         repliedUsersDict = {}
         for prevComment in self._commentDB.getComments(stamp.stamp_id):
+            # Skip if it was generated from a restamp
+            if prevComment.restamp_id:
+                continue
+
             repliedUserId = prevComment['user']['user_id']
             if repliedUserId not in commentedUserIds \
                 and repliedUserId not in mentionedUserIds \
                 and repliedUserId != user.user_id:
                 repliedUsersDict[prevComment['user']['user_id']] = 1 
-        # repliedUserIds = repliedUsersDict.keys()
+        
         repliedUserIds = []
         for repliedUserId in repliedUsersDict.keys():
             # Check if block exists between user and previous commenter

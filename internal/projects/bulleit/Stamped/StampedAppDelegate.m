@@ -22,6 +22,7 @@
 #import "User.h"
 #import "SearchResult.h"
 #import "OAuthToken.h"
+#import "UserImageDownloadManager.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
@@ -35,7 +36,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 #if !TARGET_IPHONE_SIMULATOR
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
-
+  
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.suspended = YES;
@@ -156,20 +157,21 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   return YES;
 }
 
-/*- (void)applicationWillResignActive:(UIApplication*)application {
+- (void)applicationWillResignActive:(UIApplication*)application {
+  [[UserImageDownloadManager sharedManager] purgeCache];
 }
 
-- (void)applicationDidEnterBackground:(UIApplication*)application {
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+  [[UserImageDownloadManager sharedManager] purgeCache];
 }
 
-- (void)applicationWillEnterForeground:(UIApplication*)application {
-}
+- (void)applicationDidEnterBackground:(UIApplication*)application {}
 
-- (void)applicationDidBecomeActive:(UIApplication*)application {
-}
+- (void)applicationWillEnterForeground:(UIApplication*)application {}
 
-- (void)applicationWillTerminate:(UIApplication*)application {
-}*/
+- (void)applicationDidBecomeActive:(UIApplication*)application {}
+
+- (void)applicationWillTerminate:(UIApplication*)application {}
 
 - (void)dealloc {
   [window_ release];

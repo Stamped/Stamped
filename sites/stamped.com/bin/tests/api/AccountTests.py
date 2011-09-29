@@ -67,62 +67,27 @@ class StampedAPIAccountCustomizeStamp(StampedAPIAccountTest):
 
 class StampedAPIAccountBlacklistedScreenName(StampedAPIAccountTest):
     def test_blacklist(self):
-        try:
+        with expected_exception():
             (user, token) = self.createAccount('cock')
-            ret = False
-        except:
-            ret = True
-
-        self.assertTrue(ret)
-
+    
     def test_invalid_characters(self):
-        try:
+        with expected_exception():
             (user, token) = self.createAccount('a b')
-            ret = False
-        except:
-            ret = True
-
-        self.assertTrue(ret)
-
-        try:
+        
+        with expected_exception():
             (user, token) = self.createAccount('a*b')
-            ret = False
-        except:
-            ret = True
-
-        self.assertTrue(ret)
-        try:
+        
+        with expected_exception():
             (user, token) = self.createAccount('a!')
-            ret = False
-        except:
-            ret = True
-
-        self.assertTrue(ret)
-
-        try:
+        
+        with expected_exception():
             (user, token) = self.createAccount('a+b')
-            ret = False
-        except:
-            ret = True
-
-        self.assertTrue(ret)
-
-        try:
+        
+        with expected_exception():
             (user, token) = self.createAccount('a/b')
-            ret = False
-        except:
-            ret = True
-
-        self.assertTrue(ret)
-
-        try:
+        
+        with expected_exception():
             (user, token) = self.createAccount('@ab')
-            ret = False
-        except:
-            ret = True
-
-        self.assertTrue(ret)
-
 
 class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
     def test_check_email_available(self):
@@ -132,12 +97,9 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
             "client_secret": CLIENT_SECRET,
             "login": 'testest1234@stamped.com',
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_check_screen_name_available(self):
         path = "account/check.json"
@@ -146,12 +108,9 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
             "client_secret": CLIENT_SECRET,
             "login": 'testtest1234',
         }
-        try:
+        
+        with expected_exception():
             result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
 
     def test_check_email_taken(self):
         path = "account/check.json"
@@ -173,7 +132,6 @@ class StampedAPIAccountCheckAccount(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertEqual(result['user_id'], self.user['user_id'])
 
-
 class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
     def test_twitter(self):
         path = "account/linked_accounts.json"
@@ -183,8 +141,6 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)
-
-
 
 ### TESTS TO ADD:
 # Change bio from string to None

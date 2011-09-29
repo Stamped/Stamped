@@ -92,12 +92,8 @@ class StampedAPIBlockComments(StampedAPIBlockTest):
         entity = self.createEntity(self.tokenB)
         stamp = self.createStamp(self.tokenB, entity['entity_id'])
 
-        try:
+        with expected_exception():
             self.createComment(self.tokenA, stamp['stamp_id'], "test")
-            result = False
-        except:
-            result = True
-        self.assertTrue(result)
 
         self.deleteStamp(self.tokenB, stamp['stamp_id'])
         self.deleteEntity(self.tokenB, entity['entity_id'])
@@ -107,12 +103,8 @@ class StampedAPIBlockComments(StampedAPIBlockTest):
         entity = self.createEntity(self.tokenA)
         stamp = self.createStamp(self.tokenA, entity['entity_id'])
 
-        try:
+        with expected_exception():
             self.createComment(self.tokenB, stamp['stamp_id'], "test")
-            result = False
-        except:
-            result = True
-        self.assertTrue(result)
 
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
         self.deleteEntity(self.tokenA, entity['entity_id'])
@@ -205,22 +197,13 @@ class StampedAPIBlockComments(StampedAPIBlockTest):
 class StampedAPIBlockFriendships(StampedAPIBlockTest):
     # A friends B
     def test_a_friend_b(self):
-        try:
+        with expected_exception():
             self.createFriendship(self.tokenA, self.userB)
-            result = False
-        except:
-            result = True
-        self.assertTrue(result)
 
     # B friends A
     def test_b_friend_a(self):
-        try:
+        with expected_exception():
             self.createFriendship(self.tokenB, self.userA)
-            result = False
-        except:
-            result = True
-        self.assertTrue(result)
-
 
 class StampedAPIBlockStamps(StampedAPIBlockTest):
     # A mentions B in stamp

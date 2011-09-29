@@ -14,7 +14,7 @@ import datetime
 
 def about(request):
     try:
-        return render_to_response('about.html', None)
+        response = render_to_response('about.html', None)
 
         response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
