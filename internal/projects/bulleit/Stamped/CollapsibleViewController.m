@@ -346,8 +346,6 @@ int const SPACE_HEIGHT = 10;
     viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) +20;
     self.view.frame = viewFrame;
   }
-  
-  [content release];
 }
 
 - (float)contentHeight {
