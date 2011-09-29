@@ -158,7 +158,7 @@ class StampedAPICommentsReply(StampedAPICommentTest):
             self.blurb)
 
         path = "comments/show.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenA['access_token'],
             "stamp_id": self.stamp['stamp_id']
         }
