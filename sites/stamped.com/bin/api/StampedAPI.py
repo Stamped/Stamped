@@ -34,7 +34,7 @@ from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 
 CREDIT_BENEFIT  = 2 # Per credit
-LIKE_BENEFIT    = 1 # Per 5 stamps
+LIKE_BENEFIT    = 1 # Per 3 stamps
 
 class StampedAPI(AStampedAPI):
     """
