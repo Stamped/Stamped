@@ -316,7 +316,7 @@ A</string>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
 						<object class="NSCustomResource" key="IBUINormalImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">twitter_logo.png</string>
+							<string key="NSResourceName">twitter_icon.png</string>
 						</object>
 						<reference key="IBUINormalBackgroundImage" ref="1058270028"/>
 					</object>
@@ -379,7 +379,7 @@ A</string>
 						<string key="NSFrame">{{403, 272}, {28, 28}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="899467491"/>
+						<reference key="NSNextKeyView" ref="378969406"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -523,7 +523,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{720, 209}, {160, 58}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="378969406"/>
+						<reference key="NSNextKeyView" ref="892488891"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
@@ -735,7 +735,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{102, 353}, {117, 12}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="892488891"/>
+						<reference key="NSNextKeyView" ref="899467491"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -1262,6 +1262,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 					<string>12.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
 					<string>13.IBPluginDependency</string>
 					<string>13.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
+					<string>13.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>14.IBPluginDependency</string>
 					<string>15.IBPluginDependency</string>
 					<string>16.IBPluginDependency</string>
@@ -1313,6 +1314,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="1"/>
+					<real value="3"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1609,7 +1611,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 				<string>stamp_selection_check.png</string>
 				<string>temp_exampleUsersColors@2x.png</string>
 				<string>temp_swipeContinue@2x.png</string>
-				<string>twitter_logo.png</string>
+				<string>twitter_icon.png</string>
 				<string>welcome_blank_stamp@2x.png</string>
 				<string>welcome_keyline@2x.png</string>
 				<string>welcome_stamp_logo.png</string>

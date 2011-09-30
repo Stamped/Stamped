@@ -37,7 +37,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
   
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.suspended = YES;
   [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
@@ -129,9 +129,9 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                         @"refresh_token", @"refreshToken",
                                         @"expires_in", @"lifetimeSecs", nil];
 
-  RKObjectMapping* registerMapping = [RKObjectMapping serializationMapping];
-  [registerMapping mapRelationship:@"user" withMapping:userMapping];
-  [registerMapping mapRelationship:@"token" withMapping:oauthMapping];
+  RKObjectMapping* userAndTokenMapping = [RKObjectMapping serializationMapping];
+  [userAndTokenMapping mapRelationship:@"user" withMapping:userMapping];
+  [userAndTokenMapping mapRelationship:@"token" withMapping:oauthMapping];
   
   RKObjectMapping* searchResultMapping = [RKObjectMapping mappingForClass:[SearchResult class]];
   [searchResultMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", @"search_id", @"searchID", nil];
@@ -147,7 +147,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [objectManager.mappingProvider setMapping:eventMapping forKeyPath:@"Event"];
   [objectManager.mappingProvider setMapping:favoriteMapping forKeyPath:@"Favorite"];
   [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
-  [objectManager.mappingProvider setMapping:registerMapping forKeyPath:@"Registration"];
+  [objectManager.mappingProvider setMapping:userAndTokenMapping forKeyPath:@"UserAndToken"];
 
   [objectManager.mappingProvider setMapping:searchResultMapping forKeyPath:@"SearchResult"];
 

@@ -75,6 +75,7 @@ NSString* const kStampColors[7][2] = {
   self.galleryStamp4 = nil;
   self.galleryStamp5 = nil;
   self.galleryStamp6 = nil;
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
   self.userStampImageView = nil;
   self.userImageView = nil;
@@ -118,6 +119,7 @@ NSString* const kStampColors[7][2] = {
   self.galleryStamp4 = nil;
   self.galleryStamp5 = nil;
   self.galleryStamp6 = nil;
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
   self.userStampImageView = nil;
   self.userImageView = nil;
@@ -135,15 +137,19 @@ NSString* const kStampColors[7][2] = {
   [user.managedObjectContext save:NULL];
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:[AccountManager sharedManager]];
-  [self.currentStampRequest cancel];
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kUpdateStampPath
-                                                               delegate:nil];
-  request.params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary",
-                    secondary, @"color_secondary", nil];
-  request.method = RKRequestMethodPOST;
-  [request send];
-  self.currentStampRequest = request;
+  
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUpdateStampPath 
+                                                                    delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = mapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary",
+                                                                   secondary, @"color_secondary", nil];
+  self.currentStampRequest = objectLoader;
+  [objectLoader send];
 }
 
 #pragma mark - StampCustomizerViewDelegate methods.
