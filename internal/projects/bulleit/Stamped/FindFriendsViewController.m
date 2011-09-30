@@ -16,6 +16,7 @@
 //	#import "FBConnect.h"
 
 #import "STSectionHeaderView.h"
+#import "STSearchField.h"
 #import "FriendshipTableViewCell.h"
 #import "Util.h"
 #import "User.h"
@@ -64,6 +65,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 @synthesize contactsButton = contactsButton_;
 @synthesize twitterButton = twitterButton_;
+@synthesize facebookButton = facebookButton_;
+@synthesize stampedButton = stampedButton_;
+@synthesize searchField = searchField_;
 @synthesize nipple = nipple_;
 @synthesize tableView = tableView_;
 
@@ -84,8 +88,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.contactFriends = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
+  self.facebookButton = nil;
+  self.stampedButton = nil;
+  self.searchField = nil;
   self.nipple = nil;
   self.tableView = nil;
+  
   [super dealloc];
 }
 
@@ -111,7 +119,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.contactFriends = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
+  self.facebookButton = nil;
+  self.stampedButton = nil;
   self.nipple = nil;
+  self.searchField = nil;
   self.tableView = nil;
 
   [super viewDidUnload];
@@ -123,11 +134,61 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [self.navigationController popViewControllerAnimated:YES];
 }
 
+- (IBAction)findFromStamped:(id)sender {
+  contactsButton_.selected = NO;
+  twitterButton_.selected = NO;
+  facebookButton_.selected = NO;
+  stampedButton_.selected = YES;
+  [searchField_ becomeFirstResponder];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, 26), 0, 26);
+                   }
+                   completion:nil];
+  
+  [self adjustNippleToView:self.stampedButton];
+  self.findSource = FindFriendsFromStamped;
+  [tableView_ reloadData];
+}
+
+- (IBAction)findFromFacebook:(id)sender {
+  if (stampedButton_.selected) {
+    [searchField_ resignFirstResponder];
+    [UIView animateWithDuration:0.2
+                          delay:0
+                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                       tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, -26), 0, -26);
+                     }
+                     completion:nil];
+  }
+  contactsButton_.selected = NO;
+  twitterButton_.selected = NO;
+  facebookButton_.selected = YES;
+  stampedButton_.selected = NO;
+
+  [self adjustNippleToView:facebookButton_];
+  self.findSource = FindFriendsFromFacebook;
+  [tableView_ reloadData];
+}
+
 - (IBAction)findFromContacts:(id)sender {
-  [self.contactsButton setImage:[UIImage imageNamed:@"contacts_icon"]
-                       forState:UIControlStateNormal];
-  [self.twitterButton setImage:[UIImage imageNamed:@"twitter_icon_disabled"]
-                      forState:UIControlStateNormal];
+  if (stampedButton_.selected) {
+    [searchField_ resignFirstResponder];
+    [UIView animateWithDuration:0.2
+                          delay:0
+                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                       tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, -26), 0, -26);
+                     }
+                     completion:nil];
+  }
+  contactsButton_.selected = YES;
+  twitterButton_.selected = NO;
+  facebookButton_.selected = NO;
+  stampedButton_.selected = NO;
   [self adjustNippleToView:self.contactsButton];
   self.findSource = FindFriendsFromContacts;
   if (contactFriends_) {
@@ -161,13 +222,26 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [sanitizedNumbers addObject:[Util sanitizedPhoneNumberFromString:num]];
 
   [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
+  [tableView_ reloadData];
 }
 
 - (IBAction)findFromTwitter:(id)sender {
-  [self.contactsButton setImage:[UIImage imageNamed:@"contacts_icon_disabled"]
-                       forState:UIControlStateNormal];
-  [self.twitterButton setImage:[UIImage imageNamed:@"twitter_logo"]
-                      forState:UIControlStateNormal];
+  if (stampedButton_.selected) {
+    [searchField_ resignFirstResponder];
+    [UIView animateWithDuration:0.2
+                          delay:0
+                        options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                       tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, -26), 0, -26);
+                     }
+                     completion:nil];
+  }
+
+  contactsButton_.selected = NO;
+  twitterButton_.selected = YES;
+  facebookButton_.selected = NO;
+  stampedButton_.selected = NO;
+
   [self adjustNippleToView:self.twitterButton];
   self.findSource = FindFriendsFromTwitter;
 
@@ -184,6 +258,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   } else {
     [self signInToTwitter];
   }
+  [tableView_ reloadData];
 }
 
 - (FriendshipTableViewCell*)friendshipCellFromSubview:(UIView*)view {
@@ -321,8 +396,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (GTMOAuthAuthentication*)createAuthentication {
-  NSString *myConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
-  NSString *myConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
+  NSString* myConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
+  NSString* myConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
 
   if ([myConsumerKey length] == 0 || [myConsumerSecret length] == 0) {
     return nil;
@@ -332,7 +407,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   auth = [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
                                                       consumerKey:myConsumerKey
                                                        privateKey:myConsumerSecret] autorelease];
-
   [auth setServiceProvider:@"Twitter"];
   [auth setCallback:kOAuthCallbackURL];
   return auth;
