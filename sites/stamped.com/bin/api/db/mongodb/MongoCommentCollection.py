@@ -21,6 +21,8 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     def __init__(self):
         AMongoCollection.__init__(self, collection='comments', primary_key='comment_id', obj=Comment)
         ACommentDB.__init__(self)
+
+        self._collection.ensure_index('user.user_id')
     
     ### PUBLIC
 
@@ -78,3 +80,12 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     def getNumberOfComments(self, stampId):
         return len(self.getCommentIds(stampId))
 
+    def getUserCommentIds(self, userId):
+        documents = self._collection.find({'user.user_id': userId})
+
+        comments = []
+        for document in documents:
+            comments.append(self._convertFromMongo(document))
+        
+        return comments
+        

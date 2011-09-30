@@ -192,12 +192,102 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def removeAccount(self, authUserId):
-        
-        ### TODO: Remove all activity, stamps, entities, images, etc. for user
-        ### TODO: Verify w/ password?
-        
         account = self._accountDB.getAccount(authUserId)
-        self._accountDB.removeAccount(authUserId)
+        
+        ### TODO: Verify w/ password
+
+        stampIds    = self._collectionDB.getUserStampIds(account.user_id)
+        friendIds   = self._friendshipDB.getFriends(account.user_id)
+        followerIds = self._friendshipDB.getFollowers(account.user_id)
+
+        # Remove friends / followers
+        for followerId in followerIds:
+            friendship              = Friendship()
+            friendship.user_id      = followerId
+            friendship.friend_id    = account.user_id
+            
+            self._friendshipDB.removeFriendship(friendship)
+            
+            # Increment stats 
+            self._userDB.updateUserStats(followerId, 'num_friends', \
+                        None, increment=-1)
+            
+            # Remove stamps from Inbox
+            self._stampDB.removeInboxStampReferencesForUser(followerId, stampIds)
+
+        for friendId in friendIds:
+            friendship              = Friendship()
+            friendship.user_id      = account.user_id
+            friendship.friend_id    = friendId
+            
+            self._friendshipDB.removeFriendship(friendship)
+            
+            # Increment stats 
+            self._userDB.updateUserStats(friendId, 'num_followers', \
+                        None, increment=-1)
+
+        # Remove favorites
+        favEntityIds = self._favoriteDB.getFavoriteEntityIds(account.user_id)
+        for entityId in favEntityIds:
+            self._favoriteDB.removeFavorite(account.user_id, entityId)
+
+        # Remove stamps / collections
+        stamps = self._stampDB.getStamps(stampIds, limit=len(stampIds))
+        for stamp in stamps:
+            if len(stamp.credit) > 0:
+                for creditedUser in stamp.credit:
+                    self._stampDB.removeCredit(creditedUser['user_id'], stamp)
+
+                    # Decrement user stats by one
+                    self._userDB.updateUserStats( \
+                        creditedUser['user_id'], 'num_credits', increment=-1)
+
+            # Remove activity on stamp
+            self._activityDB.removeActivityForStamp(stamp.stamp_id)
+
+        self._stampDB.removeStamps(stampIds)
+        self._stampDB.removeAllUserStampReferences(account.user_id)
+        self._stampDB.removeAllInboxStampReferences(account.user_id)
+        ### TODO: If restamp, remove from credited stamps' comment list?
+        
+        # Remove comments
+        comments = self._commentDB.getUserCommentIds(account.user_id)
+        for comment in comments:
+            # Remove comment
+            self._commentDB.removeComment(comment.comment_id)
+
+            # Decrement comment count on stamp
+            if comment.stamp_id not in stampIds:
+                logs.info('STAMP ID: %s' % comment.stamp_id)
+                self._stampDB.updateStampStats( \
+                    comment.stamp_id, 'num_comments', increment=-1)
+
+        # Remove likes
+        likedStampIds = self._stampDB.getUserLikes(account.user_id)
+        likedStamps = self._stampDB.getStamps(likedStampIds, \
+            limit=len(likedStampIds))
+        for stamp in likedStamps:
+            self._stampDB.removeLike(account.user_id, stamp.stamp_id)
+
+            # Decrement user stats by one
+            self._userDB.updateUserStats( \
+                stamp.user_id, 'num_likes', increment=-1)
+
+            # Decrement stamp stats by one
+            self._stampDB.updateStampStats( \
+                stamp.stamp_id, 'num_likes', increment=-1)
+
+        # Remove activity items
+        self._activityDB.removeUserActivity(account.user_id)
+
+        # Remove custom entities
+        ### TODO: Do this?
+
+        # Remove profile image
+        self._imageDB.removeProfileImage(account.screen_name.lower())
+        
+        # Remove account
+        self._accountDB.removeAccount(account.user_id)
         
         # Remove email address from invite list
         self._inviteDB.remove(account.email)
@@ -498,7 +588,7 @@ class StampedAPI(AStampedAPI):
             activity.genre              = 'follower'
             activity.user.user_id       = authUserId
             activity.linked_user_id     = authUserId
-            activity.linked_friend_id   = user.user_id
+            # activity.linked_friend_id   = user.user_id
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity([user.user_id], activity)
@@ -1429,6 +1519,16 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Remove from activity? To do? Anything else?
 
+        # Remove comments
+        ### TODO: Make this more efficient?
+        comments = self._commentDB.getComments(stampId)
+        for comment in comments:
+            # Remove comment
+            self._commentDB.removeComment(comment.comment_id)
+
+        # Remove activity
+        self._activityDB.removeActivityForStamp(stamp.stamp_id)
+
         # Update user stats 
         ### TODO: Do an actual count / update?
         self._userDB.updateUserStats(authUserId, 'num_stamps', \
@@ -1848,7 +1948,8 @@ class StampedAPI(AStampedAPI):
             stamp.num_likes = 0
         stamp.num_likes -= 1
 
-        ### TODO: Remove activity item?
+        # Remove activity
+        self._activityDB.removeActivity('like', authUserId, stampId=stampId)
 
         return stamp
     
@@ -2098,13 +2199,15 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=-1)
 
-        ### TODO: Remove activity item?
-
         # Enrich stamp
         if favorite.stamp_id != None:
             stamp           = self._stampDB.getStamp(favorite.stamp_id)
             favorite.stamp  = self._enrichStampObjects( \
                                 stamp, authUserId=authUserId)
+
+            # Remove activity
+            self._activityDB.removeActivity('favorite', authUserId, \
+                stampId=stamp.stamp_id)
 
         return favorite
     
@@ -2150,6 +2253,7 @@ class StampedAPI(AStampedAPI):
                 if stampIds[favorite.stamp_id] != 1:
                     favorite.stamp = stampIds[favorite.stamp_id]
                 else:
+                    favorite.stamp_id = None
                     logs.warning('FAV MISSING STAMP: %s' % favorite)
             favorites.append(favorite)
 

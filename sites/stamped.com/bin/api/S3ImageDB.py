@@ -16,6 +16,7 @@ from StringIO import StringIO
 from boto.cloudfront    import CloudFrontConnection
 from boto.s3.connection import S3Connection
 from boto.s3.key        import Key
+# from boto.s3.bucket     import Bucket
 
 class S3ImageDB(AImageDB):
     
@@ -64,29 +65,9 @@ class S3ImageDB(AImageDB):
         im = Image.open(io)
         
         return im
-    
-    def addProfileImage(self, screenName, image):
-        assert isinstance(image, Image.Image)
-        
-        prefix = 'users/%s' % screenName
-        images = []
-        
-        width, height = image.size
-        
-        if width != height:
-            # Extract a square aspect ratio image by cropping the longer side
-            diff = abs(height - width) / 2
-            
-            if width > height:
-                box = (diff, 0, width - diff, height)
-            else:
-                box = (0, diff, width, height - diff)
-            
-            square = image.crop(box)
-        else:
-            # image is already square
-            square = image
 
+    @property
+    def profileImageSizes(self):
         maxSize = (500, 500)
         
         sizes = {
@@ -111,8 +92,49 @@ class S3ImageDB(AImageDB):
             '31x31': (31, 31),  # 1x
         }
 
+        return maxSize, sizes
+
+    
+    def addProfileImage(self, screenName, image):
+        assert isinstance(image, Image.Image)
+        
+        prefix = 'users/%s' % screenName
+        images = []
+        
+        width, height = image.size
+        
+        if width != height:
+            # Extract a square aspect ratio image by cropping the longer side
+            diff = abs(height - width) / 2
+            
+            if width > height:
+                box = (diff, 0, width - diff, height)
+            else:
+                box = (0, diff, width, height - diff)
+            
+            square = image.crop(box)
+        else:
+            # image is already square
+            square = image
+
+        maxSize, sizes = self.profileImageSizes
+
         # Add images in all sizes
         self._addImageSizes(prefix, image, maxSize, sizes)
+
+    def removeProfileImage(self, screenName):
+        prefix = 'users/%s' % screenName
+        suffix = '.jpg'
+
+        maxSize, sizes = self.profileImageSizes
+
+        try:
+            self._removeFromS3('%s%s') % (prefix, suffix)
+
+            for size in sizes:
+                self._removeFromS3('%s-%s%s') % (prefix, size, suffix)
+        except:
+            logs.warning('Failed to remove file')
     
     def addEntityImage(self, entityId, image):
         assert isinstance(image, Image.Image)
@@ -226,6 +248,26 @@ class S3ImageDB(AImageDB):
                 key.set_acl('public-read')
                 key.close()
                 return key
+            except:
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "Unable to connect to S3 after %d retries (%s)" % \
+                        (max_retries, self._parent.__class__.__name__)
+                    logs.warning(msg)
+                    raise Exception(msg)
+                
+                logs.info("Retrying (%s)" % (num_retries))
+                time.sleep(0.5)
+
+    def _removeFromS3(self, name):
+        num_retries = 0
+        max_retries = 5
+        
+        while True:
+            try:
+                if self.bucket.get_key(name):
+                    self.bucket.delete_key(name)
+                return True
             except:
                 num_retries += 1
                 if num_retries > max_retries:

@@ -35,3 +35,6 @@ class MongoFriendsCollection(AMongoCollection):
     def getFriends(self, userId):
         return self._getRelationships(userId)
 
+    def removeAllFriends(self, userId):
+        return self._removeAllRelationships(userId)
+

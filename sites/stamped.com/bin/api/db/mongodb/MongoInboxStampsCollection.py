@@ -60,4 +60,6 @@ class MongoInboxStampsCollection(AMongoCollection):
             self.removeInboxStamp(userId, stampId)
         return True
 
+    def removeAllInboxStamps(self, userId):
+        return self._removeAllRelationships(userId)
 

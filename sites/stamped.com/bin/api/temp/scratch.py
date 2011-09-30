@@ -22,7 +22,7 @@ client_auth = {
 }
 
 _baseurl = "https://dev.stamped.com/v0"
-_baseurl = "http://localhost:18000/v0"
+# _baseurl = "http://localhost:18000/v0"
 
 def handleGET(path, data):
     params = urllib.urlencode(data)
@@ -55,7 +55,7 @@ token = handlePOST(path, data)
 path = "users/search.json"
 data = { 
     "oauth_token": token['token']['access_token'],
-    "q": 'e'
+    "q": 'bon'
 }
 result = handlePOST(path, data)
 

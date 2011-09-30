@@ -93,6 +93,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         # Remove a reference to the stamp in the user's collection
         self.user_stamps_collection.removeUserStamp(userId, stampId) 
 
+    def removeAllUserStampReferences(self, userId):
+        self.user_stamps_collection.removeAllUserStamps(userId)
+
     def addInboxStampReference(self, userIds, stampId):
         # Add a reference to the stamp in followers' inbox
         self.inbox_stamps_collection.addInboxStamps(userIds, stampId)
@@ -106,6 +109,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
 
     def removeInboxStampReferencesForUser(self, userId, stampIds):
         self.inbox_stamps_collection.removeInboxStampsForUser(userId, stampIds)
+
+    def removeAllInboxStampReferences(self, userId):
+        self.inbox_stamps_collection.removeAllInboxStamps(userId)
 
     def getStamps(self, stampIds, **kwargs):
         params = {
@@ -247,6 +253,14 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             raise
         except:
             return False
+    
+    def removeStamps(self, stampIds):
+        documentIds = []
+        for stampId in stampIds:
+            documentIds.append(self._getObjectIdFromString(stampId))
+        result = self._removeMongoDocuments(documentIds)
+
+        return result
 
         
             

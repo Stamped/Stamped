@@ -35,3 +35,6 @@ class MongoUserStampsCollection(AMongoCollection):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(userId, limit)
 
+    def removeAllUserStamps(self, userId):
+        return self._removeAllRelationships(userId)
+

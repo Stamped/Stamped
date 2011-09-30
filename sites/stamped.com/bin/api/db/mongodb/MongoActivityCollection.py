@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import Globals, logs, copy
+import Globals, logs, copy, pymongo
 
 from datetime import datetime
 from utils import lazyProperty
@@ -21,45 +21,43 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     """
     Activity Types:
     * restamp
+    * mention
     * comment
     * reply
+    * like
     * favorite
-    * directed
-    * mention
-    * milestone
+    * invite_sent
+    * invite_received
+    * follower
     """
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='activity', primary_key='activity_id', obj=Activity)
         AActivityDB.__init__(self)
-    
+
+        self._collection.ensure_index([('recipient_id', pymongo.ASCENDING), \
+                                        ('timestamp.created', pymongo.DESCENDING)])
+        self._collection.ensure_index('user.user_id')
+        self._collection.ensure_index('link.linked_stamp_id')
+
     ### PUBLIC
     
-    @lazyProperty
-    def user_activity_collection(self):
-        return MongoUserActivityCollection()
-    
     def getActivity(self, userId, **kwargs):
-        params = {
-            'since':    kwargs.pop('since', None),
-            'before':   kwargs.pop('before', None), 
-            'limit':    kwargs.pop('limit', 20),
-            'sort':     'timestamp.created',
-        }
+        since       = kwargs.pop('since', None)
+        before      = kwargs.pop('before', None)
+        limit       = kwargs.pop('limit', 20)
 
-        # Get activity
-        activityIds = self.user_activity_collection.getUserActivityIds(userId)
-
-        # logs.debug("ACTIVITY IDS: %s" % activityIds)
-
-        documentIds = []
-        for activityId in activityIds:
-            documentIds.append(self._getObjectIdFromString(activityId))
-
-        # logs.debug("DOCUMENT IDS: %s" % documentIds)
-
-        # Get stamps
-        documents = self._getMongoDocumentsFromIds(documentIds, **params)
+        params = {'recipient_id': userId}
+        
+        if since != None and before != None:
+            params['timestamp.created'] = {'$gte': since, '$lte': before}
+        elif since != None:
+            params['timestamp.created'] = {'$gte': since}
+        elif before != None:
+            params['timestamp.created'] = {'$lte': before}
+        
+        documents = self._collection.find(params).sort('timestamp.created', \
+            pymongo.DESCENDING).limit(limit)
 
         activity = []
         for document in documents:
@@ -67,26 +65,34 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
 
         return activity
     
-    def addActivity(self, recipientIds, activity):
-        # activity = self._addObject(activity)
-        activity = activity.value
-        query = copy.copy(activity)
-        query.pop('timestamp')
-        # Note: I don't like doing safe=True, but it's necessary to get the _id
-        # back. We might want to explore different options here eventually.
-        ### TODO: Add Mongo Index on all major fields
-        result = self._collection.update(query, activity, upsert=True, safe=True)
-        if 'upserted' in result:
-            activity_id = self._getStringFromObjectId(result['upserted'])
-            if not isinstance(recipientIds, list):
-                msg = 'Must pass recipients as list'
-                logs.warning(msg)
-                raise Exception(msg)
-            for userId in recipientIds:
-                self.user_activity_collection.addUserActivity(userId, \
-                    activity_id)
+    def addActivity(self, recipientIds, activityItem):
+        for recipientId in recipientIds:
+            activity = activityItem.value
+            activity['recipient_id'] = recipientId
+            query = copy.copy(activity)
+            query.pop('timestamp')
+            result = self._collection.update(query, activity, upsert=True)
+
         
-    def removeActivity(self, userId, activityId):
-        self.user_activity_collection.removeUserActivity(userId, activityId)
-        return self._removeDocument(activityId)
+    def removeActivity(self, genre, userId, **kwargs):
+        stampId     = kwargs.pop('stampId', None)
+
+        if genre in ['like', 'favorite'] and stampId:
+            self._collection.remove({
+                'user.user_id': userId,
+                'link.linked_stamp_id': stampId,
+                'genre': genre
+            })
+
+
+    def removeActivityForStamp(self, stampId):
+        self._collection.remove({'link.linked_stamp_id': stampId})
+        
+    def removeUserActivity(self, userId):
+        self._collection.remove({'user.user_id': userId})
+
+
+
+
+
 

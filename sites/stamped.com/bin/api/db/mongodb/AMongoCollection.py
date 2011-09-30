@@ -257,6 +257,14 @@ class AMongoCollection(object):
         else:
             return True
     
+    def _removeMongoDocuments(self, documentIds):
+        # Confused here. Supposed to return None on success, so I guess it's 
+        # working, but should probably test more.
+        if self._collection.remove({'_id': {'$in': documentIds}}):
+            return False
+        else:
+            return True
+    
     def _getMongoDocumentsFromIds(self, documentIds, **kwargs):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
@@ -390,4 +398,16 @@ class AMongoCollection(object):
             ids += document['ref_ids'][limit:]
         
         return ids
+    
+    def _removeAllRelationships(self, keyId):
+        doc = self._collection.find_one({'_id': keyId})
+        
+        if doc:
+            if 'overflow' in doc:
+                for bucket in doc['overflow']:
+                    self._collection.remove({'_id': '%s%s' % (keyId, bucket)})
+                    
+            self._collection.remove({'_id': keyId})
+        
+        return True
 

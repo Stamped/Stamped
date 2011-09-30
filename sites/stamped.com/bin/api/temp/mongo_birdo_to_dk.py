@@ -1,5 +1,5 @@
 
-import pymongo, json, codecs, os, sys
+import pymongo, json, codecs, os, sys, bson
 from subprocess import Popen, PIPE
 
 OLD_HOST        = "ec2-107-20-48-197.compute-1.amazonaws.com"
@@ -30,6 +30,7 @@ def main():
         print 
 
     convertUsers()
+    convertActivity()
 
 
 def mongoExportImport(collection):
@@ -72,6 +73,29 @@ def convertUsers():
                 {'_id': user['_id']},
                 {'$set': {'name_lower': name}}
             )
+
+
+def convertActivity():
+    activity_collection = new_database['activity']
+    user_activity_collection = new_database['useractivity']
+
+    user_activity = user_activity_collection.find()
+
+    for user in user_activity:        
+        if len(user['_id']) < 24:
+            continue
+
+        for activityId in user['ref_ids']:
+            item = activity_collection.find_one({'_id': bson.objectid.ObjectId(activityId)})
+            
+            if item:
+                del(item['_id'])
+                item['recipient_id'] = user['_id']
+
+                activity_collection.insert(item)
+
+
+    new_database['activity'].remove({'recipient_id': {'$exists': False}})
 
 if __name__ == '__main__':  
     main()

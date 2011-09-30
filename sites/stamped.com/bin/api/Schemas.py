@@ -267,6 +267,7 @@ class Comment(Schema):
 class Activity(Schema):
     def setSchema(self):
         self.activity_id        = SchemaElement(basestring)
+        self.recipient_id       = SchemaElement(basestring)
         self.genre              = SchemaElement(basestring, required=True)
         self.user               = UserMini()
         self.image              = SchemaElement(basestring)
@@ -284,7 +285,6 @@ class ActivityLink(Schema):
         self.linked_stamp_id    = SchemaElement(basestring)
         self.linked_entity      = Entity()
         self.linked_entity_id   = SchemaElement(basestring)
-        self.linked_friend_id   = SchemaElement(basestring) # Temp??
         self.linked_comment     = Comment()
         self.linked_comment_id  = SchemaElement(basestring)
         self.linked_url         = SchemaElement(basestring)
