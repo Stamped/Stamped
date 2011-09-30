@@ -52,6 +52,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
 @property (nonatomic, retain) RKClient* twitterClient;
+@property (nonatomic, retain) Facebook* facebookClient;
 @property (nonatomic, copy) NSArray* twitterFriends;
 @property (nonatomic, copy) NSArray* contactFriends;
 @property (nonatomic, copy) NSArray* stampedFriends;
@@ -64,11 +65,11 @@ static NSString* const kFacebookAppID = @"297022226980395";
 @synthesize authentication = authentication_;
 @synthesize twitterClient = twitterClient_;
 @synthesize twitterFriends = twitterFriends_;
+@synthesize facebookClient = facebookClient_;
 @synthesize contactFriends = contactFriends_;
 @synthesize stampedFriends = stampedFriends_;
 @synthesize facebookFriends = facebookFriends_;
 @synthesize followedUsers = followedUsers_;
-
 @synthesize contactsButton = contactsButton_;
 @synthesize twitterButton = twitterButton_;
 @synthesize facebookButton = facebookButton_;
@@ -82,6 +83,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
     self.findSource = source;
     self.followedUsers = [NSMutableArray array];
+    facebookClient_ = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:self];
   }
   return self;
 }
@@ -97,6 +99,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
   self.facebookButton = nil;
   self.stampedButton = nil;
   self.searchField = nil;
+  self.facebookClient = nil;
   self.nipple = nil;
   self.tableView = nil;
   
@@ -129,6 +132,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
   self.stampedButton = nil;
   self.nipple = nil;
   self.searchField = nil;
+  self.facebookClient = nil;
   self.tableView = nil;
 
   [super viewDidUnload];
@@ -156,6 +160,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 }
 
 - (IBAction)findFromFacebook:(id)sender {
+  [facebookClient_ authorize:[NSArray arrayWithObject:@""]];
   tableView_.hidden = NO;
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;

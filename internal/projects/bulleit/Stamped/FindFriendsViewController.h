@@ -9,6 +9,8 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+#import "FBConnect.h"
+
 @class STSearchField;
 
 typedef enum {
@@ -21,6 +23,9 @@ typedef enum {
 
 @interface FindFriendsViewController : UIViewController<RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
+                                                        FBRequestDelegate,
+                                                        FBDialogDelegate,
+                                                        FBSessionDelegate,
                                                         UITableViewDelegate,
                                                         UITableViewDataSource,
                                                         UITextFieldDelegate>
