@@ -22,7 +22,8 @@ typedef enum {
 @interface FindFriendsViewController : UIViewController<RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
                                                         UITableViewDelegate,
-                                                        UITableViewDataSource>
+                                                        UITableViewDataSource,
+                                                        UITextFieldDelegate>
 
 @property (nonatomic, retain) IBOutlet UIButton* contactsButton;
 @property (nonatomic, retain) IBOutlet UIButton* twitterButton;
