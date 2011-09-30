@@ -339,7 +339,7 @@ class MongoEntitySearcher(EntitySearcher):
             if prefix or len(input_query) < 3:
                 db_results = self.entityDB._collection.find(entity_query, output=list, limit=100)
             else:
-                db_results = self.entityDB._collection.find(entity_query, output=list)
+                db_results = self.entityDB._collection.find(entity_query, output=list, limit=400)
             
             ret['db_results'] = []
             for doc in db_results:

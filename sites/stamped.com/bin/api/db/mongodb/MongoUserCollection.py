@@ -196,3 +196,16 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             result.append(user)
         return result
 
+    def findUsersByFacebook(self, facebookIds, limit=0): 
+        ### TODO: Add Index
+        data = self._collection.find(
+            {"linked_accounts.facebook.facebook_id": {"$in": facebookIds}}
+        ).limit(limit)
+            
+        result = []
+        for item in data:
+            user = self._convertFromMongo(item)
+            user.identifier = item['linked_accounts']['facebook']['facebook_id']
+            result.append(user)
+        return result
+
