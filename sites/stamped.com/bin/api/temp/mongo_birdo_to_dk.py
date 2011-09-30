@@ -92,6 +92,9 @@ def convertActivity():
                 del(item['_id'])
                 item['recipient_id'] = user['_id']
 
+                if 'link' in item and 'linked_friend_id' in item['link']:
+                    del(item['link']['linked_friend_id'])
+
                 activity_collection.insert(item)
 
 
