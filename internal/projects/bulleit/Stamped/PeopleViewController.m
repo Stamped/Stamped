@@ -223,7 +223,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
 
   if (indexPath.row == 0) {
-    FindFriendsViewController* vc = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromTwitter];
+    FindFriendsViewController* vc = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromContacts];
     vc.followedUsers = [NSMutableArray arrayWithArray:self.friendsArray];
     [delegate.navigationController pushViewController:vc animated:YES];
     [vc release];
