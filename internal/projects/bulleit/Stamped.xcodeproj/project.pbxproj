@@ -987,6 +987,7 @@
 		1E5AFFC5141D2A5000772F11 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				7EA969C414353AEA00AE5FF3 /* FBConnect */,
 				7E2B339B140F29F300AFC384 /* TestFlightSDK */,
 				7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */,
 				1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */,
@@ -1473,7 +1474,6 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				7EA969C414353AEA00AE5FF3 /* FBConnect */,
 				7E8A880A14242A5300B0092C /* icon1.png */,
 				7E8A880814242A4B00B0092C /* icon1@2x.png */,
 				7EE24A24142147350027DBB6 /* Stamp Customizer */,
