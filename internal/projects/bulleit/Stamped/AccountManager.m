@@ -27,7 +27,7 @@ static NSString* const kClientSecret = @"august1ftw";
 static NSString* const kLoginPath = @"/oauth2/login.json";
 static NSString* const kRefreshPath = @"/oauth2/token.json";
 static NSString* const kRegisterPath = @"/account/create.json";
-static NSString* const kUserLookupPath = @"/users/lookup.json";
+static NSString* const kUserLookupPath = @"/users/show.json";
 static NSString* const kTokenExpirationUserDefaultsKey = @"TokenExpirationDate";
 static AccountManager* sharedAccountManager_ = nil;
 
@@ -199,14 +199,12 @@ static AccountManager* sharedAccountManager_ = nil;
     self.firstRunViewController.delegate = nil;
     [self.navController.parentViewController dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
-
-    [self storeOAuthToken:object];
+    [self storeOAuthToken:[object objectForKey:@"token"]];
     [self sendUserInfoRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self storeOAuthToken:object];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
     // Registering a new user.
-    NSLog(@"did load object: %@", object);
     [self storeOAuthToken:[object objectForKey:@"token"]];
     [self sendUserInfoRequest];
     firstInstall_ = YES;
@@ -225,7 +223,7 @@ static AccountManager* sharedAccountManager_ = nil;
     return;
 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* oauthMapping = [objectManager.mappingProvider mappingForKeyPath:@"OAuthToken"];
+  RKObjectMapping* oauthMapping = [objectManager.mappingProvider mappingForKeyPath:@"UserAndToken"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kLoginPath
                                                                     delegate:self];
   objectLoader.method = RKRequestMethodPOST;
@@ -267,8 +265,7 @@ static AccountManager* sharedAccountManager_ = nil;
   NSString* username = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserLookupPath delegate:self];
   objectLoader.objectMapping = userMapping;
-  objectLoader.method = RKRequestMethodPOST;
-  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_names", username, nil];
+  objectLoader.params = [NSDictionary dictionaryWithKeysAndObjects:@"screen_name", username, nil];
   [objectLoader send];
 }
 
@@ -335,7 +332,7 @@ static AccountManager* sharedAccountManager_ = nil;
   [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];
 
   RKObjectManager* manager = [RKObjectManager sharedManager];
-  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"Registration"];
+  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"UserAndToken"];
   RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kRegisterPath
                                                         delegate:self];
   loader.method = RKRequestMethodPOST;

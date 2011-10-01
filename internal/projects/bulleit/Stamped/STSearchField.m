@@ -15,7 +15,7 @@
 @implementation STSearchField
 
 - (void)initialize {
-  self.background = [UIImage imageNamed:@"search_field_background"];
+  self.background = [[UIImage imageNamed:@"search_field_background"] stretchableImageWithLeftCapWidth:35 topCapHeight:0];
   self.font = [UIFont fontWithName:@"Helvetica" size:14];
   self.autocorrectionType = UITextAutocorrectionTypeNo;
   self.returnKeyType = UIReturnKeySearch;
