@@ -20,6 +20,7 @@
 #import "UIColor+Stamped.h"
 #import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
+#import "SettingsViewController.h"
 
 static NSString* const kFriendsPath = @"/temp/friends.json";
 
@@ -41,6 +42,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 @synthesize userScreenNameLabel = userScreenNameLabel_;
 @synthesize addFriendsButton = addFriendsButton_;
 @synthesize friendsArray = friendsArray_;
+@synthesize settingsNavigationController = settingsNavigationController_;
 
 - (void)dealloc {
   self.currentUserView = nil;
@@ -49,6 +51,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   self.userScreenNameLabel = nil;
   self.addFriendsButton = nil;
   self.friendsArray = nil;
+  self.settingsNavigationController = nil;
   [super dealloc];
 }
 
@@ -92,6 +95,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   self.userScreenNameLabel = nil;
   self.addFriendsButton = nil;
   self.friendsArray = nil;
+  self.settingsNavigationController = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -110,11 +114,11 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.settingsButton.hidden = YES;
   [super viewWillDisappear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
+  self.settingsButton.hidden = YES;
   [super viewDidDisappear:animated];
 }
 
@@ -158,9 +162,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"PeopleLastUpdatedAt"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
-
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
     self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
@@ -251,7 +252,9 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 #pragma mark - Custom methods.
 
 - (void)settingsButtonPressed:(id)sender {
-  NSLog(@"settings button pressed.");
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  NSLog(@"View controllers: %@", settingsNavigationController_.viewControllers);
+  [delegate.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
 }
 
 - (UIButton*)settingsButton {

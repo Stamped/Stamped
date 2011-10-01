@@ -19,6 +19,7 @@
 #import "STSearchField.h"
 #import "Util.h"
 
+
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;

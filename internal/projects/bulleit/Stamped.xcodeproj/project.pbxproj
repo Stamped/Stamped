@@ -183,6 +183,8 @@
 		7E86285414259A3B00E6FA3D /* toolbar_todoButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E86284014259A3B00E6FA3D /* toolbar_todoButton.png */; };
 		7E86285514259A3B00E6FA3D /* toolbar_todoButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E86284114259A3B00E6FA3D /* toolbar_todoButton@2x.png */; };
 		7E89C3AE1437B5E600547960 /* settings_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3AD1437B5E600547960 /* settings_button@2x.png */; };
+		7E89C3B31437BFEA00547960 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E89C3B11437BFEA00547960 /* SettingsViewController.m */; };
+		7E89C3B41437BFEA00547960 /* SettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3B21437BFEA00547960 /* SettingsViewController.xib */; };
 		7E8A880114240B5B00B0092C /* SearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E8A880014240B5B00B0092C /* SearchResult.m */; };
 		7E8A88031424298100B0092C /* temp_swipeContinue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */; };
 		7E8A880914242A4C00B0092C /* icon1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8A880814242A4B00B0092C /* icon1@2x.png */; };
@@ -702,6 +704,9 @@
 		7E86284014259A3B00E6FA3D /* toolbar_todoButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toolbar_todoButton.png; sourceTree = "<group>"; };
 		7E86284114259A3B00E6FA3D /* toolbar_todoButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_todoButton@2x.png"; sourceTree = "<group>"; };
 		7E89C3AD1437B5E600547960 /* settings_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_button@2x.png"; sourceTree = "<group>"; };
+		7E89C3B01437BFEA00547960 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
+		7E89C3B11437BFEA00547960 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
+		7E89C3B21437BFEA00547960 /* SettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SettingsViewController.xib; sourceTree = "<group>"; };
 		7E8A87FF14240B5B00B0092C /* SearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchResult.h; sourceTree = "<group>"; };
 		7E8A880014240B5B00B0092C /* SearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchResult.m; sourceTree = "<group>"; };
 		7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "temp_swipeContinue@2x.png"; sourceTree = "<group>"; };
@@ -1308,6 +1313,16 @@
 			name = Profile;
 			sourceTree = "<group>";
 		};
+		7E89C3AF1437BFC300547960 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				7E89C3B01437BFEA00547960 /* SettingsViewController.h */,
+				7E89C3B11437BFEA00547960 /* SettingsViewController.m */,
+				7E89C3B21437BFEA00547960 /* SettingsViewController.xib */,
+			);
+			name = Settings;
+			sourceTree = "<group>";
+		};
 		7EA969C414353AEA00AE5FF3 /* FBConnect */ = {
 			isa = PBXGroup;
 			children = (
@@ -1476,7 +1491,6 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				7E89C3AD1437B5E600547960 /* settings_button@2x.png */,
 				7E8A880A14242A5300B0092C /* icon1.png */,
 				7E8A880814242A4B00B0092C /* icon1@2x.png */,
 				7EE24A24142147350027DBB6 /* Stamp Customizer */,
@@ -1504,14 +1518,15 @@
 				7EE7E36F13CD223100FA3B3A /* inbox_top_border@2x.png */,
 				7E146FEA13EF4FE200B954C6 /* refresh_arrow@2x.png */,
 				7EC30B721401C9350047D773 /* globe_button@2x.png */,
+				7E89C3AD1437B5E600547960 /* settings_button@2x.png */,
 				7E5406EC141550FE00912463 /* top-round-corner-mask@2x.png */,
 				7E7E109B13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png */,
 				7E92C11E13E32407008D379D /* shelf_background.png */,
+				7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */,
 				7ED6E1181403216200D84E03 /* newstamp_btn.png */,
 				7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */,
 				7E42FDDD13EF0F0E007B3C26 /* profile_placeholder.png */,
 				7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */,
-				7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */,
 				7E303F7813F0BB7700C1F794 /* gradient_background.png */,
 				7E303F7913F0BB7700C1F794 /* gradient_background@2x.png */,
 				7E7E109C13DF0D9100E44DE1 /* nav_bar@2x.png */,
@@ -1752,6 +1767,7 @@
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E2267D813D52FF500657A66 /* Model */,
 				7E5406D91415507300912463 /* First run */,
+				7E89C3AF1437BFC300547960 /* Settings */,
 				7ECCB93814351AFE006575D1 /* Friend Finder */,
 				7EE24A2B1421479E0027DBB6 /* Stamp Customizer */,
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
@@ -2265,6 +2281,7 @@
 				7E2B7E011436402A002BF383 /* add_friends_header@2x.png in Resources */,
 				7E2B7E031436432E002BF383 /* blue_button_background@2x.png in Resources */,
 				7E89C3AE1437B5E600547960 /* settings_button@2x.png in Resources */,
+				7E89C3B41437BFEA00547960 /* SettingsViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2379,6 +2396,7 @@
 				7EA969E914353AEA00AE5FF3 /* SBJsonBase.m in Sources */,
 				7EA969EA14353AEA00AE5FF3 /* SBJsonParser.m in Sources */,
 				7EA969EB14353AEA00AE5FF3 /* SBJsonWriter.m in Sources */,
+				7E89C3B31437BFEA00547960 /* SettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
