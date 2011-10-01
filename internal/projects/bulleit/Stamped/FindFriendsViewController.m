@@ -34,6 +34,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 
 @interface FindFriendsViewController ()
 - (void)adjustNippleToView:(UIView*)view;
+- (void)setSearchFieldHidden:(BOOL)hidden;
 - (GTMOAuthAuthentication*)createAuthentication;
 - (void)signInToTwitter;
 - (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user;
@@ -57,6 +58,8 @@ static NSString* const kFacebookAppID = @"297022226980395";
 @property (nonatomic, copy) NSArray* contactFriends;
 @property (nonatomic, copy) NSArray* stampedFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
+@property (nonatomic, assign) BOOL searchFieldHidden;
+@property (nonatomic, assign) BOOL twitterAuthFailed;
 @end
 
 @implementation FindFriendsViewController
@@ -77,7 +80,8 @@ static NSString* const kFacebookAppID = @"297022226980395";
 @synthesize searchField = searchField_;
 @synthesize nipple = nipple_;
 @synthesize tableView = tableView_;
-
+@synthesize searchFieldHidden = searchFieldHidden_;
+@synthesize twitterAuthFailed = twitterAuthFailed_;
 
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
@@ -115,6 +119,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  searchFieldHidden_ = YES;
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   if (self.findSource == FindFriendsFromContacts)
     [self findFromContacts:self];
@@ -145,9 +150,10 @@ static NSString* const kFacebookAppID = @"297022226980395";
 }
 
 - (IBAction)findFromStamped:(id)sender {
+  [self setSearchFieldHidden:NO];
+  tableView_.hidden = YES;
   self.stampedFriends = nil;
   [self.tableView reloadData];
-  tableView_.hidden = YES;
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
@@ -160,8 +166,9 @@ static NSString* const kFacebookAppID = @"297022226980395";
 }
 
 - (IBAction)findFromFacebook:(id)sender {
-  [facebookClient_ authorize:[NSArray arrayWithObject:@""]];
+  [self setSearchFieldHidden:YES];
   tableView_.hidden = NO;
+  // [facebookClient_ authorize:[NSArray arrayWithObject:@""]];
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = YES;
@@ -173,6 +180,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 }
 
 - (IBAction)findFromContacts:(id)sender {
+  [self setSearchFieldHidden:YES];
   tableView_.hidden = NO;
   contactsButton_.selected = YES;
   twitterButton_.selected = NO;
@@ -216,6 +224,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 }
 
 - (IBAction)findFromTwitter:(id)sender {
+  [self setSearchFieldHidden:YES];
   tableView_.hidden = NO;
   contactsButton_.selected = NO;
   twitterButton_.selected = YES;
@@ -239,6 +248,29 @@ static NSString* const kFacebookAppID = @"297022226980395";
     [self signInToTwitter];
   }
   [tableView_ reloadData];
+}
+
+- (void)setSearchFieldHidden:(BOOL)hidden {
+  if (hidden == searchFieldHidden_)
+    return;
+
+  searchFieldHidden_ = hidden;
+
+  CGFloat yOffset = -26;
+  if (!hidden) {
+    yOffset *= -1;
+    searchField_.text = nil;
+  }
+
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     tableView_.frame = CGRectOffset(CGRectInset(tableView_.frame, 0, yOffset), 0, yOffset);
+                   }
+                   completion:^(BOOL finished){
+                     searchField_.text = nil;
+                   }];
 }
 
 - (FriendshipTableViewCell*)friendshipCellFromSubview:(UIView*)view {
@@ -337,6 +369,9 @@ static NSString* const kFacebookAppID = @"297022226980395";
 }
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
+  if (findSource_ == FindFriendsFromStamped && !stampedFriends_)
+    return nil;
+
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
 
   if (findSource_ == FindFriendsFromTwitter && twitterFriends_) {
@@ -636,7 +671,6 @@ static NSString* const kFacebookAppID = @"297022226980395";
   loader.params = [NSDictionary dictionaryWithObject:searchField_.text forKey:@"q"];
   loader.objectMapping = mapping;
   [loader send];
-
   tableView_.hidden = NO;
   [searchField_ resignFirstResponder];
   return NO;
