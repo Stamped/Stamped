@@ -398,7 +398,12 @@ typedef enum {
   CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
                                                                     longitude:longitude];
-  annotation.stamp = [entity.stamps anyObject];
+
+  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+  NSArray* stampsArray = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+
+  annotation.stamp = [stampsArray lastObject];
   
   [mapView_ addAnnotation:annotation];
   [annotation release];
