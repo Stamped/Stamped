@@ -210,15 +210,21 @@ typedef enum {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
-  NSString* path = kInboxPath;
-  if (entitiesArray_.count == 0)
-    path = kEverythingPath;
-
+  NSFetchRequest* request = [Stamp fetchRequest];
+  // Grab oldest stamp.
+	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+  [request setFetchLimit:1];
+	Stamp* latestStamp = [Stamp objectWithFetchRequest:request];
+  NSString* path = entitiesArray_.count == 0 ? kEverythingPath : kInboxPath;
+  NSString* latestTimestamp = [NSString stringWithFormat:@"%.0f", latestStamp.created.timeIntervalSince1970];
+  NSLog(@"latest timestamp: %@", latestTimestamp);
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.objectMapping = stampMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", nil];
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", latestTimestamp, @"since", nil];
   [objectLoader send];
 }
 
@@ -270,30 +276,6 @@ typedef enum {
   }
 }
 
-#pragma mark - Table view data source
-
-//- (void)tableView:(UITableView*)tableView willBeginEditingRowAtIndexPath:(NSIndexPath*)indexPath {
-//  //InboxTableViewCell* cell = (InboxTableViewCell*)[tableView cellForRowAtIndexPath:indexPath];
-//}
-//
-//- (void)tableView:(UITableView*)tableView didEndEditingRowAtIndexPath:(NSIndexPath*)indexPath {
-//  //UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
-//}
-//
-//- (UITableViewCellEditingStyle)tableView:(UITableView*)tableView
-//           editingStyleForRowAtIndexPath:(NSIndexPath*)indexPath {
-//  return UITableViewCellEditingStyleDelete;
-//}
-//
-//- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
-//  if (editingStyle == UITableViewCellEditingStyleDelete) {
-//    /*Entity* e = [filteredEntitiesArray_ objectAtIndex:indexPath.row];
-//    [filteredEntitiesArray_ removeObjectAtIndex:indexPath.row];
-//    [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
-//                          withRowAnimation:UITableViewRowAnimationBottom];*/
-//  }    
-//}
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
   return 1;
 }
@@ -325,7 +307,12 @@ typedef enum {
     [stamp.managedObjectContext save:NULL];
   }
 	[self loadStampsFromDataStore];
-  [self setIsLoading:NO];
+  NSLog(@"Object count... %d", objects.count);
+  if (objects.count < 50) {
+    [self setIsLoading:NO];
+  } else {
+    [self loadStampsFromNetwork];
+  }
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
