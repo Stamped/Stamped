@@ -219,7 +219,6 @@ typedef enum {
 	Stamp* latestStamp = [Stamp objectWithFetchRequest:request];
   NSString* path = entitiesArray_.count == 0 ? kEverythingPath : kInboxPath;
   NSString* latestTimestamp = [NSString stringWithFormat:@"%.0f", latestStamp.created.timeIntervalSince1970];
-  NSLog(@"latest timestamp: %@", latestTimestamp);
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
@@ -307,7 +306,6 @@ typedef enum {
     [stamp.managedObjectContext save:NULL];
   }
 	[self loadStampsFromDataStore];
-  NSLog(@"Object count... %d", objects.count);
   if (objects.count < 50) {
     [self setIsLoading:NO];
   } else {
