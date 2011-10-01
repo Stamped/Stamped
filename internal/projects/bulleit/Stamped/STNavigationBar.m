@@ -25,6 +25,7 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
 
 @synthesize hideLogo = hideLogo_;
 @synthesize string = string_;
+@synthesize settingsButton = settingsButton_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -119,6 +120,12 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   mapLayer_.opacity = 0.0;
   [self.layer addSublayer:mapLayer_];
   [mapLayer_ release];
+  
+  settingsButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+  settingsButton_.frame = CGRectMake(5, 7, 34, 30);
+  [settingsButton_ setImage:[UIImage imageNamed:@"settings_button"] forState:UIControlStateNormal];
+  settingsButton_.hidden = YES;
+  [self addSubview:settingsButton_];
 }
 
 - (void)setButtonShown:(BOOL)shown {

@@ -24,4 +24,5 @@ extern NSString* const kListViewButtonPressedNotification;
 
 @property (nonatomic, assign) BOOL hideLogo;
 @property (nonatomic, retain) NSString* string;
+@property (nonatomic, readonly) UIButton* settingsButton;
 @end
