@@ -91,6 +91,7 @@ typedef enum {
   CGRect mapFrame = mapView_.frame;
   mapFrame.origin.y = self.tableView.contentOffset.y;
   mapView_.frame = mapFrame;
+  [self.tableView scrollRectToVisible:mapFrame animated:NO];
   userPannedMap_ = NO;
   self.tableView.scrollEnabled = NO;
   [UIView animateWithDuration:0.5
