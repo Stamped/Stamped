@@ -98,7 +98,7 @@ typedef enum {
                    animations:^{ mapView_.alpha = 1.0; }
                    completion:^(BOOL finished) {
                      mapView_.showsUserLocation = YES;
-                     for (Entity* e in self.filteredEntitiesArray) {
+                     for (Entity* e in self.entitiesArray) {
                        if (!e.coordinates)
                          continue;
                       [self addAnnotationForEntity:e];
