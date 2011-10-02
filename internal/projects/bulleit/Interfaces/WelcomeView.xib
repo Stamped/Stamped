@@ -105,7 +105,7 @@
 						<string key="NSFrame">{{325, 0}, {310, 390}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="102950527"/>
+						<reference key="NSNextKeyView" ref="543989543"/>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -236,7 +236,7 @@ A</string>
 						<string key="NSFrame">{{35, 125}, {251, 61}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1030062927"/>
+						<reference key="NSNextKeyView" ref="29340024"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUIContentMode">1</int>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -551,13 +551,14 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{357, 117}, {46, 46}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="578941605"/>
+						<reference key="NSNextKeyView" ref="705789328"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="551459821"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<double key="IBUIImageEdgeInsets.top">5</double>
 						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
 						<double key="IBUIImageEdgeInsets.left">0.0</double>
@@ -568,17 +569,17 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
-						<object class="NSCustomResource" key="IBUIHighlightedImage" id="805748879">
+						<object class="NSCustomResource" key="IBUIHighlightedImage" id="93633108">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">welcome_checkmark.png</string>
 						</object>
-						<reference key="IBUISelectedImage" ref="805748879"/>
+						<reference key="IBUISelectedImage" ref="93633108"/>
 						<object class="NSCustomResource" key="IBUINormalBackgroundImage" id="367579248">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">stamp_46pt_texture.png</string>
 						</object>
 					</object>
-					<object class="IBUIImageView" id="1030062927">
+					<object class="IBUIImageView" id="29340024">
 						<reference key="NSNextResponder" ref="676673607"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{351, 113}, {58, 58}}</string>
@@ -589,7 +590,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<object class="NSCustomResource" key="IBUIImage" id="289181589">
+						<object class="NSCustomResource" key="IBUIImage" id="464911657">
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">welcome_stamp_shadow@2x.png</string>
 						</object>
@@ -600,7 +601,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{423, 117}, {46, 46}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="243235258"/>
+						<reference key="NSNextKeyView" ref="619542923"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUITag">1</int>
@@ -608,6 +609,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="551459821"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<double key="IBUIImageEdgeInsets.top">5</double>
 						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
 						<double key="IBUIImageEdgeInsets.left">0.0</double>
@@ -618,11 +620,11 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
-						<reference key="IBUIHighlightedImage" ref="805748879"/>
-						<reference key="IBUISelectedImage" ref="805748879"/>
+						<reference key="IBUIHighlightedImage" ref="93633108"/>
+						<reference key="IBUISelectedImage" ref="93633108"/>
 						<reference key="IBUINormalBackgroundImage" ref="367579248"/>
 					</object>
-					<object class="IBUIImageView" id="578941605">
+					<object class="IBUIImageView" id="705789328">
 						<reference key="NSNextResponder" ref="676673607"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{417, 113}, {58, 58}}</string>
@@ -633,7 +635,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUIImage" ref="289181589"/>
+						<reference key="IBUIImage" ref="464911657"/>
 					</object>
 					<object class="IBUIButton" id="730100112">
 						<reference key="NSNextResponder" ref="676673607"/>
@@ -641,7 +643,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{491, 117}, {46, 46}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="698621955"/>
+						<reference key="NSNextKeyView" ref="717352734"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUITag">2</int>
@@ -649,6 +651,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="551459821"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<double key="IBUIImageEdgeInsets.top">5</double>
 						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
 						<double key="IBUIImageEdgeInsets.left">0.0</double>
@@ -659,11 +662,11 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
-						<reference key="IBUIHighlightedImage" ref="805748879"/>
-						<reference key="IBUISelectedImage" ref="805748879"/>
+						<reference key="IBUIHighlightedImage" ref="93633108"/>
+						<reference key="IBUISelectedImage" ref="93633108"/>
 						<reference key="IBUINormalBackgroundImage" ref="367579248"/>
 					</object>
-					<object class="IBUIImageView" id="243235258">
+					<object class="IBUIImageView" id="619542923">
 						<reference key="NSNextResponder" ref="676673607"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{485, 113}, {58, 58}}</string>
@@ -674,7 +677,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUIImage" ref="289181589"/>
+						<reference key="IBUIImage" ref="464911657"/>
 					</object>
 					<object class="IBUIButton" id="957060923">
 						<reference key="NSNextResponder" ref="676673607"/>
@@ -690,6 +693,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="551459821"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<double key="IBUIImageEdgeInsets.top">5</double>
 						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
 						<double key="IBUIImageEdgeInsets.left">0.0</double>
@@ -700,11 +704,11 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
-						<reference key="IBUIHighlightedImage" ref="805748879"/>
-						<reference key="IBUISelectedImage" ref="805748879"/>
+						<reference key="IBUIHighlightedImage" ref="93633108"/>
+						<reference key="IBUISelectedImage" ref="93633108"/>
 						<reference key="IBUINormalBackgroundImage" ref="367579248"/>
 					</object>
-					<object class="IBUIImageView" id="698621955">
+					<object class="IBUIImageView" id="717352734">
 						<reference key="NSNextResponder" ref="676673607"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{553, 113}, {58, 58}}</string>
@@ -715,7 +719,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUIImage" ref="289181589"/>
+						<reference key="IBUIImage" ref="464911657"/>
 					</object>
 					<object class="IBUIButton" id="495996846">
 						<reference key="NSNextResponder" ref="676673607"/>
@@ -723,7 +727,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{357, 184}, {46, 46}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="148372474"/>
+						<reference key="NSNextKeyView" ref="986782480"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUITag">4</int>
@@ -731,6 +735,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="551459821"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<double key="IBUIImageEdgeInsets.top">5</double>
 						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
 						<double key="IBUIImageEdgeInsets.left">0.0</double>
@@ -741,11 +746,11 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
-						<reference key="IBUIHighlightedImage" ref="805748879"/>
-						<reference key="IBUISelectedImage" ref="805748879"/>
+						<reference key="IBUIHighlightedImage" ref="93633108"/>
+						<reference key="IBUISelectedImage" ref="93633108"/>
 						<reference key="IBUINormalBackgroundImage" ref="367579248"/>
 					</object>
-					<object class="IBUIImageView" id="102950527">
+					<object class="IBUIImageView" id="543989543">
 						<reference key="NSNextResponder" ref="676673607"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{351, 180}, {58, 58}}</string>
@@ -756,7 +761,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUIImage" ref="289181589"/>
+						<reference key="IBUIImage" ref="464911657"/>
 					</object>
 					<object class="IBUIButton" id="751015906">
 						<reference key="NSNextResponder" ref="676673607"/>
@@ -764,7 +769,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<string key="NSFrame">{{423, 184}, {46, 46}}</string>
 						<reference key="NSSuperview" ref="676673607"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="813853844"/>
+						<reference key="NSNextKeyView" ref="984561681"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<int key="IBUITag">5</int>
@@ -772,6 +777,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="551459821"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<double key="IBUIImageEdgeInsets.top">5</double>
 						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
 						<double key="IBUIImageEdgeInsets.left">0.0</double>
@@ -782,11 +788,11 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
-						<reference key="IBUIHighlightedImage" ref="805748879"/>
-						<reference key="IBUISelectedImage" ref="805748879"/>
+						<reference key="IBUIHighlightedImage" ref="93633108"/>
+						<reference key="IBUISelectedImage" ref="93633108"/>
 						<reference key="IBUINormalBackgroundImage" ref="367579248"/>
 					</object>
-					<object class="IBUIImageView" id="148372474">
+					<object class="IBUIImageView" id="986782480">
 						<reference key="NSNextResponder" ref="676673607"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{417, 180}, {58, 58}}</string>
@@ -797,7 +803,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUIImage" ref="289181589"/>
+						<reference key="IBUIImage" ref="464911657"/>
 					</object>
 					<object class="IBUIButton" id="923809995">
 						<reference key="NSNextResponder" ref="676673607"/>
@@ -813,6 +819,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<reference key="IBUIFont" ref="551459821"/>
+						<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 						<double key="IBUIImageEdgeInsets.top">5</double>
 						<double key="IBUIImageEdgeInsets.bottom">0.0</double>
 						<double key="IBUIImageEdgeInsets.left">0.0</double>
@@ -823,11 +830,11 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="1007162086"/>
-						<reference key="IBUIHighlightedImage" ref="805748879"/>
-						<reference key="IBUISelectedImage" ref="805748879"/>
+						<reference key="IBUIHighlightedImage" ref="93633108"/>
+						<reference key="IBUISelectedImage" ref="93633108"/>
 						<reference key="IBUINormalBackgroundImage" ref="367579248"/>
 					</object>
-					<object class="IBUIImageView" id="813853844">
+					<object class="IBUIImageView" id="984561681">
 						<reference key="NSNextResponder" ref="676673607"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{485, 180}, {58, 58}}</string>
@@ -838,7 +845,7 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUIImage" ref="289181589"/>
+						<reference key="IBUIImage" ref="464911657"/>
 					</object>
 				</object>
 				<string key="NSFrameSize">{960, 390}</string>
@@ -1209,13 +1216,13 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 							<reference ref="495996846"/>
 							<reference ref="751015906"/>
 							<reference ref="923809995"/>
-							<reference ref="813853844"/>
-							<reference ref="102950527"/>
-							<reference ref="1030062927"/>
-							<reference ref="578941605"/>
-							<reference ref="243235258"/>
-							<reference ref="698621955"/>
-							<reference ref="148372474"/>
+							<reference ref="984561681"/>
+							<reference ref="543989543"/>
+							<reference ref="29340024"/>
+							<reference ref="705789328"/>
+							<reference ref="619542923"/>
+							<reference ref="717352734"/>
+							<reference ref="986782480"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Scroll View Contents</string>
@@ -1398,37 +1405,37 @@ CnRoZSBwbGFjZSB0aGF0IGdhdmUgeW91IGZvb2QgcG9pc29uaW5nLg</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">76</int>
-						<reference key="object" ref="102950527"/>
+						<reference key="object" ref="543989543"/>
 						<reference key="parent" ref="676673607"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">77</int>
-						<reference key="object" ref="1030062927"/>
+						<reference key="object" ref="29340024"/>
 						<reference key="parent" ref="676673607"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">78</int>
-						<reference key="object" ref="578941605"/>
+						<reference key="object" ref="705789328"/>
 						<reference key="parent" ref="676673607"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">79</int>
-						<reference key="object" ref="148372474"/>
+						<reference key="object" ref="986782480"/>
 						<reference key="parent" ref="676673607"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">81</int>
-						<reference key="object" ref="243235258"/>
+						<reference key="object" ref="619542923"/>
 						<reference key="parent" ref="676673607"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">82</int>
-						<reference key="object" ref="698621955"/>
+						<reference key="object" ref="717352734"/>
 						<reference key="parent" ref="676673607"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">80</int>
-						<reference key="object" ref="813853844"/>
+						<reference key="object" ref="984561681"/>
 						<reference key="parent" ref="676673607"/>
 					</object>
 				</object>
