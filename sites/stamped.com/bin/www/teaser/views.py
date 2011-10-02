@@ -33,4 +33,26 @@ def index(request):
         return response
     except:
         raise Http404
+
+def terms(request):
+    try:
+        response = render_to_response('terms-mobile.html', None)
+
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
+    except:
+        raise Http404
+
+def privacy(request):
+    try:
+        response = render_to_response('privacy-mobile.html', None)
+
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
+    except:
+        raise Http404
     
