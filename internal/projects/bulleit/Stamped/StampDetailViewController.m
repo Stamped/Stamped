@@ -551,6 +551,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if (shouldDelete) {
     objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
         stamp_.entityObject.entityID, @"entity_id", nil];
+    stamp_.entityObject.favorite = nil;
+    [stamp_.managedObjectContext save:nil];
   } else {
     objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
         stamp_.entityObject.entityID, @"entity_id",
