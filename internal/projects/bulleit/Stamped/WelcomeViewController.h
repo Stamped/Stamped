@@ -17,7 +17,6 @@
 
 @property (nonatomic, retain) IBOutlet UIView* contentView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, retain) IBOutlet UIPageControl* pageControl;
 
 @property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;
 
@@ -38,7 +37,6 @@
 - (IBAction)findfromContacts:(id)sender;
 - (IBAction)findFromTwitter:(id)sender;
 - (IBAction)dismissWelcomeView:(id)sender;
-- (IBAction)pageViewChanged:(id)sender;
 - (IBAction)stampCustomizerButtonPressed:(id)sender;
 - (IBAction)stampButtonPressed:(id)sender;
 

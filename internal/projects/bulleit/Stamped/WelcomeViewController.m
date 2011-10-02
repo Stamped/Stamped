@@ -38,7 +38,6 @@ NSString* const kStampColors[7][2] = {
 
 @synthesize contentView = contentView_;
 @synthesize scrollView = scrollView_;
-@synthesize pageControl = pageControl_;
 
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
@@ -66,7 +65,6 @@ NSString* const kStampColors[7][2] = {
 - (void)dealloc {
   self.contentView = nil;
   self.scrollView = nil;
-  self.pageControl = nil;
   self.page1Title = nil;
   self.page2Title = nil;
   self.page3Title = nil;
@@ -111,7 +109,6 @@ NSString* const kStampColors[7][2] = {
   [super viewDidUnload];
   self.contentView = nil;
   self.scrollView = nil;
-  self.pageControl = nil;
   self.page1Title = nil;
   self.page2Title = nil;
   self.page3Title = nil;
@@ -202,25 +199,6 @@ NSString* const kStampColors[7][2] = {
   [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes object:nil];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
   [delegate.navigationController dismissModalViewControllerAnimated:YES];
-}
-
-- (IBAction)pageViewChanged:(id)sender {
-  NSInteger page = self.pageControl.currentPage;
-
-  // The scroll view contains a single view whose contents each are the width of
-  // the containing scroll view.
-  CGFloat xOffset = self.scrollView.frame.size.width * page;
-  CGPoint offset = CGPointMake(xOffset, 0);
-
-  [self.scrollView setContentOffset:offset animated:YES];
-}
-
-#pragma mark - Scroll View Delegate
-
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-  CGFloat xOffset = self.scrollView.contentOffset.x;
-  NSInteger page = xOffset / self.scrollView.frame.size.width;
-  self.pageControl.currentPage = page;
 }
 
 @end
