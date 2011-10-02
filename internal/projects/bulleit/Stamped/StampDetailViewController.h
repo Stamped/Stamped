@@ -45,6 +45,11 @@
 @property (nonatomic, retain) IBOutlet UILabel* addFavoriteLabel;
 @property (nonatomic, retain) IBOutlet UIButton* likeButton;
 @property (nonatomic, retain) IBOutlet UILabel* likeLabel;
+@property (nonatomic, retain) IBOutlet UIButton* shareButton;
+@property (nonatomic, retain) IBOutlet UILabel* shareLabel;
+@property (nonatomic, retain) IBOutlet UIButton* stampButton;
+@property (nonatomic, retain) IBOutlet UILabel* stampLabel;
+
 @property (nonatomic, retain) IBOutlet UIImageView* eDetailArrowImageView;
 
 @end

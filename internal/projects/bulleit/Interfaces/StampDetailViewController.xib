@@ -577,7 +577,6 @@
 						<string key="NSFrame">{{255, 399}, {50, 16}}</string>
 						<reference key="NSSuperview" ref="880728759"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:311</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -810,6 +809,38 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">82</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">shareButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="537858746"/>
+					</object>
+					<int key="connectionID">83</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">shareLabel</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="337528872"/>
+					</object>
+					<int key="connectionID">84</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">stampButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="600580011"/>
+					</object>
+					<int key="connectionID">85</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">stampLabel</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="763577215"/>
+					</object>
+					<int key="connectionID">86</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1196,7 +1227,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">82</int>
+			<int key="maxID">86</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1270,6 +1301,10 @@
 							<string>loadingView</string>
 							<string>mainCommentContainer</string>
 							<string>scrollView</string>
+							<string>shareButton</string>
+							<string>shareLabel</string>
+							<string>stampButton</string>
+							<string>stampLabel</string>
 							<string>stampedLabel</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -1290,6 +1325,10 @@
 							<string>UIActivityIndicatorView</string>
 							<string>UIView</string>
 							<string>UIScrollView</string>
+							<string>UIButton</string>
+							<string>UILabel</string>
+							<string>UIButton</string>
+							<string>UILabel</string>
 							<string>UILabel</string>
 						</object>
 					</object>
@@ -1313,6 +1352,10 @@
 							<string>loadingView</string>
 							<string>mainCommentContainer</string>
 							<string>scrollView</string>
+							<string>shareButton</string>
+							<string>shareLabel</string>
+							<string>stampButton</string>
+							<string>stampLabel</string>
 							<string>stampedLabel</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -1380,6 +1423,22 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">scrollView</string>
 								<string key="candidateClassName">UIScrollView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">shareButton</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">shareLabel</string>
+								<string key="candidateClassName">UILabel</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">stampButton</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">stampLabel</string>
+								<string key="candidateClassName">UILabel</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">stampedLabel</string>

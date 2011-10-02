@@ -82,6 +82,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize addFavoriteLabel = addFavoriteLabel_;
 @synthesize likeButton = likeButton_;
 @synthesize likeLabel = likeLabel_;
+@synthesize shareLabel = shareLabel_;
+@synthesize shareButton = shareButton_;
+@synthesize stampLabel = stampLabel_;
+@synthesize stampButton = stampButton_;
 @synthesize stampPhotoView = stampPhotoView_;
 @synthesize eDetailArrowImageView = eDetailArrowImageView_;
 @synthesize likeFaceImageView = likeFaceImageView_;
@@ -114,6 +118,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.addFavoriteLabel = nil;
   self.likeButton = nil;
   self.likeLabel = nil;
+  self.shareLabel = nil;
+  self.shareButton = nil;
+  self.stampLabel = nil;
+  self.stampButton = nil;
   [super dealloc];
 }
 
@@ -196,6 +204,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.addFavoriteLabel = nil;
   self.likeButton = nil;
   self.likeLabel = nil;
+  self.shareLabel = nil;
+  self.shareButton = nil;
+  self.stampLabel = nil;
+  self.stampButton = nil;
 }
 
 - (void)setUpHeader {
@@ -268,6 +280,28 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if (stamp_.isLiked.boolValue && stamp_.numLikes.unsignedIntValue > 0) {
     likeLabel_.text = @"Liked";
     likeButton_.selected = YES;
+  }
+  
+  if ([AccountManager sharedManager].currentUser == stamp_.user) {
+    stampLabel_.hidden = YES;
+    stampButton_.hidden = YES;
+    likeLabel_.hidden = YES;
+    likeButton_.hidden = YES;
+    NSInteger xOffset = 320 / 3;
+    // Rearrange To-do and Share buttons to center them.
+    CGPoint center = addFavoriteButton_.center;
+    center.x = xOffset;
+    addFavoriteButton_.center = center;
+    center = addFavoriteLabel_.center;
+    center.x = xOffset;
+    addFavoriteLabel_.center = center;
+    xOffset *= 2;
+    center = shareLabel_.center;
+    center.x = xOffset;
+    shareLabel_.center = center;
+    center = shareButton_.center;
+    center.x = xOffset;
+    shareButton_.center = center;
   }
 }
 
