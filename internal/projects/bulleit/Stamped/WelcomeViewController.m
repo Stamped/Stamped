@@ -51,6 +51,10 @@ NSString* const kStampColors[7][2] = {
 @synthesize galleryStamp5 = galleryStamp5_;
 @synthesize galleryStamp6 = galleryStamp6_;
 
+@synthesize nextButton = nextButton_;
+@synthesize backButton = backButton_;
+@synthesize readyButton = readyButton_;
+
 @synthesize page1Title = page1Title_;
 @synthesize page2Title = page2Title_;
 @synthesize page3Title = page3Title_;
@@ -75,6 +79,9 @@ NSString* const kStampColors[7][2] = {
   self.galleryStamp4 = nil;
   self.galleryStamp5 = nil;
   self.galleryStamp6 = nil;
+  self.nextButton = nil;
+  self.backButton = nil;
+  self.readyButton = nil;
   self.findFriendsNavigationController = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
@@ -87,6 +94,9 @@ NSString* const kStampColors[7][2] = {
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+
+  backButton_.alpha = 0.0;
+  readyButton_.alpha = 0.0;
 
   [self.scrollView addSubview:self.contentView];
   self.scrollView.contentSize = self.contentView.frame.size;
@@ -119,6 +129,9 @@ NSString* const kStampColors[7][2] = {
   self.galleryStamp4 = nil;
   self.galleryStamp5 = nil;
   self.galleryStamp6 = nil;
+  self.nextButton = nil;
+  self.backButton = nil;
+  self.readyButton = nil;
   self.findFriendsNavigationController = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
@@ -162,6 +175,17 @@ NSString* const kStampColors[7][2] = {
 }
 
 #pragma mark - Actions
+
+- (IBAction)backButtonPressed:(id)sender {
+  CGPoint newOffset = CGPointMake(fmaxf(0, scrollView_.contentOffset.x - CGRectGetWidth(scrollView_.frame)), 0);
+  [scrollView_ setContentOffset:newOffset animated:YES];
+}
+
+- (IBAction)nextButtonPressed:(id)sender {
+  CGPoint newOffset = CGPointMake(fminf(scrollView_.contentSize.width - CGRectGetWidth(scrollView_.frame),
+                                        scrollView_.contentOffset.x + CGRectGetWidth(scrollView_.frame)), 0);
+  [scrollView_ setContentOffset:newOffset animated:YES];
+}
 
 - (IBAction)stampButtonPressed:(id)sender {
   UIButton* button = sender;
@@ -208,6 +232,14 @@ NSString* const kStampColors[7][2] = {
   [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes object:nil];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
   [delegate.navigationController dismissModalViewControllerAnimated:YES];
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  backButton_.alpha = fminf(1, scrollView_.contentOffset.x / CGRectGetWidth(scrollView_.frame));
+  nextButton_.alpha = fmaxf(0, (scrollView_.contentSize.width - scrollView_.contentOffset.x - CGRectGetWidth(scrollView_.frame)) / CGRectGetWidth(scrollView_.frame));
+  readyButton_.alpha = 1.0 - nextButton_.alpha;
 }
 
 @end

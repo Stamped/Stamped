@@ -30,10 +30,16 @@
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp5;
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp6;
 
+@property (nonatomic, retain) IBOutlet UIButton* nextButton;
+@property (nonatomic, retain) IBOutlet UIButton* backButton;
+@property (nonatomic, retain) IBOutlet UIButton* readyButton;
+
 @property (nonatomic, retain) IBOutlet UILabel* page1Title;
 @property (nonatomic, retain) IBOutlet UILabel* page2Title;
 @property (nonatomic, retain) IBOutlet UILabel* page3Title;
 
+- (IBAction)backButtonPressed:(id)sender;
+- (IBAction)nextButtonPressed:(id)sender;
 - (IBAction)findfromContacts:(id)sender;
 - (IBAction)findFromTwitter:(id)sender;
 - (IBAction)dismissWelcomeView:(id)sender;
