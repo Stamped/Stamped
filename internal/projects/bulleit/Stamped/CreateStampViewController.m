@@ -452,7 +452,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   backgroundImageView_.hidden = NO;
   [self.navigationController setNavigationBarHidden:NO animated:YES];
 
-  CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(310, MAXFLOAT)];
+  CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
   contentSize.height += CGRectGetHeight(self.stampPhotoView.bounds) + 10;
   CGRect newCommentFrame = CGRectMake(0, 4, 310, fmaxf(104, contentSize.height));
   CGRect convertedFrame = [self.view convertRect:newCommentFrame fromView:ribbonedContainerView_];  
