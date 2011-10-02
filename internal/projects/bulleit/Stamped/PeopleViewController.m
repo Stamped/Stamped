@@ -106,7 +106,9 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   if (delegate.navigationController.navigationBarHidden)
     [delegate.navigationController setNavigationBarHidden:NO animated:YES];
 
-  [self loadFriendsFromNetwork];
+  if (!friendsArray_)
+    [self loadFriendsFromNetwork];
+
   [super viewWillAppear:animated];
 }
 

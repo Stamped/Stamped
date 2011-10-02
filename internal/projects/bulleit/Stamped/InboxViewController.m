@@ -142,7 +142,7 @@ typedef enum {
                                 (id)filmFilterButton_,
                                 (id)musicFilterButton_,
                                 (id)otherFilterButton_, nil];
-  
+
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
   [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
@@ -170,7 +170,6 @@ typedef enum {
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self loadStampsFromDataStore];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
