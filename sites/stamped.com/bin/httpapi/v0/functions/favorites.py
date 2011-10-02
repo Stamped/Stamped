@@ -33,7 +33,12 @@ def remove(request):
     favorite    = stampedAPI.removeFavorite(authUserId, schema.entity_id)
     favorite    = HTTPFavorite().importSchema(favorite)
 
-    return transformOutput(favorite.exportSparse())
+    # Hack to force 'entity' to null for Bons
+    ### TODO: Come up with a long-term solution
+    result      = favorite.exportSparse()
+    result['entity'] = None
+
+    return transformOutput(result)
 
 
 @handleHTTPRequest
