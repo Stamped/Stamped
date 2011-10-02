@@ -93,6 +93,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                         @"num_comments", @"numComments",
                                         @"num_likes", @"numLikes",
                                         @"is_liked", @"isLiked",
+                                        @"is_fav", @"isFavorited",
                                         @"image_dimensions", @"imageDimensions",
                                         @"image_url", @"imageURL",
                                         @"url", @"URL", nil];

@@ -715,6 +715,7 @@
 		7E89C3C41437DB3A00547960 /* settings_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_button_bg@2x.png"; sourceTree = "<group>"; };
 		7E89C3C81437DD9B00547960 /* facebook_icon_gray@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "facebook_icon_gray@2x.png"; sourceTree = "<group>"; };
 		7E89C3C91437DD9B00547960 /* twitter_icon_gray@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "twitter_icon_gray@2x.png"; sourceTree = "<group>"; };
+		7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 4.xcdatamodel"; sourceTree = "<group>"; };
 		7E8A87FF14240B5B00B0092C /* SearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchResult.h; sourceTree = "<group>"; };
 		7E8A880014240B5B00B0092C /* SearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchResult.m; sourceTree = "<group>"; };
 		7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "temp_swipeContinue@2x.png"; sourceTree = "<group>"; };
@@ -2678,9 +2679,10 @@
 			children = (
 				7E26888614290738001BC95D /* StampedModel 2.xcdatamodel */,
 				7EA6CF69142BF8C6001AE920 /* StampedModel 3.xcdatamodel */,
+				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7EA6CF69142BF8C6001AE920 /* StampedModel 3.xcdatamodel */;
+			currentVersion = 7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;
