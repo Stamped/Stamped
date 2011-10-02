@@ -178,6 +178,11 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 
 - (void)loadFavoritesFromDataStore {
   self.favoritesArray = nil;
+
+  NSArray* toDelete = [Favorite objectsWithPredicate:[NSPredicate predicateWithFormat:@"entityObject == NIL"]];
+  for (Favorite* fave in toDelete)
+    [fave.managedObjectContext deleteObject:fave];
+
   NSFetchRequest* request = [Favorite fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];

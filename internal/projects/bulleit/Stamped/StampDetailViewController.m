@@ -545,7 +545,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   NSString* path = shouldDelete ? kRemoveFavoritePath : kCreateFavoritePath;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
   if (shouldDelete) {
@@ -737,33 +737,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
-                                                        object:nil];
-    NSLog(@"response: %@", objectLoader.response.bodyAsString);
-    return;
-  }
-
-  if ([objectLoader.resourcePath isEqualToString:kRemoveFavoritePath]) {
-    NSLog(@"response: %@", objectLoader.response.bodyAsString);
-    Favorite* fav = [objects lastObject];
-    Favorite* storedFavorite =
-        [Favorite objectWithPredicate:[NSPredicate predicateWithFormat:@"favoriteID == %@", fav.favoriteID]];
-    if (storedFavorite) {
-      [storedFavorite deleteEntity];
-      [storedFavorite.managedObjectContext save:NULL];
-    }
-    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification 
-                                                        object:nil];
-    return;
-  }
-  
-  if ([objectLoader.resourcePath isEqualToString:kCreateLikePath] ||
-      [objectLoader.resourcePath isEqualToString:kRemoveLikePath]) {
-    NSLog(@"Like action: %@: %@", objectLoader.resourcePath, objectLoader.response.bodyAsString);
-    return;
-  }
-  
   [loadingView_ stopAnimating];
   addCommentField_.hidden = NO;
   currentUserImageView_.hidden = NO;
@@ -778,12 +751,13 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     
     addCommentField_.text = nil;
     return;
+  } else if ([objectLoader.resourcePath rangeOfString:kCommentsPath].location != NSNotFound) {
+    stamp_.numComments = [NSNumber numberWithUnsignedInteger:objects.count];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
+                                                        object:stamp_];
+    stamp_.comments = [NSSet setWithArray:objects];
+    [self renderComments];
   }
-  stamp_.numComments = [NSNumber numberWithUnsignedInteger:objects.count];
-  [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
-                                                      object:stamp_];
-  stamp_.comments = [NSSet setWithArray:objects];
-  [self renderComments];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -791,16 +765,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
 
-  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath] ||
-      [objectLoader.resourcePath isEqualToString:kRemoveFavoritePath]) {
-    NSLog(@"%@", objectLoader.response.bodyAsString);
-    return;
+  if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
+    [loadingView_ stopAnimating];
+    addCommentField_.hidden = NO;
+    currentUserImageView_.hidden = NO;
+    [addCommentField_ becomeFirstResponder];
   }
-
-  [loadingView_ stopAnimating];
-  addCommentField_.hidden = NO;
-  currentUserImageView_.hidden = NO;
-  [addCommentField_ becomeFirstResponder];
 }
 
 @end
