@@ -22,6 +22,7 @@
 
 @property (nonatomic, retain) IBOutlet UIImageView* userStampImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
+@property (nonatomic, retain) IBOutlet UIImageView* largeStampColorImageView;
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp0;
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp1;
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp2;

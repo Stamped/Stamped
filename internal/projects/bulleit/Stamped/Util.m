@@ -111,6 +111,12 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 }
 
 + (UIImage*)stampImageWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary {
+  return [Util gradientImage:[UIImage imageNamed:@"stamp_46pt_texture"]
+            withPrimaryColor:primary
+                   secondary:secondary];
+}
+
++ (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary {
   CGFloat r1, g1, b1, r2, g2, b2;
   [Util splitHexString:primary toRed:&r1 green:&g1 blue:&b1];
   
@@ -121,8 +127,8 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     g2 = g1;
     b2 = b1;
   }
-  
-  return [Util gradientImage:[UIImage imageNamed:@"stamp_46pt_texture"]
+
+  return [Util gradientImage:image
               withPrimaryRed:r1
                 primaryGreen:g1
                  primaryBlue:b1

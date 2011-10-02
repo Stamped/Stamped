@@ -42,6 +42,7 @@ NSString* const kStampColors[7][2] = {
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 @synthesize userStampImageView = userStampImageView_;
+@synthesize largeStampColorImageView = largeStampColorImageView_;
 @synthesize userImageView = userImageView_;
 @synthesize galleryStamp0 = galleryStamp0_;
 @synthesize galleryStamp1 = galleryStamp1_;
@@ -86,6 +87,7 @@ NSString* const kStampColors[7][2] = {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
   self.userStampImageView = nil;
+  self.largeStampColorImageView = nil;
   self.userImageView = nil;
   [super dealloc];
 }
@@ -135,6 +137,7 @@ NSString* const kStampColors[7][2] = {
   self.findFriendsNavigationController = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
+  self.largeStampColorImageView = nil;
   self.userStampImageView = nil;
   self.userImageView = nil;
 }
@@ -151,6 +154,9 @@ NSString* const kStampColors[7][2] = {
   [user.managedObjectContext save:NULL];
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:[AccountManager sharedManager]];
+  self.largeStampColorImageView.image = [Util gradientImage:largeStampColorImageView_.image
+                                           withPrimaryColor:primary
+                                                  secondary:secondary];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
   

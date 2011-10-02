@@ -42,6 +42,7 @@ extern NSString* const kKeychainTwitterToken;
             secondaryBlue:(CGFloat)sBlue;
 + (UIImage*)stampImageForUser:(User*)user;
 + (UIImage*)stampImageWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
++ (UIImage*)gradientImage:(UIImage*)image withPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date;
 
 + (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject;
