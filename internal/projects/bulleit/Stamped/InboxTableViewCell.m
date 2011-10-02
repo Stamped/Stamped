@@ -270,6 +270,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)setTitle:(NSString*)title {
   if (title_ != title) {
+    [title_ release];
     title_ = [title copy];
 
     NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
@@ -322,51 +323,51 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 }
 
 - (void)setStamps:(NSArray*)stamps {
-  if (stamps_ == stamps)
-    return;
+  if (stamps_ != stamps) {
+    [stamps_ release];
+    stamps_ = [stamps copy];
+    Stamp* stamp = [stamps_ lastObject];
+    
+    cameraImageView_.hidden = stamp.imageURL ? NO : YES;
+    disclosureImageView_.hidden = !cameraImageView_.hidden;
 
-  stamps_ = [stamps copy];
-  Stamp* stamp = [stamps_ lastObject];
-  
-  cameraImageView_.hidden = stamp.imageURL ? NO : YES;
-  disclosureImageView_.hidden = !cameraImageView_.hidden;
+    self.stampImage = stamp.user.stampImage;
+    userNameLabel_.text = stamp.user.screenName;
+    [userNameLabel_ sizeToFit];
+    userNameLabel_.frame = CGRectMake(userImageRightMargin_,
+                                      57,
+                                      CGRectGetWidth(userNameLabel_.frame),
+                                      CGRectGetHeight(userNameLabel_.frame));
 
-  self.stampImage = stamp.user.stampImage;
-  userNameLabel_.text = stamp.user.screenName;
-  [userNameLabel_ sizeToFit];
-  userNameLabel_.frame = CGRectMake(userImageRightMargin_,
-                                    57,
-                                    CGRectGetWidth(userNameLabel_.frame),
-                                    CGRectGetHeight(userNameLabel_.frame));
+    NSString* comment = stamp.blurb.length ?
+        [NSString stringWithFormat:@"\u201c%@\u201d", stamp.blurb] : @"stamped";
+    
+    self.numComments = [stamp.numComments unsignedIntegerValue];
 
-  NSString* comment = stamp.blurb.length ?
-      [NSString stringWithFormat:@"\u201c%@\u201d", stamp.blurb] : @"stamped";
-  
-  self.numComments = [stamp.numComments unsignedIntegerValue];
+    CGFloat commentMaxWidth = kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 3;
+    if (numComments_ > 0)
+      commentMaxWidth -= (CGRectGetWidth(numCommentsLabel_.frame) + CGRectGetWidth(commentBubbleImageView_.frame) + 8);
 
-  CGFloat commentMaxWidth = kSubstringMaxWidth - CGRectGetWidth(userNameLabel_.frame) - 3;
-  if (numComments_ > 0)
-    commentMaxWidth -= (CGRectGetWidth(numCommentsLabel_.frame) + CGRectGetWidth(commentBubbleImageView_.frame) + 8);
+    CGSize stringSize = [comment sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
+                                     forWidth:commentMaxWidth
+                                lineBreakMode:UILineBreakModeTailTruncation];
+    commentLabel_.text = comment;
+    commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3,
+                                     57,
+                                     stringSize.width,
+                                     stringSize.height);
 
-  CGSize stringSize = [comment sizeWithFont:[UIFont fontWithName:kCommentFontString size:kSubstringFontSize]
-                                   forWidth:commentMaxWidth
-                              lineBreakMode:UILineBreakModeTailTruncation];
-  commentLabel_.text = comment;
-  commentLabel_.frame = CGRectMake(CGRectGetMaxX(userNameLabel_.frame) + 3,
-                                   57,
-                                   stringSize.width,
-                                   stringSize.height);
-
-  self.hidePhotos = NO;
-  
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-  for (Stamp* s in stamps_) {
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(stampChanged:)
-                                                 name:kStampDidChangeNotification
-                                               object:s];
+    self.hidePhotos = NO;
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    for (Stamp* s in stamps_) {
+      [[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(stampChanged:)
+                                                   name:kStampDidChangeNotification
+                                                 object:s];
+    }
+    [self updateTimestamp];
   }
-  [self updateTimestamp];
 }
 
 - (void)setHidePhotos:(BOOL)hidePhotos {

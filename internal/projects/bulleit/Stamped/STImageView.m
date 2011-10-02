@@ -64,16 +64,19 @@
 }
 
 - (void)setImageURL:(NSString*)imageURL {
-  imageURL_ = [imageURL copy];
-  if (imageURL_) {
-    self.downloadData = [NSMutableData data];
-    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:imageURL_]];
-    NSURLConnection* connection = [[NSURLConnection alloc] initWithRequest:request
-                                                                  delegate:self];
-    self.connection = connection;
-    [connection release];
+  if (imageURL != imageURL_) {
+    [imageURL_ release];
+    imageURL_ = [imageURL copy];
+    if (imageURL_) {
+      self.downloadData = [NSMutableData data];
+      NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:imageURL_]];
+      NSURLConnection* connection = [[NSURLConnection alloc] initWithRequest:request
+                                                                    delegate:self];
+      self.connection = connection;
+      [connection release];
+    }
+    [self setNeedsDisplay];
   }
-  [self setNeedsDisplay];
 }
 
 #pragma mark - NSURLConnectionDelegate methods.

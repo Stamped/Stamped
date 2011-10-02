@@ -80,12 +80,14 @@
 }
 
 - (void)setImageURL:(NSString*)imageURL {
-  imageURL_ = [imageURL copy];
-  if (imageURL_) {
-    imageView_.image =
-        [[UserImageDownloadManager sharedManager] profileImageAtURL:imageURL_];
+  if (imageURL != imageURL_) {
+    [imageURL_ release];
+    imageURL_ = [imageURL copy];
+    if (imageURL_)
+      imageView_.image = [[UserImageDownloadManager sharedManager] profileImageAtURL:imageURL_];
+
+    [self setNeedsDisplay];
   }
-  [self setNeedsDisplay];
 }
 
 - (void)imageChanged:(NSNotification*)notification {

@@ -202,7 +202,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   downloader = [[UserImageDownloader alloc] init];
   downloader.imageURL = imageURL;
   downloader.delegate = self;
-  [downloads_ setObject:downloader forKey:imageURL];
+  [downloads_ setObject:downloader forKey:[NSString stringWithString:imageURL]];
   [downloader start];
   [downloader release];
 }
@@ -212,7 +212,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   UIImage* img = nil;
   if (mediumImageCache_)
     img = [mediumImageCache_ objectForKey:imageURL];
-  
+
   if (!img)
     img = [UIImage imageWithContentsOfFile:[self mediumImagePathWithImageURL:imageURL]];
 
@@ -220,7 +220,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
     if (!mediumImageCache_)
       mediumImageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
     
-    [mediumImageCache_ setObject:img forKey:imageURL];
+    [mediumImageCache_ setObject:img forKey:[NSString stringWithString:imageURL]];
     return img;
   }
 
@@ -243,8 +243,8 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   if (img) {
     if (!imageCache_)
       imageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
-    
-    [imageCache_ setObject:img forKey:imageURL];
+
+    [imageCache_ setObject:img forKey:[NSString stringWithString:imageURL]];
     return img;
   }
 
@@ -264,12 +264,12 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 
   UIImage* scaledImage = [self generateMediumProfileImage:image];
   [UIImagePNGRepresentation(scaledImage)
-       writeToFile:[self mediumImagePathWithImageURL:imageURL] 
+       writeToFile:[self mediumImagePathWithImageURL:imageURL]
         atomically:YES];
   if (!mediumImageCache_)
     mediumImageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
 
-  [mediumImageCache_ setObject:scaledImage forKey:imageURL];
+  [mediumImageCache_ setObject:scaledImage forKey:[NSString stringWithString:imageURL]];
   [[NSNotificationCenter defaultCenter]
       postNotificationName:kMediumUserImageLoadedNotification object:imageURL];
 
@@ -279,7 +279,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   if (!imageCache_)
     imageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
   
-  [imageCache_ setObject:image forKey:imageURL];
+  [imageCache_ setObject:image forKey:[NSString stringWithString:imageURL]];
   [[NSNotificationCenter defaultCenter]
       postNotificationName:kUserImageLoadedNotification object:imageURL];
   [downloads_ removeObjectForKey:imageURL];

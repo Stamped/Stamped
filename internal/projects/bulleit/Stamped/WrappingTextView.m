@@ -66,7 +66,7 @@
 }
 
 - (CGRect)resizeBottomRect:(CGRect)botRect topRect:(CGRect)topRect {
-  CGMutablePathRef path = CGPathCreateMutable(); 
+  CGMutablePathRef path = CGPathCreateMutable();
   CGPathAddRect(path, NULL, topRect);
 
   NSAttributedString* string = [self attributedStringForText];
@@ -75,6 +75,7 @@
   CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((CFAttributedStringRef)string);  
   CTFrameRef topFrame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, string.length), path, NULL);
   CFRange topRectRange = CTFrameGetVisibleStringRange(topFrame);
+  CFRelease(topFrame);
   
   // Use topRectRange to determine how big the bottom rect needs to be to fit the rest of the text.
   CGPathRelease(path);
@@ -86,6 +87,8 @@
                                                                       nil,
                                                                       CGSizeMake(botRect.size.width, HUGE_VAL),
                                                                       &fitRange);
+  CFRelease(framesetter);
+
   CGRect resizedBottomRect = botRect;
   resizedBottomRect.size.height = ceilf(suggestedSize.height);
   resizedBottomRect.size.height += resizedBottomRect.size.height * 0.1;
@@ -106,7 +109,9 @@
 	[string addAttribute:(id)kCTFontAttributeName
                  value:(id)helvetica
                  range:NSMakeRange(0, [string length])];
-  
+
+  CFRelease(helvetica);
+
   [string addAttribute:(id)kCTForegroundColorAttributeName
                  value:(id)[UIColor stampedGrayColor].CGColor
                  range:NSMakeRange(0, [string length])];
