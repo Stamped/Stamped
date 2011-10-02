@@ -32,6 +32,7 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSNumber* numStampsLeft;
 
 @property (nonatomic, readonly) NSString* profileImageURL;
+@property (nonatomic, readonly) NSString* largeProfileImageURL;
 @end
 
 @interface User (CoreDataGeneratedAccessors)

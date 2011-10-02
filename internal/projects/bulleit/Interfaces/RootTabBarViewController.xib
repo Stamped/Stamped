@@ -113,7 +113,6 @@
 						<string key="NSFrame">{{138, 363}, {44, 44}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -624,6 +623,7 @@
 							<string>addStampLabel</string>
 							<string>cancelButton</string>
 							<string>searchField</string>
+							<string>searchingIndicatorView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -631,6 +631,7 @@
 							<string>UILabel</string>
 							<string>UIButton</string>
 							<string>STSearchField</string>
+							<string>UIView</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -641,6 +642,7 @@
 							<string>addStampLabel</string>
 							<string>cancelButton</string>
 							<string>searchField</string>
+							<string>searchingIndicatorView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -659,6 +661,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">searchField</string>
 								<string key="candidateClassName">STSearchField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">searchingIndicatorView</string>
+								<string key="candidateClassName">UIView</string>
 							</object>
 						</object>
 					</object>

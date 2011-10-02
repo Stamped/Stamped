@@ -51,7 +51,7 @@
 							<object class="IBUIImageView" id="160696552">
 								<reference key="NSNextResponder" ref="779548825"/>
 								<int key="NSvFlags">274</int>
-								<string key="NSFrameSize">{320, 436}</string>
+								<string key="NSFrameSize">{320, 480}</string>
 								<reference key="NSSuperview" ref="779548825"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
@@ -65,9 +65,10 @@
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
 						</object>
-						<string key="NSFrameSize">{320, 436}</string>
+						<string key="NSFrameSize">{320, 480}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="160696552"/>
 						<string key="NSReuseIdentifierKey">_NS:174</string>
 						<reference key="IBUIBackgroundColor" ref="789599544"/>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -80,13 +81,16 @@
 						<float key="IBUIMaximumZoomScale">10</float>
 					</object>
 				</object>
-				<string key="NSFrame">{{0, 44}, {320, 436}}</string>
+				<string key="NSFrameSize">{320, 480}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
-				<reference key="NSNextKeyView" ref="160696552"/>
+				<reference key="NSNextKeyView" ref="779548825"/>
 				<reference key="IBUIBackgroundColor" ref="789599544"/>
+				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics">
+					<int key="IBUIStatusBarStyle">1</int>
+				</object>
 				<object class="IBUISimulatedNavigationBarMetrics" key="IBUISimulatedTopBarMetrics">
-					<int key="IBUIBarStyle">1</int>
+					<int key="IBUIBarStyle">2</int>
 					<bool key="IBUIPrompted">NO</bool>
 				</object>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -174,6 +178,7 @@
 					<string>-2.CustomClassName</string>
 					<string>-2.IBPluginDependency</string>
 					<string>1.IBPluginDependency</string>
+					<string>4.CustomClassName</string>
 					<string>4.IBPluginDependency</string>
 					<string>6.IBPluginDependency</string>
 				</object>
@@ -184,6 +189,7 @@
 					<string>UIResponder</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>STImageView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
@@ -206,17 +212,25 @@
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<object class="IBPartialClassDescription">
+					<string key="className">STImageView</string>
+					<string key="superclassName">UIImageView</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/STImageView.h</string>
+					</object>
+				</object>
+				<object class="IBPartialClassDescription">
 					<string key="className">ShowImageViewController</string>
 					<string key="superclassName">UIViewController</string>
 					<object class="NSMutableDictionary" key="outlets">
 						<string key="NS.key.0">imageView</string>
-						<string key="NS.object.0">UIImageView</string>
+						<string key="NS.object.0">STImageView</string>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
 						<string key="NS.key.0">imageView</string>
 						<object class="IBToOneOutletInfo" key="NS.object.0">
 							<string key="name">imageView</string>
-							<string key="candidateClassName">UIImageView</string>
+							<string key="candidateClassName">STImageView</string>
 						</object>
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">

@@ -172,7 +172,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)userImageTapped:(id)sender {
   ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
-  controller.image = userImageView_.imageView.image;
+  controller.imageURL = user_.largeProfileImageURL;
   [self.navigationController pushViewController:controller animated:YES];
   [controller release];
 }

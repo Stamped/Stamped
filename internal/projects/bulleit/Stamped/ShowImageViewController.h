@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+@class STImageView;
+
 @interface ShowImageViewController : UIViewController <UIScrollViewDelegate>
 
-@property (nonatomic, retain) IBOutlet UIImageView* imageView;
+@property (nonatomic, retain) IBOutlet STImageView* imageView;
 @property (nonatomic, retain) UIImage* image;
+@property (nonatomic, copy) NSString* imageURL;
 
 @end

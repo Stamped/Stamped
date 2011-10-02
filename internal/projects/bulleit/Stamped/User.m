@@ -24,6 +24,7 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic website;
 @dynamic secondaryColor;
 @dynamic profileImageURL;
+@dynamic largeProfileImageURL;
 @dynamic screenName;
 @dynamic stampImage;
 @dynamic stamps;
@@ -61,6 +62,10 @@ const CGFloat kMediumUserImageSize = 41.0;
     return;
 
   self.stampImage = [Util stampImageForUser:self];
+}
+
+- (NSString*)largeProfileImageURL {
+  return [NSString stringWithFormat:@"http://static.stamped.com/users/%@.jpg", self.screenName.lowercaseString];
 }
 
 - (NSString*)profileImageURL {

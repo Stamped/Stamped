@@ -26,6 +26,7 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
 @synthesize hideLogo = hideLogo_;
 @synthesize string = string_;
 @synthesize settingsButton = settingsButton_;
+@synthesize black = black_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -45,6 +46,11 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
 }
 
 - (void)drawRect:(CGRect)rect {
+  if (black_) {
+    [super drawRect:rect];
+    return;
+  }
+
   CGContextRef ctx = UIGraphicsGetCurrentContext();
   CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
   CGContextFillRect(ctx, rect);
@@ -105,12 +111,12 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   self.layer.masksToBounds = NO;
 
   CGFloat ripplesY = CGRectGetMaxY(self.bounds);
-  CALayer* ripplesLayer = [[CALayer alloc] init];
-  ripplesLayer.frame = CGRectMake(0, ripplesY, 320, 3);
-  ripplesLayer.contentsGravity = kCAGravityResizeAspect;
-  ripplesLayer.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
-  [self.layer addSublayer:ripplesLayer];
-  [ripplesLayer release];
+  ripplesLayer_ = [[CALayer alloc] init];
+  ripplesLayer_.frame = CGRectMake(0, ripplesY, 320, 3);
+  ripplesLayer_.contentsGravity = kCAGravityResizeAspect;
+  ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
+  [self.layer addSublayer:ripplesLayer_];
+  [ripplesLayer_ release];
 
   mapLayer_ = [[CALayer alloc] init];
   mapLayer_.frame = CGRectMake(281, 7, 34, 30);
@@ -126,6 +132,18 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   [settingsButton_ setImage:[UIImage imageNamed:@"settings_button"] forState:UIControlStateNormal];
   settingsButton_.hidden = YES;
   [self addSubview:settingsButton_];
+}
+
+- (void)setBlack:(BOOL)black {
+  if (black == black_)
+    return;
+
+  black_ = black;
+  
+  ripplesLayer_.hidden = black;
+  mapLayer_.hidden = black;
+  settingsButton_.hidden = settingsButton_.hidden | black;
+  [self setNeedsDisplay];
 }
 
 - (void)setButtonShown:(BOOL)shown {
