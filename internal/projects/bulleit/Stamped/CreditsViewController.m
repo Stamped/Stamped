@@ -14,6 +14,7 @@
 #import "CreditTableViewCell.h"
 #import "Entity.h"
 #import "Stamp.h"
+#import "StampDetailViewController.h"
 
 static NSString* const kCreditsPath = @"/collections/credit.json";
 
@@ -35,6 +36,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 }
 
 - (void)dealloc {
+  
   self.tableView = nil;
   self.stampsArray = nil;
   self.screenName = nil;
@@ -45,22 +47,25 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [self loadStampsFromNetwork];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.tableView = nil;
   self.stampsArray = nil;
   self.screenName = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
+                            animated:animated];
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self loadStampsFromNetwork];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -87,26 +92,19 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   CreditTableViewCell* cell = (CreditTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     cell = [[[CreditTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
-    Stamp* stamp = [stampsArray_ objectAtIndex:indexPath.row];
-    //cell.textLabel.text = stamp.entityObject.title;
   }
   
-  // Configure the cell...
-  
+  cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
   return cell;
 }
 
 #pragma mark - Table view delegate
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-  // Navigation logic may go here. Create and push another view controller.
-  /*
-   <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-   // ...
-   // Pass the selected object to the new view controller.
-   [self.navigationController pushViewController:detailViewController animated:YES];
-   [detailViewController release];
-   */
+- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  Stamp* stamp = [stampsArray_ objectAtIndex:indexPath.row];
+  UIViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
+  [self.navigationController pushViewController:detailViewController animated:YES];
+  [detailViewController release];
 }
 
 #pragma mark - Private methods.
@@ -127,7 +125,8 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	self.stampsArray = objects;
+  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+	self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
   [self.tableView reloadData];
 }
 

@@ -43,7 +43,7 @@
 
     entityTitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(70, 25, 200, 40)];
     entityTitleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
-    entityTitleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+    entityTitleLabel_.textColor = [UIColor stampedBlackColor];
     entityTitleLabel_.highlightedTextColor = [UIColor whiteColor];
     entityTitleLabel_.backgroundColor = [UIColor clearColor];
     [self.contentView addSubview:entityTitleLabel_];
@@ -78,20 +78,14 @@
                                 forWidth:200
                            lineBreakMode:UILineBreakModeTailTruncation];
   CGRect stampFrame = firstStampLayer_.frame;
-  stampFrame.origin.x = CGRectGetMinX(headerTextLayer_.frame) +
-      titleSize.width - (CGRectGetWidth(stampFrame) / 2);
-  CGRect oldFrame = firstStampLayer_.frame;
+  stampFrame.origin.x = CGRectGetMinX(entityTitleLabel_.frame) + titleSize.width - 5;
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   firstStampLayer_.frame = stampFrame;
-  [self.contentView setNeedsDisplayInRect:oldFrame];
-  [self.contentView setNeedsDisplayInRect:stampFrame];
-  oldFrame = secondStampLayer_.frame;
   CGRect secondLayerFrame = CGRectOffset(stampFrame, CGRectGetWidth(stampFrame) / 2, 0);
   secondStampLayer_.frame = secondLayerFrame;
   [CATransaction commit];
-  [self.contentView setNeedsDisplayInRect:oldFrame];
-  [self.contentView setNeedsDisplayInRect:secondLayerFrame];
+  [self.contentView setNeedsDisplay];
 }
 
 - (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color {
