@@ -40,6 +40,8 @@ NSString* const kStampColors[7][2] = {
 @synthesize scrollView = scrollView_;
 @synthesize pageControl = pageControl_;
 
+@synthesize findFriendsNavigationController = findFriendsNavigationController_;
+
 @synthesize userStampImageView = userStampImageView_;
 @synthesize userImageView = userImageView_;
 @synthesize galleryStamp0 = galleryStamp0_;
@@ -75,6 +77,7 @@ NSString* const kStampColors[7][2] = {
   self.galleryStamp4 = nil;
   self.galleryStamp5 = nil;
   self.galleryStamp6 = nil;
+  self.findFriendsNavigationController = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
   self.userStampImageView = nil;
@@ -119,6 +122,7 @@ NSString* const kStampColors[7][2] = {
   self.galleryStamp4 = nil;
   self.galleryStamp5 = nil;
   self.galleryStamp6 = nil;
+  self.findFriendsNavigationController = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentStampRequest];
   self.currentStampRequest = nil;
   self.userStampImageView = nil;
@@ -186,16 +190,12 @@ NSString* const kStampColors[7][2] = {
   [vc release];
 }
 
-- (IBAction)findfromContacts:(id)sender {
-  FindFriendsViewController* findFriendsVC = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromContacts];
-  [self.navigationController pushViewController:findFriendsVC animated:YES];
-  [findFriendsVC release];
+- (IBAction)findfromContacts:(id)sender {  
+  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
 }
 
 - (IBAction)findFromTwitter:(id)sender {
-  FindFriendsViewController* findFriendsVC = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromTwitter];
-  [self.navigationController pushViewController:findFriendsVC animated:YES];
-  [findFriendsVC release];
+  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
 }
 
 - (IBAction)dismissWelcomeView:(id)sender {

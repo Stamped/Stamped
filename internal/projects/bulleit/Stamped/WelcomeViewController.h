@@ -19,6 +19,8 @@
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIPageControl* pageControl;
 
+@property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;
+
 @property (nonatomic, retain) IBOutlet UIImageView* userStampImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
 @property (nonatomic, retain) IBOutlet UIButton* galleryStamp0;

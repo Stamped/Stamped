@@ -21,5 +21,6 @@
 @property (nonatomic, retain) IBOutlet UILabel* userScreenNameLabel;
 @property (nonatomic, retain) IBOutlet UIButton* addFriendsButton;
 @property (nonatomic, retain) IBOutlet UINavigationController* settingsNavigationController;
+@property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;
 
 @end

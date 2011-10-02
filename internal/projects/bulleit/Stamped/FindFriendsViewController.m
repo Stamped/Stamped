@@ -146,7 +146,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 #pragma mark - Actions
 
 - (IBAction)done:(id)sender {
-  [self.navigationController popViewControllerAnimated:YES];
+  [self.parentViewController dismissModalViewControllerAnimated:YES];
 }
 
 - (IBAction)findFromStamped:(id)sender {

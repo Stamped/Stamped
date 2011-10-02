@@ -43,6 +43,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 @synthesize addFriendsButton = addFriendsButton_;
 @synthesize friendsArray = friendsArray_;
 @synthesize settingsNavigationController = settingsNavigationController_;
+@synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 - (void)dealloc {
   self.currentUserView = nil;
@@ -52,6 +53,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   self.addFriendsButton = nil;
   self.friendsArray = nil;
   self.settingsNavigationController = nil;
+  self.findFriendsNavigationController = nil;
   [super dealloc];
 }
 
@@ -96,6 +98,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   self.addFriendsButton = nil;
   self.friendsArray = nil;
   self.settingsNavigationController = nil;
+  self.findFriendsNavigationController = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -236,10 +239,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
 
   if (indexPath.row == 0) {
-    FindFriendsViewController* vc = [[FindFriendsViewController alloc] initWithFindSource:FindFriendsFromContacts];
+    FindFriendsViewController* vc = (FindFriendsViewController*)findFriendsNavigationController_.viewControllers.lastObject;
     vc.followedUsers = [NSMutableArray arrayWithArray:self.friendsArray];
-    [delegate.navigationController pushViewController:vc animated:YES];
-    [vc release];
+    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+    [delegate.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
     return;
   }
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
