@@ -41,15 +41,15 @@
 }
 
 - (void)setImageURL:(NSString*)imageURL {
-  if (imageURL != imageURL_) {
+  if (![imageURL isEqualToString:imageURL_]) {
     [imageURL_ release];
     imageURL_ = [imageURL copy];
-  
-    if (imageURL_)
-      self.image = [[UserImageDownloadManager sharedManager] mediumProfileImageAtURL:imageURL_];
-
-    [self setNeedsDisplay];
   }
+
+  if (imageURL_)
+    self.image = [[UserImageDownloadManager sharedManager] mediumProfileImageAtURL:imageURL_];
+
+  [self setNeedsDisplay];
 }
 
 - (void)mediumImageChanged:(NSNotification*)notification {

@@ -234,11 +234,13 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 
 - (UIImage*)profileImageAtURL:(NSString*)imageURL {
   UIImage* img = nil;
-  if (imageCache_)
+  if (imageCache_) {
     img = [imageCache_ objectForKey:imageURL];
-  
-  if (!img)
-    img = [UIImage imageWithContentsOfFile:[self imagePathWithImageURL:imageURL]];
+    if (img)
+      return img;
+  }
+
+  img = [UIImage imageWithContentsOfFile:[self imagePathWithImageURL:imageURL]];
   
   if (img) {
     if (!imageCache_)

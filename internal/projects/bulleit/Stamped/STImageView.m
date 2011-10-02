@@ -64,7 +64,7 @@
 }
 
 - (void)setImageURL:(NSString*)imageURL {
-  if (imageURL != imageURL_) {
+  if (![imageURL isEqualToString:imageURL_]) {
     [imageURL_ release];
     imageURL_ = [imageURL copy];
     if (imageURL_) {
