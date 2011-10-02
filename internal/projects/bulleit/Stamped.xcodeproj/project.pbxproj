@@ -185,6 +185,10 @@
 		7E89C3AE1437B5E600547960 /* settings_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3AD1437B5E600547960 /* settings_button@2x.png */; };
 		7E89C3B31437BFEA00547960 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E89C3B11437BFEA00547960 /* SettingsViewController.m */; };
 		7E89C3B41437BFEA00547960 /* SettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3B21437BFEA00547960 /* SettingsViewController.xib */; };
+		7E89C3B91437D14600547960 /* settings_label@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3B81437D14600547960 /* settings_label@2x.png */; };
+		7E89C3C51437DB3A00547960 /* settings_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3C41437DB3A00547960 /* settings_button_bg@2x.png */; };
+		7E89C3CA1437DD9B00547960 /* facebook_icon_gray@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3C81437DD9B00547960 /* facebook_icon_gray@2x.png */; };
+		7E89C3CB1437DD9B00547960 /* twitter_icon_gray@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E89C3C91437DD9B00547960 /* twitter_icon_gray@2x.png */; };
 		7E8A880114240B5B00B0092C /* SearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E8A880014240B5B00B0092C /* SearchResult.m */; };
 		7E8A88031424298100B0092C /* temp_swipeContinue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */; };
 		7E8A880914242A4C00B0092C /* icon1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E8A880814242A4B00B0092C /* icon1@2x.png */; };
@@ -707,6 +711,10 @@
 		7E89C3B01437BFEA00547960 /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
 		7E89C3B11437BFEA00547960 /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
 		7E89C3B21437BFEA00547960 /* SettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SettingsViewController.xib; sourceTree = "<group>"; };
+		7E89C3B81437D14600547960 /* settings_label@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_label@2x.png"; sourceTree = "<group>"; };
+		7E89C3C41437DB3A00547960 /* settings_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_button_bg@2x.png"; sourceTree = "<group>"; };
+		7E89C3C81437DD9B00547960 /* facebook_icon_gray@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "facebook_icon_gray@2x.png"; sourceTree = "<group>"; };
+		7E89C3C91437DD9B00547960 /* twitter_icon_gray@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "twitter_icon_gray@2x.png"; sourceTree = "<group>"; };
 		7E8A87FF14240B5B00B0092C /* SearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchResult.h; sourceTree = "<group>"; };
 		7E8A880014240B5B00B0092C /* SearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchResult.m; sourceTree = "<group>"; };
 		7E8A88021424298100B0092C /* temp_swipeContinue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "temp_swipeContinue@2x.png"; sourceTree = "<group>"; };
@@ -1323,6 +1331,17 @@
 			name = Settings;
 			sourceTree = "<group>";
 		};
+		7E89C3B51437D0D400547960 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				7E89C3C41437DB3A00547960 /* settings_button_bg@2x.png */,
+				7E89C3B81437D14600547960 /* settings_label@2x.png */,
+				7E89C3C81437DD9B00547960 /* facebook_icon_gray@2x.png */,
+				7E89C3C91437DD9B00547960 /* twitter_icon_gray@2x.png */,
+			);
+			name = Settings;
+			sourceTree = "<group>";
+		};
 		7EA969C414353AEA00AE5FF3 /* FBConnect */ = {
 			isa = PBXGroup;
 			children = (
@@ -1493,6 +1512,7 @@
 			children = (
 				7E8A880A14242A5300B0092C /* icon1.png */,
 				7E8A880814242A4B00B0092C /* icon1@2x.png */,
+				7E89C3B51437D0D400547960 /* Settings */,
 				7EE24A24142147350027DBB6 /* Stamp Customizer */,
 				7ECCB93714351A7B006575D1 /* Friend Finder */,
 				7E5406DF141550D000912463 /* First run */,
@@ -2282,6 +2302,10 @@
 				7E2B7E031436432E002BF383 /* blue_button_background@2x.png in Resources */,
 				7E89C3AE1437B5E600547960 /* settings_button@2x.png in Resources */,
 				7E89C3B41437BFEA00547960 /* SettingsViewController.xib in Resources */,
+				7E89C3B91437D14600547960 /* settings_label@2x.png in Resources */,
+				7E89C3C51437DB3A00547960 /* settings_button_bg@2x.png in Resources */,
+				7E89C3CA1437DD9B00547960 /* facebook_icon_gray@2x.png in Resources */,
+				7E89C3CB1437DD9B00547960 /* twitter_icon_gray@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

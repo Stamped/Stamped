@@ -253,7 +253,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)settingsButtonPressed:(id)sender {
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  NSLog(@"View controllers: %@", settingsNavigationController_.viewControllers);
   [delegate.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
 }
 

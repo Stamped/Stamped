@@ -10,7 +10,7 @@
 
 @interface SettingsViewController : UIViewController
 
-@property (nonatomic, retain) IBOutlet UINavigationController* navigationController;
+@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 
 - (IBAction)doneButtonPressed:(id)sender;
 
