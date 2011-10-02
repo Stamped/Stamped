@@ -19,10 +19,6 @@
 #import "STSearchField.h"
 #import "Util.h"
 
-#warning delete this mofo
-#import "WelcomeViewController.h"
-
-
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
@@ -130,11 +126,6 @@
     self.tabBar.selectedItem = stampsTabBarItem_;
     [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
   }
-  
-#warning delete this mofo.
-  WelcomeViewController* vc = [[WelcomeViewController alloc] init];
-  [self presentModalViewController:vc animated:YES];
-  [vc release];
 }
 
 - (void)ensureCorrectHeightOfViewControllers {
