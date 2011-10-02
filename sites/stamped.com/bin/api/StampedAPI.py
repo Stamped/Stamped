@@ -2204,6 +2204,8 @@ class StampedAPI(AStampedAPI):
             stamp           = self._stampDB.getStamp(favorite.stamp_id)
             favorite.stamp  = self._enrichStampObjects( \
                                 stamp, authUserId=authUserId)
+            # Just in case...
+            favorite.stamp.is_fav = False
 
             # Remove activity
             self._activityDB.removeActivity('favorite', authUserId, \
