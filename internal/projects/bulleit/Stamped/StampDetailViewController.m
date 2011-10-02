@@ -272,7 +272,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
   bottomToolbar_.alpha = 0.9;
   
-  if (stamp_.entityObject.favorite) {
+  if (stamp_.isFavorited.boolValue) {
     addFavoriteLabel_.text = @"To-Do'd";
     addFavoriteButton_.selected = YES;
   }
