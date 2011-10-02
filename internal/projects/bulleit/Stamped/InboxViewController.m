@@ -212,16 +212,15 @@ typedef enum {
 
   NSFetchRequest* request = [Stamp fetchRequest];
   // Grab oldest stamp.
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
   [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
   [request setFetchLimit:1];
 	Stamp* latestStamp = [Stamp objectWithFetchRequest:request];
-  NSString* path = entitiesArray_.count == 0 ? kEverythingPath : kInboxPath;
-  NSString* latestTimestamp = [NSString stringWithFormat:@"%.0f", latestStamp.created.timeIntervalSince1970];
+  NSString* latestTimestamp = [NSString stringWithFormat:@"%.0f", latestStamp.modified.timeIntervalSince1970];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kInboxPath delegate:self];
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", latestTimestamp, @"since", nil];
   [objectLoader send];
@@ -306,7 +305,7 @@ typedef enum {
     [stamp.managedObjectContext save:NULL];
   }
 	[self loadStampsFromDataStore];
-  if (objects.count < 50) {
+  if (objects.count < 10) {
     [self setIsLoading:NO];
   } else {
     [self loadStampsFromNetwork];

@@ -98,7 +98,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                         @"image_url", @"imageURL",
                                         @"url", @"URL", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapAttributes:@"blurb", nil];
+  [stampMapping mapAttributes:@"blurb", @"modified", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
   [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];
