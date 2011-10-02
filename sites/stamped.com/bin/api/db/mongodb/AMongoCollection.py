@@ -269,6 +269,7 @@ class AMongoCollection(object):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
         sort        = kwargs.pop('sort', 'timestamp.created')
+        order       = kwargs.pop('sortOrder', pymongo.DESCENDING)
         limit       = kwargs.pop('limit', 0)
 
         params = {'_id': {'$in': documentIds}}
@@ -282,7 +283,7 @@ class AMongoCollection(object):
         
         if sort != None:
             documents = self._collection.find(params).sort(sort, \
-                pymongo.DESCENDING).limit(limit)
+                order).limit(limit)
         else:
             documents = self._collection.find(params).limit(limit)
         

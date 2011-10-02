@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals, logs, re
+import pymongo
 
 from datetime import datetime
 from utils import lazyProperty
@@ -29,6 +30,8 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         AMongoCollection.__init__(self, collection='stamps', primary_key='stamp_id', obj=Stamp)
         AStampDB.__init__(self)
         
+        self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
+
         # Define patterns
         self.user_regex  = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
         self.reply_regex = re.compile(r'@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)
@@ -119,6 +122,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             'before':   kwargs.pop('before', None), 
             'limit':    kwargs.pop('limit', 20),
             'sort':     'timestamp.modified',
+            'sortOrder': pymongo.ASCENDING,
         }
 
         documentIds = []
