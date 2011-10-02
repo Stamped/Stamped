@@ -168,8 +168,17 @@ NSString* const kStampColors[7][2] = {
   for (UIView* view in [(UIView*)sender superview].subviews) {
     if ([view isMemberOfClass:[UIButton class]])
       [(UIButton*)view setSelected:NO];
+    if ([view isMemberOfClass:[UIImageView class]] && view.hidden)
+      view.hidden = NO;
   }
   button.selected = YES;
+  // Make sure this is in sync with the nib. The white backgrounds are always one
+  // index after the buttons themselves.
+  NSUInteger index = [button.superview.subviews indexOfObject:button] + 1;
+  if (index < button.superview.subviews.count) {
+    UIView* whiteBackground = [button.superview.subviews objectAtIndex:index];
+    whiteBackground.hidden = YES;
+  }
   NSString* primary = kStampColors[button.tag][0];
   NSString* secondary = kStampColors[button.tag][1];
   userStampImageView_.image = [Util stampImageWithPrimaryColor:primary secondary:secondary];
