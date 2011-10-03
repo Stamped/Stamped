@@ -145,6 +145,7 @@
 								<reference key="IBUIBackgroundColor" ref="620266313"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<bool key="IBUIEnabled">NO</bool>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<reference key="IBUIFont" ref="154266804"/>
 								<double key="IBUITitleEdgeInsets.top">0.0</double>
@@ -174,6 +175,7 @@
 								<reference key="IBUIBackgroundColor" ref="620266313"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<bool key="IBUIEnabled">NO</bool>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<reference key="IBUIFont" ref="154266804"/>
 								<double key="IBUITitleEdgeInsets.top">0.0</double>
@@ -226,6 +228,7 @@
 								<reference key="IBUIBackgroundColor" ref="620266313"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<bool key="IBUIEnabled">NO</bool>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<reference key="IBUIFont" ref="154266804"/>
 								<double key="IBUITitleEdgeInsets.top">0.0</double>
@@ -252,6 +255,7 @@
 								<reference key="IBUIBackgroundColor" ref="620266313"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<bool key="IBUIEnabled">NO</bool>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<reference key="IBUIFont" ref="154266804"/>
 								<double key="IBUITitleEdgeInsets.top">0.0</double>
@@ -278,6 +282,7 @@
 								<reference key="IBUIBackgroundColor" ref="620266313"/>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<bool key="IBUIEnabled">NO</bool>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<reference key="IBUIFont" ref="154266804"/>
 								<double key="IBUITitleEdgeInsets.top">0.0</double>
@@ -302,7 +307,6 @@
 								<string key="NSFrame">{{5, 422}, {310, 50}}</string>
 								<reference key="NSSuperview" ref="726625627"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
 								<reference key="IBUIBackgroundColor" ref="620266313"/>
 								<bool key="IBUIOpaque">NO</bool>

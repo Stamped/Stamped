@@ -769,11 +769,12 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
     if (blurb.length > substring.length)
       blurb = [substring stringByAppendingString:@"..."];
-    
-    blurb = [blurb stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 
     // Stamped: [blurb] [link]
     NSString* tweet = [NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp.URL];
+    tweet = [tweet stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    tweet = [tweet stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
+    NSLog(@"tweet: %@", tweet);
     NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
     [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
     [self.twitterAuth authorizeRequest:request.URLRequest];

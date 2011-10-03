@@ -144,6 +144,7 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
                       action:@selector(settingsButtonPressed:)
             forControlEvents:UIControlEventTouchUpInside];
   settingsButton_.alpha = 0.0;
+  settingsButton_.hidden = YES;
   [self addSubview:settingsButton_];
 }
 
@@ -155,8 +156,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   
   ripplesLayer_.hidden = black;
   mapLayer_.hidden = black;
-  settingsButton_.hidden = black;
-  settingsButton_.alpha = 0.0;  // HACK
   [self setNeedsDisplay];
 }
 
@@ -171,8 +170,11 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
     return;
   
   settingsButtonShown_ = shown;
+  if (shown)
+    settingsButton_.hidden = NO;
   [UIView animateWithDuration:0.2
-                   animations:^{ settingsButton_.alpha = shown ? 1.0 : 0.0; }];
+                   animations:^{ settingsButton_.alpha = shown ? 1.0 : 0.0; }
+                   completion:^(BOOL finished) { settingsButton_.hidden = !shown; }];
 }
 
 - (void)setButtonShown:(BOOL)shown {
