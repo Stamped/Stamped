@@ -20,7 +20,6 @@
 - (id)init {
   self = [self initWithNibName:@"EditProfileViewController" bundle:nil];
   if (self) {
-    
   }
   return self;
 }
