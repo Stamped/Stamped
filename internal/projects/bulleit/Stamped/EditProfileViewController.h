@@ -13,7 +13,10 @@
 @class User;
 @class STImageView;
 
-@interface EditProfileViewController : UIViewController <StampCustomizerViewControllerDelegate>
+@interface EditProfileViewController : UIViewController <StampCustomizerViewControllerDelegate,
+                                                         UIActionSheetDelegate,
+                                                         UINavigationControllerDelegate,
+                                                         UIImagePickerControllerDelegate>
 
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) IBOutlet UIImageView* stampImageView;
@@ -21,5 +24,6 @@
 
 - (IBAction)settingsButtonPressed:(id)sender;
 - (IBAction)editStampButtonPressed:(id)sender;
+- (IBAction)changePhotoButtonPressed:(id)sender;
 
 @end
