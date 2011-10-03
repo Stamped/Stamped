@@ -42,10 +42,10 @@ def _coordinatesFlatToDict(coordinates):
 def _profileImageURL(screenName, cache=None):
     if cache and cache + timedelta(days=1) <= datetime.utcnow():
         url = 'http://static.stamped.com/users/%s.jpg?%s' % \
-            (screenName, time.mktime(cache.timetuple()))
+            (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     else:
         url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg' % \
-            screenName
+            str(screenName).lower()
     return url
 
 
