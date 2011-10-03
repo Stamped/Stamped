@@ -16,7 +16,8 @@
 @interface EditProfileViewController : UIViewController <StampCustomizerViewControllerDelegate,
                                                          UIActionSheetDelegate,
                                                          UINavigationControllerDelegate,
-                                                         UIImagePickerControllerDelegate>
+                                                         UIImagePickerControllerDelegate,
+                                                         UITextFieldDelegate>
 
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) IBOutlet UIImageView* stampImageView;
@@ -24,6 +25,7 @@
 @property (nonatomic, retain) IBOutlet UITextField* nameTextField;
 @property (nonatomic, retain) IBOutlet UITextField* locationTextField;
 @property (nonatomic, retain) IBOutlet UITextField* aboutTextField;
+@property (nonatomic, retain) IBOutlet UIView* containerView;
 
 
 - (IBAction)settingsButtonPressed:(id)sender;

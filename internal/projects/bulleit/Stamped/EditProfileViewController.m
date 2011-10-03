@@ -27,6 +27,7 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 @synthesize nameTextField = nameTextField_;
 @synthesize locationTextField = locationTextField_;
 @synthesize aboutTextField = aboutTextField_;
+@synthesize containerView = containerView_;
 
 - (id)init {
   self = [self initWithNibName:@"EditProfileViewController" bundle:nil];
@@ -42,6 +43,7 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   self.nameTextField = nil;
   self.locationTextField = nil;
   self.aboutTextField = nil;
+  self.containerView = nil;
   [super dealloc];
 }
 
@@ -73,6 +75,7 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   self.nameTextField = nil;
   self.locationTextField = nil;
   self.aboutTextField = nil;
+  self.containerView = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -91,6 +94,33 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   vc.delegate = self;
   [self.navigationController presentModalViewController:vc animated:YES];
   [vc release];
+}
+
+#pragma mark - UITextFieldDelegate methods.
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     containerView_.frame = CGRectOffset(containerView_.frame, 0, -95);
+                   }
+                   completion:nil];
+}
+
+- (void)textFieldDidEndEditing:(UITextField*)textField {
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     containerView_.frame = CGRectOffset(containerView_.frame, 0, 95);
+                   }
+                   completion:nil];  
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
+  return YES;
 }
 
 #pragma mark - StampCustomizerViewControllerDelegate methods.
