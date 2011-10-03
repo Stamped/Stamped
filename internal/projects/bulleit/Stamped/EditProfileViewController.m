@@ -22,9 +22,13 @@ static const NSUInteger kMaxLocationLength = 80;
 static const NSUInteger kMaxBioLength = 200;
 static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
+static NSString* const kUpdateProfileImagePath = @"/account/update_profile_image.json";
+static const NSUInteger kMaxPicUploadTries = 3;
 
 @interface EditProfileViewController ()
 @property (nonatomic, readonly) UIResponder* firstResponder;
+@property (nonatomic, retain) UIImage* newProfilePic;
+@property (nonatomic, assign) NSUInteger numPicUploadTries;
 @end
 
 @implementation EditProfileViewController
@@ -37,9 +41,11 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
 @synthesize aboutTextField = aboutTextField_;
 @synthesize containerView = containerView_;
 @synthesize saveButton = saveButton_;
-@synthesize cancelButton = cancelButton_;
 @synthesize saveIndicator = saveIndicator_;
 @synthesize firstResponder = firstResponder_;
+@synthesize profileImageIndicator = profileImageIndicator_;
+@synthesize newProfilePic = newProfilePic_;
+@synthesize numPicUploadTries = numPicUploadTries_;
 
 - (id)init {
   self = [self initWithNibName:@"EditProfileViewController" bundle:nil];
@@ -58,7 +64,8 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
   self.containerView = nil;
   self.saveIndicator = nil;
   self.saveButton = nil;
-  self.cancelButton = nil;
+  self.profileImageIndicator = nil;
+  self.newProfilePic = nil;
   firstResponder_ = nil;
   [super dealloc];
 }
@@ -76,15 +83,12 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
   [super viewDidLoad];
   self.stampImageView.image = user_.stampImage;
   self.userImageView.userInteractionEnabled = NO;
+  self.userImageView.layer.shadowOpacity = 0;
   self.userImageView.imageURL = user_.profileImageURL;
   self.nameTextField.text = user_.name;
   self.locationTextField.text = user_.location;
   self.aboutTextField.text = user_.bio;
-  saveButton_.alpha = 0;
-  cancelButton_.alpha = 0;
-  [saveIndicator_ stopAnimating];
-
-  // Do any additional setup after loading the view from its nib.
+  saveButton_.enabled = NO;
 }
 
 - (void)viewDidUnload {
@@ -97,7 +101,7 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
   self.containerView = nil;
   self.saveIndicator = nil;
   self.saveButton = nil;
-  self.cancelButton = nil;
+  self.profileImageIndicator = nil;
   firstResponder_ = nil;
 }
 
@@ -111,33 +115,31 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
 - (IBAction)saveButtonPressed:(id)sender {
   if (!nameTextField_.text.length) {
     UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp" 
-                                                    message:@"Your name is required."
-                                                   delegate:nil
-                                          cancelButtonTitle:nil
-                                          otherButtonTitles:@"Yay!", nil] autorelease];
+                                                     message:@"Your name is required."
+                                                    delegate:nil
+                                           cancelButtonTitle:nil
+                                           otherButtonTitles:@"Yay!", nil] autorelease];
     [alert show];
     return;
   }
   [saveIndicator_ startAnimating];
-  saveButton_.hidden = YES;
+  saveButton_.enabled = NO;
+  [saveButton_ setTitle:nil forState:UIControlStateNormal];
+
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUpdateProfilePath 
-                                                                    delegate:nil];
+                                                                    delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = mapping;
-  //NSMutableDictionary params = [NSMutableDictionary dictionary];
-  //objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary",
-  //                       secondary, @"color_secondary", nil];
-  //[objectLoader send];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObject:nameTextField_.text forKey:@"name"];
+  if (locationTextField_.text.length > 0)
+    [params setObject:locationTextField_.text forKey:@"location"];
+  if (aboutTextField_.text.length > 0)
+    [params setObject:aboutTextField_.text forKey:@"bio"];
+  objectLoader.params = params;
+  [objectLoader send];
   
-  //[firstResponder_ resignFirstResponder];
-}
-
-- (IBAction)cancelButtonPressed:(id)sender {
-  self.nameTextField.text = user_.name;
-  self.locationTextField.text = user_.location;
-  self.aboutTextField.text = user_.bio;
   [firstResponder_ resignFirstResponder];
 }
 
@@ -150,6 +152,40 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
   vc.delegate = self;
   [self.navigationController presentModalViewController:vc animated:YES];
   [vc release];
+}
+
+#pragma mark - RKObjectLoaderDelegate methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
+  NSLog(@"Success: %@", objectLoader.response.bodyAsString);
+  if ([objectLoader.resourcePath isEqualToString:kUpdateProfilePath]) {
+    [saveIndicator_ stopAnimating];
+    saveButton_.enabled = YES;
+    [saveButton_ setTitle:@"Saved!" forState:UIControlStateNormal];
+  } else if ([objectLoader.resourcePath isEqualToString:kUpdateProfileImagePath]) {
+    [profileImageIndicator_ stopAnimating];
+    userImageView_.image = self.newProfilePic;
+    userImageView_.hidden = NO;
+  }
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  NSLog(@"Error: %@", objectLoader.response.bodyAsString);
+  if ([objectLoader.resourcePath isEqualToString:kUpdateProfilePath]) {
+    [saveIndicator_ stopAnimating];
+    saveButton_.enabled = YES;
+    [saveButton_ setTitle:@"Save" forState:UIControlStateNormal];
+  } else if ([objectLoader.resourcePath isEqualToString:kUpdateProfileImagePath]) {
+    [profileImageIndicator_ stopAnimating];
+    userImageView_.hidden = NO;
+  }
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp" 
+                                                   message:@"There was a problem. Try again please."
+                                                  delegate:nil
+                                         cancelButtonTitle:nil
+                                         otherButtonTitles:@"OK", nil] autorelease];
+  [alert show];
+  return;
 }
 
 #pragma mark - UITextFieldDelegate methods.
@@ -168,27 +204,26 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
+  saveButton_.enabled = YES;
+  [saveButton_ setTitle:@"Save" forState:UIControlStateNormal];
   firstResponder_ = textField;
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
                      containerView_.frame = CGRectOffset(containerView_.frame, 0, -95);
-                     saveButton_.alpha = 1;
-                     cancelButton_.alpha = 1;
                    }
                    completion:nil];
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
+  saveButton_.enabled = NO;
   firstResponder_ = nil;
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
                      containerView_.frame = CGRectOffset(containerView_.frame, 0, 95);
-                     saveButton_.alpha = 0;
-                     cancelButton_.alpha = 0;
                    }
                    completion:nil];
 }
@@ -263,9 +298,25 @@ static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
     
     UIGraphicsBeginImageContext(CGSizeMake(kProfileImageSize, kProfileImageSize));
     [photo drawInRect:CGRectMake(0, 0, kProfileImageSize, kProfileImageSize)];
-    UIImage* newPhoto = UIGraphicsGetImageFromCurrentImageContext();
+    self.newProfilePic = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    userImageView_.image = newPhoto;
+    userImageView_.hidden = YES;
+    [profileImageIndicator_ startAnimating];
+    numPicUploadTries_ = 0;
+    RKObjectManager* manager = [RKObjectManager sharedManager];
+    RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
+    RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kUpdateProfileImagePath
+                                                          delegate:self];
+    loader.method = RKRequestMethodPOST;
+    loader.objectMapping = mapping;
+    if (!self.newProfilePic)
+      return;
+    
+    RKParams* params = [RKParams params];
+    NSData* imageData = UIImageJPEGRepresentation(self.newProfilePic, 0.8);
+    [params setData:imageData MIMEType:@"image/jpeg" forParam:@"profile_image"];
+    loader.params = params;
+    [loader send];
   }
   
   [self dismissModalViewControllerAnimated:YES];

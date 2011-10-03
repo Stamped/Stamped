@@ -414,7 +414,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)fillInUserData {
   fullNameLabel_.text = user_.name;
-  usernameLocationLabel_.text = user_.screenName;
+  if (!user_.location)
+    usernameLocationLabel_.text = user_.screenName;
+  else
+    usernameLocationLabel_.text = [NSString stringWithFormat:@"%@ / %@", user_.screenName, user_.location];
+
   bioLabel_.text = user_.bio;
   creditCountLabel_.text = [user_.numCredits stringValue];
   followerCountLabel_.text = [user_.numFollowers stringValue];
