@@ -92,36 +92,39 @@ def update_profile_image(request):
     authUserId  = checkOAuth(request)
     schema      = parseFileUpload(HTTPAccountProfileImage(), request, 'profile_image')
     
-    ret         = stampedAPI.updateProfileImage(authUserId, schema.profile_image)
+    user        = stampedAPI.updateProfileImage(authUserId, schema.profile_image)
+    user        = HTTPUser().importSchema(user)
     
-    suffix      = '.jpg'
+    return transformOutput(user.exportSparse())
     
-    images = { }
-    prefixes = {
-        'fast' : 'static.stamped.com/', 
-        'slow' : 'http://stamped.com.static.images.s3.amazonaws.com/', 
-    }
+    # suffix      = '.jpg'
     
-    for k, prefix in prefixes.iteritems():
-        prefix = "%s/users/%s" % (prefix, authUserId)
-        value  = []
+    # images = { }
+    # prefixes = {
+    #     'fast' : 'static.stamped.com/', 
+    #     'slow' : 'http://stamped.com.static.images.s3.amazonaws.com/', 
+    # }
+    
+    # for k, prefix in prefixes.iteritems():
+    #     prefix = "%s/users/%s" % (prefix, authUserId)
+    #     value  = []
         
-        value.append("%s%s" % (prefix, suffix))
-        value.append("%s-144x144%s" % (prefix, suffix))
-        value.append("%s-72x72%s" % (prefix, suffix))
-        value.append("%s-110x110%s" % (prefix, suffix))
-        value.append("%s-55x55%s" % (prefix, suffix))
-        value.append("%s-92x92%s" % (prefix, suffix))
-        value.append("%s-46x46%s" % (prefix, suffix))
-        value.append("%s-74x74%s" % (prefix, suffix))
-        value.append("%s-37x37%s" % (prefix, suffix))
-        value.append("%s-62x62%s" % (prefix, suffix))
-        value.append("%s-31x31%s" % (prefix, suffix))
-        images[k] = value
+    #     value.append("%s%s" % (prefix, suffix))
+    #     value.append("%s-144x144%s" % (prefix, suffix))
+    #     value.append("%s-72x72%s" % (prefix, suffix))
+    #     value.append("%s-110x110%s" % (prefix, suffix))
+    #     value.append("%s-55x55%s" % (prefix, suffix))
+    #     value.append("%s-92x92%s" % (prefix, suffix))
+    #     value.append("%s-46x46%s" % (prefix, suffix))
+    #     value.append("%s-74x74%s" % (prefix, suffix))
+    #     value.append("%s-37x37%s" % (prefix, suffix))
+    #     value.append("%s-62x62%s" % (prefix, suffix))
+    #     value.append("%s-31x31%s" % (prefix, suffix))
+    #     images[k] = value
     
-    output      = { 'user_id': authUserId, 'images': images, }
+    # output      = { 'user_id': authUserId, 'images': images, }
     
-    return transformOutput(output)
+    # return transformOutput(output)
 
 
 @handleHTTPRequest
