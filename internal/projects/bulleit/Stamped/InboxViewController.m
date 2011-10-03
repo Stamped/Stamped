@@ -46,6 +46,7 @@ typedef enum {
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)mapButtonWasPressed:(NSNotification*)notification;
 - (void)listButtonWasPressed:(NSNotification*)notification;
+- (void)userLoggedOut:(NSNotification*)notification;
 - (void)addAnnotationForEntity:(Entity*)entity;
 - (void)mapUserTapped:(id)sender;
 - (void)mapDisclosureTapped:(id)sender;
@@ -129,6 +130,10 @@ typedef enum {
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(listButtonWasPressed:)
                                                name:kListViewButtonPressedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(userLoggedOut:)
+                                               name:kUserHasLoggedOutNotification
                                              object:nil];
   mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
   mapView_.alpha = 0.0;
@@ -227,6 +232,10 @@ typedef enum {
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {      
+  [self loadStampsFromDataStore];
+}
+
+- (void)userLoggedOut:(NSNotification*)notification {
   [self loadStampsFromDataStore];
 }
 

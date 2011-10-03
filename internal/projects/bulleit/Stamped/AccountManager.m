@@ -18,6 +18,7 @@
 #import "Util.h"
 
 NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
+NSString* const kUserHasLoggedOutNotification = @"KUserHasLoggedOutNotification";
 
 static NSString* const kPasswordKeychainItemID = @"Password";
 static NSString* const kAccessTokenKeychainItemID = @"AccessToken";
@@ -410,6 +411,8 @@ static AccountManager* sharedAccountManager_ = nil;
   [RKObjectManager.sharedManager.objectStore deletePersistantStore];
   authenticated_ = NO;
   firstRun_ = YES;
+  [[NSNotificationCenter defaultCenter] postNotificationName:kUserHasLoggedOutNotification
+                                                      object:self];
   [self authenticate];
 }
 

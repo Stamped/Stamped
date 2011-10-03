@@ -27,10 +27,11 @@
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)newsCountChanged:(NSNotification*)notification;
 - (void)reloadPanes:(NSNotification*)notification;
+- (void)userLoggedOut:(NSNotification*)notification;
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
-
+@property (nonatomic, copy) NSArray* tabBarItems;
 @end
 
 @implementation RootTabBarViewController
@@ -45,12 +46,14 @@
 @synthesize peopleTabBarItem = peopleTabBarItem_;
 @synthesize userStampBackgroundImageView = userStampBackgroundImageView_;
 @synthesize tooltipImageView = tooltipImageView_;
+@synthesize tabBarItems = tabBarItems_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [AccountManager sharedManager].delegate = nil;
   self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
+  self.tabBarItems = nil;
   self.viewControllers = nil;
   self.tabBar = nil;
   self.stampsTabBarItem = nil;
@@ -95,7 +98,10 @@
                                            selector:@selector(reloadPanes:)
                                                name:UIApplicationSignificantTimeChangeNotification
                                              object:nil];
-  
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(userLoggedOut:)
+                                               name:kUserHasLoggedOutNotification
+                                             object:nil];
 
   [AccountManager sharedManager].delegate = self;
   if ([AccountManager sharedManager].authenticated) {
@@ -120,11 +126,17 @@
   [todo release];
   [people release];
 
+  self.tabBarItems = [NSArray arrayWithObjects:stampsTabBarItem_,
+                                               activityTabBarItem_,
+                                               mustDoTabBarItem_,
+                                               peopleTabBarItem_,
+                                               nil];
+  
   // This will load all views.
   [self ensureCorrectHeightOfViewControllers];
   if (!self.tabBar.selectedItem) {
-    self.tabBar.selectedItem = stampsTabBarItem_;
-    [self tabBar:self.tabBar didSelectItem:stampsTabBarItem_];
+    self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
+    [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
   }
 }
 
@@ -137,6 +149,15 @@
 
 - (void)currentUserUpdated:(NSNotification*)notification {
   [self fillStampImageView];
+}
+
+- (void)userLoggedOut:(NSNotification*)notification {
+  activityTabBarItem_.badgeValue = nil;
+  selectedViewControllerIndex_ = 0;
+  self.tabBar.selectedItem = [tabBarItems_ objectAtIndex:selectedViewControllerIndex_];
+  [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
+  [self.selectedViewController.view removeFromSuperview];
+  self.tabBar.selectedItem = nil;
 }
 
 - (void)fillStampImageView {
@@ -183,6 +204,7 @@
   self.searchStampsNavigationController = nil;
   self.selectedViewController = nil;
   self.viewControllers = nil;
+  self.tabBarItems = nil;
   self.tabBar = nil;
   self.stampsTabBarItem = nil;
   self.activityTabBarItem = nil;
@@ -328,6 +350,7 @@
   [self.view insertSubview:newViewController.view atIndex:0];
   [newViewController viewDidAppear:NO];
   self.selectedViewController = newViewController;
+  selectedViewControllerIndex_ = [tabBarItems_ indexOfObject:item];
 }
 
 @end

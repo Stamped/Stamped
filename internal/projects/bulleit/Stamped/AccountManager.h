@@ -14,6 +14,7 @@
 #import "FirstRunViewController.h"
 
 extern NSString* const kCurrentUserHasUpdatedNotification;
+extern NSString* const kUserHasLoggedOutNotification;
 
 @protocol AccountManagerDelegate
 @required

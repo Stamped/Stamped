@@ -10,7 +10,10 @@
 
 #import "AccountManager.h"
 
-@interface RootTabBarViewController : UIViewController <UITabBarDelegate, AccountManagerDelegate>
+@interface RootTabBarViewController : UIViewController <UITabBarDelegate, AccountManagerDelegate> {
+ @private
+  NSUInteger selectedViewControllerIndex_;
+}
 
 @property (nonatomic, retain) NSArray* viewControllers;
 @property (nonatomic, retain) UIViewController* selectedViewController;

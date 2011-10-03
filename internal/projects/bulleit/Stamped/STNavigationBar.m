@@ -52,7 +52,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
 - (void)dealloc {
   mapLayer_ = nil;
   settingsButton_ = nil;
-  NSLog(@"nav bar was dealloc'd");
   [super dealloc];
 }
 
