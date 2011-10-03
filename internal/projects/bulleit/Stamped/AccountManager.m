@@ -116,7 +116,7 @@ static AccountManager* sharedAccountManager_ = nil;
   self.navController.navigationBarHidden = YES;
 
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController presentModalViewController:self.navController animated:YES];
+  [delegate.navigationController presentModalViewController:self.navController animated:NO];
 
   [self.navController release];
   [self.firstRunViewController release];
@@ -405,12 +405,12 @@ static AccountManager* sharedAccountManager_ = nil;
   [passwordKeychainItem_ resetKeychainItem];
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];
+  self.currentUser = nil;
 #warning delete photos and anything in documents...
   [RKObjectManager.sharedManager.objectStore deletePersistantStore];
   authenticated_ = NO;
   firstRun_ = YES;
   [self authenticate];
-#warning this doesn't show the login dialog... hmm.
 }
 
 @end

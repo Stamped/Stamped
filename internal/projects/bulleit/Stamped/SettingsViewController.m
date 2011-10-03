@@ -82,7 +82,7 @@
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
   if (buttonIndex == 0) {  // Logout.
-    [self.parentViewController dismissModalViewControllerAnimated:YES];
+    [self.parentViewController dismissModalViewControllerAnimated:NO];
     [[AccountManager sharedManager] logout];
   }
 }

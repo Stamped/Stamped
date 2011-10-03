@@ -137,6 +137,7 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 #pragma mark - UIImagePickerControllerDelegate methods.
 
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info {
+  [self view];
   NSString* mediaType = [info objectForKey:UIImagePickerControllerMediaType];
   
   if (CFStringCompare((CFStringRef)mediaType, kUTTypeImage, 0) == kCFCompareEqualTo) {
