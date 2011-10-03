@@ -18,6 +18,7 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSString* name;
 @property (nonatomic, retain) NSString* userID;
 @property (nonatomic, retain) NSString* website;
+@property (nonatomic, retain) NSString* location;
 @property (nonatomic, retain) NSString* secondaryColor;
 @property (nonatomic, retain) NSString* screenName;
 @property (nonatomic, retain) UIImage* stampImage;

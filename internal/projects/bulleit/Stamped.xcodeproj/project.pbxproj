@@ -53,7 +53,7 @@
 		7E146FEB13EF4FE200B954C6 /* refresh_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E146FEA13EF4FE200B954C6 /* refresh_arrow@2x.png */; };
 		7E146FEE13EF543B00B954C6 /* UserImageDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E146FED13EF543B00B954C6 /* UserImageDownloadManager.m */; };
 		7E146FF113F07A7500B954C6 /* MediumUserImageButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E146FF013F07A7500B954C6 /* MediumUserImageButton.m */; };
-		7E1873C3143A0A3A00A0ECC0 /* edit_profile_labels@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1873C2143A0A3A00A0ECC0 /* edit_profile_labels@2x.png */; };
+		7E1873C6143A14AE00A0ECC0 /* edit_profile_labels@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1873C5143A14AE00A0ECC0 /* edit_profile_labels@2x.png */; };
 		7E1D92DC13D5F5C50022412D /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E1D92DB13D5F5C40022412D /* User.m */; };
 		7E1D92EA13D632DE0022412D /* stamp_shape_textured@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1D92E913D632DE0022412D /* stamp_shape_textured@2x.png */; };
 		7E1E107C141571D700E6B980 /* create_account_button_active@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E1E1078141571D700E6B980 /* create_account_button_active@2x.png */; };
@@ -581,7 +581,8 @@
 		7E146FED13EF543B00B954C6 /* UserImageDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserImageDownloadManager.m; sourceTree = "<group>"; };
 		7E146FEF13F07A7400B954C6 /* MediumUserImageButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediumUserImageButton.h; sourceTree = "<group>"; };
 		7E146FF013F07A7500B954C6 /* MediumUserImageButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediumUserImageButton.m; sourceTree = "<group>"; };
-		7E1873C2143A0A3A00A0ECC0 /* edit_profile_labels@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "edit_profile_labels@2x.png"; sourceTree = "<group>"; };
+		7E1873C4143A10D500A0ECC0 /* StampedModel 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 6.xcdatamodel"; sourceTree = "<group>"; };
+		7E1873C5143A14AE00A0ECC0 /* edit_profile_labels@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "edit_profile_labels@2x.png"; sourceTree = "<group>"; };
 		7E1D92DA13D5F5C40022412D /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = User.h; sourceTree = "<group>"; };
 		7E1D92DB13D5F5C40022412D /* User.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = User.m; sourceTree = "<group>"; };
 		7E1D92E913D632DE0022412D /* stamp_shape_textured@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_shape_textured@2x.png"; sourceTree = "<group>"; };
@@ -1074,8 +1075,8 @@
 				7E0B62271439716500A573FA /* change_picture_inner_shadow@2x.png */,
 				7E0B62281439716500A573FA /* stamp_inner_shadow@2x.png */,
 				7E0B62291439716500A573FA /* change_stamp_button_bg@2x.png */,
+				7E1873C5143A14AE00A0ECC0 /* edit_profile_labels@2x.png */,
 				7E0B622A1439716500A573FA /* change_picture_button_bg@2x.png */,
-				7E1873C2143A0A3A00A0ECC0 /* edit_profile_labels@2x.png */,
 			);
 			name = "Edit Profile";
 			sourceTree = "<group>";
@@ -2430,7 +2431,7 @@
 				7E0B622D1439716500A573FA /* change_stamp_button_bg@2x.png in Resources */,
 				7E0B622E1439716500A573FA /* change_picture_button_bg@2x.png in Resources */,
 				7E0B62341439718F00A573FA /* EditProfileViewController.xib in Resources */,
-				7E1873C3143A0A3A00A0ECC0 /* edit_profile_labels@2x.png in Resources */,
+				7E1873C6143A14AE00A0ECC0 /* edit_profile_labels@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2804,13 +2805,14 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E1873C4143A10D500A0ECC0 /* StampedModel 6.xcdatamodel */,
 				7E0B61FC1439246E00A573FA /* StampedModel 5.xcdatamodel */,
 				7E26888614290738001BC95D /* StampedModel 2.xcdatamodel */,
 				7EA6CF69142BF8C6001AE920 /* StampedModel 3.xcdatamodel */,
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E0B61FC1439246E00A573FA /* StampedModel 5.xcdatamodel */;
+			currentVersion = 7E1873C4143A10D500A0ECC0 /* StampedModel 6.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

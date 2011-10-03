@@ -24,6 +24,9 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 @synthesize user = user_;
 @synthesize stampImageView = stampImageView_;
 @synthesize userImageView = userImageView_;
+@synthesize nameTextField = nameTextField_;
+@synthesize locationTextField = locationTextField_;
+@synthesize aboutTextField = aboutTextField_;
 
 - (id)init {
   self = [self initWithNibName:@"EditProfileViewController" bundle:nil];
@@ -36,6 +39,9 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   self.user = nil;
   self.stampImageView = nil;
   self.userImageView = nil;
+  self.nameTextField = nil;
+  self.locationTextField = nil;
+  self.aboutTextField = nil;
   [super dealloc];
 }
 
@@ -53,6 +59,10 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   self.stampImageView.image = user_.stampImage;
   self.userImageView.userInteractionEnabled = NO;
   self.userImageView.imageURL = user_.profileImageURL;
+  self.nameTextField.text = user_.name;
+  self.locationTextField.text = user_.location;
+  self.aboutTextField.text = user_.bio;
+
   // Do any additional setup after loading the view from its nib.
 }
 
@@ -60,6 +70,9 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   [super viewDidUnload];
   self.stampImageView = nil;
   self.userImageView = nil;
+  self.nameTextField = nil;
+  self.locationTextField = nil;
+  self.aboutTextField = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

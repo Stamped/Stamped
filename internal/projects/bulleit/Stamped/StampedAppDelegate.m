@@ -56,7 +56,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
                                        @"num_stamps_left", @"numStampsLeft",
                                        nil];
   userMapping.primaryKeyAttribute = @"userID";
-  [userMapping mapAttributes:@"bio", @"website", nil];
+  [userMapping mapAttributes:@"bio", @"website", @"location", nil];
 
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",

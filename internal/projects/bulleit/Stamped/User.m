@@ -25,6 +25,7 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic secondaryColor;
 @dynamic profileImageURL;
 @dynamic largeProfileImageURL;
+@dynamic location;
 @dynamic screenName;
 @dynamic stampImage;
 @dynamic stamps;

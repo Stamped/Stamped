@@ -204,7 +204,7 @@
 						<string key="NSFrame">{{174, 67}, {46, 47}}</string>
 						<reference key="NSSuperview" ref="540011283"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="785033630"/>
+						<reference key="NSNextKeyView" ref="1058417053"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -250,13 +250,13 @@
 							<string key="NSResourceName">change_picture_inner_shadow@2x.png</string>
 						</object>
 					</object>
-					<object class="IBUITextField" id="43878248">
+					<object class="IBUITextField" id="205460764">
 						<reference key="NSNextResponder" ref="540011283"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{97, 151}, {210, 31}}</string>
 						<reference key="NSSuperview" ref="540011283"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="943790740"/>
+						<reference key="NSNextKeyView" ref="866270280"/>
 						<string key="NSReuseIdentifierKey">_NS:294</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -277,13 +277,13 @@
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						</object>
 					</object>
-					<object class="IBUITextField" id="943790740">
+					<object class="IBUITextField" id="866270280">
 						<reference key="NSNextResponder" ref="540011283"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{97, 199}, {210, 31}}</string>
 						<reference key="NSSuperview" ref="540011283"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="946268639"/>
+						<reference key="NSNextKeyView" ref="15948234"/>
 						<string key="NSReuseIdentifierKey">_NS:294</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -304,7 +304,7 @@
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						</object>
 					</object>
-					<object class="IBUITextField" id="946268639">
+					<object class="IBUITextField" id="15948234">
 						<reference key="NSNextResponder" ref="540011283"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{97, 247}, {210, 31}}</string>
@@ -331,13 +331,13 @@
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						</object>
 					</object>
-					<object class="IBUIImageView" id="785033630">
+					<object class="IBUIImageView" id="1058417053">
 						<reference key="NSNextResponder" ref="540011283"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{11, 161}, {86, 117}}</string>
 						<reference key="NSSuperview" ref="540011283"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="43878248"/>
+						<reference key="NSNextKeyView" ref="205460764"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -418,6 +418,30 @@
 					</object>
 					<int key="connectionID">33</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">aboutTextField</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="15948234"/>
+					</object>
+					<int key="connectionID">38</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">locationTextField</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="866270280"/>
+					</object>
+					<int key="connectionID">39</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">nameTextField</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="205460764"/>
+					</object>
+					<int key="connectionID">40</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -454,10 +478,10 @@
 							<reference ref="395569956"/>
 							<reference ref="1070764613"/>
 							<reference ref="849066880"/>
-							<reference ref="43878248"/>
-							<reference ref="943790740"/>
-							<reference ref="946268639"/>
-							<reference ref="785033630"/>
+							<reference ref="205460764"/>
+							<reference ref="866270280"/>
+							<reference ref="15948234"/>
+							<reference ref="1058417053"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -517,22 +541,22 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">34</int>
-						<reference key="object" ref="43878248"/>
+						<reference key="object" ref="205460764"/>
 						<reference key="parent" ref="540011283"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">35</int>
-						<reference key="object" ref="943790740"/>
+						<reference key="object" ref="866270280"/>
 						<reference key="parent" ref="540011283"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">36</int>
-						<reference key="object" ref="946268639"/>
+						<reference key="object" ref="15948234"/>
 						<reference key="parent" ref="540011283"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">37</int>
-						<reference key="object" ref="785033630"/>
+						<reference key="object" ref="1058417053"/>
 						<reference key="parent" ref="540011283"/>
 					</object>
 				</object>
@@ -604,7 +628,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">37</int>
+			<int key="maxID">40</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -655,11 +679,17 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>aboutTextField</string>
+							<string>locationTextField</string>
+							<string>nameTextField</string>
 							<string>stampImageView</string>
 							<string>userImageView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>UITextField</string>
+							<string>UITextField</string>
+							<string>UITextField</string>
 							<string>UIImageView</string>
 							<string>STImageView</string>
 						</object>
@@ -668,11 +698,26 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>aboutTextField</string>
+							<string>locationTextField</string>
+							<string>nameTextField</string>
 							<string>stampImageView</string>
 							<string>userImageView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBToOneOutletInfo">
+								<string key="name">aboutTextField</string>
+								<string key="candidateClassName">UITextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">locationTextField</string>
+								<string key="candidateClassName">UITextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">nameTextField</string>
+								<string key="candidateClassName">UITextField</string>
+							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">stampImageView</string>
 								<string key="candidateClassName">UIImageView</string>

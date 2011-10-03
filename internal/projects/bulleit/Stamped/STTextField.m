@@ -24,7 +24,7 @@ const CGFloat kTextLeftInset = 10.0;
 }
 
 - (CGRect)textRectForBounds:(CGRect)bounds {
-  return CGRectOffset(CGRectInset(bounds, kTextLeftInset / 2, 0), kTextLeftInset / 2, 0);
+  return CGRectOffset(CGRectInset(bounds, kTextLeftInset / 2, 0), kTextLeftInset / 2, -1);
 }
 
 - (CGRect)editingRectForBounds:(CGRect)bounds {

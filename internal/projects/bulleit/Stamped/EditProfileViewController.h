@@ -21,6 +21,10 @@
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) IBOutlet UIImageView* stampImageView;
 @property (nonatomic, retain) IBOutlet STImageView* userImageView;
+@property (nonatomic, retain) IBOutlet UITextField* nameTextField;
+@property (nonatomic, retain) IBOutlet UITextField* locationTextField;
+@property (nonatomic, retain) IBOutlet UITextField* aboutTextField;
+
 
 - (IBAction)settingsButtonPressed:(id)sender;
 - (IBAction)editStampButtonPressed:(id)sender;
