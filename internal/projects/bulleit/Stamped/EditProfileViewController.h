@@ -8,15 +8,18 @@
 
 #import <UIKit/UIKit.h>
 
+#import "StampCustomizerViewController.h"
+
 @class User;
 @class STImageView;
 
-@interface EditProfileViewController : UIViewController
+@interface EditProfileViewController : UIViewController <StampCustomizerViewControllerDelegate>
 
 @property (nonatomic, retain) User* user;
 @property (nonatomic, retain) IBOutlet UIImageView* stampImageView;
 @property (nonatomic, retain) IBOutlet STImageView* userImageView;
 
 - (IBAction)settingsButtonPressed:(id)sender;
+- (IBAction)editStampButtonPressed:(id)sender;
 
 @end

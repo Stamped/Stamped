@@ -8,8 +8,14 @@
 
 #import "EditProfileViewController.h"
 
+#import <RestKit/RestKit.h>
+
+#import "AccountManager.h"
 #import "User.h"
+#import "Util.h"
 #import "STImageView.h"
+
+static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 
 @implementation EditProfileViewController
 
@@ -63,6 +69,36 @@
 
 - (IBAction)settingsButtonPressed:(id)sender {
   [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (IBAction)editStampButtonPressed:(id)sender {
+  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithNibName:@"StampCustomizerViewController" bundle:nil];
+  vc.delegate = self;
+  [self.navigationController presentModalViewController:vc animated:YES];
+  [vc release];
+}
+
+#pragma mark - StampCustomizerViewControllerDelegate methods.
+
+- (void)stampCustomizer:(StampCustomizerViewController*)customizer
+      chosePrimaryColor:(NSString*)primary
+         secondaryColor:(NSString*)secondary {
+  User* user = [AccountManager sharedManager].currentUser;
+  user.primaryColor = primary;
+  user.secondaryColor = secondary;
+  self.stampImageView.image = user.stampImage;
+  [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
+                                                      object:[AccountManager sharedManager]];
+  
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUpdateStampPath 
+                                                                    delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = mapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary",
+                         secondary, @"color_secondary", nil];
+  [objectLoader send];
 }
 
 @end
