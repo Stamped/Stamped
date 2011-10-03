@@ -155,7 +155,8 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   
   ripplesLayer_.hidden = black;
   mapLayer_.hidden = black;
-  settingsButton_.hidden = settingsButton_.hidden | black;
+  settingsButton_.hidden = black;
+  settingsButton_.alpha = 0.0;  // HACK
   [self setNeedsDisplay];
 }
 

@@ -16,6 +16,7 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSString* bio;
 @property (nonatomic, retain) NSString* primaryColor;
 @property (nonatomic, retain) NSString* name;
+@property (nonatomic, retain) NSString* imageURL;
 @property (nonatomic, retain) NSString* userID;
 @property (nonatomic, retain) NSString* website;
 @property (nonatomic, retain) NSString* location;

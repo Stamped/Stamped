@@ -37,6 +37,7 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic numFollowers;
 @dynamic numStamps;
 @dynamic numStampsLeft;
+@dynamic imageURL;
 
 - (void)setPrimaryColor:(NSString*)primaryColor {
   [self willChangeValueForKey:@"primaryColor"];
@@ -66,10 +67,20 @@ const CGFloat kMediumUserImageSize = 41.0;
 }
 
 - (NSString*)largeProfileImageURL {
+  if (self.imageURL)
+    return self.imageURL;
+
   return [NSString stringWithFormat:@"http://static.stamped.com/users/%@.jpg", self.screenName.lowercaseString];
 }
 
 - (NSString*)profileImageURL {
+  if (self.imageURL) {
+    NSString* original = [NSString stringWithFormat:@"/users/%@.jpg", self.screenName.lowercaseString];
+    NSString* replacement = [NSString stringWithFormat:@"/users/%@-144x144.jpg", self.screenName.lowercaseString];
+    NSString* URL = [self.imageURL stringByReplacingOccurrencesOfString:original withString:replacement];
+    return URL;
+  }
+  
   return [NSString stringWithFormat:@"http://static.stamped.com/users/%@-144x144.jpg",
       self.screenName.lowercaseString];
 }

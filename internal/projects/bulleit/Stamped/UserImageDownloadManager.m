@@ -259,7 +259,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   }
 
   img = [UIImage imageWithContentsOfFile:[self imagePathWithImageURL:imageURL]];
-  
+
   if (img) {
     if (!imageCache_)
       imageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
