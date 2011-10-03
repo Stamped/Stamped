@@ -18,6 +18,7 @@ const CGFloat kTextLeftInset = 10.0;
   self = [super initWithCoder:aDecoder];
   if (self) {
     self.textColor = [UIColor stampedDarkGrayColor];
+    self.keyboardAppearance = UIKeyboardAppearanceAlert;
   }
   return self;
 }
@@ -33,7 +34,7 @@ const CGFloat kTextLeftInset = 10.0;
 - (void)drawRect:(CGRect)rect {
   [super drawRect:rect];
   CGContextRef ctx = UIGraphicsGetCurrentContext();
-  CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.87 alpha:1.0].CGColor);
+  CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.866 alpha:1.0].CGColor);
   CGContextFillRect(ctx, CGRectMake(0, CGRectGetMaxY(self.bounds) - 1, CGRectGetWidth(self.bounds), 1));
 }
 
