@@ -13,5 +13,6 @@
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 
 - (IBAction)doneButtonPressed:(id)sender;
+- (IBAction)notificationsButtonPressed:(id)sender;
 
 @end

@@ -8,6 +8,8 @@
 
 #import "SettingsViewController.h"
 
+#import "NotificationSettingsViewController.h"
+
 @implementation SettingsViewController
 
 @synthesize scrollView = scrollView_;
@@ -85,6 +87,12 @@
 
 - (IBAction)doneButtonPressed:(id)sender {
   [self.parentViewController dismissModalViewControllerAnimated:YES];
+}
+
+- (IBAction)notificationsButtonPressed:(id)sender {
+  NotificationSettingsViewController* vc = [[NotificationSettingsViewController alloc] init];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 @end
