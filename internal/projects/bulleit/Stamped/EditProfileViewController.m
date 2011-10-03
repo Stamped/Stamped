@@ -17,7 +17,15 @@
 #import "STImageView.h"
 
 static const CGFloat kProfileImageSize = 500;
+static const NSUInteger kMaxNameLength = 80;
+static const NSUInteger kMaxLocationLength = 80;
+static const NSUInteger kMaxBioLength = 200;
 static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
+static NSString* const kUpdateProfilePath = @"/account/update_profile.json";
+
+@interface EditProfileViewController ()
+@property (nonatomic, readonly) UIResponder* firstResponder;
+@end
 
 @implementation EditProfileViewController
 
@@ -28,6 +36,10 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 @synthesize locationTextField = locationTextField_;
 @synthesize aboutTextField = aboutTextField_;
 @synthesize containerView = containerView_;
+@synthesize saveButton = saveButton_;
+@synthesize cancelButton = cancelButton_;
+@synthesize saveIndicator = saveIndicator_;
+@synthesize firstResponder = firstResponder_;
 
 - (id)init {
   self = [self initWithNibName:@"EditProfileViewController" bundle:nil];
@@ -44,6 +56,10 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   self.locationTextField = nil;
   self.aboutTextField = nil;
   self.containerView = nil;
+  self.saveIndicator = nil;
+  self.saveButton = nil;
+  self.cancelButton = nil;
+  firstResponder_ = nil;
   [super dealloc];
 }
 
@@ -64,6 +80,9 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   self.nameTextField.text = user_.name;
   self.locationTextField.text = user_.location;
   self.aboutTextField.text = user_.bio;
+  saveButton_.alpha = 0;
+  cancelButton_.alpha = 0;
+  [saveIndicator_ stopAnimating];
 
   // Do any additional setup after loading the view from its nib.
 }
@@ -76,6 +95,10 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
   self.locationTextField = nil;
   self.aboutTextField = nil;
   self.containerView = nil;
+  self.saveIndicator = nil;
+  self.saveButton = nil;
+  self.cancelButton = nil;
+  firstResponder_ = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -84,6 +107,39 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 }
 
 #pragma mark - Actions
+
+- (IBAction)saveButtonPressed:(id)sender {
+  if (!nameTextField_.text.length) {
+    UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp" 
+                                                    message:@"Your name is required."
+                                                   delegate:nil
+                                          cancelButtonTitle:nil
+                                          otherButtonTitles:@"Yay!", nil] autorelease];
+    [alert show];
+    return;
+  }
+  [saveIndicator_ startAnimating];
+  saveButton_.hidden = YES;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUpdateProfilePath 
+                                                                    delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = mapping;
+  //NSMutableDictionary params = [NSMutableDictionary dictionary];
+  //objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary",
+  //                       secondary, @"color_secondary", nil];
+  //[objectLoader send];
+  
+  //[firstResponder_ resignFirstResponder];
+}
+
+- (IBAction)cancelButtonPressed:(id)sender {
+  self.nameTextField.text = user_.name;
+  self.locationTextField.text = user_.location;
+  self.aboutTextField.text = user_.bio;
+  [firstResponder_ resignFirstResponder];
+}
 
 - (IBAction)settingsButtonPressed:(id)sender {
   [self.navigationController popViewControllerAnimated:YES];
@@ -98,24 +154,43 @@ static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 
 #pragma mark - UITextFieldDelegate methods.
 
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  NSString* text = [textField.text stringByReplacingCharactersInRange:range withString:string];
+  if (textField == nameTextField_) {
+    return text.length <= kMaxNameLength;
+  } else if (textField == aboutTextField_) {
+    return text.length <= kMaxBioLength;
+  } else if (textField == locationTextField_) {
+    return text.length <= kMaxLocationLength;
+  }
+
+  return YES;
+}
+
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
+  firstResponder_ = textField;
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
                      containerView_.frame = CGRectOffset(containerView_.frame, 0, -95);
+                     saveButton_.alpha = 1;
+                     cancelButton_.alpha = 1;
                    }
                    completion:nil];
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
+  firstResponder_ = nil;
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
                      containerView_.frame = CGRectOffset(containerView_.frame, 0, 95);
+                     saveButton_.alpha = 0;
+                     cancelButton_.alpha = 0;
                    }
-                   completion:nil];  
+                   completion:nil];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {

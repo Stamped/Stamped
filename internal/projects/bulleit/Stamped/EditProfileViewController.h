@@ -26,8 +26,12 @@
 @property (nonatomic, retain) IBOutlet UITextField* locationTextField;
 @property (nonatomic, retain) IBOutlet UITextField* aboutTextField;
 @property (nonatomic, retain) IBOutlet UIView* containerView;
+@property (nonatomic, retain) IBOutlet UIButton* saveButton;
+@property (nonatomic, retain) IBOutlet UIButton* cancelButton;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* saveIndicator;
 
-
+- (IBAction)saveButtonPressed:(id)sender;
+- (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)settingsButtonPressed:(id)sender;
 - (IBAction)editStampButtonPressed:(id)sender;
 - (IBAction)changePhotoButtonPressed:(id)sender;
