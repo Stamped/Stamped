@@ -398,4 +398,18 @@ static AccountManager* sharedAccountManager_ = nil;
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
+#pragma mark - Logout stuff.
+
+- (void)logout {
+  NSLog(@"Logout now...");
+  [passwordKeychainItem_ resetKeychainItem];
+  [accessTokenKeychainItem_ resetKeychainItem];
+  [refreshTokenKeychainItem_ resetKeychainItem];
+  [RKObjectManager.sharedManager.objectStore deletePersistantStore];
+  authenticated_ = NO;
+  firstRun_ = YES;
+  [self authenticate];
+#warning this doesn't show the login dialog... hmm.
+}
+
 @end

@@ -36,6 +36,7 @@ extern NSString* const kCurrentUserHasUpdatedNotification;
 + (AccountManager*)sharedManager;
 - (void)authenticate;
 - (void)refreshToken;
+- (void)logout;
 
 @property (nonatomic, retain) User* currentUser;
 @property (nonatomic, retain) OAuthToken* authToken;

@@ -8,6 +8,7 @@
 
 #import "SettingsViewController.h"
 
+#import "AccountManager.h"
 #import "NotificationSettingsViewController.h"
 
 @implementation SettingsViewController
@@ -57,6 +58,25 @@
   NotificationSettingsViewController* vc = [[NotificationSettingsViewController alloc] init];
   [self.navigationController pushViewController:vc animated:YES];
   [vc release];
+}
+
+- (IBAction)logoutButtonPressed:(id)sender {
+  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure?"
+                                                      delegate:self
+                                             cancelButtonTitle:@"Cancel"
+                                        destructiveButtonTitle:@"Logout"
+                                             otherButtonTitles:nil] autorelease];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  [sheet showInView:self.view];
+}
+
+#pragma mark - UIActionSheetDelegate methods.
+
+- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  if (buttonIndex == 0) {  // Logout.
+    [self.parentViewController dismissModalViewControllerAnimated:YES];
+    [[AccountManager sharedManager] logout];
+  }
 }
 
 @end
