@@ -74,6 +74,12 @@ def convertUsers():
                 {'$set': {'name_lower': name}}
             )
 
+        if 'image_cache' not in user['timestamp']:
+            user_collection.update(
+                {'_id': user['_id']},
+                {'$set': {'timestamp.image_cache': user['timestamp']['created']}}
+            )
+
 
 def convertActivity():
     activity_collection = new_database['activity']
