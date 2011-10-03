@@ -407,8 +407,19 @@ static AccountManager* sharedAccountManager_ = nil;
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];
   self.currentUser = nil;
-#warning delete photos and anything in documents...
   [RKObjectManager.sharedManager.objectStore deletePersistantStore];
+  NSFileManager* fm = [NSFileManager defaultManager];
+  NSURL* directoryURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+  NSError* error = nil;
+  for (NSString* file in [fm contentsOfDirectoryAtPath:directoryURL.path error:&error]) {
+    if ([file isEqualToString:@"StampedData.sqlite"])
+      continue;
+
+    BOOL success = [fm removeItemAtURL:[directoryURL URLByAppendingPathComponent:file] error:&error];
+    if (!success || error) {
+      NSLog(@"Deleting stuff failed: %@", error);
+    }
+  }
   authenticated_ = NO;
   firstRun_ = YES;
   [[NSNotificationCenter defaultCenter] postNotificationName:kUserHasLoggedOutNotification
