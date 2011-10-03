@@ -389,10 +389,12 @@ class StampedAPI(AStampedAPI):
         user    = self._userDB.getUser(authUserId)
         self._imageDB.addProfileImage(user.screen_name.lower(), image)
 
+        image_cache = datetime.utcnow()
+        user.image_cache = image_cache
         self._accountDB.updateUserTimestamp(authUserId, 'image_cache', \
-            datetime.utcnow())
+            image_cache)
         
-        return True
+        return user
     
     def checkAccount(self, login):
         valid = False
