@@ -28,8 +28,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)currentUserUpdated:(NSNotification*)notification;
 - (void)topViewTapped:(UITapGestureRecognizer*)recognizer;
 - (void)loadFriendsFromNetwork;
-- (UIButton*)settingsButton;
-- (void)settingsButtonPressed:(id)sender;
+- (void)settingsButtonPressed:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* friendsArray;
 @end
@@ -66,14 +65,14 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [self.settingsButton addTarget:self 
-                          action:@selector(settingsButtonPressed:)
-                forControlEvents:UIControlEventTouchUpInside];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(currentUserUpdated:)
                                                name:kCurrentUserHasUpdatedNotification
                                              object:[AccountManager sharedManager]];
-  
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(settingsButtonPressed:)
+                                               name:kSettingsButtonPressedNotification
+                                             object:nil];
   userScreenNameLabel_.textColor = [UIColor stampedLightGrayColor];
   userFullNameLabel_.textColor = [UIColor stampedBlackColor];
   UITapGestureRecognizer* recognizer =
@@ -87,9 +86,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-  [self.settingsButton removeTarget:self
-                             action:@selector(settingsButtonPressed:)
-                   forControlEvents:UIControlEventTouchUpInside];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.currentUserView = nil;
   self.userStampImageView = nil;
@@ -113,7 +109,9 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  self.settingsButton.hidden = NO;
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+  [navBar setSettingsButtonShown:YES];
   [super viewDidAppear:animated];
 }
 
@@ -123,7 +121,9 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-  self.settingsButton.hidden = YES;
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+  [navBar setSettingsButtonShown:NO];
   [super viewDidDisappear:animated];
 }
 
@@ -256,15 +256,9 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 #pragma mark - Custom methods.
 
-- (void)settingsButtonPressed:(id)sender {
+- (void)settingsButtonPressed:(NSNotification*)notification {
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
-}
-
-- (UIButton*)settingsButton {
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
-  return navBar.settingsButton;
 }
 
 - (void)topViewTapped:(UITapGestureRecognizer*)recognizer {

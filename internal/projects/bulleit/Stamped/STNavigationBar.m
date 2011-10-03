@@ -14,19 +14,23 @@
 
 NSString* const kMapViewButtonPressedNotification = @"kMapViewButtonPressedNotification";
 NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNotification";
+NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNotification";
 
 @interface STNavigationBar ()
 - (void)initialize;
 - (void)auxiliaryButtonTapped;
 - (CGPathRef)newPathForTitle;
+- (void)settingsButtonPressed:(id)sender;
+
+@property (nonatomic, readonly) UIButton* settingsButton;
 @end
 
 @implementation STNavigationBar
 
 @synthesize hideLogo = hideLogo_;
 @synthesize string = string_;
-@synthesize settingsButton = settingsButton_;
 @synthesize black = black_;
+@synthesize settingsButton = settingsButton_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -43,6 +47,13 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
     [self initialize];
   
   return self;
+}
+
+- (void)dealloc {
+  mapLayer_ = nil;
+  settingsButton_ = nil;
+  NSLog(@"nav bar was dealloc'd");
+  [super dealloc];
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -127,10 +138,13 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   [self.layer addSublayer:mapLayer_];
   [mapLayer_ release];
   
-  settingsButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+  settingsButton_ = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
   settingsButton_.frame = CGRectMake(5, 7, 34, 30);
   [settingsButton_ setImage:[UIImage imageNamed:@"settings_button"] forState:UIControlStateNormal];
-  settingsButton_.hidden = YES;
+  [settingsButton_ addTarget:self
+                      action:@selector(settingsButtonPressed:)
+            forControlEvents:UIControlEventTouchUpInside];
+  settingsButton_.alpha = 0.0;
   [self addSubview:settingsButton_];
 }
 
@@ -144,6 +158,21 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
   mapLayer_.hidden = black;
   settingsButton_.hidden = settingsButton_.hidden | black;
   [self setNeedsDisplay];
+}
+
+- (void)settingsButtonPressed:(id)sender {
+  [[NSNotificationCenter defaultCenter] postNotificationName:kSettingsButtonPressedNotification
+                                                      object:nil];
+}
+
+
+- (void)setSettingsButtonShown:(BOOL)shown {
+  if (settingsButtonShown_ == shown)
+    return;
+  
+  settingsButtonShown_ = shown;
+  [UIView animateWithDuration:0.2
+                   animations:^{ settingsButton_.alpha = shown ? 1.0 : 0.0; }];
 }
 
 - (void)setButtonShown:(BOOL)shown {
@@ -191,11 +220,6 @@ NSString* const kListViewButtonPressedNotification = @"kListViewButtonPressedNot
                                                         object:self];
   }
   listButtonShown_ = !listButtonShown_;
-}
-
-- (void)dealloc {
-  mapLayer_ = nil;
-  [super dealloc];
 }
 
 - (CGPathRef)newPathForTitle {

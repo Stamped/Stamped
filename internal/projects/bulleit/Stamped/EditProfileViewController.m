@@ -15,6 +15,7 @@
 #import "User.h"
 #import "Util.h"
 #import "STImageView.h"
+#import "UserImageDownloadManager.h"
 
 static const CGFloat kProfileImageSize = 500;
 static const NSUInteger kMaxNameLength = 80;
@@ -166,6 +167,8 @@ static const NSUInteger kMaxPicUploadTries = 3;
     [profileImageIndicator_ stopAnimating];
     userImageView_.image = self.newProfilePic;
     userImageView_.hidden = NO;
+    [[UserImageDownloadManager sharedManager] setImage:self.newProfilePic
+                                                forURL:user_.profileImageURL];
   }
 }
 
@@ -230,6 +233,8 @@ static const NSUInteger kMaxPicUploadTries = 3;
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
+  if ([saveButton_.titleLabel.text isEqualToString:@"Save"])
+    [self saveButtonPressed:nil];
   return YES;
 }
 

@@ -10,6 +10,7 @@
 
 extern NSString* const kMapViewButtonPressedNotification;
 extern NSString* const kListViewButtonPressedNotification;
+extern NSString* const kSettingsButtonPressedNotification;
 
 @interface STNavigationBar : UINavigationBar {
  @private
@@ -18,13 +19,14 @@ extern NSString* const kListViewButtonPressedNotification;
   BOOL listButtonShown_;
   BOOL potentialButtonTap_;
   BOOL buttonShown_;
+  BOOL settingsButtonShown_;
   NSString* string;
 }
 
 - (void)setButtonShown:(BOOL)shown;
+- (void)setSettingsButtonShown:(BOOL)shown;
 
 @property (nonatomic, assign) BOOL black;
 @property (nonatomic, assign) BOOL hideLogo;
 @property (nonatomic, retain) NSString* string;
-@property (nonatomic, readonly) UIButton* settingsButton;
 @end

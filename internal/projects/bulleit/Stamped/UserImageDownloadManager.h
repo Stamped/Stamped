@@ -25,6 +25,7 @@ extern NSString* const kMediumUserImageLoadedNotification;
 + (UserImageDownloadManager*)sharedManager;
 - (UIImage*)mediumProfileImageAtURL:(NSString*)imageURL;
 - (UIImage*)profileImageAtURL:(NSString*)imageURL;
+- (void)setImage:(UIImage*)image forURL:(NSString*)imageURL;
 - (void)purgeCache;
 
 @end

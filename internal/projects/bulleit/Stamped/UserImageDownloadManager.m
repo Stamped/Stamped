@@ -84,6 +84,17 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 
 @end
 
+@interface UserImageDownloadManager ()
+- (NSString*)imagePathWithImageURL:(NSString*)imageURL;
+- (NSString*)mediumImagePathWithImageURL:(NSString*)imageURL;
+- (UIImage*)generateMediumProfileImage:(UIImage*)image;
+- (NSURL*)documentsDirectory;
+- (void)downloadImageAtURL:(NSString*)imageURL;
+- (UIImage*)mediumProfileImageAtURL:(NSString*)imageURL;
+- (UIImage*)profileImageAtURL:(NSString*)imageURL;
+- (void)userImageDidLoad:(UIImage*)image fromURL:(NSString*)imageURL;
+@end
+
 
 @implementation UserImageDownloadManager
 
@@ -140,6 +151,13 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   mediumImageCache_ = nil;
   [imageCache_ release];
   imageCache_ = nil;
+}
+
+- (void)setImage:(UIImage*)image forURL:(NSString*)imageURL {
+  NSFileManager* fileManager = [NSFileManager defaultManager];
+  [fileManager removeItemAtPath:[self mediumImagePathWithImageURL:imageURL] error:NULL];
+  [fileManager removeItemAtPath:[self imagePathWithImageURL:imageURL] error:NULL];
+  [self userImageDidLoad:image fromURL:imageURL];
 }
 
 - (UIImage*)generateMediumProfileImage:(UIImage*)image {
