@@ -402,7 +402,6 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - Logout stuff.
 
 - (void)logout {
-  NSLog(@"Logout now...");
   [passwordKeychainItem_ resetKeychainItem];
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];

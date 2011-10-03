@@ -125,6 +125,8 @@ static NSString* const kFacebookAppID = @"297022226980395";
     [self findFromContacts:self];
   else if (self.findSource == FindFriendsFromTwitter)
     [self findFromTwitter:self];
+  else
+    [self findFromContacts:self];
 }
 
 - (void)viewDidUnload {

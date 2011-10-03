@@ -12,8 +12,8 @@
 	<string></string>
 	<key>CFBundleIconFiles</key>
 	<array>
-		<string>icon1@2x.png</string>
-		<string>icon1.png</string>
+		<string>icon2@2x.png</string>
+		<string>icon2.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>
 	<string>com.stamped.${PRODUCT_NAME:rfc1034identifier}</string>
@@ -24,9 +24,20 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.25</string>
+	<string>0.26</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string></string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb297022226980395</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>0</string>
 	<key>LSRequiresIPhoneOS</key>
@@ -45,17 +56,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string></string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>fb297022226980395</string>
-			</array>
-		</dict>
 	</array>
 </dict>
 </plist>

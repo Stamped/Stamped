@@ -158,7 +158,6 @@ static const NSUInteger kMaxPicUploadTries = 3;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
-  NSLog(@"Success: %@", objectLoader.response.bodyAsString);
   if ([objectLoader.resourcePath isEqualToString:kUpdateProfilePath]) {
     [saveIndicator_ stopAnimating];
     saveButton_.enabled = YES;
@@ -173,7 +172,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  NSLog(@"Error: %@", objectLoader.response.bodyAsString);
+  NSLog(@"Error from uploading image: %@", objectLoader.response.bodyAsString);
   if ([objectLoader.resourcePath isEqualToString:kUpdateProfilePath]) {
     [saveIndicator_ stopAnimating];
     saveButton_.enabled = YES;
