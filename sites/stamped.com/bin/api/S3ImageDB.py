@@ -7,7 +7,7 @@ __license__ = "TODO"
 
 import Globals
 import Image, ImageFile
-import aws, logs, os, utils
+import aws, logs, os, utils, time
 import zlib, struct, array, random
 
 from AImageDB import AImageDB

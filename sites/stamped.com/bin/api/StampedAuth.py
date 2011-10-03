@@ -60,7 +60,6 @@ class StampedAuth(AStampedAuth):
     # ##### #
     
     def verifyUserCredentials(self, clientId, userIdentifier, password):
-
         try:
             # Login via email
             if utils.validate_email(userIdentifier):
@@ -96,6 +95,19 @@ class StampedAuth(AStampedAuth):
             return user, token
         except:
             msg = "Invalid user credentials"
+            logs.warning(msg)
+            raise StampedHTTPError("invalid_credentials", 401, msg)
+    
+    def verifyPassword(self, userId, password):
+        try:
+            user = self._accountDB.getAccount(userId)
+
+            if not auth.comparePasswordToStored(password, user.password):
+                raise
+
+            return True
+        except:
+            msg = "Invalid password"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
 
