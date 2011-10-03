@@ -1104,7 +1104,7 @@ class StampedAPI(AStampedAPI):
         
         # Check to make sure the user hasn't already stamped this entity
         if self._stampDB.checkStamp(user.user_id, entity.entity_id):
-            msg = "Cannot stamp same entity twice"
+            msg = "Cannot stamp same entity twice (id = %s)" % entity.entity_id
             logs.warning(msg)
             raise IllegalActionError(msg)
         
