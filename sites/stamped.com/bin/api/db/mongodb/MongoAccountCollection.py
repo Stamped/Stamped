@@ -106,7 +106,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return True
 
     def updateUserTimestamp(self, userId, key, value):
-        key = 'timestamp.%s' % (stat)
+        key = 'timestamp.%s' % (key)
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)}, 
             {'$set': {key: value}})

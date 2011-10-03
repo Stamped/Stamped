@@ -5,7 +5,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
-import copy, urllib, urlparse, re, logs, string
+import copy, urllib, urlparse, re, logs, string, time
 from datetime import datetime, date, timedelta
 from schema import *
 from Schemas import *
@@ -40,11 +40,15 @@ def _coordinatesFlatToDict(coordinates):
         return None
 
 def _profileImageURL(screenName, cache=None):
-    if cache and cache + timedelta(days=1) >= datetime.utcnow():
-        url = 'http://static.stamped.com/users/%s.jpg' % screenName
-    else:
+    if not cache:
         url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg' % \
-                screenName
+            str(screenName).lower()
+    elif cache + timedelta(days=1) <= datetime.utcnow():
+        url = 'http://static.stamped.com/users/%s.jpg?%s' % \
+            (str(screenName).lower(), int(time.mktime(cache.timetuple())))
+    else:
+        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg?%s' % \
+            (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     return url
 
 
