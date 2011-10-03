@@ -405,6 +405,7 @@ static AccountManager* sharedAccountManager_ = nil;
   [passwordKeychainItem_ resetKeychainItem];
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];
+#warning delete photos and anything in documents...
   [RKObjectManager.sharedManager.objectStore deletePersistantStore];
   authenticated_ = NO;
   firstRun_ = YES;

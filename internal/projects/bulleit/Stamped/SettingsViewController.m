@@ -9,6 +9,7 @@
 #import "SettingsViewController.h"
 
 #import "AccountManager.h"
+#import "EditProfileViewController.h"
 #import "NotificationSettingsViewController.h"
 
 @implementation SettingsViewController
@@ -52,6 +53,13 @@
 
 - (IBAction)doneButtonPressed:(id)sender {
   [self.parentViewController dismissModalViewControllerAnimated:YES];
+}
+
+- (IBAction)editProfileButtonPressed:(id)sender {
+  EditProfileViewController* vc = [[EditProfileViewController alloc] init];
+  vc.user = [AccountManager sharedManager].currentUser;
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 - (IBAction)notificationsButtonPressed:(id)sender {

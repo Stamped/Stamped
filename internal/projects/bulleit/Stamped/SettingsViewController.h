@@ -13,6 +13,7 @@
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 
 - (IBAction)doneButtonPressed:(id)sender;
+- (IBAction)editProfileButtonPressed:(id)sender;
 - (IBAction)notificationsButtonPressed:(id)sender;
 - (IBAction)logoutButtonPressed:(id)sender;
 
