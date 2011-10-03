@@ -154,9 +154,9 @@
 								<double key="IBUITitleEdgeInsets.right">0.0</double>
 								<string key="IBUINormalTitle">Notification settings</string>
 								<reference key="IBUIHighlightedTitleColor" ref="136463241"/>
-								<object class="NSColor" key="IBUINormalTitleColor">
+								<object class="NSColor" key="IBUINormalTitleColor" id="337567760">
 									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC4zAA</bytes>
+									<bytes key="NSWhite">MC42AA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="361466754"/>
 								<object class="NSCustomResource" key="IBUINormalBackgroundImage">
@@ -184,10 +184,7 @@
 								<double key="IBUITitleEdgeInsets.right">0.0</double>
 								<string key="IBUINormalTitle">Sharing settings</string>
 								<reference key="IBUIHighlightedTitleColor" ref="136463241"/>
-								<object class="NSColor" key="IBUINormalTitleColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC4zAA</bytes>
-								</object>
+								<reference key="IBUINormalTitleColor" ref="337567760"/>
 								<reference key="IBUINormalTitleShadowColor" ref="361466754"/>
 								<object class="NSCustomResource" key="IBUINormalBackgroundImage" id="926722085">
 									<string key="NSClassName">NSImage</string>
@@ -237,10 +234,7 @@
 								<double key="IBUITitleEdgeInsets.right">0.0</double>
 								<string key="IBUINormalTitle">About us</string>
 								<reference key="IBUIHighlightedTitleColor" ref="136463241"/>
-								<object class="NSColor" key="IBUINormalTitleColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC4zAA</bytes>
-								</object>
+								<reference key="IBUINormalTitleColor" ref="337567760"/>
 								<reference key="IBUINormalTitleShadowColor" ref="361466754"/>
 								<reference key="IBUINormalBackgroundImage" ref="834545038"/>
 							</object>
@@ -264,10 +258,7 @@
 								<double key="IBUITitleEdgeInsets.right">0.0</double>
 								<string key="IBUINormalTitle">Legal &amp; terms of service</string>
 								<reference key="IBUIHighlightedTitleColor" ref="136463241"/>
-								<object class="NSColor" key="IBUINormalTitleColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC4zAA</bytes>
-								</object>
+								<reference key="IBUINormalTitleColor" ref="337567760"/>
 								<reference key="IBUINormalTitleShadowColor" ref="361466754"/>
 								<reference key="IBUINormalBackgroundImage" ref="926722085"/>
 							</object>
@@ -291,10 +282,7 @@
 								<double key="IBUITitleEdgeInsets.right">0.0</double>
 								<string key="IBUINormalTitle">Send feedback</string>
 								<reference key="IBUIHighlightedTitleColor" ref="136463241"/>
-								<object class="NSColor" key="IBUINormalTitleColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC4zAA</bytes>
-								</object>
+								<reference key="IBUINormalTitleColor" ref="337567760"/>
 								<reference key="IBUINormalTitleShadowColor" ref="361466754"/>
 								<object class="NSCustomResource" key="IBUINormalBackgroundImage">
 									<string key="NSClassName">NSImage</string>
