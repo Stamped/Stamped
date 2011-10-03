@@ -44,8 +44,8 @@ def _profileImageURL(screenName, cache=None):
         url = 'http://static.stamped.com/users/%s.jpg?%s' % \
             (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     else:
-        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg' % \
-            str(screenName).lower()
+        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg?%s' % \
+            (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     return url
 
 
