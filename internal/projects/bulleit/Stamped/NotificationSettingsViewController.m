@@ -10,12 +10,19 @@
 
 @implementation NotificationSettingsViewController
 
+@synthesize scrollView = scrollView_;
+
 - (id)init {
   self = [self initWithNibName:@"NotificationSettingsViewController" bundle:nil];
   if (self) {
     
   }
   return self;
+}
+
+- (void)dealloc {
+  self.scrollView = nil;
+  [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -29,12 +36,13 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  // Do any additional setup after loading the view from its nib.
+  UIView* lastView = scrollView_.subviews.lastObject;
+  scrollView_.contentSize = CGSizeMake(320, CGRectGetMaxY(lastView.frame));
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
-
+  self.scrollView = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

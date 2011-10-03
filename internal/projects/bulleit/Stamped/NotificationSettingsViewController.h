@@ -10,6 +10,8 @@
 
 @interface NotificationSettingsViewController : UIViewController
 
+@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
+
 - (IBAction)settingsButtomPressed:(id)sender;
 
 @end

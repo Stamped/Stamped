@@ -42,6 +42,7 @@
 		7E0B621D14395C3800A573FA /* NotificationSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B621B14395C3800A573FA /* NotificationSettingsViewController.xib */; };
 		7E0B622014395CD800A573FA /* notifications_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B621E14395CD700A573FA /* notifications_header@2x.png */; };
 		7E0B622114395CD800A573FA /* gray_back_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B621F14395CD700A573FA /* gray_back_button_bg@2x.png */; };
+		7E0B62231439611F00A573FA /* notification_settings_set_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B62221439611F00A573FA /* notification_settings_set_bg@2x.png */; };
 		7E146FEB13EF4FE200B954C6 /* refresh_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E146FEA13EF4FE200B954C6 /* refresh_arrow@2x.png */; };
 		7E146FEE13EF543B00B954C6 /* UserImageDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E146FED13EF543B00B954C6 /* UserImageDownloadManager.m */; };
 		7E146FF113F07A7500B954C6 /* MediumUserImageButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E146FF013F07A7500B954C6 /* MediumUserImageButton.m */; };
@@ -558,6 +559,7 @@
 		7E0B621B14395C3800A573FA /* NotificationSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NotificationSettingsViewController.xib; sourceTree = "<group>"; };
 		7E0B621E14395CD700A573FA /* notifications_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notifications_header@2x.png"; sourceTree = "<group>"; };
 		7E0B621F14395CD700A573FA /* gray_back_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gray_back_button_bg@2x.png"; sourceTree = "<group>"; };
+		7E0B62221439611F00A573FA /* notification_settings_set_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notification_settings_set_bg@2x.png"; sourceTree = "<group>"; };
 		7E146FEA13EF4FE200B954C6 /* refresh_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "refresh_arrow@2x.png"; sourceTree = "<group>"; };
 		7E146FEC13EF543B00B954C6 /* UserImageDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserImageDownloadManager.h; sourceTree = "<group>"; };
 		7E146FED13EF543B00B954C6 /* UserImageDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserImageDownloadManager.m; sourceTree = "<group>"; };
@@ -1393,6 +1395,7 @@
 				7E89C3C91437DD9B00547960 /* twitter_icon_gray@2x.png */,
 				7E0B621E14395CD700A573FA /* notifications_header@2x.png */,
 				7E0B621F14395CD700A573FA /* gray_back_button_bg@2x.png */,
+				7E0B62221439611F00A573FA /* notification_settings_set_bg@2x.png */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -2378,6 +2381,7 @@
 				7E0B621D14395C3800A573FA /* NotificationSettingsViewController.xib in Resources */,
 				7E0B622014395CD800A573FA /* notifications_header@2x.png in Resources */,
 				7E0B622114395CD800A573FA /* gray_back_button_bg@2x.png in Resources */,
+				7E0B62231439611F00A573FA /* notification_settings_set_bg@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
