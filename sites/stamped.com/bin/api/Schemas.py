@@ -168,6 +168,7 @@ class TimestampSchema(Schema):
     def setSchema(self):
         self.created            = SchemaElement(datetime, required=True)
         self.modified           = SchemaElement(datetime)
+        self.image_cache        = SchemaElement(datetime)
 
 
 # ########### #

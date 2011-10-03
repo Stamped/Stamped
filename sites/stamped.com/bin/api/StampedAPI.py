@@ -147,6 +147,10 @@ class StampedAPI(AStampedAPI):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise InputError(msg)
+
+        # Add image timestamp if exists
+        if imageData:
+            account.image_cache = datetime.utcnow()
         
         # Create account
         account = self._accountDB.addAccount(account)
@@ -384,6 +388,9 @@ class StampedAPI(AStampedAPI):
         image   = self._imageDB.getImage(data)
         user    = self._userDB.getUser(authUserId)
         self._imageDB.addProfileImage(user.screen_name.lower(), image)
+
+        self._accountDB.updateUserTimestamp(authUserId, 'image_cache', \
+            datetime.utcnow())
         
         return True
     
@@ -417,6 +424,16 @@ class StampedAPI(AStampedAPI):
     def updateLinkedAccounts(self, authUserId, linkedAccounts):
         self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
         
+        return True
+
+    @API_CALL
+    def updatePassword(self, authUserId, password):
+        password = convertPasswordForStorage(password)
+        
+        self._accountDB.updatePassword(authUserId, password)
+
+        account = self._accountDB.getAccount(authUserId)
+
         return True
     
     @API_CALL

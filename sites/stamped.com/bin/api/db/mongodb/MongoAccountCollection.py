@@ -52,6 +52,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return self._convertFromMongo(document)
     
     def updateAccount(self, user):
+        ### TODO: Only update certain fields (i.e. remove race conditions if 
+        ###     user gets credit while modifying account)
         document = self._convertToMongo(user)
         document = self._updateMongoDocument(document)
         return self._convertFromMongo(document)
@@ -95,3 +97,18 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 {'_id': self._getObjectIdFromString(userId)},
                 {'$set': fields}
             )
+
+    def updatePassword(self, userId, password):
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(userId)}, 
+            {'$set': {'password': password}})
+
+        return True
+
+    def updateUserTimestamp(self, userId, key, value):
+        key = 'timestamp.%s' % (stat)
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(userId)}, 
+            {'$set': {key: value}})
+
+

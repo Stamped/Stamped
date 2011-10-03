@@ -172,8 +172,18 @@ def linked_accounts(request):
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
-def verify_credentials(request):
-    raise NotImplementedError
+def change_password(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPAccountChangePassword(), request, \
+                    obfuscate=['old_password', 'new_password'])
+    new         = schema.new_password
+    old         = schema.old_password
+
+    stampedAuth.verifyPassword(authUserId, old)
+
+    result      = stampedAPI.updatePassword(authUserId, new)
+
+    return transformOutput(True)
 
 
 @handleHTTPRequest

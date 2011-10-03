@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import copy, urllib, urlparse, re, logs, string
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from schema import *
 from Schemas import *
 
@@ -38,6 +38,15 @@ def _coordinatesFlatToDict(coordinates):
         }
     except:
         return None
+
+def _profileImageURL(screenName, cache=None):
+    if cache and cache + timedelta(days=1) >= datetime.utcnow():
+        url = 'http://static.stamped.com/users/%s.jpg' % screenName
+    else:
+        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s.jpg' % \
+                screenName
+    return url
+
 
 def _encodeLinkShareDeepURL(raw_url):
     parsed_url  = urlparse.urlparse(raw_url)
@@ -189,6 +198,11 @@ class HTTPLinkedAccounts(Schema):
             raise NotImplementedError
         return schema
 
+class HTTPAccountChangePassword(Schema):
+    def setSchema(self):
+        self.old_password       = SchemaElement(basestring, required=True)
+        self.new_password       = SchemaElement(basestring, required=True)
+
 # ##### #
 # Users #
 # ##### #
@@ -204,6 +218,7 @@ class HTTPUser(Schema):
         self.website            = SchemaElement(basestring)
         self.location           = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
+        self.image_url          = SchemaElement(basestring)
         self.identifier         = SchemaElement(basestring)
         self.num_stamps         = SchemaElement(int)
         self.num_stamps_left    = SchemaElement(int)
@@ -229,6 +244,9 @@ class HTTPUser(Schema):
             self.num_credits_given  = stats.pop('num_credits_given', 0)
             self.num_likes          = stats.pop('num_credits', 0)
             self.num_likes_given    = stats.pop('num_credits_given', 0)
+
+            self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
+
         else:
             raise NotImplementedError
         return self
@@ -240,10 +258,12 @@ class HTTPUserMini(Schema):
         self.color_primary      = SchemaElement(basestring)
         self.color_secondary    = SchemaElement(basestring)
         self.privacy            = SchemaElement(bool, required=True)
+        self.image_url          = SchemaElement(basestring)
 
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'UserMini':
             self.importData(schema.exportSparse(), overflow=True)
+            self.image_url = _profileImageURL(schema.screen_name, schema.image_cache)
         else:
             raise NotImplementedError
         return self

@@ -142,6 +142,37 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
 
+    def test_facebook(self):
+        path = "account/linked_accounts.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "facebook_id": '1234567890',
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
+class StampedAPIAccountChangePassword(StampedAPIAccountTest):
+    def test_change_password(self):
+        path = "account/change_password.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "old_password": '12345',
+            "new_password": '54321',
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
+        path = "oauth2/login.json"
+        data = { 
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "login": self.user['screen_name'],
+            "password": "54321"
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result['token']['access_token']) == 22)
+        self.assertTrue(len(result['token']['refresh_token']) == 43)
+
 ### TESTS TO ADD:
 # Change bio from string to None
 # Upload image data for avatar
