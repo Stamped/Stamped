@@ -762,9 +762,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     [request.URLRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     [request.URLRequest setHTTPMethod:@"POST"];
 
-    NSString* blurb = [NSString stringWithFormat:@"\u201c%@\u201d", stamp.blurb];
+    NSString* blurb = [NSString stringWithFormat:@"%@. \u201c%@\u201d", stamp.entityObject.title, stamp.blurb];
     if (stamp.blurb.length == 0)
-      blurb = stamp.entityObject.title;
+      blurb = [stamp.entityObject.title stringByAppendingString:@"."];
 
     NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
     if (blurb.length > substring.length)
