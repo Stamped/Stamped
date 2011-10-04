@@ -78,7 +78,6 @@ const CGFloat kKeyboardHeight = 217.0;
   self.cityTextField = nil;
   self.stateTextField = nil;
   self.zipTextField = nil;
-  self.segmentedControl = nil;
   self.menuArrow = nil;
   self.descriptionTextField = nil;
   [super dealloc];
@@ -112,7 +111,6 @@ const CGFloat kKeyboardHeight = 217.0;
                         action:@selector(segmentedControlChanged:)
               forControlEvents:UIControlEventValueChanged];
   scrollView_.contentSize = self.view.bounds.size;
-  
 }
 
 - (void)viewDidUnload {
@@ -134,7 +132,6 @@ const CGFloat kKeyboardHeight = 217.0;
   self.cityTextField = nil;
   self.stateTextField = nil;
   self.zipTextField = nil;
-  self.segmentedControl = nil;
   self.menuArrow = nil;
   self.descriptionTextField = nil;
 }
