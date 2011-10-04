@@ -112,6 +112,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setSettingsButtonShown:YES];
+  [self loadFriendsFromNetwork];
   [super viewDidAppear:animated];
 }
 

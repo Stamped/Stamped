@@ -178,6 +178,7 @@ typedef enum {
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
+  [self loadStampsFromDataStore];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

@@ -9,6 +9,7 @@
 #import "FindFriendsViewController.h"
 
 #import <AddressBook/AddressBook.h>
+#import <RestKit/CoreData/CoreData.h>
 
 #import "GTMOAuthAuthentication.h"
 #import "GTMOAuthViewControllerTouch.h"
@@ -18,6 +19,7 @@
 #import "STSectionHeaderView.h"
 #import "STSearchField.h"
 #import "FriendshipTableViewCell.h"
+#import "Stamp.h"
 #import "Util.h"
 #import "User.h"
 
@@ -626,6 +628,12 @@ static NSString* const kFacebookAppID = @"297022226980395";
   } else if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath] ||
              [objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
     User* user = [objects objectAtIndex:0];
+    NSFetchRequest* request = [Stamp fetchRequest];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"user.userID == %@", user.userID]];
+    NSArray* results = [Stamp objectsWithFetchRequest:request];
+    for (Stamp* s in results)
+      s.temporary = [NSNumber numberWithBool:objectLoader.resourcePath == kFriendshipRemovePath];
+
     for (UITableViewCell* cell in tableView_.visibleCells) {
       FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
       if (friendCell.user == user) {
@@ -637,6 +645,23 @@ static NSString* const kFacebookAppID = @"297022226980395";
         }
       }
     }
+
+    if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath]) {
+      RKObjectManager* objectManager = [RKObjectManager sharedManager];
+      RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
+      RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:@"/collections/user.json"
+                                                                        delegate:self];
+      objectLoader.objectMapping = stampMapping;
+      objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", user.userID, @"user_id", nil];
+      [objectLoader send];
+    }
+  }
+  
+  if ([objectLoader.resourcePath rangeOfString:@"/collections/user.json"].location != NSNotFound) {
+    for (Stamp* s in objects)
+      s.temporary = [NSNumber numberWithBool:NO];
+  
+    [[(Stamp*)objects.lastObject managedObjectContext] save:NULL];
   }
 }
 

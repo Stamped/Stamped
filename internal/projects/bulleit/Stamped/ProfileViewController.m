@@ -127,9 +127,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   toolbarView_.layer.shadowOpacity = 0.2;
   toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
   toolbarView_.alpha = 0.85;
-  [self loadRelationshipData];
   [self loadStampsFromNetwork];
   [self loadUserInfoFromNetwork];
+  [self loadRelationshipData];
 }
 
 - (void)viewDidUnload {
@@ -292,6 +292,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     followButton_.hidden = YES;
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] + 1];
     followerCountLabel_.text = [user_.numFollowers stringValue];
+
+    // TODO(andybons): Fix this cut&paste.
+    NSFetchRequest* request = [Stamp fetchRequest];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"user.userID == %@", user_.userID]];
+    NSArray* results = [Stamp objectsWithFetchRequest:request];
+    for (Stamp* s in results)
+      s.temporary = [NSNumber numberWithBool:NO];
+    
+    [[(Stamp*)results.lastObject managedObjectContext] save:NULL];
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
@@ -301,6 +310,14 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     followButton_.hidden = NO;
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] - 1];
     followerCountLabel_.text = [user_.numFollowers stringValue];
+    
+    NSFetchRequest* request = [Stamp fetchRequest];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"user.userID == %@", user_.userID]];
+    NSArray* results = [Stamp objectsWithFetchRequest:request];
+    for (Stamp* s in results)
+      s.temporary = [NSNumber numberWithBool:YES];
+
+    [[(Stamp*)results.lastObject managedObjectContext] save:NULL];
   }
   
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
