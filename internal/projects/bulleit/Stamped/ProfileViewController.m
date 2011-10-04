@@ -106,8 +106,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   stampLayer.contents = (id)user_.stampImage.CGImage;
   [shelfImageView_.superview.layer insertSublayer:stampLayer below:shelfImageView_.layer];
   [stampLayer release];
-  cameraButton_.hidden = YES;
-  //cameraButton_.hidden = ![user_.userID isEqualToString:[AccountManager sharedManager].currentUser.userID];
+  cameraButton_.hidden = YES;  // Still need?
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
