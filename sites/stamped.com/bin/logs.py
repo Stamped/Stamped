@@ -99,9 +99,13 @@ def warn(msg, *args, **kwargs):
 
 
 # HTTP Log Requests
-def begin(output=None, request=None):
+def begin(add=None, save=None, requestData=None):
     refresh(format='object')
-    localData.output = output
+    localData.output = save
+    if requestData:
+        request(requestData)
+    if add:
+        localData.log['_id'] = add(localData.log)
 
 def request(request):
     try:

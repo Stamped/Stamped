@@ -27,8 +27,12 @@ def handleHTTPRequest(fn):
             print
             print
             
-            logs.begin(stampedAPI._logsDB.addLog)
-            logs.request(request)
+            logs.begin(
+                add=stampedAPI._logsDB.addLog, 
+                save=stampedAPI._logsDB.saveLog,
+                requestData=request,
+            )
+            # logs.request(request)
             logs.info("%s %s" % (request.method, request.path))
             ret = fn(request, *args, **kwargs)
             logs.info("End request: Success")

@@ -25,10 +25,28 @@ class MongoLogsCollection(AMongoCollection):
             # if 'headers' in logData:
             #     logData['headers'] = str(logData['headers'])#pickle.dumps(logData['headers'])
 
-            self._collection.insert_one(logData, log=False)
+            return self._collection.insert_one(logData, log=False)
         except Exception as e:
             print e
             raise
+
+    def saveLog(self, logData, logId=None):
+        try:
+            # print 'LOG DATA: %s' % logData
+            if 'form' in logData:
+                logData['form'] = str(logData['form'])
+
+            # if 'headers' in logData:
+            #     logData['headers'] = str(logData['headers'])#pickle.dumps(logData['headers'])
+
+            if '_id' not in logData and logId:
+                logData['_id'] = logId
+
+            self._collection.save(logData, log=False)
+        except Exception as e:
+            print e
+            raise
+
 
     def getLogs(self, userId=None, **kwargs):
         limit       = kwargs.pop('limit', 10)

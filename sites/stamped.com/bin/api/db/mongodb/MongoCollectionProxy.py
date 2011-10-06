@@ -165,6 +165,8 @@ class MongoCollectionProxy(object):
     def save(self, to_save, manipulate=True, safe=False, **kwargs):
         num_retries = 0
         max_retries = 5
+
+        storeLog = kwargs.pop('log', True)
         
         while True:
             try:
@@ -175,9 +177,11 @@ class MongoCollectionProxy(object):
                 if num_retries > max_retries:
                     msg = "Unable to connect after %d retries (%s)" % \
                         (max_retries, self._parent.__class__.__name__)
-                    logs.warning(msg)
+                    if storeLog:
+                        logs.warning(msg)
                     raise
-                logs.info("Retrying delete (%s)" % (self._parent.__class__.__name__))
+                if storeLog:
+                    logs.info("Retrying delete (%s)" % (self._parent.__class__.__name__))
                 time.sleep(1)
         
     def update(self, spec, document, upsert=False, manipulate=False,
