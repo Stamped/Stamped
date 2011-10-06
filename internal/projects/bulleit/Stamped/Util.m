@@ -244,8 +244,11 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
   num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet symbolCharacterSet]] componentsJoinedByString: @""];
   num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] componentsJoinedByString: @""];
   num = [[num componentsSeparatedByCharactersInSet:[NSCharacterSet letterCharacterSet]] componentsJoinedByString: @""];
-
-  num = [NSString stringWithFormat:@"%d", num.integerValue];
+  NSNumberFormatter* f = [[NSNumberFormatter alloc] init];
+  [f setNumberStyle:NSNumberFormatterDecimalStyle];
+  NSNumber* number = [f numberFromString:num];
+  [f release];
+  num = number.stringValue;
   return num;
 }
 

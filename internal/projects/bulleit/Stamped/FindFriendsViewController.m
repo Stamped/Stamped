@@ -210,7 +210,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
     CFRelease(phoneNumberProperty);
     [allNumbers addObjectsFromArray:phoneNumbers];
     [phoneNumbers release];
-    
+
     ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
     NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
     CFRelease(emailProperty);
@@ -220,9 +220,11 @@ static NSString* const kFacebookAppID = @"297022226980395";
   CFRelease(addressBook);
   CFRelease(people);
   NSMutableArray* sanitizedNumbers = [NSMutableArray array];
-  for (NSString* num in allNumbers)
-    [sanitizedNumbers addObject:[Util sanitizedPhoneNumberFromString:num]];
-
+  for (NSString* num in allNumbers) {
+    NSString* sanitized = [Util sanitizedPhoneNumberFromString:num];
+    if (sanitized)
+      [sanitizedNumbers addObject:sanitized];
+  }
   [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
   [tableView_ reloadData];
 }
@@ -613,7 +615,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
       self.contactFriends = objects;
     } else {
       self.contactFriends = [self.contactFriends arrayByAddingObjectsFromArray:objects];
-      self.contactFriends = [self.contactFriends valueForKeyPath:@"@distinctUnionOfObjects.userID"];
+      self.contactFriends = [[NSSet setWithArray:self.contactFriends] allObjects];
     }
     self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:
         [NSSortDescriptor sortDescriptorWithKey:@"name"
