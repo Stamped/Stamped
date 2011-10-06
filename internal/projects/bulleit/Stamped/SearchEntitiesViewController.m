@@ -36,6 +36,7 @@ typedef enum {
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, retain) RKRequest* currentRequest;
 @property (nonatomic, assign) ResultType currentResultType;
+@property (nonatomic, assign) BOOL loading;
 @end
 
 @implementation SearchEntitiesViewController
@@ -47,9 +48,13 @@ typedef enum {
 @synthesize addStampCell = addStampCell_;
 @synthesize addStampLabel = addStampLabel_;
 @synthesize tooltipImageView = tooltipImageView_;
-@synthesize searchingIndicatorView = searchingIndicatorView_;
+@synthesize searchingIndicatorCell = searchingIndicatorCell_;
 @synthesize currentRequest = currentRequest_;
 @synthesize currentResultType = currentResultType_;
+@synthesize fullSearchCellLabel = fullSearchCellLabel_;
+@synthesize fullSearchCell = fullSearchCell_;
+@synthesize loading = loading_;
+@synthesize loadingIndicatorLabel = loadingIndicatorLabel_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -59,8 +64,11 @@ typedef enum {
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
-  self.searchingIndicatorView = nil;
+  self.fullSearchCellLabel = nil;
+  self.searchingIndicatorCell = nil;
   self.currentRequest = nil;
+  self.fullSearchCell = nil;
+  self.loadingIndicatorLabel = nil;
   tooltipImageView_ = nil;
   [super dealloc];
 }
@@ -87,6 +95,7 @@ typedef enum {
   tooltipImageView_.alpha = 0.0;
   [self.view addSubview:tooltipImageView_];
   [tooltipImageView_ release];
+  self.searchingIndicatorCell.selectionStyle = UITableViewCellSelectionStyleNone;
 }
 
 - (void)viewDidUnload {
@@ -97,7 +106,10 @@ typedef enum {
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
-  self.searchingIndicatorView = nil;
+  self.searchingIndicatorCell = nil;
+  self.fullSearchCell = nil;
+  self.fullSearchCellLabel = nil;
+  self.loadingIndicatorLabel = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   tooltipImageView_ = nil;
@@ -125,11 +137,13 @@ typedef enum {
     tooltipImageView_.alpha = 0.0;
 
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  loading_ = NO;
   [self.navigationController setNavigationBarHidden:NO animated:animated];
   [self.locationManager stopUpdatingLocation];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
+  [self.tableView reloadData];
   [super viewDidDisappear:animated];
 }
 
@@ -148,17 +162,35 @@ typedef enum {
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  if (searchField_.text.length == 0)
+    return 0;
+
   // Return the number of rows in the section.
   NSInteger numRows = [resultsArray_ count];
-  if (self.searchField.text.length > 0 && currentResultType_ == ResultTypeFull)
+  if (currentResultType_ == ResultTypeFull && !loading_)
     ++numRows;  // One more for the 'Add new entity' cell.
+  if (currentResultType_ == ResultTypeFast)
+    ++numRows;  // For 'Search "blah"' cell.
+  if (loading_)
+    ++numRows;  // For the 'Loading...' cell.
 
   return numRows;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.row == [resultsArray_ count])
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_)
     return self.addStampCell;
+
+  if (indexPath.row == 0 && currentResultType_ == ResultTypeFast) {
+    self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search for \u201c%@\u201d", searchField_.text];
+    return self.fullSearchCell;
+  }
+
+  if (indexPath.row == 0 && currentResultType_ == ResultTypeFull && loading_)
+    return self.searchingIndicatorCell;
+
+  if (indexPath.row == 1 && currentResultType_ == ResultTypeFast && loading_)
+    return self.searchingIndicatorCell;
   
   static NSString* CellIdentifier = @"ResultCell";
   SearchEntitiesTableViewCell* cell =
@@ -166,8 +198,16 @@ typedef enum {
   if (cell == nil) {
     cell = [[[SearchEntitiesTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
+  
+  NSUInteger offset = 0;
+  if (loading_)
+    ++offset;
+  
+  if (currentResultType_ == ResultTypeFast)
+    ++offset;
 
-  [cell setSearchResult:(SearchResult*)[resultsArray_ objectAtIndex:indexPath.row]];
+  NSUInteger index = indexPath.row - offset;
+  [cell setSearchResult:(SearchResult*)[resultsArray_ objectAtIndex:index]];
   
   return cell;
 }
@@ -184,19 +224,28 @@ typedef enum {
 }
 
 - (void)sendFastSearchRequest {
+  loadingIndicatorLabel_.text = @"Loading...";
+  loading_ = YES;
+  self.currentResultType = ResultTypeFast;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  self.resultsArray = nil;
+  [self.tableView reloadData];
   NSString* query = self.searchField.text;
   query = [query lowercaseString];
   query = [query stringByReplacingOccurrencesOfString:@" " withString:@"_"];
   NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@.json.gz", kFastSearchURI, query]];
   RKRequest* request = [[RKRequest alloc] initWithURL:url delegate:self];
-  searchingIndicatorView_.hidden = NO;
   [[RKClient sharedClient].requestQueue addRequest:request];
   self.currentRequest = request;
   [request release];
 }
 
 - (void)sendSearchRequest {
+  loadingIndicatorLabel_.text = @"Searching...";
+  loading_ = YES;
+  self.currentResultType = ResultTypeFull;
+  self.resultsArray = nil;
+  [self.tableView reloadData];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
@@ -209,7 +258,6 @@ typedef enum {
     [params setObject:coordString forKey:@"coordinates"];
   }
   objectLoader.params = params;
-  searchingIndicatorView_.hidden = NO;
   [objectLoader send];
   self.currentRequest = objectLoader;
 }
@@ -217,6 +265,8 @@ typedef enum {
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  loading_ = NO;
+
   NSLog(@"Fast search url: %@", request.URL.absoluteString);
   if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
     return;
@@ -239,20 +289,18 @@ typedef enum {
       result.entityID = [object valueForKey:@"entity_id"];
       [array addObject:result];
     }
-    self.currentResultType = ResultTypeFast;
     self.resultsArray = array;
     [self.tableView reloadData];
   } else if (response.isNotFound) {
     self.resultsArray = nil;
     [self.tableView reloadData];
   }
-  searchingIndicatorView_.hidden = YES;
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  searchingIndicatorView_.hidden = YES;
+  loading_ = NO;
   self.currentResultType = ResultTypeFull;
   self.resultsArray = objects;
   [self.tableView reloadData];
@@ -260,6 +308,7 @@ typedef enum {
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  loading_ = NO;
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
   } else if ([objectLoader.response isNotFound]) {
@@ -267,7 +316,6 @@ typedef enum {
     [self sendSearchRequest];
     return;
   }
-  searchingIndicatorView_.hidden = YES;
   [searchField_ becomeFirstResponder];
   self.currentRequest = nil;
 }
@@ -275,7 +323,7 @@ typedef enum {
 #pragma mark - UITableViewDelegate Methods.
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
-  if (!resultsArray_)
+  if (!resultsArray_.count || currentResultType_ == ResultTypeFast)
     return 0;
 
   return 25;
@@ -296,7 +344,7 @@ typedef enum {
   view.leftLabel.textColor = view.leftLabel.shadowColor;
   view.leftLabel.shadowColor = [UIColor stampedGrayColor];
   view.leftLabel.shadowOffset = CGSizeMake(0, -1);
-  view.leftLabel.text = self.currentResultType == ResultTypeFull ? @"All results" : @"Popular results";
+  view.leftLabel.text = @"All results";
   return view;
 }
 
@@ -306,11 +354,23 @@ typedef enum {
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   SearchResult* result = nil;
-  if (indexPath.row == [resultsArray_ count]) {
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull) {
     result = [[[SearchResult alloc] init] autorelease];
     result.title = self.searchField.text;
-  } else {
+  } else if (indexPath.row == 0 && currentResultType_ == ResultTypeFast) {
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [self sendSearchRequest];
+    return;
+  } else if (indexPath.row == 1 && currentResultType_ == ResultTypeFast && loading_) {
+    return;
+  } else if (currentResultType_ == ResultTypeFast && !loading_) {
+    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row - 1];
+  } else if (currentResultType_ == ResultTypeFast && loading_) {
+    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row - 2];
+  } else if (currentResultType_ == ResultTypeFull && !loading_) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
+  } else if (indexPath.row == 0 && currentResultType_ == ResultTypeFull && loading_) {
+    return;
   }
   
   CreateStampViewController* detailViewController =
@@ -343,7 +403,6 @@ typedef enum {
     [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
     self.resultsArray = nil;
     [self.tableView reloadData];
-    searchingIndicatorView_.hidden = YES;
   }
 }
 

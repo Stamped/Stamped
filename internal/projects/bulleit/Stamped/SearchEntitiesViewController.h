@@ -20,7 +20,10 @@
 @property (nonatomic, retain) IBOutlet UIButton* cancelButton;
 @property (nonatomic, retain) IBOutlet UITableViewCell* addStampCell;
 @property (nonatomic, retain) IBOutlet UILabel* addStampLabel;
-@property (nonatomic, retain) IBOutlet UIView* searchingIndicatorView;
+@property (nonatomic, retain) IBOutlet UITableViewCell* searchingIndicatorCell;
+@property (nonatomic, retain) IBOutlet UILabel* fullSearchCellLabel;
+@property (nonatomic, retain) IBOutlet UILabel* loadingIndicatorLabel;
+@property (nonatomic, retain) IBOutlet UITableViewCell* fullSearchCell;
 
 - (IBAction)cancelButtonTapped:(id)sender;
 - (void)clearSearchField;
