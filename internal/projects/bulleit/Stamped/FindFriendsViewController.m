@@ -371,6 +371,9 @@ static NSString* const kFacebookAppID = @"297022226980395";
 #pragma mark - Table View Delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
+  if (findSource_ == FindFriendsFromStamped && !stampedFriends_)
+    return 0;
+  
   return 25;
 }
 

@@ -257,6 +257,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - Table view delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
+  if (!stampsArray_.count)
+    return 0;
+
   return 25;
 }
 
