@@ -275,6 +275,9 @@ typedef enum {
 #pragma mark - UITableViewDelegate Methods.
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
+  if (!resultsArray_)
+    return 0;
+
   return 25;
 }
 
