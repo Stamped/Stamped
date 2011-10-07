@@ -51,6 +51,19 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         document = self._getMongoDocumentFromId(documentId)
         return self._convertFromMongo(document)
     
+    def getAccounts(self, userIds, limit=0):
+        query = []
+        if isinstance(userIds, list):
+            for userId in userIds:
+                query.append(self._getObjectIdFromString(userId))
+
+        data = self._collection.find({"_id": {"$in": query}}).limit(limit)
+            
+        result = []
+        for item in data:
+            result.append(self._convertFromMongo(item))
+        return result
+    
     def updateAccount(self, user):
         ### TODO: Only update certain fields (i.e. remove race conditions if 
         ###     user gets credit while modifying account)

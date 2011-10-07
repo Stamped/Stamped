@@ -39,6 +39,8 @@ urlpatterns = patterns('',
     (r'v0/account/change_password.json',        'v0.functions.account.change_password'),
     (r'v0/account/check.json',                  'v0.functions.account.check'),
     (r'v0/account/linked_accounts.json',        'v0.functions.account.linked_accounts'),
+    (r'v0/account/alerts/show.json',            'v0.functions.account.show_alerts'),
+    (r'v0/account/alerts/update.json',          'v0.functions.account.update_alerts'),
     
     ### USERS
     (r'v0/users/show.json',             'v0.functions.users.show'),
@@ -103,6 +105,7 @@ urlpatterns = patterns('',
     (r'v0/temp/followers.json',         'v0.functions.temp.followers'),
     (r'v0/temp/activity.json',          'v0.functions.temp.activity'),
     (r'v0/temp/inbox.json',             'v0.functions.temp.inbox'),
+    (r'v0/temp/timeout.json',           'v0.functions.temp.timeout'),
     
     ### DOCS
     # (r'v0/oauth2/$',                    'v0.views.oauth2'),

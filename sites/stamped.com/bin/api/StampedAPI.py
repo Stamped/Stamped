@@ -127,6 +127,22 @@ class StampedAPI(AStampedAPI):
         # Set default stamp colors
         account.color_primary   = '004AB2'
         account.color_secondary = '0057D1'
+
+        # Set default alerts
+        account.ios_alert_credit       = False
+        account.ios_alert_like         = False
+        account.ios_alert_fav          = False
+        account.ios_alert_mention      = False
+        account.ios_alert_comment      = False
+        account.ios_alert_reply        = False
+        account.ios_alert_follow       = False
+        account.email_alert_credit     = True
+        account.email_alert_like       = False
+        account.email_alert_fav        = False
+        account.email_alert_mention    = True
+        account.email_alert_comment    = True
+        account.email_alert_reply      = True
+        account.email_alert_follow     = True
         
         # Validate Screen Name
         account.screen_name = account.screen_name.strip()
@@ -437,6 +453,23 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
 
         return True
+
+    @API_CALL
+    def updateAlerts(self, authUserId, alerts):
+        if isinstance(alerts, SchemaElement):
+            alerts = alerts.value
+
+        account = self._accountDB.getAccount(authUserId)
+
+        for k, v in alerts.iteritems():
+            if v:
+                account['alerts'][k] = True
+            else:
+                account['alerts'][k] = False
+
+        self._accountDB.updateAccount(account)
+
+        return account
     
     @API_CALL
     def resetPassword(self, params):

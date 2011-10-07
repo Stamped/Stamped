@@ -96,35 +96,6 @@ def update_profile_image(request):
     user        = HTTPUser().importSchema(user)
     
     return transformOutput(user.exportSparse())
-    
-    # suffix      = '.jpg'
-    
-    # images = { }
-    # prefixes = {
-    #     'fast' : 'static.stamped.com/', 
-    #     'slow' : 'http://stamped.com.static.images.s3.amazonaws.com/', 
-    # }
-    
-    # for k, prefix in prefixes.iteritems():
-    #     prefix = "%s/users/%s" % (prefix, authUserId)
-    #     value  = []
-        
-    #     value.append("%s%s" % (prefix, suffix))
-    #     value.append("%s-144x144%s" % (prefix, suffix))
-    #     value.append("%s-72x72%s" % (prefix, suffix))
-    #     value.append("%s-110x110%s" % (prefix, suffix))
-    #     value.append("%s-55x55%s" % (prefix, suffix))
-    #     value.append("%s-92x92%s" % (prefix, suffix))
-    #     value.append("%s-46x46%s" % (prefix, suffix))
-    #     value.append("%s-74x74%s" % (prefix, suffix))
-    #     value.append("%s-37x37%s" % (prefix, suffix))
-    #     value.append("%s-62x62%s" % (prefix, suffix))
-    #     value.append("%s-31x31%s" % (prefix, suffix))
-    #     images[k] = value
-    
-    # output      = { 'user_id': authUserId, 'images': images, }
-    
-    # return transformOutput(output)
 
 
 @handleHTTPRequest
@@ -193,4 +164,28 @@ def change_password(request):
 @require_http_methods(["POST"])
 def reset_password(request):
     raise NotImplementedError
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def show_alerts(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(None, request)
+    
+    account     = stampedAPI.getAccount(authUserId)
+    settings    = HTTPAccountAlerts().importSchema(account)
+
+    return transformOutput(settings.value)
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def update_alerts(request):
+    authUserId  = checkOAuth(request)
+    alerts      = parseRequest(HTTPAccountAlerts(), request)
+    
+    account     = stampedAPI.updateAlerts(authUserId, alerts)
+    settings    = HTTPAccountAlerts().importSchema(account)
+
+    return transformOutput(settings.value)
 

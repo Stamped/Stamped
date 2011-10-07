@@ -54,7 +54,7 @@ class Account(Schema):
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema()
-        self.alerts             = AlertSchema()
+        self.alerts             = AccountAlerts()
 
 class LinkedAccounts(Schema):
     def setSchema(self):
@@ -75,22 +75,29 @@ class FacebookAccountSchema(Schema):
         
 class DevicesSchema(Schema):
     def setSchema(self):
-        self.ios_device_tokens  = SchemaElement(basestring)
+        self.ios_device_tokens  = SchemaList(SchemaElement(basestring))
         
 class LocaleSchema(Schema):
     def setSchema(self):
         self.language           = SchemaElement(basestring, default='en')
         self.time_zone          = SchemaElement(basestring)
         
-class AlertSchema(Schema):
+class AccountAlerts(Schema):
     def setSchema(self):
-        self.alert_credit       = SchemaElement(basestring)
-        self.alert_like         = SchemaElement(basestring)
-        self.alert_fav          = SchemaElement(basestring)
-        self.alert_mention      = SchemaElement(basestring)
-        self.alert_comment      = SchemaElement(basestring)
-        self.alert_reply        = SchemaElement(basestring)
-        self.alert_follow       = SchemaElement(basestring)
+        self.ios_alert_credit       = SchemaElement(bool)
+        self.ios_alert_like         = SchemaElement(bool)
+        self.ios_alert_fav          = SchemaElement(bool)
+        self.ios_alert_mention      = SchemaElement(bool)
+        self.ios_alert_comment      = SchemaElement(bool)
+        self.ios_alert_reply        = SchemaElement(bool)
+        self.ios_alert_follow       = SchemaElement(bool)
+        self.email_alert_credit     = SchemaElement(bool)
+        self.email_alert_like       = SchemaElement(bool)
+        self.email_alert_fav        = SchemaElement(bool)
+        self.email_alert_mention    = SchemaElement(bool)
+        self.email_alert_comment    = SchemaElement(bool)
+        self.email_alert_reply      = SchemaElement(bool)
+        self.email_alert_follow     = SchemaElement(bool)
 
 
 # ##### #
@@ -308,6 +315,7 @@ class Alert(Schema):
         self.activity_id        = SchemaElement(basestring, required=True)
         self.recipient_id       = SchemaElement(basestring, required=True)
         self.user_id            = SchemaElement(basestring)
+        self.genre              = SchemaElement(basestring)
         self.created            = SchemaElement(datetime)
         
 

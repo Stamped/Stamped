@@ -69,6 +69,11 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
 
         return activity
     
+    def getActivityItem(self, activityId):
+        documentId = self._getObjectIdFromString(activityId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
+    
     def addActivity(self, recipientIds, activityItem):
         for recipientId in recipientIds:
             activity = activityItem.value
@@ -82,6 +87,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             alert.activity_id   = activityId
             alert.recipient_id  = recipientId
             alert.user_id       = activity['user']['user_id']
+            alert.genre         = activity['genre']
             alert.created       = activity['timestamp']['created']
             self.alerts_collection.addAlert(alert)
 

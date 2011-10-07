@@ -173,6 +173,26 @@ class StampedAPIAccountChangePassword(StampedAPIAccountTest):
         self.assertTrue(len(result['token']['access_token']) == 22)
         self.assertTrue(len(result['token']['refresh_token']) == 43)
 
+class StampedAPIAccountAlertSettings(StampedAPIAccountTest):
+    def test_show_settings(self):
+        path = "account/alerts/show.json"
+        data = {
+            "oauth_token": self.token['access_token']
+        }
+        result = self.handleGET(path, data)
+        self.assertTrue(len(result) == 14)
+
+    def test_update_settings(self):
+        path = "account/alerts/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "email_alert_fav": True,
+            "email_alert_reply": False
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(len(result) == 14)
+        self.assertTrue(result['email_alert_fav'])
+
 ### TESTS TO ADD:
 # Change bio from string to None
 # Upload image data for avatar
