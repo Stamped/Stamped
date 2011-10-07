@@ -24,6 +24,7 @@
 #import "Notifications.h"
 #import "Stamp.h"
 #import "SearchResult.h"
+#import "StampedAppDelegate.h"
 #import "UserImageView.h"
 #import "Util.h"
 #import "User.h"
@@ -783,7 +784,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 }
 
 - (void)dismissSelf {
-  UIViewController* vc = self.navigationController.parentViewController;
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
+  UIViewController* vc = delegate.navigationController;
   if (vc && vc.modalViewController) {
     [vc dismissModalViewControllerAnimated:YES];
   } else {

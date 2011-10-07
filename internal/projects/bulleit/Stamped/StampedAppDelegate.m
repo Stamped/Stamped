@@ -61,7 +61,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [[UserImageDownloadManager sharedManager] purgeCache];
 }
 
-- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+- (void)applicationDidReceiveMemoryWarning:(UIApplication*)application {
   [[UserImageDownloadManager sharedManager] purgeCache];
 }
 
@@ -74,8 +74,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 
 - (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo {
   UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Push"
-                                                       message:[NSString stringWithFormat:@"The application received this remote notification while it was running:\n%@",
-                                                               [[userInfo objectForKey:@"aps"] objectForKey:@"alert"]]
+                                                       message:[NSString stringWithFormat:@"%@", [[userInfo objectForKey:@"aps"] objectForKey:@"alert"]]
                                                       delegate:self
                                              cancelButtonTitle:@"OK"
                                              otherButtonTitles:nil] autorelease];
