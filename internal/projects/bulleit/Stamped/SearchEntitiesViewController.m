@@ -241,6 +241,7 @@ typedef enum {
 }
 
 - (void)sendSearchRequest {
+  [searchField_ resignFirstResponder];
   loadingIndicatorLabel_.text = @"Searching...";
   loading_ = YES;
   self.currentResultType = ResultTypeFull;

@@ -170,6 +170,7 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  [RKClient sharedClient].requestQueue.suspended = NO;
   if ([objectLoader.response isUnauthorized] &&
       [objectLoader.resourcePath isEqualToString:kUserLookupPath]) {
     [self refreshToken];
@@ -194,11 +195,13 @@ static AccountManager* sharedAccountManager_ = nil;
       [self.firstRunViewController signUpSucess];
       firstInstall_ = NO;
     }
+    [RKClient sharedClient].requestQueue.suspended = NO;
     return;
   } else if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
     // Simple log in: store the OAuth token.
     self.firstRunViewController.delegate = nil;
-    [self.navController.parentViewController dismissModalViewControllerAnimated:YES];
+    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+    [delegate.navigationController dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
     [self storeOAuthToken:[object objectForKey:@"token"]];
     [self sendUserInfoRequest];
@@ -311,6 +314,7 @@ static AccountManager* sharedAccountManager_ = nil;
     [passwordKeychainItem_ setObject:username forKey:(id)kSecAttrAccount];
     [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];
     [self sendLoginRequest];
+    NSLog(@"Sending login request...");
   } else {
     [viewController signInFailed:nil];
   }
