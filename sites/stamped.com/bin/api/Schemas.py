@@ -54,6 +54,7 @@ class Account(Schema):
         self.flags              = FlagsSchema()
         self.stats              = UserStatsSchema()
         self.timestamp          = TimestampSchema()
+        self.alerts             = AlertSchema()
 
 class LinkedAccounts(Schema):
     def setSchema(self):
@@ -80,6 +81,17 @@ class LocaleSchema(Schema):
     def setSchema(self):
         self.language           = SchemaElement(basestring, default='en')
         self.time_zone          = SchemaElement(basestring)
+        
+class AlertSchema(Schema):
+    def setSchema(self):
+        self.alert_credit       = SchemaElement(basestring)
+        self.alert_like         = SchemaElement(basestring)
+        self.alert_fav          = SchemaElement(basestring)
+        self.alert_mention      = SchemaElement(basestring)
+        self.alert_comment      = SchemaElement(basestring)
+        self.alert_reply        = SchemaElement(basestring)
+        self.alert_follow       = SchemaElement(basestring)
+
 
 # ##### #
 # Users #
@@ -289,6 +301,15 @@ class ActivityLink(Schema):
         self.linked_comment     = Comment()
         self.linked_comment_id  = SchemaElement(basestring)
         self.linked_url         = SchemaElement(basestring)
+
+class Alert(Schema):
+    def setSchema(self):
+        self.alert_id           = SchemaElement(basestring)
+        self.activity_id        = SchemaElement(basestring, required=True)
+        self.recipient_id       = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring)
+        self.created            = SchemaElement(datetime)
+        
 
 # ######## #
 # Entities #

@@ -652,6 +652,11 @@ class StampedAPI(AStampedAPI):
         # Remove stamps from Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
+
+        # Remove activity
+        ### TODO: Don't remove this?
+        self._activityDB.removeActivity(genre='follower', userId=authUserId, \
+                                        recipientId=user['user_id'])
         
         return user
     
