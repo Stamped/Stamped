@@ -13,7 +13,7 @@ from utils import lazyProperty
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
-from MongoUserActivityCollection import MongoUserActivityCollection
+from MongoAlertCollection import MongoAlertCollection
 from AActivityDB import AActivityDB
 
 class MongoActivityCollection(AMongoCollection, AActivityDB):
@@ -42,6 +42,10 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
 
     ### PUBLIC
     
+    @lazyProperty
+    def alerts_collection(self):
+        return MongoAlertCollection()
+    
     def getActivity(self, userId, **kwargs):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
@@ -69,18 +73,34 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         for recipientId in recipientIds:
             activity = activityItem.value
             activity['recipient_id'] = recipientId
-            query = copy.copy(activity)
-            query.pop('timestamp')
-            result = self._collection.update(query, activity, upsert=True)
+            # query = copy.copy(activity)
+            # query.pop('timestamp')
+            # result = self._collection.update(query, activity, upsert=True)
+            activityId = self._collection.insert_one(activity)
+
+            alert = Alert()
+            alert.activity_id   = activityId
+            alert.recipient_id  = recipientId
+            alert.user_id       = activity['user']['user_id']
+            alert.created       = activity['timestamp']['created']
+            self.alerts_collection.addAlert(alert)
 
         
     def removeActivity(self, genre, userId, **kwargs):
         stampId     = kwargs.pop('stampId', None)
+        recipientId = kwargs.pop('recipientId', None)
 
         if genre in ['like', 'favorite'] and stampId:
             self._collection.remove({
                 'user.user_id': userId,
                 'link.linked_stamp_id': stampId,
+                'genre': genre
+            })
+
+        if genre == 'follower' and recipientId:
+            self._collection.remove({
+                'user.user_id': userId,
+                'recipient_id': recipientId,
                 'genre': genre
             })
 
