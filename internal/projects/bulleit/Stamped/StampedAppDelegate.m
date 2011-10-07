@@ -27,6 +27,12 @@
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 
+@interface StampedAppDelegate ()
+
+- (void)performRestKitMappings;
+
+@end
+
 @implementation StampedAppDelegate
 
 @synthesize window = window_;
@@ -36,68 +42,129 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 #if !TARGET_IPHONE_SIMULATOR
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
+  [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
+  [self performRestKitMappings];
+
+  if ([launchOptions objectForKey:@"aps"]) {
+    // Got a push notification.
+    NSLog(@"Alert: %@", [[launchOptions objectForKey:@"aps"] objectForKey:@"alert"]);
+  }
   
+  self.window.rootViewController = self.navigationController;
+  [self.window makeKeyAndVisible];
+
+  return YES;
+}
+
+- (void)applicationWillResignActive:(UIApplication*)application {
+  [[UserImageDownloadManager sharedManager] purgeCache];
+}
+
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
+  [[UserImageDownloadManager sharedManager] purgeCache];
+}
+
+- (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken {
+  NSString* deviceToken = [NSString stringWithFormat:@"%@", devToken];
+  deviceToken = [deviceToken stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
+  deviceToken = [deviceToken stringByReplacingOccurrencesOfString:@" " withString:@""];
+  NSLog(@"Device token: %@", deviceToken);
+  //self.registered = YES;
+  //[self sendProviderDeviceToken:devTokenBytes]; // custom method
+}
+
+- (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo {
+  UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Received a Remote Notification"
+                                                       message:[NSString stringWithFormat:@"The application received this remote notification while it was running:\n%@",
+                                                               [[userInfo objectForKey:@"aps"] objectForKey:@"alert"]]
+                                                      delegate:self
+                                             cancelButtonTitle:@"OK"
+                                             otherButtonTitles:nil] autorelease];
+  [alertView show];
+}
+
+- (void)application:(UIApplication*)app didFailToRegisterForRemoteNotificationsWithError:(NSError*)err {
+  NSLog(@"Error in registration. Error: %@", err);
+}
+
+- (void)applicationDidEnterBackground:(UIApplication*)application {}
+
+- (void)applicationWillEnterForeground:(UIApplication*)application {}
+
+- (void)applicationDidBecomeActive:(UIApplication*)application {}
+
+- (void)applicationWillTerminate:(UIApplication*)application {}
+
+- (void)dealloc {
+  [window_ release];
+  [navigationController_ release];
+  [super dealloc];
+}
+
+#pragma mark - Private methods.
+
+- (void)performRestKitMappings {
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.suspended = YES;
   [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
-
+  
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
-                                       @"name", @"name",
-                                       @"color_primary", @"primaryColor",
-                                       @"color_secondary", @"secondaryColor",
-                                       @"screen_name", @"screenName",
-                                       @"num_credits", @"numCredits",
-                                       @"num_followers", @"numFollowers",
-                                       @"num_friends", @"numFriends",
-                                       @"num_stamps", @"numStamps",
-                                       @"num_stamps_left", @"numStampsLeft",
-                                       @"image_url", @"imageURL",
-                                       nil];
+   @"name", @"name",
+   @"color_primary", @"primaryColor",
+   @"color_secondary", @"secondaryColor",
+   @"screen_name", @"screenName",
+   @"num_credits", @"numCredits",
+   @"num_followers", @"numFollowers",
+   @"num_friends", @"numFriends",
+   @"num_stamps", @"numStamps",
+   @"num_stamps_left", @"numStampsLeft",
+   @"image_url", @"imageURL",
+   nil];
   userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapAttributes:@"bio", @"website", @"location", nil];
-
+  
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
-                                         @"opentable_url", @"openTableURL", 
-                                         @"itunes_short_url", @"itunesShortURL",
-                                         @"itunes_url", @"itunesURL", 
-                                         @"artist_name", @"artist",
-                                         @"release_date", @"releaseDate", 
-                                         @"amazon_url", @"amazonURL",
-                                         @"in_theaters", @"inTheaters", 
-                                         @"fandango_url", @"fandangoURL", nil];
+   @"opentable_url", @"openTableURL", 
+   @"itunes_short_url", @"itunesShortURL",
+   @"itunes_url", @"itunesURL", 
+   @"artist_name", @"artist",
+   @"release_date", @"releaseDate", 
+   @"amazon_url", @"amazonURL",
+   @"in_theaters", @"inTheaters", 
+   @"fandango_url", @"fandangoURL", nil];
   
   entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapAttributes:@"address", @"category", @"subtitle",
-                               @"title", @"coordinates", @"phone", @"subcategory",
-                               @"street", @"substreet", @"city", @"state", @"zipcode",
-                               @"neighborhood", @"desc", @"genre", @"label", @"length", 
-                               @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
-                               @"price", @"website", @"rating", @"isbn", @"format", 
-                               @"publisher", @"language", @"albums", @"songs",
-                               @"image", nil];
-
+   @"title", @"coordinates", @"phone", @"subcategory",
+   @"street", @"substreet", @"city", @"state", @"zipcode",
+   @"neighborhood", @"desc", @"genre", @"label", @"length", 
+   @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
+   @"price", @"website", @"rating", @"isbn", @"format", 
+   @"publisher", @"language", @"albums", @"songs",
+   @"image", nil];
+  
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];
   [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
-                                          @"restamp_id", @"restampID",
-                                          @"stamp_id", @"stampID", nil];
+   @"restamp_id", @"restampID",
+   @"stamp_id", @"stampID", nil];
   commentMapping.primaryKeyAttribute = @"commentID";
   [commentMapping mapRelationship:@"user" withMapping:userMapping];
-
+  
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
   [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
-                                        @"created", @"created",
-                                        @"num_comments", @"numComments",
-                                        @"num_likes", @"numLikes",
-                                        @"is_liked", @"isLiked",
-                                        @"is_fav", @"isFavorited",
-                                        @"image_dimensions", @"imageDimensions",
-                                        @"image_url", @"imageURL",
-                                        @"url", @"URL", nil];
+   @"created", @"created",
+   @"num_comments", @"numComments",
+   @"num_likes", @"numLikes",
+   @"is_liked", @"isLiked",
+   @"is_fav", @"isFavorited",
+   @"image_dimensions", @"imageDimensions",
+   @"image_url", @"imageURL",
+   @"url", @"URL", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
   [stampMapping mapAttributes:@"blurb", @"modified", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
@@ -119,7 +186,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   RKManagedObjectMapping* favoriteMapping = [RKManagedObjectMapping mappingForClass:[Favorite class]];
   [favoriteMapping mapAttributes:@"complete", @"created", nil];
   [favoriteMapping mapKeyPathsToAttributes:@"favorite_id", @"favoriteID",
-                                           @"user_id", @"userID", nil];
+   @"user_id", @"userID", nil];
   favoriteMapping.primaryKeyAttribute = @"favoriteID";
   [favoriteMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [favoriteMapping mapRelationship:@"stamp" withMapping:stampMapping];
@@ -128,9 +195,9 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   
   RKObjectMapping* oauthMapping = [RKObjectMapping mappingForClass:[OAuthToken class]];
   [oauthMapping mapKeyPathsToAttributes:@"access_token", @"accessToken",
-                                        @"refresh_token", @"refreshToken",
-                                        @"expires_in", @"lifetimeSecs", nil];
-
+   @"refresh_token", @"refreshToken",
+   @"expires_in", @"lifetimeSecs", nil];
+  
   RKObjectMapping* userAndTokenMapping = [RKObjectMapping serializationMapping];
   [userAndTokenMapping mapRelationship:@"user" withMapping:userMapping];
   [userAndTokenMapping mapRelationship:@"token" withMapping:oauthMapping];
@@ -150,35 +217,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [objectManager.mappingProvider setMapping:favoriteMapping forKeyPath:@"Favorite"];
   [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
   [objectManager.mappingProvider setMapping:userAndTokenMapping forKeyPath:@"UserAndToken"];
-
+  
   [objectManager.mappingProvider setMapping:searchResultMapping forKeyPath:@"SearchResult"];
-
-  self.window.rootViewController = self.navigationController;
-  [self.window makeKeyAndVisible];
-
-  return YES;
-}
-
-- (void)applicationWillResignActive:(UIApplication*)application {
-  [[UserImageDownloadManager sharedManager] purgeCache];
-}
-
-- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
-  [[UserImageDownloadManager sharedManager] purgeCache];
-}
-
-- (void)applicationDidEnterBackground:(UIApplication*)application {}
-
-- (void)applicationWillEnterForeground:(UIApplication*)application {}
-
-- (void)applicationDidBecomeActive:(UIApplication*)application {}
-
-- (void)applicationWillTerminate:(UIApplication*)application {}
-
-- (void)dealloc {
-  [window_ release];
-  [navigationController_ release];
-  [super dealloc];
 }
 
 @end
