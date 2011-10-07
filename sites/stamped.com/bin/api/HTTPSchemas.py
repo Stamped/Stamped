@@ -207,6 +207,32 @@ class HTTPAccountChangePassword(Schema):
         self.old_password       = SchemaElement(basestring, required=True)
         self.new_password       = SchemaElement(basestring, required=True)
 
+class HTTPAccountAlerts(Schema):
+    def setSchema(self):
+        self.ios_alert_credit       = SchemaElement(bool, default=False)
+        self.ios_alert_like         = SchemaElement(bool, default=False)
+        self.ios_alert_fav          = SchemaElement(bool, default=False)
+        self.ios_alert_mention      = SchemaElement(bool, default=False)
+        self.ios_alert_comment      = SchemaElement(bool, default=False)
+        self.ios_alert_reply        = SchemaElement(bool, default=False)
+        self.ios_alert_follow       = SchemaElement(bool, default=False)
+        self.email_alert_credit     = SchemaElement(bool, default=False)
+        self.email_alert_like       = SchemaElement(bool, default=False)
+        self.email_alert_fav        = SchemaElement(bool, default=False)
+        self.email_alert_mention    = SchemaElement(bool, default=False)
+        self.email_alert_comment    = SchemaElement(bool, default=False)
+        self.email_alert_reply      = SchemaElement(bool, default=False)
+        self.email_alert_follow     = SchemaElement(bool, default=False)
+
+    def importSchema(self, schema):
+        if schema.__class__.__name__ == 'Account':
+            data = schema.alerts.value
+            self.importData(data, overflow=True)
+        else:
+            raise NotImplementedError
+        return self
+
+
 # ##### #
 # Users #
 # ##### #

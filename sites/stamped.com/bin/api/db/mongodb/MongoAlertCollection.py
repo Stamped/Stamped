@@ -17,19 +17,6 @@ from AMongoCollection import AMongoCollection
 
 class MongoAlertCollection(AMongoCollection):
     
-    """
-    Alert Types:
-    * restamp
-    * mention
-    * comment
-    * reply
-    * like
-    * favorite
-    * invite_sent
-    * invite_received
-    * follower
-    """
-    
     def __init__(self):
         AMongoCollection.__init__(self, collection='alerts', primary_key='alert_id', obj=Alert)
         # AAlertDB.__init__(self)
@@ -37,16 +24,19 @@ class MongoAlertCollection(AMongoCollection):
         self._collection.ensure_index('created', pymongo.ASCENDING)
 
     ### PUBLIC
-    
-    def getAlerts(self, userId, **kwargs):
-        limit       = kwargs.pop('limit', 20)
 
-        params = {'recipient_id': userId}
+    def numAlerts(self):
+        num = self._collection.find().count()
+        return num
+    
+    def getAlerts(self, **kwargs):
+        limit       = kwargs.pop('limit', 5)
         
-        documents = self._collection.find(params).sort('timestamp.created', \
+        documents = self._collection.find().sort('timestamp.created', \
             pymongo.ASCENDING).limit(limit)
 
         alert = []
+
         for document in documents:
             alert.append(self._convertFromMongo(document))
 
@@ -55,21 +45,10 @@ class MongoAlertCollection(AMongoCollection):
 
     def addAlert(self, alert):
         result = self._collection.insert_one(alert.value)
+        return result
 
         
-    def removeAlert(self, genre, userId, **kwargs):
-        stampId     = kwargs.pop('stampId', None)
-
-        if genre in ['like', 'favorite'] and stampId:
-            self._collection.remove({
-                'user.user_id': userId,
-                'link.linked_stamp_id': stampId,
-                'genre': genre
-            })
-
-
-
-
-
-
+    def removeAlert(self, alertId, **kwargs):
+        documentId = self._getObjectIdFromString(alertId)
+        result = self._removeMongoDocument(documentId)
 

@@ -6,6 +6,7 @@ __version__ = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
+import time
 from httpapi.v0.helpers import *
 
 @handleHTTPRequest
@@ -83,3 +84,11 @@ def inbox(request):
             result.append(HTTPStamp().importSchema(stamp).exportSparse())
 
     return transformOutput(result)
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def timeout(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(None, request)
+
+    time.sleep(55)
