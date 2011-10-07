@@ -193,6 +193,24 @@ class StampedAPIAccountAlertSettings(StampedAPIAccountTest):
         self.assertTrue(len(result) == 14)
         self.assertTrue(result['email_alert_fav'])
 
+    def test_set_token(self):
+        path = "account/alerts/ios/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "token": "%s" % ("0" * 64)
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
+    def test_remove_token(self):
+        path = "account/alerts/ios/remove.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "token": "%s" % ("0" * 64)
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
 ### TESTS TO ADD:
 # Change bio from string to None
 # Upload image data for avatar

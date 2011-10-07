@@ -470,6 +470,16 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateAccount(account)
 
         return account
+
+    @API_CALL
+    def updateAPNSToken(self, authUserId, token):
+        self._accountDB.updateAPNSToken(authUserId, token)
+        return True
+
+    @API_CALL
+    def removeAPNSToken(self, authUserId, token):
+        self._accountDB.removeAPNSToken(authUserId, token)
+        return True
     
     @API_CALL
     def resetPassword(self, params):

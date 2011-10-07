@@ -41,6 +41,8 @@ urlpatterns = patterns('',
     (r'v0/account/linked_accounts.json',        'v0.functions.account.linked_accounts'),
     (r'v0/account/alerts/show.json',            'v0.functions.account.show_alerts'),
     (r'v0/account/alerts/update.json',          'v0.functions.account.update_alerts'),
+    (r'v0/account/alerts/ios/update.json',      'v0.functions.account.update_apns'),
+    (r'v0/account/alerts/ios/remove.json',      'v0.functions.account.remove_apns'),
     
     ### USERS
     (r'v0/users/show.json',             'v0.functions.users.show'),

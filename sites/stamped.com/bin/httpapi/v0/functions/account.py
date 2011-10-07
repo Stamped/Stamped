@@ -189,3 +189,29 @@ def update_alerts(request):
 
     return transformOutput(settings.value)
 
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def update_apns(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPAPNSToken(), request)
+
+    if len(schema.token) != 64:
+        raise InputError('Invalid token length')
+    
+    stampedAPI.updateAPNSToken(authUserId, schema.token)
+    return transformOutput(True)
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def remove_apns(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPAPNSToken(), request)
+
+    if len(schema.token) != 64:
+        raise InputError('Invalid token length')
+    
+    stampedAPI.removeAPNSToken(authUserId, schema.token)
+    return transformOutput(True)
+

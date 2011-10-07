@@ -7,9 +7,12 @@ __license__ = "TODO"
 
 import Globals, auth, utils, logs
 from datetime import datetime
+from utils import lazyProperty
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
+from MongoAlertAPNSCollection import MongoAlertAPNSCollection
+
 from AAccountDB import AAccountDB
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
@@ -42,6 +45,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
     
     ### PUBLIC
+    
+    @lazyProperty
+    def alert_apns_collection(self):
+        return MongoAlertAPNSCollection()
     
     def addAccount(self, user):
         return self._addObject(user)
@@ -123,5 +130,49 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)}, 
             {'$set': {key: value}})
+
+    def updateAPNSToken(self, userId, token):
+        current = self.alert_apns_collection.getToken(token)
+        if current == userId:
+            # Update user token
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(userId)},
+                {'$addToSet': {'devices.ios_device_tokens': token}}
+            )
+        elif current == None:
+            # Add token for user
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(userId)},
+                {'$addToSet': {'devices.ios_device_tokens': token}}
+            )
+            # Add token reference
+            self.alert_apns_collection.addToken(token, userId)
+        else:
+            # Token is assigned to someone else!
+            # Remove token reference
+            self.alert_apns_collection.removeToken(token)
+            # Remove token from old user
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(current)},
+                {'$pull': {'devices.ios_device_tokens': token}}
+            )
+            # Add token for user
+            self._collection.update(
+                {'_id': self._getObjectIdFromString(userId)},
+                {'$addToSet': {'devices.ios_device_tokens': token}}
+            )
+            # Add token reference
+            self.alert_apns_collection.addToken(token, userId)
+
+    def removeAPNSToken(self, userId, token):
+        current = self.alert_apns_collection.getToken(token)
+        if current == userId:
+            self.alert_apns_collection.removeToken(token)
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(userId)},
+            {'$pull': {'devices.ios_device_tokens': token}}
+        )
+        
+
 
 

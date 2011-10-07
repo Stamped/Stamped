@@ -232,6 +232,10 @@ class HTTPAccountAlerts(Schema):
             raise NotImplementedError
         return self
 
+class HTTPAPNSToken(Schema):
+    def setSchema(self):
+        self.token              = SchemaElement(basestring, required=True)
+
 
 # ##### #
 # Users #
