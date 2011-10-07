@@ -48,6 +48,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   if ([launchOptions objectForKey:@"aps"]) {
     // Got a push notification.
     NSLog(@"Alert: %@", [[launchOptions objectForKey:@"aps"] objectForKey:@"alert"]);
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
   }
   
   self.window.rootViewController = self.navigationController;
@@ -69,18 +70,17 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   deviceToken = [deviceToken stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
   deviceToken = [deviceToken stringByReplacingOccurrencesOfString:@" " withString:@""];
   NSLog(@"Device token: %@", deviceToken);
-  //self.registered = YES;
-  //[self sendProviderDeviceToken:devTokenBytes]; // custom method
 }
 
 - (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo {
-  UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Received a Remote Notification"
+  UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Push"
                                                        message:[NSString stringWithFormat:@"The application received this remote notification while it was running:\n%@",
                                                                [[userInfo objectForKey:@"aps"] objectForKey:@"alert"]]
                                                       delegate:self
                                              cancelButtonTitle:@"OK"
                                              otherButtonTitles:nil] autorelease];
   [alertView show];
+  [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
 }
 
 - (void)application:(UIApplication*)app didFailToRegisterForRemoteNotificationsWithError:(NSError*)err {
@@ -106,9 +106,9 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 - (void)performRestKitMappings {
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
-  [RKClient sharedClient].requestQueue.suspended = YES;
-  [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
+  [RKClient sharedClient].requestQueue.requestTimeout = 30;
+  [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
   
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",

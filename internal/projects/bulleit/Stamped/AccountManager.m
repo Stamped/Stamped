@@ -95,6 +95,7 @@ static AccountManager* sharedAccountManager_ = nil;
     accessTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kAccessTokenKeychainItemID];
     refreshTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kRefreshTokenKeychainItemID];
     oAuthRequestQueue_ = [[RKRequestQueue alloc] init];
+    oAuthRequestQueue_.requestTimeout = 30;
     oAuthRequestQueue_.delegate = self;
     oAuthRequestQueue_.concurrentRequestsLimit = 1;
     [oAuthRequestQueue_ start];
@@ -103,7 +104,6 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)refreshToken {
-  [RKClient sharedClient].requestQueue.suspended = YES;
   [self sendTokenRefreshRequest];
 }
 
@@ -159,7 +159,6 @@ static AccountManager* sharedAccountManager_ = nil;
                                                         selector:@selector(refreshTimerFired:)
                                                         userInfo:nil
                                                          repeats:YES];
-    [RKClient sharedClient].requestQueue.suspended = NO;
     [self sendUserInfoRequest];
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
@@ -170,7 +169,6 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-  [RKClient sharedClient].requestQueue.suspended = NO;
   if ([objectLoader.response isUnauthorized] &&
       [objectLoader.resourcePath isEqualToString:kUserLookupPath]) {
     [self refreshToken];
@@ -195,7 +193,6 @@ static AccountManager* sharedAccountManager_ = nil;
       [self.firstRunViewController signUpSucess];
       firstInstall_ = NO;
     }
-    [RKClient sharedClient].requestQueue.suspended = NO;
     return;
   } else if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
     // Simple log in: store the OAuth token.
@@ -219,7 +216,6 @@ static AccountManager* sharedAccountManager_ = nil;
     [self.delegate accountManagerDidAuthenticate];
     firstRun_ = NO;
   }
-  [RKClient sharedClient].requestQueue.suspended = NO;
 }
 
 - (void)sendLoginRequest {
@@ -399,8 +395,31 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
-  if (queue.count == 0)
+  if ([RKClient sharedClient].requestQueue.count == 0 && oAuthRequestQueue_.count == 0)
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+}
+
+- (void)requestQueue:(RKRequestQueue*)queue didLoadResponse:(RKResponse*)response {
+  if (queue == oAuthRequestQueue_)
+    [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)requestQueue:(RKRequestQueue*)queue didCancelRequest:(RKRequest*)request {
+  if (queue == oAuthRequestQueue_)
+    [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
+  if (queue == oAuthRequestQueue_)
+    [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)requestQueueWasSuspended:(RKRequestQueue*)queue {
+  NSLog(@"Request queue suspended...");
+}
+
+- (void)requestQueueWasUnsuspended:(RKRequestQueue*)queue {
+  NSLog(@"Request queue unsuspended...");
 }
 
 #pragma mark - Logout stuff.
