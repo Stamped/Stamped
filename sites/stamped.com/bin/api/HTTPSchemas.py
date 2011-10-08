@@ -661,6 +661,7 @@ class HTTPEntityAutosuggest(Schema):
         self.title              = SchemaElement(basestring, required=True)
         self.subtitle           = SchemaElement(basestring)
         self.category           = SchemaElement(basestring, required=True)
+        self.distance           = SchemaElement(float)
     
     def importSchema(self, schema):
         if schema.__class__.__name__ == 'Entity':
@@ -699,6 +700,7 @@ class HTTPEntitySearch(Schema):
         self.coordinates        = SchemaElement(basestring)
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
+        self.local              = SchemaElement(bool)
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'EntitySearch':
