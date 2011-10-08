@@ -22,11 +22,33 @@ static NSString* const kSearchPath = @"/entities/search.json";
 static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v1/";
 
 typedef enum {
+  SearchFilterNone = 0,
+  SearchFilterFood,
+  SearchFilterBook,
+  SearchFilterFilm,
+  SearchFilterMusic,
+  SearchFilterOther
+} SearchFilter;
+
+// This MUST be kept in sync with the enum order above.
+
+NSString* const kSearchFilterStrings[6] = {
+  @"",
+  @"food",
+  @"book",
+  @"film",
+  @"music",
+  @"other"
+};
+
+typedef enum {
   ResultTypeFast,
   ResultTypeFull
 } ResultType;
 
 @interface SearchEntitiesViewController ()
+- (void)addKeyboardAccessoryView;
+- (void)filterButtonPressed:(id)sender;
 - (void)textFieldDidChange:(id)sender;
 - (void)sendSearchRequest;
 - (void)sendFastSearchRequest;
@@ -37,6 +59,7 @@ typedef enum {
 @property (nonatomic, retain) RKRequest* currentRequest;
 @property (nonatomic, assign) ResultType currentResultType;
 @property (nonatomic, assign) BOOL loading;
+@property (nonatomic, assign) SearchFilter currentSearchFilter;
 @end
 
 @implementation SearchEntitiesViewController
@@ -55,6 +78,7 @@ typedef enum {
 @synthesize fullSearchCell = fullSearchCell_;
 @synthesize loading = loading_;
 @synthesize loadingIndicatorLabel = loadingIndicatorLabel_;
+@synthesize currentSearchFilter = currentSearchFilter_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -96,6 +120,95 @@ typedef enum {
   [self.view addSubview:tooltipImageView_];
   [tooltipImageView_ release];
   self.searchingIndicatorCell.selectionStyle = UITableViewCellSelectionStyleNone;
+  [self addKeyboardAccessoryView];
+}
+
+- (void)addKeyboardAccessoryView {
+  UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+  accessoryView.backgroundColor = [UIColor colorWithWhite:0.4 alpha:1.0];
+  accessoryView.alpha = 0.95;
+  CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
+  gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.15 alpha:1.0].CGColor,
+                     (id)[UIColor colorWithWhite:0.3 alpha:1.0].CGColor, nil];
+  gradient.startPoint = CGPointZero;
+  gradient.endPoint = CGPointMake(0, 1);
+  gradient.frame = CGRectMake(0, 1, 320, 43);
+  // This is not providing the right amount of opacity.
+  gradient.opacity = 0.95;
+  [accessoryView.layer addSublayer:gradient];
+  [gradient release];
+  searchField_.inputAccessoryView = accessoryView;
+  [accessoryView release];
+  
+  NSUInteger i = 0;
+  const CGFloat yDistance = 42.0;
+  // Food.
+  UIButton* filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_restaurants_button"]
+                forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_restaurants_button_selected"]
+                forState:UIControlStateSelected];
+  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
+  filterButton.tag = SearchFilterFood;
+  [accessoryView addSubview:filterButton];
+  // Book.
+  ++i;
+  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_books_button"]
+                forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_books_button_selected"]
+                forState:UIControlStateSelected];
+  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
+  filterButton.tag = SearchFilterBook;
+  [accessoryView addSubview:filterButton];
+  // Film.
+  ++i;
+  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_movies_button"]
+                forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_movies_button_selected"]
+                forState:UIControlStateSelected];
+  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
+  filterButton.tag = SearchFilterFilm;
+  [accessoryView addSubview:filterButton];
+  // Music.
+  ++i;
+  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_music_button"]
+                forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_music_button_selected"]
+                forState:UIControlStateSelected];
+  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
+  filterButton.tag = SearchFilterMusic;
+  [accessoryView addSubview:filterButton];
+  // Other.
+  ++i;
+  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_other_button"]
+                forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_other_button_selected"]
+                forState:UIControlStateSelected];
+  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
+  filterButton.tag = SearchFilterOther;
+  [accessoryView addSubview:filterButton];
+  // None.
+  ++i;
+  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_clear_button"]
+                forState:UIControlStateNormal];
+  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_clear_button_selected"]
+                forState:UIControlStateSelected];
+  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
+  filterButton.tag = SearchFilterNone;
+  [accessoryView addSubview:filterButton];
+
+  for (UIView* view in accessoryView.subviews) {
+    if ([view isMemberOfClass:[UIButton class]]) {
+      [(UIButton*)view addTarget:self
+                          action:@selector(filterButtonPressed:)
+                forControlEvents:UIControlEventTouchUpInside];
+    }
+  }
 }
 
 - (void)viewDidUnload {
@@ -153,6 +266,28 @@ typedef enum {
 
 - (IBAction)cancelButtonTapped:(id)sender {
   [self.parentViewController dismissModalViewControllerAnimated:YES];
+}
+
+- (void)filterButtonPressed:(id)sender {
+  UIButton* button = sender;
+  for (UIView* view in searchField_.inputAccessoryView.subviews) {
+    if ([view isMemberOfClass:[UIButton class]] && view != sender)
+      [(UIButton*)view setSelected:NO];
+  }
+
+  self.currentSearchFilter = button.tag;
+
+  if (self.currentSearchFilter != SearchFilterNone)
+    button.selected = !button.selected;
+  else if (self.currentSearchFilter == SearchFilterNone)
+    button.selected = NO;
+
+  if (searchField_.text.length) {
+    if (currentResultType_ == ResultTypeFast)
+      [self sendFastSearchRequest];
+    else if (currentResultType_ == ResultTypeFull)
+      [self sendSearchRequest];
+  }
 }
 
 #pragma mark - Table view data source
@@ -233,7 +368,12 @@ typedef enum {
   NSString* query = self.searchField.text;
   query = [query lowercaseString];
   query = [query stringByReplacingOccurrencesOfString:@" " withString:@"_"];
-  NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@.json.gz", kFastSearchURI, query]];
+  NSString* URLString = [NSString stringWithFormat:@"%@%@.json.gz", kFastSearchURI, query];
+  if (currentSearchFilter_ != SearchFilterNone) {
+    NSString* queryString = [NSString stringWithFormat:@"?category=%@", kSearchFilterStrings[currentSearchFilter_]];
+    URLString = [URLString stringByAppendingString:queryString];
+  }
+  NSURL* url = [NSURL URLWithString:URLString];
   RKRequest* request = [[RKRequest alloc] initWithURL:url delegate:self];
   [[RKClient sharedClient].requestQueue addRequest:request];
   self.currentRequest = request;
@@ -258,6 +398,10 @@ typedef enum {
     NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
     [params setObject:coordString forKey:@"coordinates"];
   }
+
+  if (currentSearchFilter_ != SearchFilterNone)
+    [params setObject:kSearchFilterStrings[currentSearchFilter_] forKey:@"category"];
+
   objectLoader.params = params;
   [objectLoader send];
   self.currentRequest = objectLoader;
