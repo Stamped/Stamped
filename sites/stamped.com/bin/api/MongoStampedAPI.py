@@ -109,8 +109,8 @@ class MongoStampedAPI(StampedAPI):
         return MongoTempEntityCollection()
     
     def getStats(self):
-        source_stats = { }
         subcategory_stats = { }
+        source_stats = { }
         
         for source in EntitySourcesSchema()._elements:
             count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()

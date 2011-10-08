@@ -79,15 +79,16 @@ def search(request):
     schema      = parseRequest(HTTPEntitySearch(), request)
     search      = schema.exportSchema(EntitySearch())
     
-    result      = stampedAPI.searchEntities(search.q, 
-                                            search.coordinates, 
-                                            authUserId, 
-                                            search.category, 
-                                            search.subcategory)
+    result      = stampedAPI.searchEntities(query=search.q, 
+                                            coords=search.coordinates, 
+                                            authUserId=authUserId, 
+                                            category_filter=search.category, 
+                                            subcategory_filter=search.subcategory, 
+                                            local=search.local)
     
     autosuggest = []
     for item in result:
-        item = HTTPEntityAutosuggest().importSchema(item).exportSparse()
+        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
         autosuggest.append(item)
     
     return transformOutput(autosuggest)

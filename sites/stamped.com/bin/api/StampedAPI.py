@@ -950,6 +950,7 @@ class StampedAPI(AStampedAPI):
                        subcategory_filter=None, 
                        limit=10, 
                        prefix=False, 
+                       local=False, 
                        full=True):
         coords  = self._parseCoords(coords)
         results = self._entitySearcher.getSearchResults(query=query, 
@@ -958,7 +959,10 @@ class StampedAPI(AStampedAPI):
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
                                                         full=full, 
-                                                        prefix=prefix)
+                                                        prefix=prefix, 
+                                                        local=local)
+        return results
+        """
         output  = []
         
         for result in results:
@@ -969,6 +973,7 @@ class StampedAPI(AStampedAPI):
             self._statsSink.increment('stamped.api.search.noresults')
         
         return output
+        """
     
     def _parseCoords(self, coords):
         if coords is not None and 'lat' in coords and coords.lat != None:

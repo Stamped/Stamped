@@ -663,7 +663,7 @@ class HTTPEntityAutosuggest(Schema):
         self.category           = SchemaElement(basestring, required=True)
         self.distance           = SchemaElement(float)
     
-    def importSchema(self, schema):
+    def importSchema(self, schema, distance):
         if schema.__class__.__name__ == 'Entity':
             from Entity import setFields
             setFields(schema, detailed=True)
@@ -678,7 +678,8 @@ class HTTPEntityAutosuggest(Schema):
             self.title = schema.title
             self.subtitle = schema.subtitle
             self.category = schema.category
-
+            self.distance = distance
+            
             if self.subtitle is None:
                 entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
         else:
@@ -708,6 +709,7 @@ class HTTPEntitySearch(Schema):
             schema.coordinates = _coordinatesFlatToDict(self.coordinates)
             schema.importData({'category': self.category})
             schema.importData({'subcategory': self.subcategory})
+            schema.importData({'local': self.local})
         else:
             raise NotImplementedError
         return schema
