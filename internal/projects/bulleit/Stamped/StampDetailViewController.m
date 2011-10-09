@@ -367,6 +367,19 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   stampedLabel_.frame = stampedFrame;
   stampedLabel_.textColor = [UIColor stampedGrayColor];
 
+  UILabel* timestampLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+  timestampLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
+  timestampLabel.textColor = [UIColor stampedLightGrayColor];
+  timestampLabel.textAlignment = UITextAlignmentRight;
+  timestampLabel.text = [Util shortUserReadableTimeSinceDate:stamp_.created];
+  [timestampLabel sizeToFit];
+  timestampLabel.frame = CGRectMake(310 - CGRectGetWidth(timestampLabel.frame) - 10,
+                                    10,
+                                    CGRectGetWidth(timestampLabel.frame),
+                                    CGRectGetHeight(timestampLabel.frame));
+  [mainCommentContainer_ addSubview:timestampLabel];
+  [timestampLabel release];
+  
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
   UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.font = commentFont;

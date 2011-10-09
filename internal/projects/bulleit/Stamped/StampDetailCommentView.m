@@ -12,6 +12,7 @@
 #import "User.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+#import "Util.h"
 
 NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedNotification";
 
@@ -60,12 +61,25 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
   commentLabel.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
   commentLabel.text = comment_.blurb;
-  commentLabel.textColor = [UIColor colorWithWhite:0.35 alpha:1.0];
+  commentLabel.textColor = [UIColor stampedBlackColor];
   commentLabel.numberOfLines = 0;
   stringSize = [commentLabel sizeThatFits:CGSizeMake(220, MAXFLOAT)];
   commentLabel.frame = CGRectMake(leftPadding, 23, stringSize.width, stringSize.height);
   [self addSubview:commentLabel];
   [commentLabel release];
+  
+  UILabel* timestampLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+  timestampLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
+  timestampLabel.textColor = [UIColor stampedLightGrayColor];
+  timestampLabel.textAlignment = UITextAlignmentRight;
+  timestampLabel.text = [Util shortUserReadableTimeSinceDate:comment_.created];
+  [timestampLabel sizeToFit];
+  timestampLabel.frame = CGRectMake(310 - CGRectGetWidth(timestampLabel.frame) - 10,
+                                    10,
+                                    CGRectGetWidth(timestampLabel.frame),
+                                    CGRectGetHeight(timestampLabel.frame));
+  [self addSubview:timestampLabel];
+  [timestampLabel release];
   
   CGRect frame = self.frame;
   frame.size.height = fmaxf(minHeight, CGRectGetMaxY(commentLabel.frame) + 8);
