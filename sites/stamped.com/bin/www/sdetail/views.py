@@ -21,6 +21,7 @@ stampedAPI  = MongoStampedAPI()
 def show(request, **kwargs):
     screenName  = kwargs.pop('screen_name', None)
     stampNum    = kwargs.pop('stamp_num', None)
+    stampTitle  = kwargs.pop('stamp_title', None)
     mobile      = kwargs.pop('mobile', False)
     try:
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
@@ -28,6 +29,9 @@ def show(request, **kwargs):
         template = 'sdetail.html'
         if mobile:
             template = 'sdetail-mobile.html'
+
+        if _encodeStampTitle(stamp.entity.title) != stampTitle:
+            raise
 
         response = render_to_response(template, stamp)
         response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()

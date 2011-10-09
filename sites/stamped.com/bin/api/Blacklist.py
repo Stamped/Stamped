@@ -26,6 +26,7 @@ screen_names = set([
     'tramp',
     'about',
     'help',
+    '500',
     '404', 
     '403',
     '402',
@@ -39,5 +40,8 @@ screen_names = set([
     'readme',
     'staff',
     'default',
+    'launchapp',
+    'aboutus',
+    'redirect',
 ])
 

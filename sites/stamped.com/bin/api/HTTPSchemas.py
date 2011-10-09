@@ -51,6 +51,11 @@ def _profileImageURL(screenName, cache=None):
             (str(screenName).lower(), int(time.mktime(cache.timetuple())))
     return url
 
+def _encodeStampTitle(title):
+    stamp_title = title.replace(' ', '-').encode('ascii', 'ignore')
+    stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
+    return stamp_title
+
 
 def _encodeLinkShareDeepURL(raw_url):
     parsed_url  = urlparse.urlparse(raw_url)
@@ -778,8 +783,7 @@ class HTTPStamp(Schema):
             if self.image_dimensions != None:
                 self.image_url = 'http://static.stamped.com/stamps/%s.jpg' % self.stamp_id
 
-            stamp_title = schema.entity.title.replace(' ', '-').encode('ascii', 'ignore')
-            stamp_title = re.sub('([^a-zA-Z0-9._-])', '', stamp_title)
+            stamp_title = _encodeStampTitle(schema.entity.title)
             self.url = 'http://www.stamped.com/%s/stamps/%s/%s' % \
                 (schema.user.screen_name, schema.stamp_num, stamp_title)
 
