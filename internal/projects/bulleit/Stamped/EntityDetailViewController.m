@@ -228,7 +228,11 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
   };
   CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* full = [NSString stringWithFormat:@"To-do added via %@", user.screenName];
+  NSString* screenName = user.screenName;
+  if ([user.screenName isEqualToString:[AccountManager sharedManager].currentUser.screenName])
+    screenName = @"you";
+
+  NSString* full = [NSString stringWithFormat:@"To-do added via %@", screenName];
   NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
   [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                          (id)style, (id)kCTParagraphStyleAttributeName,
@@ -236,7 +240,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
                   range:NSMakeRange(0, full.length)];
   [string addAttribute:(NSString*)kCTFontAttributeName
                  value:(id)font 
-                 range:[full rangeOfString:user.screenName options:NSBackwardsSearch]];
+                 range:[full rangeOfString:screenName options:NSBackwardsSearch]];
   CFRelease(font);
   CFRelease(style);
   return [string autorelease];
