@@ -14,17 +14,22 @@ typedef enum {
   StampFilterTypeBook,
   StampFilterTypeMusic,
   StampFilterTypeFilm,
-  StampFilterTypeOther,
-  StampFilterTypeTime,
-  StampFilterTypeDistance,
-  StampFilterTypePopularity
+  StampFilterTypeOther
 } StampFilterType;
+
+typedef enum {
+  StampSortTypeTime = 0,
+  StampSortTypeDistance,
+  StampSortTypePopularity
+} StampSortType;
 
 @class STStampFilterBar;
 @protocol STStampFilterBarDelegate
 
-- (void)filterBar:(STStampFilterBar*)bar didSelectFilter:(StampFilterType)filterType;
-- (void)filterBar:(STStampFilterBar*)bar didFilterByQuery:(NSString*)query;
+- (void)stampFilterBar:(STStampFilterBar*)bar
+       didSelectFilter:(StampFilterType)filterType 
+          withSortType:(StampSortType)sortType
+              andQuery:(NSString*)query;
 @end
 
 @interface STStampFilterBar : UIView
