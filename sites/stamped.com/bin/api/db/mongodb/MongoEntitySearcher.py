@@ -217,7 +217,8 @@ class MongoEntitySearcher(EntitySearcher):
                          category_filter=None, 
                          subcategory_filter=None, 
                          full=False, 
-                         prefix=False):
+                         prefix=False, 
+                         local=False):
         
         if prefix:
             assert not full
@@ -231,7 +232,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = input_query
         
-        if not self._is_possible_location_query(category_filter, subcategory_filter):
+        if not self._is_possible_location_query(category_filter, subcategory_filter, local):
             # if we're filtering by category / subcategory and the filtered results 
             # couldn't possibly contain a location, then ensure that coords is disabled
             coords = None
@@ -336,10 +337,12 @@ class MongoEntitySearcher(EntitySearcher):
                 'subcategory' : 1, 
             }
             
-            if prefix or len(input_query) < 3:
-                db_results = self.entityDB._collection.find(entity_query, output=list, limit=100)
+            if prefix or len(input_query) <= 3:
+                max_results = 100
             else:
-                db_results = self.entityDB._collection.find(entity_query, output=list, limit=400)
+                max_results = 400
+            
+            db_results = self.entityDB._collection.find(entity_query, output=list, limit=max_results)
             
             ret['db_results'] = []
             for doc in db_results:
@@ -411,10 +414,10 @@ class MongoEntitySearcher(EntitySearcher):
                 utils.printException()
         
         if full:
-            if self._is_possible_amazon_query(category_filter, subcategory_filter):
+            if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_amazon, wrapper)
             
-            if self._is_possible_apple_query(category_filter, subcategory_filter):
+            if self._is_possible_apple_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_apple,  wrapper)
         
         pool.spawn(_find_entity, wrapper)
@@ -434,18 +437,10 @@ class MongoEntitySearcher(EntitySearcher):
             ]
             
             if prefix:
-                fields = {
-                    'title' : 1, 
-                    'sources' : 1, 
-                    'subcategory' : 1, 
-                    'coordinates' : 1, 
-                }
-                
                 # limit number of results returned
                 q_params.append(('num', 50))
-                
-                # only select certain fields to return to reduce data transfer
-                #q_params.append(('fields', fields))
+            else:
+                q_params.append(('num', 200))
             
             q = SON(q_params)
             
@@ -544,6 +539,9 @@ class MongoEntitySearcher(EntitySearcher):
                     if aid in aids:
                         return
                     aids.add(aid)
+                
+                if local and not self._is_possible_location_query(result[0].category, result[0].subcategory, local):
+                    return
                 
                 results[result[0].entity_id] = result
             except:
@@ -831,7 +829,10 @@ class MongoEntitySearcher(EntitySearcher):
         
         return value
     
-    def _is_possible_location_query(self, category_filter, subcategory_filter):
+    def _is_possible_location_query(self, category_filter, subcategory_filter, local):
+        if local:
+            return True
+        
         if category_filter is not None and category_filter in self.location_category_blacklist:
             return False
         
@@ -840,7 +841,10 @@ class MongoEntitySearcher(EntitySearcher):
         
         return True
     
-    def _is_possible_amazon_query(self, category_filter, subcategory_filter):
+    def _is_possible_amazon_query(self, category_filter, subcategory_filter, local):
+        if local:
+            return False
+        
         if category_filter is not None and category_filter in self.amazon_category_blacklist:
             return False
         
@@ -849,7 +853,10 @@ class MongoEntitySearcher(EntitySearcher):
         
         return True
     
-    def _is_possible_apple_query(self, category_filter, subcategory_filter):
+    def _is_possible_apple_query(self, category_filter, subcategory_filter, local):
+        if local:
+            return False
+        
         if category_filter is not None and category_filter not in self.apple_category_whitelist:
             return False
         
