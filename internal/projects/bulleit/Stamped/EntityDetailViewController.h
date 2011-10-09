@@ -38,6 +38,7 @@
 @property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIView* mainContentView;
+@property (nonatomic, retain) IBOutlet UIImageView* shelfImageView;
 
 
 @end

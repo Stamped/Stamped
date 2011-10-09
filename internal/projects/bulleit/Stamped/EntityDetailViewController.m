@@ -8,6 +8,7 @@
 
 #import "EntityDetailViewController.h"
 
+#import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
@@ -16,14 +17,20 @@
 #import "Stamp.h"
 #import "SearchResult.h"
 #import "UIColor+Stamped.h"
+#import "StampDetailViewController.h"
 #import "PlaceDetailViewController.h"
 #import "Notifications.h"
+#import "Favorite.h"
+#import "User.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 @interface EntityDetailViewController ()
+- (void)addTodoBar;
+- (NSAttributedString*)todoAttributedString:(User*)user;
+- (void)todoBarTapped:(UITapGestureRecognizer*)recognizer;
 - (void)loadEntityDataFromServer;
 - (void)showContents;
 - (void)setupSectionViews;
@@ -40,7 +47,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize categoryImageView = categoryImageView_;
 @synthesize loadingView = loadingView_;
 @synthesize mainContentView = mainContentView_;
-
+@synthesize shelfImageView = shelfImageView_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -68,6 +75,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.descriptionLabel = nil;
   self.mainActionLabel = nil;
   self.mainActionButton = nil;
+  self.shelfImageView = nil;
   self.scrollView = nil;
   self.categoryImageView = nil;
   self.mainActionsView = nil;
@@ -151,6 +159,96 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   mainActionButton_.layer.masksToBounds = YES;
   mainActionButton_.layer.cornerRadius = 2.0;
   mainActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
+
+  if (entityObject_.favorite)
+    [self addTodoBar];
+}
+
+- (void)addTodoBar {
+  for (UIView* view in self.scrollView.subviews) {
+    if (view == shelfImageView_)
+      continue;
+
+    view.frame = CGRectOffset(view.frame, 0, 44);
+  }
+
+  UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+  bar.backgroundColor = [UIColor colorWithWhite:0.0 alpha:.1];
+  CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
+  gradient.frame = bar.bounds;
+  gradient.startPoint = CGPointZero;
+  gradient.endPoint = CGPointMake(0, 1);
+  gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithRed:0.043 green:0.38 blue:0.85 alpha:1.0].CGColor,
+                     (id)[UIColor colorWithRed:0.29 green:0.56 blue:0.95 alpha:1.0].CGColor, nil];
+  [bar.layer addSublayer:gradient];
+  bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
+  bar.layer.shadowColor = [UIColor blackColor].CGColor;
+  bar.layer.shadowOpacity = 0.25;
+  bar.layer.shadowOffset = CGSizeMake(0, 1);
+  bar.layer.shadowRadius = 3;
+  [gradient release];
+  
+  UIImageView* icon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_todo_icon"]];
+  icon.frame = CGRectOffset(icon.frame, 14, 14);
+  [bar addSubview:icon];
+  [icon release];
+  
+  UIImageView* arrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_todo_arrow"]];
+  arrow.frame = CGRectOffset(arrow.frame, 297, 18);
+  [bar addSubview:arrow];
+  [arrow release];
+  
+  CATextLayer* text = [[CATextLayer alloc] init];
+  text.frame = CGRectMake(CGRectGetMaxX(icon.frame) + 2,
+                                       CGRectGetMinY(icon.frame) + 5, 200, 14);
+  text.truncationMode = kCATruncationEnd;
+  text.contentsScale = [[UIScreen mainScreen] scale];
+  text.fontSize = 12.0;
+  text.foregroundColor = [UIColor whiteColor].CGColor;
+  text.string = [self todoAttributedString:entityObject_.favorite.stamp.user];
+  [bar.layer addSublayer:text];
+  [text release];
+  
+  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                               action:@selector(todoBarTapped:)];
+  [bar addGestureRecognizer:recognizer];
+  [recognizer release];
+  [self.scrollView insertSubview:bar atIndex:0];
+  [bar release];
+}
+
+- (NSAttributedString*)todoAttributedString:(User*)user {
+  if (!user)
+    return nil;
+  
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  CFIndex numSettings = 1;
+  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
+  CTParagraphStyleSetting settings[1] = {
+    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
+  };
+  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
+  NSString* full = [NSString stringWithFormat:@"To-do added via %@", user.screenName];
+  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
+  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                         (id)style, (id)kCTParagraphStyleAttributeName,
+                         (id)[UIColor whiteColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
+                  range:NSMakeRange(0, full.length)];
+  [string addAttribute:(NSString*)kCTFontAttributeName
+                 value:(id)font 
+                 range:[full rangeOfString:user.screenName options:NSBackwardsSearch]];
+  CFRelease(font);
+  CFRelease(style);
+  return [string autorelease];
+}
+
+- (void)todoBarTapped:(UITapGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  StampDetailViewController* vc = [[StampDetailViewController alloc] initWithStamp:entityObject_.favorite.stamp];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 - (void)viewDidUnload {
@@ -160,6 +258,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.descriptionLabel = nil;
   self.mainActionLabel = nil;
   self.mainActionButton = nil;
+  self.shelfImageView = nil;
   self.scrollView = nil;
   self.categoryImageView = nil;
   self.mainActionsView = nil;
