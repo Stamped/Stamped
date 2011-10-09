@@ -23,11 +23,13 @@ NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopb
 NSString* const kTwitterRequestTokenURL = @"https://api.twitter.com/oauth/request_token";
 NSString* const kTwitterAuthorizeURL = @"https://api.twitter.com/oauth/authorize";
 NSString* const kTwitterAccessTokenURL = @"https://api.twitter.com/oauth/access_token";
-
 NSString* const kOAuthCallbackURL = @"http://www.example.com/oauth_callback";
 NSString* const kTwitterScope = @"http://www.example.com/oauth_scope";
-
 NSString* const kKeychainTwitterToken = @"Stamped Twitter";
+
+@interface Util ()
++ (NSString*)userReadableTimeSinceDate:(NSDate*)date shortened:(BOOL)shortened;
+@end
 
 @implementation Util
 
@@ -137,50 +139,77 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
                secondaryBlue:b2];
 }
 
-+ (NSString*)userReadableTimeSinceDate:(NSDate*)date {
++ (NSString*)userReadableTimeSinceDate:(NSDate*)date shortened:(BOOL)shortened {
   NSTimeInterval timeSince = [[NSDate date] timeIntervalSinceDate:date];
-  NSString* result = nil;
   if (timeSince > 31556926) {
     CGFloat numYears = floorf(timeSince / 31556926);
+    if (shortened)
+      return [NSString stringWithFormat:@"%.0fy", numYears];
+
     if (numYears < 2) {
-      result = @"a year ago";
+      return @"a year ago";
     } else {
-      result = [NSString stringWithFormat:@"%.0f years ago", numYears];
+      return [NSString stringWithFormat:@"%.0f years ago", numYears];
     }
-  } else if (timeSince > 2629743.83) {
+  } else if (timeSince > 2629743.83 && !shortened) {  // Don't include months in shortened version.
     CGFloat numMonths = floorf(timeSince / 2629743.83);
     if (numMonths < 2) {
-      result = @"a month ago";
+      return @"a month ago";
     } else {
-      result = [NSString stringWithFormat:@"%.0f months ago", numMonths];
+      return [NSString stringWithFormat:@"%.0f months ago", numMonths];
     }
   } else if (timeSince > 604800) {
     CGFloat numWeeks = floorf(timeSince / 604800);
+    if (shortened)
+      return [NSString stringWithFormat:@"%.0fw", numWeeks];
+
     if (numWeeks < 2) {
-      result = @"a week ago";
+      return @"a week ago";
     } else {
-      result = [NSString stringWithFormat:@"%.0f weeks ago", numWeeks];
+      return [NSString stringWithFormat:@"%.0f weeks ago", numWeeks];
     }
   } else if (timeSince > 86400) {
     CGFloat numDays = floorf(timeSince / 86400);
+    if (shortened)
+      return [NSString stringWithFormat:@"%.0fd", numDays];
+    
     if (numDays < 2) {
-      result = [NSString stringWithFormat:@"%.0f day ago", numDays];
+      return [NSString stringWithFormat:@"%.0f day ago", numDays];
     } else {
-      result = [NSString stringWithFormat:@"%.0f days ago", numDays];
+      return [NSString stringWithFormat:@"%.0f days ago", numDays];
     }
   } else if (timeSince > 3600) {
     CGFloat numHours = floorf(timeSince / 3600);
+    if (shortened)
+      return [NSString stringWithFormat:@"%.0fh", numHours];
+
     if (numHours < 2) {
-      result = [NSString stringWithFormat:@"%.0f hr ago", numHours];
+      return [NSString stringWithFormat:@"%.0f hr ago", numHours];
     } else {
-      result = [NSString stringWithFormat:@"%.0f hrs ago", numHours];
+      return [NSString stringWithFormat:@"%.0f hrs ago", numHours];
     }
   } else if (timeSince > 60) {
-    result = [NSString stringWithFormat:@"%.0f min ago", floorf(timeSince / 60)];
+    CGFloat numMin = floorf(timeSince / 60);
+
+    if (shortened)
+      return [NSString stringWithFormat:@"%.0fm", numMin];
+
+    return [NSString stringWithFormat:@"%.0f min ago", numMin];
   } else {
-    result = @"just now";
+    if (shortened)
+      return [NSString stringWithFormat:@"%.0fs", timeSince];
+
+    return @"just now";
   }
-  return result;
+  return nil;
+}
+
++ (NSString*)shortUserReadableTimeSinceDate:(NSDate*)date {
+  return [Util userReadableTimeSinceDate:date shortened:YES];
+}
+
++ (NSString*)userReadableTimeSinceDate:(NSDate*)date {
+  return [Util userReadableTimeSinceDate:date shortened:NO];
 }
 
 + (UIViewController*)detailViewControllerForEntity:(Entity*)entityObject {
