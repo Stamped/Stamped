@@ -1,5 +1,5 @@
 
-import pymongo, json, codecs, os, sys, bson
+import pymongo, json, codecs, os, sys, bson, unicodedata
 from subprocess import Popen, PIPE
 
 OLD_HOST        = "ec2-174-129-76-168.compute-1.amazonaws.com"
@@ -32,6 +32,8 @@ def main():
 
         print 
 
+    convertEntities()
+
 
 def mongoExportImport(collection):
 
@@ -59,7 +61,27 @@ def mongoImportJSON(collection):
                 (collection, NEW_HOST, collection)
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
-    
+
+def convertEntities():
+    entity_collection = new_database['entities']
+    entities = entity_collection.find()
+
+    for entity in entities:
+
+        if 'titlel' in entity:
+            titlel = entity['titlel']
+            new = unicodedata.normalize('NFKD', unicode(titlel)).encode('ascii', 'ignore')
+
+            if titlel != new:
+                entity_collection.update(
+                    {'_id': entity['_id']},
+                    {'$set': {'titlel': new}}
+                )
+                print 'OLD: %30s     NEW: %s' % (titlel, new)
+        else:
+            print '-' * 40
+            print 'SKIPPED: %s (%s)' % (entity['_id'], entity['title'])    
+            print '-' * 40
 
 if __name__ == '__main__':  
     main()
