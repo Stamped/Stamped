@@ -540,7 +540,7 @@ class MongoEntitySearcher(EntitySearcher):
                         return
                     aids.add(aid)
                 
-                if local and not self._is_possible_location_query(result[0].category, result[0].subcategory, local):
+                if local and not self._is_possible_location_query(result[0].category, result[0].subcategory, False):
                     return
                 
                 results[result[0].entity_id] = result
