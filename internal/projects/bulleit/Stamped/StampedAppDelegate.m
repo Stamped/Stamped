@@ -111,59 +111,59 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
-   @"name", @"name",
-   @"color_primary", @"primaryColor",
-   @"color_secondary", @"secondaryColor",
-   @"screen_name", @"screenName",
-   @"num_credits", @"numCredits",
-   @"num_followers", @"numFollowers",
-   @"num_friends", @"numFriends",
-   @"num_stamps", @"numStamps",
-   @"num_stamps_left", @"numStampsLeft",
-   @"image_url", @"imageURL",
-   nil];
+     @"name", @"name",
+     @"color_primary", @"primaryColor",
+     @"color_secondary", @"secondaryColor",
+     @"screen_name", @"screenName",
+     @"num_credits", @"numCredits",
+     @"num_followers", @"numFollowers",
+     @"num_friends", @"numFriends",
+     @"num_stamps", @"numStamps",
+     @"num_stamps_left", @"numStampsLeft",
+     @"image_url", @"imageURL",
+     nil];
   userMapping.primaryKeyAttribute = @"userID";
   [userMapping mapAttributes:@"bio", @"website", @"location", nil];
   
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
-   @"opentable_url", @"openTableURL", 
-   @"itunes_short_url", @"itunesShortURL",
-   @"itunes_url", @"itunesURL", 
-   @"artist_name", @"artist",
-   @"release_date", @"releaseDate", 
-   @"amazon_url", @"amazonURL",
-   @"in_theaters", @"inTheaters", 
-   @"fandango_url", @"fandangoURL", nil];
+     @"opentable_url", @"openTableURL", 
+     @"itunes_short_url", @"itunesShortURL",
+     @"itunes_url", @"itunesURL", 
+     @"artist_name", @"artist",
+     @"release_date", @"releaseDate", 
+     @"amazon_url", @"amazonURL",
+     @"in_theaters", @"inTheaters", 
+     @"fandango_url", @"fandangoURL", nil];
   
   entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapAttributes:@"address", @"category", @"subtitle",
-   @"title", @"coordinates", @"phone", @"subcategory",
-   @"street", @"substreet", @"city", @"state", @"zipcode",
-   @"neighborhood", @"desc", @"genre", @"label", @"length", 
-   @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
-   @"price", @"website", @"rating", @"isbn", @"format", 
-   @"publisher", @"language", @"albums", @"songs",
-   @"image", nil];
+     @"title", @"coordinates", @"phone", @"subcategory",
+     @"street", @"substreet", @"city", @"state", @"zipcode",
+     @"neighborhood", @"desc", @"genre", @"label", @"length", 
+     @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
+     @"price", @"website", @"rating", @"isbn", @"format", 
+     @"publisher", @"language", @"albums", @"songs",
+     @"image", nil];
   
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];
   [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
-   @"restamp_id", @"restampID",
-   @"stamp_id", @"stampID", nil];
+     @"restamp_id", @"restampID",
+     @"stamp_id", @"stampID", nil];
   commentMapping.primaryKeyAttribute = @"commentID";
   [commentMapping mapRelationship:@"user" withMapping:userMapping];
   
   RKManagedObjectMapping* stampMapping = [RKManagedObjectMapping mappingForClass:[Stamp class]];
   [stampMapping mapKeyPathsToAttributes:@"stamp_id", @"stampID",
-   @"created", @"created",
-   @"num_comments", @"numComments",
-   @"num_likes", @"numLikes",
-   @"is_liked", @"isLiked",
-   @"is_fav", @"isFavorited",
-   @"image_dimensions", @"imageDimensions",
-   @"image_url", @"imageURL",
-   @"url", @"URL", nil];
+     @"created", @"created",
+     @"num_comments", @"numComments",
+     @"num_likes", @"numLikes",
+     @"is_liked", @"isLiked",
+     @"is_fav", @"isFavorited",
+     @"image_dimensions", @"imageDimensions",
+     @"image_url", @"imageURL",
+     @"url", @"URL", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
   [stampMapping mapAttributes:@"blurb", @"modified", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
@@ -184,8 +184,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   
   RKManagedObjectMapping* favoriteMapping = [RKManagedObjectMapping mappingForClass:[Favorite class]];
   [favoriteMapping mapAttributes:@"complete", @"created", nil];
-  [favoriteMapping mapKeyPathsToAttributes:@"favorite_id", @"favoriteID",
-   @"user_id", @"userID", nil];
+  [favoriteMapping mapKeyPathsToAttributes:@"favorite_id", @"favoriteID", @"user_id", @"userID", nil];
   favoriteMapping.primaryKeyAttribute = @"favoriteID";
   [favoriteMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [favoriteMapping mapRelationship:@"stamp" withMapping:stampMapping];
@@ -194,8 +193,8 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   
   RKObjectMapping* oauthMapping = [RKObjectMapping mappingForClass:[OAuthToken class]];
   [oauthMapping mapKeyPathsToAttributes:@"access_token", @"accessToken",
-   @"refresh_token", @"refreshToken",
-   @"expires_in", @"lifetimeSecs", nil];
+     @"refresh_token", @"refreshToken",
+     @"expires_in", @"lifetimeSecs", nil];
   
   RKObjectMapping* userAndTokenMapping = [RKObjectMapping serializationMapping];
   [userAndTokenMapping mapRelationship:@"user" withMapping:userMapping];

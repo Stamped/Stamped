@@ -25,7 +25,7 @@
   self.borderStyle = UITextBorderStyleNone;
   self.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
   self.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-  self.clearButtonMode = UITextFieldViewModeWhileEditing;
+  self.clearButtonMode = UITextFieldViewModeAlways;
   self.leftViewMode = UITextFieldViewModeAlways;
   UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 32, CGRectGetHeight(self.frame))];
   UIImageView* searchIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_icon"]];

@@ -96,10 +96,13 @@ static const CGFloat kTopMargin = 5;
   filterType_ = filterType;
   
   for (UIButton* button in filterButtons_) {
-    if (filterType == button.tag)
+    if (filterType == button.tag) {
       button.selected = (!button.selected && filterType != StampFilterTypeNone);
-    else
+      if (!button.selected)
+        filterType_ = StampFilterTypeNone;
+    } else {
       button.selected = NO;
+    }
   }
 }
 
@@ -294,7 +297,6 @@ static const CGFloat kTopMargin = 5;
   // Search field.
   searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(700, 10, 250, 30)];
   searchField_.delegate = self;
-  searchField_.clearButtonMode = UITextFieldViewModeAlways;
   searchField_.placeholder = @"Search";
   [scrollView_ addSubview:searchField_];
   [searchField_ release];
@@ -317,8 +319,8 @@ static const CGFloat kTopMargin = 5;
 }
 
 - (void)filterButtonPressed:(id)sender {
-  NSLog(@"Filter button pressed.");
   self.filterType = [(UIButton*)sender tag];
+  NSLog(@"Filter button pressed: %d", filterType_);
   [self fireDelegateMethod];
 }
 

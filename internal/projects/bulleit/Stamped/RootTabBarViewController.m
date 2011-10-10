@@ -112,9 +112,6 @@
 
   if ([AccountManager sharedManager].currentUser)
     [self fillStampImageView];
-  
-#warning REMOVE THIS
-  [self finishViewInit];
 }
 
 - (void)finishViewInit {
