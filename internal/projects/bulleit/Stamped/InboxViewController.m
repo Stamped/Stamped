@@ -167,11 +167,30 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)loadStampsFromDataStore {
   self.entitiesArray = nil;
+  NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
+  
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO"];
+  if (searchTerms.count == 1 && searchQuery_.length) {
+    p = [NSPredicate predicateWithFormat:
+         @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
+         searchQuery_, searchQuery_, searchQuery_, searchQuery_];
+  } else if (searchTerms.count > 1) {
+    NSMutableArray* subPredicates = [NSMutableArray array];
+    for (NSString* term in searchTerms) {
+      if (!term.length)
+        continue;
 
+      NSPredicate* p = [NSPredicate predicateWithFormat:
+          @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
+          term, term, term, term];
+      [subPredicates addObject:p];
+    }
+    p = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+  }
   NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+  [request setPredicate:p];
 	NSArray* results = [Stamp objectsWithFetchRequest:request];
   NSMutableArray* sortedEntities = [NSMutableArray arrayWithCapacity:results.count];
   for (Stamp* s in results) {
@@ -219,14 +238,19 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType
           withSortType:(StampSortType)sortType
-              andQuery:(NSString*)query {  
-    selectedFilterType_ = filterType;
-    [self filterStamps];
+              andQuery:(NSString*)query {
+  if (![query isEqualToString:searchQuery_]) {
+    self.searchQuery = query;
+    [self loadStampsFromDataStore];
+  }
 
-    selectedSortType_ = sortType;
-    [self sortStamps];
+  selectedFilterType_ = filterType;
+  [self filterStamps];
 
-    [self.tableView reloadData];
+  selectedSortType_ = sortType;
+  [self sortStamps];
+
+  [self.tableView reloadData];
 }
 
 #pragma mark - Filter/Sort/Search stuff.
