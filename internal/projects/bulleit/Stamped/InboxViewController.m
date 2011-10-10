@@ -138,9 +138,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
-  self.searchQuery = nil;
   self.stampFilterBar = nil;
 }
 

@@ -60,12 +60,13 @@
 @dynamic fandangoURL;
 @dynamic image;
 @dynamic events;
-@dynamic location;
 
+@synthesize location = location_;
 @synthesize cachedDistance = cachedDistance_;
 
 - (void)dealloc {
   self.cachedDistance = nil;
+  self.location = nil;
   [super dealloc];
 }
 
@@ -93,11 +94,14 @@
 - (CLLocation*)location {
   if (!self.coordinates)
     return nil;
+  if (location_)
+    return location_;
   
   NSArray* coordinates = [self.coordinates componentsSeparatedByString:@","]; 
   CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
-  return [[[CLLocation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
+  self.location = [[[CLLocation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
+  return location_;
 }
 
 - (id)valueForUndefinedKey:(NSString*)key {

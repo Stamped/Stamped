@@ -72,7 +72,7 @@ typedef enum {
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
-@property (nonatomic, readonly) CLLocation* location;
+@property (nonatomic, retain) CLLocation* location;
 @property (nonatomic, retain) NSNumber* cachedDistance;
 @end
 
