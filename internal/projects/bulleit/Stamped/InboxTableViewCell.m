@@ -145,6 +145,8 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     UIImage* highlightedLocationImage = [Util whiteMaskedImageUsingImage:locationImage];
     locationImageView_ = [[UIImageView alloc] initWithImage:locationImage
                                            highlightedImage:highlightedLocationImage];
+    [self addSubview:locationImageView_];
+    [locationImageView_ release];
 
     cameraImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(293, 34, 17, 14)];
     cameraImageView_.contentMode = UIViewContentModeCenter;
@@ -387,24 +389,44 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     if (sortType_ == StampSortTypeTime) {
       distanceLabel_.hidden = YES;
       timestampLabel_.hidden = NO;
+      locationImageView_.hidden = YES;
       [self updateTimestamp];
     } else if (sortType_ == StampSortTypeDistance) {
       timestampLabel_.hidden = YES;
-      NSLog(@"Cached distance: %@", stamp.entityObject.cachedDistance.stringValue);
-      distanceLabel_.text = stamp.entityObject.cachedDistance.stringValue;
+      if (!stamp.entityObject.cachedDistance) {
+        distanceLabel_.hidden = YES;
+        locationImageView_.hidden = YES;
+        return;
+      }
+
+      CGFloat miles = stamp.entityObject.cachedDistance.floatValue * 0.000621371192f;
+      if (miles < 2.0) {
+        distanceLabel_.textColor = [UIColor colorWithRed:0.66 green:0.48 blue:0.8 alpha:1.0];
+        locationImageView_.image = [UIImage imageNamed:@"small_location_icon_purple"];
+      } else {
+        distanceLabel_.textColor = [UIColor stampedLightGrayColor];
+        locationImageView_.image = [UIImage imageNamed:@"small_location_icon"];
+      }
+      distanceLabel_.text = [NSString stringWithFormat:@"%.1f mi", miles];
       [distanceLabel_ sizeToFit];
-      CGRect distanceFrame = distanceLabel_.frame;  // heh.
+      CGRect distanceFrame = distanceLabel_.frame;
       distanceFrame.origin.x = 283 - distanceFrame.size.width;
       distanceFrame.origin.y = 74;
       distanceLabel_.frame = distanceFrame;
       CGRect subtitleFrame = subtitleLabel_.frame;
       subtitleFrame.size.width = kSubtitleDefaultWidth - CGRectGetWidth(distanceFrame);
       subtitleLabel_.frame = subtitleFrame;
+      locationImageView_.frame = CGRectMake(CGRectGetMinX(distanceFrame) - CGRectGetWidth(locationImageView_.frame) - 3,
+                                            CGRectGetMinY(distanceFrame) + 2, 
+                                            CGRectGetWidth(locationImageView_.frame),
+                                            CGRectGetHeight(locationImageView_.frame));
       distanceLabel_.hidden = NO;
+      locationImageView_.hidden = NO;
       [self setNeedsDisplay];
     } else if (sortType_ == StampSortTypePopularity) {
       timestampLabel_.hidden = YES;
       distanceLabel_.hidden = YES;
+      locationImageView_.hidden = YES;
     }
   }
 }

@@ -74,6 +74,7 @@ static const CGFloat kTopMargin = 5;
 }
 
 - (void)initialize {
+  
   self.locationManager = [[[CLLocationManager alloc] init] autorelease];
   self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
   self.locationManager.delegate = self;
@@ -88,6 +89,7 @@ static const CGFloat kTopMargin = 5;
   scrollView_.showsVerticalScrollIndicator = NO;
   scrollView_.showsHorizontalScrollIndicator = NO;
   scrollView_.delegate = self;
+  scrollView_.scrollsToTop = NO;
   [self addSubview:scrollView_];
   [scrollView_ release];
   [self addFirstPageButtons];
@@ -354,6 +356,10 @@ static const CGFloat kTopMargin = 5;
 }
 
 #pragma mark - UIScrollViewDelegate methods.
+
+- (BOOL)scrollViewShouldScrollToTop:(UIScrollView*)scrollView {
+  return NO;
+}
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView*)scrollView {
   CGFloat currentPage = fmaxf(0, floorf(scrollView_.contentOffset.x / CGRectGetWidth(self.bounds)));
