@@ -50,19 +50,20 @@ data = {
     "login": USER,
     "password": PASS
 }
-token = handlePOST(path, data)
+account = handlePOST(path, data)
+token = account['token']
 
-path = "users/search.json"
-data = { 
-    "oauth_token": token['token']['access_token'],
-    "q": 'bon'
-}
-result = handlePOST(path, data)
+# path = "users/search.json"
+# data = { 
+#     "oauth_token": token['token']['access_token'],
+#     "q": 'bon'
+# }
+# result = handlePOST(path, data)
 
-print
-print
-for i in xrange(len(result)):
-    print '%2s | %14s | %s' % (i+1, result[i]['screen_name'], result[i]['name'])
+# print
+# print
+# for i in xrange(len(result)):
+#     print '%2s | %14s | %s' % (i+1, result[i]['screen_name'], result[i]['name'])
 
 # path = "favorites/create.json"
 # data = { 
@@ -72,14 +73,28 @@ for i in xrange(len(result)):
 # }
 # result = handlePOST(path, data)
 
-# path = "friendships/remove.json"
-# data = {
-#     "oauth_token": token['access_token'],
-#     "screen_name": 'zoe'
-# }
-# result = handlePOST(path, data)
+path = "account/alerts/update.json"
+data = {
+    "oauth_token": token['access_token'],
+    "ios_alert_credit": True,
+    "ios_alert_like": True,
+    "ios_alert_fav": True,
+    "ios_alert_mention": True,
+    "ios_alert_comment": True,
+    "ios_alert_reply": True,
+    "ios_alert_follow": True,
+    "email_alert_credit": True,
+    "email_alert_like": True,
+    "email_alert_fav": True,
+    "email_alert_mention": True,
+    "email_alert_comment": True,
+    "email_alert_reply": True,
+    "email_alert_follow": True,
 
-# print result
+}
+result = handlePOST(path, data)
+
+print result
 
 print
 print

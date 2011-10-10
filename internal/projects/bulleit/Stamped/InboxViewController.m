@@ -138,9 +138,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
-  self.searchQuery = nil;
   self.stampFilterBar = nil;
 }
 
@@ -245,7 +242,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       break;
     case StampSortTypeDistance: {
       CLLocation* currentLocation = stampFilterBar_.currentLocation;
-      NSLog(@"Current location: %@", currentLocation);
       if (!currentLocation)
         break;
 
@@ -264,7 +260,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
           return NSOrderedAscending;
 
         firstDistance = [NSNumber numberWithDouble:[firstEntity.location distanceFromLocation:currentLocation]];
+        firstEntity.cachedDistance = firstDistance;
         secondDistance = [NSNumber numberWithDouble:[secondEntity.location distanceFromLocation:currentLocation]];
+        secondEntity.cachedDistance = secondDistance;
         return [firstDistance compare:secondDistance];
       }];
 
@@ -332,6 +330,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
+  cell.sortType = selectedSortType_;
   cell.entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
 
   return cell;

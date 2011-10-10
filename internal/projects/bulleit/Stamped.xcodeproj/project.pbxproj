@@ -176,6 +176,8 @@
 		7E69021A13E76A4100B09802 /* ActivityCreditTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E69021913E76A4100B09802 /* ActivityCreditTableViewCell.m */; };
 		7E6FFA53140F137400F23A26 /* clear_unfollow_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FFA51140F137400F23A26 /* clear_unfollow_bg@2x.png */; };
 		7E6FFA54140F137400F23A26 /* green_follow_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FFA52140F137400F23A26 /* green_follow_bg@2x.png */; };
+		7E7396EA14438A5600C7CFEA /* small_location_icon_purple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7396E814438A5600C7CFEA /* small_location_icon_purple@2x.png */; };
+		7E7396EB14438A5600C7CFEA /* small_location_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7396E914438A5600C7CFEA /* small_location_icon@2x.png */; };
 		7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */; };
 		7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */; };
 		7E76129C13C938DE0023CCC4 /* main_action_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */; };
@@ -763,6 +765,9 @@
 		7E69021913E76A4100B09802 /* ActivityCreditTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityCreditTableViewCell.m; sourceTree = "<group>"; };
 		7E6FFA51140F137400F23A26 /* clear_unfollow_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "clear_unfollow_bg@2x.png"; sourceTree = "<group>"; };
 		7E6FFA52140F137400F23A26 /* green_follow_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "green_follow_bg@2x.png"; sourceTree = "<group>"; };
+		7E7396E814438A5600C7CFEA /* small_location_icon_purple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "small_location_icon_purple@2x.png"; sourceTree = "<group>"; };
+		7E7396E914438A5600C7CFEA /* small_location_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "small_location_icon@2x.png"; sourceTree = "<group>"; };
+		7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
 		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
 		7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PlaceDetailViewController.xib; path = ../Interfaces/PlaceDetailViewController.xib; sourceTree = "<group>"; };
@@ -1574,6 +1579,8 @@
 		7EB29D831414657C003A8EA3 /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
+				7E7396E814438A5600C7CFEA /* small_location_icon_purple@2x.png */,
+				7E7396E914438A5600C7CFEA /* small_location_icon@2x.png */,
 				7E29C873141D5D51005D60CE /* inbox_chat_bubble@2x.png */,
 				7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */,
 			);
@@ -2574,6 +2581,8 @@
 				7EBBDB511441F21F00DDEAE9 /* hdr_sort_popular_button@2x.png in Resources */,
 				7EBBDB521441F21F00DDEAE9 /* hdr_sort_time_button_selected@2x.png in Resources */,
 				7EBBDB531441F21F00DDEAE9 /* hdr_sort_time_button@2x.png in Resources */,
+				7E7396EA14438A5600C7CFEA /* small_location_icon_purple@2x.png in Resources */,
+				7E7396EB14438A5600C7CFEA /* small_location_icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2952,6 +2961,7 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */,
 				7E1873CB143A64B800A0ECC0 /* StampedModel 7.xcdatamodel */,
 				7E1873C4143A10D500A0ECC0 /* StampedModel 6.xcdatamodel */,
 				7E0B61FC1439246E00A573FA /* StampedModel 5.xcdatamodel */,
@@ -2960,7 +2970,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E1873CB143A64B800A0ECC0 /* StampedModel 7.xcdatamodel */;
+			currentVersion = 7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

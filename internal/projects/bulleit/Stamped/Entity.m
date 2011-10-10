@@ -62,6 +62,13 @@
 @dynamic events;
 @dynamic location;
 
+@synthesize cachedDistance = cachedDistance_;
+
+- (void)dealloc {
+  self.cachedDistance = nil;
+  [super dealloc];
+}
+
 - (UIImage*)categoryImage {
   if (self.category)
     return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];
@@ -83,18 +90,23 @@
   return EntityCategoryOther;
 }
 
-- (CLLocation*)location {
-  if (!self.coordinates)
-    return nil;
-  
-  NSArray* coordinates = [self.coordinates componentsSeparatedByString:@","]; 
-  CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
-  CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
-  return [[[CLLocation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
+- (void)setCoordinates:(NSString*)coordinates {
+  [self willChangeValueForKey:@"coordinates"];
+  [self setPrimitiveValue:coordinates forKey:@"coordinates"];
+  NSArray* coordinatesArray = [self.coordinates componentsSeparatedByString:@","]; 
+  CGFloat latitude = [(NSString*)[coordinatesArray objectAtIndex:0] floatValue];
+  CGFloat longitude = [(NSString*)[coordinatesArray objectAtIndex:1] floatValue];
+  self.location = [[[CLLocation alloc] initWithLatitude:latitude longitude:longitude] autorelease];  
+  [self didChangeValueForKey:@"coordinates"];
 }
 
 - (id)valueForUndefinedKey:(NSString*)key {
   return nil;
+}
+
+- (void)awakeFromFetch {
+  if (self.coordinates && !self.location)
+    [self setCoordinates:self.coordinates];
 }
 
 @end

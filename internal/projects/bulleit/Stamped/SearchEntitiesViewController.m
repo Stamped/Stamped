@@ -113,6 +113,7 @@ typedef enum {
              forControlEvents:UIControlEventEditingChanged];
 
   self.locationManager = [[[CLLocationManager alloc] init] autorelease];
+  self.locationManager.desiredAccuracy = kCLLocationAccuracyKilometer;
   
   tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_tooltip"]];
   tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 6, 40);
@@ -548,6 +549,12 @@ typedef enum {
     self.resultsArray = nil;
     [self.tableView reloadData];
   }
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  [searchField_ resignFirstResponder];
 }
 
 @end
