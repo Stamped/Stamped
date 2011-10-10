@@ -75,6 +75,7 @@ static const CGFloat kTopMargin = 5;
 
 - (void)initialize {
   self.locationManager = [[[CLLocationManager alloc] init] autorelease];
+  self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
   self.locationManager.delegate = self;
   
   self.sortButtons = [NSMutableArray array];

@@ -62,6 +62,13 @@
 @dynamic events;
 @dynamic location;
 
+@synthesize cachedDistance = cachedDistance_;
+
+- (void)dealloc {
+  self.cachedDistance = nil;
+  [super dealloc];
+}
+
 - (UIImage*)categoryImage {
   if (self.category)
     return [UIImage imageNamed:[@"cat_icon_" stringByAppendingString:[self.category lowercaseString]]];

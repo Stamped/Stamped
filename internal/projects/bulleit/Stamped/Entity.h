@@ -40,8 +40,8 @@ typedef enum {
 @property (nonatomic, retain) NSString* subcategory;
 @property (nonatomic, retain) NSString* desc;
 @property (nonatomic, retain) NSString* artist;
-@property (nonatomic, retain) NSArray*  albums;
-@property (nonatomic, retain) NSArray*  songs;
+@property (nonatomic, retain) NSArray* albums;
+@property (nonatomic, retain) NSArray* songs;
 @property (nonatomic, retain) NSString* author;
 @property (nonatomic, retain) NSString* cast;
 @property (nonatomic, retain) NSString* director;
@@ -73,6 +73,7 @@ typedef enum {
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
 @property (nonatomic, readonly) CLLocation* location;
+@property (nonatomic, retain) NSNumber* cachedDistance;
 @end
 
 @interface Entity (CoreDataGeneratedAccessors)

@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "STStampFilterBar.h"
+
 @class InboxCellView;
 @class Entity;
 @class PageDotsView;
@@ -29,5 +31,6 @@ extern NSString* const kInboxTableDidScrollNotification;
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, readonly) InboxCellView* customView;
+@property (nonatomic, assign) StampSortType sortType;
 
 @end

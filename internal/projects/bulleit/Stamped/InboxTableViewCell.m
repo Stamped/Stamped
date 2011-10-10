@@ -45,10 +45,12 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   UIImageView* disclosureImageView_;
   UIImageView* cameraImageView_;
   UIImageView* commentBubbleImageView_;
+  UIImageView* locationImageView_;
   UILabel* userNameLabel_;
   UILabel* commentLabel_;
   UILabel* numCommentsLabel_;
   UILabel* timestampLabel_;
+  UILabel* distanceLabel_;
   MediumUserImageView* topUserImageView_;
   MediumUserImageView* middleUserImageView_;
   MediumUserImageView* bottomUserImageView_;
@@ -73,6 +75,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 @property (nonatomic, assign) BOOL selected;
 @property (nonatomic, assign) BOOL hidePhotos;
+@property (nonatomic, assign) StampSortType sortType;
 @property (nonatomic, assign) NSUInteger numComments;
 @property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, copy) NSString* title;
@@ -92,6 +95,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize title = title_;
 @synthesize stamps = stamps_;
 @synthesize hidePhotos = hidePhotos_;
+@synthesize sortType = sortType_;
 @synthesize subtitleLabel = subtitleLabel_;
 @synthesize typeImageView = typeImageView_;
 
@@ -127,6 +131,20 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     timestampLabel_.font = [UIFont fontWithName:@"Helvetica" size:10];
     [self addSubview:timestampLabel_];
     [timestampLabel_ release];
+    
+    distanceLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    distanceLabel_.backgroundColor = [UIColor clearColor];
+    distanceLabel_.textColor = [UIColor stampedLightGrayColor];
+    distanceLabel_.highlightedTextColor = [UIColor whiteColor];
+    distanceLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
+    distanceLabel_.hidden = YES;
+    [self addSubview:distanceLabel_];
+    [distanceLabel_ release];
+    
+    UIImage* locationImage = [UIImage imageNamed:@"small_location_icon"];
+    UIImage* highlightedLocationImage = [Util whiteMaskedImageUsingImage:locationImage];
+    locationImageView_ = [[UIImageView alloc] initWithImage:locationImage
+                                           highlightedImage:highlightedLocationImage];
 
     cameraImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(293, 34, 17, 14)];
     cameraImageView_.contentMode = UIViewContentModeCenter;
@@ -366,7 +384,28 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                                    name:kStampDidChangeNotification
                                                  object:s];
     }
-    [self updateTimestamp];
+    if (sortType_ == StampSortTypeTime) {
+      distanceLabel_.hidden = YES;
+      timestampLabel_.hidden = NO;
+      [self updateTimestamp];
+    } else if (sortType_ == StampSortTypeDistance) {
+      timestampLabel_.hidden = YES;
+      NSLog(@"Cached distance: %@", stamp.entityObject.cachedDistance.stringValue);
+      distanceLabel_.text = stamp.entityObject.cachedDistance.stringValue;
+      [distanceLabel_ sizeToFit];
+      CGRect distanceFrame = distanceLabel_.frame;  // heh.
+      distanceFrame.origin.x = 283 - distanceFrame.size.width;
+      distanceFrame.origin.y = 74;
+      distanceLabel_.frame = distanceFrame;
+      CGRect subtitleFrame = subtitleLabel_.frame;
+      subtitleFrame.size.width = kSubtitleDefaultWidth - CGRectGetWidth(distanceFrame);
+      subtitleLabel_.frame = subtitleFrame;
+      distanceLabel_.hidden = NO;
+      [self setNeedsDisplay];
+    } else if (sortType_ == StampSortTypePopularity) {
+      timestampLabel_.hidden = YES;
+      distanceLabel_.hidden = YES;
+    }
   }
 }
 
@@ -478,11 +517,13 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize entityObject = entityObject_;
 @synthesize stamp = stamp_;
 @synthesize customView = customView_;
+@synthesize sortType = sortType_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
               reuseIdentifier:reuseIdentifier];
   if (self) {
+    sortType_ = StampSortTypeTime;
     self.accessoryType = UITableViewCellAccessoryNone;
     CGRect customViewFrame = CGRectMake(0, 0, self.contentView.bounds.size.width,
                                               self.contentView.bounds.size.height);
@@ -535,6 +576,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
   [super setSelected:selected animated:animated];
   [customView_ setSelected:selected animated:animated];
+}
+
+- (void)setSortType:(StampSortType)sortType {
+  sortType_ = sortType;
+  [customView_ setSortType:sortType];
 }
 
 - (void)setStamp:(Stamp*)stamp {
