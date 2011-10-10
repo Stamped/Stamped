@@ -13,7 +13,6 @@
 #import "ActivityViewController.h"
 #import "SearchEntitiesViewController.h"
 #import "Notifications.h"
-#import "TodoViewController.h"
 #import "PeopleViewController.h"
 #import "STNavigationBar.h"
 #import "STSearchField.h"
@@ -119,6 +118,8 @@
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
   TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
   PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];
+  
+  todo.delegate = self;
 
   self.viewControllers = [NSArray arrayWithObjects:inbox, activity, todo, people, nil];
   [inbox release];
@@ -287,6 +288,7 @@
 - (IBAction)createStamp:(id)sender {
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
   SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
+  vc.searchIntent = SearchIntentStamp;
   [vc clearSearchField];
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
@@ -316,6 +318,16 @@
 
 - (void)accountManagerDidAuthenticate {
   [self finishViewInit];
+}
+
+#pragma mark - TodoViewControllerDelegate Methods.
+
+- (void)displaySearchEntities {
+  [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
+  SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
+  vc.searchIntent = SearchIntentTodo;
+  [vc clearSearchField];
+  [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 
 #pragma mark - UITabBarDelegate Methods.

@@ -25,11 +25,13 @@
 #import "Util.h"
 
 static NSString* const kShowFavoritesPath = @"/favorites/show.json";
+static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 @interface TodoViewController ()
 - (void)loadFavoritesFromDataStore;
 - (void)loadFavoritesFromNetwork;
 - (void)favoriteDidChange:(NSNotification*)notification;
+- (void)removeFavoriteWithEntityID:(NSString*)entityID;
 
 @property (nonatomic, copy) NSArray* favoritesArray;
 @end
@@ -37,6 +39,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 @implementation TodoViewController
 
 @synthesize favoritesArray = favoritesArray_;
+@synthesize delegate = delegate_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -102,10 +105,32 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.favoritesArray.count;
+  if (favoritesArray_ != nil)
+    return self.favoritesArray.count + 1;  // One more for adding friends.
+  
+  return 0;
+}
+
+- (float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+  if (indexPath.row == 0)
+    return 50.0;
+  else 
+    return 82.0;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (indexPath.row == 0 && favoritesArray_ != nil) {
+    UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                                    reuseIdentifier:nil] autorelease];
+    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button_addTodo"]];
+    addFriendsImageView.center = cell.contentView.center;
+    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 0.0, 4.0);
+    [cell addSubview:addFriendsImageView];
+    [addFriendsImageView release];
+    return cell;
+  }
+
+  
   static NSString* CellIdentifier = @"Cell";
 
   TodoTableViewCell* cell = (TodoTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
@@ -113,7 +138,7 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
     cell = [[[TodoTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
 
-  Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row];
+  Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row - 1];
   cell.delegate = self;
   cell.favorite = fave;
   
@@ -123,11 +148,50 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row];
+  if (indexPath.row == 0) {
+    [self.delegate displaySearchEntities];
+    return;
+  }
+  
+  Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row - 1];
   UIViewController* detailViewController = [Util detailViewControllerForEntity:fave.entityObject];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
 }
+
+//-(void)tableView:(UITableView*)tableView willBeginEditingRowAtIndexPath:(NSIndexPath *)indexPath {
+//  TodoTableViewCell* cell = (TodoTableViewCell*)[self tableView:tableView cellForRowAtIndexPath:indexPath];
+//}
+
+
+//-(void)tableView:(UITableView *)tableView didEndEditingRowAtIndexPath:(NSIndexPath *)indexPath {
+//  TodoTableViewCell* cell = (TodoTableViewCell*)[self tableView:tableView cellForRowAtIndexPath:indexPath];
+//}
+
+-(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+  if (indexPath.row == 0) 
+    return NO;
+  return YES;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle 
+forRowAtIndexPath:(NSIndexPath *)indexPath {
+  // If row is deleted, remove it from the list.
+  if (editingStyle == UITableViewCellEditingStyleDelete) {
+    Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row - 1];
+    [self removeFavoriteWithEntityID:fave.entityObject.entityID];
+    
+    fave.entityObject = nil;
+    [fave.managedObjectContext save:nil];
+
+    NSMutableArray* tempFaves = self.favoritesArray.mutableCopy;
+    [tempFaves removeObjectAtIndex:indexPath.row - 1];
+    self.favoritesArray = tempFaves;
+    
+    [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationMiddle];
+  }
+}
+
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
@@ -196,5 +260,18 @@ static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 - (void)favoriteDidChange:(NSNotification*)notification {
   [self loadFavoritesFromDataStore];
 }
+
+- (void)removeFavoriteWithEntityID:(NSString*)entityID {
+  NSString* path = kRemoveFavoritePath;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = favoriteMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityID, @"entity_id", nil];
+
+  [objectLoader send];
+}
+
 
 @end

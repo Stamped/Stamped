@@ -24,6 +24,7 @@
 #import "User.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
+static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 
@@ -34,6 +35,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)loadEntityDataFromServer;
 - (void)showContents;
 - (void)setupSectionViews;
+- (void)addSelfAsFavorite;
 @end
 
 @implementation EntityDetailViewController
@@ -160,7 +162,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   mainActionButton_.layer.cornerRadius = 2.0;
   mainActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
 
-  if (entityObject_.favorite)
+  if (entityObject_.favorite.stamp)
     [self addTodoBar];
 }
 
@@ -214,6 +216,39 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [bar addGestureRecognizer:recognizer];
   [recognizer release];
   [self.scrollView insertSubview:bar atIndex:0];
+  [bar release];
+}
+
+- (void)addToolbar {
+  UIView* bar = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 56, 320, 56)];
+  bar.layer.shadowPath = [UIBezierPath bezierPathWithRect:bar.bounds].CGPath;
+  bar.layer.shadowOpacity = 0.2;
+  bar.layer.shadowOffset = CGSizeMake(0, -1);
+  CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
+  toolbarGradient.frame = bar.bounds;
+  toolbarGradient.colors = [NSArray arrayWithObjects:
+                            (id)[UIColor whiteColor].CGColor,
+                            (id)[UIColor colorWithWhite:0.85 alpha:1.0].CGColor, nil];
+  [bar.layer addSublayer:toolbarGradient];
+  [toolbarGradient release];
+  
+  UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+  UIImage* buttonBG = [UIImage imageNamed:@"big_blue_button_bg"];
+  [button setBackgroundImage:buttonBG forState:UIControlStateNormal];
+  [button setTitle:@"Add To-Do" forState:UIControlStateNormal];
+  [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+  button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14.0];
+  button.titleLabel.shadowColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+  button.titleLabel.shadowOffset = CGSizeMake(0.0, -0.5);
+  button.frame = CGRectMake((bar.frame.size.width - buttonBG.size.width) / 2, 8.0, buttonBG.size.width, buttonBG.size.height);
+  [button addTarget:self action:@selector(addSelfAsFavorite) forControlEvents:UIControlEventTouchUpInside];
+  [bar addSubview:button];
+  
+  
+  [self.view addSubview:bar];
+  CGRect frame = self.scrollView.frame;
+  frame.size.height -= 56;
+  self.scrollView.frame = frame;
   [bar release];
 }
 
@@ -388,6 +423,21 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   }
   
   return contentHeight;
+}
+
+# pragma mark - Make a todo from this entity.
+
+- (void)addSelfAsFavorite {
+  NSString* path = kCreateFavoritePath;
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = favoriteMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
+                         entityObject_.entityID, @"entity_id", nil];
+  [objectLoader send];
+  [self.navigationController dismissModalViewControllerAnimated:YES];
 }
 
 @end

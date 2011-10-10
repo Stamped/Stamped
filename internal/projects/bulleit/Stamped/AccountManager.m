@@ -430,7 +430,7 @@ static AccountManager* sharedAccountManager_ = nil;
   [refreshTokenKeychainItem_ resetKeychainItem];
   [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
   self.currentUser = nil;
-  [RKObjectManager.sharedManager.objectStore deletePersistantStore];
+  [[RKObjectManager sharedManager].objectStore deletePersistantStore];
   NSFileManager* fm = [NSFileManager defaultManager];
   NSURL* directoryURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
   NSError* error = nil;
