@@ -8,6 +8,7 @@
 
 #import "SearchEntitiesViewController.h"
 
+#import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
@@ -84,7 +85,6 @@ typedef enum {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.resultsArray = nil;
   self.searchField = nil;
-  self.locationManager.delegate = nil;
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
@@ -215,7 +215,6 @@ typedef enum {
   [super viewDidUnload];
 
   self.searchField = nil;
-  self.locationManager.delegate = nil;
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;

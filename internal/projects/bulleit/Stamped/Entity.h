@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+@class CLLocation;
 @class Event;
 @class Favorite;
 @class Stamp;
@@ -71,6 +72,7 @@ typedef enum {
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
+@property (nonatomic, readonly) CLLocation* location;
 @end
 
 @interface Entity (CoreDataGeneratedAccessors)
