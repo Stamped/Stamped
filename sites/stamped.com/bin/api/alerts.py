@@ -81,7 +81,10 @@ def main():
 
     print 'Number of alerts: %s' % numAlerts
     print
-    print 'Accounts: %s' % accounts
+    print 'Accounts:'
+    for k, v in userIds.iteritems():
+        print v.value
+    print
 
     pushQueue = []
     emailQueue = []
@@ -125,50 +128,55 @@ def main():
                 send_email  = None
 
             if send_push:
-                # Send push notification
-                print 'SEND PUSH NOTIFICATION'
+                try:
+                    # Send push notification
+                    print 'SEND PUSH NOTIFICATION'
 
-                if not recipient.devices.ios_device_tokens:
-                    raise
-                print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
+                    if not recipient.devices.ios_device_tokens:
+                        raise
+                    print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
 
-                # User
-                user = userIds[str(alert['user_id'])]
-                
-                # Activity
-                activity = activityDB.getActivityItem(alert.activity_id)
+                    # User
+                    user = userIds[str(alert['user_id'])]
+                    
+                    # Activity
+                    activity = activityDB.getActivityItem(alert.activity_id)
 
-                # Build push notification
-                for token in recipient.devices.ios_device_tokens:
-                    result = buildPushNotification(user, activity, token.value)
-                    pushQueue.append(result)
+                    # Build push notification
+                    for token in recipient.devices.ios_device_tokens:
+                        result = buildPushNotification(user, activity, token.value)
+                        pushQueue.append(result)
+
+                    print 'PUSH COMPLETE'
+                except:
+                    print 'PUSH FAILED'
 
 
             if send_email:
-                # Send email
-                print 'SEND EMAIL'
+                try:
+                    # Send email
+                    print 'SEND EMAIL'
 
-                if not recipient.email:
-                    raise
-                print 'EMAIL ADDRESS: %s' % recipient.email
+                    if not recipient.email:
+                        raise
+                    print 'EMAIL ADDRESS: %s' % recipient.email
 
-                # User
-                user = userIds[str(alert['user_id'])]
-                
-                # Activity
-                activity = activityDB.getActivityItem(alert.activity_id)
+                    # User
+                    user = userIds[str(alert['user_id'])]
+                    
+                    # Activity
+                    activity = activityDB.getActivityItem(alert.activity_id)
 
-                # Build email
-                email = buildEmail(user, recipient, activity)
-                emailQueue.append(email)
+                    # Build email
+                    email = buildEmail(user, recipient, activity)
+                    emailQueue.append(email)
 
-
-            if not send_push and not send_email:
-                raise
-
-            # Remove alert
-            print 'COMPLETE'
-            # alertDB.removeAlert(alert.alert_id)
+                    print 'EMAIL COMPLETE'
+                except:
+                    print 'EMAIL FAILED'
+            
+            # Remove the alert
+            raise
 
         except:
             print 'REMOVED'
@@ -192,19 +200,19 @@ def main():
 def _setSubject(user, genre):
 
     if genre == 'restamp':
-        msg = '%s (@%s) gave you credit for a stamp' % (user.name, user.screen_name)
+        msg = '%s (@%s) gave you credit for a stamp' % (user['name'], user.screen_name)
     elif genre == 'like':
-        msg = '%s (@%s) liked your stamp' % (user.name, user.screen_name)
+        msg = '%s (@%s) liked your stamp' % (user['name'], user.screen_name)
     elif genre == 'favorite':
-        msg = '%s (@%s) added your stamp as a to-do' % (user.name, user.screen_name)
+        msg = '%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
     elif genre == 'mention':
-        msg = '%s (@%s) mentioned you on Stamped' % (user.name, user.screen_name)
+        msg = '%s (@%s) mentioned you on Stamped' % (user['name'], user.screen_name)
     elif genre == 'comment':
-        msg = '%s (@%s) commented on your stamp' % (user.name, user.screen_name)
+        msg = '%s (@%s) commented on your stamp' % (user['name'], user.screen_name)
     elif genre == 'reply':
-        msg = '%s (@%s) replied to you on Stamped' % (user.name, user.screen_name)
+        msg = '%s (@%s) replied to you on Stamped' % (user['name'], user.screen_name)
     elif genre == 'follower':
-        msg = '%s (@%s) is now following you on Stamped' % (user.name, user.screen_name)
+        msg = '%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
     else:
         ### TODO: Add error logging?
         raise Exception
@@ -212,7 +220,6 @@ def _setSubject(user, genre):
     return msg
 
 def _setBody(user, activity):
-    pass
 
     return 'This is where the body text will go.'
 
@@ -243,7 +250,7 @@ def buildPushNotification(user, activityItem, deviceId):
 
     elif genre == 'mention':
         msg = "%s (@%s) mentioned you on %s." % \
-            (user.name, user.screen_name, activityItem.subject)
+            (user['name'], user.screen_name, activityItem.subject)
 
     elif genre == 'comment':
         msg = "Test"
