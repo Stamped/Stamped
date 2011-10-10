@@ -17,6 +17,9 @@ from db.mongodb.MongoAlertCollection import MongoAlertCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
 
+AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
+AWS_SECRET_KEY = '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'
+
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
     version = "%prog " + __version__
@@ -63,7 +66,7 @@ def main():
     activityDB  = MongoActivityCollection()
 
     numAlerts = alertDB.numAlerts()
-    alerts  = alertDB.getAlerts()
+    alerts  = alertDB.getAlerts(limit=100)
     userIds   = {}
 
     for alert in alerts:
@@ -134,7 +137,7 @@ def main():
                     pushQueue.append(result)
 
 
-            elif notification == 'e':
+            if notification == 'e':
                 # Send email
                 print 'SEND EMAIL'
 
@@ -149,11 +152,11 @@ def main():
                 activity = activityDB.getActivityItem(alert.activity_id)
 
                 # Build email
+                email = buildEmail(user, recipient, activity)
+                emailQueue.append(email)
 
-                ### TODO: Kick out to fn that actually builds HTML email
 
-
-            else:
+            if not notification or notification not in ['p', 'e']:
                 raise
 
             # Remove alert
@@ -179,14 +182,43 @@ def main():
 
     print
 
-def sendEmails(emailQueue):
-    pass
-    
-def sendPushNotifications(pushQueue):
+def _setSubject(user, genre):
+
+    if genre == 'restamp':
+        msg = '%s (@%s) gave you credit for a stamp' % (user.name, user.screen_name)
+    elif genre == 'like':
+        msg = '%s (@%s) liked your stamp' % (user.name, user.screen_name)
+    elif genre == 'favorite':
+        msg = '%s (@%s) added your stamp as a to-do' % (user.name, user.screen_name)
+    elif genre == 'mention':
+        msg = '%s (@%s) mentioned you on Stamped' % (user.name, user.screen_name)
+    elif genre == 'comment':
+        msg = '%s (@%s) commented on your stamp' % (user.name, user.screen_name)
+    elif genre == 'reply':
+        msg = '%s (@%s) replied to you on Stamped' % (user.name, user.screen_name)
+    elif genre == 'follower':
+        msg = '%s (@%s) is now following you on Stamped' % (user.name, user.screen_name)
+    else:
+        ### TODO: Add error logging?
+        raise Exception
+
+    return msg
+
+def _setBody(user, activity):
     pass
 
+    return 'This is where the body text will go.'
+
+
 def buildEmail(user, recipient, activityItem):
-    pass
+    email = {}
+    email['to'] = recipient.email
+    email['from'] = 'Stamped <noreply@stamped.com>'
+    email['subject'] = _setSubject(user, activityItem.genre)
+    email['body'] = _setBody(user, activityItem)
+
+    return email
+
 
 def buildPushNotification(user, activityItem, deviceId):
     genre = activityItem.genre
@@ -232,6 +264,18 @@ def buildPushNotification(user, activityItem, deviceId):
                 len(s_payload), s_payload)
 
     return result
+
+
+def sendEmails(emailQueue):
+    ses = boto.connect_ses(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+
+    for msg in emailQueue:
+        ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'])
+
+
+def sendPushNotifications(pushQueue):
+    pass
+
 
 if __name__ == '__main__':
     main()
