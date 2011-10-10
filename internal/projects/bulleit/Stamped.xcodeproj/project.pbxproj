@@ -767,6 +767,7 @@
 		7E6FFA52140F137400F23A26 /* green_follow_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "green_follow_bg@2x.png"; sourceTree = "<group>"; };
 		7E7396E814438A5600C7CFEA /* small_location_icon_purple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "small_location_icon_purple@2x.png"; sourceTree = "<group>"; };
 		7E7396E914438A5600C7CFEA /* small_location_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "small_location_icon@2x.png"; sourceTree = "<group>"; };
+		7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 8.xcdatamodel"; sourceTree = "<group>"; };
 		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
 		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
 		7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PlaceDetailViewController.xib; path = ../Interfaces/PlaceDetailViewController.xib; sourceTree = "<group>"; };
@@ -2960,6 +2961,7 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */,
 				7E1873CB143A64B800A0ECC0 /* StampedModel 7.xcdatamodel */,
 				7E1873C4143A10D500A0ECC0 /* StampedModel 6.xcdatamodel */,
 				7E0B61FC1439246E00A573FA /* StampedModel 5.xcdatamodel */,
@@ -2968,7 +2970,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E1873CB143A64B800A0ECC0 /* StampedModel 7.xcdatamodel */;
+			currentVersion = 7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

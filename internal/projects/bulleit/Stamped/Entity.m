@@ -60,13 +60,12 @@
 @dynamic fandangoURL;
 @dynamic image;
 @dynamic events;
+@dynamic location;
 
-@synthesize location = location_;
 @synthesize cachedDistance = cachedDistance_;
 
 - (void)dealloc {
   self.cachedDistance = nil;
-  self.location = nil;
   [super dealloc];
 }
 
@@ -91,21 +90,23 @@
   return EntityCategoryOther;
 }
 
-- (CLLocation*)location {
-  if (!self.coordinates)
-    return nil;
-  if (location_)
-    return location_;
-  
-  NSArray* coordinates = [self.coordinates componentsSeparatedByString:@","]; 
-  CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
-  CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
-  self.location = [[[CLLocation alloc] initWithLatitude:latitude longitude:longitude] autorelease];
-  return location_;
+- (void)setCoordinates:(NSString*)coordinates {
+  [self willChangeValueForKey:@"coordinates"];
+  [self setPrimitiveValue:coordinates forKey:@"coordinates"];
+  NSArray* coordinatesArray = [self.coordinates componentsSeparatedByString:@","]; 
+  CGFloat latitude = [(NSString*)[coordinatesArray objectAtIndex:0] floatValue];
+  CGFloat longitude = [(NSString*)[coordinatesArray objectAtIndex:1] floatValue];
+  self.location = [[[CLLocation alloc] initWithLatitude:latitude longitude:longitude] autorelease];  
+  [self didChangeValueForKey:@"coordinates"];
 }
 
 - (id)valueForUndefinedKey:(NSString*)key {
   return nil;
+}
+
+- (void)awakeFromFetch {
+  if (self.coordinates && !self.location)
+    [self setCoordinates:self.coordinates];
 }
 
 @end

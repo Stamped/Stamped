@@ -69,10 +69,10 @@ typedef enum {
 @property (nonatomic, retain) NSNumber* inTheaters;
 @property (nonatomic, retain) NSString* fandangoURL;
 @property (nonatomic, retain) NSString* image;
+@property (nonatomic, retain) CLLocation* location;
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
-@property (nonatomic, retain) CLLocation* location;
 @property (nonatomic, retain) NSNumber* cachedDistance;
 @end
 
