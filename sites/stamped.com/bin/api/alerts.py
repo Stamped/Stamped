@@ -20,6 +20,8 @@ from db.mongodb.MongoActivityCollection import MongoActivityCollection
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'
 
+IPHONE_APN_PUSH_CERT = 'apns-dev.pem'
+
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
     version = "%prog " + __version__
@@ -127,20 +129,23 @@ def main():
                 send_push   = None
                 send_email  = None
 
+            if not send_push and not send_email:
+                raise
+                    
+            # Activity
+            activity = activityDB.getActivityItem(alert.activity_id)
+
+            # User
+            user = userIds[str(alert['user_id'])]
+
             if send_push:
                 try:
                     # Send push notification
-                    print 'SEND PUSH NOTIFICATION'
+                    print 'PUSH'
 
                     if not recipient.devices.ios_device_tokens:
                         raise
                     print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
-
-                    # User
-                    user = userIds[str(alert['user_id'])]
-                    
-                    # Activity
-                    activity = activityDB.getActivityItem(alert.activity_id)
 
                     # Build push notification
                     for token in recipient.devices.ios_device_tokens:
@@ -155,17 +160,10 @@ def main():
             if send_email:
                 try:
                     # Send email
-                    print 'SEND EMAIL'
+                    print 'EMAIL'
 
                     if not recipient.email:
                         raise
-                    print 'EMAIL ADDRESS: %s' % recipient.email
-
-                    # User
-                    user = userIds[str(alert['user_id'])]
-                    
-                    # Activity
-                    activity = activityDB.getActivityItem(alert.activity_id)
 
                     # Build email
                     email = buildEmail(user, recipient, activity)
@@ -183,34 +181,43 @@ def main():
             # alertDB.removeAlert(alert.alert_id)
             continue
 
+    print
+
     # Send emails
     if len(emailQueue) > 0:
+        print '-' * 40
         print 'EMAILS:'
         print emailQueue
         print
 
     # Send push notifications
     if len(pushQueue) > 0:
+        print '-' * 40
         print 'PUSH:'
         print pushQueue
         print
 
-    print
 
 def _setSubject(user, genre):
 
     if genre == 'restamp':
         msg = '%s (@%s) gave you credit for a stamp' % (user['name'], user.screen_name)
+
     elif genre == 'like':
         msg = '%s (@%s) liked your stamp' % (user['name'], user.screen_name)
+
     elif genre == 'favorite':
         msg = '%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
+
     elif genre == 'mention':
         msg = '%s (@%s) mentioned you on Stamped' % (user['name'], user.screen_name)
+
     elif genre == 'comment':
         msg = '%s (@%s) commented on your stamp' % (user['name'], user.screen_name)
+
     elif genre == 'reply':
         msg = '%s (@%s) replied to you on Stamped' % (user['name'], user.screen_name)
+
     elif genre == 'follower':
         msg = '%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
     else:
@@ -239,27 +246,27 @@ def buildPushNotification(user, activityItem, deviceId):
 
     # Set message
     if genre == 'restamp':
-        msg = "Test"
+        msg = '%s (@%s) gave you credit for a stamp' % (user['name'], user.screen_name)
 
     elif genre == 'like':
         ### TODO: Include emoji in notification -- &#xe057;
-        msg = "Test"
+        msg = '%s (@%s) liked your stamp' % (user['name'], user.screen_name)
     
     elif genre == 'favorite':
-        msg = "Test"
+        msg = '%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
 
     elif genre == 'mention':
         msg = "%s (@%s) mentioned you on %s." % \
             (user['name'], user.screen_name, activityItem.subject)
 
     elif genre == 'comment':
-        msg = "Test"
+        msg = '%s (@%s) commented on your stamp' % (user['name'], user.screen_name)
 
     elif genre == 'reply':
-        msg = "Test"
+        msg = '%s (@%s) replied to you on Stamped' % (user['name'], user.screen_name)
 
     elif genre == 'follower':
-        msg = "Test"
+        msg = '%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
 
     # Build payload
     payload = {
@@ -284,11 +291,29 @@ def sendEmails(emailQueue):
     ses = boto.connect_ses(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
 
     for msg in emailQueue:
-        ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'])
+        try:
+            ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'])
+        except:
+            print 'EMAIL FAILED: %s' % msg
 
 
 def sendPushNotifications(pushQueue):
-    pass
+    host_name = 'gateway.sandbox.push.apple.com'
+    # host_name = 'gateway.push.apple.com'
+    try:
+        s = socket()
+        c = ssl.wrap_socket(s,
+                            ssl_version=ssl.PROTOCOL_SSLv3,
+                            certfile=IPHONE_APN_PUSH_CERT)
+        c.connect((host_name, 2195))
+        for msg in pushQueue:
+            try:
+                c.write(msg)
+            except:
+                print 'MESSAGE FAILED: %s' % msg
+        c.close()
+    except:
+        print 'FAIL: %s' % pushQueue
 
 
 if __name__ == '__main__':
