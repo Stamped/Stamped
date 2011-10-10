@@ -10,7 +10,7 @@ import init
 import os, json, utils, random, time, hashlib, logs
 
 from errors import *
-from HTTPSchemas import *
+from api.HTTPSchemas import *
 from api.MongoStampedAPI import MongoStampedAPI
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
@@ -23,14 +23,16 @@ def show(request, **kwargs):
     stampNum    = kwargs.pop('stamp_num', None)
     stampTitle  = kwargs.pop('stamp_title', None)
     mobile      = kwargs.pop('mobile', False)
+
     try:
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
+
         # stamp['credit'] = stamp['credit'][:1]
         template = 'sdetail.html'
         if mobile:
             template = 'sdetail-mobile.html'
 
-        if _encodeStampTitle(stamp.entity.title) != stampTitle:
+        if encodeStampTitle(stamp.entity.title) != stampTitle:
             raise
 
         response = render_to_response(template, stamp)
