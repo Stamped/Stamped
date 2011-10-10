@@ -21,12 +21,16 @@ static const CGFloat kTopMargin = 5;
 - (void)addSecondPageButtons;
 
 @property (nonatomic, readonly) UIScrollView* scrollView;
+@property (nonatomic, retain) NSMutableArray* filterButtons;
+@property (nonatomic, retain) NSMutableArray* sortButtons;
 @end
 
 @implementation STStampFilterBar
 
 @synthesize delegate = delegate_;
 @synthesize scrollView = scrollView_;
+@synthesize sortButtons = sortButtons_;
+@synthesize filterButtons = filterButtons_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -44,7 +48,16 @@ static const CGFloat kTopMargin = 5;
   return self;
 }
 
+- (void)dealloc {
+  self.sortButtons = nil;
+  self.filterButtons = nil;
+  [super dealloc];
+}
+
 - (void)initialize {
+  self.sortButtons = [NSMutableArray array];
+  self.filterButtons = [NSMutableArray array];
+  
   scrollView_ = [[UIScrollView alloc] initWithFrame:self.bounds];
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.bounds) * 3,
                                        CGRectGetHeight(self.bounds));
@@ -68,6 +81,8 @@ static const CGFloat kTopMargin = 5;
   filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   filterButton.tag = StampFilterTypeFood;
   [scrollView_ addSubview:filterButton];
+  [filterButtons_ addObject:filterButton];
+
   // Book.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -78,6 +93,8 @@ static const CGFloat kTopMargin = 5;
   filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   filterButton.tag = StampFilterTypeBook;
   [scrollView_ addSubview:filterButton];
+  [filterButtons_ addObject:filterButton];
+
   // Film.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -88,6 +105,8 @@ static const CGFloat kTopMargin = 5;
   filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   filterButton.tag = StampFilterTypeFilm;
   [scrollView_ addSubview:filterButton];
+  [filterButtons_ addObject:filterButton];
+
   // Music.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -98,6 +117,8 @@ static const CGFloat kTopMargin = 5;
   filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   filterButton.tag = StampFilterTypeMusic;
   [scrollView_ addSubview:filterButton];
+  [filterButtons_ addObject:filterButton];
+
   // Other.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -108,6 +129,8 @@ static const CGFloat kTopMargin = 5;
   filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   filterButton.tag = StampFilterTypeOther;
   [scrollView_ addSubview:filterButton];
+  [filterButtons_ addObject:filterButton];
+
   // None.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -118,13 +141,12 @@ static const CGFloat kTopMargin = 5;
   filterButton.frame = CGRectMake(5 + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   filterButton.tag = StampFilterTypeNone;
   [scrollView_ addSubview:filterButton];
+  [filterButtons_ addObject:filterButton];
   
-  for (UIView* view in scrollView_.subviews) {
-    if ([view isMemberOfClass:[UIButton class]]) {
-      [(UIButton*)view addTarget:self
-                          action:@selector(filterButtonPressed:)
-                forControlEvents:UIControlEventTouchUpInside];
-    }
+  for (UIButton* button in filterButtons_) {
+    [button addTarget:self
+               action:@selector(filterButtonPressed:)
+     forControlEvents:UIControlEventTouchUpInside];
   }
   
   // Divider and next arrow.
@@ -173,10 +195,8 @@ static const CGFloat kTopMargin = 5;
               forState:UIControlStateSelected];
   sortButton.frame = CGRectMake(leftMargin + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   sortButton.tag = StampSortTypeTime;
-  [sortButton addTarget:self
-                 action:@selector(sortButtonPressed:)
-       forControlEvents:UIControlEventTouchUpInside];
   [scrollView_ addSubview:sortButton];
+  [sortButtons_ addObject:sortButton];
 
   // Book.
   ++i;
@@ -187,10 +207,8 @@ static const CGFloat kTopMargin = 5;
               forState:UIControlStateSelected];
   sortButton.frame = CGRectMake(leftMargin + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   sortButton.tag = StampSortTypeDistance;
-  [sortButton addTarget:self
-                 action:@selector(sortButtonPressed:)
-       forControlEvents:UIControlEventTouchUpInside];
   [scrollView_ addSubview:sortButton];
+  [sortButtons_ addObject:sortButton];
 
   // Film.
   ++i;
@@ -201,10 +219,14 @@ static const CGFloat kTopMargin = 5;
               forState:UIControlStateSelected];
   sortButton.frame = CGRectMake(leftMargin + (kHorizontalSeparation * i), kTopMargin, 40, 40);
   sortButton.tag = StampSortTypePopularity;
-  [sortButton addTarget:self
-                 action:@selector(sortButtonPressed:)
-       forControlEvents:UIControlEventTouchUpInside];
   [scrollView_ addSubview:sortButton];
+  [sortButtons_ addObject:sortButton];
+  
+  for (UIButton* button in sortButtons_) {
+    [button addTarget:self
+               action:@selector(sortButtonPressed:)
+     forControlEvents:UIControlEventTouchUpInside];
+  }
   
   UIButton* searchButton = [UIButton buttonWithType:UIButtonTypeCustom];
   searchButton.frame = CGRectMake(555, kTopMargin, 80, 40);
