@@ -15,12 +15,17 @@
 @implementation STSearchField
 
 - (void)initialize {
-  self.background = [[UIImage imageNamed:@"search_field_background"] stretchableImageWithLeftCapWidth:35 topCapHeight:0];
+  self.background = [[UIImage imageNamed:@"search_field_background"] stretchableImageWithLeftCapWidth:35
+                                                                                         topCapHeight:0];
   self.font = [UIFont fontWithName:@"Helvetica" size:14];
   self.autocorrectionType = UITextAutocorrectionTypeNo;
   self.returnKeyType = UIReturnKeySearch;
   self.enablesReturnKeyAutomatically = YES;
   self.keyboardAppearance = UIKeyboardAppearanceAlert;
+  self.borderStyle = UITextBorderStyleNone;
+  self.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+  self.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+  self.clearButtonMode = UITextFieldViewModeWhileEditing;
   self.leftViewMode = UITextFieldViewModeAlways;
   UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 32, CGRectGetHeight(self.frame))];
   UIImageView* searchIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_icon"]];
@@ -30,7 +35,6 @@
   [searchIcon release];
   self.leftView = leftView;
   [leftView release];
-  self.contentMode = UIViewContentModeScaleAspectFit;
 }
 
 - (id)initWithCoder:(NSCoder*)aDecoder {

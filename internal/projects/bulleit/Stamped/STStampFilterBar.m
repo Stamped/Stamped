@@ -8,6 +8,8 @@
 
 #import "STStampFilterBar.h"
 
+#import "STSearchField.h"
+
 static const CGFloat kHorizontalSeparation = 42.0;
 static const CGFloat kTopMargin = 5;
 
@@ -17,10 +19,13 @@ static const CGFloat kTopMargin = 5;
 - (void)sortButtonPressed:(id)sender;
 - (void)nextButtonPressed:(id)sender;
 - (void)backButtonPressed:(id)sender;
+- (void)fireDelegateMethod;
 - (void)addFirstPageButtons;
 - (void)addSecondPageButtons;
+- (void)addThirdPageButtons;
 
 @property (nonatomic, readonly) UIScrollView* scrollView;
+@property (nonatomic, readonly) STSearchField* searchField;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
 @property (nonatomic, retain) NSMutableArray* sortButtons;
 @end
@@ -31,6 +36,10 @@ static const CGFloat kTopMargin = 5;
 @synthesize scrollView = scrollView_;
 @synthesize sortButtons = sortButtons_;
 @synthesize filterButtons = filterButtons_;
+@synthesize filterType = filterType_;
+@synthesize sortType = sortType_;
+@synthesize searchQuery = searchQuery_;
+@synthesize searchField = searchField_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -51,6 +60,7 @@ static const CGFloat kTopMargin = 5;
 - (void)dealloc {
   self.sortButtons = nil;
   self.filterButtons = nil;
+  self.searchQuery = nil;
   [super dealloc];
 }
 
@@ -64,10 +74,33 @@ static const CGFloat kTopMargin = 5;
   scrollView_.pagingEnabled = YES;
   scrollView_.showsVerticalScrollIndicator = NO;
   scrollView_.showsHorizontalScrollIndicator = NO;
+  scrollView_.delegate = self;
   [self addSubview:scrollView_];
   [scrollView_ release];
   [self addFirstPageButtons];
   [self addSecondPageButtons];
+  [self addThirdPageButtons];
+  
+  self.filterType = StampFilterTypeNone;
+  self.sortType = StampSortTypeTime;
+}
+
+- (void)setSortType:(StampSortType)sortType {
+  sortType_ = sortType;
+
+  for (UIButton* button in sortButtons_)
+    button.selected = (button.tag == sortType);
+}
+
+- (void)setFilterType:(StampFilterType)filterType {
+  filterType_ = filterType;
+  
+  for (UIButton* button in filterButtons_) {
+    if (filterType == button.tag)
+      button.selected = (!button.selected && filterType != StampFilterTypeNone);
+    else
+      button.selected = NO;
+  }
 }
 
 - (void)addFirstPageButtons {
@@ -240,6 +273,33 @@ static const CGFloat kTopMargin = 5;
   [scrollView_ addSubview:searchButton];
 }
 
+- (void)addThirdPageButtons {
+  // Back arrow then divider.
+  UIButton* nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  nextButton.frame = CGRectMake(644, kTopMargin, 40, 40);
+  [nextButton setImage:[UIImage imageNamed:@"hdr_back_button"]
+              forState:UIControlStateNormal];
+  [nextButton setImage:[UIImage imageNamed:@"hdr_back_button_selected"]
+              forState:UIControlStateHighlighted];
+  [nextButton addTarget:self
+                 action:@selector(backButtonPressed:)
+       forControlEvents:UIControlEventTouchUpInside];
+  [scrollView_ addSubview:nextButton];
+  
+  UIImageView* divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hdr_separator"]];
+  divider.frame = CGRectOffset(divider.frame, 685, 8);
+  [scrollView_ addSubview:divider];
+  [divider release];
+  
+  // Search field.
+  searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(700, 10, 250, 30)];
+  searchField_.delegate = self;
+  searchField_.clearButtonMode = UITextFieldViewModeAlways;
+  searchField_.placeholder = @"Search";
+  [scrollView_ addSubview:searchField_];
+  [searchField_ release];
+}
+
 - (void)nextButtonPressed:(id)sender {
   CGFloat nextPage = fmaxf(0, floorf(scrollView_.contentOffset.x / CGRectGetWidth(self.bounds)) + 1);
   [scrollView_ setContentOffset:CGPointMake(nextPage * 320, 0) animated:YES];
@@ -252,11 +312,43 @@ static const CGFloat kTopMargin = 5;
 
 - (void)sortButtonPressed:(id)sender {
   NSLog(@"Sort button pressed.");
+  self.sortType = [(UIButton*)sender tag];
+  [self fireDelegateMethod];
 }
 
 - (void)filterButtonPressed:(id)sender {
   NSLog(@"Filter button pressed.");
+  self.filterType = [(UIButton*)sender tag];
+  [self fireDelegateMethod];
 }
 
+- (void)fireDelegateMethod {
+  [delegate_ stampFilterBar:self
+            didSelectFilter:filterType_
+               withSortType:sortType_
+                   andQuery:searchField_.text];
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView*)scrollView {
+  CGFloat currentPage = fmaxf(0, floorf(scrollView_.contentOffset.x / CGRectGetWidth(self.bounds)));
+  if (currentPage == 2)
+    [searchField_ becomeFirstResponder];
+  else
+    [searchField_ resignFirstResponder];
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView*)scrollView {
+  [self scrollViewDidEndScrollingAnimation:scrollView];
+}
+
+#pragma mark - UITextFieldDelegate methods.
+
+- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
+  [self fireDelegateMethod];
+  return YES;
+}
 
 @end

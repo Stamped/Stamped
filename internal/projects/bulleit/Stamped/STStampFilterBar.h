@@ -24,16 +24,19 @@ typedef enum {
 } StampSortType;
 
 @class STStampFilterBar;
-@protocol STStampFilterBarDelegate
 
+@protocol STStampFilterBarDelegate
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType 
           withSortType:(StampSortType)sortType
               andQuery:(NSString*)query;
 @end
 
-@interface STStampFilterBar : UIView
+@interface STStampFilterBar : UIView <UIScrollViewDelegate, UITextFieldDelegate>
 
 @property (nonatomic, assign) id<STStampFilterBarDelegate> delegate;
+@property (nonatomic, assign) StampFilterType filterType;
+@property (nonatomic, assign) StampSortType sortType;
+@property (nonatomic, copy) NSString* searchQuery;
 
 @end
