@@ -100,24 +100,31 @@ def main():
             recipient = userIds[str(alert['recipient_id'])]
 
             if alert.genre == 'restamp':
-                notification = recipient.alerts.alert_credit
+                send_push   = recipient.alerts.ios_alert_credit
+                send_email  = recipient.alerts.email_alert_credit
             elif alert.genre == 'like':
-                notification = recipient.alerts.alert_like
+                send_push   = recipient.alerts.ios_alert_like
+                send_email  = recipient.alerts.email_alert_like
             elif alert.genre == 'favorite':
-                notification = recipient.alerts.alert_fav
+                send_push   = recipient.alerts.ios_alert_fav
+                send_email  = recipient.alerts.email_alert_fav
             elif alert.genre == 'mention':
-                notification = recipient.alerts.alert_mention
+                send_push   = recipient.alerts.ios_alert_mention
+                send_email  = recipient.alerts.email_alert_mention
             elif alert.genre == 'comment':
-                notification = recipient.alerts.alert_comment
+                send_push   = recipient.alerts.ios_alert_comment
+                send_email  = recipient.alerts.email_alert_comment
             elif alert.genre == 'reply':
-                notification = recipient.alerts.alert_reply
+                send_push   = recipient.alerts.ios_alert_reply
+                send_email  = recipient.alerts.email_alert_reply
             elif alert.genre == 'follower':
-                notification = recipient.alerts.alert_follow
+                send_push   = recipient.alerts.ios_alert_follow
+                send_email  = recipient.alerts.email_alert_follow
             else:
-                notification = None
+                send_push   = None
+                send_email  = None
 
-
-            if notification == 'p':
+            if send_push:
                 # Send push notification
                 print 'SEND PUSH NOTIFICATION'
 
@@ -137,7 +144,7 @@ def main():
                     pushQueue.append(result)
 
 
-            if notification == 'e':
+            if send_email:
                 # Send email
                 print 'SEND EMAIL'
 
@@ -156,7 +163,7 @@ def main():
                 emailQueue.append(email)
 
 
-            if not notification or notification not in ['p', 'e']:
+            if not send_push and not send_email:
                 raise
 
             # Remove alert
