@@ -109,7 +109,6 @@ typedef enum {
 
 - (void)listButtonWasPressed:(NSNotification*)notification {
   self.tableView.scrollEnabled = YES;
-  mapView_.showsUserLocation = NO;
   [mapView_ removeAnnotations:mapView_.annotations];
   [UIView animateWithDuration:0.5
                    animations:^{ mapView_.alpha = 0.0; }];
