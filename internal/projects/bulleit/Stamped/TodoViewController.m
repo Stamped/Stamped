@@ -23,6 +23,7 @@
 #import "TodoTableViewCell.h"
 #import "User.h"
 #import "Util.h"
+#import "Stamp.h"
 
 static NSString* const kShowFavoritesPath = @"/favorites/show.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
@@ -182,7 +183,9 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
     [self removeFavoriteWithEntityID:fave.entityObject.entityID];
     
     fave.entityObject = nil;
+    fave.stamp.isFavorited = NO;
     [fave.managedObjectContext save:nil];
+
 
     NSMutableArray* tempFaves = self.favoritesArray.mutableCopy;
     [tempFaves removeObjectAtIndex:indexPath.row - 1];
@@ -195,7 +198,9 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
+
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  NSLog(@"%@", objects);
 	[self loadFavoritesFromDataStore];
   [self setIsLoading:NO];
 }
