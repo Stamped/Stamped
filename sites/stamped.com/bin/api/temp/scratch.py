@@ -22,7 +22,7 @@ client_auth = {
 }
 
 _baseurl = "https://dev.stamped.com/v0"
-_baseurl = "http://localhost:18000/v0"
+# _baseurl = "http://localhost:18000/v0"
 
 def handleGET(path, data):
     params = urllib.urlencode(data)
@@ -40,7 +40,7 @@ def handlePOST(path, data):
 
 
 
-USER = 'kevin'
+USER = 'andybons'
 PASS = '12345'
 
 path = "oauth2/login.json"
