@@ -226,7 +226,8 @@ def _setSubject(user, genre):
 def _setBody(user, activity):
 
     try:
-        template = open('templates/email_%s.html.j2' % activity.genre, 'r')
+        path = os.path.join(base, 'templates', 'email_%s.html.j2' % activity.genre)
+        template = open(path, 'r')
     except:
         ### TODO: Add error logging?
         raise Exception
