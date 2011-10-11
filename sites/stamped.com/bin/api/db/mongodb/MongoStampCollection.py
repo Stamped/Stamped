@@ -122,7 +122,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             'before':   kwargs.pop('before', None), 
             'limit':    kwargs.pop('limit', 20),
             'sort':     'timestamp.modified',
-            'sortOrder': pymongo.ASCENDING,
+            'sortOrder': pymongo.DESCENDING,
         }
 
         documentIds = []
