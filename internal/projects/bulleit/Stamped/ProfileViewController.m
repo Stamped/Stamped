@@ -20,6 +20,7 @@
 #import "StampDetailViewController.h"
 #import "ShowImageViewController.h"
 #import "STSectionHeaderView.h"
+#import "StampListViewController.h"
 #import "InboxTableViewCell.h"
 #import "User.h"
 #import "UserImageView.h"
@@ -297,6 +298,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   if (stampsArray_.count && indexPath.row == stampsArray_.count) {
+    StampListViewController* vc = [[StampListViewController alloc] init];
+    vc.user = user_;
+    vc.stampsAreTemporary = stampsAreTemporary_;
+    [self.navigationController pushViewController:vc animated:YES];
+    [vc release];
     return;
   }
   
