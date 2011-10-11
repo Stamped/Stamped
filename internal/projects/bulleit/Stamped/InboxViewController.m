@@ -211,20 +211,27 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)loadStampsFromNetwork {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
-
-  NSFetchRequest* request = [Stamp fetchRequest];
-  // Grab oldest stamp.
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];
-	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
-  [request setFetchLimit:1];
-	Stamp* latestStamp = [Stamp objectWithFetchRequest:request];
-  NSString* latestTimestamp = [NSString stringWithFormat:@"%.0f", latestStamp.modified.timeIntervalSince1970];
+  
+  // In case of inbox having zero stamps...
+  NSTimeInterval latestTimestamp = 0;
+  NSDate* lastUpdated = [[NSUserDefaults standardUserDefaults] objectForKey:@"InboxLatestStampModified"];
+  if (lastUpdated)
+    latestTimestamp = lastUpdated.timeIntervalSince1970;
+  
+  NSString* latestTimestampString = [NSString stringWithFormat:@"%.0f", latestTimestamp];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kInboxPath delegate:self];
   objectLoader.objectMapping = stampMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:@"1", @"quality", latestTimestamp, @"since", nil];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"1", @"quality",
+                         latestTimestampString, @"since",
+                         nil];
+  NSDate* oldestTimeInBatch = [[NSUserDefaults standardUserDefaults] objectForKey:@"InboxOldestTimestampInBatch"];
+  if (oldestTimeInBatch && oldestTimeInBatch.timeIntervalSince1970 > 0) {
+    NSString* oldestTimeInBatchString = [NSString stringWithFormat:@"%.0f", oldestTimeInBatch.timeIntervalSince1970];
+    [params setObject:oldestTimeInBatchString forKey:@"before"];
+  }
+  objectLoader.params = params;
   [objectLoader send];
 }
 
@@ -366,14 +373,32 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"InboxLastUpdatedAt"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
   for (Stamp* stamp in objects) {
     stamp.temporary = [NSNumber numberWithBool:NO];
     [stamp.managedObjectContext save:NULL];
   }
-	[self loadStampsFromDataStore];
+
+  Stamp* oldestStampInBatch = objects.lastObject;
+  NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
+  [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
+                                            forKey:@"InboxOldestTimestampInBatch"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  [self loadStampsFromDataStore];
   if (objects.count < 10) {
+    // Grab latest stamp.
+    NSFetchRequest* request = [Stamp fetchRequest];
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];
+    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+    [request setFetchLimit:1];
+    Stamp* latestStamp = [Stamp objectWithFetchRequest:request];
+
+    NSLog(@"Storing latest stamp at time: %@", latestStamp.modified);
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] setObject:latestStamp.modified
+                                              forKey:@"InboxLatestStampModified"];
+    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"InboxLastUpdatedAt"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     [self setIsLoading:NO];
   } else {
     [self loadStampsFromNetwork];
@@ -419,6 +444,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)userPulledToReload {
   [super userPulledToReload];
+  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
   [self loadStampsFromNetwork];
   [[NSNotificationCenter defaultCenter] postNotificationName:kAppShouldReloadAllPanes
                                                       object:self];
