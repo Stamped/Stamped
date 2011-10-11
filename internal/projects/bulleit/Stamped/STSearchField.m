@@ -15,7 +15,7 @@
 @implementation STSearchField
 
 - (void)initialize {
-  self.background = [[UIImage imageNamed:@"search_field_background"] stretchableImageWithLeftCapWidth:35
+  self.background = [[UIImage imageNamed:@"search_field_background"] stretchableImageWithLeftCapWidth:30
                                                                                          topCapHeight:0];
   self.font = [UIFont fontWithName:@"Helvetica" size:14];
   self.autocorrectionType = UITextAutocorrectionTypeNo;
@@ -27,14 +27,19 @@
   self.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
   self.clearButtonMode = UITextFieldViewModeAlways;
   self.leftViewMode = UITextFieldViewModeAlways;
-  UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 32, CGRectGetHeight(self.frame))];
+  UIView* leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, CGRectGetHeight(self.frame))];
   UIImageView* searchIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_icon"]];
-  searchIcon.frame = CGRectOffset(searchIcon.frame, 10, 8);
+  searchIcon.frame = CGRectOffset(searchIcon.frame, 10, 7);
   searchIcon.contentMode = UIViewContentModeCenter;
   [leftView addSubview:searchIcon];
   [searchIcon release];
   self.leftView = leftView;
   [leftView release];
+}
+
+- (CGRect)placeholderRectForBounds:(CGRect)bounds {
+  // TODO(andybons): This will overflow if the placeholder is long enough.
+  return CGRectOffset(bounds, 32, 0);
 }
 
 - (id)initWithCoder:(NSCoder*)aDecoder {

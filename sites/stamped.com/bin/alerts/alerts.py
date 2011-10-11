@@ -18,10 +18,12 @@ from db.mongodb.MongoAlertCollection import MongoAlertCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
 
+base = os.path.dirname(os.path.abspath(__file__))
+
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'
 
-IPHONE_APN_PUSH_CERT = 'apns-dev.pem'
+IPHONE_APN_PUSH_CERT = os.path.join(base, 'apns-dev.pem')
 
 
 def parseCommandLine():
@@ -38,6 +40,24 @@ def parseCommandLine():
 
 
 def main():
+    lock = os.path.join(base, 'alerts.lock')
+    if os.path.exists(lock):
+        print 'LOCKED'
+        return
+    
+    try:
+        open(lock, 'w').close()
+        print 'BEGIN'
+        runAlerts()
+        print 'END'
+    except Exception as e:
+        print e
+        print 'FAIL'
+    finally:
+        os.remove(lock)
+
+
+def runAlerts():
     # parse commandline
     options     = parseCommandLine()
     options     = options.__dict__
@@ -160,7 +180,7 @@ def main():
 
         except:
             print 'REMOVED'
-            # alertDB.removeAlert(alert.alert_id)
+            alertDB.removeAlert(alert.alert_id)
             continue
 
     print
@@ -176,6 +196,7 @@ def main():
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
         sendEmails(userEmailQueue)
+        print
 
     # Send push notifications
     if len(userPushQueue) > 0:
@@ -189,6 +210,7 @@ def main():
             print k, len(v)
         print
         sendPushNotifications(userPushQueue)
+        print
 
 
 def _setSubject(user, genre):
@@ -222,7 +244,8 @@ def _setSubject(user, genre):
 def _setBody(user, activity):
 
     try:
-        template = open('templates/email_%s.html.j2' % activity.genre, 'r')
+        path = os.path.join(base, 'templates', 'email_%s.html.j2' % activity.genre)
+        template = open(path, 'r')
     except:
         ### TODO: Add error logging?
         raise Exception
@@ -270,7 +293,6 @@ def buildPushNotification(user, activityItem, deviceId):
         msg = '%s gave you credit' % (user.screen_name)
 
     elif genre == 'like':
-        ### TODO: Include emoji in notification -- &#xe057;
         msg = u'%s \ue057 your stamp' % (user.screen_name)
     
     elif genre == 'favorite':
@@ -363,7 +385,7 @@ def sendPushNotifications(queue):
                         (msg['activity_id'], msg['device_id'])
         c.close()
     except:
-        print 'FAIL: %s' % pushQueue
+        print 'FAIL: %s' % queue
 
 
 if __name__ == '__main__':

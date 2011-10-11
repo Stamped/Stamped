@@ -60,6 +60,7 @@ typedef enum {
 @property (nonatomic, retain) RKRequest* currentRequest;
 @property (nonatomic, assign) ResultType currentResultType;
 @property (nonatomic, assign) BOOL loading;
+@property (nonatomic, readonly) UIButton* clearFilterButton;
 @property (nonatomic, assign) SearchFilter currentSearchFilter;
 @end
 
@@ -80,6 +81,7 @@ typedef enum {
 @synthesize loading = loading_;
 @synthesize loadingIndicatorLabel = loadingIndicatorLabel_;
 @synthesize currentSearchFilter = currentSearchFilter_;
+@synthesize clearFilterButton = clearFilterButton_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -94,6 +96,7 @@ typedef enum {
   self.fullSearchCell = nil;
   self.loadingIndicatorLabel = nil;
   tooltipImageView_ = nil;
+  clearFilterButton_ = nil;
   [super dealloc];
 }
 
@@ -116,7 +119,7 @@ typedef enum {
   self.locationManager.desiredAccuracy = kCLLocationAccuracyKilometer;
   
   tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_tooltip"]];
-  tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 6, 40);
+  tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 5, 40);
   tooltipImageView_.alpha = 0.0;
   [self.view addSubview:tooltipImageView_];
   [tooltipImageView_ release];
@@ -194,14 +197,15 @@ typedef enum {
   [accessoryView addSubview:filterButton];
   // None.
   ++i;
-  filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_clear_button"]
-                forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_clear_button_selected"]
-                forState:UIControlStateSelected];
-  filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
-  filterButton.tag = SearchFilterNone;
-  [accessoryView addSubview:filterButton];
+  clearFilterButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+  [clearFilterButton_ setImage:[UIImage imageNamed:@"keyb_filter_clear_button"]
+                      forState:UIControlStateNormal];
+  [clearFilterButton_ setImage:[UIImage imageNamed:@"keyb_filter_clear_button_selected"]
+                      forState:UIControlStateSelected];
+  clearFilterButton_.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
+  clearFilterButton_.tag = SearchFilterNone;
+  clearFilterButton_.alpha = 0.0;
+  [accessoryView addSubview:clearFilterButton_];
 
   for (UIView* view in accessoryView.subviews) {
     if ([view isMemberOfClass:[UIButton class]]) {
@@ -226,6 +230,7 @@ typedef enum {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   tooltipImageView_ = nil;
+  clearFilterButton_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -282,6 +287,12 @@ typedef enum {
   else if (self.currentSearchFilter == SearchFilterNone)
     button.selected = NO;
 
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
+                   completion:nil];
+  
   if (searchField_.text.length) {
     if (currentResultType_ == ResultTypeFast)
       [self sendFastSearchRequest];
