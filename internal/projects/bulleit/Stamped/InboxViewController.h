@@ -11,22 +11,12 @@
 #import <UIKit/UIKit.h>
 
 #import "STReloadableTableViewController.h"
+#import "STStampFilterBar.h"
 
 @interface InboxViewController : STReloadableTableViewController <UIScrollViewDelegate,
                                                                   RKObjectLoaderDelegate,
-                                                                  MKMapViewDelegate> {
- @private
-  BOOL userPannedMap_;
-}
-
+                                                                  MKMapViewDelegate,
+                                                                  STStampFilterBarDelegate>
 @property (nonatomic, readonly) MKMapView* mapView;
-@property (nonatomic, assign) IBOutlet UIView* filterView;
-@property (nonatomic, retain) IBOutlet UIButton* foodFilterButton;
-@property (nonatomic, retain) IBOutlet UIButton* booksFilterButton;
-@property (nonatomic, retain) IBOutlet UIButton* filmFilterButton;
-@property (nonatomic, retain) IBOutlet UIButton* musicFilterButton;
-@property (nonatomic, retain) IBOutlet UIButton* otherFilterButton;
-
-- (IBAction)filterButtonPushed:(id)sender;
-
+@property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
 @end

@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+@class CLLocation;
 @class Event;
 @class Favorite;
 @class Stamp;
@@ -39,8 +40,8 @@ typedef enum {
 @property (nonatomic, retain) NSString* subcategory;
 @property (nonatomic, retain) NSString* desc;
 @property (nonatomic, retain) NSString* artist;
-@property (nonatomic, retain) NSArray*  albums;
-@property (nonatomic, retain) NSArray*  songs;
+@property (nonatomic, retain) NSArray* albums;
+@property (nonatomic, retain) NSArray* songs;
 @property (nonatomic, retain) NSString* author;
 @property (nonatomic, retain) NSString* cast;
 @property (nonatomic, retain) NSString* director;
@@ -68,9 +69,11 @@ typedef enum {
 @property (nonatomic, retain) NSNumber* inTheaters;
 @property (nonatomic, retain) NSString* fandangoURL;
 @property (nonatomic, retain) NSString* image;
+@property (nonatomic, retain) CLLocation* location;
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
+@property (nonatomic, retain) NSNumber* cachedDistance;
 @end
 
 @interface Entity (CoreDataGeneratedAccessors)

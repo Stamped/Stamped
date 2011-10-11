@@ -6,6 +6,7 @@
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 
 typedef enum {
@@ -14,21 +15,30 @@ typedef enum {
   StampFilterTypeBook,
   StampFilterTypeMusic,
   StampFilterTypeFilm,
-  StampFilterTypeOther,
-  StampFilterTypeTime,
-  StampFilterTypeDistance,
-  StampFilterTypePopularity
+  StampFilterTypeOther
 } StampFilterType;
 
-@class STStampFilterBar;
-@protocol STStampFilterBarDelegate
+typedef enum {
+  StampSortTypeTime = 0,
+  StampSortTypeDistance,
+  StampSortTypePopularity
+} StampSortType;
 
-- (void)filterBar:(STStampFilterBar*)bar didSelectFilter:(StampFilterType)filterType;
-- (void)filterBar:(STStampFilterBar*)bar didFilterByQuery:(NSString*)query;
+@class STStampFilterBar;
+
+@protocol STStampFilterBarDelegate
+- (void)stampFilterBar:(STStampFilterBar*)bar
+       didSelectFilter:(StampFilterType)filterType 
+          withSortType:(StampSortType)sortType
+              andQuery:(NSString*)query;
 @end
 
-@interface STStampFilterBar : UIView
+@interface STStampFilterBar : UIView <UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate>
 
-@property (nonatomic, assign) id<STStampFilterBarDelegate> delegate;
+@property (nonatomic, assign) IBOutlet id<STStampFilterBarDelegate> delegate;
+@property (nonatomic, assign) StampFilterType filterType;
+@property (nonatomic, assign) StampSortType sortType;
+@property (nonatomic, copy) NSString* searchQuery;
+@property (nonatomic, retain) CLLocation* currentLocation;
 
 @end

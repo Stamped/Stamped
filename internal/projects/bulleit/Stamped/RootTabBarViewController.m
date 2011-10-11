@@ -61,6 +61,7 @@
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
   tooltipImageView_ = nil;
+  ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
   [super dealloc];
 }
 
@@ -213,6 +214,7 @@
   self.peopleTabBarItem = nil;
   self.userStampBackgroundImageView = nil;
   tooltipImageView_ = nil;
+  ((TodoViewController*)[self.viewControllers objectAtIndex:2]).delegate = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {

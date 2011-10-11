@@ -8,6 +8,7 @@
 
 #import "SearchEntitiesViewController.h"
 
+#import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
@@ -88,7 +89,6 @@ typedef enum {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.resultsArray = nil;
   self.searchField = nil;
-  self.locationManager.delegate = nil;
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
@@ -117,6 +117,7 @@ typedef enum {
              forControlEvents:UIControlEventEditingChanged];
 
   self.locationManager = [[[CLLocationManager alloc] init] autorelease];
+  self.locationManager.desiredAccuracy = kCLLocationAccuracyKilometer;
   
   tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_tooltip"]];
   tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 6, 40);
@@ -219,7 +220,6 @@ typedef enum {
   [super viewDidUnload];
 
   self.searchField = nil;
-  self.locationManager.delegate = nil;
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
@@ -580,6 +580,12 @@ typedef enum {
     self.resultsArray = nil;
     [self.tableView reloadData];
   }
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  [searchField_ resignFirstResponder];
 }
 
 @end

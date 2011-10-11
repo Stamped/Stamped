@@ -104,11 +104,12 @@ def findPhone(request):
     phoneNumbers = []
 
     for item in q:
-        if not isinstance(int(item), int):
+        try:
+            number = int(item)
+            phoneNumbers.append(item)
+        except:
             msg = 'Invalid phone number: %s' % item
             logs.warning(msg)
-            raise InputError(msg)
-        phoneNumbers.append(item)
 
     users       = stampedAPI.findUsersByPhone(authUserId, phoneNumbers)
 
@@ -129,11 +130,12 @@ def findTwitter(request):
     twitterIds = []
 
     for item in q:
-        if not isinstance(int(item), int):
+        try:
+            number = int(item)
+            twitterIds.append(item)
+        except:
             msg = 'Invalid twitter id: %s' % item
             logs.warning(msg)
-            raise InputError(msg)
-        twitterIds.append(item)
 
     users       = stampedAPI.findUsersByTwitter(authUserId, twitterIds)
 
@@ -154,11 +156,12 @@ def findFacebook(request):
     facebookIds = []
 
     for item in q:
-        if not isinstance(int(item), int):
+        try:
+            number = int(item)
+            facebookIds.append(item)
+        except:
             msg = 'Invalid facebook id: %s' % item
             logs.warning(msg)
-            raise InputError(msg)
-        facebookIds.append(item)
 
     users       = stampedAPI.findUsersByFacebook(authUserId, facebookIds)
 

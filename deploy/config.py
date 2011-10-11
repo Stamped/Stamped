@@ -43,5 +43,12 @@ def getInstances():
             
             'replSet' : replSetName, 
         }, 
+        {
+            'name' : 'mon0', 
+            'roles' : [ 'monitor', ], 
+            
+            'replSet' : replSetName, 
+        }, 
+
     ]
 

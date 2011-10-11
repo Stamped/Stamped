@@ -23,25 +23,17 @@
 #import "Stamp.h"
 #import "STNavigationBar.h"
 #import "STPlaceAnnotation.h"
+#import "STStampFilterBar.h"
 #import "InboxTableViewCell.h"
 #import "UserImageView.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
 static NSString* const kInboxPath = @"/collections/inbox.json";
-static NSString* const kEverythingPath = @"/temp/inbox.json";
-
-typedef enum {
-  StampsListFilterTypeBook,
-  StampsListFilterTypeFilm,
-  StampsListFilterTypeMusic,
-  StampsListFilterTypePlace,
-  StampsListFilterTypeOther,
-  StampsListFilterTypeAll
-} StampsListFilterType;
 
 @interface InboxViewController ()
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
+- (void)sortStamps;
 - (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)mapButtonWasPressed:(NSNotification*)notification;
@@ -51,10 +43,12 @@ typedef enum {
 - (void)mapUserTapped:(id)sender;
 - (void)mapDisclosureTapped:(id)sender;
 
-@property (nonatomic, copy) NSArray* filterButtons;
 @property (nonatomic, retain) NSMutableArray* entitiesArray;
 @property (nonatomic, retain) NSMutableArray* filteredEntitiesArray;
-@property (nonatomic, retain) UIButton* selectedFilterButton;
+@property (nonatomic, assign) BOOL userPannedMap;
+@property (nonatomic, assign) StampFilterType selectedFilterType;
+@property (nonatomic, assign) StampSortType selectedSortType;
+@property (nonatomic, copy) NSString* searchQuery;
 
 @end
 
@@ -63,28 +57,19 @@ typedef enum {
 @synthesize mapView = mapView_;
 @synthesize entitiesArray = entitiesArray_;
 @synthesize filteredEntitiesArray = filteredEntitiesArray_;
-@synthesize filterButtons = filterButtons_;
-@synthesize filterView = filterView_;
-@synthesize foodFilterButton = foodFilterButton_;
-@synthesize booksFilterButton = booksFilterButton_;
-@synthesize filmFilterButton = filmFilterButton_;
-@synthesize musicFilterButton = musicFilterButton_;
-@synthesize otherFilterButton = otherFilterButton_;
-@synthesize selectedFilterButton = selectedFilterButton_;
+@synthesize userPannedMap = userPannedMap_;
+@synthesize selectedFilterType = selectedFilterType_;
+@synthesize selectedSortType = selectedSortType_;
+@synthesize searchQuery = searchQuery_;
+@synthesize stampFilterBar = stampFilterBar_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.entitiesArray = nil;
   self.filteredEntitiesArray = nil;
-  self.filterView = nil;
-  self.filterButtons = nil;
-  self.foodFilterButton = nil;
-  self.booksFilterButton = nil;
-  self.filmFilterButton = nil;
-  self.musicFilterButton = nil;
-  self.otherFilterButton = nil;
-  self.selectedFilterButton = nil;
+  self.searchQuery = nil;
+  self.stampFilterBar = nil;
   [super dealloc];
 }
 
@@ -109,7 +94,6 @@ typedef enum {
 
 - (void)listButtonWasPressed:(NSNotification*)notification {
   self.tableView.scrollEnabled = YES;
-  mapView_.showsUserLocation = NO;
   [mapView_ removeAnnotations:mapView_.annotations];
   [UIView animateWithDuration:0.5
                    animations:^{ mapView_.alpha = 0.0; }];
@@ -141,12 +125,9 @@ typedef enum {
   [self.view addSubview:mapView_];
   [mapView_ release];
 
-  self.filterButtons =
-      [NSArray arrayWithObjects:(id)foodFilterButton_,
-                                (id)booksFilterButton_,
-                                (id)filmFilterButton_,
-                                (id)musicFilterButton_,
-                                (id)otherFilterButton_, nil];
+  stampFilterBar_.filterType = selectedFilterType_;
+  stampFilterBar_.sortType = selectedSortType_;
+  stampFilterBar_.searchQuery = searchQuery_;
 
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
   [self loadStampsFromDataStore];
@@ -157,16 +138,7 @@ typedef enum {
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
-  self.filterView = nil;
-  self.filterButtons = nil;
-  self.foodFilterButton = nil;
-  self.booksFilterButton = nil;
-  self.filmFilterButton = nil;
-  self.musicFilterButton = nil;
-  self.otherFilterButton = nil;
-  self.selectedFilterButton = nil;
+  self.stampFilterBar = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -195,11 +167,30 @@ typedef enum {
 
 - (void)loadStampsFromDataStore {
   self.entitiesArray = nil;
+  NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
+  
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO"];
+  if (searchTerms.count == 1 && searchQuery_.length) {
+    p = [NSPredicate predicateWithFormat:
+         @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
+         searchQuery_, searchQuery_, searchQuery_, searchQuery_];
+  } else if (searchTerms.count > 1) {
+    NSMutableArray* subPredicates = [NSMutableArray array];
+    for (NSString* term in searchTerms) {
+      if (!term.length)
+        continue;
 
+      NSPredicate* p = [NSPredicate predicateWithFormat:
+          @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
+          term, term, term, term];
+      [subPredicates addObject:p];
+    }
+    p = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+  }
   NSFetchRequest* request = [Stamp fetchRequest];
 	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+  [request setPredicate:p];
 	NSArray* results = [Stamp objectsWithFetchRequest:request];
   NSMutableArray* sortedEntities = [NSMutableArray arrayWithCapacity:results.count];
   for (Stamp* s in results) {
@@ -209,6 +200,8 @@ typedef enum {
   self.entitiesArray = sortedEntities;
 
   [self filterStamps];
+  [self sortStamps];
+  [self.tableView reloadData];
   self.tableView.contentOffset = scrollPosition_;
 }
 
@@ -240,47 +233,108 @@ typedef enum {
   [self loadStampsFromDataStore];
 }
 
-#pragma mark - Filter stuff
+#pragma mark - STStampFilterBarDelegate methods.
 
-- (IBAction)filterButtonPushed:(id)sender {
-  self.filteredEntitiesArray = nil;
+- (void)stampFilterBar:(STStampFilterBar*)bar
+       didSelectFilter:(StampFilterType)filterType
+          withSortType:(StampSortType)sortType
+              andQuery:(NSString*)query {
+  if (![query isEqualToString:searchQuery_]) {
+    self.searchQuery = query;
+    [self loadStampsFromDataStore];
+  }
 
-  UIButton* selectedButton = (UIButton*)sender;
-  for (UIButton* button in self.filterButtons)
-    button.selected = (button == selectedButton && !button.selected);
-
-  self.selectedFilterButton = selectedButton;
-  if (selectedButton && !selectedButton.selected)
-    self.selectedFilterButton = nil;
-  
+  selectedFilterType_ = filterType;
   [self filterStamps];
+
+  selectedSortType_ = sortType;
+  [self sortStamps];
+
+  [self.tableView reloadData];
+}
+
+#pragma mark - Filter/Sort/Search stuff.
+
+- (void)sortStamps {
+  NSSortDescriptor* desc = nil;
+  switch (selectedSortType_) {
+    case StampSortTypeTime:
+      desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+      break;
+    case StampSortTypePopularity:
+      desc = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@count" ascending:NO];
+      break;
+    case StampSortTypeDistance: {
+      CLLocation* currentLocation = stampFilterBar_.currentLocation;
+      if (!currentLocation)
+        break;
+
+      NSArray* sortedEntities = [filteredEntitiesArray_ sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        Entity* firstEntity = (Entity*)obj1;
+        Entity* secondEntity = (Entity*)obj2;
+        
+        NSNumber* firstDistance = nil;
+        NSNumber* secondDistance = nil;
+
+        if (!firstEntity.location && !secondEntity.location)
+          return NSOrderedSame;
+        else if (!firstEntity.location && secondEntity.location)
+          return NSOrderedDescending;
+        else if (firstEntity.location && !secondEntity.location)
+          return NSOrderedAscending;
+
+        firstDistance = [NSNumber numberWithDouble:[firstEntity.location distanceFromLocation:currentLocation]];
+        firstEntity.cachedDistance = firstDistance;
+        secondDistance = [NSNumber numberWithDouble:[secondEntity.location distanceFromLocation:currentLocation]];
+        secondEntity.cachedDistance = secondDistance;
+        return [firstDistance compare:secondDistance];
+      }];
+
+      self.filteredEntitiesArray = [NSMutableArray arrayWithArray:sortedEntities];
+      break;
+    }
+    default:
+      break;
+  }
+  if (!desc)
+    return;
+
+  NSArray* sortedEntities = [filteredEntitiesArray_ sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  self.filteredEntitiesArray = [NSMutableArray arrayWithArray:sortedEntities];
 }
 
 - (void)filterStamps {
-  if (!self.selectedFilterButton) {
+  if (selectedFilterType_ == StampFilterTypeNone) {
     // No need to filter.
     self.filteredEntitiesArray = [NSMutableArray arrayWithArray:entitiesArray_];
-    [self.tableView reloadData];
     return;
   }
-  
+
   NSString* filterString = nil;
-  if (self.selectedFilterButton == foodFilterButton_) {
-    filterString = @"food";
-  } else if (self.selectedFilterButton == booksFilterButton_) {
-    filterString = @"book";
-  } else if (self.selectedFilterButton == filmFilterButton_) {
-    filterString = @"film";
-  } else if (self.selectedFilterButton == musicFilterButton_) {
-    filterString = @"music";
-  } else if (self.selectedFilterButton == otherFilterButton_) {
-    filterString = @"other";
+  switch (selectedFilterType_) {
+    case StampFilterTypeBook:
+      filterString = @"book";
+      break;
+    case StampFilterTypeFood:
+      filterString = @"food";
+      break;
+    case StampFilterTypeFilm:
+      filterString = @"film";
+      break;
+    case StampFilterTypeMusic:
+      filterString = @"music";
+      break;
+    case StampFilterTypeOther:
+      filterString = @"other";
+      break;
+    default:
+      NSLog(@"Invalid filter string...");
+      break;
   }
   if (filterString) {
     NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"category == %@", filterString];
     self.filteredEntitiesArray =
         [NSMutableArray arrayWithArray:[entitiesArray_ filteredArrayUsingPredicate:filterPredicate]];
-    [self.tableView reloadData];
   }
 }
 
@@ -300,6 +354,7 @@ typedef enum {
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
+  cell.sortType = selectedSortType_;
   cell.entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
 
   return cell;
@@ -387,7 +442,8 @@ typedef enum {
 #pragma mark - Map stuff.
 
 - (void)addAnnotationForEntity:(Entity*)entity {
-  NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","]; 
+  // TODO(andybons): Replace with entity location method.
+  NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","];
   CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude

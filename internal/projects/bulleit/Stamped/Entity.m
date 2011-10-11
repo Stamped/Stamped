@@ -6,6 +6,8 @@
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <CoreLocation/CoreLocation.h>
+
 #import "Entity.h"
 #import "Event.h"
 #import "Favorite.h"
@@ -58,6 +60,14 @@
 @dynamic fandangoURL;
 @dynamic image;
 @dynamic events;
+@dynamic location;
+
+@synthesize cachedDistance = cachedDistance_;
+
+- (void)dealloc {
+  self.cachedDistance = nil;
+  [super dealloc];
+}
 
 - (UIImage*)categoryImage {
   if (self.category)
@@ -80,8 +90,24 @@
   return EntityCategoryOther;
 }
 
+- (void)setCoordinates:(NSString*)coordinates {
+  [self willChangeValueForKey:@"coordinates"];
+  [self setPrimitiveValue:coordinates forKey:@"coordinates"];
+  NSArray* coordinatesArray = [self.coordinates componentsSeparatedByString:@","]; 
+  CGFloat latitude = [(NSString*)[coordinatesArray objectAtIndex:0] floatValue];
+  CGFloat longitude = [(NSString*)[coordinatesArray objectAtIndex:1] floatValue];
+  self.location = [[[CLLocation alloc] initWithLatitude:latitude longitude:longitude] autorelease];  
+  [self didChangeValueForKey:@"coordinates"];
+}
+
 - (id)valueForUndefinedKey:(NSString*)key {
   return nil;
+}
+
+// TODO(andybons): Remove for launch.
+- (void)awakeFromFetch {
+  if (self.coordinates && !self.location)
+    [self setCoordinates:self.coordinates];
 }
 
 @end

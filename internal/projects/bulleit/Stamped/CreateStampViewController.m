@@ -326,6 +326,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
   stampsRemainingLayer_.shadowRadius = 0;
   
+#warning this is returning nil in some cases.
   NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;

@@ -46,6 +46,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.favoritesArray = nil;
+  self.delegate = nil;
   [super dealloc];
 }
 
@@ -80,6 +81,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.favoritesArray = nil;
+  self.delegate = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {

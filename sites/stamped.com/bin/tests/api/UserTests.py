@@ -177,25 +177,26 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
 
     def test_fail_find_by_phone(self):
         # Set phone number
-        numbers = ['1235551111','2123343774\u200e']
+        numbers = ['3335551111','2123343774\u200e']
         path = "account/settings.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "phone": numbers[0],
         }
+        result = self.handlePOST(path, data)
 
         path = "users/find/phone.json"
         data = { 
             "oauth_token": self.tokenA['access_token'],
             "q": ','.join(numbers)
         }
+        result = self.handlePOST(path, data)
 
-        try:
-            result = self.handlePOST(path, data)
-            ret = False
-        except:
-            ret = True
-        self.assertTrue(ret)
+        self.assertLength(result, 1)
+        user = result[0]
+        self.assertIn(user['screen_name'], self.screen_names)
+        self.assertIn(user['identifier'], numbers)
+
 
 
 class StampedAPIUsersFindTwitter(StampedAPIUserTest):

@@ -6,7 +6,6 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
-#import <CoreLocation/CoreLocation.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 

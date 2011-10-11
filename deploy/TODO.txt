@@ -1,5 +1,1 @@
 
-OLD:
-    * refer to individual machines via stackName.instanceName ala stack.db0 or stack.db1
-    * better way of testing if SSH is up and running than repeatedly fabricing into it
-
