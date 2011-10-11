@@ -295,27 +295,26 @@ def buildPushNotification(user, activityItem, deviceId):
 
     # Set message
     if genre == 'restamp':
-        msg = '%s (@%s) gave you credit for a stamp' % (user['name'], user.screen_name)
+        msg = '%s gave you credit' % (user.screen_name)
 
     elif genre == 'like':
         ### TODO: Include emoji in notification -- &#xe057;
-        msg = '%s (@%s) liked your stamp' % (user['name'], user.screen_name)
+        msg = '%s &#xe057; your stamp' % (user.screen_name)
     
     elif genre == 'favorite':
-        msg = '%s (@%s) added your stamp as a to-do' % (user['name'], user.screen_name)
+        msg = '%s added your stamp as a to-do' % (user.screen_name)
 
     elif genre == 'mention':
-        msg = "%s (@%s) mentioned you on %s." % \
-            (user['name'], user.screen_name, activityItem.subject)
+        msg = "%s mentioned you on a stamp" % (user.screen_name)
 
     elif genre == 'comment':
-        msg = '%s (@%s) commented on your stamp' % (user['name'], user.screen_name)
+        msg = '%s commented on your stamp' % (user.screen_name)
 
     elif genre == 'reply':
-        msg = '%s (@%s) replied to you on Stamped' % (user['name'], user.screen_name)
+        msg = '%s replied to you' % (user.screen_name)
 
     elif genre == 'follower':
-        msg = '%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
+        msg = '%s is now following you' % (user.screen_name)
 
     # Build payload
     payload = {
