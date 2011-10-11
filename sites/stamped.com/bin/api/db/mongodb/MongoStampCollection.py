@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import Globals, logs, re
 import pymongo
@@ -122,7 +122,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             'before':   kwargs.pop('before', None), 
             'limit':    kwargs.pop('limit', 20),
             'sort':     'timestamp.modified',
-            'sortOrder': pymongo.ASCENDING,
+            'sortOrder': pymongo.DESCENDING,
         }
 
         documentIds = []

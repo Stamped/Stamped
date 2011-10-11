@@ -40,7 +40,7 @@ def handlePOST(path, data):
 
 
 
-USER = 'kevin'
+USER = 'andybons'
 PASS = '12345'
 
 path = "oauth2/login.json"
@@ -73,24 +73,30 @@ token = account['token']
 # }
 # result = handlePOST(path, data)
 
-path = "account/alerts/update.json"
+# path = "account/alerts/update.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "ios_alert_credit": True,
+#     "ios_alert_like": True,
+#     "ios_alert_fav": True,
+#     "ios_alert_mention": True,
+#     "ios_alert_comment": True,
+#     "ios_alert_reply": True,
+#     "ios_alert_follow": True,
+#     "email_alert_credit": True,
+#     "email_alert_like": True,
+#     "email_alert_fav": True,
+#     "email_alert_mention": True,
+#     "email_alert_comment": True,
+#     "email_alert_reply": True,
+#     "email_alert_follow": True,
+
+# }
+
+path = "account/alerts/ios/update.json"
 data = {
     "oauth_token": token['access_token'],
-    "ios_alert_credit": True,
-    "ios_alert_like": True,
-    "ios_alert_fav": True,
-    "ios_alert_mention": True,
-    "ios_alert_comment": True,
-    "ios_alert_reply": True,
-    "ios_alert_follow": True,
-    "email_alert_credit": True,
-    "email_alert_like": True,
-    "email_alert_fav": True,
-    "email_alert_mention": True,
-    "email_alert_comment": True,
-    "email_alert_reply": True,
-    "email_alert_follow": True,
-
+    "token": "cf061c5538ac48a066429449188ccb0b0574aeb068a6a6c56f3115a5c4085329"
 }
 result = handlePOST(path, data)
 

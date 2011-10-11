@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import Globals, utils
 import json, logs, urllib
@@ -200,8 +200,8 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             # ensure that we received a valid response
             if response['status'] != 'OK' or len(response['results']) <= 0:
-                #utils.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
-                #          'ErrorCode: ' + response['status'] + '\n')
+                utils.log('[GooglePlaces] error searching "' + str(latLng) + '"\n' + 
+                          'ErrorCode: ' + response['status'] + '\n')
                 
                 if response['status'] == 'OVER_QUERY_LIMIT':
                     count += 1
@@ -232,7 +232,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('search', params)
-        #logs.debug('[GooglePlaces] ' + url)
+        utils.log('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
@@ -257,7 +257,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         # example URL:
         # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('details', params)
-        #logs.debug('[GooglePlaces] ' + url)
+        utils.log('[GooglePlaces] ' + url)
         
         try:
             # GET the data and parse the response as json
@@ -303,8 +303,9 @@ def parseCommandLine():
     parser.add_option("-n", "--name", action="store", type="string", dest="name", 
         default=None, help="Optionally provide a name to filter results")
     
+    d = 500
     parser.add_option("-r", "--radius", action="store", type="int", dest="radius", 
-        default=500, help="Optionally specify a radius in meters (defaults to %default meters)")
+        default=d, help="Optionally specify a radius in meters (defaults to %d meters)" % d)
     
     parser.add_option("-t", "--types", action="store", type="string", dest="types", 
         default=None, help="Optionally specify one or more types to search by, with " + 

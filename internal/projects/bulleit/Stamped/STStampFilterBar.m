@@ -29,7 +29,6 @@ static const CGFloat kTopMargin = 5;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
 @property (nonatomic, retain) NSMutableArray* sortButtons;
 @property (nonatomic, retain) UIButton* clearFilterButton;
-@property (nonatomic, retain) CLLocationManager* locationManager;
 @end
 
 @implementation STStampFilterBar
@@ -43,8 +42,8 @@ static const CGFloat kTopMargin = 5;
 @synthesize searchQuery = searchQuery_;
 @synthesize searchField = searchField_;
 @synthesize clearFilterButton = clearFilterButton_;
-@synthesize locationManager = locationManager_;
 @synthesize currentLocation = currentLocation_;
+@synthesize locationManager = locationManager_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -63,19 +62,18 @@ static const CGFloat kTopMargin = 5;
 }
 
 - (void)dealloc {
+  locationManager_.delegate = nil;
+  [locationManager_ release];
   self.sortButtons = nil;
   self.filterButtons = nil;
   self.searchQuery = nil;
   self.clearFilterButton = nil;
-  self.locationManager.delegate = nil;
-  self.locationManager = nil;
   self.currentLocation = nil;
   [super dealloc];
 }
 
 - (void)initialize {
-  
-  self.locationManager = [[[CLLocationManager alloc] init] autorelease];
+  locationManager_ = [[CLLocationManager alloc] init];
   self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
   self.locationManager.delegate = self;
   

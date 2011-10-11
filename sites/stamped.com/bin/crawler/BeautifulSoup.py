@@ -78,10 +78,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE, DAMMIT.
 """
 from __future__ import generators
 
-__author__ = "Leonard Richardson (leonardr@segfault.org)"
-__version__ = "3.2.0"
+__author__    = "Leonard Richardson (leonardr@segfault.org)"
+__version__   = "3.2.0"
 __copyright__ = "Copyright (c) 2004-2010 Leonard Richardson"
-__license__ = "New-style BSD"
+__license__   = "New-style BSD"
 
 import Globals
 from sgmllib import SGMLParser, SGMLParseError

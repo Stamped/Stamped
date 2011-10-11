@@ -40,5 +40,6 @@ typedef enum {
 @property (nonatomic, assign) StampSortType sortType;
 @property (nonatomic, copy) NSString* searchQuery;
 @property (nonatomic, retain) CLLocation* currentLocation;
+@property (nonatomic, readonly) CLLocationManager* locationManager;
 
 @end

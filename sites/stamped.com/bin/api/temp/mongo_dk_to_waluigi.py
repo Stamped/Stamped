@@ -33,6 +33,7 @@ def main():
         print 
 
     convertEntities()
+    updateUserFavEntities()
 
 
 def mongoExportImport(collection):
@@ -82,6 +83,22 @@ def convertEntities():
             print '-' * 40
             print 'SKIPPED: %s (%s)' % (entity['_id'], entity['title'])    
             print '-' * 40
+
+def updateUserFavEntities():
+    user_collection = new_database['users']
+    fav_collection = new_database['favorites']
+    userfav_collection = new_database['userfaventities']
+    users = user_collection.find()
+    for user in users:
+        userfavorites = fav_collection.find({'user_id': str(user['_id'])})
+        favs = []
+        for v in userfavorites:
+            favs.append(str(v['_id']))
+        userfav_collection.update(
+            {'_id': str(user['_id'])},
+            {'$set': {'ref_ids': favs}}
+        )
+
 
 if __name__ == '__main__':  
     main()

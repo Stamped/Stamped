@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import copy
 from datetime import datetime
@@ -380,6 +380,7 @@ class EntitySearch(Schema):
         self.coordinates        = CoordinatesSchema()
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
+        self.local              = SchemaElement(bool)
 
 class CoordinatesSchema(Schema):
     def setSchema(self):
