@@ -492,11 +492,12 @@ class MongoEntitySearcher(EntitySearcher):
             
             if full:
                 wrapper['google_place_results'] = []
-                pool.spawn(_find_google_places, wrapper, coords, 500, True)
+                pool.spawn(_find_google_places, wrapper, coords, 20000, True)
                 
-                us_center_coords = [ 39.5, -98.35 ]
-                us_search_radius = 5000000
-                pool.spawn(_find_google_places, wrapper, us_center_coords, us_search_radius, False)
+                # national search centered in kansas
+                #us_center_coords = [ 39.5, -98.35 ]
+                #us_search_radius = 5000000
+                #pool.spawn(_find_google_places, wrapper, us_center_coords, us_search_radius, False)
             
             pool.spawn(_find_places, wrapper)
         
