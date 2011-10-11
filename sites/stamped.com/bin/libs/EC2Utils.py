@@ -8,7 +8,8 @@ __license__   = "TODO"
 import Globals
 import copy, os, re, sys, utils
 
-from pprint import pprint
+from subprocess     import Popen, PIPE
+from pprint         import pprint
 
 class EC2Utils(object):
     
@@ -27,7 +28,7 @@ class EC2Utils(object):
         self.env['EC2_CERT']        = os.path.join(root, 'deploy/keys/cert-W7ITOSRSFD353R3K6MULWBZCDASTRG3L.pem')
     
     def get_tags(self):
-        ret = utils.shell('ec2-describe-tags', self.env)
+        ret = self._shell('ec2-describe-tags', self.env)
         
         if 0 != ret[1]:
             return None
@@ -35,7 +36,7 @@ class EC2Utils(object):
             return ret[0]
     
     def get_local_instance_id(self):
-        ret = utils.shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')
+        ret = self._shell('wget -q -O - http://169.254.169.254/latest/meta-data/instance-id')
         
         if 0 != ret[1]:
             return None
@@ -43,7 +44,7 @@ class EC2Utils(object):
             return ret[0]
     
     def get_stack(self, instance_id):
-        ret = utils.shell('ec2-describe-tags | grep "%s[ \t]*stack"' % instance_id, self.env)
+        ret = self._shell('ec2-describe-tags | grep "%s[ \t]*stack"' % instance_id, self.env)
         
         if 0 != ret[1]:
             return None
@@ -55,7 +56,7 @@ class EC2Utils(object):
             return None
     
     def get_instance_ids_in_stack(self, stack):
-        ret = utils.shell('ec2-describe-tags | grep "stack[ \t]*%s$"' % stack, self.env)
+        ret = self._shell('ec2-describe-tags | grep "stack[ \t]*%s$"' % stack, self.env)
         
         if 0 != ret[1]:
             return None
@@ -70,43 +71,55 @@ class EC2Utils(object):
             return out
     
     def get_instance_info(self, instance_id):
-        ret = utils.shell('ec2-describe-instances %s' % instance_id, self.env)
+        ret = self._shell('ec2-describe-instances %s' % instance_id, self.env)
         
         if 0 != ret[1]:
             return None
         
-        return {
+        return utils.AttributeDict({
             'private_dns' : re.match('.*(ip-[0-9a-zA-Z.-]*internal).*', ret[0], re.DOTALL).groups()[0], 
             'public_dns'  : re.match('.*(ec2-[0-9a-zA-Z.-]*amazonaws\.com).*', ret[0], re.DOTALL).groups()[0], 
             'roles'       : eval(re.match('.*roles[ \t]*(\[[^\]]*\]).*', ret[0], re.DOTALL).groups()[0]), 
             'stack'       : re.match('.*stack[ \t]*([a-zA-Z0-9_]*).*', ret[0], re.DOTALL).groups()[0], 
             'name'        : re.match('.*name[ \t]*([a-zA-Z0-9_]*).*', ret[0], re.DOTALL).groups()[0], 
             'id'          : instance_id, 
-        }
+        })
     
-    def get_stack_info(self, instance_id=None):
-        if instance_id is None:
-            instance_id = self.get_local_instance_id()
+    def get_stack_info(self, instance_id=None, stack=None):
+        if stack is None:
+            if instance_id is None:
+                instance_id = self.get_local_instance_id()
+            
+            stack = self.get_stack(instance_id)
+        else:
+            instance_id = None
         
-        stack = self.get_stack(instance_id)
         ids = self.get_instance_ids_in_stack(stack)
         
         data  = {
             'instance' : {
                 'id' : instance_id, 
             }, 
-            'nodes' : {}
+            'nodes' : []
         }
         
         for cur_id in ids:
             info = self.get_instance_info(cur_id)
-            name = info['name']
-            data['nodes'][name] = info
+            data['nodes'].append(info)
             
-            if cur_id.lower() == instance_id.lower():
-                data['instance']['name'] = name
+            if cur_id == instance_id:
+                data['instance']['name'] = info['name']
         
         return utils.AttributeDict(data)
+    
+    def _shell(self, cmd, env=None):
+        utils.log(cmd)
+        pp = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, env=env)
+        output = pp.stdout.read().strip()
+        status = pp.wait()
+        
+        return (output, status)
+
 
 """
 ec2 = EC2Utils()
