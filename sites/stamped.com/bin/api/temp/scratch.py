@@ -22,7 +22,7 @@ client_auth = {
 }
 
 _baseurl = "https://dev.stamped.com/v0"
-# _baseurl = "http://localhost:18000/v0"
+_baseurl = "http://localhost:18000/v0"
 
 def handleGET(path, data):
     params = urllib.urlencode(data)
@@ -96,7 +96,7 @@ token = account['token']
 path = "account/alerts/ios/update.json"
 data = {
     "oauth_token": token['access_token'],
-    "token": "%s" % ("0" * 64)
+    "token": "cf061c5538ac48a066429449188ccb0b0574aeb068a6a6c56f3115a5c4085329"
 }
 result = handlePOST(path, data)
 
