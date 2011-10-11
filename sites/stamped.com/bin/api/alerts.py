@@ -230,30 +230,30 @@ def _setBody(user, activity):
 
     commentHTML = """
         <tr><td width="600" align="center"><table cellpadding="0" cellspacing="0"><tr><td rowspan=2 width="94" 
-        height="94"><img src="http://static.stamped.com/users/%s-92x92.jpg" width="92" height="92" border="1" alt="%s" 
-        style="border-size:1px;border-style:solid;border-color:#e6e6e6"></td><td rowspan=2 width="20" height="92">&nbsp;</td>
-        <td width="455" valign="top" height="28" style="color:#999;font-family:Helvetica,Arial;font-weight:bold;font-size:16px">
-        %s</td></tr><tr><td width="445" style="color:#333;font-family:Helvetica,Arial;font-size:16px;" valign="top">%s</td></tr>
-        </table></td></tr><tr><td width="600" height="44" align="center" valign="middle">
-        <img src="http://static.stamped.com/assets/img/email-line.png" width="593" height="3"></td></tr>
-    """ % (user.screen_name, user.screen_name, user.screen_name)
+        height="94"><img src="http://static.stamped.com/users/%(screen_name)s-92x92.jpg" width="92" height="92" border="1" 
+        alt="%(screen_name)s" style="border-size:1px;border-style:solid;border-color:#e6e6e6"></td><td rowspan=2 width="20" 
+        height="92">&nbsp;</td><td width="455" valign="top" height="28" style="color:#999;font-family:Helvetica,Arial;
+        font-weight:bold;font-size:16px">%(screen_name)s</td></tr><tr><td width="445" style="color:#333;font-family:Helvetica,Arial;
+        font-size:16px;" valign="top">%(blurb)s</td></tr></table></td></tr><tr><td width="600" height="44" align="center" 
+        valign="middle"><img src="http://static.stamped.com/assets/img/email-line.png" width="593" height="3"></td></tr>
+    """
 
     userHTML = """
         <tr><td width="600" align="center"><table cellpadding="0" cellspacing="0"><tr><td rowspan=2 width="94" 
-        height="94"><img src="http://static.stamped.com/users/%s-92x92.jpg" width="92" height="92" border="1" alt="%s" 
-        style="border-size:1px;border-style:solid;border-color:#e6e6e6"></td><td rowspan=2 width="20" height="92">&nbsp;</td>
-        <td width="455" valign="top" height="28" style="color:#999;font-family:Helvetica,Arial;font-weight:bold;font-size:16px">
-        %s</td></tr><tr><td width="445" style="color:#333;font-family:Helvetica,Arial;font-size:16px;" valign="top">%s</td></tr>
-        </table></td></tr><tr><td width="600" height="44" align="center" valign="middle">
-        <img src="http://static.stamped.com/assets/img/email-line.png" width="593" height="3"></td></tr>
-    """ % (user.screen_name, user.screen_name, user.screen_name)
+        height="94"><img src="http://static.stamped.com/users/%(screen_name)s-92x92.jpg" width="92" height="92" border="1" 
+        alt="%(screen_name)s" style="border-size:1px;border-style:solid;border-color:#e6e6e6"></td><td rowspan=2 width="20" 
+        height="92">&nbsp;</td><td width="455" valign="top" height="28" style="color:#999;font-family:Helvetica,Arial;
+        font-weight:bold;font-size:16px">%(screen_name)s</td></tr><tr><td width="445" style="color:#333;font-family:Helvetica,Arial;
+        font-size:16px;" valign="top">%(blurb)s</td></tr></table></td></tr><tr><td width="600" height="44" align="center" 
+        valign="middle"><img src="http://static.stamped.com/assets/img/email-line.png" width="593" height="3"></td></tr>
+    """
 
     content = ''
 
     if genre == 'follower':
         msg = '<strong>%s</strong> (@%s) is now following you on Stamped.' % \
             (user['name'], user.screen_name)
-        content = userHTML % activity.blurb
+        content = userHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
     elif genre == 'like':
         msg = '<strong>%s</strong> (@%s) liked your stamp of <strong>%s</strong>.' % \
@@ -266,22 +266,22 @@ def _setBody(user, activity):
     elif genre == 'restamp':
         msg = '<strong>%s</strong> (@%s) gave you credit for <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
-        content = commentHTML % activity.blurb
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
     elif genre == 'mention':
         msg = '<strong>%s</strong> (@%s) mentioned you <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
-        content = commentHTML % activity.blurb
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
     elif genre == 'comment':
         msg = '<strong>%s</strong> (@%s) commented on <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
-        content = commentHTML % activity.blurb
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
     elif genre == 'reply':
         msg = '<strong>%s</strong> (@%s) replied to you on <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
-        content = commentHTML % activity.blurb
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
     else:
         ### TODO: Add error logging?
         raise Exception
