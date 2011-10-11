@@ -250,38 +250,39 @@ def _setBody(user, activity):
 
     content = ''
 
-    if genre == 'follower':
+    if activity.genre == 'follower':
         msg = '<strong>%s</strong> (@%s) is now following you on Stamped.' % \
             (user['name'], user.screen_name)
         content = userHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
-    elif genre == 'like':
+    elif activity.genre == 'like':
         msg = '<strong>%s</strong> (@%s) liked your stamp of <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
 
-    elif genre == 'favorite':
+    elif activity.genre == 'favorite':
         msg = '<strong>%s</strong> (@%s) added <strong>%s</strong> as a to-do.' % \
             (user['name'], user.screen_name, activity.subject)
 
-    elif genre == 'restamp':
+    elif activity.genre == 'restamp':
         msg = '<strong>%s</strong> (@%s) gave you credit for <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
         content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
-    elif genre == 'mention':
+    elif activity.genre == 'mention':
         msg = '<strong>%s</strong> (@%s) mentioned you <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
         content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
-    elif genre == 'comment':
+    elif activity.genre == 'comment':
         msg = '<strong>%s</strong> (@%s) commented on <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
         content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
 
-    elif genre == 'reply':
+    elif activity.genre == 'reply':
         msg = '<strong>%s</strong> (@%s) replied to you on <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
         content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
+        
     else:
         ### TODO: Add error logging?
         raise Exception
