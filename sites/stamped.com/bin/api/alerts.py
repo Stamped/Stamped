@@ -282,13 +282,13 @@ def _setBody(user, activity):
         msg = '<strong>%s</strong> (@%s) replied to you on <strong>%s</strong>.' % \
             (user['name'], user.screen_name, activity.subject)
         content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
-        
+
     else:
         ### TODO: Add error logging?
         raise Exception
 
 
-    template = """<html><body bgcolor="#f3f3f3"><table id="fullbody" width="100%" cellpadding="0" cellspacing="0"><tr><td 
+    template = """<html><body bgcolor="#f3f3f3"><table id="fullbody" width="100%%" cellpadding="0" cellspacing="0"><tr><td 
         align="center" bgcolor="#f3f3f3"><table id="body" cellpadding="0" cellspacing="0"><tr><td width="5"></td><td width="650" 
         height="40" align="center" valign="bottom"><img src="http://static.stamped.com/assets/img/email-logo-top.png" width="650" 
         height="30" style="display:block;"></td><td width="5"></td></tr><tr><td width="5"></td><td width="650" height="160" 
