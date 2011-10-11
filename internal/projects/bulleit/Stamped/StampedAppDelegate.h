@@ -8,10 +8,12 @@
 
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
+#import "FBConnect.h"
 
-@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKRequestDelegate>
+@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKRequestDelegate, FBSessionDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;
+@property (nonatomic, retain) Facebook* facebook;
 
 @end

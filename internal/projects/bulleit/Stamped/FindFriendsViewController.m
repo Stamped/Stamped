@@ -18,6 +18,7 @@
 
 #import "STSectionHeaderView.h"
 #import "STSearchField.h"
+#import "StampedAppDelegate.h"
 #import "FriendshipTableViewCell.h"
 #import "Stamp.h"
 #import "Util.h"
@@ -25,14 +26,16 @@
 
 static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
 static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
+static NSString* const kFacebookFriendsURI = @"/me/friends";
 static NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
+static NSString* const kStampedFacebookFriendsURI = @"/users/find/facebook.json";
 static NSString* const kStampedEmailFriendsURI = @"/users/find/email.json";
 static NSString* const kStampedPhoneFriendsURI = @"/users/find/phone.json";
 static NSString* const kStampedSearchURI = @"/users/search.json";
 static NSString* const kStampedLinkedAccountsURI = @"/account/linked_accounts.json";
 static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
-static NSString* const kFacebookAppID = @"297022226980395";
+//static NSString* const kFacebookAppID = @"297022226980395";
 
 @interface FindFriendsViewController ()
 - (void)adjustNippleToView:(UIView*)view;
@@ -47,9 +50,11 @@ static NSString* const kFacebookAppID = @"297022226980395";
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error;
 - (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID;
+- (void)connectFacebookUserName:(NSString*)username userID:(NSString*)userID;
 - (void)fetchCurrentUser;
 - (void)fetchFriendIDs:(NSString*)userIDString;
 - (void)findStampedFriendsFromTwitter:(NSArray*)twitterIDs;
+- (void)findStampedFriendsFromFacebook:(NSArray*)facebookIDs;
 - (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
@@ -89,10 +94,10 @@ static NSString* const kFacebookAppID = @"297022226980395";
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
     self.findSource = source;
     self.followedUsers = [NSMutableArray array];
-    facebookClient_ = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:self];
   }
   return self;
 }
+
 
 - (void)dealloc {
   self.followedUsers = nil;
@@ -123,10 +128,14 @@ static NSString* const kFacebookAppID = @"297022226980395";
   [super viewDidLoad];
   searchFieldHidden_ = YES;
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
+  self.facebookClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+
   if (self.findSource == FindFriendsFromContacts)
     [self findFromContacts:self];
   else if (self.findSource == FindFriendsFromTwitter)
     [self findFromTwitter:self];
+  else if (self.findSource == FindFriendsFromFacebook)
+    [self findFromFacebook:self];
   else
     [self findFromContacts:self];
 }
@@ -178,7 +187,6 @@ static NSString* const kFacebookAppID = @"297022226980395";
 - (IBAction)findFromFacebook:(id)sender {
   [self setSearchFieldHidden:YES];
   tableView_.hidden = NO;
-  // [facebookClient_ authorize:[NSArray arrayWithObject:@""]];
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = YES;
@@ -186,6 +194,17 @@ static NSString* const kFacebookAppID = @"297022226980395";
   [searchField_ resignFirstResponder];
   [self adjustNippleToView:facebookButton_];
   self.findSource = FindFriendsFromFacebook;
+  
+  if (!self.facebookClient.isSessionValid) {
+    [self.facebookClient authorize:nil];
+  }
+  if (facebookFriends_) {
+    [self.tableView reloadData];
+    return;
+  }
+  
+  // Grab some Facebook friends
+  [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
   [tableView_ reloadData];
 }
 
@@ -559,6 +578,59 @@ static NSString* const kFacebookAppID = @"297022226980395";
   [loader send];
 }
 
+#pragma mark - Facebook.
+
+- (void)connectFacebookUserName:(NSString*)username userID:(NSString*)userID {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI
+                                                               delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
+                    username, @"twitter_screen_name", nil];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}
+
+// FBRequestDelegate methods.
+- (void)requestLoading:(FBRequest*)request {
+  NSLog(@"fb request loading: %@", request);
+}
+
+- (void)request:(FBRequest*)request didLoad:(id)result{
+  NSLog(@"fb did load: %@", result);
+  NSArray* resultData;
+  
+  if ([result isKindOfClass:[NSArray class]]) {}
+  if ([result isKindOfClass:[NSDictionary class]])
+    resultData = [result objectForKey:@"data"];
+  
+  if (resultData  &&  resultData.count != 0) {
+    NSMutableArray* fbFriendIDs = [NSMutableArray array];
+    for (NSDictionary* dict in resultData)
+      [fbFriendIDs addObject:[dict objectForKey:@"id"]];
+    if (fbFriendIDs.count > 0)
+      [self findStampedFriendsFromFacebook:fbFriendIDs];
+  }
+}
+
+- (void) findStampedFriendsFromFacebook:(NSArray*)facebookIDs {
+  // TODO: the server only supports 100 IDs at a time. need to chunk.
+  
+  RKObjectManager* manager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
+  
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedFacebookFriendsURI
+                                                        delegate:self];
+  loader.method = RKRequestMethodPOST;
+  loader.params = [NSDictionary dictionaryWithObject:[facebookIDs componentsJoinedByString:@","] forKey:@"q"];
+  
+  loader.objectMapping = mapping;
+  [loader send];
+}
+
+- (void)request:(FBRequest*)request didFailWithError:(NSError *)error {
+  NSLog(@"fb request hit error: %@", error);
+}
+
+
 #pragma mark - RKRequestDelegate Methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
@@ -595,6 +667,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
   // Stamped friends.
   else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
     [self findStampedFriendsFromTwitter:[body objectForKey:@"ids"]];
+    NSLog(@"%@", [body objectForKey:@"ids"]);
   }
 }
 
@@ -610,7 +683,14 @@ static NSString* const kFacebookAppID = @"297022226980395";
         [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
             [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
     [self.tableView reloadData];
-  } else if ([objectLoader.resourcePath isEqualToString:kStampedPhoneFriendsURI] ||
+  }
+  else if ([objectLoader.resourcePath isEqualToString:kStampedFacebookFriendsURI]) {
+    self.facebookFriends =
+    [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
+                                          [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    [self.tableView reloadData];
+  }
+  else if ([objectLoader.resourcePath isEqualToString:kStampedPhoneFriendsURI] ||
              [objectLoader.resourcePath isEqualToString:kStampedEmailFriendsURI]) {
     if (objects.count == 0) {
       if (!self.contactFriends) {

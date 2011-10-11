@@ -30,6 +30,8 @@ static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
+static NSString* const kFacebookAppID = @"297022226980395";
+
 @interface StampedAppDelegate ()
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
@@ -39,6 +41,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 @synthesize window = window_;
 @synthesize navigationController = navigationController_;
+@synthesize facebook = facebook_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if !TARGET_IPHONE_SIMULATOR
@@ -56,6 +59,19 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                                                         object:self
                                                       userInfo:apsInfo];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+  }
+
+  
+  self.window.rootViewController = self.navigationController;
+  [self.window makeKeyAndVisible];
+  
+  // Create an appwide Facebook client.
+  facebook_ = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:self];
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"] 
+      && [defaults objectForKey:@"FBExpirationDateKey"]) {
+    self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+    self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
 
   return YES;
@@ -105,6 +121,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)dealloc {
   [window_ release];
   [navigationController_ release];
+  [facebook_ release];
   [super dealloc];
 }
 
@@ -267,6 +284,29 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [objectManager.mappingProvider setMapping:userAndTokenMapping forKeyPath:@"UserAndToken"];
   
   [objectManager.mappingProvider setMapping:searchResultMapping forKeyPath:@"SearchResult"];
+}
+
+#pragma mark - UIApplicationDelegate methods.
+// Pre 4.2 support
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+  if (self.facebook)
+    return [self.facebook handleOpenURL:url]; 
+  return NO;
+}
+
+// For 4.2+ support
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+  if (self.facebook)
+    return [self.facebook handleOpenURL:url]; 
+  return NO;
+}
+
+- (void)fbDidLogin {
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[self.facebook accessToken] forKey:@"FBAccessTokenKey"];
+  [defaults setObject:[self.facebook expirationDate] forKey:@"FBExpirationDateKey"];
+  [defaults synchronize];
 }
 
 @end
