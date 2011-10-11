@@ -262,8 +262,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
-  view.leftLabel.text = @"Stamps";
-  view.rightLabel.text = [user_.numStamps stringValue];
+  view.leftLabel.text = @"Recent stamps";
   
   return view;
 }
@@ -467,7 +466,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                                     delegate:self];
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:user_.userID, @"user_id",
-                                                                   @"1", @"quality", nil];
+                                                                   @"1", @"quality",
+                                                                   @"5", @"limit", nil];
   [objectLoader send];
 }
 
