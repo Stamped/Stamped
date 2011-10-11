@@ -40,6 +40,24 @@ def parseCommandLine():
 
 
 def main():
+    lock = os.path.join(base, 'alerts.lock')
+    if os.path.exists(lock):
+        print 'LOCKED'
+        return
+    
+    try:
+        open(lock, 'w').close()
+        print 'BEGIN'
+        runAlerts()
+        print 'END'
+    except Exception as e:
+        print e
+        print 'FAIL'
+    finally:
+        os.remove(lock)
+
+
+def runAlerts():
     # parse commandline
     options     = parseCommandLine()
     options     = options.__dict__
@@ -162,7 +180,7 @@ def main():
 
         except:
             print 'REMOVED'
-            # alertDB.removeAlert(alert.alert_id)
+            alertDB.removeAlert(alert.alert_id)
             continue
 
     print
