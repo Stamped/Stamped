@@ -151,7 +151,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   NSSortDescriptor* desc = nil;
   switch (selectedSortType_) {
     case StampSortTypeTime:
-      desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+      desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
       break;
     case StampSortTypePopularity:
       desc = [NSSortDescriptor sortDescriptorWithKey:@"entityObject.stamps.@count" ascending:NO];
