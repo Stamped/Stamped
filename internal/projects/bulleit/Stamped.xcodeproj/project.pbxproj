@@ -123,6 +123,8 @@
 		7E35A72E13DB9CEA008F856F /* SearchEntitiesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E35A72D13DB9CEA008F856F /* SearchEntitiesTableViewCell.m */; };
 		7E3909361401975D00910F98 /* Notifications.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3909351401975C00910F98 /* Notifications.m */; };
 		7E3B6D7A13D7509600FBE958 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3B6D7913D7509600FBE958 /* Util.m */; };
+		7E3D979F1444C9B40018820C /* StampListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3D979D1444C9B40018820C /* StampListViewController.m */; };
+		7E3D97A01444C9B40018820C /* StampListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E3D979E1444C9B40018820C /* StampListViewController.xib */; };
 		7E428A8513EB2C72004CA2B2 /* stacks_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */; };
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
 		7E42DCBD13DB64CA00AF63BE /* SearchEntitiesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */; };
@@ -701,6 +703,9 @@
 		7E3909351401975C00910F98 /* Notifications.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Notifications.m; sourceTree = "<group>"; };
 		7E3B6D7813D7509600FBE958 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		7E3B6D7913D7509600FBE958 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
+		7E3D979C1444C9B40018820C /* StampListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampListViewController.h; sourceTree = "<group>"; };
+		7E3D979D1444C9B40018820C /* StampListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StampListViewController.m; sourceTree = "<group>"; };
+		7E3D979E1444C9B40018820C /* StampListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StampListViewController.xib; sourceTree = "<group>"; };
 		7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacks_back_button@2x.png"; sourceTree = "<group>"; };
 		7E42DCB913DB64CA00AF63BE /* SearchEntitiesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesViewController.h; sourceTree = "<group>"; };
 		7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesViewController.m; sourceTree = "<group>"; };
@@ -1288,6 +1293,16 @@
 				7EC38CBC141C14900069B892 /* cat_icon_other_large@2x.png */,
 			);
 			name = Categories;
+			sourceTree = "<group>";
+		};
+		7E3D97A11444C9BC0018820C /* Stamp List */ = {
+			isa = PBXGroup;
+			children = (
+				7E3D979C1444C9B40018820C /* StampListViewController.h */,
+				7E3D979D1444C9B40018820C /* StampListViewController.m */,
+				7E3D979E1444C9B40018820C /* StampListViewController.xib */,
+			);
+			name = "Stamp List";
 			sourceTree = "<group>";
 		};
 		7E42DCBE13DB64D100AF63BE /* Create Stamp */ = {
@@ -2006,6 +2021,7 @@
 				7E89C3AF1437BFC300547960 /* Settings */,
 				7ECCB93814351AFE006575D1 /* Friend Finder */,
 				7EE24A2B1421479E0027DBB6 /* Stamp Customizer */,
+				7E3D97A11444C9BC0018820C /* Stamp List */,
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
 				7E0BC47413E4A07F008CC076 /* Search Entities */,
 				7E47E94C1409C00F00130B32 /* Edit Entity */,
@@ -2583,6 +2599,7 @@
 				7EBBDB531441F21F00DDEAE9 /* hdr_sort_time_button@2x.png in Resources */,
 				7E7396EA14438A5600C7CFEA /* small_location_icon_purple@2x.png in Resources */,
 				7E7396EB14438A5600C7CFEA /* small_location_icon@2x.png in Resources */,
+				7E3D97A01444C9B40018820C /* StampListViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2702,6 +2719,7 @@
 				7E0B621C14395C3800A573FA /* NotificationSettingsViewController.m in Sources */,
 				7E0B62331439718F00A573FA /* EditProfileViewController.m in Sources */,
 				7EBBDB561441F4BC00DDEAE9 /* STStampFilterBar.m in Sources */,
+				7E3D979F1444C9B40018820C /* StampListViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
