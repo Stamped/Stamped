@@ -30,6 +30,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         if instances is None:
             instances = config.getInstances()
+            
             for instance in instances:
                 if self.system.options.restore is not None and 'raid' in instance:
                     instance['raid']['restore'] = self.system.options.restore

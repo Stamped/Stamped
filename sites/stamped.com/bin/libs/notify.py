@@ -26,6 +26,9 @@ class ANotificationHandler(object):
     @abstract
     def sms(self, subject, message):
         pass
+    
+    def __str__(self):
+        return self.__class__.__name__
 
 class NotificationRecipient(object):
     _carriers = {
@@ -70,23 +73,30 @@ class SMTPNotificationHandler(ANotificationHandler):
     
     @lazyProperty
     def _server(self):
+        utils.log('[%s] connecting to gmail SMTP server' % self)
         server = smtplib.SMTP('smtp.gmail.com:587')
         server.starttls()
         server.login(self.username, self.password)
+        
         return server
     
     def _sendmail(self, recipient, subject, message):
         msg             = MIMEText(message)
-        msg['Subject']  = subject
         msg['From']     = self.username
         msg['To']       = recipient
         
-        return self._server.sendmail(self.username, [ recipient ], msg.as_string())
+        if subject is not None:
+            msg['Subject']  = subject
+        
+        server = self._server
+        
+        utils.log("[%s] sending mail to '%s'" % (self, recipient))
+        return server.sendmail(self.username, [ recipient ], msg.as_string())
 
 class StampedNotificationHandler(SMTPNotificationHandler):
     def __init__(self, username, password):
         recipients = [
-            NotificationRecipient(email='dev@stamped.com'), 
+            NotificationRecipient(name='dev',    email='dev@stamped.com'), 
             NotificationRecipient(name='travis', phone='2622156221', carrier='at&t'), 
             NotificationRecipient(name='kevin',  phone='3123155045', carrier='at&t'), 
         ]
