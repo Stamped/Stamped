@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-__author__ = "Stamped (dev@Stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@Stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped, Inc."
-__license__ = "TODO"
+__license__   = "TODO"
 
 import Globals
 from utils import abstract
