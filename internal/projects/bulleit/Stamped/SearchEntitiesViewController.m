@@ -116,7 +116,7 @@ typedef enum {
   self.locationManager.desiredAccuracy = kCLLocationAccuracyKilometer;
   
   tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_tooltip"]];
-  tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 6, 40);
+  tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 5, 40);
   tooltipImageView_.alpha = 0.0;
   [self.view addSubview:tooltipImageView_];
   [tooltipImageView_ release];
