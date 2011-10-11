@@ -228,9 +228,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 #pragma mark - Table view delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
-  if (!friendsArray_)
-    return 0;
-
   return 25;
 }
 
