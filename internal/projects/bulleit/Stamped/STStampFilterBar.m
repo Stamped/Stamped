@@ -74,7 +74,6 @@ static const CGFloat kTopMargin = 5;
 }
 
 - (void)initialize {
-  
   self.locationManager = [[[CLLocationManager alloc] init] autorelease];
   self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
   self.locationManager.delegate = self;
@@ -98,6 +97,10 @@ static const CGFloat kTopMargin = 5;
   
   self.filterType = StampFilterTypeNone;
   self.sortType = StampSortTypeTime;
+}
+
+- (CLLocationManager*)locationManager {
+  return locationManager_;
 }
 
 - (void)setSortType:(StampSortType)sortType {

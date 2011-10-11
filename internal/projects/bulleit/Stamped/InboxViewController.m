@@ -147,6 +147,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  if (stampFilterBar_.sortType == StampSortTypeDistance)
+    [stampFilterBar_.locationManager startUpdatingLocation];
+
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
@@ -155,7 +158,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  
+  [stampFilterBar_.locationManager stopUpdatingLocation];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:NO];

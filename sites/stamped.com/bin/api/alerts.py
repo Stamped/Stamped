@@ -228,7 +228,56 @@ def _setSubject(user, genre):
 
 def _setBody(user, activity):
 
-    return 'This is where the body text will go.'
+    commentHTML = """<tr><td width="600" align="center"><table cellpadding="0" cellspacing="0"><tr><td rowspan=2 width="94" height="94"><img src="http://static.stamped.com/users/%(screen_name)s-92x92.jpg" width="92" height="92" border="1" alt="%(screen_name)s" style="border-size:1px;border-style:solid;border-color:#e6e6e6"></td><td rowspan=2 width="20" height="92">&nbsp;</td><td width="455" valign="top" height="28" style="color:#999;font-family:Helvetica,Arial;font-weight:bold;font-size:16px">%(screen_name)s</td></tr><tr><td width="445" style="color:#333;font-family:Helvetica,Arial;font-size:16px;" valign="top">%(blurb)s</td></tr></table></td></tr><tr><td width="600" height="44" align="center" valign="middle"><img src="http://static.stamped.com/assets/img/email-line.png" width="593" height="3"></td></tr>
+    """
+
+    userHTML = """<tr><td width="600" align="center"><table cellpadding="0" cellspacing="0"><tr><td rowspan=2 width="94" height="94"><img src="http://static.stamped.com/users/%(screen_name)s-92x92.jpg" width="92" height="92" border="1" alt="%(screen_name)s" style="border-size:1px;border-style:solid;border-color:#e6e6e6"></td><td rowspan=2 width="20" height="92">&nbsp;</td><td width="455" valign="top" height="28" style="color:#999;font-family:Helvetica,Arial;font-weight:bold;font-size:16px">%(screen_name)s</td></tr><tr><td width="445" style="color:#333;font-family:Helvetica,Arial;font-size:16px;" valign="top">%(blurb)s</td></tr></table></td></tr><tr><td width="600" height="44" align="center" valign="middle"><img src="http://static.stamped.com/assets/img/email-line.png" width="593" height="3"></td></tr>
+    """
+
+    content = ''
+
+    if activity.genre == 'follower':
+        msg = '<strong>%s</strong> (@%s) is now following you on Stamped.' % \
+            (user['name'], user.screen_name)
+        content = userHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
+
+    elif activity.genre == 'like':
+        msg = '<strong>%s</strong> (@%s) liked your stamp of <strong>%s</strong>.' % \
+            (user['name'], user.screen_name, activity.subject)
+
+    elif activity.genre == 'favorite':
+        msg = '<strong>%s</strong> (@%s) added <strong>%s</strong> as a to-do.' % \
+            (user['name'], user.screen_name, activity.subject)
+
+    elif activity.genre == 'restamp':
+        msg = '<strong>%s</strong> (@%s) gave you credit for <strong>%s</strong>.' % \
+            (user['name'], user.screen_name, activity.subject)
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
+
+    elif activity.genre == 'mention':
+        msg = '<strong>%s</strong> (@%s) mentioned you <strong>%s</strong>.' % \
+            (user['name'], user.screen_name, activity.subject)
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
+
+    elif activity.genre == 'comment':
+        msg = '<strong>%s</strong> (@%s) commented on <strong>%s</strong>.' % \
+            (user['name'], user.screen_name, activity.subject)
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
+
+    elif activity.genre == 'reply':
+        msg = '<strong>%s</strong> (@%s) replied to you on <strong>%s</strong>.' % \
+            (user['name'], user.screen_name, activity.subject)
+        content = commentHTML % {'screen_name': user.screen_name, 'blurb': activity.blurb}
+
+    else:
+        ### TODO: Add error logging?
+        raise Exception
+
+
+    template = """<html><body bgcolor="#f3f3f3"><table id="fullbody" width="100%%" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="#f3f3f3"><table id="body" cellpadding="0" cellspacing="0"><tr><td width="5"></td><td width="650" height="40" align="center" valign="bottom"><img src="http://static.stamped.com/assets/img/email-logo-top.png" width="650" height="30" style="display:block;"></td><td width="5"></td></tr><tr><td width="5"></td><td width="650" height="160" align="center" bgcolor="white"><img src="http://static.stamped.com/assets/img/email-logo.png" width="650" height="160" alt="Stamped Logo" style="display:block;"></td><td width="5"></td></tr><tr><td width="5"></td><td width="650" align="center" bgcolor="white"><table id="content" cellpadding="0" cellspacing="0"><tr><td height="6" style="font-size:3px;">&nbsp;</td></tr><tr><td align="center" bgcolor="white"><table width="600" cellpadding="0" cellspacing="0"><tr><td width="600" height="36" align="center" valign="bottom" style="color:#333;font-family:Helvetica,Arial;font-size:16px">%s</td></tr><tr><td width="600" height="44" align="center" valign="middle"><img src="http://static.stamped.com/assets/img/email-line.png" width="593" height="3"></td></tr>%s<tr><td width="600" height="72" align="center" valign="middle"><img src="http://static.stamped.com/assets/img/email-icon.png" width="68" height="64" alt="App Icon"></td></tr><tr><td width="600" height="24" align="center" valign="middle" style="color:#397de0;font-family:Helvetica,Arial;font-size:16px;font-weight:bold;margin:0;padding:0;">Launch Stamped</td></tr><tr><td width="600" height="40" align="center" valign="top" style="color:#666;font-family:Helvetica,Arial;font-size:12px;margin:0;padding:0;">to reply to @%s</td></tr></table></td></tr></table></td><td width="5"></td></tr><tr><td width="5"></td><td width="650" height="18" align="center"><img src="http://static.stamped.com/assets/img/email-ribbon-bottom.png" width="650" height="18"></td><td width="5"></td></tr><tr><td width="5"></td><td width="650" height="18" align="center">&nbsp;</td><td width="5"></td></tr><tr><td colspan="3" width="660" height="24" align="center" valign="middle"><a href="" style="color:#779bc3;text-decoration:none;font-family:Helvetica,Arial;font-size:12px;">Change your notification settings</a></td></tr><tr><td colspan="3" width="660" height="80" align="center" valign="top" style="color:#999;font-family:Helvetica,Arial;font-size:12px;">&copy;2011 Stamped, Inc.</td></tr></table></td></tr></table></body></html>""" % \
+        (msg, content, user.screen_name)
+
+    return template
 
 
 def buildEmail(user, recipient, activityItem):

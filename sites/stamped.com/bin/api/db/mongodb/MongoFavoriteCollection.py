@@ -43,7 +43,7 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
                                         'user_id': userId})
         
             # Remove links to favorite
-            self.user_fav_entities_collection.addUserFavoriteEntity( \
+            self.user_fav_entities_collection.removeUserFavoriteEntity( \
                 userId, entityId)
         except:
             logs.warning("Cannot remove document")
