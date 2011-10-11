@@ -24,6 +24,7 @@
 #import "User.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+#import "Util.h"
 
 static NSString* const kUserStampsPath = @"/collections/user.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
@@ -239,10 +240,37 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.stampsArray.count;
+  if (stampsArray_.count)
+    return self.stampsArray.count + 1;
+
+  return 0;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (stampsArray_.count && indexPath.row == stampsArray_.count) {
+    UITableViewCell* allStampsCell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+                                                             reuseIdentifier:nil] autorelease];
+    UILabel* bodyLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    bodyLabel.text = [NSString stringWithFormat:@"View all %d stamps...", user_.numStamps.integerValue];
+    bodyLabel.highlightedTextColor = [UIColor whiteColor];
+    bodyLabel.textColor = [UIColor colorWithRed:0.48 green:0.61 blue:0.8 alpha:1.0];
+    bodyLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    [bodyLabel sizeToFit];
+    bodyLabel.frame = CGRectMake(69, 33, CGRectGetWidth(bodyLabel.frame), CGRectGetHeight(bodyLabel.frame));
+    [allStampsCell.contentView addSubview:bodyLabel];
+    [bodyLabel release];
+    UIImage* disclosureArrowImage = [UIImage imageNamed:@"disclosure_arrow"];
+    UIImageView* disclosureImageView = [[UIImageView alloc] initWithImage:disclosureArrowImage 
+                                                          highlightedImage:[Util whiteMaskedImageUsingImage:disclosureArrowImage]];
+                                         
+    disclosureImageView.frame = CGRectMake(300, 37,
+                                           CGRectGetWidth(disclosureImageView.frame),
+                                           CGRectGetHeight(disclosureImageView.frame));
+    [allStampsCell.contentView addSubview:disclosureImageView];
+    [disclosureImageView release];
+    return allStampsCell;
+  }
+  
   static NSString* CellIdentifier = @"StampCell";
   InboxTableViewCell* cell = (InboxTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
@@ -268,6 +296,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (stampsArray_.count && indexPath.row == stampsArray_.count) {
+    return;
+  }
+  
   Stamp* stamp = [stampsArray_ objectAtIndex:indexPath.row];
   StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
 
@@ -386,6 +418,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     return;
 
   NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
+  if (!stampsLeft)
+    return;
+
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
   CFIndex numSettings = 1;
   CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
