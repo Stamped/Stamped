@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #Robby test script to activate new accounts
 
-__author__ = "Stamped (dev@stamped.com)"
-__version__ = "1.0"
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
-__license__ = "TODO"
+__license__   = "TODO"
 
 import Globals
 import sys, thread, urllib, urllib2, json
