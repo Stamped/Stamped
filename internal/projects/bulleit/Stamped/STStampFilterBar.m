@@ -352,7 +352,7 @@ static const CGFloat kTopMargin = 5;
   [delegate_ stampFilterBar:self
             didSelectFilter:filterType_
                withSortType:sortType_
-                   andQuery:searchField_.text];
+                   andQuery:searchQuery_];
 }
 
 #pragma mark - UIScrollViewDelegate methods.
@@ -375,8 +375,21 @@ static const CGFloat kTopMargin = 5;
 
 #pragma mark - UITextFieldDelegate methods.
 
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  self.searchQuery = [textField.text stringByReplacingCharactersInRange:range withString:string];
+  [self fireDelegateMethod];
+  return YES;
+}
+
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
+  self.searchQuery = searchField_.text;
+  [self fireDelegateMethod];
+  return YES;
+}
+
+- (BOOL)textFieldShouldClear:(UITextField*)textField {
+  self.searchQuery = nil;
   [self fireDelegateMethod];
   return YES;
 }

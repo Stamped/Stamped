@@ -104,6 +104,7 @@
   return nil;
 }
 
+// TODO(andybons): Remove for launch.
 - (void)awakeFromFetch {
   if (self.coordinates && !self.location)
     [self setCoordinates:self.coordinates];
