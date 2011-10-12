@@ -235,9 +235,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - Custom methods.
 
 - (void)loadFavoritesFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];

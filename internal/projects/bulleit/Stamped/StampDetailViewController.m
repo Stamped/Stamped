@@ -654,9 +654,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 #pragma mark - Comments.
 
 - (void)loadCommentsFromServer {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-  
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCommentsPath delegate:self];

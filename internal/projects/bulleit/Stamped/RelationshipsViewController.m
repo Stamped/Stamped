@@ -48,10 +48,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 }
 
 - (void)userPulledToReload {
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
-    [self setIsLoading:NO];
-    return;
-  }
   [self loadRelationshipsFromNetwork];
 }
 
@@ -139,9 +135,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 #pragma mark - People
 
 - (void)loadRelationshipsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-  
   NSString* path = relationshipType_ == RelationshipTypeFollowers ? kFollowersPath : kFriendsPath;
   
   RKObjectManager* objectManager = [RKObjectManager sharedManager];

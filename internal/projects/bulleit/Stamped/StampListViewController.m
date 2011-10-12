@@ -271,9 +271,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)loadStampsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-  
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserStampsPath

@@ -223,9 +223,6 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)sendLoginRequest {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* oauthMapping = [objectManager.mappingProvider mappingForKeyPath:@"UserAndToken"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kLoginPath
@@ -243,9 +240,6 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)sendTokenRefreshRequest {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* oauthMapping = [objectManager.mappingProvider mappingForKeyPath:@"OAuthToken"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kRefreshPath 
@@ -261,9 +255,6 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)sendUserInfoRequest {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* username = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
@@ -327,9 +318,6 @@ static AccountManager* sharedAccountManager_ = nil;
                      email:(NSString*)email
               profileImage:(UIImage*)image
                phoneNumber:(NSString*)number {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   if (![name length] || ![handle length] || ![password length] || ![email length])
     return [self.firstRunViewController signUpFailed:@"Please fill out all required fields."];
 

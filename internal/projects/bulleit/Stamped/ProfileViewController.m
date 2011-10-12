@@ -484,9 +484,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)loadUserInfoFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* username = user_.screenName;
@@ -498,9 +495,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)loadStampsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-  
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kUserStampsPath

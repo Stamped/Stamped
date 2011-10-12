@@ -108,10 +108,7 @@ static NSString* kLoadingText = @"Loading...";
 
 #pragma mark - To be implemented by subclasses.
 
-- (void)userPulledToReload {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    [self setIsLoading:NO];
-}
+- (void)userPulledToReload {}
 
 - (void)reloadData {
   // NOTHING. YOU DO NOTHING!
