@@ -181,7 +181,7 @@ def runAlerts():
 
         except:
             print 'REMOVED'
-            # alertDB.removeAlert(alert.alert_id)
+            alertDB.removeAlert(alert.alert_id)
             continue
 
     print
@@ -196,7 +196,7 @@ def runAlerts():
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
-        # sendEmails(userEmailQueue)
+        sendEmails(userEmailQueue)
         print
 
     # Send push notifications
@@ -210,7 +210,7 @@ def runAlerts():
         for k, v in userPushQueue.iteritems():
             print k, len(v)
         print
-        # sendPushNotifications(userPushQueue)
+        sendPushNotifications(userPushQueue)
         print
 
 

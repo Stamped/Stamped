@@ -22,6 +22,8 @@ monitor = Monitor()
 
 @app.route('/')
 def index():
+    #monitor.ping()
+    #monitor.status
     return "Test: %s" % (datetime.utcnow())
 
 # ######## #
