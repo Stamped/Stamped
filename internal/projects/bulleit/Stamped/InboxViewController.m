@@ -472,6 +472,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
                                                       object:scrollView];
+  if (stampFilterBar_.searchQuery.length)
+    [stampFilterBar_.searchField resignFirstResponder];
+
   [super scrollViewDidScroll:scrollView];
 }
 

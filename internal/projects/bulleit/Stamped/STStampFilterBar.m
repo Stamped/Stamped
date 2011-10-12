@@ -25,7 +25,6 @@ static const CGFloat kTopMargin = 5;
 - (void)addThirdPageButtons;
 
 @property (nonatomic, readonly) UIScrollView* scrollView;
-@property (nonatomic, readonly) STSearchField* searchField;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
 @property (nonatomic, retain) NSMutableArray* sortButtons;
 @property (nonatomic, retain) UIButton* clearFilterButton;
