@@ -201,6 +201,8 @@ static AccountManager* sharedAccountManager_ = nil;
     [delegate.navigationController dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
     [self storeOAuthToken:[object objectForKey:@"token"]];
+    User* user = [object objectForKey:@"user"];
+    [passwordKeychainItem_ setObject:user.screenName forKey:(id)kSecAttrAccount];
     [self sendUserInfoRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self storeOAuthToken:object];
