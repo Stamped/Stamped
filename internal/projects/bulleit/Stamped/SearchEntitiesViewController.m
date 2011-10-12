@@ -248,7 +248,9 @@ typedef enum {
     default:
       break;
   }
-  
+  if (!searchField_.inputAccessoryView)
+    [self addKeyboardAccessoryView];
+
   [super viewWillAppear:animated];
 }
 

@@ -150,7 +150,13 @@ static NSString* const kFacebookAppID = @"297022226980395";
 #pragma mark - Actions
 
 - (IBAction)done:(id)sender {
-  [self.parentViewController dismissModalViewControllerAnimated:YES];
+  UIViewController* vc = nil;
+  if ([self respondsToSelector:@selector(presentingViewController)])
+    vc = [(id)self presentingViewController];
+  else
+    vc = self.parentViewController;
+  
+  [vc dismissModalViewControllerAnimated:YES];
 }
 
 - (IBAction)findFromStamped:(id)sender {
