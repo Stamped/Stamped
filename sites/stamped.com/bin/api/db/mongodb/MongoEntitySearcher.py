@@ -336,6 +336,7 @@ class MongoEntitySearcher(EntitySearcher):
         gids    = set()
         aids    = set()
         pool    = Pool(8)
+        earthRadius = 3959.0 # miles
         
         # -------------------------------- #
         # initiate external search queries #
@@ -361,7 +362,13 @@ class MongoEntitySearcher(EntitySearcher):
             for doc in db_results:
                 try:
                     e = self.entityDB._convertFromMongo(doc)
-                    ret['db_results'].append((e, -1))
+                    distance = -1
+                    
+                    if e.lat is not None and e.lng is not None:
+                        distance = utils.get_spherical_distance(coords, (e.lat, e.lng))
+                        distance = -distance * earthRadius
+                    
+                    ret['db_results'].append((e, distance))
                 except:
                     utils.printException()
         
@@ -445,7 +452,6 @@ class MongoEntitySearcher(EntitySearcher):
         # ------------------------------ #
         
         if coords is not None:
-            earthRadius = 3959.0 # miles
             q_params = [
                 ('geoNear', 'places'), 
                 ('near', [float(coords[1]), float(coords[0])]), 
@@ -635,6 +641,8 @@ class MongoEntitySearcher(EntitySearcher):
         # strip out distance from results if not using original (user's) coordinates
         if not original_coords:
             results = list((result[0], -1) for result in results)
+        
+        results = list((result[0], result[1] if result[1] >= 0 or result[1] == -1 else -result[1]) for result in results)
         
         if not prefix:
             gevent.spawn(self._add_temp, results)
