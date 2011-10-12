@@ -248,10 +248,6 @@ typedef enum {
     default:
       break;
   }
-  if (!searchField_.inputAccessoryView)
-    [self addKeyboardAccessoryView];
-  else
-    [self filterButtonPressed:nil];
 
   [super viewWillAppear:animated];
 }
@@ -734,6 +730,10 @@ typedef enum {
   self.searchField.text = nil;
   self.locationButton.selected = NO;
   [self textFieldDidChange:self.searchField];
+  if (!searchField_.inputAccessoryView)
+    [self addKeyboardAccessoryView];
+  else
+    [self filterButtonPressed:nil];
 }
 
 - (void)textFieldDidChange:(id)sender {
