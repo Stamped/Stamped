@@ -21,7 +21,7 @@ class MongoAlertCollection(AMongoCollection):
         AMongoCollection.__init__(self, collection='alerts', primary_key='alert_id', obj=Alert)
         # AAlertDB.__init__(self)
 
-        self._collection.ensure_index('created', pymongo.ASCENDING)
+        self._collection.ensure_index('created', unique=False)
 
     ### PUBLIC
 
