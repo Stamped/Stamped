@@ -118,6 +118,9 @@ def parseCommandLine():
     parser.add_option("-l", "--limit", default=None, type="int", 
         help="limits the number of entities to import")
     
+    parser.add_option("-L", "--Local", default=False, action="store_true", 
+        help="local nearby search")
+    
     parser.add_option("-a", "--a", default=None, type="string", 
         action="store", dest="location", help="location")
     
@@ -167,7 +170,8 @@ def main():
                                          category_filter=options.category, 
                                          subcategory_filter=options.subcategory, 
                                          full=options.full, 
-                                         prefix=options.prefix)
+                                         prefix=options.prefix, 
+                                         local=options.Local)
     
     # display all results
     for result in results:

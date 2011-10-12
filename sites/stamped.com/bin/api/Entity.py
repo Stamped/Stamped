@@ -7,6 +7,8 @@ __license__   = "TODO"
 
 import logs, re
 
+from difflib    import SequenceMatcher
+
 categories = set([
     'food', 
     'music', 
@@ -183,4 +185,53 @@ def setFields(entity, detailed=False):
             entity.subtitle = "Other"
     
     return entity
+
+def isEqual(entity1, entity2):
+    if entity1.subcategory != entity2.subcategory:
+        return False
+    
+    if entity1.title.lower != entity2.title.lower():
+        return False
+    
+    if entity1.lat is not None:
+        if entity2.lat is None:
+            return False
+        
+        earthRadius = 3959.0 # miles
+        
+        distance = utils.get_spherical_distance((entity1.lat, entity1.lng), 
+                                                (entity2.lat, entity2.lng))
+        distance = distance * earthRadius
+        
+        if distance > 0.8:
+            return False
+        
+        """
+        is_junk = " \t-,".__contains__ # characters for SequenceMatcher to disregard
+        
+        addr1 = entity1.address.lower()
+        addr2 = entity2.address.lower()
+        
+        def _normalize_addr(addr):
+            addr = addr.replace(' street ' ' st ')
+            addr = addr.replace(' st. ' ' st ')
+            addr = addr.replace(' boulevard ' ' st ')
+            addr = addr.replace(' lane ' ' st ')
+            addr = addr.replace(' highway ' ' st ')
+            addr = addr.replace(' road ' ' st ')
+            addr = addr.replace(',' ' ')
+            return addr
+        
+        addr1 = _normalize_addr(addr1)
+        addr2 = _normalize_addr(addr2)
+        
+        ratio = SequenceMatcher(is_junk, addr1, addr2).ratio()
+        
+        return (ratio >= 0.95)
+        """
+    
+    elif entity2.lat is not None:
+        return False
+    
+    return True
 

@@ -24,6 +24,10 @@ from GooglePlaces   import GooglePlaces
 from libs.apple     import AppleAPI
 from libs.AmazonAPI import AmazonAPI
 
+from Entity import setFields, isEqual
+
+# Stamped: '40.736006685255155,-73.98884296417236'
+
 class MongoEntitySearcher(EntitySearcher):
     # subcategory weights for biasing search results towards entities that we're 
     # most interested in.
@@ -313,7 +317,6 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = query.replace('cafe', "caf[eé]")
         
-        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -322,8 +325,7 @@ class MongoEntitySearcher(EntitySearcher):
         data['category']    = category_filter
         data['subcategory'] = subcategory_filter
         data['full']        = full
-        logs.debug(pformat(data))
-        """
+        utils.log(pformat(data))
         
         #entity_query = {"title": {"$regex": query, "$options": "i"}}
         entity_query = {"titlel": {"$regex": query }}
@@ -510,7 +512,7 @@ class MongoEntitySearcher(EntitySearcher):
             
             if full:
                 wrapper['google_place_results'] = []
-                radius = 1000 if local else 20000
+                radius = 1000 if local and 0 == len(query) else 20000
                 pool.spawn(_find_google_places, wrapper, coords, radius, True)
                 
                 # TODO: find a workaround for non-local place searches
@@ -519,7 +521,8 @@ class MongoEntitySearcher(EntitySearcher):
                 #us_search_radius = 5000000
                 #pool.spawn(_find_google_places, wrapper, us_center_coords, us_search_radius, False)
             
-            pool.spawn(_find_places, wrapper)
+            if len(query) > 0:
+                pool.spawn(_find_places, wrapper)
         
         # perform the requests concurrently, yielding several advantages:
         #   1) fault isolation between separate requests s.t. if one query 
@@ -579,7 +582,7 @@ class MongoEntitySearcher(EntitySearcher):
         # aggregate all results
         for key in result_keys:
             if key in wrapper:
-                #utils.log("%s) %d" % (key, len(wrapper[key])))
+                utils.log("%s) %d" % (key, len(wrapper[key])))
                 
                 for result in wrapper[key]:
                     _add_result(result)
@@ -594,8 +597,6 @@ class MongoEntitySearcher(EntitySearcher):
         converted = False
         
         def _convert(r):
-            from Entity import setFields
-            
             for result in r:
                 setFields(result[0])
         
@@ -675,6 +676,9 @@ class MongoEntitySearcher(EntitySearcher):
             if len(results) > soft_limit:
                 results = results[0 : soft_limit]
         
+        # TODO: bug where an exact-matched entity that is far away will replace 
+        # another non-built-in result that is much closer!
+        # need to fix this asap -- tweak how we tell that two entities are equal!
         for i in xrange(len(results)):
             if i in prune:
                 continue
@@ -692,8 +696,7 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 # TODO: replace with generic *are these two entities equal* function
                 # look at unique indices
-                if entity1.subcategory == entity2.subcategory and \
-                   entity1.title.lower() == entity2.title.lower():
+                if isEqual(entity1, entity2):
                    prune.add(j)
                    
                    if keep1 and entity1.entity_id.startswith('T_') and not \
@@ -754,9 +757,13 @@ class MongoEntitySearcher(EntitySearcher):
             data['totalv']      = aggregate_value
             
             #if input_query.lower() == entity.title.lower():
-            #from pprint import pprint
-            #pprint(entity.title)
-            #pprint(data)
+            """
+            from pprint import pprint
+            print
+            pprint(entity.title)
+            pprint(data)
+            print
+            """
             
             return aggregate_value
         
@@ -795,7 +802,7 @@ class MongoEntitySearcher(EntitySearcher):
                 if input_query in title:
                     if title.startswith(input_query):
                         # if the query is a prefix match for the title, weight it more
-                        weight = 6
+                        weight = 20.0
                     elif title.endswith(input_query):
                         weight = 4
                     elif 'remix' not in title:
