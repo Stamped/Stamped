@@ -47,12 +47,15 @@ def main():
     
     try:
         open(lock, 'w').close()
+        print '-' * 40
         print 'BEGIN: %s' % datetime.utcnow()
         runAlerts()
         print 'END: %s' % datetime.utcnow()
+        print '-' * 40
     except Exception as e:
         print e
         print 'FAIL'
+        print '-' * 40
     finally:
         os.remove(lock)
 
@@ -125,13 +128,6 @@ def runAlerts():
             # Raise if no settings
             if not send_push and not send_email:
                 raise
-                    
-            # Add recipient to queue
-            if recipient.user_id not in userEmailQueue:
-                userEmailQueue[recipient.user_id] = []
-                    
-            if recipient.user_id not in userPushQueue:
-                userPushQueue[recipient.user_id] = []
 
             # Activity
             activity = activityDB.getActivityItem(alert.activity_id)
@@ -151,7 +147,9 @@ def runAlerts():
                     # Build push notification
                     for token in recipient.devices.ios_device_tokens:
                         result = buildPushNotification(user, activity, token.value)
-                        userPushQueue[recipient.user_id].append(result)
+                        if token not in userPushQueue:
+                            userPushQueue[token] = []
+                        userPushQueue[token].append(result)
 
                     print 'PUSH COMPLETE'
                 except:
@@ -166,9 +164,12 @@ def runAlerts():
                     if not recipient.email:
                         raise
 
+                    if recipient.email not in userEmailQueue:
+                        userEmailQueue[recipient.email] = []
+
                     # Build email
                     email = buildEmail(user, recipient, activity)
-                    userEmailQueue[recipient.user_id].append(email)
+                    userEmailQueue[recipient.email].append(email)
 
                     print 'EMAIL COMPLETE'
                 except Exception as e:
@@ -180,7 +181,7 @@ def runAlerts():
 
         except:
             print 'REMOVED'
-            alertDB.removeAlert(alert.alert_id)
+            # alertDB.removeAlert(alert.alert_id)
             continue
 
     print
@@ -191,11 +192,11 @@ def runAlerts():
         print 'EMAILS:'
         for k, v in userEmailQueue.iteritems():
             for email in v:
-                print "%30s | %30s | %s" % (email['from'], email['to'], email['subject'])
+                print "%64s | %s" % (email['to'], email['subject'])
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
-        sendEmails(userEmailQueue)
+        # sendEmails(userEmailQueue)
         print
 
     # Send push notifications
@@ -209,7 +210,7 @@ def runAlerts():
         for k, v in userPushQueue.iteritems():
             print k, len(v)
         print
-        sendPushNotifications(userPushQueue)
+        # sendPushNotifications(userPushQueue)
         print
 
 
