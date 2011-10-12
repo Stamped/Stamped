@@ -352,7 +352,7 @@ typedef enum {
                    animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
                    completion:nil];
   
-  if (searchField_.text.length) {
+  if (searchField_.text.length && currentSearchFilter_ != SearchFilterNone) {
     if (currentResultType_ == ResultTypeFast)
       [self sendFastSearchRequest];
     else if (currentResultType_ == ResultTypeFull)
