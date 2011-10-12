@@ -66,14 +66,14 @@ static NSString* const kFacebookAppID = @"297022226980395";
   [self.window makeKeyAndVisible];
   
   // Create an appwide Facebook client.
-  facebook_ = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:self];
+  
+  facebook_ = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:nil];
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] 
       && [defaults objectForKey:@"FBExpirationDateKey"]) {
     self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
     self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
-
   return YES;
 }
 
@@ -300,13 +300,6 @@ static NSString* const kFacebookAppID = @"297022226980395";
   if (self.facebook)
     return [self.facebook handleOpenURL:url]; 
   return NO;
-}
-
-- (void)fbDidLogin {
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:[self.facebook accessToken] forKey:@"FBAccessTokenKey"];
-  [defaults setObject:[self.facebook expirationDate] forKey:@"FBExpirationDateKey"];
-  [defaults synchronize];
 }
 
 @end

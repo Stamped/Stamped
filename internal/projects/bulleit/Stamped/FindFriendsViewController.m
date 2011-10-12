@@ -15,6 +15,7 @@
 #import "GTMOAuthViewControllerTouch.h"
 
 #import "FBConnect.h"
+#import "Facebook.h"
 
 #import "STSectionHeaderView.h"
 #import "STSearchField.h"
@@ -129,6 +130,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   searchFieldHidden_ = YES;
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   self.facebookClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+  self.facebookClient.sessionDelegate = self;
 
   if (self.findSource == FindFriendsFromContacts)
     [self findFromContacts:self];
@@ -579,6 +581,16 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 #pragma mark - Facebook.
+
+- (void)fbDidLogin {
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[self.facebookClient accessToken] forKey:@"FBAccessTokenKey"];
+  [defaults setObject:[self.facebookClient expirationDate] forKey:@"FBExpirationDateKey"];
+  [defaults synchronize];
+  NSLog(@"fb logged in");
+  
+//  [self connectFacebookUserName:<#(NSString *)#> userID:<#(NSString *)#>];
+}
 
 - (void)connectFacebookUserName:(NSString*)username userID:(NSString*)userID {
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI

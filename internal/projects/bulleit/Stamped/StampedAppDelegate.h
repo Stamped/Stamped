@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 #import "FBConnect.h"
 
-@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKRequestDelegate, FBSessionDelegate>
+@interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;

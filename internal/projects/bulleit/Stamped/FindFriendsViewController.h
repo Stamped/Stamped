@@ -24,7 +24,6 @@ typedef enum {
 @interface FindFriendsViewController : UIViewController<RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
                                                         FBRequestDelegate,
-                                                        FBDialogDelegate,
                                                         FBSessionDelegate,
                                                         UITableViewDelegate,
                                                         UITableViewDataSource,
