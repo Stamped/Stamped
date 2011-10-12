@@ -270,7 +270,9 @@ typedef enum {
 
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   loading_ = NO;
-  [self.navigationController setNavigationBarHidden:NO animated:animated];
+  if (self.navigationController.viewControllers.count > 1)
+    [self.navigationController setNavigationBarHidden:NO animated:animated];
+
   [self.locationManager stopUpdatingLocation];
 }
 
