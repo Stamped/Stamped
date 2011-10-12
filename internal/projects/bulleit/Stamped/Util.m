@@ -140,7 +140,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 }
 
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date shortened:(BOOL)shortened {
-  NSTimeInterval timeSince = [[NSDate date] timeIntervalSinceDate:date];
+  NSTimeInterval timeSince = fmaxf(0, [[NSDate date] timeIntervalSinceDate:date]);
   if (timeSince > 31556926) {
     CGFloat numYears = floorf(timeSince / 31556926);
     if (shortened)
