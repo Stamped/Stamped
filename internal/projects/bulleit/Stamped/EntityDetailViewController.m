@@ -243,8 +243,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   button.frame = CGRectMake((bar.frame.size.width - buttonBG.size.width) / 2, 8.0, buttonBG.size.width, buttonBG.size.height);
   [button addTarget:self action:@selector(addSelfAsFavorite) forControlEvents:UIControlEventTouchUpInside];
   [bar addSubview:button];
-  
-  
+
   [self.view addSubview:bar];
   CGRect frame = self.scrollView.frame;
   frame.size.height -= 56;
@@ -425,7 +424,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   return contentHeight;
 }
 
-# pragma mark - Make a todo from this entity.
+#pragma mark - Make a todo from this entity.
 
 - (void)addSelfAsFavorite {
   NSString* path = kCreateFavoritePath;
@@ -434,8 +433,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-                         entityObject_.entityID, @"entity_id", nil];
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityObject_.entityID, @"entity_id", nil];
   [objectLoader send];
   [self.navigationController dismissModalViewControllerAnimated:YES];
 }

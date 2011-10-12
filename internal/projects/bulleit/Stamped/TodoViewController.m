@@ -171,14 +171,14 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 //  TodoTableViewCell* cell = (TodoTableViewCell*)[self tableView:tableView cellForRowAtIndexPath:indexPath];
 //}
 
--(BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+-(BOOL)tableView:(UITableView*)tableView canEditRowAtIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.row == 0) 
     return NO;
+
   return YES;
 }
 
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle 
-forRowAtIndexPath:(NSIndexPath *)indexPath {
+- (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
   // If row is deleted, remove it from the list.
   if (editingStyle == UITableViewCellEditingStyleDelete) {
     Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row - 1];
