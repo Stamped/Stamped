@@ -214,9 +214,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)loadStampsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-  
   [self setIsLoading:YES];
   // In case of inbox having zero stamps...
   NSTimeInterval latestTimestamp = 0;

@@ -717,7 +717,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   } else if ([objectToStamp_ valueForKey:@"searchID"]) {
     [paramsDictionary setValue:[objectToStamp_ valueForKey:@"searchID"] forKey:@"search_id"];
   }
-  NSLog(@"Params dictionary: %@", paramsDictionary);
   RKParams* params = [RKParams paramsWithDictionary:paramsDictionary];
 
   if (self.stampPhoto) {
@@ -924,18 +923,17 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   CGFloat width = original.size.width;
   CGFloat height = original.size.height;
 
-  if ((width > height && width > 320) || (height > width && height > 480)) {
-    CGFloat horizontalRatio = 320 / width;
+  CGFloat ratio = 1.0;
+  if (width > 480 || height > 480) {
+    CGFloat horizontalRatio = 480 / width;
     CGFloat verticalRatio = 480 / height;
-    CGFloat ratio = MIN(horizontalRatio, verticalRatio);
-    CGRect drawRect = CGRectIntegral(CGRectMake(0, 0, width * ratio, height * ratio));
-    UIGraphicsBeginImageContextWithOptions(drawRect.size, YES, 0.0);
-    [original drawInRect:CGRectIntegral(CGRectMake(0, 0, drawRect.size.width, drawRect.size.height))];
-    self.stampPhoto = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-  } else {
-    self.stampPhoto = original;
+    ratio = MIN(horizontalRatio, verticalRatio);
   }
+  CGRect drawRect = CGRectIntegral(CGRectMake(0, 0, width * ratio, height * ratio));
+  UIGraphicsBeginImageContextWithOptions(drawRect.size, YES, 0.0);
+  [original drawInRect:CGRectIntegral(CGRectMake(0, 0, drawRect.size.width, drawRect.size.height))];
+  self.stampPhoto = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
 
   [self addStampPhotoView];
 

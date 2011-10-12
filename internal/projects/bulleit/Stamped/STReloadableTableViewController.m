@@ -96,22 +96,21 @@ static NSString* kLoadingText = @"Loading...";
   }
 
   reloadLabel_.text = kLoadingText;
-  [UIView animateWithDuration:0.2
-                        delay:0 
-                      options:UIViewAnimationOptionBeginFromCurrentState | 
-                              UIViewAnimationOptionAllowUserInteraction
-                   animations:^{
-                     self.tableView.contentInset = UIEdgeInsetsMake(70, 0, 0, 0);
-                   }
-                   completion:nil];
+  if (self.tableView.contentOffset.y < 0) {
+    [UIView animateWithDuration:0.2
+                          delay:0 
+                        options:UIViewAnimationOptionBeginFromCurrentState | 
+                                UIViewAnimationOptionAllowUserInteraction
+                     animations:^{
+                       self.tableView.contentInset = UIEdgeInsetsMake(70, 0, 0, 0);
+                     }
+                     completion:nil];
+  }
 }
 
 #pragma mark - To be implemented by subclasses.
 
-- (void)userPulledToReload {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    [self setIsLoading:NO];
-}
+- (void)userPulledToReload {}
 
 - (void)reloadData {
   // NOTHING. YOU DO NOTHING!
