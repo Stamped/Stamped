@@ -43,8 +43,9 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 #if !TARGET_IPHONE_SIMULATOR
   [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
-  [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
   [self performRestKitMappings];
+  self.window.rootViewController = self.navigationController;
+  [self.window makeKeyAndVisible];
 
   NSDictionary* userInfo = [launchOptions valueForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
   NSDictionary* apsInfo = [userInfo objectForKey:@"aps"];
@@ -54,8 +55,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
                                                       userInfo:apsInfo];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
   }
-  self.window.rootViewController = self.navigationController;
-  [self.window makeKeyAndVisible];
 
   return YES;
 }

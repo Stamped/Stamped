@@ -124,17 +124,19 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)authenticate {
-  NSString* screenName = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
-  if (screenName.length > 0) {
-    self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
-  } else {
-    [self showFirstRunViewController];
-    return;
-  }
   NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
   // Fresh install.
   if (!tokenExpirationDate) {
     [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
+    [passwordKeychainItem_ resetKeychainItem];
+    [self showFirstRunViewController];
+    return;
+  }
+
+  NSString* screenName = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
+  if (screenName.length > 0) {
+    self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
+  } else {
     [self showFirstRunViewController];
     return;
   }
