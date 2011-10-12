@@ -93,3 +93,23 @@ def search(request):
     
     return transformOutput(autosuggest)
 
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def nearby(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPEntityNearby(), request)
+    search      = schema.exportSchema(EntitySearch())
+    
+    result      = stampedAPI.searchNearby(coords=search.coordinates, 
+                                            authUserId=authUserId, 
+                                            category_filter=search.category, 
+                                            subcategory_filter=search.subcategory)
+    
+    autosuggest = []
+    for item in result:
+        item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
+        autosuggest.append(item)
+    
+    return transformOutput(autosuggest)
+

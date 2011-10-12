@@ -718,6 +718,21 @@ class HTTPEntitySearch(Schema):
             raise NotImplementedError
         return schema
 
+class HTTPEntityNearby(Schema):
+    def setSchema(self):
+        self.coordinates        = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'EntityNearby':
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+            schema.importData({'category': self.category})
+            schema.importData({'subcategory': self.subcategory})
+        else:
+            raise NotImplementedError
+        return schema
+
 # ###### #
 # Stamps #
 # ###### #

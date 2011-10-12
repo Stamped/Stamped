@@ -74,6 +74,7 @@ urlpatterns = patterns('',
     (r'v0/entities/update.json',        'v0.functions.entities.update'),
     (r'v0/entities/remove.json',        'v0.functions.entities.remove'),
     (r'v0/entities/search.json',        'v0.functions.entities.search'),
+    (r'v0/entities/nearby.json',        'v0.functions.entities.nearby'),
     
     ### STAMPS
     (r'v0/stamps/create.json',          'v0.functions.stamps.create'),
