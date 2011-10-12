@@ -13,6 +13,7 @@ from datetime import *
 from socket import socket
  
 from errors import Fail
+from HTTPSchemas import *
 
 from db.mongodb.MongoAlertCollection import MongoAlertCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
@@ -251,12 +252,11 @@ def _setBody(user, activity):
         ### TODO: Add error logging?
         raise Exception
 
-    params = {
-        'screen_name': user['screen_name'],
-        'name': user['name'],
-        'title': activity['subject'],
-        'blurb': activity['blurb'],
-    }
+    params = HTTPUser().importSchema(user).value
+    params['title'] = activity['subject']
+    params['blurb'] = activity['blurb']
+
+    params['image_url_92'] = params['image_url'].replace('.jpg', '-92x92.jpg')
 
     html = parseTemplate(template, params)
 

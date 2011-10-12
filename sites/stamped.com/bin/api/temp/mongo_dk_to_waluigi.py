@@ -34,6 +34,7 @@ def main():
 
     convertEntities()
     updateUserFavEntities()
+    updateUsers()
 
 
 def mongoExportImport(collection):
@@ -99,6 +100,34 @@ def updateUserFavEntities():
             {'$set': {'ref_ids': favs}}
         )
 
+def updateUsers():
+    user_collection = new_database['users']
+    users = user_collection.find()
+
+    for user in users:
+        user_collection.update(
+        {'_id': user['_id']},
+        {'$set': {  
+            "alerts" : { 
+                "ios_alert_comment" : True, 
+                "ios_alert_follow" : True, 
+                "ios_alert_reply" : True, 
+                "ios_alert_fav" : True, 
+                "ios_alert_credit" : True, 
+                "ios_alert_mention" : True, 
+                "ios_alert_like" : True, 
+                "email_alert_credit" : False, 
+                "email_alert_reply" : False, 
+                "email_alert_like" : False, 
+                "email_alert_comment" : False, 
+                "email_alert_mention" : False, 
+                "email_alert_follow" : False, 
+                "email_alert_fav" : False 
+            }
+        }})
+
+## TODO:
+# Update notification settings
 
 if __name__ == '__main__':  
     main()
