@@ -98,7 +98,7 @@
           distanceLabel_.textColor = [UIColor stampedLightGrayColor];
           locationImageView_.image = [UIImage imageNamed:@"small_location_icon"];
         }
-        if (miles > 0.5)
+        if (miles > 0.1)
           distanceLabel_.text = [NSString stringWithFormat:@"%.1f mi", miles];
         else
           distanceLabel_.text = [NSString stringWithFormat:@"%.0f ft", miles * 5280.0f];

@@ -45,4 +45,6 @@ typedef enum {
 @property (nonatomic, readonly) CLLocationManager* locationManager;
 @property (nonatomic, readonly) STSearchField* searchField;
 
+- (void)reset;
+
 @end

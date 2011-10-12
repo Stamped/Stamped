@@ -97,6 +97,14 @@ static const CGFloat kTopMargin = 5;
   self.sortType = StampSortTypeTime;
 }
 
+- (void)reset {
+  self.searchQuery = nil;
+  self.sortType = StampSortTypeTime;
+  self.filterType = StampFilterTypeNone;
+  self.searchField.text = nil;
+  [self.scrollView setContentOffset:CGPointZero animated:YES];
+}
+
 - (void)setSortType:(StampSortType)sortType {
   sortType_ = sortType;
 

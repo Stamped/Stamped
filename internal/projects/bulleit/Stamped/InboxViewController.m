@@ -382,9 +382,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   selectedFilterType_ = StampFilterTypeNone;
   self.searchQuery = nil;
   selectedSortType_ = StampSortTypeTime;
-  self.stampFilterBar.searchQuery = nil;
-  self.stampFilterBar.sortType = StampSortTypeTime;
-  self.stampFilterBar.filterType = StampFilterTypeNone;
+  [stampFilterBar_ reset];
 
   for (Stamp* stamp in objects) {
     stamp.temporary = [NSNumber numberWithBool:NO];
