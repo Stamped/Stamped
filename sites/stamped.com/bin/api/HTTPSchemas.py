@@ -682,7 +682,8 @@ class HTTPEntityAutosuggest(Schema):
             self.title = schema.title
             self.subtitle = schema.subtitle
             self.category = schema.category
-            self.distance = distance
+            if isinstance(distance, float) and distance >= 0:
+                self.distance = distance
             
             if self.subtitle is None:
                 entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
