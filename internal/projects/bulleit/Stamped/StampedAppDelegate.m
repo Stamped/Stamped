@@ -80,7 +80,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo {
-  [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification 
+  [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                       object:self
                                                     userInfo:[userInfo objectForKey:@"aps"]];
   [UIApplication sharedApplication].applicationIconBadgeNumber = 0;

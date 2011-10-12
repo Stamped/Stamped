@@ -325,8 +325,10 @@
 }
 
 - (void)pushNotificationReceived:(NSNotification*)notification {
-  self.tabBar.selectedItem = activityTabBarItem_;
-  [self tabBar:self.tabBar didSelectItem:activityTabBarItem_];
+  if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive) {
+    self.tabBar.selectedItem = activityTabBarItem_;
+    [self tabBar:self.tabBar didSelectItem:activityTabBarItem_];
+  }
   [((ActivityViewController*)[self.viewControllers objectAtIndex:1]) reloadData];
 }
 
