@@ -44,7 +44,8 @@ NSString* const kSearchFilterStrings[6] = {
 
 typedef enum {
   ResultTypeFast,
-  ResultTypeFull
+  ResultTypeFull,
+  ResultTypeLocal
 } ResultType;
 
 @interface SearchEntitiesViewController ()
@@ -68,7 +69,7 @@ typedef enum {
 
 @synthesize resultsArray = resultsArray_;
 @synthesize searchField = searchField_;
-@synthesize cancelButton = cancelButton_;
+@synthesize locationButton = locationButton_;
 @synthesize locationManager = locationManager_;
 @synthesize addStampCell = addStampCell_;
 @synthesize addStampLabel = addStampLabel_;
@@ -94,6 +95,7 @@ typedef enum {
   self.searchingIndicatorCell = nil;
   self.currentRequest = nil;
   self.fullSearchCell = nil;
+  self.locationButton = nil;
   self.loadingIndicatorLabel = nil;
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
@@ -105,11 +107,6 @@ typedef enum {
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.view.backgroundColor = [UIColor colorWithWhite:0.972 alpha:1.0];
-  self.cancelButton.layer.masksToBounds = YES;
-  self.cancelButton.layer.borderColor = [UIColor colorWithWhite:0.6 alpha:0.8].CGColor;
-  self.cancelButton.layer.borderWidth = 1.0;
-  self.cancelButton.layer.cornerRadius = 5.0;
-  self.cancelButton.layer.shadowOpacity = 1.0;
 
   [self.searchField addTarget:self
                        action:@selector(textFieldDidChange:)
@@ -227,6 +224,7 @@ typedef enum {
   self.fullSearchCell = nil;
   self.fullSearchCellLabel = nil;
   self.loadingIndicatorLabel = nil;
+  self.locationButton = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   tooltipImageView_ = nil;
@@ -240,8 +238,7 @@ typedef enum {
 
 - (void)viewDidAppear:(BOOL)animated {
   [self.locationManager startUpdatingLocation];
-  [self.searchField becomeFirstResponder];
-  if (self.searchField.text.length == 0) {
+  if (self.searchField.text.length == 0 && currentResultType_ != ResultTypeLocal) {
     [UIView animateWithDuration:0.3 animations:^{
       tooltipImageView_.alpha = 1.0;
     }];
@@ -267,6 +264,41 @@ typedef enum {
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (IBAction)locationButtonTapped:(id)sender {
+  UIButton* locationButton = sender;
+  locationButton.selected = !locationButton.selected;
+  searchField_.placeholder = locationButton.selected ? @"Search nearby" : @"Find something to stamp";
+  if (!locationButton.selected) {
+    [self addKeyboardAccessoryView];
+    self.inputAccessoryView.alpha = 0;
+  }
+
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
+                     tooltipImageView_.alpha = (self.searchField.text.length > 0 || locationButton.selected) ? 0 : 1;
+                   }
+                   completion:nil];
+  
+  [UIView animateWithDuration:0.2
+                   animations:^{ searchField_.inputAccessoryView.alpha = locationButton.selected ? 0 : 1; }
+                   completion:^(BOOL completed) {
+                     if (locationButton.selected)
+                       searchField_.inputAccessoryView = nil;
+
+                     [searchField_ reloadInputViews];
+                   }];
+  if (locationButton.selected) {
+    currentResultType_ = ResultTypeLocal;
+    [self sendSearchRequest];
+  } else {
+    currentResultType_ = ResultTypeFast;
+    [searchField_ becomeFirstResponder];
+    [self.tableView reloadData];
+  }
 }
 
 - (IBAction)cancelButtonTapped:(id)sender {
@@ -308,7 +340,7 @@ typedef enum {
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (searchField_.text.length == 0)
+  if (searchField_.text.length == 0 && currentResultType_ != ResultTypeLocal)
     return 0;
 
   // Return the number of rows in the section.
@@ -332,7 +364,7 @@ typedef enum {
     return self.fullSearchCell;
   }
 
-  if (indexPath.row == 0 && currentResultType_ == ResultTypeFull && loading_)
+  if (indexPath.row == 0 && (currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && loading_)
     return self.searchingIndicatorCell;
 
   if (indexPath.row == 1 && currentResultType_ == ResultTypeFast && loading_)
@@ -393,9 +425,14 @@ typedef enum {
 
 - (void)sendSearchRequest {
   [searchField_ resignFirstResponder];
-  loadingIndicatorLabel_.text = @"Searching...";
+  if (self.currentResultType != ResultTypeLocal) {
+    self.currentResultType = ResultTypeFull;
+    loadingIndicatorLabel_.text = @"Searching...";
+  } else if (currentResultType_ == ResultTypeLocal && searchField_.text.length == 0) {
+    loadingIndicatorLabel_.text = @"Loading popular results nearby";
+  }
+
   loading_ = YES;
-  self.currentResultType = ResultTypeFull;
   self.resultsArray = nil;
   [self.tableView reloadData];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -403,7 +440,11 @@ typedef enum {
   RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
   objectLoader.objectMapping = searchResultMapping;
-  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", searchField_.text, nil];
+  NSString* query = searchField_.text;
+  if (!query.length)
+    query = @" ";
+
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", query, nil];
   if (self.locationManager.location) {
     CLLocationCoordinate2D coordinate = self.locationManager.location.coordinate;
     NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
@@ -412,6 +453,9 @@ typedef enum {
 
   if (currentSearchFilter_ != SearchFilterNone)
     [params setObject:kSearchFilterStrings[currentSearchFilter_] forKey:@"category"];
+  
+  if (currentResultType_ == ResultTypeLocal)
+    [params setObject:@"true" forKey:@"local"];
 
   objectLoader.params = params;
   [objectLoader send];
@@ -422,11 +466,11 @@ typedef enum {
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   loading_ = NO;
-
-  NSLog(@"Fast search url: %@", request.URL.absoluteString);
+  NSLog(@"response: %@", response.bodyAsString);
   if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
     return;
 
+  NSLog(@"Fast search url: %@", request.URL.absoluteString);
   if (response.isOK) {
     NSError* err = nil;
     id body = [response parsedBody:&err];
@@ -457,7 +501,6 @@ typedef enum {
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   loading_ = NO;
-  self.currentResultType = ResultTypeFull;
   self.resultsArray = objects;
   [self.tableView reloadData];
   self.currentRequest = nil;
@@ -474,6 +517,7 @@ typedef enum {
   }
   [searchField_ becomeFirstResponder];
   self.currentRequest = nil;
+  [self.tableView reloadData];
 }
 
 #pragma mark - UITableViewDelegate Methods.
@@ -500,7 +544,11 @@ typedef enum {
   view.leftLabel.textColor = view.leftLabel.shadowColor;
   view.leftLabel.shadowColor = [UIColor stampedGrayColor];
   view.leftLabel.shadowOffset = CGSizeMake(0, -1);
-  view.leftLabel.text = @"All results";
+  if (currentResultType_ == ResultTypeLocal) {
+    view.leftLabel.text = searchField_.text.length ? @"Nearby results" : @"Popular nearby";
+  } else {
+    view.leftLabel.text = @"All results";
+  }
   return view;
 }
 
@@ -548,12 +596,12 @@ typedef enum {
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                    animations:^{
-                     tooltipImageView_.alpha = self.searchField.text.length > 0 ? 0.0 : 1.0;
+                     tooltipImageView_.alpha = (self.searchField.text.length > 0 || locationButton_.selected) ? 0.0 : 1.0;
                    }
                    completion:nil];
 
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
-  if (searchField_.text.length > 0) {
+  if (searchField_.text.length > 0 && currentResultType_ != ResultTypeLocal) {
     [self sendFastSearchRequest];
   } else {
     [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];

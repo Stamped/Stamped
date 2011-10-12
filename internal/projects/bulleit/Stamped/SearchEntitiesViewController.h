@@ -16,7 +16,7 @@
                                                                  UITextFieldDelegate>
 
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;
-@property (nonatomic, retain) IBOutlet UIButton* cancelButton;
+@property (nonatomic, retain) IBOutlet UIButton* locationButton;
 @property (nonatomic, retain) IBOutlet UITableViewCell* addStampCell;
 @property (nonatomic, retain) IBOutlet UILabel* addStampLabel;
 @property (nonatomic, retain) IBOutlet UITableViewCell* searchingIndicatorCell;
@@ -24,6 +24,7 @@
 @property (nonatomic, retain) IBOutlet UILabel* loadingIndicatorLabel;
 @property (nonatomic, retain) IBOutlet UITableViewCell* fullSearchCell;
 
+- (IBAction)locationButtonTapped:(id)sender;
 - (IBAction)cancelButtonTapped:(id)sender;
 - (void)clearSearchField;
 

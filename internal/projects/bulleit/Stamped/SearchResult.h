@@ -21,6 +21,7 @@ typedef enum {
 @property (nonatomic, copy) NSString* title;
 @property (nonatomic, copy) NSString* category;
 @property (nonatomic, copy) NSString* subtitle;
+@property (nonatomic, retain) NSNumber* distance;
 @property (nonatomic, copy) NSString* searchID;
 @property (nonatomic, copy) NSString* entityID;
 

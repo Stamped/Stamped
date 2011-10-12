@@ -179,7 +179,7 @@
 								<string key="NSFrame">{{5, 7}, {207, 30}}</string>
 								<reference key="NSSuperview" ref="709319091"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="995980514"/>
+								<reference key="NSNextKeyView" ref="796673959"/>
 								<string key="NSReuseIdentifierKey">_NS:217</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -230,13 +230,13 @@
 									<string key="NSResourceName">top-round-corner-mask@2x.png</string>
 								</object>
 							</object>
-							<object class="IBUIButton" id="995980514">
+							<object class="IBUIButton" id="796673959">
 								<reference key="NSNextResponder" ref="709319091"/>
 								<int key="NSvFlags">292</int>
 								<string key="NSFrame">{{217, 7}, {34, 30}}</string>
 								<reference key="NSSuperview" ref="709319091"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="978425818"/>
+								<reference key="NSNextKeyView" ref="598583732"/>
 								<string key="NSReuseIdentifierKey">_NS:225</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -251,11 +251,11 @@
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MC41AA</bytes>
 								</object>
-								<object class="NSCustomResource" key="IBUIHighlightedImage" id="272222882">
+								<object class="NSCustomResource" key="IBUIHighlightedImage" id="855787142">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">eSearch_location_icon_blue.png</string>
 								</object>
-								<reference key="IBUISelectedImage" ref="272222882"/>
+								<reference key="IBUISelectedImage" ref="855787142"/>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">eSearch_location_icon.png</string>
@@ -274,7 +274,7 @@
 									<int key="NSfFlags">16</int>
 								</object>
 							</object>
-							<object class="IBUIButton" id="978425818">
+							<object class="IBUIButton" id="598583732">
 								<reference key="NSNextResponder" ref="709319091"/>
 								<int key="NSvFlags">292</int>
 								<string key="NSFrame">{{256, 7}, {59, 30}}</string>
@@ -491,6 +491,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">locationButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="796673959"/>
+					</object>
+					<int key="connectionID">65</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">dataSource</string>
 						<reference key="source" ref="873029372"/>
 						<reference key="destination" ref="372490531"/>
@@ -515,8 +523,17 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">locationButtonTapped:</string>
+						<reference key="source" ref="796673959"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">66</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">cancelButtonTapped:</string>
-						<reference key="source" ref="978425818"/>
+						<reference key="source" ref="598583732"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">7</int>
 					</object>
@@ -589,8 +606,8 @@
 							<reference ref="672323501"/>
 							<reference ref="780588220"/>
 							<reference ref="459194021"/>
-							<reference ref="995980514"/>
-							<reference ref="978425818"/>
+							<reference ref="796673959"/>
+							<reference ref="598583732"/>
 						</object>
 						<reference key="parent" ref="873029372"/>
 						<string key="objectName">View</string>
@@ -650,12 +667,12 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">62</int>
-						<reference key="object" ref="995980514"/>
+						<reference key="object" ref="796673959"/>
 						<reference key="parent" ref="709319091"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">63</int>
-						<reference key="object" ref="978425818"/>
+						<reference key="object" ref="598583732"/>
 						<reference key="parent" ref="709319091"/>
 					</object>
 				</object>
@@ -731,7 +748,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">64</int>
+			<int key="maxID">66</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -748,14 +765,35 @@
 					<string key="className">SearchEntitiesViewController</string>
 					<string key="superclassName">UITableViewController</string>
 					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">cancelButtonTapped:</string>
-						<string key="NS.object.0">id</string>
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>cancelButtonTapped:</string>
+							<string>locationButtonTapped:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+						</object>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
-						<string key="NS.key.0">cancelButtonTapped:</string>
-						<object class="IBActionInfo" key="NS.object.0">
-							<string key="name">cancelButtonTapped:</string>
-							<string key="candidateClassName">id</string>
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<object class="NSArray" key="dict.sortedKeys">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>cancelButtonTapped:</string>
+							<string>locationButtonTapped:</string>
+						</object>
+						<object class="NSMutableArray" key="dict.values">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBActionInfo">
+								<string key="name">cancelButtonTapped:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">locationButtonTapped:</string>
+								<string key="candidateClassName">id</string>
+							</object>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="outlets">
@@ -768,6 +806,7 @@
 							<string>fullSearchCell</string>
 							<string>fullSearchCellLabel</string>
 							<string>loadingIndicatorLabel</string>
+							<string>locationButton</string>
 							<string>searchField</string>
 							<string>searchingIndicatorCell</string>
 						</object>
@@ -779,6 +818,7 @@
 							<string>UITableViewCell</string>
 							<string>UILabel</string>
 							<string>UILabel</string>
+							<string>UIButton</string>
 							<string>STSearchField</string>
 							<string>UITableViewCell</string>
 						</object>
@@ -793,6 +833,7 @@
 							<string>fullSearchCell</string>
 							<string>fullSearchCellLabel</string>
 							<string>loadingIndicatorLabel</string>
+							<string>locationButton</string>
 							<string>searchField</string>
 							<string>searchingIndicatorCell</string>
 						</object>
@@ -821,6 +862,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">loadingIndicatorLabel</string>
 								<string key="candidateClassName">UILabel</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">locationButton</string>
+								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">searchField</string>

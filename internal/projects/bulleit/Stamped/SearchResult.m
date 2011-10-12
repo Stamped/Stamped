@@ -15,6 +15,12 @@
 @synthesize subtitle = subtitle_;
 @synthesize searchID = searchID_;
 @synthesize entityID = entityID_;
+@synthesize distance = distance_;
+
+- (void)dealloc {
+  self.distance = nil;
+  [super dealloc];
+}
 
 - (SearchCategory)searchCategory {
   NSString* cat = self.category;

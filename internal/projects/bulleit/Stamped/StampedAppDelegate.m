@@ -202,7 +202,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   
   RKObjectMapping* searchResultMapping = [RKObjectMapping mappingForClass:[SearchResult class]];
   [searchResultMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", @"search_id", @"searchID", nil];
-  [searchResultMapping mapAttributes:@"category", @"title", @"subtitle", nil];
+  [searchResultMapping mapAttributes:@"category", @"title", @"subtitle", @"distance", nil];
   
   // Example date string: 2011-07-19 20:49:42.037000
   [RKManagedObjectMapping addDefaultDateFormatterForString:@"yyyy-MM-dd HH:mm:ss.SSSSSS" inTimeZone:nil];
