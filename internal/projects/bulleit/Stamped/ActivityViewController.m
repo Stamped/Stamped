@@ -83,9 +83,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (void)loadEventsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* eventMapping = [objectManager.mappingProvider mappingForKeyPath:@"Event"];

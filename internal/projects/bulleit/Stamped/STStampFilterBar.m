@@ -25,7 +25,6 @@ static const CGFloat kTopMargin = 5;
 - (void)addThirdPageButtons;
 
 @property (nonatomic, readonly) UIScrollView* scrollView;
-@property (nonatomic, readonly) STSearchField* searchField;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
 @property (nonatomic, retain) NSMutableArray* sortButtons;
 @property (nonatomic, retain) UIButton* clearFilterButton;
@@ -112,16 +111,23 @@ static const CGFloat kTopMargin = 5;
 
 - (void)setFilterType:(StampFilterType)filterType {
   filterType_ = filterType;
-  
+
   for (UIButton* button in filterButtons_) {
     if (filterType == button.tag) {
       button.selected = (!button.selected && filterType != StampFilterTypeNone);
-      if (!button.selected)
+      if (!button.selected) {
         filterType_ = StampFilterTypeNone;
+      }
     } else {
       button.selected = NO;
     }
   }
+
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{ clearFilterButton_.alpha = filterType_ == StampFilterTypeNone ? 0 : 1; }
+                   completion:nil];
 }
 
 - (void)addFirstPageButtons {
@@ -338,11 +344,6 @@ static const CGFloat kTopMargin = 5;
 
 - (void)filterButtonPressed:(id)sender {
   self.filterType = [(UIButton*)sender tag];
-  [UIView animateWithDuration:0.3
-                        delay:0
-                      options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
-                   animations:^{ clearFilterButton_.alpha = filterType_ == StampFilterTypeNone ? 0 : 1; }
-                   completion:nil];
   [self fireDelegateMethod];
 }
 

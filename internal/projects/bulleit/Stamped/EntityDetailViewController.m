@@ -113,9 +113,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)loadEntityDataFromServer {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath

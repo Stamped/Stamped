@@ -248,7 +248,9 @@ typedef enum {
     default:
       break;
   }
-  
+  if (!searchField_.inputAccessoryView)
+    [self addKeyboardAccessoryView];
+
   [super viewWillAppear:animated];
 }
 
@@ -270,7 +272,9 @@ typedef enum {
 
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   loading_ = NO;
-  [self.navigationController setNavigationBarHidden:NO animated:animated];
+  if (self.navigationController.viewControllers.count > 1)
+    [self.navigationController setNavigationBarHidden:NO animated:animated];
+
   [self.locationManager stopUpdatingLocation];
 }
 
@@ -554,7 +558,13 @@ typedef enum {
       result.entityID = [object valueForKey:@"entity_id"];
       [array addObject:result];
     }
-    self.resultsArray = array;
+    if (currentSearchFilter_ != SearchFilterNone) {
+      NSPredicate* predicate = [NSPredicate predicateWithFormat:@"category == %@",
+          kSearchFilterStrings[currentSearchFilter_]];
+      self.resultsArray = [array filteredArrayUsingPredicate:predicate];
+    } else {
+      self.resultsArray = array;
+    }
     [self.tableView reloadData];
   } else if (response.isNotFound) {
     self.resultsArray = nil;

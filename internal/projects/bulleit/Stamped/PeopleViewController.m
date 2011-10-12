@@ -129,10 +129,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)userPulledToReload {
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
-    [self setIsLoading:NO];
-    return;
-  }
   [self loadFriendsFromNetwork];
 }
 
@@ -153,9 +149,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)loadFriendsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-  
   [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];

@@ -225,6 +225,7 @@ class MongoEntitySearcher(EntitySearcher):
     def _appleAPI(self):
         return AppleAPI()
     
+    #@lru_cache(maxsize=2048)
     def getSearchResults(self, 
                          query, 
                          coords=None, 
@@ -343,6 +344,7 @@ class MongoEntitySearcher(EntitySearcher):
         # -------------------------------- #
         
         # search built-in entities database
+        #@lru_cache(maxsize=1024)
         def _find_entity(ret):
             # only select certain fields to return to reduce data transfer
             fields = {
@@ -364,7 +366,7 @@ class MongoEntitySearcher(EntitySearcher):
                     e = self.entityDB._convertFromMongo(doc)
                     distance = -1
                     
-                    if e.lat is not None and e.lng is not None:
+                    if coords is not None and e.lat is not None and e.lng is not None:
                         distance = utils.get_spherical_distance(coords, (e.lat, e.lng))
                         distance = -distance * earthRadius
                     
@@ -518,7 +520,7 @@ class MongoEntitySearcher(EntitySearcher):
             
             if full:
                 wrapper['google_place_results'] = []
-                radius = 1000 if local and 0 == len(query) else 20000
+                radius = 100 if local and 0 == len(query) else 20000
                 pool.spawn(_find_google_places, wrapper, coords, radius, True)
                 
                 # TODO: find a workaround for non-local place searches
@@ -648,7 +650,6 @@ class MongoEntitySearcher(EntitySearcher):
             gevent.spawn(self._add_temp, results)
         
         #utils.log("num_results: %d" % len(results))
-        
         return results
     
     def _add_temp(self, results):
@@ -810,7 +811,7 @@ class MongoEntitySearcher(EntitySearcher):
                 if input_query in title:
                     if title.startswith(input_query):
                         # if the query is a prefix match for the title, weight it more
-                        weight = 20.0
+                        weight = 6.0
                     elif title.endswith(input_query):
                         weight = 4
                     elif 'remix' not in title:

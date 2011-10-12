@@ -110,9 +110,6 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 #pragma mark - Private methods.
 
 - (void)loadStampsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* stampMapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreditsPath delegate:self];

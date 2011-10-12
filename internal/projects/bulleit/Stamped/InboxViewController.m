@@ -96,7 +96,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   self.tableView.scrollEnabled = YES;
   [mapView_ removeAnnotations:mapView_.annotations];
   [UIView animateWithDuration:0.5
-                   animations:^{ mapView_.alpha = 0.0; }];
+                   animations:^{ mapView_.alpha = 0.0; }
+                   completion:^(BOOL finished) { mapView_.showsUserLocation = NO; }];
 }
 
 #pragma mark - View lifecycle
@@ -130,7 +131,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   stampFilterBar_.searchQuery = searchQuery_;
 
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
-  [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
 }
 
@@ -147,6 +147,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  if (mapView_.alpha > 0)
+    mapView_.showsUserLocation = YES;
+  
   if (stampFilterBar_.sortType == StampSortTypeDistance)
     [stampFilterBar_.locationManager startUpdatingLocation];
 
@@ -158,6 +161,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
+
+  mapView_.showsUserLocation = NO;
   [stampFilterBar_.locationManager stopUpdatingLocation];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
@@ -209,9 +214,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)loadStampsFromNetwork {
-  if (![[RKClient sharedClient] isNetworkAvailable])
-    return;
-  
   [self setIsLoading:YES];
   // In case of inbox having zero stamps...
   NSTimeInterval latestTimestamp = 0;
@@ -250,9 +252,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
        didSelectFilter:(StampFilterType)filterType
           withSortType:(StampSortType)sortType
               andQuery:(NSString*)query {
-  if (![query isEqualToString:searchQuery_]) {
+  if (query && ![query isEqualToString:searchQuery_]) {
     self.searchQuery = query;
+    selectedFilterType_ = filterType;
+    selectedSortType_ = sortType;
     [self loadStampsFromDataStore];
+    return;
   }
 
   selectedFilterType_ = filterType;
@@ -374,9 +379,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  stampFilterBar_.filterType = StampFilterTypeNone;
-  stampFilterBar_.searchQuery = nil;
-  stampFilterBar_.sortType = StampSortTypeTime;
+  selectedFilterType_ = StampFilterTypeNone;
+  self.searchQuery = nil;
+  selectedSortType_ = StampSortTypeTime;
+  self.stampFilterBar.searchQuery = nil;
+  self.stampFilterBar.sortType = StampSortTypeTime;
+  self.stampFilterBar.filterType = StampFilterTypeNone;
 
   for (Stamp* stamp in objects) {
     stamp.temporary = [NSNumber numberWithBool:NO];
@@ -467,6 +475,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
                                                       object:scrollView];
+  if (stampFilterBar_.searchQuery.length)
+    [stampFilterBar_.searchField resignFirstResponder];
+
   [super scrollViewDidScroll:scrollView];
 }
 

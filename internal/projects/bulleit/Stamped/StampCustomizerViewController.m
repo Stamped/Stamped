@@ -243,7 +243,12 @@
   NSString* secondaryColor = [NSString stringWithFormat:@"%@%@%@", redHexValue, greenHexValue, blueHexValue];
   
   [delegate_ stampCustomizer:self chosePrimaryColor:primaryColor secondaryColor:secondaryColor];
-  [self.parentViewController dismissModalViewControllerAnimated:YES];
+
+  if ([self respondsToSelector:@selector(presentingViewController)]) {
+    [[self presentingViewController] dismissModalViewControllerAnimated:YES];
+  } else {
+    [self.parentViewController dismissModalViewControllerAnimated:YES];
+  }
 }
 
 @end

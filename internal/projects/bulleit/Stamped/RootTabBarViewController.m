@@ -342,6 +342,7 @@
 
 - (void)displaySearchEntities {
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
+  [self.searchStampsNavigationController setNavigationBarHidden:YES];
   SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
   vc.searchIntent = SearchIntentTodo;
   [vc resetState];
