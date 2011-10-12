@@ -291,7 +291,7 @@
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
   SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
   vc.searchIntent = SearchIntentStamp;
-  [vc clearSearchField];
+  [vc resetState];
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 
@@ -328,7 +328,7 @@
   [self.searchStampsNavigationController popToRootViewControllerAnimated:NO];
   SearchEntitiesViewController* vc = (SearchEntitiesViewController*)[searchStampsNavigationController_.viewControllers objectAtIndex:0];
   vc.searchIntent = SearchIntentTodo;
-  [vc clearSearchField];
+  [vc resetState];
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
 }
 

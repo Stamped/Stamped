@@ -202,7 +202,6 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
 
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  NSLog(@"%@", objects);
 	[self loadFavoritesFromDataStore];
   [self setIsLoading:NO];
 }

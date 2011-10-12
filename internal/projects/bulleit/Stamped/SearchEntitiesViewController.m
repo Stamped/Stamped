@@ -239,14 +239,13 @@ typedef enum {
   [self.navigationController setNavigationBarHidden:YES animated:animated];
   
   switch (self.searchIntent) {
-    case 0:
-      self.searchField.placeholder = @"Find something to stamp...";
+    case SearchIntentStamp:
+      searchField_.placeholder = locationButton_.selected ? @"Search nearby" : @"Find something to stamp";
       break;
-    case 1:
+    case SearchIntentTodo:
       self.searchField.placeholder = @"Find something to do...";
       break;
     default:
-      self.searchField.placeholder = @"Find something to stamp...";
       break;
   }
   
@@ -259,6 +258,7 @@ typedef enum {
     [UIView animateWithDuration:0.3 animations:^{
       tooltipImageView_.alpha = 1.0;
     }];
+    [searchField_ becomeFirstResponder];
   }
   [super viewDidAppear:animated];
 }
@@ -286,7 +286,16 @@ typedef enum {
 - (IBAction)locationButtonTapped:(id)sender {
   UIButton* locationButton = sender;
   locationButton.selected = !locationButton.selected;
-  searchField_.placeholder = locationButton.selected ? @"Search nearby" : @"Find something to stamp";
+  switch (self.searchIntent) {
+    case SearchIntentStamp:
+      searchField_.placeholder = locationButton_.selected ? @"Search nearby" : @"Find something to stamp";
+      break;
+    case SearchIntentTodo:
+      self.searchField.placeholder = @"Find something to do...";
+      break;
+    default:
+      break;
+  }
   if (!locationButton.selected) {
     [self addKeyboardAccessoryView];
     self.inputAccessoryView.alpha = 0;
@@ -309,6 +318,7 @@ typedef enum {
                      [searchField_ reloadInputViews];
                    }];
   if (locationButton.selected) {
+    currentSearchFilter_ = SearchFilterNone;
     currentResultType_ = ResultTypeLocal;
     [self sendSearchRequest];
   } else {
@@ -364,6 +374,8 @@ typedef enum {
   NSInteger numRows = [resultsArray_ count];
   if (currentResultType_ == ResultTypeFull && !loading_)
     ++numRows;  // One more for the 'Add new entity' cell.
+  if (currentResultType_ == ResultTypeLocal && !loading_)
+    ++numRows;  // For 'Search for X nearby' or 'Add new entity' cell.
   if (currentResultType_ == ResultTypeFast)
     ++numRows;  // For 'Search "blah"' cell.
   if (loading_)
@@ -380,6 +392,22 @@ typedef enum {
     self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search for \u201c%@\u201d", searchField_.text];
     return self.fullSearchCell;
   }
+  
+  if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && !loading_ && searchField_.text.length > 0 && resultsArray_.count == 0) {
+    self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search nearby for \u201c%@\u201d", searchField_.text];
+    return self.fullSearchCell;
+  }
+  
+  if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && loading_)
+    return self.searchingIndicatorCell;
+
+  if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal && searchField_.text.length == 0) {
+    self.fullSearchCellLabel.text = @"Search for more nearby";
+    return self.fullSearchCell;
+  }
+  
+  if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal && searchField_.text.length > 0)
+    return self.addStampCell;
 
   if (indexPath.row == 0 && (currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && loading_)
     return self.searchingIndicatorCell;
@@ -444,9 +472,30 @@ typedef enum {
   [searchField_ resignFirstResponder];
   if (self.currentResultType != ResultTypeLocal) {
     self.currentResultType = ResultTypeFull;
-    loadingIndicatorLabel_.text = @"Searching...";
+    switch (currentSearchFilter_) {
+      case SearchFilterBook:
+        loadingIndicatorLabel_.text = @"Searching books...";
+        break;
+      case SearchFilterFood:
+        loadingIndicatorLabel_.text = @"Searching restaurants and bars...";
+        break;
+      case SearchFilterMusic:
+        loadingIndicatorLabel_.text = @"Searching music...";
+        break;
+      case SearchFilterFilm:
+        loadingIndicatorLabel_.text = @"Searching movies and TV shows...";
+        break;
+      case SearchFilterOther:
+      case SearchFilterNone:
+      default:
+        loadingIndicatorLabel_.text = @"Searching...";
+        break;
+    }
+    
   } else if (currentResultType_ == ResultTypeLocal && searchField_.text.length == 0) {
     loadingIndicatorLabel_.text = @"Loading popular results nearby";
+  } else if (currentResultType_ == ResultTypeLocal) {
+    loadingIndicatorLabel_.text = @"Searching nearby...";
   }
 
   loading_ = YES;
@@ -547,9 +596,6 @@ typedef enum {
 }
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
-  if (self.resultsArray.count == 0)
-    return nil;
-
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
   CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
   gradientLayer.frame = view.frame;
@@ -561,7 +607,9 @@ typedef enum {
   view.leftLabel.textColor = view.leftLabel.shadowColor;
   view.leftLabel.shadowColor = [UIColor stampedGrayColor];
   view.leftLabel.shadowOffset = CGSizeMake(0, -1);
-  if (currentResultType_ == ResultTypeLocal) {
+  if (resultsArray_ && resultsArray_.count == 0) {
+    view.leftLabel.text = @"No results";
+  } else if (currentResultType_ == ResultTypeLocal) {
     view.leftLabel.text = searchField_.text.length ? @"Nearby results" : @"Popular nearby";
   } else {
     view.leftLabel.text = @"All results";
@@ -582,18 +630,32 @@ typedef enum {
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
     [self sendSearchRequest];
     return;
+  } else if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && !loading_ && searchField_.text.length > 0 && resultsArray_.count == 0) {
+    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [self sendSearchRequest];
+    return;
+  } else if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal) {
+    if (searchField_.text.length > 0) {
+      result = [[[SearchResult alloc] init] autorelease];
+      result.title = self.searchField.text;
+    } else {
+      [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+      [self.tableView setContentOffset:CGPointMake(0, 0) animated:NO];
+      [searchField_ becomeFirstResponder];
+      return;
+    }
   } else if (indexPath.row == 1 && currentResultType_ == ResultTypeFast && loading_) {
     return;
   } else if (currentResultType_ == ResultTypeFast && !loading_) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row - 1];
   } else if (currentResultType_ == ResultTypeFast && loading_) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row - 2];
-  } else if (currentResultType_ == ResultTypeFull && !loading_) {
+  } else if ((currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && !loading_) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   } else if (indexPath.row == 0 && currentResultType_ == ResultTypeFull && loading_) {
     return;
   }
-  
+
   switch (self.searchIntent) {
     case SearchIntentStamp: {
       CreateStampViewController* detailViewController = [[CreateStampViewController alloc] initWithSearchResult:result];
@@ -605,17 +667,18 @@ typedef enum {
       EntityDetailViewController* detailViewController = (EntityDetailViewController*)[Util detailViewControllerForSearchResult:result];
       [detailViewController addToolbar];
       [self.navigationController pushViewController:detailViewController animated:YES];
-//      [detailViewController release];
       break;
     }
     default:
       break;
   }
-
 }
 
-- (void)clearSearchField {
+- (void)resetState {
+  self.currentResultType = ResultTypeFast;
+  self.currentSearchFilter = SearchFilterNone;
   self.searchField.text = nil;
+  self.locationButton.selected = NO;
   [self textFieldDidChange:self.searchField];
 }
 

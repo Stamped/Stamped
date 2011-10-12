@@ -121,7 +121,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
       objectForKey = searchResult_.searchID;
     }
   }
-  NSAssert(objectForKey, @"Must provide a valid search of entity ID to fetch data");
+  NSAssert(objectForKey, @"Must provide a valid search or entity ID to fetch data");
   objectLoader.params = [NSDictionary dictionaryWithObject:objectForKey forKey:key];
   [objectLoader send];
   [self view];

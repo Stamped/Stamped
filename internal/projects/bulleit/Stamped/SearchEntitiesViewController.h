@@ -16,7 +16,6 @@ typedef enum {
   SearchIntentTodo
 } SearchIntent;
 
-
 @interface SearchEntitiesViewController : UITableViewController <RKObjectLoaderDelegate,
                                                                  RKRequestDelegate,
                                                                  UITextFieldDelegate>
@@ -29,10 +28,10 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UILabel* fullSearchCellLabel;
 @property (nonatomic, retain) IBOutlet UILabel* loadingIndicatorLabel;
 @property (nonatomic, retain) IBOutlet UITableViewCell* fullSearchCell;
-@property NSInteger searchIntent;
+@property (nonatomic, assign) NSInteger searchIntent;
 
 - (IBAction)locationButtonTapped:(id)sender;
 - (IBAction)cancelButtonTapped:(id)sender;
-- (void)clearSearchField;
+- (void)resetState;
 
 @end
