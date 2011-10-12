@@ -18,13 +18,15 @@ from pymongo.son    import SON
 from gevent.pool    import Pool
 from pprint         import pprint, pformat
 from utils          import lazyProperty
+from errors         import InputError
 
 # third-party search API wrappers
 from GooglePlaces   import GooglePlaces
 from libs.apple     import AppleAPI
 from libs.AmazonAPI import AmazonAPI
 
-from Entity import setFields, isEqual
+from Entity         import setFields, isEqual
+from LRUCache       import lru_cache
 
 # Stamped: '40.736006685255155,-73.98884296417236'
 
@@ -225,7 +227,7 @@ class MongoEntitySearcher(EntitySearcher):
     def _appleAPI(self):
         return AppleAPI()
     
-    #@lru_cache(maxsize=2048)
+    @lru_cache(maxsize=2048)
     def getSearchResults(self, 
                          query, 
                          coords=None, 
@@ -238,6 +240,9 @@ class MongoEntitySearcher(EntitySearcher):
         
         if prefix:
             assert not full
+        
+        if coords is not None:
+            coords = self._parseCoords(coords)
         
         # -------------------------------- #
         # transform input query and coords #
@@ -328,9 +333,6 @@ class MongoEntitySearcher(EntitySearcher):
         data['full']        = full
         utils.log(pformat(data))
         
-        #entity_query = {"title": {"$regex": query, "$options": "i"}}
-        entity_query = {"titlel": {"$regex": query }}
-        
         results = {}
         wrapper = {}
         asins   = set()
@@ -344,116 +346,34 @@ class MongoEntitySearcher(EntitySearcher):
         # -------------------------------- #
         
         # search built-in entities database
-        #@lru_cache(maxsize=1024)
-        def _find_entity(ret):
-            # only select certain fields to return to reduce data transfer
-            fields = {
-                'title' : 1, 
-                'sources' : 1, 
-                'subcategory' : 1, 
-            }
-            
-            if prefix or len(input_query) <= 3:
-                max_results = 100
-            else:
-                max_results = 400
-            
-            db_results = self.entityDB._collection.find(entity_query, output=list, limit=max_results)
-            
-            ret['db_results'] = []
-            for doc in db_results:
-                try:
-                    e = self.entityDB._convertFromMongo(doc)
-                    distance = -1
-                    
-                    if coords is not None and e.lat is not None and e.lng is not None:
-                        distance = utils.get_spherical_distance(coords, (e.lat, e.lng))
-                        distance = -distance * earthRadius
-                    
-                    ret['db_results'].append((e, distance))
-                except:
-                    utils.printException()
-        
-        # search apple itunes API
-        def _find_apple_specific(ret, media, entity):
-            try:
-                params = dict(
-                    country='us', 
-                    term=input_query, 
-                    media=media, 
-                    limit=5, 
-                    transform=True
-                )
-                
-                if entity is not None:
-                    params['entity'] = entity
-                
-                self._statsSink.increment('stamped.api.search.third-party.apple')
-                apple_results = self._appleAPI.search(**params)
-                
-                for result in apple_results:
-                    entity = result.entity
-                    
-                    entity.entity_id = 'T_APPLE_%s' % entity.aid
-                    ret['apple_results'].append((entity, -1))
-            except:
-                utils.printException()
+        def _find_entity():
+            wrapper['db_results'] = self._find_entity(input_query, query, coords, prefix)
         
         # search apple itunes API for multiple variants (artist, album, song, etc.)
-        def _find_apple(ret):
-            try:
-                apple_pool = Pool(4)
-                ret['apple_results'] = []
-                
-                if subcategory_filter is None or subcategory_filter == 'song':
-                    apple_pool.spawn(_find_apple_specific, ret, media='music', entity='song')
-                
-                if subcategory_filter is None or subcategory_filter == 'album':
-                    apple_pool.spawn(_find_apple_specific, ret, media='music', entity='album')
-                
-                if subcategory_filter is None or subcategory_filter == 'artist':
-                    apple_pool.spawn(_find_apple_specific, ret, media='all', entity='allArtist')
-                
-                apple_pool.spawn(_find_apple_specific, ret, media='all', entity=None)
-                apple_pool.join()
-            except:
-                utils.printException()
+        def _find_apple():
+            wrapper['apple_results'] = self._find_apple(input_query, subcategory_filter)
         
         # search amazon product API
-        def _find_amazon(ret):
-            try:
-                #utils.log("amazon")
-                
-                self._statsSink.increment('stamped.api.search.third-party.amazon')
-                amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
-                                                                    SearchIndex='All', 
-                                                                    Availability='Available', 
-                                                                    transform=True)
-                
-                #utils.log("amazon: %d" % len(amazon_results))
-                
-                ret['amazon_results'] = []
-                for entity in amazon_results:
-                    entity.entity_id = 'T_AMAZON_%s' % entity.asin
-                    ret['amazon_results'].append((entity, -1))
-            except:
-                utils.printException()
+        def _find_amazon():
+            wrapper['amazon_results'] = self._find_amazon(input_query)
         
         if full:
             if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
-                pool.spawn(_find_amazon, wrapper)
+                pool.spawn(_find_amazon)
             
             if self._is_possible_apple_query(category_filter, subcategory_filter, local):
-                pool.spawn(_find_apple,  wrapper)
+                pool.spawn(_find_apple)
         
         if len(query) > 0:
-            pool.spawn(_find_entity, wrapper)
+            pool.spawn(_find_entity)
         
         # ------------------------------ #
         # handle location-based searches #
         # ------------------------------ #
         
         if coords is not None:
+            entity_query = self._get_entity_query(query)
+            
             q_params = [
                 ('geoNear', 'places'), 
                 ('near', [float(coords[1]), float(coords[0])]), 
@@ -550,32 +470,38 @@ class MongoEntitySearcher(EntitySearcher):
         def _add_result(result):
             try:
                 # TODO: add an async task to merge these obvious dupes
+                entity = result[0]
+                if entity.entity_id is None:
+                    if entity.search_id is not None:
+                        entity.entity_id = entity.search_id
+                    else:
+                        return
                 
                 # dedupe entities from amazon
-                asin = result[0].asin
+                asin = entity.asin
                 if asin is not None:
                     if asin in asins:
                         return
                     asins.add(asin)
                 
                 # dedupe entities from google
-                gid = result[0].gid
+                gid = entity.gid
                 if gid is not None:
                     if gid in gids:
                         return
                     gids.add(gid)
                 
                 # dedupe entities from apple
-                aid = result[0].aid
+                aid = entity.aid
                 if aid is not None:
                     if aid in aids:
                         return
                     aids.add(aid)
                 
-                if local and not self._is_possible_location_query(result[0].category, result[0].subcategory, False):
+                if local and not self._is_possible_location_query(entity.category, entity.subcategory, False):
                     return
                 
-                results[result[0].entity_id] = result
+                results[entity.entity_id] = result
             except:
                 utils.printException()
         
@@ -665,8 +591,12 @@ class MongoEntitySearcher(EntitySearcher):
                     
                     #utils.log("%s vs %s" % (entity.search_id, entity.entity_id))
                     self.tempDB.addEntity(entity)
+                    entity.entity_id = entity.search_id
                 except:
                     # TODO: why is this occasionally failing?
+                    if entity.search_id is not None:
+                        entity.entity_id = entity.search_id
+                    
                     utils.printException()
                     pass
     
@@ -929,4 +859,131 @@ class MongoEntitySearcher(EntitySearcher):
             return False
         
         return True
+    
+    def _get_entity_query(self, query):
+        #return {"title": {"$regex": query, "$options": "i"}}
+        return {"titlel": {"$regex": query }}
+    
+    @lru_cache(maxsize=64)
+    def _find_entity(self, input_query, query, coords, prefix):
+        output = []
+        
+        """
+        # only select certain fields to return to reduce data transfer
+        fields = {
+            'title' : 1, 
+            'sources' : 1, 
+            'subcategory' : 1, 
+        }
+        """
+        
+        if prefix or len(input_query) <= 3:
+            max_results = 100
+        else:
+            max_results = 400
+        
+        entity_query = self._get_entity_query(query)
+        db_results = self.entityDB._collection.find(entity_query, output=list, limit=max_results)
+        
+        for doc in db_results:
+            try:
+                e = self.entityDB._convertFromMongo(doc)
+                distance = -1
+                
+                if coords is not None and e.lat is not None and e.lng is not None:
+                    distance = utils.get_spherical_distance(coords, (e.lat, e.lng))
+                    distance = -distance * earthRadius
+                
+                assert e.entity_id is not None
+                output.append((e, distance))
+            except:
+                utils.printException()
+        
+        return output
+    
+    @lru_cache(maxsize=128)
+    def _find_apple(self, input_query, subcategory_filter):
+        output = []
+        
+        def _find_apple_specific(media, entity):
+            try:
+                params = dict(
+                    country='us', 
+                    term=input_query, 
+                    media=media, 
+                    limit=5, 
+                    transform=True
+                )
+                
+                if entity is not None:
+                    params['entity'] = entity
+                
+                self._statsSink.increment('stamped.api.search.third-party.apple')
+                apple_results = self._appleAPI.search(**params)
+                
+                for result in apple_results:
+                    entity = result.entity
+                    
+                    entity.entity_id = 'T_APPLE_%s' % entity.aid
+                    output.append((entity, -1))
+            except:
+                utils.printException()
+        
+        try:
+            apple_pool = Pool(4)
+            
+            if subcategory_filter is None or subcategory_filter == 'song':
+                apple_pool.spawn(_find_apple_specific, media='music', entity='song')
+            
+            if subcategory_filter is None or subcategory_filter == 'album':
+                apple_pool.spawn(_find_apple_specific, media='music', entity='album')
+            
+            if subcategory_filter is None or subcategory_filter == 'artist':
+                apple_pool.spawn(_find_apple_specific, media='all', entity='allArtist')
+            
+            apple_pool.spawn(_find_apple_specific, media='all', entity=None)
+            apple_pool.join()
+        except:
+            utils.printException()
+        
+        return output
+    
+    @lru_cache(maxsize=128)
+    def _find_amazon(self, input_query):
+        output = []
+        
+        try:
+            #utils.log("amazon")
+            self._statsSink.increment('stamped.api.search.third-party.amazon')
+            amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
+                                                                SearchIndex='All', 
+                                                                Availability='Available', 
+                                                                transform=True)
+            
+            #utils.log("amazon: %d" % len(amazon_results))
+            
+            for entity in amazon_results:
+                entity.entity_id = 'T_AMAZON_%s' % entity.asin
+                output.append((entity, -1))
+        except:
+            utils.printException()
+        
+        return output
+    
+    def _parseCoords(self, coords):
+        if coords is not None and isinstance(coords, basestring):
+            lat, lng = coords.split(',')
+            coords = [float(lat), float(lng)]
+        
+        if coords is not None and 'lat' in coords and coords.lat != None:
+            try:
+                coords = [coords['lat'], coords['lng']]
+                if coords[0] == None or coords[1] == None:
+                    raise
+            except:
+                msg = "Invalid coordinates (%s)" % coords
+                logs.warning(msg)
+                raise InputError(msg)
+        
+        return coords
 
