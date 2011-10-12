@@ -682,7 +682,8 @@ class HTTPEntityAutosuggest(Schema):
             self.title = schema.title
             self.subtitle = schema.subtitle
             self.category = schema.category
-            self.distance = distance
+            if isinstance(distance, float) and distance >= 0:
+                self.distance = distance
             
             if self.subtitle is None:
                 entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
@@ -714,6 +715,21 @@ class HTTPEntitySearch(Schema):
             schema.importData({'category': self.category})
             schema.importData({'subcategory': self.subcategory})
             schema.importData({'local': self.local})
+        else:
+            raise NotImplementedError
+        return schema
+
+class HTTPEntityNearby(Schema):
+    def setSchema(self):
+        self.coordinates        = SchemaElement(basestring, required=True)
+        self.category           = SchemaElement(basestring)
+        self.subcategory        = SchemaElement(basestring)
+    
+    def exportSchema(self, schema):
+        if schema.__class__.__name__ == 'EntityNearby':
+            schema.coordinates = _coordinatesFlatToDict(self.coordinates)
+            schema.importData({'category': self.category})
+            schema.importData({'subcategory': self.subcategory})
         else:
             raise NotImplementedError
         return schema
