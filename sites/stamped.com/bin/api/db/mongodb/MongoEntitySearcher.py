@@ -971,6 +971,10 @@ class MongoEntitySearcher(EntitySearcher):
         return output
     
     def _parseCoords(self, coords):
+        if coords is not None and isinstance(coords, basestring):
+            lat, lng = coords.split(',')
+            coords = [float(lat), float(lng)]
+        
         if coords is not None and 'lat' in coords and coords.lat != None:
             try:
                 coords = [coords['lat'], coords['lng']]
@@ -980,8 +984,6 @@ class MongoEntitySearcher(EntitySearcher):
                 msg = "Invalid coordinates (%s)" % coords
                 logs.warning(msg)
                 raise InputError(msg)
-            
-            return coords
-        else:
-            return None
+        
+        return coords
 
