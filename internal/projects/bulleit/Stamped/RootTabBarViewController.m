@@ -28,6 +28,7 @@
 - (void)reloadPanes:(NSNotification*)notification;
 - (void)userLoggedOut:(NSNotification*)notification;
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer;
+- (void)pushNotificationReceived:(NSNotification*)notification;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, copy) NSArray* tabBarItems;
@@ -102,6 +103,11 @@
                                            selector:@selector(userLoggedOut:)
                                                name:kUserHasLoggedOutNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(pushNotificationReceived:)
+                                               name:kPushNotificationReceivedNotification
+                                             object:nil];
+  
 
   [AccountManager sharedManager].delegate = self;
   if ([AccountManager sharedManager].authenticated) {
@@ -115,6 +121,8 @@
 }
 
 - (void)finishViewInit {
+  [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
+  
   InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
   ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
   TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
@@ -314,6 +322,12 @@
     if (notification.object != viewController)
       [viewController reloadData];
   }
+}
+
+- (void)pushNotificationReceived:(NSNotification*)notification {
+  self.tabBar.selectedItem = activityTabBarItem_;
+  [self tabBar:self.tabBar didSelectItem:activityTabBarItem_];
+  [((ActivityViewController*)[self.viewControllers objectAtIndex:1]) reloadData];
 }
 
 #pragma mark - AccountManagerDelegate Methods.

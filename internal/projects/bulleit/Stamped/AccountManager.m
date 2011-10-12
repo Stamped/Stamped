@@ -124,17 +124,19 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)authenticate {
-  NSString* screenName = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
-  if (screenName.length > 0) {
-    self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
-  } else {
-    [self showFirstRunViewController];
-    return;
-  }
   NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
   // Fresh install.
   if (!tokenExpirationDate) {
     [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
+    [passwordKeychainItem_ resetKeychainItem];
+    [self showFirstRunViewController];
+    return;
+  }
+
+  NSString* screenName = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
+  if (screenName.length > 0) {
+    self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
+  } else {
     [self showFirstRunViewController];
     return;
   }
@@ -201,6 +203,8 @@ static AccountManager* sharedAccountManager_ = nil;
     [delegate.navigationController dismissModalViewControllerAnimated:YES];
     self.firstRunViewController = nil;
     [self storeOAuthToken:[object objectForKey:@"token"]];
+    User* user = [object objectForKey:@"user"];
+    [passwordKeychainItem_ setObject:user.screenName forKey:(id)kSecAttrAccount];
     [self sendUserInfoRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self storeOAuthToken:object];
@@ -429,6 +433,7 @@ static AccountManager* sharedAccountManager_ = nil;
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];
   [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
+  [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]];
   self.currentUser = nil;
   [[RKObjectManager sharedManager].objectStore deletePersistantStore];
   NSFileManager* fm = [NSFileManager defaultManager];

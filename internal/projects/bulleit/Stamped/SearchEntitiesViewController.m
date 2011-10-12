@@ -352,7 +352,7 @@ typedef enum {
                    animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
                    completion:nil];
   
-  if (searchField_.text.length) {
+  if (searchField_.text.length && currentSearchFilter_ != SearchFilterNone) {
     if (currentResultType_ == ResultTypeFast)
       [self sendFastSearchRequest];
     else if (currentResultType_ == ResultTypeFull)
@@ -425,7 +425,7 @@ typedef enum {
   NSUInteger offset = 0;
   if (loading_)
     ++offset;
-  
+
   if (currentResultType_ == ResultTypeFast)
     ++offset;
 
@@ -532,7 +532,6 @@ typedef enum {
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   loading_ = NO;
-  NSLog(@"response: %@", response.bodyAsString);
   if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
     return;
 
