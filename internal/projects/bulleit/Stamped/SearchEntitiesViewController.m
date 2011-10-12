@@ -117,7 +117,7 @@ typedef enum {
              forControlEvents:UIControlEventEditingChanged];
 
   self.locationManager = [[[CLLocationManager alloc] init] autorelease];
-  self.locationManager.desiredAccuracy = kCLLocationAccuracyKilometer;
+  self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters;
   
   tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_tooltip"]];
   tooltipImageView_.frame = CGRectOffset(tooltipImageView_.frame, 5, 40);
