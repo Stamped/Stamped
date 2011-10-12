@@ -50,7 +50,7 @@ def main():
         print '-' * 40
         print 'BEGIN: %s' % datetime.utcnow()
         runAlerts()
-        print 'END: %s' % datetime.utcnow()
+        print 'END:   %s' % datetime.utcnow()
         print '-' * 40
     except Exception as e:
         print e
@@ -314,7 +314,8 @@ def buildPushNotification(user, activityItem, deviceId):
     # Build payload
     content = {
         'aps': {
-            'alert': msg
+            'alert': msg,
+            'sound': 'default',
         }
     }
 
