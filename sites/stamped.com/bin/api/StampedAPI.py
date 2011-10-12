@@ -965,15 +965,15 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def searchNearby(self, 
-                       coords=None, 
-                       authUserId=None, 
-                       category_filter=None, 
-                       subcategory_filter=None, 
-                       limit=10, 
-                       prefix=False, 
-                       full=True):
+                     coords=None, 
+                     authUserId=None, 
+                     category_filter=None, 
+                     subcategory_filter=None, 
+                     limit=10, 
+                     prefix=False, 
+                     full=True):
         coords  = self._parseCoords(coords)
-        results = self._entitySearcher.getSearchResults(query=' ', 
+        results = self._entitySearcher.getSearchResults(query='', 
                                                         coords=coords, 
                                                         limit=limit, 
                                                         category_filter=category_filter, 

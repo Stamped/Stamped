@@ -25,6 +25,8 @@ from libs.apple     import AppleAPI
 from libs.AmazonAPI import AmazonAPI
 
 class MongoEntitySearcher(EntitySearcher):
+    # subcategory weights for biasing search results towards entities that we're 
+    # most interested in.
     subcategory_weights = {
         # --------------------------
         #           food
@@ -95,6 +97,8 @@ class MongoEntitySearcher(EntitySearcher):
         'video_game'        : 65
     }
     
+    # weights for many of the built-in sources to bias results coming from 
+    # higher quality sources as likely higher quality themselves as well
     source_weights = {
         'googlePlaces'      : 50, 
         'amazon'            : 90, 
@@ -113,12 +117,14 @@ class MongoEntitySearcher(EntitySearcher):
         'netflix'           : 100, 
     }
     
+    # categories which definitely aren't associated with a location-based search
     location_category_blacklist = set([
         'music', 
         'film', 
         'book', 
     ])
     
+    # subcategories which definitely aren't associated with a location-based search
     location_subcategory_blacklist = set([
         'book', 
         'movie', 
@@ -130,10 +136,12 @@ class MongoEntitySearcher(EntitySearcher):
         'video_game', 
     ])
     
+    # categories which definitely won't come from amazon
     amazon_category_blacklist = set([
         'food', 
     ])
     
+    # subcategories which may come from amazon
     amazon_subcategory_whitelist = set([
         'book', 
         'movie', 
@@ -144,11 +152,13 @@ class MongoEntitySearcher(EntitySearcher):
         'video_game', 
     ])
     
+    # categories which may come from apple
     apple_category_whitelist = set([
         'music', 
         'film', 
     ])
     
+    # subcategories which may come from apple
     apple_subcategory_whitelist = set([
         'movie', 
         'tv', 
@@ -171,6 +181,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         self._init_cities()
     
+    # initialize the list of cities used to guide searches with location hints
     def _init_cities(self):
         self._regions = {}
         city_in_state = {}
@@ -420,7 +431,8 @@ class MongoEntitySearcher(EntitySearcher):
             if self._is_possible_apple_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_apple,  wrapper)
         
-        pool.spawn(_find_entity, wrapper)
+        if not (local and 0 == len(query)):
+            pool.spawn(_find_entity, wrapper)
         
         # ------------------------------ #
         # handle location-based searches #
@@ -467,9 +479,11 @@ class MongoEntitySearcher(EntitySearcher):
             def _find_google_places(ret, specific_coords, radius, use_distance):
                 try:
                     params = {
-                        'name'   : input_query, 
                         'radius' : radius, 
                     }
+                    
+                    if len(input_query) > 0:
+                        params['name'] = input_query
                     
                     self._statsSink.increment('stamped.api.search.third-party.googlePlaces')
                     google_results = self._googlePlaces.getEntityResultsByLatLng(specific_coords, params, detailed=False)
@@ -492,8 +506,10 @@ class MongoEntitySearcher(EntitySearcher):
             
             if full:
                 wrapper['google_place_results'] = []
-                pool.spawn(_find_google_places, wrapper, coords, 20000, True)
+                radius = 1000 if local else 20000
+                pool.spawn(_find_google_places, wrapper, coords, radius, True)
                 
+                # TODO: find a workaround for non-local place searches
                 # national search centered in kansas
                 #us_center_coords = [ 39.5, -98.35 ]
                 #us_search_radius = 5000000
@@ -644,6 +660,8 @@ class MongoEntitySearcher(EntitySearcher):
                 result2 = results[j]
                 entity2 = result2[0]
                 
+                # TODO: replace with generic *are these two entities equal* function
+                # look at unique indices
                 if entity1.subcategory == entity2.subcategory and \
                    entity1.title.lower() == entity2.title.lower():
                    prune.add(j)
