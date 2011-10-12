@@ -809,7 +809,7 @@ class MongoEntitySearcher(EntitySearcher):
                 if input_query in title:
                     if title.startswith(input_query):
                         # if the query is a prefix match for the title, weight it more
-                        weight = 20.0
+                        weight = 6.0
                     elif title.endswith(input_query):
                         weight = 4
                     elif 'remix' not in title:
