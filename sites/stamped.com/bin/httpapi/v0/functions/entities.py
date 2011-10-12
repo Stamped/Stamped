@@ -99,7 +99,7 @@ def search(request):
 def nearby(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPEntityNearby(), request)
-    search      = schema.exportSchema(EntitySearch())
+    search      = schema.exportSchema(EntityNearby())
     
     result      = stampedAPI.searchNearby(coords=search.coordinates, 
                                             authUserId=authUserId, 
