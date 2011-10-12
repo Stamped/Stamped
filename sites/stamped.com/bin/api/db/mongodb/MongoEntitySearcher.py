@@ -452,7 +452,7 @@ class MongoEntitySearcher(EntitySearcher):
                 # limit number of results returned
                 q_params.append(('num', 50))
             else:
-                q_params.append(('num', 200))
+                q_params.append(('num', 100))
             
             q = SON(q_params)
             
