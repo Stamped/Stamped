@@ -250,6 +250,8 @@ typedef enum {
   }
   if (!searchField_.inputAccessoryView)
     [self addKeyboardAccessoryView];
+  else
+    [self filterButtonPressed:nil];
 
   [super viewWillAppear:animated];
 }
@@ -350,18 +352,17 @@ typedef enum {
   else if (self.currentSearchFilter == SearchFilterNone)
     button.selected = NO;
 
+  if (!button.selected)
+    currentSearchFilter_ = SearchFilterNone;
+  
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
                    animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
                    completion:nil];
   
-  if (searchField_.text.length && currentSearchFilter_ != SearchFilterNone) {
-    if (currentResultType_ == ResultTypeFast)
-      [self sendFastSearchRequest];
-    else if (currentResultType_ == ResultTypeFull)
-      [self sendSearchRequest];
-  }
+  if (searchField_.text.length)
+    [self sendFastSearchRequest];
 }
 
 #pragma mark - Table view data source
@@ -393,7 +394,31 @@ typedef enum {
     return self.addStampCell;
 
   if (indexPath.row == 0 && currentResultType_ == ResultTypeFast) {
-    self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search for \u201c%@\u201d", searchField_.text];
+    if (currentSearchFilter_ == SearchFilterNone) {
+      self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search for \u201c%@\u201d", searchField_.text];
+    } else {
+      NSString* corpus = nil;
+      switch (currentSearchFilter_) {
+        case SearchFilterBook:
+          corpus = @"books";
+          break;
+        case SearchFilterMusic:
+          corpus = @"music";
+          break;
+        case SearchFilterFilm:
+          corpus = @"movies & TV shows";
+          break;
+        case SearchFilterFood:
+          corpus = @"restaurants & bars";
+          break;
+        case SearchFilterOther:
+          corpus = @"within other categories";
+          break;
+        default:
+          break;
+      }
+      self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search %@ for \u201c%@\u201d", corpus, searchField_.text];
+    }
     return self.fullSearchCell;
   }
   
@@ -406,7 +431,7 @@ typedef enum {
     return self.searchingIndicatorCell;
 
   if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal && searchField_.text.length == 0) {
-    self.fullSearchCellLabel.text = @"Search for more nearby";
+    self.fullSearchCellLabel.text = @"Search nearby";
     return self.fullSearchCell;
   }
   
@@ -481,13 +506,13 @@ typedef enum {
         loadingIndicatorLabel_.text = @"Searching books...";
         break;
       case SearchFilterFood:
-        loadingIndicatorLabel_.text = @"Searching restaurants and bars...";
+        loadingIndicatorLabel_.text = @"Searching restaurants & bars...";
         break;
       case SearchFilterMusic:
         loadingIndicatorLabel_.text = @"Searching music...";
         break;
       case SearchFilterFilm:
-        loadingIndicatorLabel_.text = @"Searching movies and TV shows...";
+        loadingIndicatorLabel_.text = @"Searching movies & TV shows...";
         break;
       case SearchFilterOther:
       case SearchFilterNone:
@@ -621,7 +646,27 @@ typedef enum {
   } else if (currentResultType_ == ResultTypeLocal) {
     view.leftLabel.text = searchField_.text.length ? @"Nearby results" : @"Popular nearby";
   } else {
-    view.leftLabel.text = @"All results";
+    NSString* corpus = @"All results";
+    switch (currentSearchFilter_) {
+      case SearchFilterBook:
+        corpus = @"Book results";
+        break;
+      case SearchFilterMusic:
+        corpus = @"Music results";
+        break;
+      case SearchFilterFilm:
+        corpus = @"Movie & TV show results";
+        break;
+      case SearchFilterFood:
+        corpus = @"Restaurant & bar results";
+        break;
+      case SearchFilterOther:
+        corpus = @"Other category results";
+        break;
+      default:
+        break;
+    }
+    view.leftLabel.text = corpus;
   }
   return view;
 }
