@@ -241,7 +241,7 @@ class MongoEntitySearcher(EntitySearcher):
         if prefix:
             assert not full
         
-        if coords is not None and isinstance(coords, basestring):
+        if coords is not None:
             coords = self._parseCoords(coords)
         
         # -------------------------------- #
