@@ -46,8 +46,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
   [self performRestKitMappings];
 
-  NSLog(@"launch options: %@", launchOptions);
-  NSDictionary* userInfo = [launchOptions valueForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"];
+  NSDictionary* userInfo = [launchOptions valueForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
   NSDictionary* apsInfo = [userInfo objectForKey:@"aps"];
   if (apsInfo) {
     [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification 
