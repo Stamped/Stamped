@@ -96,7 +96,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   self.tableView.scrollEnabled = YES;
   [mapView_ removeAnnotations:mapView_.annotations];
   [UIView animateWithDuration:0.5
-                   animations:^{ mapView_.alpha = 0.0; }];
+                   animations:^{ mapView_.alpha = 0.0; }
+                   completion:^(BOOL finished) { mapView_.showsUserLocation = NO; }];
 }
 
 #pragma mark - View lifecycle
@@ -146,6 +147,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
+  if (mapView_.alpha > 0)
+    mapView_.showsUserLocation = YES;
+  
   if (stampFilterBar_.sortType == StampSortTypeDistance)
     [stampFilterBar_.locationManager startUpdatingLocation];
 
@@ -157,6 +161,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
+
+  mapView_.showsUserLocation = NO;
   [stampFilterBar_.locationManager stopUpdatingLocation];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
@@ -472,6 +478,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
                                                       object:scrollView];
+  if (stampFilterBar_.searchQuery.length)
+    [stampFilterBar_.searchField resignFirstResponder];
+
   [super scrollViewDidScroll:scrollView];
 }
 

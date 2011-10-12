@@ -9,6 +9,8 @@
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 
+@class STSearchField;
+
 typedef enum {
   StampFilterTypeNone = 0,
   StampFilterTypeFood,
@@ -41,5 +43,6 @@ typedef enum {
 @property (nonatomic, copy) NSString* searchQuery;
 @property (nonatomic, retain) CLLocation* currentLocation;
 @property (nonatomic, readonly) CLLocationManager* locationManager;
+@property (nonatomic, readonly) STSearchField* searchField;
 
 @end

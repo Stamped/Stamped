@@ -558,7 +558,13 @@ typedef enum {
       result.entityID = [object valueForKey:@"entity_id"];
       [array addObject:result];
     }
-    self.resultsArray = array;
+    if (currentSearchFilter_ != SearchFilterNone) {
+      NSPredicate* predicate = [NSPredicate predicateWithFormat:@"category == %@",
+          kSearchFilterStrings[currentSearchFilter_]];
+      self.resultsArray = [array filteredArrayUsingPredicate:predicate];
+    } else {
+      self.resultsArray = array;
+    }
     [self.tableView reloadData];
   } else if (response.isNotFound) {
     self.resultsArray = nil;
