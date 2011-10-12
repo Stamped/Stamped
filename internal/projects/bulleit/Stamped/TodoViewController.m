@@ -125,11 +125,11 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   if (indexPath.row == 0 && favoritesArray_ != nil) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                     reuseIdentifier:nil] autorelease];
-    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button_addTodo"]];
-    addFriendsImageView.center = cell.contentView.center;
-    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 0.0, 4.0);
-    [cell addSubview:addFriendsImageView];
-    [addFriendsImageView release];
+    UIImageView* addTodoImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button_addTodo"]];
+    addTodoImageView.center = cell.contentView.center;
+    addTodoImageView.frame = CGRectOffset(addTodoImageView.frame, 0.0, 4.0);
+    [cell addSubview:addTodoImageView];
+    [addTodoImageView release];
     return cell;
   }
 
@@ -182,11 +182,15 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   // If row is deleted, remove it from the list.
   if (editingStyle == UITableViewCellEditingStyleDelete) {
     Favorite* fave = [self.favoritesArray objectAtIndex:indexPath.row - 1];
-    [self removeFavoriteWithEntityID:fave.entityObject.entityID];
+
+    NSString* entityID = fave.entityObject.entityID;
     
+    fave.entityObject.favorite = nil;
     fave.entityObject = nil;
-    fave.stamp.isFavorited = NO;
+    fave.stamp.isFavorited = [NSNumber numberWithBool:NO];
     [fave.managedObjectContext save:nil];
+    
+    [self removeFavoriteWithEntityID:entityID];
 
 
     NSMutableArray* tempFaves = self.favoritesArray.mutableCopy;
@@ -276,6 +280,5 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
   [objectLoader send];
 }
-
 
 @end

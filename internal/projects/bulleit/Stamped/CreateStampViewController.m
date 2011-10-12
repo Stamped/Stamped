@@ -827,6 +827,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                                                         object:stamp];
 
     stamp.entityObject.favorite.complete = [NSNumber numberWithBool:YES];
+    
     [stamp.managedObjectContext save:NULL];
     [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
                                                         object:stamp];
