@@ -27,6 +27,7 @@
 - (void)addSectionWithName:(NSString*)name;
 - (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight;
 - (void)addSectionStampedBy;
+- (void)addToolbar;
 - (CGFloat)contentHeight;
 
 @property (nonatomic, retain) IBOutlet UIView* mainActionsView;

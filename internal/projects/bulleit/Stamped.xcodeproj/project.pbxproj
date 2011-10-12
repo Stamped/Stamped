@@ -436,6 +436,7 @@
 		CBD126011418596A00CCBDD8 /* eDetail-arrow-down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBD125FF1418596A00CCBDD8 /* eDetail-arrow-down@2x.png */; };
 		CBD126021418596A00CCBDD8 /* eDetail-arrow-up@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBD126001418596A00CCBDD8 /* eDetail-arrow-up@2x.png */; };
 		CBD12611141A801200CCBDD8 /* PairedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD1260F141A801100CCBDD8 /* PairedLabel.m */; };
+		CBDFC8C414429F2600C6FDB7 /* button_addTodo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBDFC8C314429F2600C6FDB7 /* button_addTodo@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1089,6 +1090,7 @@
 		CBD126001418596A00CCBDD8 /* eDetail-arrow-up@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eDetail-arrow-up@2x.png"; sourceTree = "<group>"; };
 		CBD1260E141A801100CCBDD8 /* PairedLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PairedLabel.h; sourceTree = "<group>"; };
 		CBD1260F141A801100CCBDD8 /* PairedLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PairedLabel.m; sourceTree = "<group>"; };
+		CBDFC8C314429F2600C6FDB7 /* button_addTodo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "button_addTodo@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1246,6 +1248,7 @@
 				7E86283F14259A3B00E6FA3D /* toolbar_todoButton_selected@2x.png */,
 				7E86284014259A3B00E6FA3D /* toolbar_todoButton.png */,
 				7E86284114259A3B00E6FA3D /* toolbar_todoButton@2x.png */,
+				CBDFC8C314429F2600C6FDB7 /* button_addTodo@2x.png */,
 			);
 			name = "Stamp Detail";
 			sourceTree = "<group>";
@@ -2600,6 +2603,7 @@
 				7EBBDB511441F21F00DDEAE9 /* hdr_sort_popular_button@2x.png in Resources */,
 				7EBBDB521441F21F00DDEAE9 /* hdr_sort_time_button_selected@2x.png in Resources */,
 				7EBBDB531441F21F00DDEAE9 /* hdr_sort_time_button@2x.png in Resources */,
+				CBDFC8C414429F2600C6FDB7 /* button_addTodo@2x.png in Resources */,
 				7E7396EA14438A5600C7CFEA /* small_location_icon_purple@2x.png in Resources */,
 				7E7396EB14438A5600C7CFEA /* small_location_icon@2x.png in Resources */,
 				7E3D97A01444C9B40018820C /* StampListViewController.xib in Resources */,
@@ -2873,6 +2877,7 @@
 				PROVISIONING_PROFILE = "E709B6F8-9394-45DE-A272-1F16920E6964";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -2902,6 +2907,7 @@
 				PROVISIONING_PROFILE = "E709B6F8-9394-45DE-A272-1F16920E6964";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SKIP_INSTALL = NO;
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};

@@ -12,6 +12,12 @@
 #import "STReloadableTableViewController.h"
 #import "TodoTableViewCell.h"
 
+@protocol TodoViewControllerDelegate
+- (void)displaySearchEntities;
+@end
+
 @interface TodoViewController : STReloadableTableViewController <RKObjectLoaderDelegate, TodoTableViewCellDelegate>
+
+@property (nonatomic, assign) id<TodoViewControllerDelegate> delegate;
 
 @end

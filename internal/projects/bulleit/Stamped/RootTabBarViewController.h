@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 
 #import "AccountManager.h"
+#import "TodoViewController.h"
 
-@interface RootTabBarViewController : UIViewController <UITabBarDelegate, AccountManagerDelegate> {
+@interface RootTabBarViewController : UIViewController <UITabBarDelegate, AccountManagerDelegate, TodoViewControllerDelegate> {
  @private
   NSUInteger selectedViewControllerIndex_;
 }

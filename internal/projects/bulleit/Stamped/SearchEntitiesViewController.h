@@ -11,6 +11,12 @@
 
 @class STSearchField;
 
+typedef enum {
+  SearchIntentStamp,
+  SearchIntentTodo
+} SearchIntent;
+
+
 @interface SearchEntitiesViewController : UITableViewController <RKObjectLoaderDelegate,
                                                                  RKRequestDelegate,
                                                                  UITextFieldDelegate>
@@ -23,6 +29,7 @@
 @property (nonatomic, retain) IBOutlet UILabel* fullSearchCellLabel;
 @property (nonatomic, retain) IBOutlet UILabel* loadingIndicatorLabel;
 @property (nonatomic, retain) IBOutlet UITableViewCell* fullSearchCell;
+@property NSInteger searchIntent;
 
 - (IBAction)cancelButtonTapped:(id)sender;
 - (void)clearSearchField;

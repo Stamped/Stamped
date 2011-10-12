@@ -47,9 +47,9 @@ def main():
     
     try:
         open(lock, 'w').close()
-        print 'BEGIN'
+        print 'BEGIN: %s' % datetime.utcnow()
         runAlerts()
-        print 'END'
+        print 'END: %s' % datetime.utcnow()
     except Exception as e:
         print e
         print 'FAIL'
