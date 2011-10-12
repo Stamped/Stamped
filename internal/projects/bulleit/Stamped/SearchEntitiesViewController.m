@@ -532,7 +532,6 @@ typedef enum {
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   loading_ = NO;
-  NSLog(@"response: %@", response.bodyAsString);
   if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
     return;
 

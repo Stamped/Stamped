@@ -75,6 +75,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   
   NSLog(@"Device token: %@", deviceToken);
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kPushNotificationPath delegate:self];
+  request.method = RKRequestMethodPOST;
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:deviceToken, @"token", nil];
   [request send];
 }
@@ -107,7 +108,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  NSLog(@"Push nofification registration successful? %@ response: %@", response.isOK, response.bodyAsString);
+  NSLog(@"Push nofification registration response: %@", response.bodyAsString);
 }
 
 #pragma mark - Private methods.
