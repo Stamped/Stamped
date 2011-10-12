@@ -46,6 +46,14 @@ class MongoAlertCollection(AMongoCollection):
     def addAlert(self, alert):
         result = self._collection.insert_one(alert.value)
         return result
+    
+
+    def addAlerts(self, alerts):
+        objects = []
+        for alert in alerts:
+            objects.append(alert.value)
+        result = self._collection.insert(objects)
+        return result
 
         
     def removeAlert(self, alertId, **kwargs):
