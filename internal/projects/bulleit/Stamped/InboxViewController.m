@@ -374,6 +374,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  stampFilterBar_.filterType = StampFilterTypeNone;
+  stampFilterBar_.searchQuery = nil;
+  stampFilterBar_.sortType = StampSortTypeTime;
+
   for (Stamp* stamp in objects) {
     stamp.temporary = [NSNumber numberWithBool:NO];
     [stamp.managedObjectContext save:NULL];

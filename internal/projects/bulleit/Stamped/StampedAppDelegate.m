@@ -8,7 +8,6 @@
 
 #import "StampedAppDelegate.h"
 
-#import <RestKit/RestKit.h>
 #import <RestKit/CoreData/CoreData.h>
 
 #import "TestFlight.h"
@@ -20,12 +19,14 @@
 #import "Favorite.h"
 #import "Stamp.h"
 #import "User.h"
+#import "Notifications.h"
 #import "SearchResult.h"
 #import "OAuthToken.h"
 #import "UserImageDownloadManager.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
+static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
 @interface StampedAppDelegate ()
 
@@ -45,12 +46,15 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
   [self performRestKitMappings];
 
-  if ([launchOptions objectForKey:@"aps"]) {
-    // Got a push notification.
-    NSLog(@"Alert: %@", [[launchOptions objectForKey:@"aps"] objectForKey:@"alert"]);
+  NSLog(@"launch options: %@", launchOptions);
+  NSDictionary* userInfo = [launchOptions valueForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"];
+  NSDictionary* apsInfo = [userInfo objectForKey:@"aps"];
+  if (apsInfo) {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification 
+                                                        object:self
+                                                      userInfo:apsInfo];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
   }
-  
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];
 
@@ -69,16 +73,17 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   NSString* deviceToken = [NSString stringWithFormat:@"%@", devToken];
   deviceToken = [deviceToken stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
   deviceToken = [deviceToken stringByReplacingOccurrencesOfString:@" " withString:@""];
+  
   NSLog(@"Device token: %@", deviceToken);
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kPushNotificationPath delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:deviceToken, @"token", nil];
+  [request send];
 }
 
 - (void)application:(UIApplication*)application didReceiveRemoteNotification:(NSDictionary*)userInfo {
-  UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Push"
-                                                       message:[NSString stringWithFormat:@"%@", [[userInfo objectForKey:@"aps"] objectForKey:@"alert"]]
-                                                      delegate:self
-                                             cancelButtonTitle:@"OK"
-                                             otherButtonTitles:nil] autorelease];
-  [alertView show];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification 
+                                                      object:self
+                                                    userInfo:[userInfo objectForKey:@"aps"]];
   [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
 }
 
@@ -100,10 +105,16 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
   [super dealloc];
 }
 
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  NSLog(@"Push nofification registration successful? %@ response: %@", response.isOK, response.bodyAsString);
+}
+
 #pragma mark - Private methods.
 
 - (void)performRestKitMappings {
-  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
+  RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
   [RKClient sharedClient].requestQueue.requestTimeout = 30;

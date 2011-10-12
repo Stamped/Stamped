@@ -10,5 +10,6 @@
 
 NSString* const kAppShouldReloadAllPanes = @"kAppShouldReloadAllPanes";
 NSString* const kAppShouldReloadNewsPane = @"kAppShouldReloadNewsPane";
+NSString* const kPushNotificationReceivedNotification = @"kPushNotificationReceivedNotification";
 NSString* const kFavoriteHasChangedNotification = @"kFavoriteHasChangedNotification";
 NSString* const kNewsItemCountHasChangedNotification = @"kNewsItemCountHasChangedNotification";

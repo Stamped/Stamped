@@ -429,6 +429,7 @@ static AccountManager* sharedAccountManager_ = nil;
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];
   [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
+  [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]];
   self.currentUser = nil;
   [[RKObjectManager sharedManager].objectStore deletePersistantStore];
   NSFileManager* fm = [NSFileManager defaultManager];

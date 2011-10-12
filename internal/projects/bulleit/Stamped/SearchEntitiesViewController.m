@@ -425,7 +425,7 @@ typedef enum {
   NSUInteger offset = 0;
   if (loading_)
     ++offset;
-  
+
   if (currentResultType_ == ResultTypeFast)
     ++offset;
 
