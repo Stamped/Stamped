@@ -368,6 +368,8 @@ class MongoEntitySearcher(EntitySearcher):
         # ------------------------------ #
         
         if coords is not None:
+            entity_query = self._get_entity_query(query)
+            
             q_params = [
                 ('geoNear', 'places'), 
                 ('near', [float(coords[1]), float(coords[0])]), 
