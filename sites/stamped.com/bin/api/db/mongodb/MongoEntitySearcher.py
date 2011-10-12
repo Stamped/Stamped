@@ -411,11 +411,15 @@ class MongoEntitySearcher(EntitySearcher):
         # search amazon product API
         def _find_amazon(ret):
             try:
+                #utils.log("amazon")
+                
                 self._statsSink.increment('stamped.api.search.third-party.amazon')
                 amazon_results = self._amazonAPI.item_detail_search(Keywords=input_query, 
                                                                     SearchIndex='All', 
                                                                     Availability='Available', 
                                                                     transform=True)
+                
+                #utils.log("amazon: %d" % len(amazon_results))
                 
                 ret['amazon_results'] = []
                 for entity in amazon_results:
@@ -526,7 +530,7 @@ class MongoEntitySearcher(EntitySearcher):
         # 
         # note: timeout is specified in seconds
         # TODO: drive this timout number down to speed up search results!
-        pool.join(timeout=4)
+        pool.join(timeout=6.5)
         
         # ----------------- #
         # parse all results #
@@ -575,6 +579,8 @@ class MongoEntitySearcher(EntitySearcher):
         # aggregate all results
         for key in result_keys:
             if key in wrapper:
+                #utils.log("%s) %d" % (key, len(wrapper[key])))
+                
                 for result in wrapper[key]:
                     _add_result(result)
         
@@ -585,12 +591,32 @@ class MongoEntitySearcher(EntitySearcher):
         results = results.values()
         #utils.log("num_results: %d" % len(results))
         
+        converted = False
+        
+        def _convert(r):
+            from Entity import setFields
+            
+            for result in r:
+                setFields(result[0])
+        
         # apply category filter to results
         if category_filter is not None:
+            if not converted:
+                converted = True
+                _convert(results)
+            
+            #for e in results:
+                #utils.log("%s vs %s" % (e[0].category, category_filter))
             results = filter(lambda e: e[0].category == category_filter, results)
         
         # apply subcategory filter to results
         if subcategory_filter is not None:
+            if not converted:
+                converted = True
+                _convert(results)
+            
+            #for e in results:
+                #utils.log("%s vs %s" % (e[0].subcategory, subcategory_filter))
             results = filter(lambda e: e[0].subcategory == subcategory_filter, results)
         
         # early-exit if there are no results at this point
@@ -599,6 +625,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         # sort the results based on a custom ranking function
         results = sorted(results, key=self._get_entity_weight_func(input_query, prefix), reverse=True)
+        
+        #utils.log("num_results: %d" % len(results))
         
         # limit the number of results returned and remove obvious duplicates
         results = self._prune_results(results, limit)
@@ -609,6 +637,8 @@ class MongoEntitySearcher(EntitySearcher):
         
         if not prefix:
             gevent.spawn(self._add_temp, results)
+        
+        #utils.log("num_results: %d" % len(results))
         
         return results
     
