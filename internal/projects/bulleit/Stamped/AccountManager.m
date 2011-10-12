@@ -367,6 +367,7 @@ static AccountManager* sharedAccountManager_ = nil;
     }
 
     if ([request.params isKindOfClass:[RKParams class]]) {
+      NSLog(@"Request: %@", request.resourcePath);
       [(RKParams*)request.params setValue:self.authToken.accessToken forParam:@"oauth_token"];
       return;
     }
