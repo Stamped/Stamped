@@ -21,45 +21,136 @@ class MonitorException(Exception):
         self.email  = email
         self.sms    = sms
 
-def try_ping_webServer(node):
-    url = 'https://%s/v0/entities/show.json' % node.public_dns
+class Monitor(object):
     
-    try:
-        response = urllib2.urlopen(url)
-    except urllib2.HTTPError, e:
-        if e.code == 401:
-            return
-    
-    raise MonitorException("unable to ping api server at '%s.%s'" % (node.stack, node.name), 
-                           email=True, sms=True)
-
-def try_ping_db(node):
-    cmd_template = "mongo %s:27017/admin --eval 'printjson(%s);'"
-    
-    # ensure that the server and replica set and both responding and healthy
-    mongo_cmds = [
-        'db.serverStatus()', 
-        'rs.status()', 
-    ]
-    
-    for mongo_cmd in mongo_cmds:
-        dns = node.private_dns if is_ec2 else node.public_dns
-        cmd = cmd_template % (dns, mongo_cmd)
-        logs.debug(cmd)
+    def __init__(self, options=None):
+        self.handler  = StampedNotificationHandler()
+        self.ec2utils = EC2Utils()
+        self.status   = { }
+        self._info    = None
         
-        ret = utils.shell(cmd)
-        
-        if 0 != ret[1]:
-            error = "unable to reach db server at '%s.%s'" % \
-                     (node.stack, node.name)
+        if options is not None:
+            self.options = options
+        else:
+            self.options = utils.AttributeDict({
+                'stack'     : None, 
+                'time'      : 10, 
+                'noop'      : False, 
+                'verbose'   : False, 
+            })
+    
+    def update(self, force=False):
+        if self._info is None or force:
+            self._info = ec2utils.get_stack_info(stack=self.options.stack)
             
-            raise MonitorException(error, email=True, sms=True)
+            if self._info is None:
+                utils.log("error retrieving stack data from AWS")
+    
+    def run(self):
+        while True:
+            self.update(force=True)
+            self.ping()
         
-        if re.match('.*"ok"[ \t]*:[ \t]*1.*', ret[0], re.DOTALL) is None:
-            error = "db server '%s.%s' returned invalid status for cmd '%s'" % \
-                     (node.stack, node.name, mongo_cmd)
+        time.sleep(self.options.time)
+    
+    def ping(self):
+        self.update()
+        
+        if self.options.stack:
+            mich = None
+        else:
+            mich = self._info.instance.id
+        
+        for node in self._info.nodes:
+            node_status = 1
             
-            raise MonitorException(error, detail=ret[0], email=True, sms=True)
+            # don't try to monitor myself
+            if node.id == mich:
+                continue
+            
+            try:
+                utils.logRaw("pinging node '%s.%s'..." % (node.stack, node.name), True)
+                
+                if 'webServer' in node.roles:
+                    self._try_ping_webServer(node)
+                
+                if 'db' in node.roles:
+                    self._try_ping_db(node)
+                
+                utils.logRaw("success!\n")
+            except Exception, e:
+                node_status = -1
+                unexpected  = False
+                detail      = None
+                
+                if isinstance(e, MonitorException):
+                    logs.error("monitor error: %s" % e)
+                    utils.log("monitor error: %s" % e)
+                    detail = e.detail
+                else:
+                    logs.error("unexpected error: %s" % e)
+                    utils.log("unexpected error: %s" % e)
+                    unexpected = True
+                
+                # only send a notification if this node's status has changed since 
+                # the last time we checked, so we don't get duplicate notifications 
+                # related to the same incident.
+                notify = (node.id not in self.status or self.status[node.id] != -1)
+                
+                if notify and not self.options.noop:
+                    subject = '%s.%s error' % (node.stack, node.name)
+                    message = str(e)
+                    
+                    if unexpected or e.email:
+                        if detail is not None:
+                            message = "%s\n\n--- detail ---\n\n%s" % (message, detail)
+                        
+                        self.handler.email(subject, message)
+                    
+                    if unexpected or e.sms:
+                        self.handler.email(subject, message)
+            
+            self.status[node.id] = node_status
+    
+    def _try_ping_webServer(self, node):
+        url = 'https://%s/v0/entities/show.json' % node.public_dns
+        
+        try:
+            response = urllib2.urlopen(url)
+        except urllib2.HTTPError, e:
+            if e.code == 401:
+                return
+        
+        error = "unable to ping api server at '%s.%s'" % (node.stack, node.name)
+        raise MonitorException(error, email=True, sms=True)
+    
+    def _try_ping_db(self, node):
+        cmd_template = "mongo %s:27017/admin --eval 'printjson(%s);'"
+        
+        # ensure that the server and replica set and both responding and healthy
+        mongo_cmds = [
+            'db.serverStatus()', 
+            'rs.status()', 
+        ]
+        
+        for mongo_cmd in mongo_cmds:
+            dns = node.private_dns if is_ec2 else node.public_dns
+            cmd = cmd_template % (dns, mongo_cmd)
+            logs.debug(cmd)
+            
+            ret = utils.shell(cmd)
+            
+            if 0 != ret[1]:
+                error = "unable to reach db server at '%s.%s'" % \
+                         (node.stack, node.name)
+                
+                raise MonitorException(error, email=True, sms=True)
+            
+            if re.match('.*"ok"[ \t]*:[ \t]*1.*', ret[0], re.DOTALL) is None:
+                error = "db server '%s.%s' returned invalid status for cmd '%s'" % \
+                         (node.stack, node.name, mongo_cmd)
+                
+                raise MonitorException(error, detail=ret[0], email=True, sms=True)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] query"
@@ -90,72 +181,7 @@ def parseCommandLine():
 def main():
     options, args = parseCommandLine()
     
-    handler  = StampedNotificationHandler()
-    ec2utils = EC2Utils()
-    
-    status = { }
-    
-    while True:
-        info = ec2utils.get_stack_info(stack=options.stack)
-        
-        if info is None:
-            utils.log("unable to obtain stack data!")
-        else:
-            if options.stack:
-                mich = None
-            else:
-                mich = info.instance.id
-            
-            for node in info.nodes:
-                node_status = 1
-                
-                # don't try to monitor myself
-                if node.id == mich:
-                    continue
-                
-                try:
-                    utils.logRaw("pinging node '%s.%s'..." % (node.stack, node.name), True)
-                    
-                    if 'webServer' in node.roles:
-                        try_ping_webServer(node)
-                    
-                    if 'db' in node.roles:
-                        try_ping_db(node)
-                    
-                    utils.logRaw("success!\n")
-                except Exception, e:
-                    raise
-                    
-                    node_status = -1
-                    unexpected  = False
-                    detail      = None
-                    
-                    if isinstance(e, MonitorException):
-                        logs.error("monitor error: %s" % e)
-                        detail = e.detail
-                    else:
-                        logs.error("unexpected error: %s" % e)
-                        unexpected = True
-                    
-                    # only send a notification if this node's status has changed since 
-                    # the last time we checked, so we don't get duplicate notifications 
-                    # related to the same incident.
-                    if (not options.noop) and (node.id not in status or status[node.id] != -1):
-                        subject = '%s.%s error' % (node.stack, node.name)
-                        message = str(e)
-                        
-                        if unexpected or e.email:
-                            if detail is not None:
-                                message = "%s\n\n--- detail ---\n\n%s" % (message, detail)
-                            
-                            handler.email(subject, message)
-                        
-                        if unexpected or e.sms:
-                            handler.email(subject, message)
-                
-                status[node.id] = node_status
-        
-        time.sleep(options.time)
+    Monitor(options).run()
 
 if __name__ == '__main__':
     main()
