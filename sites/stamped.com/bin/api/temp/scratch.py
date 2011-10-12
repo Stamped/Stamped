@@ -22,7 +22,7 @@ client_auth = {
 }
 
 _baseurl = "https://dev.stamped.com/v0"
-_baseurl = "http://localhost:18000/v0"
+# _baseurl = "http://localhost:18000/v0"
 
 def handleGET(path, data):
     params = urllib.urlencode(data)
@@ -40,7 +40,7 @@ def handlePOST(path, data):
 
 
 
-USER = 'andybons'
+USER = 'rando'
 PASS = '12345'
 
 path = "oauth2/login.json"
@@ -100,12 +100,21 @@ token = account['token']
 # }
 # result = handlePOST(path, data)
 
-path = "entities/nearby.json"
+# path = "entities/nearby.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "coordinates": "38.5,-122.56"
+# }
+# result = handleGET(path, data)
+
+path = "stamps/likes/create.json"
 data = {
     "oauth_token": token['access_token'],
-    "coordinates": "38.5,-122.56"
+    "stamp_id": "4e94851efe4a1d038000000f"
 }
-result = handleGET(path, data)
+result = handlePOST(path, data)
+
+
 
 print result
 
