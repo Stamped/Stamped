@@ -22,6 +22,7 @@
 #import "Notifications.h"
 #import "Favorite.h"
 #import "User.h"
+#import "StampedAppDelegate.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
@@ -29,6 +30,10 @@ static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 @interface EntityDetailViewController ()
+
+@property (nonatomic, retain) UIButton* addFavoriteButton;
+@property (nonatomic, retain) UIActivityIndicatorView* spinner;
+
 - (void)addTodoBar;
 - (NSAttributedString*)todoAttributedString:(User*)user;
 - (void)todoBarTapped:(UITapGestureRecognizer*)recognizer;
@@ -36,6 +41,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)showContents;
 - (void)setupSectionViews;
 - (void)addSelfAsFavorite;
+- (void)dismissSelf;
 @end
 
 @implementation EntityDetailViewController
@@ -50,6 +56,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize loadingView = loadingView_;
 @synthesize mainContentView = mainContentView_;
 @synthesize shelfImageView = shelfImageView_;
+@synthesize addFavoriteButton = addFavoriteButton_;
+@synthesize spinner = spinner_;
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -73,6 +81,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+    
   self.titleLabel = nil;
   self.descriptionLabel = nil;
   self.mainActionLabel = nil;
@@ -83,9 +92,12 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainActionsView = nil;
   self.mainContentView = nil;
   self.loadingView = nil;
+  self.addFavoriteButton = nil;
+  self.spinner = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
+  
 
   [entityObject_ release];
   [searchResult_ release];
@@ -239,15 +251,24 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
   button.titleLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14.0];
   button.titleLabel.shadowColor = [UIColor colorWithWhite:0.3 alpha:1.0];
-  button.titleLabel.shadowOffset = CGSizeMake(0.0, -0.5);
+  button.titleLabel.shadowOffset = CGSizeMake(0.0, -1.0);
   button.frame = CGRectMake((bar.frame.size.width - buttonBG.size.width) / 2, 8.0, buttonBG.size.width, buttonBG.size.height);
   [button addTarget:self action:@selector(addSelfAsFavorite) forControlEvents:UIControlEventTouchUpInside];
-  [bar addSubview:button];
-
+  self.addFavoriteButton = button;
+  [bar addSubview:self.addFavoriteButton];
+  
+  UIActivityIndicatorView* activity = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+  activity.center = button.center;
+  activity.hidesWhenStopped = YES;
+  [activity stopAnimating];
+  self.spinner = activity;
+  [bar addSubview:self.spinner];
+  
   [self.view addSubview:bar];
   CGRect frame = self.scrollView.frame;
   frame.size.height -= 56;
   self.scrollView.frame = frame;
+  
   [bar release];
 }
 
@@ -302,6 +323,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   self.mainActionsView = nil;
   self.loadingView = nil;
   self.mainContentView = nil;
+  self.addFavoriteButton = nil;
+  self.spinner = nil;
   
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
@@ -326,6 +349,13 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
+  // Handle callback from "Add To-Do"
+  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
+    [self.spinner stopAnimating];
+    [self dismissSelf];
+    return;
+  }
+  
   dataLoaded_ = YES;
   [entityObject_ release];
   entityObject_ = [(Entity*)object retain];
@@ -334,6 +364,12 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+  // Handle callback from "Add To-Do"
+  if ([objectLoader.resourcePath isEqualToString:kCreateFavoritePath]) {
+    [self.spinner stopAnimating];
+    self.addFavoriteButton.hidden = NO;
+  }
+  
 	NSLog(@"Hit error: %@", error);
   NSLog(@"Query: %@ Response: %@", objectLoader.resourcePath, objectLoader.response.bodyAsString);
   if ([objectLoader.response isUnauthorized]) {
@@ -427,15 +463,30 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 #pragma mark - Make a todo from this entity.
 
 - (void)addSelfAsFavorite {
+  self.addFavoriteButton.hidden = YES;
+  self.spinner.hidden = NO;
+  [self.spinner startAnimating];
+  [self.addFavoriteButton setNeedsDisplay];
+  [self.spinner setNeedsDisplay];
+  
   NSString* path = kCreateFavoritePath;
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
-  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:nil];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityObject_.entityID, @"entity_id", nil];
   [objectLoader send];
-  [self.navigationController dismissModalViewControllerAnimated:YES];
+}
+
+- (void)dismissSelf {
+  UIViewController* vc = nil;
+  if ([self respondsToSelector:@selector(presentingViewController)]) 
+    vc = [(id)self presentingViewController];
+  else
+    vc = self.parentViewController;
+  if (vc)
+    [vc dismissModalViewControllerAnimated:YES];
 }
 
 @end
