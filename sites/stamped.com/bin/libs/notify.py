@@ -53,7 +53,7 @@ class NotificationRecipient(object):
             self.carrier = None
             self.sms = None
 
-class SMTPNotificationHandler(ANotificationHandler):
+class GoogleSMTPNotificationHandler(ANotificationHandler):
     
     def __init__(self, username, password, recipients=[]):
         ANotificationHandler.__init__(self, recipients)
@@ -93,15 +93,15 @@ class SMTPNotificationHandler(ANotificationHandler):
         utils.log("[%s] sending mail to '%s'" % (self, recipient))
         return server.sendmail(self.username, [ recipient ], msg.as_string())
 
-class StampedNotificationHandler(SMTPNotificationHandler):
-    def __init__(self, username, password):
+class StampedNotificationHandler(GoogleSMTPNotificationHandler):
+    def __init__(self):
         recipients = [
             NotificationRecipient(name='dev',    email='dev@stamped.com'), 
             NotificationRecipient(name='travis', phone='2622156221', carrier='at&t'), 
             NotificationRecipient(name='kevin',  phone='3123155045', carrier='at&t'), 
         ]
         
-        SMTPNotificationHandler.__init__(self, 'notifications@stamped.com', 'mariotennis', recipients)
+        GoogleSMTPNotificationHandler.__init__(self, 'notifications@stamped.com', 'mariotennis', recipients)
 
 if __name__ == "__main__":
     recipients = [
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         NotificationRecipient(phone='2622156221', carrier='at&t'), 
     ]
     
-    handler = SMTPNotificationHandler('notifications@stamped.com', 'mariotennis', recipients)
+    handler = GoogleSMTPNotificationHandler('notifications@stamped.com', 'mariotennis', recipients)
     
     handler.email('[TEST0]', 'test message0')
     handler.sms('[TEST1]',   'test message1')

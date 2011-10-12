@@ -260,4 +260,5 @@ static const CGFloat kSubstringFontSize = 12.0;
   completedImageView_.image = [self completedStamp];
 }
 
+
 @end

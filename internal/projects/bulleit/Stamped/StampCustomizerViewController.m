@@ -215,7 +215,7 @@
 
 - (IBAction)cancelButtonPressed:(id)sender {
   if ([self respondsToSelector:@selector(presentingViewController)]) {
-    [self.presentingViewController dismissModalViewControllerAnimated:YES];
+    [[self presentingViewController] dismissModalViewControllerAnimated:YES];
   } else {
     [self.parentViewController dismissModalViewControllerAnimated:YES];
   }

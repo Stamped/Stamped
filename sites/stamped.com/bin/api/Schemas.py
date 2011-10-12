@@ -380,6 +380,7 @@ class EntitySearch(Schema):
         self.coordinates        = CoordinatesSchema()
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
+        self.local              = SchemaElement(bool)
 
 class CoordinatesSchema(Schema):
     def setSchema(self):

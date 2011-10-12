@@ -13,11 +13,13 @@
 
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
+#import "EntityDetailViewController.h"
 #import "SearchEntitiesTableViewCell.h"
 #import "STSearchField.h"
 #import "STSectionHeaderView.h"
 #import "SearchResult.h"
 #import "UIColor+Stamped.h"
+#import "Util.h"
 
 static NSString* const kSearchPath = @"/entities/search.json";
 static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v1/";
@@ -47,6 +49,7 @@ typedef enum {
   ResultTypeFull,
   ResultTypeLocal
 } ResultType;
+
 
 @interface SearchEntitiesViewController ()
 - (void)addKeyboardAccessoryView;
@@ -82,6 +85,7 @@ typedef enum {
 @synthesize loading = loading_;
 @synthesize loadingIndicatorLabel = loadingIndicatorLabel_;
 @synthesize currentSearchFilter = currentSearchFilter_;
+@synthesize searchIntent = searchIntent_;
 @synthesize clearFilterButton = clearFilterButton_;
 
 - (void)dealloc {
@@ -233,6 +237,19 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [self.navigationController setNavigationBarHidden:YES animated:animated];
+  
+  switch (self.searchIntent) {
+    case 0:
+      self.searchField.placeholder = @"Find something to stamp...";
+      break;
+    case 1:
+      self.searchField.placeholder = @"Find something to do...";
+      break;
+    default:
+      self.searchField.placeholder = @"Find something to stamp...";
+      break;
+  }
+  
   [super viewWillAppear:animated];
 }
 
@@ -577,10 +594,24 @@ typedef enum {
     return;
   }
   
-  CreateStampViewController* detailViewController =
-      [[CreateStampViewController alloc] initWithSearchResult:result];
-  [self.navigationController pushViewController:detailViewController animated:YES];
-  [detailViewController release];
+  switch (self.searchIntent) {
+    case SearchIntentStamp: {
+      CreateStampViewController* detailViewController = [[CreateStampViewController alloc] initWithSearchResult:result];
+      [self.navigationController pushViewController:detailViewController animated:YES];
+      [detailViewController release];
+      break;
+    }
+    case SearchIntentTodo: {
+      EntityDetailViewController* detailViewController = (EntityDetailViewController*)[Util detailViewControllerForSearchResult:result];
+      [detailViewController addToolbar];
+      [self.navigationController pushViewController:detailViewController animated:YES];
+//      [detailViewController release];
+      break;
+    }
+    default:
+      break;
+  }
+
 }
 
 - (void)clearSearchField {
