@@ -518,7 +518,7 @@ class MongoEntitySearcher(EntitySearcher):
             
             if full:
                 wrapper['google_place_results'] = []
-                radius = 1000 if local and 0 == len(query) else 20000
+                radius = 100 if local and 0 == len(query) else 20000
                 pool.spawn(_find_google_places, wrapper, coords, radius, True)
                 
                 # TODO: find a workaround for non-local place searches
@@ -648,7 +648,6 @@ class MongoEntitySearcher(EntitySearcher):
             gevent.spawn(self._add_temp, results)
         
         #utils.log("num_results: %d" % len(results))
-        
         return results
     
     def _add_temp(self, results):

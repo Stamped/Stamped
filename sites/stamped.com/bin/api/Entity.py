@@ -89,6 +89,9 @@ subcategories = {
 
 city_state_re = re.compile('.*,\s*([a-zA-Z .-]+)\s*,\s*([a-zA-Z][a-zA-Z]).*')
 
+def setSubtitle(entity):
+    entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+
 def setFields(entity, detailed=False):
     global city_state_re
 
@@ -106,7 +109,7 @@ def setFields(entity, detailed=False):
             # elif entity.neighborhood is not None:
             #     entity.subtitle = entity.neighborhood
             else:
-                entity.subtitle = str(entity.subcategory).title()
+                setSubtitle(entity)
         else:
             # address = {}
             # if len(entity.address_components) > 0:
@@ -136,13 +139,13 @@ def setFields(entity, detailed=False):
             
             if not is_set:
                 # else fall back to the generic subcategory
-                entity.subtitle = str(entity.subcategory).title()
+                setSubtitle(entity)
     
     elif entity.category == 'book':
         if entity.author != None:
             entity.subtitle = entity.author
         else:
-            entity.subtitle = str(entity.subcategory).title()
+            setSubtitle(entity)
     
     elif entity.category == 'film':
         if entity.subcategory == 'movie':
