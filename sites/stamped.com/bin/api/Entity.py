@@ -167,7 +167,7 @@ def setFields(entity, detailed=False):
             entity.subtitle = "%s (Album)" % entity.artist_display_name
         else:
             entity.subtitle = 'Album'
-            
+    
     elif entity.category == 'music' and entity.subcategory == 'song':
         if entity.artist_display_name != None:
             entity.subtitle = "%s (Song)" % entity.artist_display_name
@@ -182,7 +182,7 @@ def setFields(entity, detailed=False):
     
     if entity.subtitle is None or len(entity.subtitle) == 0:
         logs.warning('Invalid subtitle: %s' % entity)
-        entity.subtitle = str(entity.subcategory).replace('_', ' ').title()
+        setSubtitle(entity)
         
         if entity.subtitle is None or len(entity.subtitle) == 0:
             entity.subtitle = "Other"

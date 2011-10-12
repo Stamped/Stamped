@@ -565,7 +565,7 @@
 							<int key="NSfFlags">16</int>
 						</object>
 						<bool key="IBUIReversesTitleShadowWhenHighlighted">YES</bool>
-						<string key="IBUITitleShadowOffset">{0, -0.5}</string>
+						<string key="IBUITitleShadowOffset">{0, -1}</string>
 						<string key="IBUINormalTitle">Stamp it</string>
 						<reference key="IBUIHighlightedTitleColor" ref="935530847"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
@@ -1380,14 +1380,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/CreateStampViewController.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">STCreditTextField</string>
-					<string key="superclassName">UITextField</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/STCreditTextField.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
