@@ -431,7 +431,7 @@ class MongoEntitySearcher(EntitySearcher):
             if self._is_possible_apple_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_apple,  wrapper)
         
-        if not (local and 0 == len(query)):
+        if len(query) > 0:
             pool.spawn(_find_entity, wrapper)
         
         # ------------------------------ #
