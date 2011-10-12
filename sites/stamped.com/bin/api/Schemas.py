@@ -384,7 +384,7 @@ class EntitySearch(Schema):
 
 class EntityNearby(Schema):
     def setSchema(self):
-        self.coordinates        = CoordinatesSchema(required=True)
+        self.coordinates        = CoordinatesSchema()
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
 
