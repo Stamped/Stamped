@@ -95,6 +95,7 @@ static NSString* kLoadingText = @"Loading...";
     return;
   }
 
+  reloadLabel_.text = kLoadingText;
   [UIView animateWithDuration:0.2
                         delay:0 
                       options:UIViewAnimationOptionBeginFromCurrentState | 
@@ -140,7 +141,6 @@ static NSString* kLoadingText = @"Loading...";
 - (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
   if (shouldReload_) {
     [self setIsLoading:YES];
-    reloadLabel_.text = kLoadingText;
     [self userPulledToReload];
   }
 }

@@ -156,6 +156,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
   
+  [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* userID = [AccountManager sharedManager].currentUser.userID;

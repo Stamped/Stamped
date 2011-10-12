@@ -28,7 +28,7 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UILabel* fullSearchCellLabel;
 @property (nonatomic, retain) IBOutlet UILabel* loadingIndicatorLabel;
 @property (nonatomic, retain) IBOutlet UITableViewCell* fullSearchCell;
-@property (nonatomic, assign) NSInteger searchIntent;
+@property (nonatomic, assign) SearchIntent searchIntent;
 
 - (IBAction)locationButtonTapped:(id)sender;
 - (IBAction)cancelButtonTapped:(id)sender;

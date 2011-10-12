@@ -12,10 +12,7 @@
 @class SearchEntitiesCellView;
 @class SearchResult;
 
-@interface SearchEntitiesTableViewCell : UITableViewCell {
- @private  
-  SearchEntitiesCellView* customView_;
-}
+@interface SearchEntitiesTableViewCell : UITableViewCell
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 

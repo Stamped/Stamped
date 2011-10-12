@@ -238,6 +238,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath {
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
 
+  [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* favoriteMapping = [objectManager.mappingProvider mappingForKeyPath:@"Favorite"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kShowFavoritesPath

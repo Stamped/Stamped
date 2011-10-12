@@ -13,28 +13,31 @@
 #import "Util.h"
 #import "UIColor+Stamped.h"
 
-@interface SearchEntitiesCellView : UIView
-
-// This is magic with UITableViewCell. No need to set this explicitly.
-@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
+@interface SearchEntitiesTableViewCell ()
 @property (nonatomic, readonly) UIImageView* categoryImageView;
 @property (nonatomic, readonly) UILabel* titleLabel;
 @property (nonatomic, readonly) UILabel* subtitleLabel;
+@property (nonatomic, readonly) UILabel* distanceLabel;
+@property (nonatomic, readonly) UIImageView* locationImageView;
 @end
 
-@implementation SearchEntitiesCellView
+@implementation SearchEntitiesTableViewCell
 
-@synthesize highlighted = highlighted_;
+@synthesize searchResult = searchResult_;
 @synthesize categoryImageView = categoryImageView_;
 @synthesize titleLabel = titleLabel_;
 @synthesize subtitleLabel = subtitleLabel_;
+@synthesize distanceLabel = distanceLabel_;
+@synthesize locationImageView = locationImageView_;
 
-- (id)initWithFrame:(CGRect)frame {
-  self = [super initWithFrame:frame];
+- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
+  self = [super initWithStyle:UITableViewCellStyleDefault
+              reuseIdentifier:reuseIdentifier];
   if (self) {
+    self.accessoryType = UITableViewCellAccessoryNone;
     categoryImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(8, 0, 30, 32)];
     categoryImageView_.contentMode = UIViewContentModeBottomLeft;
-    [self addSubview:categoryImageView_];
+    [self.contentView addSubview:categoryImageView_];
     [categoryImageView_ release];
     
     titleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
@@ -42,7 +45,7 @@
     titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
     titleLabel_.textColor = [UIColor stampedBlackColor];
     titleLabel_.highlightedTextColor = [UIColor whiteColor];
-    [self addSubview:titleLabel_];
+    [self.contentView addSubview:titleLabel_];
     [titleLabel_ release];
     
     subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 34, 241, 20)];
@@ -50,27 +53,26 @@
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
     subtitleLabel_.textColor = [UIColor stampedGrayColor];
     subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
-    [self addSubview:subtitleLabel_];
+    [self.contentView addSubview:subtitleLabel_];
     [subtitleLabel_ release];
-  }
-  return self;
-}
 
-@end
+    distanceLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    distanceLabel_.backgroundColor = [UIColor clearColor];
+    distanceLabel_.textColor = [UIColor stampedLightGrayColor];
+    distanceLabel_.highlightedTextColor = [UIColor whiteColor];
+    distanceLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
+    [self.contentView addSubview:distanceLabel_];
+    [distanceLabel_ release];
 
-@implementation SearchEntitiesTableViewCell
-
-@synthesize searchResult = searchResult_;
-
-- (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
-  self = [super initWithStyle:UITableViewCellStyleDefault
-              reuseIdentifier:reuseIdentifier];
-  if (self) {
-    self.accessoryType = UITableViewCellAccessoryNone;
-    CGRect customViewFrame = CGRectMake(0.0, 0.0, self.contentView.bounds.size.width, self.contentView.bounds.size.height);
-		customView_ = [[SearchEntitiesCellView alloc] initWithFrame:customViewFrame];
-		[self.contentView addSubview:customView_];
-    [customView_ release];
+    UIImage* locationImage = [UIImage imageNamed:@"small_location_icon"];
+    UIImage* highlightedLocationImage = [Util whiteMaskedImageUsingImage:locationImage];
+    locationImageView_ = [[UIImageView alloc] initWithImage:locationImage
+                                           highlightedImage:highlightedLocationImage];
+    [self.contentView addSubview:locationImageView_];
+    [locationImageView_ release];
+    
+    //distanceLabel_.hidden = YES;
+    //locationImageView_.hidden = YES;
   }
   return self;
 }
@@ -85,13 +87,39 @@
     [searchResult_ release];
     searchResult_ = [searchResult retain];
     if (searchResult) {
-      customView_.titleLabel.text = searchResult.title;
-      customView_.subtitleLabel.text = searchResult.subtitle;
-      customView_.categoryImageView.image = searchResult.largeCategoryImage;
-      customView_.categoryImageView.highlightedImage =
+      titleLabel_.text = searchResult.title;
+      subtitleLabel_.text = searchResult.subtitle;
+      categoryImageView_.image = searchResult.largeCategoryImage;
+      categoryImageView_.highlightedImage =
           [Util whiteMaskedImageUsingImage:searchResult.largeCategoryImage];
+      if (searchResult.distance) {
+        CGFloat miles = searchResult.distance.floatValue;
+        if (miles < 2.0) {
+          distanceLabel_.textColor = [UIColor colorWithRed:0.66 green:0.48 blue:0.8 alpha:1.0];
+          locationImageView_.image = [UIImage imageNamed:@"small_location_icon_purple"];
+        } else {
+          distanceLabel_.textColor = [UIColor stampedLightGrayColor];
+          locationImageView_.image = [UIImage imageNamed:@"small_location_icon"];
+        }
+        distanceLabel_.text = [NSString stringWithFormat:@"%.1f mi", miles];
+        [distanceLabel_ sizeToFit];
+        CGRect distanceFrame = distanceLabel_.frame;
+        distanceFrame.origin.x = 311 - distanceFrame.size.width;
+        distanceFrame.origin.y = 22;
+        distanceLabel_.frame = distanceFrame;
+        locationImageView_.frame = CGRectMake(CGRectGetMinX(distanceFrame) - CGRectGetWidth(locationImageView_.frame) - 3,
+                                              CGRectGetMinY(distanceFrame) + 2, 
+                                              CGRectGetWidth(locationImageView_.frame),
+                                              CGRectGetHeight(locationImageView_.frame));
+        distanceLabel_.hidden = NO;
+        locationImageView_.hidden = NO;
+      } else {
+        distanceLabel_.hidden = YES;
+        locationImageView_.hidden = YES;
+      }
     }
   }
+  [self.contentView setNeedsDisplay];
 }
 
 @end
