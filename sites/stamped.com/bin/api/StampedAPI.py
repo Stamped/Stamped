@@ -952,7 +952,6 @@ class StampedAPI(AStampedAPI):
                        prefix=False, 
                        local=False, 
                        full=True):
-        coords  = self._parseCoords(coords)
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
                                                         limit=limit, 
@@ -972,7 +971,6 @@ class StampedAPI(AStampedAPI):
                      limit=10, 
                      prefix=False, 
                      full=True):
-        coords  = self._parseCoords(coords)
         results = self._entitySearcher.getSearchResults(query='', 
                                                         coords=coords, 
                                                         limit=limit, 
@@ -982,21 +980,6 @@ class StampedAPI(AStampedAPI):
                                                         prefix=prefix, 
                                                         local=True)
         return results
-    
-    def _parseCoords(self, coords):
-        if coords is not None and 'lat' in coords and coords.lat != None:
-            try:
-                coords = [coords['lat'], coords['lng']]
-                if coords[0] == None or coords[1] == None:
-                    raise
-            except:
-                msg = "Invalid coordinates (%s)" % coords
-                logs.warning(msg)
-                raise InputError(msg)
-            
-            return coords
-        else:
-            return None
     
     """
      #####                                    

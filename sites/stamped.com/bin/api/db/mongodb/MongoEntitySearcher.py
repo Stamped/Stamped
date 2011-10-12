@@ -18,6 +18,7 @@ from pymongo.son    import SON
 from gevent.pool    import Pool
 from pprint         import pprint, pformat
 from utils          import lazyProperty
+from errors         import InputError
 
 # third-party search API wrappers
 from GooglePlaces   import GooglePlaces
@@ -239,6 +240,9 @@ class MongoEntitySearcher(EntitySearcher):
         
         if prefix:
             assert not full
+        
+        if coords is not None and isinstance(coords, basestring):
+            coords = self._parseCoords(coords)
         
         # -------------------------------- #
         # transform input query and coords #
@@ -965,4 +969,19 @@ class MongoEntitySearcher(EntitySearcher):
             utils.printException()
         
         return output
+    
+    def _parseCoords(self, coords):
+        if coords is not None and 'lat' in coords and coords.lat != None:
+            try:
+                coords = [coords['lat'], coords['lng']]
+                if coords[0] == None or coords[1] == None:
+                    raise
+            except:
+                msg = "Invalid coordinates (%s)" % coords
+                logs.warning(msg)
+                raise InputError(msg)
+            
+            return coords
+        else:
+            return None
 
