@@ -248,11 +248,12 @@ class S3ImageDB(AImageDB):
                 key.set_acl('public-read')
                 key.close()
                 return key
-            except:
+            except Exception as e:
+                logs.warning('S3 Exception: %s' % e)
                 num_retries += 1
                 if num_retries > max_retries:
                     msg = "Unable to connect to S3 after %d retries (%s)" % \
-                        (max_retries, self._parent.__class__.__name__)
+                        (max_retries, self.__class__.__name__)
                     logs.warning(msg)
                     raise Exception(msg)
                 
@@ -268,11 +269,12 @@ class S3ImageDB(AImageDB):
                 if self.bucket.get_key(name):
                     self.bucket.delete_key(name)
                 return True
-            except:
+            except Exception as e:
+                logs.warning('S3 Exception: %s' % e)
                 num_retries += 1
                 if num_retries > max_retries:
                     msg = "Unable to connect to S3 after %d retries (%s)" % \
-                        (max_retries, self._parent.__class__.__name__)
+                        (max_retries, self.__class__.__name__)
                     logs.warning(msg)
                     raise Exception(msg)
                 
