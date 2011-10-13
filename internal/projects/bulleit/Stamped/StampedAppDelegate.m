@@ -43,6 +43,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
 @synthesize navigationController = navigationController_;
 @synthesize facebook = facebook_;
 
+
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if !TARGET_IPHONE_SIMULATOR
 //  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
@@ -60,20 +61,9 @@ static NSString* const kFacebookAppID = @"297022226980395";
                                                       userInfo:apsInfo];
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
   }
-
-  
-  self.window.rootViewController = self.navigationController;
-  [self.window makeKeyAndVisible];
-  
+    
   // Create an appwide Facebook client.
-  
   facebook_ = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:nil];
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:@"FBAccessTokenKey"] 
-      && [defaults objectForKey:@"FBExpirationDateKey"]) {
-    self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-    self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-  }
   return YES;
 }
 

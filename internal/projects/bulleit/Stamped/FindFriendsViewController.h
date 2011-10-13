@@ -37,6 +37,8 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;
 @property (nonatomic, retain) NSMutableArray* followedUsers;
+@property (nonatomic, retain) IBOutlet UIView* signInTwitterView;
+@property (nonatomic, retain) IBOutlet UIView* signInFacebookView;
 
 - (id)initWithFindSource:(FindFriendsSource)source;
 
@@ -46,5 +48,7 @@ typedef enum {
 - (IBAction)findFromTwitter:(id)sender;
 - (IBAction)findFromStamped:(id)sender;
 - (IBAction)findFromFacebook:(id)sender;
+- (IBAction)connectToTwitterButtonPressed:(id)sender;
+- (IBAction)connectToFacebookButtonPressed:(id)sender;
 
 @end
