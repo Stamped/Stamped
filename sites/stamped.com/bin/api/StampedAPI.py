@@ -1336,6 +1336,7 @@ class StampedAPI(AStampedAPI):
             activity.genre              = 'restamp'
             activity.user.user_id       = user.user_id
             activity.subject            = stamp.entity.title
+            activity.blurb              = stamp.blurb
             activity.linked_stamp_id    = stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
             activity.benefit            = CREDIT_BENEFIT
@@ -1517,6 +1518,7 @@ class StampedAPI(AStampedAPI):
             activity.genre              = 'restamp'
             activity.user.user_id       = user.user_id
             activity.subject            = stamp.entity.title
+            activity.blurb              = stamp.blurb
             activity.linked_stamp_id    = stamp.stamp_id
             activity.timestamp.created  = datetime.utcnow()
             activity.benefit            = CREDIT_BENEFIT
