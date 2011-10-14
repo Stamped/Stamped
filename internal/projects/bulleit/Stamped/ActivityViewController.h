@@ -11,6 +11,8 @@
 
 #import "STReloadableTableViewController.h"
 
-@interface ActivityViewController : STReloadableTableViewController <UIScrollViewDelegate, RKObjectLoaderDelegate>
+@interface ActivityViewController : STReloadableTableViewController <UIScrollViewDelegate,
+                                                                     RKObjectLoaderDelegate,
+                                                                     NSFetchedResultsControllerDelegate>
 
 @end

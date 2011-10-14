@@ -31,55 +31,62 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 @interface ActivityViewController ()
 - (void)loadEventsFromDataStore;
 - (void)loadEventsFromNetwork;
-@property (nonatomic, copy) NSArray* eventsArray;
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
+@property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
+@property (nonatomic, assign) NSUInteger numRows;
 @end
 
 @implementation ActivityViewController
 
-@synthesize eventsArray = eventsArray_;
+@synthesize fetchedResultsController = fetchedResultsController_;
+@synthesize numRows = numRows_;
 
 #pragma mark - View lifecycle
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.eventsArray = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
   [super dealloc];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  [self loadEventsFromDataStore];  // Needed otherwise the counter won't update.
+  [self loadEventsFromDataStore];
   [self loadEventsFromNetwork];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.eventsArray = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self loadEventsFromDataStore];
 }
 
 - (void)loadEventsFromDataStore {
-	NSFetchRequest* request = [Event fetchRequest];
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-  NSArray* results = [Event objectsWithFetchRequest:request];
-  if (self.eventsArray) {
-    NSUInteger newItemCount = results.count - self.eventsArray.count;
-    if (newItemCount > 0) {
-      [[NSNotificationCenter defaultCenter]
-          postNotificationName:kNewsItemCountHasChangedNotification 
-          object:[NSNumber numberWithUnsignedInteger:newItemCount]];
-    }
+  if (!fetchedResultsController_) {
+    NSFetchRequest* request = [Event fetchRequest];
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    NSFetchedResultsController* fetchedResultsController =
+        [[NSFetchedResultsController alloc] initWithFetchRequest:request
+                                            managedObjectContext:[Event managedObjectContext]
+                                              sectionNameKeyPath:nil
+                                                       cacheName:@"ActivityItems"];
+    self.fetchedResultsController = fetchedResultsController;
+    fetchedResultsController.delegate = self;
+    [fetchedResultsController release];
   }
-  self.eventsArray = nil;
-	self.eventsArray = results;
-  [self.tableView reloadData];
-  self.tableView.contentOffset = scrollPosition_;
+  
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
 }
 
 - (void)loadEventsFromNetwork {
@@ -92,6 +99,53 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   [objectLoader send];
 }
 
+#pragma mark - NSFetchedResultsControllerDelegate method.
+
+- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
+  numRows_ = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
+  [self.tableView beginUpdates];
+}
+
+- (void)controller:(NSFetchedResultsController*)controller 
+   didChangeObject:(id)anObject
+       atIndexPath:(NSIndexPath*)indexPath
+     forChangeType:(NSFetchedResultsChangeType)type
+      newIndexPath:(NSIndexPath*)newIndexPath {
+  
+  UITableView* tableView = self.tableView;
+  
+  switch(type) {
+    case NSFetchedResultsChangeInsert:
+      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationFade];
+      break;
+      
+    case NSFetchedResultsChangeDelete:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+      break;
+      
+    case NSFetchedResultsChangeUpdate:
+      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+      break;
+      
+    case NSFetchedResultsChangeMove:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationFade];
+      break;
+  }
+}
+
+- (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView endUpdates];
+  NSUInteger numNewRows = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects] - numRows_;
+  if (numNewRows > 0) {
+    [[NSNotificationCenter defaultCenter]
+        postNotificationName:kNewsItemCountHasChangedNotification
+                      object:[NSNumber numberWithUnsignedInteger:numNewRows]];
+  }
+
+  numRows_ = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
@@ -99,11 +153,18 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  return [eventsArray_ count];
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:section];
+  return [sectionInfo numberOfObjects];
+}
+
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
+  Event* event = [fetchedResultsController_ objectAtIndexPath:indexPath];
+  if ([cell respondsToSelector:@selector(setEvent:)])
+    [(id)cell setEvent:event];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  Event* event = [eventsArray_ objectAtIndex:indexPath.row];
+  Event* event = [fetchedResultsController_ objectAtIndexPath:indexPath];
   NSString* reuseIdentifier = @"CommentIdentifier";
   if ([event.genre isEqualToString:@"restamp"]) {
     reuseIdentifier = @"RestampIdentifier";
@@ -130,8 +191,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     }
   }
 
-  if ([cell respondsToSelector:@selector(setEvent:)])
-    [(id)cell setEvent:event];
+  [self configureCell:cell atIndexPath:indexPath];
 
   return cell;
 }
@@ -147,7 +207,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
-  Event* event = [eventsArray_ objectAtIndex:indexPath.row];
+  Event* event = [fetchedResultsController_ objectAtIndexPath:indexPath];
   if ([event.genre isEqualToString:@"comment"] ||
       [event.genre isEqualToString:@"reply"] ||
       [event.genre isEqualToString:@"mention"]) {
@@ -163,7 +223,8 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Event* event = [eventsArray_ objectAtIndex:indexPath.row];
+  Event* event = [fetchedResultsController_ objectAtIndexPath:indexPath];
+
   if (!event)
     return;
 
@@ -185,8 +246,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"ActivityLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
-
-	[self loadEventsFromDataStore];
   [self setIsLoading:NO];
 }
 
