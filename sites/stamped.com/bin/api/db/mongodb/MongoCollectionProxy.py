@@ -134,7 +134,7 @@ class MongoCollectionProxy(object):
                     result = self._collection.insert(objects, manipulate, safe, check_keys, **kwargs)
                     if count == 1:
                         if storeLog:
-                            logs.debug("Inserted document (%s)" % (self._parent.__class__.__name__))
+                            logs.debug("Inserted document (%s) id=%s" % (self._parent.__class__.__name__, result))
                     else:
                         if storeLog:
                             logs.debug("Inserted %d documents (%s)" % (count, self._parent.__class__.__name__))
@@ -211,7 +211,7 @@ class MongoCollectionProxy(object):
         while True:
             try:
                 ret = self._collection.remove(spec_or_id, safe, **kwargs)
-                logs.debug("Removed document (%s)" % (self._parent.__class__.__name__))
+                logs.debug("Removed document (%s) id=%s" % (self._parent.__class__.__name__, spec_or_id))
                 return ret
             except AutoReconnect as e:
                 num_retries += 1
