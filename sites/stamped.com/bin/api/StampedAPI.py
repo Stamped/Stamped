@@ -2511,7 +2511,10 @@ class StampedAPI(AStampedAPI):
         
         del entity.entity_id
         entity = self._entityMatcher.addOne(entity)
+        
         assert entity.entity_id is not None
+        logs.debug("converted search_id=%s to entity_id=%s" % \
+                   (search_id, entity.entity_id))
         
         return entity.entity_id
     
