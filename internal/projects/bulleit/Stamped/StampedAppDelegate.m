@@ -118,7 +118,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [RKClient sharedClient].requestQueue.delegate = [AccountManager sharedManager];
   [RKClient sharedClient].requestQueue.requestTimeout = 30;
   [RKClient sharedClient].requestQueue.concurrentRequestsLimit = 1;
-  
+
   RKManagedObjectMapping* userMapping = [RKManagedObjectMapping mappingForClass:[User class]];
   [userMapping mapKeyPathsToAttributes:@"user_id", @"userID",
      @"name", @"name",
