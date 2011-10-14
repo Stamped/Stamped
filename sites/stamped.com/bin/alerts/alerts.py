@@ -315,7 +315,7 @@ def buildPushNotification(user, activityItem, deviceId):
     content = {
         'aps': {
             'alert': msg,
-            'sound': 'default',
+            # 'sound': 'default',
         }
     }
 
