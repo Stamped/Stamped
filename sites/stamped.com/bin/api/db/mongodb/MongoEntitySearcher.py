@@ -269,6 +269,8 @@ class MongoEntitySearcher(EntitySearcher):
                     if region_name in self._regions:
                         region = self._regions[region_name]
                         query  = groups[0]
+                        input_query = query
+                        
                         coords = [ region['lat'], region['lng'], ]
                         original_coords = False
                         break
