@@ -269,6 +269,8 @@ class MongoEntitySearcher(EntitySearcher):
                     if region_name in self._regions:
                         region = self._regions[region_name]
                         query  = groups[0]
+                        input_query = query
+                        
                         coords = [ region['lat'], region['lng'], ]
                         original_coords = False
                         break
@@ -347,7 +349,12 @@ class MongoEntitySearcher(EntitySearcher):
         
         # search built-in entities database
         def _find_entity():
-            wrapper['db_results'] = self._find_entity(input_query, query, coords, prefix)
+            if coords is not None:
+                lat, lng = coords[0], coords[1]
+            else:
+                lat, lng = None, None
+            
+            wrapper['db_results'] = self._find_entity(input_query, query, lat, lng, prefix)
         
         # search apple itunes API for multiple variants (artist, album, song, etc.)
         def _find_apple():
@@ -865,7 +872,12 @@ class MongoEntitySearcher(EntitySearcher):
         return {"titlel": {"$regex": query }}
     
     @lru_cache(maxsize=64)
-    def _find_entity(self, input_query, query, coords, prefix):
+    def _find_entity(self, input_query, query, lat, lng, prefix):
+        if lat is None or lng is None:
+            coords = None
+        else:
+            coords = (lat, lng)
+        
         output = []
         
         """
@@ -884,6 +896,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         entity_query = self._get_entity_query(query)
         db_results = self.entityDB._collection.find(entity_query, output=list, limit=max_results)
+        earthRadius = 3959.0 # miles
         
         for doc in db_results:
             try:

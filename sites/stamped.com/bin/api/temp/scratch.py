@@ -22,7 +22,7 @@ client_auth = {
 }
 
 _baseurl = "https://dev.stamped.com/v0"
-# _baseurl = "http://localhost:18000/v0"
+_baseurl = "http://localhost:18000/v0"
 
 def handleGET(path, data):
     params = urllib.urlencode(data)
@@ -40,7 +40,7 @@ def handlePOST(path, data):
 
 
 
-USER = 'rando'
+USER = 'testuser'
 PASS = '12345'
 
 path = "oauth2/login.json"
@@ -107,10 +107,11 @@ token = account['token']
 # }
 # result = handleGET(path, data)
 
-path = "stamps/likes/create.json"
+path = "account/customize_stamp.json"
 data = {
     "oauth_token": token['access_token'],
-    "stamp_id": "4e94851efe4a1d038000000f"
+    "color_primary": "000000",
+    "color_secondary": "000000",
 }
 result = handlePOST(path, data)
 

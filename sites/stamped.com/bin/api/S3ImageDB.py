@@ -242,17 +242,24 @@ class S3ImageDB(AImageDB):
         
         while True:
             try:
+                logs.info('BEGIN: GET KEY')
                 key = Key(self.bucket, name)
+                logs.info('GOT KEY / SET CONTENT-TYPE')
                 key.set_metadata('Content-Type', contentType)
+                logs.info('CONTENT-TYPE SET / SET DATA')
                 key.set_contents_from_string(data)
+                logs.info('DATA SET / SET PERMISSIONS')
                 key.set_acl('public-read')
+                logs.info('PERMISSIONS SET / CLOSE KEY')
                 key.close()
+                logs.info('KEY IS CLOSED!')
                 return key
-            except:
+            except Exception as e:
+                logs.warning('S3 Exception: %s' % e)
                 num_retries += 1
                 if num_retries > max_retries:
                     msg = "Unable to connect to S3 after %d retries (%s)" % \
-                        (max_retries, self._parent.__class__.__name__)
+                        (max_retries, self.__class__.__name__)
                     logs.warning(msg)
                     raise Exception(msg)
                 
@@ -268,11 +275,12 @@ class S3ImageDB(AImageDB):
                 if self.bucket.get_key(name):
                     self.bucket.delete_key(name)
                 return True
-            except:
+            except Exception as e:
+                logs.warning('S3 Exception: %s' % e)
                 num_retries += 1
                 if num_retries > max_retries:
                     msg = "Unable to connect to S3 after %d retries (%s)" % \
-                        (max_retries, self._parent.__class__.__name__)
+                        (max_retries, self.__class__.__name__)
                     logs.warning(msg)
                     raise Exception(msg)
                 

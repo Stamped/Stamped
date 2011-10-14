@@ -164,7 +164,8 @@ def main():
     
     api      = MongoStampedAPI()
     searcher = api._entitySearcher
-    for i in xrange(4):
+    
+    for i in xrange(1):
         t1 = time.time()
         results  = searcher.getSearchResults(query=args[0], 
                                              coords=options.location, 
