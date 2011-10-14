@@ -242,11 +242,17 @@ class S3ImageDB(AImageDB):
         
         while True:
             try:
+                logs.info('BEGIN: GET KEY')
                 key = Key(self.bucket, name)
+                logs.info('GOT KEY / SET CONTENT-TYPE')
                 key.set_metadata('Content-Type', contentType)
+                logs.info('CONTENT-TYPE SET / SET DATA')
                 key.set_contents_from_string(data)
+                logs.info('DATA SET / SET PERMISSIONS')
                 key.set_acl('public-read')
+                logs.info('PERMISSIONS SET / CLOSE KEY')
                 key.close()
+                logs.info('KEY IS CLOSED!')
                 return key
             except Exception as e:
                 logs.warning('S3 Exception: %s' % e)
