@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
+import logs
 
 from AStampedAPI            import AStampedAPI
 from utils                  import abstract, AttributeDict
@@ -81,7 +82,7 @@ class AEntityMatcher(object):
                 return None
             
             if self.options.verbose:
-                utils.log("[%s] deduping %s" % (self, entity.title))
+                logs.debug("[%s] deduping %s" % (self, entity.title))
             
             dupes0 = self.getDuplicates(entity)
             
@@ -109,7 +110,7 @@ class AEntityMatcher(object):
             numDuplicates2 = len(dupes2)
             
             if numDuplicates2 > 0:
-                utils.log("%s) found %d duplicate%s" % (keep.title, numDuplicates, '' if 1 == numDuplicates else 's'))
+                logs.debug("%s) found %d duplicate%s" % (keep.title, numDuplicates, '' if 1 == numDuplicates else 's'))
                 self.numDuplicates += numDuplicates2
             
             for i in xrange(numDuplicates):
@@ -117,7 +118,7 @@ class AEntityMatcher(object):
                 
                 if dupe.entity_id is not None:
                     self.dead_entities.add(dupe.entity_id)
-                    utils.log("   %d) removing %s" % (i + 1, dupe.title))
+                    logs.debug("   %d) removing %s" % (i + 1, dupe.title))
             
             self.mergeDuplicates(keep, dupes1, override=override)
             return keep
@@ -128,7 +129,7 @@ class AEntityMatcher(object):
                 if entity_id in self.dead_entities:
                     return
                 
-                utils.log("%s) removing malformed / invalid entity (%s)" % (self.__class__.__name__, entity_id))
+                logs.debug("%s) removing malformed / invalid entity (%s)" % (self.__class__.__name__, entity_id))
                 self.dead_entities.add(entity_id)
                 
                 if not self.options.noop:

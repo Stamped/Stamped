@@ -35,6 +35,7 @@ class _GetchUnix:
             ch = sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        
         return ch
 
 def parseCommandLine():
