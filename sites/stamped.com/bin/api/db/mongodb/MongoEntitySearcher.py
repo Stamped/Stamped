@@ -24,6 +24,7 @@ from errors         import InputError
 from GooglePlaces   import GooglePlaces
 from libs.apple     import AppleAPI
 from libs.AmazonAPI import AmazonAPI
+from libs.TheTVDB   import TheTVDB
 
 from Entity         import setFields, isEqual
 from LRUCache       import lru_cache
@@ -121,6 +122,7 @@ class MongoEntitySearcher(EntitySearcher):
         'chicagomag'        : 80, 
         'phillymag'         : 80, 
         'netflix'           : 100, 
+        'thetvdb'           : 110, 
     }
     
     # categories which definitely aren't associated with a location-based search
@@ -226,6 +228,10 @@ class MongoEntitySearcher(EntitySearcher):
     @lazyProperty
     def _appleAPI(self):
         return AppleAPI()
+    
+    @lazyProperty
+    def _theTVDB(self):
+        return TheTVDB()
     
     @lru_cache(maxsize=2048)
     def getSearchResults(self, 
@@ -364,12 +370,19 @@ class MongoEntitySearcher(EntitySearcher):
         def _find_amazon():
             wrapper['amazon_results'] = self._find_amazon(input_query)
         
+        # search thetvdb.com
+        def _find_tv():
+            wrapper['tv_results'] = self._find_tv(input_query)
+        
         if full:
             if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_amazon)
             
             if self._is_possible_apple_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_apple)
+            
+            if self._is_possible_tv_query(category_filter, subcategory_filter, local):
+                pool.spawn(_find_tv)
         
         if len(query) > 0:
             pool.spawn(_find_entity)
@@ -512,21 +525,12 @@ class MongoEntitySearcher(EntitySearcher):
             except:
                 utils.printException()
         
-        result_keys = [
-            'place_results', 
-            'db_results', 
-            'apple_results', 
-            'amazon_results', 
-            'google_place_results', 
-        ]
-        
         # aggregate all results
-        for key in result_keys:
-            if key in wrapper:
-                utils.log("%s) %d" % (key, len(wrapper[key])))
-                
-                for result in wrapper[key]:
-                    _add_result(result)
+        for key, value in wrapper.iteritems():
+            utils.log("%s) %d" % (key, len(value)))
+            
+            for result in value:
+                _add_result(result)
         
         # ----------------------- #
         # filter and rank results #
@@ -867,6 +871,18 @@ class MongoEntitySearcher(EntitySearcher):
         
         return True
     
+    def _is_possible_tv_query(self, category_filter, subcategory_filter, local):
+        if local:
+            return False
+        
+        if category_filter is not None and category_filter != 'film':
+            return False
+        
+        if subcategory_filter is not None and subcategory_filter != 'tv':
+            return False
+        
+        return True
+    
     def _get_entity_query(self, query):
         #return {"title": {"$regex": query, "$options": "i"}}
         return {"titlel": {"$regex": query }}
@@ -977,6 +993,22 @@ class MongoEntitySearcher(EntitySearcher):
             
             for entity in amazon_results:
                 entity.entity_id = 'T_AMAZON_%s' % entity.asin
+                output.append((entity, -1))
+        except:
+            utils.printException()
+        
+        return output
+    
+    @lru_cache(maxsize=128)
+    def _find_tv(self, input_query):
+        output = []
+        
+        try:
+            self._statsSink.increment('stamped.api.search.third-party.thetvdb')
+            results = self._theTVDB.search(input_query, detailed=False)
+            
+            for entity in results:
+                entity.entity_id = 'T_TVDB_%s' % entity.thetvdb_id
                 output.append((entity, -1))
         except:
             utils.printException()
