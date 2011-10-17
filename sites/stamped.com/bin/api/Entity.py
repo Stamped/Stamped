@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import logs, re
+import utils
 
 from difflib    import SequenceMatcher
 
