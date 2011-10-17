@@ -488,8 +488,8 @@ class MongoEntitySearcher(EntitySearcher):
         # ----------------- #
         
         def _add_result(result):
+            # TODO: add an async task to merge these obvious dupes
             try:
-                # TODO: add an async task to merge these obvious dupes
                 entity = result[0]
                 if entity.entity_id is None:
                     if entity.search_id is not None:
@@ -498,7 +498,7 @@ class MongoEntitySearcher(EntitySearcher):
                         return
                 
                 # if local search and result is too far away, discard it
-                if local and result[1] > 30:
+                if local and abs(result[1]) > 30 :
                     return
                 
                 # dedupe entities from amazon
