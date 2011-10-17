@@ -1,5 +1,5 @@
 //
-//  Entity.m
+//  Entity+Addtions.m
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/27/11.
@@ -12,12 +12,8 @@
 
 @implementation Entity (Additions)
 
+// TODO(andybons): Is this leaking?
 @dynamic cachedDistance;
-
-- (void)dealloc {
-  self.cachedDistance = nil;
-  [super dealloc];
-}
 
 - (UIImage*)categoryImage {
   if (self.category)

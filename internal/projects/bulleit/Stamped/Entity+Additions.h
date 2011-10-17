@@ -1,5 +1,5 @@
 //
-//  Entity.h
+//  Entity+Additions.h
 //  Stamped
 //
 //  Created by Andrew Bonventre on 7/27/11.
