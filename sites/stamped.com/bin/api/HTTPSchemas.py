@@ -482,6 +482,8 @@ class HTTPEntity(Schema):
                 
                 if schema.ngenres is not None:
                     self.genre = string.join((str(i) for i in schema.ngenres), '; ')
+                elif schema.genre is not None:
+                    self.genre = schema.genre
                 
                 if schema.short_description != None:
                     self.desc = schema.short_description
