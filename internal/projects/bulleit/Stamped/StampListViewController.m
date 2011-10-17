@@ -10,7 +10,7 @@
 
 #import <RestKit/CoreData/CoreData.h>
 
-#import "Entity.h"
+#import "Entity+Additions.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"
 #import "AccountManager.h"

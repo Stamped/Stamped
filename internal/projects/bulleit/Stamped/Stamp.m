@@ -2,7 +2,7 @@
 //  Stamp.m
 //  Stamped
 //
-//  Created by Andrew Bonventre on 7/26/11.
+//  Created by Andrew Bonventre on 10/17/11.
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
@@ -10,31 +10,30 @@
 #import "Comment.h"
 #import "Entity.h"
 #import "Event.h"
+#import "Favorite.h"
 #import "User.h"
 
-NSString* kStampDidChangeNotification = @"StampDidChangeNotification";
-NSString* kStampWasCreatedNotification = @"StampWasCreatedNotification";
 
 @implementation Stamp
 
 @dynamic blurb;
 @dynamic created;
+@dynamic deleted;
+@dynamic imageDimensions;
+@dynamic imageURL;
+@dynamic isFavorited;
+@dynamic isLiked;
 @dynamic modified;
 @dynamic numComments;
 @dynamic numLikes;
-@dynamic isLiked;
 @dynamic stampID;
-@dynamic entityObject;
-@dynamic user;
+@dynamic temporary;
+@dynamic URL;
 @dynamic comments;
 @dynamic credits;
-@dynamic event;
+@dynamic entityObject;
+@dynamic events;
 @dynamic favorites;
-@dynamic temporary;
-@dynamic image;
-@dynamic imageURL;
-@dynamic imageDimensions;
-@dynamic URL;
-@dynamic isFavorited;
+@dynamic user;
 
 @end
