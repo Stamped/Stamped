@@ -497,6 +497,10 @@ class MongoEntitySearcher(EntitySearcher):
                     else:
                         return
                 
+                # if local search and result is too far away, discard it
+                if local and result[1] > 30:
+                    return
+                
                 # dedupe entities from amazon
                 asin = entity.asin
                 if asin is not None:
