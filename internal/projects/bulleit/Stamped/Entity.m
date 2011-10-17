@@ -106,6 +106,7 @@
 
 // TODO(andybons): Remove for launch.
 - (void)awakeFromFetch {
+  [super awakeFromFetch];
   if (self.coordinates && !self.location)
     [self setCoordinates:self.coordinates];
 }
