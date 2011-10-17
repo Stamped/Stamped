@@ -9,7 +9,7 @@
 #import "Util.h"
 
 #import "User.h"
-#import "Entity.h"
+#import "Entity+Additions.h"
 #import "SearchResult.h"
 #import "PlaceDetailViewController.h"
 #import "GenericItemDetailViewController.h"
