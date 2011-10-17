@@ -855,6 +855,7 @@
 		7E90B03A13FF081900875522 /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TodoViewController.xib; path = ../Interfaces/TodoViewController.xib; sourceTree = "<group>"; };
 		7E92C11E13E32407008D379D /* shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_background.png; sourceTree = "<group>"; };
 		7E9D882E141C02DB00EF75C1 /* search_tooltip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_tooltip@2x.png"; sourceTree = "<group>"; };
+		7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 9.xcdatamodel"; sourceTree = "<group>"; };
 		7E9EE35113DF683500F4736F /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
 		7E9EE35213DF683500F4736F /* Stamp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Stamp.m; sourceTree = "<group>"; };
 		7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+Stamped.h"; sourceTree = "<group>"; };
@@ -3009,6 +3010,7 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */,
 				7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */,
 				7E1873CB143A64B800A0ECC0 /* StampedModel 7.xcdatamodel */,
 				7E1873C4143A10D500A0ECC0 /* StampedModel 6.xcdatamodel */,
@@ -3018,7 +3020,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */;
+			currentVersion = 7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

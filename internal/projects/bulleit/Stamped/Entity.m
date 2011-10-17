@@ -61,6 +61,7 @@
 @dynamic image;
 @dynamic events;
 @dynamic location;
+@dynamic mostRecentStampDate;
 
 @synthesize cachedDistance = cachedDistance_;
 

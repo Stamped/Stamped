@@ -70,6 +70,7 @@ typedef enum {
 @property (nonatomic, retain) NSString* fandangoURL;
 @property (nonatomic, retain) NSString* image;
 @property (nonatomic, retain) CLLocation* location;
+@property (nonatomic, retain) NSDate* mostRecentStampDate;
 
 @property (nonatomic, readonly) EntityCategory entityCategory;
 @property (nonatomic, readonly) UIImage* categoryImage;
