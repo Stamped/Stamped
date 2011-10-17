@@ -541,8 +541,6 @@ class MongoEntitySearcher(EntitySearcher):
         # ----------------------- #
         
         results = results.values()
-        #utils.log("num_results: %d" % len(results))
-        
         converted = False
         
         def _convert(r):
@@ -555,8 +553,6 @@ class MongoEntitySearcher(EntitySearcher):
                 converted = True
                 _convert(results)
             
-            #for e in results:
-                #utils.log("%s vs %s" % (e[0].category, category_filter))
             results = filter(lambda e: e[0].category == category_filter, results)
         
         # apply subcategory filter to results
@@ -565,8 +561,6 @@ class MongoEntitySearcher(EntitySearcher):
                 converted = True
                 _convert(results)
             
-            #for e in results:
-                #utils.log("%s vs %s" % (e[0].subcategory, subcategory_filter))
             results = filter(lambda e: e[0].subcategory == subcategory_filter, results)
         
         # early-exit if there are no results at this point
@@ -575,8 +569,6 @@ class MongoEntitySearcher(EntitySearcher):
         
         # sort the results based on a custom ranking function
         results = sorted(results, key=self._get_entity_weight_func(input_query, prefix), reverse=True)
-        
-        #utils.log("num_results: %d" % len(results))
         
         # limit the number of results returned and remove obvious duplicates
         results = self._prune_results(results, limit)
@@ -590,7 +582,6 @@ class MongoEntitySearcher(EntitySearcher):
         if not prefix:
             gevent.spawn(self._add_temp, results)
         
-        #utils.log("num_results: %d" % len(results))
         return results
     
     def _add_temp(self, results):
