@@ -30,6 +30,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
     ### PUBLIC
     
     def addEntity(self, entity):
+        if entity.titlel is None:
+            entity.titlel = entity.title.lower()
+        
         return self._addObject(entity)
     
     def getEntity(self, entityId):
@@ -70,5 +73,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB):
             raise Exception
     
     def addEntities(self, entities):
+        for entity in entities:
+            if entity.titlel is None:
+                entity.titlel = entity.title.lower()
+        
         return self._addObjects(entities)
 
