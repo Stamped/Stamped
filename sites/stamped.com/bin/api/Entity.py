@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import logs, re
+import utils
 
 from difflib    import SequenceMatcher
 
@@ -193,7 +194,7 @@ def isEqual(entity1, entity2):
     if entity1.subcategory != entity2.subcategory:
         return False
     
-    if entity1.title.lower != entity2.title.lower():
+    if entity1.title.lower() != entity2.title.lower():
         return False
     
     if entity1.lat is not None:

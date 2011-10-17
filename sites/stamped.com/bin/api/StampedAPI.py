@@ -32,6 +32,7 @@ from Schemas         import *
 from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
+from libs.TheTVDB   import TheTVDB
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -2376,20 +2377,20 @@ class StampedAPI(AStampedAPI):
                 userIds[item.linked_user_id] = 1
             if item.linked_stamp_id != None:
                 stampIds[item.linked_stamp_id] = 1
-
+        
         # Enrich users
         users = self._userDB.lookupUsers(userIds.keys(), None)
-
+        
         for user in users:
             userIds[str(user.user_id)] = user.exportSchema(UserMini())
-
+        
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
-
+        
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
-
+        
         activity = []
         for item in activityData:
             if item.user.user_id != None:
@@ -2423,6 +2424,10 @@ class StampedAPI(AStampedAPI):
     @lazyProperty
     def _appleAPI(self):
         return AppleAPI()
+    
+    @lazyProperty
+    def _theTVDB(self):
+        return TheTVDB()
     
     def _convertSearchId(self, search_id):
         if not search_id.startswith('T_'):
@@ -2504,6 +2509,10 @@ class StampedAPI(AStampedAPI):
                 entity = self._googlePlaces.parseEntity(details)
             
             self._googlePlaces.parseEntityDetail(details, entity)
+        elif search_id.startswith('T_TVDB_'):
+            thetvdb_id = search_id[7:]
+            
+            entity = self._theTVDB.lookup(thetvdb_id)
         
         if entity is None:
             logs.warning("ERROR: could not match temp entity id %s" % search_id)

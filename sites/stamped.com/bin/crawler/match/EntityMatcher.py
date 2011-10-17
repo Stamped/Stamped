@@ -71,6 +71,10 @@ class EntityMatcher(AEntityMatcher):
     def _factual_matcher(self):
         return FactualEntityMatcher(self.stamped_api, self.options)
     
+    @lazyProperty
+    def _thetvdb_matcher(self):
+        return TheTVDBMatcher(self.stamped_api, self.options)
+    
     # --------------------------
     #        proxy methods
     # --------------------------
@@ -116,6 +120,7 @@ class EntityMatcher(AEntityMatcher):
             'googlePlaces'  : self._googlePlaces_matcher, 
             'amazon'        : self._amazon_matcher, 
             'factual'       : self._factual_matcher, 
+            'thetvdb'       : self._thetvdb_matcher, 
         }
         
         """

@@ -501,7 +501,7 @@ class VideoSchema(Schema):
         self.short_description  = SchemaElement(basestring)
         self.long_description   = SchemaElement(basestring)
         self.episode_production_number  = SchemaElement(basestring)
-        ### TODO: modify ese based on crawler logic (only for custom entities currently)
+        ### TODO: modify these based on crawler logic (only for custom entities currently)
         self.cast               = SchemaElement(basestring)
         self.director           = SchemaElement(basestring)
         self.in_theaters        = SchemaElement(bool)
@@ -514,6 +514,8 @@ class VideoSchema(Schema):
         self.v_lc_rental_price  = SchemaElement(basestring)
         self.v_sd_rental_price  = SchemaElement(basestring)
         self.v_hd_rental_price  = SchemaElement(basestring)
+        
+        self.imdb_id            = SchemaElement(basestring)
 
 class ArtistSchema(Schema):
     def setSchema(self):
@@ -605,6 +607,7 @@ class EntitySourcesSchema(Schema):
         self.phillymag          = PhillyMagSchema()
         self.washmag            = WashMagSchema()
         self.netflix            = NetflixSchema()
+        self.thetvdb            = TheTVDBSchema()
         self.amazon             = AmazonSchema()
         self.awardAnnals        = AwardAnnalsSchema()
         self.userGenerated      = UserGeneratedSchema()
@@ -744,6 +747,10 @@ class SFGateSchema(Schema):
 class WashMagSchema(Schema):
     def setSchema(self):
         pass
+
+class TheTVDBSchema(Schema):
+    def setSchema(self):
+        self.thetvdb_id         = SchemaElement(basestring)
 
 class NetflixSchema(Schema):
     def setSchema(self):

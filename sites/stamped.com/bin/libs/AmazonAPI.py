@@ -268,9 +268,11 @@ class AmazonAPI(object):
             result = re.sub('xmlns="[^"]*"', '', result)
             tree   = objectify.fromstring(result)
             
+            """
             f = open('out.xml', 'w')
             f.write(etree.tostring(tree, pretty_print=True))
             f.close()
+            """
             
             return tree
     

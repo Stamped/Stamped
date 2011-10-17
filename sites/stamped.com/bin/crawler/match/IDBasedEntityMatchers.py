@@ -9,12 +9,13 @@ import Globals, utils
 from AIDBasedEntityMatcher import AIDBasedEntityMatcher
 
 __all__ = [
+    "AmazonEntityMatcher", 
     "AppleEntityMatcher", 
     "GooglePlacesEntityMatcher", 
     "FandangoEntityMatcher", 
     "OpenTableEntityMatcher", 
     "FactualEntityMatcher", 
-    "AmazonEntityMatcher", 
+    "TheTVDBMatcher", 
 ]
 
 class AmazonEntityMatcher(AIDBasedEntityMatcher):
@@ -40,4 +41,8 @@ class OpenTableEntityMatcher(AIDBasedEntityMatcher):
 class FactualEntityMatcher(AIDBasedEntityMatcher):
     def __init__(self, stamped_api, options=None):
         AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.factual.faid')
+
+class TheTVDBMatcher(AIDBasedEntityMatcher):
+    def __init__(self, stamped_api, options=None):
+        AIDBasedEntityMatcher.__init__(self, stamped_api, options, 'sources.thetvdb.thetvdb_id')
 

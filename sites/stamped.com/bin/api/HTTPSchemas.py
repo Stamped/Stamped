@@ -480,7 +480,9 @@ class HTTPEntity(Schema):
                 self.length         = schema.track_length
                 self.rating         = schema.mpaa_rating
                 
-                if schema.ngenres is not None:
+                if schema.genre is not None:
+                    self.genre = schema.genre
+                elif schema.ngenres is not None:
                     self.genre = string.join((str(i) for i in schema.ngenres), '; ')
                 
                 if schema.short_description != None:
