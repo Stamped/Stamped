@@ -46,7 +46,7 @@ class ASimulatedUser(Greenlet):
             utils.log("[%s-%s] performing action '%s'" % (self, self.name, action))
             try:
                 if not self.parent.options.noop:
-                    action()
+                    action(self.parent, self)
             except:
                 utils.printException()
                 break
