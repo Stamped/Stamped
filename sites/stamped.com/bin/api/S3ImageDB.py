@@ -24,14 +24,10 @@ class S3ImageDB(AImageDB):
         # find or create bucket
         # ---------------------
         conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
-        rs = conn.get_all_buckets()
-        rs = filter(lambda b: b.name == bucket_name, rs)
-        
-        ImageFile.MAXBLOCK = 1000000 # default is 64k
-        
-        if 1 == len(rs):
-            self.bucket = rs[0]
-        else:
+
+        self.bucket = conn.lookup(bucket_name)
+
+        if not self.bucket:
             self.bucket = conn.create_bucket(bucket_name)
         
         self.bucket.set_acl('public-read')
@@ -217,7 +213,7 @@ class S3ImageDB(AImageDB):
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
         
-        self._addDataToS3(name, out.getvalue(), 'image/jpeg')
+        self._addDataToS3(name, out, 'image/jpeg')
         
         return name
     
@@ -232,7 +228,7 @@ class S3ImageDB(AImageDB):
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
         
-        self._addDataToS3(name, out.getvalue(), 'image/png')
+        self._addDataToS3(name, out, 'image/png')
         
         return name
 
@@ -242,18 +238,25 @@ class S3ImageDB(AImageDB):
         
         while True:
             try:
-                logs.info('BEGIN: GET KEY')
-                key = Key(self.bucket, name)
+                logs.info('CREATE NEW CONNECTION & ASSIGN BUCKET')
+                conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+                bucket = conn.lookup(self.bucket_name)
+
+                logs.info('GET KEY')
+                key = Key(bucket, name)
+
                 logs.info('GOT KEY / SET CONTENT-TYPE')
                 key.set_metadata('Content-Type', contentType)
+
                 logs.info('CONTENT-TYPE SET / SET DATA')
-                key.set_contents_from_string(data)
-                logs.info('DATA SET / SET PERMISSIONS')
-                key.set_acl('public-read')
-                logs.info('PERMISSIONS SET / CLOSE KEY')
+                key.set_contents_from_file(data, policy='public-read')
+
+                logs.info('DATA SET / CLOSE KEY')
                 key.close()
+
                 logs.info('KEY IS CLOSED!')
                 return key
+
             except Exception as e:
                 logs.warning('S3 Exception: %s' % e)
                 num_retries += 1
@@ -265,6 +268,14 @@ class S3ImageDB(AImageDB):
                 
                 logs.info("Retrying (%s)" % (num_retries))
                 time.sleep(0.5)
+
+            finally:
+                try:
+                    if not key.closed:
+                        logs.info('CLOSE KEY!')
+                        key.close()
+                except:
+                    pass
 
     def _removeFromS3(self, name):
         num_retries = 0
