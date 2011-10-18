@@ -127,6 +127,7 @@
 		7E3D97E41444EF420018820C /* eSearch_location_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E3D97E01444EF420018820C /* eSearch_location_icon@2x.png */; };
 		7E3D97E51444EF420018820C /* eSearch_location_icon_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E3D97E11444EF420018820C /* eSearch_location_icon_blue@2x.png */; };
 		7E3D97E71444F3FB0018820C /* search_field_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E3D97E61444F3FB0018820C /* search_field_background@2x.png */; };
+		7E407E7A144E46BD00D7847F /* StampDetailAddCommentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E79144E46BD00D7847F /* StampDetailAddCommentView.m */; };
 		7E428A8513EB2C72004CA2B2 /* stacks_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */; };
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
 		7E42DCBD13DB64CA00AF63BE /* SearchEntitiesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */; };
@@ -711,6 +712,8 @@
 		7E3D97E01444EF420018820C /* eSearch_location_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eSearch_location_icon@2x.png"; sourceTree = "<group>"; };
 		7E3D97E11444EF420018820C /* eSearch_location_icon_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eSearch_location_icon_blue@2x.png"; sourceTree = "<group>"; };
 		7E3D97E61444F3FB0018820C /* search_field_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_field_background@2x.png"; sourceTree = "<group>"; };
+		7E407E78144E46BD00D7847F /* StampDetailAddCommentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StampDetailAddCommentView.h; path = Stamped/StampDetailAddCommentView.h; sourceTree = SOURCE_ROOT; };
+		7E407E79144E46BD00D7847F /* StampDetailAddCommentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StampDetailAddCommentView.m; path = Stamped/StampDetailAddCommentView.m; sourceTree = SOURCE_ROOT; };
 		7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacks_back_button@2x.png"; sourceTree = "<group>"; };
 		7E42DCB913DB64CA00AF63BE /* SearchEntitiesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesViewController.h; sourceTree = "<group>"; };
 		7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesViewController.m; sourceTree = "<group>"; };
@@ -1474,6 +1477,8 @@
 				7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */,
 				7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */,
 				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
+				7E407E78144E46BD00D7847F /* StampDetailAddCommentView.h */,
+				7E407E79144E46BD00D7847F /* StampDetailAddCommentView.m */,
 				7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */,
 				7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */,
 			);
@@ -2733,6 +2738,7 @@
 				7E3D979F1444C9B40018820C /* StampListViewController.m in Sources */,
 				7E9EB0F9144CCFA7006F887B /* Stamp.m in Sources */,
 				7E9EB0FC144CD12F006F887B /* Entity.m in Sources */,
+				7E407E7A144E46BD00D7847F /* StampDetailAddCommentView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

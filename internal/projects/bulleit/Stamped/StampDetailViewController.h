@@ -14,7 +14,8 @@
 @class Stamp;
 
 @interface StampDetailViewController : UIViewController <UITextFieldDelegate,
-                                                         RKObjectLoaderDelegate> {
+                                                         RKObjectLoaderDelegate,
+                                                         UIScrollViewDelegate> {
  @private
   Stamp* stamp_;
   // Managed by the view system.
@@ -40,7 +41,6 @@
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIButton* addFavoriteButton;
 @property (nonatomic, retain) IBOutlet UILabel* addFavoriteLabel;
 @property (nonatomic, retain) IBOutlet UIButton* likeButton;
@@ -51,5 +51,7 @@
 @property (nonatomic, retain) IBOutlet UILabel* stampLabel;
 
 @property (nonatomic, retain) IBOutlet UIImageView* eDetailArrowImageView;
+
+@property (nonatomic, retain) IBOutlet UIView* addCommentContainerView;
 
 @end

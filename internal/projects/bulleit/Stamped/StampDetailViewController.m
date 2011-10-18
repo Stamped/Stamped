@@ -57,6 +57,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
+- (void)setAddCommentFieldPinned:(BOOL)pinned;
+- (void)adjustAddCommentView;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -77,7 +79,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize commenterImageView = commenterImageView_;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
-@synthesize loadingView = loadingView_;
 @synthesize addFavoriteButton = addFavoriteButton_;
 @synthesize addFavoriteLabel = addFavoriteLabel_;
 @synthesize likeButton = likeButton_;
@@ -91,6 +92,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize likeFaceImageView = likeFaceImageView_;
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
+@synthesize addCommentContainerView = addCommentContainerView_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -101,6 +103,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)dealloc {
+  [Stamp.managedObjectContext refreshObject:stamp_ mergeChanges:NO];
   [stamp_ release];
   [detailViewController_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -113,7 +116,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
-  self.loadingView = nil;
   self.addFavoriteButton = nil;
   self.addFavoriteLabel = nil;
   self.likeButton = nil;
@@ -122,6 +124,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
+  self.addCommentContainerView = nil;
   [super dealloc];
 }
 
@@ -162,8 +165,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   gestureRecognizer.cancelsTouchesInView = NO;
   [gestureRecognizer release];
 
-  scrollView_.contentSize = self.view.bounds.size;
-
   [self setUpToolbar];
   [self setUpHeader];
 
@@ -198,7 +199,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
-  self.loadingView = nil;
   self.addFavoriteButton = nil;
   self.addFavoriteButton = nil;
   self.addFavoriteLabel = nil;
@@ -208,6 +208,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
+  self.addCommentContainerView = nil;
 }
 
 - (void)setUpHeader {
@@ -312,7 +313,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   activityFrame.size.height = CGRectGetMaxY(mainCommentContainer_.frame) + CGRectGetHeight(commentsView_.bounds) + 5;
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + 60);
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   activityGradientLayer_.frame = activityView_.bounds;
@@ -668,6 +669,16 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     if (c.restampID == nil)
       [self addComment:c];
   }
+  StampDetailCommentView* commentView = nil;
+  for (UIView* view in commentsView_.subviews) {
+    if ([view isMemberOfClass:[StampDetailCommentView class]]) {
+      commentView = (StampDetailCommentView*)view;
+      commentView.borderHidden = NO;
+    }
+  }
+  
+  commentView.borderHidden = YES;
+  [self adjustAddCommentView];
 }
 
 - (void)addComment:(Comment*)comment {
@@ -731,7 +742,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
   addCommentField_.hidden = YES;
   currentUserImageView_.hidden = YES;
-  [loadingView_ startAnimating];
   [addCommentField_ resignFirstResponder];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
@@ -749,7 +759,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  [loadingView_ stopAnimating];
   addCommentField_.hidden = NO;
   currentUserImageView_.hidden = NO;
 
@@ -778,11 +787,89 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [[AccountManager sharedManager] refreshToken];
 
   if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
-    [loadingView_ stopAnimating];
     addCommentField_.hidden = NO;
     currentUserImageView_.hidden = NO;
     [addCommentField_ becomeFirstResponder];
   }
+}
+
+- (void)setAddCommentFieldPinned:(BOOL)pinned {
+  if (!pinned) {
+    CGRect addCommentFrame = addCommentContainerView_.frame;
+    addCommentFrame.origin.x = 0;
+    addCommentFrame.size.width = 310;
+    addCommentFrame.origin.y = CGRectGetHeight(commentsView_.frame) - CGRectGetHeight(addCommentFrame);
+    addCommentContainerView_.frame = addCommentFrame;
+    [commentsView_ addSubview:addCommentContainerView_];
+  } else {
+    CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
+                                           fromView:addCommentContainerView_.superview];
+    addCommentFrame.origin.y = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetHeight(addCommentFrame);
+    addCommentContainerView_.frame = addCommentFrame;
+    [self.view insertSubview:addCommentContainerView_ belowSubview:bottomToolbar_];
+  }
+
+  CGFloat heightDelta = CGRectGetHeight(addCommentContainerView_.frame);
+  if (pinned)
+    heightDelta *= -1;
+  
+  CGRect frame = commentsView_.frame;
+  frame.size.height += heightDelta;
+  frame.origin.y -= heightDelta;
+  commentsView_.frame = frame;
+  
+  frame = activityView_.frame;
+  frame.size.height += heightDelta;
+  activityView_.frame = frame;
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+  activityGradientLayer_.frame = activityView_.bounds;
+  [CATransaction commit];
+  [activityGradientLayer_ setNeedsDisplay];
+  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+
+  [addCommentContainerView_ setNeedsDisplay];
+}
+
+- (void)adjustAddCommentView {
+  if (addCommentContainerView_.superview != self.view &&
+      addCommentContainerView_.superview != commentsView_) {
+    // The comments view is within the keyboard input accessory view. So...
+    return;
+  }
+
+  if (addCommentContainerView_.superview == self.view) {
+    CGRect commentsFrame = [self.view convertRect:commentsView_.frame
+                                         fromView:commentsView_.superview];
+    CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) -
+        (CGRectGetMaxY(commentsFrame) + CGRectGetHeight(addCommentContainerView_.frame));
+    if (distance > 0) {
+      [self setAddCommentFieldPinned:NO];
+    } else {
+      CGFloat ratio = MAX(0, MIN(1.0, distance / -20.0f));
+      CGRect addCommentFrame = addCommentContainerView_.frame;
+      CGFloat outset = ratio * 10;
+      addCommentFrame.size.width = 310 + outset;
+      addCommentFrame.origin.x = 5 - (outset / 2);
+      addCommentContainerView_.frame = addCommentFrame;
+      [addCommentContainerView_ setNeedsDisplay];
+      return;
+    }
+  }
+
+  if (addCommentContainerView_.superview == commentsView_) {
+    CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
+                                           fromView:addCommentContainerView_.superview];
+    CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetMaxY(addCommentFrame);
+    if (distance <= 0)
+      [self setAddCommentFieldPinned:YES];
+  }
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  [self adjustAddCommentView];
 }
 
 @end
