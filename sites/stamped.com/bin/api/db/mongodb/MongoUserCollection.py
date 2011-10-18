@@ -175,7 +175,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         ### TODO: Add Index
         data = self._collection.find({"phone": {"$in": queryPhone}}).limit(limit)
-            
+        
         result = []
         for item in data:
             user = self._convertFromMongo(item)

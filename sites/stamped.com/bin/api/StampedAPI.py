@@ -558,9 +558,9 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def findUsersByPhone(self, authUserId, phone):
-
+        
         ### TODO: Add check for privacy settings?
-
+        
         users = self._userDB.findUsersByPhone(phone, limit=100)
         
         return users
