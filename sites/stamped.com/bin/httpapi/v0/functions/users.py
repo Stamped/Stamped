@@ -57,7 +57,7 @@ def suggested(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(None, request)
 
-    screenNames = ['robby', 'kevin', 'bart', 'parislemon', 'andy']
+    screenNames = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag']
     users       = stampedAPI.getUsers(None, screenNames, authUserId)
     logs.info('users: %s' % users)
 
@@ -85,7 +85,17 @@ def findEmail(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
 
-    users       = stampedAPI.findUsersByEmail(authUserId, schema.q.value)
+    q = schema.q.value
+    emails = []
+
+    for email in q:
+        try:
+            emails.append(email.decode('ascii'))
+        except:
+            msg = 'Invalid email: %s' % email
+            logs.warning(msg)
+
+    users       = stampedAPI.findUsersByEmail(authUserId, emails)
 
     output = []
     for user in users:
