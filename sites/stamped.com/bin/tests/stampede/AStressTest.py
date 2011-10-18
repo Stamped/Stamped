@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -116,8 +116,9 @@ class StressTest(Greenlet):
                 if 0 == num_users:
                     if not self.options.noop:
                         self.addEntity(self._parent.createEntity(user.token))
-                        self.addEntity(self._parent.createPlacesEntity(user.token))
+                        self.addEntity(self._parent.createPlaceEntity(user.token))
             except:
+                utils.printException()
                 pass
             
             if self.bieber_protocol:

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -27,8 +27,7 @@ class StressTests(AStampedAPITestCase):
             actions_per_minute_decay=False, 
             actions_per_user_limit=None, 
             bieber_protocol=True, 
-            user_class=RealisticSimulatedUser, 
-            noop=True
+            user_class=RealisticSimulatedUser
         )
     
     def test_stress(self):

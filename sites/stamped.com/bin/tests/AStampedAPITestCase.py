@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals
+import Globals, utils
 import atexit, urllib, json, unittest, mimetools, urllib2
 
 from StampedTestUtils import *
@@ -38,14 +38,32 @@ class AStampedAPITestCase(AStampedTestCase):
     def handleGET(self, path, data):
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (self._baseurl, path, params)
-        result = json.load(self._opener.open(url))
+        
+        utils.log("GET:  %s" % url)
+        raw = self._opener.open(url).read()
+        
+        try:
+            result = json.loads(raw)
+        except:
+            utils.log(raw)
+            raise
         
         return result
     
     def handlePOST(self, path, data):
         params = urllib.urlencode(data)
         url    = "%s/%s" % (self._baseurl, path)
-        result = json.load(self._opener.open(url, params))
+        
+        utils.log("POST: %s" % url)
+        pprint(params)
+        
+        raw = self._opener.open(url, params).read()
+        
+        try:
+            result = json.loads(raw)
+        except:
+            utils.log(raw)
+            raise
         
         return result
     

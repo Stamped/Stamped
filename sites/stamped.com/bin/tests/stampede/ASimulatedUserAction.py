@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -44,7 +44,6 @@ class UpdateInboxAction(ASimulatedUserAction):
 class SearchAction(ASimulatedUserAction):
     def __init__(self, weight, repeat=1):
         ASimulatedUserAction.__init__(self, weight, repeat)
-        
     
     def _execute(self, parent, user):
         path   = "entities/search.json"
