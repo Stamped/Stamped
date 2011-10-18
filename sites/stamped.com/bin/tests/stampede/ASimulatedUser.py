@@ -16,10 +16,10 @@ class ASimulatedUser(Greenlet):
     
     def __init__(self, name, parent):
         Greenlet.__init__(self)
-        self.name    = name
-        self.parent  = parent
-        self.actions = []
-        self.ready   = False
+        self.name      = name
+        self.parent    = parent
+        self.actions   = []
+        self._is_ready = False
         
         utils.log("[%s] new simulated user '%s'" % (self, self.name))
     
@@ -28,7 +28,7 @@ class ASimulatedUser(Greenlet):
         self.userID, self.token = self.parent._parent.createAccount(self.name)
         self.parent.new_users.append(self)
         
-        while not self.ready:
+        while not self._is_ready:
             time.sleep(4)
         
         t0 = time.time()

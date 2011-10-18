@@ -158,7 +158,7 @@ class StressTest(Greenlet):
             if len(self.users) >= 100:
                 self.users = self.users[-25:]
             
-            user.ready = True
+            user._is_ready = True
     
     def getRandomStampID(self):
         if len(self.stamps) > 0:
