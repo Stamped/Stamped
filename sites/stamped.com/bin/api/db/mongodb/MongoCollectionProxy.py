@@ -148,9 +148,10 @@ class MongoCollectionProxy(object):
                             logs.warning("Insert document failed (%s) -- %d of %d" % \
                                 (self._parent.__class__.__name__, num_retries, max_retries))
 
-                        if num_retries > max_retries and storeLog:
-                            logs.warning("Unable to connect after %d retries (%s)" % \
-                                (max_retries, self._parent.__class__.__name__))
+                        if num_retries > max_retries:
+                            if storeLog:
+                                logs.warning("Unable to connect after %d retries (%s)" % \
+                                    (max_retries, self._parent.__class__.__name__))
                             raise
                         
                         time.sleep(1)
