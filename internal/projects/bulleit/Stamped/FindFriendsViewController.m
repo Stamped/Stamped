@@ -286,10 +286,17 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.findSource = FindFriendsFromFacebook;
   
   if (facebookFriends_) {
-    if (facebookFriends_.count == 0)
-      [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
+    [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
     [self.tableView reloadData];
     return;
+  }
+  
+  
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"] 
+      && [defaults objectForKey:@"FBExpirationDateKey"]) {
+    self.facebookClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+    self.facebookClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
   
   if (!self.facebookClient.isSessionValid) {
@@ -640,6 +647,28 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
 }
 
+- (void) signOutOfFacebook {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"]) {
+    [defaults removeObjectForKey:@"FBAccessTokenKey"];
+    [defaults removeObjectForKey:@"FBExpirationDateKey"];
+    [defaults synchronize];
+    
+    // Nil out the session variables to prevent
+    // the app from thinking there is a valid session
+    if (nil != self.facebookClient.accessToken) {
+      self.facebookClient.accessToken = nil;
+    }
+    if (nil != self.facebookClient.expirationDate) {
+      self.facebookClient.expirationDate = nil;
+    }
+    if (self.findSource == FindFriendsFromFacebook)
+      self.tableView.hidden = YES;
+    self.signInFacebookView.hidden = NO;
+  }
+
+}
+
 - (void)fbDidLogin {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[self.facebookClient accessToken] forKey:@"FBAccessTokenKey"];
@@ -660,7 +689,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 // FBRequestDelegate Methods.
 
-- (void)request:(FBRequest*)request didLoad:(id)result{
+- (void)request:(FBRequest*)request didLoad:(id)result {
   NSArray* resultData;
   
   if ([result isKindOfClass:[NSArray class]])
@@ -701,7 +730,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)request:(FBRequest*)request didFailWithError:(NSError *)error {
-  NSLog(@"fb request hit error: %@", error);
+  NSLog(@"FB err code: %d", [error code]);
+  NSLog(@"FB err message: %@", [error description]);
+  if (error.code == 10000)
+    [self signOutOfFacebook];
 }
 
 
