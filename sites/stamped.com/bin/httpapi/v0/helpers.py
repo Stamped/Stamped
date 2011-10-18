@@ -75,7 +75,10 @@ def handleHTTPRequest(fn):
             return response
         
         finally:
-            logs.save()
+            try:
+                logs.save()
+            except:
+                pass
     
     return handleHTTPRequest
 
