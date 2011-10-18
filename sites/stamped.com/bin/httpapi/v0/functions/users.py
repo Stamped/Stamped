@@ -105,14 +105,18 @@ def findPhone(request):
 
     for item in q:
         try:
+            if 11 == len(item) and item.startswith('1'):
+                number = int(item[1:])
+                phoneNumbers.append(item)
+            
             number = int(item)
             phoneNumbers.append(item)
         except:
             msg = 'Invalid phone number: %s' % item
             logs.warning(msg)
-
+    
     users       = stampedAPI.findUsersByPhone(authUserId, phoneNumbers)
-
+    
     output = []
     for user in users:
         output.append(HTTPUser().importSchema(user).exportSparse())
