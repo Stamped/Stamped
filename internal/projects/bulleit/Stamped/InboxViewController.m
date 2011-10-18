@@ -14,7 +14,7 @@
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
-#import "Entity+Additions.h"
+#import "Entity.h"
 #import "UserImageView.h"
 #import "Notifications.h"
 #import "ProfileViewController.h"

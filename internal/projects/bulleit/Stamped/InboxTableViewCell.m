@@ -13,7 +13,7 @@
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 
-#import "Entity+Additions.h"
+#import "Entity.h"
 #import "Stamp.h"
 #import "User.h"
 #import "Util.h"

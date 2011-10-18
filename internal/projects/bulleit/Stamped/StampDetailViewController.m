@@ -15,7 +15,7 @@
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
 #import "Comment.h"
-#import "Entity+Additions.h"
+#import "Entity.h"
 #import "Favorite.h"
 #import "Notifications.h"
 #import "ProfileViewController.h"
