@@ -9,6 +9,7 @@ __license__   = "TODO"
 import Globals, utils
 import atexit, urllib, json, unittest, mimetools, urllib2
 
+from pprint           import pprint
 from StampedTestUtils import *
 
 CLIENT_ID     = "stampedtest"

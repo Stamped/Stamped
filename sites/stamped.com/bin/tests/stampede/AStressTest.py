@@ -128,16 +128,10 @@ class StressTest(Greenlet):
                             self._parent.createFriendship(user.token, self.bieber.userID)
                     except:
                         # purposefully ignore if friendship fails to create
+                        utils.printException()
                         pass
                 elif 'bieber' in user.name:
                     self.bieber = user
-            
-            num_users += 1
-            self.users.append(user)
-            
-            # keep users that we hang onto from growing unbounded so we don't OOM
-            if len(self.users) >= 100:
-                self.users = self.users[-25:]
             
             num_to_follow = int(random.normalvariate(self.avg_friend_connectivity, self.stdev_friend_connectivity))
             num_to_follow = max(0, num_to_follow)
@@ -145,9 +139,22 @@ class StressTest(Greenlet):
             for i in xrange(num_to_follow):
                 friend_index = random.randint(0, len(self.users) - 1)
                 
-                if friend_index >= 0:
-                    if not self.options.noop:
-                        self._parent.createFriendship(user.token, self.users[friend_index].userID)
+                if friend_index >= 0 and not self.options.noop:
+                    friend = self.users[friend_index]
+                    
+                    if user.userID != friend.userID:
+                        try:
+                            self._parent.createFriendship(user.token, friend.userID)
+                        except:
+                            utils.printException()
+                            pass
+            
+            num_users += 1
+            self.users.append(user)
+            
+            # keep users that we hang onto from growing unbounded so we don't OOM
+            if len(self.users) >= 100:
+                self.users = self.users[-25:]
             
             user.ready = True
     
