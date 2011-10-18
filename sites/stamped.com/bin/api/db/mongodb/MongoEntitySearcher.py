@@ -331,6 +331,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = query.replace('cafe', "caf[eé]")
         
+        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -340,6 +341,7 @@ class MongoEntitySearcher(EntitySearcher):
         data['subcategory'] = subcategory_filter
         data['full']        = full
         utils.log(pformat(data))
+        """
         
         results = {}
         wrapper = {}
@@ -394,21 +396,24 @@ class MongoEntitySearcher(EntitySearcher):
         if coords is not None:
             entity_query = self._get_entity_query(query)
             
-            q_params = [
-                ('geoNear', 'places'), 
-                ('near', [float(coords[1]), float(coords[0])]), 
-                ('distanceMultiplier', earthRadius), 
-                ('spherical', True), 
-                ('query', entity_query), 
-            ]
-            
-            if prefix:
-                # limit number of results returned
-                q_params.append(('num', 50))
-            else:
-                q_params.append(('num', 100))
-            
-            q = SON(q_params)
+            try:
+                q_params = [
+                    ('geoNear', 'places'), 
+                    ('near', [float(coords[1]), float(coords[0])]), 
+                    ('distanceMultiplier', earthRadius), 
+                    ('spherical', True), 
+                    ('query', entity_query), 
+                ]
+                
+                if prefix:
+                    # limit number of results returned
+                    q_params.append(('num', 50))
+                else:
+                    q_params.append(('num', 100))
+                
+                q = SON(q_params)
+            except:
+                q = None
             
             # search built-in places database via proximity
             def _find_places(ret):
@@ -463,13 +468,16 @@ class MongoEntitySearcher(EntitySearcher):
                 radius = 100 if local and 0 == len(query) else 20000
                 pool.spawn(_find_google_places, wrapper, coords, radius, True)
                 
+                # TODO: look into using (deprecated) maps local search
+                #       look into using autosuggest for national coverage
+                
                 # TODO: find a workaround for non-local place searches
                 # national search centered in kansas
                 #us_center_coords = [ 39.5, -98.35 ]
                 #us_search_radius = 5000000
                 #pool.spawn(_find_google_places, wrapper, us_center_coords, us_search_radius, False)
             
-            if len(query) > 0:
+            if len(query) > 0 and q is not None:
                 pool.spawn(_find_places, wrapper)
         
         # perform the requests concurrently, yielding several advantages:
@@ -1013,12 +1021,13 @@ class MongoEntitySearcher(EntitySearcher):
     def _parseCoords(self, coords):
         if coords is not None and isinstance(coords, basestring):
             lat, lng = coords.split(',')
-            coords = [float(lat), float(lng)]
+            coords = [ float(lat), float(lng) ]
         
-        if coords is not None and 'lat' in coords and coords.lat != None:
+        if coords is not None and 'lat' in coords and coords.lat is not None:
             try:
                 coords = [coords['lat'], coords['lng']]
-                if coords[0] == None or coords[1] == None:
+                
+                if coords[0] is None or coords[1] is None:
                     raise
             except:
                 msg = "Invalid coordinates (%s)" % coords

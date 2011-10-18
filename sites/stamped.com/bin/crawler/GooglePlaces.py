@@ -141,6 +141,9 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         entity = self.parseEntity(result)
         
+        if entity is None:
+            return None
+        
         if detailed:
             # fetch a google places details request to fill in any missing data
             details = self.getPlaceDetails(result['reference'])
@@ -211,6 +214,35 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             return response['results']
     
+    def getAutocompleteResults(self, query, params=None):
+        (offset, count) = self._initAPIKeyIndices()
+        
+        while True:
+            # try a different API key for each attempt
+            apiKey = self._getAPIKey(offset, count)
+            if apiKey is None:
+                return None
+            
+            response = self._getAutocompleteResponse(query, apiKey, params)
+            
+            if response is None:
+                return None
+            
+            #utils.log(json.dumps(response, sort_keys=True, indent=2))
+            
+            # ensure that we received a valid response
+            if response['status'] != 'OK' or len(response['predictions']) <= 0:
+                utils.log('[GooglePlaces] error autocompleting "' + str(latLng) + '"\n' + 
+                          'ErrorCode: ' + response['status'] + '\n')
+                
+                if response['status'] == 'OVER_QUERY_LIMIT':
+                    count += 1
+                    continue
+                else:
+                    return None
+            
+            return response['predictions']
+    
     def _getSearchResponseByLatLng(self, latLng, apiKey, optionalParams=None):
         params = {
             'location' : self._geocoder.getEncodedLatLng(latLng), 
@@ -250,9 +282,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             'key'       : apiKey, 
         }
         
-        if optionalParams is not None:
-            for key in optionalParams:
-                params[key] = optionalParams[key]
+        self._handleParams(params, optionalParams)
         
         # example URL:
         # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
@@ -266,6 +296,41 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
         
         return None
+    
+    def _getAutocompleteResponse(self, query, apiKey, optionalParams=None):
+        params = {
+            'input'  : query, 
+            'sensor' : 'false', 
+            'types'  : 'establishment', 
+            'key'    : apiKey, 
+        }
+        
+        self._handleParams(params, optionalParams)
+        
+        # example URL:
+        # https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
+        url = self._getAPIURL('autocomplete', params)
+        utils.log('[GooglePlaces] ' + url)
+        
+        try:
+            # GET the data and parse the response as json
+            return json.loads(utils.getFile(url))
+        except:
+            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
+            return None
+        
+        return None
+    
+    def _handleParams(self, params, optionalParams):
+        if optionalParams is not None:
+            for key in optionalParams:
+                params[key] = optionalParams[key]
+        
+        for k in params:
+            v = params[k]
+            
+            if isinstance(v, unicode):
+                params[k] = v.encode("ascii", "xmlcharrefreplace")
     
     def addressToLatLng(self, address):
         latLng = self._geocoder.addressToLatLng(address)
@@ -319,6 +384,9 @@ def parseCommandLine():
     parser.add_option("-v", "--verbose", action="store_true", default=False, 
                       help="Print out verbose results")
     
+    parser.add_option("-s", "--suggest", action="store_true", default=False, 
+                      help="Use Places autosuggest API")
+    
     #parser.add_option("-d", "--detail", action="store_true", dest="detail", 
     #    default=False, help="Included more detailed search result info.")
     
@@ -326,7 +394,7 @@ def parseCommandLine():
     parser.set_defaults(name=None)
     parser.set_defaults(types=None)
     parser.set_defaults(limit=None)
-    parser.set_defaults(radius=500)
+    parser.set_defaults(radius=None)
     parser.set_defaults(detail=False)
     
     (options, args) = parser.parse_args()
@@ -335,10 +403,13 @@ def parseCommandLine():
         parser.print_help()
         return None
     
-    if not options.address:
+    if not (options.address or options.suggest):
         lat, lng = args[0].split(',')
         lat, lng = float(lat), float(lng)
         args[0] = (lat, lng)
+    
+    if not options.suggest and options.radius is None:
+        options.radius = 500
     
     return (options, args)
 
@@ -374,19 +445,21 @@ def main():
     
     places = GooglePlaces()
     results = []
-    optionalParams = {}
+    params  = {}
     
     if options.name:
-        optionalParams['name'] = options.name
+        params['name'] = options.name
     if options.radius:
-        optionalParams['radius'] = options.radius
+        params['radius'] = options.radius
     if options.types:
-        optionalParams['types'] = options.types
+        params['types'] = options.types
     
-    if options.address:
-        results = places.getSearchResultsByAddress(args[0], optionalParams)
+    if options.suggest:
+        results = places.getAutocompleteResults(args[0], params)
+    elif options.address:
+        results = places.getSearchResultsByAddress(args[0], params)
     else:
-        results = places.getSearchResultsByLatLng(args[0], optionalParams)
+        results = places.getSearchResultsByLatLng(args[0], params)
     
     if results is None:
         print "Failed to return results for '%s'" % (args[0], )

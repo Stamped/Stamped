@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -16,10 +16,10 @@ class ASimulatedUser(Greenlet):
     
     def __init__(self, name, parent):
         Greenlet.__init__(self)
-        self.name    = name
-        self.parent  = parent
-        self.actions = []
-        self.ready   = False
+        self.name      = name
+        self.parent    = parent
+        self.actions   = []
+        self._is_ready = False
         
         utils.log("[%s] new simulated user '%s'" % (self, self.name))
     
@@ -28,7 +28,7 @@ class ASimulatedUser(Greenlet):
         self.userID, self.token = self.parent._parent.createAccount(self.name)
         self.parent.new_users.append(self)
         
-        while not self.ready:
+        while not self._is_ready:
             time.sleep(4)
         
         t0 = time.time()
@@ -46,7 +46,7 @@ class ASimulatedUser(Greenlet):
             utils.log("[%s-%s] performing action '%s'" % (self, self.name, action))
             try:
                 if not self.parent.options.noop:
-                    action()
+                    action(self.parent, self)
             except:
                 utils.printException()
                 break

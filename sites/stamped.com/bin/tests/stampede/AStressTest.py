@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -116,8 +116,9 @@ class StressTest(Greenlet):
                 if 0 == num_users:
                     if not self.options.noop:
                         self.addEntity(self._parent.createEntity(user.token))
-                        self.addEntity(self._parent.createPlacesEntity(user.token))
+                        self.addEntity(self._parent.createPlaceEntity(user.token))
             except:
+                utils.printException()
                 pass
             
             if self.bieber_protocol:
@@ -127,9 +128,28 @@ class StressTest(Greenlet):
                             self._parent.createFriendship(user.token, self.bieber.userID)
                     except:
                         # purposefully ignore if friendship fails to create
+                        utils.printException()
                         pass
                 elif 'bieber' in user.name:
                     self.bieber = user
+            
+            # initialize friendships
+            if len(self.users) > 0:
+                num_to_follow = int(random.normalvariate(self.avg_friend_connectivity, self.stdev_friend_connectivity))
+                num_to_follow = max(0, num_to_follow)
+                
+                for i in xrange(num_to_follow):
+                    friend_index = random.randint(0, len(self.users) - 1)
+                    
+                    if friend_index >= 0 and not self.options.noop:
+                        friend = self.users[friend_index]
+                        
+                        if user.userID != friend.userID:
+                            try:
+                                self._parent.createFriendship(user.token, friend.userID)
+                            except:
+                                utils.printException()
+                                pass
             
             num_users += 1
             self.users.append(user)
@@ -138,17 +158,7 @@ class StressTest(Greenlet):
             if len(self.users) >= 100:
                 self.users = self.users[-25:]
             
-            num_to_follow = int(random.normalvariate(self.avg_friend_connectivity, self.stdev_friend_connectivity))
-            num_to_follow = max(0, num_to_follow)
-            
-            for i in xrange(num_to_follow):
-                friend_index = random.randint(0, len(self.users) - 1)
-                
-                if friend_index >= 0:
-                    if not self.options.noop:
-                        self._parent.createFriendship(user.token, self.users[friend_index].userID)
-            
-            user.ready = True
+            user._is_ready = True
     
     def getRandomStampID(self):
         if len(self.stamps) > 0:

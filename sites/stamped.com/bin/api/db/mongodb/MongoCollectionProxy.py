@@ -117,6 +117,7 @@ class MongoCollectionProxy(object):
         storeLog = kwargs.pop('log', True)
         
         def _insert(objects, level):
+            num_retries = 0
             ret = []
             count = len(objects)
             
@@ -129,38 +130,39 @@ class MongoCollectionProxy(object):
                     offset = i * max_batch_size
                     sub_objects = objects[offset : offset + max_batch_size]
                     ret += _insert(sub_objects, level)
+                return ret
             else:
-                try:
-                    result = self._collection.insert(objects, manipulate, safe, check_keys, **kwargs)
-                    if count == 1:
+                while True:
+                    try:
+                        result = self._collection.insert(objects, manipulate, safe, check_keys, **kwargs)
+                        if count == 1:
+                            if storeLog:
+                                logs.debug("Inserted document (%s) id=%s" % (self._parent.__class__.__name__, result))
+                        else:
+                            if storeLog:
+                                logs.debug("Inserted %d documents (%s)" % (count, self._parent.__class__.__name__))
+                        return result
+                    except AutoReconnect as e:
+                        num_retries += 1
                         if storeLog:
-                            logs.debug("Inserted document (%s) id=%s" % (self._parent.__class__.__name__, result))
-                    else:
-                        if storeLog:
-                            logs.debug("Inserted %d documents (%s)" % (count, self._parent.__class__.__name__))
-                    ret += result
-                except AutoReconnect as e:
-                    if level > max_retries and storeLog:
-                        logs.warning("Unable to connect after %d retries (%s)" % \
-                            (max_retries, self._parent.__class__.__name__))
-                        raise
-                    
-                    if storeLog:
-                        logs.warning("Insert document failed (%s)" % (self._parent.__class__.__name__))
-                    
-                    time.sleep(1)
+                            logs.warning("Insert document failed (%s) -- %d of %d" % \
+                                (self._parent.__class__.__name__, num_retries, max_retries))
 
-                    if count > 1:
-                        mid = count / 2
-                        ret += _insert(objects[:mid], level + 1)
-                        ret += _insert(objects[mid:], level + 1)
-            
-            return ret
+                        if num_retries > max_retries:
+                            if storeLog:
+                                logs.warning("Unable to connect after %d retries (%s)" % \
+                                    (max_retries, self._parent.__class__.__name__))
+                            raise
+                        
+                        time.sleep(1)
         
         return _insert(docs, 0)
     
     def insert_one(self, doc, safe=False, **kwargs):
-        return self.insert([doc], safe=safe, **kwargs)[0]
+        try:
+            return self.insert([doc], safe=safe, **kwargs)[0]
+        except:
+            raise
         
     def save(self, to_save, manipulate=True, safe=False, **kwargs):
         num_retries = 0
