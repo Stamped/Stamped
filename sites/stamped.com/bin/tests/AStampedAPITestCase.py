@@ -26,9 +26,12 @@ class AStampedAPITestCase(AStampedTestCase):
     
     #_baseurl = "http://0.0.0.0:5000/api/v1"
     _baseurl = "http://localhost:18000/v0"
+    _baseurl = "http://ec2-50-17-40-183.compute-1.amazonaws.com:18000/v0"
     #_baseurl = "http://ec2-50-19-138-154.compute-1.amazonaws.com:5000/v0"
     #_baseurl = "https://dev.stamped.com/v0"
     #_baseurl = "http://dev.stamped.com:5000/v0"
+    _baseurl = "http://ec2-50-17-94-229.compute-1.amazonaws.com:5000/v0"
+    
     
     _opener = StampedAPIURLOpener()
     client_auth = {
@@ -40,13 +43,13 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (self._baseurl, path, params)
         
-        utils.log("GET:  %s" % url)
+        # utils.log("GET:  %s" % url)
         raw = self._opener.open(url).read()
         
         try:
             result = json.loads(raw)
         except:
-            utils.log(raw)
+            # utils.log(raw)
             raise
         
         return result
@@ -55,15 +58,15 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s" % (self._baseurl, path)
         
-        utils.log("POST: %s" % url)
-        pprint(params)
+        # utils.log("POST: %s" % url)
+        # pprint(params)
         
         raw = self._opener.open(url, params).read()
         
         try:
             result = json.loads(raw)
         except:
-            utils.log(raw)
+            # utils.log(raw)
             raise
         
         return result

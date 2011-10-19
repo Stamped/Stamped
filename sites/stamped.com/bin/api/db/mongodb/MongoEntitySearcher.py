@@ -183,6 +183,8 @@ class MongoEntitySearcher(EntitySearcher):
         self.placesDB = api._placesEntityDB
         self.tempDB   = api._tempEntityDB
         self._statsSink = api._statsSink
+        self._errors    = utils.AttributeDict()
+        self._notificationHandler = api._notificationHandler
         
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
         self.entityDB._collection.ensure_index([("titlel", pymongo.ASCENDING)])
@@ -242,7 +244,8 @@ class MongoEntitySearcher(EntitySearcher):
                          subcategory_filter=None, 
                          full=False, 
                          prefix=False, 
-                         local=False):
+                         local=False, 
+                         user=None):
         
         if prefix:
             assert not full
@@ -460,8 +463,11 @@ class MongoEntitySearcher(EntitySearcher):
                             
                             entity.entity_id = 'T_GOOGLE_%s' % entity.reference
                             ret['google_place_results'].append((entity, distance))
-                except:
+                except Exception, e:
+                    self._handle_search_error('googlePlaces', e)
                     utils.printException()
+                else:
+                    self._clear_search_errors('googlePlaces')
             
             if full:
                 wrapper['google_place_results'] = []
@@ -507,6 +513,10 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 # if local search and result is too far away, discard it
                 if local and abs(result[1]) > 30 :
+                    return
+                
+                generated_by = entity.generated_by 
+                if generated_by is not None and generated_by != user:
                     return
                 
                 # dedupe entities from amazon
@@ -928,8 +938,11 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 assert e.entity_id is not None
                 output.append((e, distance))
-            except:
+            except Exception, e:
+                self._handle_search_error('mongodb', e)
                 utils.printException()
+            else:
+                self._clear_search_errors('mongodb')
         
         return output
     
@@ -958,8 +971,11 @@ class MongoEntitySearcher(EntitySearcher):
                     
                     entity.entity_id = 'T_APPLE_%s' % entity.aid
                     output.append((entity, -1))
-            except:
+            except Exception, e:
+                self._handle_search_error('apple', e)
                 utils.printException()
+            else:
+                self._clear_search_errors('apple')
         
         try:
             apple_pool = Pool(4)
@@ -974,7 +990,7 @@ class MongoEntitySearcher(EntitySearcher):
                 apple_pool.spawn(_find_apple_specific, media='all', entity='allArtist')
             
             apple_pool.spawn(_find_apple_specific, media='all', entity=None)
-            apple_pool.join()
+            apple_pool.join(timeout=6.5)
         except:
             utils.printException()
         
@@ -997,8 +1013,11 @@ class MongoEntitySearcher(EntitySearcher):
             for entity in amazon_results:
                 entity.entity_id = 'T_AMAZON_%s' % entity.asin
                 output.append((entity, -1))
-        except:
+        except Exception, e:
+            self._handle_search_error('amazon', e)
             utils.printException()
+        else:
+            self._clear_search_errors('amazon')
         
         return output
     
@@ -1013,8 +1032,11 @@ class MongoEntitySearcher(EntitySearcher):
             for entity in results:
                 entity.entity_id = 'T_TVDB_%s' % entity.thetvdb_id
                 output.append((entity, -1))
-        except:
+        except Exception, e:
+            self._handle_search_error('thetvdb', e)
             utils.printException()
+        else:
+            self._clear_search_errors('thetvdb')
         
         return output
     
@@ -1035,4 +1057,24 @@ class MongoEntitySearcher(EntitySearcher):
                 raise InputError(msg)
         
         return coords
+    
+    def _handle_search_error(self, key, error):
+        if key not in self._errors:
+            self._errors[key] = []
+        
+        self._errors[key].append(error)
+        self._statsSink.increment('stamped.api.search.third-party.errors.%s' % key)
+        
+        if 6 == len(self._errors[key]):
+            subject = "%s search failing" % key
+            message = "%s search failing\n\n" % key
+            
+            for error in self._errors[key]:
+                message += "%s\n\n" % error
+            
+            self._notificationHandler.email(subject, message)
+    
+    def _clear_search_errors(self, key):
+        if key in self._errors:
+            self._errors[key] = []
 

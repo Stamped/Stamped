@@ -14,6 +14,7 @@ from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
 from match.EntityMatcher    import EntityMatcher
+from libs.notify            import StampedNotificationHandler
 
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoEntityCollection       import MongoEntityCollection
@@ -108,9 +109,16 @@ class MongoStampedAPI(StampedAPI):
     def _tempEntityDB(self):
         return MongoTempEntityCollection()
     
+    @lazyProperty
+    def _notificationHandler(self):
+        return StampedNotificationHandler()
+    
     def getStats(self):
         subcategory_stats = { }
         source_stats = { }
+        
+        # TODO: incorporate more metrics
+        # https://docs.google.com/a/stamped.com/spreadsheet/ccc?key=0AmEQSQLwlDtTdHoweWRZSjhXTm5Xb3NvSFBCQ0szWlE&hl=en_US#gid=0
         
         for source in EntitySourcesSchema()._elements:
             count = self._entityDB._collection.find({"sources.%s" % source : { "$exists" : True }}).count()

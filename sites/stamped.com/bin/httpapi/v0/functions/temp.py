@@ -92,3 +92,80 @@ def timeout(request):
     schema      = parseRequest(None, request)
 
     time.sleep(55)
+
+
+
+
+
+
+
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def static(request):
+    return transformOutput(True)
+
+
+def addEntity():
+    entity = Entity()
+    entity.title = 'SAMPLE TITLE'
+    entity.subtitle = 'SAMPLE SUBTITLE'
+    entity.category = 'other'
+    entity.subcategory = 'other'
+
+    result = stampedAPI.addEntity(entity)
+    return result['entity_id']
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def begin(request):
+    result = addEntity()
+    return transformOutput(result)
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def read(request):
+    entityIds = request.GET['entity_ids'].split(',')
+    output = []
+    for entityId in entityIds:
+        result = stampedAPI.getEntity({'entity_id': entityId})
+        output.append(HTTPEntity().importSchema(result).exportSparse())
+    return transformOutput(output)
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def write(request):
+    n = int(request.GET['n'])
+    output = []
+    for i in xrange(n):
+        result = addEntity()
+        output.append(result)
+    return transformOutput(output)
+
+
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def readwrite(request):
+    output = []
+
+    entityIds = request.GET['entity_ids'].split(',')
+    for entityId in entityIds:
+        result = stampedAPI.getEntity({'entity_id': entityId})
+        output.append(HTTPEntity().importSchema(result).exportSparse())
+
+    n = int(request.GET['n'])
+    for i in xrange(n):
+        result = addEntity()
+        output.append(result)
+
+    return transformOutput(output)
+
+
+
+
+
+

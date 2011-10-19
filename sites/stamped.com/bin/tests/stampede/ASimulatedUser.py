@@ -20,6 +20,7 @@ class ASimulatedUser(Greenlet):
         self.parent    = parent
         self.actions   = []
         self._is_ready = False
+        self.entity_ids = []
         
         utils.log("[%s] new simulated user '%s'" % (self, self.name))
     
@@ -100,6 +101,16 @@ class RealisticSimulatedUser(ASimulatedUser):
             StampAction(10), 
             CommentAction(20), 
             LikeAction(25), 
+        ]
+
+class BaselineSimulatedUser(ASimulatedUser):
+    def __init__(self, name, parent):
+        ASimulatedUser.__init__(self, name, parent)
+
+        self.actions = [
+            # BaselineBeginAction(50),
+            BaselineReadAction(50),
+            BaselineWriteAction(50),
         ]
 
 class NullSimulatedUser(ASimulatedUser):

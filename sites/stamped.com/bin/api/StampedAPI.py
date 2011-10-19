@@ -32,7 +32,7 @@ from Schemas         import *
 from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
-from libs.TheTVDB   import TheTVDB
+from libs.TheTVDB    import TheTVDB
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -960,7 +960,8 @@ class StampedAPI(AStampedAPI):
                                                         subcategory_filter=subcategory_filter, 
                                                         full=full, 
                                                         prefix=prefix, 
-                                                        local=local)
+                                                        local=local, 
+                                                        user=authUserId)
         return results
     
     @API_CALL
@@ -979,7 +980,8 @@ class StampedAPI(AStampedAPI):
                                                         subcategory_filter=subcategory_filter, 
                                                         full=full, 
                                                         prefix=prefix, 
-                                                        local=True)
+                                                        local=True, 
+                                                        user=authUserId)
         return results
     
     """
@@ -1952,10 +1954,11 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
         
         # Increment stamp stats by one
-        self._stampDB.updateStampStats( \
-            stamp.stamp_id, 'num_likes', increment=1)
+        self._stampDB.updateStampStats(stamp.stamp_id, 'num_likes', increment=1)
+        
         if stamp.num_likes == None:
             stamp.num_likes = 0
+        
         stamp.num_likes += 1
         stamp.is_liked = True
         

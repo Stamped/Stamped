@@ -125,3 +125,43 @@ class NullAction(ASimulatedUserAction):
         # note: purposefully empty
         pass
 
+
+class BaselineBeginAction(ASimulatedUserAction):
+    def __init__(self, weight, repeat=1):
+        ASimulatedUserAction.__init__(self, weight, repeat)
+
+    def _execute(self, parent, user):
+        path = 'test/begin.json'
+        entity_id = parent._parent.handleGET(path, {'n': 1})
+        user.entity_ids.append(entity_id)
+        return True
+
+class BaselineReadAction(ASimulatedUserAction):
+    def __init__(self, weight, repeat=1):
+        ASimulatedUserAction.__init__(self, weight, repeat)
+
+    def _execute(self, parent, user):
+        path = 'test/read.json'
+
+        data = {'entity_ids': parent.getRandomEntityID()}
+        # if len(user.entity_ids) == 0:
+        #     return False
+        # data = {'entity_ids': user.entity_ids[-1]} # parent.getRandomEntityID()
+        
+        return parent._parent.handleGET(path, data)
+
+class BaselineWriteAction(ASimulatedUserAction):
+    def __init__(self, weight, repeat=1):
+        ASimulatedUserAction.__init__(self, weight, repeat)
+
+    def _execute(self, parent, user):
+        path = 'test/write.json'
+        data = {'n': 1}
+        entity_ids = parent._parent.handleGET(path, data)
+        user.entity_ids += entity_ids
+        return True
+
+    
+
+
+
