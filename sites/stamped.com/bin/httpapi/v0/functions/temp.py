@@ -131,7 +131,6 @@ def read(request):
     entityIds = request.GET['entity_ids'].split(',')
     output = []
     for entityId in entityIds:
-        print entityId
         result = stampedAPI.getEntity({'entity_id': entityId})
         output.append(HTTPEntity().importSchema(result).exportSparse())
     return transformOutput(output)
