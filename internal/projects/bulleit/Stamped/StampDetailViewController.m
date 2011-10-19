@@ -94,6 +94,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize addCommentContainerView = addCommentContainerView_;
 @synthesize addCommentViewDetached = addCommentViewDetached_;
 @synthesize addCommentViewPinned = addCommentViewPinned_;
+@synthesize timestampLabel = timestampLabel_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -126,6 +127,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.stampButton = nil;
   self.addCommentContainerView.commentTextField.delegate = nil;
   self.addCommentContainerView = nil;
+  self.timestampLabel = nil;
   [super dealloc];
 }
 
@@ -205,6 +207,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.stampButton = nil;
   self.addCommentContainerView.commentTextField.delegate = nil;
   self.addCommentContainerView = nil;
+  self.timestampLabel = nil;
 }
 
 - (void)setUpHeader {
@@ -364,29 +367,27 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   stampedLabel_.frame = stampedFrame;
   stampedLabel_.textColor = [UIColor stampedGrayColor];
 
-  UILabel* timestampLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  timestampLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
-  timestampLabel.textColor = [UIColor stampedLightGrayColor];
-  timestampLabel.textAlignment = UITextAlignmentRight;
-  timestampLabel.text = [Util shortUserReadableTimeSinceDate:stamp_.created];
-  [timestampLabel sizeToFit];
-  timestampLabel.frame = CGRectMake(310 - CGRectGetWidth(timestampLabel.frame) - 10,
-                                    10,
-                                    CGRectGetWidth(timestampLabel.frame),
-                                    CGRectGetHeight(timestampLabel.frame));
-  [mainCommentContainer_ addSubview:timestampLabel];
-  [timestampLabel release];
+  timestampLabel_.text = [Util shortUserReadableTimeSinceDate:stamp_.created];
+  [timestampLabel_ sizeToFit];
+  timestampLabel_.frame = CGRectMake(310 - CGRectGetWidth(timestampLabel_.frame) - 10,
+                                     10,
+                                     CGRectGetWidth(timestampLabel_.frame),
+                                     CGRectGetHeight(timestampLabel_.frame));
+  
   
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
   UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.font = commentFont;
-  commentLabel.textColor = [UIColor colorWithWhite:0.2 alpha:1.0];
+  commentLabel.textColor = [UIColor stampedBlackColor];
   commentLabel.text = stamp_.blurb;
   commentLabel.numberOfLines = 0;
   CGSize stringSize = [stamp_.blurb sizeWithFont:commentFont
                                constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                    lineBreakMode:commentLabel.lineBreakMode];
 
+  
+  
+  
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
 
   commentLabel.frame = CGRectMake(leftPadding, 25, stringSize.width, stringSize.height);
