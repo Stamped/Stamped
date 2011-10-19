@@ -41,7 +41,7 @@ class Monitor(object):
     
     def update(self, force=False):
         if self._info is None or force:
-            self._info = ec2utils.get_stack_info(stack=self.options.stack)
+            self._info = self.ec2utils.get_stack_info(stack=self.options.stack)
             
             if self._info is None:
                 utils.log("error retrieving stack data from AWS")
@@ -114,12 +114,17 @@ class Monitor(object):
     
     def _try_ping_webServer(self, node):
         url = 'https://%s/v0/entities/show.json' % node.public_dns
+        retries = 0
         
-        try:
-            response = urllib2.urlopen(url)
-        except urllib2.HTTPError, e:
-            if e.code == 401:
-                return
+        while retries < 5:
+            try:
+                response = urllib2.urlopen(url)
+            except urllib2.HTTPError, e:
+                if e.code == 401:
+                    return
+            
+            retries += 1
+            time.sleep(retries * retries)
         
         error = "unable to ping api server at '%s.%s'" % (node.stack, node.name)
         raise MonitorException(error, email=True, sms=True)
@@ -136,9 +141,19 @@ class Monitor(object):
         for mongo_cmd in mongo_cmds:
             dns = node.private_dns if is_ec2 else node.public_dns
             cmd = cmd_template % (dns, mongo_cmd)
-            logs.debug(cmd)
             
-            ret = utils.shell(cmd)
+            retries = 0
+            
+            while retries < 5:
+                logs.debug(cmd)
+                
+                ret = utils.shell(cmd)
+                
+                if 0 == ret:
+                    break
+                
+                retries += 1
+                time.sleep(retries * retries)
             
             if 0 != ret[1]:
                 error = "unable to reach db server at '%s.%s'" % \
