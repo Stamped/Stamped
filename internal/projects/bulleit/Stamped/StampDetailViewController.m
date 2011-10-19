@@ -702,13 +702,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 #pragma mark - UITextFieldDelegate Methods.
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField*)textField {
-  NSLog(@"Text field superview: %@", addCommentContainerView_.superview);
-  UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 53)];
-  accessoryView.backgroundColor = [UIColor whiteColor];
-  textField.inputAccessoryView = accessoryView;
-  [accessoryView release];
-  //[addCommentContainerView_ removeFromSuperview];
-  NSLog(@"Text field superview: %@", addCommentContainerView_.superview);
   return YES;
 }
 
