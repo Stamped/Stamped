@@ -32,7 +32,6 @@
 - (IBAction)handleLikeButtonTap:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, retain) IBOutlet UIView* headerView;
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
 @property (nonatomic, retain) IBOutlet UIView* commentsView;
 @property (nonatomic, retain) IBOutlet UIView* activityView;
@@ -48,10 +47,10 @@
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* stampButton;
 @property (nonatomic, retain) IBOutlet UILabel* stampLabel;
+@property (nonatomic, retain) IBOutlet UILabel* titleLabel;
+@property (nonatomic, retain) IBOutlet UILabel* subtitleLabel;
+@property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UILabel* timestampLabel;
-
-@property (nonatomic, retain) IBOutlet UIImageView* eDetailArrowImageView;
-
 @property (nonatomic, retain) IBOutlet StampDetailAddCommentView* addCommentContainerView;
 
 @end

@@ -49,7 +49,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
-- (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
+- (void)handleEntityTap:(id)sender;
 - (void)handleCommentUserImageViewTap:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
 - (void)renderComments;
@@ -69,7 +69,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 @implementation StampDetailViewController
 
-@synthesize headerView = headerView_;
 @synthesize mainCommentContainer = mainCommentContainer_;
 @synthesize scrollView = scrollView_;
 @synthesize commentsView = commentsView_;
@@ -87,7 +86,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize stampLabel = stampLabel_;
 @synthesize stampButton = stampButton_;
 @synthesize stampPhotoView = stampPhotoView_;
-@synthesize eDetailArrowImageView = eDetailArrowImageView_;
 @synthesize likeFaceImageView = likeFaceImageView_;
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
@@ -95,6 +93,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize addCommentViewDetached = addCommentViewDetached_;
 @synthesize addCommentViewPinned = addCommentViewPinned_;
 @synthesize timestampLabel = timestampLabel_;
+@synthesize titleLabel = titleLabel_;
+@synthesize categoryImageView = categoryImageView_;
+@synthesize subtitleLabel = subtitleLabel_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -109,7 +110,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [stamp_ release];
   [detailViewController_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.headerView = nil;
+  self.titleLabel = nil;
+  self.categoryImageView = nil;
+  self.subtitleLabel = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -188,7 +191,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.headerView = nil;
+  self.titleLabel = nil;
+  self.categoryImageView = nil;
+  self.subtitleLabel = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
@@ -214,16 +219,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   NSString* fontString = @"TitlingGothicFBComp-Regular";
   CGFloat fontSize = 36.0;
   CGSize stringSize = [stamp_.entityObject.title sizeWithFont:[UIFont fontWithName:fontString size:fontSize]
-                                                     forWidth:250
+                                                     forWidth:270
                                                 lineBreakMode:UILineBreakModeTailTruncation];
-  
-  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 15, stringSize.width, stringSize.height)];
-  nameLabel.font = [UIFont fontWithName:fontString size:fontSize];
-  nameLabel.text = stamp_.entityObject.title;
-  nameLabel.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
-  nameLabel.backgroundColor = [UIColor clearColor];
-  [headerView_ addSubview:nameLabel];
-  [nameLabel release];
+
+  titleLabel_.font = [UIFont fontWithName:fontString size:fontSize];
+  titleLabel_.text = stamp_.entityObject.title;
+  titleLabel_.textColor = [UIColor stampedDarkGrayColor];
 
   // Badge stamp.
   CALayer* stampLayer = [[CALayer alloc] init];
@@ -231,31 +232,13 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                 17 - (46 / 2),
                                 46, 46);
   stampLayer.contents = (id)stamp_.user.stampImage.CGImage;
-  [headerView_.layer addSublayer:stampLayer];
+  [scrollView_.layer insertSublayer:stampLayer above:titleLabel_.layer];
   [stampLayer release];
   
-  CALayer* typeIconLayer = [[CALayer alloc] init];
-  typeIconLayer.contentsGravity = kCAGravityResizeAspect;
-  typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
-  typeIconLayer.frame = CGRectMake(17, 50, 15, 12);
-  [headerView_.layer addSublayer:typeIconLayer];
-  [typeIconLayer release];
-  
-  UILabel* detailLabel =
-      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 4, 49, 258, 15)];
-  detailLabel.opaque = NO;
-  detailLabel.backgroundColor = [UIColor clearColor];
-  detailLabel.text = stamp_.entityObject.subtitle;
-  detailLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
-  detailLabel.textColor = [UIColor stampedGrayColor];
-  [headerView_ addSubview:detailLabel];
-  [detailLabel release];
-
-  UITapGestureRecognizer* gestureRecognizer =
-      [[UITapGestureRecognizer alloc] initWithTarget:self 
-                                              action:@selector(handleEntityTap:)];
-  [headerView_ addGestureRecognizer:gestureRecognizer];
-  [gestureRecognizer release];
+  categoryImageView_.image = stamp_.entityObject.categoryImage;
+  subtitleLabel_.text = stamp_.entityObject.subtitle;
+  subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
+  subtitleLabel_.textColor = [UIColor stampedGrayColor];
 }
 
 - (void)setUpToolbar {
@@ -608,10 +591,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [viewController release];
 }
 
-- (void)handleEntityTap:(UITapGestureRecognizer*)recognizer {
-  if (recognizer.state != UIGestureRecognizerStateEnded)
-    return;
-
+- (void)handleEntityTap:(id)sender {
   [self.navigationController pushViewController:detailViewController_ animated:YES];
 }
 
