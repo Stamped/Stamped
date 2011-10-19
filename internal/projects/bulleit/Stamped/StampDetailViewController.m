@@ -269,9 +269,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [toolbarGradient release];
 
   bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
-  bottomToolbar_.layer.shadowOpacity = 0.2;
+  bottomToolbar_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
+  bottomToolbar_.layer.shadowOpacity = 1;
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
-  bottomToolbar_.alpha = 0.9;
   
   if (stamp_.entityObject.favorite) {
     addFavoriteLabel_.text = @"To-Do'd";
@@ -313,7 +313,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   activityFrame.size.height = CGRectGetMaxY(mainCommentContainer_.frame) + CGRectGetHeight(commentsView_.bounds) + 5;
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + 60);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   activityGradientLayer_.frame = activityView_.bounds;
@@ -718,7 +718,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [CATransaction commit];
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + 60);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
 }
 
 #pragma mark - UITextFieldDelegate Methods.
@@ -853,7 +853,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
       addCommentFrame.origin.x = 5 - (outset / 2);
       addCommentContainerView_.layer.shadowOpacity = ratio;
       addCommentContainerView_.frame = addCommentFrame;
-      [addCommentContainerView_ setNeedsDisplay];
       return;
     }
   }
