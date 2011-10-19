@@ -49,6 +49,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleCommentUserImageViewTap:(NSNotification*)notification;
+- (void)keyboardWillAppear:(NSNotification*)notification;
+- (void)keyboardWillDisappear:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
 - (void)renderComments;
 - (void)addComment:(Comment*)comment;
@@ -150,6 +152,14 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(handleCommentUserImageViewTap:)
                                                name:kCommentUserImageTappedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(keyboardWillAppear:)
+                                               name:UIKeyboardWillShowNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(keyboardWillDisappear:)
+                                               name:UIKeyboardWillHideNotification
                                              object:nil];
   [super viewWillAppear:animated];
 }
@@ -356,9 +366,13 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                      CGRectGetHeight(timestampLabel_.frame));
   
   
-  UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+  TTTAttributedLabel* commentLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
+  commentLabel.delegate = self;
+  commentLabel.userInteractionEnabled = YES;
   UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
+  commentLabel.dataDetectorTypes = UIDataDetectorTypeLink;
   commentLabel.font = commentFont;
+  commentLabel.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel.textColor = [UIColor stampedBlackColor];
   commentLabel.text = stamp_.blurb;
   commentLabel.numberOfLines = 0;
@@ -500,10 +514,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 #pragma mark - TTTAttributedLabelDelegate methods.
 
 - (void)attributedLabel:(TTTAttributedLabel*)label didSelectLinkWithURL:(NSURL*)url {
+  NSLog(@"URL: %@", url);
   NSString* userID = url.absoluteString;
   User* user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
   if (!user)
     return;
+
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
   profileViewController.user = user;
   [self.navigationController pushViewController:profileViewController animated:YES];
@@ -628,15 +644,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     if (c.restampID == nil)
       [self addComment:c];
   }
-  StampDetailCommentView* commentView = nil;
-  for (UIView* view in commentsView_.subviews) {
-    if ([view isMemberOfClass:[StampDetailCommentView class]]) {
-      commentView = (StampDetailCommentView*)view;
-      commentView.borderHidden = NO;
-    }
-  }
-  
-  commentView.borderHidden = YES;
   [self adjustAddCommentView];
 }
 
@@ -680,35 +687,99 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
 }
 
-#pragma mark - UITextFieldDelegate Methods.
+#pragma mark - Keyboard notifications.
 
-- (BOOL)textFieldShouldBeginEditing:(UITextField*)textField {
+- (void)keyboardWillAppear:(NSNotification*)notification {
+  CGRect keyboardFrame = [[[notification userInfo] valueForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
   addCommentViewDetached_ = YES;
   self.addCommentViewPinned = YES;
   CGRect frame = addCommentContainerView_.frame;
-  frame.origin.y = 148;
+  frame.origin.y = CGRectGetHeight(self.view.frame) -
+      CGRectGetHeight(keyboardFrame) - CGRectGetHeight(frame);
+  frame.origin.x = 0;
+  frame.size.width = CGRectGetWidth(self.view.frame);
+  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) -
+      CGRectGetHeight(keyboardFrame) - CGRectGetHeight(addCommentContainerView_.frame);
+  CGFloat contentHeight = CGRectGetMaxY(activityView_.frame);
+
+  // This must be within its own block without |UIViewAnimationOptionBeginFromCurrentState|
+  // because otherwise it will begin from its original frame position if within the
+  // comments container.
   [UIView animateWithDuration:0.3 animations:^{
     addCommentContainerView_.frame = frame;
+    addCommentContainerView_.layer.shadowOpacity = 1.0;
   }];
+
+  [UIView animateWithDuration:0.3
+                        delay:0.0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
+                     scrollView_.contentOffset = CGPointMake(0, contentHeight - scrollHeight);
+                     scrollView_.contentSize = CGSizeMake(320, contentHeight);
+
+                     CGFloat heightDelta = CGRectGetHeight(keyboardFrame);
+                     CGRect frame = commentsView_.frame;
+                     frame.size.height += heightDelta;
+                     frame.origin.y -= heightDelta;
+                     commentsView_.frame = frame;
+                     
+                     frame = activityView_.frame;
+                     frame.size.height += heightDelta;
+                     activityView_.frame = frame;
+                   }
+                   completion:^(BOOL finished) {
+                     activityGradientLayer_.frame = activityView_.bounds;
+                     activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+                   }];
+}
+
+- (void)keyboardWillDisappear:(NSNotification*)notification {
+  CGRect keyboardFrame = [[[notification userInfo] valueForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(bottomToolbar_.frame);
+  CGFloat contentHeight = CGRectGetMaxY(activityView_.frame) - CGRectGetHeight(keyboardFrame);
+  [UIView animateWithDuration:0.3
+                        delay:0.0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
+                     scrollView_.contentOffset = CGPointZero;
+                     scrollView_.contentSize = CGSizeMake(320, contentHeight);
+                     
+                     CGFloat heightDelta = -CGRectGetHeight(keyboardFrame);
+                     CGRect frame = commentsView_.frame;
+                     frame.size.height += heightDelta;
+                     frame.origin.y -= heightDelta;
+                     commentsView_.frame = frame;
+                     
+                     frame = activityView_.frame;
+                     frame.size.height += heightDelta;
+                     activityView_.frame = frame;
+                     addCommentViewDetached_ = NO;
+                     self.addCommentViewPinned = NO;
+                   }
+                   completion:^(BOOL finished) {
+                     activityGradientLayer_.frame = activityView_.bounds;
+                     activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+                   }];
+}
+
+#pragma mark - UITextFieldDelegate Methods.
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField*)textField {
   return YES;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-  [UIView animateWithDuration:0.3 animations:^{
-    scrollView_.contentInset = UIEdgeInsetsMake(0, 0, kKeyboardHeight - 10, 0);
-    scrollView_.contentOffset = CGPointMake(0, CGRectGetMaxY(activityView_.frame) - (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight));
-  }];
+
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
-  addCommentViewDetached_ = NO;
-  self.addCommentViewPinned = NO;
-  [UIView animateWithDuration:0.3 animations:^{
-    scrollView_.contentInset = UIEdgeInsetsZero;
-  }];
+
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
+  [textField resignFirstResponder];
   return YES;
 }
 
@@ -778,12 +849,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   CGFloat heightDelta = CGRectGetHeight(addCommentContainerView_.frame);
   if (pinned)
     heightDelta *= -1;
-  
+
   CGRect frame = commentsView_.frame;
   frame.size.height += heightDelta;
   frame.origin.y -= heightDelta;
   commentsView_.frame = frame;
-  
+
   frame = activityView_.frame;
   frame.size.height += heightDelta;
   activityView_.frame = frame;

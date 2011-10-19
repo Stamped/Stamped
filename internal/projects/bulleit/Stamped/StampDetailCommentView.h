@@ -19,6 +19,5 @@ extern NSString* const kCommentUserImageTappedNotification;
 
 @property (nonatomic, retain) Comment* comment;
 @property (nonatomic, readonly) UserImageView* userImage;
-@property (nonatomic, assign) BOOL borderHidden;
 
 @end

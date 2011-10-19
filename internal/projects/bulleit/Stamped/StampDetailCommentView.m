@@ -25,7 +25,6 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 
 @synthesize comment = comment_;
 @synthesize userImage = userImage_;
-@synthesize borderHidden = borderHidden_;
 
 - (id)initWithComment:(Comment*)comment {
   self = [super initWithFrame:CGRectZero];
@@ -88,13 +87,10 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 }
 
 - (void)drawRect:(CGRect)rect {
-  if (borderHidden_)
-    return;
-
   CGContextRef ctx = UIGraphicsGetCurrentContext();
   CGContextSaveGState(ctx);
   CGContextSetFillColorWithColor(ctx, [UIColor colorWithWhite:0.9 alpha:1.0].CGColor);
-  CGContextFillRect(ctx, CGRectMake(0, CGRectGetMaxY(self.bounds) - 1, CGRectGetWidth(self.bounds), 1));
+  CGContextFillRect(ctx, CGRectMake(0, 0, CGRectGetWidth(self.bounds), 1));
   CGContextRestoreGState(ctx);
 }
 
