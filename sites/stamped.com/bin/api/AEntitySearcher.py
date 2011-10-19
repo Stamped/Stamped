@@ -19,6 +19,7 @@ class AEntitySearcher(object):
                          subcategory_filter=None, 
                          full=False, 
                          prefix=False, 
-                         local=False):
+                         local=False, 
+                         user=None):
         pass
 

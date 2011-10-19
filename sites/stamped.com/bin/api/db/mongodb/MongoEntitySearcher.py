@@ -244,7 +244,8 @@ class MongoEntitySearcher(EntitySearcher):
                          subcategory_filter=None, 
                          full=False, 
                          prefix=False, 
-                         local=False):
+                         local=False, 
+                         user=None):
         
         if prefix:
             assert not full
@@ -512,6 +513,10 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 # if local search and result is too far away, discard it
                 if local and abs(result[1]) > 30 :
+                    return
+                
+                generated_by = entity.generated_by 
+                if generated_by is not None and generated_by != user:
                     return
                 
                 # dedupe entities from amazon
