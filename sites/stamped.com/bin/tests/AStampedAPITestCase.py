@@ -26,6 +26,7 @@ class AStampedAPITestCase(AStampedTestCase):
     
     #_baseurl = "http://0.0.0.0:5000/api/v1"
     _baseurl = "http://localhost:18000/v0"
+    _baseurl = "http://ec2-50-17-40-183.compute-1.amazonaws.com:18000/v0"
     #_baseurl = "http://ec2-50-19-138-154.compute-1.amazonaws.com:5000/v0"
     #_baseurl = "https://dev.stamped.com/v0"
     #_baseurl = "http://dev.stamped.com:5000/v0"

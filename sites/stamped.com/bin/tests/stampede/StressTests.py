@@ -20,7 +20,7 @@ class StressTests(AStampedAPITestCase):
             self, 
             avg_friend_connectivity=12, 
             stdev_friend_connectivity=5, 
-            users_per_minute=100, 
+            users_per_minute=25, 
             users_per_minute_decay=True, 
             users_limit=None, 
             actions_per_minute=3, 

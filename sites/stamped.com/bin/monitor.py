@@ -108,7 +108,7 @@ class Monitor(object):
                         self.handler.email(subject, message)
                     
                     if unexpected or e.sms:
-                        self.handler.email(subject, message)
+                        self.handler.sms(subject, message)
             
             self.status[node.id] = node_status
     

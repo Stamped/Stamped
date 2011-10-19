@@ -14,6 +14,7 @@ from StampedAPI             import StampedAPI
 from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
 from match.EntityMatcher    import EntityMatcher
+from libs.notify            import StampedNotificationHandler
 
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoEntityCollection       import MongoEntityCollection
@@ -107,6 +108,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _tempEntityDB(self):
         return MongoTempEntityCollection()
+    
+    @lazyProperty
+    def _notificationHandler(self):
+        return StampedNotificationHandler()
     
     def getStats(self):
         subcategory_stats = { }
