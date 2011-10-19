@@ -32,7 +32,7 @@ from Schemas         import *
 from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
-from libs.TheTVDB   import TheTVDB
+from libs.TheTVDB    import TheTVDB
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
