@@ -56,7 +56,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
-- (void)setAddCommentFieldPinned:(BOOL)pinned;
 - (void)adjustAddCommentView;
 - (void)sendAddCommentRequest;
 
@@ -64,6 +63,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
 @property (nonatomic, readonly) UILabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
+@property (nonatomic, assign) BOOL addCommentViewDetached;
+@property (nonatomic, assign) BOOL addCommentViewPinned;
 @end
 
 @implementation StampDetailViewController
@@ -91,6 +92,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
 @synthesize addCommentContainerView = addCommentContainerView_;
+@synthesize addCommentViewDetached = addCommentViewDetached_;
+@synthesize addCommentViewPinned = addCommentViewPinned_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -702,18 +705,27 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 #pragma mark - UITextFieldDelegate Methods.
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField*)textField {
+  addCommentViewDetached_ = YES;
+  self.addCommentViewPinned = YES;
+  CGRect frame = addCommentContainerView_.frame;
+  frame.origin.y = 148;
+  [UIView animateWithDuration:0.3 animations:^{
+    addCommentContainerView_.frame = frame;  
+  }];
   return YES;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-  [UIView animateWithDuration:0.2 animations:^{
+  [UIView animateWithDuration:0.3 animations:^{
     scrollView_.contentInset = UIEdgeInsetsMake(0, 0, kKeyboardHeight - 10, 0);
     scrollView_.contentOffset = CGPointMake(0, CGRectGetMaxY(activityView_.frame) - (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight));
   }];
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
-  [UIView animateWithDuration:0.2 animations:^{
+  addCommentViewDetached_ = NO;
+  self.addCommentViewPinned = NO;
+  [UIView animateWithDuration:0.3 animations:^{
     scrollView_.contentInset = UIEdgeInsetsZero;
   }];
 }
@@ -764,7 +776,11 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   }
 }
 
-- (void)setAddCommentFieldPinned:(BOOL)pinned {
+- (void)setAddCommentViewPinned:(BOOL)pinned {
+  if (addCommentViewPinned_ == pinned)
+    return;
+
+  addCommentViewPinned_ = pinned;
   if (!pinned) {
     CGRect addCommentFrame = addCommentContainerView_.frame;
     addCommentFrame.origin.x = 0;
@@ -775,11 +791,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   } else {
     CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
                                            fromView:addCommentContainerView_.superview];
-    addCommentFrame.origin.y = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetHeight(addCommentFrame);
+    if (!addCommentViewDetached_)
+      addCommentFrame.origin.y = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetHeight(addCommentFrame);
     addCommentContainerView_.frame = addCommentFrame;
     [self.view insertSubview:addCommentContainerView_ belowSubview:bottomToolbar_];
   }
-
+  
   CGFloat heightDelta = CGRectGetHeight(addCommentContainerView_.frame);
   if (pinned)
     heightDelta *= -1;
@@ -798,16 +815,13 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [CATransaction commit];
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-
+  
   [addCommentContainerView_ setNeedsDisplay];
 }
 
 - (void)adjustAddCommentView {
-  if (addCommentContainerView_.superview != self.view &&
-      addCommentContainerView_.superview != commentsView_) {
-    // The comments view is within the keyboard input accessory view. So...
+  if (addCommentViewDetached_)
     return;
-  }
 
   if (addCommentContainerView_.superview == self.view) {
     CGRect commentsFrame = [self.view convertRect:commentsView_.frame
@@ -815,7 +829,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) -
         (CGRectGetMaxY(commentsFrame) + CGRectGetHeight(addCommentContainerView_.frame));
     if (distance > 0) {
-      [self setAddCommentFieldPinned:NO];
+      self.addCommentViewPinned = NO;
     } else {
       CGFloat ratio = MAX(0, MIN(1.0, distance / -20.0f));
       CGRect addCommentFrame = addCommentContainerView_.frame;
@@ -834,7 +848,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                            fromView:addCommentContainerView_.superview];
     CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetMaxY(addCommentFrame);
     if (distance <= 0)
-      [self setAddCommentFieldPinned:YES];
+      self.addCommentViewPinned = YES;
   }
 }
 
