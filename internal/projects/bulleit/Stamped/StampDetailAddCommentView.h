@@ -8,6 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+@class UserImageView;
+
 @interface StampDetailAddCommentView : UIView
+
+@property (nonatomic, readonly) UserImageView* userImageView;
+@property (nonatomic, readonly) UITextField* commentTextField;
 
 @end

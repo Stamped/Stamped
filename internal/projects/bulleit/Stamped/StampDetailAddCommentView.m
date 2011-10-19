@@ -10,9 +10,46 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "UserImageView.h"
+
+@interface StampDetailAddCommentView ()
+- (void)setup;
+@end
+
 @implementation StampDetailAddCommentView
 
-- (void)awakeFromNib {
+@synthesize userImageView = userImageView_;
+@synthesize commentTextField = commentTextField_;
+
+- (id)initWithFrame:(CGRect)frame {
+  self = [super initWithFrame:frame];
+  if (self)
+    [self setup];
+
+  return self;
+}
+
+- (id)initWithCoder:(NSCoder*)aDecoder {
+  self = [super initWithCoder:aDecoder];
+  if (self)
+    [self setup];
+
+  return self;
+}
+
+- (void)setup {
+  self.backgroundColor = [UIColor whiteColor];
+  userImageView_ = [[UserImageView alloc] initWithFrame:CGRectMake(10, 11, 31, 31)];
+  [self addSubview:userImageView_];
+  [userImageView_ release];
+  commentTextField_ = [[UITextField alloc] initWithFrame:CGRectMake(52, 11, 250, 31)];
+  commentTextField_.placeholder = @"Add a comment";
+  commentTextField_.keyboardAppearance = UIKeyboardAppearanceAlert;
+  commentTextField_.font = [UIFont fontWithName:@"Helvetica" size:14];
+  commentTextField_.borderStyle = UITextBorderStyleRoundedRect;
+  commentTextField_.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+  [self addSubview:commentTextField_];
+  [commentTextField_ release];
   self.layer.shadowOffset = CGSizeZero;
   self.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
   self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;

@@ -12,6 +12,7 @@
 
 @class UserImageView;
 @class Stamp;
+@class StampDetailAddCommentView;
 
 @interface StampDetailViewController : UIViewController <UITextFieldDelegate,
                                                          RKObjectLoaderDelegate,
@@ -33,11 +34,9 @@
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* headerView;
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
-@property (nonatomic, retain) IBOutlet UITextField* addCommentField;
 @property (nonatomic, retain) IBOutlet UIView* commentsView;
 @property (nonatomic, retain) IBOutlet UIView* activityView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
-@property (nonatomic, retain) IBOutlet UserImageView* currentUserImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
@@ -52,6 +51,6 @@
 
 @property (nonatomic, retain) IBOutlet UIImageView* eDetailArrowImageView;
 
-@property (nonatomic, retain) IBOutlet UIView* addCommentContainerView;
+@property (nonatomic, retain) IBOutlet StampDetailAddCommentView* addCommentContainerView;
 
 @end

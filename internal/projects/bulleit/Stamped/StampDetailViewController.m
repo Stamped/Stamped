@@ -25,6 +25,7 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "StampDetailCommentView.h"
+#import "StampDetailAddCommentView.h"
 #import "ShowImageViewController.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
@@ -42,13 +43,11 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpHeader;
 - (void)setUpToolbar;
 - (void)setUpMainContentView;
-- (void)setUpCommentsView;
 - (void)addUserGradientBackground;
 - (void)addCreditedUser:(User*)creditedUser;
 - (NSAttributedString*)creditAttributedString:(User*)creditedUser;
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
-- (void)handleTap:(UITapGestureRecognizer*)recognizer;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleCommentUserImageViewTap:(NSNotification*)notification;
@@ -59,6 +58,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)preloadEntityView;
 - (void)setAddCommentFieldPinned:(BOOL)pinned;
 - (void)adjustAddCommentView;
+- (void)sendAddCommentRequest;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -71,11 +71,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize headerView = headerView_;
 @synthesize mainCommentContainer = mainCommentContainer_;
 @synthesize scrollView = scrollView_;
-@synthesize addCommentField = addCommentField_;
 @synthesize commentsView = commentsView_;
 @synthesize activityView = activityView_;
 @synthesize bottomToolbar = bottomToolbar_;
-@synthesize currentUserImageView = currentUserImageView_;
 @synthesize commenterImageView = commenterImageView_;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
@@ -112,7 +110,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.activityView = nil;
   self.mainCommentContainer = nil;
   self.scrollView = nil;
-  self.currentUserImageView = nil;
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
@@ -124,6 +121,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
+  self.addCommentContainerView.commentTextField.delegate = nil;
   self.addCommentContainerView = nil;
   [super dealloc];
 }
@@ -159,12 +157,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  UITapGestureRecognizer* gestureRecognizer =
-      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-  [self.view addGestureRecognizer:gestureRecognizer];
-  gestureRecognizer.cancelsTouchesInView = NO;
-  [gestureRecognizer release];
-
   [self setUpToolbar];
   [self setUpHeader];
 
@@ -178,10 +170,11 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   mainCommentContainer_.layer.shadowRadius = 2;
   mainCommentContainer_.layer.shadowPath =
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
-  
-  [self setUpMainContentView];
-  [self setUpCommentsView];
 
+  addCommentContainerView_.commentTextField.delegate = self;
+  addCommentContainerView_.userImageView.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
+
+  [self setUpMainContentView];
   [self renderComments];
   [self loadCommentsFromServer];
 }
@@ -195,7 +188,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.activityView = nil;
   self.mainCommentContainer = nil;
   self.scrollView = nil;
-  self.currentUserImageView = nil;
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
@@ -208,6 +200,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
+  self.addCommentContainerView.commentTextField.delegate = nil;
   self.addCommentContainerView = nil;
 }
 
@@ -533,10 +526,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   return [string autorelease];
 }
 
-- (void)setUpCommentsView {
-  currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
-}
-
 #pragma mark - Toolbar Actions
 
 - (IBAction)handleRestampButtonTap:(id)sender {
@@ -605,16 +594,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   detailViewController_ = [[Util detailViewControllerForEntity:stamp_.entityObject] retain];
 }
 
-- (void)handleTap:(UITapGestureRecognizer*)recognizer {
-  if (recognizer.state != UIGestureRecognizerStateEnded)
-    return;
-
-  if ([addCommentField_ isFirstResponder]) {
-    [addCommentField_ resignFirstResponder];
-    return;
-  }
-}
-
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
@@ -629,7 +608,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
-  [addCommentField_ resignFirstResponder];
   [self.navigationController pushViewController:detailViewController_ animated:YES];
 }
 
@@ -723,9 +701,20 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 #pragma mark - UITextFieldDelegate Methods.
 
+- (BOOL)textFieldShouldBeginEditing:(UITextField*)textField {
+  NSLog(@"Text field superview: %@", addCommentContainerView_.superview);
+  UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 53)];
+  accessoryView.backgroundColor = [UIColor whiteColor];
+  textField.inputAccessoryView = accessoryView;
+  [accessoryView release];
+  //[addCommentContainerView_ removeFromSuperview];
+  NSLog(@"Text field superview: %@", addCommentContainerView_.superview);
+  return YES;
+}
+
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [UIView animateWithDuration:0.2 animations:^{
-    scrollView_.contentInset = UIEdgeInsetsMake(0, 0, kKeyboardHeight - 60, 0);
+    scrollView_.contentInset = UIEdgeInsetsMake(0, 0, kKeyboardHeight - 10, 0);
     scrollView_.contentOffset = CGPointMake(0, CGRectGetMaxY(activityView_.frame) - (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight));
   }];
 }
@@ -737,31 +726,24 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
-  if (textField != addCommentField_)
-    return YES;
+  return YES;
+}
 
-  addCommentField_.hidden = YES;
-  currentUserImageView_.hidden = YES;
-  [addCommentField_ resignFirstResponder];
+- (void)sendAddCommentRequest {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateCommentPath delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-      addCommentField_.text, @"blurb",
-      stamp_.stampID, @"stamp_id", nil];
+                         addCommentContainerView_.commentTextField.text, @"blurb",
+                         stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
- 
-  return NO;
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  addCommentField_.hidden = NO;
-  currentUserImageView_.hidden = NO;
-
 	if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     Comment* comment = [objects objectAtIndex:0];
     [self addComment:comment];
@@ -769,8 +751,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] + 1];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
                                                         object:stamp_];
-    
-    addCommentField_.text = nil;
     return;
   } else if ([objectLoader.resourcePath rangeOfString:kCommentsPath].location != NSNotFound) {
     stamp_.numComments = [NSNumber numberWithUnsignedInteger:objects.count];
@@ -787,9 +767,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [[AccountManager sharedManager] refreshToken];
 
   if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
-    addCommentField_.hidden = NO;
-    currentUserImageView_.hidden = NO;
-    [addCommentField_ becomeFirstResponder];
+    // Problem with sending the comment...
   }
 }
 
@@ -858,6 +836,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   }
 
   if (addCommentContainerView_.superview == commentsView_) {
+    addCommentContainerView_.layer.shadowOpacity = 0;
     CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
                                            fromView:addCommentContainerView_.superview];
     CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetMaxY(addCommentFrame);
