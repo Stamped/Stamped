@@ -45,11 +45,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpMainContentView;
 - (void)addUserGradientBackground;
 - (void)addCreditedUser:(User*)creditedUser;
-- (NSAttributedString*)creditAttributedString:(User*)creditedUser;
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
-- (void)handleEntityTap:(id)sender;
 - (void)handleCommentUserImageViewTap:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
 - (void)renderComments;
@@ -367,9 +365,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   CGSize stringSize = [stamp_.blurb sizeWithFont:commentFont
                                constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                    lineBreakMode:commentLabel.lineBreakMode];
-
-  
-  
   
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
 
@@ -382,7 +377,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   
   if (stamp_.imageURL) {
     stampPhotoView_ = [[STImageView alloc] initWithFrame:CGRectZero];
-    NSArray* coordinates = [stamp_.imageDimensions componentsSeparatedByString:@","]; 
+    NSArray* coordinates = [stamp_.imageDimensions componentsSeparatedByString:@","];
     CGFloat width = [(NSString*)[coordinates objectAtIndex:0] floatValue];
     CGFloat height = [(NSString*)[coordinates objectAtIndex:1] floatValue];
     
@@ -478,39 +473,41 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [mainCommentContainer_.layer addSublayer:secondStampLayer];
   [secondStampLayer release];
   
-  CATextLayer* creditStringLayer = [[CATextLayer alloc] init];
-  creditStringLayer.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
-                                       CGRectGetMinY(secondStampLayer.frame) + 1, 200, 14);
-  creditStringLayer.truncationMode = kCATruncationEnd;
-  creditStringLayer.contentsScale = [[UIScreen mainScreen] scale];
-  creditStringLayer.fontSize = 12.0;
-  creditStringLayer.foregroundColor = [UIColor stampedGrayColor].CGColor;
-  creditStringLayer.string = [self creditAttributedString:creditedUser];
-  [mainCommentContainer_.layer addSublayer:creditStringLayer];
-  [creditStringLayer release];
+  TTTAttributedLabel* creditLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
+  creditLabel.delegate = self;
+  creditLabel.userInteractionEnabled = YES;
+  creditLabel.textColor = [UIColor stampedGrayColor];
+  creditLabel.font = [UIFont fontWithName:@"Helvetica" size:12.0];
+  creditLabel.dataDetectorTypes = UIDataDetectorTypeLink;
+  NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
+  CFRelease(font);
+  creditLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
+  creditLabel.text = [NSString stringWithFormat:@"%@ %@", @"Credit to", creditedUser.screenName];
+  [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
+                  withRange:[creditLabel.text rangeOfString:creditedUser.screenName
+                                                    options:NSBackwardsSearch]];
+  [creditLabel sizeToFit];
+  creditLabel.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
+                                 CGRectGetMinY(secondStampLayer.frame) - 1,
+                                 CGRectGetWidth(creditLabel.frame),
+                                 CGRectGetHeight(creditLabel.frame));
+  [mainCommentContainer_ addSubview:creditLabel];
+  [creditLabel release];
 }
 
-- (NSAttributedString*)creditAttributedString:(User*)creditedUser {
-  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
-  CFIndex numSettings = 1;
-  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
-  CTParagraphStyleSetting settings[1] = {
-    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
-  };
-  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* user = creditedUser.screenName;
-  NSString* full = [NSString stringWithFormat:@"%@ %@", @"Credit to", user];
-  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
-  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
-                         (id)style, (id)kCTParagraphStyleAttributeName,
-                         (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
-                  range:NSMakeRange(0, full.length)];
-  [string addAttribute:(NSString*)kCTFontAttributeName
-                 value:(id)font 
-                 range:[full rangeOfString:user options:NSBackwardsSearch]];
-  CFRelease(font);
-  CFRelease(style);
-  return [string autorelease];
+#pragma mark - TTTAttributedLabelDelegate methods.
+
+- (void)attributedLabel:(TTTAttributedLabel*)label didSelectLinkWithURL:(NSURL*)url {
+  NSString* userID = url.absoluteString;
+  User* user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
+  if (!user)
+    return;
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
 }
 
 #pragma mark - Toolbar Actions
@@ -591,7 +588,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [viewController release];
 }
 
-- (void)handleEntityTap:(id)sender {
+- (IBAction)handleEntityTap:(id)sender {
   [self.navigationController pushViewController:detailViewController_ animated:YES];
 }
 
@@ -691,7 +688,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   CGRect frame = addCommentContainerView_.frame;
   frame.origin.y = 148;
   [UIView animateWithDuration:0.3 animations:^{
-    addCommentContainerView_.frame = frame;  
+    addCommentContainerView_.frame = frame;
   }];
   return YES;
 }

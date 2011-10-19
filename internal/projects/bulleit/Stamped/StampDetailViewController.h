@@ -10,13 +10,16 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
+#import "TTTAttributedLabel.h"
+
 @class UserImageView;
 @class Stamp;
 @class StampDetailAddCommentView;
 
 @interface StampDetailViewController : UIViewController <UITextFieldDelegate,
                                                          RKObjectLoaderDelegate,
-                                                         UIScrollViewDelegate> {
+                                                         UIScrollViewDelegate,
+                                                         TTTAttributedLabelDelegate> {
  @private
   Stamp* stamp_;
   // Managed by the view system.
@@ -30,6 +33,7 @@
 - (IBAction)handleTodoButtonTap:(id)sender;
 - (IBAction)handleSendButtonTap:(id)sender;
 - (IBAction)handleLikeButtonTap:(id)sender;
+- (IBAction)handleEntityTap:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
