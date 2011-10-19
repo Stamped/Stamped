@@ -68,7 +68,7 @@ class StressTest(Greenlet):
         while True:
             t1 = time.time()
             
-            username = 'test_%d_%d' % (num_users, int(t1))
+            username = 't_%d_%d' % (num_users, int(t1))
             user = self.user_class(username, self)
             user.start()
             
