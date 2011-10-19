@@ -8,7 +8,20 @@
 
 #import "StampDetailAddCommentView.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 @implementation StampDetailAddCommentView
+
+- (void)awakeFromNib {
+  self.layer.shadowOffset = CGSizeZero;
+  self.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
+  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+}
+
+- (void)setFrame:(CGRect)frame {
+  [super setFrame:frame];
+  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+}
 
 - (void)drawRect:(CGRect)rect {
   CGContextRef ctx = UIGraphicsGetCurrentContext();

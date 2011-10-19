@@ -30,7 +30,7 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 - (id)initWithComment:(Comment*)comment {
   self = [super initWithFrame:CGRectZero];
   if (self) {
-    self.backgroundColor = [UIColor clearColor];
+    self.backgroundColor = [UIColor whiteColor];
     self.comment = comment;
     [self initViews];
   }

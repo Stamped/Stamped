@@ -851,6 +851,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
       CGFloat outset = ratio * 10;
       addCommentFrame.size.width = 310 + outset;
       addCommentFrame.origin.x = 5 - (outset / 2);
+      addCommentContainerView_.layer.shadowOpacity = ratio;
       addCommentContainerView_.frame = addCommentFrame;
       [addCommentContainerView_ setNeedsDisplay];
       return;
