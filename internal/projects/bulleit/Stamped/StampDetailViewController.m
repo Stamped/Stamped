@@ -25,6 +25,7 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "StampDetailCommentView.h"
+#import "StampDetailAddCommentView.h"
 #import "ShowImageViewController.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
@@ -42,42 +43,38 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setUpHeader;
 - (void)setUpToolbar;
 - (void)setUpMainContentView;
-- (void)setUpCommentsView;
 - (void)addUserGradientBackground;
 - (void)addCreditedUser:(User*)creditedUser;
-- (NSAttributedString*)creditAttributedString:(User*)creditedUser;
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
-- (void)handleTap:(UITapGestureRecognizer*)recognizer;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
-- (void)handleEntityTap:(UITapGestureRecognizer*)recognizer;
 - (void)handleCommentUserImageViewTap:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
 - (void)renderComments;
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
+- (void)adjustAddCommentView;
+- (void)sendAddCommentRequest;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
 @property (nonatomic, readonly) UILabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
+@property (nonatomic, assign) BOOL addCommentViewDetached;
+@property (nonatomic, assign) BOOL addCommentViewPinned;
 @end
 
 @implementation StampDetailViewController
 
-@synthesize headerView = headerView_;
 @synthesize mainCommentContainer = mainCommentContainer_;
 @synthesize scrollView = scrollView_;
-@synthesize addCommentField = addCommentField_;
 @synthesize commentsView = commentsView_;
 @synthesize activityView = activityView_;
 @synthesize bottomToolbar = bottomToolbar_;
-@synthesize currentUserImageView = currentUserImageView_;
 @synthesize commenterImageView = commenterImageView_;
 @synthesize commenterNameLabel = commenterNameLabel_;
 @synthesize stampedLabel = stampedLabel_;
-@synthesize loadingView = loadingView_;
 @synthesize addFavoriteButton = addFavoriteButton_;
 @synthesize addFavoriteLabel = addFavoriteLabel_;
 @synthesize likeButton = likeButton_;
@@ -87,10 +84,16 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize stampLabel = stampLabel_;
 @synthesize stampButton = stampButton_;
 @synthesize stampPhotoView = stampPhotoView_;
-@synthesize eDetailArrowImageView = eDetailArrowImageView_;
 @synthesize likeFaceImageView = likeFaceImageView_;
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
+@synthesize addCommentContainerView = addCommentContainerView_;
+@synthesize addCommentViewDetached = addCommentViewDetached_;
+@synthesize addCommentViewPinned = addCommentViewPinned_;
+@synthesize timestampLabel = timestampLabel_;
+@synthesize titleLabel = titleLabel_;
+@synthesize categoryImageView = categoryImageView_;
+@synthesize subtitleLabel = subtitleLabel_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -101,19 +104,20 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)dealloc {
+  [Stamp.managedObjectContext refreshObject:stamp_ mergeChanges:NO];
   [stamp_ release];
   [detailViewController_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.headerView = nil;
+  self.titleLabel = nil;
+  self.categoryImageView = nil;
+  self.subtitleLabel = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
   self.scrollView = nil;
-  self.currentUserImageView = nil;
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
-  self.loadingView = nil;
   self.addFavoriteButton = nil;
   self.addFavoriteLabel = nil;
   self.likeButton = nil;
@@ -122,6 +126,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
+  self.addCommentContainerView.commentTextField.delegate = nil;
+  self.addCommentContainerView = nil;
+  self.timestampLabel = nil;
   [super dealloc];
 }
 
@@ -156,14 +163,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
 
-  UITapGestureRecognizer* gestureRecognizer =
-      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-  [self.view addGestureRecognizer:gestureRecognizer];
-  gestureRecognizer.cancelsTouchesInView = NO;
-  [gestureRecognizer release];
-
-  scrollView_.contentSize = self.view.bounds.size;
-
   [self setUpToolbar];
   [self setUpHeader];
 
@@ -177,10 +176,11 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   mainCommentContainer_.layer.shadowRadius = 2;
   mainCommentContainer_.layer.shadowPath =
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
-  
-  [self setUpMainContentView];
-  [self setUpCommentsView];
 
+  addCommentContainerView_.commentTextField.delegate = self;
+  addCommentContainerView_.userImageView.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
+
+  [self setUpMainContentView];
   [self renderComments];
   [self loadCommentsFromServer];
 }
@@ -189,16 +189,16 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  self.headerView = nil;
+  self.titleLabel = nil;
+  self.categoryImageView = nil;
+  self.subtitleLabel = nil;
   self.bottomToolbar = nil;
   self.activityView = nil;
   self.mainCommentContainer = nil;
   self.scrollView = nil;
-  self.currentUserImageView = nil;
   self.commenterImageView = nil;
   self.commenterNameLabel = nil;
   self.stampedLabel = nil;
-  self.loadingView = nil;
   self.addFavoriteButton = nil;
   self.addFavoriteButton = nil;
   self.addFavoriteLabel = nil;
@@ -208,22 +208,21 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
+  self.addCommentContainerView.commentTextField.delegate = nil;
+  self.addCommentContainerView = nil;
+  self.timestampLabel = nil;
 }
 
 - (void)setUpHeader {
   NSString* fontString = @"TitlingGothicFBComp-Regular";
   CGFloat fontSize = 36.0;
   CGSize stringSize = [stamp_.entityObject.title sizeWithFont:[UIFont fontWithName:fontString size:fontSize]
-                                                     forWidth:250
+                                                     forWidth:270
                                                 lineBreakMode:UILineBreakModeTailTruncation];
-  
-  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, 15, stringSize.width, stringSize.height)];
-  nameLabel.font = [UIFont fontWithName:fontString size:fontSize];
-  nameLabel.text = stamp_.entityObject.title;
-  nameLabel.textColor = [UIColor colorWithWhite:0.37 alpha:1.0];
-  nameLabel.backgroundColor = [UIColor clearColor];
-  [headerView_ addSubview:nameLabel];
-  [nameLabel release];
+
+  titleLabel_.font = [UIFont fontWithName:fontString size:fontSize];
+  titleLabel_.text = stamp_.entityObject.title;
+  titleLabel_.textColor = [UIColor stampedDarkGrayColor];
 
   // Badge stamp.
   CALayer* stampLayer = [[CALayer alloc] init];
@@ -231,31 +230,13 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                 17 - (46 / 2),
                                 46, 46);
   stampLayer.contents = (id)stamp_.user.stampImage.CGImage;
-  [headerView_.layer addSublayer:stampLayer];
+  [scrollView_.layer insertSublayer:stampLayer above:titleLabel_.layer];
   [stampLayer release];
   
-  CALayer* typeIconLayer = [[CALayer alloc] init];
-  typeIconLayer.contentsGravity = kCAGravityResizeAspect;
-  typeIconLayer.contents = (id)stamp_.entityObject.categoryImage.CGImage;
-  typeIconLayer.frame = CGRectMake(17, 50, 15, 12);
-  [headerView_.layer addSublayer:typeIconLayer];
-  [typeIconLayer release];
-  
-  UILabel* detailLabel =
-      [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeIconLayer.frame) + 4, 49, 258, 15)];
-  detailLabel.opaque = NO;
-  detailLabel.backgroundColor = [UIColor clearColor];
-  detailLabel.text = stamp_.entityObject.subtitle;
-  detailLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
-  detailLabel.textColor = [UIColor stampedGrayColor];
-  [headerView_ addSubview:detailLabel];
-  [detailLabel release];
-
-  UITapGestureRecognizer* gestureRecognizer =
-      [[UITapGestureRecognizer alloc] initWithTarget:self 
-                                              action:@selector(handleEntityTap:)];
-  [headerView_ addGestureRecognizer:gestureRecognizer];
-  [gestureRecognizer release];
+  categoryImageView_.image = stamp_.entityObject.categoryImage;
+  subtitleLabel_.text = stamp_.entityObject.subtitle;
+  subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
+  subtitleLabel_.textColor = [UIColor stampedGrayColor];
 }
 
 - (void)setUpToolbar {
@@ -268,9 +249,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [toolbarGradient release];
 
   bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
-  bottomToolbar_.layer.shadowOpacity = 0.2;
+  bottomToolbar_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
+  bottomToolbar_.layer.shadowOpacity = 1;
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
-  bottomToolbar_.alpha = 0.9;
   
   if (stamp_.entityObject.favorite) {
     addFavoriteLabel_.text = @"To-Do'd";
@@ -312,7 +293,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   activityFrame.size.height = CGRectGetMaxY(mainCommentContainer_.frame) + CGRectGetHeight(commentsView_.bounds) + 5;
   activityView_.frame = activityFrame;
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityFrame) + kKeyboardHeight);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
   [CATransaction begin];
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   activityGradientLayer_.frame = activityView_.bounds;
@@ -367,29 +348,24 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   stampedLabel_.frame = stampedFrame;
   stampedLabel_.textColor = [UIColor stampedGrayColor];
 
-  UILabel* timestampLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  timestampLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
-  timestampLabel.textColor = [UIColor stampedLightGrayColor];
-  timestampLabel.textAlignment = UITextAlignmentRight;
-  timestampLabel.text = [Util shortUserReadableTimeSinceDate:stamp_.created];
-  [timestampLabel sizeToFit];
-  timestampLabel.frame = CGRectMake(310 - CGRectGetWidth(timestampLabel.frame) - 10,
-                                    10,
-                                    CGRectGetWidth(timestampLabel.frame),
-                                    CGRectGetHeight(timestampLabel.frame));
-  [mainCommentContainer_ addSubview:timestampLabel];
-  [timestampLabel release];
+  timestampLabel_.text = [Util shortUserReadableTimeSinceDate:stamp_.created];
+  [timestampLabel_ sizeToFit];
+  timestampLabel_.frame = CGRectMake(310 - CGRectGetWidth(timestampLabel_.frame) - 10,
+                                     10,
+                                     CGRectGetWidth(timestampLabel_.frame),
+                                     CGRectGetHeight(timestampLabel_.frame));
+  
   
   UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
   UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.font = commentFont;
-  commentLabel.textColor = [UIColor colorWithWhite:0.2 alpha:1.0];
+  commentLabel.textColor = [UIColor stampedBlackColor];
   commentLabel.text = stamp_.blurb;
   commentLabel.numberOfLines = 0;
   CGSize stringSize = [stamp_.blurb sizeWithFont:commentFont
                                constrainedToSize:CGSizeMake(210, MAXFLOAT)
                                    lineBreakMode:commentLabel.lineBreakMode];
-
+  
   const CGFloat leftPadding = CGRectGetMaxX(commenterImageView_.frame) + 10;
 
   commentLabel.frame = CGRectMake(leftPadding, 25, stringSize.width, stringSize.height);
@@ -401,7 +377,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   
   if (stamp_.imageURL) {
     stampPhotoView_ = [[STImageView alloc] initWithFrame:CGRectZero];
-    NSArray* coordinates = [stamp_.imageDimensions componentsSeparatedByString:@","]; 
+    NSArray* coordinates = [stamp_.imageDimensions componentsSeparatedByString:@","];
     CGFloat width = [(NSString*)[coordinates objectAtIndex:0] floatValue];
     CGFloat height = [(NSString*)[coordinates objectAtIndex:1] floatValue];
     
@@ -497,43 +473,41 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [mainCommentContainer_.layer addSublayer:secondStampLayer];
   [secondStampLayer release];
   
-  CATextLayer* creditStringLayer = [[CATextLayer alloc] init];
-  creditStringLayer.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
-                                       CGRectGetMinY(secondStampLayer.frame) + 1, 200, 14);
-  creditStringLayer.truncationMode = kCATruncationEnd;
-  creditStringLayer.contentsScale = [[UIScreen mainScreen] scale];
-  creditStringLayer.fontSize = 12.0;
-  creditStringLayer.foregroundColor = [UIColor stampedGrayColor].CGColor;
-  creditStringLayer.string = [self creditAttributedString:creditedUser];
-  [mainCommentContainer_.layer addSublayer:creditStringLayer];
-  [creditStringLayer release];
-}
-
-- (NSAttributedString*)creditAttributedString:(User*)creditedUser {
+  TTTAttributedLabel* creditLabel = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
+  creditLabel.delegate = self;
+  creditLabel.userInteractionEnabled = YES;
+  creditLabel.textColor = [UIColor stampedGrayColor];
+  creditLabel.font = [UIFont fontWithName:@"Helvetica" size:12.0];
+  creditLabel.dataDetectorTypes = UIDataDetectorTypeLink;
+  NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
-  CFIndex numSettings = 1;
-  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
-  CTParagraphStyleSetting settings[1] = {
-    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
-  };
-  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* user = creditedUser.screenName;
-  NSString* full = [NSString stringWithFormat:@"%@ %@", @"Credit to", user];
-  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
-  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
-                         (id)style, (id)kCTParagraphStyleAttributeName,
-                         (id)[UIColor stampedGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
-                  range:NSMakeRange(0, full.length)];
-  [string addAttribute:(NSString*)kCTFontAttributeName
-                 value:(id)font 
-                 range:[full rangeOfString:user options:NSBackwardsSearch]];
+  [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
   CFRelease(font);
-  CFRelease(style);
-  return [string autorelease];
+  creditLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
+  creditLabel.text = [NSString stringWithFormat:@"%@ %@", @"Credit to", creditedUser.screenName];
+  [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
+                  withRange:[creditLabel.text rangeOfString:creditedUser.screenName
+                                                    options:NSBackwardsSearch]];
+  [creditLabel sizeToFit];
+  creditLabel.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
+                                 CGRectGetMinY(secondStampLayer.frame) - 1,
+                                 CGRectGetWidth(creditLabel.frame),
+                                 CGRectGetHeight(creditLabel.frame));
+  [mainCommentContainer_ addSubview:creditLabel];
+  [creditLabel release];
 }
 
-- (void)setUpCommentsView {
-  currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
+#pragma mark - TTTAttributedLabelDelegate methods.
+
+- (void)attributedLabel:(TTTAttributedLabel*)label didSelectLinkWithURL:(NSURL*)url {
+  NSString* userID = url.absoluteString;
+  User* user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
+  if (!user)
+    return;
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
 }
 
 #pragma mark - Toolbar Actions
@@ -604,16 +578,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   detailViewController_ = [[Util detailViewControllerForEntity:stamp_.entityObject] retain];
 }
 
-- (void)handleTap:(UITapGestureRecognizer*)recognizer {
-  if (recognizer.state != UIGestureRecognizerStateEnded)
-    return;
-
-  if ([addCommentField_ isFirstResponder]) {
-    [addCommentField_ resignFirstResponder];
-    return;
-  }
-}
-
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
@@ -624,11 +588,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [viewController release];
 }
 
-- (void)handleEntityTap:(UITapGestureRecognizer*)recognizer {
-  if (recognizer.state != UIGestureRecognizerStateEnded)
-    return;
-
-  [addCommentField_ resignFirstResponder];
+- (IBAction)handleEntityTap:(id)sender {
   [self.navigationController pushViewController:detailViewController_ animated:YES];
 }
 
@@ -668,6 +628,16 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     if (c.restampID == nil)
       [self addComment:c];
   }
+  StampDetailCommentView* commentView = nil;
+  for (UIView* view in commentsView_.subviews) {
+    if ([view isMemberOfClass:[StampDetailCommentView class]]) {
+      commentView = (StampDetailCommentView*)view;
+      commentView.borderHidden = NO;
+    }
+  }
+  
+  commentView.borderHidden = YES;
+  [self adjustAddCommentView];
 }
 
 - (void)addComment:(Comment*)comment {
@@ -707,52 +677,56 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [CATransaction commit];
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.view.bounds), CGRectGetMaxY(activityView_.frame) + 60);
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
 }
 
 #pragma mark - UITextFieldDelegate Methods.
 
+- (BOOL)textFieldShouldBeginEditing:(UITextField*)textField {
+  addCommentViewDetached_ = YES;
+  self.addCommentViewPinned = YES;
+  CGRect frame = addCommentContainerView_.frame;
+  frame.origin.y = 148;
+  [UIView animateWithDuration:0.3 animations:^{
+    addCommentContainerView_.frame = frame;
+  }];
+  return YES;
+}
+
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-  [UIView animateWithDuration:0.2 animations:^{
-    scrollView_.contentInset = UIEdgeInsetsMake(0, 0, kKeyboardHeight - 60, 0);
+  [UIView animateWithDuration:0.3 animations:^{
+    scrollView_.contentInset = UIEdgeInsetsMake(0, 0, kKeyboardHeight - 10, 0);
     scrollView_.contentOffset = CGPointMake(0, CGRectGetMaxY(activityView_.frame) - (CGRectGetHeight(scrollView_.frame) - kKeyboardHeight));
   }];
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
-  [UIView animateWithDuration:0.2 animations:^{
+  addCommentViewDetached_ = NO;
+  self.addCommentViewPinned = NO;
+  [UIView animateWithDuration:0.3 animations:^{
     scrollView_.contentInset = UIEdgeInsetsZero;
   }];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
-  if (textField != addCommentField_)
-    return YES;
+  return YES;
+}
 
-  addCommentField_.hidden = YES;
-  currentUserImageView_.hidden = YES;
-  [loadingView_ startAnimating];
-  [addCommentField_ resignFirstResponder];
+- (void)sendAddCommentRequest {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateCommentPath delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-      addCommentField_.text, @"blurb",
-      stamp_.stampID, @"stamp_id", nil];
+                         addCommentContainerView_.commentTextField.text, @"blurb",
+                         stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
- 
-  return NO;
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  [loadingView_ stopAnimating];
-  addCommentField_.hidden = NO;
-  currentUserImageView_.hidden = NO;
-
 	if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     Comment* comment = [objects objectAtIndex:0];
     [self addComment:comment];
@@ -760,8 +734,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] + 1];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
                                                         object:stamp_];
-    
-    addCommentField_.text = nil;
     return;
   } else if ([objectLoader.resourcePath rangeOfString:kCommentsPath].location != NSNotFound) {
     stamp_.numComments = [NSNumber numberWithUnsignedInteger:objects.count];
@@ -778,11 +750,90 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [[AccountManager sharedManager] refreshToken];
 
   if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
-    [loadingView_ stopAnimating];
-    addCommentField_.hidden = NO;
-    currentUserImageView_.hidden = NO;
-    [addCommentField_ becomeFirstResponder];
+    // Problem with sending the comment...
   }
+}
+
+- (void)setAddCommentViewPinned:(BOOL)pinned {
+  if (addCommentViewPinned_ == pinned)
+    return;
+
+  addCommentViewPinned_ = pinned;
+  if (!pinned) {
+    CGRect addCommentFrame = addCommentContainerView_.frame;
+    addCommentFrame.origin.x = 0;
+    addCommentFrame.size.width = 310;
+    addCommentFrame.origin.y = CGRectGetHeight(commentsView_.frame) - CGRectGetHeight(addCommentFrame);
+    addCommentContainerView_.frame = addCommentFrame;
+    [commentsView_ addSubview:addCommentContainerView_];
+  } else {
+    CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
+                                           fromView:addCommentContainerView_.superview];
+    if (!addCommentViewDetached_)
+      addCommentFrame.origin.y = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetHeight(addCommentFrame);
+    addCommentContainerView_.frame = addCommentFrame;
+    [self.view insertSubview:addCommentContainerView_ belowSubview:bottomToolbar_];
+  }
+  
+  CGFloat heightDelta = CGRectGetHeight(addCommentContainerView_.frame);
+  if (pinned)
+    heightDelta *= -1;
+  
+  CGRect frame = commentsView_.frame;
+  frame.size.height += heightDelta;
+  frame.origin.y -= heightDelta;
+  commentsView_.frame = frame;
+  
+  frame = activityView_.frame;
+  frame.size.height += heightDelta;
+  activityView_.frame = frame;
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+  activityGradientLayer_.frame = activityView_.bounds;
+  [CATransaction commit];
+  [activityGradientLayer_ setNeedsDisplay];
+  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+  
+  [addCommentContainerView_ setNeedsDisplay];
+}
+
+- (void)adjustAddCommentView {
+  if (addCommentViewDetached_)
+    return;
+
+  if (addCommentContainerView_.superview == self.view) {
+    CGRect commentsFrame = [self.view convertRect:commentsView_.frame
+                                         fromView:commentsView_.superview];
+    CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) -
+        (CGRectGetMaxY(commentsFrame) + CGRectGetHeight(addCommentContainerView_.frame));
+    if (distance > 0) {
+      self.addCommentViewPinned = NO;
+    } else {
+      CGFloat ratio = MAX(0, MIN(1.0, distance / -20.0f));
+      CGRect addCommentFrame = addCommentContainerView_.frame;
+      CGFloat outset = ratio * 10;
+      addCommentFrame.size.width = 310 + outset;
+      addCommentFrame.origin.x = 5 - (outset / 2);
+      addCommentContainerView_.layer.shadowOpacity = ratio;
+      addCommentContainerView_.frame = addCommentFrame;
+      return;
+    }
+  }
+
+  if (addCommentContainerView_.superview == commentsView_) {
+    addCommentContainerView_.layer.shadowOpacity = 0;
+    CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
+                                           fromView:addCommentContainerView_.superview];
+    CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetMaxY(addCommentFrame);
+    if (distance <= 0)
+      self.addCommentViewPinned = YES;
+  }
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  [self adjustAddCommentView];
 }
 
 @end

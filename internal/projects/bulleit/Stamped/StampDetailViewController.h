@@ -10,11 +10,16 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
+#import "TTTAttributedLabel.h"
+
 @class UserImageView;
 @class Stamp;
+@class StampDetailAddCommentView;
 
 @interface StampDetailViewController : UIViewController <UITextFieldDelegate,
-                                                         RKObjectLoaderDelegate> {
+                                                         RKObjectLoaderDelegate,
+                                                         UIScrollViewDelegate,
+                                                         TTTAttributedLabelDelegate> {
  @private
   Stamp* stamp_;
   // Managed by the view system.
@@ -28,19 +33,16 @@
 - (IBAction)handleTodoButtonTap:(id)sender;
 - (IBAction)handleSendButtonTap:(id)sender;
 - (IBAction)handleLikeButtonTap:(id)sender;
+- (IBAction)handleEntityTap:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
-@property (nonatomic, retain) IBOutlet UIView* headerView;
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
-@property (nonatomic, retain) IBOutlet UITextField* addCommentField;
 @property (nonatomic, retain) IBOutlet UIView* commentsView;
 @property (nonatomic, retain) IBOutlet UIView* activityView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
-@property (nonatomic, retain) IBOutlet UserImageView* currentUserImageView;
 @property (nonatomic, retain) IBOutlet UserImageView* commenterImageView;
 @property (nonatomic, retain) IBOutlet UILabel* commenterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* stampedLabel;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIButton* addFavoriteButton;
 @property (nonatomic, retain) IBOutlet UILabel* addFavoriteLabel;
 @property (nonatomic, retain) IBOutlet UIButton* likeButton;
@@ -49,7 +51,10 @@
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* stampButton;
 @property (nonatomic, retain) IBOutlet UILabel* stampLabel;
-
-@property (nonatomic, retain) IBOutlet UIImageView* eDetailArrowImageView;
+@property (nonatomic, retain) IBOutlet UILabel* titleLabel;
+@property (nonatomic, retain) IBOutlet UILabel* subtitleLabel;
+@property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
+@property (nonatomic, retain) IBOutlet UILabel* timestampLabel;
+@property (nonatomic, retain) IBOutlet StampDetailAddCommentView* addCommentContainerView;
 
 @end

@@ -41,13 +41,13 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (self._baseurl, path, params)
         
-        utils.log("GET:  %s" % url)
+        # utils.log("GET:  %s" % url)
         raw = self._opener.open(url).read()
         
         try:
             result = json.loads(raw)
         except:
-            utils.log(raw)
+            # utils.log(raw)
             raise
         
         return result
@@ -56,15 +56,15 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s" % (self._baseurl, path)
         
-        utils.log("POST: %s" % url)
-        pprint(params)
+        # utils.log("POST: %s" % url)
+        # pprint(params)
         
         raw = self._opener.open(url, params).read()
         
         try:
             result = json.loads(raw)
         except:
-            utils.log(raw)
+            # utils.log(raw)
             raise
         
         return result

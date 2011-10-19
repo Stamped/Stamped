@@ -273,7 +273,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   [accessoryView release];
 
   titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:36];
-  titleLabel_.textColor = [UIColor colorWithWhite:0.3 alpha:1.0];
+  titleLabel_.textColor = [UIColor stampedDarkGrayColor];
 
   stampLayer_ = [[CALayer alloc] init];
   stampLayer_.contents = (id)[AccountManager sharedManager].currentUser.stampImage.CGImage;
