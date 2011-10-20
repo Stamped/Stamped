@@ -43,7 +43,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 typedef enum {
   StampDetailActionTypeDeleteComment = 0,
   StampDetailActionTypeRetrySend,
-  StampDetailActionTypeDeleteStamp
+  StampDetailActionTypeDeleteStamp,
+  StampDetailActionTypeShare
 } StampDetailActionType;
 
 @interface StampDetailViewController ()
@@ -581,8 +582,16 @@ typedef enum {
   [objectLoader send];
 }
 
-- (IBAction)handleSendButtonTap:(id)sender {
-
+- (IBAction)handleShareButtonTap:(id)sender {
+  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:nil
+                                                      delegate:self
+                                             cancelButtonTitle:@"Cancel"
+                                        destructiveButtonTitle:nil
+                                             otherButtonTitles:@"Email", @"Send to Twitter", @"Post on Facebook", nil] autorelease];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  sheet.tag = StampDetailActionTypeShare;
+  [sheet showInView:self.view];
+  return;
 }
 
 - (IBAction)handleLikeButtonTap:(id)sender {

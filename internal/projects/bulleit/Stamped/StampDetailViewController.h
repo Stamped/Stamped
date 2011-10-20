@@ -35,7 +35,7 @@ extern NSString* const kRemoveCommentPath;
 - (id)initWithStamp:(Stamp*)stamp;
 - (IBAction)handleRestampButtonTap:(id)sender;
 - (IBAction)handleTodoButtonTap:(id)sender;
-- (IBAction)handleSendButtonTap:(id)sender;
+- (IBAction)handleShareButtonTap:(id)sender;
 - (IBAction)handleLikeButtonTap:(id)sender;
 - (IBAction)handleEntityTap:(id)sender;
 - (IBAction)sendButtonPressed:(id)sender;
