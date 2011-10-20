@@ -60,6 +60,7 @@ typedef enum {
 - (void)handleUserImageViewTap:(id)sender;
 - (void)renderComments;
 - (void)addComment:(Comment*)comment;
+- (void)removeComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
 - (void)sendAddCommentRequest;
@@ -732,6 +733,34 @@ typedef enum {
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
 }
 
+- (void)removeComment:(Comment*)comment {
+  StampDetailCommentView* commentView = nil;
+  for (StampDetailCommentView* view in commentViews_) {
+    if ([view.comment.commentID isEqualToString:comment.commentID]) {
+      commentView = view;
+      break;
+    }
+  }
+  [commentViews_ removeObject:commentView];
+  CGRect frame = commentsView_.frame;
+  frame.size.height -= CGRectGetHeight(commentView.frame);
+  frame.origin.y += CGRectGetHeight(commentView.frame);
+  commentsView_.frame = frame;
+  
+  frame = activityView_.frame;
+  frame.size.height -= CGRectGetHeight(commentView.frame);
+  [commentView removeFromSuperview];
+  activityView_.frame = frame;
+  [CATransaction begin];
+  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+  activityGradientLayer_.frame = activityView_.bounds;
+  [CATransaction commit];
+  [activityGradientLayer_ setNeedsDisplay];
+  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
+  
+}
+
 #pragma mark - Keyboard notifications.
 
 - (void)keyboardWillAppear:(NSNotification*)notification {
@@ -777,13 +806,15 @@ typedef enum {
     }
   } else if (actionSheet.tag == StampDetailActionTypeDeleteComment) {
     if (buttonIndex == 0) {  // DELETE.
-      NSString* commentID = nil;
+      Comment* comment = nil;
       for (StampDetailCommentView* view in commentViews_) {
         if (view.editing)
-          commentID = view.comment.commentID;
+          comment = view.comment;
       }
-      if (commentID)
-        [self sendRemoveCommentRequest:commentID];
+      if (comment) {
+        [self removeComment:comment];
+        [self sendRemoveCommentRequest:comment.commentID];
+      }
     } else { // Cancel.
       for (StampDetailCommentView* view in commentViews_)
         view.editing = NO;
