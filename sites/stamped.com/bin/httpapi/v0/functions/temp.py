@@ -93,6 +93,11 @@ def timeout(request):
 
     time.sleep(55)
 
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def ping(request):
+    return transformOutput(true)
+
 
 
 
