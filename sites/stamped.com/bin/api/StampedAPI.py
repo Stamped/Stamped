@@ -1226,6 +1226,7 @@ class StampedAPI(AStampedAPI):
         
         # Add the stamp data to the database
         stamp = self._stampDB.addStamp(stamp)
+        ### TODO: Rollback adds stamp to "deleted stamps" table. Fix that.
         self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
         
         # Add image to stamp
