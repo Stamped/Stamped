@@ -13,6 +13,8 @@
 #import "TTTAttributedLabel.h"
 #import "StampDetailCommentView.h"
 
+extern NSString* const kRemoveCommentPath;
+
 @class UserImageView;
 @class Stamp;
 

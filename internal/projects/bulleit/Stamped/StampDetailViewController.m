@@ -28,6 +28,9 @@
 #import "ShowImageViewController.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+#import "SharedRequestDelegate.h"
+
+NSString* const kRemoveCommentPath = @"/comments/remove.json";
 
 static const CGFloat kMainCommentFrameMinHeight = 75.0;
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
@@ -35,7 +38,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 static NSString* const kCreateLikePath = @"/stamps/likes/create.json";
 static NSString* const kRemoveLikePath = @"/stamps/likes/remove.json";
 static NSString* const kCreateCommentPath = @"/comments/create.json";
-static NSString* const kRemoveCommentPath = @"/comments/remove.json";
 static NSString* const kCommentsPath = @"/comments/show.json";
 
 typedef enum {
@@ -61,6 +63,7 @@ typedef enum {
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
 - (void)sendAddCommentRequest;
+- (void)sendRemoveCommentRequest:(NSString*)commentID;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -594,7 +597,7 @@ typedef enum {
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = stampMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:stamp_.stampID, @"stamp_id", nil];
-  
+
   [objectLoader send];
 }
 
@@ -643,6 +646,9 @@ typedef enum {
 #pragma mark - StampDetailCommentViewDelegate methods.
 
 - (BOOL)commentViewShouldBeginEditing:(StampDetailCommentView*)commentView {
+  for (StampDetailCommentView* view in commentViews_)
+    view.editing = NO;
+
   User* currentUser = [AccountManager sharedManager].currentUser;
   if ([stamp_.user.userID isEqualToString:currentUser.userID] || [commentView.comment.user.userID isEqualToString:currentUser.userID])
     return YES;
@@ -771,7 +777,13 @@ typedef enum {
     }
   } else if (actionSheet.tag == StampDetailActionTypeDeleteComment) {
     if (buttonIndex == 0) {  // DELETE.
-      NSLog(@"Delete the comment.");
+      NSString* commentID = nil;
+      for (StampDetailCommentView* view in commentViews_) {
+        if (view.editing)
+          commentID = view.comment.commentID;
+      }
+      if (commentID)
+        [self sendRemoveCommentRequest:commentID];
     } else { // Cancel.
       for (StampDetailCommentView* view in commentViews_)
         view.editing = NO;
@@ -818,6 +830,17 @@ typedef enum {
   [self sendAddCommentRequest];
 }
 
+- (void)sendRemoveCommentRequest:(NSString*)commentID {
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kRemoveCommentPath 
+                                                                    delegate:[SharedRequestDelegate sharedDelegate]];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = commentMapping;
+  objectLoader.params = [NSDictionary dictionaryWithObject:commentID forKey:@"comment_id"];
+  [objectLoader send];
+}
+
 - (void)sendAddCommentRequest {
   [sendButton_ setTitle:nil forState:UIControlStateNormal];
   [sendButton_ setImage:nil forState:UIControlStateNormal];
@@ -836,7 +859,7 @@ typedef enum {
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-	if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
+  if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     lastCommentAttemptFailed_ = NO;
     [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
     [sendIndicator_ stopAnimating];

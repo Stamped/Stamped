@@ -135,6 +135,7 @@
 		7E407E8F14507BF300D7847F /* comment_fail_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E407E8D14507BF300D7847F /* comment_fail_button_bg@2x.png */; };
 		7E407E9014507BF300D7847F /* comment_fail_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E407E8E14507BF300D7847F /* comment_fail_icon@2x.png */; };
 		7E407E9214508E5800D7847F /* delete_comment_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E407E9114508E5700D7847F /* delete_comment_icon@2x.png */; };
+		7E407E951450A55200D7847F /* SharedRequestDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E941450A55100D7847F /* SharedRequestDelegate.m */; };
 		7E428A8513EB2C72004CA2B2 /* stacks_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */; };
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
 		7E42DCBD13DB64CA00AF63BE /* SearchEntitiesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */; };
@@ -730,6 +731,8 @@
 		7E407E8D14507BF300D7847F /* comment_fail_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "comment_fail_button_bg@2x.png"; sourceTree = "<group>"; };
 		7E407E8E14507BF300D7847F /* comment_fail_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "comment_fail_icon@2x.png"; sourceTree = "<group>"; };
 		7E407E9114508E5700D7847F /* delete_comment_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "delete_comment_icon@2x.png"; sourceTree = "<group>"; };
+		7E407E931450A55100D7847F /* SharedRequestDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedRequestDelegate.h; sourceTree = "<group>"; };
+		7E407E941450A55100D7847F /* SharedRequestDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SharedRequestDelegate.m; sourceTree = "<group>"; };
 		7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacks_back_button@2x.png"; sourceTree = "<group>"; };
 		7E42DCB913DB64CA00AF63BE /* SearchEntitiesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesViewController.h; sourceTree = "<group>"; };
 		7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesViewController.m; sourceTree = "<group>"; };
@@ -2061,6 +2064,8 @@
 				7E3B6D7913D7509600FBE958 /* Util.m */,
 				7E3909341401975C00910F98 /* Notifications.h */,
 				7E3909351401975C00910F98 /* Notifications.m */,
+				7E407E931450A55100D7847F /* SharedRequestDelegate.h */,
+				7E407E941450A55100D7847F /* SharedRequestDelegate.m */,
 				7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */,
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E2267D813D52FF500657A66 /* Model */,
@@ -2779,6 +2784,7 @@
 				7E407E84144F462400D7847F /* NSAttributedString+Attributes.m in Sources */,
 				7E407E85144F462400D7847F /* TTTAttributedLabel.m in Sources */,
 				7E407E8C144FB05D00D7847F /* STAddCommentTextField.m in Sources */,
+				7E407E951450A55200D7847F /* SharedRequestDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
