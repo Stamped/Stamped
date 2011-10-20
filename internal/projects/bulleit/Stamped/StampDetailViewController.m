@@ -25,7 +25,6 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "StampDetailCommentView.h"
-#import "StampDetailAddCommentView.h"
 #import "ShowImageViewController.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
@@ -56,15 +55,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)addComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
 - (void)preloadEntityView;
-- (void)adjustAddCommentView;
 - (void)sendAddCommentRequest;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
 @property (nonatomic, readonly) UILabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
-@property (nonatomic, assign) BOOL addCommentViewDetached;
-@property (nonatomic, assign) BOOL addCommentViewPinned;
 @end
 
 @implementation StampDetailViewController
@@ -89,13 +85,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize likeFaceImageView = likeFaceImageView_;
 @synthesize numLikesLabel = numLikesLabel_;
 @synthesize numLikes = numLikes_;
-@synthesize addCommentContainerView = addCommentContainerView_;
-@synthesize addCommentViewDetached = addCommentViewDetached_;
-@synthesize addCommentViewPinned = addCommentViewPinned_;
 @synthesize timestampLabel = timestampLabel_;
 @synthesize titleLabel = titleLabel_;
 @synthesize categoryImageView = categoryImageView_;
 @synthesize subtitleLabel = subtitleLabel_;
+@synthesize currentUserImageView = currentUserImageView_;
+@synthesize commentTextField = commentTextField_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -128,9 +123,9 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
-  self.addCommentContainerView.commentTextField.delegate = nil;
-  self.addCommentContainerView = nil;
   self.timestampLabel = nil;
+  self.currentUserImageView = nil;
+  self.commentTextField = nil;
   [super dealloc];
 }
 
@@ -187,8 +182,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   mainCommentContainer_.layer.shadowPath =
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
 
-  addCommentContainerView_.commentTextField.delegate = self;
-  addCommentContainerView_.userImageView.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
+  currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
 
   [self setUpMainContentView];
   [self renderComments];
@@ -218,8 +212,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.shareButton = nil;
   self.stampLabel = nil;
   self.stampButton = nil;
-  self.addCommentContainerView.commentTextField.delegate = nil;
-  self.addCommentContainerView = nil;
+  self.currentUserImageView = nil;
+  self.commentTextField = nil;
   self.timestampLabel = nil;
 }
 
@@ -644,7 +638,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     if (c.restampID == nil)
       [self addComment:c];
   }
-  [self adjustAddCommentView];
 }
 
 - (void)addComment:(Comment*)comment {
@@ -691,24 +684,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)keyboardWillAppear:(NSNotification*)notification {
   CGRect keyboardFrame = [[[notification userInfo] valueForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-  addCommentViewDetached_ = YES;
-  self.addCommentViewPinned = YES;
-  CGRect frame = addCommentContainerView_.frame;
-  frame.origin.y = CGRectGetHeight(self.view.frame) -
-      CGRectGetHeight(keyboardFrame) - CGRectGetHeight(frame);
-  frame.origin.x = 0;
-  frame.size.width = CGRectGetWidth(self.view.frame);
-  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) -
-      CGRectGetHeight(keyboardFrame) - CGRectGetHeight(addCommentContainerView_.frame);
-  CGFloat contentHeight = CGRectGetMaxY(activityView_.frame);
-
-  // This must be within its own block without |UIViewAnimationOptionBeginFromCurrentState|
-  // because otherwise it will begin from its original frame position if within the
-  // comments container.
-  [UIView animateWithDuration:0.3 animations:^{
-    addCommentContainerView_.frame = frame;
-    addCommentContainerView_.layer.shadowOpacity = 1.0;
-  }];
+  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(keyboardFrame);
+  CGFloat contentHeight = CGRectGetMaxY(activityView_.frame) + 10;
 
   [UIView animateWithDuration:0.3
                         delay:0.0
@@ -716,52 +693,19 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                    animations:^{
                      scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
                      scrollView_.contentOffset = CGPointMake(0, contentHeight - scrollHeight);
-                     scrollView_.contentSize = CGSizeMake(320, contentHeight);
-
-                     CGFloat heightDelta = CGRectGetHeight(keyboardFrame);
-                     CGRect frame = commentsView_.frame;
-                     frame.size.height += heightDelta;
-                     frame.origin.y -= heightDelta;
-                     commentsView_.frame = frame;
-                     
-                     frame = activityView_.frame;
-                     frame.size.height += heightDelta;
-                     activityView_.frame = frame;
                    }
-                   completion:^(BOOL finished) {
-                     activityGradientLayer_.frame = activityView_.bounds;
-                     activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-                   }];
+                   completion:nil];
 }
 
 - (void)keyboardWillDisappear:(NSNotification*)notification {
-  CGRect keyboardFrame = [[[notification userInfo] valueForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
   CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(bottomToolbar_.frame);
-  CGFloat contentHeight = CGRectGetMaxY(activityView_.frame) - CGRectGetHeight(keyboardFrame);
   [UIView animateWithDuration:0.3
                         delay:0.0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
                      scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
-                     scrollView_.contentOffset = CGPointZero;
-                     scrollView_.contentSize = CGSizeMake(320, contentHeight);
-                     
-                     CGFloat heightDelta = -CGRectGetHeight(keyboardFrame);
-                     CGRect frame = commentsView_.frame;
-                     frame.size.height += heightDelta;
-                     frame.origin.y -= heightDelta;
-                     commentsView_.frame = frame;
-                     
-                     frame = activityView_.frame;
-                     frame.size.height += heightDelta;
-                     activityView_.frame = frame;
-                     addCommentViewDetached_ = NO;
-                     self.addCommentViewPinned = NO;
                    }
-                   completion:^(BOOL finished) {
-                     activityGradientLayer_.frame = activityView_.bounds;
-                     activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-                   }];
+                   completion:nil];
 }
 
 #pragma mark - UITextFieldDelegate Methods.
@@ -790,7 +734,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = commentMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:
-                         addCommentContainerView_.commentTextField.text, @"blurb",
+                         commentTextField_.text, @"blurb",
                          stamp_.stampID, @"stamp_id", nil];
   [objectLoader send];
 }
@@ -823,88 +767,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     // Problem with sending the comment...
   }
-}
-
-- (void)setAddCommentViewPinned:(BOOL)pinned {
-  if (addCommentViewPinned_ == pinned)
-    return;
-
-  addCommentViewPinned_ = pinned;
-  if (!pinned) {
-    CGRect addCommentFrame = addCommentContainerView_.frame;
-    addCommentFrame.origin.x = 0;
-    addCommentFrame.size.width = 310;
-    addCommentFrame.origin.y = CGRectGetHeight(commentsView_.frame) - CGRectGetHeight(addCommentFrame);
-    addCommentContainerView_.frame = addCommentFrame;
-    [commentsView_ addSubview:addCommentContainerView_];
-  } else {
-    CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
-                                           fromView:addCommentContainerView_.superview];
-    if (!addCommentViewDetached_)
-      addCommentFrame.origin.y = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetHeight(addCommentFrame);
-    addCommentContainerView_.frame = addCommentFrame;
-    [self.view insertSubview:addCommentContainerView_ belowSubview:bottomToolbar_];
-  }
-  
-  CGFloat heightDelta = CGRectGetHeight(addCommentContainerView_.frame);
-  if (pinned)
-    heightDelta *= -1;
-
-  CGRect frame = commentsView_.frame;
-  frame.size.height += heightDelta;
-  frame.origin.y -= heightDelta;
-  commentsView_.frame = frame;
-
-  frame = activityView_.frame;
-  frame.size.height += heightDelta;
-  activityView_.frame = frame;
-  [CATransaction begin];
-  [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
-  activityGradientLayer_.frame = activityView_.bounds;
-  [CATransaction commit];
-  [activityGradientLayer_ setNeedsDisplay];
-  activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  
-  [addCommentContainerView_ setNeedsDisplay];
-}
-
-- (void)adjustAddCommentView {
-  if (addCommentViewDetached_)
-    return;
-
-  if (addCommentContainerView_.superview == self.view) {
-    CGRect commentsFrame = [self.view convertRect:commentsView_.frame
-                                         fromView:commentsView_.superview];
-    CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) -
-        (CGRectGetMaxY(commentsFrame) + CGRectGetHeight(addCommentContainerView_.frame));
-    if (distance > 0) {
-      self.addCommentViewPinned = NO;
-    } else {
-      CGFloat ratio = MAX(0, MIN(1.0, distance / -20.0f));
-      CGRect addCommentFrame = addCommentContainerView_.frame;
-      CGFloat outset = ratio * 10;
-      addCommentFrame.size.width = 310 + outset;
-      addCommentFrame.origin.x = 5 - (outset / 2);
-      addCommentContainerView_.layer.shadowOpacity = ratio;
-      addCommentContainerView_.frame = addCommentFrame;
-      return;
-    }
-  }
-
-  if (addCommentContainerView_.superview == commentsView_) {
-    addCommentContainerView_.layer.shadowOpacity = 0;
-    CGRect addCommentFrame = [self.view convertRect:addCommentContainerView_.frame
-                                           fromView:addCommentContainerView_.superview];
-    CGFloat distance = CGRectGetMinY(bottomToolbar_.frame) - CGRectGetMaxY(addCommentFrame);
-    if (distance <= 0)
-      self.addCommentViewPinned = YES;
-  }
-}
-
-#pragma mark - UIScrollViewDelegate methods.
-
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-  [self adjustAddCommentView];
 }
 
 @end

@@ -14,11 +14,9 @@
 
 @class UserImageView;
 @class Stamp;
-@class StampDetailAddCommentView;
 
 @interface StampDetailViewController : UIViewController <UITextFieldDelegate,
                                                          RKObjectLoaderDelegate,
-                                                         UIScrollViewDelegate,
                                                          TTTAttributedLabelDelegate> {
  @private
   Stamp* stamp_;
@@ -55,6 +53,9 @@
 @property (nonatomic, retain) IBOutlet UILabel* subtitleLabel;
 @property (nonatomic, retain) IBOutlet UIImageView* categoryImageView;
 @property (nonatomic, retain) IBOutlet UILabel* timestampLabel;
-@property (nonatomic, retain) IBOutlet StampDetailAddCommentView* addCommentContainerView;
+@property (nonatomic, retain) IBOutlet UserImageView* currentUserImageView;
+@property (nonatomic, retain) IBOutlet UITextField* commentTextField;
+
+
 
 @end
