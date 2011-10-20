@@ -19,6 +19,7 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 @interface StampDetailCommentView ()
 - (void)initViews;
 - (void)userImageTapped:(id)sender;
+- (void)handleSwipeRight:(UISwipeGestureRecognizer*)recognizer;
 @end
 
 @implementation StampDetailCommentView
@@ -96,6 +97,12 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 
 - (void)userImageTapped:(id)sender {
   [[NSNotificationCenter defaultCenter] postNotificationName:kCommentUserImageTappedNotification object:self];
+}
+
+- (void)handleSwipeRight:(UISwipeGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+  NSLog(@"Swiped right");
 }
 
 @end
