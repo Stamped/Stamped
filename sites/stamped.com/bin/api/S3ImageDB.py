@@ -32,7 +32,7 @@ class S3ImageDB(AImageDB):
         
         self.bucket.set_acl('public-read')
         self.bucket_name = bucket_name
-        
+
         # find or create distribution
         # ---------------------------
         """
@@ -208,7 +208,12 @@ class S3ImageDB(AImageDB):
         name    = "%s.jpg" % name
 
         out     = StringIO()
-        image.save(out, 'jpeg', optimize=True)
+
+        try:
+            image.save(out, 'jpeg', optimize=True)
+        except IOError:
+            ImageFile.MAXBLOCK = (image.size[0] * image.size[1]) + 1
+            image.save(out, 'jpeg', optimize=True)
         
         logs.info('[%s] adding image %s (%dx%d)' % \
             (self, name, image.size[0], image.size[1]))
