@@ -10,15 +10,20 @@
 
 @class Comment;
 @class UserImageView;
+@class StampDetailCommentView;
 
-extern NSString* const kCommentUserImageTappedNotification;
+@protocol StampDetailCommentViewDelegate
+- (BOOL)commentViewShouldBeginEditing:(StampDetailCommentView*)commentView;
+- (void)commentViewUserImageTapped:(StampDetailCommentView*)commentView;
+- (void)commentViewDeleteButtonPressed:(StampDetailCommentView*)commentView;
+@end
 
 @interface StampDetailCommentView : UIView
 
 - (id)initWithComment:(Comment*)comment;
 
 @property (nonatomic, retain) Comment* comment;
-@property (nonatomic, readonly) UserImageView* userImage;
 @property (nonatomic, assign) BOOL editing;
+@property (nonatomic, assign) id<StampDetailCommentViewDelegate> delegate;
 
 @end

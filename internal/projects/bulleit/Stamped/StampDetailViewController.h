@@ -11,14 +11,17 @@
 #import <UIKit/UIKit.h>
 
 #import "TTTAttributedLabel.h"
+#import "StampDetailCommentView.h"
 
 @class UserImageView;
 @class Stamp;
 
 @interface StampDetailViewController : UIViewController <UITextFieldDelegate,
                                                          UIActionSheetDelegate,
+                                                         UIScrollViewDelegate,
                                                          RKObjectLoaderDelegate,
-                                                         TTTAttributedLabelDelegate> {
+                                                         TTTAttributedLabelDelegate,
+                                                         StampDetailCommentViewDelegate> {
  @private
   Stamp* stamp_;
   // Managed by the view system.

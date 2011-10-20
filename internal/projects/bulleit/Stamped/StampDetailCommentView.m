@@ -14,13 +14,13 @@
 #import "UIColor+Stamped.h"
 #import "Util.h"
 
-NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedNotification";
-
 @interface StampDetailCommentView ()
 - (void)initViews;
 - (void)userImageTapped:(id)sender;
+- (void)deleteButtonPressed:(id)sender;
 - (void)handleSwipeRight:(UISwipeGestureRecognizer*)recognizer;
 
+@property (nonatomic, readonly) UserImageView* userImage;
 @property (nonatomic, readonly) UILabel* nameLabel;
 @property (nonatomic, readonly) UILabel* commentLabel;
 @property (nonatomic, readonly) UIButton* deleteButton;
@@ -35,6 +35,7 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 @synthesize commentLabel = commentLabel_;
 @synthesize deleteButton = deleteButton_;
 @synthesize editing = editing_;
+@synthesize delegate = delegate_;
 
 - (id)initWithComment:(Comment*)comment {
   self = [super initWithFrame:CGRectZero];
@@ -44,6 +45,12 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
     [self initViews];
   }
   return self;
+}
+
+- (void)dealloc {
+  self.delegate = nil;
+  self.comment = nil;
+  [super dealloc];
 }
 
 - (void)initViews {
@@ -100,6 +107,9 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
   [deleteButton_ setImage:[UIImage imageNamed:@"delete_comment_icon"] forState:UIControlStateNormal];
   deleteButton_.frame = CGRectMake(7, self.center.y - (31 / 2), 31, 31);
   deleteButton_.alpha = 0;
+  [deleteButton_ addTarget:self
+                    action:@selector(deleteButtonPressed:)
+          forControlEvents:UIControlEventTouchUpInside];
   [self addSubview:deleteButton_];
 
   UISwipeGestureRecognizer* recognizer =
@@ -118,7 +128,11 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 }
 
 - (void)userImageTapped:(id)sender {
-  [[NSNotificationCenter defaultCenter] postNotificationName:kCommentUserImageTappedNotification object:self];
+  [delegate_ commentViewUserImageTapped:self];
+}
+
+- (void)deleteButtonPressed:(id)sender {
+  [delegate_ commentViewDeleteButtonPressed:self];
 }
 
 - (void)setEditing:(BOOL)editing {
@@ -131,19 +145,24 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
   if (!editing)
     offset *= -1;
   
-  [UIView animateWithDuration:0.2 animations:^{
-    deleteButton_.alpha = editing ? 1 : 0;
-    userImage_.frame = CGRectOffset(userImage_.frame, offset, 0);
-    nameLabel_.frame = CGRectOffset(nameLabel_.frame, offset, 0);
-    commentLabel_.frame = CGRectOffset(commentLabel_.frame, offset, 0);
-  }];
+  [UIView animateWithDuration:0.2
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
+                     deleteButton_.alpha = editing ? 1 : 0;
+                     userImage_.frame = CGRectOffset(userImage_.frame, offset, 0);
+                     nameLabel_.frame = CGRectOffset(nameLabel_.frame, offset, 0);
+                     commentLabel_.frame = CGRectOffset(commentLabel_.frame, offset, 0);
+                   }
+                   completion:nil];
 }
 
 - (void)handleSwipeRight:(UISwipeGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
 
-  self.editing = !editing_;
+  if ([delegate_ commentViewShouldBeginEditing:self])
+    self.editing = YES;
 }
 
 @end

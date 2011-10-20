@@ -34,8 +34,15 @@ static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 static NSString* const kCreateLikePath = @"/stamps/likes/create.json";
 static NSString* const kRemoveLikePath = @"/stamps/likes/remove.json";
-static NSString* const kCreateCommentPath = @"/comments/create_fail.json";
+static NSString* const kCreateCommentPath = @"/comments/create.json";
+static NSString* const kRemoveCommentPath = @"/comments/remove.json";
 static NSString* const kCommentsPath = @"/comments/show.json";
+
+typedef enum {
+  StampDetailActionTypeDeleteComment = 0,
+  StampDetailActionTypeRetrySend,
+  StampDetailActionTypeDeleteStamp
+} StampDetailActionType;
 
 @interface StampDetailViewController ()
 - (void)setUpHeader;
@@ -46,7 +53,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
-- (void)handleCommentUserImageViewTap:(NSNotification*)notification;
 - (void)keyboardWillAppear:(NSNotification*)notification;
 - (void)keyboardWillDisappear:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
@@ -61,6 +67,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @property (nonatomic, readonly) UILabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
 @property (nonatomic, assign) BOOL lastCommentAttemptFailed;
+@property (nonatomic, retain) NSMutableArray* commentViews;
 @end
 
 @implementation StampDetailViewController
@@ -94,11 +101,13 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize sendButton = sendButton_;
 @synthesize sendIndicator = sendIndicator_;
 @synthesize lastCommentAttemptFailed = lastCommentAttemptFailed_;
+@synthesize commentViews = commentViews_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     stamp_ = [stamp retain];
+    self.commentViews = [NSMutableArray array];
   }
   return self;
 }
@@ -131,6 +140,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.commentTextField = nil;
   self.sendButton = nil;
   self.sendIndicator = nil;
+  self.commentViews = nil;
   [super dealloc];
 }
 
@@ -155,10 +165,6 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(handleCommentUserImageViewTap:)
-                                               name:kCommentUserImageTappedNotification
-                                             object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(keyboardWillAppear:)
                                                name:UIKeyboardWillShowNotification
@@ -634,6 +640,35 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+#pragma mark - StampDetailCommentViewDelegate methods.
+
+- (BOOL)commentViewShouldBeginEditing:(StampDetailCommentView*)commentView {
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if ([stamp_.user.userID isEqualToString:currentUser.userID] || [commentView.comment.user.userID isEqualToString:currentUser.userID])
+    return YES;
+
+  return NO;
+}
+
+- (void)commentViewUserImageTapped:(StampDetailCommentView*)commentView {
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = commentView.comment.user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
+}
+
+- (void)commentViewDeleteButtonPressed:(StampDetailCommentView*)commentView {
+  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure you want to delete this comment?"
+                                                      delegate:self
+                                             cancelButtonTitle:@"Cancel"
+                                        destructiveButtonTitle:@"Delete"
+                                             otherButtonTitles:nil] autorelease];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  sheet.tag = StampDetailActionTypeDeleteComment;
+  [sheet showInView:self.view];
+  return;
+}
+
 #pragma mark - Comments.
 
 - (void)loadCommentsFromServer {
@@ -654,27 +689,25 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (void)addComment:(Comment*)comment {
-  StampDetailCommentView* commentView = nil;
-  for (UIView* view in commentsView_.subviews) {
-    if ([view isMemberOfClass:[StampDetailCommentView class]]) {
-      commentView = (StampDetailCommentView*)view;
-      if ([commentView.comment.commentID isEqualToString:comment.commentID])
-        return;
-    }
+  for (StampDetailCommentView* view in commentViews_) {
+    if ([view.comment.commentID isEqualToString:comment.commentID])
+      return;
   }
-  commentView = [[StampDetailCommentView alloc] initWithComment:comment];
 
+  StampDetailCommentView* commentView = [[StampDetailCommentView alloc] initWithComment:comment];
+
+  commentView.delegate = self;
   CGRect frame = commentView.frame;
   CGFloat yPos = 0.0;
   frame.size.width = CGRectGetWidth(activityView_.frame);
-  for (UIView* view in commentsView_.subviews) {
-    if ([view isKindOfClass:[StampDetailCommentView class]])
-      yPos += CGRectGetHeight(view.frame);
-  }
+  for (StampDetailCommentView* view in commentViews_)
+    yPos += CGRectGetHeight(view.frame);
+
   frame.origin.y = yPos;
   commentView.frame = frame;
   [commentsView_ addSubview:commentView];
   [commentView release];
+  [commentViews_ addObject:commentView];
 
   frame = commentsView_.frame;
   frame.size.height += CGRectGetHeight(commentView.frame);
@@ -729,11 +762,22 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
   NSLog(@"Button index: %d", buttonIndex);
-  if (buttonIndex == 0) {  // Try again.
-    [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
-    [sendButton_ setImage:nil forState:UIControlStateNormal];
-    lastCommentAttemptFailed_ = NO;
-    [self sendAddCommentRequest];
+  if (actionSheet.tag == StampDetailActionTypeRetrySend) {
+    if (buttonIndex == 0) {  // Try again.
+      [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
+      [sendButton_ setImage:nil forState:UIControlStateNormal];
+      lastCommentAttemptFailed_ = NO;
+      [self sendAddCommentRequest];
+    }
+  } else if (actionSheet.tag == StampDetailActionTypeDeleteComment) {
+    if (buttonIndex == 0) {  // DELETE.
+      NSLog(@"Delete the comment.");
+    } else { // Cancel.
+      for (StampDetailCommentView* view in commentViews_)
+        view.editing = NO;
+    }
+  } else if (actionSheet.tag == StampDetailActionTypeDeleteStamp) {
+    
   }
 }
 
@@ -766,6 +810,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                                           destructiveButtonTitle:nil
                                                otherButtonTitles:@"Try Again", nil] autorelease];
     sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    sheet.tag = StampDetailActionTypeRetrySend;
     [sheet showInView:self.view];
     return;
   }
@@ -826,6 +871,13 @@ static NSString* const kCommentsPath = @"/comments/show.json";
     [sendButton_ setImage:[UIImage imageNamed:@"comment_fail_icon"] forState:UIControlStateNormal];
     [sendIndicator_ stopAnimating];
   }
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  for (StampDetailCommentView* view in commentViews_)
+    view.editing = NO;
 }
 
 @end
