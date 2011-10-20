@@ -129,6 +129,9 @@
 		7E3D97E71444F3FB0018820C /* search_field_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E3D97E61444F3FB0018820C /* search_field_background@2x.png */; };
 		7E407E84144F462400D7847F /* NSAttributedString+Attributes.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E81144F462400D7847F /* NSAttributedString+Attributes.m */; };
 		7E407E85144F462400D7847F /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E83144F462400D7847F /* TTTAttributedLabel.m */; };
+		7E407E87144FA72000D7847F /* green_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E407E86144FA71F00D7847F /* green_button_bg@2x.png */; };
+		7E407E89144FA88200D7847F /* text_field_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E407E88144FA88200D7847F /* text_field_background@2x.png */; };
+		7E407E8C144FB05D00D7847F /* STAddCommentTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E8B144FB05D00D7847F /* STAddCommentTextField.m */; };
 		7E428A8513EB2C72004CA2B2 /* stacks_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */; };
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
 		7E42DCBD13DB64CA00AF63BE /* SearchEntitiesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */; };
@@ -717,6 +720,10 @@
 		7E407E81144F462400D7847F /* NSAttributedString+Attributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSAttributedString+Attributes.m"; sourceTree = "<group>"; };
 		7E407E82144F462400D7847F /* TTTAttributedLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTTAttributedLabel.h; sourceTree = "<group>"; };
 		7E407E83144F462400D7847F /* TTTAttributedLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTTAttributedLabel.m; sourceTree = "<group>"; };
+		7E407E86144FA71F00D7847F /* green_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "green_button_bg@2x.png"; sourceTree = "<group>"; };
+		7E407E88144FA88200D7847F /* text_field_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "text_field_background@2x.png"; sourceTree = "<group>"; };
+		7E407E8A144FB05C00D7847F /* STAddCommentTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAddCommentTextField.h; sourceTree = "<group>"; };
+		7E407E8B144FB05D00D7847F /* STAddCommentTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAddCommentTextField.m; sourceTree = "<group>"; };
 		7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacks_back_button@2x.png"; sourceTree = "<group>"; };
 		7E42DCB913DB64CA00AF63BE /* SearchEntitiesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesViewController.h; sourceTree = "<group>"; };
 		7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesViewController.m; sourceTree = "<group>"; };
@@ -1232,6 +1239,8 @@
 		7E22679A13D4E94800657A66 /* Stamp Detail */ = {
 			isa = PBXGroup;
 			children = (
+				7E407E86144FA71F00D7847F /* green_button_bg@2x.png */,
+				7E407E88144FA88200D7847F /* text_field_background@2x.png */,
 				7EF49995140418E20071871D /* gray_disclosure_arrow@2x.png */,
 				7E605898142CFBDB00303991 /* small_like_icon@2x.png */,
 				7E22679B13D4E96A00657A66 /* stamp_detail_ripple_bottom@2x.png */,
@@ -1494,6 +1503,8 @@
 				7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */,
 				7E668C2713D8B27C00E79E14 /* StampDetailCommentView.h */,
 				7E668C2813D8B27C00E79E14 /* StampDetailCommentView.m */,
+				7E407E8A144FB05C00D7847F /* STAddCommentTextField.h */,
+				7E407E8B144FB05D00D7847F /* STAddCommentTextField.m */,
 			);
 			name = "Stamp Detail";
 			sourceTree = "<group>";
@@ -2631,6 +2642,8 @@
 				7E3D97E41444EF420018820C /* eSearch_location_icon@2x.png in Resources */,
 				7E3D97E51444EF420018820C /* eSearch_location_icon_blue@2x.png in Resources */,
 				7E3D97E71444F3FB0018820C /* search_field_background@2x.png in Resources */,
+				7E407E87144FA72000D7847F /* green_button_bg@2x.png in Resources */,
+				7E407E89144FA88200D7847F /* text_field_background@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2753,6 +2766,7 @@
 				7E9EB0FC144CD12F006F887B /* Entity.m in Sources */,
 				7E407E84144F462400D7847F /* NSAttributedString+Attributes.m in Sources */,
 				7E407E85144F462400D7847F /* TTTAttributedLabel.m in Sources */,
+				7E407E8C144FB05D00D7847F /* STAddCommentTextField.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

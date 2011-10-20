@@ -32,6 +32,7 @@
 - (IBAction)handleSendButtonTap:(id)sender;
 - (IBAction)handleLikeButtonTap:(id)sender;
 - (IBAction)handleEntityTap:(id)sender;
+- (IBAction)sendButtonPressed:(id)sender;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
@@ -55,7 +56,8 @@
 @property (nonatomic, retain) IBOutlet UILabel* timestampLabel;
 @property (nonatomic, retain) IBOutlet UserImageView* currentUserImageView;
 @property (nonatomic, retain) IBOutlet UITextField* commentTextField;
-
+@property (nonatomic, retain) IBOutlet UIButton* sendButton;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* sendIndicator;
 
 
 @end

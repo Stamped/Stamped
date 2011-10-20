@@ -91,6 +91,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize subtitleLabel = subtitleLabel_;
 @synthesize currentUserImageView = currentUserImageView_;
 @synthesize commentTextField = commentTextField_;
+@synthesize sendButton = sendButton_;
+@synthesize sendIndicator = sendIndicator_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -126,6 +128,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.timestampLabel = nil;
   self.currentUserImageView = nil;
   self.commentTextField = nil;
+  self.sendButton = nil;
+  self.sendIndicator = nil;
   [super dealloc];
 }
 
@@ -215,6 +219,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   self.currentUserImageView = nil;
   self.commentTextField = nil;
   self.timestampLabel = nil;
+  self.sendButton = nil;
+  self.sendIndicator = nil;
 }
 
 - (void)setUpHeader {
@@ -256,7 +262,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   bottomToolbar_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
   bottomToolbar_.layer.shadowOpacity = 1;
   bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
-  
+
   if (stamp_.entityObject.favorite) {
     addFavoriteLabel_.text = @"To-Do'd";
     addFavoriteButton_.selected = YES;
@@ -559,7 +565,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (IBAction)handleSendButtonTap:(id)sender {
-  
+
 }
 
 - (IBAction)handleLikeButtonTap:(id)sender {
@@ -693,6 +699,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                    animations:^{
                      scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
                      scrollView_.contentOffset = CGPointMake(0, contentHeight - scrollHeight);
+                     commentTextField_.frame = CGRectOffset(CGRectInset(commentTextField_.frame, 27, 0), -27, 0);
+                     sendButton_.alpha = 1.0;
                    }
                    completion:nil];
 }
@@ -704,6 +712,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
                      scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
+                     commentTextField_.frame = CGRectOffset(CGRectInset(commentTextField_.frame, -27, 0), 27, 0);
+                     sendButton_.alpha = 0.0;
                    }
                    completion:nil];
 }
@@ -727,6 +737,12 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   return YES;
 }
 
+- (IBAction)sendButtonPressed:(id)sender {
+  [sendButton_ setTitle:nil forState:UIControlStateNormal];
+  [sendIndicator_ startAnimating];
+  [self sendAddCommentRequest];
+}
+
 - (void)sendAddCommentRequest {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
@@ -743,6 +759,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
+    [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
+    [sendIndicator_ stopAnimating];
+    commentTextField_.text = nil;
+    [commentTextField_ resignFirstResponder];
     Comment* comment = [objects objectAtIndex:0];
     [self addComment:comment];
     [stamp_ addCommentsObject:comment];
@@ -766,6 +786,8 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
   if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     // Problem with sending the comment...
+    [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
+    [sendIndicator_ stopAnimating];
   }
 }
 
