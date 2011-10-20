@@ -43,12 +43,15 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)mapUserTapped:(id)sender;
 - (void)mapDisclosureTapped:(id)sender;
 
+- (void)managedObjectContextChanged:(NSNotification*)notification;
+
 @property (nonatomic, retain) NSMutableArray* entitiesArray;
 @property (nonatomic, retain) NSMutableArray* filteredEntitiesArray;
 @property (nonatomic, assign) BOOL userPannedMap;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
 @property (nonatomic, assign) StampSortType selectedSortType;
 @property (nonatomic, copy) NSString* searchQuery;
+@property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
 
 @end
 
@@ -62,6 +65,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize selectedSortType = selectedSortType_;
 @synthesize searchQuery = searchQuery_;
 @synthesize stampFilterBar = stampFilterBar_;
+@synthesize fetchedResultsController = fetchedResultsController_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -70,6 +74,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   self.filteredEntitiesArray = nil;
   self.searchQuery = nil;
   self.stampFilterBar = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
   [super dealloc];
 }
 
@@ -120,6 +126,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
                                            selector:@selector(userLoggedOut:)
                                                name:kUserHasLoggedOutNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(managedObjectContextChanged:)
+                                               name:NSManagedObjectContextObjectsDidChangeNotification
+                                             object:[Entity managedObjectContext]];
   mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
   mapView_.alpha = 0.0;
   mapView_.delegate = self;
@@ -173,7 +183,52 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (void)managedObjectContextChanged:(NSNotification*)notification {
+  NSSet* objects = [NSSet setWithSet:[notification.userInfo objectForKey:NSUpdatedObjectsKey]];
+  objects = [objects setByAddingObjectsFromSet:[notification.userInfo objectForKey:NSInsertedObjectsKey]];
+  objects = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
+    if ([obj isMemberOfClass:[Stamp class]] && ![[(Stamp*)obj temporary] boolValue])
+      return YES;
+
+    return NO;
+  }];
+
+  if (objects.count > 0) {
+    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    NSArray* sortedStamps = [[objects allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    Stamp* latestStamp = [sortedStamps objectAtIndex:0];
+    Entity* entity = latestStamp.entityObject;
+    if (!entity.mostRecentStampDate ||
+        [latestStamp.created timeIntervalSinceDate:entity.mostRecentStampDate] > 0) {
+      latestStamp.entityObject.mostRecentStampDate = latestStamp.created;
+    }
+  }
+  
+  // TODO(andybons): Deal with when we remove stamps.
+  //NSLog(@"Deleted objects %@", [notification.userInfo objectForKey:NSDeletedObjectsKey]);
+}
+
 - (void)loadStampsFromDataStore {
+  if (!fetchedResultsController_) {
+    NSFetchRequest* request = [Entity fetchRequest];
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
+    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    NSFetchedResultsController* fetchedResultsController =
+        [[NSFetchedResultsController alloc] initWithFetchRequest:request
+                                            managedObjectContext:[Entity managedObjectContext]
+                                              sectionNameKeyPath:nil
+                                                       cacheName:@"InboxItems"];
+    self.fetchedResultsController = fetchedResultsController;
+    fetchedResultsController.delegate = self;
+    [fetchedResultsController release];
+  }
+
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
+  
   self.entitiesArray = nil;
   NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
   

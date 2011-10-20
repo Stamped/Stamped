@@ -16,6 +16,7 @@
 @interface InboxViewController : STReloadableTableViewController <UIScrollViewDelegate,
                                                                   RKObjectLoaderDelegate,
                                                                   MKMapViewDelegate,
+                                                                  NSFetchedResultsControllerDelegate,
                                                                   STStampFilterBarDelegate>
 @property (nonatomic, readonly) MKMapView* mapView;
 @property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
