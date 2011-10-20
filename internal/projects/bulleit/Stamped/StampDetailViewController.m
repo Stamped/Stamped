@@ -142,9 +142,15 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 #pragma mark - View lifecycle
 
 - (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+  [commentTextField_ resignFirstResponder];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  [super viewWillDisappear:animated];
+  
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
