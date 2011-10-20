@@ -41,6 +41,7 @@
   self = [super initWithFrame:CGRectZero];
   if (self) {
     self.backgroundColor = [UIColor whiteColor];
+    self.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin;
     self.comment = comment;
     [self initViews];
   }
@@ -62,7 +63,7 @@
        forControlEvents:UIControlEventTouchUpInside];
   [self addSubview:userImage_];
   [userImage_ release];
-  
+
   CGFloat minHeight = CGRectGetMaxY(userImage_.frame) + 8;
 
   nameLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];

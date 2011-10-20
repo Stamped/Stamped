@@ -741,6 +741,15 @@ typedef enum {
       break;
     }
   }
+
+  for (StampDetailCommentView* view in commentViews_) {
+    if ([commentViews_ indexOfObject:view] <= [commentViews_ indexOfObject:commentView])
+      continue;
+    CGRect frame = view.frame;
+    frame.origin.y -= CGRectGetHeight(commentView.frame);
+    view.frame = frame;
+  }
+  
   [commentViews_ removeObject:commentView];
   CGRect frame = commentsView_.frame;
   frame.size.height -= CGRectGetHeight(commentView.frame);
@@ -758,7 +767,6 @@ typedef enum {
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
-  
 }
 
 #pragma mark - Keyboard notifications.
@@ -905,11 +913,13 @@ typedef enum {
     return;
   } else if ([objectLoader.resourcePath rangeOfString:kCommentsPath].location != NSNotFound) {
     stamp_.numComments = [NSNumber numberWithUnsignedInteger:objects.count];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
-                                                        object:stamp_];
-    stamp_.comments = [NSSet setWithArray:objects];
+    [stamp_ removeComments:stamp_.comments];
+    [stamp_ addComments:[NSSet setWithArray:objects]];
+    [Stamp.managedObjectContext save:NULL];
     [self renderComments];
   }
+  [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
+                                                      object:stamp_];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
