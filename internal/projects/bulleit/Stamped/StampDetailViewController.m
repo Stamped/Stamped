@@ -30,7 +30,6 @@
 #import "UIColor+Stamped.h"
 
 static const CGFloat kMainCommentFrameMinHeight = 75.0;
-static const CGFloat kKeyboardHeight = 216.0;
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 static NSString* const kCreateLikePath = @"/stamps/likes/create.json";
@@ -61,6 +60,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
 @property (nonatomic, readonly) UILabel* numLikesLabel;
 @property (nonatomic, assign) NSUInteger numLikes;
+@property (nonatomic, assign) BOOL lastCommentAttemptFailed;
 @end
 
 @implementation StampDetailViewController
@@ -93,6 +93,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 @synthesize commentTextField = commentTextField_;
 @synthesize sendButton = sendButton_;
 @synthesize sendIndicator = sendIndicator_;
+@synthesize lastCommentAttemptFailed = lastCommentAttemptFailed_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -724,7 +725,36 @@ static NSString* const kCommentsPath = @"/comments/show.json";
                    completion:nil];
 }
 
+#pragma mark - UIActionSheetDelegate methods.
+
+- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  NSLog(@"Button index: %d", buttonIndex);
+  [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
+  [sendButton_ setImage:nil forState:UIControlStateNormal];
+  lastCommentAttemptFailed_ = NO;
+  if (buttonIndex == 0) {  // Try again.
+    [self sendAddCommentRequest];
+  } else {  // Cancel.
+    [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
+    commentTextField_.text = nil;
+    [commentTextField_ resignFirstResponder];
+  }
+}
+
 #pragma mark - UITextFieldDelegate Methods.
+
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
+  [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
+  [sendButton_ setImage:nil forState:UIControlStateNormal];
+  NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
+  sendButton_.enabled = result.length > 0;
+  return YES;
+}
+
+- (void)textFieldDidBeginEditing:(UITextField*)textField {
+  sendButton_.enabled = NO;
+}
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   [textField resignFirstResponder];
@@ -732,12 +762,24 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 }
 
 - (IBAction)sendButtonPressed:(id)sender {
-  [sendButton_ setTitle:nil forState:UIControlStateNormal];
-  [sendIndicator_ startAnimating];
+  if (lastCommentAttemptFailed_) {
+    UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"There was a problem adding your comment."
+                                                        delegate:self
+                                               cancelButtonTitle:@"Cancel"
+                                          destructiveButtonTitle:nil
+                                               otherButtonTitles:@"Try Again", nil] autorelease];
+    sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [sheet showInView:self.view];
+    return;
+  }
+
   [self sendAddCommentRequest];
 }
 
 - (void)sendAddCommentRequest {
+  [sendButton_ setTitle:nil forState:UIControlStateNormal];
+  [sendButton_ setImage:nil forState:UIControlStateNormal];
+  [sendIndicator_ startAnimating];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateCommentPath delegate:self];
@@ -753,6 +795,7 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
+    lastCommentAttemptFailed_ = NO;
     [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
     [sendIndicator_ stopAnimating];
     commentTextField_.text = nil;
@@ -780,7 +823,10 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
   if ([objectLoader.resourcePath isEqualToString:kCreateCommentPath]) {
     // Problem with sending the comment...
-    [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
+    lastCommentAttemptFailed_ = YES;
+    [sendButton_ setTitle:nil forState:UIControlStateNormal];
+    [sendButton_ setBackgroundImage:[UIImage imageNamed:@"comment_fail_button_bg"] forState:UIControlStateNormal];
+    [sendButton_ setImage:[UIImage imageNamed:@"comment_fail_icon"] forState:UIControlStateNormal];
     [sendIndicator_ stopAnimating];
   }
 }

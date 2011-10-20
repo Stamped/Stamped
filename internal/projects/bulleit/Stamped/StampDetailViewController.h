@@ -16,6 +16,7 @@
 @class Stamp;
 
 @interface StampDetailViewController : UIViewController <UITextFieldDelegate,
+                                                         UIActionSheetDelegate,
                                                          RKObjectLoaderDelegate,
                                                          TTTAttributedLabelDelegate> {
  @private
