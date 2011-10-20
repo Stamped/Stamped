@@ -747,13 +747,14 @@ static NSString* const kCommentsPath = @"/comments/show.json";
   [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
   [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
   [sendButton_ setImage:nil forState:UIControlStateNormal];
+  lastCommentAttemptFailed_ = NO;
   NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
   sendButton_.enabled = result.length > 0;
   return YES;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-  sendButton_.enabled = NO;
+  sendButton_.enabled = commentTextField_.text.length > 0;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
