@@ -20,12 +20,21 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
 - (void)initViews;
 - (void)userImageTapped:(id)sender;
 - (void)handleSwipeRight:(UISwipeGestureRecognizer*)recognizer;
+
+@property (nonatomic, readonly) UILabel* nameLabel;
+@property (nonatomic, readonly) UILabel* commentLabel;
+@property (nonatomic, readonly) UIButton* deleteButton;
+
 @end
 
 @implementation StampDetailCommentView
 
 @synthesize comment = comment_;
 @synthesize userImage = userImage_;
+@synthesize nameLabel = nameLabel_;
+@synthesize commentLabel = commentLabel_;
+@synthesize deleteButton = deleteButton_;
+@synthesize editing = editing_;
 
 - (id)initWithComment:(Comment*)comment {
   self = [super initWithFrame:CGRectZero];
@@ -46,28 +55,29 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
        forControlEvents:UIControlEventTouchUpInside];
   [self addSubview:userImage_];
   [userImage_ release];
+  
   CGFloat minHeight = CGRectGetMaxY(userImage_.frame) + 8;
 
-  UILabel* nameLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  nameLabel.textColor = [UIColor stampedGrayColor];
-  nameLabel.text = comment_.user.screenName;
-  nameLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-  CGSize stringSize = [nameLabel sizeThatFits:CGSizeMake(260, MAXFLOAT)];
+  nameLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  nameLabel_.textColor = [UIColor stampedGrayColor];
+  nameLabel_.text = comment_.user.screenName;
+  nameLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  CGSize stringSize = [nameLabel_ sizeThatFits:CGSizeMake(260, MAXFLOAT)];
   const CGFloat leftPadding = CGRectGetMaxX(userImage_.frame) + 8;
-  nameLabel.frame = CGRectMake(leftPadding, 8, stringSize.width, stringSize.height);
-  [self addSubview:nameLabel];
-  [nameLabel release];
-  
-  UILabel* commentLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-  commentLabel.lineBreakMode = UILineBreakModeWordWrap;
-  commentLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
-  commentLabel.text = comment_.blurb;
-  commentLabel.textColor = [UIColor stampedBlackColor];
-  commentLabel.numberOfLines = 0;
-  stringSize = [commentLabel sizeThatFits:CGSizeMake(220, MAXFLOAT)];
-  commentLabel.frame = CGRectMake(leftPadding, 23, stringSize.width, stringSize.height);
-  [self addSubview:commentLabel];
-  [commentLabel release];
+  nameLabel_.frame = CGRectMake(leftPadding, 8, stringSize.width, stringSize.height);
+  [self addSubview:nameLabel_];
+  [nameLabel_ release];
+
+  commentLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  commentLabel_.lineBreakMode = UILineBreakModeWordWrap;
+  commentLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
+  commentLabel_.text = comment_.blurb;
+  commentLabel_.textColor = [UIColor stampedBlackColor];
+  commentLabel_.numberOfLines = 0;
+  stringSize = [commentLabel_ sizeThatFits:CGSizeMake(215, MAXFLOAT)];
+  commentLabel_.frame = CGRectMake(leftPadding, 23, stringSize.width, stringSize.height);
+  [self addSubview:commentLabel_];
+  [commentLabel_ release];
   
   UILabel* timestampLabel = [[UILabel alloc] initWithFrame:CGRectZero];
   timestampLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
@@ -83,8 +93,20 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
   [timestampLabel release];
   
   CGRect frame = self.frame;
-  frame.size.height = fmaxf(minHeight, CGRectGetMaxY(commentLabel.frame) + 8);
+  frame.size.height = fmaxf(minHeight, CGRectGetMaxY(commentLabel_.frame) + 8);
   self.frame = frame;
+  
+  deleteButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
+  [deleteButton_ setImage:[UIImage imageNamed:@"delete_comment_icon"] forState:UIControlStateNormal];
+  deleteButton_.frame = CGRectMake(7, self.center.y - (31 / 2), 31, 31);
+  deleteButton_.alpha = 0;
+  [self addSubview:deleteButton_];
+
+  UISwipeGestureRecognizer* recognizer =
+      [[UISwipeGestureRecognizer alloc] initWithTarget:self
+                                                action:@selector(handleSwipeRight:)];
+  [self addGestureRecognizer:recognizer];
+  [recognizer release];
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -99,10 +121,29 @@ NSString* const kCommentUserImageTappedNotification = @"kCommentUserImageTappedN
   [[NSNotificationCenter defaultCenter] postNotificationName:kCommentUserImageTappedNotification object:self];
 }
 
+- (void)setEditing:(BOOL)editing {
+  if (editing_ == editing)
+    return;
+
+  editing_ = editing;
+  
+  CGFloat offset = 35;
+  if (!editing)
+    offset *= -1;
+  
+  [UIView animateWithDuration:0.2 animations:^{
+    deleteButton_.alpha = editing ? 1 : 0;
+    userImage_.frame = CGRectOffset(userImage_.frame, offset, 0);
+    nameLabel_.frame = CGRectOffset(nameLabel_.frame, offset, 0);
+    commentLabel_.frame = CGRectOffset(commentLabel_.frame, offset, 0);
+  }];
+}
+
 - (void)handleSwipeRight:(UISwipeGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
-  NSLog(@"Swiped right");
+
+  self.editing = !editing_;
 }
 
 @end

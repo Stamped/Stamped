@@ -34,7 +34,7 @@ static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 static NSString* const kCreateLikePath = @"/stamps/likes/create.json";
 static NSString* const kRemoveLikePath = @"/stamps/likes/remove.json";
-static NSString* const kCreateCommentPath = @"/comments/create.json";
+static NSString* const kCreateCommentPath = @"/comments/create_fail.json";
 static NSString* const kCommentsPath = @"/comments/show.json";
 
 @interface StampDetailViewController ()
@@ -729,15 +729,11 @@ static NSString* const kCommentsPath = @"/comments/show.json";
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
   NSLog(@"Button index: %d", buttonIndex);
-  [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
-  [sendButton_ setImage:nil forState:UIControlStateNormal];
-  lastCommentAttemptFailed_ = NO;
   if (buttonIndex == 0) {  // Try again.
+    [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];
+    [sendButton_ setImage:nil forState:UIControlStateNormal];
+    lastCommentAttemptFailed_ = NO;
     [self sendAddCommentRequest];
-  } else {  // Cancel.
-    [sendButton_ setTitle:@"Send" forState:UIControlStateNormal];
-    commentTextField_.text = nil;
-    [commentTextField_ resignFirstResponder];
   }
 }
 
