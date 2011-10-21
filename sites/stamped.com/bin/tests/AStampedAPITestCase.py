@@ -31,6 +31,7 @@ class AStampedAPITestCase(AStampedTestCase):
     #_baseurl = "https://dev.stamped.com/v0"
     #_baseurl = "http://dev.stamped.com:5000/v0"
     _baseurl = "http://ec2-50-17-94-229.compute-1.amazonaws.com:5000/v0"
+    _baseurl = "https://elb-dev-636754835.us-east-1.elb.amazonaws.com/v0"
     
     
     _opener = StampedAPIURLOpener()
