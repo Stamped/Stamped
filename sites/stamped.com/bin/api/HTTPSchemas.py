@@ -881,6 +881,7 @@ class HTTPComment(Schema):
         if schema.__class__.__name__ == 'Comment':
             self.importData(schema.exportSparse(), overflow=True)
             self.created = schema.timestamp.created
+            self.user = HTTPUserMini().importSchema(schema.user).exportSparse()
 
         else:
             raise NotImplementedError
