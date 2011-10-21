@@ -99,7 +99,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   [objectLoader send];
 }
 
-#pragma mark - NSFetchedResultsControllerDelegate method.
+#pragma mark - NSFetchedResultsControllerDelegate methods.
 
 - (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
   numRows_ = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];

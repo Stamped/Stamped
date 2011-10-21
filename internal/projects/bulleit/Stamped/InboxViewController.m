@@ -33,6 +33,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @interface InboxViewController ()
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 - (void)sortStamps;
 - (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
@@ -141,6 +142,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   stampFilterBar_.searchQuery = searchQuery_;
 
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
+  [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
 }
 
@@ -166,7 +168,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
-  [self loadStampsFromDataStore];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -213,6 +214,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSFetchRequest* request = [Entity fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setFetchBatchSize:20];
+    [NSFetchedResultsController deleteCacheWithName:nil];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
                                             managedObjectContext:[Entity managedObjectContext]
@@ -228,44 +231,44 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 		// Update to handle the error appropriately.
 		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
 	}
-  
-  self.entitiesArray = nil;
-  NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
-  
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO"];
-  if (searchTerms.count == 1 && searchQuery_.length) {
-    p = [NSPredicate predicateWithFormat:
-         @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
-         searchQuery_, searchQuery_, searchQuery_, searchQuery_];
-  } else if (searchTerms.count > 1) {
-    NSMutableArray* subPredicates = [NSMutableArray array];
-    for (NSString* term in searchTerms) {
-      if (!term.length)
-        continue;
 
-      NSPredicate* p = [NSPredicate predicateWithFormat:
-          @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
-          term, term, term, term];
-      [subPredicates addObject:p];
-    }
-    p = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
-  }
-  NSFetchRequest* request = [Stamp fetchRequest];
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-  [request setPredicate:p];
-	NSArray* results = [Stamp objectsWithFetchRequest:request];
-  NSMutableArray* sortedEntities = [NSMutableArray arrayWithCapacity:results.count];
-  for (Stamp* s in results) {
-    if (s.entityObject && ![sortedEntities containsObject:s.entityObject])
-      [sortedEntities addObject:s.entityObject];
-  }
-  self.entitiesArray = sortedEntities;
-
-  [self filterStamps];
-  [self sortStamps];
-  [self.tableView reloadData];
-  self.tableView.contentOffset = scrollPosition_;
+//  self.entitiesArray = nil;
+//  NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
+//  
+//  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO"];
+//  if (searchTerms.count == 1 && searchQuery_.length) {
+//    p = [NSPredicate predicateWithFormat:
+//         @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
+//         searchQuery_, searchQuery_, searchQuery_, searchQuery_];
+//  } else if (searchTerms.count > 1) {
+//    NSMutableArray* subPredicates = [NSMutableArray array];
+//    for (NSString* term in searchTerms) {
+//      if (!term.length)
+//        continue;
+//
+//      NSPredicate* p = [NSPredicate predicateWithFormat:
+//          @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
+//          term, term, term, term];
+//      [subPredicates addObject:p];
+//    }
+//    p = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+//  }
+//  NSFetchRequest* request = [Stamp fetchRequest];
+//	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+//	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+//  [request setPredicate:p];
+//	NSArray* results = [Stamp objectsWithFetchRequest:request];
+//  NSMutableArray* sortedEntities = [NSMutableArray arrayWithCapacity:results.count];
+//  for (Stamp* s in results) {
+//    if (s.entityObject && ![sortedEntities containsObject:s.entityObject])
+//      [sortedEntities addObject:s.entityObject];
+//  }
+//  self.entitiesArray = sortedEntities;
+//
+//  [self filterStamps];
+//  [self sortStamps];
+//  [self.tableView reloadData];
+//  self.tableView.contentOffset = scrollPosition_;
 }
 
 - (void)loadStampsFromNetwork {
@@ -294,11 +297,11 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {      
-  [self loadStampsFromDataStore];
+  //[self loadStampsFromDataStore];
 }
 
 - (void)userLoggedOut:(NSNotification*)notification {
-  [self loadStampsFromDataStore];
+  //[self loadStampsFromDataStore];
 }
 
 #pragma mark - STStampFilterBarDelegate methods.
@@ -311,7 +314,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     self.searchQuery = query;
     selectedFilterType_ = filterType;
     selectedSortType_ = sortType;
-    [self loadStampsFromDataStore];
+    //[self loadStampsFromDataStore];
     return;
   }
 
@@ -414,8 +417,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  // Return the number of rows in the section.
-  return [filteredEntitiesArray_ count];
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:section];
+  return [sectionInfo numberOfObjects];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -425,8 +428,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   if (cell == nil) {
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
   }
-  cell.sortType = selectedSortType_;
-  cell.entityObject = (Entity*)[filteredEntitiesArray_ objectAtIndex:indexPath.row];
+
+  [self configureCell:cell atIndexPath:indexPath];
 
   return cell;
 }
@@ -449,7 +452,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
                                             forKey:@"InboxOldestTimestampInBatch"];
   [[NSUserDefaults standardUserDefaults] synchronize];
-  [self loadStampsFromDataStore];
+  //[self loadStampsFromDataStore];
   if (objects.count < 10) {
     // Grab latest stamp.
     NSFetchRequest* request = [Stamp fetchRequest];
@@ -482,6 +485,48 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [self setIsLoading:NO];
 }
 
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
+  [(InboxTableViewCell*)cell setSortType:selectedSortType_];
+  [(InboxTableViewCell*)cell setEntityObject:(Entity*)[fetchedResultsController_ objectAtIndexPath:indexPath]];
+}
+
+#pragma mark - NSFetchedResultsControllerDelegate methods.
+
+- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView beginUpdates];
+}
+
+- (void)controller:(NSFetchedResultsController*)controller 
+   didChangeObject:(id)anObject
+       atIndexPath:(NSIndexPath*)indexPath
+     forChangeType:(NSFetchedResultsChangeType)type
+      newIndexPath:(NSIndexPath*)newIndexPath {
+  UITableView* tableView = self.tableView;
+  
+  switch(type) {
+    case NSFetchedResultsChangeInsert:
+      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeDelete:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeUpdate:
+      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+      break;
+      
+    case NSFetchedResultsChangeMove:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+  }
+}
+
+- (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView endUpdates];
+}
+
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -489,7 +534,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Entity* entity = [filteredEntitiesArray_ objectAtIndex:indexPath.row];
+  Entity* entity = [fetchedResultsController_ objectAtIndexPath:indexPath];
+
   Stamp* stamp = nil;
   if (entity.stamps.count > 0) {
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
