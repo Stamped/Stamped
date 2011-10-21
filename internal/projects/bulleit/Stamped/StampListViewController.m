@@ -21,14 +21,12 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @interface StampListViewController ()
 - (void)loadStampsFromNetwork;
 - (void)loadStampsFromDataStore;
-- (void)sortStamps;
 - (void)filterStamps;
 
 @property (nonatomic, retain) NSDate* oldestInBatch;
 @property (nonatomic, copy) NSArray* stampsArray;
 @property (nonatomic, copy) NSArray* filteredStampsArray;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
-@property (nonatomic, assign) StampSortType selectedSortType;
 @property (nonatomic, copy) NSString* searchQuery;
 @end
 
@@ -40,7 +38,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize user = user_;
 @synthesize oldestInBatch = oldestInBatch_;
-@synthesize selectedSortType = selectedSortType_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
 @synthesize stampFilterBar = stampFilterBar_;
@@ -81,7 +78,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  [stampFilterBar_.locationManager stopUpdatingLocation];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 }
 
@@ -147,56 +143,10 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   }
 }
 
-- (void)sortStamps {
-  NSSortDescriptor* desc = nil;
-  switch (selectedSortType_) {
-    case StampSortTypeTime:
-      desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-      break;
-    case StampSortTypePopularity:
-      desc = [NSSortDescriptor sortDescriptorWithKey:@"entityObject.stamps.@count" ascending:NO];
-      break;
-    case StampSortTypeDistance: {
-      CLLocation* currentLocation = stampFilterBar_.currentLocation;
-      if (!currentLocation)
-        break;
-      
-      self.filteredStampsArray = [filteredStampsArray_ sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-        Stamp* firstStamp = (Stamp*)obj1;
-        Stamp* secondStamp = (Stamp*)obj2;
-        
-        NSNumber* firstDistance = nil;
-        NSNumber* secondDistance = nil;
-        
-        if (!firstStamp.entityObject.location && !secondStamp.entityObject.location)
-          return NSOrderedSame;
-        else if (!firstStamp.entityObject.location && secondStamp.entityObject.location)
-          return NSOrderedDescending;
-        else if (firstStamp.entityObject.location && !secondStamp.entityObject.location)
-          return NSOrderedAscending;
-        
-        firstDistance = [NSNumber numberWithDouble:[firstStamp.entityObject.location distanceFromLocation:currentLocation]];
-        firstStamp.entityObject.cachedDistance = firstDistance;
-        secondDistance = [NSNumber numberWithDouble:[secondStamp.entityObject.location distanceFromLocation:currentLocation]];
-        secondStamp.entityObject.cachedDistance = secondDistance;
-        return [firstDistance compare:secondDistance];
-      }];
-      break;
-    }
-    default:
-      break;
-  }
-  if (!desc)
-    return;
-  
-  self.filteredStampsArray = [filteredStampsArray_ sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-}
-
 #pragma mark - STStampFilterBarDelegate methods.
 
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType
-          withSortType:(StampSortType)sortType
               andQuery:(NSString*)query {
   if (![query isEqualToString:searchQuery_]) {
     self.searchQuery = query;
@@ -205,9 +155,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
   selectedFilterType_ = filterType;
   [self filterStamps];
-  
-  selectedSortType_ = sortType;
-  [self sortStamps];
   
   [self.tableView reloadData];
 }
@@ -228,8 +175,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   
   if (!cell)
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
-  
-  cell.sortType = selectedSortType_;
+
   cell.stamp = (Stamp*)[filteredStampsArray_ objectAtIndex:indexPath.row];
   
   return cell;
@@ -314,7 +260,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 	self.stampsArray = [Stamp objectsWithFetchRequest:request];
   
   [self filterStamps];
-  [self sortStamps];
   [self.tableView reloadData];
 }
 

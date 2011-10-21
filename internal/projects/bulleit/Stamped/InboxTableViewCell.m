@@ -76,7 +76,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 @property (nonatomic, assign) BOOL selected;
 @property (nonatomic, assign) BOOL hidePhotos;
-@property (nonatomic, assign) StampSortType sortType;
 @property (nonatomic, assign) NSUInteger numComments;
 @property (nonatomic, retain) UIImage* stampImage;
 @property (nonatomic, copy) NSString* title;
@@ -96,7 +95,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize title = title_;
 @synthesize stamps = stamps_;
 @synthesize hidePhotos = hidePhotos_;
-@synthesize sortType = sortType_;
 @synthesize subtitleLabel = subtitleLabel_;
 @synthesize typeImageView = typeImageView_;
 
@@ -387,52 +385,10 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
                                                    name:kStampDidChangeNotification
                                                  object:s];
     }
-    if (sortType_ == StampSortTypeTime) {
-      distanceLabel_.hidden = YES;
-      timestampLabel_.hidden = NO;
-      locationImageView_.hidden = YES;
-      [self updateTimestamp];
-    } else if (sortType_ == StampSortTypeDistance) {
-      timestampLabel_.hidden = YES;
-      if (!stamp.entityObject.cachedDistance) {
-        distanceLabel_.hidden = YES;
-        locationImageView_.hidden = YES;
-        return;
-      }
-
-      CGFloat miles = stamp.entityObject.cachedDistance.floatValue * 0.000621371192f;
-      if (miles < 2.0) {
-        distanceLabel_.textColor = [UIColor colorWithRed:0.66 green:0.48 blue:0.8 alpha:1.0];
-        locationImageView_.image = [UIImage imageNamed:@"small_location_icon_purple"];
-      } else {
-        distanceLabel_.textColor = [UIColor stampedLightGrayColor];
-        locationImageView_.image = [UIImage imageNamed:@"small_location_icon"];
-      }
-      if (miles > 0.1)
-        distanceLabel_.text = [NSString stringWithFormat:@"%.1f mi", miles];
-      else
-        distanceLabel_.text = [NSString stringWithFormat:@"%.0f ft", miles * 5280.0f];
-
-      [distanceLabel_ sizeToFit];
-      CGRect distanceFrame = distanceLabel_.frame;
-      distanceFrame.origin.x = 283 - distanceFrame.size.width;
-      distanceFrame.origin.y = 74;
-      distanceLabel_.frame = distanceFrame;
-      CGRect subtitleFrame = subtitleLabel_.frame;
-      subtitleFrame.size.width = kSubtitleDefaultWidth - CGRectGetWidth(distanceFrame);
-      subtitleLabel_.frame = subtitleFrame;
-      locationImageView_.frame = CGRectMake(CGRectGetMinX(distanceFrame) - CGRectGetWidth(locationImageView_.frame) - 3,
-                                            CGRectGetMinY(distanceFrame) + 2, 
-                                            CGRectGetWidth(locationImageView_.frame),
-                                            CGRectGetHeight(locationImageView_.frame));
-      distanceLabel_.hidden = NO;
-      locationImageView_.hidden = NO;
-      [self setNeedsDisplay];
-    } else if (sortType_ == StampSortTypePopularity) {
-      timestampLabel_.hidden = YES;
-      distanceLabel_.hidden = YES;
-      locationImageView_.hidden = YES;
-    }
+    distanceLabel_.hidden = YES;
+    timestampLabel_.hidden = NO;
+    locationImageView_.hidden = YES;
+    [self updateTimestamp];
   }
 }
 
@@ -544,13 +500,11 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 @synthesize entityObject = entityObject_;
 @synthesize stamp = stamp_;
 @synthesize customView = customView_;
-@synthesize sortType = sortType_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithStyle:UITableViewCellStyleDefault
               reuseIdentifier:reuseIdentifier];
   if (self) {
-    sortType_ = StampSortTypeTime;
     self.accessoryType = UITableViewCellAccessoryNone;
     CGRect customViewFrame = CGRectMake(0, 0, self.contentView.bounds.size.width,
                                               self.contentView.bounds.size.height);
@@ -603,11 +557,6 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
   [super setSelected:selected animated:animated];
   [customView_ setSelected:selected animated:animated];
-}
-
-- (void)setSortType:(StampSortType)sortType {
-  sortType_ = sortType;
-  [customView_ setSortType:sortType];
 }
 
 - (void)setStamp:(Stamp*)stamp {

@@ -6,7 +6,6 @@
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
-#import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 
 @class STSearchField;
@@ -20,29 +19,19 @@ typedef enum {
   StampFilterTypeOther
 } StampFilterType;
 
-typedef enum {
-  StampSortTypeTime = 0,
-  StampSortTypeDistance,
-  StampSortTypePopularity
-} StampSortType;
-
 @class STStampFilterBar;
 
 @protocol STStampFilterBarDelegate
 - (void)stampFilterBar:(STStampFilterBar*)bar
-       didSelectFilter:(StampFilterType)filterType 
-          withSortType:(StampSortType)sortType
+       didSelectFilter:(StampFilterType)filterType
               andQuery:(NSString*)query;
 @end
 
-@interface STStampFilterBar : UIView <UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate>
+@interface STStampFilterBar : UIView <UIScrollViewDelegate, UITextFieldDelegate>
 
 @property (nonatomic, assign) IBOutlet id<STStampFilterBarDelegate> delegate;
 @property (nonatomic, assign) StampFilterType filterType;
-@property (nonatomic, assign) StampSortType sortType;
 @property (nonatomic, copy) NSString* searchQuery;
-@property (nonatomic, retain) CLLocation* currentLocation;
-@property (nonatomic, readonly) CLLocationManager* locationManager;
 @property (nonatomic, readonly) STSearchField* searchField;
 
 - (void)reset;

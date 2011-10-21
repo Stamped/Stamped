@@ -63,7 +63,6 @@ typedef enum {
 - (void)addComment:(Comment*)comment;
 - (void)removeComment:(Comment*)comment;
 - (void)loadCommentsFromServer;
-- (void)preloadEntityView;
 - (void)sendAddCommentRequest;
 - (void)sendRemoveCommentRequest:(NSString*)commentID;
 
@@ -120,7 +119,6 @@ typedef enum {
 - (void)dealloc {
   [Stamp.managedObjectContext refreshObject:stamp_ mergeChanges:NO];
   [stamp_ release];
-  [detailViewController_ release];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.titleLabel = nil;
   self.categoryImageView = nil;
@@ -182,7 +180,6 @@ typedef enum {
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  [self preloadEntityView];
   stampPhotoView_.imageURL = stamp_.imageURL;
   [super viewDidAppear:animated];
 }
@@ -613,13 +610,6 @@ typedef enum {
 
 #pragma mark -
 
-- (void)preloadEntityView {
-  if (detailViewController_)
-    return;
-
-  detailViewController_ = [[Util detailViewControllerForEntity:stamp_.entityObject] retain];
-}
-
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
@@ -631,7 +621,8 @@ typedef enum {
 }
 
 - (IBAction)handleEntityTap:(id)sender {
-  [self.navigationController pushViewController:detailViewController_ animated:YES];
+  UIViewController* detailViewController = [Util detailViewControllerForEntity:stamp_.entityObject];
+  [self.navigationController pushViewController:detailViewController animated:YES];
 }
 
 - (void)handleUserImageViewTap:(id)sender {

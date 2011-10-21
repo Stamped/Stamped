@@ -16,17 +16,14 @@ static const CGFloat kTopMargin = 5;
 @interface STStampFilterBar ()
 - (void)initialize;
 - (void)filterButtonPressed:(id)sender;
-- (void)sortButtonPressed:(id)sender;
 - (void)nextButtonPressed:(id)sender;
 - (void)backButtonPressed:(id)sender;
 - (void)fireDelegateMethod;
 - (void)addFirstPageButtons;
 - (void)addSecondPageButtons;
-- (void)addThirdPageButtons;
 
 @property (nonatomic, readonly) UIScrollView* scrollView;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
-@property (nonatomic, retain) NSMutableArray* sortButtons;
 @property (nonatomic, retain) UIButton* clearFilterButton;
 @end
 
@@ -34,15 +31,11 @@ static const CGFloat kTopMargin = 5;
 
 @synthesize delegate = delegate_;
 @synthesize scrollView = scrollView_;
-@synthesize sortButtons = sortButtons_;
 @synthesize filterButtons = filterButtons_;
 @synthesize filterType = filterType_;
-@synthesize sortType = sortType_;
 @synthesize searchQuery = searchQuery_;
 @synthesize searchField = searchField_;
 @synthesize clearFilterButton = clearFilterButton_;
-@synthesize currentLocation = currentLocation_;
-@synthesize locationManager = locationManager_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -61,26 +54,17 @@ static const CGFloat kTopMargin = 5;
 }
 
 - (void)dealloc {
-  locationManager_.delegate = nil;
-  [locationManager_ release];
-  self.sortButtons = nil;
   self.filterButtons = nil;
   self.searchQuery = nil;
   self.clearFilterButton = nil;
-  self.currentLocation = nil;
   [super dealloc];
 }
 
 - (void)initialize {
-  locationManager_ = [[CLLocationManager alloc] init];
-  self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
-  self.locationManager.delegate = self;
-  
-  self.sortButtons = [NSMutableArray array];
   self.filterButtons = [NSMutableArray array];
   
   scrollView_ = [[UIScrollView alloc] initWithFrame:self.bounds];
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.bounds) * 3,
+  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(self.bounds) * 2,
                                        CGRectGetHeight(self.bounds));
   scrollView_.pagingEnabled = YES;
   scrollView_.showsVerticalScrollIndicator = NO;
@@ -91,30 +75,15 @@ static const CGFloat kTopMargin = 5;
   [scrollView_ release];
   [self addFirstPageButtons];
   [self addSecondPageButtons];
-  [self addThirdPageButtons];
   
   self.filterType = StampFilterTypeNone;
-  self.sortType = StampSortTypeTime;
 }
 
 - (void)reset {
   self.searchQuery = nil;
-  self.sortType = StampSortTypeTime;
   self.filterType = StampFilterTypeNone;
   self.searchField.text = nil;
   [self.scrollView setContentOffset:CGPointZero animated:YES];
-}
-
-- (void)setSortType:(StampSortType)sortType {
-  sortType_ = sortType;
-
-  if (sortType == StampSortTypeDistance)
-    [self.locationManager startUpdatingLocation];
-  else
-    [self.locationManager stopUpdatingLocation];
-  
-  for (UIButton* button in sortButtons_)
-    button.selected = (button.tag == sortType);
 }
 
 - (void)setFilterType:(StampFilterType)filterType {
@@ -238,97 +207,24 @@ static const CGFloat kTopMargin = 5;
 
 - (void)addSecondPageButtons {
   // Back arrow then divider.
-  UIButton* nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  nextButton.frame = CGRectMake(324, kTopMargin, 40, 40);
-  [nextButton setImage:[UIImage imageNamed:@"hdr_back_button"]
+  UIButton* prevButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  prevButton.frame = CGRectMake(324, kTopMargin, 40, 40);
+  [prevButton setImage:[UIImage imageNamed:@"hdr_back_button"]
               forState:UIControlStateNormal];
-  [nextButton setImage:[UIImage imageNamed:@"hdr_back_button_selected"]
+  [prevButton setImage:[UIImage imageNamed:@"hdr_back_button_selected"]
               forState:UIControlStateHighlighted];
-  [nextButton addTarget:self
+  [prevButton addTarget:self
                  action:@selector(backButtonPressed:)
        forControlEvents:UIControlEventTouchUpInside];
-  [scrollView_ addSubview:nextButton];
+  [scrollView_ addSubview:prevButton];
   
   UIImageView* divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hdr_separator"]];
   divider.frame = CGRectOffset(divider.frame, 365, 8);
   [scrollView_ addSubview:divider];
   [divider release];
   
-  NSUInteger i = 0;
-  CGFloat leftMargin = 379;
-  // Time.
-  UIButton* sortButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [sortButton setImage:[UIImage imageNamed:@"hdr_sort_time_button"]
-              forState:UIControlStateNormal];
-  [sortButton setImage:[UIImage imageNamed:@"hdr_sort_time_button_selected"]
-              forState:UIControlStateSelected];
-  sortButton.frame = CGRectMake(leftMargin + (kHorizontalSeparation * i), kTopMargin, 40, 40);
-  sortButton.tag = StampSortTypeTime;
-  [scrollView_ addSubview:sortButton];
-  [sortButtons_ addObject:sortButton];
-
-  // Book.
-  ++i;
-  sortButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [sortButton setImage:[UIImage imageNamed:@"hdr_sort_location_button"]
-              forState:UIControlStateNormal];
-  [sortButton setImage:[UIImage imageNamed:@"hdr_sort_location_button_selected"]
-              forState:UIControlStateSelected];
-  sortButton.frame = CGRectMake(leftMargin + (kHorizontalSeparation * i), kTopMargin, 40, 40);
-  sortButton.tag = StampSortTypeDistance;
-  [scrollView_ addSubview:sortButton];
-  [sortButtons_ addObject:sortButton];
-
-  // Film.
-  ++i;
-  sortButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [sortButton setImage:[UIImage imageNamed:@"hdr_sort_popular_button"]
-              forState:UIControlStateNormal];
-  [sortButton setImage:[UIImage imageNamed:@"hdr_sort_popular_button_selected"]
-              forState:UIControlStateSelected];
-  sortButton.frame = CGRectMake(leftMargin + (kHorizontalSeparation * i), kTopMargin, 40, 40);
-  sortButton.tag = StampSortTypePopularity;
-  [scrollView_ addSubview:sortButton];
-  [sortButtons_ addObject:sortButton];
-  
-  for (UIButton* button in sortButtons_) {
-    [button addTarget:self
-               action:@selector(sortButtonPressed:)
-     forControlEvents:UIControlEventTouchUpInside];
-  }
-  
-  UIButton* searchButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  searchButton.frame = CGRectMake(555, kTopMargin, 80, 40);
-  [searchButton setImage:[UIImage imageNamed:@"hdr_search_button"]
-                forState:UIControlStateNormal];
-  [searchButton setImage:[UIImage imageNamed:@"hdr_search_button_selected"]
-                forState:UIControlStateHighlighted];
-  [searchButton addTarget:self
-                   action:@selector(nextButtonPressed:)
-         forControlEvents:UIControlEventTouchUpInside];
-  [scrollView_ addSubview:searchButton];
-}
-
-- (void)addThirdPageButtons {
-  // Back arrow then divider.
-  UIButton* nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  nextButton.frame = CGRectMake(644, kTopMargin, 40, 40);
-  [nextButton setImage:[UIImage imageNamed:@"hdr_back_button"]
-              forState:UIControlStateNormal];
-  [nextButton setImage:[UIImage imageNamed:@"hdr_back_button_selected"]
-              forState:UIControlStateHighlighted];
-  [nextButton addTarget:self
-                 action:@selector(backButtonPressed:)
-       forControlEvents:UIControlEventTouchUpInside];
-  [scrollView_ addSubview:nextButton];
-  
-  UIImageView* divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hdr_separator"]];
-  divider.frame = CGRectOffset(divider.frame, 685, 8);
-  [scrollView_ addSubview:divider];
-  [divider release];
-  
   // Search field.
-  searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(700, 10, 250, 30)];
+  searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(380, 10, 250, 30)];
   searchField_.delegate = self;
   searchField_.placeholder = @"Search";
   [scrollView_ addSubview:searchField_];
@@ -345,11 +241,6 @@ static const CGFloat kTopMargin = 5;
   [scrollView_ setContentOffset:CGPointMake(previousPage * 320, 0) animated:YES];
 }
 
-- (void)sortButtonPressed:(id)sender {
-  self.sortType = [(UIButton*)sender tag];
-  [self fireDelegateMethod];
-}
-
 - (void)filterButtonPressed:(id)sender {
   self.filterType = [(UIButton*)sender tag];
   [self fireDelegateMethod];
@@ -358,7 +249,6 @@ static const CGFloat kTopMargin = 5;
 - (void)fireDelegateMethod {
   [delegate_ stampFilterBar:self
             didSelectFilter:filterType_
-               withSortType:sortType_
                    andQuery:searchQuery_];
 }
 
@@ -370,7 +260,7 @@ static const CGFloat kTopMargin = 5;
 
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView*)scrollView {
   CGFloat currentPage = fmaxf(0, floorf(scrollView_.contentOffset.x / CGRectGetWidth(self.bounds)));
-  if (currentPage == 2)
+  if (currentPage == 1)
     [searchField_ becomeFirstResponder];
   else
     [searchField_ resignFirstResponder];
@@ -399,19 +289,6 @@ static const CGFloat kTopMargin = 5;
   self.searchQuery = nil;
   [self fireDelegateMethod];
   return YES;
-}
-
-#pragma mark - CLLocationManagerDelegate methods.
-
-- (void)locationManager:(CLLocationManager*)manager
-    didUpdateToLocation:(CLLocation*)newLocation
-           fromLocation:(CLLocation*)oldLocation {
-  CLLocationDistance distance = [newLocation distanceFromLocation:oldLocation];
-  // 160 meters == 0.1 mi.
-  if (distance > 160 || !self.currentLocation) {
-    self.currentLocation = newLocation;
-    [self fireDelegateMethod];
-  }
 }
 
 @end

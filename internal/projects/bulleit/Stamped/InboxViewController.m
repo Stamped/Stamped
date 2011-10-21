@@ -34,7 +34,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)loadStampsFromDataStore;
 - (void)loadStampsFromNetwork;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
-- (void)sortStamps;
 - (void)filterStamps;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)mapButtonWasPressed:(NSNotification*)notification;
@@ -50,7 +49,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @property (nonatomic, retain) NSMutableArray* filteredEntitiesArray;
 @property (nonatomic, assign) BOOL userPannedMap;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
-@property (nonatomic, assign) StampSortType selectedSortType;
 @property (nonatomic, copy) NSString* searchQuery;
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
 
@@ -63,7 +61,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize filteredEntitiesArray = filteredEntitiesArray_;
 @synthesize userPannedMap = userPannedMap_;
 @synthesize selectedFilterType = selectedFilterType_;
-@synthesize selectedSortType = selectedSortType_;
 @synthesize searchQuery = searchQuery_;
 @synthesize stampFilterBar = stampFilterBar_;
 @synthesize fetchedResultsController = fetchedResultsController_;
@@ -138,7 +135,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [mapView_ release];
 
   stampFilterBar_.filterType = selectedFilterType_;
-  stampFilterBar_.sortType = selectedSortType_;
   stampFilterBar_.searchQuery = searchQuery_;
 
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
@@ -161,9 +157,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewDidAppear:animated];
   if (mapView_.alpha > 0)
     mapView_.showsUserLocation = YES;
-  
-  if (stampFilterBar_.sortType == StampSortTypeDistance)
-    [stampFilterBar_.locationManager startUpdatingLocation];
 
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
@@ -174,7 +167,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewWillDisappear:animated];
 
   mapView_.showsUserLocation = NO;
-  [stampFilterBar_.locationManager stopUpdatingLocation];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:NO];
@@ -308,74 +300,20 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType
-          withSortType:(StampSortType)sortType
               andQuery:(NSString*)query {
   if (query && ![query isEqualToString:searchQuery_]) {
     self.searchQuery = query;
     selectedFilterType_ = filterType;
-    selectedSortType_ = sortType;
-    //[self loadStampsFromDataStore];
     return;
   }
 
   selectedFilterType_ = filterType;
   [self filterStamps];
 
-  selectedSortType_ = sortType;
-  [self sortStamps];
-
   [self.tableView reloadData];
 }
 
-#pragma mark - Filter/Sort/Search stuff.
-
-- (void)sortStamps {
-  NSSortDescriptor* desc = nil;
-  switch (selectedSortType_) {
-    case StampSortTypeTime:
-      desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-      break;
-    case StampSortTypePopularity:
-      desc = [NSSortDescriptor sortDescriptorWithKey:@"stamps.@count" ascending:NO];
-      break;
-    case StampSortTypeDistance: {
-      CLLocation* currentLocation = stampFilterBar_.currentLocation;
-      if (!currentLocation)
-        break;
-
-      NSArray* sortedEntities = [filteredEntitiesArray_ sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-        Entity* firstEntity = (Entity*)obj1;
-        Entity* secondEntity = (Entity*)obj2;
-        
-        NSNumber* firstDistance = nil;
-        NSNumber* secondDistance = nil;
-
-        if (!firstEntity.location && !secondEntity.location)
-          return NSOrderedSame;
-        else if (!firstEntity.location && secondEntity.location)
-          return NSOrderedDescending;
-        else if (firstEntity.location && !secondEntity.location)
-          return NSOrderedAscending;
-
-        firstDistance = [NSNumber numberWithDouble:[firstEntity.location distanceFromLocation:currentLocation]];
-        firstEntity.cachedDistance = firstDistance;
-        secondDistance = [NSNumber numberWithDouble:[secondEntity.location distanceFromLocation:currentLocation]];
-        secondEntity.cachedDistance = secondDistance;
-        return [firstDistance compare:secondDistance];
-      }];
-
-      self.filteredEntitiesArray = [NSMutableArray arrayWithArray:sortedEntities];
-      break;
-    }
-    default:
-      break;
-  }
-  if (!desc)
-    return;
-
-  NSArray* sortedEntities = [filteredEntitiesArray_ sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  self.filteredEntitiesArray = [NSMutableArray arrayWithArray:sortedEntities];
-}
+#pragma mark - Filter/Search stuff.
 
 - (void)filterStamps {
   if (selectedFilterType_ == StampFilterTypeNone) {
@@ -439,7 +377,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   selectedFilterType_ = StampFilterTypeNone;
   self.searchQuery = nil;
-  selectedSortType_ = StampSortTypeTime;
   [stampFilterBar_ reset];
 
   for (Stamp* stamp in objects) {
@@ -486,7 +423,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
-  [(InboxTableViewCell*)cell setSortType:selectedSortType_];
   [(InboxTableViewCell*)cell setEntityObject:(Entity*)[fetchedResultsController_ objectAtIndexPath:indexPath]];
 }
 

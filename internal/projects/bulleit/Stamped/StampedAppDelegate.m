@@ -39,7 +39,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if !TARGET_IPHONE_SIMULATOR
-  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
+//  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
   [self performRestKitMappings];
   self.window.rootViewController = self.navigationController;
@@ -135,20 +135,20 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
-     @"opentable_url", @"openTableURL", 
+     @"opentable_url", @"openTableURL",
      @"itunes_short_url", @"itunesShortURL",
-     @"itunes_url", @"itunesURL", 
+     @"itunes_url", @"itunesURL",
      @"artist_name", @"artist",
-     @"release_date", @"releaseDate", 
+     @"release_date", @"releaseDate",
      @"amazon_url", @"amazonURL",
-     @"in_theaters", @"inTheaters", 
+     @"in_theaters", @"inTheaters",
      @"fandango_url", @"fandangoURL", nil];
   
   entityMapping.primaryKeyAttribute = @"entityID";
   [entityMapping mapAttributes:@"address", @"category", @"subtitle",
      @"title", @"coordinates", @"phone", @"subcategory",
      @"street", @"substreet", @"city", @"state", @"zipcode",
-     @"neighborhood", @"desc", @"genre", @"label", @"length", 
+     @"neighborhood", @"desc", @"genre", @"label", @"length",
      @"author", @"cast", @"director", @"year", @"hours", @"cuisine",
      @"price", @"website", @"rating", @"isbn", @"format", 
      @"publisher", @"language", @"albums", @"songs",

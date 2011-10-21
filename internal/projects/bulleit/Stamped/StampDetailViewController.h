@@ -28,8 +28,6 @@ extern NSString* const kRemoveCommentPath;
   Stamp* stamp_;
   // Managed by the view system.
   CAGradientLayer* activityGradientLayer_;
-  // Preloaded Entity View.
-  UIViewController* detailViewController_;
 }
 
 - (id)initWithStamp:(Stamp*)stamp;

@@ -31,6 +31,5 @@ extern NSString* const kInboxTableDidScrollNotification;
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) Stamp* stamp;
 @property (nonatomic, readonly) InboxCellView* customView;
-@property (nonatomic, assign) StampSortType sortType;
 
 @end
