@@ -35,7 +35,10 @@ def show(request, **kwargs):
         if encodeStampTitle(stamp.entity.title) != stampTitle:
             raise
 
-        response = render_to_response(template, stamp)
+        params = stamp.value
+        params['image_url_92'] = params['image_url'].replace('.jpg', '-92x92.jpg')
+
+        response = render_to_response(template, params)
         response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
 
