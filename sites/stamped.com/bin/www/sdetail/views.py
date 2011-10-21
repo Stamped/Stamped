@@ -33,9 +33,9 @@ def show(request, **kwargs):
             template = 'sdetail-mobile.html'
 
         if encodeStampTitle(stamp.entity.title) != stampTitle:
-            raise
+            raise Exception
 
-        params = stamp.value
+        params = HTTPStamp().importSchema(stamp).value
         params['image_url_92'] = params['image_url'].replace('.jpg', '-92x92.jpg')
 
         response = render_to_response(template, params)
@@ -44,9 +44,10 @@ def show(request, **kwargs):
 
         return response
 
-    except:
+    except Exception as e:
         logs.begin(stampedAPI._logsDB.addLog)
         logs.request(request)
+        logs.warning("500 Error: %s" % e)
         logs.error(500)
         raise Http404
 
