@@ -36,7 +36,7 @@ def show(request, **kwargs):
             raise Exception
 
         params = HTTPStamp().importSchema(stamp).value
-        params['image_url_92'] = params['image_url'].replace('.jpg', '-92x92.jpg')
+        params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
 
         response = render_to_response(template, params)
         response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
