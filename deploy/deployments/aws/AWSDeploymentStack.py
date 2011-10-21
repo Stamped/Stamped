@@ -89,9 +89,10 @@ class AWSDeploymentStack(ADeploymentStack):
         web_server_instances = self.web_server_instances
         assert len(web_server_instances) > 0
         
-        with settings(host_string=web_server_instances[0].public_dns_name):
-            with cd("/stamped"):
-                sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % config, pty=False)
+        for instance in web_server_instances:
+            with settings(host_string=instance.public_dns_name):
+                with cd("/stamped"):
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % config, pty=False)
         
         if self.system.options.ip:
             """ associate ip address here"""
