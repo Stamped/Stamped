@@ -76,6 +76,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, retain) RKClient* twitterClient;
 @property (nonatomic, retain) GTMOAuthAuthentication* twitterAuth;
 @property (nonatomic, retain) id objectToStamp;
+@property (nonatomic, readonly) UIView* editingMask;
 @end
 
 @implementation CreateStampViewController
@@ -115,6 +116,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize twitterAuth = twitterAuth_;
 @synthesize twitterClient = twitterClient_;
 @synthesize shareLabel = shareLabel_;
+@synthesize editingMask = editingMask_;
 
 @synthesize objectToStamp = objectToStamp_;
 
@@ -309,6 +311,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
       shareLabel_.textColor = [UIColor stampedLightGrayColor];
     }
   }
+  editingMask_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
+  editingMask_.backgroundColor = [UIColor whiteColor];
+  editingMask_.alpha = 0;
+  [self.view addSubview:editingMask_];
+  [editingMask_ release];
 }
 
 - (void)addStampsRemainingLayer {
@@ -429,19 +436,20 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   reasoningTextView_.inputView = nil;
   [reasoningTextView_ reloadInputViews];
   takePhotoButton_.selected = NO;
-
   mainCommentContainer_.frame = [ribbonedContainerView_ convertRect:mainCommentContainer_.frame
                                                              toView:self.view];
-  [self.view addSubview:mainCommentContainer_];
   [self.navigationController setNavigationBarHidden:YES animated:YES];
-  CGRect frame = CGRectMake(0, 0, 320, 246 - CGRectGetHeight(reasoningTextView_.inputAccessoryView.frame));
-  scrollView_.hidden = YES;
-  backgroundImageView_.hidden = YES;
-  [UIView animateWithDuration:0.2
+  [UIView animateWithDuration:0.2 
+                        delay:0 
+                      options:0
                    animations:^{
-                     mainCommentContainer_.frame = frame;
+                     [self.view addSubview:mainCommentContainer_];
+                     mainCommentContainer_.frame =
+                         CGRectMake(0, 0, 320, 246 - CGRectGetHeight(reasoningTextView_.inputAccessoryView.frame));
                      deletePhotoButton_.alpha = 1.0;
-                   } completion:^(BOOL finished) {
+                     editingMask_.alpha = 1.0;
+                   }
+                   completion:^(BOOL finished) {
                      reasoningTextView_.scrollEnabled = YES;
                      [self adjustTextViewContentSize];
                    }];
@@ -452,8 +460,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     return;
 
   self.firstResponder = nil;
-  scrollView_.hidden = NO;
-  backgroundImageView_.hidden = NO;
   [self.navigationController setNavigationBarHidden:NO animated:YES];
 
   CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
@@ -480,14 +486,18 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                                   CGRectGetHeight(tweetButton_.frame));
   [tweetButton_ setNeedsDisplay];
 
-  [UIView animateWithDuration:0.2 animations:^{
-    mainCommentContainer_.frame = convertedFrame;
-    deletePhotoButton_.alpha = 0.0;
-  } completion:^(BOOL finished) {
-    mainCommentContainer_.frame = newCommentFrame;
-    [ribbonedContainerView_ addSubview:mainCommentContainer_];
-    reasoningTextView_.contentOffset = CGPointZero;
-  }];
+  [UIView animateWithDuration:0.2 
+                        delay:0 
+                      options:UIViewAnimationOptionBeginFromCurrentState 
+                   animations:^{
+                     editingMask_.alpha = 0.0;
+                     mainCommentContainer_.frame = convertedFrame;
+                     deletePhotoButton_.alpha = 0.0;
+                   } completion:^(BOOL finished) {
+                     mainCommentContainer_.frame = newCommentFrame;
+                     [ribbonedContainerView_ addSubview:mainCommentContainer_];
+                     reasoningTextView_.contentOffset = CGPointZero;
+                   }];
 }
 
 - (void)textViewDidChange:(UITextView*)textView {

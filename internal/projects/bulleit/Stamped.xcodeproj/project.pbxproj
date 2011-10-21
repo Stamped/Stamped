@@ -296,12 +296,6 @@
 		7EBBDB4B1441F21F00DDEAE9 /* hdr_search_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB321441F21F00DDEAE9 /* hdr_search_button_selected@2x.png */; };
 		7EBBDB4C1441F21F00DDEAE9 /* hdr_search_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB331441F21F00DDEAE9 /* hdr_search_button@2x.png */; };
 		7EBBDB4D1441F21F00DDEAE9 /* hdr_separator@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB341441F21F00DDEAE9 /* hdr_separator@2x.png */; };
-		7EBBDB4E1441F21F00DDEAE9 /* hdr_sort_location_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB351441F21F00DDEAE9 /* hdr_sort_location_button_selected@2x.png */; };
-		7EBBDB4F1441F21F00DDEAE9 /* hdr_sort_location_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB361441F21F00DDEAE9 /* hdr_sort_location_button@2x.png */; };
-		7EBBDB501441F21F00DDEAE9 /* hdr_sort_popular_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB371441F21F00DDEAE9 /* hdr_sort_popular_button_selected@2x.png */; };
-		7EBBDB511441F21F00DDEAE9 /* hdr_sort_popular_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB381441F21F00DDEAE9 /* hdr_sort_popular_button@2x.png */; };
-		7EBBDB521441F21F00DDEAE9 /* hdr_sort_time_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB391441F21F00DDEAE9 /* hdr_sort_time_button_selected@2x.png */; };
-		7EBBDB531441F21F00DDEAE9 /* hdr_sort_time_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB3A1441F21F00DDEAE9 /* hdr_sort_time_button@2x.png */; };
 		7EBBDB561441F4BC00DDEAE9 /* STStampFilterBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */; };
 		7EBCBE8713D78896009FCECF /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBCBE8613D78896009FCECF /* Comment.m */; };
 		7EBE8E2713DEFAD200D36E50 /* disclosure_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */; };
@@ -934,12 +928,6 @@
 		7EBBDB321441F21F00DDEAE9 /* hdr_search_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_search_button_selected@2x.png"; sourceTree = "<group>"; };
 		7EBBDB331441F21F00DDEAE9 /* hdr_search_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_search_button@2x.png"; sourceTree = "<group>"; };
 		7EBBDB341441F21F00DDEAE9 /* hdr_separator@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_separator@2x.png"; sourceTree = "<group>"; };
-		7EBBDB351441F21F00DDEAE9 /* hdr_sort_location_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_sort_location_button_selected@2x.png"; sourceTree = "<group>"; };
-		7EBBDB361441F21F00DDEAE9 /* hdr_sort_location_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_sort_location_button@2x.png"; sourceTree = "<group>"; };
-		7EBBDB371441F21F00DDEAE9 /* hdr_sort_popular_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_sort_popular_button_selected@2x.png"; sourceTree = "<group>"; };
-		7EBBDB381441F21F00DDEAE9 /* hdr_sort_popular_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_sort_popular_button@2x.png"; sourceTree = "<group>"; };
-		7EBBDB391441F21F00DDEAE9 /* hdr_sort_time_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_sort_time_button_selected@2x.png"; sourceTree = "<group>"; };
-		7EBBDB3A1441F21F00DDEAE9 /* hdr_sort_time_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_sort_time_button@2x.png"; sourceTree = "<group>"; };
 		7EBBDB541441F4BC00DDEAE9 /* STStampFilterBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampFilterBar.h; sourceTree = "<group>"; };
 		7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampFilterBar.m; sourceTree = "<group>"; };
 		7EBCBE8513D78896009FCECF /* Comment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Comment.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -1850,12 +1838,6 @@
 				7EBBDB321441F21F00DDEAE9 /* hdr_search_button_selected@2x.png */,
 				7EBBDB331441F21F00DDEAE9 /* hdr_search_button@2x.png */,
 				7EBBDB341441F21F00DDEAE9 /* hdr_separator@2x.png */,
-				7EBBDB351441F21F00DDEAE9 /* hdr_sort_location_button_selected@2x.png */,
-				7EBBDB361441F21F00DDEAE9 /* hdr_sort_location_button@2x.png */,
-				7EBBDB371441F21F00DDEAE9 /* hdr_sort_popular_button_selected@2x.png */,
-				7EBBDB381441F21F00DDEAE9 /* hdr_sort_popular_button@2x.png */,
-				7EBBDB391441F21F00DDEAE9 /* hdr_sort_time_button_selected@2x.png */,
-				7EBBDB3A1441F21F00DDEAE9 /* hdr_sort_time_button@2x.png */,
 			);
 			name = "Stamp List Filter";
 			sourceTree = "<group>";
@@ -2641,12 +2623,6 @@
 				7EBBDB4B1441F21F00DDEAE9 /* hdr_search_button_selected@2x.png in Resources */,
 				7EBBDB4C1441F21F00DDEAE9 /* hdr_search_button@2x.png in Resources */,
 				7EBBDB4D1441F21F00DDEAE9 /* hdr_separator@2x.png in Resources */,
-				7EBBDB4E1441F21F00DDEAE9 /* hdr_sort_location_button_selected@2x.png in Resources */,
-				7EBBDB4F1441F21F00DDEAE9 /* hdr_sort_location_button@2x.png in Resources */,
-				7EBBDB501441F21F00DDEAE9 /* hdr_sort_popular_button_selected@2x.png in Resources */,
-				7EBBDB511441F21F00DDEAE9 /* hdr_sort_popular_button@2x.png in Resources */,
-				7EBBDB521441F21F00DDEAE9 /* hdr_sort_time_button_selected@2x.png in Resources */,
-				7EBBDB531441F21F00DDEAE9 /* hdr_sort_time_button@2x.png in Resources */,
 				CBDFC8C414429F2600C6FDB7 /* button_addTodo@2x.png in Resources */,
 				7E7396EA14438A5600C7CFEA /* small_location_icon_purple@2x.png in Resources */,
 				7E7396EB14438A5600C7CFEA /* small_location_icon@2x.png in Resources */,
