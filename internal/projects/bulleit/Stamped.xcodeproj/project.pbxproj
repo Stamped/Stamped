@@ -136,6 +136,8 @@
 		7E407E9014507BF300D7847F /* comment_fail_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E407E8E14507BF300D7847F /* comment_fail_icon@2x.png */; };
 		7E407E9214508E5800D7847F /* delete_comment_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E407E9114508E5700D7847F /* delete_comment_icon@2x.png */; };
 		7E407E951450A55200D7847F /* SharedRequestDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E941450A55100D7847F /* SharedRequestDelegate.m */; };
+		7E407E99145203BA00D7847F /* STCreditPill.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E98145203BA00D7847F /* STCreditPill.m */; };
+		7E407E9C145203F300D7847F /* STCreditTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E9B145203F300D7847F /* STCreditTextField.m */; };
 		7E428A8513EB2C72004CA2B2 /* stacks_back_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */; };
 		7E42DCBC13DB64CA00AF63BE /* SearchEntitiesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */; };
 		7E42DCBD13DB64CA00AF63BE /* SearchEntitiesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCBB13DB64CA00AF63BE /* SearchEntitiesViewController.xib */; };
@@ -364,6 +366,7 @@
 		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
 		7EDE38E413C5093E003AEE52 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E313C5093E003AEE52 /* QuartzCore.framework */; };
 		7EDE38E613C51133003AEE52 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EDE38E513C51133003AEE52 /* CoreText.framework */; };
+		7EDE672C1452193F0019CD68 /* STCreditPickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE672B1452193F0019CD68 /* STCreditPickerController.m */; };
 		7EE1193613CE0C8500378139 /* libRestKitCoreData.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1192E13CE0C4100378139 /* libRestKitCoreData.a */; };
 		7EE1193713CE0C8500378139 /* libRestKitJSONParserJSONKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1192A13CE0C4100378139 /* libRestKitJSONParserJSONKit.a */; };
 		7EE1193813CE0C8500378139 /* libRestKitNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EE1192013CE0C4100378139 /* libRestKitNetwork.a */; };
@@ -727,6 +730,10 @@
 		7E407E9114508E5700D7847F /* delete_comment_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "delete_comment_icon@2x.png"; sourceTree = "<group>"; };
 		7E407E931450A55100D7847F /* SharedRequestDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedRequestDelegate.h; sourceTree = "<group>"; };
 		7E407E941450A55100D7847F /* SharedRequestDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SharedRequestDelegate.m; sourceTree = "<group>"; };
+		7E407E97145203BA00D7847F /* STCreditPill.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreditPill.h; sourceTree = "<group>"; };
+		7E407E98145203BA00D7847F /* STCreditPill.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreditPill.m; sourceTree = "<group>"; };
+		7E407E9A145203F300D7847F /* STCreditTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreditTextField.h; sourceTree = "<group>"; };
+		7E407E9B145203F300D7847F /* STCreditTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreditTextField.m; sourceTree = "<group>"; };
 		7E428A8413EB2C72004CA2B2 /* stacks_back_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stacks_back_button@2x.png"; sourceTree = "<group>"; };
 		7E42DCB913DB64CA00AF63BE /* SearchEntitiesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchEntitiesViewController.h; sourceTree = "<group>"; };
 		7E42DCBA13DB64CA00AF63BE /* SearchEntitiesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchEntitiesViewController.m; sourceTree = "<group>"; };
@@ -1009,6 +1016,8 @@
 		7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = StampDetailViewController.xib; path = ../Interfaces/StampDetailViewController.xib; sourceTree = "<group>"; };
 		7EDE38E313C5093E003AEE52 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		7EDE38E513C51133003AEE52 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+		7EDE672A1452193F0019CD68 /* STCreditPickerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreditPickerController.h; sourceTree = "<group>"; };
+		7EDE672B1452193F0019CD68 /* STCreditPickerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreditPickerController.m; sourceTree = "<group>"; };
 		7EE1190B13CE0C4100378139 /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = RestKit/RestKit.xcodeproj; sourceTree = "<group>"; };
 		7EE1193B13CE0C8500378139 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		7EE1193C13CE0C8500378139 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -1340,6 +1349,19 @@
 				7E407E83144F462400D7847F /* TTTAttributedLabel.m */,
 			);
 			path = TTTAttributedLabel;
+			sourceTree = "<group>";
+		};
+		7E407E96145203A100D7847F /* Credit Picker */ = {
+			isa = PBXGroup;
+			children = (
+				7E407E97145203BA00D7847F /* STCreditPill.h */,
+				7E407E98145203BA00D7847F /* STCreditPill.m */,
+				7E407E9A145203F300D7847F /* STCreditTextField.h */,
+				7E407E9B145203F300D7847F /* STCreditTextField.m */,
+				7EDE672A1452193F0019CD68 /* STCreditPickerController.h */,
+				7EDE672B1452193F0019CD68 /* STCreditPickerController.m */,
+			);
+			name = "Credit Picker";
 			sourceTree = "<group>";
 		};
 		7E42DCBE13DB64D100AF63BE /* Create Stamp */ = {
@@ -2060,6 +2082,7 @@
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
 				7E0BC47413E4A07F008CC076 /* Search Entities */,
 				7E47E94C1409C00F00130B32 /* Edit Entity */,
+				7E407E96145203A100D7847F /* Credit Picker */,
 				7E42DCBE13DB64D100AF63BE /* Create Stamp */,
 				7E668C2613D8B25300E79E14 /* Stamp Detail */,
 				7E68B915141AA4F500D55021 /* Show Image */,
@@ -2761,6 +2784,9 @@
 				7E407E85144F462400D7847F /* TTTAttributedLabel.m in Sources */,
 				7E407E8C144FB05D00D7847F /* STAddCommentTextField.m in Sources */,
 				7E407E951450A55200D7847F /* SharedRequestDelegate.m in Sources */,
+				7E407E99145203BA00D7847F /* STCreditPill.m in Sources */,
+				7E407E9C145203F300D7847F /* STCreditTextField.m in Sources */,
+				7EDE672C1452193F0019CD68 /* STCreditPickerController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

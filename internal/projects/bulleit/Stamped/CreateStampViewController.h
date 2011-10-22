@@ -9,17 +9,18 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+#import "STCreditTextField.h"
+
 @class Entity;
 @class UserImageView;
 @class CAGradientLayer;
 @class User;
 @class SearchResult;
-@class STCreditTextField;
 
-@interface CreateStampViewController : UIViewController<UITextFieldDelegate,
-                                                        UITextViewDelegate,
+@interface CreateStampViewController : UIViewController<UITextViewDelegate,
                                                         RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
+                                                        STCreditTextFieldDelegate,
                                                         UINavigationControllerDelegate,
                                                         UIImagePickerControllerDelegate,
                                                         UIActionSheetDelegate> {
@@ -52,11 +53,11 @@
 @property (nonatomic, retain) IBOutlet UIButton* tweetButton;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* disclosureButton;
+@property (nonatomic, retain) IBOutlet UIView* creditContainer;
 
 - (IBAction)disclosureButtonPressed:(id)sender;
 - (IBAction)tweetButtonPressed:(id)sender;
 - (IBAction)editButtonPressed:(id)sender;
-- (IBAction)backButtonPressed:(id)sender;
 - (IBAction)saveStampButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;
 - (id)initWithSearchResult:(SearchResult*)searchResult;

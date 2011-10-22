@@ -14,6 +14,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "AccountManager.h"
+#import "STCreditTextField.h"
 #import "EditEntityViewController.h"
 #import "Entity.h"
 #import "EntityDetailViewController.h"
@@ -34,20 +35,6 @@ static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kCreateStampPath = @"/stamps/create.json";
 static NSString* const kCreateEntityPath = @"/entities/create.json";
 
-@interface STCreditTextField : UITextField
-@end
-
-@implementation STCreditTextField
-
-- (CGRect)textRectForBounds:(CGRect)bounds {
-  return CGRectOffset(CGRectInset(bounds, 40, 0), 40, 0);
-}
-
-- (CGRect)editingRectForBounds:(CGRect)bounds {    
-  return CGRectOffset(CGRectInset(bounds, 40, 0), 40, 0);
-}
-
-@end
 
 @interface CreateStampViewController ()
 - (void)editorDoneButtonPressed:(id)sender;
@@ -117,6 +104,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize twitterClient = twitterClient_;
 @synthesize shareLabel = shareLabel_;
 @synthesize editingMask = editingMask_;
+@synthesize creditContainer = creditContainer_;
 
 @synthesize objectToStamp = objectToStamp_;
 
@@ -174,6 +162,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.shelfBackground = nil;
   self.spinner = nil;
   self.stampItButton = nil;
+  self.creditTextField.delegate = nil;
   self.creditTextField = nil;
   self.editButton = nil;
   self.mainCommentContainer = nil;
@@ -183,6 +172,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.twitterAuth = nil;
   self.twitterClient = nil;
   self.disclosureButton = nil;
+  self.creditContainer = nil;
   stampsRemainingLayer_ = nil;
 
   [super dealloc];
@@ -316,6 +306,12 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   editingMask_.alpha = 0;
   [self.view addSubview:editingMask_];
   [editingMask_ release];
+  
+  CGRect shadowBounds = CGRectInset(creditContainer_.bounds, -10, 0);
+  creditContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:shadowBounds].CGPath;
+  creditContainer_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
+  creditContainer_.layer.shadowOffset = CGSizeMake(0, 1);
+  creditTextField_.subDelegate = self;
 }
 
 - (void)addStampsRemainingLayer {
@@ -395,6 +391,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.shelfBackground = nil;
   self.spinner = nil;
   self.stampItButton = nil;
+  self.creditTextField.delegate = nil;
   self.creditTextField = nil;
   self.editButton = nil;
   self.mainCommentContainer = nil;
@@ -402,6 +399,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
   self.disclosureButton = nil;
+  self.creditContainer = nil;
   stampsRemainingLayer_ = nil;
 }
 
@@ -465,7 +463,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
   contentSize.height += CGRectGetHeight(self.stampPhotoView.bounds) + 10;
   CGRect newCommentFrame = CGRectMake(0, 4, 310, fmaxf(104, contentSize.height));
-  CGRect convertedFrame = [self.view convertRect:newCommentFrame fromView:ribbonedContainerView_];  
+  CGRect convertedFrame = [self.view convertRect:newCommentFrame fromView:ribbonedContainerView_];
   CGRect newContainerFrame = ribbonedContainerView_.frame;
   newContainerFrame.size.height = CGRectGetHeight(convertedFrame) + 60.0;
   
@@ -529,32 +527,53 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   } completion:nil];
 }
 
-#pragma mark - UITextFieldDelegate Methods.
+#pragma mark - STCreditTextFieldDelegate Methods.
 
-- (void)textFieldDidBeginEditing:(UITextField*)textField {
+- (void)creditTextFieldDidBeginEditing:(STCreditTextField*)textField {
   if (textField != creditTextField_)
     return;
   
   self.firstResponder = creditTextField_;
-  [UIView animateWithDuration:0.2 animations:^{
-    self.scrollView.contentInset =
-      UIEdgeInsetsMake(0, 0, CGRectGetMaxY(ribbonedContainerView_.frame) - 50, 0);
-    [self.scrollView setContentOffset:CGPointMake(0, CGRectGetMaxY(ribbonedContainerView_.frame) - 50) animated:YES];
-  }];
+  creditContainer_.frame = [ribbonedContainerView_ convertRect:creditContainer_.frame
+                                                        toView:self.view];
+  [self.navigationController setNavigationBarHidden:YES animated:YES];
+  [UIView animateWithDuration:0.3
+                        delay:0 
+                      options:0
+                   animations:^{
+                     [self.view addSubview:creditContainer_];
+                     creditContainer_.frame = CGRectMake(0, 0, 320, CGRectGetHeight(creditContainer_.frame));
+                     creditContainer_.layer.shadowOpacity = 1.0;
+                     editingMask_.alpha = 1.0;
+                     
+                   }
+                   completion:^(BOOL finished) {}];
+
 }
 
-- (void)textFieldDidEndEditing:(UITextField*)textField {
+- (void)creditTextFieldDidEndEditing:(STCreditTextField*)textField {
   if (textField != creditTextField_)
     return;
   
   self.firstResponder = nil;
-  [UIView animateWithDuration:0.2 animations:^{
-    self.scrollView.contentInset = UIEdgeInsetsZero;
-  }];
-  [self.scrollView setContentOffset:CGPointZero animated:YES];
+  [self.navigationController setNavigationBarHidden:NO animated:YES];
+  CGRect frame = CGRectMake(0, 108, 310, 48);
+  CGRect convertedFrame = [ribbonedContainerView_ convertRect:frame toView:self.view];
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     creditContainer_.frame = convertedFrame;
+                     creditContainer_.layer.shadowOpacity = 0.0;
+                     editingMask_.alpha = 0.0;
+                   }
+                   completion:^(BOOL finished) {
+                     creditContainer_.frame = frame;
+                     [ribbonedContainerView_ addSubview:creditContainer_];
+                   }];
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField*)textField {
+- (BOOL)creditTextFieldShouldReturn:(STCreditTextField*)textField {
   if (textField != creditTextField_)
     return YES;
   
@@ -583,10 +602,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
       [[EditEntityViewController alloc] initWithEntityObject:entityObject_];
   [self.navigationController presentModalViewController:editViewController animated:YES];
   [editViewController release];
-}
-
-- (IBAction)backButtonPressed:(id)sender {
-  [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (IBAction)saveStampButtonPressed:(id)sender {
