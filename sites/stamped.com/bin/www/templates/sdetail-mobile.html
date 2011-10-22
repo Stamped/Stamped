@@ -57,10 +57,10 @@
                     <div class="inner">
                         <div class="meta">
                             <div class="thumb">
-                                <img src="http://static.stamped.com/users/{{ user.screen_name }}-92x92.jpg"/>
+                                <img src="{{ image_url_92 }}"/>
                             </div>
                             <div class="copy">
-                                <h1>{{ title }}</h1> 
+                                <h1>{{ entity.title }}</h1> 
                                 <span class="type {{ entity.category }}">{{ entity.subtitle }}</span> 
                             </div>
                         </div>
@@ -69,7 +69,7 @@
                             <p>{{ blurb }}</p> 
                             {% if image_dimensions %}
                             <div class="photo">
-                                <img src="http://static.stamped.com/stamps/{{ stamp_id }}.jpg" alt="{{ title }}" width="572px"/>
+                                <img src="http://static.stamped.com/stamps/{{ stamp_id }}.jpg" alt="{{ entity.title }}" width="572px"/>
                             </div>
                             {% endif %}
                             {% if credit %}

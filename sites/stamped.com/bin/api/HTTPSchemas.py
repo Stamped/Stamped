@@ -783,6 +783,7 @@ class HTTPStamp(Schema):
                 data['credit'] = credit
 
             self.importData(data, overflow=True)
+            self.user                   = HTTPUserMini().importSchema(schema.user).exportSparse()
             self.entity.coordinates     = _coordinatesDictToFlat(coordinates)
             self.num_comments           = schema.num_comments
             self.num_likes              = schema.num_likes
@@ -880,6 +881,7 @@ class HTTPComment(Schema):
         if schema.__class__.__name__ == 'Comment':
             self.importData(schema.exportSparse(), overflow=True)
             self.created = schema.timestamp.created
+            self.user = HTTPUserMini().importSchema(schema.user).exportSparse()
 
         else:
             raise NotImplementedError

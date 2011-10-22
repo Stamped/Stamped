@@ -33,17 +33,21 @@ def show(request, **kwargs):
             template = 'sdetail-mobile.html'
 
         if encodeStampTitle(stamp.entity.title) != stampTitle:
-            raise
+            raise Exception
 
-        response = render_to_response(template, stamp)
+        params = HTTPStamp().importSchema(stamp).value
+        params['image_url_92'] = params['user']['image_url'].replace('.jpg', '-92x92.jpg')
+
+        response = render_to_response(template, params)
         response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
 
         return response
 
-    except:
+    except Exception as e:
         logs.begin(stampedAPI._logsDB.addLog)
         logs.request(request)
+        logs.warning("500 Error: %s" % e)
         logs.error(500)
         raise Http404
 
