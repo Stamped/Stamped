@@ -16,8 +16,12 @@
 - (BOOL)creditTextFieldShouldReturn:(STCreditTextField*)textField;
 @end
 
-@interface STCreditPickerController : NSObject
+@interface STCreditPickerController : NSObject <UITextFieldDelegate,
+                                                UITableViewDelegate,
+                                                UITableViewDataSource>
 
+// All of these are WEAK references.
+@property (nonatomic, assign) STCreditTextField* creditTextField;
 @property (nonatomic, assign) id<STCreditPickerControllerDelegate> delegate;
 
 @end

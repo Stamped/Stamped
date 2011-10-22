@@ -10,12 +10,9 @@
 
 @interface STCreditTextField ()
 - (void)commonInit;
-
 @end
 
 @implementation STCreditTextField
-
-@synthesize subDelegate = subDelegate_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -34,19 +31,7 @@
 }
 
 - (void)commonInit {
-  self.delegate = self;
-}
-
-- (void)textFieldDidBeginEditing:(UITextField*)textField {
-  [subDelegate_ creditTextFieldDidEndEditing:self];
-}
-
-- (void)textFieldDidEndEditing:(UITextField*)textField {
-  [subDelegate_ creditTextFieldDidEndEditing:self];
-}
-
-- (BOOL)textFieldShouldReturn:(UITextField*)textField {
-  return [subDelegate_ creditTextFieldShouldReturn:self];
+  
 }
 
 - (CGRect)textRectForBounds:(CGRect)bounds {

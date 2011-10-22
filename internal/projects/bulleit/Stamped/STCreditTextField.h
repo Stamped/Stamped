@@ -8,14 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class STCreditTextField;
-
-@protocol STCreditTextFieldDelegate <UITextFieldDelegate>
-- (void)creditTextFieldDidBeginEditing:(STCreditTextField*)textField;
-- (void)creditTextFieldDidEndEditing:(STCreditTextField*)textField;
-- (BOOL)creditTextFieldShouldReturn:(STCreditTextField*)textField;
-@end
 
 @interface STCreditTextField : UITextField <UITextFieldDelegate>
-@property (nonatomic, assign) id<STCreditTextFieldDelegate> subDelegate;
+
 @end

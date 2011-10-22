@@ -64,6 +64,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, retain) GTMOAuthAuthentication* twitterAuth;
 @property (nonatomic, retain) id objectToStamp;
 @property (nonatomic, readonly) UIView* editingMask;
+@property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @end
 
 @implementation CreateStampViewController
@@ -105,12 +106,16 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize shareLabel = shareLabel_;
 @synthesize editingMask = editingMask_;
 @synthesize creditContainer = creditContainer_;
+@synthesize creditPickerController = creditPickerController_;
 
 @synthesize objectToStamp = objectToStamp_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
+    creditPickerController_ = [[STCreditPickerController alloc] init];
+    creditPickerController_.delegate = self;
+
     self.entityObject = entityObject;
     self.objectToStamp = entityObject;
   }
@@ -173,6 +178,9 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.twitterClient = nil;
   self.disclosureButton = nil;
   self.creditContainer = nil;
+  self.creditPickerController.creditTextField = nil;
+  self.creditPickerController.delegate = nil;
+  self.creditPickerController = nil;
   stampsRemainingLayer_ = nil;
 
   [super dealloc];
@@ -311,7 +319,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   creditContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:shadowBounds].CGPath;
   creditContainer_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
   creditContainer_.layer.shadowOffset = CGSizeMake(0, 1);
-  creditTextField_.subDelegate = self;
+  
+  creditPickerController_.creditTextField = creditTextField_;
 }
 
 - (void)addStampsRemainingLayer {
@@ -400,6 +409,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.deletePhotoButton = nil;
   self.disclosureButton = nil;
   self.creditContainer = nil;
+  self.creditPickerController.creditTextField = nil;
   stampsRemainingLayer_ = nil;
 }
 

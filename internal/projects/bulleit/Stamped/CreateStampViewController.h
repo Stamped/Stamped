@@ -9,7 +9,7 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STCreditTextField.h"
+#import "STCreditPickerController.h"
 
 @class Entity;
 @class UserImageView;
@@ -20,7 +20,7 @@
 @interface CreateStampViewController : UIViewController<UITextViewDelegate,
                                                         RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
-                                                        STCreditTextFieldDelegate,
+                                                        STCreditPickerControllerDelegate,
                                                         UINavigationControllerDelegate,
                                                         UIImagePickerControllerDelegate,
                                                         UIActionSheetDelegate> {
