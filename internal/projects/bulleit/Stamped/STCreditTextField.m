@@ -8,6 +8,8 @@
 
 #import "STCreditTextField.h"
 
+#import <QuartzCore/QuartzCore.h>
+
 @interface STCreditTextField ()
 - (void)commonInit;
 @end
@@ -31,7 +33,16 @@
 }
 
 - (void)commonInit {
-  
+  //self.backgroundColor = [UIColor grayColor];
+  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+  self.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
+  self.layer.shadowOffset = CGSizeMake(0, 1);
+  self.layer.shadowOpacity = 1.0;
+}
+
+- (void)setFrame:(CGRect)frame {
+  [super setFrame:frame];
+  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
 }
 
 - (CGRect)textRectForBounds:(CGRect)bounds {

@@ -208,7 +208,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   }
   
   static NSString* CellIdentifier = @"Cell";
-  
+
   PeopleTableViewCell* cell = (PeopleTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     cell = [[[PeopleTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];

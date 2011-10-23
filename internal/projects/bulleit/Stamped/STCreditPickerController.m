@@ -12,10 +12,14 @@
 
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
+#import "STCreditPill.h"
 #import "STCreditTextField.h"
 #import "User.h"
 
 @interface STCreditPickerController ()
+- (void)addPerson:(NSString*)username;
+- (void)removePerson:(NSString*)username;
+
 @property (nonatomic, retain) UITableView* creditTableView;
 @property (nonatomic, copy) NSArray* peopleArray;
 @end
@@ -31,8 +35,11 @@
   self = [super init];
   if (self) {
     User* currentUser = [AccountManager sharedManager].currentUser;
-    self.peopleArray =
-        [User objectsWithPredicate:[NSPredicate predicateWithFormat:@"userID != %@ AND name != NIL", currentUser.userID]];
+    NSFetchRequest* request = [User fetchRequest];
+    request.predicate = [NSPredicate predicateWithFormat:@"userID != %@ AND name != NIL", currentUser.userID];
+    request.sortDescriptors =
+        [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
+    self.peopleArray = [User objectsWithFetchRequest:request];
   }
   return self;
 }
@@ -53,6 +60,33 @@
   }
 }
 
+- (void)addPerson:(NSString*)username {
+  STCreditPill* pill = [[STCreditPill alloc] initWithFrame:CGRectMake(10, 10, 94, 25)];
+  pill.textLabel.text = username;
+  [pill sizeToFit];
+  [creditTextField_ addSubview:pill];
+  [pill release];
+}
+
+- (void)removePerson:(NSString*)username {
+  
+}
+
+#pragma mark - UITextFieldDelegate methods.
+
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
+  NSArray* people = [result componentsSeparatedByString:@" "];
+  for (NSString* username in people) {
+    if (!username.length)
+      continue;
+    [self addPerson:username];
+  }
+
+  NSLog(@"People: %@", people);
+  return YES;
+}
+
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [delegate_ creditTextFieldDidBeginEditing:creditTextField_];
   if (!creditTableView_) {
@@ -65,7 +99,6 @@
     // TODO(andybons): MAJOR hack.
     [creditTextField_.superview.superview insertSubview:creditTableView_
                                            belowSubview:creditTextField_.superview];
-  
   }
   [UIView animateWithDuration:0.3 animations:^{
     creditTableView_.alpha = 1.0;

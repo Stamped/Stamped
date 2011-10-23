@@ -10,56 +10,65 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "UIColor+Stamped.h"
+
+@interface STCreditPill ()
+@property (nonatomic, readonly) UILabel* atSymbolLabel;
+@property (nonatomic, readonly) CAGradientLayer* gradientBorder;
+@property (nonatomic, readonly) CAGradientLayer* gradientBackground;
+@end
+
 @implementation STCreditPill
 
 @synthesize textLabel = textLabel_;
 @synthesize stampImageView = stampImageView_;
+@synthesize atSymbolLabel = atSymbolLabel_;
+@synthesize gradientBorder = gradientBorder_;
+@synthesize gradientBackground = gradientBackground_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
     self.layer.cornerRadius = 12.5;
     self.layer.masksToBounds = YES;
-    CAGradientLayer* gradientBorder = [[CAGradientLayer alloc] init];
-    gradientBorder.frame = self.bounds;
-    gradientBorder.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor,
-                             (id)[UIColor colorWithWhite:0.8 alpha:1.0].CGColor, nil];
-    gradientBorder.startPoint = CGPointMake(0, 0);
-    gradientBorder.endPoint = CGPointMake(0, 1);
-    [self.layer addSublayer:gradientBorder];
-    [gradientBorder release];
-  
-    CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
-    gradientLayer.colors =
-        [NSArray arrayWithObjects:(id)[UIColor whiteColor].CGColor,
-                                  (id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor, nil];
-    gradientLayer.frame = CGRectInset(self.bounds, 1, 1);
-    gradientLayer.cornerRadius = 11.5;
-    gradientLayer.startPoint = CGPointMake(0, 0);
-    gradientLayer.endPoint = CGPointMake(0, 1);
-    [self.layer addSublayer:gradientLayer];
-    [gradientLayer release];
+    gradientBorder_ = [[CAGradientLayer alloc] init];
+    gradientBorder_.frame = self.bounds;
+    gradientBorder_.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor,
+                              (id)[UIColor colorWithWhite:0.8 alpha:1.0].CGColor, nil];
+    gradientBorder_.startPoint = CGPointMake(0, 0);
+    gradientBorder_.endPoint = CGPointMake(0, 1);
+    [self.layer addSublayer:gradientBorder_];
+    [gradientBorder_ release];
     
-    stampImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(6, 5, 15, 15)];
-    stampImageView_.image = [UIImage imageNamed:@"baxter_stamp"];
+    gradientBackground_ = [[CAGradientLayer alloc] init];
+    gradientBackground_.colors =
+    [NSArray arrayWithObjects:(id)[UIColor whiteColor].CGColor,
+        (id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor, nil];
+    gradientBackground_.frame = CGRectInset(self.bounds, 1, 1);
+    gradientBackground_.cornerRadius = 11.5;
+    gradientBackground_.startPoint = CGPointMake(0, 0);
+    gradientBackground_.endPoint = CGPointMake(0, 1);
+    [self.layer addSublayer:gradientBackground_];
+    [gradientBackground_ release];
+    
+    stampImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
     [self addSubview:stampImageView_];
     [stampImageView_ release];
-
-    UILabel* atSymbolLabel = [[UILabel alloc] initWithFrame:CGRectMake(23, 2, 0, 0)];
-    atSymbolLabel.text = @"@";
-    [atSymbolLabel sizeToFit];
-    atSymbolLabel.backgroundColor = [UIColor clearColor];
-    atSymbolLabel.textColor = [UIColor colorWithWhite:0.6 alpha:1.0];
-    atSymbolLabel.font = [UIFont fontWithName:@"Helvetica" size:11];
-    atSymbolLabel.shadowColor = [UIColor whiteColor];
-    atSymbolLabel.shadowOffset = CGSizeMake(0, 1);
-    [self addSubview:atSymbolLabel];
-    [atSymbolLabel release];
-
-    textLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(34, 5, 0, 0)];
+    [stampImageView_ sizeToFit];
+    
+    atSymbolLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    atSymbolLabel_.text = @"@";
+    atSymbolLabel_.backgroundColor = [UIColor clearColor];
+    atSymbolLabel_.textColor = [UIColor stampedGrayColor];
+    atSymbolLabel_.font = [UIFont fontWithName:@"Helvetica" size:11];
+    atSymbolLabel_.shadowColor = [UIColor whiteColor];
+    atSymbolLabel_.shadowOffset = CGSizeMake(0, 1);
+    [self addSubview:atSymbolLabel_];
+    [atSymbolLabel_ release];
+    
+    textLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     textLabel_.backgroundColor = [UIColor clearColor];
-    textLabel_.text = @"baxterjeff";
-    textLabel_.textColor = [UIColor colorWithWhite:0.35 alpha:1.0];
+    textLabel_.textColor = [UIColor stampedDarkGrayColor];
     textLabel_.shadowColor = [UIColor whiteColor];
     textLabel_.shadowOffset = CGSizeMake(0, 1);
     textLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:11];
@@ -73,16 +82,36 @@
 - (void)dealloc {
   textLabel_ = nil;
   stampImageView_ = nil;
+  atSymbolLabel_ = nil;
+  gradientBorder_ = nil;
+  gradientBackground_ = nil;
   [super dealloc];
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
+- (CGSize)sizeThatFits:(CGSize)size {
+  CGFloat stampImageWidth = 19.0;
+  if (!stampImageView_.image)
+    stampImageWidth = 0.0;
+  
+  [textLabel_ sizeToFit];
+  return CGSizeMake(stampImageWidth + CGRectGetWidth(textLabel_.frame) + 26, 25);
 }
-*/
+
+- (void)layoutSubviews {
+  gradientBorder_.frame = self.bounds;
+  gradientBackground_.frame = CGRectInset(self.bounds, 1, 1);
+  
+  BOOL hasStampImage = stampImageView_.image != nil;
+  if (hasStampImage)
+    stampImageView_.frame = CGRectMake(6, 5, 15, 15);
+  
+  CGFloat xPos = hasStampImage ? 25.0 : 6.0;
+  atSymbolLabel_.frame = CGRectMake(xPos, 5, 0, 0);
+  [atSymbolLabel_ sizeToFit];
+  
+  xPos = hasStampImage ? 36.0 : 17.0;
+  textLabel_.frame = CGRectMake(xPos, 5, 0, 0);
+  [textLabel_ sizeToFit];
+}
 
 @end
