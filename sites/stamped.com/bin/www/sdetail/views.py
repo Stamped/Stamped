@@ -27,7 +27,6 @@ def show(request, **kwargs):
     try:
         stamp = stampedAPI.getStampFromUser(screenName, stampNum)
 
-        # stamp['credit'] = stamp['credit'][:1]
         template = 'sdetail.html'
         if mobile:
             template = 'sdetail-mobile.html'
