@@ -1300,21 +1300,21 @@ class StampedAPI(AStampedAPI):
                     {'creditedUserId': item.user_id, 'stamp': stamp}))
                 self._stampDB.giveCredit(item.user_id, stamp)
                 
-                # Add restamp as comment (if prior stamp exists)
-                if 'stamp_id' in item and item['stamp_id'] != None:
-                    # Build comment
-                    comment                     = Comment()
-                    comment.user.user_id        = user.user_id
-                    comment.stamp_id            = item.stamp_id
-                    comment.restamp_id          = stamp.stamp_id
-                    comment.blurb               = stamp.blurb
-                    comment.mentions            = stamp.mentions
-                    comment.timestamp.created   = datetime.utcnow()
+                # # Add restamp as comment (if prior stamp exists)
+                # if 'stamp_id' in item and item['stamp_id'] != None:
+                #     # Build comment
+                #     comment                     = Comment()
+                #     comment.user.user_id        = user.user_id
+                #     comment.stamp_id            = item.stamp_id
+                #     comment.restamp_id          = stamp.stamp_id
+                #     comment.blurb               = stamp.blurb
+                #     comment.mentions            = stamp.mentions
+                #     comment.timestamp.created   = datetime.utcnow()
                     
-                    # Add the comment data to the database
-                    comment = self._commentDB.addComment(comment)
-                    self._rollback.append((self._commentDB.removeComment, \
-                        {'commentId': comment.comment_id}))
+                #     # Add the comment data to the database
+                #     comment = self._commentDB.addComment(comment)
+                #     self._rollback.append((self._commentDB.removeComment, \
+                #         {'commentId': comment.comment_id}))
                 
                 # Add stats
                 self._statsSink.increment('stamped.api.stamps.credit')
@@ -1494,19 +1494,19 @@ class StampedAPI(AStampedAPI):
                 # Assign credit
                 self._stampDB.giveCredit(item.user_id, stamp)
                 
-                # Add restamp as comment (if prior stamp exists)
-                if 'stamp_id' in item and item['stamp_id'] != None:
-                    # Build comment
-                    comment                     = Comment()
-                    comment.user.user_id        = user.user_id
-                    comment.stamp_id            = item.stamp_id
-                    comment.restamp_id          = stamp.stamp_id
-                    comment.blurb               = stamp.blurb
-                    comment.mentions            = stamp.mentions
-                    comment.timestamp.created   = datetime.utcnow()
+                # # Add restamp as comment (if prior stamp exists)
+                # if 'stamp_id' in item and item['stamp_id'] != None:
+                #     # Build comment
+                #     comment                     = Comment()
+                #     comment.user.user_id        = user.user_id
+                #     comment.stamp_id            = item.stamp_id
+                #     comment.removeStamp_id          = stamp.stamp_id
+                #     comment.blurb               = stamp.blurb
+                #     comment.mentions            = stamp.mentions
+                #     comment.timestamp.created   = datetime.utcnow()
                     
-                    # Add the comment data to the database
-                    self._commentDB.addComment(comment)
+                #     # Add the comment data to the database
+                #     self._commentDB.addComment(comment)
 
                 # Update credited user stats
                 self._userDB.updateUserStats(item.user_id, 'num_credits', \
