@@ -161,7 +161,3 @@ class BaselineWriteAction(ASimulatedUserAction):
         user.entity_ids += entity_ids
         return True
 
-    
-
-
-

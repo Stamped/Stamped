@@ -30,6 +30,7 @@ from Schemas         import *
 
 # third-party search API wrappers
 from GooglePlaces    import GooglePlaces
+from GoogleLocal     import GoogleLocal
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 from libs.TheTVDB    import TheTVDB
@@ -2422,6 +2423,10 @@ class StampedAPI(AStampedAPI):
         return GooglePlaces()
     
     @lazyProperty
+    def _googleLocal(self):
+        return GoogleLocal()
+    
+    @lazyProperty
     def _amazonAPI(self):
         return AmazonAPI()
     
@@ -2517,6 +2522,29 @@ class StampedAPI(AStampedAPI):
             thetvdb_id = search_id[7:]
             
             entity = self._theTVDB.lookup(thetvdb_id)
+        elif search_id.startswith('T_LOCAL_GOOGLE_'):
+            info  = search_id[15:]
+            split = info.split(',')
+            
+            if len(split) > 3:
+                split = (split[0], split[1], string.joinfields(split[2:], ', '))
+            
+            lat, lng  = float(split[0]), float(split[1])
+            
+            latLng  = (lat, lng)
+            params  = {
+                'name' : split[2], 
+            }
+            
+            results = self._googlePlaces.getEntityResultsByLatLng(latLng, params)
+            if len(results) > 0:
+                reference = results[0].reference
+                details   = self._googlePlaces.getPlaceDetails(result.reference)
+                
+                if entity is None:
+                    entity = self._googlePlaces.parseEntity(details)
+                
+                self._googlePlaces.parseEntityDetail(details, entity)
         
         if entity is None:
             logs.warning("ERROR: could not match temp entity id %s" % search_id)

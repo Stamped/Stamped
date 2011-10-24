@@ -192,7 +192,9 @@ def setFields(entity, detailed=False):
 
 def isEqual(entity1, entity2):
     if entity1.subcategory != entity2.subcategory:
-        return False
+        if not ((entity1.subcategory == 'other' and entity1.googleLocal is not None) or \
+                (entity2.subcategory == 'other' and entity2.googleLocal is not None)):
+            return False
     
     if entity1.title.lower() != entity2.title.lower():
         return False

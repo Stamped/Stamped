@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import json, logs, urllib
+import json, logs, string, urllib
 
 from optparse import OptionParser
 from Geocoder import Geocoder
@@ -165,9 +165,11 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         entity.reference = result['reference']
         entity.subcategory = subcategory
         
+        """
         if result['icon'] != u'http://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png' and \
            result['icon'] != u'http://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png':
             entity.image = result['icon']
+        """
         
         if 'vicinity' in result:
             entity.neighborhood = result['vicinity']
@@ -214,7 +216,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             return response['results']
     
-    def getAutocompleteResults(self, query, params=None):
+    def getAutocompleteResults(self, latLng, query, params=None):
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
@@ -223,7 +225,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             if apiKey is None:
                 return None
             
-            response = self._getAutocompleteResponse(query, apiKey, params)
+            response = self._getAutocompleteResponse(latLng, query, apiKey, params)
             
             if response is None:
                 return None
@@ -232,7 +234,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             # ensure that we received a valid response
             if response['status'] != 'OK' or len(response['predictions']) <= 0:
-                utils.log('[GooglePlaces] error autocompleting "' + str(latLng) + '"\n' + 
+                utils.log('[GooglePlaces] error autocompleting "' + query + '"\n' + 
                           'ErrorCode: ' + response['status'] + '\n')
                 
                 if response['status'] == 'OVER_QUERY_LIMIT':
@@ -242,6 +244,29 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
                     return None
             
             return response['predictions']
+    
+    def getEntityAutocompleteResults(self, latLng, query, params=None):
+        results = self.getAutocompleteResults(latLng, query, params)
+        output  = []
+        
+        for result in results:
+            entity = Entity()
+            entity.subcategory = 'other'
+            
+            entity.gid = result['id']
+            entity.reference = result['reference']
+            
+            try:
+                terms = result['terms']
+                entity.title = terms[0]
+                
+                if len(terms) > 1:
+                    entity.address  = string.joinfields(terms[1:], ', ')
+                    entity.subtitle = entity.address
+            except:
+                entity.title = result['description']
+        
+        return output
     
     def _getSearchResponseByLatLng(self, latLng, apiKey, optionalParams=None):
         params = {
@@ -297,13 +322,16 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         return None
     
-    def _getAutocompleteResponse(self, query, apiKey, optionalParams=None):
+    def _getAutocompleteResponse(self, latLng, query, apiKey, optionalParams=None):
         params = {
             'input'  : query, 
             'sensor' : 'false', 
             'types'  : 'establishment', 
             'key'    : apiKey, 
         }
+        
+        if latLng is not None:
+            params['location'] = self._geocoder.getEncodedLatLng(latLng)
         
         self._handleParams(params, optionalParams)
         
@@ -403,13 +431,20 @@ def parseCommandLine():
         parser.print_help()
         return None
     
-    if not (options.address or options.suggest):
+    if not options.address:
         lat, lng = args[0].split(',')
         lat, lng = float(lat), float(lng)
         args[0] = (lat, lng)
     
     if not options.suggest and options.radius is None:
         options.radius = 500
+    
+    options.latLng = args[0]
+    
+    if len(args) > 1:
+        options.input = args[1]
+    else:
+        options.input = None
     
     return (options, args)
 
@@ -455,14 +490,14 @@ def main():
         params['types'] = options.types
     
     if options.suggest:
-        results = places.getAutocompleteResults(args[0], params)
+        results = places.getAutocompleteResults(options.latLng, options.input, params)
     elif options.address:
-        results = places.getSearchResultsByAddress(args[0], params)
+        results = places.getSearchResultsByAddress(options.latLng, params)
     else:
-        results = places.getSearchResultsByLatLng(args[0], params)
+        results = places.getSearchResultsByLatLng(options.latLng, params)
     
     if results is None:
-        print "Failed to return results for '%s'" % (args[0], )
+        print "Failed to return results for '%s'" % (options.latLng, )
     else:
         if options.limit:
             results = results[0:min(options.limit, len(results))]

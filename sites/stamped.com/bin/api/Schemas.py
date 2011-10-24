@@ -591,6 +591,7 @@ class MediaSchema(Schema):
 class EntitySourcesSchema(Schema):
     def setSchema(self):
         self.googlePlaces       = GooglePlacesSchema()
+        self.googleLocal        = GoogleLocalSchema()
         self.openTable          = OpenTableSchema()
         self.factual            = FactualSchema()
         self.apple              = AppleSchema()
@@ -626,6 +627,10 @@ class GooglePlacesSchema(Schema):
         self.gid                = SchemaElement(basestring)
         self.gurl               = SchemaElement(basestring)
         self.reference          = SchemaElement(basestring)
+
+class GoogleLocalSchema(Schema):
+    def setSchema(self):
+        pass
 
 class OpenTableSchema(Schema):
     def setSchema(self):
