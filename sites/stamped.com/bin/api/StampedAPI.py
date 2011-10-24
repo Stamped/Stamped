@@ -1139,6 +1139,8 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
+        t0 = time.time()
+        
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
         
@@ -1157,6 +1159,9 @@ class StampedAPI(AStampedAPI):
             msg = "Cannot stamp same entity twice (id = %s)" % entity.entity_id
             logs.warning(msg)
             raise IllegalActionError(msg)
+        
+        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.0.time', duration)
         
         # Build stamp
         stamp                       = Stamp()
@@ -1230,6 +1235,9 @@ class StampedAPI(AStampedAPI):
         ### TODO: Rollback adds stamp to "deleted stamps" table. Fix that.
         self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
         
+        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.1.time', duration)
+        
         # Add image to stamp
         ### TODO: Unwind stamp if this fails
         if imageData != None:
@@ -1245,15 +1253,24 @@ class StampedAPI(AStampedAPI):
             
             self._statsSink.increment('stamped.api.stamps.images')
         
+        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.2.time', duration)
+        
         # Add user objects back into stamp
         entityIds = {entity.entity_id: entity.exportSchema(EntityMini())}
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, \
             userIds=userIds, entityIds=entityIds)
         
+        t1 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.3.time', duration)
+        
         # Add a reference to the stamp in the user's collection
         self._rollback.append((self._stampDB.removeUserStampReference, \
             {'stampId': stamp.stamp_id, 'userId': user.user_id}))
         self._stampDB.addUserStampReference(user.user_id, stamp.stamp_id)
+        
+        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.4.time', duration)
         
         # Add a reference to the stamp in followers' inbox
         followers = self._friendshipDB.getFollowers(user.user_id)
@@ -1261,6 +1278,9 @@ class StampedAPI(AStampedAPI):
         self._rollback.append((self._stampDB.removeInboxStampReference, \
             {'stampId': stamp.stamp_id, 'userIds': followers}))
         self._stampDB.addInboxStampReference(followers, stamp.stamp_id)
+        
+        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.5.time', duration)
         
         # Update user stats 
         ### TODO: Should rollback go before or after?
@@ -1278,6 +1298,9 @@ class StampedAPI(AStampedAPI):
                     None, increment=1)
         self._rollback.append((self._userDB.updateUserStats, \
             {'userId': authUserId, 'stat': 'num_stamps_total', 'increment': -1}))
+        
+        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.6.time', duration)
         
         # If stamped entity is on the to do list, mark as complete
         try:
@@ -1335,6 +1358,9 @@ class StampedAPI(AStampedAPI):
         
         # Note: No activity should be generated for the user creating the stamp
         
+        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.6.time', duration)
+        
         # Add activity for credited users
         if self._activity == True and len(creditedUserIds) > 0:
             activity                    = Activity()
@@ -1348,6 +1374,9 @@ class StampedAPI(AStampedAPI):
             
             ### TODO: Rollback: Remove activity
             self._activityDB.addActivity(creditedUserIds, activity)
+        
+        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.7.time', duration)
         
         # Add activity for mentioned users
         if self._activity == True and stamp.mentions != None \
@@ -1379,6 +1408,9 @@ class StampedAPI(AStampedAPI):
                 
                 # Increment mentions metric
                 self._statsSink.increment('stamped.api.stamps.mentions')
+        
+        t2 = time.time(); duration = (t1 - t0) * 1000.0; t0 = t1
+        self._statsSink.time('stamped.api.methods.addStamp.8.time', duration)
         
         return stamp
     
