@@ -1392,8 +1392,10 @@ class StampedAPI(AStampedAPI):
                         'user_id':      user.user_id,
                         'friend_id':    mention['user_id'],
                     })
+                    
                     if self._friendshipDB.blockExists(friendship) == False:
                         mentionedUserIds.append(mention['user_id'])
+            
             if len(mentionedUserIds) > 0:
                 activity                    = Activity()
                 activity.genre              = 'mention'
