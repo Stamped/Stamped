@@ -122,6 +122,9 @@ class Monitor(object):
             except urllib2.HTTPError, e:
                 if e.code == 401:
                     return
+                
+                print url
+                utils.printException()
             
             retries += 1
             time.sleep(retries * retries)
@@ -146,10 +149,11 @@ class Monitor(object):
             
             while retries < 5:
                 logs.debug(cmd)
+                utils.log(cmd)
                 
                 ret = utils.shell(cmd)
                 
-                if 0 == ret:
+                if 0 == ret[1]:
                     break
                 
                 retries += 1
