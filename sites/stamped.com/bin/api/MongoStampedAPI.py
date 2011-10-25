@@ -113,12 +113,15 @@ class MongoStampedAPI(StampedAPI):
         host, port = "localhost", 8125
         
         if utils.is_ec2():
-            self.stack_info = self.ec2_utils.get_stack_info()
-            
-            for node in stack_info.nodes:
-                if 'monitor' in node.roles:
-                    host, port = node.private_dns, 8125
-                    break
+            try:
+                self.stack_info = self.ec2_utils.get_stack_info()
+                
+                for node in stack_info.nodes:
+                    if 'monitor' in node.roles:
+                        host, port = node.private_dns, 8125
+                        break
+            except:
+                pass
         
         return StatsDSink(host, port)
     
