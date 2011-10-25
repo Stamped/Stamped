@@ -12,5 +12,6 @@
 
 @property (nonatomic, readonly) UILabel* textLabel;
 @property (nonatomic, readonly) UIImageView* stampImageView;
+@property (nonatomic, assign) BOOL highlighted;
 
 @end

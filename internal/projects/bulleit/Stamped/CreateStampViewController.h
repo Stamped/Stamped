@@ -49,7 +49,6 @@
 @property (nonatomic, retain) IBOutlet UIButton* editButton;
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
 @property (nonatomic, retain) IBOutlet UIImageView* backgroundImageView;
-@property (nonatomic, retain) IBOutlet UILabel* creditLabel;
 @property (nonatomic, retain) IBOutlet UIButton* tweetButton;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* disclosureButton;

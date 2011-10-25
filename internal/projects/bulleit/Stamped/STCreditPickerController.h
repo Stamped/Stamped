@@ -20,6 +20,8 @@
                                                 UITableViewDelegate,
                                                 UITableViewDataSource>
 
+- (NSString*)usersSeparatedByCommas;
+
 // All of these are WEAK references.
 @property (nonatomic, assign) STCreditTextField* creditTextField;
 @property (nonatomic, assign) id<STCreditPickerControllerDelegate> delegate;

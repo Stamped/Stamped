@@ -99,13 +99,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize creditedUserText = creditedUserText_;
 @synthesize firstResponder = firstResponder_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
-@synthesize creditLabel = creditLabel_;
 @synthesize tweetButton = tweetButton_;
 @synthesize twitterAuth = twitterAuth_;
 @synthesize twitterClient = twitterClient_;
 @synthesize shareLabel = shareLabel_;
 @synthesize editingMask = editingMask_;
-@synthesize creditContainer = creditContainer_;
 @synthesize creditPickerController = creditPickerController_;
 
 @synthesize objectToStamp = objectToStamp_;
@@ -177,7 +175,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.twitterAuth = nil;
   self.twitterClient = nil;
   self.disclosureButton = nil;
-  self.creditContainer = nil;
   self.creditPickerController.creditTextField = nil;
   self.creditPickerController.delegate = nil;
   self.creditPickerController = nil;
@@ -315,11 +312,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   [self.view addSubview:editingMask_];
   [editingMask_ release];
   
-  CGRect shadowBounds = CGRectInset(creditContainer_.bounds, -10, 0);
-  creditContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:shadowBounds].CGPath;
-  creditContainer_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
-  creditContainer_.layer.shadowOffset = CGSizeMake(0, 1);
-  
   creditPickerController_.creditTextField = creditTextField_;
 }
 
@@ -408,7 +400,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
   self.disclosureButton = nil;
-  self.creditContainer = nil;
   self.creditPickerController.creditTextField = nil;
   stampsRemainingLayer_ = nil;
 }
@@ -472,17 +463,17 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
   CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
   contentSize.height += CGRectGetHeight(self.stampPhotoView.bounds) + 10;
-  CGRect newCommentFrame = CGRectMake(0, 4, 310, fmaxf(104, contentSize.height));
-  CGRect convertedFrame = [self.view convertRect:newCommentFrame fromView:ribbonedContainerView_];
+  contentSize.height = fmaxf(104, contentSize.height);
+
   CGRect newContainerFrame = ribbonedContainerView_.frame;
-  newContainerFrame.size.height = CGRectGetHeight(convertedFrame) + 60.0;
-  
+  newContainerFrame.size.height = contentSize.height + CGRectGetHeight(creditTextField_.frame) + 8.0;
+  ribbonedContainerView_.frame = newContainerFrame;
+  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+
   CGSize newContentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
                                      CGRectGetMaxY(newContainerFrame) + 145);
   [scrollView_ setContentSize:newContentSize];
-  ribbonedContainerView_.frame = newContainerFrame;
-  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
-  
+
   shareLabel_.frame = CGRectMake(shareLabel_.frame.origin.x,
                                  CGRectGetMaxY(newContainerFrame) + 22,
                                  CGRectGetWidth(shareLabel_.frame),
@@ -494,6 +485,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                                   CGRectGetHeight(tweetButton_.frame));
   [tweetButton_ setNeedsDisplay];
 
+  CGRect newCommentFrame = CGRectMake(0, 4, 310, contentSize.height);
+  CGRect convertedFrame = [self.scrollView convertRect:newCommentFrame fromView:ribbonedContainerView_];
   [UIView animateWithDuration:0.2 
                         delay:0 
                       options:UIViewAnimationOptionBeginFromCurrentState 
@@ -544,18 +537,17 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     return;
   
   self.firstResponder = creditTextField_;
-  creditContainer_.frame = [ribbonedContainerView_ convertRect:creditContainer_.frame
+  creditTextField_.frame = [ribbonedContainerView_ convertRect:creditTextField_.frame
                                                         toView:self.view];
   [self.navigationController setNavigationBarHidden:YES animated:YES];
   [UIView animateWithDuration:0.3
                         delay:0 
                       options:0
                    animations:^{
-                     [self.view addSubview:creditContainer_];
-                     creditContainer_.frame = CGRectMake(0, 0, 320, CGRectGetHeight(creditContainer_.frame));
-                     creditContainer_.layer.shadowOpacity = 1.0;
+                     [self.view addSubview:creditTextField_];
+                     creditTextField_.frame = CGRectMake(0, 0, 320, CGRectGetHeight(creditTextField_.frame));
+                     creditTextField_.layer.shadowOpacity = 1.0;
                      editingMask_.alpha = 1.0;
-                     
                    }
                    completion:^(BOOL finished) {}];
 
@@ -567,19 +559,48 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   
   self.firstResponder = nil;
   [self.navigationController setNavigationBarHidden:NO animated:YES];
-  CGRect frame = CGRectMake(0, 108, 310, 48);
-  CGRect convertedFrame = [ribbonedContainerView_ convertRect:frame toView:self.view];
+
+  CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
+  contentSize.height += CGRectGetHeight(self.stampPhotoView.bounds) + 10;
+  contentSize.height = fmaxf(104, contentSize.height);
+  
+  CGRect newContainerFrame = ribbonedContainerView_.frame;
+  newContainerFrame.size.height = contentSize.height + CGRectGetHeight(creditTextField_.frame) + 9.0;
+  ribbonedContainerView_.frame = newContainerFrame;
+  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+  
+  CGSize newContentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
+                                     CGRectGetMaxY(newContainerFrame) + 145);
+  [scrollView_ setContentSize:newContentSize];
+  
+  shareLabel_.frame = CGRectMake(shareLabel_.frame.origin.x,
+                                 CGRectGetMaxY(newContainerFrame) + 22,
+                                 CGRectGetWidth(shareLabel_.frame),
+                                 CGRectGetHeight(shareLabel_.frame));
+  [shareLabel_ setNeedsDisplay];
+  tweetButton_.frame = CGRectMake(tweetButton_.frame.origin.x,
+                                  CGRectGetMaxY(newContainerFrame) + 9,
+                                  CGRectGetWidth(tweetButton_.frame),
+                                  CGRectGetHeight(tweetButton_.frame));
+  [tweetButton_ setNeedsDisplay];
+
+  CGRect frame =
+      CGRectMake(0,
+                 CGRectGetHeight(ribbonedContainerView_.frame) - CGRectGetHeight(creditTextField_.frame) - 5,
+                 310,
+                 CGRectGetHeight(creditTextField_.frame));
+  CGRect convertedFrame = [self.scrollView convertRect:frame fromView:ribbonedContainerView_];
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
-                     creditContainer_.frame = convertedFrame;
-                     creditContainer_.layer.shadowOpacity = 0.0;
+                     creditTextField_.frame = convertedFrame;
+                     creditTextField_.layer.shadowOpacity = 0.0;
                      editingMask_.alpha = 0.0;
                    }
                    completion:^(BOOL finished) {
-                     creditContainer_.frame = frame;
-                     [ribbonedContainerView_ addSubview:creditContainer_];
+                     creditTextField_.frame = frame;
+                     [ribbonedContainerView_ addSubview:creditTextField_];
                    }];
 }
 
@@ -743,10 +764,12 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 #pragma mark - Network request methods.
 
 - (void)sendSaveStampRequest {
-  NSString* credit = [creditTextField_.text stringByReplacingOccurrencesOfString:@" " withString:@""];
   NSMutableDictionary* paramsDictionary = [NSMutableDictionary dictionary];
   [paramsDictionary setValue:reasoningTextView_.text forKey:@"blurb"];
-  [paramsDictionary setValue:credit forKey:@"credit"];
+  NSString* credit = creditPickerController_.usersSeparatedByCommas;
+  if (credit)
+    [paramsDictionary setValue:credit forKey:@"credit"];
+
   if ([objectToStamp_ valueForKey:@"entityID"]) {
     [paramsDictionary setValue:[objectToStamp_ valueForKey:@"entityID"] forKey:@"entity_id"];
   } else if ([objectToStamp_ valueForKey:@"searchID"]) {
