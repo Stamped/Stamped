@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "UIColor+Stamped.h"
+#import "Util.h"
 
 @interface STCreditPill ()
 @property (nonatomic, readonly) UILabel* atSymbolLabel;
@@ -22,6 +23,7 @@
 
 @synthesize textLabel = textLabel_;
 @synthesize stampImageView = stampImageView_;
+@synthesize highlighted = highlighted_;
 @synthesize atSymbolLabel = atSymbolLabel_;
 @synthesize gradientBorder = gradientBorder_;
 @synthesize gradientBackground = gradientBackground_;
@@ -42,8 +44,8 @@
     
     gradientBackground_ = [[CAGradientLayer alloc] init];
     gradientBackground_.colors =
-    [NSArray arrayWithObjects:(id)[UIColor whiteColor].CGColor,
-        (id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor, nil];
+        [NSArray arrayWithObjects:(id)[UIColor whiteColor].CGColor,
+            (id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor, nil];
     gradientBackground_.frame = CGRectInset(self.bounds, 1, 1);
     gradientBackground_.cornerRadius = 11.5;
     gradientBackground_.startPoint = CGPointMake(0, 0);
@@ -95,6 +97,44 @@
   
   [textLabel_ sizeToFit];
   return CGSizeMake(stampImageWidth + CGRectGetWidth(textLabel_.frame) + 26, 25);
+}
+
+- (void)setHighlighted:(BOOL)highlighted {
+  if (highlighted_ == highlighted)
+    return;
+
+  highlighted_ = highlighted;
+  if (stampImageView_.image && !stampImageView_.highlightedImage)
+    stampImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:stampImageView_.image];
+  if (highlighted) {
+    atSymbolLabel_.textColor = [UIColor whiteColor];
+    atSymbolLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2];
+    atSymbolLabel_.shadowOffset = CGSizeMake(0, -1);
+    textLabel_.textColor = [UIColor whiteColor];
+    textLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2];
+    textLabel_.shadowOffset = CGSizeMake(0, -1);
+    gradientBackground_.colors =
+        [NSArray arrayWithObjects:(id)[UIColor colorWithRed:0.286 green:0.56 blue:0.95 alpha:1.0].CGColor,
+            (id)[UIColor colorWithRed:0.043 green:0.38 blue:0.85 alpha:1.0].CGColor, nil];
+    gradientBorder_.colors =
+        [NSArray arrayWithObjects:(id)[UIColor colorWithRed:0.286 green:0.56 blue:0.95 alpha:1.0].CGColor,
+            (id)[UIColor colorWithRed:0.39 green:0.33 blue:0.75 alpha:1.0].CGColor, nil];
+  } else {
+    textLabel_.textColor = [UIColor stampedDarkGrayColor];
+    textLabel_.shadowColor = [UIColor whiteColor];
+    textLabel_.shadowOffset = CGSizeMake(0, 1);
+    atSymbolLabel_.textColor = [UIColor stampedGrayColor];
+    atSymbolLabel_.shadowColor = [UIColor whiteColor];
+    atSymbolLabel_.shadowOffset = CGSizeMake(0, 1);
+    gradientBackground_.colors =
+        [NSArray arrayWithObjects:(id)[UIColor whiteColor].CGColor,
+            (id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor, nil];
+    gradientBorder_.colors =
+        [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.9 alpha:1.0].CGColor,
+            (id)[UIColor colorWithWhite:0.8 alpha:1.0].CGColor, nil];
+  }
+  
+  [stampImageView_ setHighlighted:highlighted];
 }
 
 - (void)layoutSubviews {

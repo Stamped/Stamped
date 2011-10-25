@@ -20,6 +20,8 @@
 - (void)addPerson:(NSString*)username;
 - (void)removePerson:(NSString*)username;
 - (void)decorateTextField;
+- (void)resizeTableView;
+- (void)filterPeople;
 
 @property (nonatomic, retain) UITableView* creditTableView;
 @property (nonatomic, copy) NSArray* peopleArray;
@@ -78,49 +80,87 @@
   [pill sizeToFit];
   [creditTextField_ addSubview:pill];
   [creditTextField_ sizeToFit];
+  [self resizeTableView];
   [pills_ addObject:pill];
   [pill release];
 }
 
 - (void)removePerson:(NSString*)username {
-  
+  for (STCreditPill* pill in pills_) {
+    if ([pill.textLabel.text isEqualToString:username]) {
+      [pill removeFromSuperview];
+      [pills_ removeObject:pill];
+      [creditTextField_ setNeedsLayout];
+    }
+  }
+  [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
 }
 
 - (void)decorateTextField {
   // Take raw text and convert it into pills.
-  NSArray* people = [creditTextField_.text componentsSeparatedByString:@" "];
+  NSString* text = [creditTextField_.text stringByReplacingOccurrencesOfString:@"\u200b" withString:@""];
+  NSArray* people = [text componentsSeparatedByString:@" "];
   for (NSString* username in people) {
     if (!username.length)
       continue;
 
     [self addPerson:username];
   }
-  creditTextField_.text = nil;
+  creditTextField_.text = @"\u200b";
+}
+
+- (void)resizeTableView {
+  creditTableView_.frame = CGRectMake(0,
+                                      CGRectGetMaxY(creditTextField_.frame) + 1,
+                                      320,
+                                      460 - CGRectGetHeight(creditTextField_.frame) - 216);
+  [creditTableView_ setNeedsDisplay];
+}
+
+- (void)filterPeople {
+  
 }
 
 #pragma mark - UITextFieldDelegate methods.
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
-  //NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
-  NSLog(@"string: %@", string);
-  if ([string isEqualToString:@" "]) {
+  if ([string isEqualToString:@" "] && !textField.hidden) {
     [self decorateTextField];
     return NO;
   }
+  NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
+  if (result.length == 0 && pills_.count) {
+    if (textField.hidden) {
+      // Remove the last pill (the one highlighted).
+      [self removePerson:[pills_.lastObject textLabel].text];
+      textField.hidden = NO;
+    } else {
+      // Last pill should be highlighted.
+      [pills_.lastObject setHighlighted:YES];
+      textField.hidden = YES;
+    }
+    return NO;
+  }
+  textField.hidden = NO;
+  for (STCreditPill* pill in pills_)
+    pill.highlighted = NO;
+  
   [creditTextField_ setNeedsLayout];
+  [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
   return YES;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   [delegate_ creditTextFieldDidBeginEditing:creditTextField_];
   if (!creditTableView_) {
-    creditTableView_ = [[UITableView alloc] initWithFrame:CGRectMake(0, 48, 320, 196)
+    creditTableView_ = [[UITableView alloc] initWithFrame:CGRectZero
                                                     style:UITableViewStylePlain];
     creditTableView_.rowHeight = 51.0;
     creditTableView_.delegate = self;
     creditTableView_.dataSource = self;
     creditTableView_.alpha = 0.0;
     [creditTextField_.superview insertSubview:creditTableView_ belowSubview:creditTextField_];
+    [self resizeTableView];
   }
   [UIView animateWithDuration:0.3 animations:^{
     creditTableView_.alpha = 1.0;
@@ -128,6 +168,7 @@
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
+  [self decorateTextField];
   [delegate_ creditTextFieldDidEndEditing:creditTextField_];
   [UIView animateWithDuration:0.3 animations:^{
     creditTableView_.alpha = 0.0;

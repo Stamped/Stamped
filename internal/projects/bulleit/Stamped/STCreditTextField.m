@@ -12,38 +12,12 @@
 
 #import "STCreditPill.h"
 #import "UIColor+Stamped.h"
-
-@class STCreditInputTextField;
-@protocol STCreditInputTextFieldDelegate
-@required
-- (void)textFieldDidDeleteBackwards:(STCreditInputTextField*)textField;
-@end
-
-@interface STCreditInputTextField : UITextField
-@property (nonatomic, assign) id<STCreditInputTextFieldDelegate> subDelegate;
-@end
-
-@implementation STCreditInputTextField
-@synthesize subDelegate = subDelegate_;
-
-- (void)deleteBackward {
-  [super deleteBackward];
-  NSLog(@"Deleted backwards...");
-  [subDelegate_ textFieldDidDeleteBackwards:self];
-}
-
-- (void)dealloc {
-  subDelegate_ = nil;
-  [super dealloc];
-}
-
-@end
   
 @interface STCreditTextField ()
 - (void)commonInit;
 - (CGPoint)originOfCursorInSize:(CGSize)size;
 
-@property (nonatomic, readonly) STCreditInputTextField* textField;
+@property (nonatomic, readonly) UITextField* textField;
 @end
 
 @implementation STCreditTextField
@@ -93,9 +67,10 @@
   self.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
   self.layer.shadowOffset = CGSizeMake(0, 1);
   
-  textField_ = [[STCreditInputTextField alloc] initWithFrame:CGRectZero];
+  textField_ = [[UITextField alloc] initWithFrame:CGRectZero];
   textField_.autocorrectionType = UITextAutocorrectionTypeNo;
   textField_.keyboardAppearance = UIKeyboardAppearanceAlert;
+  textField_.autocapitalizationType = UITextAutocapitalizationTypeNone;
   textField_.returnKeyType = UIReturnKeyDone;
   textField_.font = [UIFont fontWithName:@"Helvetica" size:14];
   [self addSubview:textField_];
@@ -181,6 +156,13 @@
 
 - (CGSize)sizeThatFits:(CGSize)size {
   return CGSizeMake(size.width, MAX(47, textField_.frame.origin.y + 33));
+}
+
+#pragma mark - UIResponder methods.
+
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+  [super touchesEnded:touches withEvent:event];
+  [self.textField becomeFirstResponder];
 }
 
 @end
