@@ -47,8 +47,6 @@ class MongoStampedAPI(StampedAPI):
         self._placesEntityDB = MongoPlacesEntityCollection()
         
         self.ec2_utils  = EC2Utils()
-        self.stack_info = self.ec2_utils.get_stack_info()
-        self._statsSink = StatsDSink(self.stack_info)
     
     @lazyProperty
     def _accountDB(self):
@@ -109,6 +107,20 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _notificationHandler(self):
         return StampedNotificationHandler()
+    
+    @lazyProperty
+    def _statsSink(self):
+        host, port = "localhost", 8125
+        
+        if utils.is_ec2():
+            self.stack_info = self.ec2_utils.get_stack_info()
+            
+            for node in stack_info.nodes:
+                if 'monitor' in node.roles:
+                    host, port = node.private_dns, 8125
+                    break
+        
+        return StatsDSink(host, port)
     
     def getStats(self):
         subcategory_stats = { }

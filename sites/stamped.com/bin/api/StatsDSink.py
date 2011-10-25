@@ -12,16 +12,8 @@ from libs.StatsD    import StatsD
 
 class StatsDSink(AStatsSink):
     
-    def __init__(self, stack_info):
-        self.statsd = None
-        
-        for node in stack_info.nodes:
-            if 'monitor' in node.roles:
-                self.statsd = StatsD(host=node.private_dns, port=8125)
-                break
-        
-        if self.statsd is None:
-            raise Exception("unable to initialize statsd!")
+    def __init__(self, host, port):
+        self.statsd = StatsD(host=host, port=port)
     
     def time(self, name, time, sample_rate=1):
         logs.debug("[%s] time: %s %0.3f ms" % (self, name, time))
