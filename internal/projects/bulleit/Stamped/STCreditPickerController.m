@@ -25,6 +25,7 @@
 
 @property (nonatomic, retain) UITableView* creditTableView;
 @property (nonatomic, copy) NSArray* peopleArray;
+@property (nonatomic, copy) NSArray* filteredPeopleArray;
 @property (nonatomic, retain) NSMutableArray* pills;
 @end
 
@@ -34,6 +35,7 @@
 @synthesize creditTextField = creditTextField_;
 @synthesize creditTableView = creditTableView_;
 @synthesize peopleArray = peopleArray_;
+@synthesize filteredPeopleArray = filteredPeopleArray_;
 @synthesize pills = pills_;
 
 - (id)init {
@@ -47,12 +49,14 @@
     request.sortDescriptors =
         [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
     self.peopleArray = [User objectsWithFetchRequest:request];
+    [self filterPeople];
   }
   return self;
 }
 
 - (void)dealloc {
   self.peopleArray = nil;
+  self.filteredPeopleArray = nil;
   self.pills = nil;
   creditTableView_.delegate = nil;
   creditTableView_.dataSource = nil;
@@ -71,6 +75,8 @@
 }
 
 - (void)addPerson:(NSString*)username {
+  [pills_.lastObject setHighlighted:NO];
+
   STCreditPill* pill = [[STCreditPill alloc] initWithFrame:CGRectZero];
   User* user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", username]];
   pill.textLabel.text = username;
@@ -80,19 +86,28 @@
   [pill sizeToFit];
   [creditTextField_ addSubview:pill];
   [creditTextField_ sizeToFit];
-  [self resizeTableView];
+  [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
   [pills_ addObject:pill];
   [pill release];
 }
 
 - (void)removePerson:(NSString*)username {
+  STCreditPill* pillToRemove = nil;
   for (STCreditPill* pill in pills_) {
     if ([pill.textLabel.text isEqualToString:username]) {
-      [pill removeFromSuperview];
-      [pills_ removeObject:pill];
-      [creditTextField_ setNeedsLayout];
+      pillToRemove = pill;
+      break;
     }
   }
+  if (!pillToRemove)
+    return;
+
+  [pillToRemove removeFromSuperview];
+  [pills_ removeObject:pillToRemove];
+  [creditTextField_ setNeedsLayout];
+  for (STCreditPill* pill in pills_)
+    pill.highlighted = NO;
+
   [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
 }
 
@@ -118,7 +133,16 @@
 }
 
 - (void)filterPeople {
-  
+  NSString* text = [creditTextField_.text stringByReplacingOccurrencesOfString:@"\u200b" withString:@""];
+  if (text.length) {
+    NSPredicate* p = [NSPredicate predicateWithFormat:@"(userID != %@ AND name != NIL) AND ((name contains[cd] %@) OR (screenName contains[cd] %@))",
+        [AccountManager sharedManager].currentUser.userID, text, text];
+    
+    self.filteredPeopleArray = [peopleArray_ filteredArrayUsingPredicate:p];
+  } else {
+    self.filteredPeopleArray = peopleArray_;
+  }
+  [creditTableView_ reloadData];
 }
 
 #pragma mark - UITextFieldDelegate methods.
@@ -126,6 +150,7 @@
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
   if ([string isEqualToString:@" "] && !textField.hidden) {
     [self decorateTextField];
+    [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
     return NO;
   }
   NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
@@ -139,6 +164,7 @@
       [pills_.lastObject setHighlighted:YES];
       textField.hidden = YES;
     }
+    [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
     return NO;
   }
   textField.hidden = NO;
@@ -146,6 +172,7 @@
     pill.highlighted = NO;
   
   [creditTextField_ setNeedsLayout];
+  [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
   [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
   return YES;
 }
@@ -182,14 +209,17 @@
 #pragma mark - UITableViewDelegate methods.
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  // Add user...
+  User* user = [filteredPeopleArray_ objectAtIndex:indexPath.row];
+  [self addPerson:user.screenName];
+  creditTextField_.text = @"\u200b";
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
+  [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.3];
 }
 
 #pragma mark - UITableViewDataSource methods.
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  return peopleArray_.count;
+  return filteredPeopleArray_.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -201,7 +231,7 @@
   }
   
   cell.disclosureArrowHidden = YES;
-  cell.user = [self.peopleArray objectAtIndex:indexPath.row];
+  cell.user = [self.filteredPeopleArray objectAtIndex:indexPath.row];
 
   return cell;
 }
