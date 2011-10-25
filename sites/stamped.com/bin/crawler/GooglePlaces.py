@@ -152,9 +152,9 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         return entity
     
-    def parseEntity(self, result):
+    def parseEntity(self, result, valid=False):
         subcategory  = self.getSubcategoryFromTypes(result['types'])
-        if subcategory not in self.google_subcategory_whitelist:
+        if not valid and subcategory not in self.google_subcategory_whitelist:
             return None
         
         entity = Entity()

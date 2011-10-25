@@ -2556,10 +2556,12 @@ class StampedAPI(AStampedAPI):
                     entity.songs = songs
         elif search_id.startswith('T_GOOGLE_'):
             gref = search_id[9:]
-            details = self._googlePlaces.getPlaceDetails(gref)
             
-            entity = self._googlePlaces.parseEntity(details)
-            self._googlePlaces.parseEntityDetail(details, entity)
+            details = self._googlePlaces.getPlaceDetails(gref)
+            entity  = self._googlePlaces.parseEntity(details, valid=True)
+            
+            if entity is not None:
+                self._googlePlaces.parseEntityDetail(details, entity)
         elif search_id.startswith('T_TVDB_'):
             thetvdb_id = search_id[7:]
             
