@@ -155,7 +155,7 @@
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {
-  return CGSizeMake(size.width, MAX(47, textField_.frame.origin.y + 33));
+  return CGSizeMake(size.width, MAX(48, textField_.frame.origin.y + 33));
 }
 
 #pragma mark - UIResponder methods.

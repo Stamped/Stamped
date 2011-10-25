@@ -463,17 +463,17 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
   CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
   contentSize.height += CGRectGetHeight(self.stampPhotoView.bounds) + 10;
-  CGRect newCommentFrame = CGRectMake(0, 4, 310, fmaxf(104, contentSize.height));
-  CGRect convertedFrame = [self.view convertRect:newCommentFrame fromView:ribbonedContainerView_];
+  contentSize.height = fmaxf(104, contentSize.height);
+
   CGRect newContainerFrame = ribbonedContainerView_.frame;
-  newContainerFrame.size.height = CGRectGetHeight(convertedFrame) + 60.0;
-  
+  newContainerFrame.size.height = contentSize.height + CGRectGetHeight(creditTextField_.frame) + 8.0;
+  ribbonedContainerView_.frame = newContainerFrame;
+  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+
   CGSize newContentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
                                      CGRectGetMaxY(newContainerFrame) + 145);
   [scrollView_ setContentSize:newContentSize];
-  ribbonedContainerView_.frame = newContainerFrame;
-  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
-  
+
   shareLabel_.frame = CGRectMake(shareLabel_.frame.origin.x,
                                  CGRectGetMaxY(newContainerFrame) + 22,
                                  CGRectGetWidth(shareLabel_.frame),
@@ -485,6 +485,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                                   CGRectGetHeight(tweetButton_.frame));
   [tweetButton_ setNeedsDisplay];
 
+  CGRect newCommentFrame = CGRectMake(0, 4, 310, contentSize.height);
+  CGRect convertedFrame = [self.scrollView convertRect:newCommentFrame fromView:ribbonedContainerView_];
   [UIView animateWithDuration:0.2 
                         delay:0 
                       options:UIViewAnimationOptionBeginFromCurrentState 
@@ -557,8 +559,37 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   
   self.firstResponder = nil;
   [self.navigationController setNavigationBarHidden:NO animated:YES];
-  CGRect frame = CGRectMake(0, 108, 310, 48);
-  CGRect convertedFrame = [ribbonedContainerView_ convertRect:frame toView:self.view];
+
+  CGSize contentSize = [reasoningTextView_ sizeThatFits:CGSizeMake(241, MAXFLOAT)];
+  contentSize.height += CGRectGetHeight(self.stampPhotoView.bounds) + 10;
+  contentSize.height = fmaxf(104, contentSize.height);
+  
+  CGRect newContainerFrame = ribbonedContainerView_.frame;
+  newContainerFrame.size.height = contentSize.height + CGRectGetHeight(creditTextField_.frame) + 9.0;
+  ribbonedContainerView_.frame = newContainerFrame;
+  ribbonGradientLayer_.frame = ribbonedContainerView_.bounds;
+  
+  CGSize newContentSize = CGSizeMake(CGRectGetWidth(self.view.frame),
+                                     CGRectGetMaxY(newContainerFrame) + 145);
+  [scrollView_ setContentSize:newContentSize];
+  
+  shareLabel_.frame = CGRectMake(shareLabel_.frame.origin.x,
+                                 CGRectGetMaxY(newContainerFrame) + 22,
+                                 CGRectGetWidth(shareLabel_.frame),
+                                 CGRectGetHeight(shareLabel_.frame));
+  [shareLabel_ setNeedsDisplay];
+  tweetButton_.frame = CGRectMake(tweetButton_.frame.origin.x,
+                                  CGRectGetMaxY(newContainerFrame) + 9,
+                                  CGRectGetWidth(tweetButton_.frame),
+                                  CGRectGetHeight(tweetButton_.frame));
+  [tweetButton_ setNeedsDisplay];
+
+  CGRect frame =
+      CGRectMake(0,
+                 CGRectGetHeight(ribbonedContainerView_.frame) - CGRectGetHeight(creditTextField_.frame) - 5,
+                 310,
+                 CGRectGetHeight(creditTextField_.frame));
+  CGRect convertedFrame = [self.scrollView convertRect:frame fromView:ribbonedContainerView_];
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
