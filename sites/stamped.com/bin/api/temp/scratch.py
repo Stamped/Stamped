@@ -40,7 +40,7 @@ def handlePOST(path, data):
 
 
 
-USER = 'testuser'
+USER = 'test_5_1319057191'
 PASS = '12345'
 
 path = "oauth2/login.json"
@@ -53,12 +53,12 @@ data = {
 account = handlePOST(path, data)
 token = account['token']
 
-# path = "users/search.json"
-# data = { 
-#     "oauth_token": token['token']['access_token'],
-#     "q": 'bon'
-# }
-# result = handlePOST(path, data)
+path = "users/search.json"
+data = { 
+    "oauth_token": token['access_token'],
+    "q": '*#%^!*#($t'
+}
+result = handlePOST(path, data)
 
 # print
 # print
@@ -107,13 +107,13 @@ token = account['token']
 # }
 # result = handleGET(path, data)
 
-path = "account/customize_stamp.json"
-data = {
-    "oauth_token": token['access_token'],
-    "color_primary": "000000",
-    "color_secondary": "000000",
-}
-result = handlePOST(path, data)
+# path = "account/customize_stamp.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "color_primary": "000000",
+#     "color_secondary": "000000",
+# }
+# result = handlePOST(path, data)
 
 
 

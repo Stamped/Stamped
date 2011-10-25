@@ -69,36 +69,12 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
     def searchUsers(self, query, limit=0):
         query = query.lower()
-        query = query.replace('[', '\[?')
-        query = query.replace(']', '\]?')
-        query = query.replace('(', '\(?')
-        query = query.replace(')', '\)?')
-        query = query.replace('|', '\|')
-        query = query.replace('.', '\.?')
-        query = query.replace(':', ':?')
-        query = query.replace('&', ' & ')
+
+        valid_re = re.compile("[^\s\w-]+", re.IGNORECASE)
+        query = valid_re.sub('', query)
         
-        # process individual words in query
-        words = query.split(' ')
-        if len(words) > 1:
-            for i in xrange(len(words)):
-                word = words[i]
-                
-                if word.endswith('s'):
-                    word += '?'
-                else:
-                    word += 's?'
-                
-                words[i] = word
-            query = ' '.join(words).strip()
-        
-        query = query.replace(' ands? ', ' (and|&)? ')
-        query = query.replace("$", "[$st]?")
-        query = query.replace("5", "[5s]?")
-        query = query.replace("!", "[!li]?")
-        query = query.replace('-', '[ -]?')
-        query = query.replace(' ', '[ -]?')
-        query = query.replace("'", "'?")
+        if len(query) == 0:
+            return []
 
         user_query = {"$or": [{"screen_name_lower": {"$regex": query}}, \
                               {"name_lower": {"$regex": query}}]}
