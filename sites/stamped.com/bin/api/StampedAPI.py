@@ -2558,9 +2558,7 @@ class StampedAPI(AStampedAPI):
             gref = search_id[9:]
             details = self._googlePlaces.getPlaceDetails(gref)
             
-            if entity is None:
-                entity = self._googlePlaces.parseEntity(details)
-            
+            entity = self._googlePlaces.parseEntity(details)
             self._googlePlaces.parseEntityDetail(details, entity)
         elif search_id.startswith('T_TVDB_'):
             thetvdb_id = search_id[7:]
