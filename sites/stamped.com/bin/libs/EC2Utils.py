@@ -76,12 +76,16 @@ class EC2Utils(object):
         if 0 != ret[1]:
             return None
         
+        desc = ret[0].strip()
+        if 0 == len(desc):
+            return None
+        
         return utils.AttributeDict({
-            'private_dns' : re.match('.*([a-zA-Z]*-[0-9a-zA-Z.-]*internal).*', ret[0], re.DOTALL).groups()[0], 
-            'public_dns'  : re.match('.*(ec2-[0-9a-zA-Z.-]*amazonaws\.com).*', ret[0], re.DOTALL).groups()[0], 
-            'roles'       : eval(re.match('.*roles[ \t]*(\[[^\]]*\]).*', ret[0], re.DOTALL).groups()[0]), 
-            'stack'       : re.match('.*stack[ \t]*([a-zA-Z0-9_]*).*', ret[0], re.DOTALL).groups()[0], 
-            'name'        : re.match('.*name[ \t]*([a-zA-Z0-9_]*).*', ret[0], re.DOTALL).groups()[0], 
+            'private_dns' : re.match('.*([a-zA-Z]*-[0-9a-zA-Z.-]*internal).*', desc, re.DOTALL).groups()[0], 
+            'public_dns'  : re.match('.*(ec2-[0-9a-zA-Z.-]*amazonaws\.com).*', desc, re.DOTALL).groups()[0], 
+            'roles'       : eval(re.match('.*roles[ \t]*(\[[^\]]*\]).*', desc, re.DOTALL).groups()[0]), 
+            'stack'       : re.match('.*stack[ \t]*([a-zA-Z0-9_]*).*', desc, re.DOTALL).groups()[0], 
+            'name'        : re.match('.*name[ \t]*([a-zA-Z0-9_]*).*', desc, re.DOTALL).groups()[0], 
             'id'          : instance_id, 
         })
     
@@ -105,6 +109,9 @@ class EC2Utils(object):
         
         for cur_id in ids:
             info = self.get_instance_info(cur_id)
+            if info is None:
+                continue
+            
             data['nodes'].append(info)
             
             if cur_id == instance_id:
