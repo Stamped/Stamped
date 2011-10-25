@@ -187,7 +187,7 @@ static const CGFloat kTopMargin = 5;
      forControlEvents:UIControlEventTouchUpInside];
   }
   
-  // Divider and next arrow.
+  // Divider and search icon.
   UIImageView* divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hdr_separator"]];
   divider.frame = CGRectOffset(divider.frame, 275, 8);
   [scrollView_ addSubview:divider];
@@ -195,9 +195,9 @@ static const CGFloat kTopMargin = 5;
   
   UIButton* nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
   nextButton.frame = CGRectMake(279, kTopMargin, 40, 40);
-  [nextButton setImage:[UIImage imageNamed:@"hdr_next_button"]
+  [nextButton setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button"]
               forState:UIControlStateNormal];
-  [nextButton setImage:[UIImage imageNamed:@"hdr_next_button_selected"]
+  [nextButton setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button_selected"]
               forState:UIControlStateHighlighted];
   [nextButton addTarget:self
                  action:@selector(nextButtonPressed:)

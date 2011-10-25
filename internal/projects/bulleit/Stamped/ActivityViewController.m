@@ -63,10 +63,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   self.fetchedResultsController = nil;
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-  [super viewDidAppear:animated];
-}
-
 - (void)loadEventsFromDataStore {
   if (!fetchedResultsController_) {
     NSFetchRequest* request = [Event fetchRequest];
@@ -147,10 +143,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 #pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:section];

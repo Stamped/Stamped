@@ -887,8 +887,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     stamp.entityObject.favorite.complete = [NSNumber numberWithBool:YES];
     
     [stamp.managedObjectContext save:NULL];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kFavoriteHasChangedNotification
-                                                        object:stamp];
     NSUInteger numStampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft unsignedIntegerValue];
     [AccountManager sharedManager].currentUser.numStampsLeft = [NSNumber numberWithUnsignedInteger:--numStampsLeft];
 

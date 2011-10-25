@@ -16,7 +16,9 @@
 - (void)displaySearchEntities;
 @end
 
-@interface TodoViewController : STReloadableTableViewController <RKObjectLoaderDelegate, TodoTableViewCellDelegate>
+@interface TodoViewController : STReloadableTableViewController <RKObjectLoaderDelegate,
+                                                                 TodoTableViewCellDelegate,
+                                                                 NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, assign) id<TodoViewControllerDelegate> delegate;
 
