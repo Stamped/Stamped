@@ -48,7 +48,6 @@ def parseCommandLine():
         default=None, type="string", help="Filter results on severity (debug, info, warning, error, critical)")
     
     (options, args) = parser.parse_args()
-
     return options
 
 def main():

@@ -7,19 +7,24 @@ __license__   = "TODO"
 
 import Globals, logs
 
-from AStatsSink  import AStatsSink
-from libs.StatsD import StatsD
+from AStatsSink     import AStatsSink
+from libs.EC2Utils  import EC2Utils
+from libs.StatsD    import StatsD
 
 class StatsDSink(AStatsSink):
     
     def __init__(self):
         ec2_utils = EC2Utils()
-        stack  = ec2_utils.get_stack_info()
+        stack = ec2_utils.get_stack_info()
         
         self.statsd = None
         for node in stacks:
             if 'monitor' in node.roles:
                 self.statsd = StatsD(host=node.private_dns, port=8125)
+                break
+        
+        if self.statsd is None:
+            raise Exception("unable to initialize statsd!")
     
     def time(self, name, time, sample_rate=1):
         logs.debug("[%s] time: %s %0.3f ms" % (self, name, time))
