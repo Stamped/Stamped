@@ -148,9 +148,15 @@
 #pragma mark - UITextFieldDelegate methods.
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
-  if ([string isEqualToString:@" "] && !textField.hidden) {
-    [self decorateTextField];
-    [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
+  if ([string isEqualToString:@" "]) {
+    if (!textField.hidden) {
+      [self decorateTextField];
+      [self performSelector:@selector(filterPeople) withObject:self afterDelay:0.0];
+    } else {
+      textField.hidden = NO;
+      for (STCreditPill* pill in pills_)
+        pill.highlighted = NO;
+    }
     return NO;
   }
   NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];

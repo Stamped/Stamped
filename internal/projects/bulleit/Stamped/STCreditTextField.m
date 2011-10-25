@@ -149,7 +149,7 @@
     yPos += 30.0;
   }
   textField_.frame = CGRectMake(xPos, yPos + 2, 
-                                CGRectGetWidth(textField_.bounds),
+                                CGRectGetWidth(textField_.bounds) + 4,
                                 CGRectGetHeight(textField_.bounds));
   [self sizeToFit];
 }
