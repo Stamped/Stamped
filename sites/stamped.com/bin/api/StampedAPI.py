@@ -2316,6 +2316,9 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=-1)
 
+        if not favorite:
+            favorite = Favorite()
+
         # Enrich stamp
         if favorite.stamp_id != None:
             stamp           = self._stampDB.getStamp(favorite.stamp_id)
