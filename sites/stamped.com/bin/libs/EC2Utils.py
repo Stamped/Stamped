@@ -77,7 +77,7 @@ class EC2Utils(object):
             return None
         
         return utils.AttributeDict({
-            'private_dns' : re.match('.*(ip-[0-9a-zA-Z.-]*internal).*', ret[0], re.DOTALL).groups()[0], 
+            'private_dns' : re.match('.*([a-zA-Z]*-[0-9a-zA-Z.-]*internal).*', ret[0], re.DOTALL).groups()[0], 
             'public_dns'  : re.match('.*(ec2-[0-9a-zA-Z.-]*amazonaws\.com).*', ret[0], re.DOTALL).groups()[0], 
             'roles'       : eval(re.match('.*roles[ \t]*(\[[^\]]*\]).*', ret[0], re.DOTALL).groups()[0]), 
             'stack'       : re.match('.*stack[ \t]*([a-zA-Z0-9_]*).*', ret[0], re.DOTALL).groups()[0], 

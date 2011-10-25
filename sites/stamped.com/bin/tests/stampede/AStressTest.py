@@ -113,10 +113,13 @@ class StressTest(Greenlet):
             
             utils.log("[%s] initializing user '%s'" % (self, user.name))
             try:
-                if 0 == num_users:
-                    if not self.options.noop:
+                if not self.options.noop:
+                    if 0 == num_users:
+                        for i in xrange(8):
+                            self.addEntity(self._parent.createEntity(user.token))
+                            self.addEntity(self._parent.createPlaceEntity(user.token))
+                    else:
                         self.addEntity(self._parent.createEntity(user.token))
-                        self.addEntity(self._parent.createPlaceEntity(user.token))
             except:
                 utils.printException()
                 pass
