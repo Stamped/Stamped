@@ -262,13 +262,12 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
                     entity.title = terms[0]['value']
                     
                     if len(terms) > 1:
-                        if terms[-1] == "United States":
+                        if terms[-1]['value'] == "United States":
                             terms = terms[:-1]
                         
                         entity.address  = string.joinfields((v['value'] for v in terms[1:]), ', ')
                         entity.subtitle = entity.address
                 except:
-                    utils.printException()
                     entity.title = result['description']
                 
                 output.append(entity)

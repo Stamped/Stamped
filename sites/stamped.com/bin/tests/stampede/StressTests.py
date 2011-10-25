@@ -30,10 +30,10 @@ baselineParams = {
 realisticParams = {
     'avg_friend_connectivity': 12, 
     'stdev_friend_connectivity': 5, 
-    'users_per_minute': 100, 
+    'users_per_minute': 300, 
     'users_per_minute_decay': True, 
     'users_limit': None, 
-    'actions_per_minute': 10, 
+    'actions_per_minute': 3, 
     'actions_per_minute_decay': False, 
     'actions_per_user_limit': None, 
     'bieber_protocol': True, 

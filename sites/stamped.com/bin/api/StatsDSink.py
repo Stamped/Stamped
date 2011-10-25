@@ -13,7 +13,13 @@ from libs.StatsD import StatsD
 class StatsDSink(AStatsSink):
     
     def __init__(self):
-        self.statsd = StatsD(host='localhost', port=8125)
+        ec2_utils = EC2Utils()
+        stack  = ec2_utils.get_stack_info()
+        
+        self.statsd = None
+        for node in stacks:
+            if 'monitor' in node.roles:
+                self.statsd = StatsD(host=node.private_dns, port=8125)
     
     def time(self, name, time, sample_rate=1):
         logs.debug("[%s] time: %s %0.3f ms" % (self, name, time))

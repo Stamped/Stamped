@@ -13,7 +13,7 @@ def getInstances():
     replSetName = 'stamped-dev-01'
 
     dbCount     = 2
-    webCount    = 6
+    webCount    = 1
     monCount    = 1
 
     ### TEMPLATES
