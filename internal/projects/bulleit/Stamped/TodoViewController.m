@@ -120,9 +120,11 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
       [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
       break;
       
-    case NSFetchedResultsChangeUpdate:
-      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+    case NSFetchedResultsChangeUpdate: {
+      NSIndexPath* offsetIndexPath = [NSIndexPath indexPathForRow:(indexPath.row - 1) inSection:0];
+      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:offsetIndexPath];
       break;
+    }
       
     case NSFetchedResultsChangeMove:
       [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];

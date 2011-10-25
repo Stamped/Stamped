@@ -98,7 +98,12 @@ static const CGFloat kSubstringFontSize = 12.0;
   [self invertColors];
 }
 
-- (void)setFavorite:(Favorite *)favorite {
+- (void)setFavorite:(Favorite*)favorite {
+  if (favorite) {
+    stampImageView_.hidden = [favorite.complete boolValue];
+    completedImageView_.hidden = ![favorite.complete boolValue];
+  }
+  
   if (favorite_ != favorite) {
     [favorite_ release];
     favorite_ = [favorite retain];
