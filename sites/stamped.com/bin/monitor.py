@@ -11,6 +11,7 @@ import logs, re, sys, time, urllib2, utils
 from libs.notify    import StampedNotificationHandler
 from libs.EC2Utils  import EC2Utils
 from optparse       import OptionParser
+from pprint         import pprint
 
 is_ec2 = utils.is_ec2()
 
