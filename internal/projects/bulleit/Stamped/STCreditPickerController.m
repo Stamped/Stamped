@@ -205,6 +205,7 @@
     [creditTextField_.superview insertSubview:creditTableView_ belowSubview:creditTextField_];
     [self resizeTableView];
   }
+  creditTableView_.contentOffset = CGPointZero;
   [UIView animateWithDuration:0.3 animations:^{
     creditTableView_.alpha = 1.0;
   }];
