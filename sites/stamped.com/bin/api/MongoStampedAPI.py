@@ -15,6 +15,7 @@ from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
 from match.EntityMatcher    import EntityMatcher
 from libs.notify            import StampedNotificationHandler
+from libs.EC2Utils          import EC2Utils
 
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoEntityCollection       import MongoEntityCollection
@@ -44,14 +45,14 @@ class MongoStampedAPI(StampedAPI):
         
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
+        
+        self.ec2_utils  = EC2Utils()
+        self.stack_info = self.ec2_utils.get_stack_info()
+        self._statsSink = StatsDSink(self.stack_info)
     
     @lazyProperty
     def _accountDB(self):
         return MongoAccountCollection()
-    
-    #@lazyProperty
-    #def _entityDB(self):
-    #    return MongoEntityCollection()
     
     @lazyProperty
     def _userDB(self):
@@ -100,10 +101,6 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _logsDB(self):
         return MongoLogsCollection()
-    
-    @lazyProperty
-    def _statsSink(self):
-        return StatsDSink()
     
     @lazyProperty
     def _tempEntityDB(self):

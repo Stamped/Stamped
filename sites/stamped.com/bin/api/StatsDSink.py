@@ -8,17 +8,14 @@ __license__   = "TODO"
 import Globals, logs
 
 from AStatsSink     import AStatsSink
-from libs.EC2Utils  import EC2Utils
 from libs.StatsD    import StatsD
 
 class StatsDSink(AStatsSink):
     
-    def __init__(self):
-        ec2_utils = EC2Utils()
-        stack = ec2_utils.get_stack_info()
-        
+    def __init__(self, stack_info):
         self.statsd = None
-        for node in stacks:
+        
+        for node in stack_info.nodes:
             if 'monitor' in node.roles:
                 self.statsd = StatsD(host=node.private_dns, port=8125)
                 break
