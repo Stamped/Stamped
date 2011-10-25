@@ -85,18 +85,30 @@ class AWSDeploymentSystem(DeploymentSystem):
                         'to_port'     : 5000, 
                         'cidr_ip'     : '0.0.0.0/0', 
                     }, 
-                    {
-                        'ip_protocol' : 'tcp', 
-                        'from_port'   : 8080, 
-                        'to_port'     : 8080, 
-                        'cidr_ip'     : '0.0.0.0/0', 
-                    }, 
                 ], 
             }, 
             {
                 'name' : 'crawler', 
                 'desc' : 'Crawler security group', 
                 'rules' : [
+                ], 
+            }, 
+            {
+                'name' : 'monitor', 
+                'desc' : 'Monitor security group', 
+                'rules' : [
+                    {
+                        'ip_protocol' : 'tcp', 
+                        'from_port'   : 8080, 
+                        'to_port'     : 8080, 
+                        'cidr_ip'     : '0.0.0.0/0', 
+                    }, 
+                    {
+                        'ip_protocol' : 'tcp', 
+                        'from_port'   : 8125, 
+                        'to_port'     : 8125, 
+                        'cidr_ip'     : '0.0.0.0/0', 
+                    }, 
                 ], 
             }, 
         ]

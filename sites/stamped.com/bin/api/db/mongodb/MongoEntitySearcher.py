@@ -22,7 +22,6 @@ from errors         import InputError
 
 # third-party search API wrappers
 from GooglePlaces   import GooglePlaces
-from GoogleLocal    import GoogleLocal
 from libs.apple     import AppleAPI
 from libs.AmazonAPI import AmazonAPI
 from libs.TheTVDB   import TheTVDB
@@ -225,10 +224,6 @@ class MongoEntitySearcher(EntitySearcher):
         return GooglePlaces()
     
     @lazyProperty
-    def _googleLocal(self):
-        return GoogleLocal()
-    
-    @lazyProperty
     def _amazonAPI(self):
         return AmazonAPI()
     
@@ -385,8 +380,8 @@ class MongoEntitySearcher(EntitySearcher):
             wrapper['tv_results'] = self._find_tv(input_query)
         
         # (deprecated) google local search
-        def _find_google_local():
-            wrapper['google_local_results'] = self._find_google_local(input_query)
+        def _find_google_national():
+            wrapper['google_national_results'] = self._find_google_national(input_query)
         
         if full:
             if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
@@ -400,6 +395,8 @@ class MongoEntitySearcher(EntitySearcher):
             
             #if not local:
             #    pool.spawn(_find_google_local)
+            if not local:
+                pool.spawn(_find_google_national)
         
         if len(query) > 0:
             pool.spawn(_find_entity)
@@ -1052,24 +1049,23 @@ class MongoEntitySearcher(EntitySearcher):
         
         return output
     
-    @lru_cache(maxsize=1024)
-    def _find_google_local(self, input_query):
+    @lru_cache(maxsize=2048)
+    def _find_google_national(self, input_query):
         output = []
         
         try:
-            self._statsSink.increment('stamped.api.search.third-party.googleLocal')
-            results = self._googleLocal.getLocalSearchResults(input_query, None, None)
+            self._statsSink.increment('stamped.api.search.third-party.googleAutocomplete')
+            results = self._googlePlaces.getEntityAutocompleteResults(input_query)
             
             if results is not None:
                 for entity in results:
-                    entity.entity_id = 'T_LOCAL_GOOGLE_%s,%s,%s' % \
-                                        (entity.lat, entity.lng, entity.title)
+                    entity.entity_id = 'T_GOOGLE_%s' % entity.reference
                     output.append((entity, -1))
         except Exception, e:
-            self._handle_search_error('googleLocal', e)
+            self._handle_search_error('googleAutocomplete', e)
             utils.printException()
         else:
-            self._clear_search_errors('googleLocal')
+            self._clear_search_errors('googleAutocomplete')
         
         return output
     

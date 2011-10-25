@@ -7,13 +7,13 @@ __license__   = "TODO"
 
 import Globals, logs
 
-from AStatsSink  import AStatsSink
-from libs.StatsD import StatsD
+from AStatsSink     import AStatsSink
+from libs.StatsD    import StatsD
 
 class StatsDSink(AStatsSink):
     
-    def __init__(self):
-        self.statsd = StatsD(host='localhost', port=8125)
+    def __init__(self, host, port):
+        self.statsd = StatsD(host=host, port=port)
     
     def time(self, name, time, sample_rate=1):
         logs.debug("[%s] time: %s %0.3f ms" % (self, name, time))

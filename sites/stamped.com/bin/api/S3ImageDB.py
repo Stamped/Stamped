@@ -379,6 +379,7 @@ class S3ImageDB(AImageDB):
         
         output = [
             (195, 195, 'stamped_logo_mask.png',   'logo'),
+            (36,  36,  'stamped_email_mask.png',  'email'),
             (18,  18,  'stamped_credit_mask.png', 'credit'),
         ]
         

@@ -40,8 +40,8 @@ def handlePOST(path, data):
 
 
 
-USER = 'testuser'
-PASS = '12345'
+USER = 'edmuki'
+PASS = '54321'
 
 path = "oauth2/login.json"
 data = { 
@@ -53,10 +53,12 @@ data = {
 account = handlePOST(path, data)
 token = account['token']
 
-# path = "users/search.json"
+
+
+# path = "favorites/remove.json"
 # data = { 
-#     "oauth_token": token['token']['access_token'],
-#     "q": 'bon'
+#     "oauth_token": token['access_token'],
+#     "entity_id": '4e7d0f42d6970356a60008b9'
 # }
 # result = handlePOST(path, data)
 

@@ -30,7 +30,6 @@ from Schemas         import *
 
 # third-party search API wrappers
 from GooglePlaces    import GooglePlaces
-from GoogleLocal     import GoogleLocal
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 from libs.TheTVDB    import TheTVDB
@@ -1139,6 +1138,11 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
+        # notes: 
+            # 1) checking stamp db
+            # 2) call to _enrichStampObjects
+            # 3) _stampDB.addStamp itself
+        
         t0 = time.time()
         
         user        = self._userDB.getUser(authUserId)
@@ -2312,6 +2316,9 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=-1)
 
+        if not favorite:
+            favorite = Favorite()
+
         # Enrich stamp
         if favorite.stamp_id != None:
             stamp           = self._stampDB.getStamp(favorite.stamp_id)
@@ -2464,10 +2471,6 @@ class StampedAPI(AStampedAPI):
         return GooglePlaces()
     
     @lazyProperty
-    def _googleLocal(self):
-        return GoogleLocal()
-    
-    @lazyProperty
     def _amazonAPI(self):
         return AmazonAPI()
     
@@ -2553,16 +2556,21 @@ class StampedAPI(AStampedAPI):
                     entity.songs = songs
         elif search_id.startswith('T_GOOGLE_'):
             gref = search_id[9:]
+            
             details = self._googlePlaces.getPlaceDetails(gref)
+            entity2 = self._googlePlaces.parseEntity(details, valid=True)
             
-            if entity is None:
-                entity = self._googlePlaces.parseEntity(details)
+            if entity2 is not None:
+                entity = entity2
             
-            self._googlePlaces.parseEntityDetail(details, entity)
+            if entity is not None:
+                self._googlePlaces.parseEntityDetail(details, entity)
         elif search_id.startswith('T_TVDB_'):
             thetvdb_id = search_id[7:]
             
             entity = self._theTVDB.lookup(thetvdb_id)
+        
+        """
         elif search_id.startswith('T_LOCAL_GOOGLE_'):
             info  = search_id[15:]
             split = info.split(',')
@@ -2586,6 +2594,7 @@ class StampedAPI(AStampedAPI):
                     entity = self._googlePlaces.parseEntity(details)
                 
                 self._googlePlaces.parseEntityDetail(details, entity)
+        """
         
         if entity is None:
             logs.warning("ERROR: could not match temp entity id %s" % search_id)
