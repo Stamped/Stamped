@@ -55,12 +55,12 @@ token = account['token']
 
 
 
-path = "favorites/remove.json"
-data = { 
-    "oauth_token": token['access_token'],
-    "entity_id": '4e7d0f42d6970356a60008b9'
-}
-result = handlePOST(path, data)
+# path = "favorites/remove.json"
+# data = { 
+#     "oauth_token": token['access_token'],
+#     "entity_id": '4e7d0f42d6970356a60008b9'
+# }
+# result = handlePOST(path, data)
 
 # print
 # print
@@ -109,13 +109,13 @@ result = handlePOST(path, data)
 # }
 # result = handleGET(path, data)
 
-# path = "account/customize_stamp.json"
-# data = {
-#     "oauth_token": token['access_token'],
-#     "color_primary": "000000",
-#     "color_secondary": "000000",
-# }
-# result = handlePOST(path, data)
+path = "account/customize_stamp.json"
+data = {
+    "oauth_token": token['access_token'],
+    "color_primary": "000000",
+    "color_secondary": "000000",
+}
+result = handlePOST(path, data)
 
 
 
