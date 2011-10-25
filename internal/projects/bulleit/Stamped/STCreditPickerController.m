@@ -19,9 +19,11 @@
 @interface STCreditPickerController ()
 - (void)addPerson:(NSString*)username;
 - (void)removePerson:(NSString*)username;
+- (void)decorateTextField;
 
 @property (nonatomic, retain) UITableView* creditTableView;
 @property (nonatomic, copy) NSArray* peopleArray;
+@property (nonatomic, retain) NSMutableArray* pills;
 @end
 
 @implementation STCreditPickerController
@@ -30,10 +32,13 @@
 @synthesize creditTextField = creditTextField_;
 @synthesize creditTableView = creditTableView_;
 @synthesize peopleArray = peopleArray_;
+@synthesize pills = pills_;
 
 - (id)init {
   self = [super init];
   if (self) {
+    self.pills = [NSMutableArray array];
+
     User* currentUser = [AccountManager sharedManager].currentUser;
     NSFetchRequest* request = [User fetchRequest];
     request.predicate = [NSPredicate predicateWithFormat:@"userID != %@ AND name != NIL", currentUser.userID];
@@ -46,6 +51,7 @@
 
 - (void)dealloc {
   self.peopleArray = nil;
+  self.pills = nil;
   creditTableView_.delegate = nil;
   creditTableView_.dataSource = nil;
   [creditTableView_ release];
@@ -57,14 +63,22 @@
     creditTextField_.delegate = nil;
     creditTextField_ = creditTextField;
     creditTextField_.delegate = self;
+    
+    [self decorateTextField];
   }
 }
 
 - (void)addPerson:(NSString*)username {
-  STCreditPill* pill = [[STCreditPill alloc] initWithFrame:CGRectMake(10, 10, 94, 25)];
+  STCreditPill* pill = [[STCreditPill alloc] initWithFrame:CGRectZero];
+  User* user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", username]];
   pill.textLabel.text = username;
+  if (user)
+    pill.stampImageView.image = user.stampImage;
+
   [pill sizeToFit];
   [creditTextField_ addSubview:pill];
+  [creditTextField_ sizeToFit];
+  [pills_ addObject:pill];
   [pill release];
 }
 
@@ -72,18 +86,28 @@
   
 }
 
-#pragma mark - UITextFieldDelegate methods.
-
-- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
-  NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
-  NSArray* people = [result componentsSeparatedByString:@" "];
+- (void)decorateTextField {
+  // Take raw text and convert it into pills.
+  NSArray* people = [creditTextField_.text componentsSeparatedByString:@" "];
   for (NSString* username in people) {
     if (!username.length)
       continue;
+
     [self addPerson:username];
   }
+  creditTextField_.text = nil;
+}
 
-  NSLog(@"People: %@", people);
+#pragma mark - UITextFieldDelegate methods.
+
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  //NSString* result = [textField.text stringByReplacingCharactersInRange:range withString:string];
+  NSLog(@"string: %@", string);
+  if ([string isEqualToString:@" "]) {
+    [self decorateTextField];
+    return NO;
+  }
+  [creditTextField_ setNeedsLayout];
   return YES;
 }
 
@@ -96,9 +120,7 @@
     creditTableView_.delegate = self;
     creditTableView_.dataSource = self;
     creditTableView_.alpha = 0.0;
-    // TODO(andybons): MAJOR hack.
-    [creditTextField_.superview.superview insertSubview:creditTableView_
-                                           belowSubview:creditTextField_.superview];
+    [creditTextField_.superview insertSubview:creditTableView_ belowSubview:creditTextField_];
   }
   [UIView animateWithDuration:0.3 animations:^{
     creditTableView_.alpha = 1.0;
@@ -119,7 +141,7 @@
 #pragma mark - UITableViewDelegate methods.
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  NSLog(@"Selected row...");
+  // Add user...
   [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 

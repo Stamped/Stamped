@@ -99,13 +99,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize creditedUserText = creditedUserText_;
 @synthesize firstResponder = firstResponder_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
-@synthesize creditLabel = creditLabel_;
 @synthesize tweetButton = tweetButton_;
 @synthesize twitterAuth = twitterAuth_;
 @synthesize twitterClient = twitterClient_;
 @synthesize shareLabel = shareLabel_;
 @synthesize editingMask = editingMask_;
-@synthesize creditContainer = creditContainer_;
 @synthesize creditPickerController = creditPickerController_;
 
 @synthesize objectToStamp = objectToStamp_;
@@ -177,7 +175,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.twitterAuth = nil;
   self.twitterClient = nil;
   self.disclosureButton = nil;
-  self.creditContainer = nil;
   self.creditPickerController.creditTextField = nil;
   self.creditPickerController.delegate = nil;
   self.creditPickerController = nil;
@@ -315,11 +312,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   [self.view addSubview:editingMask_];
   [editingMask_ release];
   
-  CGRect shadowBounds = CGRectInset(creditContainer_.bounds, -10, 0);
-  creditContainer_.layer.shadowPath = [UIBezierPath bezierPathWithRect:shadowBounds].CGPath;
-  creditContainer_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
-  creditContainer_.layer.shadowOffset = CGSizeMake(0, 1);
-  
   creditPickerController_.creditTextField = creditTextField_;
 }
 
@@ -408,7 +400,6 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
   self.disclosureButton = nil;
-  self.creditContainer = nil;
   self.creditPickerController.creditTextField = nil;
   stampsRemainingLayer_ = nil;
 }
@@ -544,18 +535,17 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     return;
   
   self.firstResponder = creditTextField_;
-  creditContainer_.frame = [ribbonedContainerView_ convertRect:creditContainer_.frame
+  creditTextField_.frame = [ribbonedContainerView_ convertRect:creditTextField_.frame
                                                         toView:self.view];
   [self.navigationController setNavigationBarHidden:YES animated:YES];
   [UIView animateWithDuration:0.3
                         delay:0 
                       options:0
                    animations:^{
-                     [self.view addSubview:creditContainer_];
-                     creditContainer_.frame = CGRectMake(0, 0, 320, CGRectGetHeight(creditContainer_.frame));
-                     creditContainer_.layer.shadowOpacity = 1.0;
+                     [self.view addSubview:creditTextField_];
+                     creditTextField_.frame = CGRectMake(0, 0, 320, CGRectGetHeight(creditTextField_.frame));
+                     creditTextField_.layer.shadowOpacity = 1.0;
                      editingMask_.alpha = 1.0;
-                     
                    }
                    completion:^(BOOL finished) {}];
 
@@ -573,13 +563,13 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState
                    animations:^{
-                     creditContainer_.frame = convertedFrame;
-                     creditContainer_.layer.shadowOpacity = 0.0;
+                     creditTextField_.frame = convertedFrame;
+                     creditTextField_.layer.shadowOpacity = 0.0;
                      editingMask_.alpha = 0.0;
                    }
                    completion:^(BOOL finished) {
-                     creditContainer_.frame = frame;
-                     [ribbonedContainerView_ addSubview:creditContainer_];
+                     creditTextField_.frame = frame;
+                     [ribbonedContainerView_ addSubview:creditTextField_];
                    }];
 }
 

@@ -8,7 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+@interface STCreditTextField : UIView <UITextFieldDelegate>
 
-@interface STCreditTextField : UITextField <UITextFieldDelegate>
+- (void)becomeFirstResponder;
+- (void)resignFirstResponder;
+
+@property (nonatomic, assign) id<UITextFieldDelegate> delegate;
+@property (nonatomic, copy) NSString* text;
 
 @end
