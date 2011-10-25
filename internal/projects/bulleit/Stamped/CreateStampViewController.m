@@ -733,10 +733,12 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 #pragma mark - Network request methods.
 
 - (void)sendSaveStampRequest {
-  NSString* credit = [creditTextField_.text stringByReplacingOccurrencesOfString:@" " withString:@""];
   NSMutableDictionary* paramsDictionary = [NSMutableDictionary dictionary];
   [paramsDictionary setValue:reasoningTextView_.text forKey:@"blurb"];
-  [paramsDictionary setValue:credit forKey:@"credit"];
+  NSString* credit = creditPickerController_.usersSeparatedByCommas;
+  if (credit)
+    [paramsDictionary setValue:credit forKey:@"credit"];
+
   if ([objectToStamp_ valueForKey:@"entityID"]) {
     [paramsDictionary setValue:[objectToStamp_ valueForKey:@"entityID"] forKey:@"entity_id"];
   } else if ([objectToStamp_ valueForKey:@"searchID"]) {

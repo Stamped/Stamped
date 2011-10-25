@@ -111,6 +111,16 @@
   [self performSelector:@selector(resizeTableView) withObject:self afterDelay:0.0];
 }
 
+- (NSString*)usersSeparatedByCommas {
+  if (!pills_.count)
+    return nil;
+
+  NSMutableArray* usersArray = [NSMutableArray arrayWithCapacity:pills_.count];
+  for (STCreditPill* pill in pills_)
+    [usersArray addObject:pill.textLabel.text];
+  return [usersArray componentsJoinedByString:@","];
+}
+
 - (void)decorateTextField {
   // Take raw text and convert it into pills.
   NSString* text = [creditTextField_.text stringByReplacingOccurrencesOfString:@"\u200b" withString:@""];
