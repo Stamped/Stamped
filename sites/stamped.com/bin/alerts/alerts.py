@@ -243,7 +243,7 @@ def _setSubject(user, genre):
 
     return msg
 
-def _setBody(user, activity):
+def _setBody(user, activity, emailAddress):
 
     try:
         path = os.path.join(base, 'templates', 'email_%s.html.j2' % activity.genre)
@@ -256,7 +256,13 @@ def _setBody(user, activity):
     params['title'] = activity['subject']
     params['blurb'] = activity['blurb']
 
+    # HTML Encode the bio?
+    params['bio'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
+
     params['image_url_92'] = params['image_url'].replace('.jpg', '-92x92.jpg')
+
+    # Add email address
+    params['email_address'] = emailAddress
 
     html = parseTemplate(template, params)
 
@@ -280,7 +286,7 @@ def buildEmail(user, recipient, activityItem):
     email['to'] = recipient.email
     email['from'] = 'Stamped <noreply@stamped.com>'
     email['subject'] = _setSubject(user, activityItem.genre)
-    email['body'] = _setBody(user, activityItem)
+    email['body'] = _setBody(user, activityItem, recipient.email)
     email['activity_id'] = activityItem.activity_id
 
     return email
