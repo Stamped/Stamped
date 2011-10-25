@@ -245,26 +245,33 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             
             return response['predictions']
     
-    def getEntityAutocompleteResults(self, latLng, query, params=None):
+    def getEntityAutocompleteResults(self, query, latLng=None, params=None):
         results = self.getAutocompleteResults(latLng, query, params)
         output  = []
         
-        for result in results:
-            entity = Entity()
-            entity.subcategory = 'other'
-            
-            entity.gid = result['id']
-            entity.reference = result['reference']
-            
-            try:
-                terms = result['terms']
-                entity.title = terms[0]
+        if results is not None:
+            for result in results:
+                entity = Entity()
+                entity.subcategory = 'other'
                 
-                if len(terms) > 1:
-                    entity.address  = string.joinfields(terms[1:], ', ')
-                    entity.subtitle = entity.address
-            except:
-                entity.title = result['description']
+                entity.gid = result['id']
+                entity.reference = result['reference']
+                
+                try:
+                    terms = result['terms']
+                    entity.title = terms[0]['value']
+                    
+                    if len(terms) > 1:
+                        if terms[-1] == "United States":
+                            terms = terms[:-1]
+                        
+                        entity.address  = string.joinfields((v['value'] for v in terms[1:]), ', ')
+                        entity.subtitle = entity.address
+                except:
+                    utils.printException()
+                    entity.title = result['description']
+                
+                output.append(entity)
         
         return output
     
@@ -431,20 +438,24 @@ def parseCommandLine():
         parser.print_help()
         return None
     
-    if not options.address:
+    if not options.suggest and options.radius is None:
+        options.radius = 500
+    
+    do = True
+    if options.suggest:
+        if len(args) > 1:
+            options.input = args[1]
+            args[0] = args[1]
+        else:
+            options.input = args[0]
+            do = False
+    
+    if do and not options.address:
         lat, lng = args[0].split(',')
         lat, lng = float(lat), float(lng)
         args[0] = (lat, lng)
     
-    if not options.suggest and options.radius is None:
-        options.radius = 500
-    
     options.latLng = args[0]
-    
-    if len(args) > 1:
-        options.input = args[1]
-    else:
-        options.input = None
     
     return (options, args)
 
