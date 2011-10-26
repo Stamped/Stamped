@@ -7,16 +7,21 @@ __license__ = "TODO"
 
 import Globals
 import config, json, pickle, os, string, utils
-from ADeploymentStack import ADeploymentStack
-from AWSInstance import AWSInstance
-from errors import Fail
-from boto.ec2.connection import EC2Connection
-from boto.ec2.address import Address
-from boto.exception import EC2ResponseError
+import AWSDeploymentSystem
 
-from gevent.pool import Pool
-from fabric.operations import *
-from fabric.api import *
+from ADeploymentStack       import ADeploymentStack
+from AWSInstance            import AWSInstance
+from errors                 import Fail
+
+from boto.ec2.elb           import ELBConnection
+from boto.ec2.connection    import EC2Connection
+from boto.ec2.address       import Address
+from boto.exception         import EC2ResponseError
+
+from gevent.pool            import Pool
+from pprint                 import pprint
+from fabric.operations      import *
+from fabric.api             import *
 import fabric.contrib.files as fabricfiles
 
 ELASTIC_IP_ADDRESS = '184.73.229.100'
@@ -64,7 +69,7 @@ class AWSDeploymentStack(ADeploymentStack):
         self._pool.join()
         utils.log("[%s] done creating %d instances" % (self, len(self.instances)))
     
-    def init(self):
+    def _get_init_config(self):
         db_instances = self.db_instances
         assert len(db_instances) > 1
         
@@ -78,10 +83,13 @@ class AWSDeploymentStack(ADeploymentStack):
                 "host": instance.private_ip_address
             })
         
-        config = self._encode_params({
+        return self._encode_params({
             "_id" : replica_set, 
             "members" : replica_set_members, 
         })
+    
+    def init(self):
+        config = self._get_init_config()
         
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
@@ -471,4 +479,117 @@ class AWSDeploymentStack(ADeploymentStack):
     
     def _encode_params(self, params):
         return json.dumps(params).replace('"', "'")
+    
+    def add(self, *args):
+        if 0 == len(args) or args[0] not in [ 'db', 'api' ]:
+            raise Exception("must specify what type of instance to add (e.g., db, api)")
+        
+        add = args[0]
+        sim = []
+        ids = set()
+        top = -1
+        
+        # infer the suffix number for the new instance (e.g., api4, db2, etc.)
+        for instance in self.instances:
+            if instance.name.startswith(add):
+                sim.append(instance)
+                ids.add(instance.instance_id)
+                cur = int(instance.name[len(add):])
+                
+                if cur > top:
+                    top = cur
+        
+        top += 1
+        
+        # assumes all instances are sequential and zero-indexed
+        assert len(sim) == top
+        
+        if 0 == len(sim):
+            instances = config.getInstances()
+            for instance in instances:
+                if instance['name'].startswith(add):
+                    sim.append(utils.AttributeDict({
+                        'config' : instance, 
+                    }))
+        
+        conf = dict(sim[0].config).copy()
+        conf['name'] = '%s%d' % (add, top)
+        
+        if isinstance(conf['roles'], basestring):
+            conf['roles'] = eval(conf['roles'])
+        
+        # create and bootstrap the new instance
+        utils.log("[%s] creating instance %s" % (self, conf['name']))
+        instance = AWSInstance(self, conf)
+        
+        self._pool.spawn(instance.create)
+        self._pool.join()
+        
+        if add == 'api':
+            # initialize new API instance
+            # ---------------------------
+            conf = self._get_init_config()
+            
+            env.user = 'ubuntu'
+            env.key_filename = [ 'keys/test-keypair' ]
+            
+            # initialize the new instance
+            utils.log("[%s] initializing instance %s" % (self, instance.name))
+            with settings(host_string=instance.public_dns_name):
+                with cd("/stamped"):
+                    sudo('. bin/activate && python /stamped/bootstrap/bin/init.py "%s"' % conf, pty=False)
+            
+            utils.log("[%s] done initializing instance %s" % (self, instance.name))
+            utils.log("[%s] checking ELBs for stack %s" % (self, self.name))
+            
+            # get all ELBs
+            conn = ELBConnection(AWSDeploymentSystem.AWS_ACCESS_KEY_ID, 
+                                 AWSDeploymentSystem.AWS_SECRET_KEY)
+            elbs = conn.get_all_load_balancers()
+            the_elb = None
+            
+            # attempt to find the ELB belonging to this stack's set of API servers
+            for elb in elbs:
+                for awsInstance in elb.instances: 
+                    if awsInstance.id in ids:
+                        the_elb = elb
+                        break
+                
+                if the_elb is not None:
+                    break
+            
+            # register the new instance with the appropriate ELB
+            if the_elb is not None:
+                utils.log("[%s] registering instance '%s' with ELB '%s'" % (self, instance.name, the_elb))
+                the_elb.register_instances([ instance.instance_id ])
+            else:
+                utils.log("[%s] unable to find ELB for instance '%s'" % (self, instance.name))
+        elif add == 'db':
+            # initialize new DB instance
+            # --------------------------
+            db_instances = self.db_instances
+            assert len(db_instances) > 0
+            
+            host = db_instances[0]
+            port = conf['mongodb']['port']
+            replSet = conf['mongodb']['replSet']
+            
+            utils.log("[%s] registering instance '%s' with replica set '%s'" % (self, instance.name, replSet))
+            
+            # register new instance with existing replia set
+            mongo_cmd = 'rs.add("%s:%d")' % (instance.private_ip_address, port)
+            command   = "mongo %s:%s/admin --eval 'printjson(%s);'" % \
+                         (host.public_dns_name, port, mongo_cmd)
+            
+            utils.log(command)
+            ret = utils.shell(command)
+            if 0 == ret[1]:
+                utils.log("[%s] done adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
+                utils.log("[%s] (it may take a few minutes during initial sync for node to become active)" % self)
+            else:
+                utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
+                print ret[0]
+        
+        self.instances.append(instance)
+        utils.log("[%s] done creating instance %s" % (self, instance.name))
 

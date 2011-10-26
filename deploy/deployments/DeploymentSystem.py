@@ -94,4 +94,9 @@ class DeploymentSystem(ADeploymentSystem):
         for (stackName, stack) in stacks.iteritems():
             utils.log("%d) '%s'" % (index, stackName))
             index += 1
+    
+    def add_stack(self, *args):
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.add(*args[1:])
 
