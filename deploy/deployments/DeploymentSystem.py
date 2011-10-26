@@ -99,4 +99,9 @@ class DeploymentSystem(ADeploymentSystem):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
         stack.add(*args[1:])
+    
+    def stress(self, *args):
+        stackName = args[0]
+        stack = self._get_matching_stack(stackName)
+        stack.stress(*args[1:])
 

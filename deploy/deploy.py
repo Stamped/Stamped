@@ -37,6 +37,7 @@ available_commands = {
     'update_stack' : 'update_stack', 
     
     'crawl' : 'crawl', 
+    'stress' : 'stress', 
     
     'setup_crawler_data' : 'setup_crawler_data', 
     

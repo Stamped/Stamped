@@ -40,6 +40,10 @@ class ADeploymentStack(object):
         pass
     
     @abstract
+    def stress(self, *args):
+        pass
+    
+    @abstract
     def setup_crawler_data(self, *args):
         pass
     
