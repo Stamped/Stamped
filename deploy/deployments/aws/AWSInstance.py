@@ -60,11 +60,11 @@ def _getAMI(instanceType, region, software='Ubuntu 10.04', ebs=True):
         return INSTANCE_AMI_UBUNTU_1004[region][INSTANCE_ARCHITECTURE[instanceType]]
     return False
 
-INSTANCE_TYPE      = 'm1.large' #'t1.micro'
-INSTANCE_REGION    = 'us-east-1'
-INSTANCE_OS        = 'Ubuntu 10.04'
-INSTANCE_EBS       = True
-KEY_NAME           = 'test-keypair'
+INSTANCE_TYPE   = 'm1.large' #'t1.micro'
+INSTANCE_REGION = 'us-east-1'
+INSTANCE_OS     = 'Ubuntu 10.04'
+INSTANCE_EBS    = True
+KEY_NAME        = 'test-keypair'
 
 class AWSInstance(AInstance):
     def __init__(self, stack, configOrInstance):
@@ -253,10 +253,6 @@ class AWSInstance(AInstance):
         f = open(path, 'r')
         user_data = convert.parse_file(f, params)
         f.close()
-        
-        f2 = open('test', 'w')
-        f2.write(user_data)
-        f2.close()
         
         return user_data
         #user_data64 = base64.encodestring(user_data)

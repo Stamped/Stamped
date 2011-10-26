@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__ = "TODO"
 
 import Globals
-import config, json, pickle, os, string, utils
+import config, json, pickle, os, re, string, utils
 import AWSDeploymentSystem
 
 from ADeploymentStack       import ADeploymentStack
@@ -594,7 +594,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
                              (host.public_dns_name, port, mongo_cmd)
                 
-                # wait until the replica set recognizes the newly added instance as healthy
+                # wait until the replica set reports the newly added instance as healthy
                 while True:
                     ret = utils.shell(command)
                     #print ret[0]
