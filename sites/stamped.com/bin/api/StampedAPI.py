@@ -2310,6 +2310,7 @@ class StampedAPI(AStampedAPI):
     def removeFavorite(self, authUserId, entityId):
         ### TODO: Fail gracefully if favorite doesn't exist
         favorite = self._favoriteDB.getFavorite(authUserId, entityId)
+        logs.debug('FAVORITE: %s' % favorite)
         self._favoriteDB.removeFavorite(authUserId, entityId)
 
         # Decrement user stats by one

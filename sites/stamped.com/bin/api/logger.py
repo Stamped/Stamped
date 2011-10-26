@@ -95,7 +95,7 @@ def main():
 
             if 'finish' in logs[i]:
                 duration = logs[i]['finish'] - begin_utc
-                print '%-10s %s seconds' % ('Duration:', duration.microseconds / 1000000.0)
+                print '%-10s %s' % ('Duration:', duration)
             
         if 'token' in logs[i]:
             print '%-10s %s' % ('Token:', logs[i]['token'])
