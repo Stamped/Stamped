@@ -50,4 +50,7 @@ class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
     
     def removeRefreshToken(self, tokenId):
         return self._removeMongoDocument(tokenId)
+
+    def removeRefreshTokensForUser(self, userId):
+        return self._collection.remove({'user_id': userId})
         

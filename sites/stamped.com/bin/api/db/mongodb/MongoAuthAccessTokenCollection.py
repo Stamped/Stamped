@@ -51,3 +51,6 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
     def removeAccessToken(self, tokenId):
         return self._removeMongoDocument(tokenId)
 
+    def removeAccessTokensForUser(self, userId):
+        return self._collection.remove({'user_id': userId})
+

@@ -163,7 +163,12 @@ def change_password(request):
 @handleHTTPRequest
 @require_http_methods(["POST"])
 def reset_password(request):
-    raise NotImplementedError
+    client_id   = checkClient(request)
+    schema      = parseRequest(HTTPEmail(), request)
+
+    stampedAPI.resetPassword(schema.email)
+
+    return transformOutput(True)
 
 
 @handleHTTPRequest

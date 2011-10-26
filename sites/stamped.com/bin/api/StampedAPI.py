@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs, re, time, Blacklist
+import logs, re, time, Blacklist, auth, boto
 
 from datetime        import datetime
 from errors          import *
@@ -33,6 +33,9 @@ from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 from libs.TheTVDB    import TheTVDB
+
+AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
+AWS_SECRET_KEY = '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'
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -483,8 +486,46 @@ class StampedAPI(AStampedAPI):
         return True
     
     @API_CALL
-    def resetPassword(self, params):
-        raise NotImplementedError
+    def resetPassword(self, email):
+        email = str(email).lower().strip()
+        if not utils.validate_email(email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Verify user exists
+        account = self._accountDB.getAccountByEmail(email)
+        if not account or not account.user_id:
+            msg = "User does not exist"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Generate random password
+        new_password = auth.generateToken(10)
+
+        # Convert and store new password
+        password = convertPasswordForStorage(new_password)
+        self._accountDB.updatePassword(account.user_id, password)
+
+        # Remove refresh / access tokens
+        self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
+        self._accessTokenDB.removeAccessTokensForUser(account.user_id)
+
+        # Email user
+        msg = {}
+        msg['to'] = email
+        msg['from'] = 'Stamped <noreply@stamped.com>'
+        msg['subject'] = 'Stamped: Reset Password'
+        ### TODO: Update this copy?
+        msg['body'] = 'Your new password is: %s \n\n'% (new_password) + \
+            'To change your password, log in to Stamped and go to ' + \
+            'Profile > Settings > Change Password.' 
+
+        ### TODO: Carve this out into another script...
+        ses = boto.connect_ses(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
+        ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'])
+
+        return True
     
     
     """

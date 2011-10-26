@@ -337,9 +337,10 @@ class HTTPFindUser(Schema):
 # Invites #
 # ####### #
 
-class HTTPInvitation(Schema):
+class HTTPEmail(Schema):
     def setSchema(self):
         self.email              = SchemaElement(basestring)
+        
 
 # ######## #
 # Entities #

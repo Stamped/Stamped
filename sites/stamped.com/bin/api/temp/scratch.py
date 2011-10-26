@@ -41,7 +41,7 @@ def handlePOST(path, data):
 
 
 USER = 'kevin'
-PASS = '12345'
+PASS = 'V8YyUFvP0s'
 
 path = "oauth2/login.json"
 data = { 
@@ -117,12 +117,20 @@ token = account['token']
 # }
 # result = handlePOST(path, data)
 
-path = "friendships/invite.json"
-data = {
-    "oauth_token": token['access_token'],
-    "email": "ed@stamped.com",
-}
-result = handlePOST(path, data)
+# path = "friendships/invite.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "email": "ed@stamped.com",
+# }
+# result = handlePOST(path, data)
+
+# path = "account/reset_password.json"
+# data = {
+#     'client_id': 'stampedtest',
+#     'client_secret': 'august1ftw',
+#     "email": "kevin@stamped.com",
+# }
+# result = handlePOST(path, data)
 
 
 
