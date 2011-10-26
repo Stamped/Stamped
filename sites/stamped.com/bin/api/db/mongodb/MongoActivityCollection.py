@@ -13,7 +13,7 @@ from utils import lazyProperty
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
-from MongoAlertCollection import MongoAlertCollection
+from MongoAlertQueueCollection import MongoAlertQueueCollection
 from AActivityDB import AActivityDB
 
 class MongoActivityCollection(AMongoCollection, AActivityDB):
@@ -44,7 +44,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
     
     @lazyProperty
     def alerts_collection(self):
-        return MongoAlertCollection()
+        return MongoAlertQueueCollection()
     
     def getActivity(self, userId, **kwargs):
         since       = kwargs.pop('since', None)

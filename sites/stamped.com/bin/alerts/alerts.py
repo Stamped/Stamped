@@ -15,7 +15,8 @@ from socket import socket
 from errors import Fail
 from HTTPSchemas import *
 
-from db.mongodb.MongoAlertCollection import MongoAlertCollection
+from db.mongodb.MongoAlertQueueCollection import MongoAlertQueueCollection
+from db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
 
@@ -50,7 +51,12 @@ def main():
         open(lock, 'w').close()
         print '-' * 40
         print 'BEGIN: %s' % datetime.utcnow()
-        runAlerts()
+
+        options = parseCommandLine()
+        options = options.__dict__
+        runAlerts(options)
+        runInvites(options)
+        
         print 'END:   %s' % datetime.utcnow()
         print '-' * 40
     except Exception as e:
@@ -61,12 +67,8 @@ def main():
         os.remove(lock)
 
 
-def runAlerts():
-    # parse commandline
-    options     = parseCommandLine()
-    options     = options.__dict__
-
-    alertDB     = MongoAlertCollection()
+def runAlerts(options):
+    alertDB     = MongoAlertQueueCollection()
     accountDB   = MongoAccountCollection()
     activityDB  = MongoActivityCollection()
 
@@ -190,7 +192,7 @@ def runAlerts():
     # Send emails
     if len(userEmailQueue) > 0:
         print '-' * 40
-        print 'EMAILS:'
+        print 'ALERT EMAILS:'
         for k, v in userEmailQueue.iteritems():
             for email in v:
                 print "%64s | %s" % (email['to'], email['subject'])
@@ -203,7 +205,7 @@ def runAlerts():
     # Send push notifications
     if len(userPushQueue) > 0:
         print '-' * 40
-        print 'PUSH:'
+        print 'ALERT PUSH NOTIFICATIONS:'
         for k, v in userPushQueue.iteritems():
             for push in v:
                 print push
@@ -212,6 +214,100 @@ def runAlerts():
             print k, len(v)
         print
         sendPushNotifications(userPushQueue)
+        print
+
+
+def runInvites(options):
+    inviteDB    = MongoInviteQueueCollection()
+    accountDB   = MongoAccountCollection()
+
+    numInvites = inviteDB.numInvites()
+    invites  = inviteDB.getInvites(limit=options['limit'])
+    userIds   = {}
+    userEmailQueue = {}
+
+    for invite in invites:
+        userIds[str(invite['user_id'])] = 1
+    
+    accounts = accountDB.getAccounts(userIds.keys())
+
+    for account in accounts:
+        userIds[account.user_id] = account
+
+    print 'Number of invitations: %s' % numInvites
+
+    for invite in invites:
+        try:
+            print 
+            print
+
+            print invite
+            if userIds[str(invite['user_id'])] == 1:
+                raise
+
+            ### TODO: Check if recipient is already a member?
+
+            user = userIds[str(invite['user_id'])]
+            emailAddress = invite.recipient_email
+
+            try:
+                # Send email
+                print 'EMAIL'
+
+                if not emailAddress:
+                    raise
+
+                if emailAddress not in userEmailQueue:
+                    userEmailQueue[emailAddress] = []
+
+                # Grab template
+                try:
+                    path = os.path.join(base, 'templates', 'email_invite.html.j2')
+                    print path
+                    template = open(path, 'r')
+                except:
+                    ### TODO: Add error logging?
+                    raise Exception
+
+                # Build email
+                email = {}
+                email['to'] = emailAddress
+                email['from'] = 'Stamped <noreply@stamped.com>'
+                email['subject'] = '%s thinks you have great taste' % user['name']
+                email['invite_id'] = invite.invite_id
+                
+                params = HTTPUser().importSchema(user).value
+                html = parseTemplate(template, params)
+                email['body'] = html
+
+                userEmailQueue[emailAddress].append(email)
+
+                print 'EMAIL COMPLETE'
+            except Exception as e:
+                print e
+                print 'EMAIL FAILED'
+            
+            # Remove the invite
+            raise
+
+        except:
+            print 'REMOVED'
+            inviteDB.removeInvite(invite.invite_id)
+            continue
+
+    print
+
+    # Send emails
+    if len(userEmailQueue) > 0:
+        print '-' * 40
+        print 'INVITE EMAILS:'
+        for k, v in userEmailQueue.iteritems():
+            for email in v:
+                print "%64s | %s" % (email['to'], email['subject'])
+        print
+        for k, v in userEmailQueue.iteritems():
+            print k, len(v)
+        sendEmails(userEmailQueue)
         print
 
 

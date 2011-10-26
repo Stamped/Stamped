@@ -13,50 +13,49 @@ from utils import lazyProperty
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
-# from AAlertDB import AAlertDB
 
-class MongoAlertCollection(AMongoCollection):
+class MongoInviteQueueCollection(AMongoCollection):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='alerts', primary_key='alert_id', obj=Alert)
-        # AAlertDB.__init__(self)
+        AMongoCollection.__init__(self, collection='invitequeue', primary_key='invite_id', obj=Invite)
 
         self._collection.ensure_index('created', unique=False)
 
     ### PUBLIC
 
-    def numAlerts(self):
+    def numInvites(self):
         num = self._collection.find().count()
         return num
     
-    def getAlerts(self, **kwargs):
+    
+    def getInvites(self, **kwargs):
         limit       = kwargs.pop('limit', 5)
         
         documents = self._collection.find().sort('timestamp.created', \
             pymongo.ASCENDING).limit(limit)
 
-        alert = []
+        invite = []
 
         for document in documents:
-            alert.append(self._convertFromMongo(document))
+            invite.append(self._convertFromMongo(document))
 
-        return alert
+        return invite
     
 
-    def addAlert(self, alert):
-        result = self._collection.insert_one(alert.value)
+    def addInvite(self, invite):
+        result = self._collection.insert_one(invite.value)
         return result
     
 
-    def addAlerts(self, alerts):
+    def addInvites(self, invites):
         objects = []
-        for alert in alerts:
-            objects.append(alert.value)
+        for invite in invites:
+            objects.append(invite.value)
         result = self._collection.insert(objects)
         return result
 
         
-    def removeAlert(self, alertId, **kwargs):
-        documentId = self._getObjectIdFromString(alertId)
+    def removeInvite(self, inviteId, **kwargs):
+        documentId = self._getObjectIdFromString(inviteId)
         result = self._removeMongoDocument(documentId)
 

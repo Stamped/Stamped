@@ -183,7 +183,7 @@ class StampedAPI(AStampedAPI):
             self._imageDB.addProfileImage(account.screen_name.lower(), image)
         
         # Add activity if invitations were sent
-        invites = self._inviteDB.getInvites(account.email)
+        invites = self._inviteDB.getInvitations(account.email)
         invitedBy = {}
         for invite in invites:
             invitedBy[invite['user_id']] = 1
@@ -2105,6 +2105,7 @@ class StampedAPI(AStampedAPI):
     def _getStampCollection(self, authUserId, stampIds, **kwargs):
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
+        sort            = kwargs.pop('sort', 'created')
         includeComments = kwargs.pop('includeComments', False)
         godMode         = kwargs.pop('godMode', False)
                        
@@ -2132,6 +2133,7 @@ class StampedAPI(AStampedAPI):
             'since':    since,
             'before':   before, 
             'limit':    limit,
+            'sort':     sort,
         }
 
         stampData = self._stampDB.getStamps(stampIds, **params)
