@@ -278,6 +278,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   objectLoader.objectMapping = stampMapping;
   NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"1", @"quality",
                          latestTimestampString, @"since",
+                         @"modified", @"sort",
                          nil];
   NSDate* oldestTimeInBatch = [[NSUserDefaults standardUserDefaults] objectForKey:@"InboxOldestTimestampInBatch"];
   if (oldestTimeInBatch && oldestTimeInBatch.timeIntervalSince1970 > 0) {
