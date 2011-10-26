@@ -141,7 +141,7 @@ class EC2Utils(object):
         # attempt to find the ELB belonging to this stack's set of API servers
         for elb in elbs:
             for awsInstance in elb.instances: 
-                if awsInstance.id in ids:
+                if awsInstance.id in instance_ids:
                     return elb
         
         return None
