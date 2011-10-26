@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import copy, os, re, sys, utils
+import aws, copy, os, re, sys, utils
 
 from boto.ec2.elb   import ELBConnection
 from subprocess     import Popen, PIPE
