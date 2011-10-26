@@ -6,8 +6,9 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import copy, os, re, sys, utils
+import aws, copy, os, re, sys, utils
 
+from boto.ec2.elb   import ELBConnection
 from subprocess     import Popen, PIPE
 from pprint         import pprint
 
@@ -128,6 +129,23 @@ class EC2Utils(object):
         
         return utils.AttributeDict(data)
     
+    def get_elb(self, instance_ids=None):
+        if instance_ids is None:
+            stack = self.get_stack(self.get_local_instance_id())
+            instance_ids = self.get_instance_ids_in_stack(stack)
+        
+        # get all ELBs
+        conn = ELBConnection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+        elbs = conn.get_all_load_balancers()
+        
+        # attempt to find the ELB belonging to this stack's set of API servers
+        for elb in elbs:
+            for awsInstance in elb.instances: 
+                if awsInstance.id in instance_ids:
+                    return elb
+        
+        return None
+    
     def _shell(self, cmd, env=None):
         utils.log(cmd)
         pp = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, env=env)
@@ -135,7 +153,6 @@ class EC2Utils(object):
         status = pp.wait()
         
         return (output, status)
-
 
 """
 ec2 = EC2Utils()

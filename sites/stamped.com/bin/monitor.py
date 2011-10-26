@@ -86,11 +86,11 @@ class Monitor(object):
                 
                 if isinstance(e, MonitorException):
                     logs.error("monitor error: %s" % e)
-                    utils.log("monitor error: %s" % e)
+                    utils.log ("monitor error: %s" % e)
                     detail = e.detail
                 else:
                     logs.error("unexpected error: %s" % e)
-                    utils.log("unexpected error: %s" % e)
+                    utils.log ("unexpected error: %s" % e)
                     unexpected = True
                 
                 # only send a notification if this node's status has changed since 
@@ -134,7 +134,7 @@ class Monitor(object):
         raise MonitorException(error, email=True, sms=True)
     
     def _try_ping_db(self, node):
-        cmd_template = "mongo %s:27017/admin --eval 'printjson(%s);'"
+        cmd_template = "mongo --quiet %s:27017/admin --eval 'printjson(%s);'"
         
         # ensure that the server and replica set and both responding and healthy
         mongo_cmds = [
@@ -164,7 +164,7 @@ class Monitor(object):
                 error = "unable to reach db server at '%s.%s'" % \
                          (node.stack, node.name)
                 
-                raise MonitorException(error, email=True, sms=True)
+                raise MonitorException(error, detail=ret[0], email=True, sms=True)
             
             if re.match('.*"ok"[ \t]*:[ \t]*1.*', ret[0], re.DOTALL) is None:
                 error = "db server '%s.%s' returned invalid status for cmd '%s'" % \
@@ -193,6 +193,11 @@ def parseCommandLine():
     
     if options.time < 0:
         utils.log("invalid time parameter")
+        parser.print_help()
+        sys.exit(1)
+    
+    if options.stack is None and not utils.is_ec2():
+        utils.log("error: if this program isn't run from an EC2 instance, you must specify a stack to monitor")
         parser.print_help()
         sys.exit(1)
     

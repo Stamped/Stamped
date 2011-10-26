@@ -17,23 +17,32 @@ CLIENT_SECRET = "august1ftw"
 
 _accounts  = []
 _test_case = None
+_baseurl   = "http://localhost:18000/v0"
+
+#_baseurl = "http://107.20.179.250:5000/v0"
+#_baseurl = "http://ec2-50-17-69-169.compute-1.amazonaws.com:5000/v0"
+#_baseurl = "https://myloadbalancer-2126199649.us-east-1.elb.amazonaws.com/v0"
+#_baseurl = "http://ec2-50-19-138-154.compute-1.amazonaws.com:5000/v0"
+#_baseurl = "https://dev.stamped.com/v0"
+#_baseurl = "http://dev.stamped.com:5000/v0"
+#_baseurl = "http://ec2-50-17-94-229.compute-1.amazonaws.com:5000/v0"
+#_baseurl = "https://elb-dev-636754835.us-east-1.elb.amazonaws.com/v0"
+
+if utils.is_ec2():
+    from libs.EC2Utils import EC2Utils
+    ec2_utils = EC2Utils()
+    elb = ec2_utils.get_elb()
+    
+    if elb is not None:
+        _baseurl = "https://%s/v0" % elb.dns_name
+
+print "BASE_URL: %s" % _baseurl
 
 class StampedAPIURLOpener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
         return ('stampedtest', 'august1ftw')
 
 class AStampedAPITestCase(AStampedTestCase):
-    
-    #_baseurl = "http://0.0.0.0:5000/api/v1"
-    _baseurl = "http://localhost:18000/v0"
-    #_baseurl = "http://107.20.179.250:5000/v0"
-    #_baseurl = "http://ec2-50-17-69-169.compute-1.amazonaws.com:5000/v0"
-    # _baseurl = "https://myloadbalancer-2126199649.us-east-1.elb.amazonaws.com/v0"
-    #_baseurl = "http://ec2-50-19-138-154.compute-1.amazonaws.com:5000/v0"
-    #_baseurl = "https://dev.stamped.com/v0"
-    #_baseurl = "http://dev.stamped.com:5000/v0"
-    # _baseurl = "http://ec2-50-17-94-229.compute-1.amazonaws.com:5000/v0"
-    # _baseurl = "https://elb-dev-636754835.us-east-1.elb.amazonaws.com/v0"
     
     _opener = StampedAPIURLOpener()
     client_auth = {
@@ -42,8 +51,9 @@ class AStampedAPITestCase(AStampedTestCase):
     }
     
     def handleGET(self, path, data):
+        global _baseurl
         params = urllib.urlencode(data)
-        url    = "%s/%s?%s" % (self._baseurl, path, params)
+        url    = "%s/%s?%s" % (_baseurl, path, params)
         
         # utils.log("GET:  %s" % url)
         raw = self._opener.open(url).read()
@@ -57,8 +67,9 @@ class AStampedAPITestCase(AStampedTestCase):
         return result
     
     def handlePOST(self, path, data):
+        global _baseurl
         params = urllib.urlencode(data)
-        url    = "%s/%s" % (self._baseurl, path)
+        url    = "%s/%s" % (_baseurl, path)
         
         # utils.log("POST: %s" % url)
         # pprint(params)
@@ -74,7 +85,8 @@ class AStampedAPITestCase(AStampedTestCase):
         return result
     
     def handleMultiPart(self, path, fields, files, file_type='image/jpeg'):
-        url             = "%s/%s" % (self._baseurl, path)
+        global _baseurl
+        url             = "%s/%s" % (_baseurl, path)
         headers, data   = self.encodeMultiPart(fields, files, file_type)
         
         request         = urllib2.Request(url, data, headers)
