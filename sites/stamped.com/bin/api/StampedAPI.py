@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs, re, time, Blacklist, auth, boto
+import logs, re, time, Blacklist, auth
 
 from datetime        import datetime
 from errors          import *
@@ -33,9 +33,6 @@ from GooglePlaces    import GooglePlaces
 from libs.apple      import AppleAPI
 from libs.AmazonAPI  import AmazonAPI
 from libs.TheTVDB    import TheTVDB
-
-AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
-AWS_SECRET_KEY = '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'
 
 CREDIT_BENEFIT  = 2 # Per credit
 LIKE_BENEFIT    = 1 # Per 3 stamps
@@ -521,9 +518,7 @@ class StampedAPI(AStampedAPI):
             'To change your password, log in to Stamped and go to ' + \
             'Profile > Settings > Change Password.' 
 
-        ### TODO: Carve this out into another script...
-        ses = boto.connect_ses(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
-        ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'])
+        utils.sendEmail(msg, format='text')
 
         return True
     

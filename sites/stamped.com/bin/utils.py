@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import gzip, httplib, json, logging, os, sys, pickle, string, threading, time, re
 import htmlentitydefs, traceback, urllib, urllib2
-import aws, logs, math, random
+import aws, logs, math, random, boto
 
 from boto.ec2.connection import EC2Connection
 from subprocess          import Popen, PIPE
@@ -629,3 +629,15 @@ def sampleCDF(cdf, item_func=lambda i: i):
     
     return i - 1
 
+def sendEmail(msg, **kwargs):
+    if not validate_email(msg['to']):
+        msg = "Invalid email address"
+        logs.warning(msg)
+        raise Exception(msg)
+
+    format = kwargs.pop('format', 'text')
+
+    ses = boto.connect_ses(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+    ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format=format)
+
+    return True
