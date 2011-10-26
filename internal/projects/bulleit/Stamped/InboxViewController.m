@@ -45,8 +45,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)managedObjectContextChanged:(NSNotification*)notification;
 
-@property (nonatomic, retain) NSMutableArray* entitiesArray;
-@property (nonatomic, retain) NSMutableArray* filteredEntitiesArray;
 @property (nonatomic, assign) BOOL userPannedMap;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
 @property (nonatomic, copy) NSString* searchQuery;
@@ -57,8 +55,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @implementation InboxViewController
 
 @synthesize mapView = mapView_;
-@synthesize entitiesArray = entitiesArray_;
-@synthesize filteredEntitiesArray = filteredEntitiesArray_;
 @synthesize userPannedMap = userPannedMap_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
@@ -68,8 +64,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.entitiesArray = nil;
-  self.filteredEntitiesArray = nil;
   self.searchQuery = nil;
   self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
@@ -84,11 +78,13 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [self.tableView scrollRectToVisible:mapFrame animated:NO];
   userPannedMap_ = NO;
   self.tableView.scrollEnabled = NO;
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+  NSArray* entitiesArray = [sectionInfo objects];
   [UIView animateWithDuration:0.5
                    animations:^{ mapView_.alpha = 1.0; }
                    completion:^(BOOL finished) {
                      mapView_.showsUserLocation = YES;
-                     for (Entity* e in self.entitiesArray) {
+                     for (Entity* e in entitiesArray) {
                        if (!e.coordinates)
                          continue;
                       [self addAnnotationForEntity:e];
@@ -319,7 +315,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)filterStamps {
   if (selectedFilterType_ == StampFilterTypeNone) {
     // No need to filter.
-    self.filteredEntitiesArray = [NSMutableArray arrayWithArray:entitiesArray_];
+//    self.filteredEntitiesArray = [NSMutableArray arrayWithArray:entitiesArray_];
     return;
   }
 
@@ -346,8 +342,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   }
   if (filterString) {
     NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"category == %@", filterString];
-    self.filteredEntitiesArray =
-        [NSMutableArray arrayWithArray:[entitiesArray_ filteredArrayUsingPredicate:filterPredicate]];
+//    self.filteredEntitiesArray =
+//        [NSMutableArray arrayWithArray:[entitiesArray_ filteredArrayUsingPredicate:filterPredicate]];
   }
 }
 
