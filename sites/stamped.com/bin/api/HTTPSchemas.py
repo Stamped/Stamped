@@ -337,9 +337,10 @@ class HTTPFindUser(Schema):
 # Invites #
 # ####### #
 
-class HTTPInvitation(Schema):
+class HTTPEmail(Schema):
     def setSchema(self):
         self.email              = SchemaElement(basestring)
+        
 
 # ######## #
 # Entities #
@@ -834,6 +835,7 @@ class HTTPGenericSlice(Schema):
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
         self.quality            = SchemaElement(int)
+        self.sort               = SchemaElement(basestring)
 
 class HTTPUserCollectionSlice(Schema):
     def setSchema(self):
@@ -843,6 +845,7 @@ class HTTPUserCollectionSlice(Schema):
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
         self.quality            = SchemaElement(int)
+        self.sort               = SchemaElement(basestring)
 
 class HTTPStampImage(Schema):
     def setSchema(self):
@@ -903,6 +906,7 @@ class HTTPCommentSlice(Schema):
         self.limit              = SchemaElement(int)
         self.since              = SchemaElement(int)
         self.before             = SchemaElement(int)
+        self.sort               = SchemaElement(basestring)
 
 # ######## #
 # Favorite #

@@ -27,10 +27,12 @@ from db.mongodb.MongoFavoriteCollection     import MongoFavoriteCollection
 from db.mongodb.MongoCollectionCollection   import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection   import MongoFriendshipCollection
 from db.mongodb.MongoActivityCollection     import MongoActivityCollection
-from db.mongodb.MongoInviteCollection       import MongoInviteCollection
+from db.mongodb.MongoInvitationCollection   import MongoInvitationCollection
 from db.mongodb.MongoEntitySearcher         import MongoEntitySearcher
 from db.mongodb.MongoTempEntityCollection   import MongoTempEntityCollection
 from db.mongodb.MongoLogsCollection         import MongoLogsCollection
+from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
+from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -82,7 +84,7 @@ class MongoStampedAPI(StampedAPI):
     
     @lazyProperty
     def _inviteDB(self):
-        return MongoInviteCollection()
+        return MongoInvitationCollection()
     
     @lazyProperty
     def _entitySearcher(self):
@@ -107,6 +109,14 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _notificationHandler(self):
         return StampedNotificationHandler()
+    
+    @lazyProperty
+    def _accessTokenDB(self):
+        return MongoAuthAccessTokenCollection()
+
+    @lazyProperty
+    def _refreshTokenDB(self):
+        return MongoAuthRefreshTokenCollection()
     
     @lazyProperty
     def _statsSink(self):

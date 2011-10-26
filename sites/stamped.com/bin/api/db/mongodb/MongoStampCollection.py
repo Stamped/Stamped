@@ -117,11 +117,17 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         self.inbox_stamps_collection.removeAllInboxStamps(userId)
 
     def getStamps(self, stampIds, **kwargs):
+        sort = kwargs.pop('sort', None)
+        if sort in ['modified', 'created']:
+            sort = 'timestamp.%s' % sort
+        else:
+            sort = 'timestamp.created'
+
         params = {
             'since':    kwargs.pop('since', None),
             'before':   kwargs.pop('before', None), 
             'limit':    kwargs.pop('limit', 20),
-            'sort':     'timestamp.modified',
+            'sort':     sort,
             'sortOrder': pymongo.DESCENDING,
         }
 

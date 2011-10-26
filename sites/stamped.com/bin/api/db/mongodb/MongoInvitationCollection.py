@@ -7,18 +7,24 @@ __license__   = "TODO"
 
 import Globals, auth, utils, logs
 from datetime import datetime
+from utils import lazyProperty
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
+from MongoInviteQueueCollection import MongoInviteQueueCollection
 # from AAccountDB import AAccountDB
 
-class MongoInviteCollection(AMongoCollection):
+class MongoInvitationCollection(AMongoCollection):
     
     def __init__(self):
-        AMongoCollection.__init__(self, 'invites')
+        AMongoCollection.__init__(self, 'invitations')
         # AAccountDB.__init__(self)
     
     ### PUBLIC
+    
+    @lazyProperty
+    def invite_queue(self):
+        return MongoInviteQueueCollection()
 
     def inviteUser(self, email, userId):
         try:
@@ -40,7 +46,6 @@ class MongoInviteCollection(AMongoCollection):
         data = {
             'user_id': userId, 
             'timestamp': datetime.utcnow(),
-            'sent': False,
         }
         
         self._collection.update(
@@ -49,20 +54,21 @@ class MongoInviteCollection(AMongoCollection):
             upsert=True
         )
 
+        # Queue email to be sent
+        invite = Invite()
+        invite.recipient_email = email
+        invite.user_id = userId
+        invite.created = datetime.utcnow()
+        self.invite_queue.addInvite(invite)
+
         return True
 
-    def getInvites(self, email):
+    def getInvitations(self, email):
         document = self._collection.find_one({'_id': email})
         if document and 'invited_by' in document \
             and isinstance(document['invited_by'], list):
             return document['invited_by']
         return []
-
-    def getUnsentInvites(self):
-        pass
-
-    def sendInvitation(self, email, userId):
-        pass
 
     def join(self, email):
         try:

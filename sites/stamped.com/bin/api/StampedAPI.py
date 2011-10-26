@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs, re, time, Blacklist
+import logs, re, time, Blacklist, auth
 
 from datetime        import datetime
 from errors          import *
@@ -183,7 +183,7 @@ class StampedAPI(AStampedAPI):
             self._imageDB.addProfileImage(account.screen_name.lower(), image)
         
         # Add activity if invitations were sent
-        invites = self._inviteDB.getInvites(account.email)
+        invites = self._inviteDB.getInvitations(account.email)
         invitedBy = {}
         for invite in invites:
             invitedBy[invite['user_id']] = 1
@@ -483,8 +483,44 @@ class StampedAPI(AStampedAPI):
         return True
     
     @API_CALL
-    def resetPassword(self, params):
-        raise NotImplementedError
+    def resetPassword(self, email):
+        email = str(email).lower().strip()
+        if not utils.validate_email(email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Verify user exists
+        account = self._accountDB.getAccountByEmail(email)
+        if not account or not account.user_id:
+            msg = "User does not exist"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Generate random password
+        new_password = auth.generateToken(10)
+
+        # Convert and store new password
+        password = convertPasswordForStorage(new_password)
+        self._accountDB.updatePassword(account.user_id, password)
+
+        # Remove refresh / access tokens
+        self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
+        self._accessTokenDB.removeAccessTokensForUser(account.user_id)
+
+        # Email user
+        msg = {}
+        msg['to'] = email
+        msg['from'] = 'Stamped <noreply@stamped.com>'
+        msg['subject'] = 'Stamped: Reset Password'
+        ### TODO: Update this copy?
+        msg['body'] = 'Your new password is: %s \n\n'% (new_password) + \
+            'To change your password, log in to Stamped and go to ' + \
+            'Profile > Settings > Change Password.' 
+
+        utils.sendEmail(msg, format='text')
+
+        return True
     
     
     """
@@ -2105,6 +2141,7 @@ class StampedAPI(AStampedAPI):
     def _getStampCollection(self, authUserId, stampIds, **kwargs):
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
+        sort            = kwargs.pop('sort', 'created')
         includeComments = kwargs.pop('includeComments', False)
         godMode         = kwargs.pop('godMode', False)
                        
@@ -2132,6 +2169,7 @@ class StampedAPI(AStampedAPI):
             'since':    since,
             'before':   before, 
             'limit':    limit,
+            'sort':     sort,
         }
 
         stampData = self._stampDB.getStamps(stampIds, **params)
@@ -2310,6 +2348,7 @@ class StampedAPI(AStampedAPI):
     def removeFavorite(self, authUserId, entityId):
         ### TODO: Fail gracefully if favorite doesn't exist
         favorite = self._favoriteDB.getFavorite(authUserId, entityId)
+        logs.debug('FAVORITE: %s' % favorite)
         self._favoriteDB.removeFavorite(authUserId, entityId)
 
         # Decrement user stats by one

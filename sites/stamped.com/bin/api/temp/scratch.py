@@ -40,18 +40,18 @@ def handlePOST(path, data):
 
 
 
-USER = 'edmuki'
-PASS = '54321'
+USER = 'kevin'
+PASS = '12345'
 
-path = "oauth2/login.json"
-data = { 
-    "client_id": CLIENT_ID,
-    "client_secret": CLIENT_SECRET,
-    "login": USER,
-    "password": PASS
-}
-account = handlePOST(path, data)
-token = account['token']
+# path = "oauth2/login.json"
+# data = { 
+#     "client_id": CLIENT_ID,
+#     "client_secret": CLIENT_SECRET,
+#     "login": USER,
+#     "password": PASS
+# }
+# account = handlePOST(path, data)
+# token = account['token']
 
 
 
@@ -109,11 +109,26 @@ token = account['token']
 # }
 # result = handleGET(path, data)
 
-path = "account/customize_stamp.json"
+# path = "account/customize_stamp.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "color_primary": "000000",
+#     "color_secondary": "000000",
+# }
+# result = handlePOST(path, data)
+
+# path = "friendships/invite.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "email": "ed@stamped.com",
+# }
+# result = handlePOST(path, data)
+
+path = "account/reset_password.json"
 data = {
-    "oauth_token": token['access_token'],
-    "color_primary": "000000",
-    "color_secondary": "000000",
+    'client_id': 'stampedtest',
+    'client_secret': 'august1ftw',
+    "email": "kevin@stamped.com",
 }
 result = handlePOST(path, data)
 
