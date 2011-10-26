@@ -53,6 +53,10 @@ class AWSDeploymentStack(ADeploymentStack):
         return self._getInstancesByRole('crawler')
     
     @property
+    def test_instances(self):
+        return self._getInstancesByRole('test')
+    
+    @property
     def db_instances(self):
         return self._getInstancesByRole('db')
     
@@ -621,4 +625,64 @@ class AWSDeploymentStack(ADeploymentStack):
         
         self.instances.append(instance)
         utils.log("[%s] done creating instance %s" % (self, instance.name))
+    
+    def stress(self, *args):
+        numInstances = 2
+        
+        if len(args) > 0:
+            numInstances = int(args[0])
+        
+        if numInstances <= 0:
+            utils.log("[%s] invalid number of instances to run stress tests on")
+        
+        test_instances = self.test_instances
+        
+        if len(test_instances) != numInstances:
+            if len(test_instances) > 0:
+                utils.log("[%s] removing %d stale test instances before create can occur" % (self, len(test_instances)))
+                ids = set()
+                
+                for instance in test_instances:
+                    ids.add(instance.instance_id)
+                    instance.terminate()
+                
+                self.instances = filter(lambda instance: instance.instance_id not in ids, self.instances)
+            
+            utils.log("[%s] creating %d test instances" % (self, numInstances))
+            
+            test_instances = []
+            for i in xrange(numInstances):
+                config = {
+                    'name'  : 'test%d' % i, 
+                    'roles' : [ 'test' ], 
+                    'instance_type' : 'm1.small', 
+                }
+                
+                instance = AWSInstance(self, config)
+                test_instances.append(instance)
+                self._pool.spawn(instance.create)
+            
+            self._pool.join()
+            
+            self.instances.extend(test_instances)
+            utils.log("[%s] done creating %d test instances; initiating tests..." % (self, numInstances))
+        
+        env.user = 'ubuntu'
+        env.key_filename = [ 'keys/test-keypair' ]
+        
+        for instance in test_instances:
+            num_retries = 5
+            
+            test_cmd = "/stamped/stamped/sites/stamped.com/bin/tests/stampede/StressTests.py"
+            log = "/stamped/logs/test.log"
+            cmd = "nohup bash -c '. /stamped/bin/activate && python %s >& %s < /dev/null' &" % \
+                   (test_cmd, log)
+            
+            while num_retries > 0:
+                ret = utils.runbg(instance.public_dns_name, env.user, cmd)
+                if 0 == ret:
+                    break
+                
+                num_retries -= 1
+        
 

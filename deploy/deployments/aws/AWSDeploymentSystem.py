@@ -96,6 +96,12 @@ class AWSDeploymentSystem(DeploymentSystem):
                 ], 
             }, 
             {
+                'name' : 'test', 
+                'desc' : 'Test security group', 
+                'rules' : [
+                ], 
+            }, 
+            {
                 'name' : 'monitor', 
                 'desc' : 'Monitor security group', 
                 'rules' : [
