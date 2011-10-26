@@ -780,6 +780,9 @@ typedef enum {
 #pragma mark - Keyboard notifications.
 
 - (void)keyboardWillAppear:(NSNotification*)notification {
+  if (self.modalViewController)
+    return;
+
   CGRect keyboardFrame = [[[notification userInfo] valueForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
   CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(keyboardFrame);
   CGFloat contentHeight = CGRectGetMaxY(activityView_.frame) + 10;
@@ -797,6 +800,9 @@ typedef enum {
 }
 
 - (void)keyboardWillDisappear:(NSNotification*)notification {
+  if (self.modalViewController)
+    return;
+
   CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(bottomToolbar_.frame);
   [UIView animateWithDuration:0.3
                         delay:0.0
