@@ -17,6 +17,15 @@ CLIENT_SECRET = "august1ftw"
 
 _accounts  = []
 _test_case = None
+_baseurl   = "http://localhost:18000/v0"
+
+if utils.is_ec2():
+    from libs.EC2Utils import EC2Utils
+    ec2_utils = EC2Utils()
+    elb = ec2_utils.get_elb()
+    
+    if elb is not None:
+        _baseurl = "https://%s/v0" % elb.dns_name
 
 class StampedAPIURLOpener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
@@ -24,7 +33,6 @@ class StampedAPIURLOpener(urllib.FancyURLopener):
 
 class AStampedAPITestCase(AStampedTestCase):
     
-    #_baseurl = "http://0.0.0.0:5000/api/v1"
     _baseurl = "http://localhost:18000/v0"
     #_baseurl = "http://107.20.179.250:5000/v0"
     #_baseurl = "http://ec2-50-17-69-169.compute-1.amazonaws.com:5000/v0"

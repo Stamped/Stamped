@@ -634,10 +634,11 @@ def sendEmail(msg, **kwargs):
         msg = "Invalid email address"
         logs.warning(msg)
         raise Exception(msg)
-
+    
     format = kwargs.pop('format', 'text')
-
+    
     ses = boto.connect_ses(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
     ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format=format)
-
+    
     return True
+
