@@ -632,9 +632,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
                                        selector:@selector(caseInsensitiveCompare:)]]];
     [self.tableView reloadData];
   } else if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
-    self.stampedFriends =
-        [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
-            [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    self.stampedFriends = objects;
     [self.tableView reloadData];
   } else if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath] ||
              [objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
