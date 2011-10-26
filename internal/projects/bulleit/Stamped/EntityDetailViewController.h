@@ -11,10 +11,12 @@
 #import "UIColor+Stamped.h"
 
 @class Entity;
+@class DetailedEntity;
 @class SearchResult;
 
 @interface EntityDetailViewController : UIViewController <RKObjectLoaderDelegate, CollapsibleViewControllerDelegate> {
  @protected
+  DetailedEntity* detailedEntity_;
   Entity* entityObject_;
   SearchResult* searchResult_;
   BOOL viewIsVisible_;

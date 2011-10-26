@@ -10,7 +10,7 @@
 
 #import "STCategoryDropdownTableView.h"
 
-@class Entity;
+@class DetailedEntity;
 @class STNavigationBar;
 
 @interface EditEntityViewController : UIViewController <UITableViewDelegate, UITextFieldDelegate> {
@@ -41,9 +41,9 @@
 
 @property (nonatomic, retain) UISegmentedControl* segmentedControl;
 
-- (id)initWithEntityObject:(Entity*)entityObject;
+- (id)initWithDetailedEntity:(DetailedEntity*)detailedEntity;
 
-@property (nonatomic, retain) Entity* entityObject;
+@property (nonatomic, retain) DetailedEntity* detailedEntity;
 
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)doneButtonPressed:(id)sender;

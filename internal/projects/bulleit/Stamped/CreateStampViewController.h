@@ -52,7 +52,6 @@
 @property (nonatomic, retain) IBOutlet UIButton* tweetButton;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* disclosureButton;
-@property (nonatomic, retain) IBOutlet UIView* creditContainer;
 
 - (IBAction)disclosureButtonPressed:(id)sender;
 - (IBAction)tweetButtonPressed:(id)sender;

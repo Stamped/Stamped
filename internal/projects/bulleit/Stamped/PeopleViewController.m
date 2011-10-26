@@ -206,7 +206,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     [addFriendsImageView release];
     return cell;
   }
-  
+
   static NSString* CellIdentifier = @"Cell";
 
   PeopleTableViewCell* cell = (PeopleTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];

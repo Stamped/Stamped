@@ -13,6 +13,7 @@
 #import "TestFlight.h"
 
 #import "AccountManager.h"
+#import "DetailedEntity.h"
 #import "Comment.h"
 #import "Entity.h"
 #import "Event.h"
@@ -134,7 +135,13 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [userMapping mapAttributes:@"bio", @"website", @"location", nil];
   
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
-  [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
+  entityMapping.primaryKeyAttribute = @"entityID";
+  [entityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID", nil];
+  [entityMapping mapAttributes:@"category", @"subtitle", @"title", @"coordinates", @"subcategory", nil];
+  
+  RKManagedObjectMapping* detailedEntityMapping = [RKManagedObjectMapping mappingForClass:[DetailedEntity class]];
+  detailedEntityMapping.primaryKeyAttribute = @"entityID";
+  [detailedEntityMapping mapKeyPathsToAttributes:@"entity_id", @"entityID",
      @"opentable_url", @"openTableURL",
      @"itunes_short_url", @"itunesShortURL",
      @"itunes_url", @"itunesURL",
@@ -143,9 +150,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"amazon_url", @"amazonURL",
      @"in_theaters", @"inTheaters",
      @"fandango_url", @"fandangoURL", nil];
-  
-  entityMapping.primaryKeyAttribute = @"entityID";
-  [entityMapping mapAttributes:@"address", @"category", @"subtitle",
+  [detailedEntityMapping mapAttributes:@"address", @"category", @"subtitle",
      @"title", @"coordinates", @"phone", @"subcategory",
      @"street", @"substreet", @"city", @"state", @"zipcode",
      @"neighborhood", @"desc", @"genre", @"label", @"length",
@@ -153,7 +158,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"price", @"website", @"rating", @"isbn", @"format", 
      @"publisher", @"language", @"albums", @"songs",
      @"image", nil];
-  
+
   RKManagedObjectMapping* commentMapping = [RKManagedObjectMapping mappingForClass:[Comment class]];
   [commentMapping mapAttributes:@"blurb", @"created", nil];
   [commentMapping mapKeyPathsToAttributes:@"comment_id", @"commentID",
@@ -217,6 +222,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   
   [objectManager.mappingProvider setMapping:userMapping forKeyPath:@"User"];
   [objectManager.mappingProvider setMapping:stampMapping forKeyPath:@"Stamp"];
+  [objectManager.mappingProvider setMapping:detailedEntityMapping forKeyPath:@"DetailedEntity"];
   [objectManager.mappingProvider setMapping:entityMapping forKeyPath:@"Entity"];
   [objectManager.mappingProvider setMapping:commentMapping forKeyPath:@"Comment"];
   [objectManager.mappingProvider setMapping:eventMapping forKeyPath:@"Event"];

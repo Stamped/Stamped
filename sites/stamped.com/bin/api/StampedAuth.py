@@ -227,7 +227,6 @@ class StampedAuth(AStampedAuth):
             raise StampedHTTPError("invalid_token", 401, msg)
     
     def removeAccessToken(self, tokenId):
-        logs.info("Begin")
         return self._accessTokenDB.removeAccessToken(tokenId)
 
 

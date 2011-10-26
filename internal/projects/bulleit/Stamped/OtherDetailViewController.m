@@ -11,6 +11,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
 
+#import "DetailedEntity.h"
 #import "Entity.h"
 #import "STPlaceAnnotation.h"
 #import "Util.h"
@@ -33,7 +34,7 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  self.descriptionLabel.text = entityObject_.subtitle;
+  self.descriptionLabel.text = detailedEntity_.subtitle;
 
   [self setupMainActionsContainer];
   [self setupMapView];
@@ -107,7 +108,7 @@
 
 - (void)confirmCall {
   UIAlertView* alert = [[UIAlertView alloc] init];
-	[alert setTitle:entityObject_.phone];
+	[alert setTitle:detailedEntity_.phone];
 	[alert setDelegate:self];
 	[alert addButtonWithTitle:@"Cancel"];
 	[alert addButtonWithTitle:@"Call"];
@@ -118,7 +119,7 @@
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if (buttonIndex == 1) {
     NSString* telURL = [NSString stringWithFormat:@"tel://%i",
-        [Util sanitizedPhoneNumberFromString:entityObject_.phone]];
+        [Util sanitizedPhoneNumberFromString:detailedEntity_.phone]];
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:telURL]];
   }
 }
@@ -130,25 +131,25 @@
   callActionButton_.layer.cornerRadius = 2.0;
   callActionLabel_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.25];
   
-  if (entityObject_.phone) {  
-    callActionLabel_.text = entityObject_.phone;
+  if (detailedEntity_.phone) {  
+    callActionLabel_.text = detailedEntity_.phone;
     callActionButton_.hidden = NO;
     callActionLabel_.hidden = NO;
     self.mainActionsView.hidden = NO;
   }
 
   // TODO(andybons): Will there EVER be a phone property for Other category?
-  if (!entityObject_.phone) {
+  if (!detailedEntity_.phone) {
     mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }  
 }
 
 - (void)setupMapView {
-  if (!entityObject_.coordinates)
+  if (!detailedEntity_.coordinates)
     return;
 
-  NSArray* coordinates = [entityObject_.coordinates componentsSeparatedByString:@","]; 
+  NSArray* coordinates = [detailedEntity_.coordinates componentsSeparatedByString:@","]; 
   latitude_ = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   longitude_ = [(NSString*)[coordinates objectAtIndex:1] floatValue];
   CLLocationCoordinate2D mapCoord = CLLocationCoordinate2DMake(latitude_, longitude_);
@@ -173,39 +174,39 @@
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
   
   
-  if (entityObject_.desc) {
+  if (detailedEntity_.desc) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
-    [section addText:entityObject_.desc forKey:@"desc"];
+    [section addText:detailedEntity_.desc forKey:@"desc"];
   }
 
   
   [self addSectionWithName:@"Information"];
   section = [sectionsDict_ objectForKey:@"Information"];
   
-  if (entityObject_.subcategory) { 
+  if (detailedEntity_.subcategory) { 
     [section addPairedLabelWithName:@"Category:"
-                              value:entityObject_.subcategory
+                              value:detailedEntity_.subcategory
                              forKey:@"subcategory"];
   }
   
   
-  if (entityObject_.address) {
+  if (detailedEntity_.address) {
     [section addPairedLabelWithName:@"Address:"
-                              value:entityObject_.address
+                              value:detailedEntity_.address
                              forKey:@"address"];
 
   }
     
-  if (entityObject_.neighborhood) {
+  if (detailedEntity_.neighborhood) {
     [section addPairedLabelWithName:@"Neighborhood:"
-                              value:entityObject_.neighborhood
+                              value:detailedEntity_.neighborhood
                              forKey:@"neighborhood"];
   }
   
-  if (entityObject_.website) {
+  if (detailedEntity_.website) {
     [section addPairedLabelWithName:@"Website:"
-                              value:entityObject_.website
+                              value:detailedEntity_.website
                              forKey:@"website"];
   }
 

@@ -130,7 +130,7 @@ def blocksRemove(request):
 @require_http_methods(["POST"])
 def invite(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPInvitation(), request)
+    schema      = parseRequest(HTTPEmail(), request)
 
     result      = stampedAPI.inviteFriend(authUserId, schema.email)
 

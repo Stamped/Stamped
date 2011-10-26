@@ -141,6 +141,13 @@ class UserTiny(Schema):
         self.user_id            = SchemaElement(basestring, required=True)
         self.screen_name        = SchemaElement(basestring, required=True)
 
+class Invite(Schema):
+    def setSchema(self):
+        self.invite_id          = SchemaElement(basestring)
+        self.recipient_email    = SchemaElement(basestring, required=True)
+        self.user_id            = SchemaElement(basestring)
+        self.created            = SchemaElement(datetime)
+
 
 # ##### #
 # Flags #

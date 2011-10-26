@@ -16,6 +16,7 @@
 #import "AccountManager.h"
 #import "STCreditTextField.h"
 #import "EditEntityViewController.h"
+#import "DetailedEntity.h"
 #import "Entity.h"
 #import "EntityDetailViewController.h"
 #import "Favorite.h"
@@ -65,6 +66,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @property (nonatomic, retain) id objectToStamp;
 @property (nonatomic, readonly) UIView* editingMask;
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
+@property (nonatomic, retain) DetailedEntity* detailedEntity;
 @end
 
 @implementation CreateStampViewController
@@ -72,6 +74,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize entityObject = entityObject_;
 @synthesize creditedUser = creditedUser_;
 @synthesize newEntity = newEntity_;
+@synthesize detailedEntity = detailedEntity_;
 
 @synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
@@ -131,11 +134,14 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (id)initWithSearchResult:(SearchResult*)searchResult {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
+    creditPickerController_ = [[STCreditPickerController alloc] init];
+    creditPickerController_.delegate = self;
+
     if (!searchResult.entityID && !searchResult.searchID) {
       newEntity_ = YES;
-      self.entityObject = [Entity object];
-      entityObject_.title = searchResult.title;
-      self.objectToStamp = entityObject_;
+      self.detailedEntity = [DetailedEntity object];
+      detailedEntity_.title = searchResult.title;
+      self.objectToStamp = detailedEntity_;
     } else {
       self.objectToStamp = searchResult;
     }
@@ -178,6 +184,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.creditPickerController.creditTextField = nil;
   self.creditPickerController.delegate = nil;
   self.creditPickerController = nil;
+  self.detailedEntity = nil;
   stampsRemainingLayer_ = nil;
 
   [super dealloc];
@@ -630,7 +637,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 - (IBAction)editButtonPressed:(id)sender {
   EditEntityViewController* editViewController =
-      [[EditEntityViewController alloc] initWithEntityObject:entityObject_];
+      [[EditEntityViewController alloc] initWithDetailedEntity:detailedEntity_];
   [self.navigationController presentModalViewController:editViewController animated:YES];
   [editViewController release];
 }
@@ -644,7 +651,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   if (savePhoto_ && self.stampPhoto)
     UIImageWriteToSavedPhotosAlbum(self.stampPhoto, nil, nil, nil);
 
-  if (entityObject_ && !entityObject_.entityID) {
+  if (detailedEntity_ && !detailedEntity_.entityID) {
     [self sendSaveEntityRequest];
   } else {
     [self sendSaveStampRequest];
@@ -793,24 +800,24 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 - (void)sendSaveEntityRequest {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
+  RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"DetailedEntity"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kCreateEntityPath 
                                                                     delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = entityMapping;
   
   NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-      entityObject_.title, @"title",
-      entityObject_.subtitle, @"subtitle",
-      entityObject_.category, @"category",
-      entityObject_.subcategory, @"subcategory",
+      detailedEntity_.title, @"title",
+      detailedEntity_.subtitle, @"subtitle",
+      detailedEntity_.category, @"category",
+      detailedEntity_.subcategory, @"subcategory",
       nil];
-  if (entityObject_.desc)
-    [params setObject:entityObject_.desc forKey:@"desc"];
-  if (entityObject_.address.length > 0)
-    [params setObject:entityObject_.address forKey:@"address"];
+  if (detailedEntity_.desc)
+    [params setObject:detailedEntity_.desc forKey:@"desc"];
+  if (detailedEntity_.address.length > 0)
+    [params setObject:detailedEntity_.address forKey:@"address"];
   if (entityObject_.coordinates)
-    [params setObject:entityObject_.coordinates forKey:@"coordinates"];
+    [params setObject:detailedEntity_.coordinates forKey:@"coordinates"];
   objectLoader.params = params;
   [objectLoader send];
 }
@@ -871,9 +878,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObject:(id)object {
   if ([objectLoader.resourcePath isEqualToString:kCreateEntityPath]) {
-    Entity* entity = object;
-    entityObject_.entityID = entity.entityID;
-    [entityObject_.managedObjectContext save:NULL];
+    DetailedEntity* entity = object;
+    [objectToStamp_ setEntityID:entity.entityID];
     [self sendSaveStampRequest];
   } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
     Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];

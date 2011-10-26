@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "DetailedEntity.h"
 #import "Entity.h"
 
 @interface MusicDetailViewController ()
@@ -32,21 +33,21 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  if ([entityObject_.subcategory isEqualToString:@"artist"])
-      self.descriptionLabel.text = entityObject_.subcategory;
+  if ([detailedEntity_.subcategory isEqualToString:@"artist"])
+      self.descriptionLabel.text = detailedEntity_.subcategory;
 
-  if ([entityObject_.subcategory isEqualToString:@"album"]
-      || [entityObject_.subcategory isEqualToString:@"song"]) {
-    if (!entityObject_.artist)
-      self.descriptionLabel.text = entityObject_.subcategory;
+  if ([detailedEntity_.subcategory isEqualToString:@"album"]
+      || [detailedEntity_.subcategory isEqualToString:@"song"]) {
+    if (!detailedEntity_.artist)
+      self.descriptionLabel.text = detailedEntity_.subcategory;
     else
-      self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", entityObject_.artist];
+      self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", detailedEntity_.artist];
   }
 
-  if (entityObject_.image) {
+  if (detailedEntity_.image) {
     self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:entityObject_.image]]];
+                                                   [NSURL URLWithString:detailedEntity_.image]]];
   }
   
   [self setupMainActionsContainer];
@@ -90,7 +91,7 @@
 
 - (IBAction)mainActionButtonPressed:(id)sender {
   [[UIApplication sharedApplication] openURL:
-   [NSURL URLWithString:entityObject_.itunesShortURL]];
+   [NSURL URLWithString:detailedEntity_.itunesShortURL]];
 }
 
 
@@ -98,7 +99,7 @@
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
 - (void)setupMainActionsContainer {
-  if (entityObject_.itunesShortURL) {
+  if (detailedEntity_.itunesShortURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
@@ -109,8 +110,8 @@
 
 - (void)setupSectionViews {
   // Tracks
-  if (entityObject_.songs) {
-    NSArray* tracksArray = entityObject_.songs;
+  if (detailedEntity_.songs) {
+    NSArray* tracksArray = detailedEntity_.songs;
     
     [self addSectionWithName:@"Tracks" previewHeight:136.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Tracks"];
@@ -124,23 +125,23 @@
   }
 
   // Details
-  if (entityObject_.genre || entityObject_.releaseDate) {
+  if (detailedEntity_.genre || detailedEntity_.releaseDate) {
     
     [self addSectionWithName:@"Details"];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Details"];
     
-    if (entityObject_.genre)
-      [section addPairedLabelWithName:@"Genres" value:entityObject_.genre forKey:@"genre"]; 
-    if (entityObject_.releaseDate)
-      [section addPairedLabelWithName:@"Release Date" value:entityObject_.releaseDate forKey:@"releaseDate"];
+    if (detailedEntity_.genre)
+      [section addPairedLabelWithName:@"Genres" value:detailedEntity_.genre forKey:@"genre"]; 
+    if (detailedEntity_.releaseDate)
+      [section addPairedLabelWithName:@"Release Date" value:detailedEntity_.releaseDate forKey:@"releaseDate"];
 
     self.mainContentView.hidden = NO;
   }
   
-  if (entityObject_.desc) {
+  if (detailedEntity_.desc) {
     [self addSectionWithName:@"iTunes Notes"];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"iTunes Notes"];
-    [section addText:entityObject_.desc forKey:@"desc"];
+    [section addText:detailedEntity_.desc forKey:@"desc"];
     
     self.mainContentView.hidden = NO;
   }
