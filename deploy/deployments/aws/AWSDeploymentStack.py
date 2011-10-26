@@ -577,15 +577,44 @@ class AWSDeploymentStack(ADeploymentStack):
             utils.log("[%s] registering instance '%s' with replica set '%s'" % (self, instance.name, replSet))
             
             # register new instance with existing replia set
-            mongo_cmd = 'rs.add("%s:%d")' % (instance.private_ip_address, port)
-            command   = "mongo %s:%s/admin --eval 'printjson(%s);'" % \
+            node_name = '%s:%d' % (instance.private_ip_address, port)
+            mongo_cmd = 'rs.add("%s")' % node_name
+            command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
                          (host.public_dns_name, port, mongo_cmd)
             
             utils.log(command)
             ret = utils.shell(command)
+            
             if 0 == ret[1]:
-                utils.log("[%s] done adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
-                utils.log("[%s] (it may take a few minutes during initial sync for node to become active)" % self)
+                utils.log("[%s] added instance '%s' to replica set '%s'" % (self, instance.name, replSet))
+                utils.log("[%s] waiting for node to come online (may take a few minutes during initial sync)" % self)
+                print ret[0]
+                
+                mongo_cmd = 'rs.status()'
+                command   = "mongo --quiet %s:%s/admin --eval 'printjson(%s);'" % \
+                             (host.public_dns_name, port, mongo_cmd)
+                
+                # wait until the replica set recognizes the newly added instance as healthy
+                while True:
+                    ret = utils.shell(command)
+                    #print ret[0]
+                    
+                    if 0 == ret[1]:
+                        status  = re.sub("ISODate\(([^)]*)\)", '""', ret[0])
+                        status  = json.loads(status)
+                        healthy = False
+                        
+                        for node in status['members']:
+                            if node['name'] == node_name:
+                                healthy = (1 == node['health'])
+                                break
+                        
+                        if healthy:
+                            break
+                    
+                    time.sleep(2)
+                
+                utils.log("[%s] instance '%s' is online with replica set '%s'" % (self, instance.name, replSet))
             else:
                 utils.log("[%s] error adding instance '%s' to replica set '%s'" % (self, instance.name, replSet))
                 print ret[0]
