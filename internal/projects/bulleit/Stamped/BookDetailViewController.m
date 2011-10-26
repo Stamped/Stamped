@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "DetailedEntity.h"
 #import "Entity.h"
 
 @interface BookDetailViewController ()
@@ -37,16 +38,16 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  if (!entityObject_.author) {
+  if (!detailedEntity_.author) {
     self.descriptionLabel.text = @"book";
   } else {
-    self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", entityObject_.author];
+    self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", detailedEntity_.author];
   }
 
-  if (entityObject_.image) {
+  if (detailedEntity_.image) {
     self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:entityObject_.image]]];
+                                                   [NSURL URLWithString:detailedEntity_.image]]];
   }
 
   [self setupMainActionsContainer];
@@ -91,13 +92,13 @@
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {
-  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:entityObject_.amazonURL]];
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.amazonURL]];
 }
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
 - (void)setupMainActionsContainer {
-  if (!entityObject_.amazonURL) {
+  if (!detailedEntity_.amazonURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
@@ -108,7 +109,7 @@
 
 - (void) setupSectionViews {
   // Amazon Review
-  if (entityObject_.desc) {
+  if (detailedEntity_.desc) {
         
     [self addSectionWithName:@"Amazon Review" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Amazon Review"];
@@ -116,7 +117,7 @@
     section.expandedFooterText = @"read less";
     section.footerLabel.text = section.collapsedFooterText;
     section.imageView = self.imageView;
-    [section addWrappingText:entityObject_.desc forKey:@"desc"];
+    [section addWrappingText:detailedEntity_.desc forKey:@"desc"];
     section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
     
@@ -124,39 +125,39 @@
   }
 
   // Details
-  if (entityObject_.format || entityObject_.length || entityObject_.language || entityObject_.releaseDate ||
-      entityObject_.publisher || entityObject_.isbn) {
+  if (detailedEntity_.format || detailedEntity_.length || detailedEntity_.language || detailedEntity_.releaseDate ||
+      detailedEntity_.publisher || detailedEntity_.isbn) {
     
     [self addSectionWithName:@"Details"];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Details"];
     
-    if (entityObject_.format && (entityObject_.length && entityObject_.length.intValue > 0))
+    if (detailedEntity_.format && (detailedEntity_.length && detailedEntity_.length.intValue > 0))
       [section addPairedLabelWithName:@"Format:" 
-                                value:[NSString stringWithFormat:@"%@, %@ pages", entityObject_.format, entityObject_.length] 
+                                value:[NSString stringWithFormat:@"%@, %@ pages", detailedEntity_.format, detailedEntity_.length] 
                                forKey:@"format"];
-    else if (entityObject_.format)
+    else if (detailedEntity_.format)
       [section addPairedLabelWithName:@"Format:" 
-                                value:entityObject_.format 
+                                value:detailedEntity_.format 
                                forKey:@"format"];
-    else if (entityObject_.length && (entityObject_.length && entityObject_.length.intValue > 0))
+    else if (detailedEntity_.length && (detailedEntity_.length && detailedEntity_.length.intValue > 0))
       [section addPairedLabelWithName:@"Length:" 
-                                value:[NSString stringWithFormat:@"%@ pages", entityObject_.length] 
+                                value:[NSString stringWithFormat:@"%@ pages", detailedEntity_.length] 
                                forKey:@"length"];
-    if (entityObject_.publisher)
+    if (detailedEntity_.publisher)
       [section addPairedLabelWithName:@"Publisher:" 
-                                value:entityObject_.publisher
+                                value:detailedEntity_.publisher
                                forKey:@"publisher"];
-    if (entityObject_.releaseDate)
+    if (detailedEntity_.releaseDate)
       [section addPairedLabelWithName:@"Release Date:" 
-                                value:entityObject_.releaseDate 
+                                value:detailedEntity_.releaseDate 
                                forKey:@"releaseDate"];
-    if (entityObject_.language)
+    if (detailedEntity_.language)
       [section addPairedLabelWithName:@"Language:" 
-                                value:entityObject_.language 
+                                value:detailedEntity_.language 
                                forKey:@"language"];
-    if (entityObject_.isbn)
+    if (detailedEntity_.isbn)
       [section addPairedLabelWithName:@"ISBN:" 
-                                value:entityObject_.isbn 
+                                value:detailedEntity_.isbn 
                                forKey:@"isbn"];
     
     self.mainContentView.hidden = NO;

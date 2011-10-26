@@ -8,7 +8,7 @@
 
 #import "EditEntityViewController.h"
 
-#import "Entity.h"
+#import "DetailedEntity.h"
 #import "STNavigationBar.h"
 #import "UIColor+Stamped.h"
 
@@ -38,7 +38,7 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize primaryTextField = primaryTextField_;
 @synthesize secondaryTextField = secondaryTextField_;
 @synthesize tertiaryTextField = tertiaryTextField_;
-@synthesize entityObject = entityObject_;
+@synthesize detailedEntity = detailedEntity_;
 @synthesize addLocationButton = addLocationButton_;
 @synthesize addDescriptionButton = addDescriptionButton_;
 @synthesize addLocationView = addLocationView_;
@@ -51,11 +51,10 @@ const CGFloat kKeyboardHeight = 217.0;
 @synthesize descriptionTextField = descriptionTextField_;
 @synthesize segmentedControl = segmentedControl_;
 
-
-- (id)initWithEntityObject:(Entity*)entityObject {
+- (id)initWithDetailedEntity:(DetailedEntity*)detailedEntity {
   self = [super initWithNibName:@"EditEntityViewController" bundle:nil];
   if (self) {
-    self.entityObject = entityObject;
+    self.detailedEntity = detailedEntity;
   }
   return self;
 }
@@ -138,50 +137,50 @@ const CGFloat kKeyboardHeight = 217.0;
 
 - (void)viewWillAppear:(BOOL)animated {
   navBar_.hideLogo = YES;
-  entityNameTextField_.text = entityObject_.title;
-  descriptionTextField_.text = entityObject_.desc;
-  streetTextField_.text = entityObject_.street;
-  secondStreetTextField_.text = entityObject_.substreet;
-  cityTextField_.text = entityObject_.city;
-  stateTextField_.text = entityObject_.state;
-  zipTextField_.text = entityObject_.zipcode;
+  entityNameTextField_.text = detailedEntity_.title;
+  descriptionTextField_.text = detailedEntity_.desc;
+  streetTextField_.text = detailedEntity_.street;
+  secondStreetTextField_.text = detailedEntity_.substreet;
+  cityTextField_.text = detailedEntity_.city;
+  stateTextField_.text = detailedEntity_.state;
+  zipTextField_.text = detailedEntity_.zipcode;
   segmentedControl_.selectedSegmentIndex = 0;
   
-  if ([entityObject_.category isEqualToString:@"film"]) {
+  if ([detailedEntity_.category isEqualToString:@"film"]) {
     [self showFilmView];
     selectedCategory_ = STEditCategoryRowFilm;
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_film_icon"];
-    primaryTextField_.text = entityObject_.cast;
-    secondaryTextField_.text = entityObject_.director;
-    tertiaryTextField_.text = entityObject_.year;
-    if ([entityObject_.subcategory isEqualToString:@"tv"]) {
+    primaryTextField_.text = detailedEntity_.cast;
+    secondaryTextField_.text = detailedEntity_.director;
+    tertiaryTextField_.text = detailedEntity_.year;
+    if ([detailedEntity_.subcategory isEqualToString:@"tv"]) {
       segmentedControl_.selectedSegmentIndex = 1;
     }
-  } else if ([entityObject_.category isEqualToString:@"book"]) {
+  } else if ([detailedEntity_.category isEqualToString:@"book"]) {
     [self showBookView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_book_icon"];
-    primaryTextField_.text = entityObject_.author;
+    primaryTextField_.text = detailedEntity_.author;
     selectedCategory_ = STEditCategoryRowBooks;
-  } else if ([entityObject_.category isEqualToString:@"food"]) {
+  } else if ([detailedEntity_.category isEqualToString:@"food"]) {
     [self showFoodView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_food_icon"];
-    if ([entityObject_.subcategory isEqualToString:@"bar"]) {
+    if ([detailedEntity_.subcategory isEqualToString:@"bar"]) {
       segmentedControl_.selectedSegmentIndex = 1;
     }
     selectedCategory_ = STEditCategoryRowFood;
-  } else if ([entityObject_.category isEqualToString:@"music"]) {
+  } else if ([detailedEntity_.category isEqualToString:@"music"]) {
     [self showMusicView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_music_icon"];
-    if ([entityObject_.subcategory isEqualToString:@"song"]) {
+    if ([detailedEntity_.subcategory isEqualToString:@"song"]) {
       segmentedControl_.selectedSegmentIndex = 1;
     } 
-    if ([entityObject_.subcategory isEqualToString:@"artist"]) {
+    if ([detailedEntity_.subcategory isEqualToString:@"artist"]) {
       segmentedControl_.selectedSegmentIndex = 2;
     }    
-    primaryTextField_.text = entityObject_.artist;
-    secondaryTextField_.text = [entityObject_.albums objectAtIndex:0];
+    primaryTextField_.text = detailedEntity_.artist;
+    secondaryTextField_.text = [detailedEntity_.albums objectAtIndex:0];
     selectedCategory_ = STEditCategoryRowMusic;
-  } else if ([entityObject_.category isEqualToString:@"other"]) {
+  } else if ([detailedEntity_.category isEqualToString:@"other"]) {
     [self showOtherView];
     categoryDropdownImageView_.image = [UIImage imageNamed:@"edit_other_icon"];
     selectedCategory_ = STEditCategoryRowOther;
@@ -475,80 +474,80 @@ const CGFloat kKeyboardHeight = 217.0;
 #pragma mark - Action methods.
 
 - (IBAction)doneButtonPressed:(id)sender {
-  entityObject_.title = entityNameTextField_.text;
-  entityObject_.desc = descriptionTextField_.text;
-  entityObject_.street = streetTextField_.text;
-  entityObject_.substreet = secondStreetTextField_.text;
-  entityObject_.city = cityTextField_.text;
-  entityObject_.state = stateTextField_.text;
-  entityObject_.zipcode = zipTextField_.text;
+  detailedEntity_.title = entityNameTextField_.text;
+  detailedEntity_.desc = descriptionTextField_.text;
+  detailedEntity_.street = streetTextField_.text;
+  detailedEntity_.substreet = secondStreetTextField_.text;
+  detailedEntity_.city = cityTextField_.text;
+  detailedEntity_.state = stateTextField_.text;
+  detailedEntity_.zipcode = zipTextField_.text;
   
-  NSString* street = [[NSArray arrayWithObjects:entityObject_.street, entityObject_.substreet, nil] componentsJoinedByString:@" "];
-  NSString* cityStateZip = [[NSArray arrayWithObjects:entityObject_.city, entityObject_.state, entityObject_.zipcode, nil] componentsJoinedByString:@" "];
+  NSString* street = [[NSArray arrayWithObjects:detailedEntity_.street, detailedEntity_.substreet, nil] componentsJoinedByString:@" "];
+  NSString* cityStateZip = [[NSArray arrayWithObjects:detailedEntity_.city, detailedEntity_.state, detailedEntity_.zipcode, nil] componentsJoinedByString:@" "];
   street = [street stringByTrimmingCharactersInSet:
       [NSCharacterSet whitespaceAndNewlineCharacterSet]];
   cityStateZip = [cityStateZip stringByTrimmingCharactersInSet:
       [NSCharacterSet whitespaceAndNewlineCharacterSet]];
   if (street.length > 0 && cityStateZip.length > 0) {
-    entityObject_.address = [[NSArray arrayWithObjects:street, cityStateZip, nil] componentsJoinedByString:@", "];
+    detailedEntity_.address = [[NSArray arrayWithObjects:street, cityStateZip, nil] componentsJoinedByString:@", "];
   } else {
-    entityObject_.address = street.length > 0 ? street : cityStateZip;
+    detailedEntity_.address = street.length > 0 ? street : cityStateZip;
   }
   
   switch (selectedCategory_) {
     case STEditCategoryRowFilm:
-      entityObject_.category = @"film";
-      entityObject_.cast = primaryTextField_.text;
-      entityObject_.director = secondaryTextField_.text;
-      entityObject_.year = tertiaryTextField_.text;
+      detailedEntity_.category = @"film";
+      detailedEntity_.cast = primaryTextField_.text;
+      detailedEntity_.director = secondaryTextField_.text;
+      detailedEntity_.year = tertiaryTextField_.text;
       if (segmentedControl_.selectedSegmentIndex == 0) {
-        entityObject_.subcategory = @"movie";
+        detailedEntity_.subcategory = @"movie";
       } else {
-        entityObject_.subcategory = @"tv";
+        detailedEntity_.subcategory = @"tv";
       }
-      if (entityObject_.year.length > 0) {
-        entityObject_.subtitle = entityObject_.year;
+      if (detailedEntity_.year.length > 0) {
+        detailedEntity_.subtitle = detailedEntity_.year;
       } else {
-        entityObject_.subtitle =
+        detailedEntity_.subtitle =
             segmentedControl_.selectedSegmentIndex == 0 ? @"Film" : @"TV Series";
       }
       break;
     case STEditCategoryRowBooks:
-      entityObject_.category = @"book";
-      entityObject_.subcategory = @"book";
-      entityObject_.author = primaryTextField_.text;
-      entityObject_.subtitle =
-          entityObject_.author.length > 0 ? entityObject_.author : @"Book";
+      detailedEntity_.category = @"book";
+      detailedEntity_.subcategory = @"book";
+      detailedEntity_.author = primaryTextField_.text;
+      detailedEntity_.subtitle =
+          detailedEntity_.author.length > 0 ? detailedEntity_.author : @"Book";
       break;
     case STEditCategoryRowFood:
-      entityObject_.category = @"food";
-      entityObject_.subcategory =
+      detailedEntity_.category = @"food";
+      detailedEntity_.subcategory =
           segmentedControl_.selectedSegmentIndex == 0 ? @"restaurant" : @"bar";
-      entityObject_.subtitle = entityObject_.address;
+      detailedEntity_.subtitle = detailedEntity_.address;
       break;
     case STEditCategoryRowMusic:
-      entityObject_.category = @"music";
+      detailedEntity_.category = @"music";
       if (segmentedControl_.selectedSegmentIndex == 0) {
-        entityObject_.subcategory = @"album";
-        entityObject_.artist = primaryTextField_.text;
-        entityObject_.subtitle =
-            entityObject_.artist.length > 0 ? entityObject_.artist : @"Album";
+        detailedEntity_.subcategory = @"album";
+        detailedEntity_.artist = primaryTextField_.text;
+        detailedEntity_.subtitle =
+            detailedEntity_.artist.length > 0 ? detailedEntity_.artist : @"Album";
       } else if (segmentedControl_.selectedSegmentIndex == 1) {
-        entityObject_.subcategory = @"song";
-        entityObject_.artist = primaryTextField_.text;
-        entityObject_.albums = [NSArray arrayWithObject:(id)secondaryTextField_.text];
-        entityObject_.subtitle =
-            entityObject_.artist.length > 0 ? entityObject_.artist : @"Song";
+        detailedEntity_.subcategory = @"song";
+        detailedEntity_.artist = primaryTextField_.text;
+        detailedEntity_.albums = [NSArray arrayWithObject:(id)secondaryTextField_.text];
+        detailedEntity_.subtitle =
+            detailedEntity_.artist.length > 0 ? detailedEntity_.artist : @"Song";
       } else {
-        entityObject_.subcategory = @"artist";
-        entityObject_.artist = entityNameTextField_.text;
-        entityObject_.subtitle = @"Artist";
+        detailedEntity_.subcategory = @"artist";
+        detailedEntity_.artist = entityNameTextField_.text;
+        detailedEntity_.subtitle = @"Artist";
       }
       break;
     case STEditCategoryRowOther:
-      entityObject_.category = @"other";
-      entityObject_.subcategory = @"other";
-      entityObject_.subtitle =
+      detailedEntity_.category = @"other";
+      detailedEntity_.subcategory = @"other";
+      detailedEntity_.subtitle =
           primaryTextField_.text.length > 0 ? primaryTextField_.text : @"Other";
       break;
     default:

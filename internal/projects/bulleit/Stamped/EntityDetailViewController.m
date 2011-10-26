@@ -13,6 +13,7 @@
 #import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
+#import "DetailedEntity.h"
 #import "Entity.h"
 #import "Stamp.h"
 #import "SearchResult.h"
@@ -98,8 +99,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator)
     vc.delegate = nil;
   
-  [Entity.managedObjectContext refreshObject:entityObject_ mergeChanges:NO];
+  [DetailedEntity.managedObjectContext refreshObject:detailedEntity_ mergeChanges:NO];
   [entityObject_ release];
+  [detailedEntity_ release];
   [searchResult_ release];
   [sectionsDict_ release];
   [super dealloc];
@@ -114,7 +116,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)loadEntityDataFromServer {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
-  RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"Entity"];
+  RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"DetailedEntity"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
                                                                     delegate:self];
   objectLoader.objectMapping = entityMapping;
@@ -354,8 +356,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   }
   
   dataLoaded_ = YES;
-  [entityObject_ release];
-  entityObject_ = [(Entity*)object retain];
+  [detailedEntity_ release];
+  detailedEntity_ = [(DetailedEntity*)object retain];
   [self showContents];
   [self.loadingView stopAnimating];
 }

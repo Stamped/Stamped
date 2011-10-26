@@ -262,6 +262,7 @@
 		7E90B03B13FF081900875522 /* TodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E90B03913FF081900875522 /* TodoViewController.m */; };
 		7E90B03C13FF081900875522 /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E90B03A13FF081900875522 /* TodoViewController.xib */; };
 		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
+		7E99C9B71458849500B116AC /* DetailedEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E99C9B61458849500B116AC /* DetailedEntity.m */; };
 		7E9D882F141C02DB00EF75C1 /* search_tooltip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E9D882E141C02DB00EF75C1 /* search_tooltip@2x.png */; };
 		7E9EB0F9144CCFA7006F887B /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EB0F8144CCFA7006F887B /* Stamp.m */; };
 		7E9EB0FC144CD12F006F887B /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EB0FB144CD12F006F887B /* Entity.m */; };
@@ -885,6 +886,9 @@
 		7E90B03913FF081900875522 /* TodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoViewController.m; sourceTree = "<group>"; };
 		7E90B03A13FF081900875522 /* TodoViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = TodoViewController.xib; path = ../Interfaces/TodoViewController.xib; sourceTree = "<group>"; };
 		7E92C11E13E32407008D379D /* shelf_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_background.png; sourceTree = "<group>"; };
+		7E99C9B41458816E00B116AC /* StampedModel 10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 10.xcdatamodel"; sourceTree = "<group>"; };
+		7E99C9B51458849500B116AC /* DetailedEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailedEntity.h; sourceTree = "<group>"; };
+		7E99C9B61458849500B116AC /* DetailedEntity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DetailedEntity.m; sourceTree = "<group>"; };
 		7E9D882E141C02DB00EF75C1 /* search_tooltip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_tooltip@2x.png"; sourceTree = "<group>"; };
 		7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 9.xcdatamodel"; sourceTree = "<group>"; };
 		7E9EB0F7144CCFA7006F887B /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
@@ -1290,6 +1294,8 @@
 		7E2267D813D52FF500657A66 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				7E99C9B51458849500B116AC /* DetailedEntity.h */,
+				7E99C9B61458849500B116AC /* DetailedEntity.m */,
 				7E9EB0F7144CCFA7006F887B /* Stamp.h */,
 				7E9EB0F8144CCFA7006F887B /* Stamp.m */,
 				7E32AE3113FEEC04000B6EC2 /* Favorite.h */,
@@ -2803,6 +2809,7 @@
 				7E407E99145203BA00D7847F /* STCreditPill.m in Sources */,
 				7E407E9C145203F300D7847F /* STCreditTextField.m in Sources */,
 				7EDE672C1452193F0019CD68 /* STCreditPickerController.m in Sources */,
+				7E99C9B71458849500B116AC /* DetailedEntity.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3080,6 +3087,7 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E99C9B41458816E00B116AC /* StampedModel 10.xcdatamodel */,
 				7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */,
 				7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */,
 				7E1873CB143A64B800A0ECC0 /* StampedModel 7.xcdatamodel */,
@@ -3090,7 +3098,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */;
+			currentVersion = 7E99C9B41458816E00B116AC /* StampedModel 10.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

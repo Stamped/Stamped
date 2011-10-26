@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "DetailedEntity.h"
 #import "Entity.h"
 
 @interface FilmDetailViewController ()
@@ -33,18 +34,18 @@
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-  
+
   // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  if (!entityObject_.length || entityObject_.length.intValue == 0) 
-    self.descriptionLabel.text = entityObject_.subtitle;
+  if (!detailedEntity_.length || detailedEntity_.length.intValue == 0) 
+    self.descriptionLabel.text = detailedEntity_.subtitle;
 
   else {
-    NSNumber*  hours = [NSNumber numberWithFloat: entityObject_.length.floatValue / 3600.f];
+    NSNumber*  hours = [NSNumber numberWithFloat: detailedEntity_.length.floatValue / 3600.f];
     CGFloat fMinutes = hours.floatValue;
     hours = [NSNumber numberWithInt:floor(hours.floatValue)];
     
@@ -55,22 +56,22 @@
     self.descriptionLabel.text = [NSString stringWithFormat:@"%d hr %d min", hours.intValue, minutes.intValue];
   }
   
-  if (!entityObject_.rating || [entityObject_.rating isEqualToString:@"UR"]) {
+  if (!detailedEntity_.rating || [detailedEntity_.rating isEqualToString:@"UR"]) {
     CGRect frame = self.descriptionLabel.frame;
     frame.origin.x = self.titleLabel.frame.origin.x;
     self.descriptionLabel.frame = frame;
   }
   
   else {
-    if ([entityObject_.rating isEqualToString:@"G"]) 
+    if ([detailedEntity_.rating isEqualToString:@"G"]) 
       self.ratingView.image = [UIImage imageNamed:@"rating_G"];
-    if ([entityObject_.rating isEqualToString:@"PG"]) 
+    if ([detailedEntity_.rating isEqualToString:@"PG"]) 
       self.ratingView.image = [UIImage imageNamed:@"rating_PG"];
-    if ([entityObject_.rating isEqualToString:@"PG-13"]) 
+    if ([detailedEntity_.rating isEqualToString:@"PG-13"]) 
       self.ratingView.image = [UIImage imageNamed:@"rating_PG-13"];
-    if ([entityObject_.rating isEqualToString:@"R"]) 
+    if ([detailedEntity_.rating isEqualToString:@"R"]) 
       self.ratingView.image = [UIImage imageNamed:@"rating_R"];
-    if ([entityObject_.rating isEqualToString:@"NC-17"]) 
+    if ([detailedEntity_.rating isEqualToString:@"NC-17"]) 
       self.ratingView.image = [UIImage imageNamed:@"rating_NC-17"];
     
     [self.ratingView sizeToFit];
@@ -81,10 +82,10 @@
 
   }
 
-  if (entityObject_.image) {
+  if (detailedEntity_.image) {
     self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:entityObject_.image]]];
+                                                   [NSURL URLWithString:detailedEntity_.image]]];
   }
 
   [self setupMainActionsContainer];
@@ -130,13 +131,13 @@
 
 - (IBAction)mainActionButtonPressed:(id)sender {
   [[UIApplication sharedApplication] openURL:
-   [NSURL URLWithString:entityObject_.fandangoURL]];
+   [NSURL URLWithString:detailedEntity_.fandangoURL]];
 }
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
 - (void)setupMainActionsContainer {
-  if (entityObject_.fandangoURL) {
+  if (detailedEntity_.fandangoURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
@@ -149,7 +150,7 @@
 - (void)setupSectionViews {
   
   // Synopsis
-  if (entityObject_.desc) {
+  if (detailedEntity_.desc) {
         
     [self addSectionWithName:@"Synopsis" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Synopsis"];
@@ -157,7 +158,7 @@
     section.expandedFooterText = @"read less";
     section.footerLabel.text = section.collapsedFooterText;
     section.imageView = self.imageView;
-    [section addWrappingText:entityObject_.desc forKey:@"desc"];
+    [section addWrappingText:detailedEntity_.desc forKey:@"desc"];
     section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                            [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
     
@@ -165,31 +166,31 @@
   }
 
   // Information
-  if (entityObject_.genre || entityObject_.cast || entityObject_.director || 
-      entityObject_.inTheaters || entityObject_.releaseDate ) {
+  if (detailedEntity_.genre || detailedEntity_.cast || detailedEntity_.director || 
+      detailedEntity_.inTheaters || detailedEntity_.releaseDate ) {
     
     [self addSectionWithName:@"Information"];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Information"];
     
-    if (entityObject_.cast)
+    if (detailedEntity_.cast)
       [section addPairedLabelWithName:@"Cast:" 
-                                value:entityObject_.cast 
+                                value:detailedEntity_.cast 
                                forKey:@"cast"];
-    if (entityObject_.director)
+    if (detailedEntity_.director)
       [section addPairedLabelWithName:@"Director:" 
-                                value:entityObject_.director 
+                                value:detailedEntity_.director 
                                forKey:@"director"];
-    if (entityObject_.genre)
+    if (detailedEntity_.genre)
       [section addPairedLabelWithName:@"Genres:" 
-                                value:entityObject_.genre 
+                                value:detailedEntity_.genre 
                                forKey:@"genre"];
-    if (entityObject_.inTheaters)
+    if (detailedEntity_.inTheaters)
       [section addPairedLabelWithName:@"In Theaters:" 
-                                value:entityObject_.inTheaters.stringValue 
+                                value:detailedEntity_.inTheaters.stringValue 
                                forKey:@"inTheaters"];
-    if (entityObject_.releaseDate)
+    if (detailedEntity_.releaseDate)
       [section addPairedLabelWithName:@"Open Date:" 
-                                value:entityObject_.releaseDate
+                                value:detailedEntity_.releaseDate
                                forKey:@"releaseDate"];
 
     self.mainContentView.hidden = NO;
