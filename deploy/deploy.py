@@ -41,6 +41,8 @@ available_commands = {
     'setup_crawler_data' : 'setup_crawler_data', 
     
     'backup' : 'backup', 
+    
+    'add' : 'add_stack', 
 }
 
 def parseCommandLine():

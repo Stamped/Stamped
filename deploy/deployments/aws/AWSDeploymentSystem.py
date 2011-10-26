@@ -7,11 +7,13 @@ __license__ = "TODO"
 
 import Globals
 import re, os, utils
-from ..DeploymentSystem import DeploymentSystem
-from errors import Fail
-from AWSDeploymentStack import AWSDeploymentStack
-from boto.ec2.connection import EC2Connection
-from boto.exception import EC2ResponseError
+
+from ..DeploymentSystem     import DeploymentSystem
+from errors                 import Fail
+
+from AWSDeploymentStack     import AWSDeploymentStack
+from boto.ec2.connection    import EC2Connection
+from boto.exception         import EC2ResponseError
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'

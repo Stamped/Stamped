@@ -60,11 +60,11 @@ def _getAMI(instanceType, region, software='Ubuntu 10.04', ebs=True):
         return INSTANCE_AMI_UBUNTU_1004[region][INSTANCE_ARCHITECTURE[instanceType]]
     return False
 
-INSTANCE_TYPE      = 'm1.large' #'t1.micro'
-INSTANCE_REGION    = 'us-east-1'
-INSTANCE_OS        = 'Ubuntu 10.04'
-INSTANCE_EBS       = True
-KEY_NAME           = 'test-keypair'
+INSTANCE_TYPE   = 'm1.large' #'t1.micro'
+INSTANCE_REGION = 'us-east-1'
+INSTANCE_OS     = 'Ubuntu 10.04'
+INSTANCE_EBS    = True
+KEY_NAME        = 'test-keypair'
 
 class AWSInstance(AInstance):
     def __init__(self, stack, configOrInstance):
@@ -156,10 +156,13 @@ class AWSInstance(AInstance):
         
         self._instance = reservation.instances[0]
     
-    def _validate_port(self, port, desc=None):
-        if desc == None:
+    def _validate_port(self, port, desc=None, timeout=None):
+        if desc is None:
             desc = "port %s" % (str(port))
+        
         utils.log("[%s] waiting for %s to come online (this may take a few minutes)..." % (self, desc))
+        sleepy_time = 2
+        
         while True:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -167,36 +170,29 @@ class AWSInstance(AInstance):
                 s.close()
                 break
             except socket.error:
-                time.sleep(2)
-                pass
+                if timeout is not None:
+                    timeout -= sleepy_time
+                    
+                    if timeout <= 0:
+                        msg = "[%s] timeout attempting to access port %d (%s)" % (self, port, desc)
+                        utils.log(msg)
+                        raise Exception(msg)
+                
+                time.sleep(sleepy_time)
+        
         utils.log("[%s] %s is online" % (self, desc))
     
     def _post_create(self, block):
         # Check for SSH
-        self._validate_port(22, desc="ssh service")
+        self._validate_port(22, desc="ssh service", timeout=40)
         
         if block:
             # Check for init to finish
-            self._validate_port(8649, desc="init script / ganglia")
+            self._validate_port(8649, desc="init script / ganglia", timeout=1200)
             
             if 'db' in self.roles:
                 # Check for mongo to finish
-                self._validate_port(27017, desc="mongo")
-        
-        """
-        env.user = 'ubuntu'
-        env.key_filename = [ 'keys/test-keypair' ]
-        
-        done = False
-        while not done:
-            try:
-                with settings(host_string=self.public_dns_name, user='ubuntu'):
-                    sudo('curl http://169.254.169.254/1.0/user-data -o user-data.sh && chmod +x user-data.sh && ./user-data.sh')
-                done = True
-            except SystemExit:
-                time.sleep(2)
-                pass
-        """
+                self._validate_port(27017, desc="mongo", timeout=1000)
     
     def start(self):
         self.update()
@@ -241,19 +237,22 @@ class AWSInstance(AInstance):
         return security_groups
     
     def _get_user_data(self):
+        config = dict(self.config)
+        for k in config:
+            v = config[k]
+            
+            if isinstance(v, utils.AttributeDict):
+                config[k] = dict(v)
+        
         params = {
             # TODO: look at replacement of quotes
-            'init_params' : json.dumps(self.config._dict)
+            'init_params' : json.dumps(config)
         }
         
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "userdata.sh")
         f = open(path, 'r')
         user_data = convert.parse_file(f, params)
         f.close()
-        
-        f2 = open('test', 'w')
-        f2.write(user_data)
-        f2.close()
         
         return user_data
         #user_data64 = base64.encodestring(user_data)

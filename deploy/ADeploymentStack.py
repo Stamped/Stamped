@@ -47,6 +47,10 @@ class ADeploymentStack(object):
     def backup(self, *args):
         pass
     
+    @abstract
+    def add(self, *args):
+        pass
+    
     def local(self, cmd, env=None, show_cmd=True):
         if show_cmd:
             print "[%s-local] %s" % (self, cmd, )
