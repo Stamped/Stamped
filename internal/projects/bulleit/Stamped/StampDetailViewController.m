@@ -11,6 +11,7 @@
 #import <CoreText/CoreText.h>
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
+#import <Twitter/Twitter.h>
 
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
@@ -65,6 +66,7 @@ typedef enum {
 - (void)loadCommentsFromServer;
 - (void)sendAddCommentRequest;
 - (void)sendRemoveCommentRequest:(NSString*)commentID;
+- (void)showTweetViewController;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -202,7 +204,7 @@ typedef enum {
       [UIBezierPath bezierPathWithRect:mainCommentContainer_.bounds].CGPath;
 
   currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
-
+  
   [self setUpMainContentView];
   [self renderComments];
   [self loadCommentsFromServer];
@@ -580,11 +582,17 @@ typedef enum {
 }
 
 - (IBAction)handleShareButtonTap:(id)sender {
+  NSString* tweetMsg = nil;
+  if ([TWTweetComposeViewController canSendTweet] &&
+      [AccountManager.sharedManager.currentUser.screenName isEqualToString:stamp_.user.screenName]) {
+    tweetMsg = @"Share to Twitter...";
+  }
+
   UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:nil
                                                       delegate:self
                                              cancelButtonTitle:@"Cancel"
                                         destructiveButtonTitle:nil
-                                             otherButtonTitles:@"Email", @"Send to Twitter", @"Post on Facebook", nil] autorelease];
+                                             otherButtonTitles:@"Copy link...", tweetMsg, nil] autorelease];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   sheet.tag = StampDetailActionTypeShare;
   [sheet showInView:self.view];
@@ -829,7 +837,41 @@ typedef enum {
     }
   } else if (actionSheet.tag == StampDetailActionTypeDeleteStamp) {
     
+  } else if (actionSheet.tag == StampDetailActionTypeShare) {
+    BOOL canTweet = NO;
+    if ([TWTweetComposeViewController canSendTweet] &&
+        [AccountManager.sharedManager.currentUser.screenName isEqualToString:stamp_.user.screenName]) {
+      canTweet = YES;
+    }
+    if (buttonIndex == 0) {  // Copy link...
+      [UIPasteboard generalPasteboard].URL = [NSURL URLWithString:stamp_.URL];
+    } else if (buttonIndex == 1 && canTweet) {  // Twitter or cancel depending...
+      [self showTweetViewController];
+    }
   }
+}
+
+- (void)showTweetViewController {
+  TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
+  NSString* blurb = [NSString stringWithFormat:@"%@. \u201c%@\u201d", stamp_.entityObject.title, stamp_.blurb];
+  if (stamp_.blurb.length == 0)
+    blurb = [stamp_.entityObject.title stringByAppendingString:@"."];
+  
+  NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
+  if (blurb.length > substring.length)
+    blurb = [substring stringByAppendingString:@"..."];
+  
+  // Stamped: [blurb] [link]
+  [twitter setInitialText:[NSString stringWithFormat:@"Stamped: %@", blurb]];
+  [twitter addURL:[NSURL URLWithString:stamp_.URL]];
+  
+  if ([TWTweetComposeViewController canSendTweet]) {
+    [self presentViewController:twitter animated:YES completion:nil];
+  }
+  
+  twitter.completionHandler = ^(TWTweetComposeViewControllerResult res) {
+    [self dismissModalViewControllerAnimated:YES];
+  };
 }
 
 #pragma mark - UITextFieldDelegate Methods.
