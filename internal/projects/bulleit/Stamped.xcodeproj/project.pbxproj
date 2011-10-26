@@ -263,6 +263,7 @@
 		7E90B03C13FF081900875522 /* TodoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E90B03A13FF081900875522 /* TodoViewController.xib */; };
 		7E92C11F13E32407008D379D /* shelf_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E92C11E13E32407008D379D /* shelf_background.png */; };
 		7E99C9B71458849500B116AC /* DetailedEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E99C9B61458849500B116AC /* DetailedEntity.m */; };
+		7E99C9B91458B4E000B116AC /* Twitter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E99C9B81458B4E000B116AC /* Twitter.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		7E9D882F141C02DB00EF75C1 /* search_tooltip@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E9D882E141C02DB00EF75C1 /* search_tooltip@2x.png */; };
 		7E9EB0F9144CCFA7006F887B /* Stamp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EB0F8144CCFA7006F887B /* Stamp.m */; };
 		7E9EB0FC144CD12F006F887B /* Entity.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9EB0FB144CD12F006F887B /* Entity.m */; };
@@ -889,6 +890,7 @@
 		7E99C9B41458816E00B116AC /* StampedModel 10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 10.xcdatamodel"; sourceTree = "<group>"; };
 		7E99C9B51458849500B116AC /* DetailedEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailedEntity.h; sourceTree = "<group>"; };
 		7E99C9B61458849500B116AC /* DetailedEntity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DetailedEntity.m; sourceTree = "<group>"; };
+		7E99C9B81458B4E000B116AC /* Twitter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Twitter.framework; path = System/Library/Frameworks/Twitter.framework; sourceTree = SDKROOT; };
 		7E9D882E141C02DB00EF75C1 /* search_tooltip@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_tooltip@2x.png"; sourceTree = "<group>"; };
 		7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 9.xcdatamodel"; sourceTree = "<group>"; };
 		7E9EB0F7144CCFA7006F887B /* Stamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Stamp.h; sourceTree = "<group>"; };
@@ -1130,6 +1132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7E99C9B91458B4E000B116AC /* Twitter.framework in Frameworks */,
 				7ED608971420F69B001C499D /* AddressBook.framework in Frameworks */,
 				1E5AFFD0141D2A9B00772F11 /* libOAuthTouch.a in Frameworks */,
 				7EC1C65213F459B50070CE6D /* Security.framework in Frameworks */,
@@ -1679,6 +1682,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
+				7E99C9B81458B4E000B116AC /* Twitter.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
