@@ -99,8 +99,7 @@ class MongoDBConfig(Singleton):
         while True:            
             try:
                 logs.info("Connecting to MongoDB: %s:%d" % (self.host, self.port))
-                self._connection = pymongo.Connection(self.host, self.port, \
-                    slave_okay=True)
+                self._connection = pymongo.Connection(self.host, self.port, slave_okay=True, replicaset='stamped-dev-01')
                 return self._connection
             except AutoReconnect as e:
                 if delay > max_delay:
