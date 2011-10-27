@@ -48,6 +48,7 @@ class MongoStampedAPI(StampedAPI):
         
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
+        self._statsSink      = self._getStatsSink()
         
         self.ec2_utils  = EC2Utils()
     
@@ -119,11 +120,9 @@ class MongoStampedAPI(StampedAPI):
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
     
-    @lazyProperty
-    def _statsSink(self):
+    def _getStatsSink(self):
         host, port = "localhost", 8125
         
-        """
         if utils.is_ec2():
             try:
                 logs.info("initializing stats sink")
@@ -135,7 +134,6 @@ class MongoStampedAPI(StampedAPI):
                         break
             except:
                 pass
-        """
         
         logs.info("initializing stats sink to %s:%d" % (host, port))
         return StatsDSink(host, port)
