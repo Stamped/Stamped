@@ -53,7 +53,7 @@ typedef enum {
 - (void)setUpToolbar;
 - (void)setUpMainContentView;
 - (void)addUserGradientBackground;
-- (void)addCreditedUser:(User*)creditedUser;
+- (void)addCreditedUsers;
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
@@ -462,7 +462,7 @@ typedef enum {
 
   [self addUserGradientBackground];
   [self setMainCommentContainerFrame:mainCommentFrame];
-  [self addCreditedUser:creditedUser];
+  [self addCreditedUsers];
 }
 
 - (void)addUserGradientBackground {
@@ -488,10 +488,11 @@ typedef enum {
   [activityGradientLayer_ release];
 }
 
-- (void)addCreditedUser:(User*)creditedUser {
-  if (!creditedUser)
+- (void)addCreditedUsers {
+  if (!stamp_.credits.count)
     return;
 
+  User* creditedUser = [stamp_.credits anyObject];
   CALayer* firstStampLayer = [[CALayer alloc] init];
   firstStampLayer.contents = (id)creditedUser.stampImage.CGImage;
   firstStampLayer.frame = CGRectMake(10, CGRectGetMaxY(mainCommentContainer_.frame) - 29, 12, 12);
@@ -515,10 +516,31 @@ typedef enum {
   [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
   CFRelease(font);
   creditLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
-  creditLabel.text = [NSString stringWithFormat:@"%@ %@", @"Credit to", creditedUser.screenName];
-  [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
-                  withRange:[creditLabel.text rangeOfString:creditedUser.screenName
-                                                    options:NSBackwardsSearch]];
+  if (stamp_.credits.count == 1) {
+    creditLabel.text = [NSString stringWithFormat:@"Credit to %@", creditedUser.screenName];
+    [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
+                    withRange:[creditLabel.text rangeOfString:creditedUser.screenName
+                                                      options:NSBackwardsSearch]];
+  } else {
+    NSString* others = nil;
+    if (stamp_.credits.count - 1 == 0)
+      others = @"1 other";
+    else
+      others = [NSString stringWithFormat:@"%d others", stamp_.credits.count - 1];
+    creditLabel.text = [NSString stringWithFormat:@"Credit to %@ and %@", creditedUser.screenName, others];
+    [creditLabel addLinkToURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@", creditedUser.userID]]
+                    withRange:[creditLabel.text rangeOfString:creditedUser.screenName
+                                                      options:NSBackwardsSearch]];
+    NSMutableArray* otherUsers = [NSMutableArray array];
+    for (User* user in stamp_.credits) {
+      if (user == creditedUser)
+        continue;
+      
+      [otherUsers addObject:user.userID];
+    }
+    [creditLabel addLinkToURL:[NSURL URLWithString:[otherUsers componentsJoinedByString:@","]]
+                    withRange:[creditLabel.text rangeOfString:others options:NSBackwardsSearch]];
+  }
   [creditLabel sizeToFit];
   creditLabel.frame = CGRectMake(CGRectGetMaxX(secondStampLayer.frame) + 5,
                                  CGRectGetMinY(secondStampLayer.frame) - 1,

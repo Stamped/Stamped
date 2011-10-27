@@ -43,15 +43,15 @@ def handlePOST(path, data):
 USER = 'kevin'
 PASS = '12345'
 
-# path = "oauth2/login.json"
-# data = { 
-#     "client_id": CLIENT_ID,
-#     "client_secret": CLIENT_SECRET,
-#     "login": USER,
-#     "password": PASS
-# }
-# account = handlePOST(path, data)
-# token = account['token']
+path = "oauth2/login.json"
+data = { 
+    "client_id": CLIENT_ID,
+    "client_secret": CLIENT_SECRET,
+    "login": USER,
+    "password": PASS
+}
+account = handlePOST(path, data)
+token = account['token']
 
 
 
@@ -124,13 +124,20 @@ PASS = '12345'
 # }
 # result = handlePOST(path, data)
 
-path = "account/reset_password.json"
+# path = "account/reset_password.json"
+# data = {
+#     'client_id': 'stampedtest',
+#     'client_secret': 'august1ftw',
+#     "email": "kevin@stamped.com",
+# }
+# result = handlePOST(path, data)
+
+path = "stamps/likes/show.json"
 data = {
-    'client_id': 'stampedtest',
-    'client_secret': 'august1ftw',
-    "email": "kevin@stamped.com",
+    "oauth_token": token['access_token'],
+    "stamp_id": "4ea866d532a7ba4fc0000406",
 }
-result = handlePOST(path, data)
+result = handleGET(path, data)
 
 
 

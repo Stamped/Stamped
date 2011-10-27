@@ -248,11 +248,11 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         return False
         
     def getStampLikes(self, stampId):
-        # Add a reference to the user in the stamp's 'like' collection
+        # Returns user ids that have "liked" the stamp
         return self.stamp_likes_collection.getStampLikes(stampId) 
         
     def getUserLikes(self, userId):
-        # Add a reference to the user in the stamp's 'like' collection
+        # Return stamp ids that a user has "liked"
         return self.user_likes_collection.getUserLikes(userId) 
 
     def checkLike(self, userId, stampId):

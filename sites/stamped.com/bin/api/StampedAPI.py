@@ -2104,6 +2104,40 @@ class StampedAPI(AStampedAPI):
         self._activityDB.removeActivity('like', authUserId, stampId=stampId)
 
         return stamp
+
+    @API_CALL
+    def getLikes(self, authUserId, stampId):
+        stamp       = self._stampDB.getStamp(stampId)
+        stamp       = self._enrichStampObjects(stamp, authUserId=authUserId)
+
+        # Verify user has the ability to view the stamp's likes
+        if stamp.user_id != authUserId:
+            friendship = Friendship({
+                'user_id':      stamp.user_id,
+                'friend_id':    authUserId,
+            })
+
+            # Check if stamp is private; if so, must be a follower
+            if stamp.user.privacy == True:
+                if not self._friendshipDB.checkFriendship(friendship):
+                    msg = "Insufficient privileges to add comment"
+                    logs.warning(msg)
+                    raise InsufficientPrivilegesError(msg)
+
+            # Check if block exists between user and stamp owner
+            if self._friendshipDB.blockExists(friendship) == True:
+                logs.info("Block exists")
+                raise Exception("Block exists")
+        
+        # Get user ids
+        userIds = self._stampDB.getStampLikes(stampId)
+
+        # Get users
+        ### TODO: Return user ids instead so there's no limit? Or allow paging?
+        users = self._userDB.lookupUsers(userIds, None, limit=100)
+
+        return users
+
     
 
     """
@@ -2209,6 +2243,7 @@ class StampedAPI(AStampedAPI):
         
         kwargs['includeComments'] = True
         kwargs['includeDeleted'] = True
+        kwargs['sort'] = 'modified' ## TEMP
         
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     

@@ -108,3 +108,18 @@ def likesRemove(request):
     return transformOutput(stamp.exportSparse())
 
 
+@handleHTTPRequest
+@require_http_methods(["GET"])
+def likesShow(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPStampId(), request)
+
+    users       = stampedAPI.getLikes(authUserId, schema.stamp_id)
+
+    output = []
+    for user in users:
+        output.append(HTTPUser().importSchema(user).exportSparse())
+    
+    return transformOutput(output)
+
+
