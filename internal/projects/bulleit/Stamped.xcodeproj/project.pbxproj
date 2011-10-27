@@ -235,6 +235,7 @@
 		7E7DDE0F145A09070058ACA9 /* uiweb_share_button_inactive@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7DDDF7145A09070058ACA9 /* uiweb_share_button_inactive@2x.png */; };
 		7E7DDE10145A09070058ACA9 /* uiweb_share_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7DDDF8145A09070058ACA9 /* uiweb_share_button.png */; };
 		7E7DDE11145A09070058ACA9 /* uiweb_share_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7DDDF9145A09070058ACA9 /* uiweb_share_button@2x.png */; };
+		7E7DDE14145A0AE50058ACA9 /* STToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E7DDE13145A0AE50058ACA9 /* STToolbar.m */; };
 		7E7E109D13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E109B13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png */; };
 		7E7E109E13DF0D9100E44DE1 /* nav_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E109C13DF0D9100E44DE1 /* nav_bar@2x.png */; };
 		7E7E10A013DF0FF300E44DE1 /* toolbar_todo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E109F13DF0FF300E44DE1 /* toolbar_todo@2x.png */; };
@@ -877,6 +878,8 @@
 		7E7DDDF7145A09070058ACA9 /* uiweb_share_button_inactive@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "uiweb_share_button_inactive@2x.png"; sourceTree = "<group>"; };
 		7E7DDDF8145A09070058ACA9 /* uiweb_share_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = uiweb_share_button.png; sourceTree = "<group>"; };
 		7E7DDDF9145A09070058ACA9 /* uiweb_share_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "uiweb_share_button@2x.png"; sourceTree = "<group>"; };
+		7E7DDE12145A0AE50058ACA9 /* STToolbar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STToolbar.h; sourceTree = "<group>"; };
+		7E7DDE13145A0AE50058ACA9 /* STToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STToolbar.m; sourceTree = "<group>"; };
 		7E7E109B13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_no_logo@2x.png"; sourceTree = "<group>"; };
 		7E7E109C13DF0D9100E44DE1 /* nav_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar@2x.png"; sourceTree = "<group>"; };
 		7E7E109F13DF0FF300E44DE1 /* toolbar_todo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_todo@2x.png"; sourceTree = "<group>"; };
@@ -2215,6 +2218,8 @@
 				7E42FDE913EF3A64007B3C26 /* STReloadableTableViewController.m */,
 				7E5EB261140C0535007D164F /* STTextField.h */,
 				7E5EB262140C0535007D164F /* STTextField.m */,
+				7E7DDE12145A0AE50058ACA9 /* STToolbar.h */,
+				7E7DDE13145A0AE50058ACA9 /* STToolbar.m */,
 				7EC0178413C3754300ABE6E2 /* StampedAppDelegate.h */,
 				7EC0178513C3754300ABE6E2 /* StampedAppDelegate.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
@@ -2936,6 +2941,7 @@
 				7EDE672C1452193F0019CD68 /* STCreditPickerController.m in Sources */,
 				7E99C9B71458849500B116AC /* DetailedEntity.m in Sources */,
 				7E7DDDDE145A00CE0058ACA9 /* WebViewController.m in Sources */,
+				7E7DDE14145A0AE50058ACA9 /* STToolbar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

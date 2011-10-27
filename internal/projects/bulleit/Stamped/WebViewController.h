@@ -13,6 +13,12 @@
 - (id)initWithURL:(NSURL*)url;
 
 @property (nonatomic, retain) IBOutlet UIWebView* webView;
-@property (nonatomic, retain) UIActivityIndicatorView* loadingIndicator;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingIndicator;
+@property (nonatomic, retain) IBOutlet UIButton* backButton;
+@property (nonatomic, retain) IBOutlet UIButton* forwardButton;
+@property (nonatomic, retain) IBOutlet UIButton* reloadButton;
+@property (nonatomic, retain) IBOutlet UIButton* shareButton;
+@property (nonatomic, retain) IBOutlet UIView* toolbar;
+
 @property (nonatomic, retain) NSURL* url;
 @end

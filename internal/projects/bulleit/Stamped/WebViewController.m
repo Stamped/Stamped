@@ -13,9 +13,14 @@
 @synthesize webView = webView_;
 @synthesize url = url_;
 @synthesize loadingIndicator = loadingIndicator_;
+@synthesize backButton = backButton_;
+@synthesize forwardButton = forwardButton_;
+@synthesize reloadButton = reloadButton_;
+@synthesize shareButton = shareButton_;
+@synthesize toolbar = toolbar_;
 
 - (id)initWithURL:(NSURL*)url {
-  self = [self initWithNibName:@"WebViewController" bundle:nil];
+  self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
   if (self) {
     self.url = url;
   }
@@ -26,6 +31,11 @@
   self.webView = nil;
   self.url = nil;
   self.loadingIndicator = nil;
+  self.backButton = nil;
+  self.forwardButton = nil;
+  self.reloadButton = nil;
+  self.shareButton = nil;
+  self.toolbar = nil;
   [super dealloc];
 }
 
@@ -46,6 +56,11 @@
   self.webView = nil;
   self.url = nil;
   self.loadingIndicator = nil;
+  self.backButton = nil;
+  self.forwardButton = nil;
+  self.reloadButton = nil;
+  self.shareButton = nil;
+  self.toolbar = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
