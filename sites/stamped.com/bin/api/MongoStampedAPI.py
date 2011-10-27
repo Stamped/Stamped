@@ -47,6 +47,7 @@ class MongoStampedAPI(StampedAPI):
         
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
+        self._statsSink      = StatsDSink()
     
     @lazyProperty
     def _accountDB(self):
@@ -115,10 +116,6 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
-    
-    @lazyProperty
-    def _statsSink(self):
-        return StatsDSink()
     
     def getStats(self):
         subcategory_stats = { }

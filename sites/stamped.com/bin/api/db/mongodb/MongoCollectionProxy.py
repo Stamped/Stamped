@@ -48,7 +48,7 @@ class MongoCollectionProxy(object):
                     raise
                 
                 logs.info("Retrying find (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
     
     def command(self, cmd):
         num_retries = 0
@@ -67,7 +67,7 @@ class MongoCollectionProxy(object):
                     raise
                 
                 logs.info("Retrying command (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
     
     def count(self):
         num_retries = 0
@@ -86,7 +86,7 @@ class MongoCollectionProxy(object):
                     raise
                 
                 logs.info("Retrying count (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
     
     def find_one(self, spec_or_id=None, **kwargs):
         if spec_or_id is not None and not isinstance(spec_or_id, dict):
@@ -108,7 +108,7 @@ class MongoCollectionProxy(object):
                     raise
                 
                 logs.info("Retrying find_one (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
     
     def insert(self, docs, manipulate=True, safe=False, check_keys=True, **kwargs):
         max_batch_size = 64
@@ -154,7 +154,7 @@ class MongoCollectionProxy(object):
                                     (max_retries, self._parent.__class__.__name__))
                             raise
                         
-                        time.sleep(1)
+                        time.sleep(0.25)
         
         return _insert(docs, 0)
     
@@ -184,7 +184,7 @@ class MongoCollectionProxy(object):
                     raise
                 if storeLog:
                     logs.info("Retrying delete (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
         
     def update(self, spec, document, upsert=False, manipulate=False,
                safe=False, multi=False, **kwargs):
@@ -204,7 +204,7 @@ class MongoCollectionProxy(object):
                     logs.warning(msg)
                     raise
                 logs.info("Retrying update (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
     
     def remove(self, spec_or_id=None, safe=False, **kwargs):
         num_retries = 0
@@ -223,7 +223,7 @@ class MongoCollectionProxy(object):
                     logs.warning(msg)
                     raise
                 logs.info("Retrying remove (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
     
     def ensure_index(self, key_or_list, deprecated_unique=None,
                      ttl=300, **kwargs):
@@ -242,7 +242,7 @@ class MongoCollectionProxy(object):
                     logs.warning(msg)
                     raise
                 logs.info("Retrying ensure_index (%s)" % (self._parent.__class__.__name__))
-                time.sleep(1)
+                time.sleep(0.25)
     
     def __str__(self):
         return self.__class__.__name__
