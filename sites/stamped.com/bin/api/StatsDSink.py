@@ -5,13 +5,14 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals, logs
+import Globals, utils, logs
 import time
 
 from AStatsSink     import AStatsSink
 from libs.EC2Utils  import EC2Utils
 from libs.StatsD    import StatsD
 from gevent.pool    import Pool
+from pprint         import pformat
 
 class StatsDSink(AStatsSink):
     
@@ -25,18 +26,18 @@ class StatsDSink(AStatsSink):
         logs.info("initializing StatsD")
         host, port = "localhost", 8125
         
-        if utils.is_ec2():
+        if True: #utils.is_ec2():
             ec2_utils = EC2Utils()
             done = False
             
             while not done:
                 try:
-                    logs.debug("EC2UTILS GET_STACK_INFO 1")
-                    stack_info = ec2_utils.get_stack_info()
+                    utils.log("EC2UTILS GET_STACK_INFO 1")
                     
-                    logs.debug("EC2UTILS GET_STACK_INFO 2")
-                    from pprint import pformat
-                    logs.debug(pformat(dict(stack_info)))
+                    stack_info = ec2_utils.get_stack_info(stack='dk2')
+                    
+                    utils.log("EC2UTILS GET_STACK_INFO 2")
+                    utils.log(pformat(dict(stack_info)))
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
@@ -48,7 +49,7 @@ class StatsDSink(AStatsSink):
                     pass
         
         logs.info("initializing StatsD at %s:%d" % (host, port))
-        self.statsd = StatsDSink(host, port)
+        self.statsd = StatsD(host, port)
     
     def time(self, name, time, sample_rate=1):
         logs.debug("[%s] time: %s %0.3f ms" % (self, name, time))

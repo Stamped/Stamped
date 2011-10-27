@@ -17,8 +17,18 @@ from StringIO            import StringIO
 
 def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
-    output = pp.stdout.read().strip()
+    delay = 0.01
+    
+    while pp.returncode is None:
+        time.sleep(delay)
+        delay *= 2
+        if delay > 1:
+            delay = 1
+        
+        pp.poll()
+    
     status = pp.wait()
+    output = pp.stdout.read().strip()
     
     return (output, status)
 
