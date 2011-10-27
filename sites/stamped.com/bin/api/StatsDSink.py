@@ -59,14 +59,9 @@ class StatsDSink(AStatsSink):
         if utils.is_ec2():
             done = False
             
-            stack_info = self.get_stack_info()
-            
             while not done:
                 try:
-                    utils.log("EC2UTILS GET_STACK_INFO 1")
-                    
-                                        
-                    utils.log("EC2UTILS GET_STACK_INFO 2")
+                    stack_info = self.get_stack_info()
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
