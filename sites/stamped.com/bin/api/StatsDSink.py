@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, logs
+import time
 
 from AStatsSink     import AStatsSink
 from libs.EC2Utils  import EC2Utils
@@ -18,6 +19,7 @@ class StatsDSink(AStatsSink):
         self.statsd = StatsD(host="localhost", port=8125)
         self._pool  = Pool(1)
         self._pool.spawn(self._init)
+        time.sleep(0.01)
     
     def _init(self):
         logs.info("initializing StatsD")
@@ -30,7 +32,8 @@ class StatsDSink(AStatsSink):
             while not done:
                 try:
                     stack_info = ec2_utils.get_stack_info()
-                    pprint(dict(stack_info))
+                    from pprint import pformat
+                    logs.debug(pformat(dict(stack_info)))
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
