@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
+import logs
 
 from Entity                 import *
 from Schemas                import *
@@ -125,6 +126,7 @@ class MongoStampedAPI(StampedAPI):
         """
         if utils.is_ec2():
             try:
+                logs.info("initializing stats sink")
                 self.stack_info = self.ec2_utils.get_stack_info()
                 
                 for node in stack_info.nodes:
@@ -135,6 +137,7 @@ class MongoStampedAPI(StampedAPI):
                 pass
         """
         
+        logs.info("initializing stats sink to %s:%d" % (host, port))
         return StatsDSink(host, port)
     
     def getStats(self):
