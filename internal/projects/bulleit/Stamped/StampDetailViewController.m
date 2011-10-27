@@ -920,7 +920,7 @@ typedef enum {
     [self presentViewController:twitter animated:YES completion:nil];
   }
   
-  twitter.completionHandler = ^(TWTweetComposeViewControllerResult res) {
+  twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
     [self dismissModalViewControllerAnimated:YES];
   };
 }
