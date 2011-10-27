@@ -126,8 +126,9 @@ class MongoStampedAPI(StampedAPI):
         if utils.is_ec2():
             try:
                 logs.info("initializing stats sink")
-                self.stack_info = self.ec2_utils.get_stack_info()
+                stack_info = self.ec2_utils.get_stack_info()
                 
+                pprint(dict(stack_info))
                 for node in stack_info.nodes:
                     if 'monitor' in node.roles:
                         host, port = node.private_dns, 8125
