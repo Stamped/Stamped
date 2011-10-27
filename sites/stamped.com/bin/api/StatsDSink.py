@@ -31,7 +31,10 @@ class StatsDSink(AStatsSink):
             
             while not done:
                 try:
+                    logs.debug("EC2UTILS GET_STACK_INFO 1")
                     stack_info = ec2_utils.get_stack_info()
+                    
+                    logs.debug("EC2UTILS GET_STACK_INFO 2")
                     from pprint import pformat
                     logs.debug(pformat(dict(stack_info)))
                     
