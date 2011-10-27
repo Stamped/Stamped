@@ -42,7 +42,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             document['name_lower'] = str(document['name']).lower()
         
         return document
-
     
     ### PUBLIC
     
@@ -172,7 +171,4 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             {'_id': self._getObjectIdFromString(userId)},
             {'$pull': {'devices.ios_device_tokens': token}}
         )
-        
-
-
 

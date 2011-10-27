@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
+import logs
 
 from Entity                 import *
 from Schemas                import *
@@ -15,7 +16,6 @@ from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
 from match.EntityMatcher    import EntityMatcher
 from libs.notify            import StampedNotificationHandler
-from libs.EC2Utils          import EC2Utils
 
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoEntityCollection       import MongoEntityCollection
@@ -47,8 +47,7 @@ class MongoStampedAPI(StampedAPI):
         
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
-        
-        self.ec2_utils  = EC2Utils()
+        self._statsSink      = StatsDSink()
     
     @lazyProperty
     def _accountDB(self):
@@ -117,23 +116,6 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
-    
-    @lazyProperty
-    def _statsSink(self):
-        host, port = "localhost", 8125
-        
-        if utils.is_ec2():
-            try:
-                self.stack_info = self.ec2_utils.get_stack_info()
-                
-                for node in stack_info.nodes:
-                    if 'monitor' in node.roles:
-                        host, port = node.private_dns, 8125
-                        break
-            except:
-                pass
-        
-        return StatsDSink(host, port)
     
     def getStats(self):
         subcategory_stats = { }
