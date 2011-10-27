@@ -324,6 +324,22 @@ class StampedAPILikesPass(StampedAPIStampLikesTest):
                 if 'like_threshold_hit' in result:
                     self.assertEqual(result['like_threshold_hit'], False)
 
+            # Verify likes that exist
+            path = "stamps/likes/show.json"
+            data = { 
+                "oauth_token": self.tokenB['access_token'],
+                "stamp_id": self.stamp['stamp_id']
+            }
+            result = self.handleGET(path, data)
+            self.assertEqual(len(result), i + 1)
+
+            # Verify user is within results
+            check = False
+            for item in result:
+                if item['user_id'] == user['user_id']:
+                    check = True
+            self.assertTrue(check)
+
         for i in xrange(6):
             token = tokens[i]
             path = "stamps/likes/remove.json"

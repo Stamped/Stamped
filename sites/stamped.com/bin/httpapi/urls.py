@@ -84,6 +84,7 @@ urlpatterns = patterns('',
     (r'v0/stamps/remove.json',          'v0.functions.stamps.remove'),
     (r'v0/stamps/likes/create.json',    'v0.functions.stamps.likesCreate'),
     (r'v0/stamps/likes/remove.json',    'v0.functions.stamps.likesRemove'),
+    (r'v0/stamps/likes/show.json',      'v0.functions.stamps.likesShow'),
     
     ### COMMENTS
     (r'v0/comments/create.json',        'v0.functions.comments.create'),
