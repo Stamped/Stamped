@@ -16,6 +16,7 @@
 			<string>IBUIImageView</string>
 			<string>IBProxyObject</string>
 			<string>IBUILabel</string>
+			<string>IBUIActivityIndicatorView</string>
 			<string>IBUITextField</string>
 			<string>IBUITableView</string>
 			<string>IBUIView</string>
@@ -82,6 +83,7 @@
 						<string key="NSFrame">{{10, 106}, {300, 31}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:217</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -125,7 +127,7 @@
 								<string key="NSFrameSize">{320, 364}</string>
 								<reference key="NSSuperview" ref="684497743"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="142463018"/>
+								<reference key="NSNextKeyView" ref="24167093"/>
 								<string key="NSReuseIdentifierKey">_NS:541</string>
 								<int key="IBUIContentMode">2</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -167,6 +169,10 @@
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">add_friends_button_connecttwitter_pressed.png</string>
 								</object>
+								<object class="NSCustomResource" key="IBUIDisabledBackgroundImage" id="811690597">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">add_friends_button_inactive</string>
+								</object>
 								<object class="NSCustomResource" key="IBUINormalBackgroundImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">add_friends_button_connecttwitter.png</string>
@@ -183,13 +189,25 @@
 									<int key="NSfFlags">16</int>
 								</object>
 							</object>
+							<object class="IBUIActivityIndicatorView" id="406408583">
+								<reference key="NSNextResponder" ref="684497743"/>
+								<int key="NSvFlags">-2147483356</int>
+								<string key="NSFrame">{{150, 94}, {20, 20}}</string>
+								<reference key="NSSuperview" ref="684497743"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="520992708"/>
+								<string key="NSReuseIdentifierKey">_NS:1030</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIStyle">2</int>
+							</object>
 							<object class="IBUILabel" id="308129675">
 								<reference key="NSNextResponder" ref="684497743"/>
 								<int key="NSvFlags">292</int>
 								<string key="NSFrame">{{61, 175}, {198, 42}}</string>
 								<reference key="NSSuperview" ref="684497743"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="520992708"/>
+								<reference key="NSNextKeyView" ref="406408583"/>
 								<string key="NSReuseIdentifierKey">_NS:311</string>
 								<reference key="IBUIBackgroundColor" ref="675415453"/>
 								<bool key="IBUIOpaque">NO</bool>
@@ -223,6 +241,17 @@
 									<double key="NSSize">12</double>
 									<int key="NSfFlags">16</int>
 								</object>
+							</object>
+							<object class="IBUIView" id="24167093">
+								<reference key="NSNextResponder" ref="684497743"/>
+								<int key="NSvFlags">-2147483356</int>
+								<string key="NSFrameSize">{320, 364}</string>
+								<reference key="NSSuperview" ref="684497743"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="142463018"/>
+								<string key="NSReuseIdentifierKey">_NS:180</string>
+								<reference key="IBUIBackgroundColor" ref="675415453"/>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
 						</object>
 						<string key="NSFrame">{{0, 96}, {320, 364}}</string>
@@ -258,7 +287,7 @@
 								<string key="NSFrame">{{37, 84}, {246, 41}}</string>
 								<reference key="NSSuperview" ref="520992708"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="138445342"/>
+								<reference key="NSNextKeyView" ref="541720236"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
 								<reference key="IBUIBackgroundColor" ref="675415453"/>
 								<bool key="IBUIOpaque">NO</bool>
@@ -275,12 +304,25 @@
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">add_friends_button_connectfacebook_pressed.png</string>
 								</object>
+								<reference key="IBUIDisabledBackgroundImage" ref="811690597"/>
 								<object class="NSCustomResource" key="IBUINormalBackgroundImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">add_friends_button_connectfacebook.png</string>
 								</object>
 								<reference key="IBUIFontDescription" ref="165745577"/>
 								<reference key="IBUIFont" ref="203295087"/>
+							</object>
+							<object class="IBUIActivityIndicatorView" id="541720236">
+								<reference key="NSNextResponder" ref="520992708"/>
+								<int key="NSvFlags">-2147483356</int>
+								<string key="NSFrame">{{150, 94}, {20, 20}}</string>
+								<reference key="NSSuperview" ref="520992708"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="138445342"/>
+								<string key="NSReuseIdentifierKey">_NS:1030</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIStyle">2</int>
 							</object>
 							<object class="IBUILabel" id="138445342">
 								<reference key="NSNextResponder" ref="520992708"/>
@@ -633,6 +675,46 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">signInAuthView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="24167093"/>
+					</object>
+					<int key="connectionID">67</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">signInTwitterActivityIndicator</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="406408583"/>
+					</object>
+					<int key="connectionID">70</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">signInFacebookActivityIndicator</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="541720236"/>
+					</object>
+					<int key="connectionID">71</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">signInTwitterConnectButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="142463018"/>
+					</object>
+					<int key="connectionID">72</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">signInFacebookConnectButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="800313419"/>
+					</object>
+					<int key="connectionID">73</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="628756118"/>
 						<reference key="destination" ref="372490531"/>
@@ -836,6 +918,8 @@
 							<reference ref="1003283871"/>
 							<reference ref="142463018"/>
 							<reference ref="308129675"/>
+							<reference ref="24167093"/>
+							<reference ref="406408583"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 						<string key="objectName">Sign In Twitter View</string>
@@ -848,6 +932,7 @@
 							<reference ref="641184470"/>
 							<reference ref="800313419"/>
 							<reference ref="138445342"/>
+							<reference ref="541720236"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 						<string key="objectName">Sign In Facebook View</string>
@@ -877,16 +962,35 @@
 						<string key="objectName">Image View - add_friends_gradient_bg.png</string>
 					</object>
 					<object class="IBObjectRecord">
+						<int key="objectID">35</int>
+						<reference key="object" ref="308129675"/>
+						<reference key="parent" ref="684497743"/>
+						<string key="objectName">Label – Twitter Pledge</string>
+					</object>
+					<object class="IBObjectRecord">
 						<int key="objectID">33</int>
 						<reference key="object" ref="142463018"/>
 						<reference key="parent" ref="684497743"/>
 						<string key="objectName">Twitter Button</string>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">35</int>
-						<reference key="object" ref="308129675"/>
+						<int key="objectID">62</int>
+						<reference key="object" ref="24167093"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+						</object>
 						<reference key="parent" ref="684497743"/>
-						<string key="objectName">Label – Twitter Pledge</string>
+						<string key="objectName">Sign In Auth View</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">68</int>
+						<reference key="object" ref="541720236"/>
+						<reference key="parent" ref="520992708"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">69</int>
+						<reference key="object" ref="406408583"/>
+						<reference key="parent" ref="684497743"/>
 					</object>
 				</object>
 			</object>
@@ -921,6 +1025,9 @@
 					<string>46.IBPluginDependency</string>
 					<string>5.IBPluginDependency</string>
 					<string>6.IBPluginDependency</string>
+					<string>62.IBPluginDependency</string>
+					<string>68.IBPluginDependency</string>
+					<string>69.IBPluginDependency</string>
 					<string>8.IBPluginDependency</string>
 					<string>8.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>9.IBPluginDependency</string>
@@ -945,10 +1052,13 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="1"/>
+					<real value="3"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="0.0"/>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -973,7 +1083,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">46</int>
+			<int key="maxID">73</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1056,7 +1166,12 @@
 							<string>facebookButton</string>
 							<string>nipple</string>
 							<string>searchField</string>
+							<string>signInAuthView</string>
+							<string>signInFacebookActivityIndicator</string>
+							<string>signInFacebookConnectButton</string>
 							<string>signInFacebookView</string>
+							<string>signInTwitterActivityIndicator</string>
+							<string>signInTwitterConnectButton</string>
 							<string>signInTwitterView</string>
 							<string>stampedButton</string>
 							<string>tableView</string>
@@ -1069,6 +1184,11 @@
 							<string>UIImageView</string>
 							<string>STSearchField</string>
 							<string>UIView</string>
+							<string>UIActivityIndicatorView</string>
+							<string>UIButton</string>
+							<string>UIView</string>
+							<string>UIActivityIndicatorView</string>
+							<string>UIButton</string>
 							<string>UIView</string>
 							<string>UIButton</string>
 							<string>UITableView</string>
@@ -1083,7 +1203,12 @@
 							<string>facebookButton</string>
 							<string>nipple</string>
 							<string>searchField</string>
+							<string>signInAuthView</string>
+							<string>signInFacebookActivityIndicator</string>
+							<string>signInFacebookConnectButton</string>
 							<string>signInFacebookView</string>
+							<string>signInTwitterActivityIndicator</string>
+							<string>signInTwitterConnectButton</string>
 							<string>signInTwitterView</string>
 							<string>stampedButton</string>
 							<string>tableView</string>
@@ -1108,8 +1233,28 @@
 								<string key="candidateClassName">STSearchField</string>
 							</object>
 							<object class="IBToOneOutletInfo">
+								<string key="name">signInAuthView</string>
+								<string key="candidateClassName">UIView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">signInFacebookActivityIndicator</string>
+								<string key="candidateClassName">UIActivityIndicatorView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">signInFacebookConnectButton</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
 								<string key="name">signInFacebookView</string>
 								<string key="candidateClassName">UIView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">signInTwitterActivityIndicator</string>
+								<string key="candidateClassName">UIActivityIndicatorView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">signInTwitterConnectButton</string>
+								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">signInTwitterView</string>
@@ -1160,6 +1305,7 @@
 				<string>add_friends_button_connectfacebook_pressed.png</string>
 				<string>add_friends_button_connecttwitter.png</string>
 				<string>add_friends_button_connecttwitter_pressed.png</string>
+				<string>add_friends_button_inactive</string>
 				<string>add_friends_gradient_bg.png</string>
 				<string>add_friends_header@2x.png</string>
 				<string>add_friends_nipple_bar.png</string>
@@ -1176,6 +1322,7 @@
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>

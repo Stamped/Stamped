@@ -67,6 +67,8 @@
 		4F94D2E112288D0F00BC78AA /* GTMOAuthBuzzWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F7249D012248449001A4AD0 /* GTMOAuthBuzzWindowController.m */; };
 		4F94D2E312288D3400BC78AA /* GTMOAuthLatitudeWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F7249C912248443001A4AD0 /* GTMOAuthLatitudeWindowController.m */; };
 		4F94D33E1228944800BC78AA /* GTMOAuthWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F7249FB122485EE001A4AD0 /* GTMOAuthWindowController.m */; };
+		CB2E0C281454BCA8000E9DC5 /* GTMOAuthViewTouch.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB2E0C271454BCA8000E9DC5 /* GTMOAuthViewTouch.xib */; };
+		CB2E0C291454BCA8000E9DC5 /* GTMOAuthViewTouch.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB2E0C271454BCA8000E9DC5 /* GTMOAuthViewTouch.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -76,7 +78,6 @@
 		4F24484A121F2E5C00FEE1DA /* GTMOAuthSignIn.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTMOAuthSignIn.m; sourceTree = "<group>"; };
 		4F24484D121F2E6300FEE1DA /* GTMOAuthViewControllerTouch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTMOAuthViewControllerTouch.h; path = Touch/GTMOAuthViewControllerTouch.h; sourceTree = "<group>"; };
 		4F24484E121F2E6300FEE1DA /* GTMOAuthViewControllerTouch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GTMOAuthViewControllerTouch.m; path = Touch/GTMOAuthViewControllerTouch.m; sourceTree = "<group>"; };
-		4F244850121F2E6800FEE1DA /* GTMOAuthViewTouch.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = GTMOAuthViewTouch.xib; path = Touch/GTMOAuthViewTouch.xib; sourceTree = "<group>"; };
 		4F244918121F370000FEE1DA /* GTMHTTPFetcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTMHTTPFetcher.h; path = ../HTTPFetcher/GTMHTTPFetcher.h; sourceTree = SOURCE_ROOT; };
 		4F244919121F370000FEE1DA /* GTMHTTPFetcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GTMHTTPFetcher.m; path = ../HTTPFetcher/GTMHTTPFetcher.m; sourceTree = SOURCE_ROOT; };
 		4F35139213EA1FF500E12259 /* libOAuthTouch.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOAuthTouch.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,6 +106,7 @@
 		4F724BAE12248F81001A4AD0 /* GTMHTTPFetcherLogging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GTMHTTPFetcherLogging.m; path = ../HTTPFetcher/GTMHTTPFetcherLogging.m; sourceTree = SOURCE_ROOT; };
 		4F724C72122494D4001A4AD0 /* GTMOAuthTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = GTMOAuthTest.m; path = Test/GTMOAuthTest.m; sourceTree = "<group>"; };
 		4F94D2E512288D5000BC78AA /* ServicesReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = ServicesReadMe.txt; path = Services/ServicesReadMe.txt; sourceTree = "<group>"; };
+		CB2E0C271454BCA8000E9DC5 /* GTMOAuthViewTouch.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = GTMOAuthViewTouch.xib; path = Touch/GTMOAuthViewTouch.xib; sourceTree = "<group>"; };
 		D2AAC07E0554694100DB518D /* libOAuthTouch.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOAuthTouch.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -231,7 +233,7 @@
 			children = (
 				4F24484D121F2E6300FEE1DA /* GTMOAuthViewControllerTouch.h */,
 				4F24484E121F2E6300FEE1DA /* GTMOAuthViewControllerTouch.m */,
-				4F244850121F2E6800FEE1DA /* GTMOAuthViewTouch.xib */,
+				CB2E0C271454BCA8000E9DC5 /* GTMOAuthViewTouch.xib */,
 			);
 			name = Touch;
 			sourceTree = "<group>";
@@ -437,6 +439,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB2E0C291454BCA8000E9DC5 /* GTMOAuthViewTouch.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,6 +455,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB2E0C281454BCA8000E9DC5 /* GTMOAuthViewTouch.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -287,8 +287,10 @@ static NSString* const kFacebookAppID = @"297022226980395";
 // For 4.2+ support
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
   sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-  if (self.facebook)
-    return [self.facebook handleOpenURL:url]; 
+  if (self.facebook) {
+    NSLog(@"back from fb...");
+    return [self.facebook handleOpenURL:url];
+  }
   return NO;
 }
 

@@ -27,7 +27,8 @@ typedef enum {
                                                         FBSessionDelegate,
                                                         UITableViewDelegate,
                                                         UITableViewDataSource,
-                                                        UITextFieldDelegate>
+                                                        UITextFieldDelegate,
+                                                        UIWebViewDelegate>
 
 @property (nonatomic, retain) IBOutlet UIButton* contactsButton;
 @property (nonatomic, retain) IBOutlet UIButton* twitterButton;
@@ -39,6 +40,11 @@ typedef enum {
 @property (nonatomic, retain) NSMutableArray* followedUsers;
 @property (nonatomic, retain) IBOutlet UIView* signInTwitterView;
 @property (nonatomic, retain) IBOutlet UIView* signInFacebookView;
+@property (nonatomic, retain) IBOutlet UIView* signInAuthView;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInTwitterActivityIndicator;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInFacebookActivityIndicator;
+@property (nonatomic, retain) IBOutlet UIButton* signInTwitterConnectButton;
+@property (nonatomic, retain) IBOutlet UIButton* signInFacebookConnectButton;
 
 - (id)initWithFindSource:(FindFriendsSource)source;
 
