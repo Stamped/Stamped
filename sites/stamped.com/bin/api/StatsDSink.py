@@ -36,18 +36,26 @@ class StatsDSink(AStatsSink):
                 try:
                     utils.log("EC2UTILS GET_STACK_INFO 1")
                     
+                    stack_info = None
                     if os.path.exists(path):
-                        f = open(path, 'r')
-                        stack_info = json.load.load(f)
-                        f.close()
-                    else:
+                        try:
+                            f = open(path, 'r')
+                            stack_info = json.load(f)
+                        except:
+                            stack_info = None
+                        finally:
+                            f.close()
+                    
+                    if stack_info is None:
                         stack_info = ec2_utils.get_stack_info()
+                        
                         try:
                             f = open(path, 'w')
                             json.dump(stack_info, f)
-                            f.close()
                         except:
                             pass
+                        finally:
+                            f.close()
                     
                     utils.log("EC2UTILS GET_STACK_INFO 2")
                     utils.log(pformat(dict(stack_info)))
