@@ -8,12 +8,41 @@ __license__   = "TODO"
 import Globals, logs
 
 from AStatsSink     import AStatsSink
+from libs.EC2Utils  import EC2Utils
 from libs.StatsD    import StatsD
+from gevent.pool    import Pool
 
 class StatsDSink(AStatsSink):
     
-    def __init__(self, host, port):
+    def __init__(self):
         self.statsd = StatsD(host=host, port=port)
+        self._pool  = Pool(1)
+        self._pool.spawn(self._init)
+    
+    def _init(self):
+        logs.info("initializing StatsD")
+        host, port = "localhost", 8125
+        
+        if utils.is_ec2():
+            ec2_utils = EC2Utils()
+            done = False
+            
+            while not done:
+                try:
+                    stack_info = ec2_utils.get_stack_info()
+                    pprint(dict(stack_info))
+                    
+                    for node in stack_info.nodes:
+                        if 'monitor' in node.roles:
+                            host, port = node.private_dns, 8125
+                            done = True
+                            break
+                except:
+                    utils.printException()
+                    pass
+        
+        logs.info("initializing StatsD at %s:%d" % (host, port))
+        self.statsd = StatsDSink(host, port)
     
     def time(self, name, time, sample_rate=1):
         logs.debug("[%s] time: %s %0.3f ms" % (self, name, time))

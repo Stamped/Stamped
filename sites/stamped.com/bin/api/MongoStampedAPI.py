@@ -16,7 +16,6 @@ from S3ImageDB              import S3ImageDB
 from StatsDSink             import StatsDSink
 from match.EntityMatcher    import EntityMatcher
 from libs.notify            import StampedNotificationHandler
-from libs.EC2Utils          import EC2Utils
 
 from db.mongodb.MongoAccountCollection      import MongoAccountCollection
 from db.mongodb.MongoEntityCollection       import MongoEntityCollection
@@ -46,7 +45,6 @@ class MongoStampedAPI(StampedAPI):
         if db:
             utils.init_db_config(db)
         
-        self.ec2_utils       = EC2Utils()
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
         
@@ -120,25 +118,9 @@ class MongoStampedAPI(StampedAPI):
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
     
-    def _getStatsSink(self):
-        host, port = "localhost", 8125
-        
-        if utils.is_ec2():
-            try:
-                logs.info("initializing stats sink")
-                stack_info = self.ec2_utils.get_stack_info()
-                
-                pprint(dict(stack_info))
-                for node in stack_info.nodes:
-                    if 'monitor' in node.roles:
-                        host, port = node.private_dns, 8125
-                        break
-            except:
-                utils.printException()
-                pass
-        
-        logs.info("initializing stats sink to %s:%d" % (host, port))
-        return StatsDSink(host, port)
+    @lazyProperty
+    def _statsSink(self):
+        return StatsDSink()
     
     def getStats(self):
         subcategory_stats = { }
