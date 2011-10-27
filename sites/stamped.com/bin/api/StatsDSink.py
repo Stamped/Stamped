@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, logs
-import time
+import json, os, time
 
 from AStatsSink     import AStatsSink
 from libs.EC2Utils  import EC2Utils
@@ -26,15 +26,28 @@ class StatsDSink(AStatsSink):
         logs.info("initializing StatsD")
         host, port = "localhost", 8125
         
-        if True: #utils.is_ec2():
+        if utils.is_ec2():
             ec2_utils = EC2Utils()
             done = False
+            
+            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.stack.txt')
             
             while not done:
                 try:
                     utils.log("EC2UTILS GET_STACK_INFO 1")
                     
-                    stack_info = ec2_utils.get_stack_info()
+                    if os.path.exists(path):
+                        f = open(path, 'r')
+                        stack_info = json.load.load(f)
+                        f.close()
+                    else:
+                        stack_info = ec2_utils.get_stack_info()
+                        try:
+                            f = open(path, 'w')
+                            json.dump(stack_info, f)
+                            f.close()
+                        except:
+                            pass
                     
                     utils.log("EC2UTILS GET_STACK_INFO 2")
                     utils.log(pformat(dict(stack_info)))
