@@ -83,6 +83,18 @@
   commentLabel_.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   commentLabel_.text = comment_.blurb;
+  NSError* error = NULL;
+  NSRegularExpression* regex = [NSRegularExpression
+                                regularExpressionWithPattern:@"@(\\w+)"
+                                options:NSRegularExpressionCaseInsensitive
+                                error:&error];
+  [regex enumerateMatchesInString:comment_.blurb
+                          options:0
+                            range:NSMakeRange(0, comment_.blurb.length)
+                       usingBlock:^(NSTextCheckingResult* match, NSMatchingFlags flags, BOOL* stop){
+    [commentLabel_ addLinkToURL:[NSURL URLWithString:[comment_.blurb substringWithRange:match.range]]
+                      withRange:match.range];
+  }];
   commentLabel_.textColor = [UIColor stampedBlackColor];
   commentLabel_.numberOfLines = 0;
   stringSize = [commentLabel_ sizeThatFits:CGSizeMake(215, MAXFLOAT)];
@@ -172,7 +184,7 @@
 #pragma mark - TTTAttributedLabelDelegate methods.
 
 - (void)attributedLabel:(TTTAttributedLabel*)label didSelectLinkWithURL:(NSURL*)url {
-  NSLog(@"url: %@", url);
+  [delegate_ commentView:self didSelectLinkWithURL:url];
 }
 
 @end

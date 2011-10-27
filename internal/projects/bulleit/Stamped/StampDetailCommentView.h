@@ -15,9 +15,11 @@
 @class StampDetailCommentView;
 
 @protocol StampDetailCommentViewDelegate
+@required
 - (BOOL)commentViewShouldBeginEditing:(StampDetailCommentView*)commentView;
 - (void)commentViewUserImageTapped:(StampDetailCommentView*)commentView;
 - (void)commentViewDeleteButtonPressed:(StampDetailCommentView*)commentView;
+- (void)commentView:(StampDetailCommentView*)commentView didSelectLinkWithURL:(NSURL*)url;
 @end
 
 @interface StampDetailCommentView : UIView <TTTAttributedLabelDelegate>

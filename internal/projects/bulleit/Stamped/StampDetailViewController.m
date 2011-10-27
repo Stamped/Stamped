@@ -67,6 +67,7 @@ typedef enum {
 - (void)sendAddCommentRequest;
 - (void)sendRemoveCommentRequest:(NSString*)commentID;
 - (void)showTweetViewController;
+- (void)handleURL:(NSURL*)url;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -392,6 +393,19 @@ typedef enum {
   commentLabel.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel.textColor = [UIColor stampedBlackColor];
   commentLabel.text = stamp_.blurb;
+  NSError* error = NULL;
+  NSRegularExpression* regex = [NSRegularExpression
+                                regularExpressionWithPattern:@"@(\\w+)"
+                                options:NSRegularExpressionCaseInsensitive
+                                error:&error];
+  [regex enumerateMatchesInString:stamp_.blurb
+                          options:0
+                            range:NSMakeRange(0, stamp_.blurb.length)
+                       usingBlock:^(NSTextCheckingResult* match, NSMatchingFlags flags, BOOL* stop){
+                         [commentLabel addLinkToURL:[NSURL URLWithString:[stamp_.blurb substringWithRange:match.range]]
+                                           withRange:match.range];
+                       }];
+
   commentLabel.numberOfLines = 0;
   CGSize stringSize = [stamp_.blurb sizeWithFont:commentFont
                                constrainedToSize:CGSizeMake(210, MAXFLOAT)
@@ -553,16 +567,7 @@ typedef enum {
 #pragma mark - TTTAttributedLabelDelegate methods.
 
 - (void)attributedLabel:(TTTAttributedLabel*)label didSelectLinkWithURL:(NSURL*)url {
-  NSLog(@"URL: %@", url);
-  NSString* userID = url.absoluteString;
-  User* user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
-  if (!user)
-    return;
-
-  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
-  profileViewController.user = user;
-  [self.navigationController pushViewController:profileViewController animated:YES];
-  [profileViewController release];
+  [self handleURL:url];
 }
 
 #pragma mark - Toolbar Actions
@@ -706,6 +711,10 @@ typedef enum {
   return;
 }
 
+- (void)commentView:(StampDetailCommentView*)commentView didSelectLinkWithURL:(NSURL*)url {
+  [self handleURL:url];
+}
+
 #pragma mark - Comments.
 
 - (void)loadCommentsFromServer {
@@ -797,6 +806,30 @@ typedef enum {
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
+}
+
+- (void)handleURL:(NSURL*)url {
+  if ([url.scheme isEqualToString:@"http"]) {
+    // Open in web browser...
+    return;
+  }
+
+  NSString* urlString = url.absoluteString;
+  User* user = nil;
+  if ([urlString hasPrefix:@"@"]) {
+    NSString* screenName = [urlString substringFromIndex:1];
+    user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]]; 
+  } else if (urlString.length == 24) {
+    NSString* userID = url.absoluteString;
+    user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
+  }
+  if (!user)
+    return;
+
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
 }
 
 #pragma mark - Keyboard notifications.
