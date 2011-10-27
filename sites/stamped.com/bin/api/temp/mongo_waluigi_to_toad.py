@@ -73,16 +73,18 @@ def convertEntities():
         if 'details' in entity and 'media' in entity['details'] and 'track_length' in entity['details']['media']:
             track_length = entity['details']['media']['track_length']
             if track_length:
-                new = int(track_length)
-                if 'sources' in entity and 'apple' in entity['sources'] and 'export_date' in entity['sources']['apple']:
-                    new = int(round(int(track_length) / 1000.0))
-                
-                entity_collection.update(
-                    {'_id': entity['_id']},
-                    {'$set': {'details.media.track_length': new}}
-                )
-                print '%60s (%s -> %s)' % (entity['title'], track_length, new)
-
+                try:
+                    new = int(track_length)
+                    if 'sources' in entity and 'apple' in entity['sources'] and 'export_date' in entity['sources']['apple']:
+                        new = int(round(int(track_length) / 1000.0))
+                    
+                    entity_collection.update(
+                        {'_id': entity['_id']},
+                        {'$set': {'details.media.track_length': new}}
+                    )
+                    print '%60s (%s -> %s)' % (entity['title'], track_length, new)
+                except Exception as e:
+                    print 'SKIPPED: %s (%s)' % (entity['title'], e)
 
 if __name__ == '__main__':  
     main()
