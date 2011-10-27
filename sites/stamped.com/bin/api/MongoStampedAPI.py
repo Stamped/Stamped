@@ -122,6 +122,7 @@ class MongoStampedAPI(StampedAPI):
     def _statsSink(self):
         host, port = "localhost", 8125
         
+        """
         if utils.is_ec2():
             try:
                 self.stack_info = self.ec2_utils.get_stack_info()
@@ -132,6 +133,7 @@ class MongoStampedAPI(StampedAPI):
                         break
             except:
                 pass
+        """
         
         return StatsDSink(host, port)
     
