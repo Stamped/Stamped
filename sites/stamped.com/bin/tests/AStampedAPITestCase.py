@@ -18,7 +18,7 @@ CLIENT_SECRET = "august1ftw"
 _accounts  = []
 _test_case = None
 #_baseurl   = "http://localhost:18000/v0"
-_baseurl   = "https://MyLoadBalancer-2017429568.us-east-1.elb.amazonaws.com/v0"
+#_baseurl   = "https://MyLoadBalancer-2017429568.us-east-1.elb.amazonaws.com/v0"
 _baseurl = "https://ec2-107-20-125-151.compute-1.amazonaws.com/v0"
 
 #_baseurl = "http://107.20.179.250:5000/v0"
@@ -57,13 +57,13 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s?%s" % (_baseurl, path, params)
         
-        #utils.log("GET:  %s" % url)
+        utils.log("GET:  %s" % url)
         raw = self._opener.open(url).read()
         
         try:
             result = json.loads(raw)
         except:
-            # utils.log(raw)
+            utils.log(raw)
             raise
         
         return result
@@ -73,15 +73,15 @@ class AStampedAPITestCase(AStampedTestCase):
         params = urllib.urlencode(data)
         url    = "%s/%s" % (_baseurl, path)
         
-        #utils.log("POST: %s" % url)
-        #pprint(params)
+        utils.log("POST: %s" % url)
+        pprint(params)
         
         raw = self._opener.open(url, params).read()
         
         try:
             result = json.loads(raw)
         except:
-            # utils.log(raw)
+            utils.log(raw)
             raise
         
         return result

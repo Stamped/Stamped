@@ -50,9 +50,10 @@ class MongoStampedAPI(StampedAPI):
         self._placesEntityDB = MongoPlacesEntityCollection()
     
     @property
-    def _statsSink
+    def _statsSink(self):
         if self.__statsSink is None:
             self.__statsSink = StatsDSink()
+        
         return self.__statsSink
     
     @lazyProperty
