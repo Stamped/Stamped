@@ -66,7 +66,7 @@ def mongoImportJSON(collection):
 def convertEntities():
     entity_collection = new_database['entities']
     # entities = entity_collection.find({'sources.apple.export_date': '1311152428052'})
-    entities = entity_collection.find({'$exists': {'details.media.track_length': True}})
+    entities = entity_collection.find({'details.media.track_length': {'$exists': True}})
 
     for entity in entities:
 
