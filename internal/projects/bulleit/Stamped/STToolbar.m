@@ -36,7 +36,7 @@
       (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
       (id)[UIColor colorWithWhite:0.855 alpha:1.0].CGColor, nil];
   gradientLayer.frame = self.bounds;
-  [self.layer addSublayer:gradientLayer];
+  [self.layer insertSublayer:gradientLayer atIndex:0];
   [gradientLayer release];
 
   self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
