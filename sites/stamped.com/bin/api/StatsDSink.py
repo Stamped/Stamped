@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, logs
-import json, os, time
+import pickle, os, time
 
 from AStatsSink     import AStatsSink
 from libs.EC2Utils  import EC2Utils
@@ -26,7 +26,7 @@ class StatsDSink(AStatsSink):
         logs.info("initializing StatsD")
         host, port = "localhost", 8125
         
-        if utils.is_ec2():
+        if True:#utils.is_ec2():
             ec2_utils = EC2Utils()
             done = False
             
@@ -40,25 +40,27 @@ class StatsDSink(AStatsSink):
                     if os.path.exists(path):
                         try:
                             f = open(path, 'r')
-                            stack_info = json.load(f)
+                            stack_info = utils.AttributeDict(dict(pickle.loads(f.read())))
                         except:
+                            utils.printException()
                             stack_info = None
                         finally:
                             f.close()
                     
                     if stack_info is None:
-                        stack_info = ec2_utils.get_stack_info()
+                        stack_info = ec2_utils.get_stack_info(stack='dk2')
+                        utils.log(pformat(dict(stack_info)))
                         
                         try:
                             f = open(path, 'w')
-                            json.dump(stack_info, f)
+                            f.write(pickle.dumps(dict(stack_info)))
                         except:
+                            utils.printException()
                             pass
                         finally:
                             f.close()
                     
                     utils.log("EC2UTILS GET_STACK_INFO 2")
-                    utils.log(pformat(dict(stack_info)))
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:
