@@ -92,7 +92,8 @@ class MongoDBConfig(Singleton):
         
         # TODO: have a more consistent approach to handling AutoReconnect!
         logs.debug("Creating connection")
-        logs.debug(traceback.format_stack())
+        for line in traceback.format_stack():
+            logs.debug(line)
         
         delay = 1
         max_delay = 16
