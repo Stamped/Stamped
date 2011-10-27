@@ -26,7 +26,7 @@ class StatsDSink(AStatsSink):
         logs.info("initializing StatsD")
         host, port = "localhost", 8125
         
-        if True:#utils.is_ec2():
+        if utils.is_ec2():
             ec2_utils = EC2Utils()
             done = False
             
@@ -48,7 +48,7 @@ class StatsDSink(AStatsSink):
                             f.close()
                     
                     if stack_info is None:
-                        stack_info = ec2_utils.get_stack_info(stack='dk2')
+                        stack_info = ec2_utils.get_stack_info()
                         utils.log(pformat(dict(stack_info)))
                         
                         try:
