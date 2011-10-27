@@ -73,17 +73,17 @@ class StatsDSink(AStatsSink):
         self.statsd = StatsD(host, port)
     
     def time(self, name, time, sample_rate=1):
-        logs.debug("[%s] time: %s %0.3f ms" % (self, name, time))
+        logs.debug("[%s-%s:%d] time: %s %0.3f ms" % (self, self.statsd.addr[0], self.statsd.addr[1], name, time))
         
         return self.statsd.time(name, time, sample_rate)
     
     def increment(self, name, sample_rate=1):
-        logs.debug("[%s] increment: %s" % (self, name))
+        logs.debug("[%s-%s:%d] increment: %s" % (self, self.statsd.addr[0], self.statsd.addr[1], name))
         
         return self.statsd.increment(name, sample_rate)
     
     def decrement(self, name, sample_rate=1):
-        logs.debug("[%s] decrement: %s" % (self, name))
+        logs.debug("[%s-%s:%d] decrement: %s" % (self, self.statsd.addr[0], self.statsd.addr[1], name))
         
         return self.statsd.decrement(name, sample_rate)
 
