@@ -34,7 +34,7 @@ class StatsDSink(AStatsSink):
                 try:
                     utils.log("EC2UTILS GET_STACK_INFO 1")
                     
-                    stack_info = ec2_utils.get_stack_info(stack='dk2')
+                    stack_info = ec2_utils.get_stack_info()
                     
                     utils.log("EC2UTILS GET_STACK_INFO 2")
                     utils.log(pformat(dict(stack_info)))
