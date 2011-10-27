@@ -322,6 +322,8 @@ class StampedAPI(AStampedAPI):
         ### TODO: Verify that email address is unique, confirm it
         
         account = self._accountDB.getAccount(authUserId)
+
+        old_screen_name = account['screen_name']
         
         # Import each item
         for k, v in data.iteritems():
@@ -350,6 +352,11 @@ class StampedAPI(AStampedAPI):
             raise InputError(msg)
 
         self._accountDB.updateAccount(account)
+
+        # Update profile picture link if screen name has changed
+        if account.screen_name.lower() != old_screen_name.lower():
+            self._imageDB.changeProfileImageName(old_screen_name.lower(), \
+                                                 account.screen_name.lower())
 
         return account
     

@@ -163,6 +163,23 @@ class S3ImageDB(AImageDB):
         
         # Add images in all sizes
         self._addImageSizes(prefix, image, maxSize, sizes)
+
+    def changeProfileImageName(self, oldScreenName, newScreenName):
+        oldPrefix = 'users/%s' % oldScreenName
+        newPrefix = 'users/%s' % newScreenName
+        suffix = '.jpg'
+
+        maxSize, sizes = self.profileImageSizes
+
+        old = '%s%s' % (oldPrefix, suffix)
+        new = '%s%s' % (newPrefix, suffix)
+        self._copyInS3(old, new)
+
+        for size in sizes:
+            old = '%s-%s%s' % (oldPrefix, size, suffix)
+            new = '%s-%s%s' % (newPrefix, size, suffix)
+            self._copyInS3(old, new)
+
     
     def _addImageSizes(self, prefix, image, maxSize, sizes=None):
         assert isinstance(image, Image.Image)
@@ -291,6 +308,36 @@ class S3ImageDB(AImageDB):
                 if self.bucket.get_key(name):
                     self.bucket.delete_key(name)
                 return True
+            except Exception as e:
+                logs.warning('S3 Exception: %s' % e)
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "Unable to connect to S3 after %d retries (%s)" % \
+                        (max_retries, self.__class__.__name__)
+                    logs.warning(msg)
+                    raise Exception(msg)
+                
+                logs.info("Retrying (%s)" % (num_retries))
+                time.sleep(0.5)
+
+    def _copyInS3(self, oldKey, newKey):
+        num_retries = 0
+        max_retries = 5
+        
+        while True:
+            try:
+                logs.info('CREATE NEW CONNECTION & ASSIGN BUCKET')
+                conn = S3Connection(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+                bucket = conn.lookup(self.bucket_name)
+
+                if not self.bucket.get_key(oldKey):
+                    logs.info('KEY DOES NOT EXIST')
+                    return True
+                
+                logs.info('COPY KEY')
+                bucket.copy_key(newKey, self.bucket_name, oldKey, preserve_acl=True)
+                return True
+
             except Exception as e:
                 logs.warning('S3 Exception: %s' % e)
                 num_retries += 1
