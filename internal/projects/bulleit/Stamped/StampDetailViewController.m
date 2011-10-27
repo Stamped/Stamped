@@ -30,6 +30,7 @@
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
 #import "SharedRequestDelegate.h"
+#import "WebViewController.h"
 
 NSString* const kRemoveCommentPath = @"/comments/remove.json";
 
@@ -268,19 +269,6 @@ typedef enum {
 }
 
 - (void)setUpToolbar {
-  CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
-  toolbarGradient.colors = [NSArray arrayWithObjects:
-                            (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
-                            (id)[UIColor colorWithWhite:0.855 alpha:1.0].CGColor, nil];
-  toolbarGradient.frame = bottomToolbar_.bounds;
-  [bottomToolbar_.layer addSublayer:toolbarGradient];
-  [toolbarGradient release];
-
-  bottomToolbar_.layer.shadowPath = [UIBezierPath bezierPathWithRect:bottomToolbar_.bounds].CGPath;
-  bottomToolbar_.layer.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.2].CGColor;
-  bottomToolbar_.layer.shadowOpacity = 1;
-  bottomToolbar_.layer.shadowOffset = CGSizeMake(0, -1);
-
   if (stamp_.entityObject.favorite) {
     addFavoriteLabel_.text = @"To-Do'd";
     addFavoriteButton_.selected = YES;
@@ -810,7 +798,9 @@ typedef enum {
 
 - (void)handleURL:(NSURL*)url {
   if ([url.scheme isEqualToString:@"http"]) {
-    // Open in web browser...
+    WebViewController* vc = [[WebViewController alloc] initWithURL:url];
+    [self.navigationController pushViewController:vc animated:YES];
+    [vc release];
     return;
   }
 
