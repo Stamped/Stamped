@@ -7,7 +7,9 @@ __license__ = "TODO"
 
 import Globals
 import base64, boto, convert, json, os, socket, time, utils
+
 from boto.ec2.instance import Instance as BotoEC2Instance
+from boto.exception import EC2ResponseError
 from AInstance import AInstance
 from errors import *
 
@@ -212,7 +214,18 @@ class AWSInstance(AInstance):
     
     def update(self, validate=False):
         if self._instance:
-            self._instance.update(validate)
+            num_retries = 0
+            
+            while True:
+                try:
+                    self._instance.update(validate)
+                    break
+                except EC2ResponseError:
+                    num_retries += 1
+                    if num_retries >= 5:
+                        raise
+                    
+                    time.sleep(2)
         else:
             raise NotInitializedError()
     

@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, logs
-import json, os, time
+import pickle, os, time
 
 from AStatsSink     import AStatsSink
 from libs.EC2Utils  import EC2Utils
@@ -20,45 +20,48 @@ class StatsDSink(AStatsSink):
         self.statsd = StatsD(host="localhost", port=8125)
         self._pool  = Pool(1)
         self._pool.spawn(self._init)
+        self._ec2_utils = EC2Utils()
         time.sleep(0.01)
+    
+    def get_stack_info(self, force_update=False):
+        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.stack.txt')
+        stack_info = None
+        
+        if not force_update and os.path.exists(path):
+            try:
+                f = open(path, 'r')
+                stack_info = utils.AttributeDict(dict(pickle.loads(f.read())))
+            except:
+                utils.printException()
+                stack_info = None
+            finally:
+                f.close()
+        
+        if force_update or stack_info is None:
+            stack_info = self._ec2_utils.get_stack_info()
+            utils.log(pformat(dict(stack_info)))
+            
+            try:
+                f = open(path, 'w')
+                f.write(pickle.dumps(dict(stack_info)))
+            except:
+                utils.printException()
+                pass
+            finally:
+                f.close()
+        
+        return stack_info
     
     def _init(self):
         logs.info("initializing StatsD")
         host, port = "localhost", 8125
         
         if utils.is_ec2():
-            ec2_utils = EC2Utils()
             done = False
-            
-            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '.stack.txt')
             
             while not done:
                 try:
-                    utils.log("EC2UTILS GET_STACK_INFO 1")
-                    
-                    stack_info = None
-                    if os.path.exists(path):
-                        try:
-                            f = open(path, 'r')
-                            stack_info = json.load(f)
-                        except:
-                            stack_info = None
-                        finally:
-                            f.close()
-                    
-                    if stack_info is None:
-                        stack_info = ec2_utils.get_stack_info()
-                        
-                        try:
-                            f = open(path, 'w')
-                            json.dump(stack_info, f)
-                        except:
-                            pass
-                        finally:
-                            f.close()
-                    
-                    utils.log("EC2UTILS GET_STACK_INFO 2")
-                    utils.log(pformat(dict(stack_info)))
+                    stack_info = self.get_stack_info()
                     
                     for node in stack_info.nodes:
                         if 'monitor' in node.roles:

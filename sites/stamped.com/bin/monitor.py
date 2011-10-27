@@ -96,7 +96,10 @@ class Monitor(object):
                 # only send a notification if this node's status has changed since 
                 # the last time we checked, so we don't get duplicate notifications 
                 # related to the same incident.
-                notify = (node.id not in self.status or self.status[node.id] != -1)
+                try:
+                    notify = (-1 != self.status[node.id])
+                except KeyError:
+                    notify = False
                 
                 if notify and not self.options.noop:
                     subject = '%s.%s error' % (node.stack, node.name)

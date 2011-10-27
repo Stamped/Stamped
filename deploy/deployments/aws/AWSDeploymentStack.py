@@ -642,6 +642,7 @@ class AWSDeploymentStack(ADeploymentStack):
                 utils.log("[%s] removing %d stale test instances before create can occur" % (self, len(test_instances)))
                 ids = set()
                 
+                # remove stale test instances
                 for instance in test_instances:
                     ids.add(instance.instance_id)
                     instance.terminate()
@@ -650,6 +651,7 @@ class AWSDeploymentStack(ADeploymentStack):
             
             utils.log("[%s] creating %d test instances" % (self, numInstances))
             
+            # create new test instances
             test_instances = []
             for i in xrange(numInstances):
                 config = {
@@ -670,19 +672,19 @@ class AWSDeploymentStack(ADeploymentStack):
         env.user = 'ubuntu'
         env.key_filename = [ 'keys/test-keypair' ]
         
+        # TODO: test just this portion
+        
         for instance in test_instances:
-            num_retries = 5
-            
             test_cmd = "/stamped/stamped/sites/stamped.com/bin/tests/stampede/StressTests.py"
             log = "/stamped/logs/test.log"
-            cmd = "nohup bash -c '. /stamped/bin/activate && python %s >& %s < /dev/null' &" % \
+            cmd = "sudo nohup bash -c '. /stamped/bin/activate && python %s >& %s < /dev/null' &" % \
                    (test_cmd, log)
             
+            num_retries = 5
             while num_retries > 0:
                 ret = utils.runbg(instance.public_dns_name, env.user, cmd)
                 if 0 == ret:
                     break
                 
                 num_retries -= 1
-        
 

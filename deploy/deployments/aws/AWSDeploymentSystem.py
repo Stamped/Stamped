@@ -112,7 +112,7 @@ class AWSDeploymentSystem(DeploymentSystem):
                         'cidr_ip'     : '0.0.0.0/0', 
                     }, 
                     {
-                        'ip_protocol' : 'tcp', 
+                        'ip_protocol' : 'udp', 
                         'from_port'   : 8125, 
                         'to_port'     : 8125, 
                         'cidr_ip'     : '0.0.0.0/0', 
