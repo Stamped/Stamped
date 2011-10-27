@@ -74,9 +74,9 @@ def convertEntities():
             track_length = entity['details']['media']['track_length']
             if track_length:
                 try:
-                    new = int(track_length)
+                    new = int(float(track_length))
                     if 'sources' in entity and 'apple' in entity['sources'] and 'export_date' in entity['sources']['apple']:
-                        new = int(round(int(track_length) / 1000.0))
+                        new = int(round(int(float(track_length)) / 1000.0))
                     
                     entity_collection.update(
                         {'_id': entity['_id']},
