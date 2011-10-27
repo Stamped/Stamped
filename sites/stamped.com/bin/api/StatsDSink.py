@@ -15,7 +15,7 @@ from gevent.pool    import Pool
 class StatsDSink(AStatsSink):
     
     def __init__(self):
-        self.statsd = StatsD(host=host, port=port)
+        self.statsd = StatsD(host="localhost", port=8125)
         self._pool  = Pool(1)
         self._pool.spawn(self._init)
     
