@@ -32,6 +32,7 @@ def main():
 
         print 
 
+    convertEntities()
 
 
 def mongoExportImport(collection):
@@ -60,6 +61,29 @@ def mongoImportJSON(collection):
                 (collection, NEW_HOST, collection)
     pp = Popen(cmdImport, shell=True, stdout=PIPE)
     pp.wait()
+
+
+def convertEntities():
+    entity_collection = new_database['entities']
+    entities = entity_collection.find({'sources.apple.export_date': '1311152428052'})
+
+    for entity in entities:
+
+        if 'details' in entity and 'media' in entity['details'] and 'track_length' in entity['details']['media']:
+            track_length = entity['details']['media']['track_length']
+            if track_length:
+                new = str(int(round(int(track_length) / 1000.0)))
+
+                entity_collection.update(
+                    {'_id': entity['_id']},
+                    {'$set': {'details.media.track_length': new}}
+                )
+                print '%60s (%s -> %s)' % (entity['title'], track_length, new)
+        else:
+            print '-' * 40
+            print 'SKIPPED: %s (%s)' % (entity['_id'], entity['title'])    
+            print '-' * 40
+
 
 
 if __name__ == '__main__':  

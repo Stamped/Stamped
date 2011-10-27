@@ -6,9 +6,10 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import aws, copy, os, re, sys, utils
+import aws, copy, os, re, sys, time, utils
 
 from boto.ec2.elb   import ELBConnection
+from gevent.pool    import Pool
 from subprocess     import Popen, PIPE
 from pprint         import pprint
 
@@ -117,16 +118,22 @@ class EC2Utils(object):
             'nodes' : []
         }
         
-        for cur_id in ids:
+        pool = Pool(len(ids))
+        
+        def _process_id(cur_id):
             info = self.get_instance_info(cur_id)
             if info is None:
-                continue
+                return
             
             data['nodes'].append(info)
             
             if cur_id == instance_id:
                 data['instance']['name'] = info['name']
         
+        for cur_id in ids:
+            pool.spawn(_process_id, cur_id)
+        
+        pool.join()
         return utils.AttributeDict(data)
     
     def get_elb(self, instance_ids=None):
@@ -149,10 +156,18 @@ class EC2Utils(object):
     def _shell(self, cmd, env=None):
         utils.log(cmd)
         pp = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, env=env)
-        output = pp.stdout.read().strip()
-        status = pp.wait()
+        delay = 0.01
         
-        return (output, status)
+        while pp.returncode is None:
+            time.sleep(delay)
+            delay *= 2
+            if delay > 1:
+                delay = 1
+            
+            pp.poll()
+        
+        output = pp.stdout.read().strip()
+        return (output, pp.returncode)
 
 """
 ec2 = EC2Utils()
