@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import bson, copy, math, os, pymongo, time, utils, atexit, logs
+import atexit, bson, copy, math, os, pymongo, time, traceback, utils, logs
 from errors import *
 
 from pprint import pprint
@@ -92,6 +92,7 @@ class MongoDBConfig(Singleton):
         
         # TODO: have a more consistent approach to handling AutoReconnect!
         logs.debug("Creating connection")
+        logs.debug(traceback.format_stack())
         
         delay = 1
         max_delay = 16
