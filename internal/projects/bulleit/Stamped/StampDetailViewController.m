@@ -30,6 +30,7 @@
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
 #import "SharedRequestDelegate.h"
+#import "WebViewController.h"
 
 NSString* const kRemoveCommentPath = @"/comments/remove.json";
 
@@ -810,7 +811,9 @@ typedef enum {
 
 - (void)handleURL:(NSURL*)url {
   if ([url.scheme isEqualToString:@"http"]) {
-    // Open in web browser...
+    WebViewController* vc = [[WebViewController alloc] initWithURL:url];
+    [self.navigationController pushViewController:vc animated:YES];
+    [vc release];
     return;
   }
 
