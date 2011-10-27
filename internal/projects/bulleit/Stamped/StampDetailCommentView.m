@@ -22,7 +22,7 @@
 
 @property (nonatomic, readonly) UserImageView* userImage;
 @property (nonatomic, readonly) UILabel* nameLabel;
-@property (nonatomic, readonly) UILabel* commentLabel;
+@property (nonatomic, readonly) TTTAttributedLabel* commentLabel;
 @property (nonatomic, readonly) UIButton* deleteButton;
 
 @end
@@ -76,7 +76,10 @@
   [self addSubview:nameLabel_];
   [nameLabel_ release];
 
-  commentLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  commentLabel_ = [[TTTAttributedLabel alloc] initWithFrame:CGRectZero];
+  commentLabel_.delegate = self;
+  commentLabel_.userInteractionEnabled = YES;
+  commentLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
   commentLabel_.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   commentLabel_.text = comment_.blurb;
@@ -164,6 +167,12 @@
 
   if ([delegate_ commentViewShouldBeginEditing:self])
     self.editing = YES;
+}
+
+#pragma mark - TTTAttributedLabelDelegate methods.
+
+- (void)attributedLabel:(TTTAttributedLabel*)label didSelectLinkWithURL:(NSURL*)url {
+  NSLog(@"url: %@", url);
 }
 
 @end

@@ -271,17 +271,12 @@ static inline NSDictionary * NSAttributedStringAttributesFromLabel(UILabel *labe
         return NSNotFound;
     }
     
-    CGRect textRect = [self textRectForBounds:self.bounds limitedToNumberOfLines:self.numberOfLines];
-    if (!CGRectContainsPoint(textRect, p)) {
-        return NSNotFound;
-    }
-    
     // Convert tap coordinates (start at top left) to CT coordinates (start at bottom left)
     p = CGPointMake(p.x, self.bounds.size.height - p.y);
 
     CFIndex idx = NSNotFound;
     CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, textRect);
+    CGPathAddRect(path, NULL, self.bounds);
     CTFrameRef frame = CTFramesetterCreateFrame(self.framesetter, CFRangeMake(0, [self.attributedText length]), path, NULL);
     CFArrayRef lines = CTFrameGetLines(frame);
     NSUInteger numberOfLines = CFArrayGetCount(lines);

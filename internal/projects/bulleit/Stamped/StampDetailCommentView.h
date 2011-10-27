@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#import "TTTAttributedLabel.h"
+
 @class Comment;
 @class UserImageView;
 @class StampDetailCommentView;
@@ -18,7 +20,7 @@
 - (void)commentViewDeleteButtonPressed:(StampDetailCommentView*)commentView;
 @end
 
-@interface StampDetailCommentView : UIView
+@interface StampDetailCommentView : UIView <TTTAttributedLabelDelegate>
 
 - (id)initWithComment:(Comment*)comment;
 
