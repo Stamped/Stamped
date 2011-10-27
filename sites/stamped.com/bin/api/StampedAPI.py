@@ -49,6 +49,15 @@ class StampedAPI(AStampedAPI):
         # Enable / Disable Functionality
         self._activity = True
         self._rollback = []
+        
+        if utils.is_ec2():
+            try:
+                stack_info = self._statsSink.get_stack_info()
+                self.node_name = stack_info.instance.name
+            except:
+                self.node_name = "unknown"
+        else:
+            self.node_name = "localhost"
     
     def API_CALL(f):
         @wraps(f)
@@ -72,6 +81,7 @@ class StampedAPI(AStampedAPI):
                 self._statsSink.time('%s.time' % stat_prefix, duration)
                 
                 stats = [
+                    'stamped.api.%s.methods.count' % self.node_name
                     'stamped.api.methods.count', 
                     '%s.count' % stat_prefix, 
                 ]
