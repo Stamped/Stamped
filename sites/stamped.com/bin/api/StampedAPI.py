@@ -81,7 +81,7 @@ class StampedAPI(AStampedAPI):
                 self._statsSink.time('%s.time' % stat_prefix, duration)
                 
                 stats = [
-                    'stamped.api.%s.methods.count' % self.node_name, 
+                    'stamped.api.servers.%s' % self.node_name, 
                     'stamped.api.methods.count', 
                     '%s.count' % stat_prefix, 
                 ]
