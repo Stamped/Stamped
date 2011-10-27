@@ -133,6 +133,7 @@ class MongoStampedAPI(StampedAPI):
                         host, port = node.private_dns, 8125
                         break
             except:
+                utils.printException()
                 pass
         
         logs.info("initializing stats sink to %s:%d" % (host, port))
