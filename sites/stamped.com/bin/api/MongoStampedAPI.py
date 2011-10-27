@@ -46,11 +46,11 @@ class MongoStampedAPI(StampedAPI):
         if db:
             utils.init_db_config(db)
         
+        self.ec2_utils       = EC2Utils()
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
-        self._statsSink      = self._getStatsSink()
         
-        self.ec2_utils  = EC2Utils()
+        self._statsSink      = self._getStatsSink()
     
     @lazyProperty
     def _accountDB(self):
