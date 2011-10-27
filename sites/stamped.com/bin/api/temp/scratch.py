@@ -38,7 +38,7 @@ def handlePOST(path, data):
     
     return result
 
-
+result = None
 
 USER = 'kevin'
 PASS = '12345'
@@ -52,7 +52,6 @@ data = {
 }
 account = handlePOST(path, data)
 token = account['token']
-
 
 
 # path = "favorites/remove.json"
@@ -132,13 +131,19 @@ token = account['token']
 # }
 # result = handlePOST(path, data)
 
-path = "stamps/likes/show.json"
+# path = "stamps/likes/show.json"
+# data = {
+#     "oauth_token": token['access_token'],
+#     "stamp_id": "4ea866d532a7ba4fc0000406",
+# }
+# result = handleGET(path, data)
+
+path = "account/settings.json"
 data = {
     "oauth_token": token['access_token'],
-    "stamp_id": "4ea866d532a7ba4fc0000406",
+    "screen_name": "kevin1",
 }
-result = handleGET(path, data)
-
+result = handlePOST(path, data)
 
 
 print result
