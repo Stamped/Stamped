@@ -40,6 +40,7 @@ class MongoStampedAPI(StampedAPI):
     """
     
     def __init__(self, db=None, **kwargs):
+        self.__statsSink = None
         StampedAPI.__init__(self, "MongoStampedAPI", **kwargs)
         
         if db:
@@ -47,7 +48,12 @@ class MongoStampedAPI(StampedAPI):
         
         self._entityDB       = MongoEntityCollection()
         self._placesEntityDB = MongoPlacesEntityCollection()
-        self._statsSink      = StatsDSink()
+    
+    @property
+    def _statsSink
+        if self.__statsSink is None:
+            self.__statsSink = StatsDSink()
+        return self.__statsSink
     
     @lazyProperty
     def _accountDB(self):
