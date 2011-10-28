@@ -751,8 +751,12 @@ typedef enum {
     if (c.restampID == nil)
       [self addComment:c];
   }
-  NSArray* commentViewIDs = [commentViews_ valueForKeyPath:@"@distinctUnionOfObjects.comment.commentID"];
-  NSLog(@"Comment view IDs: %@", commentViewIDs);
+  NSArray* commentIDs = [stamp_.comments valueForKeyPath:@"@distinctUnionOfObjects.commentID"];
+  NSArray* viewComments = [commentViews_ valueForKeyPath:@"@distinctUnionOfObjects.comment"];
+  for (Comment* c in viewComments) {
+    if (c.restampID == nil && ![commentIDs containsObject:c.commentID])
+      [self removeComment:c];
+  }
 }
 
 - (void)addComment:(Comment*)comment {

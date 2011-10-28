@@ -99,7 +99,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 #pragma mark - NSFetchedResultsControllerDelegate methods.
 
 - (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
-  numRows_ = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
+  numRows_ = MAX(numRows_, [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects]);
   [self.tableView beginUpdates];
 }
 
@@ -108,7 +108,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
        atIndexPath:(NSIndexPath*)indexPath
      forChangeType:(NSFetchedResultsChangeType)type
       newIndexPath:(NSIndexPath*)newIndexPath {
-  
+
   UITableView* tableView = self.tableView;
   
   switch(type) {
@@ -133,14 +133,14 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
   [self.tableView endUpdates];
-  NSUInteger numNewRows = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects] - numRows_;
-  if (numNewRows > 0) {
+  NSUInteger numObjects = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
+  if (numObjects > numRows_) {
     [[NSNotificationCenter defaultCenter]
         postNotificationName:kNewsItemCountHasChangedNotification
-                      object:[NSNumber numberWithUnsignedInteger:numNewRows]];
+                      object:[NSNumber numberWithUnsignedInteger:numObjects - numRows_]];
   }
 
-  numRows_ = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
+  numRows_ = numObjects;
 }
 
 #pragma mark - Table view data source
