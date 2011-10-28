@@ -465,6 +465,7 @@
 		CB55A86814476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */; };
 		CB55A86914476D9A00CEB6CC /* add_friends_button_connecttwitter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86414476D9A00CEB6CC /* add_friends_button_connecttwitter@2x.png */; };
 		CB55A86A14476D9A00CEB6CC /* add_friends_gradient_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86514476D9A00CEB6CC /* add_friends_gradient_bg@2x.png */; };
+		CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */; };
 		CB958E8E141E438200BBCCBC /* OtherDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB958E8C141E438200BBCCBC /* OtherDetailViewController.m */; };
 		CBA08C431421A888005F2D84 /* LearnMoreView.m in Sources */ = {isa = PBXBuildFile; fileRef = CBA08C421421A888005F2D84 /* LearnMoreView.m */; };
 		CBA08C7214226F8F005F2D84 /* learnmore_00@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBA08C6914226F8E005F2D84 /* learnmore_00@2x.png */; };
@@ -1175,6 +1176,8 @@
 		CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connecttwitter_pressed@2x.png"; sourceTree = "<group>"; };
 		CB55A86414476D9A00CEB6CC /* add_friends_button_connecttwitter@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connecttwitter@2x.png"; sourceTree = "<group>"; };
 		CB55A86514476D9A00CEB6CC /* add_friends_gradient_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_gradient_bg@2x.png"; sourceTree = "<group>"; };
+		CB65DC34145A44AF00E702D6 /* STOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STOAuthViewController.h; sourceTree = "<group>"; };
+		CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STOAuthViewController.m; sourceTree = "<group>"; };
 		CB958E8B141E438200BBCCBC /* OtherDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OtherDetailViewController.h; sourceTree = "<group>"; };
 		CB958E8C141E438200BBCCBC /* OtherDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OtherDetailViewController.m; sourceTree = "<group>"; };
 		CBA08C411421A888005F2D84 /* LearnMoreView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LearnMoreView.h; sourceTree = "<group>"; };
@@ -2116,6 +2119,8 @@
 				7EC1C64F13F456FE0070CE6D /* KeyChainItemWrapper.m */,
 				7EDA5FF313F5705300F23B13 /* OAuthToken.h */,
 				7EDA5FF413F5705300F23B13 /* OAuthToken.m */,
+				CB65DC34145A44AF00E702D6 /* STOAuthViewController.h */,
+				CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */,
 			);
 			name = Authentication;
 			sourceTree = "<group>";
@@ -2986,6 +2991,7 @@
 				7E99C9B71458849500B116AC /* DetailedEntity.m in Sources */,
 				7E7DDDDE145A00CE0058ACA9 /* WebViewController.m in Sources */,
 				7E7DDE14145A0AE50058ACA9 /* STToolbar.m in Sources */,
+				CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

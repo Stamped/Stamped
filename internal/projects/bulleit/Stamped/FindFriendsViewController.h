@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 
 #import "FBConnect.h"
+#import "STNavigationBar.h"
 
 @class STSearchField;
 
@@ -40,7 +41,6 @@ typedef enum {
 @property (nonatomic, retain) NSMutableArray* followedUsers;
 @property (nonatomic, retain) IBOutlet UIView* signInTwitterView;
 @property (nonatomic, retain) IBOutlet UIView* signInFacebookView;
-@property (nonatomic, retain) IBOutlet UIView* signInAuthView;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInTwitterActivityIndicator;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInFacebookActivityIndicator;
 @property (nonatomic, retain) IBOutlet UIButton* signInTwitterConnectButton;
