@@ -33,7 +33,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @interface StampedAppDelegate ()
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
-- (void)cleanupStaleData;
 @end
 
 @implementation StampedAppDelegate
@@ -64,7 +63,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationWillResignActive:(UIApplication*)application {
   [[UserImageDownloadManager sharedManager] purgeCache];
-  [self cleanupStaleData];
 }
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication*)application {
@@ -95,7 +93,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 - (void)applicationDidEnterBackground:(UIApplication*)application {
-  [self cleanupStaleData];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication*)application {}
@@ -103,7 +100,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)applicationDidBecomeActive:(UIApplication*)application {}
 
 - (void)applicationWillTerminate:(UIApplication*)application {
-  [self cleanupStaleData];
 }
 
 - (void)dealloc {
@@ -119,16 +115,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 #pragma mark - Private methods.
-
-- (void)cleanupStaleData {
-  NSFetchRequest* request = [Stamp fetchRequest];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == YES"]];
-  NSArray* results = [Stamp objectsWithFetchRequest:request];
-  for (Stamp* s in results)
-    [Stamp.managedObjectContext deleteObject:s];
-  
-  [Stamp.managedObjectContext save:NULL];
-}
 
 - (void)customizeAppearance {
   if (![UIBarButtonItem conformsToProtocol:@protocol(UIAppearance)])

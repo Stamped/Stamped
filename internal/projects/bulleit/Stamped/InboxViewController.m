@@ -199,7 +199,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSFetchRequest* request = [Entity fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count > 0"]];
+    [request setPredicate:
+        [NSPredicate predicateWithFormat:@"stamps.@count > 0 AND (SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"]];
     [request setFetchBatchSize:20];
     [NSFetchedResultsController deleteCacheWithName:nil];
     NSFetchedResultsController* fetchedResultsController =

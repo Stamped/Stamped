@@ -745,11 +745,14 @@ typedef enum {
 }
 
 - (void)renderComments {
-  NSArray* sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES]];
+  NSArray* sortDescriptors = [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"created"
+                                                                                    ascending:YES]];
   for (Comment* c in [stamp_.comments sortedArrayUsingDescriptors:sortDescriptors]) {
     if (c.restampID == nil)
       [self addComment:c];
   }
+  NSArray* commentViewIDs = [commentViews_ valueForKeyPath:@"@distinctUnionOfObjects.comment.commentID"];
+  NSLog(@"Comment view IDs: %@", commentViewIDs);
 }
 
 - (void)addComment:(Comment*)comment {

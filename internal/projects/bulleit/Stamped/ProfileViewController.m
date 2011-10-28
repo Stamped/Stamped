@@ -171,14 +171,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [super viewDidDisappear:animated];
   if (self.navigationController.viewControllers.count > 1)
     return;
-
-  NSFetchRequest* request = [Stamp fetchRequest];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == YES"]];
-  NSArray* results = [Stamp objectsWithFetchRequest:request];
-  for (Stamp* s in results)
-    [Stamp.managedObjectContext deleteObject:s];
-
-  [Entity.managedObjectContext save:NULL];
 }
 
 - (void)userImageTapped:(id)sender {
