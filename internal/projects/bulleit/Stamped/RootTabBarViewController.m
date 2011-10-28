@@ -107,7 +107,6 @@
                                            selector:@selector(pushNotificationReceived:)
                                                name:kPushNotificationReceivedNotification
                                              object:nil];
-  
 
   [AccountManager sharedManager].delegate = self;
   if ([AccountManager sharedManager].authenticated) {

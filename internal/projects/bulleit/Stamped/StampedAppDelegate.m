@@ -163,6 +163,8 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
           [UIColor whiteColor], UITextAttributeTextColor,
           [NSValue valueWithUIOffset:UIOffsetMake(0, 0)], UITextAttributeTextShadowOffset, nil] 
                                               forState:UIControlStateHighlighted];
+
+  [[UITabBar appearance] setSelectionIndicatorImage:[UIImage imageNamed:@"clear_image"]];
 }
 
 - (void)performRestKitMappings {
