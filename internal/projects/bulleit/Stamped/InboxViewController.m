@@ -403,12 +403,13 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     [Entity.managedObjectContext save:NULL];
 
   Stamp* oldestStampInBatch = mutableObjects.lastObject;
-  NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
-  [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
-                                            forKey:@"InboxOldestTimestampInBatch"];
-  [[NSUserDefaults standardUserDefaults] synchronize];
-  [self.tableView reloadData];
-  if (objects.count < 10) {
+  if (oldestStampInBatch.modified) {
+    NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
+    [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
+                                              forKey:@"InboxOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+  if (objects.count < 10 || !oldestStampInBatch.modified) {
     // Grab latest stamp.
     NSFetchRequest* request = [Stamp fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];
