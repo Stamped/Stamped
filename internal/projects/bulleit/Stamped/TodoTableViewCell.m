@@ -220,7 +220,13 @@ static const CGFloat kSubstringFontSize = 12.0;
     if (!stampImageView_.hidden) {
       [delegate_ todoTableViewCell:self shouldStampEntity:favorite_.entityObject];
     } else {
-      [delegate_ todoTableViewCell:self shouldShowStamp:favorite_.stamp];
+      NSString* userID = [AccountManager sharedManager].currentUser.userID;
+      NSString* entityID = favorite_.entityObject.entityID;
+      NSPredicate* p =
+          [NSPredicate predicateWithFormat:@"user.userID == %@ AND entityObject.entityID == %@", userID, entityID];
+      Stamp* s = [Stamp objectWithPredicate:p];
+      if (s)
+        [delegate_ todoTableViewCell:self shouldShowStamp:s];
     }
     inButtonPhase_ = NO;
     return;
