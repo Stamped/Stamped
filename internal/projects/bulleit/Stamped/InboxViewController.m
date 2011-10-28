@@ -441,39 +441,39 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 #pragma mark - NSFetchedResultsControllerDelegate methods.
 
-//- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
-//  [self.tableView beginUpdates];
-//}
-//
-//- (void)controller:(NSFetchedResultsController*)controller 
-//   didChangeObject:(id)anObject
-//       atIndexPath:(NSIndexPath*)indexPath
-//     forChangeType:(NSFetchedResultsChangeType)type
-//      newIndexPath:(NSIndexPath*)newIndexPath {
-//  UITableView* tableView = self.tableView;
-//  
-//  switch(type) {
-//    case NSFetchedResultsChangeInsert:
-//      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
-//      break;
-//      
-//    case NSFetchedResultsChangeDelete:
-//      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-//      break;
-//      
-//    case NSFetchedResultsChangeUpdate:
-//      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
-//      break;
-//      
-//    case NSFetchedResultsChangeMove:
-//      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-//      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
-//      break;
-//  }
-//}
+- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView beginUpdates];
+}
+
+- (void)controller:(NSFetchedResultsController*)controller 
+   didChangeObject:(id)anObject
+       atIndexPath:(NSIndexPath*)indexPath
+     forChangeType:(NSFetchedResultsChangeType)type
+      newIndexPath:(NSIndexPath*)newIndexPath {
+  UITableView* tableView = self.tableView;
+  
+  switch(type) {
+    case NSFetchedResultsChangeInsert:
+      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeDelete:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeUpdate:
+      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+      break;
+      
+    case NSFetchedResultsChangeMove:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+  }
+}
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-  [self.tableView reloadData];
+  [self.tableView endUpdates];
 }
 
 #pragma mark - Table view delegate
