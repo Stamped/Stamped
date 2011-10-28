@@ -177,12 +177,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   NSArray* results = [Stamp objectsWithFetchRequest:request];
   for (Stamp* s in results)
     [Stamp.managedObjectContext deleteObject:s];
-  
-  request = [Entity fetchRequest];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
-  results = [Entity objectsWithFetchRequest:request];
-  for (Entity* e in results)
-    [Entity.managedObjectContext deleteObject:e];
 
   [Entity.managedObjectContext save:NULL];
 }
@@ -369,39 +363,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
   
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
-    NSMutableArray* toDelete = [NSMutableArray array];
-    NSMutableArray* mutableObjects = [NSMutableArray array];
-    for (Stamp* stamp in objects) {
-      if ([stamp.deleted boolValue]) {
-        [toDelete addObject:stamp];
-      } else {
-        [mutableObjects addObject:stamp];
-      }
-    }
-
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-    for (Stamp* stamp in toDelete) {
-      if (stamp.entityObject.stamps.count > 1) {
-        NSMutableArray* sortedStamps =
-            [NSMutableArray arrayWithArray:[[stamp.entityObject.stamps allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
-        [sortedStamps removeObject:stamp];
-        Stamp* latestStamp = [sortedStamps objectAtIndex:0];
-        stamp.entityObject.mostRecentStampDate = latestStamp.created;
-      }
-      [Stamp.managedObjectContext deleteObject:stamp];
-    }
-    [Stamp.managedObjectContext save:NULL];
-    
-    NSFetchRequest* request = [Entity fetchRequest];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
-    NSArray* results = [Entity objectsWithFetchRequest:request];
-    for (Entity* e in results)
-      [Entity.managedObjectContext deleteObject:e];
-    
-    if (results.count)
-      [Entity.managedObjectContext save:NULL];
-
-    self.stampsArray = [mutableObjects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
     [self.tableView reloadData];
     self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
   }

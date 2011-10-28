@@ -119,12 +119,20 @@ static const CGFloat kActivityBadgeSize = 21.0;
   [self.contentView setNeedsDisplay];
 }
 
+- (void)prepareForReuse {
+  self.event = nil;
+  [super prepareForReuse];
+}
+
 - (void)dealloc {
   self.event = nil;
   [super dealloc];
 }
 
 - (void)invertColors:(BOOL)inverted {
+  if (!event_)
+    return;
+
   UIColor* color = inverted ? [UIColor whiteColor] : [UIColor stampedGrayColor];
   headerTextLayer_.string = [self headerAttributedStringWithColor:color];
   [self setNeedsDisplayInRect:headerTextLayer_.frame];

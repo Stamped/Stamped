@@ -930,17 +930,15 @@ typedef enum {
       Stamp* latestStamp = [sortedStamps objectAtIndex:0];
       stamp_.entityObject.mostRecentStampDate = latestStamp.created;
     }
+    
+    Favorite* fave = [Favorite objectWithPredicate:
+        [NSPredicate predicateWithFormat:@"entityObject.entityID == %@", stamp_.entityObject.entityID]];
+    fave.complete = [NSNumber numberWithBool:NO];
+
     [self sendDeleteStampRequest];
     [Stamp.managedObjectContext deleteObject:stamp_];
     [Stamp.managedObjectContext save:NULL];
-    NSFetchRequest* request = [Entity fetchRequest];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
-    NSArray* results = [Entity objectsWithFetchRequest:request];
-    for (Entity* e in results)
-      [Entity.managedObjectContext deleteObject:e];
-    
-    if (results.count)
-      [Entity.managedObjectContext save:NULL];
+
     [self.navigationController popViewControllerAnimated:YES];
   } else if (actionSheet.tag == StampDetailActionTypeShare) {
     BOOL canTweet = NO;

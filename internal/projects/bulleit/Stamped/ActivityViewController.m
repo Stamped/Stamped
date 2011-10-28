@@ -68,6 +68,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     NSFetchRequest* request = [Event fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"stamp != NIL"]];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
                                             managedObjectContext:[Event managedObjectContext]

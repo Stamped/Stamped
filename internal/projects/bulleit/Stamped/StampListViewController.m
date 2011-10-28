@@ -204,7 +204,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
         [mutableObjects addObject:stamp];
       }
     }
-    
+
     for (Stamp* stamp in toDelete) {
       if (stamp.entityObject.stamps.count > 1) {
         NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
@@ -217,15 +217,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
       [Stamp.managedObjectContext deleteObject:stamp];
     }
     [Stamp.managedObjectContext save:NULL];
-    
-    NSFetchRequest* request = [Entity fetchRequest];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
-    NSArray* results = [Entity objectsWithFetchRequest:request];
-    for (Entity* e in results)
-      [Entity.managedObjectContext deleteObject:e];
-    
-    if (results.count)
-      [Entity.managedObjectContext save:NULL];
     
     self.oldestInBatch = [mutableObjects.lastObject modified];
 

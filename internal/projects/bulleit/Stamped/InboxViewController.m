@@ -199,6 +199,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSFetchRequest* request = [Entity fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count > 0"]];
     [request setFetchBatchSize:20];
     [NSFetchedResultsController deleteCacheWithName:nil];
     NSFetchedResultsController* fetchedResultsController =
@@ -389,19 +390,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       Stamp* latestStamp = [sortedStamps objectAtIndex:0];
       stamp.entityObject.mostRecentStampDate = latestStamp.created;
     }
-
+    
     [Stamp.managedObjectContext deleteObject:stamp];
   }
   [Stamp.managedObjectContext save:NULL];
-  
-  NSFetchRequest* request = [Entity fetchRequest];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
-  NSArray* results = [Entity objectsWithFetchRequest:request];
-  for (Entity* e in results)
-    [Entity.managedObjectContext deleteObject:e];
-
-  if (results.count)
-    [Entity.managedObjectContext save:NULL];
 
   Stamp* oldestStampInBatch = mutableObjects.lastObject;
   if (oldestStampInBatch.modified) {

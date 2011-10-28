@@ -127,13 +127,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   for (Stamp* s in results)
     [Stamp.managedObjectContext deleteObject:s];
   
-  request = [Entity fetchRequest];
-  [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
-  results = [Entity objectsWithFetchRequest:request];
-  for (Entity* e in results)
-    [Entity.managedObjectContext deleteObject:e];
-  
-  [Entity.managedObjectContext save:NULL];
+  [Stamp.managedObjectContext save:NULL];
 }
 
 - (void)customizeAppearance {
