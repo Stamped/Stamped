@@ -153,7 +153,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   UIImage* stampImage = [UIImage imageNamed:@"stamp_42pt_strokePlus"];
   UIImage* highlightedImage = [Util whiteMaskedImageUsingImage:stampImage];
   stampImageView_ = [[UIImageView alloc] initWithImage:stampImage highlightedImage:highlightedImage];
-  stampImageView_.frame = CGRectOffset(stampImageView_.frame, 14, 8);
+  stampImageView_.frame = CGRectOffset(stampImageView_.frame, 12, 8);
   stampImageView_.hidden = [favorite_.complete boolValue];
   [self.contentView addSubview:stampImageView_];
   [stampImageView_ release];
@@ -170,7 +170,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   titleLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
   titleLayer_.fontSize = 24.0;
   titleLayer_.frame = CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 15,
-                                 11, kTitleMaxWidth, kTitleFontSize);
+                                 8, kTitleMaxWidth, kTitleFontSize);
   titleLayer_.actions = [NSDictionary dictionaryWithObject:[NSNull null]
                                                     forKey:@"contents"];
   titleFont_ = CTFontCreateWithName((CFStringRef)kTitleFontString, kTitleFontSize, NULL);
@@ -188,12 +188,12 @@ static const CGFloat kSubstringFontSize = 12.0;
   [self.contentView.layer addSublayer:titleLayer_];
   [titleLayer_ release];
   
-  typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 15, 59, 15, 12)];
+  typeImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(stampImageView_.frame) + 13, 56, 15, 12)];
   typeImageView_.contentMode = UIViewContentModeScaleAspectFit;
   [self addSubview:typeImageView_];
   [typeImageView_ release];
   
-  descriptionLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 3, 57, 200, 16)];
+  descriptionLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(typeImageView_.frame) + 3, 54, 200, 16)];
   descriptionLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   descriptionLabel_.textColor = [UIColor stampedGrayColor];
   descriptionLabel_.highlightedTextColor = [UIColor whiteColor];
