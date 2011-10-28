@@ -108,16 +108,7 @@ urlpatterns = patterns('',
     (r'v0/temp/ping.json',              'v0.functions.temp.ping'),
     (r'v0/temp/friends.json',           'v0.functions.temp.friends'),
     (r'v0/temp/followers.json',         'v0.functions.temp.followers'),
-    (r'v0/temp/activity.json',          'v0.functions.temp.activity'),
-    (r'v0/temp/inbox.json',             'v0.functions.temp.inbox'),
     (r'v0/temp/timeout.json',           'v0.functions.temp.timeout'),
-
-
-    (r'v0/test/static.json',            'v0.functions.temp.static'),
-    (r'v0/test/begin.json',             'v0.functions.temp.begin'),
-    (r'v0/test/read.json',              'v0.functions.temp.read'),
-    (r'v0/test/write.json',             'v0.functions.temp.write'),
-    (r'v0/test/read-write.json',        'v0.functions.temp.readwrite'),
 
     
     ### DOCS

@@ -402,13 +402,13 @@ def buildPushNotification(user, activityItem, deviceId):
         msg = '%s added your stamp as a to-do' % (user.screen_name)
 
     elif genre == 'mention':
-        msg = "%s mentioned you on Stamped" % (user.screen_name)
+        msg = "%s mentioned you" % (user.screen_name)
 
     elif genre == 'comment':
         msg = '%s commented on your stamp' % (user.screen_name)
 
     elif genre == 'reply':
-        msg = '%s replied on Stamped' % (user.screen_name)
+        msg = '%s replied' % (user.screen_name)
 
     elif genre == 'follower':
         msg = '%s is now following you' % (user.screen_name)
