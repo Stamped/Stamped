@@ -33,6 +33,7 @@
 #import "WebViewController.h"
 
 NSString* const kRemoveCommentPath = @"/comments/remove.json";
+NSString* const kRemoveStampPath = @"/stamps/remove.json";
 
 static const CGFloat kMainCommentFrameMinHeight = 75.0;
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
@@ -69,6 +70,8 @@ typedef enum {
 - (void)sendRemoveCommentRequest:(NSString*)commentID;
 - (void)showTweetViewController;
 - (void)handleURL:(NSURL*)url;
+- (void)deleteStampButtonPressed:(id)sender;
+- (void)sendDeleteStampRequest;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -184,8 +187,8 @@ typedef enum {
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  stampPhotoView_.imageURL = stamp_.imageURL;
   [super viewDidAppear:animated];
+  stampPhotoView_.imageURL = stamp_.imageURL;
 }
 
 - (void)viewDidLoad {
@@ -193,6 +196,21 @@ typedef enum {
 
   [self setUpToolbar];
   [self setUpHeader];
+  
+  if ([[AccountManager sharedManager].currentUser.userID isEqualToString:stamp_.user.userID]) {
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Delete"
+                                                                    style:UIBarButtonItemStylePlain
+                                                                   target:self
+                                                                   action:@selector(deleteStampButtonPressed:)];
+    self.navigationItem.rightBarButtonItem = rightButton;
+    [rightButton release];
+  }
+
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:stamp_.entityObject.title
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
 
   activityView_.layer.shadowOpacity = 0.1;
   activityView_.layer.shadowOffset = CGSizeMake(0, 1);
@@ -633,6 +651,18 @@ typedef enum {
 
 #pragma mark -
 
+- (void)deleteStampButtonPressed:(id)sender {
+  UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure you want to delete this stamp?"
+                                                      delegate:self
+                                             cancelButtonTitle:@"Cancel"
+                                        destructiveButtonTitle:@"Delete"
+                                             otherButtonTitles:nil] autorelease];
+  sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+  sheet.tag = StampDetailActionTypeDeleteStamp;
+  [sheet showInView:self.view];
+  return;
+}
+
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer {
   if (recognizer.state != UIGestureRecognizerStateEnded)
     return;
@@ -794,6 +824,11 @@ typedef enum {
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
   scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
+  
+  stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] - 1];
+  [stamp_.managedObjectContext save:NULL];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
+                                                      object:stamp_];
 }
 
 - (void)handleURL:(NSURL*)url {
@@ -886,8 +921,25 @@ typedef enum {
       for (StampDetailCommentView* view in commentViews_)
         view.editing = NO;
     }
-  } else if (actionSheet.tag == StampDetailActionTypeDeleteStamp) {
+  } else if (actionSheet.tag == StampDetailActionTypeDeleteStamp && buttonIndex == 0) {
+    if (stamp_.entityObject.stamps.count > 1) {
+      NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+      NSMutableArray* sortedStamps =
+          [NSMutableArray arrayWithArray:[[stamp_.entityObject.stamps allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
+      [sortedStamps removeObject:stamp_];
+      Stamp* latestStamp = [sortedStamps objectAtIndex:0];
+      stamp_.entityObject.mostRecentStampDate = latestStamp.created;
+    }
     
+    Favorite* fave = [Favorite objectWithPredicate:
+        [NSPredicate predicateWithFormat:@"entityObject.entityID == %@", stamp_.entityObject.entityID]];
+    fave.complete = [NSNumber numberWithBool:NO];
+
+    [self sendDeleteStampRequest];
+    [Stamp.managedObjectContext deleteObject:stamp_];
+    [Stamp.managedObjectContext save:NULL];
+
+    [self.navigationController popViewControllerAnimated:YES];
   } else if (actionSheet.tag == StampDetailActionTypeShare) {
     BOOL canTweet = NO;
     if ([TWTweetComposeViewController canSendTweet] &&
@@ -920,7 +972,7 @@ typedef enum {
     [self presentViewController:twitter animated:YES completion:nil];
   }
   
-  twitter.completionHandler = ^(TWTweetComposeViewControllerResult res) {
+  twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
     [self dismissModalViewControllerAnimated:YES];
   };
 }
@@ -962,6 +1014,17 @@ typedef enum {
   [self sendAddCommentRequest];
 }
 
+- (void)sendDeleteStampRequest {
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [objectManager.mappingProvider mappingForKeyPath:@"Stamp"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kRemoveStampPath 
+                                                                    delegate:[SharedRequestDelegate sharedDelegate]];
+  objectLoader.method = RKRequestMethodPOST;
+  objectLoader.objectMapping = mapping;
+  objectLoader.params = [NSDictionary dictionaryWithObject:stamp_.stampID forKey:@"stamp_id"];
+  [objectLoader send];
+}
+
 - (void)sendRemoveCommentRequest:(NSString*)commentID {
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* commentMapping = [objectManager.mappingProvider mappingForKeyPath:@"Comment"];
@@ -1001,6 +1064,7 @@ typedef enum {
     [self addComment:comment];
     [stamp_ addCommentsObject:comment];
     stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] + 1];
+    [stamp_.managedObjectContext save:NULL];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampDidChangeNotification
                                                         object:stamp_];
     return;

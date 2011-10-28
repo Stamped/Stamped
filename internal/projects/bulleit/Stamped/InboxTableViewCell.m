@@ -547,9 +547,16 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   return self;
 }
 
+- (void)prepareForReuse {
+  [super prepareForReuse];
+  self.entityObject = nil;
+  self.stamp = nil;
+}
+
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.entityObject = nil;
+  self.stamp = nil;
   userImageScrollView_.delegate = nil;
   [super dealloc];
 }

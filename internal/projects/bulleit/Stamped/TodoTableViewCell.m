@@ -82,6 +82,8 @@ static const CGFloat kSubstringFontSize = 12.0;
 }
 
 - (void)invertColors {
+  if (!favorite_)
+    return;
   UIColor* titleColor = (self.selected || self.highlighted) ? [UIColor whiteColor] : [UIColor stampedDarkGrayColor]; 
   titleLayer_.string = [self titleAttributedStringWithColor:titleColor];
   titleLayer_.foregroundColor = titleColor.CGColor;
@@ -98,6 +100,11 @@ static const CGFloat kSubstringFontSize = 12.0;
   [self invertColors];
 }
 
+- (void)prepareForReuse {
+  self.favorite = nil;
+  [super prepareForReuse];
+}
+
 - (void)setFavorite:(Favorite*)favorite {
   if (favorite) {
     stampImageView_.hidden = [favorite.complete boolValue];
@@ -107,7 +114,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   if (favorite_ != favorite) {
     [favorite_ release];
     favorite_ = [favorite retain];
-    
+
     if (favorite) {
       stampImageView_.hidden = [favorite.complete boolValue];
       completedImageView_.hidden = ![favorite.complete boolValue];

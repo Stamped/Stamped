@@ -44,7 +44,7 @@
 						<string key="NSFrame">{{0, 4}, {320, 371}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="733924203"/>
+						<reference key="NSNextKeyView" ref="888833716"/>
 						<string key="NSReuseIdentifierKey">_NS:693</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -176,7 +176,7 @@
 							<object class="IBUIActivityIndicatorView" id="536243354">
 								<reference key="NSNextResponder" ref="269506520"/>
 								<int key="NSvFlags">-2147483356</int>
-								<string key="NSFrame">{{136, 9}, {20, 20}}</string>
+								<string key="NSFrame">{{136, 10}, {20, 20}}</string>
 								<reference key="NSSuperview" ref="269506520"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="441866606"/>
@@ -228,7 +228,7 @@
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 					</object>
-					<object class="IBUIImageView" id="733924203">
+					<object class="IBUIImageView" id="888833716">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{0, -231}, {320, 240}}</string>
@@ -383,7 +383,7 @@
 						<array class="NSMutableArray" key="children">
 							<reference ref="230694429"/>
 							<reference ref="269506520"/>
-							<reference ref="733924203"/>
+							<reference ref="888833716"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -447,7 +447,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">22</int>
-						<reference key="object" ref="733924203"/>
+						<reference key="object" ref="888833716"/>
 						<reference key="parent" ref="191373211"/>
 						<string key="objectName">Shelf background</string>
 					</object>

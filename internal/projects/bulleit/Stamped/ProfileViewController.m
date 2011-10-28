@@ -169,6 +169,16 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
+  if (self.navigationController.viewControllers.count > 1)
+    return;
+
+  NSFetchRequest* request = [Stamp fetchRequest];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == YES"]];
+  NSArray* results = [Stamp objectsWithFetchRequest:request];
+  for (Stamp* s in results)
+    [Stamp.managedObjectContext deleteObject:s];
+
+  [Entity.managedObjectContext save:NULL];
 }
 
 - (void)userImageTapped:(id)sender {
@@ -236,15 +246,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  if (stampsArray_.count)
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  if (user_.numStamps.unsignedIntValue > 5 && stampsArray_.count)
     return self.stampsArray.count + 1;
 
-  return 0;
+  return stampsArray_.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -336,7 +342,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     for (Stamp* s in results)
       s.temporary = [NSNumber numberWithBool:NO];
     
-    [[(Stamp*)results.lastObject managedObjectContext] save:NULL];
+    [Stamp.managedObjectContext save:NULL];
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
@@ -353,12 +359,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     for (Stamp* s in results)
       s.temporary = [NSNumber numberWithBool:YES];
 
-    [[(Stamp*)results.lastObject managedObjectContext] save:NULL];
+    [Stamp.managedObjectContext save:NULL];
   }
   
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
-    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-    self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
     [self.tableView reloadData];
     self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
   }

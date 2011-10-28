@@ -176,7 +176,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   NSSet* objects = [NSSet setWithSet:[notification.userInfo objectForKey:NSUpdatedObjectsKey]];
   objects = [objects setByAddingObjectsFromSet:[notification.userInfo objectForKey:NSInsertedObjectsKey]];
   objects = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
-    if ([obj isMemberOfClass:[Stamp class]] && ![[(Stamp*)obj temporary] boolValue])
+    if ([obj isMemberOfClass:[Stamp class]] && ![[(Stamp*)obj temporary] boolValue] && ![[(Stamp*)obj deleted] boolValue])
       return YES;
 
     return NO;
@@ -192,9 +192,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       latestStamp.entityObject.mostRecentStampDate = latestStamp.created;
     }
   }
-  
-  // TODO(andybons): Deal with when we remove stamps.
-  //NSLog(@"Deleted objects %@", [notification.userInfo objectForKey:NSDeletedObjectsKey]);
 }
 
 - (void)loadStampsFromDataStore {
@@ -202,6 +199,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSFetchRequest* request = [Entity fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count > 0"]];
     [request setFetchBatchSize:20];
     [NSFetchedResultsController deleteCacheWithName:nil];
     NSFetchedResultsController* fetchedResultsController =
@@ -372,22 +370,39 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  selectedFilterType_ = StampFilterTypeNone;
-  self.searchQuery = nil;
-  [stampFilterBar_ reset];
-
+  NSMutableArray* toDelete = [NSMutableArray array];
+  NSMutableArray* mutableObjects = [NSMutableArray array];
   for (Stamp* stamp in objects) {
-    stamp.temporary = [NSNumber numberWithBool:NO];
-    [stamp.managedObjectContext save:NULL];
+    if ([stamp.deleted boolValue]) {
+      [toDelete addObject:stamp];
+    } else {
+      stamp.temporary = [NSNumber numberWithBool:NO];
+      [mutableObjects addObject:stamp];
+    }
   }
+  
+  for (Stamp* stamp in toDelete) {
+    if (stamp.entityObject.stamps.count > 1) {
+      NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+      NSMutableArray* sortedStamps =
+          [NSMutableArray arrayWithArray:[[stamp.entityObject.stamps allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
+      [sortedStamps removeObject:stamp];
+      Stamp* latestStamp = [sortedStamps objectAtIndex:0];
+      stamp.entityObject.mostRecentStampDate = latestStamp.created;
+    }
+    
+    [Stamp.managedObjectContext deleteObject:stamp];
+  }
+  [Stamp.managedObjectContext save:NULL];
 
-  Stamp* oldestStampInBatch = objects.lastObject;
-  NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
-  [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
-                                            forKey:@"InboxOldestTimestampInBatch"];
-  [[NSUserDefaults standardUserDefaults] synchronize];
-  //[self loadStampsFromDataStore];
-  if (objects.count < 10) {
+  Stamp* oldestStampInBatch = mutableObjects.lastObject;
+  if (oldestStampInBatch.modified) {
+    NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
+    [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
+                                              forKey:@"InboxOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+  if (mutableObjects.count < 10 || !oldestStampInBatch.modified) {
     // Grab latest stamp.
     NSFetchRequest* request = [Stamp fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];

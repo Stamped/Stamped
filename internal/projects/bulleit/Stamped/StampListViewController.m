@@ -195,11 +195,34 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
-    self.oldestInBatch = [objects.lastObject modified];
+    NSMutableArray* toDelete = [NSMutableArray array];
+    NSMutableArray* mutableObjects = [NSMutableArray array];
+    for (Stamp* stamp in objects) {
+      if ([stamp.deleted boolValue]) {
+        [toDelete addObject:stamp];
+      } else {
+        [mutableObjects addObject:stamp];
+      }
+    }
+
+    for (Stamp* stamp in toDelete) {
+      if (stamp.entityObject.stamps.count > 1) {
+        NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+        NSMutableArray* sortedStamps =
+            [NSMutableArray arrayWithArray:[[stamp.entityObject.stamps allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
+        [sortedStamps removeObject:stamp];
+        Stamp* latestStamp = [sortedStamps objectAtIndex:0];
+        stamp.entityObject.mostRecentStampDate = latestStamp.created;
+      }
+      [Stamp.managedObjectContext deleteObject:stamp];
+    }
+    [Stamp.managedObjectContext save:NULL];
+    
+    self.oldestInBatch = [mutableObjects.lastObject modified];
 
     [self loadStampsFromDataStore];
     self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
-    if (objects.count < 10) {
+    if (mutableObjects.count < 10 || !self.oldestInBatch) {
       self.oldestInBatch = nil;
     } else {
       [self loadStampsFromNetwork];

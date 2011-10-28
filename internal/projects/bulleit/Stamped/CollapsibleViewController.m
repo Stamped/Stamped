@@ -385,10 +385,13 @@ int const SPACE_HEIGHT = 10;
   Stamp* stamp = [stamps_ objectAtIndex:button.tag];
   
   StampDetailViewController* detailViewController =
-  [[StampDetailViewController alloc] initWithStamp:stamp];
-  
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController pushViewController:detailViewController animated:YES];
+      [[StampDetailViewController alloc] initWithStamp:stamp];
+  UINavigationController* navController = self.navigationController;
+  if (!navController) {
+    StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+    navController = delegate.navigationController;
+  }
+  [navController pushViewController:detailViewController animated:YES];
   [detailViewController release];
 }
 
