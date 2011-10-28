@@ -122,10 +122,14 @@
 - (void)finishViewInit {
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
   
-  InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
-  ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
-  TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
-  PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];
+  InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController"
+                                                                     bundle:nil];
+  ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController"
+                                                                              bundle:nil];
+  TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController"
+                                                                  bundle:nil];
+  PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController"
+                                                                        bundle:nil];
   
   todo.delegate = self;
 
