@@ -977,6 +977,7 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 for result in apple_results:
                     entity = result.entity
+                    #print "HERE) %s" % entity.title
                     
                     entity.entity_id = 'T_APPLE_%s' % entity.aid
                     output.append((entity, -1))
@@ -989,16 +990,17 @@ class MongoEntitySearcher(EntitySearcher):
         try:
             apple_pool = Pool(4)
             
-            if subcategory_filter is None or subcategory_filter == 'song':
-                apple_pool.spawn(_find_apple_specific, media='music', entity='song')
-            
-            if subcategory_filter is None or subcategory_filter == 'album':
-                apple_pool.spawn(_find_apple_specific, media='music', entity='album')
-            
             if subcategory_filter is None or subcategory_filter == 'artist':
                 apple_pool.spawn(_find_apple_specific, media='all', entity='allArtist')
             
             apple_pool.spawn(_find_apple_specific, media='all', entity=None)
+            
+            if subcategory_filter is None or subcategory_filter == 'album':
+                apple_pool.spawn(_find_apple_specific, media='music', entity='album')
+            
+            if subcategory_filter is None or subcategory_filter == 'song':
+                apple_pool.spawn(_find_apple_specific, media='music', entity='song')
+            
             apple_pool.join(timeout=6.5)
         except:
             utils.printException()
