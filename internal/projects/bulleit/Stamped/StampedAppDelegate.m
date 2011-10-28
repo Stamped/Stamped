@@ -24,12 +24,14 @@
 #import "SearchResult.h"
 #import "OAuthToken.h"
 #import "UserImageDownloadManager.h"
+#import "UIColor+Stamped.h"
 
 static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
 @interface StampedAppDelegate ()
+- (void)customizeAppearance;
 - (void)performRestKitMappings;
 @end
 
@@ -43,6 +45,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 //  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
   [self performRestKitMappings];
+  [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
   [self.window makeKeyAndVisible];
 
@@ -111,6 +114,35 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 #pragma mark - Private methods.
 
+- (void)customizeAppearance {
+  if (![UIBarButtonItem conformsToProtocol:@protocol(UIAppearance)])
+    return;
+
+  UIImage* buttonImage = [[UIImage imageNamed:@"default_nav_button_bg"] 
+      resizableImageWithCapInsets:UIEdgeInsetsMake(0, 5, 0, 5)];
+  [[UIBarButtonItem appearance] setBackgroundImage:buttonImage forState:UIControlStateNormal 
+                                        barMetrics:UIBarMetricsDefault];
+
+  UIImage* backButtonImage = [[UIImage imageNamed:@"default_back_button_bg"]
+      resizableImageWithCapInsets:UIEdgeInsetsMake(0, 13, 0, 5)];
+  [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backButtonImage
+                                                    forState:UIControlStateNormal
+                                                  barMetrics:UIBarMetricsDefault];
+  [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(1, 0)
+                                                       forBarMetrics:UIBarMetricsDefault];
+  [[UIBarButtonItem appearance] setTitleTextAttributes:
+      [NSDictionary dictionaryWithObjectsAndKeys:
+          [UIColor colorWithWhite:0.7 alpha:1.0], UITextAttributeTextColor, 
+          [UIColor whiteColor], UITextAttributeTextShadowColor, 
+          [NSValue valueWithUIOffset:UIOffsetMake(0, 1)], UITextAttributeTextShadowOffset, nil] 
+                                              forState:UIControlStateNormal];
+  [[UIBarButtonItem appearance] setTitleTextAttributes:
+      [NSDictionary dictionaryWithObjectsAndKeys:
+          [UIColor whiteColor], UITextAttributeTextColor,
+          [NSValue valueWithUIOffset:UIOffsetZero], UITextAttributeTextShadowOffset, nil] 
+                                              forState:UIControlStateHighlighted];
+}
+
 - (void)performRestKitMappings {
   RKObjectManager* objectManager = [RKObjectManager objectManagerWithBaseURL:kDevDataBaseURL];
   objectManager.objectStore = [RKManagedObjectStore objectStoreWithStoreFilename:@"StampedData.sqlite"];
@@ -178,7 +210,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"image_url", @"imageURL",
      @"url", @"URL", nil];
   stampMapping.primaryKeyAttribute = @"stampID";
-  [stampMapping mapAttributes:@"blurb", @"modified", nil];
+  [stampMapping mapAttributes:@"blurb", @"modified", @"deleted", nil];
   [stampMapping mapKeyPath:@"entity" toRelationship:@"entityObject" withMapping:entityMapping];
   [stampMapping mapRelationship:@"user" withMapping:userMapping];
   [stampMapping mapKeyPath:@"comment_preview" toRelationship:@"comments" withMapping:commentMapping];

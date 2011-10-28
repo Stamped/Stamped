@@ -333,6 +333,8 @@
 		7EBBDB4D1441F21F00DDEAE9 /* hdr_separator@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBBDB341441F21F00DDEAE9 /* hdr_separator@2x.png */; };
 		7EBBDB561441F4BC00DDEAE9 /* STStampFilterBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */; };
 		7EBCBE8713D78896009FCECF /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EBCBE8613D78896009FCECF /* Comment.m */; };
+		7EBD0F53145A419E005B385F /* default_nav_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBD0F51145A419E005B385F /* default_nav_button_bg@2x.png */; };
+		7EBD0F54145A419E005B385F /* default_back_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBD0F52145A419E005B385F /* default_back_button_bg@2x.png */; };
 		7EBE8E2713DEFAD200D36E50 /* disclosure_arrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */; };
 		7EC0177613C3754300ABE6E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177513C3754300ABE6E2 /* UIKit.framework */; };
 		7EC0177813C3754300ABE6E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EC0177713C3754300ABE6E2 /* Foundation.framework */; };
@@ -1009,6 +1011,8 @@
 		7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampFilterBar.m; sourceTree = "<group>"; };
 		7EBCBE8513D78896009FCECF /* Comment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Comment.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7EBCBE8613D78896009FCECF /* Comment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Comment.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		7EBD0F51145A419E005B385F /* default_nav_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default_nav_button_bg@2x.png"; sourceTree = "<group>"; };
+		7EBD0F52145A419E005B385F /* default_back_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "default_back_button_bg@2x.png"; sourceTree = "<group>"; };
 		7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "disclosure_arrow@2x.png"; sourceTree = "<group>"; };
 		7EC0177113C3754300ABE6E2 /* Stamped.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stamped.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7EC0177513C3754300ABE6E2 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -1776,6 +1780,15 @@
 			name = Inbox;
 			sourceTree = "<group>";
 		};
+		7EBD0F48145A396A005B385F /* Standard Appearance Images */ = {
+			isa = PBXGroup;
+			children = (
+				7EBD0F51145A419E005B385F /* default_nav_button_bg@2x.png */,
+				7EBD0F52145A419E005B385F /* default_back_button_bg@2x.png */,
+			);
+			name = "Standard Appearance Images";
+			sourceTree = "<group>";
+		};
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
@@ -1897,6 +1910,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				7EBD0F48145A396A005B385F /* Standard Appearance Images */,
 				7E7DDDE1145A08F20058ACA9 /* Web View */,
 				7E10061B143E46880079AEDC /* icon1.png */,
 				7E100619143E46760079AEDC /* icon1@2x.png */,
@@ -2812,6 +2826,8 @@
 				7E7DDE0F145A09070058ACA9 /* uiweb_share_button_inactive@2x.png in Resources */,
 				7E7DDE10145A09070058ACA9 /* uiweb_share_button.png in Resources */,
 				7E7DDE11145A09070058ACA9 /* uiweb_share_button@2x.png in Resources */,
+				7EBD0F53145A419E005B385F /* default_nav_button_bg@2x.png in Resources */,
+				7EBD0F54145A419E005B385F /* default_back_button_bg@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

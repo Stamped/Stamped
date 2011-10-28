@@ -14,6 +14,7 @@
 #import "StampDetailCommentView.h"
 
 extern NSString* const kRemoveCommentPath;
+extern NSString* const kRemoveStampPath;
 
 @class UserImageView;
 @class Stamp;

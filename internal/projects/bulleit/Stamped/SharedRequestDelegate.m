@@ -12,6 +12,7 @@
 
 #import "AccountManager.h"
 #import "Comment.h"
+#import "Stamp.h"
 #import "StampDetailViewController.h"
 
 static SharedRequestDelegate* sharedDelegate_ = nil;
@@ -56,6 +57,10 @@ static SharedRequestDelegate* sharedDelegate_ = nil;
     Comment* comment = [objects lastObject];
     [Comment.managedObjectContext deleteObject:comment];
     [Comment.managedObjectContext save:NULL];
+  } if ([objectLoader.resourcePath isEqualToString:kRemoveStampPath]) {
+    Stamp* stamp = [objects lastObject];
+    [Stamp.managedObjectContext deleteObject:stamp];
+    [Stamp.managedObjectContext save:NULL];
   }
 }
 
