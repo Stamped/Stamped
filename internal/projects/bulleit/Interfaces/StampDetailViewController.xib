@@ -206,7 +206,7 @@
 									<object class="IBUIImageView" id="511216842">
 										<reference key="NSNextResponder" ref="749710472"/>
 										<int key="NSvFlags">292</int>
-										<string key="NSFrameSize">{310, 4}</string>
+										<string key="NSFrame">{{0, 1}, {310, 4}}</string>
 										<reference key="NSSuperview" ref="749710472"/>
 										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="288918524"/>
@@ -238,7 +238,7 @@
 									<object class="IBUIView" id="288918524">
 										<reference key="NSNextResponder" ref="749710472"/>
 										<int key="NSvFlags">274</int>
-										<string key="NSFrame">{{0, 4}, {310, 161}}</string>
+										<string key="NSFrame">{{0, 5}, {310, 160}}</string>
 										<reference key="NSSuperview" ref="749710472"/>
 										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="75653363"/>
@@ -325,7 +325,7 @@
 												<string key="NSFrame">{{284, 10}, {17, 10}}</string>
 												<reference key="NSSuperview" ref="75653363"/>
 												<reference key="NSWindow"/>
-												<reference key="NSNextKeyView" ref="271529655"/>
+												<reference key="NSNextKeyView" ref="778160476"/>
 												<string key="NSReuseIdentifierKey">_NS:328</string>
 												<reference key="IBUIBackgroundColor" ref="140928236"/>
 												<bool key="IBUIOpaque">NO</bool>
@@ -353,7 +353,7 @@
 												</object>
 											</object>
 										</object>
-										<string key="NSFrame">{{0, 4}, {310, 75}}</string>
+										<string key="NSFrame">{{0, 5}, {310, 74}}</string>
 										<reference key="NSSuperview" ref="749710472"/>
 										<reference key="NSWindow"/>
 										<reference key="NSNextKeyView" ref="655520347"/>
@@ -498,6 +498,16 @@
 											<int key="NSColorSpace">1</int>
 											<bytes key="NSRGB">MC4yMTU2ODYyNzQ1IDAuNDc4NDMxMzcyNSAwLjg1MDk4MDM5MjIAA</bytes>
 										</object>
+										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+									</object>
+									<object class="IBUIView" id="778160476">
+										<reference key="NSNextResponder" ref="749710472"/>
+										<int key="NSvFlags">290</int>
+										<string key="NSFrameSize">{310, 1}</string>
+										<reference key="NSSuperview" ref="749710472"/>
+										<reference key="NSWindow"/>
+										<reference key="NSNextKeyView" ref="271529655"/>
+										<reference key="IBUIBackgroundColor" ref="140928236"/>
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 									</object>
 									<object class="IBUIView" id="10497491">
@@ -917,14 +927,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">stampButton</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="600580011"/>
-					</object>
-					<int key="connectionID">85</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">stampLabel</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="763577215"/>
@@ -994,6 +996,14 @@
 						<reference key="destination" ref="465921400"/>
 					</object>
 					<int key="connectionID">112</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">stampButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="600580011"/>
+					</object>
+					<int key="connectionID">85</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -1117,12 +1127,6 @@
 						<string key="objectName">Toolbar</string>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">16</int>
-						<reference key="object" ref="600580011"/>
-						<reference key="parent" ref="880728759"/>
-						<string key="objectName">Button - Restamp</string>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">17</int>
 						<reference key="object" ref="358418181"/>
 						<reference key="parent" ref="880728759"/>
@@ -1159,6 +1163,7 @@
 							<reference ref="511216842"/>
 							<reference ref="661979840"/>
 							<reference ref="75653363"/>
+							<reference ref="778160476"/>
 						</object>
 						<reference key="parent" ref="490942180"/>
 						<string key="objectName">Activity View</string>
@@ -1339,6 +1344,18 @@
 						<reference key="object" ref="465921400"/>
 						<reference key="parent" ref="264081461"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">16</int>
+						<reference key="object" ref="600580011"/>
+						<reference key="parent" ref="880728759"/>
+						<string key="objectName">Button - Restamp</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">116</int>
+						<reference key="object" ref="778160476"/>
+						<reference key="parent" ref="749710472"/>
+						<string key="objectName">White top border</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1358,6 +1375,7 @@
 					<string>107.IBPluginDependency</string>
 					<string>108.IBPluginDependency</string>
 					<string>111.IBPluginDependency</string>
+					<string>116.IBPluginDependency</string>
 					<string>14.IBPluginDependency</string>
 					<string>14.IBUserGuides</string>
 					<string>15.CustomClassName</string>
@@ -1413,6 +1431,7 @@
 					<string>STAddCommentTextField</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>UserImageView</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1476,7 +1495,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">114</int>
+			<int key="maxID">116</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
