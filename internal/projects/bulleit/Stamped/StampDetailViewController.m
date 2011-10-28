@@ -206,6 +206,12 @@ typedef enum {
     [rightButton release];
   }
 
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:stamp_.entityObject.title
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+
   activityView_.layer.shadowOpacity = 0.1;
   activityView_.layer.shadowOffset = CGSizeMake(0, 1);
   activityView_.layer.shadowRadius = 2;
