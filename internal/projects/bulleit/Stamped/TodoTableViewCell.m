@@ -153,7 +153,7 @@ static const CGFloat kSubstringFontSize = 12.0;
   UIImage* stampImage = [UIImage imageNamed:@"stamp_42pt_strokePlus"];
   UIImage* highlightedImage = [Util whiteMaskedImageUsingImage:stampImage];
   stampImageView_ = [[UIImageView alloc] initWithImage:stampImage highlightedImage:highlightedImage];
-  stampImageView_.frame = CGRectOffset(stampImageView_.frame, 12, 8);
+  stampImageView_.frame = CGRectOffset(stampImageView_.frame, 12, 6);
   stampImageView_.hidden = [favorite_.complete boolValue];
   [self.contentView addSubview:stampImageView_];
   [stampImageView_ release];
