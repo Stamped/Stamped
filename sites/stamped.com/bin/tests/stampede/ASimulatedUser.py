@@ -88,19 +88,19 @@ class RealisticSimulatedUser(ASimulatedUser):
             # sometimes download the inbox multiple times in succession to 
             # simulate the (currently common) occurrence of pulling down 
             # the inbox to force an update multiple times in a row.
-            #UpdateInboxAction(90, 1), 
-            #UpdateInboxAction(6, 3), 
+            UpdateInboxAction(90, 1), 
+            UpdateInboxAction(6, 3), 
             
             # sometimes download activity multiple times in succession to 
             # simulate the (currently common) occurrence of pulling down 
             # the news view to force an update multiple times in a row.
-            #UpdateActivityAction(30), 
-            #UpdateActivityAction(5, 3), 
+            UpdateActivityAction(30), 
+            UpdateActivityAction(5, 3), 
             
-            #SearchAction(30), 
+            SearchAction(30), 
             StampAction(10), 
-            #CommentAction(20), 
-            #LikeAction(25), 
+            CommentAction(20), 
+            LikeAction(25), 
         ]
 
 class BaselineSimulatedUser(ASimulatedUser):
