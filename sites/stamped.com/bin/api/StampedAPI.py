@@ -678,7 +678,7 @@ class StampedAPI(AStampedAPI):
         # Verify that you're not following yourself :)
         if user.user_id == authUserId:
             logs.warning("You can't follow yourself!")
-            raise Exception("Illegal friendship")
+            raise IllegalActionError("Illegal friendship")
         
         # Check if friendship already exists
         if self._friendshipDB.checkFriendship(friendship) == True:
@@ -1697,6 +1697,12 @@ class StampedAPI(AStampedAPI):
         # Remove activity
         self._activityDB.removeActivityForStamp(stamp.stamp_id)
 
+        # Remove as favorite if necessary
+        try:
+            self._favoriteDB.completeFavorite(stamp.entity_id, authUserId, complete=False)
+        except:
+            pass
+
         # Update user stats 
         ### TODO: Do an actual count / update?
         self._userDB.updateUserStats(authUserId, 'num_stamps', \
@@ -2194,7 +2200,6 @@ class StampedAPI(AStampedAPI):
         limit           = kwargs.pop('limit', None)
         sort            = kwargs.pop('sort', 'created')
         includeComments = kwargs.pop('comments', False)
-        godMode         = kwargs.pop('godMode', False)
                        
         # Set quality
         if quality == 1:
@@ -2206,10 +2211,6 @@ class StampedAPI(AStampedAPI):
         else:
             stampCap    = 20
             commentCap  = 4
-
-        if godMode == True:
-            stampCap    = 10000
-            commentCap  = 20
         
         limit = self._setLimit(limit, cap=stampCap)
         

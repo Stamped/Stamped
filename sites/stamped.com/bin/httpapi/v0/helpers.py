@@ -186,7 +186,7 @@ def parseRequest(schema, request, **kwargs):
         logs.warning(msg)
         utils.printException()
         
-        raise StampedHTTPError("bad_request", 400)
+        raise StampedHTTPError("invalid_form", 400)
 
 def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
@@ -242,7 +242,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         logs.warning(msg)
         utils.printException()
         
-        raise StampedHTTPError("bad_request", 400)
+        raise StampedHTTPError("invalid_form", 400)
 
 def transformOutput(value, **kwargs):
     kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
