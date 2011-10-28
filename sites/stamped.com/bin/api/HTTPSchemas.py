@@ -340,7 +340,7 @@ class HTTPFindUser(Schema):
 class HTTPEmail(Schema):
     def setSchema(self):
         self.email              = SchemaElement(basestring)
-        
+
 
 # ######## #
 # Entities #
@@ -846,6 +846,7 @@ class HTTPUserCollectionSlice(Schema):
         self.before             = SchemaElement(int)
         self.quality            = SchemaElement(int)
         self.sort               = SchemaElement(basestring)
+        self.deleted            = SchemaElement(bool)
 
 class HTTPStampImage(Schema):
     def setSchema(self):

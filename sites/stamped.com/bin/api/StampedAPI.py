@@ -2193,7 +2193,7 @@ class StampedAPI(AStampedAPI):
         quality         = kwargs.pop('quality', 3)
         limit           = kwargs.pop('limit', None)
         sort            = kwargs.pop('sort', 'created')
-        includeComments = kwargs.pop('includeComments', False)
+        includeComments = kwargs.pop('comments', False)
         godMode         = kwargs.pop('godMode', False)
                        
         # Set quality
@@ -2245,7 +2245,7 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
-        if kwargs.pop('includeDeleted', False):
+        if kwargs.pop('deleted', False):
             deleted = self._stampDB.getDeletedStamps(stampIds, **params)
             if len(deleted) > 0:
                 stamps = stamps + deleted
@@ -2258,8 +2258,8 @@ class StampedAPI(AStampedAPI):
     def getInboxStamps(self, authUserId, **kwargs):
         stampIds = self._collectionDB.getInboxStampIds(authUserId)
         
-        kwargs['includeComments'] = True
-        kwargs['includeDeleted'] = True
+        kwargs['comments'] = True
+        kwargs['deleted'] = True
         kwargs['sort'] = 'modified' ## TEMP
         
         return self._getStampCollection(authUserId, stampIds, **kwargs)
@@ -2287,8 +2287,7 @@ class StampedAPI(AStampedAPI):
         
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
 
-        kwargs['includeComments'] = True
-        kwargs['includeDeleted'] = True
+        kwargs['comments'] = True
 
         return self._getStampCollection(authUserId, stampIds, **kwargs)
     
