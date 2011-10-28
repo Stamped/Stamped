@@ -33,6 +33,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @interface StampedAppDelegate ()
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
+- (void)cleanupStaleData;
 @end
 
 @implementation StampedAppDelegate
@@ -94,11 +95,15 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationDidEnterBackground:(UIApplication*)application {}
 
-- (void)applicationWillEnterForeground:(UIApplication*)application {}
+- (void)applicationWillEnterForeground:(UIApplication*)application {
+  [self cleanupStaleData];
+}
 
 - (void)applicationDidBecomeActive:(UIApplication*)application {}
 
-- (void)applicationWillTerminate:(UIApplication*)application {}
+- (void)applicationWillTerminate:(UIApplication*)application {
+  [self cleanupStaleData];
+}
 
 - (void)dealloc {
   [window_ release];
@@ -113,6 +118,22 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 }
 
 #pragma mark - Private methods.
+
+- (void)cleanupStaleData {
+  NSFetchRequest* request = [Stamp fetchRequest];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == YES"]];
+  NSArray* results = [Stamp objectsWithFetchRequest:request];
+  for (Stamp* s in results)
+    [Stamp.managedObjectContext deleteObject:s];
+  
+  request = [Entity fetchRequest];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
+  results = [Entity objectsWithFetchRequest:request];
+  for (Entity* e in results)
+    [Entity.managedObjectContext deleteObject:e];
+  
+  [Entity.managedObjectContext save:NULL];
+}
 
 - (void)customizeAppearance {
   if (![UIBarButtonItem conformsToProtocol:@protocol(UIAppearance)])
@@ -139,7 +160,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [[UIBarButtonItem appearance] setTitleTextAttributes:
       [NSDictionary dictionaryWithObjectsAndKeys:
           [UIColor whiteColor], UITextAttributeTextColor,
-          [NSValue valueWithUIOffset:UIOffsetZero], UITextAttributeTextShadowOffset, nil] 
+          [NSValue valueWithUIOffset:UIOffsetMake(0, 0)], UITextAttributeTextShadowOffset, nil] 
                                               forState:UIControlStateHighlighted];
 }
 

@@ -370,7 +370,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   NSMutableArray* toDelete = [NSMutableArray array];
-  NSMutableArray* mutableObjects = [NSMutableArray arrayWithArray:objects];
+  NSMutableArray* mutableObjects = [NSMutableArray array];
   for (Stamp* stamp in objects) {
     if ([stamp.deleted boolValue]) {
       [toDelete addObject:stamp];
@@ -389,6 +389,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       Stamp* latestStamp = [sortedStamps objectAtIndex:0];
       stamp.entityObject.mostRecentStampDate = latestStamp.created;
     }
+
     [Stamp.managedObjectContext deleteObject:stamp];
   }
   [Stamp.managedObjectContext save:NULL];

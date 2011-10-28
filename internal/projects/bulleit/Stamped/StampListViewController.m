@@ -196,7 +196,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
     NSMutableArray* toDelete = [NSMutableArray array];
-    NSMutableArray* mutableObjects = [NSMutableArray arrayWithArray:objects];
+    NSMutableArray* mutableObjects = [NSMutableArray array];
     for (Stamp* stamp in objects) {
       if ([stamp.deleted boolValue]) {
         [toDelete addObject:stamp];

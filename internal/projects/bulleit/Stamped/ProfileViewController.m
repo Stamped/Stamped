@@ -169,6 +169,19 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
+  NSFetchRequest* request = [Stamp fetchRequest];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"temporary == YES"]];
+  NSArray* results = [Stamp objectsWithFetchRequest:request];
+  for (Stamp* s in results)
+    [Stamp.managedObjectContext deleteObject:s];
+  
+  request = [Entity fetchRequest];
+  [request setPredicate:[NSPredicate predicateWithFormat:@"stamps.@count == 0"]];
+  results = [Entity objectsWithFetchRequest:request];
+  for (Entity* e in results)
+    [Entity.managedObjectContext deleteObject:e];
+
+  [Entity.managedObjectContext save:NULL];
 }
 
 - (void)userImageTapped:(id)sender {
@@ -236,15 +249,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  if (stampsArray_.count)
+- (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
+  if (user_.numStamps.unsignedIntValue > 5 && stampsArray_.count)
     return self.stampsArray.count + 1;
 
-  return 0;
+  return stampsArray_.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
