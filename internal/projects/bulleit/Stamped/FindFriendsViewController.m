@@ -413,7 +413,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInFacebookConnectButton.enabled = NO;
   [self.signInFacebookActivityIndicator startAnimating];
   // Delay for a half second so the spinner and button have time to visually update.
-  [self performSelector:@selector(signInToFacebook) withObject:nil afterDelay:0.0];
+  [self performSelector:@selector(signInToFacebook) withObject:nil afterDelay:0.1];
 }
 
 #pragma mark - Table view data source.
@@ -578,8 +578,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                 delegate:self
                                         finishedSelector:@selector(viewController:finishedWithAuth:error:)];
   [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
-  [self.signInAuthView addSubview:authVC.view];
-  [[authVC webView] setDelegate:self];
+//  [self.signInAuthView addSubview:authVC.view];
+//  [[authVC webView] setDelegate:self];
+  [self.navigationController pushViewController:authVC animated:YES];
   [authVC release];
 }
 
@@ -590,13 +591,18 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     NSLog(@"GTMOAuth error = %@", error);
     return;
   }
+  self.signInAuthView.alpha = 0.0;
   self.authentication = auth;
   [self fetchCurrentUser];
+
 }
 
 
 - (void)checkForEndlessSignIn {
-  NSLog(@"this works?");
+  if (![self.facebookClient isSessionValid]) {
+    [self.signInFacebookActivityIndicator stopAnimating];
+    self.signInFacebookConnectButton.enabled = YES; 
+  }
 }
 
 
@@ -781,6 +787,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)request:(FBRequest*)request didFailWithError:(NSError *)error {
   NSLog(@"FB err code: %d", [error code]);
   NSLog(@"FB err message: %@", [error description]);
+  [self.signInFacebookActivityIndicator stopAnimating];
+  self.signInFacebookConnectButton.enabled = YES;
   if (error.code == 10000)
     [self signOutOfFacebook];
 }
@@ -840,8 +848,16 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath isEqualToString:kStampedTwitterFriendsURI]) {
     self.twitterFriends =
-        [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
-            [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
+                                          [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    
+    [self.signInTwitterActivityIndicator stopAnimating];
+    self.signInTwitterConnectButton.enabled = YES;
+    if (self.findSource == FindFriendsFromTwitter) {
+      self.tableView.hidden = NO;
+      self.signInTwitterView.hidden = YES;
+    }
+    
     [self.tableView reloadData];
   }
   else if ([objectLoader.resourcePath isEqualToString:kStampedFacebookFriendsURI]) {
@@ -849,6 +865,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     self.facebookFriends =
     [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
                                           [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+
+      [self.signInFacebookActivityIndicator stopAnimating];
+      self.signInFacebookConnectButton.enabled = YES;
+    if (self.findSource == FindFriendsFromFacebook) {
+      self.tableView.hidden = NO;
+      self.signInFacebookView.hidden = YES;
+    }
     [self.tableView reloadData];
   }
   else if ([objectLoader.resourcePath isEqualToString:kStampedPhoneFriendsURI] ||
@@ -932,6 +955,14 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       }
     }
   }
+  else if ([objectLoader.resourcePath isEqualToString:kStampedTwitterFriendsURI]) {
+    [self.signInTwitterActivityIndicator stopAnimating];
+    self.signInTwitterConnectButton.enabled = YES;
+  }
+  else if ([objectLoader.resourcePath isEqualToString:kStampedFacebookFriendsURI]) {
+    [self.signInFacebookActivityIndicator stopAnimating];
+    self.signInFacebookConnectButton.enabled = YES;
+  }
 }
 
 #pragma mark - UITextFieldDelegate Methods.
@@ -969,6 +1000,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                            options:UIViewAnimationOptionAllowUserInteraction
                                         animations:^{webView.scrollView.contentOffset = CGPointMake(0.0, 140.0);}
                                         completion:nil];}];         */
+  }
+  if ([currentURL rangeOfString:@"twitter.com"].location == NSNotFound) {
+    [UIView animateWithDuration:0.25
+                     animations:^{signInAuthView_.alpha = 0.0;}
+                     completion:^(BOOL finished){
+                       self.signInAuthView.hidden = YES;
+                       self.signInAuthView.alpha = 0.0;}];
+    [self.signInTwitterActivityIndicator stopAnimating];
+    self.signInTwitterConnectButton.enabled = YES;
   }
 }
 
