@@ -641,7 +641,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
     [request setPredicate:[NSPredicate predicateWithFormat:@"user.userID == %@", user.userID]];
     NSArray* results = [Stamp objectsWithFetchRequest:request];
     for (Stamp* s in results)
-      s.temporary = [NSNumber numberWithBool:objectLoader.resourcePath == kFriendshipRemovePath];
+      s.temporary = [NSNumber numberWithBool:(objectLoader.resourcePath == kFriendshipRemovePath)];
 
     for (UITableViewCell* cell in tableView_.visibleCells) {
       FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;

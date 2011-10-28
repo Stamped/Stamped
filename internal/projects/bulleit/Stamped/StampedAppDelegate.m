@@ -64,6 +64,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (void)applicationWillResignActive:(UIApplication*)application {
   [[UserImageDownloadManager sharedManager] purgeCache];
+  [self cleanupStaleData];
 }
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication*)application {
@@ -93,11 +94,11 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   NSLog(@"Error in registration. Error: %@", err);
 }
 
-- (void)applicationDidEnterBackground:(UIApplication*)application {}
-
-- (void)applicationWillEnterForeground:(UIApplication*)application {
+- (void)applicationDidEnterBackground:(UIApplication*)application {
   [self cleanupStaleData];
 }
+
+- (void)applicationWillEnterForeground:(UIApplication*)application {}
 
 - (void)applicationDidBecomeActive:(UIApplication*)application {}
 

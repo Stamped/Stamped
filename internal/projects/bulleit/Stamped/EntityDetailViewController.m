@@ -379,7 +379,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [self.loadingView stopAnimating];
 }
 
-
 #pragma mark - Section / collapsible view management.
 
 - (void)addSectionWithName:(NSString*)name {
