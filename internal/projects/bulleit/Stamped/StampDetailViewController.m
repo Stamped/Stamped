@@ -235,9 +235,9 @@ typedef enum {
 
   currentUserImageView_.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
   
+  [self setupAlsoStampedBy];
   [self setUpMainContentView];
   [self renderComments];
-  [self setupAlsoStampedBy];
   [self loadCommentsFromServer];
 }
 
@@ -394,6 +394,8 @@ typedef enum {
     alsoStampedByContainer_.hidden = YES;
     return;
   }
+  
+  alsoStampedByContainer_.hidden = NO;
   NSArray* stampsArray = [self alsoStampedByArray];
   alsoStampedByScrollView_.contentSize = CGSizeMake(alsoStampedByScrollView_.frame.size.width,
                                                     alsoStampedByScrollView_.frame.size.height);

@@ -530,7 +530,7 @@
 							</object>
 							<object class="IBUIView" id="194365560">
 								<reference key="NSNextResponder" ref="490942180"/>
-								<int key="NSvFlags">292</int>
+								<int key="NSvFlags">-2147483356</int>
 								<object class="NSMutableArray" key="NSSubviews">
 									<bool key="EncodedWithXMLCoder">YES</bool>
 									<object class="IBUIImageView" id="985047090">
