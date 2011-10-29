@@ -138,7 +138,7 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   [mapLayer_ release];
   
   settingsButton_ = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
-  settingsButton_.frame = CGRectMake(5, 7, 34, 30);
+  settingsButton_.frame = CGRectMake(281, 7, 34, 30);
   [settingsButton_ setImage:[UIImage imageNamed:@"settings_button"] forState:UIControlStateNormal];
   [settingsButton_ addTarget:self
                       action:@selector(settingsButtonPressed:)
@@ -275,9 +275,7 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
       CGAffineTransform transform = CGAffineTransformMakeTranslation(position.x, position.y);
       CGPathAddPath(textPath, &transform, path);
     }
-
   }
-  
   return textPath;
 }
 

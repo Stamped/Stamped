@@ -31,6 +31,7 @@
 #import "UIColor+Stamped.h"
 #import "SharedRequestDelegate.h"
 #import "WebViewController.h"
+#import "MediumUserImageButton.h"
 
 NSString* const kRemoveCommentPath = @"/comments/remove.json";
 NSString* const kRemoveStampPath = @"/stamps/remove.json";
@@ -72,6 +73,7 @@ typedef enum {
 - (void)handleURL:(NSURL*)url;
 - (void)deleteStampButtonPressed:(id)sender;
 - (void)sendDeleteStampRequest;
+- (void)setupAlsoStampedBy;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -113,6 +115,9 @@ typedef enum {
 @synthesize sendIndicator = sendIndicator_;
 @synthesize lastCommentAttemptFailed = lastCommentAttemptFailed_;
 @synthesize commentViews = commentViews_;
+@synthesize alsoStampedByLabel = alsoStampedByLabel_;
+@synthesize alsoStampedByContainer = alsoStampedByContainer_;
+@synthesize alsoStampedByScrollView = alsoStampedByScrollView_;
 
 - (id)initWithStamp:(Stamp*)stamp {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -151,6 +156,9 @@ typedef enum {
   self.sendButton = nil;
   self.sendIndicator = nil;
   self.commentViews = nil;
+  self.alsoStampedByContainer = nil;
+  self.alsoStampedByLabel = nil;
+  self.alsoStampedByScrollView = nil;
   [super dealloc];
 }
 
@@ -227,6 +235,7 @@ typedef enum {
   
   [self setUpMainContentView];
   [self renderComments];
+  [self setupAlsoStampedBy];
   [self loadCommentsFromServer];
 }
 
@@ -258,6 +267,9 @@ typedef enum {
   self.timestampLabel = nil;
   self.sendButton = nil;
   self.sendIndicator = nil;
+  self.alsoStampedByContainer = nil;
+  self.alsoStampedByLabel = nil;
+  self.alsoStampedByScrollView = nil;
 }
 
 - (void)setUpHeader {
@@ -363,6 +375,51 @@ typedef enum {
                                         CGRectGetMinY(numLikesLabel_.frame) + 1,
                                         CGRectGetWidth(likeFaceImageView_.frame),
                                         CGRectGetHeight(likeFaceImageView_.frame));
+}
+
+- (void)setupAlsoStampedBy {
+  if (stamp_.entityObject.stamps.count == 1) {
+    alsoStampedByContainer_.hidden = YES;
+    return;
+  }
+  
+  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+  NSArray* stampsArray = [stamp_.entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+  
+  alsoStampedByScrollView_.contentSize = CGSizeMake(alsoStampedByScrollView_.frame.size.width,
+                                                    alsoStampedByScrollView_.frame.size.height);
+  
+  CGRect userImgFrame = CGRectMake(0.0, 0.0, 43.0, 43.0);
+
+  Stamp* s = nil;
+  NSUInteger pageNum = 1;
+  for (NSUInteger i = 0; i < stampsArray.count; ++i) {
+    s = [stampsArray objectAtIndex:i];
+    MediumUserImageButton* userImageButton = [[MediumUserImageButton alloc] initWithFrame:userImgFrame];
+    
+    if (i > 1 && i % 6 == 0) {
+      alsoStampedByScrollView_.contentSize = CGSizeMake(alsoStampedByScrollView_.contentSize.width + alsoStampedByScrollView_.frame.size.width,
+                                                        alsoStampedByScrollView_.contentSize.height);
+      pageNum++;
+    }
+    
+    CGFloat xOffset = i * (userImgFrame.size.width + 7.0) + 18.0 * (pageNum - 1) + 14.0;
+    
+    userImageButton.frame = CGRectOffset(userImgFrame, xOffset, 0.0);
+    userImageButton.contentMode = UIViewContentModeCenter;
+    userImageButton.layer.shadowOffset = CGSizeMake(0.0, 1.0);
+    userImageButton.layer.shadowOpacity = 0.20;
+    userImageButton.layer.shadowRadius = 1.75;
+    userImageButton.imageURL = s.user.profileImageURL;
+    
+    /*[userImageButton addTarget:self
+                        action:@selector(userImageTapped:)
+              forControlEvents:UIControlEventTouchUpInside];*/
+    userImageButton.tag = i;
+    [alsoStampedByScrollView_ addSubview:userImageButton];
+    [userImageButton release];
+  }
 }
 
 - (void)setUpMainContentView {

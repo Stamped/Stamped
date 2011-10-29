@@ -63,6 +63,10 @@ extern NSString* const kRemoveStampPath;
 @property (nonatomic, retain) IBOutlet UITextField* commentTextField;
 @property (nonatomic, retain) IBOutlet UIButton* sendButton;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* sendIndicator;
+@property (nonatomic, retain) IBOutlet UIView* alsoStampedByContainer;
+@property (nonatomic, retain) IBOutlet UILabel* alsoStampedByLabel;
+@property (nonatomic, retain) IBOutlet UIScrollView* alsoStampedByScrollView;
+
 
 
 @end
