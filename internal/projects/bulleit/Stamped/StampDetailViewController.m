@@ -346,6 +346,16 @@ typedef enum {
   [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
   activityGradientLayer_.frame = activityView_.bounds;
   [CATransaction commit];
+  if (!alsoStampedByContainer_.hidden) {
+    CGRect stampedByFrame = alsoStampedByContainer_.frame;
+    stampedByFrame.origin.y = CGRectGetMaxY(activityView_.frame) + 17;
+    alsoStampedByContainer_.frame = stampedByFrame;
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(alsoStampedByContainer_.frame) + 10);
+  } else {
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(activityView_.frame) + 10);
+  }
 }
 
 - (void)setNumLikes:(NSUInteger)likes {
@@ -866,7 +876,16 @@ typedef enum {
   [CATransaction commit];
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
+  if (!alsoStampedByContainer_.hidden) {
+    CGRect stampedByFrame = alsoStampedByContainer_.frame;
+    stampedByFrame.origin.y = CGRectGetMaxY(activityView_.frame) + 17;
+    alsoStampedByContainer_.frame = stampedByFrame;
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(alsoStampedByContainer_.frame) + 10);
+  } else {
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(activityView_.frame) + 10);
+  }
 }
 
 - (void)removeComment:(Comment*)comment {
@@ -902,7 +921,17 @@ typedef enum {
   [CATransaction commit];
   [activityGradientLayer_ setNeedsDisplay];
   activityView_.layer.shadowPath = [UIBezierPath bezierPathWithRect:activityView_.bounds].CGPath;
-  scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds), CGRectGetMaxY(activityView_.frame) + 10);
+
+  if (!alsoStampedByContainer_.hidden) {
+    CGRect stampedByFrame = alsoStampedByContainer_.frame;
+    stampedByFrame.origin.y = CGRectGetMaxY(activityView_.frame) + 17;
+    alsoStampedByContainer_.frame = stampedByFrame;
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(alsoStampedByContainer_.frame) + 10);
+  } else {
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(activityView_.frame) + 10);
+  }
   
   stamp_.numComments = [NSNumber numberWithInt:[stamp_.numComments intValue] - 1];
   [stamp_.managedObjectContext save:NULL];
@@ -944,7 +973,19 @@ typedef enum {
 
   CGRect keyboardFrame = [[[notification userInfo] valueForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
   CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(keyboardFrame);
-  CGFloat contentHeight = CGRectGetMaxY(activityView_.frame) + 10;
+  if (!alsoStampedByContainer_.hidden) {
+    CGRect stampedByFrame = alsoStampedByContainer_.frame;
+    stampedByFrame.origin.y = CGRectGetMaxY(activityView_.frame) + 17;
+    alsoStampedByContainer_.frame = stampedByFrame;
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(alsoStampedByContainer_.frame) + 10);
+  } else {
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(activityView_.frame) + 10);
+  }
+  
+  CGFloat contentHeight = alsoStampedByContainer_.hidden ?
+      CGRectGetMaxY(activityView_.frame) + 10 : CGRectGetMaxY(alsoStampedByContainer_.frame) + 10;
 
   [UIView animateWithDuration:0.3
                         delay:0.0
