@@ -74,6 +74,8 @@ typedef enum {
 - (void)deleteStampButtonPressed:(id)sender;
 - (void)sendDeleteStampRequest;
 - (void)setupAlsoStampedBy;
+- (NSArray*)alsoStampedByArray;
+- (void)alsoStampedByUserImageTapped:(id)sender;
 
 @property (nonatomic, readonly) STImageView* stampPhotoView;
 @property (nonatomic, readonly) UIImageView* likeFaceImageView;
@@ -382,14 +384,9 @@ typedef enum {
     alsoStampedByContainer_.hidden = YES;
     return;
   }
-  
-  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
-  NSArray* stampsArray = [stamp_.entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
-  
+  NSArray* stampsArray = [self alsoStampedByArray];
   alsoStampedByScrollView_.contentSize = CGSizeMake(alsoStampedByScrollView_.frame.size.width,
                                                     alsoStampedByScrollView_.frame.size.height);
-  
   CGRect userImgFrame = CGRectMake(0.0, 0.0, 43.0, 43.0);
 
   Stamp* s = nil;
@@ -399,27 +396,45 @@ typedef enum {
     MediumUserImageButton* userImageButton = [[MediumUserImageButton alloc] initWithFrame:userImgFrame];
     
     if (i > 1 && i % 6 == 0) {
-      alsoStampedByScrollView_.contentSize = CGSizeMake(alsoStampedByScrollView_.contentSize.width + alsoStampedByScrollView_.frame.size.width,
-                                                        alsoStampedByScrollView_.contentSize.height);
+      alsoStampedByScrollView_.contentSize =
+          CGSizeMake(alsoStampedByScrollView_.contentSize.width + alsoStampedByScrollView_.frame.size.width,
+                     alsoStampedByScrollView_.contentSize.height);
       pageNum++;
     }
-    
-    CGFloat xOffset = i * (userImgFrame.size.width + 7.0) + 18.0 * (pageNum - 1) + 14.0;
-    
-    userImageButton.frame = CGRectOffset(userImgFrame, xOffset, 0.0);
+
+    CGFloat xOffset = i * (userImgFrame.size.width + 7.0) + 10.0 * (pageNum - 1) + 9.0;
+
+    userImageButton.frame = CGRectOffset(userImgFrame, xOffset, 5);
     userImageButton.contentMode = UIViewContentModeCenter;
-    userImageButton.layer.shadowOffset = CGSizeMake(0.0, 1.0);
-    userImageButton.layer.shadowOpacity = 0.20;
+    userImageButton.layer.shadowOffset = CGSizeMake(0, 1);
+    userImageButton.layer.shadowOpacity = 0.2;
     userImageButton.layer.shadowRadius = 1.75;
     userImageButton.imageURL = s.user.profileImageURL;
     
-    /*[userImageButton addTarget:self
-                        action:@selector(userImageTapped:)
-              forControlEvents:UIControlEventTouchUpInside];*/
+    [userImageButton addTarget:self
+                        action:@selector(alsoStampedByUserImageTapped:)
+              forControlEvents:UIControlEventTouchUpInside];
     userImageButton.tag = i;
     [alsoStampedByScrollView_ addSubview:userImageButton];
     [userImageButton release];
   }
+}
+
+- (NSArray*)alsoStampedByArray {
+  NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
+  NSArray* stampsArray = [stamp_.entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+  NSString* excludedUserID = stamp_.user.userID;
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO AND user.userID != %@", excludedUserID];
+  return [stampsArray filteredArrayUsingPredicate:p];
+}
+
+- (void)alsoStampedByUserImageTapped:(id)sender {
+  User* user = [(Stamp*)[[self alsoStampedByArray] objectAtIndex:[sender tag]] user];
+  ProfileViewController* profileViewController =
+      [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
 }
 
 - (void)setUpMainContentView {
