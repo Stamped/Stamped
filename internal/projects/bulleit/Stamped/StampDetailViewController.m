@@ -441,12 +441,10 @@ typedef enum {
 }
 
 - (void)alsoStampedByUserImageTapped:(id)sender {
-  User* user = [(Stamp*)[[self alsoStampedByArray] objectAtIndex:[sender tag]] user];
-  ProfileViewController* profileViewController =
-      [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
-  profileViewController.user = user;
-  [self.navigationController pushViewController:profileViewController animated:YES];
-  [profileViewController release];
+  Stamp* stamp = (Stamp*)[[self alsoStampedByArray] objectAtIndex:[sender tag]];
+  StampDetailViewController* vc = [[StampDetailViewController alloc] initWithStamp:stamp];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 - (void)setUpMainContentView {
