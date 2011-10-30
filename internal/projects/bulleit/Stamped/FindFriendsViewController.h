@@ -16,10 +16,11 @@
 
 typedef enum {
   FindFriendsSourceInvalid = 0,
-  FindFriendsFromContacts = 1,
-  FindFriendsFromTwitter = 2,
-  FindFriendsFromStamped = 3,
-  FindFriendsFromFacebook = 4
+  FindFriendsSourceContacts,
+  FindFriendsSourceTwitter,
+  FindFriendsSourceStamped,
+  FindFriendsSourceFacebook,
+  FindFriendsSourceSuggested
 } FindFriendsSource;
 
 @interface FindFriendsViewController : UIViewController<RKObjectLoaderDelegate,

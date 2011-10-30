@@ -34,10 +34,10 @@ static NSString* const kStampedFacebookFriendsURI = @"/users/find/facebook.json"
 static NSString* const kStampedEmailFriendsURI = @"/users/find/email.json";
 static NSString* const kStampedPhoneFriendsURI = @"/users/find/phone.json";
 static NSString* const kStampedSearchURI = @"/users/search.json";
+static NSString* const kStampedSuggestedUsersURI = @"/users/suggested.json";
 static NSString* const kStampedLinkedAccountsURI = @"/account/linked_accounts.json";
 static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
-//static NSString* const kFacebookAppID = @"297022226980395";
 
 @interface FindFriendsViewController ()
 - (void)adjustNippleToView:(UIView*)view;
@@ -60,7 +60,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers;
 - (void)signInToFacebook;
 - (void)checkForEndlessSignIn;
-//- (void)loadSignInView;
+- (void)loadSuggestedUsers;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
@@ -70,6 +70,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @property (nonatomic, copy) NSArray* contactFriends;
 @property (nonatomic, copy) NSArray* stampedFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
+@property (nonatomic, copy) NSArray* suggestedFriends;
 @property (nonatomic, assign) BOOL searchFieldHidden;
 @property (nonatomic, assign) BOOL twitterAuthFailed;
 @end
@@ -83,6 +84,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize facebookClient = facebookClient_;
 @synthesize contactFriends = contactFriends_;
 @synthesize stampedFriends = stampedFriends_;
+@synthesize suggestedFriends = suggestedFriends_;
 @synthesize facebookFriends = facebookFriends_;
 @synthesize followedUsers = followedUsers_;
 @synthesize contactsButton = contactsButton_;
@@ -109,13 +111,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   return self;
 }
 
-
 - (void)dealloc {
   self.followedUsers = nil;
   self.authentication = nil;
   self.twitterClient = nil;
   self.twitterFriends = nil;
   self.contactFriends = nil;
+  self.suggestedFriends = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
   self.facebookButton = nil;
@@ -154,14 +156,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                            selector:@selector(checkForEndlessSignIn)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
-    
-  if (self.findSource == FindFriendsFromStamped)
+  [self loadSuggestedUsers];
+
+  if (self.findSource == FindFriendsSourceStamped)
     [self findFromStamped:self];
-  else if (self.findSource == FindFriendsFromContacts)
+  else if (self.findSource == FindFriendsSourceContacts)
     [self findFromContacts:self];
-  else if (self.findSource == FindFriendsFromTwitter)
+  else if (self.findSource == FindFriendsSourceTwitter)
     [self findFromTwitter:self];
-  else if (self.findSource == FindFriendsFromFacebook)
+  else if (self.findSource == FindFriendsSourceFacebook)
     [self findFromFacebook:self];
   else
     [self findFromStamped:self];
@@ -175,6 +178,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.twitterButton = nil;
   self.facebookButton = nil;
   self.stampedButton = nil;
+  self.suggestedFriends = nil;
   self.nipple = nil;
   self.searchField = nil;
   self.facebookClient = nil;
@@ -207,17 +211,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInTwitterView.hidden = YES;
   self.signInFacebookView.hidden = YES;
   [self setSearchFieldHidden:NO animated:YES];
-  tableView_.hidden = YES;
+  tableView_.hidden = NO;
   self.stampedFriends = nil;
-  [self.tableView reloadData];
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = NO;
   stampedButton_.selected = YES;
-  [searchField_ becomeFirstResponder];
   
   [self adjustNippleToView:self.stampedButton];
-  self.findSource = FindFriendsFromStamped;
+  self.findSource = FindFriendsSourceSuggested;
   [tableView_ reloadData];
 }
 
@@ -232,7 +234,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   stampedButton_.selected = NO;
   [searchField_ resignFirstResponder];
   [self adjustNippleToView:self.contactsButton];
-  self.findSource = FindFriendsFromContacts;
+  self.findSource = FindFriendsSourceContacts;
   if (contactFriends_) {
     [self.tableView reloadData];
     return;
@@ -278,7 +280,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   stampedButton_.selected = NO;
   [searchField_ resignFirstResponder];
   [self adjustNippleToView:self.twitterButton];
-  self.findSource = FindFriendsFromTwitter;
+  self.findSource = FindFriendsSourceTwitter;
 
   if (twitterFriends_) {
     [self.tableView reloadData];
@@ -308,16 +310,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   stampedButton_.selected = NO;
   [searchField_ resignFirstResponder];
   [self adjustNippleToView:facebookButton_];
-  self.findSource = FindFriendsFromFacebook;
+  self.findSource = FindFriendsSourceFacebook;
   
   if (facebookFriends_) {
     [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
     [self.tableView reloadData];
     return;
   }
-  
-  
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] 
       && [defaults objectForKey:@"FBExpirationDateKey"]) {
     self.facebookClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
@@ -333,6 +334,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInFacebookView.hidden = YES;
   [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
   [tableView_ reloadData];
+}
+
+- (void)loadSuggestedUsers {
+  RKObjectManager* manager = [RKObjectManager sharedManager];
+  RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
+  RKObjectLoader* loader = [manager objectLoaderWithResourcePath:kStampedSuggestedUsersURI
+                                                        delegate:self];
+  loader.objectMapping = mapping;
+  [loader send];
 }
 
 - (void)setSearchFieldHidden:(BOOL)hidden animated:(BOOL)animated {
@@ -420,13 +430,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (self.findSource == FindFriendsFromContacts)
+  if (self.findSource == FindFriendsSourceContacts)
     return self.contactFriends.count;
-  else if (self.findSource == FindFriendsFromTwitter)
+  else if (self.findSource == FindFriendsSourceTwitter)
     return self.twitterFriends.count;
-  else if (self.findSource == FindFriendsFromStamped)
+  else if (self.findSource == FindFriendsSourceStamped)
     return self.stampedFriends.count;
-  else if (self.findSource == FindFriendsFromFacebook)
+  else if (self.findSource == FindFriendsSourceSuggested)
+    return self.suggestedFriends.count;
+  else if (self.findSource == FindFriendsSourceFacebook)
     return self.facebookFriends.count;
 
   return 0;
@@ -447,13 +459,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
 
   NSArray* friends = nil;
-  if (self.findSource == FindFriendsFromTwitter)
+  if (self.findSource == FindFriendsSourceTwitter)
     friends = self.twitterFriends;
-  else if (self.findSource == FindFriendsFromContacts)
+  else if (self.findSource == FindFriendsSourceContacts)
     friends = self.contactFriends;
-  else if (self.findSource == FindFriendsFromStamped)
+  else if (self.findSource == FindFriendsSourceStamped)
     friends = self.stampedFriends;
-  else if (self.findSource == FindFriendsFromFacebook)
+  else if (self.findSource == FindFriendsSourceSuggested)
+    friends = self.suggestedFriends;
+  else if (self.findSource == FindFriendsSourceFacebook)
     friends = self.facebookFriends;
 
   User* user = [friends objectAtIndex:indexPath.row];
@@ -467,19 +481,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - Table View Delegate
 
 - (CGFloat)tableView:(UITableView*)tableView heightForHeaderInSection:(NSInteger)section {
-  if (findSource_ == FindFriendsFromStamped && !stampedFriends_)
-    return 0;
-  
   return 25;
 }
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
-  if (findSource_ == FindFriendsFromStamped && !stampedFriends_)
-    return nil;
-
   STSectionHeaderView* view = [[[STSectionHeaderView alloc] initWithFrame:CGRectMake(0, 0, 320, 25)] autorelease];
 
-  if (findSource_ == FindFriendsFromTwitter && twitterFriends_) {
+  if (findSource_ == FindFriendsSourceTwitter && twitterFriends_) {
     if (twitterFriends_.count == 0) {
       view.leftLabel.text = @"No Twitter friends are using Stamped right now.";
       view.rightLabel.text = nil;
@@ -487,7 +495,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       view.leftLabel.text = @"Twitter friends using Stamped";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
     }
-  } else if (findSource_ == FindFriendsFromContacts && contactFriends_) {
+  } else if (findSource_ == FindFriendsSourceContacts && contactFriends_) {
     if (contactFriends_.count == 0) {
       view.leftLabel.text = @"No phone contacts are using Stamped right now.";
       view.rightLabel.text = nil;
@@ -495,7 +503,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       view.leftLabel.text = @"Phone contacts using Stamped";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", contactFriends_.count];
     }
-  } else if (findSource_ == FindFriendsFromStamped && stampedFriends_) {
+  } else if (findSource_ == FindFriendsSourceStamped && stampedFriends_) {
     if (stampedFriends_.count == 0) {
       view.leftLabel.text = @"No friends were found. Sorry :(";
       view.rightLabel.text = nil;
@@ -503,7 +511,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       view.leftLabel.text = @"Friends using Stamped";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", stampedFriends_.count];
     }
-  } else if (findSource_ == FindFriendsFromFacebook && facebookFriends_) {
+  } else if (findSource_ == FindFriendsSourceFacebook && facebookFriends_) {
     if (facebookFriends_.count == 0) {
       view.leftLabel.text = @"No Facebook friends are using Stamped right now.";
       view.rightLabel.text = nil;
@@ -511,9 +519,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       view.leftLabel.text = @"Facebook friends using Stamped";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", facebookFriends_.count];
     }
-  } else {
+  } else if (findSource_ == FindFriendsSourceStamped) {
     view.leftLabel.text = @"Finding friends who use Stamped...";
     view.rightLabel.text = @"...";
+  } else if (findSource_ == FindFriendsSourceSuggested) {
+    view.leftLabel.text = @"Suggested Users";
+    if (suggestedFriends_.count == 0)
+      view.rightLabel.text = @"...";
+    else
+      view.rightLabel.text = [NSString stringWithFormat:@"%u", suggestedFriends_.count];
   }
   return view;
 }
@@ -564,14 +578,14 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
   STOAuthViewController* authVC =
       [[STOAuthViewController alloc] initWithScope:kTwitterScope
-                                                language:nil
-                                         requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
-                                       authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
-                                          accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
-                                          authentication:auth
-                                          appServiceName:kKeychainTwitterToken
-                                                delegate:self
-                                        finishedSelector:@selector(viewController:finishedWithAuth:error:)];
+                                          language:nil
+                                   requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
+                                 authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
+                                    accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
+                                    authentication:auth
+                                    appServiceName:kKeychainTwitterToken
+                                          delegate:self
+                                  finishedSelector:@selector(viewController:finishedWithAuth:error:)];
   [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
   
   [self.navigationController pushViewController:authVC animated:YES];
@@ -594,14 +608,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 }
 
-
 - (void)checkForEndlessSignIn {
   if (![self.facebookClient isSessionValid]) {
     [self.signInFacebookActivityIndicator stopAnimating];
     self.signInFacebookConnectButton.enabled = YES; 
   }
 }
-
 
 #pragma mark - Contacts.
 
@@ -662,7 +674,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [request send];
 }
 
-
 #pragma mark - Facebook.
 
 - (void)signInToFacebook {
@@ -702,7 +713,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     }
     self.facebookFriends = nil;
     // If we're watching, fade out the table.
-    if (self.findSource == FindFriendsFromFacebook) {
+    if (self.findSource == FindFriendsSourceFacebook) {
       self.searchFieldHidden = YES;
       self.signInFacebookView.hidden = NO;
       [UIView animateWithDuration:0.4
@@ -768,7 +779,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
 }
 
-- (void) findStampedFriendsFromFacebook:(NSArray*)facebookIDs {
+- (void)findStampedFriendsFromFacebook:(NSArray*)facebookIDs {
   // TODO: the server only supports 100 IDs at a time. need to chunk.
   
   RKObjectManager* manager = [RKObjectManager sharedManager];
@@ -795,7 +806,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   NSLog(@"whoa, no fb login");
   [self signOutOfFacebook];
 }
-
 
 #pragma mark - RKRequestDelegate Methods.
 
@@ -832,7 +842,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   // Response for getting Twitter friends. Send on to Stamped to find any Stamped friends.
   else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
     [self findStampedFriendsFromTwitter:[body objectForKey:@"ids"]];
-//    NSLog(@"%@", [body objectForKey:@"ids"]);
   }
 }
 
@@ -854,7 +863,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     self.twitterFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self.tableView reloadData];    
     // If we've just signed in, display the table with a fade.
-    if (self.findSource == FindFriendsFromTwitter && !self.signInTwitterView.hidden) {
+    if (self.findSource == FindFriendsSourceTwitter && !self.signInTwitterView.hidden) {
       self.searchFieldHidden = YES;
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
@@ -871,7 +880,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     self.facebookFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self.tableView reloadData];
     // If we've just signed in, display the table with a fade.
-    if (self.findSource == FindFriendsFromFacebook && !self.signInFacebookView.hidden) {
+    if (self.findSource == FindFriendsSourceFacebook && !self.signInFacebookView.hidden) {
       self.searchFieldHidden = YES;
       self.tableView.alpha = 0.0;
       self.tableView.hidden = NO;
@@ -936,12 +945,16 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       [objectLoader send];
     }
   }
-  
+  if ([objectLoader.resourcePath rangeOfString:kStampedSuggestedUsersURI].location != NSNotFound) {
+    self.suggestedFriends = objects;
+    NSLog(@"suggested friends: %@", suggestedFriends_);
+    [self.tableView reloadData];
+  }
   if ([objectLoader.resourcePath rangeOfString:@"/collections/user.json"].location != NSNotFound) {
     for (Stamp* s in objects)
       s.temporary = [NSNumber numberWithBool:NO];
   
-    [[(Stamp*)objects.lastObject managedObjectContext] save:NULL];
+    [Stamp.managedObjectContext save:NULL];
   }
 }
 
@@ -974,9 +987,32 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 #pragma mark - UITextFieldDelegate Methods.
 
+- (BOOL)textFieldShouldClear:(UITextField*)textField {
+  self.findSource = FindFriendsSourceSuggested;
+  self.stampedFriends = nil;
+  [self.tableView reloadData];
+  return YES;
+}
+
+- (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
+  NSString* result = [searchField_.text stringByReplacingCharactersInRange:range withString:string];
+  self.findSource = result.length > 0 ? FindFriendsSourceStamped : FindFriendsSourceSuggested;
+  if (findSource_ == FindFriendsSourceSuggested) {
+    self.stampedFriends = nil;
+    [tableView_ reloadData];
+  }
+  return YES;
+}
+
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   if (textField != searchField_)
     return YES;
+
+  self.stampedFriends = nil;
+  self.findSource = searchField_.text.length > 0 ? FindFriendsSourceStamped : FindFriendsSourceSuggested;
+  [tableView_ reloadData];
+  if (findSource_ == FindFriendsSourceSuggested)
+    return NO;
 
   RKObjectManager* manager = [RKObjectManager sharedManager];
   RKObjectMapping* mapping = [manager.mappingProvider mappingForKeyPath:@"User"];
@@ -986,9 +1022,14 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   loader.params = [NSDictionary dictionaryWithObject:searchField_.text forKey:@"q"];
   loader.objectMapping = mapping;
   [loader send];
-  tableView_.hidden = NO;
   [searchField_ resignFirstResponder];
   return NO;
+}
+
+#pragma mark - UIScrollViewDelegate methods.
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  [searchField_ resignFirstResponder];
 }
 
 @end

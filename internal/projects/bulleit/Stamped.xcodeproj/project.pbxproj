@@ -385,6 +385,7 @@
 		7EC38CBF141C14900069B892 /* cat_icon_film_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC38CBA141C14900069B892 /* cat_icon_film_large@2x.png */; };
 		7EC38CC0141C14900069B892 /* cat_icon_book_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC38CBB141C14900069B892 /* cat_icon_book_large@2x.png */; };
 		7EC38CC1141C14900069B892 /* cat_icon_other_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC38CBC141C14900069B892 /* cat_icon_other_large@2x.png */; };
+		7ECF3D7E145DE99F00A1CF38 /* invite_friend_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */; };
 		7ED60828141E85B8001C499D /* BookDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60827141E85B8001C499D /* BookDetailViewController.xib */; };
 		7ED6082B141E85E7001C499D /* MusicDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60829141E85E7001C499D /* MusicDetailViewController.xib */; };
 		7ED6082C141E85E7001C499D /* OtherDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */; };
@@ -1079,6 +1080,7 @@
 		7EC38CBA141C14900069B892 /* cat_icon_film_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_film_large@2x.png"; sourceTree = "<group>"; };
 		7EC38CBB141C14900069B892 /* cat_icon_book_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_book_large@2x.png"; sourceTree = "<group>"; };
 		7EC38CBC141C14900069B892 /* cat_icon_other_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_other_large@2x.png"; sourceTree = "<group>"; };
+		7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invite_friend_button_bg@2x.png"; sourceTree = "<group>"; };
 		7ED60827141E85B8001C499D /* BookDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = BookDetailViewController.xib; path = Interfaces/BookDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED60829141E85E7001C499D /* MusicDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MusicDetailViewController.xib; path = Interfaces/MusicDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = OtherDetailViewController.xib; path = Interfaces/OtherDetailViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -2022,6 +2024,7 @@
 		7ECCB93714351A7B006575D1 /* Friend Finder */ = {
 			isa = PBXGroup;
 			children = (
+				7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */,
 				7E2B7DF0143639D5002BF383 /* contacts_icon_disabled@2x.png */,
 				7E2B7DF1143639D5002BF383 /* contacts_icon@2x.png */,
 				7E2B7DF2143639D5002BF383 /* facebook_icon_disabled@2x.png */,
@@ -2865,6 +2868,7 @@
 				CB2E0C2B1454BCAF000E9DC5 /* GTMOAuthViewTouch.xib in Resources */,
 				CB3E19FF145765B60018D1F6 /* add_friends_button_inactive@2x.png in Resources */,
 				7EBD8B5C145B73860034E8A1 /* also_stamped_by_badge@2x.png in Resources */,
+				7ECF3D7E145DE99F00A1CF38 /* invite_friend_button_bg@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
