@@ -120,7 +120,8 @@
 }
 
 - (void)finishViewInit {
-  [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert];
+  [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge |
+                                                                        UIRemoteNotificationTypeAlert];
   
   InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController"
                                                                      bundle:nil];

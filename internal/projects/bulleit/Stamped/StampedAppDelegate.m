@@ -43,7 +43,6 @@ static NSString* const kFacebookAppID = @"297022226980395";
 @synthesize navigationController = navigationController_;
 @synthesize facebook = facebook_;
 
-
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if !TARGET_IPHONE_SIMULATOR
 //  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
@@ -98,15 +97,13 @@ static NSString* const kFacebookAppID = @"297022226980395";
   NSLog(@"Error in registration. Error: %@", err);
 }
 
-- (void)applicationDidEnterBackground:(UIApplication*)application {
-}
+- (void)applicationDidEnterBackground:(UIApplication*)application {}
 
 - (void)applicationWillEnterForeground:(UIApplication*)application {}
 
 - (void)applicationDidBecomeActive:(UIApplication*)application {}
 
-- (void)applicationWillTerminate:(UIApplication*)application {
-}
+- (void)applicationWillTerminate:(UIApplication*)application {}
 
 - (void)dealloc {
   [window_ release];

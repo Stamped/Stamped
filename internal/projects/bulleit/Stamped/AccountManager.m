@@ -127,6 +127,7 @@ static AccountManager* sharedAccountManager_ = nil;
   NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:kTokenExpirationUserDefaultsKey];
   // Fresh install.
   if (!tokenExpirationDate) {
+    [[UIApplication sharedApplication] unregisterForRemoteNotifications];
     [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
     [passwordKeychainItem_ resetKeychainItem];
     [self showFirstRunViewController];
@@ -422,6 +423,7 @@ static AccountManager* sharedAccountManager_ = nil;
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];
   [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
+  [[UIApplication sharedApplication] unregisterForRemoteNotifications];
   [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]];
   self.currentUser = nil;
   [[RKObjectManager sharedManager].objectStore deletePersistantStore];
