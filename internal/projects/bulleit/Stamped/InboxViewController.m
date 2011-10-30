@@ -204,6 +204,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       latestStamp.entityObject.mostRecentStampDate = latestStamp.created;
     }
   }
+  
+#warning fix this shit.
+  NSFetchRequest* request = [Entity fetchRequest];
+  request.predicate = [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0) AND mostRecentStampDate == NIL"];
+  NSArray* results = [Entity executeFetchRequest:request];
+  NSLog(@"Results: %@", results);
 }
 
 - (void)loadStampsFromDataStore {
@@ -381,6 +387,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
                                               forKey:@"InboxOldestTimestampInBatch"];
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
+
   if (mutableObjects.count < 10 || !oldestStampInBatch.modified) {
     // Grab latest stamp.
     NSFetchRequest* request = [Stamp fetchRequest];
