@@ -65,6 +65,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.searchQuery = nil;
+  self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
@@ -78,6 +79,13 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [self.tableView scrollRectToVisible:mapFrame animated:NO];
   userPannedMap_ = NO;
   self.tableView.scrollEnabled = NO;
+  self.fetchedResultsController.fetchRequest.predicate =
+      [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"];
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
   id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
   NSArray* entitiesArray = [sectionInfo objects];
   [UIView animateWithDuration:0.5
@@ -94,6 +102,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)listButtonWasPressed:(NSNotification*)notification {
   self.tableView.scrollEnabled = YES;
+  [self filterStamps];
   [mapView_ removeAnnotations:mapView_.annotations];
   [UIView animateWithDuration:0.5
                    animations:^{ mapView_.alpha = 0.0; }
@@ -142,7 +151,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
+  self.stampFilterBar.delegate = nil;
   self.stampFilterBar = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
