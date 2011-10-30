@@ -187,29 +187,19 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)managedObjectContextChanged:(NSNotification*)notification {
   NSSet* objects = [NSSet setWithSet:[notification.userInfo objectForKey:NSUpdatedObjectsKey]];
   objects = [objects setByAddingObjectsFromSet:[notification.userInfo objectForKey:NSInsertedObjectsKey]];
-  objects = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
-    if ([obj isMemberOfClass:[Stamp class]] && ![[(Stamp*)obj temporary] boolValue] && ![[(Stamp*)obj deleted] boolValue])
-      return YES;
 
-    return NO;
+  NSSet* stamps = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
+    return ([obj isMemberOfClass:[Stamp class]] && ![[(Stamp*)obj temporary] boolValue] && ![[(Stamp*)obj deleted] boolValue]);
   }];
 
-  if (objects.count > 0) {
+  for (Stamp* s in stamps) {
+    Entity* e = s.entityObject;
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-    NSArray* sortedStamps = [[objects allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    NSArray* sortedStamps = [e.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
     Stamp* latestStamp = [sortedStamps objectAtIndex:0];
-    Entity* entity = latestStamp.entityObject;
-    if (!entity.mostRecentStampDate ||
-        [latestStamp.created timeIntervalSinceDate:entity.mostRecentStampDate] > 0) {
-      latestStamp.entityObject.mostRecentStampDate = latestStamp.created;
-    }
+    if (!e.mostRecentStampDate || [latestStamp.created timeIntervalSinceDate:e.mostRecentStampDate] > 0)
+      e.mostRecentStampDate = latestStamp.created;
   }
-  
-#warning fix this shit.
-  NSFetchRequest* request = [Entity fetchRequest];
-  request.predicate = [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0) AND mostRecentStampDate == NIL"];
-  NSArray* results = [Entity executeFetchRequest:request];
-  NSLog(@"Results: %@", results);
 }
 
 - (void)loadStampsFromDataStore {
@@ -268,7 +258,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)userLoggedOut:(NSNotification*)notification {
-  //[self loadStampsFromDataStore];
+  // Do something if the user logs out?
 }
 
 #pragma mark - STStampFilterBarDelegate methods.
@@ -426,39 +416,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 #pragma mark - NSFetchedResultsControllerDelegate methods.
 
-- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
-  [self.tableView beginUpdates];
-}
-
-- (void)controller:(NSFetchedResultsController*)controller 
-   didChangeObject:(id)anObject
-       atIndexPath:(NSIndexPath*)indexPath
-     forChangeType:(NSFetchedResultsChangeType)type
-      newIndexPath:(NSIndexPath*)newIndexPath {
-  UITableView* tableView = self.tableView;
-  
-  switch(type) {
-    case NSFetchedResultsChangeInsert:
-      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-      
-    case NSFetchedResultsChangeDelete:
-      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-      
-    case NSFetchedResultsChangeUpdate:
-      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
-      break;
-      
-    case NSFetchedResultsChangeMove:
-      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-  }
-}
-
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-  [self.tableView endUpdates];
+  [self.tableView reloadData];
 }
 
 #pragma mark - Table view delegate
