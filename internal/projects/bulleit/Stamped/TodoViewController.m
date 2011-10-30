@@ -125,7 +125,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
       [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:offsetIndexPath];
       break;
     }
-      
+
     case NSFetchedResultsChangeMove:
       [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
       [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
@@ -199,7 +199,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 }
 
 - (void)tableView:(UITableView*)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath*)indexPath {
-  // If row is deleted, remove it from the list.
+  // If row is deleted, remove it from the datastore.
   if (editingStyle == UITableViewCellEditingStyleDelete) {
     NSIndexPath* offsetIndexPath = [NSIndexPath indexPathForRow:(indexPath.row - 1) inSection:0];
     Favorite* fave = [fetchedResultsController_ objectAtIndexPath:offsetIndexPath];
@@ -213,7 +213,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     [self removeFavoriteWithEntityID:entityID];    
   }
 }
-
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
@@ -265,6 +264,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     User* user = [AccountManager sharedManager].currentUser;
     [request setPredicate:[NSPredicate predicateWithFormat:@"userID == %@ AND entityObject != NIL", user.userID]];
+    [NSFetchedResultsController deleteCacheWithName:@"FavoriteItems"];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
                                             managedObjectContext:[Favorite managedObjectContext]
@@ -290,7 +290,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
   objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityID, @"entity_id", nil];
-
   [objectLoader send];
 }
 
