@@ -16,7 +16,7 @@ static const CGFloat kTopMargin = 5;
 @interface STStampFilterBar ()
 - (void)initialize;
 - (void)filterButtonPressed:(id)sender;
-- (void)nextButtonPressed:(id)sender;
+- (void)searchButtonPressed:(id)sender;
 - (void)backButtonPressed:(id)sender;
 - (void)fireDelegateMethod;
 - (void)addFirstPageButtons;
@@ -25,6 +25,7 @@ static const CGFloat kTopMargin = 5;
 @property (nonatomic, readonly) UIScrollView* scrollView;
 @property (nonatomic, retain) NSMutableArray* filterButtons;
 @property (nonatomic, retain) UIButton* clearFilterButton;
+@property (nonatomic, retain) UIButton* searchButton;
 @end
 
 @implementation STStampFilterBar
@@ -36,6 +37,7 @@ static const CGFloat kTopMargin = 5;
 @synthesize searchQuery = searchQuery_;
 @synthesize searchField = searchField_;
 @synthesize clearFilterButton = clearFilterButton_;
+@synthesize searchButton = searchButton_;
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
   self = [super initWithCoder:aDecoder];
@@ -57,6 +59,7 @@ static const CGFloat kTopMargin = 5;
   self.filterButtons = nil;
   self.searchQuery = nil;
   self.clearFilterButton = nil;
+  self.searchButton = nil;
   [super dealloc];
 }
 
@@ -193,16 +196,18 @@ static const CGFloat kTopMargin = 5;
   [scrollView_ addSubview:divider];
   [divider release];
   
-  UIButton* nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  nextButton.frame = CGRectMake(279, kTopMargin, 40, 40);
-  [nextButton setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button"]
-              forState:UIControlStateNormal];
-  [nextButton setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button_selected"]
-              forState:UIControlStateHighlighted];
-  [nextButton addTarget:self
-                 action:@selector(nextButtonPressed:)
-       forControlEvents:UIControlEventTouchUpInside];
-  [scrollView_ addSubview:nextButton];
+  self.searchButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  searchButton_.frame = CGRectMake(279, kTopMargin, 40, 40);
+  [searchButton_ setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button"]
+                 forState:UIControlStateNormal];
+  [searchButton_ setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button_selected"]
+                 forState:UIControlStateHighlighted];
+  [searchButton_ setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button_selected"]
+                 forState:UIControlStateSelected];
+  [searchButton_ addTarget:self
+                    action:@selector(searchButtonPressed:)
+          forControlEvents:UIControlEventTouchUpInside];
+  [scrollView_ addSubview:searchButton_];
 }
 
 - (void)addSecondPageButtons {
@@ -231,7 +236,7 @@ static const CGFloat kTopMargin = 5;
   [searchField_ release];
 }
 
-- (void)nextButtonPressed:(id)sender {
+- (void)searchButtonPressed:(id)sender {
   CGFloat nextPage = fmaxf(0, floorf(scrollView_.contentOffset.x / CGRectGetWidth(self.bounds)) + 1);
   [scrollView_ setContentOffset:CGPointMake(nextPage * 320, 0) animated:YES];
 }
@@ -247,6 +252,8 @@ static const CGFloat kTopMargin = 5;
 }
 
 - (void)fireDelegateMethod {
+  searchButton_.selected = searchQuery_.length > 0;
+
   [delegate_ stampFilterBar:self
             didSelectFilter:filterType_
                    andQuery:searchQuery_];

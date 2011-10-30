@@ -200,14 +200,13 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     [request setPredicate:
-        [NSPredicate predicateWithFormat:@"stamps.@count > 0 AND (SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"]];
+        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"]];
     [request setFetchBatchSize:20];
-    [NSFetchedResultsController deleteCacheWithName:nil];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
                                             managedObjectContext:[Entity managedObjectContext]
                                               sectionNameKeyPath:nil
-                                                       cacheName:@"InboxItems"];
+                                                       cacheName:nil];
     self.fetchedResultsController = fetchedResultsController;
     fetchedResultsController.delegate = self;
     [fetchedResultsController release];
@@ -218,44 +217,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 		// Update to handle the error appropriately.
 		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
 	}
-
-//  self.entitiesArray = nil;
-//  NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
-//  
-//  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO"];
-//  if (searchTerms.count == 1 && searchQuery_.length) {
-//    p = [NSPredicate predicateWithFormat:
-//         @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
-//         searchQuery_, searchQuery_, searchQuery_, searchQuery_];
-//  } else if (searchTerms.count > 1) {
-//    NSMutableArray* subPredicates = [NSMutableArray array];
-//    for (NSString* term in searchTerms) {
-//      if (!term.length)
-//        continue;
-//
-//      NSPredicate* p = [NSPredicate predicateWithFormat:
-//          @"(temporary == NO) AND ((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
-//          term, term, term, term];
-//      [subPredicates addObject:p];
-//    }
-//    p = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
-//  }
-//  NSFetchRequest* request = [Stamp fetchRequest];
-//	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-//	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-//  [request setPredicate:p];
-//	NSArray* results = [Stamp objectsWithFetchRequest:request];
-//  NSMutableArray* sortedEntities = [NSMutableArray arrayWithCapacity:results.count];
-//  for (Stamp* s in results) {
-//    if (s.entityObject && ![sortedEntities containsObject:s.entityObject])
-//      [sortedEntities addObject:s.entityObject];
-//  }
-//  self.entitiesArray = sortedEntities;
-//
-//  [self filterStamps];
-//  [self sortStamps];
-//  [self.tableView reloadData];
-//  self.tableView.contentOffset = scrollPosition_;
 }
 
 - (void)loadStampsFromNetwork {
@@ -285,7 +246,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {      
-  //[self loadStampsFromDataStore];
+  [self.tableView setContentOffset:CGPointZero];
 }
 
 - (void)userLoggedOut:(NSNotification*)notification {
@@ -297,12 +258,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType
               andQuery:(NSString*)query {
-  if (query && ![query isEqualToString:searchQuery_]) {
-    self.searchQuery = query;
-    selectedFilterType_ = filterType;
-    return;
-  }
-
+  self.searchQuery = query;
   selectedFilterType_ = filterType;
   [self filterStamps];
 
@@ -312,10 +268,20 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - Filter/Search stuff.
 
 - (void)filterStamps {
-  if (selectedFilterType_ == StampFilterTypeNone) {
-    // No need to filter.
-//    self.filteredEntitiesArray = [NSMutableArray arrayWithArray:entitiesArray_];
-    return;
+  NSMutableArray* predicates = [NSMutableArray array];
+  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"]];
+
+  if (searchQuery_.length) {
+    NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
+    for (NSString* term in searchTerms) {
+      if (!term.length)
+        continue;
+
+      NSPredicate* p = [NSPredicate predicateWithFormat:
+          @"((ANY stamps.blurb contains[cd] %@) OR (ANY stamps.user.screenName contains[cd] %@) OR (title contains[cd] %@) OR (subtitle contains[cd] %@))",
+          term, term, term, term];
+      [predicates addObject:p];
+    }
   }
 
   NSString* filterString = nil;
@@ -336,18 +302,18 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       filterString = @"other";
       break;
     default:
-      NSLog(@"Invalid filter string...");
       break;
   }
-  if (filterString) {
-    NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"category == %@", filterString];
-//    self.filteredEntitiesArray =
-//        [NSMutableArray arrayWithArray:[entitiesArray_ filteredArrayUsingPredicate:filterPredicate]];
-  }
-}
+  if (filterString)
+    [predicates addObject:[NSPredicate predicateWithFormat:@"category == %@", filterString]];
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
+  self.fetchedResultsController.fetchRequest.predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+  
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
