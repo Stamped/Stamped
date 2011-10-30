@@ -685,7 +685,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
 }
 
-- (void) signOutOfFacebook {
+- (void)signOutOfFacebook {
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"]) {
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
@@ -706,7 +706,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       self.searchFieldHidden = YES;
       self.signInFacebookView.hidden = NO;
       [UIView animateWithDuration:0.4
-                       animations:^{self.tableView.alpha = 0.0;}
+                       animations:^{ self.tableView.alpha = 0.0; }
                        completion:^(BOOL finished) {
                          [self.signInFacebookActivityIndicator stopAnimating];
                          self.signInFacebookConnectButton.enabled = YES;
@@ -742,8 +742,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [request send];
 }
 
-
-// FBRequestDelegate Methods.
+#pragma mark - FBRequestDelegate Methods.
 
 - (void)request:(FBRequest*)request didLoad:(id)result {
   NSArray* resultData;
@@ -848,10 +847,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
+                                                                   ascending:YES 
+                                                                    selector:@selector(localizedCaseInsensitiveCompare:)];
   if ([objectLoader.resourcePath isEqualToString:kStampedTwitterFriendsURI]) {
-    self.twitterFriends =
-    [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
-                                          [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    self.twitterFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self.tableView reloadData];    
     // If we've just signed in, display the table with a fade.
     if (self.findSource == FindFriendsFromTwitter && !self.signInTwitterView.hidden) {
@@ -868,10 +868,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     }
   }
   else if ([objectLoader.resourcePath isEqualToString:kStampedFacebookFriendsURI]) {
-//    NSLog(@"FB friends on Stamped: %@", objects);
-    self.facebookFriends =
-    [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:
-                                          [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    self.facebookFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self.tableView reloadData];
     // If we've just signed in, display the table with a fade.
     if (self.findSource == FindFriendsFromFacebook && !self.signInFacebookView.hidden) {
@@ -888,7 +885,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     }
   }
   else if ([objectLoader.resourcePath isEqualToString:kStampedPhoneFriendsURI] ||
-             [objectLoader.resourcePath isEqualToString:kStampedEmailFriendsURI]) {
+           [objectLoader.resourcePath isEqualToString:kStampedEmailFriendsURI]) {
     if (objects.count == 0) {
       if (!self.contactFriends) {
         self.contactFriends = objects;
@@ -903,10 +900,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       self.contactFriends = [self.contactFriends arrayByAddingObjectsFromArray:objects];
       self.contactFriends = [[NSSet setWithArray:self.contactFriends] allObjects];
     }
-    self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:
-        [NSSortDescriptor sortDescriptorWithKey:@"name"
-                                      ascending:YES 
-                                       selector:@selector(caseInsensitiveCompare:)]]];
+    self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
     [self.tableView reloadData];
   } else if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
     self.stampedFriends = objects;

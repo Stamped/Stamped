@@ -46,8 +46,10 @@
     User* currentUser = [AccountManager sharedManager].currentUser;
     NSFetchRequest* request = [User fetchRequest];
     request.predicate = [NSPredicate predicateWithFormat:@"userID != %@ AND name != NIL", currentUser.userID];
-    request.sortDescriptors =
-        [NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]];
+    NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
+                                                                     ascending:YES 
+                                                                      selector:@selector(localizedCaseInsensitiveCompare:)];
+    request.sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
     self.peopleArray = [User objectsWithFetchRequest:request];
     [self filterPeople];
   }

@@ -164,7 +164,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
-    self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES]]];
+    NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
+                                                                     ascending:YES 
+                                                                      selector:@selector(localizedCaseInsensitiveCompare:)];
+    self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   }
   [self.tableView reloadData];
   self.tableView.contentOffset = scrollPosition_;
