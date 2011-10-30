@@ -319,8 +319,18 @@ static AccountManager* sharedAccountManager_ = nil;
                      email:(NSString*)email
               profileImage:(UIImage*)image
                phoneNumber:(NSString*)number {
-  if (![name length] || ![handle length] || ![password length] || ![email length])
-    return [self.firstRunViewController signUpFailed:@"Please fill out all required fields."];
+  NSString* failedReason = nil;
+  if (!name.length) {
+    failedReason = @"Please fill out the 'full name' field.";
+  } else if (!handle.length) {
+    failedReason = @"Please enter a username.";
+  } else if (!password.length) {
+    failedReason = @"Please enter a password.";
+  } else if (!email.length) {
+    failedReason = @"Please enter your desired email address.";
+  }
+  if (failedReason)
+    return [self.firstRunViewController signUpFailed:failedReason];
 
   [passwordKeychainItem_ setObject:handle forKey:(id)kSecAttrAccount];
   [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];

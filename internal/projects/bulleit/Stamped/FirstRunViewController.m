@@ -164,6 +164,12 @@ static const CGFloat kProfileImageSize = 500;
     [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
     confirmButton_.enabled = YES;
   }
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp"
+                                                   message:@"Wrong username and password combination."
+                                                  delegate:nil
+                                         cancelButtonTitle:@"OK"
+                                         otherButtonTitles:nil] autorelease];
+  [alert show];
 }
 
 - (void)signUpSucess {
@@ -177,13 +183,12 @@ static const CGFloat kProfileImageSize = 500;
   [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   confirmButton_.enabled = YES;
   NSString* reasoning = @"Please check that all required fields are valid. Sorry. We're working on making this easier.";
-  UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Womp womp"
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp"
                                                   message:reasoning
                                                  delegate:nil
                                         cancelButtonTitle:@"OK"
-                                        otherButtonTitles:nil];
+                                        otherButtonTitles:nil] autorelease];
   [alert show];
-  [alert release];
 }
 
 #pragma mark - Nib Actions.
