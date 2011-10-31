@@ -176,6 +176,7 @@
 - (void)setTabBarIcons {
   if (![stampsTabBarItem_ respondsToSelector:@selector(setFinishedSelectedImage:withFinishedUnselectedImage:)])
     return;
+
   [stampsTabBarItem_ setFinishedSelectedImage:[UIImage imageNamed:@"tab_stamps_button_active"]
                   withFinishedUnselectedImage:[UIImage imageNamed:@"tab_stamps_button"]];
   [activityTabBarItem_ setFinishedSelectedImage:[UIImage imageNamed:@"tab_news_button_active"]
