@@ -130,9 +130,11 @@ def parseCommandLine():
     parser.add_option("-p", "--prefix", default=False, action="store_true", 
         help="use faster prefix-based search")
     
-    parser.add_option("-v", "--verbose", default=False, 
-        action="store_true", 
+    parser.add_option("-v", "--verbose", default=False, action="store_true", 
         help="turn verbosity on")
+    
+    parser.add_option("-S", "--Stats", default=False, action="store_true", 
+        help="view ranking stats")
     
     parser.add_option("-c", "--category", default=None, type="string", 
         action="store", dest="category", 
@@ -191,11 +193,16 @@ def main():
                 data = entity.getDataAsDict()
             else:
                 data = { }
-                data['title'] = utils.normalize(entity.title)
+                data['title']  = utils.normalize(entity.title)
+                #data['titles'] = utils.normalize(entity.simplified_title)
+                
                 data['subcategory'] = utils.normalize(entity.subcategory)
                 if 'address' in entity:
                     data['addr'] = utils.normalize(entity.address)
                 #data['subtitle'] = utils.normalize(entity.subtitle)
+                
+                if options.Stats:
+                    data['stats'] = entity.getDataAsDict()['stats']
             
             if distance >= 0:
                 data['distance'] = distance

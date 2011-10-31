@@ -40,12 +40,12 @@ class AmazonAPI(object):
     ])
     
     _product_type_names = {
-        'ABIS_BOOK'  : 'book', 
-        'ABIS_MUSIC' : 'album', 
-        'ABIS_DVD'   : 'movie', 
-        'CONSOLE_VIDEO_GAMES'    : 'video_game', 
-        'VIDEO_GAME_HARDWARE'    : None, 
-        'VIDEO_GAME_ACCESSORIES' : None, 
+        'abis_book'  : 'book', 
+        'abis_music' : 'album', 
+        'abis_dvd'   : 'movie', 
+        'console_video_games'    : 'video_game', 
+        'video_game_hardware'    : None, 
+        'video_game_accessories' : None, 
     }
     
     def __init__(self):

@@ -62,7 +62,7 @@ class MongoEntitySearcher(EntitySearcher):
         # --------------------------
         'artist'            : 55, 
         'song'              : 25, 
-        'album'             : 25, 
+        'album'             : 45, 
         
         # --------------------------
         #           other
@@ -108,10 +108,10 @@ class MongoEntitySearcher(EntitySearcher):
     # higher quality sources as likely higher quality themselves as well
     source_weights = {
         'googlePlaces'      : 50, 
-        'amazon'            : 90, 
+        'amazon'            : 80, 
         'openTable'         : 110, 
         'factual'           : 5, 
-        'apple'             : 80, 
+        'apple'             : 90, 
         'zagat'             : 95, 
         'urbanspoon'        : 80, 
         'nymag'             : 95, 
@@ -175,6 +175,20 @@ class MongoEntitySearcher(EntitySearcher):
         'album', 
     ])
     
+    _suffix_regexes = [
+        re.compile('^(.*) \[[^\]]+\][ \t]*$'), 
+        re.compile('^(.*) \([^)]+\)[ \t]*$'), 
+    ]
+    
+    _negative_title_strings = {
+        '[vhs]'             : -1, 
+        'special edition'   : -0.5, 
+        '[dvd]'             : -1, 
+        'blu-ray'           : -1, 
+        'season'            : -1, 
+        'complete series'   : -1, 
+    }
+    
     def __init__(self, api):
         EntitySearcher.__init__(self)
         
@@ -204,20 +218,17 @@ class MongoEntitySearcher(EntitySearcher):
             v['name'] = k
             self._regions[k.lower()] = v
             
-            state = v['state']
+            state = v['state'].lower()
             if not state in city_in_state or v['population'] > city_in_state[state]['population']:
                 city_in_state[state] = v
         
         # push lat/lng as best candidate for state
-        for k, v in city_in_state.iteritems():
-            self._regions[k.lower()] = v
-        
-        near_synonyms = set(['in', 'near'])
-        self._near_synonym_res = []
-        
-        for synonym in near_synonyms:
-            synonym_re = re.compile("(.*) %s ([a-z -']+)" % synonym)
-            self._near_synonym_res.append(synonym_re)
+        for state, v in city_in_state.iteritems():
+            self._regions[state] = v
+            
+            abbreviation = CityList.state_abbreviations[state]
+            if abbreviation not in self._regions:
+                self._regions[abbreviation] = v
     
     @lazyProperty
     def _googlePlaces(self):
@@ -258,6 +269,7 @@ class MongoEntitySearcher(EntitySearcher):
         # -------------------------------- #
         
         input_query = query.strip().lower()
+        national_query = input_query
         original_coords = True
         
         query = input_query
@@ -267,6 +279,24 @@ class MongoEntitySearcher(EntitySearcher):
             # couldn't possibly contain a location, then ensure that coords is disabled
             coords = None
         else:
+            for region_name in self._regions:
+                if query.endswith(region_name):
+                    region = self._regions[region_name]
+                    query  = query[:-len(region_name)]
+                    
+                    if query.endswith('in '):
+                        query = query[:-3]
+                    elif query.endswith('near '):
+                        query = query[:-5]
+                    
+                    query = query.strip()
+                    input_query = query
+                    
+                    coords = [ region['lat'], region['lng'], ]
+                    original_coords = False
+                    utils.log("[search] using region %s at %s" % (region_name, coords))
+            
+            """
             # process 'in' or 'near' location hint
             for synonym_re in self._near_synonym_res:
                 match = synonym_re.match(query)
@@ -282,7 +312,9 @@ class MongoEntitySearcher(EntitySearcher):
                         
                         coords = [ region['lat'], region['lng'], ]
                         original_coords = False
+                        utils.log("[search] using region %s at %s" % (region_name, coords))
                         break
+            """
         
         # attempt to replace accented characters with their ascii equivalents
         query = unicodedata.normalize('NFKD', unicode(query)).encode('ascii', 'ignore')
@@ -346,12 +378,13 @@ class MongoEntitySearcher(EntitySearcher):
         utils.log(pformat(data))
         """
         
-        results = {}
-        wrapper = {}
-        asins   = set()
-        gids    = set()
-        aids    = set()
-        pool    = Pool(8)
+        results     = {}
+        wrapper     = {}
+        db_wrapper  = {}
+        asins       = set()
+        gids        = set()
+        aids        = set()
+        pool        = Pool(8)
         earthRadius = 3959.0 # miles
         
         # -------------------------------- #
@@ -365,7 +398,7 @@ class MongoEntitySearcher(EntitySearcher):
             else:
                 lat, lng = None, None
             
-            wrapper['db_results'] = self._find_entity(input_query, query, lat, lng, prefix)
+            db_wrapper['db_results'] = self._find_entity(input_query, query, lat, lng, prefix)
         
         # search apple itunes API for multiple variants (artist, album, song, etc.)
         def _find_apple():
@@ -381,7 +414,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         # (deprecated) google local search
         def _find_google_national():
-            wrapper['google_national_results'] = self._find_google_national(input_query)
+            wrapper['google_national_results'] = self._find_google_national(national_query)
         
         if full:
             if self._is_possible_amazon_query(category_filter, subcategory_filter, local):
@@ -432,19 +465,19 @@ class MongoEntitySearcher(EntitySearcher):
                 place_results = self.placesDB._collection.command(q)
                 
                 try:
-                    place_results = wrapper['place_results']['results']
+                    place_results = place_results['results']
                 except KeyError:
                     place_results = []
                 
-                wrapper['place_results'] = []
+                db_wrapper['place_results'] = []
                 for doc in place_results:
                     try:
-                        e = self.placesDB._convertFromMongo(doc['obj'])
+                        entity = self.placesDB._convertFromMongo(doc['obj'])
                     except:
                         utils.printException()
                         continue
                     
-                    wrapper['place_results'][e.entity_id] = (e, doc['dis'])
+                    db_wrapper['place_results'].append((entity, doc['dis']))
             
             # search Google Places API
             def _find_google_places(ret, specific_coords, radius, use_distance):
@@ -556,7 +589,14 @@ class MongoEntitySearcher(EntitySearcher):
             except:
                 utils.printException()
         
-        # aggregate all results
+        # aggregate all db results
+        for key, value in db_wrapper.iteritems():
+            utils.log("%s) %d" % (key, len(value)))
+            
+            for result in value:
+                _add_result(result)
+        
+        # aggregate all third-party results
         for key, value in wrapper.iteritems():
             utils.log("%s) %d" % (key, len(value)))
             
@@ -669,12 +709,12 @@ class MongoEntitySearcher(EntitySearcher):
                 # TODO: replace with generic *are these two entities equal* function
                 # look at unique indices
                 if isEqual(entity1, entity2):
-                   prune.add(j)
-                   
-                   if keep1 and entity1.entity_id.startswith('T_') and not \
-                       entity2.entity_id.startswith('T_'):
-                       output.append(result2)
-                       keep1 = False
+                    prune.add(j)
+                    
+                    if keep1 and entity1.entity_id.startswith('T_') and not \
+                        entity2.entity_id.startswith('T_'):
+                        output.append(result2)
+                        keep1 = False
             
             if keep1:
                 output.append(result1)
@@ -683,6 +723,29 @@ class MongoEntitySearcher(EntitySearcher):
                 break
         
         return output
+    
+    def _simplify(self, title):
+        title = title.lower().strip()
+        title = unicodedata.normalize('NFKD', unicode(title)).encode('ascii', 'ignore')
+        
+        if title.startswith('the '):
+            title = title[4:]
+        
+        if title.endswith(' the'):
+            title = title[:-4]
+        
+        for regex in self._suffix_regexes:
+            match = regex.match(title)
+            
+            if match is not None:
+                title = match.groups()[0]
+        
+        title = title.strip()
+        
+        if title.endswith(','):
+            title = title[:-1]
+        
+        return title
     
     def _get_entity_weight_func(self, input_query, prefix):
         """ 
@@ -699,13 +762,17 @@ class MongoEntitySearcher(EntitySearcher):
             entity   = result[0]
             distance = result[1]
             
+            entity.simplified_title = self._simplify(entity.title)
+            
             title_value         = self._get_title_value(input_query, entity, prefix)
+            negative_value      = self._get_negative_value(entity)
             subcategory_value   = self._get_subcategory_value(entity)
             source_value        = self._get_source_value(entity)
             quality_value       = self._get_quality_value(entity)
             distance_value      = self._get_distance_value(distance)
             
             title_weight        = 1.0
+            negative_weight     = 1.0
             subcategory_weight  = 0.8
             source_weight       = 0.4
             quality_weight      = 1.0
@@ -713,11 +780,20 @@ class MongoEntitySearcher(EntitySearcher):
             
             # TODO: revisit and iterate on this simple linear ranking formula
             aggregate_value     = title_value * title_weight + \
+                                  negative_value * negative_weight + \
                                   subcategory_value * subcategory_weight + \
                                   source_value * source_weight + \
                                   quality_value * quality_weight + \
                                   distance_value * distance_weight
             
+            entity.stats.titlev     = title_value
+            entity.stats.subcatv    = subcategory_value
+            entity.stats.sourcev    = source_value
+            entity.stats.qualityv   = quality_value
+            entity.stats.distancev  = distance_value
+            entity.stats.totalv     = aggregate_value
+            
+            """
             data = {}
             data['title']       = entity.title
             data['titlev']      = title_value
@@ -729,7 +805,6 @@ class MongoEntitySearcher(EntitySearcher):
             data['totalv']      = aggregate_value
             
             #if input_query.lower() == entity.title.lower():
-            """
             from pprint import pprint
             print
             pprint(entity.title)
@@ -742,15 +817,15 @@ class MongoEntitySearcher(EntitySearcher):
         return _get_entity_weight
     
     def _get_title_value(self, input_query, entity, prefix):
-        candidates = [ entity.title ]
+        candidates = [ entity.title, entity.simplified_title ]
         
         if (entity.subcategory == 'song' or entity.subcategory == 'album') and \
             'artist_display_name' in entity:
-            candidates.append(entity.artist_display_name)
+            candidates.append(self._simplify(entity.artist_display_name))
         
         try:
             if entity.subcategory == 'song' and entity.details.song.album_name is not None:
-                candidates.append(entity.details.song.album_name)
+                candidates.append(self._simplify(entity.details.song.album_name))
         except:
             pass
         
@@ -788,6 +863,16 @@ class MongoEntitySearcher(EntitySearcher):
         
         return value_sum
     
+    def _get_negative_value(self, entity):
+        title = entity.title.lower()
+        value = 0.0
+        
+        for substring in self._negative_title_strings:
+            if substring in title:
+                value += self._negative_title_strings[substring]
+        
+        return value
+    
     def _get_subcategory_value(self, entity):
         subcat = entity.subcategory
         
@@ -795,7 +880,7 @@ class MongoEntitySearcher(EntitySearcher):
             weight = self.subcategory_weights[subcat]
         except KeyError:
             # default weight for non-standard subcategories
-            weight = 30
+            weight = 5
         
         return weight / 100.0
     

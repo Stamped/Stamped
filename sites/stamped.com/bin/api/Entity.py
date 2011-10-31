@@ -196,7 +196,7 @@ def isEqual(entity1, entity2):
                 (entity2.subcategory == 'other' and entity2.googleLocal is not None)):
             return False
     
-    if entity1.title.lower() != entity2.title.lower():
+    if entity1.simplified_title.lower() != entity2.simplified_title.lower():
         return False
     
     if entity1.lat is not None:
