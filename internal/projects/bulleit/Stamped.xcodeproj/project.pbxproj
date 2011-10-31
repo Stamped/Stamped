@@ -237,7 +237,6 @@
 		7E7DDE14145A0AE50058ACA9 /* STToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E7DDE13145A0AE50058ACA9 /* STToolbar.m */; };
 		7E7E109D13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E109B13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png */; };
 		7E7E109E13DF0D9100E44DE1 /* nav_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E109C13DF0D9100E44DE1 /* nav_bar@2x.png */; };
-		7E7E10A013DF0FF300E44DE1 /* toolbar_todo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E109F13DF0FF300E44DE1 /* toolbar_todo@2x.png */; };
 		7E7E10A313DF14C900E44DE1 /* photo_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A113DF14C900E44DE1 /* photo_icon@2x.png */; };
 		7E7E10A413DF14C900E44DE1 /* credit_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E10A213DF14C900E44DE1 /* credit_icon@2x.png */; };
 		7E7E5CB21423B3B4008F3E89 /* make_stamp_swatch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7E5CAE1423B3B4008F3E89 /* make_stamp_swatch@2x.png */; };
@@ -468,9 +467,6 @@
 		7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* InboxViewController.xib */; };
 		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
 		7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */; };
-		7EFE8F7E13C3C96D00324F34 /* toolbar_people@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */; };
-		7EFE8F8013C3C96D00324F34 /* toolbar_activity@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */; };
-		7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */; };
 		7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */; };
 		7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */; };
 		CB0DCB571427AC95009CB682 /* learnmore_star_grey@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB0DCB551427AC95009CB682 /* learnmore_star_grey@2x.png */; };
@@ -917,7 +913,6 @@
 		7E7DDE13145A0AE50058ACA9 /* STToolbar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STToolbar.m; sourceTree = "<group>"; };
 		7E7E109B13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_no_logo@2x.png"; sourceTree = "<group>"; };
 		7E7E109C13DF0D9100E44DE1 /* nav_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar@2x.png"; sourceTree = "<group>"; };
-		7E7E109F13DF0FF300E44DE1 /* toolbar_todo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_todo@2x.png"; sourceTree = "<group>"; };
 		7E7E10A113DF14C900E44DE1 /* photo_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "photo_icon@2x.png"; sourceTree = "<group>"; };
 		7E7E10A213DF14C900E44DE1 /* credit_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "credit_icon@2x.png"; sourceTree = "<group>"; };
 		7E7E5CAE1423B3B4008F3E89 /* make_stamp_swatch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "make_stamp_swatch@2x.png"; sourceTree = "<group>"; };
@@ -1201,9 +1196,6 @@
 		7EFE8F2713C39FA100324F34 /* InboxViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = InboxViewController.xib; path = ../Interfaces/InboxViewController.xib; sourceTree = "<group>"; };
 		7EFE8F3213C3AFA300324F34 /* TGLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = TGLight.otf; path = ../Resources/TGLight.otf; sourceTree = "<group>"; };
 		7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "TitlingGothicFBComp-Reg.otf"; path = "../Resources/TitlingGothicFBComp-Reg.otf"; sourceTree = "<group>"; };
-		7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_people@2x.png"; sourceTree = "<group>"; };
-		7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_activity@2x.png"; sourceTree = "<group>"; };
-		7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "toolbar_stamps@2x.png"; sourceTree = "<group>"; };
 		7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTabBarViewController.h; sourceTree = "<group>"; };
 		7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTabBarViewController.m; sourceTree = "<group>"; };
 		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RootTabBarViewController.xib; path = ../Interfaces/RootTabBarViewController.xib; sourceTree = "<group>"; };
@@ -2025,12 +2017,8 @@
 				7E303F7813F0BB7700C1F794 /* gradient_background.png */,
 				7E303F7913F0BB7700C1F794 /* gradient_background@2x.png */,
 				7E7E109C13DF0D9100E44DE1 /* nav_bar@2x.png */,
-				7E7E109F13DF0FF300E44DE1 /* toolbar_todo@2x.png */,
-				7EFE8F7913C3C96D00324F34 /* toolbar_people@2x.png */,
 				7EBE8E2613DEFAD200D36E50 /* disclosure_arrow@2x.png */,
 				7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */,
-				7EFE8F7B13C3C96D00324F34 /* toolbar_activity@2x.png */,
-				7EFE8F7C13C3C96D00324F34 /* toolbar_stamps@2x.png */,
 				7E2B7E021436432E002BF383 /* blue_button_background@2x.png */,
 				7E1873CC143A6FC300A0ECC0 /* globe_button@2x.png */,
 				7E1873CD143A6FC300A0ECC0 /* list_button@2x.png */,
@@ -2598,9 +2586,6 @@
 				7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */,
 				7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */,
 				7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */,
-				7EFE8F7E13C3C96D00324F34 /* toolbar_people@2x.png in Resources */,
-				7EFE8F8013C3C96D00324F34 /* toolbar_activity@2x.png in Resources */,
-				7EFE8F8113C3C96D00324F34 /* toolbar_stamps@2x.png in Resources */,
 				7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */,
 				7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */,
 				7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */,
@@ -2628,7 +2613,6 @@
 				7EBE8E2713DEFAD200D36E50 /* disclosure_arrow@2x.png in Resources */,
 				7E7E109D13DF0D9100E44DE1 /* nav_bar_no_logo@2x.png in Resources */,
 				7E7E109E13DF0D9100E44DE1 /* nav_bar@2x.png in Resources */,
-				7E7E10A013DF0FF300E44DE1 /* toolbar_todo@2x.png in Resources */,
 				7E7E10A313DF14C900E44DE1 /* photo_icon@2x.png in Resources */,
 				7E7E10A413DF14C900E44DE1 /* credit_icon@2x.png in Resources */,
 				7E92C11F13E32407008D379D /* shelf_background.png in Resources */,
