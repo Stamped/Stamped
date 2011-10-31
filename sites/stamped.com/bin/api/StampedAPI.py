@@ -492,6 +492,34 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateAPNSToken(self, authUserId, token):
         self._accountDB.updateAPNSToken(authUserId, token)
+
+        ### TEMP: Update alert settings with first token
+        account = self._accountDB.getAccount(authUserId)
+        if not account.ios_alert_credit \
+            and not account.ios_alert_like \
+            and not account.ios_alert_fav \
+            and not account.ios_alert_mention \
+            and not account.ios_alert_comment \
+            and not account.ios_alert_reply \
+            and not account.ios_alert_follow:
+
+            account.ios_alert_credit       = True
+            account.ios_alert_like         = True
+            account.ios_alert_fav          = True
+            account.ios_alert_mention      = True
+            account.ios_alert_comment      = True
+            account.ios_alert_reply        = True
+            account.ios_alert_follow       = True
+            account.email_alert_credit     = False
+            account.email_alert_like       = False
+            account.email_alert_fav        = False
+            account.email_alert_mention    = False
+            account.email_alert_comment    = False
+            account.email_alert_reply      = False
+            account.email_alert_follow     = False
+
+            self._accountDB.updateAccount(account)
+
         return True
 
     @API_CALL
