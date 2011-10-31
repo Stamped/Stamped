@@ -191,6 +191,11 @@ def main():
             
             if options.verbose:
                 data = entity.getDataAsDict()
+                if not options.Stats:
+                    try:
+                        del data['stats']
+                    except:
+                        pass
             else:
                 data = { }
                 data['title']  = utils.normalize(entity.title)

@@ -89,7 +89,7 @@ class Geocoder(AGeocoder):
                     if loop:
                         index += 1
                 else:
-                    #utils.log('[Geocoder] Error: all geocoders failed to convert address "%s"' % address)
+                    utils.log('[Geocoder] Error: all geocoders failed to convert address "%s"' % address)
                     return None
             
             #utils.log('[Geocoder] Service \'%s\' : %s' % (decoder.getName(), address))
@@ -229,7 +229,7 @@ class BingGeocoderService(AGeocoder):
                 
                 return self.getValidatedLatLng(latLng)
             except:
-                utils.log('[BingGeocoderService] error converting "' + url + '"')
+                #utils.log('[BingGeocoderService] error converting "' + url + '"')
                 
                 # retry with another api key
                 count += 1
@@ -311,7 +311,7 @@ class YahooGeocoderService(AGeocoder):
                 
                 return self.getValidatedLatLng(latLng)
             except:
-                utils.log('[YahooGeocoderService] error converting "' + url + '"')
+                #utils.log('[YahooGeocoderService] error converting "' + url + '"')
                 
                 # retry with another api key
                 count += 1

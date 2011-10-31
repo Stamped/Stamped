@@ -176,8 +176,9 @@ class MongoEntitySearcher(EntitySearcher):
     ])
     
     _suffix_regexes = [
-        re.compile('^(.*) \[[^\]]+\][ \t]*$'), 
-        re.compile('^(.*) \([^)]+\)[ \t]*$'), 
+        re.compile('^(.*) \[[^\]]+\] *$'), 
+        re.compile('^(.*) \([^)]+\) *$'), 
+        re.compile('^(.*) \([^)]+\) *by +[A-Za-z. -]+$'), 
     ]
     
     _negative_title_strings = {
@@ -725,6 +726,7 @@ class MongoEntitySearcher(EntitySearcher):
     def _simplify(self, title):
         title = title.lower().strip()
         title = unicodedata.normalize('NFKD', unicode(title)).encode('ascii', 'ignore')
+        title = title.replace('-', ' ')
         
         if title.startswith('the '):
             title = title[4:]
