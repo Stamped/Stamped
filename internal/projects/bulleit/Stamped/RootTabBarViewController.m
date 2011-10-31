@@ -21,6 +21,7 @@
 @interface RootTabBarViewController ()
 - (void)finishViewInit;
 - (void)fillStampImageView;
+- (void)setTabBarIcons;
 - (void)ensureCorrectHeightOfViewControllers;
 - (void)stampWasCreated:(NSNotification*)notification;
 - (void)currentUserUpdated:(NSNotification*)notification;
@@ -117,21 +118,19 @@
 
   if ([AccountManager sharedManager].currentUser)
     [self fillStampImageView];
+  
+  [self setTabBarIcons];
 }
 
 - (void)finishViewInit {
   [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeBadge |
                                                                         UIRemoteNotificationTypeAlert];
   
-  InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController"
-                                                                     bundle:nil];
-  ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController"
-                                                                              bundle:nil];
-  TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController"
-                                                                  bundle:nil];
-  PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController"
-                                                                        bundle:nil];
-  
+  InboxViewController* inbox = [[InboxViewController alloc] initWithNibName:@"InboxViewController" bundle:nil];
+  ActivityViewController* activity = [[ActivityViewController alloc] initWithNibName:@"ActivityViewController" bundle:nil];
+  TodoViewController* todo = [[TodoViewController alloc] initWithNibName:@"TodoViewController" bundle:nil];
+  PeopleViewController* people = [[PeopleViewController alloc] initWithNibName:@"PeopleViewController" bundle:nil];
+
   todo.delegate = self;
 
   self.viewControllers = [NSArray arrayWithObjects:inbox, activity, todo, people, nil];
@@ -172,6 +171,20 @@
   [self tabBar:self.tabBar didSelectItem:self.tabBar.selectedItem];
   [self.selectedViewController.view removeFromSuperview];
   self.tabBar.selectedItem = nil;
+}
+
+- (void)setTabBarIcons {
+  if (![stampsTabBarItem_ respondsToSelector:@selector(setFinishedSelectedImage:withFinishedUnselectedImage:)])
+    return;
+  [stampsTabBarItem_ setFinishedSelectedImage:[UIImage imageNamed:@"tab_stamps_button_active"]
+                  withFinishedUnselectedImage:[UIImage imageNamed:@"tab_stamps_button"]];
+  [activityTabBarItem_ setFinishedSelectedImage:[UIImage imageNamed:@"tab_news_button_active"]
+                    withFinishedUnselectedImage:[UIImage imageNamed:@"tab_news_button"]];
+  [mustDoTabBarItem_ setFinishedSelectedImage:[UIImage imageNamed:@"tab_todo_button_active"]
+                  withFinishedUnselectedImage:[UIImage imageNamed:@"tab_todo_button"]];
+  [peopleTabBarItem_ setFinishedSelectedImage:[UIImage imageNamed:@"tab_people_button_active"]
+                  withFinishedUnselectedImage:[UIImage imageNamed:@"tab_people_button"]];
+  self.tabBar.backgroundImage = [UIImage imageNamed:@"tab_bar_bg"];
 }
 
 - (void)fillStampImageView {
