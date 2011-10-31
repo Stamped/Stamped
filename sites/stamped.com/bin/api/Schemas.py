@@ -348,6 +348,7 @@ class Entity(Schema):
         self.coordinates        = CoordinatesSchema()
         self.details            = EntityDetailsSchema()
         self.sources            = EntitySourcesSchema()
+        self.stats              = StatsSchema()
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ in ('EntityMini', 'EntityPlace'):
@@ -366,6 +367,16 @@ class Entity(Schema):
         except KeyError:
             # default to 'other' category
             return "other"
+
+class StatsSchema(Schema):
+    def setSchema(self):
+        self.simplified_title   = SchemaElement(basestring)
+        self.titlev             = SchemaElement(float)
+        self.subcatv            = SchemaElement(float)
+        self.sourcev            = SchemaElement(float)
+        self.qualityv           = SchemaElement(float)
+        self.distancev          = SchemaElement(float)
+        self.totalv             = SchemaElement(float)
 
 class EntityMini(Schema):
     def setSchema(self):
