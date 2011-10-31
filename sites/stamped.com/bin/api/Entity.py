@@ -95,20 +95,20 @@ def setSubtitle(entity):
 
 def setFields(entity, detailed=False):
     global city_state_re
-
+    
     try:
         entity.category = subcategories[entity.subcategory]
     except:
         entity.category = 'other'
-
+    
     # Subtitle
     if entity.category == 'food':
-
+        
         if detailed:
             if entity.address is not None:
                 entity.subtitle = entity.address
-            # elif entity.neighborhood is not None:
-            #     entity.subtitle = entity.neighborhood
+            elif entity.neighborhood is not None:
+                entity.subtitle = entity.neighborhood
             else:
                 setSubtitle(entity)
         else:
@@ -127,11 +127,12 @@ def setFields(entity, detailed=False):
             # elif entity.neighborhood is not None:
             #     entity.subtitle = entity.neighborhood
             # else:
+            address = entity.address
             is_set = False
             
-            if entity.address is not None:
+            if address is not None:
                 # attempt to parse the city, state from the address
-                match = city_state_re.match(entity.address)
+                match = city_state_re.match(address)
                 
                 if match is not None:
                     # city, state
