@@ -46,7 +46,8 @@ def search(request):
 
     output = []
     for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+        if user.user_id != authUserId:
+            output.append(HTTPUser().importSchema(user).exportSparse())
     
     return transformOutput(output)
 
@@ -99,7 +100,8 @@ def findEmail(request):
 
     output = []
     for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+        if user.user_id != authUserId:
+            output.append(HTTPUser().importSchema(user).exportSparse())
     
     return transformOutput(output)
 
@@ -129,7 +131,8 @@ def findPhone(request):
     
     output = []
     for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+        if user.user_id != authUserId:
+            output.append(HTTPUser().importSchema(user).exportSparse())
     
     return transformOutput(output)
 
@@ -155,7 +158,8 @@ def findTwitter(request):
 
     output = []
     for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+        if user.user_id != authUserId:
+            output.append(HTTPUser().importSchema(user).exportSparse())
     
     return transformOutput(output)
 
@@ -181,7 +185,8 @@ def findFacebook(request):
 
     output = []
     for user in users:
-        output.append(HTTPUser().importSchema(user).exportSparse())
+        if user.user_id != authUserId:
+            output.append(HTTPUser().importSchema(user).exportSparse())
     
     return transformOutput(output)
 
