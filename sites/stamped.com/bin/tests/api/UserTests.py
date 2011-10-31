@@ -17,11 +17,13 @@ class StampedAPIUserTest(AStampedAPITestCase):
     def setUp(self):
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
+        (self.userC, self.tokenC) = self.createAccount('UserC')
         self.screen_names = ['UserA', 'UserB']
 
     def tearDown(self):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
+        self.deleteAccount(self.tokenC)
 
 class StampedAPIUsersShow(StampedAPIUserTest):
     def test_show_user_id(self):
@@ -73,8 +75,8 @@ class StampedAPIUsersSearch(StampedAPIUserTest):
     def test_search(self):
         path = "users/search.json"
         data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "q": "%s" % self.userA['screen_name'][:3]
+            "oauth_token": self.tokenC['access_token'],
+            "q": "%s" % self.userC['screen_name'][:3]
         }
         result = self.handlePOST(path, data)
         self.assertTrue(len(result) >= 1)
@@ -114,7 +116,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
         emails = ['%s@stamped.com' % self.userA['screen_name'],
                     '%s@stamped.com' % self.userB['screen_name']]
         data = { 
-            "oauth_token": self.tokenA['access_token'],
+            "oauth_token": self.tokenC['access_token'],
             "q": ','.join(emails)
         }
         result = self.handlePOST(path, data)
@@ -140,7 +142,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
 
         path = "users/find/phone.json"
         data = { 
-            "oauth_token": self.tokenA['access_token'],
+            "oauth_token": self.tokenC['access_token'],
             "q": ','.join(numbers)
         }
         result = self.handlePOST(path, data)
@@ -166,7 +168,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
 
         path = "users/find/phone.json"
         data = { 
-            "oauth_token": self.tokenA['access_token'],
+            "oauth_token": self.tokenC['access_token'],
             "q": number
         }
         result = self.handlePOST(path, data)
@@ -187,7 +189,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
 
         path = "users/find/phone.json"
         data = { 
-            "oauth_token": self.tokenA['access_token'],
+            "oauth_token": self.tokenC['access_token'],
             "q": ','.join(numbers)
         }
         result = self.handlePOST(path, data)
@@ -216,7 +218,7 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
 
         path = "users/find/twitter.json"
         data = { 
-            "oauth_token": self.tokenA['access_token'],
+            "oauth_token": self.tokenC['access_token'],
             "q": ','.join(ids)
         }
         result = self.handlePOST(path, data)
@@ -243,7 +245,7 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
 
         path = "users/find/facebook.json"
         data = { 
-            "oauth_token": self.tokenA['access_token'],
+            "oauth_token": self.tokenC['access_token'],
             "q": ','.join(ids)
         }
         result = self.handlePOST(path, data)
