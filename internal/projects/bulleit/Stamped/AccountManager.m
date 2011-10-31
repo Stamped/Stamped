@@ -90,7 +90,7 @@ static AccountManager* sharedAccountManager_ = nil;
 - (id)init {
   self = [super init];
   if (self) {
-    firstRun_ = YES;
+    coldLaunch_ = YES;
     passwordKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kPasswordKeychainItemID];
     accessTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kAccessTokenKeychainItemID];
     refreshTokenKeychainItem_ = [[KeychainItemWrapper alloc] initWithIdentifier:kRefreshTokenKeychainItemID];
@@ -137,6 +137,7 @@ static AccountManager* sharedAccountManager_ = nil;
   NSString* screenName = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
   if (screenName.length > 0) {
     self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
+    NSLog(@"Current user? %@", self.currentUser.screenName);
   } else {
     [self showFirstRunViewController];
     return;
@@ -147,7 +148,7 @@ static AccountManager* sharedAccountManager_ = nil;
     [self sendLoginRequest];
     return;
   }
-  if (firstRun_) {
+  if (coldLaunch_) {
     self.authToken = [[[OAuthToken alloc] init] autorelease];
     self.authToken.accessToken = accessToken;
     self.authToken.refreshToken = refreshToken;
@@ -155,6 +156,7 @@ static AccountManager* sharedAccountManager_ = nil;
     NSTimeInterval timeUntilTokenRefresh = [tokenExpirationDate timeIntervalSinceNow];
     if (timeUntilTokenRefresh <= 0) {
       [self sendTokenRefreshRequest];
+      [self sendUserInfoRequest];
       return;
     }
     oauthRefreshTimer_ = [NSTimer scheduledTimerWithTimeInterval:timeUntilTokenRefresh
@@ -165,7 +167,7 @@ static AccountManager* sharedAccountManager_ = nil;
     [self sendUserInfoRequest];
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
-    firstRun_ = NO;
+    coldLaunch_ = NO;
   }
 }
 
@@ -216,10 +218,10 @@ static AccountManager* sharedAccountManager_ = nil;
     firstInstall_ = YES;
   }
 
-  if (firstRun_) {
+  if (coldLaunch_) {
     authenticated_ = YES;
     [self.delegate accountManagerDidAuthenticate];
-    firstRun_ = NO;
+    coldLaunch_ = NO;
   }
 }
 
@@ -270,6 +272,7 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)storeCurrentUser:(User*)user {
+  NSLog(@"Storing user %@", user.screenName);
   self.currentUser = user;
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:self];
@@ -450,7 +453,7 @@ static AccountManager* sharedAccountManager_ = nil;
     }
   }
   authenticated_ = NO;
-  firstRun_ = YES;
+  coldLaunch_ = YES;
   [[NSNotificationCenter defaultCenter] postNotificationName:kUserHasLoggedOutNotification
                                                       object:self];
   [self authenticate];
