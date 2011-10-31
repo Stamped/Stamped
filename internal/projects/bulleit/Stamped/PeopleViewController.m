@@ -187,10 +187,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 #pragma mark - Table view data source.
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
-
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   if (friendsArray_ != nil)
     return self.friendsArray.count + 1;  // One more for adding friends.

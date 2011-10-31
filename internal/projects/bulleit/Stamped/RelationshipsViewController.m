@@ -82,10 +82,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   return self.peopleArray.count;
 }
@@ -128,7 +124,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 #pragma mark - Table view delegate
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
   profileViewController.user = [self.peopleArray objectAtIndex:indexPath.row];
   [self.navigationController pushViewController:profileViewController animated:YES];
