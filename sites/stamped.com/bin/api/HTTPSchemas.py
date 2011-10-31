@@ -574,6 +574,9 @@ class HTTPEntity(Schema):
                 songs = list(song.song_name for song in songs)
                 self.songs = songs
             
+            if schema.subcategory == "album" and schema.tracks is not None:
+                self.songs = schema.tracks
+            
             if (schema.subcategory == "album" or schema.subcategory == "artist") and schema.albums is not None:
                 try:
                     albums = list(album.album_name for album in schema.albums)
