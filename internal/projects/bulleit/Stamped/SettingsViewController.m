@@ -78,6 +78,10 @@
   [sheet showInView:self.view];
 }
 
+- (IBAction)sharingButtonPressed:(id)sender {
+  
+}
+
 #pragma mark - UIActionSheetDelegate methods.
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
