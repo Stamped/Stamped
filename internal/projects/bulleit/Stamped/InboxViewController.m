@@ -9,7 +9,6 @@
 #import "InboxViewController.h"
 
 #import <CoreText/CoreText.h>
-#import <MapKit/MapKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <RestKit/CoreData/CoreData.h>
 
@@ -480,7 +479,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - Map stuff.
 
 - (void)addAnnotationForEntity:(Entity*)entity {
-  // TODO(andybons): Replace with entity location method.
   NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","];
   CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
   CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];

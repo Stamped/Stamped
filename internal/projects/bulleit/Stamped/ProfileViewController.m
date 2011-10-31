@@ -116,6 +116,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   if (user_.name)
     [self fillInUserData];
 
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:user_.screenName
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
+  
   CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
   toolbarGradient.colors = [NSArray arrayWithObjects:
                             (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,

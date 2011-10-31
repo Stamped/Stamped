@@ -221,6 +221,7 @@ typedef enum {
                                                                 target:nil
                                                                 action:nil];
   [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
 
   activityView_.layer.shadowOpacity = 0.1;
   activityView_.layer.shadowOffset = CGSizeMake(0, 1);

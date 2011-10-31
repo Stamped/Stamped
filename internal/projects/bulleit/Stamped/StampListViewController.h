@@ -6,6 +6,7 @@
 //  Copyright (c) 2011 Stamped, Inc. All rights reserved.
 //
 
+#import <MapKit/MapKit.h>
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
@@ -14,7 +15,7 @@
 @class User;
 
 @interface StampListViewController : UIViewController
-    <STStampFilterBarDelegate, RKObjectLoaderDelegate, UITableViewDelegate, UITableViewDataSource>
+    <STStampFilterBarDelegate, RKObjectLoaderDelegate, UITableViewDelegate, UITableViewDataSource, MKMapViewDelegate>
 
 @property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
