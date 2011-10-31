@@ -245,7 +245,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
   [favoriteMapping mapRelationship:@"stamp" withMapping:stampMapping];
   
   [stampMapping mapRelationship:@"favorites" withMapping:favoriteMapping];
-  
+
   RKObjectMapping* oauthMapping = [RKObjectMapping mappingForClass:[OAuthToken class]];
   [oauthMapping mapKeyPathsToAttributes:@"access_token", @"accessToken",
      @"refresh_token", @"refreshToken",
@@ -271,21 +271,21 @@ static NSString* const kFacebookAppID = @"297022226980395";
   [objectManager.mappingProvider setMapping:favoriteMapping forKeyPath:@"Favorite"];
   [objectManager.mappingProvider setMapping:oauthMapping forKeyPath:@"OAuthToken"];
   [objectManager.mappingProvider setMapping:userAndTokenMapping forKeyPath:@"UserAndToken"];
-  
   [objectManager.mappingProvider setMapping:searchResultMapping forKeyPath:@"SearchResult"];
 }
 
 #pragma mark - UIApplicationDelegate methods.
+
 // Pre 4.2 support
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
   if (self.facebook)
-    return [self.facebook handleOpenURL:url]; 
+    return [self.facebook handleOpenURL:url];
   return NO;
 }
 
 // For 4.2+ support
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
-  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+- (BOOL)application:(UIApplication*)application openURL:(NSURL*)url
+  sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
   if (self.facebook) {
     NSLog(@"back from fb...");
     return [self.facebook handleOpenURL:url];

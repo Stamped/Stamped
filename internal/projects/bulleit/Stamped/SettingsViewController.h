@@ -14,7 +14,6 @@
 
 - (IBAction)doneButtonPressed:(id)sender;
 - (IBAction)editProfileButtonPressed:(id)sender;
-- (IBAction)notificationsButtonPressed:(id)sender;
 - (IBAction)logoutButtonPressed:(id)sender;
 - (IBAction)sharingButtonPressed:(id)sender;
 

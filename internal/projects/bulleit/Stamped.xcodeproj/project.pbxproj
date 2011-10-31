@@ -37,8 +37,6 @@
 		7E0B62141439564200A573FA /* settings_arrow_bottom_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B62131439564100A573FA /* settings_arrow_bottom_button_bg@2x.png */; };
 		7E0B6217143957A800A573FA /* settings_bottom_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B6215143957A700A573FA /* settings_bottom_button_bg@2x.png */; };
 		7E0B6218143957A800A573FA /* settings_top_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B6216143957A800A573FA /* settings_top_button_bg@2x.png */; };
-		7E0B621C14395C3800A573FA /* NotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0B621A14395C3800A573FA /* NotificationSettingsViewController.m */; };
-		7E0B621D14395C3800A573FA /* NotificationSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B621B14395C3800A573FA /* NotificationSettingsViewController.xib */; };
 		7E0B622014395CD800A573FA /* notifications_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B621E14395CD700A573FA /* notifications_header@2x.png */; };
 		7E0B622114395CD800A573FA /* gray_back_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B621F14395CD700A573FA /* gray_back_button_bg@2x.png */; };
 		7E0B62231439611F00A573FA /* notification_settings_set_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B62221439611F00A573FA /* notification_settings_set_bg@2x.png */; };
@@ -682,9 +680,6 @@
 		7E0B62131439564100A573FA /* settings_arrow_bottom_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_arrow_bottom_button_bg@2x.png"; sourceTree = "<group>"; };
 		7E0B6215143957A700A573FA /* settings_bottom_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_bottom_button_bg@2x.png"; sourceTree = "<group>"; };
 		7E0B6216143957A800A573FA /* settings_top_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_top_button_bg@2x.png"; sourceTree = "<group>"; };
-		7E0B621914395C3800A573FA /* NotificationSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificationSettingsViewController.h; sourceTree = "<group>"; };
-		7E0B621A14395C3800A573FA /* NotificationSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificationSettingsViewController.m; sourceTree = "<group>"; };
-		7E0B621B14395C3800A573FA /* NotificationSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NotificationSettingsViewController.xib; sourceTree = "<group>"; };
 		7E0B621E14395CD700A573FA /* notifications_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notifications_header@2x.png"; sourceTree = "<group>"; };
 		7E0B621F14395CD700A573FA /* gray_back_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gray_back_button_bg@2x.png"; sourceTree = "<group>"; };
 		7E0B62221439611F00A573FA /* notification_settings_set_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "notification_settings_set_bg@2x.png"; sourceTree = "<group>"; };
@@ -1784,9 +1779,6 @@
 				7E89C3B01437BFEA00547960 /* SettingsViewController.h */,
 				7E89C3B11437BFEA00547960 /* SettingsViewController.m */,
 				7E89C3B21437BFEA00547960 /* SettingsViewController.xib */,
-				7E0B621914395C3800A573FA /* NotificationSettingsViewController.h */,
-				7E0B621A14395C3800A573FA /* NotificationSettingsViewController.m */,
-				7E0B621B14395C3800A573FA /* NotificationSettingsViewController.xib */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -2850,7 +2842,6 @@
 				7E0B62141439564200A573FA /* settings_arrow_bottom_button_bg@2x.png in Resources */,
 				7E0B6217143957A800A573FA /* settings_bottom_button_bg@2x.png in Resources */,
 				7E0B6218143957A800A573FA /* settings_top_button_bg@2x.png in Resources */,
-				7E0B621D14395C3800A573FA /* NotificationSettingsViewController.xib in Resources */,
 				7E0B622014395CD800A573FA /* notifications_header@2x.png in Resources */,
 				7E0B622114395CD800A573FA /* gray_back_button_bg@2x.png in Resources */,
 				7E0B62231439611F00A573FA /* notification_settings_set_bg@2x.png in Resources */,
@@ -3104,7 +3095,6 @@
 				7E89C3B31437BFEA00547960 /* SettingsViewController.m in Sources */,
 				7E89C3D21438013000547960 /* CreditsViewController.m in Sources */,
 				7E89C3D61438036C00547960 /* CreditTableViewCell.m in Sources */,
-				7E0B621C14395C3800A573FA /* NotificationSettingsViewController.m in Sources */,
 				7E0B62331439718F00A573FA /* EditProfileViewController.m in Sources */,
 				7EBBDB561441F4BC00DDEAE9 /* STStampFilterBar.m in Sources */,
 				7E3D979F1444C9B40018820C /* StampListViewController.m in Sources */,
