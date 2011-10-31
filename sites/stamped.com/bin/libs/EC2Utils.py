@@ -111,6 +111,9 @@ class EC2Utils(object):
         
         ids = self.get_instance_ids_in_stack(stack)
         
+        if ids is None:
+            return None
+        
         data  = {
             'instance' : {
                 'id' : instance_id, 

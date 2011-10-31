@@ -29,7 +29,7 @@ from libs.TheTVDB   import TheTVDB
 from Entity         import setFields, isEqual
 from LRUCache       import lru_cache
 
-# Stamped: '40.736006685255155,-73.98884296417236'
+# Stamped coords: '40.736006685255155,-73.98884296417236'
 
 class MongoEntitySearcher(EntitySearcher):
     # subcategory weights for biasing search results towards entities that we're 
@@ -366,7 +366,6 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = query.replace('cafe', "caf[eé]")
         
-        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -376,7 +375,6 @@ class MongoEntitySearcher(EntitySearcher):
         data['subcategory'] = subcategory_filter
         data['full']        = full
         utils.log(pformat(data))
-        """
         
         results     = {}
         wrapper     = {}

@@ -122,7 +122,7 @@ def parseCommandLine():
         help="local nearby search")
     
     parser.add_option("-a", "--a", default=None, type="string", 
-        action="store", dest="location", help="location")
+        action="store", dest="location", help="location (lat/lng, e.g. '40.7360067,-73.98884296')")
     
     parser.add_option("-f", "--full", default=False, action="store_true", 
         help="use full search")
