@@ -10,7 +10,6 @@
 
 #import "AccountManager.h"
 #import "EditProfileViewController.h"
-#import "NotificationSettingsViewController.h"
 
 @implementation SettingsViewController
 
@@ -27,8 +26,6 @@
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-  
-  // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -36,7 +33,7 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   UIView* lastView = scrollView_.subviews.lastObject;
-  scrollView_.contentSize = CGSizeMake(320, CGRectGetMaxY(lastView.frame) + 75);
+  scrollView_.contentSize = CGSizeMake(320, CGRectGetMaxY(lastView.frame) + 30);
 }
 
 - (void)viewDidUnload {
@@ -58,12 +55,6 @@
 - (IBAction)editProfileButtonPressed:(id)sender {
   EditProfileViewController* vc = [[EditProfileViewController alloc] init];
   vc.user = [AccountManager sharedManager].currentUser;
-  [self.navigationController pushViewController:vc animated:YES];
-  [vc release];
-}
-
-- (IBAction)notificationsButtonPressed:(id)sender {
-  NotificationSettingsViewController* vc = [[NotificationSettingsViewController alloc] init];
   [self.navigationController pushViewController:vc animated:YES];
   [vc release];
 }

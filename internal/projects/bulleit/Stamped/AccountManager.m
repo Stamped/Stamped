@@ -429,6 +429,8 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - Logout stuff.
 
 - (void)logout {
+  [oAuthRequestQueue_ cancelAllRequests];
+  [[RKClient sharedClient].requestQueue cancelAllRequests];
   [passwordKeychainItem_ resetKeychainItem];
   [accessTokenKeychainItem_ resetKeychainItem];
   [refreshTokenKeychainItem_ resetKeychainItem];
@@ -436,14 +438,12 @@ static AccountManager* sharedAccountManager_ = nil;
   [[UIApplication sharedApplication] unregisterForRemoteNotifications];
   [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]];
   self.currentUser = nil;
+  self.authToken = nil;
   [[RKObjectManager sharedManager].objectStore deletePersistantStore];
   NSFileManager* fm = [NSFileManager defaultManager];
-  NSURL* directoryURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+  NSURL* directoryURL = [[fm URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] lastObject];
   NSError* error = nil;
   for (NSString* file in [fm contentsOfDirectoryAtPath:directoryURL.path error:&error]) {
-    if ([file isEqualToString:@"StampedData.sqlite"])
-      continue;
-
     BOOL success = [fm removeItemAtURL:[directoryURL URLByAppendingPathComponent:file] error:&error];
     if (!success || error) {
       NSLog(@"Deleting stuff failed: %@", error);

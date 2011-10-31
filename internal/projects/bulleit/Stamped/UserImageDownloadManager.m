@@ -88,7 +88,7 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
 - (NSString*)imagePathWithImageURL:(NSString*)imageURL;
 - (NSString*)mediumImagePathWithImageURL:(NSString*)imageURL;
 - (UIImage*)generateMediumProfileImage:(UIImage*)image;
-- (NSURL*)documentsDirectory;
+- (NSURL*)cachesDirectory;
 - (void)downloadImageAtURL:(NSString*)imageURL;
 - (UIImage*)mediumProfileImageAtURL:(NSString*)imageURL;
 - (UIImage*)profileImageAtURL:(NSString*)imageURL;
@@ -188,19 +188,20 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
   return userImage;
 }
 
-- (NSURL*)documentsDirectory {
-  return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+- (NSURL*)cachesDirectory {
+  return [[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory
+                                                 inDomains:NSUserDomainMask] lastObject];
 }
 
 - (NSString*)mediumImagePathWithImageURL:(NSString*)imageURL {
-  NSURL* fullPath = [[self documentsDirectory] URLByAppendingPathComponent:
+  NSURL* fullPath = [[self cachesDirectory] URLByAppendingPathComponent:
       [NSString stringWithFormat:@"user_%@_medium.png",
           [UserImageDownloadManager SHA1DigestFromString:imageURL]]];
   return [fullPath path];
 }
 
 - (NSString*)imagePathWithImageURL:(NSString*)imageURL {
-  NSURL* fullPath = [[self documentsDirectory] URLByAppendingPathComponent:
+  NSURL* fullPath = [[self cachesDirectory] URLByAppendingPathComponent:
       [NSString stringWithFormat:@"user_%@_regular.png",
           [UserImageDownloadManager SHA1DigestFromString:imageURL]]];
   return [fullPath path];
