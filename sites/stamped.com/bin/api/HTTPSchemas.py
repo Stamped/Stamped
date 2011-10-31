@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import copy, urllib, urlparse, re, logs, string, time
+import copy, urllib, urlparse, re, logs, string, time, utils
 from datetime import datetime, date, timedelta
 from schema import *
 from Schemas import *
@@ -582,6 +582,7 @@ class HTTPEntity(Schema):
                     albums = list(album.album_name for album in schema.albums)
                     self.albums = albums
                 except:
+                    utils.printException()
                     pass
         elif schema.__class__.__name__ == 'EntityMini':
             data                = schema.value
@@ -714,6 +715,7 @@ class HTTPEntitySearch(Schema):
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
         self.local              = SchemaElement(bool)
+        #self.page               = SchemaElement(int)
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'EntitySearch':

@@ -3659,7 +3659,7 @@ popular_cities = {
         'state' : 'Massachusetts', 
     }, 
     'New York' : {
-        'synonyms' : [ 'NYC', 'New York City', ], 
+        'synonyms' : [ 'NYC', 'New York City', 'ny', ], 
         'population' : 8459026, 
         'lat' : 40.67, 
         'lng' : -73.94, 
