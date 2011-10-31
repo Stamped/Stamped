@@ -55,7 +55,7 @@ static NSString* const kFacebookAppID = @"297022226980395";
   NSDictionary* userInfo = [launchOptions valueForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
   NSDictionary* apsInfo = [userInfo objectForKey:@"aps"];
   if (apsInfo) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification 
+    [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                         object:self
                                                       userInfo:apsInfo];
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];

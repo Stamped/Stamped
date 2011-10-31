@@ -438,7 +438,7 @@ static AccountManager* sharedAccountManager_ = nil;
   self.currentUser = nil;
   [[RKObjectManager sharedManager].objectStore deletePersistantStore];
   NSFileManager* fm = [NSFileManager defaultManager];
-  NSURL* directoryURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+  NSURL* directoryURL = [[fm URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] lastObject];
   NSError* error = nil;
   for (NSString* file in [fm contentsOfDirectoryAtPath:directoryURL.path error:&error]) {
     if ([file isEqualToString:@"StampedData.sqlite"])
