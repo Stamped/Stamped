@@ -10,6 +10,8 @@
 
 #import "AccountManager.h"
 #import "EditProfileViewController.h"
+#import "NotificationSettingsViewController.h"
+#import "SharingSettingsViewController.h"
 
 @implementation SettingsViewController
 
@@ -70,7 +72,9 @@
 }
 
 - (IBAction)sharingButtonPressed:(id)sender {
-  
+  SharingSettingsViewController* vc = [[SharingSettingsViewController alloc] init];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
 }
 
 #pragma mark - UIActionSheetDelegate methods.

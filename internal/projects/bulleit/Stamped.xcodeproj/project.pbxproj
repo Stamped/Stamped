@@ -501,6 +501,16 @@
 		CB3C9AD2141FE6EB005F837A /* WrappingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */; };
 		CB3E19FF145765B60018D1F6 /* add_friends_button_inactive@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB3E19FE145765B60018D1F6 /* add_friends_button_inactive@2x.png */; };
 		CB4388FA141ABEF90086D1AE /* MusicDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */; };
+		CB4CA264145F097600621D45 /* SharingSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB4CA262145F097600621D45 /* SharingSettingsViewController.m */; };
+		CB4CA265145F097600621D45 /* SharingSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA263145F097600621D45 /* SharingSettingsViewController.xib */; };
+		CB4CA26B145F17FB00621D45 /* settings_sharing_twitter_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA266145F17FB00621D45 /* settings_sharing_twitter_on@2x.png */; };
+		CB4CA26C145F17FB00621D45 /* settings_sharing_twitter_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA267145F17FB00621D45 /* settings_sharing_twitter_off@2x.png */; };
+		CB4CA26D145F17FB00621D45 /* settings_sharing_facebook_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA268145F17FB00621D45 /* settings_sharing_facebook_off@2x.png */; };
+		CB4CA26E145F17FB00621D45 /* settings_sharing_facebook_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA269145F17FB00621D45 /* settings_sharing_facebook_on@2x.png */; };
+		CB4CA26F145F17FB00621D45 /* settings_sharing_item_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA26A145F17FB00621D45 /* settings_sharing_item_bg@2x.png */; };
+		CB4CA274145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA271145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png */; };
+		CB4CA275145F1A2900621D45 /* settings_sharing_button_connect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA272145F1A2900621D45 /* settings_sharing_button_connect@2x.png */; };
+		CB4CA277145F1A6400621D45 /* settings_sharing_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA276145F1A6400621D45 /* settings_sharing_button@2x.png */; };
 		CB55A86614476D9A00CEB6CC /* add_friends_button_connectfacebook_pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86114476D9A00CEB6CC /* add_friends_button_connectfacebook_pressed@2x.png */; };
 		CB55A86714476D9A00CEB6CC /* add_friends_button_connectfacebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86214476D9A00CEB6CC /* add_friends_button_connectfacebook@2x.png */; };
 		CB55A86814476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */; };
@@ -1254,6 +1264,17 @@
 		CB3E19FE145765B60018D1F6 /* add_friends_button_inactive@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_inactive@2x.png"; sourceTree = "<group>"; };
 		CB4388F8141ABEF90086D1AE /* MusicDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicDetailViewController.h; sourceTree = "<group>"; };
 		CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicDetailViewController.m; sourceTree = "<group>"; };
+		CB4CA261145F097600621D45 /* SharingSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharingSettingsViewController.h; sourceTree = "<group>"; };
+		CB4CA262145F097600621D45 /* SharingSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SharingSettingsViewController.m; sourceTree = "<group>"; };
+		CB4CA263145F097600621D45 /* SharingSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SharingSettingsViewController.xib; sourceTree = "<group>"; };
+		CB4CA266145F17FB00621D45 /* settings_sharing_twitter_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_twitter_on@2x.png"; sourceTree = "<group>"; };
+		CB4CA267145F17FB00621D45 /* settings_sharing_twitter_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_twitter_off@2x.png"; sourceTree = "<group>"; };
+		CB4CA268145F17FB00621D45 /* settings_sharing_facebook_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_facebook_off@2x.png"; sourceTree = "<group>"; };
+		CB4CA269145F17FB00621D45 /* settings_sharing_facebook_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_facebook_on@2x.png"; sourceTree = "<group>"; };
+		CB4CA26A145F17FB00621D45 /* settings_sharing_item_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_item_bg@2x.png"; sourceTree = "<group>"; };
+		CB4CA271145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_disconnect@2x.png"; sourceTree = "<group>"; };
+		CB4CA272145F1A2900621D45 /* settings_sharing_button_connect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_connect@2x.png"; sourceTree = "<group>"; };
+		CB4CA276145F1A6400621D45 /* settings_sharing_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button@2x.png"; sourceTree = "<group>"; };
 		CB55A86114476D9A00CEB6CC /* add_friends_button_connectfacebook_pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connectfacebook_pressed@2x.png"; sourceTree = "<group>"; };
 		CB55A86214476D9A00CEB6CC /* add_friends_button_connectfacebook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connectfacebook@2x.png"; sourceTree = "<group>"; };
 		CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connecttwitter_pressed@2x.png"; sourceTree = "<group>"; };
@@ -1820,6 +1841,9 @@
 				7E89C3B01437BFEA00547960 /* SettingsViewController.h */,
 				7E89C3B11437BFEA00547960 /* SettingsViewController.m */,
 				7E89C3B21437BFEA00547960 /* SettingsViewController.xib */,
+				CB4CA261145F097600621D45 /* SharingSettingsViewController.h */,
+				CB4CA262145F097600621D45 /* SharingSettingsViewController.m */,
+				CB4CA263145F097600621D45 /* SharingSettingsViewController.xib */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1838,6 +1862,14 @@
 				7E0B621E14395CD700A573FA /* notifications_header@2x.png */,
 				7E0B621F14395CD700A573FA /* gray_back_button_bg@2x.png */,
 				7E0B62221439611F00A573FA /* notification_settings_set_bg@2x.png */,
+				CB4CA266145F17FB00621D45 /* settings_sharing_twitter_on@2x.png */,
+				CB4CA267145F17FB00621D45 /* settings_sharing_twitter_off@2x.png */,
+				CB4CA268145F17FB00621D45 /* settings_sharing_facebook_off@2x.png */,
+				CB4CA269145F17FB00621D45 /* settings_sharing_facebook_on@2x.png */,
+				CB4CA26A145F17FB00621D45 /* settings_sharing_item_bg@2x.png */,
+				CB4CA271145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png */,
+				CB4CA272145F1A2900621D45 /* settings_sharing_button_connect@2x.png */,
+				CB4CA276145F1A6400621D45 /* settings_sharing_button@2x.png */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -3034,6 +3066,15 @@
 				7E7B71F71461FBE00096C260 /* sea_filter_clear_button_selected@2x.png in Resources */,
 				7E7B71F81461FBE00096C260 /* sea_filter_clear_button.png in Resources */,
 				7E7B71F91461FBE00096C260 /* sea_filter_clear_button@2x.png in Resources */,
+				CB4CA265145F097600621D45 /* SharingSettingsViewController.xib in Resources */,
+				CB4CA26B145F17FB00621D45 /* settings_sharing_twitter_on@2x.png in Resources */,
+				CB4CA26C145F17FB00621D45 /* settings_sharing_twitter_off@2x.png in Resources */,
+				CB4CA26D145F17FB00621D45 /* settings_sharing_facebook_off@2x.png in Resources */,
+				CB4CA26E145F17FB00621D45 /* settings_sharing_facebook_on@2x.png in Resources */,
+				CB4CA26F145F17FB00621D45 /* settings_sharing_item_bg@2x.png in Resources */,
+				CB4CA274145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png in Resources */,
+				CB4CA275145F1A2900621D45 /* settings_sharing_button_connect@2x.png in Resources */,
+				CB4CA277145F1A6400621D45 /* settings_sharing_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3166,6 +3207,7 @@
 				CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */,
 				7ECF3D81145E00DC00A1CF38 /* SuggestedUserTableViewCell.m in Sources */,
 				7E7B71C91461CCF60096C260 /* SearchEntitiesAutoSuggestCell.m in Sources */,
+				CB4CA264145F097600621D45 /* SharingSettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

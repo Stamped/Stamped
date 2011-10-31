@@ -111,18 +111,59 @@
 - (void)setupSectionViews {
   // Tracks
   if (detailedEntity_.songs) {
-    NSArray* tracksArray = detailedEntity_.songs;
+    if ([detailedEntity_.subcategory isEqualToString:@"artist"]) {
+      NSArray* tracksArray = detailedEntity_.songs;
+      
+      [self addSectionWithName:@"Top Songs" previewHeight:136.f];
+      CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Top Songs"];
+      section.collapsedFooterText = [NSString stringWithFormat:@"Show all %d songs", tracksArray.count];
+      section.expandedFooterText = @"Show less";
+      section.footerLabel.text = section.collapsedFooterText;
+      [section addNumberedListWithValues:tracksArray];
+      section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
+                                             [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
+      self.mainContentView.hidden = NO;  
+    }
     
-    [self addSectionWithName:@"Tracks" previewHeight:136.f];
-    CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Tracks"];
-    section.collapsedFooterText = [NSString stringWithFormat:@"Show all %d tracks", tracksArray.count];
-    section.expandedFooterText = @"Show less";
-    section.footerLabel.text = section.collapsedFooterText;
-    [section addNumberedListWithValues:tracksArray];
-    section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
-                                           [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
+    else {
+      NSArray* tracksArray = detailedEntity_.songs;
+      
+      [self addSectionWithName:@"Tracks" previewHeight:136.f];
+      CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Tracks"];
+      section.collapsedFooterText = [NSString stringWithFormat:@"Show all %d tracks", tracksArray.count];
+      section.expandedFooterText = @"Show less";
+      section.footerLabel.text = section.collapsedFooterText;
+      [section addNumberedListWithValues:tracksArray];
+      section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
+                                             [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
+      self.mainContentView.hidden = NO;
+    }
+  }
+  
+  // Albums
+  if (detailedEntity_.albums) {
+    NSArray* albumsArray = detailedEntity_.albums;
+    if ([sectionsDict_ objectForKey:@"Top Songs"]) {
+      [self addSectionWithName:@"Albums"];
+      CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Albums"];
+      [section addNumberedListWithValues:albumsArray];
+      section.numLabel.hidden = NO;
+      section.numLabel.text = [NSString stringWithFormat:@"(%d)", albumsArray.count];
+      section.numLabel.frame = CGRectOffset(section.numLabel.frame, -42.0, 0.0);
+    }
+    else {
+      [self addSectionWithName:@"Albums" previewHeight:136.f];
+      CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Albums"];
+      section.collapsedFooterText = [NSString stringWithFormat:@"Show all %d albums", albumsArray.count];
+      section.expandedFooterText = @"Show less";
+      section.footerLabel.text = section.collapsedFooterText;
+      [section addNumberedListWithValues:albumsArray];
+      section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
+                                             [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
+    }
     self.mainContentView.hidden = NO;
   }
+
 
   // Details
   if (detailedEntity_.genre || detailedEntity_.releaseDate) {

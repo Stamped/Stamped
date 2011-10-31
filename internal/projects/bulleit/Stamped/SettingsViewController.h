@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SettingsViewController : UIViewController <UIActionSheetDelegate>
+@interface SettingsViewController : UIViewController <UIActionSheetDelegate> 
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 
