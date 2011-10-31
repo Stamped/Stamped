@@ -58,7 +58,8 @@ static NSString* const kFacebookAppID = @"297022226980395";
     [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification 
                                                         object:self
                                                       userInfo:apsInfo];
-    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
   }
     
   // Create an appwide Facebook client.
@@ -90,7 +91,8 @@ static NSString* const kFacebookAppID = @"297022226980395";
   [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                       object:self
                                                     userInfo:[userInfo objectForKey:@"aps"]];
-  [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
+  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 
 - (void)application:(UIApplication*)app didFailToRegisterForRemoteNotificationsWithError:(NSError*)err {
