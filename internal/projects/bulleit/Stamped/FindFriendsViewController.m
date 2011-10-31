@@ -22,6 +22,7 @@
 #import "StampedAppDelegate.h"
 #import "FriendshipTableViewCell.h"
 #import "Stamp.h"
+#import "SuggestedUserTableViewCell.h"
 #import "Util.h"
 #import "User.h"
 #import "STOAuthViewController.h"
@@ -47,7 +48,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user;
 - (void)followButtonPressed:(id)sender;
 - (void)unfollowButtonPressed:(id)sender;
-- (FriendshipTableViewCell*)friendshipCellFromSubview:(UIView*)view;
+- (UITableViewCell*)cellFromSubview:(UIView*)view;
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error;
@@ -374,13 +375,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
 }
 
-- (FriendshipTableViewCell*)friendshipCellFromSubview:(UIView*)view {
+- (UITableViewCell*)cellFromSubview:(UIView*)view {
   UIView* superview = view.superview;
-  while (superview && ![superview isMemberOfClass:[FriendshipTableViewCell class]]) {
+  while (superview && (![superview isMemberOfClass:[FriendshipTableViewCell class]] &&
+                       ![superview isMemberOfClass:[SuggestedUserTableViewCell class]])) {
     superview = superview.superview;
   }
-  FriendshipTableViewCell* cell = (FriendshipTableViewCell*)superview;
-  return cell;
+  return (UITableViewCell*)superview;
 }
 
 - (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user {
@@ -395,21 +396,23 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)followButtonPressed:(id)sender {
-  FriendshipTableViewCell* cell = [self friendshipCellFromSubview:sender];
-  [followedUsers_ addObject:cell.user];
-  cell.indicator.center = cell.followButton.center;
-  cell.followButton.hidden = YES;
-  [cell.indicator startAnimating];
-  [self sendRelationshipChangeRequestWithPath:kFriendshipCreatePath forUser:cell.user];
+  UITableViewCell* cell = [self cellFromSubview:sender];
+  User* user = (User*)[(id)cell user];
+  [followedUsers_ addObject:user];
+  [(id)cell indicator].center = [(id)cell followButton].center;
+  [(id)cell followButton].hidden = YES;
+  [[(id)cell indicator] startAnimating];
+  [self sendRelationshipChangeRequestWithPath:kFriendshipCreatePath forUser:user];
 }
 
 - (void)unfollowButtonPressed:(id)sender {
-  FriendshipTableViewCell* cell = [self friendshipCellFromSubview:sender];
-  [followedUsers_ removeObject:cell.user];
-  cell.indicator.center = cell.unfollowButton.center;
-  cell.unfollowButton.hidden = YES;
-  [cell.indicator startAnimating];
-  [self sendRelationshipChangeRequestWithPath:kFriendshipRemovePath forUser:cell.user];
+  UITableViewCell* cell = [self cellFromSubview:sender];
+  User* user = (User*)[(id)cell user];
+  [followedUsers_ removeObject:user];
+  [(id)cell indicator].center = [(id)cell unfollowButton].center;
+  [(id)cell unfollowButton].hidden = YES;
+  [[(id)cell indicator] startAnimating];
+  [self sendRelationshipChangeRequestWithPath:kFriendshipRemovePath forUser:user];
 }
 
 - (void)connectToTwitterButtonPressed:(id)sender {
@@ -424,6 +427,17 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 #pragma mark - Table view data source.
+
+- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (findSource_ == FindFriendsSourceSuggested) {
+    User* user = [suggestedFriends_ objectAtIndex:indexPath.row];
+    CGSize bioSize = [user.bio sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
+                          constrainedToSize:CGSizeMake(300, MAXFLOAT)
+                              lineBreakMode:UILineBreakModeWordWrap];
+    return bioSize.height + 83;
+  }
+  return 51.0;
+}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
   return 1;
@@ -445,17 +459,21 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  static NSString* CellIdentifier = @"Cell";
-  FriendshipTableViewCell* cell =
-      (FriendshipTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+  NSString* CellIdentifier = findSource_ == FindFriendsSourceSuggested ? @"SuggestedCell" : @"FriendshipCell";
+
+  UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-    cell = [[[FriendshipTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
-    [cell.followButton addTarget:self
-                          action:@selector(followButtonPressed:)
-                forControlEvents:UIControlEventTouchUpInside];
-    [cell.unfollowButton addTarget:self
-                           action:@selector(unfollowButtonPressed:)
-                 forControlEvents:UIControlEventTouchUpInside];
+    if (findSource_ == FindFriendsSourceSuggested)
+      cell = [[[SuggestedUserTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+    else
+      cell = [[[FriendshipTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+
+    [[(id)cell followButton] addTarget:self
+                                action:@selector(followButtonPressed:)
+                      forControlEvents:UIControlEventTouchUpInside];
+    [[(id)cell unfollowButton] addTarget:self
+                                  action:@selector(unfollowButtonPressed:)
+                        forControlEvents:UIControlEventTouchUpInside];
   }
 
   NSArray* friends = nil;
@@ -471,9 +489,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     friends = self.facebookFriends;
 
   User* user = [friends objectAtIndex:indexPath.row];
-  cell.followButton.hidden = [followedUsers_ containsObject:user];
-  cell.unfollowButton.hidden = !cell.followButton.hidden;
-  cell.user = user;
+  [(id)cell followButton].hidden = [followedUsers_ containsObject:user];
+  [(id)cell unfollowButton].hidden = ![(id)cell followButton].hidden;
+  [(id)cell setUser:user];
   
   return cell;
 }
@@ -947,7 +965,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
   if ([objectLoader.resourcePath rangeOfString:kStampedSuggestedUsersURI].location != NSNotFound) {
     self.suggestedFriends = objects;
-    NSLog(@"suggested friends: %@", suggestedFriends_);
     [self.tableView reloadData];
   }
   if ([objectLoader.resourcePath rangeOfString:@"/collections/user.json"].location != NSNotFound) {
@@ -991,6 +1008,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.findSource = FindFriendsSourceSuggested;
   self.stampedFriends = nil;
   [self.tableView reloadData];
+  [self performSelector:@selector(resignFirstResponder)
+             withObject:searchField_
+             afterDelay:0.0];
   return YES;
 }
 

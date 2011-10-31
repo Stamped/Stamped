@@ -386,6 +386,7 @@
 		7EC38CC0141C14900069B892 /* cat_icon_book_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC38CBB141C14900069B892 /* cat_icon_book_large@2x.png */; };
 		7EC38CC1141C14900069B892 /* cat_icon_other_large@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EC38CBC141C14900069B892 /* cat_icon_other_large@2x.png */; };
 		7ECF3D7E145DE99F00A1CF38 /* invite_friend_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */; };
+		7ECF3D81145E00DC00A1CF38 /* SuggestedUserTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */; };
 		7ED60828141E85B8001C499D /* BookDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60827141E85B8001C499D /* BookDetailViewController.xib */; };
 		7ED6082B141E85E7001C499D /* MusicDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60829141E85E7001C499D /* MusicDetailViewController.xib */; };
 		7ED6082C141E85E7001C499D /* OtherDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */; };
@@ -1081,6 +1082,8 @@
 		7EC38CBB141C14900069B892 /* cat_icon_book_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_book_large@2x.png"; sourceTree = "<group>"; };
 		7EC38CBC141C14900069B892 /* cat_icon_other_large@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cat_icon_other_large@2x.png"; sourceTree = "<group>"; };
 		7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invite_friend_button_bg@2x.png"; sourceTree = "<group>"; };
+		7ECF3D7F145E00DC00A1CF38 /* SuggestedUserTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SuggestedUserTableViewCell.h; sourceTree = "<group>"; };
+		7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SuggestedUserTableViewCell.m; sourceTree = "<group>"; };
 		7ED60827141E85B8001C499D /* BookDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = BookDetailViewController.xib; path = Interfaces/BookDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED60829141E85E7001C499D /* MusicDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = MusicDetailViewController.xib; path = Interfaces/MusicDetailViewController.xib; sourceTree = SOURCE_ROOT; };
 		7ED6082A141E85E7001C499D /* OtherDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = OtherDetailViewController.xib; path = Interfaces/OtherDetailViewController.xib; sourceTree = SOURCE_ROOT; };
@@ -2056,6 +2059,8 @@
 				1E1A1B64141C3AC600B7C627 /* FindFriendsView.xib */,
 				7ED60893141FF7CB001C499D /* FriendshipTableViewCell.h */,
 				7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */,
+				7ECF3D7F145E00DC00A1CF38 /* SuggestedUserTableViewCell.h */,
+				7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */,
 			);
 			name = "Friend Finder";
 			sourceTree = "<group>";
@@ -3000,6 +3005,7 @@
 				7E7DDDDE145A00CE0058ACA9 /* WebViewController.m in Sources */,
 				7E7DDE14145A0AE50058ACA9 /* STToolbar.m in Sources */,
 				CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */,
+				7ECF3D81145E00DC00A1CF38 /* SuggestedUserTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

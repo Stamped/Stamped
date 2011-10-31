@@ -192,11 +192,14 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.friendsArray.count + 1;  // One more for adding friends.
+  if (friendsArray_ != nil)
+    return self.friendsArray.count + 1;  // One more for adding friends.
+
+  return 0;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.row == 0) {
+  if (indexPath.row == 0 && friendsArray_ != nil) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                     reuseIdentifier:nil] autorelease];
     UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button_addFriends"]];
