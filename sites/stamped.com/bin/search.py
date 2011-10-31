@@ -187,7 +187,7 @@ def main():
             entity   = result[0]
             distance = result[1]
             
-            setFields(entity)
+            setFields(entity, detailed=True)
             
             if options.verbose:
                 data = entity.getDataAsDict()
@@ -199,6 +199,8 @@ def main():
             else:
                 data = { }
                 data['title']  = utils.normalize(entity.title)
+                data['subtitle'] = entity.subtitle
+                
                 #data['titles'] = utils.normalize(entity.simplified_title)
                 
                 data['subcategory'] = utils.normalize(entity.subcategory)
