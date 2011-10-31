@@ -20,6 +20,14 @@
 @property (nonatomic, retain) IBOutlet UISwitch* followPushSwitch;
 
 
+@property (nonatomic, retain) IBOutlet UISwitch* creditEmailSwitch;
+@property (nonatomic, retain) IBOutlet UISwitch* likeEmailSwitch;
+@property (nonatomic, retain) IBOutlet UISwitch* favoriteEmailSwitch;
+@property (nonatomic, retain) IBOutlet UISwitch* mentionEmailSwitch;
+@property (nonatomic, retain) IBOutlet UISwitch* commentEmailSwitch;
+@property (nonatomic, retain) IBOutlet UISwitch* replyEmailSwitch;
+@property (nonatomic, retain) IBOutlet UISwitch* followEmailSwitch;
+
 - (IBAction)settingsButtomPressed:(id)sender;
 - (IBAction)syncPrefsFromInterface:(id)sender;
 
