@@ -189,38 +189,16 @@
 
 - (void)fillStampImageView {
   User* user = [AccountManager sharedManager].currentUser;
-  
-  CGFloat r1, g1, b1, r2, g2, b2;
-  [Util splitHexString:user.primaryColor toRed:&r1 green:&g1 blue:&b1];
-  
-  if (user.secondaryColor) {
-    [Util splitHexString:user.secondaryColor toRed:&r2 green:&g2 blue:&b2];
-  } else {
-    r2 = r1;
-    g2 = g1;
-    b2 = b1;
-  }
 
-  CGFloat width = userStampBackgroundImageView_.frame.size.width;
-  CGFloat height = userStampBackgroundImageView_.frame.size.height;
-  
   UIGraphicsBeginImageContextWithOptions(userStampBackgroundImageView_.frame.size, NO, 0.0);
   CGContextRef context = UIGraphicsGetCurrentContext();
-
-  CGFloat colors[] = {r1, g1, b1, 1.0,  r2, g2, b2, 1.0};
-  CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-  CGGradientRef gradientRef = CGGradientCreateWithColorComponents(colorSpace, colors, NULL, 2);
-  CGPoint gradientStartPoint = CGPointZero;
-  CGPoint gradientEndPoint = CGPointMake(width, height);
-  CGContextDrawLinearGradient(context,
-                              gradientRef,
-                              gradientStartPoint,
-                              gradientEndPoint,
-                              kCGGradientDrawsAfterEndLocation);
-  CGGradientRelease(gradientRef);
-  CGColorSpaceRelease(colorSpace);
-  userStampBackgroundImageView_.image = UIGraphicsGetImageFromCurrentImageContext();
+  [[UIColor blackColor] setFill];
+  CGContextFillRect(context, userStampBackgroundImageView_.bounds);
+  UIImage* mask = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
+  userStampBackgroundImageView_.image = [Util gradientImage:mask
+                                           withPrimaryColor:user.primaryColor
+                                                  secondary:user.secondaryColor];
   [userStampBackgroundImageView_ setNeedsDisplay];
 }
 
