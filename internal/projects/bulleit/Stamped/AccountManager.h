@@ -30,7 +30,7 @@ extern NSString* const kUserHasLoggedOutNotification;
   KeychainItemWrapper* refreshTokenKeychainItem_;
   RKRequestQueue* oAuthRequestQueue_;
   NSTimer* oauthRefreshTimer_;
-  BOOL firstRun_;
+  BOOL coldLaunch_;
   BOOL firstInstall_;
 }
 

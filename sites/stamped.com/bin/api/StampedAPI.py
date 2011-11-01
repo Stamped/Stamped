@@ -510,13 +510,6 @@ class StampedAPI(AStampedAPI):
             account.ios_alert_comment      = True
             account.ios_alert_reply        = True
             account.ios_alert_follow       = True
-            account.email_alert_credit     = False
-            account.email_alert_like       = False
-            account.email_alert_fav        = False
-            account.email_alert_mention    = False
-            account.email_alert_comment    = False
-            account.email_alert_reply      = False
-            account.email_alert_follow     = False
 
             self._accountDB.updateAccount(account)
 

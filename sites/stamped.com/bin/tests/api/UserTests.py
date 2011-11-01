@@ -257,6 +257,11 @@ class StampedAPIUsersFindFacebook(StampedAPIUserTest):
 
 class StampedAPISuggested(StampedAPIUserTest):
     def test_suggested(self):
+        (self.userS1, self.tokenS1) = self.createAccount('mariobatali')
+        (self.userS2, self.tokenS2) = self.createAccount('petertravers')
+        (self.userS3, self.tokenS3) = self.createAccount('rebeccaminkoff')
+        (self.userS4, self.tokenS4) = self.createAccount('nymag')
+
         path = "users/suggested.json"
         data = { 
             "oauth_token": self.tokenA['access_token']
@@ -264,6 +269,11 @@ class StampedAPISuggested(StampedAPIUserTest):
         result = self.handleGET(path, data)
         for user in result:
             self.assertTrue('screen_name' in user)
+
+        self.deleteAccount(self.tokenS1)
+        self.deleteAccount(self.tokenS2)
+        self.deleteAccount(self.tokenS3)
+        self.deleteAccount(self.tokenS4)
 
 if __name__ == '__main__':
     main()

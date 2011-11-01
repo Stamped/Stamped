@@ -473,7 +473,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path delegate:self];
   objectLoader.method = RKRequestMethodPOST;
   objectLoader.objectMapping = favoriteMapping;
-  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:entityObject_.entityID, @"entity_id", nil];
+  objectLoader.params = [NSDictionary dictionaryWithObjectsAndKeys:detailedEntity_.entityID, @"entity_id", nil];
   [objectLoader send];
 }
 
