@@ -367,6 +367,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = query.replace('cafe', "caf[eé]")
         
+        """
         data = {}
         data['input']       = input_query
         data['query']       = query
@@ -376,6 +377,7 @@ class MongoEntitySearcher(EntitySearcher):
         data['subcategory'] = subcategory_filter
         data['full']        = full
         utils.log(pformat(data))
+        """
         
         results     = {}
         wrapper     = {}

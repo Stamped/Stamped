@@ -715,7 +715,7 @@ class HTTPEntitySearch(Schema):
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
         self.local              = SchemaElement(bool)
-        #self.page               = SchemaElement(int)
+        self.page               = SchemaElement(int, default=1)
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'EntitySearch':
@@ -724,6 +724,7 @@ class HTTPEntitySearch(Schema):
             schema.importData({'category': self.category})
             schema.importData({'subcategory': self.subcategory})
             schema.importData({'local': self.local})
+            schema.importData({'page': self.page})
         else:
             raise NotImplementedError
         return schema

@@ -84,7 +84,8 @@ def search(request):
                                             authUserId=authUserId, 
                                             category_filter=search.category, 
                                             subcategory_filter=search.subcategory, 
-                                            local=search.local)
+                                            local=search.local, 
+                                            page=search.page)
     
     autosuggest = []
     for item in result:
@@ -102,9 +103,10 @@ def nearby(request):
     search      = schema.exportSchema(EntityNearby())
     
     result      = stampedAPI.searchNearby(coords=search.coordinates, 
-                                            authUserId=authUserId, 
-                                            category_filter=search.category, 
-                                            subcategory_filter=search.subcategory)
+                                          authUserId=authUserId, 
+                                          category_filter=search.category, 
+                                          subcategory_filter=search.subcategory, 
+                                          page=search.page)
     
     autosuggest = []
     for item in result:

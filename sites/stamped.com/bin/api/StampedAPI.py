@@ -1030,19 +1030,22 @@ class StampedAPI(AStampedAPI):
                        authUserId=None, 
                        category_filter=None, 
                        subcategory_filter=None, 
-                       limit=10, 
                        prefix=False, 
                        local=False, 
-                       full=True):
+                       full=True, 
+                       page=1, 
+                       limit=10):
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
-                                                        limit=limit, 
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=local, 
                                                         user=authUserId)
+        offset  = limit * page
+        results = results[offset : offset + limit]
+        
         return results
     
     @API_CALL
@@ -1051,18 +1054,21 @@ class StampedAPI(AStampedAPI):
                      authUserId=None, 
                      category_filter=None, 
                      subcategory_filter=None, 
-                     limit=10, 
                      prefix=False, 
-                     full=True):
+                     full=True, 
+                     page=1, 
+                     limit=10):
         results = self._entitySearcher.getSearchResults(query='', 
                                                         coords=coords, 
-                                                        limit=limit, 
                                                         category_filter=category_filter, 
                                                         subcategory_filter=subcategory_filter, 
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=True, 
                                                         user=authUserId)
+        offset  = limit * page
+        results = results[offset : offset + limit]
+        
         return results
     
     """
