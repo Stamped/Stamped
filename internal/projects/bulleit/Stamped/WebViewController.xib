@@ -44,7 +44,7 @@
 						<string key="NSFrame">{{0, 4}, {320, 371}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="888833716"/>
+						<reference key="NSNextKeyView" ref="269506520"/>
 						<string key="NSReuseIdentifierKey">_NS:693</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -231,10 +231,10 @@
 					<object class="IBUIImageView" id="888833716">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{0, -231}, {320, 240}}</string>
+						<string key="NSFrame">{{0, -356}, {320, 365}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="269506520"/>
+						<reference key="NSNextKeyView" ref="230694429"/>
 						<string key="NSReuseIdentifierKey">_NS:363</string>
 						<int key="IBUIContentMode">6</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -248,7 +248,7 @@
 				<string key="NSFrame">{{0, 64}, {320, 416}}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
-				<reference key="NSNextKeyView" ref="230694429"/>
+				<reference key="NSNextKeyView" ref="888833716"/>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">3</int>
 					<bytes key="NSWhite">MQA</bytes>
@@ -549,7 +549,7 @@
 		<bool key="IBDocument.PluginDeclaredDependenciesTrackSystemTargetVersion">YES</bool>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
-			<string key="shelf_background.png">{320, 240}</string>
+			<string key="shelf_background.png">{320, 365}</string>
 			<string key="uiweb_back_button.png">{52, 40}</string>
 			<string key="uiweb_back_button_highlighted.png">{52, 40}</string>
 			<string key="uiweb_back_button_inactive.png">{52, 40}</string>

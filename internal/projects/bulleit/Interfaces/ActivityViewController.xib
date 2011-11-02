@@ -48,7 +48,7 @@
 							<object class="IBUIImageView" id="900203630">
 								<reference key="NSNextResponder" ref="30529713"/>
 								<int key="NSvFlags">274</int>
-								<string key="NSFrame">{{0, -233}, {320, 243}}</string>
+								<string key="NSFrame">{{0, -356}, {320, 365}}</string>
 								<reference key="NSSuperview" ref="30529713"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView"/>
@@ -251,7 +251,7 @@
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<object class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="NS.key.0">shelf_background.png</string>
-			<string key="NS.object.0">{320, 240}</string>
+			<string key="NS.object.0">{320, 365}</string>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">933</string>
 	</data>

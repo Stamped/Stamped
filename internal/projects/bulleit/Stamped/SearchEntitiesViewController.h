@@ -16,18 +16,20 @@ typedef enum {
   SearchIntentTodo
 } SearchIntent;
 
-@interface SearchEntitiesViewController : UITableViewController <RKObjectLoaderDelegate,
-                                                                 RKRequestDelegate,
-                                                                 UITextFieldDelegate>
+@interface SearchEntitiesViewController : UIViewController <RKObjectLoaderDelegate,
+                                                            RKRequestDelegate,
+                                                            UITextFieldDelegate,
+                                                            UITableViewDelegate,
+                                                            UITableViewDataSource>
 
+@property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;
 @property (nonatomic, retain) IBOutlet UIButton* locationButton;
 @property (nonatomic, retain) IBOutlet UITableViewCell* addStampCell;
 @property (nonatomic, retain) IBOutlet UILabel* addStampLabel;
 @property (nonatomic, retain) IBOutlet UITableViewCell* searchingIndicatorCell;
-@property (nonatomic, retain) IBOutlet UILabel* fullSearchCellLabel;
 @property (nonatomic, retain) IBOutlet UILabel* loadingIndicatorLabel;
-@property (nonatomic, retain) IBOutlet UITableViewCell* fullSearchCell;
+
 @property (nonatomic, assign) SearchIntent searchIntent;
 
 - (IBAction)locationButtonTapped:(id)sender;

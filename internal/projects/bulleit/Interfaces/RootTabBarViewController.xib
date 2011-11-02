@@ -610,7 +610,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">SearchEntitiesViewController</string>
-					<string key="superclassName">UITableViewController</string>
+					<string key="superclassName">UIViewController</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
@@ -649,23 +649,21 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>addStampCell</string>
 							<string>addStampLabel</string>
-							<string>fullSearchCell</string>
-							<string>fullSearchCellLabel</string>
 							<string>loadingIndicatorLabel</string>
 							<string>locationButton</string>
 							<string>searchField</string>
 							<string>searchingIndicatorCell</string>
+							<string>tableView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>UITableViewCell</string>
-							<string>UILabel</string>
 							<string>UITableViewCell</string>
 							<string>UILabel</string>
 							<string>UILabel</string>
 							<string>UIButton</string>
 							<string>STSearchField</string>
 							<string>UITableViewCell</string>
+							<string>UITableView</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -674,12 +672,11 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>addStampCell</string>
 							<string>addStampLabel</string>
-							<string>fullSearchCell</string>
-							<string>fullSearchCellLabel</string>
 							<string>loadingIndicatorLabel</string>
 							<string>locationButton</string>
 							<string>searchField</string>
 							<string>searchingIndicatorCell</string>
+							<string>tableView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -689,14 +686,6 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">addStampLabel</string>
-								<string key="candidateClassName">UILabel</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">fullSearchCell</string>
-								<string key="candidateClassName">UITableViewCell</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">fullSearchCellLabel</string>
 								<string key="candidateClassName">UILabel</string>
 							</object>
 							<object class="IBToOneOutletInfo">
@@ -714,6 +703,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">searchingIndicatorCell</string>
 								<string key="candidateClassName">UITableViewCell</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">tableView</string>
+								<string key="candidateClassName">UITableView</string>
 							</object>
 						</object>
 					</object>

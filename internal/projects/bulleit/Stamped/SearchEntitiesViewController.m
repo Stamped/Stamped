@@ -14,6 +14,7 @@
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
 #import "EntityDetailViewController.h"
+#import "SearchEntitiesAutoSuggestCell.h"
 #import "SearchEntitiesTableViewCell.h"
 #import "STSearchField.h"
 #import "STSectionHeaderView.h"
@@ -52,11 +53,12 @@ typedef enum {
 
 
 @interface SearchEntitiesViewController ()
-- (void)addKeyboardAccessoryView;
+- (void)addFilterBar;
 - (void)filterButtonPressed:(id)sender;
 - (void)textFieldDidChange:(id)sender;
 - (void)sendSearchRequest;
 - (void)sendFastSearchRequest;
+- (void)reloadTableData;
 
 @property (nonatomic, copy) NSArray* resultsArray;
 @property (nonatomic, retain) CLLocationManager* locationManager;
@@ -80,13 +82,12 @@ typedef enum {
 @synthesize searchingIndicatorCell = searchingIndicatorCell_;
 @synthesize currentRequest = currentRequest_;
 @synthesize currentResultType = currentResultType_;
-@synthesize fullSearchCellLabel = fullSearchCellLabel_;
-@synthesize fullSearchCell = fullSearchCell_;
 @synthesize loading = loading_;
 @synthesize loadingIndicatorLabel = loadingIndicatorLabel_;
 @synthesize currentSearchFilter = currentSearchFilter_;
 @synthesize searchIntent = searchIntent_;
 @synthesize clearFilterButton = clearFilterButton_;
+@synthesize tableView = tableView_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -95,12 +96,11 @@ typedef enum {
   self.locationManager = nil;
   self.addStampCell = nil;
   self.addStampLabel = nil;
-  self.fullSearchCellLabel = nil;
   self.searchingIndicatorCell = nil;
   self.currentRequest = nil;
-  self.fullSearchCell = nil;
   self.locationButton = nil;
   self.loadingIndicatorLabel = nil;
+  self.tableView = nil;
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
   [super dealloc];
@@ -110,8 +110,6 @@ typedef enum {
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.view.backgroundColor = [UIColor colorWithWhite:0.972 alpha:1.0];
-
   [self.searchField addTarget:self
                        action:@selector(textFieldDidChange:)
              forControlEvents:UIControlEventEditingChanged];
@@ -125,96 +123,95 @@ typedef enum {
   [self.view addSubview:tooltipImageView_];
   [tooltipImageView_ release];
   self.searchingIndicatorCell.selectionStyle = UITableViewCellSelectionStyleNone;
-  [self addKeyboardAccessoryView];
+  [self addFilterBar];
 }
 
-- (void)addKeyboardAccessoryView {
-  UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-  accessoryView.backgroundColor = [UIColor colorWithWhite:0.4 alpha:1.0];
-  accessoryView.alpha = 0.95;
+- (void)addFilterBar {
+  UIView* filterBar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+  filterBar.backgroundColor = [UIColor colorWithWhite:0.4 alpha:1.0];
   CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
-  gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.15 alpha:1.0].CGColor,
-                     (id)[UIColor colorWithWhite:0.3 alpha:1.0].CGColor, nil];
+  gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.6 alpha:1.0].CGColor,
+                                              (id)[UIColor colorWithWhite:0.5 alpha:1.0].CGColor, nil];
   gradient.startPoint = CGPointZero;
   gradient.endPoint = CGPointMake(0, 1);
   gradient.frame = CGRectMake(0, 1, 320, 43);
   // This is not providing the right amount of opacity.
   gradient.opacity = 0.95;
-  [accessoryView.layer addSublayer:gradient];
+  [filterBar.layer addSublayer:gradient];
   [gradient release];
-  searchField_.inputAccessoryView = accessoryView;
-  [accessoryView release];
   
   NSUInteger i = 0;
   const CGFloat yDistance = 42.0;
   // Food.
   UIButton* filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_restaurants_button"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_restaurants_button"]
                 forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_restaurants_button_selected"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_restaurants_button_selected"]
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterFood;
-  [accessoryView addSubview:filterButton];
+  [filterBar addSubview:filterButton];
   // Book.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_books_button"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_books_button"]
                 forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_books_button_selected"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_books_button_selected"]
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterBook;
-  [accessoryView addSubview:filterButton];
+  [filterBar addSubview:filterButton];
   // Film.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_movies_button"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_movies_button"]
                 forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_movies_button_selected"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_movies_button_selected"]
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterFilm;
-  [accessoryView addSubview:filterButton];
+  [filterBar addSubview:filterButton];
   // Music.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_music_button"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_music_button"]
                 forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_music_button_selected"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_music_button_selected"]
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterMusic;
-  [accessoryView addSubview:filterButton];
+  [filterBar addSubview:filterButton];
   // Other.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_other_button"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_other_button"]
                 forState:UIControlStateNormal];
-  [filterButton setImage:[UIImage imageNamed:@"keyb_filter_other_button_selected"]
+  [filterButton setImage:[UIImage imageNamed:@"sea_filter_other_button_selected"]
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterOther;
-  [accessoryView addSubview:filterButton];
+  [filterBar addSubview:filterButton];
   // None.
   ++i;
   clearFilterButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
-  [clearFilterButton_ setImage:[UIImage imageNamed:@"keyb_filter_clear_button"]
+  [clearFilterButton_ setImage:[UIImage imageNamed:@"sea_filter_clear_button"]
                       forState:UIControlStateNormal];
-  [clearFilterButton_ setImage:[UIImage imageNamed:@"keyb_filter_clear_button_selected"]
+  [clearFilterButton_ setImage:[UIImage imageNamed:@"sea_filter_clear_button_selected"]
                       forState:UIControlStateSelected];
   clearFilterButton_.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   clearFilterButton_.tag = SearchFilterNone;
   clearFilterButton_.alpha = 0.0;
-  [accessoryView addSubview:clearFilterButton_];
+  [filterBar addSubview:clearFilterButton_];
 
-  for (UIView* view in accessoryView.subviews) {
+  for (UIView* view in filterBar.subviews) {
     if ([view isMemberOfClass:[UIButton class]]) {
       [(UIButton*)view addTarget:self
                           action:@selector(filterButtonPressed:)
                 forControlEvents:UIControlEventTouchUpInside];
     }
   }
+  self.tableView.tableHeaderView = filterBar;
+  [filterBar release];
 }
 
 - (void)viewDidUnload {
@@ -225,10 +222,9 @@ typedef enum {
   self.addStampCell = nil;
   self.addStampLabel = nil;
   self.searchingIndicatorCell = nil;
-  self.fullSearchCell = nil;
-  self.fullSearchCellLabel = nil;
   self.loadingIndicatorLabel = nil;
   self.locationButton = nil;
+  self.tableView = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   tooltipImageView_ = nil;
@@ -277,8 +273,8 @@ typedef enum {
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-  [self.tableView reloadData];
   [super viewDidDisappear:animated];
+  [self reloadTableData];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -299,8 +295,7 @@ typedef enum {
       break;
   }
   if (!locationButton.selected) {
-    [self addKeyboardAccessoryView];
-    self.inputAccessoryView.alpha = 0;
+    //[self addKeyboardAccessoryView];
   }
 
   [UIView animateWithDuration:0.3
@@ -311,14 +306,10 @@ typedef enum {
                    }
                    completion:nil];
   
-  [UIView animateWithDuration:0.2
-                   animations:^{ searchField_.inputAccessoryView.alpha = locationButton.selected ? 0 : 1; }
-                   completion:^(BOOL completed) {
-                     if (locationButton.selected)
-                       searchField_.inputAccessoryView = nil;
+  
+  if (locationButton.selected)
+   tableView_.tableHeaderView = nil;
 
-                     [searchField_ reloadInputViews];
-                   }];
   if (locationButton.selected) {
     currentSearchFilter_ = SearchFilterNone;
     currentResultType_ = ResultTypeLocal;
@@ -326,7 +317,7 @@ typedef enum {
   } else {
     currentResultType_ = ResultTypeFast;
     [searchField_ becomeFirstResponder];
-    [self.tableView reloadData];
+    [self reloadTableData];
   }
 }
 
@@ -336,7 +327,7 @@ typedef enum {
 
 - (void)filterButtonPressed:(id)sender {
   UIButton* button = sender;
-  for (UIView* view in searchField_.inputAccessoryView.subviews) {
+  for (UIView* view in tableView_.tableHeaderView.subviews) {
     if ([view isMemberOfClass:[UIButton class]] && view != sender)
       [(UIButton*)view setSelected:NO];
   }
@@ -358,14 +349,20 @@ typedef enum {
                    completion:nil];
   
   if (searchField_.text.length)
-    [self sendFastSearchRequest];
+    [self sendSearchRequest];
+}
+
+- (void)reloadTableData {
+  tableView_.hidden = resultsArray_.count == 0 && currentResultType_ == ResultTypeFast;
+  if (currentResultType_ == ResultTypeFast || resultsArray_.count == 0)
+    tableView_.tableHeaderView = nil;
+  else
+    [self addFilterBar];
+
+  [self.tableView reloadData];
 }
 
 #pragma mark - Table view data source
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   if (searchField_.text.length == 0 && currentResultType_ != ResultTypeLocal)
@@ -375,10 +372,6 @@ typedef enum {
   NSInteger numRows = [resultsArray_ count];
   if (currentResultType_ == ResultTypeFull && !loading_)
     ++numRows;  // One more for the 'Add new entity' cell.
-  if (currentResultType_ == ResultTypeLocal && !loading_)
-    ++numRows;  // For 'Search for X nearby' or 'Add new entity' cell.
-  if (currentResultType_ == ResultTypeFast)
-    ++numRows;  // For 'Search "blah"' cell.
   if (loading_)
     ++numRows;  // For the 'Loading...' cell.
 
@@ -386,58 +379,28 @@ typedef enum {
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_)
-    return self.addStampCell;
+  if (currentResultType_ == ResultTypeFast) {
+    static NSString* CellIdentifier = @"AutoSuggestCell";
+    SearchEntitiesAutoSuggestCell* cell =
+        (SearchEntitiesAutoSuggestCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil)
+      cell = [[[SearchEntitiesAutoSuggestCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
 
-  if (indexPath.row == 0 && currentResultType_ == ResultTypeFast) {
-    if (currentSearchFilter_ == SearchFilterNone) {
-      self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search for \u201c%@\u201d", searchField_.text];
-    } else {
-      NSString* corpus = nil;
-      switch (currentSearchFilter_) {
-        case SearchFilterBook:
-          corpus = @"books";
-          break;
-        case SearchFilterMusic:
-          corpus = @"music";
-          break;
-        case SearchFilterFilm:
-          corpus = @"movies & TV shows";
-          break;
-        case SearchFilterFood:
-          corpus = @"restaurants & bars";
-          break;
-        case SearchFilterOther:
-          corpus = @"within other categories";
-          break;
-        default:
-          break;
-      }
-      self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search %@ for \u201c%@\u201d", corpus, searchField_.text];
-    }
-    return self.fullSearchCell;
+    SearchResult* result = [resultsArray_ objectAtIndex:indexPath.row];
+    cell.textLabel.text = result.title;
+    return cell;
   }
   
-  if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && !loading_ && searchField_.text.length > 0 && resultsArray_.count == 0) {
-    self.fullSearchCellLabel.text = [NSString stringWithFormat:@"Search nearby for \u201c%@\u201d", searchField_.text];
-    return self.fullSearchCell;
-  }
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_)
+    return self.addStampCell;
   
   if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && loading_)
     return self.searchingIndicatorCell;
-
-  if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal && searchField_.text.length == 0) {
-    self.fullSearchCellLabel.text = @"Search nearby";
-    return self.fullSearchCell;
-  }
   
   if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal && searchField_.text.length > 0)
     return self.addStampCell;
 
   if (indexPath.row == 0 && (currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && loading_)
-    return self.searchingIndicatorCell;
-
-  if (indexPath.row == 1 && currentResultType_ == ResultTypeFast && loading_)
     return self.searchingIndicatorCell;
   
   static NSString* CellIdentifier = @"ResultCell";
@@ -449,9 +412,6 @@ typedef enum {
   
   NSUInteger offset = 0;
   if (loading_)
-    ++offset;
-
-  if (currentResultType_ == ResultTypeFast)
     ++offset;
 
   NSUInteger index = indexPath.row - offset;
@@ -471,13 +431,18 @@ typedef enum {
   return NO;
 }
 
+- (BOOL)textFieldShouldClear:(UITextField*)textField {
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  self.currentRequest = nil;
+  self.currentResultType = ResultTypeFast;
+  self.resultsArray = nil;
+  [self reloadTableData];
+  return YES;
+}
+
 - (void)sendFastSearchRequest {
-  loadingIndicatorLabel_.text = @"Loading...";
-  loading_ = YES;
   self.currentResultType = ResultTypeFast;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
-  self.resultsArray = nil;
-  [self.tableView reloadData];
   NSString* query = self.searchField.text;
   query = [query lowercaseString];
   query = [query stringByReplacingOccurrencesOfString:@" " withString:@"_"];
@@ -516,7 +481,6 @@ typedef enum {
         loadingIndicatorLabel_.text = @"Searching...";
         break;
     }
-    
   } else if (currentResultType_ == ResultTypeLocal && searchField_.text.length == 0) {
     loadingIndicatorLabel_.text = @"Loading popular results nearby";
   } else if (currentResultType_ == ResultTypeLocal) {
@@ -525,7 +489,7 @@ typedef enum {
 
   loading_ = YES;
   self.resultsArray = nil;
-  [self.tableView reloadData];
+  [self reloadTableData];
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
@@ -586,19 +550,20 @@ typedef enum {
     } else {
       self.resultsArray = array;
     }
-    [self.tableView reloadData];
+    [self reloadTableData];
   } else if (response.isNotFound) {
     self.resultsArray = nil;
-    [self.tableView reloadData];
+    [self reloadTableData];
   }
 }
 
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  NSLog(@"response: %@", objectLoader.response.bodyAsString);
   loading_ = NO;
   self.resultsArray = objects;
-  [self.tableView reloadData];
+  [self reloadTableData];
   self.currentRequest = nil;
 }
 
@@ -613,7 +578,7 @@ typedef enum {
   }
   [searchField_ becomeFirstResponder];
   self.currentRequest = nil;
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 #pragma mark - UITableViewDelegate Methods.
@@ -623,6 +588,13 @@ typedef enum {
     return 0;
 
   return 25;
+}
+
+- (CGFloat)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+  if (currentResultType_ == ResultTypeFast)
+    return 47.0;
+
+  return 63.0;
 }
 
 - (UIView*)tableView:(UITableView*)tableView viewForHeaderInSection:(NSInteger)section {
@@ -667,19 +639,17 @@ typedef enum {
   return view;
 }
 
-- (void)tableView:(UITableView*)tableView willDisplayCell:(UITableViewCell*)cell forRowAtIndexPath:(NSIndexPath*)indexPath {
-  cell.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
-}
-
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  if (currentResultType_ == ResultTypeFast) {
+    self.searchField.text = [(SearchResult*)[resultsArray_ objectAtIndex:indexPath.row] title];
+    [self sendSearchRequest];
+    return;
+  }
+  
   SearchResult* result = nil;
   if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull) {
     result = [[[SearchResult alloc] init] autorelease];
     result.title = self.searchField.text;
-  } else if (indexPath.row == 0 && currentResultType_ == ResultTypeFast) {
-    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
-    [self sendSearchRequest];
-    return;
   } else if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && !loading_ && searchField_.text.length > 0 && resultsArray_.count == 0) {
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
     [self sendSearchRequest];
@@ -694,12 +664,8 @@ typedef enum {
       [searchField_ becomeFirstResponder];
       return;
     }
-  } else if (indexPath.row == 1 && currentResultType_ == ResultTypeFast && loading_) {
-    return;
-  } else if (currentResultType_ == ResultTypeFast && !loading_) {
-    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row - 1];
-  } else if (currentResultType_ == ResultTypeFast && loading_) {
-    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row - 2];
+  } else if (currentResultType_ == ResultTypeFast) {
+    result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   } else if ((currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && !loading_) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   } else if (indexPath.row == 0 && currentResultType_ == ResultTypeFull && loading_) {
@@ -727,13 +693,14 @@ typedef enum {
 - (void)resetState {
   self.currentResultType = ResultTypeFast;
   self.currentSearchFilter = SearchFilterNone;
+  self.currentRequest = nil;
   self.searchField.text = nil;
   self.locationButton.selected = NO;
   [self textFieldDidChange:self.searchField];
-  if (!searchField_.inputAccessoryView)
-    [self addKeyboardAccessoryView];
-  else
-    [self filterButtonPressed:nil];
+  //if (!searchField_.inputAccessoryView)
+    //[self addKeyboardAccessoryView];
+  //else
+  //  [self filterButtonPressed:nil];
 }
 
 - (void)textFieldDidChange:(id)sender {
@@ -754,7 +721,7 @@ typedef enum {
   } else {
     [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
     self.resultsArray = nil;
-    [self.tableView reloadData];
+    [self reloadTableData];
   }
 }
 
