@@ -720,7 +720,7 @@ class HTTPEntitySearch(Schema):
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
         self.local              = SchemaElement(bool)
-        self.page               = SchemaElement(int, default=1)
+        self.page               = SchemaElement(int, default=0)
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'EntitySearch':

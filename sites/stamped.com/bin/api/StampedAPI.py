@@ -1038,7 +1038,7 @@ class StampedAPI(AStampedAPI):
                        prefix=False, 
                        local=False, 
                        full=True, 
-                       page=1, 
+                       page=0, 
                        limit=10):
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
@@ -1061,7 +1061,7 @@ class StampedAPI(AStampedAPI):
                      subcategory_filter=None, 
                      prefix=False, 
                      full=True, 
-                     page=1, 
+                     page=0, 
                      limit=10):
         results = self._entitySearcher.getSearchResults(query='', 
                                                         coords=coords, 

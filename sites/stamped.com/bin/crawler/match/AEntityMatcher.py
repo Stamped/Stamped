@@ -259,8 +259,12 @@ class AEntityMatcher(object):
                     elif isinstance(v, dict):
                         _addDict(v, dest, wrap)
                     
-                    if override and not isinstance(v, dict):
-                        stale = True
+                    if not stale:
+                        if override and not isinstance(v, dict):
+                            stale = True
+                        
+                        if isinstance(v, basestring) and v != dest[k]:
+                            stale = True
                     
                     if stale:
                         dest[k] = v

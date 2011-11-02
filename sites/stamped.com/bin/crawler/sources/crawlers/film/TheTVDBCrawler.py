@@ -49,6 +49,7 @@ class TheTVDBCrawler(AExternalEntitySource):
         pool = Pool(32)
         rows = soup.find('table', {'id' : 'listtable'}).findAll('tr')
         rows = rows[1:]
+        count = 0
         
         for row in rows:
             cols = row.findAll('td')
@@ -66,6 +67,9 @@ class TheTVDBCrawler(AExternalEntitySource):
             url  = '%s%s' % (self.base, href)
             
             pool.spawn(self._parse_series_page, name, url)
+            count += 1
+            if 0 == (count % 20):
+                time.sleep(1)
         
         pool.join()
         self._output.put(StopIteration)
@@ -110,6 +114,7 @@ class TheTVDBCrawler(AExternalEntitySource):
             filtered_images = filter(lambda img: image_type in img, images)
             if len(filtered_images) > 0:
                 entity.image = "%s%s" % (self.base, filtered_images[0])
+                break
         
         info = contents[1].find('table').find('table')
         rows = info.findAll('tr')
