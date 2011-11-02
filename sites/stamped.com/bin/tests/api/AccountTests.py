@@ -142,11 +142,27 @@ class StampedAPIAccountLinkedAccounts(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertTrue(result)
 
+        path = "account/remove_linked_account.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "twitter": True
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
     def test_facebook(self):
         path = "account/linked_accounts.json"
         data = {
             "oauth_token": self.token['access_token'],
             "facebook_id": '1234567890',
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+
+        path = "account/remove_linked_account.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "facebook": True
         }
         result = self.handlePOST(path, data)
         self.assertTrue(result)

@@ -207,6 +207,11 @@ class HTTPLinkedAccounts(Schema):
             raise NotImplementedError
         return schema
 
+class HTTPAvailableLinkedAccounts(Schema):
+    def setSchema(self):
+        self.twitter                = SchemaElement(bool)
+        self.facebook               = SchemaElement(bool)
+
 class HTTPAccountChangePassword(Schema):
     def setSchema(self):
         self.old_password       = SchemaElement(basestring, required=True)
