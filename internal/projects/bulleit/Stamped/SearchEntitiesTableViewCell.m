@@ -41,6 +41,7 @@
     [categoryImageView_ release];
     
     titleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 13, 241, 30)];
+    titleLabel_.backgroundColor = [UIColor clearColor];
     titleLabel_.font = [UIFont fontWithName:@"TitlingGothicFBComp-Regular" size:24];
     titleLabel_.textColor = [UIColor stampedBlackColor];
     titleLabel_.highlightedTextColor = [UIColor whiteColor];
@@ -48,6 +49,7 @@
     [titleLabel_ release];
     
     subtitleLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 34, 241, 20)];
+    subtitleLabel_.backgroundColor = [UIColor clearColor];
     subtitleLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
     subtitleLabel_.textColor = [UIColor stampedGrayColor];
     subtitleLabel_.highlightedTextColor = [UIColor whiteColor];
@@ -55,6 +57,7 @@
     [subtitleLabel_ release];
 
     distanceLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    distanceLabel_.backgroundColor = [UIColor clearColor];
     distanceLabel_.textColor = [UIColor stampedLightGrayColor];
     distanceLabel_.highlightedTextColor = [UIColor whiteColor];
     distanceLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
