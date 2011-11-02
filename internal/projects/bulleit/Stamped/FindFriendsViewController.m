@@ -143,6 +143,18 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [self.navigationController setNavigationBarHidden:YES animated:animated];
+
+  if (self.findSource == FindFriendsSourceStamped)
+    [self findFromStamped:self];
+  else if (self.findSource == FindFriendsSourceContacts)
+    [self findFromContacts:self];
+  else if (self.findSource == FindFriendsSourceTwitter)
+    [self findFromTwitter:self];
+  else if (self.findSource == FindFriendsSourceFacebook)
+    [self findFromFacebook:self];
+  else
+    [self findFromStamped:self];
+  
   [super viewWillAppear:animated];
 }
 
@@ -285,7 +297,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
   if (twitterFriends_) {
     [self.tableView reloadData];
-    return;
+//    return;
   }
 
   GTMOAuthAuthentication* auth = [self createAuthentication];
@@ -316,7 +328,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   if (facebookFriends_) {
     [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
     [self.tableView reloadData];
-    return;
+//    return;
   }
 
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
@@ -816,7 +828,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   NSLog(@"FB err message: %@", [error description]);
   [self.signInFacebookActivityIndicator stopAnimating];
   self.signInFacebookConnectButton.enabled = YES;
-  if (error.code == 10000)
+  if ([error code] == 10000)
     [self signOutOfFacebook];
 }
 

@@ -7,9 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <RestKit/RestKit.h>
 #import "FBConnect.h"
 
-@interface SharingSettingsViewController : UIViewController <FBSessionDelegate>
+@interface SharingSettingsViewController : UIViewController <FBSessionDelegate,
+                                                             FBRequestDelegate,
+                                                             RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UIImageView* twitterIconView;
 @property (nonatomic, retain) IBOutlet UIImageView* fbIconView;
@@ -19,6 +22,8 @@
 @property (nonatomic, retain) IBOutlet UILabel* fbLabel;
 @property (nonatomic, retain) IBOutlet UILabel* twitterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* fbNameLabel;
+@property (nonatomic, retain) IBOutlet UIImageView* twitterButtonLabel;
+@property (nonatomic, retain) IBOutlet UIImageView* fbButtonLabel;
 
 -(IBAction)twitterButtonPressed:(id)sender;
 -(IBAction)fbButtonPressed:(id)sender;
