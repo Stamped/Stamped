@@ -385,6 +385,7 @@ class MongoEntitySearcher(EntitySearcher):
         asins       = set()
         gids        = set()
         aids        = set()
+        thetvdb_ids = set()
         pool        = Pool(8)
         earthRadius = 3959.0 # miles
         
@@ -582,6 +583,13 @@ class MongoEntitySearcher(EntitySearcher):
                     if aid in aids:
                         return
                     aids.add(aid)
+                
+                # dedupe entities from thetvdb
+                thetvdb_id = entity.thetvdb_id
+                if thetvdb_id is not None:
+                    if thetvdb_id in thetvdb_ids:
+                        return
+                    thetvdb_ids.add(thetvdb_id)
                 
                 if local and not self._is_possible_location_query(entity.category, entity.subcategory, False):
                     return

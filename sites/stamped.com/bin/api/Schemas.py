@@ -775,6 +775,10 @@ class WashMagSchema(Schema):
 class TheTVDBSchema(Schema):
     def setSchema(self):
         self.thetvdb_id         = SchemaElement(basestring)
+        self.num_seasons        = SchemaElement(int)
+        self.earliest_air_date  = SchemaElement(datetime)
+        self.latest_air_date    = SchemaElement(datetime)
+        self.air_time           = SchemaElement(basestring)
 
 class NetflixSchema(Schema):
     def setSchema(self):

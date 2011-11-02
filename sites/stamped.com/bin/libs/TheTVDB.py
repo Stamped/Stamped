@@ -58,6 +58,12 @@ class TheTVDB(object):
         tree  = objectify.fromstring(xml)
         items = tree.findall('.//Series')
         
+        """
+        f = open('out.xml', 'w')
+        f.write(xml)
+        f.close()
+        """
+        
         if items is not None and 1 == len(items):
             item = items[0]
             
