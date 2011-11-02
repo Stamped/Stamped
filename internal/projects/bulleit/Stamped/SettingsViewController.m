@@ -10,7 +10,6 @@
 
 #import "AccountManager.h"
 #import "EditProfileViewController.h"
-#import "NotificationSettingsViewController.h"
 #import "SharingSettingsViewController.h"
 #import "AboutUsViewController.h"
 
@@ -65,9 +64,9 @@
 
 
 - (IBAction)notificationsButtonPressed:(id)sender {
-  NotificationSettingsViewController* vc = [[NotificationSettingsViewController alloc] init];
-  [self.navigationController pushViewController:vc animated:YES];
-  [vc release];
+//  NotificationSettingsViewController* vc = [[NotificationSettingsViewController alloc] init];
+//  [self.navigationController pushViewController:vc animated:YES];
+//  [vc release];
 }
 
 - (IBAction)sharingButtonPressed:(id)sender {
