@@ -117,6 +117,27 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 {'$set': fields}
             )
 
+    def removeLinkedAccount(self, userId, linkedAccount):
+        fields = {}
+
+        if linkedAccount == 'facebook':
+            fields = {
+                'linked_accounts.facebook.facebook_id': 1,
+                'linked_accounts.facebook.facebook_name': 1,
+                'linked_accounts.facebook.facebook_screen_name': 1,
+            }
+
+        if linkedAccount == 'twitter':
+            fields = {
+                'linked_accounts.twitter.twitter_id': 1,
+                'linked_accounts.twitter.twitter_screen_name': 1,
+            }
+
+        self._collection.update(
+            {'_id': self._getObjectIdFromString(userId)},
+            {'$unset': fields}
+        )
+
     def updatePassword(self, userId, password):
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)}, 

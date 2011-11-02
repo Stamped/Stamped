@@ -461,6 +461,18 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
         
         return True
+    
+    @API_CALL
+    def removeLinkedAccount(self, authUserId, linkedAccount):
+
+        if linkedAccount not in ['facebook', 'twitter']:
+            msg = "Invalid linked account: %s" % linkedAccount
+            logs.warning(msg)
+            raise Exception(msg)
+
+        self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
+        
+        return True
 
     @API_CALL
     def updatePassword(self, authUserId, password):

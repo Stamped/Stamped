@@ -146,6 +146,21 @@ def linked_accounts(request):
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
+def remove_linked_account(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPAvailableLinkedAccounts(), request)
+    
+    if schema.twitter:
+        result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
+    
+    if schema.facebook:
+        result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
+    
+    return transformOutput(True)
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
 def change_password(request):
     authUserId  = checkOAuth(request)
     schema      = parseRequest(HTTPAccountChangePassword(), request, \
