@@ -125,12 +125,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 'linked_accounts.facebook.facebook_id': 1,
                 'linked_accounts.facebook.facebook_name': 1,
                 'linked_accounts.facebook.facebook_screen_name': 1,
+                'linked_accounts.facebook.facebook_alerts_sent': 1,
             }
 
         if linkedAccount == 'twitter':
             fields = {
                 'linked_accounts.twitter.twitter_id': 1,
                 'linked_accounts.twitter.twitter_screen_name': 1,
+                'linked_accounts.twitter.twitter_alerts_sent': 1,
             }
 
         self._collection.update(

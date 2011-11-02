@@ -789,10 +789,12 @@ class StampedAPI(AStampedAPI):
             activity.genre              = 'follower'
             activity.user.user_id       = authUserId
             activity.linked_user_id     = authUserId
-            # activity.linked_friend_id   = user.user_id
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity([user.user_id], activity)
+
+            # Remove 'friend' activity item
+            self._activityDB.removeActivity('friend', authUserId, recipientId=user.user_id)
         
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)

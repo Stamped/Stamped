@@ -126,7 +126,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
                 'genre': genre
             })
 
-        if genre == 'follower' and recipientId:
+        if genre in ['follower', 'friend'] and recipientId:
             self._collection.remove({
                 'user.user_id': userId,
                 'recipient_id': recipientId,
