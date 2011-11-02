@@ -74,26 +74,45 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         document = self._getMongoDocumentFromId(documentId)
         return self._convertFromMongo(document)
     
-    def addActivity(self, recipientIds, activityItem):
+    def addActivity(self, recipientIds, activityItem, **kwargs):
+        sendAlert   = kwargs.pop('sendAlert', True)
+        checkExists = kwargs.pop('checkExists', False)
+
         alerts = []
+
         for recipientId in recipientIds:
+            activityId = None
             activity = activityItem.value
             activity['recipient_id'] = recipientId
-            # query = copy.copy(activity)
-            # query.pop('timestamp')
-            # result = self._collection.update(query, activity, upsert=True)
-            activityId = self._collection.insert_one(activity)
 
-            alert = Alert()
-            alert.activity_id   = activityId
-            alert.recipient_id  = recipientId
-            alert.user_id       = activity['user']['user_id']
-            alert.genre         = activity['genre']
-            alert.created       = activity['timestamp']['created']
-            # self.alerts_collection.addAlert(alert)
-            alerts.append(alert)
-        
-        self.alerts_collection.addAlerts(alerts)
+            if checkExists:
+                try:
+                    document = self._collection.find_one({
+                        'user.user_id': activity['user']['user_id'],
+                        'recipient_id': activity['recipient_id'],
+                        'genre': activity['genre'],
+                    })
+                    if not document:
+                        activityId = self._collection.insert_one(activity)
+                except:
+                    pass
+            else:
+                activityId = self._collection.insert_one(activity)
+
+            if sendAlert:
+                if not activityId:
+                    continue
+
+                alert = Alert()
+                alert.activity_id   = activityId
+                alert.recipient_id  = recipientId
+                alert.user_id       = activity['user']['user_id']
+                alert.genre         = activity['genre']
+                alert.created       = activity['timestamp']['created']
+                alerts.append(alert)
+
+        if len(alerts):        
+            self.alerts_collection.addAlerts(alerts)
 
         
     def removeActivity(self, genre, userId, **kwargs):
@@ -120,9 +139,6 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         
     def removeUserActivity(self, userId):
         self._collection.remove({'user.user_id': userId})
-
-
-
 
 
 

@@ -146,17 +146,68 @@ def linked_accounts(request):
 
 @handleHTTPRequest
 @require_http_methods(["POST"])
-def remove_linked_account(request):
+def removeTwitter(request):
     authUserId  = checkOAuth(request)
-    schema      = parseRequest(HTTPAvailableLinkedAccounts(), request)
-    
-    if schema.twitter:
-        result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
-    
-    if schema.facebook:
-        result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
+    schema      = parseRequest(None, request)
+
+    result = stampedAPI.removeLinkedAccount(authUserId, 'twitter')
     
     return transformOutput(True)
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def removeFacebook(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(None, request)
+
+    result = stampedAPI.removeLinkedAccount(authUserId, 'facebook')
+    
+    return transformOutput(True)
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def alertFollowersFromTwitter(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
+
+    q = schema.q.value
+    twitterIds = []
+
+    for item in q:
+        try:
+            number = int(item)
+            twitterIds.append(item)
+        except:
+            msg = 'Invalid twitter id: %s' % item
+            logs.warning(msg)
+
+    result      = stampedAPI.alertFollowersFromTwitter(authUserId, twitterIds)
+    
+    return transformOutput(result)
+
+
+@handleHTTPRequest
+@require_http_methods(["POST"])
+def alertFollowersFromFacebook(request):
+    authUserId  = checkOAuth(request)
+    schema      = parseRequest(HTTPFindUser(), request, obfuscate=['q'])
+
+    q = schema.q.value
+    facebookIds = []
+
+    for item in q:
+        try:
+            number = int(item)
+            facebookIds.append(item)
+        except:
+            msg = 'Invalid facebook id: %s' % item
+            logs.warning(msg)
+
+    result      = stampedAPI.alertFollowersFromFacebook(authUserId, facebookIds)
+    
+    return transformOutput(result)
 
 
 @handleHTTPRequest

@@ -38,12 +38,21 @@ urlpatterns = patterns('',
     (r'v0/account/reset_password.json',         'v0.functions.account.reset_password'),
     (r'v0/account/change_password.json',        'v0.functions.account.change_password'),
     (r'v0/account/check.json',                  'v0.functions.account.check'),
-    (r'v0/account/linked_accounts.json',        'v0.functions.account.linked_accounts'),
-    (r'v0/account/remove_linked_account.json',  'v0.functions.account.remove_linked_account'),
     (r'v0/account/alerts/show.json',            'v0.functions.account.show_alerts'),
     (r'v0/account/alerts/update.json',          'v0.functions.account.update_alerts'),
     (r'v0/account/alerts/ios/update.json',      'v0.functions.account.update_apns'),
     (r'v0/account/alerts/ios/remove.json',      'v0.functions.account.remove_apns'),
+
+    # TODO: REMOVE FROM PROD
+    (r'v0/account/linked_accounts.json',        'v0.functions.account.linked_accounts'),
+
+    (r'v0/account/linked/twitter/update.json',      'v0.functions.account.linked_accounts'),
+    (r'v0/account/linked/twitter/followers.json',   'v0.functions.account.alertFollowersFromTwitter'),
+    (r'v0/account/linked/twitter/remove.json',      'v0.functions.account.removeTwitter'),
+    (r'v0/account/linked/facebook/update.json',     'v0.functions.account.linked_accounts'),
+    (r'v0/account/linked/facebook/followers.json',  'v0.functions.account.alertFollowersFromFacebook'),
+    (r'v0/account/linked/facebook/remove.json',     'v0.functions.account.removeFacebook'),
+    
     
     ### USERS
     (r'v0/users/show.json',             'v0.functions.users.show'),
@@ -55,6 +64,8 @@ urlpatterns = patterns('',
     (r'v0/users/find/phone.json',       'v0.functions.users.findPhone'),
     (r'v0/users/find/twitter.json',     'v0.functions.users.findTwitter'),
     (r'v0/users/find/facebook.json',    'v0.functions.users.findFacebook'),
+    (r'v0/users/alert/twitter.json',    'v0.functions.users.alertFriendsFromTwitter'),
+    (r'v0/users/alert/facebook.json',   'v0.functions.users.alertFriendsFromFacebook'),
     
     ### FRIENDS
     (r'v0/friendships/create.json',             'v0.functions.friendships.create'),
