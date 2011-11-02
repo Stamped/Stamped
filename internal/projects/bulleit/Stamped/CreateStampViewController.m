@@ -35,7 +35,8 @@
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kCreateStampPath = @"/stamps/create.json";
 static NSString* const kCreateEntityPath = @"/entities/create.json";
-
+static NSString* const kStampPhotoURLPath = @"http://static.stamped.com/stamps/";
+static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 
 @interface CreateStampViewController ()
 - (void)editorDoneButtonPressed:(id)sender;
@@ -75,6 +76,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize creditedUser = creditedUser_;
 @synthesize newEntity = newEntity_;
 @synthesize detailedEntity = detailedEntity_;
+@synthesize fbClient = fbClient_;
 
 @synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
@@ -108,6 +110,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 @synthesize shareLabel = shareLabel_;
 @synthesize editingMask = editingMask_;
 @synthesize creditPickerController = creditPickerController_;
+@synthesize fbButton = fbButton_;
 
 @synthesize objectToStamp = objectToStamp_;
 
@@ -186,6 +189,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.creditPickerController = nil;
   self.detailedEntity = nil;
   stampsRemainingLayer_ = nil;
+  self.fbClient = nil;
+  self.fbButton = nil;
 
   [super dealloc];
 }
@@ -195,6 +200,7 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
+  self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
   User* currentUser = [AccountManager sharedManager].currentUser;
   self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
@@ -313,6 +319,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
       shareLabel_.textColor = [UIColor stampedLightGrayColor];
     }
   }
+  if ([self.fbClient isSessionValid]) {
+    fbButton_.enabled = YES;
+  } else {
+    shareLabel_.textColor = [UIColor stampedLightGrayColor];
+  }
   editingMask_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
   editingMask_.backgroundColor = [UIColor whiteColor];
   editingMask_.alpha = 0;
@@ -409,6 +420,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   self.disclosureButton = nil;
   self.creditPickerController.creditTextField = nil;
   stampsRemainingLayer_ = nil;
+  self.fbClient = nil;
+  self.fbButton = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -423,6 +436,10 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                                  11 - (46 / 2),
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
+  
+  if ([self.fbClient isSessionValid]) {
+    fbButton_.enabled = YES;
+  } 
 
   [super viewWillAppear:animated];
 }
@@ -490,7 +507,12 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(tweetButton_.frame),
                                   CGRectGetHeight(tweetButton_.frame));
+  fbButton_.frame = CGRectMake(fbButton_.frame.origin.x,
+                                  CGRectGetMaxY(newContainerFrame) + 9,
+                                  CGRectGetWidth(fbButton_.frame),
+                                  CGRectGetHeight(fbButton_.frame));
   [tweetButton_ setNeedsDisplay];
+  [fbButton_ setNeedsDisplay];
 
   CGRect newCommentFrame = CGRectMake(0, 4, 310, contentSize.height);
   CGRect convertedFrame = [self.scrollView convertRect:newCommentFrame fromView:ribbonedContainerView_];
@@ -589,7 +611,12 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(tweetButton_.frame),
                                   CGRectGetHeight(tweetButton_.frame));
+  fbButton_.frame = CGRectMake(fbButton_.frame.origin.x,
+                                  CGRectGetMaxY(newContainerFrame) + 9,
+                                  CGRectGetWidth(fbButton_.frame),
+                                  CGRectGetHeight(fbButton_.frame));
   [tweetButton_ setNeedsDisplay];
+  [fbButton_ setNeedsDisplay];
 
   CGRect frame =
       CGRectMake(0,
@@ -634,6 +661,11 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
 - (IBAction)tweetButtonPressed:(id)sender {
   tweetButton_.selected = !tweetButton_.selected;
 }
+
+- (IBAction)fbButtonPressed:(id)sender {
+  fbButton_.selected = !fbButton_.selected;
+}
+
 
 - (IBAction)editButtonPressed:(id)sender {
   EditEntityViewController* editViewController =
@@ -850,6 +882,32 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   }
 }
 
+- (void)sendFBRequest:(Stamp*)stamp {
+  NSString* fbID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBid"];
+  if (self.fbClient.isSessionValid && fbButton_.selected) {
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   kFacebookAppID, @"app_id",
+                                   stamp.URL, @"link",
+//                                   [NSString stringWithFormat:@"Stamped: %@.", stamp.entityObject.title], @"name", 
+                                   stamp.entityObject.title, @"name",
+                                   [NSString stringWithFormat:@"\"%@\"", stamp.blurb], @"message", nil];
+//    if (self.stampPhoto) {
+//      NSString* photoURL = [NSString stringWithFormat:@"%@%@%@", kStampPhotoURLPath, stamp.stampID, @".jpg"];
+//      [params setObject:photoURL forKey:@"picture"];
+//    }
+//    else {
+      NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampLogoURLPath, stamp.user.primaryColor, stamp.user.secondaryColor, @"-logo-195x195.png"];
+      [params setObject:photoURL forKey:@"picture"];
+//    }
+    
+    [self.fbClient requestWithGraphPath:[fbID stringByAppendingString:@"/feed"]
+                              andParams:params
+                          andHttpMethod:@"POST"
+                            andDelegate:self];
+    NSLog(@"fb request");
+  }
+}
+
 - (void)dismissSelf {
   StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
   UIViewController* vc = delegate.navigationController;
@@ -885,6 +943,8 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
     Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];
     if (tweetButton_.selected)
       [self sendTweetRequest:stamp];
+    if (fbButton_.selected)
+      [self sendFBRequest:stamp];
     
     stamp.temporary = [NSNumber numberWithBool:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
@@ -969,6 +1029,16 @@ static NSString* const kCreateEntityPath = @"/entities/create.json";
   deletePhotoButton_.alpha = [reasoningTextView_ isFirstResponder] ? 1.0 : 0.0;
   [reasoningTextView_ addSubview:deletePhotoButton_];
   takePhotoButton_.enabled = NO;
+}
+
+#pragma mark - FBRequestDelegate methods.
+
+- (void)request:(FBRequest *)request didLoad:(id)result {
+  NSLog(@"%@", result);
+}
+
+- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
+  NSLog(@"error! %@", error);
 }
 
 #pragma mark - UIImagePickerControllerDelegate methods.

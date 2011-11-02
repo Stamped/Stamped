@@ -200,7 +200,7 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 
 - (void)signInToFacebook {
   self.fbClient.sessionDelegate = self;
-  [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", nil]];
+  [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
 }
 
 - (void)signOutOfFacebook {
@@ -216,6 +216,7 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
     [defaults removeObjectForKey:@"FBName"];
+    [defaults removeObjectForKey:@"FBID"];
     [defaults synchronize];
     
     // Nil out the session variables to prevent
@@ -240,6 +241,7 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 - (void)connectFacebookName:(NSString*)name userID:(NSString*)userID {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
+  [defaults setObject:userID forKey:@"FBid"];
   [defaults synchronize];
   
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI

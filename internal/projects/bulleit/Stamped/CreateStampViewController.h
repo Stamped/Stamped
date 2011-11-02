@@ -8,6 +8,7 @@
 
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
+#import "FBConnect.h"
 
 #import "STCreditPickerController.h"
 
@@ -20,6 +21,7 @@
 @interface CreateStampViewController : UIViewController<UITextViewDelegate,
                                                         RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
+                                                        FBRequestDelegate,
                                                         STCreditPickerControllerDelegate,
                                                         UINavigationControllerDelegate,
                                                         UIImagePickerControllerDelegate,
@@ -32,6 +34,7 @@
 @property (nonatomic, assign) BOOL newEntity;
 @property (nonatomic, retain) Entity* entityObject;
 @property (nonatomic, retain) User* creditedUser;
+@property (nonatomic, retain) Facebook* fbClient;
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;
@@ -52,9 +55,11 @@
 @property (nonatomic, retain) IBOutlet UIButton* tweetButton;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* disclosureButton;
+@property (nonatomic, retain) IBOutlet UIButton* fbButton;
 
 - (IBAction)disclosureButtonPressed:(id)sender;
 - (IBAction)tweetButtonPressed:(id)sender;
+- (IBAction)fbButtonPressed:(id)sender;
 - (IBAction)editButtonPressed:(id)sender;
 - (IBAction)saveStampButtonPressed:(id)sender;
 - (id)initWithEntityObject:(Entity*)entityObject;

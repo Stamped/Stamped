@@ -718,7 +718,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
   if (!self.facebookClient.isSessionValid) {
     self.facebookClient.sessionDelegate = self;
-    [self.facebookClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", nil]];
+    [self.facebookClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
   }
   if (facebookFriends_) {
     [self.tableView reloadData];
@@ -731,6 +731,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   if ([defaults objectForKey:@"FBAccessTokenKey"]) {
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
+    [defaults removeObjectForKey:@"FBName"];
+    [defaults removeObjectForKey:@"FBid"];
+    
     [defaults synchronize];
     
     // Nil out the session variables to prevent
@@ -781,6 +784,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
   request.method = RKRequestMethodPOST;
   [request send];
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:name forKey:@"FBName"];
+  [defaults setObject:userID forKey:@"FBid"];
+  [defaults synchronize];
 }
 
 #pragma mark - FBRequestDelegate Methods.
