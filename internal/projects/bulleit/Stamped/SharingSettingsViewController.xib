@@ -128,7 +128,7 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">sharing_header@2x.png</string>
+							<string key="NSResourceName">sharing_header</string>
 						</object>
 					</object>
 					<object class="IBUIScrollView" id="666428538">
@@ -782,7 +782,7 @@
 			<string key="settings_sharing_facebook_off">{16, 16}</string>
 			<string key="settings_sharing_item_bg@2x.png">{620, 130}</string>
 			<string key="settings_sharing_twitter_off">{16, 16}</string>
-			<string key="sharing_header@2x.png">{140, 40}</string>
+			<string key="sharing_header">{16, 16}</string>
 			<string key="shelf_background.png">{320, 240}</string>
 		</dictionary>
 		<string key="IBCocoaTouchPluginVersion">933</string>

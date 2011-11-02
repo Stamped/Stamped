@@ -841,6 +841,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
+    if (response.statusCode == 401) {
+      [self.signInTwitterActivityIndicator stopAnimating];
+      self.signInTwitterConnectButton.enabled = YES;
+    }
     NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
     return;
   }

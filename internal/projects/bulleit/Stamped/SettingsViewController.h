@@ -16,5 +16,6 @@
 - (IBAction)editProfileButtonPressed:(id)sender;
 - (IBAction)logoutButtonPressed:(id)sender;
 - (IBAction)sharingButtonPressed:(id)sender;
+- (IBAction)aboutUsButtonPressed:(id)sender;
 
 @end

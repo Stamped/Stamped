@@ -371,7 +371,10 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
-    NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
+    if (response.statusCode == 401) {
+      [self signOutOfTwitter];
+    }
+    NSLog(@"HTTP error for request: %@, response: %@, code: %d", request.resourcePath, response.bodyAsString, response.statusCode);
     [self updateUI];
     return;
   }
