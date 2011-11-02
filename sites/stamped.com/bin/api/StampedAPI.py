@@ -461,6 +461,70 @@ class StampedAPI(AStampedAPI):
         self._accountDB.updateLinkedAccounts(authUserId, linkedAccounts)
         
         return True
+    
+    @API_CALL
+    def removeLinkedAccount(self, authUserId, linkedAccount):
+
+        if linkedAccount not in ['facebook', 'twitter']:
+            msg = "Invalid linked account: %s" % linkedAccount
+            logs.warning(msg)
+            raise Exception(msg)
+
+        self._accountDB.removeLinkedAccount(authUserId, linkedAccount)
+        
+        return True
+
+    @API_CALL
+    def alertFollowersFromTwitter(self, authUserId, twitterIds):
+        account = self._accountDB.getAccount(authUserId)
+        if account.twitter_alerts_sent == True or not account.twitter_screen_name:
+            return False
+
+        users = self._userDB.findUsersByTwitter(twitterIds)
+        
+        userIds = []
+        for user in users:
+            userIds.append(user.user_id)
+
+        activity                    = Activity()
+        activity.genre              = 'friend'
+        activity.subject            = 'Your Twitter friend %s' % account.twitter_screen_name
+        activity.user.user_id       = authUserId
+        activity.linked_user_id     = authUserId
+        activity.timestamp.created  = datetime.utcnow()
+        
+        self._activityDB.addActivity(userIds, activity, sendAlert=False, checkExists=True)
+
+        account.twitter_alerts_sent = True
+        self._accountDB.updateAccount(account)
+        
+        return True
+
+    @API_CALL
+    def alertFollowersFromFacebook(self, authUserId, facebookIds):
+        account = self._accountDB.getAccount(authUserId)
+        if account.facebook_alerts_sent == True or not account.facebook_name:
+            return False
+
+        users = self._userDB.findUsersByFacebook(facebookIds)
+        
+        userIds = []
+        for user in users:
+            userIds.append(user.user_id)
+
+        activity                    = Activity()
+        activity.genre              = 'friend'
+        activity.subject            = 'Your Facebook friend %s' % account.facebook_name
+        activity.user.user_id       = authUserId
+        activity.linked_user_id     = authUserId
+        activity.timestamp.created  = datetime.utcnow()
+        
+        self._activityDB.addActivity(userIds, activity, sendAlert=False, checkExists=True)
+
+        account.facebook_alerts_sent = True
+        self._accountDB.updateAccount(account)
+        
+        return True
 
     @API_CALL
     def updatePassword(self, authUserId, password):
@@ -622,6 +686,14 @@ class StampedAPI(AStampedAPI):
         return users
     
     @API_CALL
+    def getPrivacy(self, userRequest):
+        user = self._getUserFromIdOrScreenName(userRequest)
+        
+        if user.privacy == True:
+            return True
+        return False
+    
+    @API_CALL
     def findUsersByEmail(self, authUserId, emails):
         
         ### TODO: Add check for privacy settings?
@@ -667,14 +739,6 @@ class StampedAPI(AStampedAPI):
         users = self._userDB.searchUsers(query, limit)
 
         return users
-    
-    @API_CALL
-    def getPrivacy(self, userRequest):
-        user = self._getUserFromIdOrScreenName(userRequest)
-        
-        if user.privacy == True:
-            return True
-        return False
 
     
     """
@@ -725,10 +789,12 @@ class StampedAPI(AStampedAPI):
             activity.genre              = 'follower'
             activity.user.user_id       = authUserId
             activity.linked_user_id     = authUserId
-            # activity.linked_friend_id   = user.user_id
             activity.timestamp.created  = datetime.utcnow()
             
             self._activityDB.addActivity([user.user_id], activity)
+
+            # Remove 'friend' activity item
+            self._activityDB.removeActivity('friend', authUserId, recipientId=user.user_id)
         
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(user.user_id)
@@ -1026,7 +1092,7 @@ class StampedAPI(AStampedAPI):
                        prefix=False, 
                        local=False, 
                        full=True, 
-                       page=1, 
+                       page=0, 
                        limit=10):
         results = self._entitySearcher.getSearchResults(query=query, 
                                                         coords=coords, 
@@ -1049,7 +1115,7 @@ class StampedAPI(AStampedAPI):
                      subcategory_filter=None, 
                      prefix=False, 
                      full=True, 
-                     page=1, 
+                     page=0, 
                      limit=10):
         results = self._entitySearcher.getSearchResults(query='', 
                                                         coords=coords, 

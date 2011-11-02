@@ -66,12 +66,14 @@ class TwitterAccountSchema(Schema):
     def setSchema(self):
         self.twitter_id             = SchemaElement(basestring)
         self.twitter_screen_name    = SchemaElement(basestring)
+        self.twitter_alerts_sent    = SchemaElement(bool)
         
 class FacebookAccountSchema(Schema):
     def setSchema(self):
         self.facebook_id            = SchemaElement(basestring)
         self.facebook_name          = SchemaElement(basestring)
         self.facebook_screen_name   = SchemaElement(basestring)
+        self.facebook_alerts_sent   = SchemaElement(bool)
         
 class DevicesSchema(Schema):
     def setSchema(self):
@@ -399,7 +401,7 @@ class EntitySearch(Schema):
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
         self.local              = SchemaElement(bool)
-        self.page               = SchemaElement(int, default=1)
+        self.page               = SchemaElement(int, default=0)
 
 class EntityNearby(Schema):
     def setSchema(self):
@@ -775,6 +777,10 @@ class WashMagSchema(Schema):
 class TheTVDBSchema(Schema):
     def setSchema(self):
         self.thetvdb_id         = SchemaElement(basestring)
+        self.num_seasons        = SchemaElement(int)
+        self.earliest_air_date  = SchemaElement(datetime)
+        self.latest_air_date    = SchemaElement(datetime)
+        self.air_time           = SchemaElement(basestring)
 
 class NetflixSchema(Schema):
     def setSchema(self):

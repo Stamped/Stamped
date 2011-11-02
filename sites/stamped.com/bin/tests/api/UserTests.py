@@ -204,7 +204,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserTest):
 class StampedAPIUsersFindTwitter(StampedAPIUserTest):
     def test_find_by_twitter(self):
         ids = ['1235551111','1235551112']
-        path = "account/linked_accounts.json"
+        path = "account/linked/twitter/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "twitter_id": ids[0],
@@ -231,7 +231,7 @@ class StampedAPIUsersFindTwitter(StampedAPIUserTest):
 class StampedAPIUsersFindFacebook(StampedAPIUserTest):
     def test_find_by_facebook(self):
         ids = ['1235551111','1235551112']
-        path = "account/linked_accounts.json"
+        path = "account/linked/facebook/update.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             "facebook_id": ids[0],
