@@ -739,6 +739,8 @@ class HTTPEntityNearby(Schema):
         self.coordinates        = SchemaElement(basestring, required=True)
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
+        self.local              = SchemaElement(bool, default=True)
+        self.page               = SchemaElement(int, default=0)
     
     def exportSchema(self, schema):
         if schema.__class__.__name__ == 'EntityNearby':
