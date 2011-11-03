@@ -168,6 +168,9 @@ class TheTVDBCrawler(AExternalEntitySource):
             earliest = None
             latest   = None
             
+            # each row is an episode; loop through each episode, recording the 
+            # earliest and latest air date for the show overall and the number 
+            # of seasons the show ran for.
             for row in rows:
                 tds = row.findAll('td')
                 episode = tds[0].getText()

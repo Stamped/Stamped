@@ -21,7 +21,8 @@ from gevent import monkey
 monkey.patch_all()
 
 # patch pymongo to be gevent async compatible 
-import patch_pymongo
+# note: the pymongo patch appears to not play well with too many open connections
+#import patch_pymongo
 
 #-----------------------------------------------------------
 

@@ -30,19 +30,19 @@ baselineParams = {
 realisticParams = {
     'avg_friend_connectivity': 12, 
     'stdev_friend_connectivity': 5, 
-    'users_per_minute': 50, 
+    'users_per_minute': 10, 
     'users_per_minute_decay': True, 
     'users_limit': None, 
     'actions_per_minute': 3, 
     'actions_per_minute_decay': False, 
-    'actions_per_user_limit': None, 
+    'actions_per_user_limit': 30, 
     'bieber_protocol': True, 
     'user_class': RealisticSimulatedUser
 }
 
 class StressTests(AStampedAPITestCase):
     def setUp(self):
-        self._test = StressTest(self, **realisticParams)
+        self._test = StressTest(self, **baselineParams)
     
     def test_stress(self):
         self._test.run()

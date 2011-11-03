@@ -20,8 +20,7 @@ class ASimulatedUserAction(object):
             try:
                 self._execute(parent, user)
             except:
-                utils.printException()
-                pass
+                utils.log("[%s] ERROR: unable to perform action '%s']" % (user, self))
     
     @abstract
     def _execute(self, parent, user):

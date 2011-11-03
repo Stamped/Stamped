@@ -49,7 +49,7 @@ class ASimulatedUser(Greenlet):
                 if not self.parent.options.noop:
                     action(self.parent, self)
             except:
-                utils.printException()
+                utils.log("[%s] ERROR: unable to perform action '%s'" % (self, action))
                 break
             
             num_actions += 1
@@ -78,7 +78,7 @@ class ASimulatedUser(Greenlet):
             time.sleep(sleep)
     
     def __str__(self):
-        return self.__class__.__name__
+        return "%s:%s" % (self.__class__.__name__, self.name)
 
 class RealisticSimulatedUser(ASimulatedUser):
     def __init__(self, name, parent):

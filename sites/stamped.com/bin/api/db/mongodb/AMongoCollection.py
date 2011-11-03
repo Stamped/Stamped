@@ -129,8 +129,7 @@ class AMongoCollection(object):
     
     def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
-        self._collection = MongoCollectionProxy(self, cfg.connection, db, \
-                                                collection)
+        self._collection = MongoCollectionProxy(self, cfg.connection, db, collection)
         
         logs.info("Connected to MongoDB collection: %s" % collection)
     

@@ -15,7 +15,7 @@ except ImportError:
         return os.getpid(), thread.get_ident()
 else:
     def get_ident():
-        return os.getpid(), thread.get_ident(), greenlet.getcurrent()
+        return os.getpid(), greenlet.getcurrent()
 
 _CONNECT_TIMEOUT = 20.0
 
@@ -33,6 +33,9 @@ class _Pool(object):
             Connect to Mongo and return a new (connected) socket.
         """
         try:
+            import utils
+            utils.log("CONNECTION")
+            
             # Prefer IPv4. If there is demand for an option
             # to specify one or the other we can add it later.
             s = socket.socket(socket.AF_INET)

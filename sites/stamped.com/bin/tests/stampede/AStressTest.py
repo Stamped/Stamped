@@ -121,8 +121,7 @@ class StressTest(Greenlet):
                     else:
                         self.addEntity(self._parent.createEntity(user.token))
             except:
-                utils.printException()
-                pass
+                utils.log("[%s] ERROR: unable to add default entities for user %s" % (self, user))
             
             if self.bieber_protocol:
                 if self.bieber is not None:
@@ -131,8 +130,7 @@ class StressTest(Greenlet):
                             self._parent.createFriendship(user.token, self.bieber.userID)
                     except:
                         # purposefully ignore if friendship fails to create
-                        utils.printException()
-                        pass
+                        utils.log("[%s] ERROR: unable to add bieber friendship with user %s" % (self, user))
                 elif 'bieber' in user.name:
                     self.bieber = user
             
@@ -151,8 +149,7 @@ class StressTest(Greenlet):
                             try:
                                 self._parent.createFriendship(user.token, friend.userID)
                             except:
-                                utils.printException()
-                                pass
+                                utils.log("[%s] ERROR: unable to add friendship between users %s and %s" % (self, user, friend))
             
             num_users += 1
             self.users.append(user)
@@ -226,4 +223,7 @@ class StressTest(Greenlet):
         ]
         
         return strings[random.randint(0, len(strings) - 1)]
+    
+    def __str__(self):
+        return self.__class__.__name__
 
