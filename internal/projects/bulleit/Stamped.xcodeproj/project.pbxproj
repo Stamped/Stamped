@@ -181,6 +181,12 @@
 		7E6FFA54140F137400F23A26 /* green_follow_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6FFA52140F137400F23A26 /* green_follow_bg@2x.png */; };
 		7E7396EA14438A5600C7CFEA /* small_location_icon_purple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7396E814438A5600C7CFEA /* small_location_icon_purple@2x.png */; };
 		7E7396EB14438A5600C7CFEA /* small_location_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7396E914438A5600C7CFEA /* small_location_icon@2x.png */; };
+		7E73DBA9146307E10056FCF1 /* poweredbygoogle.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E73DBA7146307E10056FCF1 /* poweredbygoogle.png */; };
+		7E73DBAA146307E10056FCF1 /* poweredbygoogle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E73DBA8146307E10056FCF1 /* poweredbygoogle@2x.png */; };
+		7E73DBAF14633AA00056FCF1 /* sea_nearby_title.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E73DBAB14633AA00056FCF1 /* sea_nearby_title.png */; };
+		7E73DBB014633AA00056FCF1 /* sea_nearby_title@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E73DBAC14633AA00056FCF1 /* sea_nearby_title@2x.png */; };
+		7E73DBB114633AA00056FCF1 /* sea_search_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E73DBAD14633AA00056FCF1 /* sea_search_button.png */; };
+		7E73DBB214633AA00056FCF1 /* sea_search_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E73DBAE14633AA00056FCF1 /* sea_search_button@2x.png */; };
 		7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */; };
 		7E76129813C930F50023CCC4 /* PlaceDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */; };
 		7E76129C13C938DE0023CCC4 /* main_action_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E76129B13C938DE0023CCC4 /* main_action_button_bg@2x.png */; };
@@ -902,6 +908,12 @@
 		7E7396E814438A5600C7CFEA /* small_location_icon_purple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "small_location_icon_purple@2x.png"; sourceTree = "<group>"; };
 		7E7396E914438A5600C7CFEA /* small_location_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "small_location_icon@2x.png"; sourceTree = "<group>"; };
 		7E7396F01443AA0C00C7CFEA /* StampedModel 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 8.xcdatamodel"; sourceTree = "<group>"; };
+		7E73DBA7146307E10056FCF1 /* poweredbygoogle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = poweredbygoogle.png; sourceTree = "<group>"; };
+		7E73DBA8146307E10056FCF1 /* poweredbygoogle@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "poweredbygoogle@2x.png"; sourceTree = "<group>"; };
+		7E73DBAB14633AA00056FCF1 /* sea_nearby_title.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sea_nearby_title.png; sourceTree = "<group>"; };
+		7E73DBAC14633AA00056FCF1 /* sea_nearby_title@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sea_nearby_title@2x.png"; sourceTree = "<group>"; };
+		7E73DBAD14633AA00056FCF1 /* sea_search_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sea_search_button.png; sourceTree = "<group>"; };
+		7E73DBAE14633AA00056FCF1 /* sea_search_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sea_search_button@2x.png"; sourceTree = "<group>"; };
 		7E76129413C930F40023CCC4 /* PlaceDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlaceDetailViewController.h; sourceTree = "<group>"; };
 		7E76129513C930F50023CCC4 /* PlaceDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlaceDetailViewController.m; sourceTree = "<group>"; };
 		7E76129613C930F50023CCC4 /* PlaceDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = PlaceDetailViewController.xib; path = ../Interfaces/PlaceDetailViewController.xib; sourceTree = "<group>"; };
@@ -1456,6 +1468,12 @@
 		7E0BC47513E4A2BE008CC076 /* Search Entities */ = {
 			isa = PBXGroup;
 			children = (
+				7E73DBA7146307E10056FCF1 /* poweredbygoogle.png */,
+				7E73DBA8146307E10056FCF1 /* poweredbygoogle@2x.png */,
+				7E73DBAB14633AA00056FCF1 /* sea_nearby_title.png */,
+				7E73DBAC14633AA00056FCF1 /* sea_nearby_title@2x.png */,
+				7E73DBAD14633AA00056FCF1 /* sea_search_button.png */,
+				7E73DBAE14633AA00056FCF1 /* sea_search_button@2x.png */,
 				7E7B71CA1461F5E90096C260 /* sea_filter_books_button_selected.png */,
 				7E7B71CB1461F5E90096C260 /* sea_filter_books_button_selected@2x.png */,
 				7E7B71CC1461F5E90096C260 /* sea_filter_books_button.png */,
@@ -3157,6 +3175,12 @@
 				CB5CF15A1463425A00DC2CBC /* TOSViewController.xib in Resources */,
 				CB5CF15D1463434900DC2CBC /* legal_header.png in Resources */,
 				CB5CF15E1463434900DC2CBC /* legal_header@2x.png in Resources */,
+				7E73DBA9146307E10056FCF1 /* poweredbygoogle.png in Resources */,
+				7E73DBAA146307E10056FCF1 /* poweredbygoogle@2x.png in Resources */,
+				7E73DBAF14633AA00056FCF1 /* sea_nearby_title.png in Resources */,
+				7E73DBB014633AA00056FCF1 /* sea_nearby_title@2x.png in Resources */,
+				7E73DBB114633AA00056FCF1 /* sea_search_button.png in Resources */,
+				7E73DBB214633AA00056FCF1 /* sea_search_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
