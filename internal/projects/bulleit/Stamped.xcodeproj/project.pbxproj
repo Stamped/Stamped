@@ -517,6 +517,12 @@
 		CB55A86A14476D9A00CEB6CC /* add_friends_gradient_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86514476D9A00CEB6CC /* add_friends_gradient_bg@2x.png */; };
 		CB5CF132146328A000DC2CBC /* welcome_profile_placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF130146328A000DC2CBC /* welcome_profile_placeholder.png */; };
 		CB5CF133146328A000DC2CBC /* welcome_profile_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF131146328A000DC2CBC /* welcome_profile_placeholder@2x.png */; };
+		CB5CF15414633FE700DC2CBC /* welcome_fineprint@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF15214633FE700DC2CBC /* welcome_fineprint@2x.png */; };
+		CB5CF15514633FE700DC2CBC /* welcome_fineprint.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF15314633FE700DC2CBC /* welcome_fineprint.png */; };
+		CB5CF1591463425A00DC2CBC /* TOSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB5CF1571463425A00DC2CBC /* TOSViewController.m */; };
+		CB5CF15A1463425A00DC2CBC /* TOSViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF1581463425A00DC2CBC /* TOSViewController.xib */; };
+		CB5CF15D1463434900DC2CBC /* legal_header.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF15B1463434900DC2CBC /* legal_header.png */; };
+		CB5CF15E1463434900DC2CBC /* legal_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF15C1463434900DC2CBC /* legal_header@2x.png */; };
 		CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */; };
 		CB7B22FB14609306004C247F /* sharing_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FA14609306004C247F /* sharing_header@2x.png */; };
 		CB7B23001461A29D004C247F /* settings_sharing_button_connect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FC1461A29D004C247F /* settings_sharing_button_connect@2x.png */; };
@@ -1295,6 +1301,13 @@
 		CB55A86514476D9A00CEB6CC /* add_friends_gradient_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_gradient_bg@2x.png"; sourceTree = "<group>"; };
 		CB5CF130146328A000DC2CBC /* welcome_profile_placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = welcome_profile_placeholder.png; sourceTree = "<group>"; };
 		CB5CF131146328A000DC2CBC /* welcome_profile_placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_profile_placeholder@2x.png"; sourceTree = "<group>"; };
+		CB5CF15214633FE700DC2CBC /* welcome_fineprint@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_fineprint@2x.png"; sourceTree = "<group>"; };
+		CB5CF15314633FE700DC2CBC /* welcome_fineprint.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = welcome_fineprint.png; sourceTree = "<group>"; };
+		CB5CF1561463425A00DC2CBC /* TOSViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TOSViewController.h; sourceTree = "<group>"; };
+		CB5CF1571463425A00DC2CBC /* TOSViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TOSViewController.m; sourceTree = "<group>"; };
+		CB5CF1581463425A00DC2CBC /* TOSViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TOSViewController.xib; sourceTree = "<group>"; };
+		CB5CF15B1463434900DC2CBC /* legal_header.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = legal_header.png; sourceTree = "<group>"; };
+		CB5CF15C1463434900DC2CBC /* legal_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "legal_header@2x.png"; sourceTree = "<group>"; };
 		CB65DC34145A44AF00E702D6 /* STOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STOAuthViewController.h; sourceTree = "<group>"; };
 		CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STOAuthViewController.m; sourceTree = "<group>"; };
 		CB7B22FA14609306004C247F /* sharing_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sharing_header@2x.png"; sourceTree = "<group>"; };
@@ -1757,6 +1770,8 @@
 				7E0B62001439283C00A573FA /* welcome_100stamps_overlay@2x.png */,
 				CB5CF130146328A000DC2CBC /* welcome_profile_placeholder.png */,
 				CB5CF131146328A000DC2CBC /* welcome_profile_placeholder@2x.png */,
+				CB5CF15214633FE700DC2CBC /* welcome_fineprint@2x.png */,
+				CB5CF15314633FE700DC2CBC /* welcome_fineprint.png */,
 			);
 			name = "First run";
 			sourceTree = "<group>";
@@ -1878,6 +1893,9 @@
 				CB7B23041461B993004C247F /* AboutUsViewController.h */,
 				CB7B23051461B993004C247F /* AboutUsViewController.m */,
 				CB7B23061461B993004C247F /* AboutUsViewController.xib */,
+				CB5CF1561463425A00DC2CBC /* TOSViewController.h */,
+				CB5CF1571463425A00DC2CBC /* TOSViewController.m */,
+				CB5CF1581463425A00DC2CBC /* TOSViewController.xib */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1885,6 +1903,8 @@
 		7E89C3B51437D0D400547960 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				CB5CF15B1463434900DC2CBC /* legal_header.png */,
+				CB5CF15C1463434900DC2CBC /* legal_header@2x.png */,
 				CB7B230B1461BCED004C247F /* settings_about_logocard@2x.png */,
 				7E0B62071439513E00A573FA /* settings_arrow_middle_button_bg@2x.png */,
 				7E0B620F1439532D00A573FA /* settings_arrow_top_button_bg@2x.png */,
@@ -3132,6 +3152,11 @@
 				CBACC47E1461C9CA00BF3D0B /* settings_about_watermark@2x.png in Resources */,
 				CB5CF132146328A000DC2CBC /* welcome_profile_placeholder.png in Resources */,
 				CB5CF133146328A000DC2CBC /* welcome_profile_placeholder@2x.png in Resources */,
+				CB5CF15414633FE700DC2CBC /* welcome_fineprint@2x.png in Resources */,
+				CB5CF15514633FE700DC2CBC /* welcome_fineprint.png in Resources */,
+				CB5CF15A1463425A00DC2CBC /* TOSViewController.xib in Resources */,
+				CB5CF15D1463434900DC2CBC /* legal_header.png in Resources */,
+				CB5CF15E1463434900DC2CBC /* legal_header@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3266,6 +3291,7 @@
 				7E7B71C91461CCF60096C260 /* SearchEntitiesAutoSuggestCell.m in Sources */,
 				CB4CA264145F097600621D45 /* SharingSettingsViewController.m in Sources */,
 				CB7B23071461B994004C247F /* AboutUsViewController.m in Sources */,
+				CB5CF1591463425A00DC2CBC /* TOSViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
