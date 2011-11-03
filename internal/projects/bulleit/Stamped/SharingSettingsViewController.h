@@ -22,6 +22,7 @@
 @property (nonatomic, retain) IBOutlet UILabel* fbLabel;
 @property (nonatomic, retain) IBOutlet UILabel* twitterNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* fbNameLabel;
+@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 
 -(IBAction)twitterButtonPressed:(id)sender;
 -(IBAction)fbButtonPressed:(id)sender;

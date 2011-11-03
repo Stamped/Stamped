@@ -44,7 +44,8 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 @synthesize twitterLabel;
 @synthesize fbLabel;
 @synthesize twitterNameLabel;
-@synthesize fbNameLabel;;
+@synthesize fbNameLabel;
+@synthesize scrollView;
 
 @synthesize authentication = authentication_;
 @synthesize twitterClient = twitterClient_;
@@ -64,6 +65,7 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   self.authentication = nil;
   self.twitterClient = nil;
   self.fbClient = nil;
+  self.scrollView = nil;
   [super dealloc];
 }
 
@@ -71,6 +73,7 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   self.navigationItem.title = @"Sharing";
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+  self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, self.scrollView.bounds.size.height + 1);
   [super viewDidLoad];
 }
 
@@ -86,6 +89,7 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   self.authentication = nil;
   self.twitterClient = nil;
   self.fbClient = nil;
+  self.scrollView = nil;
   [super viewDidUnload];
 }
 

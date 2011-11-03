@@ -12,6 +12,7 @@
 #import "EditProfileViewController.h"
 #import "SharingSettingsViewController.h"
 #import "AboutUsViewController.h"
+#import "WebViewController.h"
 
 @implementation SettingsViewController
 
@@ -36,6 +37,7 @@
   [super viewDidLoad];
   UIView* lastView = scrollView_.subviews.lastObject;
   scrollView_.contentSize = CGSizeMake(320, CGRectGetMaxY(lastView.frame) + 30);
+  self.navigationItem.title = @"Settings";
 }
 
 - (void)viewDidUnload {
@@ -77,6 +79,12 @@
 
 - (IBAction)aboutUsButtonPressed:(id)sender {
   AboutUsViewController* vc = [[AboutUsViewController alloc] init];
+  [self.navigationController pushViewController:vc animated:YES];
+  [vc release];
+}
+
+- (IBAction)FAQButtonPressed:(id)sender {
+  WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/faq/"]];
   [self.navigationController pushViewController:vc animated:YES];
   [vc release];
 }

@@ -47,6 +47,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
 @synthesize profileImageIndicator = profileImageIndicator_;
 @synthesize newProfilePic = newProfilePic_;
 @synthesize numPicUploadTries = numPicUploadTries_;
+@synthesize scrollView = scrollView_;
 
 - (id)init {
   self = [self initWithNibName:@"EditProfileViewController" bundle:nil];
@@ -67,6 +68,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
   self.saveButton = nil;
   self.profileImageIndicator = nil;
   self.newProfilePic = nil;
+  self.scrollView = nil;
   firstResponder_ = nil;
   [super dealloc];
 }
@@ -89,6 +91,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
   self.nameTextField.text = user_.name;
   self.locationTextField.text = user_.location;
   self.aboutTextField.text = user_.bio;
+  self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, self.scrollView.bounds.size.height + 1);
   saveButton_.enabled = NO;
 }
 
@@ -103,6 +106,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
   self.saveIndicator = nil;
   self.saveButton = nil;
   self.profileImageIndicator = nil;
+  self.scrollView = nil;
   firstResponder_ = nil;
 }
 

@@ -8,7 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface WebViewController : UIViewController <UIWebViewDelegate, UIActionSheetDelegate>
+@interface WebViewController : UIViewController <UIWebViewDelegate, UIActionSheetDelegate> {
+  @private 
+  BOOL navBarWasHidden;
+}
 
 - (id)initWithURL:(NSURL*)url;
 
