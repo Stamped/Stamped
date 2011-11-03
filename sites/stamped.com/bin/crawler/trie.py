@@ -170,7 +170,16 @@ def main():
     entries = placesDB._collection.find(fields={'title' : 1})
     add_entries(entries, 'places', trie, importance_threshold)
     
-    for s in [ ('song', 1.0), ('album', 1.0), ('artist', importance_threshold), ('book', importance_threshold), ('movie', importance_threshold / 4.0) ]:
+    subcategories = [
+        ('song', 1.0), 
+        ('album', 1.0), 
+        ('artist', importance_threshold), 
+        ('book', importance_threshold), 
+        ('movie', importance_threshold / 2), 
+        ('tv', importance_threshold), 
+    ]
+    
+    for s in subcategories:
         entries = entityDB._collection.find({"subcategory" : s[0]}, fields={'title' : 1})
         add_entries(entries, s[0], trie, s[1])
     
