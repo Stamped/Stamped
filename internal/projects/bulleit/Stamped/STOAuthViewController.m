@@ -26,16 +26,17 @@
 
 - (void)viewWillAppear:(BOOL)animated {
   self.navigationController.navigationBarHidden = NO;
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
-  navBar.hideLogo = YES;
+  UINavigationBar* navBar = self.navigationController.navigationBar;
+  if ([navBar respondsToSelector:@selector(setHideLogo:)]) 
+    [(id)navBar setHideLogo:YES];
   [navBar setNeedsDisplay];
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidLoad {
-  ((STNavigationBar*)self.navigationController.navigationBar).hideLogo = YES;
-  STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
-  navBar.hideLogo = YES;
+  UINavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
+  if ([navBar respondsToSelector:@selector(setHideLogo:)]) 
+    [(id)navBar setHideLogo:YES];
   [navBar setNeedsDisplay];
   self.shareButton.hidden = YES;
   [super viewDidLoad];

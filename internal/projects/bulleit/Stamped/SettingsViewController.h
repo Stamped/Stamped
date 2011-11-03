@@ -8,13 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
-@interface SettingsViewController : UIViewController <UIActionSheetDelegate>
+@interface SettingsViewController : UIViewController <UIActionSheetDelegate> 
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
+@property (nonatomic, retain) IBOutlet UIView* contentView;
 
 - (IBAction)doneButtonPressed:(id)sender;
 - (IBAction)editProfileButtonPressed:(id)sender;
 - (IBAction)logoutButtonPressed:(id)sender;
 - (IBAction)sharingButtonPressed:(id)sender;
+- (IBAction)aboutUsButtonPressed:(id)sender;
+- (IBAction)FAQButtonPressed:(id)sender;
+- (IBAction)legalButtonPressed:(id)sender;
 
 @end

@@ -50,7 +50,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @implementation ProfileViewController
 
 @synthesize userImageView = userImageView_;
-@synthesize cameraButton = cameraButton_;
 @synthesize creditCountLabel = creditCountLabel_;
 @synthesize followerCountLabel = followerCountLabel_;
 @synthesize followingCountLabel = followingCountLabel_;
@@ -76,7 +75,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.user = nil;
   self.userImageView = nil;
-  self.cameraButton = nil;
   self.creditCountLabel = nil;
   self.followerCountLabel = nil;
   self.followingCountLabel = nil;
@@ -108,7 +106,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   stampLayer.contents = (id)user_.stampImage.CGImage;
   [shelfImageView_.superview.layer insertSublayer:stampLayer below:shelfImageView_.layer];
   [stampLayer release];
-  cameraButton_.hidden = YES;  // Still need?
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
@@ -144,7 +141,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.userImageView = nil;
-  self.cameraButton = nil;
   self.creditCountLabel = nil;
   self.followerCountLabel = nil;
   self.followingCountLabel = nil;
@@ -237,10 +233,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   relationshipsViewController.user = user_;
   [self.navigationController pushViewController:relationshipsViewController animated:YES];
   [relationshipsViewController release];
-}
-
-- (IBAction)cameraButtonPressed:(id)sender {
-  NSLog(@"Camera...");
 }
 
 #pragma mark - Table view data source

@@ -9,10 +9,12 @@
 #import "FirstRunViewController.h"
 
 #import <MobileCoreServices/UTCoreTypes.h>
+#import "TTTAttributedLabel.h"
 
 #import "UserImageView.h"
 #import "WelcomeViewController.h"
 #import "Util.h"
+#import "TOSViewController.h"
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 500;
@@ -96,7 +98,6 @@ static const CGFloat kProfileImageSize = 500;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-
   [self setupBottomView];
   self.cancelButton.alpha = 0.0;
   self.confirmButton.alpha = 0.0;
@@ -249,7 +250,7 @@ static const CGFloat kProfileImageSize = 500;
     signUpEmailTextField_.text = nil;
     signUpPasswordTextField_.text = nil;
     signUpPhoneTextField_.text = nil;
-    userImageView_.imageView.image = [UIImage imageNamed:@"profile_placeholder"];
+    userImageView_.imageView.image = [UIImage imageNamed:@"welcome_profile_placeholder"];
   }];
 }
 
@@ -289,6 +290,12 @@ static const CGFloat kProfileImageSize = 500;
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   [sheet showInView:self.view];
   [sheet release];
+}
+
+- (IBAction)tosButtonPressed:(id)sender {
+  TOSViewController* vc = [[TOSViewController alloc] init];
+  [self.navigationController presentModalViewController:vc animated:YES];
+  vc.settingsButton.hidden = YES;
 }
 
 #pragma mark - UIActionSheetDelegate methods.
@@ -348,7 +355,7 @@ static const CGFloat kProfileImageSize = 500;
   if (self.profilePhoto) {
     userImageView_.imageView.image = self.profilePhoto;
   } else {
-    userImageView_.imageView.image = [UIImage imageNamed:@"profile_placeholder"];
+    userImageView_.imageView.image = [UIImage imageNamed:@"welcome_profile_placeholder"];
   }
   [self dismissModalViewControllerAnimated:YES];
 }

@@ -398,10 +398,10 @@
 							<object class="IBUIButton" id="969060622">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{246, 242}, {62, 48}}</string>
+								<string key="NSFrame">{{185, 242}, {62, 48}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="851464612"/>
+								<reference key="NSNextKeyView" ref="822963385"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
@@ -422,12 +422,12 @@
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">create_share_button_selected.png</string>
 								</object>
-								<object class="NSCustomResource" key="IBUIDisabledImage">
+								<object class="NSCustomResource" key="IBUIDisabledImage" id="564841261">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">create_share_button_inactive.png</string>
 								</object>
 								<reference key="IBUISelectedImage" ref="44272802"/>
-								<object class="NSCustomResource" key="IBUINormalImage">
+								<object class="NSCustomResource" key="IBUINormalImage" id="318914482">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">create_share_button.png</string>
 								</object>
@@ -446,7 +446,7 @@
 							<object class="IBUILabel" id="878944707">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{203, 255}, {42, 21}}</string>
+								<string key="NSFrame">{{141, 255}, {42, 21}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="969060622"/>
@@ -499,6 +499,33 @@
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">gray_disclosure_arrow.png</string>
 								</object>
+								<reference key="IBUIFontDescription" ref="572259165"/>
+								<reference key="IBUIFont" ref="32402340"/>
+							</object>
+							<object class="IBUIButton" id="822963385">
+								<reference key="NSNextResponder" ref="870662028"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{249, 242}, {62, 48}}</string>
+								<reference key="NSSuperview" ref="870662028"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="851464612"/>
+								<string key="NSReuseIdentifierKey">_NS:222</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<int key="IBUIContentMode">1</int>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<bool key="IBUIEnabled">NO</bool>
+								<int key="IBUIContentHorizontalAlignment">0</int>
+								<int key="IBUIContentVerticalAlignment">0</int>
+								<reference key="IBUIHighlightedTitleColor" ref="935530847"/>
+								<object class="NSColor" key="IBUINormalTitleColor">
+									<int key="NSColorSpace">1</int>
+									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
+								</object>
+								<reference key="IBUINormalTitleShadowColor" ref="604820021"/>
+								<reference key="IBUIHighlightedImage" ref="44272802"/>
+								<reference key="IBUIDisabledImage" ref="564841261"/>
+								<reference key="IBUISelectedImage" ref="44272802"/>
+								<reference key="IBUINormalImage" ref="318914482"/>
 								<reference key="IBUIFontDescription" ref="572259165"/>
 								<reference key="IBUIFont" ref="32402340"/>
 							</object>
@@ -570,7 +597,6 @@
 						<string key="NSFrame">{{150, 362}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -761,6 +787,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">fbButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="822963385"/>
+					</object>
+					<int key="connectionID">133</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="739928940"/>
 						<reference key="destination" ref="372490531"/>
@@ -802,6 +836,15 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">121</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">fbButtonPressed:</string>
+						<reference key="source" ref="822963385"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">132</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -853,6 +896,7 @@
 							<reference ref="969060622"/>
 							<reference ref="878944707"/>
 							<reference ref="110642938"/>
+							<reference ref="822963385"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -1011,6 +1055,12 @@
 						<reference key="object" ref="149435353"/>
 						<reference key="parent" ref="101741781"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">130</int>
+						<reference key="object" ref="822963385"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Facebook Button</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1034,6 +1084,8 @@
 					<string>119.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
 					<string>124.CustomClassName</string>
 					<string>124.IBPluginDependency</string>
+					<string>130.IBPluginDependency</string>
+					<string>130.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>36.IBPluginDependency</string>
 					<string>36.IBUserGuides</string>
 					<string>37.IBPluginDependency</string>
@@ -1074,6 +1126,8 @@
 					<string>STCreditTextField</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<real value="1"/>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 					</object>
@@ -1108,7 +1162,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">125</int>
+			<int key="maxID">133</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1122,11 +1176,13 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>disclosureButtonPressed:</string>
 							<string>editButtonPressed:</string>
+							<string>fbButtonPressed:</string>
 							<string>saveStampButtonPressed:</string>
 							<string>tweetButtonPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1139,6 +1195,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>disclosureButtonPressed:</string>
 							<string>editButtonPressed:</string>
+							<string>fbButtonPressed:</string>
 							<string>saveStampButtonPressed:</string>
 							<string>tweetButtonPressed:</string>
 						</object>
@@ -1150,6 +1207,10 @@
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">editButtonPressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">fbButtonPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -1173,6 +1234,7 @@
 							<string>detailLabel</string>
 							<string>disclosureButton</string>
 							<string>editButton</string>
+							<string>fbButton</string>
 							<string>mainCommentContainer</string>
 							<string>reasoningLabel</string>
 							<string>reasoningTextView</string>
@@ -1193,6 +1255,7 @@
 							<string>UIImageView</string>
 							<string>STCreditTextField</string>
 							<string>UILabel</string>
+							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIView</string>
@@ -1220,6 +1283,7 @@
 							<string>detailLabel</string>
 							<string>disclosureButton</string>
 							<string>editButton</string>
+							<string>fbButton</string>
 							<string>mainCommentContainer</string>
 							<string>reasoningLabel</string>
 							<string>reasoningTextView</string>
@@ -1261,6 +1325,10 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">editButton</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">fbButton</string>
 								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">

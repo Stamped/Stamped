@@ -1820,6 +1820,8 @@ class StampedAPI(AStampedAPI):
         except:
             pass
 
+        ### TODO: Remove reference in other people's favorites
+
         # Update user stats 
         ### TODO: Do an actual count / update?
         self._userDB.updateUserStats(authUserId, 'num_stamps', \
@@ -2535,15 +2537,17 @@ class StampedAPI(AStampedAPI):
     def removeFavorite(self, authUserId, entityId):
         ### TODO: Fail gracefully if favorite doesn't exist
         favorite = self._favoriteDB.getFavorite(authUserId, entityId)
-        logs.debug('FAVORITE: %s' % favorite)
+
+        if not favorite.favorite_id:
+            msg = 'Invalid favorite: %s' % favorite
+            logs.warning(msg)
+            raise Exception(msg)
+
         self._favoriteDB.removeFavorite(authUserId, entityId)
 
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_faves', \
                     None, increment=-1)
-
-        if not favorite:
-            favorite = Favorite()
 
         # Enrich stamp
         if favorite.stamp_id != None:
@@ -2595,14 +2599,17 @@ class StampedAPI(AStampedAPI):
             if entityIds[favorite.entity.entity_id] != 1:
                 favorite.entity = entityIds[favorite.entity.entity_id]
             else:
-                logs.warning('FAV MISSING ENTITY: %s' % favorite.entity)
+                logs.warning('FAV (%s) MISSING ENTITY (%s)' % \
+                    (favorite.favorite_id, favorite.entity.entity_id))
             # Add Stamp
             if favorite.stamp_id != None:
                 if stampIds[favorite.stamp_id] != 1:
                     favorite.stamp = stampIds[favorite.stamp_id]
                 else:
-                    favorite.stamp_id = None
-                    logs.warning('FAV MISSING STAMP: %s' % favorite)
+                    ### TODO: Clean these up if they're missing
+                    logs.warning('FAV (%s) MISSING STAMP (%s)' % \
+                        (favorite.favorite_id, favorite.stamp_id))
+                    favorite.stamp = Stamp()
             favorites.append(favorite)
 
         return favorites

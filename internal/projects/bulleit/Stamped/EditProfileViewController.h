@@ -31,6 +31,7 @@
 @property (nonatomic, retain) IBOutlet UIButton* saveButton;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* saveIndicator;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* profileImageIndicator;
+@property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 
 - (IBAction)saveButtonPressed:(id)sender;
 - (IBAction)settingsButtonPressed:(id)sender;

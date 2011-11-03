@@ -30,7 +30,6 @@ class S3ImageDB(AImageDB):
         if not self.bucket:
             self.bucket = conn.create_bucket(bucket_name)
         
-        self.bucket.set_acl('public-read')
         self.bucket_name = bucket_name
 
         # find or create distribution

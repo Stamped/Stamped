@@ -41,8 +41,20 @@
 #pragma mark - View lifecycle
 
 - (void)viewWillDisappear:(BOOL)animated {
+  if (navBarWasHidden)
+    self.navigationController.navigationBarHidden = YES;
   [super viewWillDisappear:animated];
   
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  if (self.navigationController.navigationBarHidden) {
+    navBarWasHidden = YES;
+  }
+  else
+    navBarWasHidden = NO;
+  self.navigationController.navigationBarHidden = NO;
+  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {

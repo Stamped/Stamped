@@ -22,6 +22,7 @@
 #import "UIColor+Stamped.h"
 #import "Util.h"
 
+static NSString* const kNearbyPath = @"/entities/nearby.json";
 static NSString* const kSearchPath = @"/entities/search.json";
 static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v1/";
 
@@ -58,6 +59,7 @@ typedef enum {
 - (void)textFieldDidChange:(id)sender;
 - (void)sendSearchRequest;
 - (void)sendFastSearchRequest;
+- (void)sendSearchNearbyRequest;
 - (void)reloadTableData;
 
 @property (nonatomic, copy) NSArray* resultsArray;
@@ -90,6 +92,8 @@ typedef enum {
 @synthesize clearFilterButton = clearFilterButton_;
 @synthesize tableView = tableView_;
 @synthesize filterBar = filterBar_;
+@synthesize nearbyImageView = nearbyImageView_;
+@synthesize searchButton = searchButton_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -104,6 +108,8 @@ typedef enum {
   self.loadingIndicatorLabel = nil;
   self.tableView = nil;
   self.filterBar = nil;
+  self.nearbyImageView = nil;
+  self.searchButton = nil;
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
   [super dealloc];
@@ -131,15 +137,12 @@ typedef enum {
 
 - (void)createFilterBar {
   filterBar_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-  filterBar_.backgroundColor = [UIColor colorWithWhite:0.4 alpha:1.0];
   CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
   gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.6 alpha:1.0].CGColor,
                                               (id)[UIColor colorWithWhite:0.5 alpha:1.0].CGColor, nil];
   gradient.startPoint = CGPointZero;
   gradient.endPoint = CGPointMake(0, 1);
-  gradient.frame = CGRectMake(0, 1, 320, 43);
-  // This is not providing the right amount of opacity.
-  gradient.opacity = 0.95;
+  gradient.frame = filterBar_.bounds;
   [filterBar_.layer addSublayer:gradient];
   [gradient release];
   
@@ -227,6 +230,8 @@ typedef enum {
   self.locationButton = nil;
   self.tableView = nil;
   self.filterBar = nil;
+  self.nearbyImageView = nil;
+  self.searchButton = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   tooltipImageView_ = nil;
@@ -251,6 +256,7 @@ typedef enum {
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   [self.locationManager startUpdatingLocation];
   if (self.searchField.text.length == 0 && currentResultType_ != ResultTypeLocal) {
     [UIView animateWithDuration:0.3 animations:^{
@@ -258,7 +264,6 @@ typedef enum {
     }];
     [searchField_ becomeFirstResponder];
   }
-  [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -283,46 +288,76 @@ typedef enum {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (IBAction)locationButtonTapped:(id)sender {
-  UIButton* locationButton = sender;
-  locationButton.selected = !locationButton.selected;
-  switch (self.searchIntent) {
-    case SearchIntentStamp:
-      searchField_.placeholder = locationButton_.selected ? @"Search nearby" : @"Find something to stamp";
-      break;
-    case SearchIntentTodo:
-      self.searchField.placeholder = @"Find something to do...";
-      break;
-    default:
-      break;
-  }
-
+- (IBAction)searchButtonPressed:(id)sender {
+  currentResultType_ = ResultTypeFast;
+  searchField_.enabled = YES;
+  self.currentSearchFilter = SearchFilterNone;
+  self.resultsArray = nil;
+  [self reloadTableData];
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  self.currentRequest = nil;
+  self.searchField.text = nil;
+  [self filterButtonPressed:nil];
+  searchField_.placeholder = @"Find something to stamp";
+  CGRect searchFrame = searchField_.frame;
+  searchFrame.size.width = 207;
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                    animations:^{
-                     tooltipImageView_.alpha = (self.searchField.text.length > 0 || locationButton.selected) ? 0 : 1;
+                     searchButton_.alpha = 0;
+                     searchField_.frame = searchFrame;
+                     searchField_.alpha = 1;
+                     locationButton_.frame = CGRectOffset(locationButton_.frame, 115, 0);
+                     locationButton_.alpha = 1;
+                     nearbyImageView_.frame = CGRectOffset(nearbyImageView_.frame, 118, 0);
+                     nearbyImageView_.alpha = 0;
+                     tooltipImageView_.alpha = 1;
                    }
                    completion:nil];
-
-  if (locationButton.selected) {
-    currentSearchFilter_ = SearchFilterNone;
-    currentResultType_ = ResultTypeLocal;
-    [self sendSearchRequest];
-  } else {
-    currentResultType_ = ResultTypeFast;
-    [searchField_ becomeFirstResponder];
-    [self reloadTableData];
-  }
+  [searchField_ becomeFirstResponder];
 }
 
-- (IBAction)cancelButtonTapped:(id)sender {
+- (IBAction)locationButtonPressed:(id)sender {
+  self.currentResultType = ResultTypeLocal;
+  self.currentSearchFilter = SearchFilterNone;
+  self.resultsArray = nil;
+  [self reloadTableData];
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  self.currentRequest = nil;
+  self.searchField.text = nil;
+  [self filterButtonPressed:nil];
+  [searchField_ resignFirstResponder];
+  searchField_.enabled = NO;
+  searchField_.placeholder = nil;
+
+  [self sendSearchNearbyRequest];
+
+  CGRect searchFrame = searchField_.frame;
+  searchFrame.size.width = 34;
+  [UIView animateWithDuration:0.3
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
+                     searchButton_.alpha = 1;
+                     nearbyImageView_.alpha = 1;
+                     searchField_.frame = searchFrame;
+                     searchField_.alpha = 0;
+                     locationButton_.frame = CGRectOffset(locationButton_.frame, -115, 0);
+                     locationButton_.alpha = 0;
+                     nearbyImageView_.frame = CGRectOffset(nearbyImageView_.frame, -118, 0);
+                     tooltipImageView_.alpha = 0;
+                   }
+                   completion:nil];
+}
+
+- (IBAction)cancelButtonPressed:(id)sender {
   [self.parentViewController dismissModalViewControllerAnimated:YES];
 }
 
 - (void)filterButtonPressed:(id)sender {
   UIButton* button = sender;
-  for (UIView* view in tableView_.tableHeaderView.subviews) {
+  for (UIView* view in filterBar_.subviews) {
     if ([view isMemberOfClass:[UIButton class]] && view != sender)
       [(UIButton*)view setSelected:NO];
   }
@@ -343,34 +378,26 @@ typedef enum {
                    animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
                    completion:nil];
   
-  //if (searchField_.text.length)
-  //  [self sendSearchRequest];
+  if (searchField_.text.length)
+    [self sendSearchRequest];
 }
 
 - (void)reloadTableData {
-  tableView_.hidden = resultsArray_.count == 0 && currentResultType_ != ResultTypeFull;
-  if (currentResultType_ == ResultTypeFast || resultsArray_.count == 0)
+  [self.tableView reloadData];
+  if (currentResultType_ != ResultTypeFull || [tableView_ numberOfRowsInSection:0] == 0)
     tableView_.tableHeaderView = nil;
   else
     tableView_.tableHeaderView = filterBar_;
-
-  [self.tableView reloadData];
+  tableView_.hidden = [tableView_ numberOfRowsInSection:0] == 0;
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (searchField_.text.length == 0 && currentResultType_ != ResultTypeLocal)
-    return 0;
+  if (currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_))
+    return [resultsArray_ count];
 
-  // Return the number of rows in the section.
-  NSInteger numRows = [resultsArray_ count];
-  if (currentResultType_ == ResultTypeFull && !loading_)
-    ++numRows;  // One more for the 'Add new entity' cell.
-  if (loading_)
-    ++numRows;  // For the 'Loading...' cell.
-
-  return numRows;
+  return [resultsArray_ count] + 1;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -389,13 +416,7 @@ typedef enum {
   if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_)
     return self.addStampCell;
   
-  if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && loading_)
-    return self.searchingIndicatorCell;
-  
-  if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal && searchField_.text.length > 0)
-    return self.addStampCell;
-
-  if (indexPath.row == 0 && (currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && loading_)
+  if (indexPath.row == 0 && currentResultType_ != ResultTypeFast && loading_)
     return self.searchingIndicatorCell;
   
   static NSString* CellIdentifier = @"ResultCell";
@@ -407,7 +428,7 @@ typedef enum {
   
   NSUInteger offset = 0;
   if (loading_)
-    ++offset;
+    offset = 1;
 
   NSUInteger index = indexPath.row - offset;
   [cell setSearchResult:(SearchResult*)[resultsArray_ objectAtIndex:index]];
@@ -455,31 +476,25 @@ typedef enum {
 
 - (void)sendSearchRequest {
   [searchField_ resignFirstResponder];
-  if (self.currentResultType != ResultTypeLocal) {
-    self.currentResultType = ResultTypeFull;
-    switch (currentSearchFilter_) {
-      case SearchFilterBook:
-        loadingIndicatorLabel_.text = @"Searching books...";
-        break;
-      case SearchFilterFood:
-        loadingIndicatorLabel_.text = @"Searching restaurants & bars...";
-        break;
-      case SearchFilterMusic:
-        loadingIndicatorLabel_.text = @"Searching music...";
-        break;
-      case SearchFilterFilm:
-        loadingIndicatorLabel_.text = @"Searching movies & TV shows...";
-        break;
-      case SearchFilterOther:
-      case SearchFilterNone:
-      default:
-        loadingIndicatorLabel_.text = @"Searching...";
-        break;
-    }
-  } else if (currentResultType_ == ResultTypeLocal && searchField_.text.length == 0) {
-    loadingIndicatorLabel_.text = @"Loading popular results nearby";
-  } else if (currentResultType_ == ResultTypeLocal) {
-    loadingIndicatorLabel_.text = @"Searching nearby...";
+  currentResultType_ = ResultTypeFull;
+  switch (currentSearchFilter_) {
+    case SearchFilterBook:
+      loadingIndicatorLabel_.text = @"Searching books...";
+      break;
+    case SearchFilterFood:
+      loadingIndicatorLabel_.text = @"Searching restaurants & bars...";
+      break;
+    case SearchFilterMusic:
+      loadingIndicatorLabel_.text = @"Searching music...";
+      break;
+    case SearchFilterFilm:
+      loadingIndicatorLabel_.text = @"Searching movies & TV shows...";
+      break;
+    case SearchFilterOther:
+    case SearchFilterNone:
+    default:
+      loadingIndicatorLabel_.text = @"Searching...";
+      break;
   }
 
   loading_ = YES;
@@ -490,11 +505,8 @@ typedef enum {
   RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kSearchPath delegate:self];
   objectLoader.objectMapping = searchResultMapping;
-  NSString* query = searchField_.text;
-  if (!query.length)
-    query = @" ";
 
-  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", query, nil];
+  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithKeysAndObjects:@"q", searchField_.text, nil];
   if (self.locationManager.location) {
     CLLocationCoordinate2D coordinate = self.locationManager.location.coordinate;
     NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
@@ -503,9 +515,32 @@ typedef enum {
 
   if (currentSearchFilter_ != SearchFilterNone)
     [params setObject:kSearchFilterStrings[currentSearchFilter_] forKey:@"category"];
+
+  objectLoader.params = params;
+  [objectLoader send];
+  self.currentRequest = objectLoader;
+}
+
+- (void)sendSearchNearbyRequest {
+  currentResultType_ = ResultTypeLocal;
+  loadingIndicatorLabel_.text = @"Loading popular results nearby";
+  loading_ = YES;
+  self.resultsArray = nil;
+  [self reloadTableData];
   
-  if (currentResultType_ == ResultTypeLocal)
-    [params setObject:@"true" forKey:@"local"];
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
+  RKObjectManager* objectManager = [RKObjectManager sharedManager];
+  RKObjectMapping* searchResultMapping = [objectManager.mappingProvider mappingForKeyPath:@"SearchResult"];
+  RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kNearbyPath delegate:self];
+  objectLoader.objectMapping = searchResultMapping;
+
+  // TODO(error): Error message for the case where location is not turned on.
+  NSMutableDictionary* params = [NSMutableDictionary dictionary];
+  if (self.locationManager.location) {
+    CLLocationCoordinate2D coordinate = self.locationManager.location.coordinate;
+    NSString* coordString = [NSString stringWithFormat:@"%f,%f", coordinate.latitude, coordinate.longitude];
+    [params setObject:coordString forKey:@"coordinates"];
+  }
 
   objectLoader.params = params;
   [objectLoader send];
@@ -555,7 +590,6 @@ typedef enum {
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  NSLog(@"response: %@", objectLoader.response.bodyAsString);
   loading_ = NO;
   self.resultsArray = objects;
   [self reloadTableData];
@@ -564,16 +598,18 @@ typedef enum {
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   loading_ = NO;
+  self.currentRequest = nil;
+  self.resultsArray = nil;
+  [self reloadTableData];
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
-  } else if ([objectLoader.response isNotFound]) {
-    self.currentRequest = nil;
-    [self sendSearchRequest];
     return;
   }
-  [searchField_ becomeFirstResponder];
-  self.currentRequest = nil;
-  [self reloadTableData];
+  if (currentResultType_ == ResultTypeLocal) {
+    // TODO(error)
+  } else {
+    [searchField_ becomeFirstResponder];
+  }
 }
 
 #pragma mark - UITableViewDelegate Methods.
@@ -607,7 +643,7 @@ typedef enum {
   if (resultsArray_ && resultsArray_.count == 0) {
     view.leftLabel.text = @"No results";
   } else if (currentResultType_ == ResultTypeLocal) {
-    view.leftLabel.text = searchField_.text.length ? @"Nearby results" : @"Popular nearby";
+    view.leftLabel.text = @"Popular nearby";
   } else {
     NSString* corpus = @"All results";
     switch (currentSearchFilter_) {
@@ -663,7 +699,7 @@ typedef enum {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   } else if ((currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && !loading_) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
-  } else if (indexPath.row == 0 && currentResultType_ == ResultTypeFull && loading_) {
+  } else if (indexPath.row == 0 && (currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && loading_) {
     return;
   }
 
@@ -688,14 +724,28 @@ typedef enum {
 - (void)resetState {
   self.currentResultType = ResultTypeFast;
   self.currentSearchFilter = SearchFilterNone;
+  [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   self.searchField.text = nil;
+  self.searchField.enabled = YES;
   self.locationButton.selected = NO;
   [self textFieldDidChange:self.searchField];
-  //if (!searchField_.inputAccessoryView)
-    //[self addKeyboardAccessoryView];
-  //else
-  //  [self filterButtonPressed:nil];
+  [self filterButtonPressed:nil];
+
+  CGRect frame = searchField_.frame;
+  frame.size.width = 207;
+  searchField_.frame = frame;
+  searchButton_.alpha = 0;
+  searchField_.alpha = 1;
+  searchField_.placeholder = @"Find something to stamp";
+  frame = locationButton_.frame;
+  frame.origin.x = 217;
+  locationButton_.frame = frame;
+  locationButton_.alpha = 1;
+  frame = nearbyImageView_.frame;
+  frame.origin.x = 225;
+  nearbyImageView_.frame = frame;
+  nearbyImageView_.alpha = 0;
 }
 
 - (void)textFieldDidChange:(id)sender {
@@ -706,12 +756,12 @@ typedef enum {
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
                    animations:^{
-                     tooltipImageView_.alpha = (self.searchField.text.length > 0 || locationButton_.selected) ? 0.0 : 1.0;
+                     tooltipImageView_.alpha = self.searchField.text.length > 0 ? 0.0 : 1.0;
                    }
                    completion:nil];
 
   self.addStampLabel.text = [NSString stringWithFormat:@"Can\u2019t find \u201c%@\u201d?", self.searchField.text];
-  if (searchField_.text.length > 0 && currentResultType_ != ResultTypeLocal) {
+  if (searchField_.text.length > 0) {
     [self sendFastSearchRequest];
   } else {
     [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];

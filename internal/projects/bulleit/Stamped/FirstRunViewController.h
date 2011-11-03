@@ -60,6 +60,7 @@ willCreateUserWithName:(NSString*)name
 - (IBAction)cancelButtonPressed:(id)sender;
 - (IBAction)confirmButtonPressed:(id)sender;
 - (IBAction)takePhotoButtonPressed:(id)sender;
+- (IBAction)tosButtonPressed:(id)sender;
 
 - (void)signInFailed:(NSString*)reason;
 

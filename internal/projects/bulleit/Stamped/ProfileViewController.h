@@ -18,7 +18,6 @@
                                                      UITableViewDataSource>
 
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
-@property (nonatomic, retain) IBOutlet UIButton* cameraButton;
 @property (nonatomic, retain) IBOutlet UILabel* creditCountLabel;
 @property (nonatomic, retain) IBOutlet UILabel* followerCountLabel;
 @property (nonatomic, retain) IBOutlet UILabel* followingCountLabel;
