@@ -53,7 +53,7 @@ typedef enum {
 
 
 @interface SearchEntitiesViewController ()
-- (void)addFilterBar;
+- (void)createFilterBar;
 - (void)filterButtonPressed:(id)sender;
 - (void)textFieldDidChange:(id)sender;
 - (void)sendSearchRequest;
@@ -68,6 +68,7 @@ typedef enum {
 @property (nonatomic, assign) BOOL loading;
 @property (nonatomic, readonly) UIButton* clearFilterButton;
 @property (nonatomic, assign) SearchFilter currentSearchFilter;
+@property (nonatomic, retain) UIView* filterBar;
 @end
 
 @implementation SearchEntitiesViewController
@@ -88,6 +89,7 @@ typedef enum {
 @synthesize searchIntent = searchIntent_;
 @synthesize clearFilterButton = clearFilterButton_;
 @synthesize tableView = tableView_;
+@synthesize filterBar = filterBar_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -101,6 +103,7 @@ typedef enum {
   self.locationButton = nil;
   self.loadingIndicatorLabel = nil;
   self.tableView = nil;
+  self.filterBar = nil;
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
   [super dealloc];
@@ -123,12 +126,12 @@ typedef enum {
   [self.view addSubview:tooltipImageView_];
   [tooltipImageView_ release];
   self.searchingIndicatorCell.selectionStyle = UITableViewCellSelectionStyleNone;
-  [self addFilterBar];
+  [self createFilterBar];
 }
 
-- (void)addFilterBar {
-  UIView* filterBar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
-  filterBar.backgroundColor = [UIColor colorWithWhite:0.4 alpha:1.0];
+- (void)createFilterBar {
+  filterBar_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+  filterBar_.backgroundColor = [UIColor colorWithWhite:0.4 alpha:1.0];
   CAGradientLayer* gradient = [[CAGradientLayer alloc] init];
   gradient.colors = [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.6 alpha:1.0].CGColor,
                                               (id)[UIColor colorWithWhite:0.5 alpha:1.0].CGColor, nil];
@@ -137,7 +140,7 @@ typedef enum {
   gradient.frame = CGRectMake(0, 1, 320, 43);
   // This is not providing the right amount of opacity.
   gradient.opacity = 0.95;
-  [filterBar.layer addSublayer:gradient];
+  [filterBar_.layer addSublayer:gradient];
   [gradient release];
   
   NSUInteger i = 0;
@@ -150,7 +153,7 @@ typedef enum {
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterFood;
-  [filterBar addSubview:filterButton];
+  [filterBar_ addSubview:filterButton];
   // Book.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -160,7 +163,7 @@ typedef enum {
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterBook;
-  [filterBar addSubview:filterButton];
+  [filterBar_ addSubview:filterButton];
   // Film.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -170,7 +173,7 @@ typedef enum {
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterFilm;
-  [filterBar addSubview:filterButton];
+  [filterBar_ addSubview:filterButton];
   // Music.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -180,7 +183,7 @@ typedef enum {
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterMusic;
-  [filterBar addSubview:filterButton];
+  [filterBar_ addSubview:filterButton];
   // Other.
   ++i;
   filterButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -190,7 +193,7 @@ typedef enum {
                 forState:UIControlStateSelected];
   filterButton.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   filterButton.tag = SearchFilterOther;
-  [filterBar addSubview:filterButton];
+  [filterBar_ addSubview:filterButton];
   // None.
   ++i;
   clearFilterButton_ = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -201,17 +204,15 @@ typedef enum {
   clearFilterButton_.frame = CGRectMake(5 + (yDistance * i), 3, 40, 40);
   clearFilterButton_.tag = SearchFilterNone;
   clearFilterButton_.alpha = 0.0;
-  [filterBar addSubview:clearFilterButton_];
+  [filterBar_ addSubview:clearFilterButton_];
 
-  for (UIView* view in filterBar.subviews) {
+  for (UIView* view in filterBar_.subviews) {
     if ([view isMemberOfClass:[UIButton class]]) {
       [(UIButton*)view addTarget:self
                           action:@selector(filterButtonPressed:)
                 forControlEvents:UIControlEventTouchUpInside];
     }
   }
-  self.tableView.tableHeaderView = filterBar;
-  [filterBar release];
 }
 
 - (void)viewDidUnload {
@@ -225,6 +226,7 @@ typedef enum {
   self.loadingIndicatorLabel = nil;
   self.locationButton = nil;
   self.tableView = nil;
+  self.filterBar = nil;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   self.currentRequest = nil;
   tooltipImageView_ = nil;
@@ -294,9 +296,6 @@ typedef enum {
     default:
       break;
   }
-  if (!locationButton.selected) {
-    //[self addKeyboardAccessoryView];
-  }
 
   [UIView animateWithDuration:0.3
                         delay:0
@@ -305,10 +304,6 @@ typedef enum {
                      tooltipImageView_.alpha = (self.searchField.text.length > 0 || locationButton.selected) ? 0 : 1;
                    }
                    completion:nil];
-  
-  
-  if (locationButton.selected)
-   tableView_.tableHeaderView = nil;
 
   if (locationButton.selected) {
     currentSearchFilter_ = SearchFilterNone;
@@ -348,16 +343,16 @@ typedef enum {
                    animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
                    completion:nil];
   
-  if (searchField_.text.length)
-    [self sendSearchRequest];
+  //if (searchField_.text.length)
+  //  [self sendSearchRequest];
 }
 
 - (void)reloadTableData {
-  tableView_.hidden = resultsArray_.count == 0 && currentResultType_ == ResultTypeFast;
+  tableView_.hidden = resultsArray_.count == 0 && currentResultType_ != ResultTypeFull;
   if (currentResultType_ == ResultTypeFast || resultsArray_.count == 0)
     tableView_.tableHeaderView = nil;
   else
-    [self addFilterBar];
+    tableView_.tableHeaderView = filterBar_;
 
   [self.tableView reloadData];
 }
