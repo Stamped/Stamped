@@ -13,6 +13,7 @@
 #import "SharingSettingsViewController.h"
 #import "AboutUsViewController.h"
 #import "WebViewController.h"
+#import "TOSViewController.h"
 
 @implementation SettingsViewController
 
@@ -99,6 +100,13 @@
                                              otherButtonTitles:nil] autorelease];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   [sheet showInView:self.view];
+}
+
+- (IBAction)legalButtonPressed:(id)sender {
+  TOSViewController* vc = [[TOSViewController alloc] init];
+  [self.navigationController pushViewController:vc animated:YES];
+  vc.doneButton.hidden = YES;
+  [vc release];
 }
 
 

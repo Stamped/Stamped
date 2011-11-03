@@ -19,5 +19,6 @@
 - (IBAction)sharingButtonPressed:(id)sender;
 - (IBAction)aboutUsButtonPressed:(id)sender;
 - (IBAction)FAQButtonPressed:(id)sender;
+- (IBAction)legalButtonPressed:(id)sender;
 
 @end
