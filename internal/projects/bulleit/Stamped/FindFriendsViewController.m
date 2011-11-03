@@ -29,6 +29,7 @@
 
 static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
 static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
+static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
 static NSString* const kFacebookFriendsURI = @"/me/friends";
 static NSString* const kStampedTwitterFriendsURI = @"/users/find/twitter.json";
 static NSString* const kStampedFacebookFriendsURI = @"/users/find/facebook.json";
@@ -36,7 +37,12 @@ static NSString* const kStampedEmailFriendsURI = @"/users/find/email.json";
 static NSString* const kStampedPhoneFriendsURI = @"/users/find/phone.json";
 static NSString* const kStampedSearchURI = @"/users/search.json";
 static NSString* const kStampedSuggestedUsersURI = @"/users/suggested.json";
-static NSString* const kStampedLinkedAccountsURI = @"/account/linked_accounts.json";
+static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
+static NSString* const kStampedTwitterRemovePath = @"/account/linked/twitter/remove.json";
+static NSString* const kStampedTwitterFollowersPath = @"/account/linked/twitter/followers.json";
+static NSString* const kStampedFacebookLinkPath = @"/account/linked/facebook/update.json";
+static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/remove.json";
+static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/followers.json";
 static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
@@ -62,6 +68,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)signInToFacebook;
 - (void)checkForEndlessSignIn;
 - (void)loadSuggestedUsers;
+- (void)connectTwitterFollowers:(NSArray*)followers;
+- (void)connectFacebookFriends:(NSArray*)friends;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
@@ -682,6 +690,14 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [request send];
 }
 
+- (void)fetchFollowerIDs:(NSString*)userIDString {
+  NSString* path =
+    [kTwitterFollowersURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
+  RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
+  [self.authentication authorizeRequest:request.URLRequest];
+  [request send];
+}
+
 - (void)findStampedFriendsFromTwitter:(NSArray*)twitterIDs {
   // TODO: the server only supports 100 IDs at a time. need to chunk.
   RKObjectManager* manager = [RKObjectManager sharedManager];
@@ -696,13 +712,21 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID {
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterLinkPath
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
                                                               username, @"twitter_screen_name", nil];
   request.method = RKRequestMethodPOST;
   [request send];
 }
+
+- (void)connectTwitterFollowers:(NSArray*)followers {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterFollowersPath delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:[followers componentsJoinedByString:@","] forKey:@"q"];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}  
+  
 
 #pragma mark - Facebook.
 
@@ -778,16 +802,24 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)connectFacebookName:(NSString*)name userID:(NSString*)userID {
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath
                                                                delegate:self];
-  
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
   request.method = RKRequestMethodPOST;
   [request send];
+  
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
   [defaults setObject:userID forKey:@"FBid"];
   [defaults synchronize];
+}
+
+- (void)connectFacebookFriends:(NSArray*)friends {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookFriendsPath
+                                                               delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:[friends componentsJoinedByString:@","] forKey:@"q"];
+  request.method = RKRequestMethodPOST;
+  [request send];
 }
 
 #pragma mark - FBRequestDelegate Methods.
@@ -811,8 +843,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     NSMutableArray* fbFriendIDs = [NSMutableArray array];
     for (NSDictionary* dict in resultData)
       [fbFriendIDs addObject:[dict objectForKey:@"id"]];
-    if (fbFriendIDs.count > 0)
+    if (fbFriendIDs.count > 0) {
+      [self connectFacebookFriends:fbFriendIDs];
       [self findStampedFriendsFromFacebook:fbFriendIDs];
+    }
   }
 }
 
@@ -856,8 +890,20 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     return;
   }
 
-  if ([request.resourcePath isEqualToString:kStampedLinkedAccountsURI]) {
-    NSLog(@"Linked account successfully.");
+  if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
+    NSLog(@"Linked Twitter successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
+    NSLog(@"Linked Twitter followers successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
+    NSLog(@"Linked Facebook successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
+    NSLog(@"Linked Facebook friends successfully.");
     return;
   }
   
@@ -878,12 +924,16 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [self connectTwitterUserName:[body objectForKey:@"screen_name"] userID:[body objectForKey:@"id_str"]];
     // Fetch the list of all the users this user is following.
     [self fetchFriendIDs:[body objectForKey:@"id_str"]];
+    [self fetchFollowerIDs:[body objectForKey:@"id_str"]];
   }
-
+  // Response for getting Twitter followers. 
+  else if ([request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound) {
+    [self connectTwitterFollowers:[body objectForKey:@"ids"]];
+  }
   // Response for getting Twitter friends. Send on to Stamped to find any Stamped friends.
   else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
     [self findStampedFriendsFromTwitter:[body objectForKey:@"ids"]];
-  }
+  }  
 }
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
