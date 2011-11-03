@@ -515,6 +515,8 @@
 		CB55A86814476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */; };
 		CB55A86914476D9A00CEB6CC /* add_friends_button_connecttwitter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86414476D9A00CEB6CC /* add_friends_button_connecttwitter@2x.png */; };
 		CB55A86A14476D9A00CEB6CC /* add_friends_gradient_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86514476D9A00CEB6CC /* add_friends_gradient_bg@2x.png */; };
+		CB5CF132146328A000DC2CBC /* welcome_profile_placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF130146328A000DC2CBC /* welcome_profile_placeholder.png */; };
+		CB5CF133146328A000DC2CBC /* welcome_profile_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF131146328A000DC2CBC /* welcome_profile_placeholder@2x.png */; };
 		CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */; };
 		CB7B22FB14609306004C247F /* sharing_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FA14609306004C247F /* sharing_header@2x.png */; };
 		CB7B23001461A29D004C247F /* settings_sharing_button_connect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FC1461A29D004C247F /* settings_sharing_button_connect@2x.png */; };
@@ -1291,6 +1293,8 @@
 		CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connecttwitter_pressed@2x.png"; sourceTree = "<group>"; };
 		CB55A86414476D9A00CEB6CC /* add_friends_button_connecttwitter@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connecttwitter@2x.png"; sourceTree = "<group>"; };
 		CB55A86514476D9A00CEB6CC /* add_friends_gradient_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_gradient_bg@2x.png"; sourceTree = "<group>"; };
+		CB5CF130146328A000DC2CBC /* welcome_profile_placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = welcome_profile_placeholder.png; sourceTree = "<group>"; };
+		CB5CF131146328A000DC2CBC /* welcome_profile_placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "welcome_profile_placeholder@2x.png"; sourceTree = "<group>"; };
 		CB65DC34145A44AF00E702D6 /* STOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STOAuthViewController.h; sourceTree = "<group>"; };
 		CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STOAuthViewController.m; sourceTree = "<group>"; };
 		CB7B22FA14609306004C247F /* sharing_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sharing_header@2x.png"; sourceTree = "<group>"; };
@@ -1751,6 +1755,8 @@
 				7E0B61FE1439283B00A573FA /* welcome_100stamps_color@2x.png */,
 				7E0B61FF1439283B00A573FA /* welcome_100stamps_overlay.png */,
 				7E0B62001439283C00A573FA /* welcome_100stamps_overlay@2x.png */,
+				CB5CF130146328A000DC2CBC /* welcome_profile_placeholder.png */,
+				CB5CF131146328A000DC2CBC /* welcome_profile_placeholder@2x.png */,
 			);
 			name = "First run";
 			sourceTree = "<group>";
@@ -3124,6 +3130,8 @@
 				CB7B23131461C4C0004C247F /* settings_about_stampedbutton_pressed@2x.png in Resources */,
 				CB7B23141461C4C0004C247F /* settings_about_stampedbutton@2x.png in Resources */,
 				CBACC47E1461C9CA00BF3D0B /* settings_about_watermark@2x.png in Resources */,
+				CB5CF132146328A000DC2CBC /* welcome_profile_placeholder.png in Resources */,
+				CB5CF133146328A000DC2CBC /* welcome_profile_placeholder@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

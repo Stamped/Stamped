@@ -17,6 +17,7 @@
 @implementation SettingsViewController
 
 @synthesize scrollView = scrollView_;
+@synthesize contentView = contentView;
 
 - (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -35,14 +36,15 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  UIView* lastView = scrollView_.subviews.lastObject;
-  scrollView_.contentSize = CGSizeMake(320, CGRectGetMaxY(lastView.frame) + 30);
+  [scrollView_ addSubview:self.contentView];
+  scrollView_.contentSize = self.contentView.bounds.size;
   self.navigationItem.title = @"Settings";
 }
 
 - (void)viewDidUnload {
-  [super viewDidUnload];
   self.scrollView = nil;
+  self.contentView = nil;
+  [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

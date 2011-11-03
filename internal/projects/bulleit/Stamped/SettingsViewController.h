@@ -11,6 +11,7 @@
 @interface SettingsViewController : UIViewController <UIActionSheetDelegate> 
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
+@property (nonatomic, retain) IBOutlet UIView* contentView;
 
 - (IBAction)doneButtonPressed:(id)sender;
 - (IBAction)editProfileButtonPressed:(id)sender;
