@@ -87,13 +87,30 @@
 									<string key="NSResourceName">shelf_background.png</string>
 								</object>
 							</object>
+							<object class="IBUIImageView" id="648865432">
+								<reference key="NSNextResponder" ref="840438215"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{225, 13}, {92, 20}}</string>
+								<reference key="NSSuperview" ref="840438215"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="99645240"/>
+								<string key="NSReuseIdentifierKey">_NS:567</string>
+								<float key="IBUIAlpha">0.0</float>
+								<int key="IBUIContentMode">4</int>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<object class="NSCustomResource" key="IBUIImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">sea_nearby_title.png</string>
+								</object>
+							</object>
 							<object class="IBUITextField" id="391601381">
 								<reference key="NSNextResponder" ref="840438215"/>
 								<int key="NSvFlags">292</int>
 								<string key="NSFrame">{{5, 7}, {207, 30}}</string>
 								<reference key="NSSuperview" ref="840438215"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="111207157"/>
+								<reference key="NSNextKeyView" ref="951730990"/>
 								<string key="NSReuseIdentifierKey">_NS:217</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -134,7 +151,7 @@
 								<string key="NSFrame">{{217, 7}, {34, 30}}</string>
 								<reference key="NSSuperview" ref="840438215"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="99645240"/>
+								<reference key="NSNextKeyView" ref="648865432"/>
 								<string key="NSReuseIdentifierKey">_NS:225</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -145,15 +162,10 @@
 									<int key="NSColorSpace">1</int>
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
-								<object class="NSColor" key="IBUINormalTitleShadowColor">
+								<object class="NSColor" key="IBUINormalTitleShadowColor" id="92588120">
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MC41AA</bytes>
 								</object>
-								<object class="NSCustomResource" key="IBUIHighlightedImage" id="840833886">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">eSearch_location_icon_blue.png</string>
-								</object>
-								<reference key="IBUISelectedImage" ref="840833886"/>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">eSearch_location_icon.png</string>
@@ -162,11 +174,11 @@
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">eSearch_location_button_bg.png</string>
 								</object>
-								<object class="IBUIFontDescription" key="IBUIFontDescription">
+								<object class="IBUIFontDescription" key="IBUIFontDescription" id="825820271">
 									<int key="type">2</int>
 									<double key="pointSize">15</double>
 								</object>
-								<object class="NSFont" key="IBUIFont">
+								<object class="NSFont" key="IBUIFont" id="929922898">
 									<string key="NSName">Helvetica-Bold</string>
 									<double key="NSSize">15</double>
 									<int key="NSfFlags">16</int>
@@ -210,6 +222,32 @@
 									<double key="NSSize">12</double>
 									<int key="NSfFlags">16</int>
 								</object>
+							</object>
+							<object class="IBUIButton" id="951730990">
+								<reference key="NSNextResponder" ref="840438215"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{5, 7}, {34, 30}}</string>
+								<reference key="NSSuperview" ref="840438215"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="111207157"/>
+								<string key="NSReuseIdentifierKey">_NS:225</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<float key="IBUIAlpha">0.0</float>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIContentHorizontalAlignment">0</int>
+								<int key="IBUIContentVerticalAlignment">0</int>
+								<reference key="IBUIHighlightedTitleColor" ref="806478777"/>
+								<object class="NSColor" key="IBUINormalTitleColor">
+									<int key="NSColorSpace">1</int>
+									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
+								</object>
+								<reference key="IBUINormalTitleShadowColor" ref="92588120"/>
+								<object class="NSCustomResource" key="IBUINormalImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">sea_search_button.png</string>
+								</object>
+								<reference key="IBUIFontDescription" ref="825820271"/>
+								<reference key="IBUIFont" ref="929922898"/>
 							</object>
 						</array>
 						<string key="NSFrameSize">{320, 44}</string>
@@ -451,6 +489,22 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">nearbyImageView</string>
+						<reference key="source" ref="841351856"/>
+						<reference key="destination" ref="648865432"/>
+					</object>
+					<int key="connectionID">36</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">searchButton</string>
+						<reference key="source" ref="841351856"/>
+						<reference key="destination" ref="951730990"/>
+					</object>
+					<int key="connectionID">41</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">dataSource</string>
 						<reference key="source" ref="98575495"/>
 						<reference key="destination" ref="841351856"/>
@@ -475,21 +529,30 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">locationButtonTapped:</string>
+						<string key="label">locationButtonPressed:</string>
 						<reference key="source" ref="111207157"/>
 						<reference key="destination" ref="841351856"/>
 						<int key="IBEventType">7</int>
 					</object>
-					<int key="connectionID">29</int>
+					<int key="connectionID">38</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">cancelButtonTapped:</string>
+						<string key="label">cancelButtonPressed:</string>
 						<reference key="source" ref="99645240"/>
 						<reference key="destination" ref="841351856"/>
 						<int key="IBEventType">7</int>
 					</object>
-					<int key="connectionID">28</int>
+					<int key="connectionID">37</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">searchButtonPressed:</string>
+						<reference key="source" ref="951730990"/>
+						<reference key="destination" ref="841351856"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">40</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -574,6 +637,8 @@
 							<reference ref="391601381"/>
 							<reference ref="111207157"/>
 							<reference ref="99645240"/>
+							<reference ref="648865432"/>
+							<reference ref="951730990"/>
 						</array>
 						<reference key="parent" ref="380805490"/>
 						<string key="objectName">View</string>
@@ -599,11 +664,23 @@
 						<int key="objectID">16</int>
 						<reference key="object" ref="111207157"/>
 						<reference key="parent" ref="840438215"/>
+						<string key="objectName">Location button</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">17</int>
 						<reference key="object" ref="99645240"/>
 						<reference key="parent" ref="840438215"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">35</int>
+						<reference key="object" ref="648865432"/>
+						<reference key="parent" ref="840438215"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">39</int>
+						<reference key="object" ref="951730990"/>
+						<reference key="parent" ref="840438215"/>
+						<string key="objectName">Search Button</string>
 					</object>
 				</array>
 			</object>
@@ -619,10 +696,12 @@
 				<string key="15.CustomClassName">STSearchField</string>
 				<string key="15.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="16.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<real value="1" key="16.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
+				<real value="2" key="16.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
 				<string key="17.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<real value="1" key="17.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
 				<string key="2.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="35.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+				<string key="39.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="4.CustomClassName">UITableViewCell</string>
 				<string key="4.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="5.CustomClassName">UITableViewCell</string>
@@ -636,7 +715,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">34</int>
+			<int key="maxID">41</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -652,16 +731,21 @@
 					<string key="className">SearchEntitiesViewController</string>
 					<string key="superclassName">UIViewController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="cancelButtonTapped:">id</string>
-						<string key="locationButtonTapped:">id</string>
+						<string key="cancelButtonPressed:">id</string>
+						<string key="locationButtonPressed:">id</string>
+						<string key="searchButtonPressed:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="cancelButtonTapped:">
-							<string key="name">cancelButtonTapped:</string>
+						<object class="IBActionInfo" key="cancelButtonPressed:">
+							<string key="name">cancelButtonPressed:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="locationButtonTapped:">
-							<string key="name">locationButtonTapped:</string>
+						<object class="IBActionInfo" key="locationButtonPressed:">
+							<string key="name">locationButtonPressed:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="searchButtonPressed:">
+							<string key="name">searchButtonPressed:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 					</dictionary>
@@ -670,6 +754,8 @@
 						<string key="addStampLabel">UILabel</string>
 						<string key="loadingIndicatorLabel">UILabel</string>
 						<string key="locationButton">UIButton</string>
+						<string key="nearbyImageView">UIImageView</string>
+						<string key="searchButton">UIButton</string>
 						<string key="searchField">STSearchField</string>
 						<string key="searchingIndicatorCell">UITableViewCell</string>
 						<string key="tableView">UITableView</string>
@@ -689,6 +775,14 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="locationButton">
 							<string key="name">locationButton</string>
+							<string key="candidateClassName">UIButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="nearbyImageView">
+							<string key="name">nearbyImageView</string>
+							<string key="candidateClassName">UIImageView</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="searchButton">
+							<string key="name">searchButton</string>
 							<string key="candidateClassName">UIButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="searchField">
@@ -719,9 +813,10 @@
 			<string key="eSearch_cancel_button_bg.png">{16, 16}</string>
 			<string key="eSearch_location_button_bg.png">{16, 16}</string>
 			<string key="eSearch_location_icon.png">{16, 16}</string>
-			<string key="eSearch_location_icon_blue.png">{16, 16}</string>
 			<string key="plus_icon.png">{16, 16}</string>
 			<string key="plus_icon_highlighted.png">{16, 16}</string>
+			<string key="sea_nearby_title.png">{91, 20}</string>
+			<string key="sea_search_button.png">{34, 30}</string>
 			<string key="shelf_background.png">{320, 365}</string>
 		</dictionary>
 		<string key="IBCocoaTouchPluginVersion">933</string>
