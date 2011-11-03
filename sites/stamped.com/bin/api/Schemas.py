@@ -409,7 +409,6 @@ class EntityNearby(Schema):
         self.coordinates        = CoordinatesSchema()
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
-        self.local              = SchemaElement(bool, default=True)
         self.page               = SchemaElement(int, default=0)
 
 class CoordinatesSchema(Schema):

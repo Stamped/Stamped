@@ -106,7 +106,6 @@ def nearby(request):
                                           authUserId=authUserId, 
                                           category_filter=search.category, 
                                           subcategory_filter=search.subcategory, 
-                                          local=True,
                                           page=search.page)
     
     autosuggest = []

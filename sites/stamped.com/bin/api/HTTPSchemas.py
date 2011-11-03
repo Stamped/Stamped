@@ -739,7 +739,6 @@ class HTTPEntityNearby(Schema):
         self.coordinates        = SchemaElement(basestring, required=True)
         self.category           = SchemaElement(basestring)
         self.subcategory        = SchemaElement(basestring)
-        self.local              = SchemaElement(bool, default=True)
         self.page               = SchemaElement(int, default=0)
     
     def exportSchema(self, schema):
@@ -747,7 +746,6 @@ class HTTPEntityNearby(Schema):
             schema.coordinates = _coordinatesFlatToDict(self.coordinates)
             schema.importData({'category': self.category})
             schema.importData({'subcategory': self.subcategory})
-            schema.importData({'local': self.local})
             schema.importData({'page': self.page})
         else:
             raise NotImplementedError
