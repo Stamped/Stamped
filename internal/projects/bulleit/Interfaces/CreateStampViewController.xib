@@ -410,10 +410,6 @@
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 								<bool key="IBUIAdjustsImageWhenDisabled">NO</bool>
-								<object class="NSColor" key="IBUITintColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MAA</bytes>
-								</object>
 								<reference key="IBUIHighlightedTitleColor" ref="935530847"/>
 								<object class="NSColor" key="IBUINormalTitleColor">
 									<int key="NSColorSpace">1</int>
@@ -525,10 +521,6 @@
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
 								<bool key="IBUIAdjustsImageWhenDisabled">NO</bool>
-								<object class="NSColor" key="IBUITintColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MAA</bytes>
-								</object>
 								<reference key="IBUIHighlightedTitleColor" ref="935530847"/>
 								<object class="NSColor" key="IBUINormalTitleColor">
 									<int key="NSColorSpace">1</int>

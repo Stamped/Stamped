@@ -31,6 +31,7 @@
 #import "Util.h"
 #import "User.h"
 #import "UIColor+Stamped.h"
+#import "STOAuthViewController.h"
 
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kCreateStampPath = @"/stamps/create.json";
