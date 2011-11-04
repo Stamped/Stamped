@@ -182,7 +182,8 @@ static const NSUInteger kMaxPicUploadTries = 3;
 }
 
 - (IBAction)editStampButtonPressed:(id)sender {
-  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithNibName:@"StampCustomizerViewController" bundle:nil];
+  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithPrimaryColor:user_.primaryColor
+                                                                                        secondary:user_.secondaryColor];
   vc.delegate = self;
   [self presentModalViewController:vc animated:YES];
   [vc release];

@@ -47,6 +47,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, copy) NSArray* stampsArray;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
+@property (nonatomic, readonly) CALayer* stampLayer;
 @end
 
 @implementation ProfileViewController
@@ -68,6 +69,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize followIndicator = followIndicator_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
+@synthesize stampLayer = stampLayer_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -102,12 +104,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                      action:@selector(userImageTapped:)
            forControlEvents:UIControlEventTouchUpInside];
 
-  CALayer* stampLayer = [[CALayer alloc] init];
-  stampLayer.frame = CGRectMake(57, -10, 61, 61);
-  stampLayer.opacity = 0.95;
-  stampLayer.contents = (id)user_.stampImage.CGImage;
-  [shelfImageView_.superview.layer insertSublayer:stampLayer below:shelfImageView_.layer];
-  [stampLayer release];
+  stampLayer_ = [[CALayer alloc] init];
+  stampLayer_.frame = CGRectMake(57, -10, 61, 61);
+  stampLayer_.opacity = 0.95;
+  stampLayer_.contents = (id)user_.stampImage.CGImage;
+  [shelfImageView_.superview.layer insertSublayer:stampLayer_ below:shelfImageView_.layer];
+  [stampLayer_ release];
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
@@ -500,6 +502,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   creditCountLabel_.text = [user_.numCredits stringValue];
   followerCountLabel_.text = [user_.numFollowers stringValue];
   followingCountLabel_.text = [user_.numFriends stringValue];
+  stampLayer_.contents = (id)user_.stampImage.CGImage;
   [self updateStampsRemainingLayer];
   [self.tableView reloadData];
 }
