@@ -13,13 +13,11 @@
 
 @class UserImageView;
 
-@interface PeopleViewController : STReloadableTableViewController <RKObjectLoaderDelegate>
+@interface PeopleViewController : UIViewController <UITableViewDelegate,
+                                                    UITableViewDataSource,
+                                                    RKObjectLoaderDelegate>
 
-@property (nonatomic, retain) IBOutlet UserImageView* currentUserView;
-@property (nonatomic, retain) IBOutlet UIImageView* userStampImageView;
-@property (nonatomic, retain) IBOutlet UILabel* userFullNameLabel;
-@property (nonatomic, retain) IBOutlet UILabel* userScreenNameLabel;
-@property (nonatomic, retain) IBOutlet UIButton* addFriendsButton;
+@property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet UINavigationController* settingsNavigationController;
 @property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;
 
