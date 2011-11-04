@@ -12,6 +12,6 @@
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier;
 
-@property (nonatomic, readonly) UILabel* textLabel;
+@property (nonatomic, readonly) UILabel* customTextLabel;
 
 @end
