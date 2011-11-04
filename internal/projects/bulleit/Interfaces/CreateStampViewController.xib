@@ -324,6 +324,16 @@
 											<string key="NSResourceName">stamp_detail_ripple_bottom</string>
 										</object>
 									</object>
+									<object class="IBUIView" id="197977392">
+										<reference key="NSNextResponder" ref="101741781"/>
+										<int key="NSvFlags">266</int>
+										<string key="NSFrame">{{0, -1}, {310, 1}}</string>
+										<reference key="NSSuperview" ref="101741781"/>
+										<reference key="NSWindow"/>
+										<reference key="NSNextKeyView" ref="829180822"/>
+										<reference key="IBUIBackgroundColor" ref="935530847"/>
+										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+									</object>
 									<object class="IBUIView" id="126407021">
 										<reference key="NSNextResponder" ref="101741781"/>
 										<int key="NSvFlags">266</int>
@@ -338,7 +348,7 @@
 								<string key="NSFrame">{{5, 72}, {310, 161}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="829180822"/>
+								<reference key="NSNextKeyView" ref="197977392"/>
 								<reference key="IBUIBackgroundColor" ref="935530847"/>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
@@ -401,7 +411,7 @@
 								<string key="NSFrame">{{214, 245}, {45, 41}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="822963385"/>
+								<reference key="NSNextKeyView" ref="174493073"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
@@ -423,9 +433,9 @@
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">share_twitter_highlighted</string>
 								</object>
-								<object class="NSCustomResource" key="IBUIDisabledImage">
+								<object class="NSCustomResource" key="IBUIDisabledImage" id="1063097962">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_twitter_disabled</string>
+									<string key="NSResourceName">share_disabled</string>
 								</object>
 								<object class="NSCustomResource" key="IBUISelectedImage">
 									<string key="NSClassName">NSImage</string>
@@ -512,7 +522,7 @@
 								<string key="NSFrame">{{264, 245}, {45, 41}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="851464612"/>
+								<reference key="NSNextKeyView" ref="1051669184"/>
 								<string key="NSReuseIdentifierKey">_NS:222</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
@@ -531,10 +541,7 @@
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">share_fb_highlighted</string>
 								</object>
-								<object class="NSCustomResource" key="IBUIDisabledImage">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_fb_disabled</string>
-								</object>
+								<reference key="IBUIDisabledImage" ref="1063097962"/>
 								<object class="NSCustomResource" key="IBUISelectedImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">share_fb_on</string>
@@ -545,6 +552,30 @@
 								</object>
 								<reference key="IBUIFontDescription" ref="572259165"/>
 								<reference key="IBUIFont" ref="32402340"/>
+							</object>
+							<object class="IBUIActivityIndicatorView" id="174493073">
+								<reference key="NSNextResponder" ref="870662028"/>
+								<int key="NSvFlags">-2147483356</int>
+								<string key="NSFrame">{{226, 255}, {20, 20}}</string>
+								<reference key="NSSuperview" ref="870662028"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="822963385"/>
+								<string key="NSReuseIdentifierKey">_NS:1030</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIStyle">2</int>
+							</object>
+							<object class="IBUIActivityIndicatorView" id="1051669184">
+								<reference key="NSNextResponder" ref="870662028"/>
+								<int key="NSvFlags">-2147483356</int>
+								<string key="NSFrame">{{276, 255}, {20, 20}}</string>
+								<reference key="NSSuperview" ref="870662028"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="851464612"/>
+								<string key="NSReuseIdentifierKey">_NS:1030</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<int key="IBUIStyle">2</int>
 							</object>
 						</object>
 						<string key="NSFrameSize">{320, 416}</string>
@@ -813,6 +844,22 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">signInTwitterActivityIndicator</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="174493073"/>
+					</object>
+					<int key="connectionID">137</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">signInFacebookActivityIndicator</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="1051669184"/>
+					</object>
+					<int key="connectionID">138</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="739928940"/>
 						<reference key="destination" ref="372490531"/>
@@ -915,6 +962,8 @@
 							<reference ref="822963385"/>
 							<reference ref="969060622"/>
 							<reference ref="878944707"/>
+							<reference ref="174493073"/>
+							<reference ref="1051669184"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -956,6 +1005,7 @@
 							<reference ref="483849353"/>
 							<reference ref="234167628"/>
 							<reference ref="149435353"/>
+							<reference ref="197977392"/>
 						</object>
 						<reference key="parent" ref="870662028"/>
 						<string key="objectName">Ribboned Container</string>
@@ -1079,6 +1129,24 @@
 						<reference key="parent" ref="870662028"/>
 						<string key="objectName">Facebook Button</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">134</int>
+						<reference key="object" ref="197977392"/>
+						<reference key="parent" ref="101741781"/>
+						<string key="objectName">White top border</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">135</int>
+						<reference key="object" ref="174493073"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Twitter activity indicator</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">136</int>
+						<reference key="object" ref="1051669184"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Facebook activity indicator</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1104,6 +1172,9 @@
 					<string>124.IBPluginDependency</string>
 					<string>130.IBPluginDependency</string>
 					<string>130.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
+					<string>134.IBPluginDependency</string>
+					<string>135.IBPluginDependency</string>
+					<string>136.IBPluginDependency</string>
 					<string>36.IBPluginDependency</string>
 					<string>36.IBUserGuides</string>
 					<string>37.IBPluginDependency</string>
@@ -1137,14 +1208,17 @@
 					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="0.0"/>
+					<real value="3"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="2"/>
 					<string>STCreditTextField</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="0.0"/>
+					<real value="3"/>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1180,7 +1254,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">133</int>
+			<int key="maxID">138</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1260,6 +1334,8 @@
 							<string>scrollView</string>
 							<string>shareLabel</string>
 							<string>shelfBackground</string>
+							<string>signInFacebookActivityIndicator</string>
+							<string>signInTwitterActivityIndicator</string>
 							<string>spinner</string>
 							<string>stampItButton</string>
 							<string>titleLabel</string>
@@ -1283,6 +1359,8 @@
 							<string>UIScrollView</string>
 							<string>UILabel</string>
 							<string>UIImageView</string>
+							<string>UIActivityIndicatorView</string>
+							<string>UIActivityIndicatorView</string>
 							<string>UIActivityIndicatorView</string>
 							<string>UIButton</string>
 							<string>UILabel</string>
@@ -1309,6 +1387,8 @@
 							<string>scrollView</string>
 							<string>shareLabel</string>
 							<string>shelfBackground</string>
+							<string>signInFacebookActivityIndicator</string>
+							<string>signInTwitterActivityIndicator</string>
 							<string>spinner</string>
 							<string>stampItButton</string>
 							<string>titleLabel</string>
@@ -1378,6 +1458,14 @@
 								<string key="candidateClassName">UIImageView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
+								<string key="name">signInFacebookActivityIndicator</string>
+								<string key="candidateClassName">UIActivityIndicatorView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">signInTwitterActivityIndicator</string>
+								<string key="candidateClassName">UIActivityIndicatorView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
 								<string key="name">spinner</string>
 								<string key="candidateClassName">UIActivityIndicatorView</string>
 							</object>
@@ -1439,12 +1527,11 @@
 				<string>edit_pencil.png</string>
 				<string>gradient_background.png</string>
 				<string>gray_disclosure_arrow.png</string>
+				<string>share_disabled</string>
 				<string>share_fb</string>
-				<string>share_fb_disabled</string>
 				<string>share_fb_highlighted</string>
 				<string>share_fb_on</string>
 				<string>share_twitter</string>
-				<string>share_twitter_disabled</string>
 				<string>share_twitter_highlighted</string>
 				<string>share_twitter_on</string>
 				<string>shelf_background.png</string>
@@ -1457,7 +1544,6 @@
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{320, 480}</string>
-				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>

@@ -22,6 +22,7 @@
                                                         RKObjectLoaderDelegate,
                                                         RKRequestDelegate,
                                                         FBRequestDelegate,
+                                                        FBSessionDelegate,
                                                         STCreditPickerControllerDelegate,
                                                         UINavigationControllerDelegate,
                                                         UIImagePickerControllerDelegate,
@@ -56,6 +57,8 @@
 @property (nonatomic, retain) IBOutlet UIButton* fbButton;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* disclosureButton;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInTwitterActivityIndicator;
+@property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInFacebookActivityIndicator;
 
 - (IBAction)disclosureButtonPressed:(id)sender;
 - (IBAction)tweetButtonPressed:(id)sender;

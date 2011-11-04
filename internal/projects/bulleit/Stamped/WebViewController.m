@@ -48,22 +48,26 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  if (self.navigationController.navigationBarHidden) {
-    navBarWasHidden = YES;
-  }
-  else
-    navBarWasHidden = NO;
-  self.navigationController.navigationBarHidden = NO;
+//  if (self.navigationController.navigationBarHidden) {
+//    navBarWasHidden = YES;
+//  }
+//  else
+//    navBarWasHidden = NO;
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   shareButton_.enabled = YES;
+  self.navigationController.navigationBarHidden = NO;
   [webView_ loadRequest:[NSURLRequest requestWithURL:url_]];
 }
 
 - (void)viewDidLoad {
+  if (self.navigationController.navigationBarHidden)
+    navBarWasHidden = YES;
+  else
+    navBarWasHidden = NO;
   [super viewDidLoad];
 }
 

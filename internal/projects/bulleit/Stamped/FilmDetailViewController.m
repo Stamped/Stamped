@@ -182,7 +182,7 @@
                                forKey:@"director"];
     if (detailedEntity_.genre)
       [section addPairedLabelWithName:@"Genres:" 
-                                value:detailedEntity_.genre 
+                                value:detailedEntity_.genre.capitalizedString 
                                forKey:@"genre"];
     if (detailedEntity_.inTheaters)
       [section addPairedLabelWithName:@"In Theaters:" 

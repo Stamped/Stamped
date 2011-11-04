@@ -147,7 +147,7 @@ def checkOAuth(request):
     except Exception:
         msg = "Invalid access token"
         logs.warning(msg)
-        raise AuthError("invalid_token", 401, msg)
+        raise AuthError("invalid_token", msg)
 
 def parseRequest(schema, request, **kwargs):
     ### Parse Request
