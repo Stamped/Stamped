@@ -472,7 +472,7 @@
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 										<int key="IBUIContentVerticalAlignment">0</int>
 										<string key="IBUIText"/>
-										<string key="IBUIPlaceholder">Street</string>
+										<string key="IBUIPlaceholder">Address 1</string>
 										<object class="NSColor" key="IBUITextColor">
 											<int key="NSColorSpace">3</int>
 											<bytes key="NSWhite">MAA</bytes>
@@ -509,7 +509,7 @@
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 										<int key="IBUIContentVerticalAlignment">0</int>
 										<string key="IBUIText"/>
-										<string key="IBUIPlaceholder">Street</string>
+										<string key="IBUIPlaceholder">Address 2</string>
 										<object class="NSColor" key="IBUITextColor">
 											<int key="NSColorSpace">3</int>
 											<bytes key="NSWhite">MAA</bytes>

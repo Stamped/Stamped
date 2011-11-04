@@ -409,7 +409,7 @@ typedef enum {
       cell = [[[SearchEntitiesAutoSuggestCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
 
     SearchResult* result = [resultsArray_ objectAtIndex:indexPath.row];
-    cell.textLabel.text = result.title;
+    cell.customTextLabel.text = result.title;
     return cell;
   }
   

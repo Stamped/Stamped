@@ -14,23 +14,23 @@
 
 @implementation SearchEntitiesAutoSuggestCell
 
-@synthesize textLabel = textLabel_;
+@synthesize customTextLabel = customTextLabel_;
 
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [self initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
   if (self) {
-    textLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 0, 264, 47)];
-    textLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
-    textLabel_.textColor = [UIColor stampedBlackColor];
-    textLabel_.highlightedTextColor = [UIColor whiteColor];
-    [self.contentView addSubview:textLabel_];
-    [textLabel_ release];
+    customTextLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(36, 0, 264, 47)];
+    customTextLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    customTextLabel_.textColor = [UIColor stampedBlackColor];
+    customTextLabel_.highlightedTextColor = [UIColor whiteColor];
+    [self.contentView addSubview:customTextLabel_];
+    [customTextLabel_ release];
   }
   return self;
 }
 
 - (void)dealloc {
-  textLabel_ = nil;
+  customTextLabel_ = nil;
   [super dealloc];
 }
 
