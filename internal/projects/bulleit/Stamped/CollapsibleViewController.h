@@ -33,6 +33,7 @@
 - (void)expand;
 - (void)collapseAnimated;
 - (void)expandAnimated;
+- (void)swapArrowImage;
 
 - (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key;
 - (void)addText:(NSString*)text forKey:(NSString*)key;
