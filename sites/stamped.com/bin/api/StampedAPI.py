@@ -2700,6 +2700,10 @@ class StampedAPI(AStampedAPI):
         
         activity = []
         for item in activityData:
+            ### TEMP
+            if item.genre == 'friend':
+                continue
+
             if item.user.user_id != None:
                 item.user = userIds[item.user.user_id]
             if item.linked_user_id != None:
