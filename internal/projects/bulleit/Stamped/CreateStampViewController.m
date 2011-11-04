@@ -38,6 +38,17 @@ static NSString* const kCreateStampPath = @"/stamps/create.json";
 static NSString* const kCreateEntityPath = @"/entities/create.json";
 static NSString* const kStampPhotoURLPath = @"http://static.stamped.com/stamps/";
 static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
+static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
+static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
+static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
+static NSString* const kFacebookFriendsURI = @"/me/friends";
+static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
+static NSString* const kStampedTwitterRemovePath = @"/account/linked/twitter/remove.json";
+static NSString* const kStampedTwitterFollowersPath = @"/account/linked/twitter/followers.json";
+static NSString* const kStampedFacebookLinkPath = @"/account/linked/facebook/update.json";
+static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/remove.json";
+static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/followers.json";
+
 
 @interface CreateStampViewController ()
 - (void)editorDoneButtonPressed:(id)sender;
@@ -53,6 +64,19 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 - (void)addStampPhotoView;
 - (void)restoreViewState;
 - (void)addStampsRemainingLayer;
+
+- (void)signInToTwitter;
+- (void)viewController:(GTMOAuthViewControllerTouch*)authVC
+      finishedWithAuth:(GTMOAuthAuthentication*)auth
+                 error:(NSError*)error;
+- (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID;
+- (void)connectFacebookName:(NSString*)name userID:(NSString*)userID;
+- (void)fetchCurrentUser;
+- (void)fetchFriendIDs:(NSString*)userIDString;
+- (void)signInToFacebook;
+- (void)checkForEndlessSignIn;
+- (void)connectTwitterFollowers:(NSArray*)followers;
+- (void)connectFacebookFriends:(NSArray*)friends;
 
 @property (nonatomic, retain) UIImage* stampPhoto;
 @property (nonatomic, retain) UIButton* takePhotoButton;
@@ -112,8 +136,10 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @synthesize editingMask = editingMask_;
 @synthesize creditPickerController = creditPickerController_;
 @synthesize fbButton = fbButton_;
-
 @synthesize objectToStamp = objectToStamp_;
+
+@synthesize signInTwitterActivityIndicator = signInTwitterActivityIndicator_;
+@synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -192,6 +218,9 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   stampsRemainingLayer_ = nil;
   self.fbClient = nil;
   self.fbButton = nil;
+  self.signInTwitterActivityIndicator = nil;
+  self.signInFacebookActivityIndicator = nil;
+
 
   [super dealloc];
 }
@@ -421,6 +450,8 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   stampsRemainingLayer_ = nil;
   self.fbClient = nil;
   self.fbButton = nil;
+  self.signInTwitterActivityIndicator = nil;
+  self.signInFacebookActivityIndicator = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -682,7 +713,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   fbButton_.selected = !fbButton_.selected;
 }
 
-
 - (IBAction)editButtonPressed:(id)sender {
   EditEntityViewController* editViewController =
       [[EditEntityViewController alloc] initWithDetailedEntity:detailedEntity_];
@@ -819,15 +849,13 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   }
   if ([actionSheet.title rangeOfString:@"Twitter"].location != NSNotFound) {
     if (buttonIndex == 0) {
-      NSLog(@"fuckin' twitter!");
-      //connect to twitter.
+      [self signInToTwitter];
       return;
     }
   }
   if ([actionSheet.title rangeOfString:@"Facebook"].location != NSNotFound) {
     if (buttonIndex == 0) {
-      NSLog(@"fuckin' facebook!");
-      //connect to facebook.
+      [self signInToFacebook];
       return;
     }
   }
@@ -921,16 +949,16 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    kFacebookAppID, @"app_id",
                                    stamp.URL, @"link",
-//                                   [NSString stringWithFormat:@"Stamped: %@.", stamp.entityObject.title], @"name", 
-                                   stamp.entityObject.title, @"name",
-                                   [NSString stringWithFormat:@"\"%@\"", stamp.blurb], @"message", nil];
+                                   stamp.entityObject.title, @"name", nil];
+      NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampLogoURLPath, stamp.user.primaryColor, stamp.user.secondaryColor, @"-logo-195x195.png"];
+      [params setObject:photoURL forKey:@"picture"];
+    if (![stamp.blurb isEqualToString:@""])
+      [params setObject:[NSString stringWithFormat:@"\"%@\"", stamp.blurb] forKey:@"message"];
+
+
 //    if (self.stampPhoto) {
 //      NSString* photoURL = [NSString stringWithFormat:@"%@%@%@", kStampPhotoURLPath, stamp.stampID, @".jpg"];
 //      [params setObject:photoURL forKey:@"picture"];
-//    }
-//    else {
-      NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampLogoURLPath, stamp.user.primaryColor, stamp.user.secondaryColor, @"-logo-195x195.png"];
-      [params setObject:photoURL forKey:@"picture"];
 //    }
     
     [self.fbClient requestWithGraphPath:[fbID stringByAppendingString:@"/feed"]
@@ -948,20 +976,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
     [vc dismissModalViewControllerAnimated:YES];
   } else {
     [self.navigationController popToRootViewControllerAnimated:YES];
-  }
-}
-
-#pragma mark - RKRequestDelegate methods.
-
-- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  if (request.resourcePath == kTwitterUpdateStatusPath) {
-    NSLog(@"twitter response: %@", response.bodyAsString);
-  }
-}
-
-- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
-  if (request.resourcePath == kTwitterUpdateStatusPath) {
-    NSLog(@"twitter error: %@", error);
   }
 }
 
@@ -1064,14 +1078,285 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   takePhotoButton_.enabled = NO;
 }
 
-#pragma mark - FBRequestDelegate methods.
-
-- (void)request:(FBRequest *)request didLoad:(id)result {
-  NSLog(@"%@", result);
+#pragma mark - Twitter methods.
+- (GTMOAuthAuthentication*)createAuthentication {
+  NSString* myConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
+  NSString* myConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
+  
+  if ([myConsumerKey length] == 0 || [myConsumerSecret length] == 0) {
+    return nil;
+  }
+  
+  GTMOAuthAuthentication* auth;
+  auth = [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
+                                                      consumerKey:myConsumerKey
+                                                       privateKey:myConsumerSecret] autorelease];
+  [auth setServiceProvider:@"Twitter"];
+  [auth setCallback:kOAuthCallbackURL];
+  return auth;
 }
 
-- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
-  NSLog(@"error! %@", error);
+- (void)signInToTwitter {
+  GTMOAuthAuthentication *auth = [self createAuthentication];
+  if (auth == nil) {
+    NSAssert(NO, @"A valid consumer key and consumer secret are required for signing in to Twitter");
+  }
+  
+  STOAuthViewController* authVC =
+  [[STOAuthViewController alloc] initWithScope:kTwitterScope
+                                      language:nil
+                               requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
+                             authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
+                                accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
+                                authentication:auth
+                                appServiceName:kKeychainTwitterToken
+                                      delegate:self
+                              finishedSelector:@selector(viewController:finishedWithAuth:error:)];
+  [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
+  
+  [self.navigationController pushViewController:authVC animated:YES];
+  [authVC release];
+}
+
+- (void)viewController:(GTMOAuthViewControllerTouch*)authVC
+      finishedWithAuth:(GTMOAuthAuthentication*)auth
+                 error:(NSError*)error {  
+  if (error) {
+    NSLog(@"GTMOAuth error = %@", error);
+    self.tweetButton.enabled = YES;
+    [self.signInTwitterActivityIndicator stopAnimating];    
+    return;
+  }
+  self.tweetButton.enabled = NO;
+  [self.signInTwitterActivityIndicator startAnimating];
+  self.twitterAuth = auth;
+  [self fetchCurrentUser];
+}
+
+- (void)fetchCurrentUser {
+  RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterCurrentUserURI delegate:self];
+  request.cachePolicy = RKRequestCachePolicyNone;
+  [request prepareURLRequest];
+  [self.twitterAuth authorizeRequest:request.URLRequest];
+  [request send];
+}
+
+- (void)fetchFriendIDs:(NSString*)userIDString {
+  NSString* path =
+  [kTwitterFriendsURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
+  RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
+  [self.twitterAuth authorizeRequest:request.URLRequest];
+  [request send];
+}
+
+- (void)fetchFollowerIDs:(NSString*)userIDString {
+  NSString* path =
+  [kTwitterFollowersURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
+  RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
+  [self.twitterAuth authorizeRequest:request.URLRequest];
+  [request send];
+}
+
+- (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterLinkPath
+                                                               delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
+                    username, @"twitter_screen_name", nil];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}
+
+- (void)connectTwitterFollowers:(NSArray*)followers {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterFollowersPath delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:[followers componentsJoinedByString:@","] forKey:@"q"];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}  
+
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  if (!response.isOK) {
+    if (response.statusCode == 401) {
+      [self.signInTwitterActivityIndicator stopAnimating];
+      self.tweetButton.enabled = YES;
+    }
+    NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
+    return;
+  }
+  if (request.resourcePath == kTwitterUpdateStatusPath) {
+    NSLog(@"twitter response: %@", response.bodyAsString);
+  }
+  if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
+    NSLog(@"Linked Twitter successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
+    NSLog(@"Linked Twitter followers successfully.");
+    [self.signInTwitterActivityIndicator stopAnimating];
+    self.tweetButton.enabled = YES;
+    self.tweetButton.selected = YES;
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
+    NSLog(@"Linked Facebook successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
+    NSLog(@"Linked Facebook friends successfully.");
+    [self.signInFacebookActivityIndicator stopAnimating];
+    self.fbButton.enabled = YES;
+    self.fbButton.selected = YES;
+    return;
+  }
+  
+
+  
+  NSError* err = nil;
+  id body = [response parsedBody:&err];
+  if (err) {
+    NSLog(@"Parse error for response %@: %@", response, err);
+    return;
+  }
+  
+  // Response for getting the current user information.
+  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound) {
+    [self connectTwitterUserName:[body objectForKey:@"screen_name"] userID:[body objectForKey:@"id_str"]];
+    // Fetch the list of all the users this user is following.
+    [self fetchFriendIDs:[body objectForKey:@"id_str"]];
+    [self fetchFollowerIDs:[body objectForKey:@"id_str"]];
+  }
+  // Response for getting Twitter followers. 
+  else if ([request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound) {
+    [self connectTwitterFollowers:[body objectForKey:@"ids"]];
+  }
+  // Response for getting Twitter friends. Send on to Stamped to find any Stamped friends.
+  else if ([request.resourcePath rangeOfString:kTwitterFriendsURI].location != NSNotFound) {
+  }
+//    [self findStampedFriendsFromTwitter:[body objectForKey:@"ids"]];
+}
+
+- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  if (request.resourcePath == kTwitterUpdateStatusPath) {
+    NSLog(@"twitter error: %@", error);
+    return;
+  }
+  NSLog(@"Error %@ for request %@", error, request.resourcePath);
+  [self.signInTwitterActivityIndicator stopAnimating];
+  self.tweetButton.enabled = YES;
+  [self.signInFacebookActivityIndicator stopAnimating];
+  self.fbButton.enabled = YES;
+}
+
+#pragma mark - Facebook.
+
+- (void)signInToFacebook {
+  if (!self.fbClient)
+    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+  
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"] 
+      && [defaults objectForKey:@"FBExpirationDateKey"]) {
+    self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+    self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+  }
+  if (!self.fbClient.isSessionValid) {
+    self.fbClient.sessionDelegate = self;
+    [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
+  }
+}
+
+- (void)signOutOfFacebook {
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"]) {
+    [defaults removeObjectForKey:@"FBAccessTokenKey"];
+    [defaults removeObjectForKey:@"FBExpirationDateKey"];
+    [defaults removeObjectForKey:@"FBName"];
+    [defaults removeObjectForKey:@"FBid"];
+    
+    [defaults synchronize];
+    
+    // Nil out the session variables to prevent
+    // the app from thinking there is a valid session
+    if (nil != self.fbClient.accessToken)
+      self.fbClient.accessToken = nil;
+    if (nil != self.fbClient.expirationDate) 
+      self.fbClient.expirationDate = nil;
+   [self.signInFacebookActivityIndicator stopAnimating];
+   self.fbButton.enabled = YES;
+  }
+}
+
+- (void)fbDidLogin {
+  self.fbButton.enabled = NO;
+  [self.signInFacebookActivityIndicator startAnimating];
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:[self.fbClient accessToken] forKey:@"FBAccessTokenKey"];
+  [defaults setObject:[self.fbClient expirationDate] forKey:@"FBExpirationDateKey"];
+  [defaults synchronize];
+  [self.fbClient requestWithGraphPath:@"me" andDelegate:self];
+}
+
+- (void)connectFacebookName:(NSString*)name userID:(NSString*)userID {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath
+                                                               delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
+  request.method = RKRequestMethodPOST;
+  [request send];
+  
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:name forKey:@"FBName"];
+  [defaults setObject:userID forKey:@"FBid"];
+  [defaults synchronize];
+}
+
+- (void)connectFacebookFriends:(NSArray*)friends {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookFriendsPath
+                                                               delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:[friends componentsJoinedByString:@","] forKey:@"q"];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}
+
+#pragma mark - FBRequestDelegate methods.
+
+- (void)request:(FBRequest*)request didLoad:(id)result {
+  NSArray* resultData;
+  
+  if ([result isKindOfClass:[NSArray class]])
+    result = [result objectAtIndex:0];
+  if ([result isKindOfClass:[NSDictionary class]]) {
+    // handle callback from request for current user info.
+    if ([result objectForKey:@"name"]) {
+      [self connectFacebookName:[result objectForKey:@"name"] userID:[result objectForKey:@"id"]];
+      [self.fbClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
+    }
+    resultData = [result objectForKey:@"data"];
+  }
+  
+  // handle callback from request for user's friends.
+  if (resultData  &&  resultData.count != 0) {
+    NSMutableArray* fbFriendIDs = [NSMutableArray array];
+    for (NSDictionary* dict in resultData)
+      [fbFriendIDs addObject:[dict objectForKey:@"id"]];
+    if (fbFriendIDs.count > 0) {
+      [self connectFacebookFriends:fbFriendIDs];
+    }
+  }
+}
+
+- (void)request:(FBRequest*)request didFailWithError:(NSError *)error {
+  NSLog(@"FB err code: %d", [error code]);
+  NSLog(@"FB err message: %@", [error description]);
+  [self.signInFacebookActivityIndicator stopAnimating];
+  self.fbButton.enabled = YES;
+  if ([error code] == 10000)
+    [self signOutOfFacebook];
+}
+
+- (void)fbDidNotLogin:(BOOL)cancelled {
+  NSLog(@"whoa, no fb login");
+  [self signOutOfFacebook];
 }
 
 #pragma mark - UIImagePickerControllerDelegate methods.

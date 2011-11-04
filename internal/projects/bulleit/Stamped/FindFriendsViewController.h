@@ -29,8 +29,7 @@ typedef enum {
                                                         FBSessionDelegate,
                                                         UITableViewDelegate,
                                                         UITableViewDataSource,
-                                                        UITextFieldDelegate,
-                                                        UIWebViewDelegate>
+                                                        UITextFieldDelegate>
 
 @property (nonatomic, retain) IBOutlet UIButton* contactsButton;
 @property (nonatomic, retain) IBOutlet UIButton* twitterButton;
