@@ -39,7 +39,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
                                         ('timestamp.created', pymongo.DESCENDING)])
         self._collection.ensure_index('user.user_id', unique=False)
         self._collection.ensure_index('link.linked_stamp_id', unique=False)
-        self._collection.ensure_index([('user.user_id', pymongoASCENDING), \
+        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('recipient_id', pymongo.ASCENDING), \
                                         ('genre', pymongo.ASCENDING)])
 
