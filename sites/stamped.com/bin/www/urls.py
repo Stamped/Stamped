@@ -19,5 +19,6 @@ urlpatterns = patterns('',
     url(R'^about$', 'teaser.views.about'),
     url(R'^privacy-mobile', 'teaser.views.privacy'),
     url(R'^terms-mobile', 'teaser.views.terms'),
+    url(R'^feedback-mobile', 'teaser.views.feedback'),
     url(R'$', 'teaser.views.index'),
 )

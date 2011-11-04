@@ -115,5 +115,10 @@ screen_names = set([
     "who_to_follow",
     "widgets",
     "media_signup",
+    "feedback",
+    "kevinpalms",
+    "privacy-mobile",
+    "terms-mobile",
+    "feedback-mobile",
 ])
 
