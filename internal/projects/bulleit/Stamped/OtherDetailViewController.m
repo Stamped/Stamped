@@ -184,32 +184,34 @@
   [self addSectionWithName:@"Information"];
   section = [sectionsDict_ objectForKey:@"Information"];
   
-  if (detailedEntity_.subcategory) { 
+  if (detailedEntity_.subcategory && ![detailedEntity_.subcategory isEqualToString:@""]) { 
     [section addPairedLabelWithName:@"Category:"
                               value:detailedEntity_.subcategory.capitalizedString
                              forKey:@"subcategory"];
   }
   
   
-  if (detailedEntity_.address) {
+  if (detailedEntity_.address && ![detailedEntity_.address isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Address:"
                               value:detailedEntity_.address
                              forKey:@"address"];
-
   }
     
-  if (detailedEntity_.neighborhood) {
+  if (detailedEntity_.neighborhood && ![detailedEntity_.neighborhood isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Neighborhood:"
                               value:detailedEntity_.neighborhood.capitalizedString
                              forKey:@"neighborhood"];
   }
   
-  if (detailedEntity_.website) {
+  if (detailedEntity_.website && ![detailedEntity_.website isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Website:"
                               value:detailedEntity_.website
                              forKey:@"website"];
   }
-
+  
+  if (section.contentDict.objectEnumerator.allObjects.count > 0)
+    self.mainContentView.hidden = NO;
+  
   NSSet* stamps = entityObject_.stamps;
   
   if (stamps && stamps.count > 0)

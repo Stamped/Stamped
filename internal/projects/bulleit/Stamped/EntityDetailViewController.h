@@ -13,6 +13,7 @@
 @class Entity;
 @class DetailedEntity;
 @class SearchResult;
+@class Stamp;
 
 @interface EntityDetailViewController : UIViewController <RKObjectLoaderDelegate, CollapsibleViewControllerDelegate> {
  @protected
@@ -31,6 +32,8 @@
 - (void)addSectionStampedBy;
 - (void)addToolbar;
 - (CGFloat)contentHeight;
+- (CollapsibleViewController*)makeSectionWithName:(NSString*)name;
+- (void)addSection:(CollapsibleViewController*)section;
 
 @property (nonatomic, retain) IBOutlet UIView* mainActionsView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;

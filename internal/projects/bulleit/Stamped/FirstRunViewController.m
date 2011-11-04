@@ -19,8 +19,8 @@
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 500;
-static  NSString* const kStampedTermsURL = @"http://dev.stamped.com/terms-mobile.html";
-static  NSString* const kStampedPrivacyURL = @"http://dev.stamped.com/privacy-mobile.html";
+static  NSString* const kStampedTermsURL = @"http://www.stamped.com/terms-mobile.html";
+static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mobile.html";
 
 @interface FirstRunViewController ()
 - (void)setupBottomView;

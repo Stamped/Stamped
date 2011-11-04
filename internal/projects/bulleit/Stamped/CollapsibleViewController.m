@@ -66,7 +66,7 @@ int const SPACE_HEIGHT = 10;
   self.sectionLabel = nil;
   self.numLabel = nil;
   self.footerLabel = nil;
-  [contentDict_ release];
+  self.contentDict = nil;
   [super dealloc];
 }
 
@@ -91,6 +91,7 @@ int const SPACE_HEIGHT = 10;
   self.sectionLabel = nil;
   self.numLabel = nil;
   self.footerLabel = nil;
+  self.contentDict = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -126,6 +127,7 @@ int const SPACE_HEIGHT = 10;
     CGFloat delta = CGRectGetMinX(self.footerLabel.frame) + [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
     arrowView_.frame = CGRectOffset(arrowView_.frame, delta, 0);
   }
+  isCollapsed_ = NO;
 }
 
 // So the shadow always comes from the top edge.

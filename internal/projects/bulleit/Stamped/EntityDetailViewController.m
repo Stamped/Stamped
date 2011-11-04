@@ -381,6 +381,25 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 #pragma mark - Section / collapsible view management.
 
+- (CollapsibleViewController*)makeSectionWithName:(NSString*)name {
+  CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
+                                              initWithNibName:@"CollapsibleViewController" bundle:nil];
+  
+  collapsibleVC.view.frame = CGRectMake(0, [self contentHeight], 
+                                        mainContentView_.frame.size.width, 
+                                        collapsibleVC.collapsedHeight);
+  
+  collapsibleVC.sectionLabel.text = name;
+  collapsibleVC.delegate = self;
+  return [collapsibleVC autorelease];
+  //TODO: ensure this doesn't leak
+}
+
+- (void)addSection:(CollapsibleViewController*)section {
+  [sectionsDict_ setObject:section forKey:section.sectionLabel.text];
+  [mainContentView_ addSubview:section.view];
+}
+
 - (void)addSectionWithName:(NSString*)name {
   CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
                                               initWithNibName:@"CollapsibleViewController" bundle:nil];
@@ -412,6 +431,12 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)addSectionStampedBy {
+  // Make sure that the current user follows someone who stamped this entity.
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO"];
+  NSArray* stamps = [[entityObject_.stamps allObjects] filteredArrayUsingPredicate:p];
+  if (stamps.count == 0)
+    return;
+  
   [self addSectionWithName:@"Stamped by"];
   CollapsibleViewController* collapsibleVC = [sectionsDict_ objectForKey:@"Stamped by"];
   
@@ -424,6 +449,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   [collapsibleVC addImagesForStamps:entityObject_.stamps];
   [collapsibleVC expand];
+  [collapsibleVC swapArrowImage];
 }
 
 // Delegate method

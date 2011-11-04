@@ -109,7 +109,7 @@
 
 - (void) setupSectionViews {
   // Amazon Review
-  if (detailedEntity_.desc) {
+  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
         
     [self addSectionWithName:@"Amazon Review" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Amazon Review"];
@@ -125,11 +125,10 @@
   }
 
   // Details
-  if (detailedEntity_.format || detailedEntity_.length || detailedEntity_.language || detailedEntity_.releaseDate ||
-      detailedEntity_.publisher || detailedEntity_.isbn) {
+  if (detailedEntity_.format || detailedEntity_.length || detailedEntity_.language || 
+      detailedEntity_.releaseDate || detailedEntity_.publisher || detailedEntity_.isbn) {
     
-    [self addSectionWithName:@"Details"];
-    CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Details"];
+    CollapsibleViewController* section = [self makeSectionWithName:@"Details"];
     
     if (detailedEntity_.format && (detailedEntity_.length && detailedEntity_.length.intValue > 0))
       [section addPairedLabelWithName:@"Format:" 
@@ -159,8 +158,10 @@
       [section addPairedLabelWithName:@"ISBN:" 
                                 value:detailedEntity_.isbn 
                                forKey:@"isbn"];
-    
-    self.mainContentView.hidden = NO;
+    if (section.contentDict.objectEnumerator.allObjects.count > 0) {
+      [self addSection:section];
+      self.mainContentView.hidden = NO;
+    }
   }
 
   // Stamped by.

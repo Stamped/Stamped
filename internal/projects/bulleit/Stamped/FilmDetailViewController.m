@@ -130,8 +130,12 @@
 }
 
 - (IBAction)mainActionButtonPressed:(id)sender {
-  [[UIApplication sharedApplication] openURL:
-   [NSURL URLWithString:detailedEntity_.fandangoURL]];
+  if (detailedEntity_.fandangoURL)
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.fandangoURL]];
+  else if (detailedEntity_.itunesURL)
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesURL]];
+  else if (detailedEntity_.itunesShortURL)
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesShortURL]];
 }
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
@@ -141,16 +145,23 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden  = NO;
     self.mainActionsView.hidden  = NO;
-  } else {
+  } 
+  else if (detailedEntity_.itunesURL) {
+    self.mainActionButton.hidden = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
+  }
+    else {
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, 
                                               -CGRectGetHeight(self.mainActionsView.frame));
   }
 }
 
 - (void)setupSectionViews {
+  NSLog(@"%@", detailedEntity_);
   
   // Synopsis
-  if (detailedEntity_.desc) {
+  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
         
     [self addSectionWithName:@"Synopsis" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Synopsis"];
@@ -169,18 +180,17 @@
   if (detailedEntity_.genre || detailedEntity_.cast || detailedEntity_.director || 
       detailedEntity_.inTheaters || detailedEntity_.releaseDate ) {
     
-    [self addSectionWithName:@"Information"];
-    CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Information"];
+    CollapsibleViewController* section = [self makeSectionWithName:@"Information"];
     
-    if (detailedEntity_.cast)
+    if (detailedEntity_.cast && ![detailedEntity_.cast isEqualToString:@""])
       [section addPairedLabelWithName:@"Cast:" 
                                 value:detailedEntity_.cast 
                                forKey:@"cast"];
-    if (detailedEntity_.director)
+    if (detailedEntity_.director && ![detailedEntity_.director isEqualToString:@""])
       [section addPairedLabelWithName:@"Director:" 
                                 value:detailedEntity_.director 
                                forKey:@"director"];
-    if (detailedEntity_.genre)
+    if (detailedEntity_.genre && ![detailedEntity_.genre isEqualToString:@""])
       [section addPairedLabelWithName:@"Genres:" 
                                 value:detailedEntity_.genre.capitalizedString 
                                forKey:@"genre"];
@@ -188,12 +198,15 @@
       [section addPairedLabelWithName:@"In Theaters:" 
                                 value:detailedEntity_.inTheaters.stringValue 
                                forKey:@"inTheaters"];
-    if (detailedEntity_.releaseDate)
+    if (detailedEntity_.releaseDate && ![detailedEntity_.releaseDate isEqualToString:@""])
       [section addPairedLabelWithName:@"Open Date:" 
                                 value:detailedEntity_.releaseDate
                                forKey:@"releaseDate"];
 
-    self.mainContentView.hidden = NO;
+    if (section.contentDict.objectEnumerator.allObjects.count > 0) {
+      [self addSection:section];
+      self.mainContentView.hidden = NO;
+    }
   }
   
   // Stamped by  

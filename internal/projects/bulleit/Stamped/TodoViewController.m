@@ -117,7 +117,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
       break;
       
     case NSFetchedResultsChangeDelete:
-      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationMiddle];
       break;
       
     case NSFetchedResultsChangeUpdate: {

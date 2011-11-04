@@ -214,7 +214,7 @@
   
   if (detailedEntity_.neighborhood) {
     [section addPairedLabelWithName:@"Neighborhood:"
-                              value:detailedEntity_.neighborhood.capitalizedString
+                              value:detailedEntity_.neighborhood
                              forKey:@"neighborhood"];
   }
   
