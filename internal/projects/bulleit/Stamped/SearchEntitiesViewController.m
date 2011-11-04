@@ -637,6 +637,14 @@ typedef enum {
                                 (id)[UIColor colorWithWhite:0.76 alpha:1.0].CGColor, nil];
   [view.layer insertSublayer:gradientLayer below:view.leftLabel.layer];
   [gradientLayer release];
+  if (currentSearchFilter_ == SearchFilterNone ||
+      currentSearchFilter_ == SearchFilterFood ||
+      currentSearchFilter_ == SearchFilterOther) {
+    UIImageView* google = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"poweredbygoogle"]];
+    google.frame = CGRectOffset(google.frame, 213, 5);
+    [view addSubview:google];
+    [google release];
+  }
   view.leftLabel.textColor = view.leftLabel.shadowColor;
   view.leftLabel.shadowColor = [UIColor stampedGrayColor];
   view.leftLabel.shadowOffset = CGSizeMake(0, -1);
@@ -648,16 +656,16 @@ typedef enum {
     NSString* corpus = @"All results";
     switch (currentSearchFilter_) {
       case SearchFilterBook:
-        corpus = @"Book results";
+        corpus = @"Books only";
         break;
       case SearchFilterMusic:
-        corpus = @"Music results";
+        corpus = @"Music only";
         break;
       case SearchFilterFilm:
-        corpus = @"Movie & TV show results";
+        corpus = @"Movies & TV shows only";
         break;
       case SearchFilterFood:
-        corpus = @"Restaurant & bar results";
+        corpus = @"Restaurants & bars only";
         break;
       case SearchFilterOther:
         corpus = @"Other category results";
