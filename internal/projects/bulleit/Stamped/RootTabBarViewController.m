@@ -363,7 +363,7 @@
     newViewController = [viewControllers_ objectAtIndex:3];
     self.navigationItem.title = @"People";
   }
-  
+  [(STNavigationBar*)self.navigationController.navigationBar setListButtonShown:NO];  
   [self.navigationController.navigationBar setNeedsDisplay];
 
   if (!newViewController || newViewController == self.selectedViewController)
