@@ -40,6 +40,7 @@ class FandangoFeed(AExternalDumpEntitySource):
         
         for url in feeds:
             pool.spawn(self._parse_feed, pool, url)
+            break
         
         pool.join()
         self._output.put(StopIteration)
@@ -47,10 +48,13 @@ class FandangoFeed(AExternalDumpEntitySource):
     
     def _parse_feed(self, pool, url):
         utils.log("[%s] parsing feed %s" % (self, url))
-        
         data = feedparser.parse(url)
-        id_r = re.compile('.*\/([0-9]*)$')
-        title_r = re.compile('^([0-9][0-9]?). (.*) \$[0-9.M]*')
+        
+        id_r      = re.compile('.*\/([0-9]*)$')
+        title_r   = re.compile('^([0-9][0-9]?). (.*) \$[0-9.M]*')
+        info_re   = re.compile('[A-Za-z]+ ([^|]+) \| Runtime:(.+)$')
+        genre_re  = re.compile('Genres:(.*)$')
+        length_re = re.compile('([0-9]+) *hr. *([0-9]+) min.')
         
         for entry in data.entries:
             if entry.title == 'More Movies':
@@ -89,7 +93,61 @@ class FandangoFeed(AExternalDumpEntitySource):
                     entity.image = link.href.replace('69/103', '375/375').replace('69x103', '375x375')
                     break
             
+            # attempt to scrape some extra details from fandango's movie page
+            url = "http://www.fandango.com/%s_%s/movieoverview" % \
+                   (filter(lambda a: a.isalnum(), entity.title.replace(' ', '')), entity.fid)
+            
+            try:
+                utils.log(url)
+                soup = utils.getSoup(url)
+                info = soup.find('div', {'id' : 'info'}).findAll('li')[1].getText()
+                
+                try:
+                    open_date, runtime = info_re.match(info).groups()
+                    entity.original_release_date = open_date
+                    
+                    match = length_re.match(runtime)
+                    if match is not None:
+                        hours, minutes = match.groups()
+                        hours, minutes = int(hours), int(minutes)
+                        seconds = 60 * (minutes + 60 * hours)
+                        
+                        entity.track_length = str(seconds)
+                except:
+                    utils.printException()
+                    pass
+                
+                try:
+                    mpaa_rating = soup.find('div', {'class' : re.compile('rating_icn')}).getText()
+                    entity.mpaa_rating = mpaa_rating
+                except:
+                    pass
+                
+                details = soup.findAll('li', {'class' : 'detail_list'})
+                
+                cast = filter(lambda d: 'Cast:' in d.getText(), details)
+                if 1 == len(cast):
+                    cast = map(lambda a: a.getText(), cast[0].findAll('a'))
+                    entity.cast = ', '.join(cast)
+                
+                director = filter(lambda d: 'Director:' in d.getText(), details)
+                if 1 == len(director):
+                    director = map(lambda a: a.getText(), director[0].findAll('a'))
+                    entity.director = ', '.join(director)
+                
+                genres = filter(lambda d: 'Genres:' in d.getText(), details)
+                if 1 == len(genres):
+                    genres = genres[0].getText()
+                    match  = genre_re.match(genres)
+                    
+                    if match is not None:
+                        entity.genre = match.groups()[0].strip()
+            except:
+                utils.printException()
+                pass
+            
             self._output.put(entity)
+            break
         
         utils.log("[%s] done parsing feed '%s' (%s)" % (self, data.feed.title, url))
 
