@@ -432,6 +432,7 @@ static AccountManager* sharedAccountManager_ = nil;
 #pragma mark - Logout stuff.
 
 - (void)logout {
+  [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
   [oAuthRequestQueue_ cancelAllRequests];
   [[RKClient sharedClient].requestQueue cancelAllRequests];
   [passwordKeychainItem_ resetKeychainItem];
@@ -442,6 +443,8 @@ static AccountManager* sharedAccountManager_ = nil;
   [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:[[NSBundle mainBundle] bundleIdentifier]];
   self.currentUser = nil;
   self.authToken = nil;
+  NSString* baseURL = [RKClient sharedClient].baseURL;
+  [RKClient sharedClient].baseURL = nil;
   [[RKObjectManager sharedManager].objectStore deletePersistantStore];
   NSFileManager* fm = [NSFileManager defaultManager];
   NSURL* directoryURL = [[fm URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] lastObject];
@@ -456,6 +459,7 @@ static AccountManager* sharedAccountManager_ = nil;
   coldLaunch_ = YES;
   [[NSNotificationCenter defaultCenter] postNotificationName:kUserHasLoggedOutNotification
                                                       object:self];
+  [RKClient sharedClient].baseURL = baseURL;
   [self authenticate];
 }
 
