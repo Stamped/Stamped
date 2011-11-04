@@ -31,6 +31,10 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
+        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
+                                        ('entity.entity_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
+                                        ('stats.stamp_num', pymongo.ASCENDING)])
 
         # Define patterns
         self.user_regex  = re.compile(r'([^a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})', re.IGNORECASE)

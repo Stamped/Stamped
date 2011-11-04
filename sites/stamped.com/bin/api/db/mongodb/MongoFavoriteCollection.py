@@ -21,6 +21,9 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     def __init__(self, setup=False):
         AMongoCollection.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite)
         AFavoriteDB.__init__(self)
+
+        self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), \
+                                        ('user_id', pymongo.ASCENDING)])
     
     ### PUBLIC
     
