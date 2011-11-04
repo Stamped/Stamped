@@ -22,6 +22,8 @@
                                                          UITextFieldDelegate>
 
 @property (nonatomic, retain) User* user;
+@property (nonatomic, retain) IBOutlet UIButton* settingsButton;
+@property (nonatomic, retain) IBOutlet UIButton* doneButton;
 @property (nonatomic, retain) IBOutlet UIImageView* stampImageView;
 @property (nonatomic, retain) IBOutlet STImageView* userImageView;
 @property (nonatomic, retain) IBOutlet UITextField* nameTextField;
@@ -33,6 +35,7 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* profileImageIndicator;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 
+- (IBAction)doneButtonPressed:(id)sender;
 - (IBAction)saveButtonPressed:(id)sender;
 - (IBAction)settingsButtonPressed:(id)sender;
 - (IBAction)editStampButtonPressed:(id)sender;

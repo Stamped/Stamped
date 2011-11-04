@@ -23,6 +23,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         
         ### TEMP: For now, verify that no duplicates can occur via index
         self._collection.ensure_index('screen_name_lower', unique=True)
+        self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
 
     def _convertFromMongo(self, document):

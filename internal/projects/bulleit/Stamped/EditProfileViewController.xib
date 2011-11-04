@@ -345,7 +345,7 @@
 										<string key="NSFrame">{{150, 253}, {20, 20}}</string>
 										<reference key="NSSuperview" ref="465083936"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="205426438"/>
+										<reference key="NSNextKeyView"/>
 										<string key="NSReuseIdentifierKey">_NS:824</string>
 										<bool key="IBUIOpaque">NO</bool>
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -380,7 +380,7 @@
 						<string key="NSFrame">{{0, 45}, {320, 415}}</string>
 						<reference key="NSSuperview" ref="540011283"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
+						<reference key="NSNextKeyView" ref="465083936"/>
 						<string key="NSReuseIdentifierKey">_NS:190</string>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIMultipleTouchEnabled">YES</bool>
@@ -431,7 +431,7 @@
 						</object>
 						<object class="NSCustomResource" key="IBUINormalBackgroundImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">gray_back_button_bg@2x.png</string>
+							<string key="NSResourceName">gray_back_button_bg.png</string>
 						</object>
 						<reference key="IBUIFontDescription" ref="293002814"/>
 						<reference key="IBUIFont" ref="181367397"/>
@@ -442,7 +442,7 @@
 						<string key="NSFrame">{{108, 14}, {104, 16}}</string>
 						<reference key="NSSuperview" ref="540011283"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="465083936"/>
+						<reference key="NSNextKeyView" ref="964490533"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<int key="IBUIContentMode">1</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -451,6 +451,33 @@
 							<string key="NSClassName">NSImage</string>
 							<string key="NSResourceName">edit_profile_header@2x.png</string>
 						</object>
+					</object>
+					<object class="IBUIButton" id="964490533">
+						<reference key="NSNextResponder" ref="540011283"/>
+						<int key="NSvFlags">-2147483356</int>
+						<string key="NSFrame">{{261, 7}, {54, 30}}</string>
+						<reference key="NSSuperview" ref="540011283"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="205426438"/>
+						<string key="NSReuseIdentifierKey">_NS:225</string>
+						<bool key="IBUIOpaque">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<int key="IBUIContentHorizontalAlignment">0</int>
+						<int key="IBUIContentVerticalAlignment">0</int>
+						<string key="IBUITitleShadowOffset">{0, -1}</string>
+						<string key="IBUINormalTitle">Done</string>
+						<reference key="IBUIHighlightedTitleColor" ref="24724135"/>
+						<reference key="IBUINormalTitleColor" ref="24724135"/>
+						<reference key="IBUINormalTitleShadowColor" ref="777165414"/>
+						<object class="NSCustomResource" key="IBUINormalBackgroundImage">
+							<string key="NSClassName">NSImage</string>
+							<string key="NSResourceName">blue_button_background.png</string>
+						</object>
+						<object class="IBUIFontDescription" key="IBUIFontDescription">
+							<int key="type">2</int>
+							<double key="pointSize">12</double>
+						</object>
+						<reference key="IBUIFont" ref="181367397"/>
 					</object>
 				</object>
 				<string key="NSFrame">{{0, 20}, {320, 460}}</string>
@@ -561,6 +588,22 @@
 					<int key="connectionID">58</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">settingsButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="585875432"/>
+					</object>
+					<int key="connectionID">62</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">doneButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="964490533"/>
+					</object>
+					<int key="connectionID">64</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">settingsButtonPressed:</string>
 						<reference key="source" ref="585875432"/>
@@ -620,6 +663,15 @@
 					</object>
 					<int key="connectionID">53</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">doneButtonPressed:</string>
+						<reference key="source" ref="964490533"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">65</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -653,27 +705,13 @@
 							<reference ref="585875432"/>
 							<reference ref="639672154"/>
 							<reference ref="205426438"/>
+							<reference ref="964490533"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">6</int>
-						<reference key="object" ref="639672154"/>
-						<reference key="parent" ref="540011283"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">7</int>
 						<reference key="object" ref="504082576"/>
-						<reference key="parent" ref="540011283"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">9</int>
-						<reference key="object" ref="468379501"/>
-						<reference key="parent" ref="540011283"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">20</int>
-						<reference key="object" ref="585875432"/>
 						<reference key="parent" ref="540011283"/>
 					</object>
 					<object class="IBObjectRecord">
@@ -778,6 +816,26 @@
 						<reference key="parent" ref="465083936"/>
 						<string key="objectName">Change Picture Button</string>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">6</int>
+						<reference key="object" ref="639672154"/>
+						<reference key="parent" ref="540011283"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">9</int>
+						<reference key="object" ref="468379501"/>
+						<reference key="parent" ref="540011283"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">20</int>
+						<reference key="object" ref="585875432"/>
+						<reference key="parent" ref="540011283"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">63</int>
+						<reference key="object" ref="964490533"/>
+						<reference key="parent" ref="540011283"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -810,6 +868,7 @@
 					<string>55.IBPluginDependency</string>
 					<string>57.IBPluginDependency</string>
 					<string>6.IBPluginDependency</string>
+					<string>63.IBPluginDependency</string>
 					<string>7.IBPluginDependency</string>
 					<string>9.IBPluginDependency</string>
 				</object>
@@ -843,6 +902,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -857,7 +917,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">58</int>
+			<int key="maxID">65</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -870,12 +930,14 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>changePhotoButtonPressed:</string>
+							<string>doneButtonPressed:</string>
 							<string>editStampButtonPressed:</string>
 							<string>saveButtonPressed:</string>
 							<string>settingsButtonPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -887,6 +949,7 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>changePhotoButtonPressed:</string>
+							<string>doneButtonPressed:</string>
 							<string>editStampButtonPressed:</string>
 							<string>saveButtonPressed:</string>
 							<string>settingsButtonPressed:</string>
@@ -895,6 +958,10 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
 								<string key="name">changePhotoButtonPressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">doneButtonPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -917,12 +984,14 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>aboutTextField</string>
 							<string>containerView</string>
+							<string>doneButton</string>
 							<string>locationTextField</string>
 							<string>nameTextField</string>
 							<string>profileImageIndicator</string>
 							<string>saveButton</string>
 							<string>saveIndicator</string>
 							<string>scrollView</string>
+							<string>settingsButton</string>
 							<string>stampImageView</string>
 							<string>userImageView</string>
 						</object>
@@ -930,12 +999,14 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UITextField</string>
 							<string>UIView</string>
+							<string>UIButton</string>
 							<string>UITextField</string>
 							<string>UITextField</string>
 							<string>UIActivityIndicatorView</string>
 							<string>UIButton</string>
 							<string>UIActivityIndicatorView</string>
 							<string>UIScrollView</string>
+							<string>UIButton</string>
 							<string>UIImageView</string>
 							<string>STImageView</string>
 						</object>
@@ -946,12 +1017,14 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>aboutTextField</string>
 							<string>containerView</string>
+							<string>doneButton</string>
 							<string>locationTextField</string>
 							<string>nameTextField</string>
 							<string>profileImageIndicator</string>
 							<string>saveButton</string>
 							<string>saveIndicator</string>
 							<string>scrollView</string>
+							<string>settingsButton</string>
 							<string>stampImageView</string>
 							<string>userImageView</string>
 						</object>
@@ -964,6 +1037,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">containerView</string>
 								<string key="candidateClassName">UIView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">doneButton</string>
+								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">locationTextField</string>
@@ -988,6 +1065,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">scrollView</string>
 								<string key="candidateClassName">UIScrollView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">settingsButton</string>
+								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">stampImageView</string>
@@ -1034,6 +1115,7 @@
 			<bool key="EncodedWithXMLCoder">YES</bool>
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>blue_button_background.png</string>
 				<string>change_picture_button_bg@2x.png</string>
 				<string>change_picture_inner_shadow@2x.png</string>
 				<string>change_stamp_button_bg@2x.png</string>
@@ -1041,12 +1123,13 @@
 				<string>edit_profile_header@2x.png</string>
 				<string>edit_profile_labels@2x.png</string>
 				<string>gradient_background.png</string>
-				<string>gray_back_button_bg@2x.png</string>
+				<string>gray_back_button_bg.png</string>
 				<string>shelf_background.png</string>
 				<string>stamp_inner_shadow@2x.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<string>{16, 16}</string>
 				<string>{292, 140}</string>
 				<string>{92, 94}</string>
 				<string>{292, 140}</string>
@@ -1054,7 +1137,7 @@
 				<string>{208, 32}</string>
 				<string>{172, 234}</string>
 				<string>{320, 480}</string>
-				<string>{138, 60}</string>
+				<string>{16, 16}</string>
 				<string>{320, 365}</string>
 				<string>{92, 94}</string>
 			</object>
