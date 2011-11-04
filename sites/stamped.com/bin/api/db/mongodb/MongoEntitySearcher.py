@@ -275,7 +275,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         query = input_query
         
-        if not self._is_possible_location_query(category_filter, subcategory_filter, local):
+        if not self._is_possible_location_query(category_filter, subcategory_filter, local, prefix):
             # if we're filtering by category / subcategory and the filtered results 
             # couldn't possibly contain a location, then ensure that coords is disabled
             coords = None
@@ -425,11 +425,11 @@ class MongoEntitySearcher(EntitySearcher):
             if self._is_possible_apple_query(category_filter, subcategory_filter, local):
                 pool.spawn(_find_apple)
             
-            if self._is_possible_tv_query(category_filter, subcategory_filter, local):
-                pool.spawn(_find_tv)
+            # note: disabling thetvdb api queries for now after crawling all english tv shows
+            # as of 11/2/11
+            #if self._is_possible_tv_query(category_filter, subcategory_filter, local):
+            #    pool.spawn(_find_tv)
             
-            #if not local:
-            #    pool.spawn(_find_google_local)
             if not local:
                 pool.spawn(_find_google_national)
         
@@ -591,7 +591,7 @@ class MongoEntitySearcher(EntitySearcher):
                         return
                     thetvdb_ids.add(thetvdb_id)
                 
-                if local and not self._is_possible_location_query(entity.category, entity.subcategory, False):
+                if local and not self._is_possible_location_query(entity.category, entity.subcategory, False, prefix):
                     return
                 
                 results[entity.entity_id] = result
@@ -952,7 +952,10 @@ class MongoEntitySearcher(EntitySearcher):
         
         return value
     
-    def _is_possible_location_query(self, category_filter, subcategory_filter, local):
+    def _is_possible_location_query(self, category_filter, subcategory_filter, local, prefix):
+        if prefix:
+            return False
+        
         if local:
             return True
         
@@ -1040,7 +1043,7 @@ class MongoEntitySearcher(EntitySearcher):
                     distance = utils.get_spherical_distance(coords, (e.lat, e.lng))
                     distance = -distance * earthRadius
                 
-                assert e.entity_id is not None
+                #assert e.entity_id is not None
                 output.append((e, distance))
             except Exception, e:
                 self._handle_search_error('mongodb', e)

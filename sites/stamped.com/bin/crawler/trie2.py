@@ -34,7 +34,6 @@ class S3AutocompleteDB(object):
         else:
             self.bucket = conn.create_bucket(bucket_name)
         
-        self.bucket.set_acl('public-read')
         self.bucket_name = bucket_name
     
     def add_key(self, name, value, content_type=None, apply_gzip=False, temp_prefix=None):
@@ -48,8 +47,7 @@ class S3AutocompleteDB(object):
             
             # TODO: why does zlib compression not work?
             #value = zlib.compress(value, 6)
-            temp = 'temp.%s.gz' % temp_prefix
-            
+            temp  = '.temp.%s.gz' % temp_prefix
             tries = 0
             
             while True:
@@ -150,8 +148,12 @@ def main():
     autocompleteDB = S3AutocompleteDB()
     
     prefixes = set()
+    wrapper  = {
+        'time_sum' : 0.0, 
+        'time_num' : 0, 
+    }
     
-    def _add(orig_name):
+    def _add(orig_name, wrapper):
         try:
             if 0 == len(orig_name) or orig_name in prefixes:
                 return
@@ -160,14 +162,21 @@ def main():
             if 0 == len(name):
                 return
             
-            name = "search/v1/%s.json" % name
+            name = "search/v2/%s.json" % name
             
             print "searching %s" % orig_name.encode('ascii', 'replace')
             tries = 0
             
             while True:
                 try:
+                    t1 = time.time()
                     results = stampedAPI.searchEntities(query=orig_name, limit=10, prefix=True, full=False)
+                    t2 = time.time()
+                    duration = (t2 - t1)
+                    
+                    wrapper['time_sum'] += duration
+                    wrapper['time_num'] += 1
+                    
                     break
                 except:
                     tries += 1
@@ -181,6 +190,7 @@ def main():
             
             if len(results) <= 1:
                 i = len(orig_name)
+                
                 while i > 0:
                     prefixes.add(orig_name[0:i])
                     i -= 1
@@ -190,7 +200,7 @@ def main():
             
             autosuggest = []
             for item in results:
-                item = HTTPEntityAutosuggest().importSchema(item).exportSparse()
+                item = HTTPEntityAutosuggest().importSchema(item[0], item[1]).exportSparse()
                 autosuggest.append(item)
             
             value = json.dumps(autosuggest, sort_keys=True)
@@ -226,11 +236,11 @@ def main():
         if options.limit is not None and done > options.limit: break
         
         line = line[:-1]
-        pool.spawn(_add, line)
+        pool.spawn(_add, line, wrapper)
         
         done += 1
         if options.limit <= 100 or ((done - 1) % (options.limit / 100)) == 0:
-            utils.log("done processing %s" % (utils.getStatusStr(done, options.limit), ))
+            utils.log("done processing %s (avg search time %s ms)" % (utils.getStatusStr(done, options.limit), 1000.0 * (wrapper['time_sum'] / (wrapper['time_num'] if wrapper['time_num'] > 0 else 1))))
     
     pool.join()
     infile.close()

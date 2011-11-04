@@ -132,6 +132,7 @@ def main():
                                                        options.album_popularity_per_genre.table)
     rows  = list(rows)
     
+    # loop through all albums
     utils.log("[%s] parsing %d rows" % ('albums', count))
     for i in xrange(len(rows)):
         if offset < options.offset: offset += 1; continue
@@ -150,6 +151,7 @@ def main():
                                                       options.song_popularity_per_genre.table)
     rows  = list(rows)
     
+    # loop through all songs
     utils.log("[%s] parsing %d rows" % ('songs', count))
     for i in xrange(len(rows)):
         if offset < options.offset: offset += 1; continue

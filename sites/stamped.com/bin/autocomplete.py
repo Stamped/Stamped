@@ -73,7 +73,7 @@ def main():
         if diff:
             print query
             try:
-                raw_result = utils.getFile('http://static.stamped.com/search/v1/%s.json.gz' % encode_s3_name(query))
+                raw_result = utils.getFile('http://static.stamped.com/search/v2/%s.json.gz' % encode_s3_name(query))
             except urllib2.HTTPError:
                 # ignore errors in the (likely) event of a non-existent autocomplete file
                 continue
