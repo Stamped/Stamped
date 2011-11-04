@@ -15,6 +15,7 @@
 #import "AccountManager.h"
 #import "CreditsViewController.h"
 #import "Entity.h"
+#import "EditProfileViewController.h"
 #import "RelationshipsViewController.h"
 #import "Stamp.h"
 #import "StampDetailViewController.h"
@@ -35,6 +36,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 @interface ProfileViewController ()
 - (void)userImageTapped:(id)sender;
+- (void)editButtonPressed:(id)sender;
 - (void)loadStampsFromNetwork;
 - (void)loadUserInfoFromNetwork;
 - (void)fillInUserData;
@@ -45,6 +47,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, copy) NSArray* stampsArray;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
+@property (nonatomic, readonly) CALayer* stampLayer;
 @end
 
 @implementation ProfileViewController
@@ -66,6 +69,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize followIndicator = followIndicator_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
+@synthesize stampLayer = stampLayer_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -96,16 +100,16 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [super viewDidLoad];
   userImageView_.imageURL = user_.profileImageURL;
   userImageView_.enabled = YES;
-  [userImageView_ addTarget:self 
+  [userImageView_ addTarget:self
                      action:@selector(userImageTapped:)
            forControlEvents:UIControlEventTouchUpInside];
 
-  CALayer* stampLayer = [[CALayer alloc] init];
-  stampLayer.frame = CGRectMake(57, -10, 61, 61);
-  stampLayer.opacity = 0.95;
-  stampLayer.contents = (id)user_.stampImage.CGImage;
-  [shelfImageView_.superview.layer insertSublayer:stampLayer below:shelfImageView_.layer];
-  [stampLayer release];
+  stampLayer_ = [[CALayer alloc] init];
+  stampLayer_.frame = CGRectMake(57, -10, 61, 61);
+  stampLayer_.opacity = 0.95;
+  stampLayer_.contents = (id)user_.stampImage.CGImage;
+  [shelfImageView_.superview.layer insertSublayer:stampLayer_ below:shelfImageView_.layer];
+  [stampLayer_ release];
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
   bioLabel_.font = [UIFont fontWithName:@"Helvetica-Oblique" size:12];
@@ -120,6 +124,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
   
+  if ([user_.screenName isEqualToString:[AccountManager sharedManager].currentUser.screenName]) {
+    UIBarButtonItem* editButton = [[UIBarButtonItem alloc] initWithTitle:@"Edit"
+                                                                   style:UIBarButtonItemStylePlain
+                                                                  target:self
+                                                                  action:@selector(editButtonPressed:)];
+    [self.navigationItem setRightBarButtonItem:editButton];
+    [editButton release];
+  }
+  
   CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
   toolbarGradient.colors = [NSArray arrayWithObjects:
                             (id)[UIColor colorWithWhite:1.0 alpha:1.0].CGColor,
@@ -132,9 +145,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   toolbarView_.layer.shadowOpacity = 0.2;
   toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
   toolbarView_.alpha = 0.85;
-  [self loadStampsFromNetwork];
   [self loadUserInfoFromNetwork];
-  [self loadRelationshipData];
 }
 
 - (void)viewDidUnload {
@@ -156,9 +167,18 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
   [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
                             animated:animated];
-  [super viewWillAppear:animated];
+  if (!user_.name)
+    [self loadUserInfoFromNetwork];
+  else
+    [self fillInUserData];
+
+  if (!stampsArray_)
+    [self loadStampsFromNetwork];
+  if (followButton_.hidden && unfollowButton_.hidden)
+    [self loadRelationshipData];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -172,8 +192,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
-  if (self.navigationController.viewControllers.count > 1)
-    return;
 }
 
 - (void)userImageTapped:(id)sender {
@@ -181,6 +199,14 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   controller.imageURL = user_.largeProfileImageURL;
   [self.navigationController pushViewController:controller animated:YES];
   [controller release];
+}
+
+- (void)editButtonPressed:(id)sender {
+  EditProfileViewController* vc = [[EditProfileViewController alloc] initWithNibName:@"EditProfileViewController"
+                                                                              bundle:nil];
+  vc.user = user_;
+  [self.navigationController presentModalViewController:vc animated:YES];
+  [vc release];
 }
 
 #pragma mark - IBActions
@@ -213,8 +239,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (IBAction)creditsButtonPressed:(id)sender {
   CreditsViewController* creditsViewController =
-      [[CreditsViewController alloc] initWithNibName:@"CreditsViewController" bundle:nil];
-  creditsViewController.screenName = user_.screenName;
+      [[CreditsViewController alloc] initWithUser:self.user];
   [self.navigationController pushViewController:creditsViewController animated:YES];
   [creditsViewController release];
 }
@@ -476,6 +501,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   creditCountLabel_.text = [user_.numCredits stringValue];
   followerCountLabel_.text = [user_.numFollowers stringValue];
   followingCountLabel_.text = [user_.numFriends stringValue];
+  stampLayer_.contents = (id)user_.stampImage.CGImage;
   [self updateStampsRemainingLayer];
   [self.tableView reloadData];
 }

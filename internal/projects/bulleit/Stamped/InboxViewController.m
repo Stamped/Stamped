@@ -179,6 +179,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [navBar setButtonShown:NO];
 }
 
+- (void)viewDidDisappear:(BOOL)animated {
+  [super viewDidDisappear:animated];  
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }

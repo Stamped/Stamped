@@ -18,6 +18,10 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def __init__(self, setup=False):
         AMongoCollection.__init__(self, collection='users', primary_key='user_id', obj=User, overflow=True)
         AUserDB.__init__(self)
+        
+        self._collection.ensure_index('phone')
+        self._collection.ensure_index('linked_accounts.twitter.twitter_id')
+        self._collection.ensure_index('linked_accounts.facebook.facebook_id')
 
     ### Note that overflow=True
     def _convertFromMongo(self, document):

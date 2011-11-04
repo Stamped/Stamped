@@ -24,7 +24,7 @@
 
 static NSString* const kNearbyPath = @"/entities/nearby.json";
 static NSString* const kSearchPath = @"/entities/search.json";
-static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v1/";
+static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v2/";
 
 typedef enum {
   SearchFilterNone = 0,
@@ -119,6 +119,12 @@ typedef enum {
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Search"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
   [self.searchField addTarget:self
                        action:@selector(textFieldDidChange:)
              forControlEvents:UIControlEventEditingChanged];
@@ -409,7 +415,7 @@ typedef enum {
       cell = [[[SearchEntitiesAutoSuggestCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
 
     SearchResult* result = [resultsArray_ objectAtIndex:indexPath.row];
-    cell.textLabel.text = result.title;
+    cell.customTextLabel.text = result.title;
     return cell;
   }
   
@@ -637,6 +643,15 @@ typedef enum {
                                 (id)[UIColor colorWithWhite:0.76 alpha:1.0].CGColor, nil];
   [view.layer insertSublayer:gradientLayer below:view.leftLabel.layer];
   [gradientLayer release];
+  if (currentSearchFilter_ == SearchFilterNone ||
+      currentSearchFilter_ == SearchFilterFood ||
+      currentSearchFilter_ == SearchFilterOther ||
+      currentResultType_ == ResultTypeLocal) {
+    UIImageView* google = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"poweredbygoogle"]];
+    google.frame = CGRectOffset(google.frame, 213, 5);
+    [view addSubview:google];
+    [google release];
+  }
   view.leftLabel.textColor = view.leftLabel.shadowColor;
   view.leftLabel.shadowColor = [UIColor stampedGrayColor];
   view.leftLabel.shadowOffset = CGSizeMake(0, -1);
@@ -648,16 +663,16 @@ typedef enum {
     NSString* corpus = @"All results";
     switch (currentSearchFilter_) {
       case SearchFilterBook:
-        corpus = @"Book results";
+        corpus = @"Books only";
         break;
       case SearchFilterMusic:
-        corpus = @"Music results";
+        corpus = @"Music only";
         break;
       case SearchFilterFilm:
-        corpus = @"Movie & TV show results";
+        corpus = @"Movies & TV shows only";
         break;
       case SearchFilterFood:
-        corpus = @"Restaurant & bar results";
+        corpus = @"Restaurants & bars only";
         break;
       case SearchFilterOther:
         corpus = @"Other category results";
@@ -678,23 +693,9 @@ typedef enum {
   }
   
   SearchResult* result = nil;
-  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull) {
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_) {
     result = [[[SearchResult alloc] init] autorelease];
-    result.title = self.searchField.text;
-  } else if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && !loading_ && searchField_.text.length > 0 && resultsArray_.count == 0) {
-    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
-    [self sendSearchRequest];
-    return;
-  } else if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal) {
-    if (searchField_.text.length > 0) {
-      result = [[[SearchResult alloc] init] autorelease];
-      result.title = self.searchField.text;
-    } else {
-      [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
-      [self.tableView setContentOffset:CGPointMake(0, 0) animated:NO];
-      [searchField_ becomeFirstResponder];
-      return;
-    }
+    result.title = self.searchField.text.capitalizedString;
   } else if (currentResultType_ == ResultTypeFast) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   } else if ((currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && !loading_) {

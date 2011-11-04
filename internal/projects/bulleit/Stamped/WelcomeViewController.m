@@ -220,7 +220,9 @@ NSString* const kStampColors[7][2] = {
     if ([view isMemberOfClass:[UIButton class]])
       [(UIButton*)view setSelected:NO];
   }
-  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithNibName:@"StampCustomizerViewController" bundle:nil];
+  User* user = [AccountManager sharedManager].currentUser;
+  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithPrimaryColor:user.primaryColor
+                                                                                        secondary:user.secondaryColor];
   vc.delegate = self;
   [self presentModalViewController:vc animated:YES];
   [vc release];

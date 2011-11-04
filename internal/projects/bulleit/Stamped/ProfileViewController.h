@@ -38,5 +38,4 @@
 - (IBAction)creditsButtonPressed:(id)sender;
 - (IBAction)followersButtonPressed:(id)sender;
 - (IBAction)followingButtonPressed:(id)sender;
-- (IBAction)cameraButtonPressed:(id)sender;
 @end

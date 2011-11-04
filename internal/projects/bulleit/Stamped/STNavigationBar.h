@@ -23,6 +23,7 @@ extern NSString* const kSettingsButtonPressedNotification;
   NSString* string;
 }
 
+- (void)setListButtonShown:(BOOL)shown;
 - (void)setButtonShown:(BOOL)shown;
 - (void)setSettingsButtonShown:(BOOL)shown;
 

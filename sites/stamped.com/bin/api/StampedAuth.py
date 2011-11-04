@@ -158,7 +158,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid refresh token"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_token", 401, msg)
+            raise AuthError("invalid_token", 401, msg)
 
         ### Generate Access Token
         token = self.addAccessToken(clientId, token.user_id, refreshToken)
@@ -224,7 +224,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid Access Token"
             logs.warning(msg)
-            raise StampedHTTPError("invalid_token", 401, msg)
+            raise AuthError("invalid_token", 401, msg)
     
     def removeAccessToken(self, tokenId):
         return self._accessTokenDB.removeAccessToken(tokenId)

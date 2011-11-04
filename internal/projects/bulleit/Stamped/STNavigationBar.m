@@ -164,7 +164,6 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
                                                       object:nil];
 }
 
-
 - (void)setSettingsButtonShown:(BOOL)shown {
   if (settingsButtonShown_ == shown)
     return;
@@ -175,6 +174,13 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   [UIView animateWithDuration:0.2
                    animations:^{ settingsButton_.alpha = shown ? 1.0 : 0.0; }
                    completion:^(BOOL finished) { settingsButton_.hidden = !shown; }];
+}
+
+- (void)setListButtonShown:(BOOL)shown {
+  if (listButtonShown_ == shown)
+    return;
+
+  [self auxiliaryButtonTapped];
 }
 
 - (void)setButtonShown:(BOOL)shown {

@@ -9,11 +9,16 @@
 #import <UIKit/UIKit.h>
 #import <RestKit/RestKit.h>
 
+@class User;
+
 @interface CreditsViewController : UIViewController <RKObjectLoaderDelegate,
                                                      UITableViewDelegate,
                                                      UITableViewDataSource>
 
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, copy) NSString* screenName;
+@property (nonatomic, retain) User* user;
+
+- (id)initWithUser:(User*)aUser;
 
 @end

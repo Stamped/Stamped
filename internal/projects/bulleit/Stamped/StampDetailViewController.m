@@ -31,7 +31,6 @@
 #import "UIColor+Stamped.h"
 #import "SharedRequestDelegate.h"
 #import "WebViewController.h"
-#import "MediumUserImageButton.h"
 
 NSString* const kRemoveCommentPath = @"/comments/remove.json";
 NSString* const kRemoveStampPath = @"/stamps/remove.json";
@@ -406,7 +405,7 @@ typedef enum {
   NSUInteger pageNum = 1;
   for (NSUInteger i = 0; i < stampsArray.count; ++i) {
     s = [stampsArray objectAtIndex:i];
-    MediumUserImageButton* userImageButton = [[MediumUserImageButton alloc] initWithFrame:userImgFrame];
+    UserImageView* userImage = [[UserImageView alloc] initWithFrame:userImgFrame];
     
     if (i > 1 && i % 6 == 0) {
       alsoStampedByScrollView_.contentSize =
@@ -417,19 +416,19 @@ typedef enum {
 
     CGFloat xOffset = i * (userImgFrame.size.width + 7.0) + 10.0 * (pageNum - 1) + 9.0;
 
-    userImageButton.frame = CGRectOffset(userImgFrame, xOffset, 5);
-    userImageButton.contentMode = UIViewContentModeCenter;
-    userImageButton.layer.shadowOffset = CGSizeMake(0, 1);
-    userImageButton.layer.shadowOpacity = 0.2;
-    userImageButton.layer.shadowRadius = 1.75;
-    userImageButton.imageURL = s.user.profileImageURL;
-    
-    [userImageButton addTarget:self
-                        action:@selector(alsoStampedByUserImageTapped:)
-              forControlEvents:UIControlEventTouchUpInside];
-    userImageButton.tag = i;
-    [alsoStampedByScrollView_ addSubview:userImageButton];
-    [userImageButton release];
+    userImage.frame = CGRectOffset(userImgFrame, xOffset, 5);
+    userImage.contentMode = UIViewContentModeCenter;
+    userImage.layer.shadowOffset = CGSizeMake(0, 1);
+    userImage.layer.shadowOpacity = 0.2;
+    userImage.layer.shadowRadius = 1.75;
+    userImage.imageURL = s.user.profileImageURL;
+    userImage.enabled = YES;
+    [userImage addTarget:self
+                  action:@selector(alsoStampedByUserImageTapped:)
+        forControlEvents:UIControlEventTouchUpInside];
+    userImage.tag = i;
+    [alsoStampedByScrollView_ addSubview:userImage];
+    [userImage release];
   }
 }
 

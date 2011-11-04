@@ -28,13 +28,15 @@ static const NSUInteger kMaxPicUploadTries = 3;
 
 @interface EditProfileViewController ()
 @property (nonatomic, readonly) UIResponder* firstResponder;
-@property (nonatomic, retain) UIImage* newProfilePic;
+@property (nonatomic, retain) UIImage* profilePic;
 @property (nonatomic, assign) NSUInteger numPicUploadTries;
 @end
 
 @implementation EditProfileViewController
 
 @synthesize user = user_;
+@synthesize settingsButton = settingsButton_;
+@synthesize doneButton = doneButton_;
 @synthesize stampImageView = stampImageView_;
 @synthesize userImageView = userImageView_;
 @synthesize nameTextField = nameTextField_;
@@ -45,7 +47,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
 @synthesize saveIndicator = saveIndicator_;
 @synthesize firstResponder = firstResponder_;
 @synthesize profileImageIndicator = profileImageIndicator_;
-@synthesize newProfilePic = newProfilePic_;
+@synthesize profilePic = profilePic_;
 @synthesize numPicUploadTries = numPicUploadTries_;
 @synthesize scrollView = scrollView_;
 
@@ -58,6 +60,8 @@ static const NSUInteger kMaxPicUploadTries = 3;
 
 - (void)dealloc {
   self.user = nil;
+  self.settingsButton = nil;
+  self.doneButton = nil;
   self.stampImageView = nil;
   self.userImageView = nil;
   self.nameTextField = nil;
@@ -67,7 +71,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
   self.saveIndicator = nil;
   self.saveButton = nil;
   self.profileImageIndicator = nil;
-  self.newProfilePic = nil;
+  self.profilePic = nil;
   self.scrollView = nil;
   firstResponder_ = nil;
   [super dealloc];
@@ -76,8 +80,6 @@ static const NSUInteger kMaxPicUploadTries = 3;
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-  
-  // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -97,6 +99,8 @@ static const NSUInteger kMaxPicUploadTries = 3;
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  self.settingsButton = nil;
+  self.doneButton = nil;
   self.stampImageView = nil;
   self.userImageView = nil;
   self.nameTextField = nil;
@@ -110,12 +114,37 @@ static const NSUInteger kMaxPicUploadTries = 3;
   firstResponder_ = nil;
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  UIViewController* vc = nil;
+  if ([self respondsToSelector:@selector(presentingViewController)]) {
+    vc = self.presentingViewController;
+  } else {
+    vc = self.parentViewController;
+  }
+  if (vc && vc.modalViewController == self) {
+    settingsButton_.hidden = YES;
+    doneButton_.hidden = NO;
+  }
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   // Return YES for supported orientations
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 #pragma mark - Actions
+
+- (IBAction)doneButtonPressed:(id)sender {
+  UIViewController* vc = nil;
+  if ([self respondsToSelector:@selector(presentingViewController)]) {
+    vc = self.presentingViewController;
+  } else {
+    vc = self.parentViewController;
+  }
+  if (vc && vc.modalViewController == self)
+    [vc dismissModalViewControllerAnimated:YES];
+}
 
 - (IBAction)saveButtonPressed:(id)sender {
   if (!nameTextField_.text.length) {
@@ -153,9 +182,10 @@ static const NSUInteger kMaxPicUploadTries = 3;
 }
 
 - (IBAction)editStampButtonPressed:(id)sender {
-  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithNibName:@"StampCustomizerViewController" bundle:nil];
+  StampCustomizerViewController* vc = [[StampCustomizerViewController alloc] initWithPrimaryColor:user_.primaryColor
+                                                                                        secondary:user_.secondaryColor];
   vc.delegate = self;
-  [self.navigationController presentModalViewController:vc animated:YES];
+  [self presentModalViewController:vc animated:YES];
   [vc release];
 }
 
@@ -168,9 +198,9 @@ static const NSUInteger kMaxPicUploadTries = 3;
     [saveButton_ setTitle:@"Saved!" forState:UIControlStateNormal];
   } else if ([objectLoader.resourcePath isEqualToString:kUpdateProfileImagePath]) {
     [profileImageIndicator_ stopAnimating];
-    userImageView_.image = self.newProfilePic;
+    userImageView_.image = self.profilePic;
     userImageView_.hidden = NO;
-    [[UserImageDownloadManager sharedManager] setImage:self.newProfilePic
+    [[UserImageDownloadManager sharedManager] setImage:self.profilePic
                                                 forURL:user_.profileImageURL];
   }
 }
@@ -306,7 +336,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
     
     UIGraphicsBeginImageContext(CGSizeMake(kProfileImageSize, kProfileImageSize));
     [photo drawInRect:CGRectMake(0, 0, kProfileImageSize, kProfileImageSize)];
-    self.newProfilePic = UIGraphicsGetImageFromCurrentImageContext();
+    self.profilePic = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     userImageView_.hidden = YES;
     [profileImageIndicator_ startAnimating];
@@ -317,11 +347,11 @@ static const NSUInteger kMaxPicUploadTries = 3;
                                                           delegate:self];
     loader.method = RKRequestMethodPOST;
     loader.objectMapping = mapping;
-    if (!self.newProfilePic)
+    if (!self.profilePic)
       return;
     
     RKParams* params = [RKParams params];
-    NSData* imageData = UIImageJPEGRepresentation(self.newProfilePic, 0.8);
+    NSData* imageData = UIImageJPEGRepresentation(self.profilePic, 0.8);
     [params setData:imageData MIMEType:@"image/jpeg" forParam:@"profile_image"];
     loader.params = params;
     [loader send];

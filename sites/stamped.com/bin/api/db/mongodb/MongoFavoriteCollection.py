@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals
+import Globals, pymongo
 
 from datetime import datetime
 from utils import lazyProperty
@@ -21,6 +21,9 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
     def __init__(self, setup=False):
         AMongoCollection.__init__(self, collection='favorites', primary_key='favorite_id', obj=Favorite)
         AFavoriteDB.__init__(self)
+
+        self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), \
+                                        ('user_id', pymongo.ASCENDING)])
     
     ### PUBLIC
     
@@ -65,6 +68,11 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
         sort        = kwargs.pop('sort', None)
         limit       = kwargs.pop('limit', 0)
 
+        if sort in ['modified', 'created']:
+            sort = 'timestamp.%s' % sort
+        else:
+            sort = 'timestamp.created'
+
         ### TODO: Make sure this is indexed
         params = {'user_id': userId}
         
@@ -75,11 +83,8 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
         elif before != None:
             params['timestamp.created'] = {'$lte': before}
         
-        if sort != None:
-            documents = self._collection.find(params).sort(sort, \
-                pymongo.DESCENDING).limit(limit)
-        else:
-            documents = self._collection.find(params).limit(limit)
+        documents = self._collection.find(params).sort(sort, \
+            pymongo.DESCENDING).limit(limit)
         
         favorites = []
         for document in documents:

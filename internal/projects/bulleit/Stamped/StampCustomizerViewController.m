@@ -25,6 +25,31 @@
 @synthesize secondaryColorButton = secondaryColorButton_;
 @synthesize delegate = delegate_;
 
+- (id)initWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary {
+  self = [self initWithNibName:@"StampCustomizerViewController" bundle:nil];
+  if (self) {
+    if (primary && secondary) {
+      CGFloat r1, g1, b1, s1;
+      [Util splitHexString:primary toRed:&r1 green:&g1 blue:&b1];
+      UIColor* primaryColor = [UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0];
+      [primaryColor getHue:&primaryHue_ saturation:&s1 brightness:&primaryBrightness_ alpha:NULL];
+      if (s1 < 1.0)
+        primaryBrightness_ = ((-0.5 * (s1 - 1)) / 0.8) + 0.5;
+      else
+        primaryBrightness_ *= 0.5;
+      CGFloat r2, g2, b2, s2;
+      [Util splitHexString:secondary toRed:&r2 green:&g2 blue:&b2];
+      UIColor* secondaryColor = [UIColor colorWithRed:r2 green:g2 blue:b2 alpha:1.0];
+      [secondaryColor getHue:&secondaryHue_ saturation:&s2 brightness:&secondaryBrightness_ alpha:NULL];
+      if (s2 < 1.0)
+        secondaryBrightness_ = ((-0.5 * (s2 - 1)) / 0.8) + 0.5;
+      else
+        secondaryBrightness_ *= 0.5;
+    }
+  }
+  return self;
+}
+
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
@@ -44,10 +69,11 @@
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  primaryHue_ = 0.75;
-  primaryBrightness_ = 0.25;
-  secondaryHue_ = 0.75;
-  secondaryBrightness_ = 0.25;
+  [self primaryColorButtonPressed:nil];
+  [self hueChanged:nil];
+  [self secondaryColorButtonPressed:nil];
+  [self hueChanged:nil];
+  [self primaryColorButtonPressed:nil];
   primaryColorButton_.selected = YES;
   [hueSlider_ setMinimumTrackImage:[UIImage imageNamed:@"hue_background"] forState:UIControlStateNormal];
   [hueSlider_ setMaximumTrackImage:[UIImage imageNamed:@"hue_background"] forState:UIControlStateNormal];

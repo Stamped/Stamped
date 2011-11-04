@@ -14,6 +14,7 @@
 #import "CreditTableViewCell.h"
 #import "Entity.h"
 #import "Stamp.h"
+#import "User.h"
 #import "StampDetailViewController.h"
 
 static NSString* const kCreditsPath = @"/collections/credit.json";
@@ -29,6 +30,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 @synthesize tableView = tableView_;
 @synthesize stampsArray = stampsArray_;
 @synthesize screenName = screenName_;
+@synthesize user = user_;
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -44,6 +46,12 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 }
 
 #pragma mark - View lifecycle
+
+- (id)initWithUser:(User*)aUser {
+  user_ = aUser;
+  screenName_ = user_.screenName;
+  return [self initWithNibName:@"CreditsViewController" bundle:nil];
+}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
@@ -95,6 +103,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   }
   
   cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
+  cell.creditedUser = self.user;
   return cell;
 }
 

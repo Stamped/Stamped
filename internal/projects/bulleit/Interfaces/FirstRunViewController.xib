@@ -309,7 +309,6 @@
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{67, 31}, {186, 186}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
-						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="259474293"/>
 						<string key="NSReuseIdentifierKey">_NS:541</string>
 						<int key="IBUIContentMode">1</int>
@@ -325,7 +324,6 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{27, 261}, {266, 31}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
-						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="627645974"/>
 						<string key="NSReuseIdentifierKey">_NS:294</string>
 						<bool key="IBUIOpaque">NO</bool>
@@ -364,7 +362,6 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{27, 307}, {266, 31}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
-						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:294</string>
 						<bool key="IBUIOpaque">NO</bool>
@@ -394,7 +391,6 @@
 				</object>
 				<string key="NSFrameSize">{320, 388}</string>
 				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="608762401"/>
 				<string key="NSReuseIdentifierKey">_NS:174</string>
 				<bool key="IBUIClipsSubviews">YES</bool>
@@ -623,7 +619,7 @@
 					<object class="IBUIImageView" id="637011777">
 						<reference key="NSNextResponder" ref="1056128844"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{98, 322}, {202, 46}}</string>
+						<string key="NSFrame">{{80, 325}, {220, 43}}</string>
 						<reference key="NSSuperview" ref="1056128844"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="141276877"/>
@@ -633,13 +629,13 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">welcome_fineprint</string>
+							<string key="NSResourceName">welcome_fineprint.png</string>
 						</object>
 					</object>
 					<object class="IBUIButton" id="141276877">
 						<reference key="NSNextResponder" ref="1056128844"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{230, 337}, {70, 14}}</string>
+						<string key="NSFrame">{{226, 338}, {75, 14}}</string>
 						<reference key="NSSuperview" ref="1056128844"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView"/>
@@ -649,25 +645,42 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
-						<object class="NSColor" key="IBUITintColor">
-							<int key="NSColorSpace">1</int>
-							<bytes key="NSRGB">MCAwIDAAA</bytes>
-						</object>
 						<reference key="IBUIHighlightedTitleColor" ref="724018161"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
 							<bytes key="NSRGB">MC4xOTYwNzg0MzE0IDAuMzA5ODAzOTIxNiAwLjUyMTU2ODYyNzUAA</bytes>
 						</object>
 						<reference key="IBUINormalTitleShadowColor" ref="461933440"/>
-						<object class="IBUIFontDescription" key="IBUIFontDescription">
+						<object class="IBUIFontDescription" key="IBUIFontDescription" id="723956113">
 							<int key="type">2</int>
 							<int key="size">2</int>
 						</object>
-						<object class="NSFont" key="IBUIFont">
+						<object class="NSFont" key="IBUIFont" id="387807984">
 							<string key="NSName">Helvetica-Bold</string>
 							<double key="NSSize">18</double>
 							<int key="NSfFlags">16</int>
 						</object>
+					</object>
+					<object class="IBUIButton" id="146568610">
+						<reference key="NSNextResponder" ref="1056128844"/>
+						<int key="NSvFlags">292</int>
+						<string key="NSFrame">{{135, 338}, {70, 14}}</string>
+						<reference key="NSSuperview" ref="1056128844"/>
+						<reference key="NSWindow"/>
+						<string key="NSReuseIdentifierKey">_NS:225</string>
+						<reference key="IBUIBackgroundColor" ref="407695596"/>
+						<bool key="IBUIOpaque">NO</bool>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+						<int key="IBUIContentHorizontalAlignment">0</int>
+						<int key="IBUIContentVerticalAlignment">0</int>
+						<reference key="IBUIHighlightedTitleColor" ref="724018161"/>
+						<object class="NSColor" key="IBUINormalTitleColor">
+							<int key="NSColorSpace">1</int>
+							<bytes key="NSRGB">MC4xOTYwNzg0MzE0IDAuMzA5ODAzOTIxNiAwLjUyMTU2ODYyNzUAA</bytes>
+						</object>
+						<reference key="IBUINormalTitleShadowColor" ref="461933440"/>
+						<reference key="IBUIFontDescription" ref="723956113"/>
+						<reference key="IBUIFont" ref="387807984"/>
 					</object>
 				</object>
 				<string key="NSFrameSize">{320, 388}</string>
@@ -971,12 +984,21 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">tosButtonPressed:</string>
+						<string key="label">privacyButtonPressed:</string>
 						<reference key="source" ref="141276877"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">7</int>
 					</object>
-					<int key="connectionID">85</int>
+					<int key="connectionID">89</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">termsButtonPressed:</string>
+						<reference key="source" ref="146568610"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">88</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1126,6 +1148,7 @@
 							<reference ref="972441663"/>
 							<reference ref="637011777"/>
 							<reference ref="141276877"/>
+							<reference ref="146568610"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Sign Up Scroll View</string>
@@ -1192,6 +1215,11 @@
 						<reference key="object" ref="141276877"/>
 						<reference key="parent" ref="1056128844"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">86</int>
+						<reference key="object" ref="146568610"/>
+						<reference key="parent" ref="1056128844"/>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1240,6 +1268,7 @@
 					<string>73.IBPluginDependency</string>
 					<string>83.IBPluginDependency</string>
 					<string>84.IBPluginDependency</string>
+					<string>86.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1285,6 +1314,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -1299,7 +1329,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">85</int>
+			<int key="maxID">89</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1314,12 +1344,14 @@
 							<string>cancelButtonPressed:</string>
 							<string>confirmButtonPressed:</string>
 							<string>createAccountButtonPressed:</string>
+							<string>privacyButtonPressed:</string>
 							<string>signInButtonPressed:</string>
 							<string>takePhotoButtonPressed:</string>
-							<string>tosButtonPressed:</string>
+							<string>termsButtonPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1335,9 +1367,10 @@
 							<string>cancelButtonPressed:</string>
 							<string>confirmButtonPressed:</string>
 							<string>createAccountButtonPressed:</string>
+							<string>privacyButtonPressed:</string>
 							<string>signInButtonPressed:</string>
 							<string>takePhotoButtonPressed:</string>
-							<string>tosButtonPressed:</string>
+							<string>termsButtonPressed:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1354,6 +1387,10 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">privacyButtonPressed:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">signInButtonPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -1362,7 +1399,7 @@
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">tosButtonPressed:</string>
+								<string key="name">termsButtonPressed:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
@@ -1583,7 +1620,7 @@
 				<string>stamp_detail_ripple_bottom@2x.png</string>
 				<string>stamped_logo_large@2x.png</string>
 				<string>top-round-corner-mask@2x.png</string>
-				<string>welcome_fineprint</string>
+				<string>welcome_fineprint.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1598,7 +1635,7 @@
 				<string>{620, 7}</string>
 				<string>{372, 372}</string>
 				<string>{640, 4}</string>
-				<string>{16, 16}</string>
+				<string>{220, 43}</string>
 			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">933</string>

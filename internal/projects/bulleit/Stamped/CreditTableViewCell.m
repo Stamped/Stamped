@@ -17,6 +17,7 @@
 #import "Util.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+#import "AccountManager.h"
 
 @interface CreditTableViewCell ()
 - (NSAttributedString*)headerAttributedStringWithColor:(UIColor*)color;
@@ -32,6 +33,7 @@
 @implementation CreditTableViewCell
 
 @synthesize stamp = stamp_;
+@synthesize creditedUser = creditedUser_;
 @synthesize entityTitleLabel = entityTitleLabel_;
 @synthesize firstStampLayer = firstStampLayer_;
 @synthesize secondStampLayer = secondStampLayer_;
@@ -91,6 +93,7 @@
 
 - (void)dealloc {
   self.stamp = nil;
+  self.creditedUser = nil;
   [super dealloc];
 }
 
@@ -121,6 +124,12 @@
     [CATransaction commit];
     [self.contentView setNeedsDisplay];
   }
+}
+
+- (void)setCreditedUser:(User *)creditedUser {
+  [creditedUser_ release];
+  creditedUser_ = [creditedUser retain];
+  firstStampLayer_.contents = (id)creditedUser_.stampImage.CGImage;
 }
 
 - (void)invertColors:(BOOL)inverted {

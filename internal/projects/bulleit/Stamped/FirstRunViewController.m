@@ -292,7 +292,13 @@ static const CGFloat kProfileImageSize = 500;
   [sheet release];
 }
 
-- (IBAction)tosButtonPressed:(id)sender {
+- (IBAction)termsButtonPressed:(id)sender {
+  TOSViewController* vc = [[TOSViewController alloc] init];
+  [self.navigationController presentModalViewController:vc animated:YES];
+  vc.settingsButton.hidden = YES;
+}
+
+- (IBAction)privacyButtonPressed:(id)sender {
   TOSViewController* vc = [[TOSViewController alloc] init];
   [self.navigationController presentModalViewController:vc animated:YES];
   vc.settingsButton.hidden = YES;

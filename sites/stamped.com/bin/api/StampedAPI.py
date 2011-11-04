@@ -2564,11 +2564,32 @@ class StampedAPI(AStampedAPI):
         return favorite
     
     @API_CALL
-    def getFavorites(self, authUserId, **kwargs):        
+    def getFavorites(self, authUserId, **kwargs):
+        quality         = kwargs.pop('quality', 3)
+        limit           = kwargs.pop('limit', None)
+        sort            = kwargs.pop('sort', 'modified')
+                       
+        # Set quality
+        if quality == 1:
+            favCap  = 50
+        elif quality == 2:
+            favCap  = 30
+        else:
+            favCap  = 20
+        
+        limit = self._setLimit(limit, cap=favCap)
+        
+        # Limit slice of data returned
+        since, before = self._setSliceParams(kwargs)
 
-        ### TODO: Add slicing (before, since, limit, quality)
+        params = {
+            'since':    since,
+            'before':   before, 
+            'limit':    limit,
+            'sort':     sort,
+        }
 
-        favoriteData = self._favoriteDB.getFavorites(authUserId)
+        favoriteData = self._favoriteDB.getFavorites(authUserId, **params)
 
         # Extract entities & stamps
         entityIds   = {}
@@ -2679,6 +2700,10 @@ class StampedAPI(AStampedAPI):
         
         activity = []
         for item in activityData:
+            ### TEMP
+            if item.genre == 'friend':
+                continue
+
             if item.user.user_id != None:
                 item.user = userIds[item.user.user_id]
             if item.linked_user_id != None:

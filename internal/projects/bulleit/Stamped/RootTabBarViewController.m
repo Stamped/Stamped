@@ -358,12 +358,12 @@
     activityTabBarItem_.badgeValue = nil;
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];
-    self.navigationItem.title = @"To Do";
+    self.navigationItem.title = @"To-Do";
   } else if (item == peopleTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:3];
     self.navigationItem.title = @"People";
   }
-  
+  [(STNavigationBar*)self.navigationController.navigationBar setListButtonShown:NO];  
   [self.navigationController.navigationBar setNeedsDisplay];
 
   if (!newViewController || newViewController == self.selectedViewController)

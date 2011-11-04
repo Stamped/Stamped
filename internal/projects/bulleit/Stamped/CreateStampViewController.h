@@ -53,9 +53,9 @@
 @property (nonatomic, retain) IBOutlet UIView* mainCommentContainer;
 @property (nonatomic, retain) IBOutlet UIImageView* backgroundImageView;
 @property (nonatomic, retain) IBOutlet UIButton* tweetButton;
+@property (nonatomic, retain) IBOutlet UIButton* fbButton;
 @property (nonatomic, retain) IBOutlet UILabel* shareLabel;
 @property (nonatomic, retain) IBOutlet UIButton* disclosureButton;
-@property (nonatomic, retain) IBOutlet UIButton* fbButton;
 
 - (IBAction)disclosureButtonPressed:(id)sender;
 - (IBAction)tweetButtonPressed:(id)sender;
