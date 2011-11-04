@@ -74,7 +74,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)fetchCurrentUser;
 - (void)fetchFriendIDs:(NSString*)userIDString;
 - (void)signInToFacebook;
-- (void)checkForEndlessSignIn;
+//- (void)checkForEndlessSignIn;
 - (void)connectTwitterFollowers:(NSArray*)followers;
 - (void)connectFacebookFriends:(NSArray*)friends;
 
