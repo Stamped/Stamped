@@ -23,6 +23,7 @@
 #import "Notifications.h"
 #import "SearchResult.h"
 #import "OAuthToken.h"
+#import "STNavigationBar.h"
 #import "UserImageDownloadManager.h"
 #import "UIColor+Stamped.h"
 
@@ -125,25 +126,25 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   if (![UIBarButtonItem conformsToProtocol:@protocol(UIAppearance)])
     return;
 
-  UIImage* buttonImage = [[UIImage imageNamed:@"default_nav_button_bg"] 
-      resizableImageWithCapInsets:UIEdgeInsetsMake(0, 5, 0, 5)];
-  [[UIBarButtonItem appearance] setBackgroundImage:buttonImage forState:UIControlStateNormal 
-                                        barMetrics:UIBarMetricsDefault];
+  UIImage* buttonImage = [[UIImage imageNamed:@"default_nav_button_bg"] resizableImageWithCapInsets:UIEdgeInsetsMake(0, 5, 0, 5)];
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setBackgroundImage:buttonImage
+                                                                                      forState:UIControlStateNormal 
+                                                                                    barMetrics:UIBarMetricsDefault];
 
   UIImage* backButtonImage = [[UIImage imageNamed:@"default_back_button_bg"]
       resizableImageWithCapInsets:UIEdgeInsetsMake(0, 13, 0, 5)];
-  [[UIBarButtonItem appearance] setBackButtonBackgroundImage:backButtonImage
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setBackButtonBackgroundImage:backButtonImage
                                                     forState:UIControlStateNormal
                                                   barMetrics:UIBarMetricsDefault];
-  [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(1, 0)
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setBackButtonTitlePositionAdjustment:UIOffsetMake(1, 0)
                                                        forBarMetrics:UIBarMetricsDefault];
-  [[UIBarButtonItem appearance] setTitleTextAttributes:
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setTitleTextAttributes:
       [NSDictionary dictionaryWithObjectsAndKeys:
           [UIColor colorWithWhite:0.7 alpha:1.0], UITextAttributeTextColor, 
           [UIColor whiteColor], UITextAttributeTextShadowColor, 
           [NSValue valueWithUIOffset:UIOffsetMake(0, 1)], UITextAttributeTextShadowOffset, nil] 
                                               forState:UIControlStateNormal];
-  [[UIBarButtonItem appearance] setTitleTextAttributes:
+  [[UIBarButtonItem appearanceWhenContainedIn:[STNavigationBar class], nil] setTitleTextAttributes:
       [NSDictionary dictionaryWithObjectsAndKeys:
           [UIColor whiteColor], UITextAttributeTextColor,
           [NSValue valueWithUIOffset:UIOffsetMake(0, 0)], UITextAttributeTextShadowOffset, nil] 
