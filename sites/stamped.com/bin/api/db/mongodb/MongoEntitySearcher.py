@@ -281,7 +281,7 @@ class MongoEntitySearcher(EntitySearcher):
             coords = None
         else:
             for region_name in self._regions:
-                if query.endswith(region_name):
+                if query.endswith(' in ' + region_name) or query.endswith(' near ' + region_name):
                     region = self._regions[region_name]
                     query  = query[:-len(region_name)]
                     
@@ -296,6 +296,7 @@ class MongoEntitySearcher(EntitySearcher):
                     coords = [ region['lat'], region['lng'], ]
                     original_coords = False
                     utils.log("[search] using region %s at %s" % (region_name, coords))
+                    break
             
             """
             # process 'in' or 'near' location hint
