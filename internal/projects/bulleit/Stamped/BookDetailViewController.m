@@ -145,7 +145,7 @@
                                forKey:@"length"];
     if (detailedEntity_.publisher)
       [section addPairedLabelWithName:@"Publisher:" 
-                                value:detailedEntity_.publisher
+                                value:detailedEntity_.publisher.capitalizedString
                                forKey:@"publisher"];
     if (detailedEntity_.releaseDate)
       [section addPairedLabelWithName:@"Release Date:" 
@@ -153,7 +153,7 @@
                                forKey:@"releaseDate"];
     if (detailedEntity_.language)
       [section addPairedLabelWithName:@"Language:" 
-                                value:detailedEntity_.language 
+                                value:detailedEntity_.language.capitalizedString
                                forKey:@"language"];
     if (detailedEntity_.isbn)
       [section addPairedLabelWithName:@"ISBN:" 
