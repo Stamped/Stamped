@@ -34,7 +34,6 @@ class S3AutocompleteDB(object):
         else:
             self.bucket = conn.create_bucket(bucket_name)
         
-        self.bucket.set_acl('public-read')
         self.bucket_name = bucket_name
     
     def add_key(self, name, value, content_type=None, apply_gzip=False, temp_prefix=None):
