@@ -239,8 +239,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (IBAction)creditsButtonPressed:(id)sender {
   CreditsViewController* creditsViewController =
-      [[CreditsViewController alloc] initWithNibName:@"CreditsViewController" bundle:nil];
-  creditsViewController.screenName = user_.screenName;
+      [[CreditsViewController alloc] initWithUser:self.user];
   [self.navigationController pushViewController:creditsViewController animated:YES];
   [creditsViewController release];
 }
