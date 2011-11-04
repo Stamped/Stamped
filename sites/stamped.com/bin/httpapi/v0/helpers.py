@@ -44,6 +44,12 @@ def handleHTTPRequest(fn):
             logs.error(response.status_code)
             return response
         
+        except AuthError as e:
+            logs.warning("401 Error: %s" % (e.msg))
+            response = HttpResponse(e.msg, status=401)
+            logs.auth(e.msg)
+            return response
+        
         except InputError as e:
             logs.warning("400 Error: %s" % (e.msg))
             response = HttpResponse("invalid_request", status=400)
@@ -141,7 +147,7 @@ def checkOAuth(request):
     except Exception:
         msg = "Invalid access token"
         logs.warning(msg)
-        raise StampedHTTPError("invalid_token", 401, msg)
+        raise AuthError("invalid_token", 401, msg)
 
 def parseRequest(schema, request, **kwargs):
     ### Parse Request

@@ -57,3 +57,9 @@ class Unavailable(Exception):
 		self.msg = msg
 		self.desc = desc
 
+class AuthError(Exception):
+	def __init__(self, msg=None, desc=None):
+		Exception.__init__(self, msg)
+		self.msg = msg
+		self.desc = desc
+
