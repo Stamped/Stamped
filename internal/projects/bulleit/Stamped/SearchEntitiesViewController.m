@@ -119,6 +119,12 @@ typedef enum {
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Search"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
   [self.searchField addTarget:self
                        action:@selector(textFieldDidChange:)
              forControlEvents:UIControlEventEditingChanged];
@@ -689,21 +695,7 @@ typedef enum {
   SearchResult* result = nil;
   if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull) {
     result = [[[SearchResult alloc] init] autorelease];
-    result.title = self.searchField.text;
-  } else if (indexPath.row == 0 && currentResultType_ == ResultTypeLocal && !loading_ && searchField_.text.length > 0 && resultsArray_.count == 0) {
-    [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
-    [self sendSearchRequest];
-    return;
-  } else if (indexPath.row == resultsArray_.count && currentResultType_ == ResultTypeLocal) {
-    if (searchField_.text.length > 0) {
-      result = [[[SearchResult alloc] init] autorelease];
-      result.title = self.searchField.text;
-    } else {
-      [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
-      [self.tableView setContentOffset:CGPointMake(0, 0) animated:NO];
-      [searchField_ becomeFirstResponder];
-      return;
-    }
+    result.title = self.searchField.text.capitalizedString;
   } else if (currentResultType_ == ResultTypeFast) {
     result = (SearchResult*)[resultsArray_ objectAtIndex:indexPath.row];
   } else if ((currentResultType_ == ResultTypeFull || currentResultType_ == ResultTypeLocal) && !loading_) {
