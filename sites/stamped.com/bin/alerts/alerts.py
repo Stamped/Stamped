@@ -267,7 +267,7 @@ def runInvites(options):
                     template = open(path, 'r')
                 except:
                     ### TODO: Add error logging?
-                    raise Exception
+                    raise
 
                 # Build email
                 email = {}
@@ -335,7 +335,7 @@ def _setSubject(user, genre):
         msg = '%s (@%s) is now following you on Stamped' % (user['name'], user.screen_name)
     else:
         ### TODO: Add error logging?
-        raise Exception
+        raise
 
     return msg
 
@@ -346,7 +346,7 @@ def _setBody(user, activity, emailAddress):
         template = open(path, 'r')
     except:
         ### TODO: Add error logging?
-        raise Exception
+        raise
 
     params = HTTPUser().importSchema(user).value
     params['title'] = activity['subject']

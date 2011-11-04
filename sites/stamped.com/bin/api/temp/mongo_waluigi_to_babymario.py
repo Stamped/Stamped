@@ -3,7 +3,7 @@ import pymongo, json, codecs, os, sys, bson, unicodedata
 from subprocess import Popen, PIPE
 
 OLD_HOST        = "ec2-184-73-40-130.compute-1.amazonaws.com"
-NEW_HOST        = "ec2-107-22-0-49.compute-1.amazonaws.com"
+NEW_HOST        = "ec2-184-72-191-50.compute-1.amazonaws.com"
 
 old_connection  = pymongo.Connection(OLD_HOST, 27017)
 new_connection  = pymongo.Connection(NEW_HOST, 27017)
