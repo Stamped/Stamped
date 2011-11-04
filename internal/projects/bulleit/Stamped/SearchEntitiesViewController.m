@@ -639,7 +639,8 @@ typedef enum {
   [gradientLayer release];
   if (currentSearchFilter_ == SearchFilterNone ||
       currentSearchFilter_ == SearchFilterFood ||
-      currentSearchFilter_ == SearchFilterOther) {
+      currentSearchFilter_ == SearchFilterOther ||
+      currentResultType_ == ResultTypeLocal) {
     UIImageView* google = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"poweredbygoogle"]];
     google.frame = CGRectOffset(google.frame, 213, 5);
     [view addSubview:google];
