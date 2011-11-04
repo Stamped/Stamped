@@ -313,17 +313,15 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
                                                  authentication:auth]) {
     self.twitterAuth = auth;
-    if (self.twitterAuth) {
-      tweetButton_.enabled = YES;
-    } else {
-      shareLabel_.textColor = [UIColor stampedLightGrayColor];
-    }
+    tweetButton_.enabled = YES;
   }
-  if ([self.fbClient isSessionValid]) {
+  if (self.fbClient.isSessionValid) {
     fbButton_.enabled = YES;
-  } else {
+  }
+  if (!self.twitterAuth && !self.fbClient.isSessionValid) {
     shareLabel_.textColor = [UIColor stampedLightGrayColor];
   }
+
   editingMask_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
   editingMask_.backgroundColor = [UIColor whiteColor];
   editingMask_.alpha = 0;
@@ -437,9 +435,6 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   
-  if ([self.fbClient isSessionValid]) {
-    fbButton_.enabled = YES;
-  } 
 
   [super viewWillAppear:animated];
 }
@@ -659,10 +654,30 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 }
 
 - (IBAction)tweetButtonPressed:(id)sender {
+  if (tweetButton_.selected == NO && !self.twitterAuth) {
+    UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Twitter."
+                                                        delegate:self
+                                               cancelButtonTitle:@"Cancel"
+                                          destructiveButtonTitle:nil
+                                               otherButtonTitles:@"Connect…", nil] autorelease];
+    sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [sheet showInView:self.view];
+    return;
+  }
   tweetButton_.selected = !tweetButton_.selected;
 }
 
 - (IBAction)fbButtonPressed:(id)sender {
+  if (fbButton_.selected == NO && !self.fbClient.isSessionValid) {
+    UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Facebook."
+                                                        delegate:self
+                                               cancelButtonTitle:@"Cancel"
+                                          destructiveButtonTitle:nil
+                                               otherButtonTitles:@"Connect…", nil] autorelease];
+    sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [sheet showInView:self.view];
+    return;
+  }
   fbButton_.selected = !fbButton_.selected;
 }
 
@@ -787,16 +802,33 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 #pragma mark - UIActionSheetDelegate methods.
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-  if (buttonIndex == 0) {  // Remove the photo.
-    [stampPhotoView_ removeFromSuperview];
-    stampPhotoView_ = nil;
-    self.stampPhoto = nil;
-    [deletePhotoButton_ removeFromSuperview];
-    self.deletePhotoButton = nil;
-    savePhoto_ = NO;
-    takePhotoButton_.enabled = YES;
-    takePhotoButton_.selected = NO;
-    [self adjustTextViewContentSize];
+  if ([actionSheet.title rangeOfString:@"photo"].location != NSNotFound) {
+    if (buttonIndex == 0) {  // Remove the photo.
+      [stampPhotoView_ removeFromSuperview];
+      stampPhotoView_ = nil;
+      self.stampPhoto = nil;
+      [deletePhotoButton_ removeFromSuperview];
+      self.deletePhotoButton = nil;
+      savePhoto_ = NO;
+      takePhotoButton_.enabled = YES;
+      takePhotoButton_.selected = NO;
+      [self adjustTextViewContentSize];
+      return;
+    }
+  }
+  if ([actionSheet.title rangeOfString:@"Twitter"].location != NSNotFound) {
+    if (buttonIndex == 0) {
+      NSLog(@"fuckin' twitter!");
+      //connect to twitter.
+      return;
+    }
+  }
+  if ([actionSheet.title rangeOfString:@"Facebook"].location != NSNotFound) {
+    if (buttonIndex == 0) {
+      NSLog(@"fuckin' facebook!");
+      //connect to facebook.
+      return;
+    }
   }
 }
 

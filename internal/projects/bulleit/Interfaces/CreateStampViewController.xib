@@ -398,7 +398,7 @@
 							<object class="IBUIButton" id="969060622">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{185, 242}, {62, 48}}</string>
+								<string key="NSFrame">{{214, 245}, {45, 41}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="822963385"/>
@@ -406,9 +406,14 @@
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<bool key="IBUIEnabled">NO</bool>
 								<int key="IBUIContentHorizontalAlignment">0</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
+								<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
+								<bool key="IBUIAdjustsImageWhenDisabled">NO</bool>
+								<object class="NSColor" key="IBUITintColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MAA</bytes>
+								</object>
 								<reference key="IBUIHighlightedTitleColor" ref="935530847"/>
 								<object class="NSColor" key="IBUINormalTitleColor">
 									<int key="NSColorSpace">1</int>
@@ -418,18 +423,21 @@
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MC41AA</bytes>
 								</object>
-								<object class="NSCustomResource" key="IBUIHighlightedImage" id="44272802">
+								<object class="NSCustomResource" key="IBUIHighlightedImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">create_share_button_selected.png</string>
+									<string key="NSResourceName">share_twitter_highlighted</string>
 								</object>
-								<object class="NSCustomResource" key="IBUIDisabledImage" id="564841261">
+								<object class="NSCustomResource" key="IBUIDisabledImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">create_share_button_inactive.png</string>
+									<string key="NSResourceName">share_twitter_disabled</string>
 								</object>
-								<reference key="IBUISelectedImage" ref="44272802"/>
-								<object class="NSCustomResource" key="IBUINormalImage" id="318914482">
+								<object class="NSCustomResource" key="IBUISelectedImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">create_share_button.png</string>
+									<string key="NSResourceName">share_twitter_on</string>
+								</object>
+								<object class="NSCustomResource" key="IBUINormalImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">share_twitter</string>
 								</object>
 								<object class="IBUIFontDescription" key="IBUIFontDescription" id="572259165">
 									<string key="name">Helvetica-Bold</string>
@@ -446,7 +454,7 @@
 							<object class="IBUILabel" id="878944707">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{141, 255}, {42, 21}}</string>
+								<string key="NSFrame">{{17, 255}, {42, 21}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="969060622"/>
@@ -505,7 +513,7 @@
 							<object class="IBUIButton" id="822963385">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{249, 242}, {62, 48}}</string>
+								<string key="NSFrame">{{264, 245}, {45, 41}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="851464612"/>
@@ -513,19 +521,36 @@
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">1</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<bool key="IBUIEnabled">NO</bool>
 								<int key="IBUIContentHorizontalAlignment">0</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
+								<bool key="IBUIAdjustsImageWhenHighlighted">NO</bool>
+								<bool key="IBUIAdjustsImageWhenDisabled">NO</bool>
+								<object class="NSColor" key="IBUITintColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MAA</bytes>
+								</object>
 								<reference key="IBUIHighlightedTitleColor" ref="935530847"/>
 								<object class="NSColor" key="IBUINormalTitleColor">
 									<int key="NSColorSpace">1</int>
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="604820021"/>
-								<reference key="IBUIHighlightedImage" ref="44272802"/>
-								<reference key="IBUIDisabledImage" ref="564841261"/>
-								<reference key="IBUISelectedImage" ref="44272802"/>
-								<reference key="IBUINormalImage" ref="318914482"/>
+								<object class="NSCustomResource" key="IBUIHighlightedImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">share_fb_highlighted</string>
+								</object>
+								<object class="NSCustomResource" key="IBUIDisabledImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">share_fb_disabled</string>
+								</object>
+								<object class="NSCustomResource" key="IBUISelectedImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">share_fb_on</string>
+								</object>
+								<object class="NSCustomResource" key="IBUINormalImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">share_fb</string>
+								</object>
 								<reference key="IBUIFontDescription" ref="572259165"/>
 								<reference key="IBUIFont" ref="32402340"/>
 							</object>
@@ -597,6 +622,7 @@
 						<string key="NSFrame">{{150, 362}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -893,10 +919,10 @@
 							<reference ref="9764505"/>
 							<reference ref="555494954"/>
 							<reference ref="591413953"/>
-							<reference ref="969060622"/>
-							<reference ref="878944707"/>
 							<reference ref="110642938"/>
 							<reference ref="822963385"/>
+							<reference ref="969060622"/>
+							<reference ref="878944707"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -1119,14 +1145,14 @@
 					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="1"/>
+					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="2"/>
 					<string>STCreditTextField</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="1"/>
+					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSMutableArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1417,13 +1443,18 @@
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>big_blue_button_bg.png</string>
-				<string>create_share_button.png</string>
-				<string>create_share_button_inactive.png</string>
-				<string>create_share_button_selected.png</string>
 				<string>edit_button_background.png</string>
 				<string>edit_pencil.png</string>
 				<string>gradient_background.png</string>
 				<string>gray_disclosure_arrow.png</string>
+				<string>share_fb</string>
+				<string>share_fb_disabled</string>
+				<string>share_fb_highlighted</string>
+				<string>share_fb_on</string>
+				<string>share_twitter</string>
+				<string>share_twitter_disabled</string>
+				<string>share_twitter_highlighted</string>
+				<string>share_twitter_on</string>
 				<string>shelf_background.png</string>
 				<string>stamp_detail_ripple_bottom</string>
 				<string>stamp_detail_ripple_top</string>
@@ -1433,10 +1464,15 @@
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
 				<string>{320, 480}</string>
+				<string>{16, 16}</string>
+				<string>{16, 16}</string>
+				<string>{16, 16}</string>
+				<string>{16, 16}</string>
+				<string>{16, 16}</string>
+				<string>{16, 16}</string>
+				<string>{16, 16}</string>
+				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{320, 365}</string>
 				<string>{16, 16}</string>
