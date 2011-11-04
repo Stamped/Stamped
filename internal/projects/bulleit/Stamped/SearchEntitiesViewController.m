@@ -24,7 +24,7 @@
 
 static NSString* const kNearbyPath = @"/entities/nearby.json";
 static NSString* const kSearchPath = @"/entities/search.json";
-static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v1/";
+static NSString* const kFastSearchURI = @"http://static.stamped.com/search/v2/";
 
 typedef enum {
   SearchFilterNone = 0,
@@ -693,7 +693,7 @@ typedef enum {
   }
   
   SearchResult* result = nil;
-  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull) {
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_) {
     result = [[[SearchResult alloc] init] autorelease];
     result.title = self.searchField.text.capitalizedString;
   } else if (currentResultType_ == ResultTypeFast) {
