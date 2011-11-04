@@ -84,7 +84,9 @@ class FandangoFeed(AExternalDumpEntitySource):
             
             for link in entry.links:
                 if 'image' in link.type:
-                    entity.image = link.href
+                    # fandango gives us low resolution 69x103 versions of the image, so hackily up the 
+                    # resolution before saving the entity :)
+                    entity.image = link.href.replace('69/103', '375/375').replace('69x103', '375x375')
                     break
             
             self._output.put(entity)
