@@ -152,6 +152,12 @@ def output(data):
     except:
         localData.log['output'] = 'FAIL'
 
+def auth(msg):
+    try:
+        localData.log['auth'] = msg
+    except:
+        localData.log['auth'] = 'FAIL'
+
 def error(code):
     try:
         localData.log['result'] = code
