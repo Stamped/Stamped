@@ -40,7 +40,6 @@ class FandangoFeed(AExternalDumpEntitySource):
         
         for url in feeds:
             pool.spawn(self._parse_feed, pool, url)
-            break
         
         pool.join()
         self._output.put(StopIteration)
@@ -147,7 +146,6 @@ class FandangoFeed(AExternalDumpEntitySource):
                 pass
             
             self._output.put(entity)
-            break
         
         utils.log("[%s] done parsing feed '%s' (%s)" % (self, data.feed.title, url))
 
