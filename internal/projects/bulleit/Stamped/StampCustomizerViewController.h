@@ -39,6 +39,8 @@
 
 @property (nonatomic, assign) id<StampCustomizerViewControllerDelegate> delegate;
 
+- (id)initWithPrimaryColor:(NSString*)primary secondary:(NSString*)secondary;
+
 - (IBAction)primaryColorButtonPressed:(id)sender;
 - (IBAction)secondaryColorButtonPressed:(id)sender;
 - (IBAction)cancelButtonPressed:(id)sender;

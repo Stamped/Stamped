@@ -117,14 +117,14 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super viewWillDisappear:animated];
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setSettingsButtonShown:NO];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
   [super viewDidDisappear:animated];
 }
 
