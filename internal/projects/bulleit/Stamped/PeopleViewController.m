@@ -34,11 +34,13 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 @implementation PeopleViewController
 
 @synthesize friendsArray = friendsArray_;
+@synthesize tableView = tableView_;
 @synthesize settingsNavigationController = settingsNavigationController_;
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 - (void)dealloc {
   self.friendsArray = nil;
+  self.tableView = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
   [super dealloc];
@@ -65,6 +67,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.friendsArray = nil;
+  self.tableView = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
 }
@@ -111,7 +114,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)loadFriendsFromNetwork {
-  [self setIsLoading:YES];
+  //[self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* userID = [AccountManager sharedManager].currentUser.userID;
@@ -132,8 +135,8 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   }
   [self.tableView reloadData];
-  self.tableView.contentOffset = scrollPosition_;
-  [self setIsLoading:NO];
+  //self.tableView.contentOffset = scrollPosition_;
+  //[self setIsLoading:NO];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -144,7 +147,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     return;
   }
   
-  [self setIsLoading:NO];
+  //[self setIsLoading:NO];
 }
 
 #pragma mark - Table view data source.
