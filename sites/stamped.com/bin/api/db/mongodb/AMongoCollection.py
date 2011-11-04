@@ -7,14 +7,14 @@ __license__   = "TODO"
 
 import Globals
 import atexit, bson, copy, math, os, pymongo, time, traceback, utils, logs
-from errors import *
 
-from pprint import pprint
-from errors import Fail
-from utils import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
-from datetime import datetime
-from pymongo.errors import AutoReconnect
-from MongoCollectionProxy import MongoCollectionProxy
+from libs.EC2Utils          import EC2Utils
+from pprint                 import pprint
+from errors                 import *
+from utils                  import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
+from datetime               import datetime
+from pymongo.errors         import AutoReconnect
+from MongoCollectionProxy   import MongoCollectionProxy
 
 class MongoDBConfig(Singleton):
     def __init__(self):
@@ -56,15 +56,28 @@ class MongoDBConfig(Singleton):
                 self.config = getPythonConfigFile(config_path, jsonPickled=True)
                 #print self.config
             except:
-                raise Fail("Error: invalid configuration file")
-                raise
+                ec2_utils   = EC2Utils()
+                stack_info  = ec2_utils.get_stack_info()
+                self.config = None
+                
+                for node in stack_info.nodes:
+                    if node.name.endswith('.db0'):
+                        self.config = AttributeDict({
+                           "mongodb" : {
+                               "host" : node.private_dns, 
+                               "port" : 27017, 
+                           }
+                        })
+                        break
+                
+                if self.config is None:
+                    raise Fail("Error: invalid configuration file")
         
         if not 'mongodb' in self.config:
             self.config = AttributeDict({
                "mongodb" : {
                    "host" : "localhost", 
                    "port" : 27017, 
-                   # "port" : 30000, 
                }
             })
             
