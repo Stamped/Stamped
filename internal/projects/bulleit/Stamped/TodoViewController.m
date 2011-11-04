@@ -144,7 +144,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   return [sectionInfo numberOfObjects] + 1;
 }
 
-- (float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
+- (float)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.row == 0)
     return 50.0;
   else 
@@ -217,6 +217,9 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
+  NSLog(@"Objects: %@", objects);
+  [[Favorite managedObjectContext] save:NULL];
   [self setIsLoading:NO];
 }
 
@@ -262,8 +265,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     NSFetchRequest* request = [Favorite fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    User* user = [AccountManager sharedManager].currentUser;
-    [request setPredicate:[NSPredicate predicateWithFormat:@"userID == %@ AND entityObject != NIL", user.userID]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"entityObject != NIL"]];
     [NSFetchedResultsController deleteCacheWithName:@"FavoriteItems"];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
