@@ -381,7 +381,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
 
-  if (mutableObjects.count < 10 || !oldestStampInBatch.modified) {
+  if (objects.count < 10 || !oldestStampInBatch.modified) {
     // Grab latest stamp.
     NSFetchRequest* request = [Stamp fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];

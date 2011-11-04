@@ -11,6 +11,7 @@
 
 @class UserImageView;
 @class FirstRunViewController;
+@class WebViewController;
 
 @protocol FirstRunViewControllerDelegate
 

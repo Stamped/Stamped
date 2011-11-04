@@ -423,6 +423,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   collapsibleVC.iconView.hidden = NO;
   
   [collapsibleVC addImagesForStamps:entityObject_.stamps];
+  [collapsibleVC expand];
 }
 
 // Delegate method

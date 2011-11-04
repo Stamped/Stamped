@@ -15,9 +15,12 @@
 #import "WelcomeViewController.h"
 #import "Util.h"
 #import "TOSViewController.h"
+#import "WebViewController.h"
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 500;
+static  NSString* const kStampedTermsURL = @"http://dev.stamped.com/terms-mobile.html";
+static  NSString* const kStampedPrivacyURL = @"http://dev.stamped.com/privacy-mobile.html";
 
 @interface FirstRunViewController ()
 - (void)setupBottomView;
@@ -293,15 +296,17 @@ static const CGFloat kProfileImageSize = 500;
 }
 
 - (IBAction)termsButtonPressed:(id)sender {
-  TOSViewController* vc = [[TOSViewController alloc] init];
+  TOSViewController* vc = [[TOSViewController alloc] initWithURL:[NSURL URLWithString:kStampedTermsURL]];
   [self.navigationController presentModalViewController:vc animated:YES];
   vc.settingsButton.hidden = YES;
+  [vc release];
 }
 
 - (IBAction)privacyButtonPressed:(id)sender {
-  TOSViewController* vc = [[TOSViewController alloc] init];
+  TOSViewController* vc = [[TOSViewController alloc] initWithURL:[NSURL URLWithString:kStampedPrivacyURL]];
   [self.navigationController presentModalViewController:vc animated:YES];
   vc.settingsButton.hidden = YES;
+  [vc release];
 }
 
 #pragma mark - UIActionSheetDelegate methods.

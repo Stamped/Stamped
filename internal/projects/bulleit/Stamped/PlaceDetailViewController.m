@@ -202,19 +202,19 @@
     
   if (detailedEntity_.subcategory) {
     [section addPairedLabelWithName:@"Category:"
-                              value:detailedEntity_.subcategory
+                              value:detailedEntity_.subcategory.capitalizedString
                              forKey:@"subcategory"];
   }
   
   if (detailedEntity_.cuisine) {
     [section addPairedLabelWithName:@"Cuisine:"      
-                              value:detailedEntity_.cuisine
+                              value:detailedEntity_.cuisine.capitalizedString
                              forKey:@"cuisine"];
   }
   
   if (detailedEntity_.neighborhood) {
     [section addPairedLabelWithName:@"Neighborhood:"
-                              value:detailedEntity_.neighborhood
+                              value:detailedEntity_.neighborhood.capitalizedString
                              forKey:@"neighborhood"];
   }
   
