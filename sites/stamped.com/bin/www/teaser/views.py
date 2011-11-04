@@ -55,4 +55,15 @@ def privacy(request):
         return response
     except:
         raise Http404
+
+def feedback(request):
+    try:
+        response = render_to_response('feedback-mobile.html', None)
+
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
+    except:
+        raise Http404
     
