@@ -89,6 +89,11 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     [Favorite.managedObjectContext deleteObject:fave];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"TodoLastUpdatedAt"]];
+}
+
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
   Favorite* fave = [fetchedResultsController_ objectAtIndexPath:indexPath];
   [(TodoTableViewCell*)cell setDelegate:self];
@@ -217,7 +222,10 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  [[Favorite managedObjectContext] save:NULL];
+  NSDate* now = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"TodoLastUpdatedAt"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  [self updateLastUpdatedTo:now];
   [self setIsLoading:NO];
 }
 

@@ -9,16 +9,16 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STReloadableTableViewController.h"
+#import "STTableViewController.h"
 #import "TodoTableViewCell.h"
 
 @protocol TodoViewControllerDelegate
 - (void)displaySearchEntities;
 @end
 
-@interface TodoViewController : STReloadableTableViewController <RKObjectLoaderDelegate,
-                                                                 TodoTableViewCellDelegate,
-                                                                 NSFetchedResultsControllerDelegate>
+@interface TodoViewController : STTableViewController <RKObjectLoaderDelegate,
+                                                       TodoTableViewCellDelegate,
+                                                       NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, assign) id<TodoViewControllerDelegate> delegate;
 
