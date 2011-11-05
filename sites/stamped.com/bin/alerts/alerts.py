@@ -421,8 +421,8 @@ def buildPushNotification(user, activityItem, deviceId):
         }
     }
 
-    if user.stats.num_unread_news:
-        content['aps']['badge'] = user.stats.num_unread_news
+    # if user.stats.num_unread_news:
+    #     content['aps']['badge'] = user.stats.num_unread_news
 
     s_content = json.dumps(content, separators=(',',':'))
 
