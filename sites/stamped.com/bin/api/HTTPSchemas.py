@@ -540,6 +540,9 @@ class HTTPEntity(Schema):
                         (schema.sources.openTable.reserveURL, )
                 self.opentable_url = url
             
+            if schema.sources.fandango.f_url is not None:
+                self.fandango_url = schema.f_url
+            
             if schema.sources.apple.view_url != None:
                 itunes_url  = schema.sources.apple.view_url
                 base_url    = "http://click.linksynergy.com/fs-bin/stat"

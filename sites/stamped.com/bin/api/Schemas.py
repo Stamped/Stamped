@@ -734,6 +734,7 @@ class AwardAnnalsSchema(Schema):
 class FandangoSchema(Schema):
     def setSchema(self):
         self.fid                = SchemaElement(basestring)
+        self.f_url              = SchemaElement(basestring)
 
 class AmazonSchema(Schema):
     def setSchema(self):
