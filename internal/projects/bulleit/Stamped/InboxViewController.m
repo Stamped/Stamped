@@ -81,6 +81,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)mapButtonWasPressed:(NSNotification*)notification {
   userPannedMap_ = NO;
+  [self.stampFilterBar.searchField resignFirstResponder];
   self.tableView.scrollEnabled = NO;
   self.fetchedResultsController.fetchRequest.predicate =
       [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"];
