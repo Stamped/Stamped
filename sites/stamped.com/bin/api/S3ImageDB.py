@@ -6,9 +6,14 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import Image, ImageFile
 import aws, logs, os, utils, time
 import zlib, struct, array, random
+
+try:
+    import Image, ImageFile
+except:
+    utils.printException()
+    pass
 
 from AImageDB import AImageDB
 from StringIO import StringIO
