@@ -9,10 +9,9 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STReloadableTableViewController.h"
+#import "STTableViewController.h"
 
-@interface ActivityViewController : STReloadableTableViewController <UIScrollViewDelegate,
-                                                                     RKObjectLoaderDelegate,
-                                                                     NSFetchedResultsControllerDelegate>
+@interface ActivityViewController : STTableViewController <RKObjectLoaderDelegate,
+                                                           NSFetchedResultsControllerDelegate>
 
 @end
