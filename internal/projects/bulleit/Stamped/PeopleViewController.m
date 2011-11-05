@@ -34,13 +34,11 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 @implementation PeopleViewController
 
 @synthesize friendsArray = friendsArray_;
-@synthesize tableView = tableView_;
 @synthesize settingsNavigationController = settingsNavigationController_;
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 - (void)dealloc {
   self.friendsArray = nil;
-  self.tableView = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
   [super dealloc];
@@ -67,7 +65,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.friendsArray = nil;
-  self.tableView = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
 }

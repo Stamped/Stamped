@@ -46,6 +46,7 @@
 		7E0B622E1439716500A573FA /* change_picture_button_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B622A1439716500A573FA /* change_picture_button_bg@2x.png */; };
 		7E0B62331439718F00A573FA /* EditProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0B62311439718F00A573FA /* EditProfileViewController.m */; };
 		7E0B62341439718F00A573FA /* EditProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B62321439718F00A573FA /* EditProfileViewController.xib */; };
+		7E0D4EE31465B58800F81CEC /* STTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE21465B58800F81CEC /* STTableViewController.m */; };
 		7E10061A143E46760079AEDC /* icon1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E100619143E46760079AEDC /* icon1@2x.png */; };
 		7E10061C143E46880079AEDC /* icon1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E10061B143E46880079AEDC /* icon1.png */; };
 		7E100623143E6C3C0079AEDC /* eSearch_location_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E10061F143E6C3C0079AEDC /* eSearch_location_button.png */; };
@@ -770,6 +771,8 @@
 		7E0B62301439718F00A573FA /* EditProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditProfileViewController.h; sourceTree = "<group>"; };
 		7E0B62311439718F00A573FA /* EditProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditProfileViewController.m; sourceTree = "<group>"; };
 		7E0B62321439718F00A573FA /* EditProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EditProfileViewController.xib; sourceTree = "<group>"; };
+		7E0D4EE11465B58800F81CEC /* STTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTableViewController.h; sourceTree = "<group>"; };
+		7E0D4EE21465B58800F81CEC /* STTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTableViewController.m; sourceTree = "<group>"; };
 		7E100619143E46760079AEDC /* icon1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon1@2x.png"; path = "../icon1@2x.png"; sourceTree = "<group>"; };
 		7E10061B143E46880079AEDC /* icon1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon1.png; path = ../icon1.png; sourceTree = "<group>"; };
 		7E10061F143E6C3C0079AEDC /* eSearch_location_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eSearch_location_button.png; sourceTree = "<group>"; };
@@ -2602,6 +2605,8 @@
 				7EE70C5313FC6378008CCC15 /* Profile View */,
 				7ED2EF6713E0DED5007F1AFB /* Root View */,
 				7EDA5FF213F56D7F00F23B13 /* Authentication */,
+				7E0D4EE11465B58800F81CEC /* STTableViewController.h */,
+				7E0D4EE21465B58800F81CEC /* STTableViewController.m */,
 				7E42FDE813EF3A64007B3C26 /* STReloadableTableViewController.h */,
 				7E42FDE913EF3A64007B3C26 /* STReloadableTableViewController.m */,
 				7E5EB261140C0535007D164F /* STTextField.h */,
@@ -3448,6 +3453,7 @@
 				CB4CA264145F097600621D45 /* SharingSettingsViewController.m in Sources */,
 				CB7B23071461B994004C247F /* AboutUsViewController.m in Sources */,
 				CB5CF1591463425A00DC2CBC /* TOSViewController.m in Sources */,
+				7E0D4EE31465B58800F81CEC /* STTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

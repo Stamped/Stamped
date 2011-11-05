@@ -176,7 +176,6 @@ typedef enum {
   [commentTextField_ resignFirstResponder];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -184,6 +183,7 @@ typedef enum {
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(keyboardWillAppear:)
                                                name:UIKeyboardWillShowNotification
@@ -192,7 +192,6 @@ typedef enum {
                                            selector:@selector(keyboardWillDisappear:)
                                                name:UIKeyboardWillHideNotification
                                              object:nil];
-  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
