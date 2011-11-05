@@ -55,7 +55,7 @@ def main():
 
 def handle_entity(entity, entityDB, options):
     if entity.f_url is not None:
-        entity.f_url = entity.f_url.replace('&m=', '?pid=5348839&m=')
+        entity.f_url = entity.f_url.replace('%26m%3d', '%3fpid=5348839%26m%3d')
         
         if not options.noop:
             entityDB.updateEntity(entity)
