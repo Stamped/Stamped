@@ -9,8 +9,6 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STReloadableTableViewController.h"
-
 @class User;
 
 typedef enum {
@@ -18,7 +16,7 @@ typedef enum {
   RelationshipTypeFollowers
 } RelationshipType;
 
-@interface RelationshipsViewController : STReloadableTableViewController <RKObjectLoaderDelegate> {
+@interface RelationshipsViewController : UITableViewController <RKObjectLoaderDelegate> {
  @private
   RelationshipType relationshipType_;
 }

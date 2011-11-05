@@ -47,10 +47,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
   [super didReceiveMemoryWarning];
 }
 
-- (void)userPulledToReload {
-  [self loadRelationshipsFromNetwork];
-}
-
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -108,7 +104,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
                                                                     selector:@selector(localizedCaseInsensitiveCompare:)];
   self.peopleArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   [self.tableView reloadData];
-  [self setIsLoading:NO];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -118,8 +113,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
     [self loadRelationshipsFromNetwork];
     return;
   }
-  
-  [self setIsLoading:NO];
 }
 
 #pragma mark - Table view delegate

@@ -60,6 +60,14 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize stampFilterBar = stampFilterBar_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 
+- (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
+  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  if (self) {
+    self.hasFilterBar = YES;
+  }
+  return self;
+}
+
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -72,10 +80,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)mapButtonWasPressed:(NSNotification*)notification {
-  CGRect mapFrame = mapView_.frame;
-  mapFrame.origin.y = self.tableView.contentOffset.y;
-  mapView_.frame = mapFrame;
-  [self.tableView scrollRectToVisible:mapFrame animated:NO];
   userPannedMap_ = NO;
   self.tableView.scrollEnabled = NO;
   self.fetchedResultsController.fetchRequest.predicate =
@@ -168,6 +172,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"InboxLastUpdatedAt"]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -394,8 +399,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
     [[NSUserDefaults standardUserDefaults] setObject:latestStamp.modified
                                               forKey:@"InboxLatestStampModified"];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"InboxLastUpdatedAt"];
+    NSDate* now = [NSDate date];
+    [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"InboxLastUpdatedAt"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    [self updateLastUpdatedTo:now];
     [self setIsLoading:NO];
   } else {
     [self loadStampsFromNetwork];
@@ -448,7 +455,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [detailViewController release];
 }
 
-#pragma mark - STReloadableTableView methods.
+#pragma mark - STTableViewController methods.
 
 - (void)userPulledToReload {
   [super userPulledToReload];

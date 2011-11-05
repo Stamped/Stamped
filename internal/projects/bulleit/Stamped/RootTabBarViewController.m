@@ -314,7 +314,7 @@
 }
 
 - (void)reloadPanes:(NSNotification*)notification {
-  for (STReloadableTableViewController* viewController in self.viewControllers) {
+  for (STTableViewController* viewController in self.viewControllers) {
     if (notification.object != viewController)
       [viewController reloadData];
   }

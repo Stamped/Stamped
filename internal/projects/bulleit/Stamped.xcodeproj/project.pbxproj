@@ -47,6 +47,8 @@
 		7E0B62331439718F00A573FA /* EditProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0B62311439718F00A573FA /* EditProfileViewController.m */; };
 		7E0B62341439718F00A573FA /* EditProfileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E0B62321439718F00A573FA /* EditProfileViewController.xib */; };
 		7E0D4EE31465B58800F81CEC /* STTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE21465B58800F81CEC /* STTableViewController.m */; };
+		7E0D4EE61465F1DB00F81CEC /* shelf_keyline_horiz.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE41465F1DB00F81CEC /* shelf_keyline_horiz.png */; };
+		7E0D4EE71465F1DB00F81CEC /* shelf_keyline_horiz@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE51465F1DB00F81CEC /* shelf_keyline_horiz@2x.png */; };
 		7E10061A143E46760079AEDC /* icon1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E100619143E46760079AEDC /* icon1@2x.png */; };
 		7E10061C143E46880079AEDC /* icon1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E10061B143E46880079AEDC /* icon1.png */; };
 		7E100623143E6C3C0079AEDC /* eSearch_location_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E10061F143E6C3C0079AEDC /* eSearch_location_button.png */; };
@@ -126,7 +128,6 @@
 		7E42DCC813DB72B300AF63BE /* shelf_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */; };
 		7E42FDDF13EF0F0E007B3C26 /* profile_placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42FDDD13EF0F0E007B3C26 /* profile_placeholder.png */; };
 		7E42FDE013EF0F0E007B3C26 /* profile_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */; };
-		7E42FDEA13EF3A64007B3C26 /* STReloadableTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E42FDE913EF3A64007B3C26 /* STReloadableTableViewController.m */; };
 		7E453720140F003C0097E64F /* RelationshipsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E45371E140F003B0097E64F /* RelationshipsViewController.m */; };
 		7E453721140F003C0097E64F /* RelationshipsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E45371F140F003B0097E64F /* RelationshipsViewController.xib */; };
 		7E47E93C1409A8EF00130B32 /* plus_icon_highlighted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E47E93B1409A8EF00130B32 /* plus_icon_highlighted@2x.png */; };
@@ -773,6 +774,8 @@
 		7E0B62321439718F00A573FA /* EditProfileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EditProfileViewController.xib; sourceTree = "<group>"; };
 		7E0D4EE11465B58800F81CEC /* STTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTableViewController.h; sourceTree = "<group>"; };
 		7E0D4EE21465B58800F81CEC /* STTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTableViewController.m; sourceTree = "<group>"; };
+		7E0D4EE41465F1DB00F81CEC /* shelf_keyline_horiz.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_keyline_horiz.png; sourceTree = "<group>"; };
+		7E0D4EE51465F1DB00F81CEC /* shelf_keyline_horiz@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shelf_keyline_horiz@2x.png"; sourceTree = "<group>"; };
 		7E100619143E46760079AEDC /* icon1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon1@2x.png"; path = "../icon1@2x.png"; sourceTree = "<group>"; };
 		7E10061B143E46880079AEDC /* icon1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon1.png; path = ../icon1.png; sourceTree = "<group>"; };
 		7E10061F143E6C3C0079AEDC /* eSearch_location_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eSearch_location_button.png; sourceTree = "<group>"; };
@@ -875,8 +878,6 @@
 		7E42DCC713DB72B300AF63BE /* shelf_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shelf_background@2x.png"; sourceTree = "<group>"; };
 		7E42FDDD13EF0F0E007B3C26 /* profile_placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = profile_placeholder.png; sourceTree = "<group>"; };
 		7E42FDDE13EF0F0E007B3C26 /* profile_placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile_placeholder@2x.png"; sourceTree = "<group>"; };
-		7E42FDE813EF3A64007B3C26 /* STReloadableTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STReloadableTableViewController.h; sourceTree = "<group>"; };
-		7E42FDE913EF3A64007B3C26 /* STReloadableTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STReloadableTableViewController.m; sourceTree = "<group>"; };
 		7E45371D140F003B0097E64F /* RelationshipsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RelationshipsViewController.h; sourceTree = "<group>"; };
 		7E45371E140F003B0097E64F /* RelationshipsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RelationshipsViewController.m; sourceTree = "<group>"; };
 		7E45371F140F003B0097E64F /* RelationshipsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RelationshipsViewController.xib; path = ../Interfaces/RelationshipsViewController.xib; sourceTree = "<group>"; };
@@ -2261,7 +2262,7 @@
 				7E76129F13C940500023CCC4 /* Logos */,
 				7E2CED0C13C7A2630068D576 /* Categories */,
 				7E47E93F1409B58300130B32 /* Edit Entity */,
-				7EC6B4A513C6039000CE83DD /* Stamp List Filter */,
+				7EC6B4A513C6039000CE83DD /* Filter Bar */,
 				7E7612B413C95BBD0023CCC4 /* Entity Details */,
 				CBA08CB714229A3B005F2D84 /* Tooltips */,
 				7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */,
@@ -2296,9 +2297,11 @@
 			path = ../Resources;
 			sourceTree = "<group>";
 		};
-		7EC6B4A513C6039000CE83DD /* Stamp List Filter */ = {
+		7EC6B4A513C6039000CE83DD /* Filter Bar */ = {
 			isa = PBXGroup;
 			children = (
+				7E0D4EE41465F1DB00F81CEC /* shelf_keyline_horiz.png */,
+				7E0D4EE51465F1DB00F81CEC /* shelf_keyline_horiz@2x.png */,
 				7E4968351457654600ACD36B /* hdr_searchIconOnly_button_selected.png */,
 				7E4968361457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png */,
 				7E4968371457654600ACD36B /* hdr_searchIconOnly_button.png */,
@@ -2323,7 +2326,7 @@
 				7EBBDB331441F21F00DDEAE9 /* hdr_search_button@2x.png */,
 				7EBBDB341441F21F00DDEAE9 /* hdr_separator@2x.png */,
 			);
-			name = "Stamp List Filter";
+			name = "Filter Bar";
 			sourceTree = "<group>";
 		};
 		7ECCB93714351A7B006575D1 /* Friend Finder */ = {
@@ -2607,8 +2610,6 @@
 				7EDA5FF213F56D7F00F23B13 /* Authentication */,
 				7E0D4EE11465B58800F81CEC /* STTableViewController.h */,
 				7E0D4EE21465B58800F81CEC /* STTableViewController.m */,
-				7E42FDE813EF3A64007B3C26 /* STReloadableTableViewController.h */,
-				7E42FDE913EF3A64007B3C26 /* STReloadableTableViewController.m */,
 				7E5EB261140C0535007D164F /* STTextField.h */,
 				7E5EB262140C0535007D164F /* STTextField.m */,
 				7E7DDE12145A0AE50058ACA9 /* STToolbar.h */,
@@ -3318,6 +3319,8 @@
 				7EB8A7DC146491370018E263 /* nav_list_button_ios4@2x.png in Resources */,
 				7EB8A7DD146491370018E263 /* nav_list_button_ios5.png in Resources */,
 				7EB8A7DE146491370018E263 /* nav_list_button_ios5@2x.png in Resources */,
+				7E0D4EE61465F1DB00F81CEC /* shelf_keyline_horiz.png in Resources */,
+				7E0D4EE71465F1DB00F81CEC /* shelf_keyline_horiz@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3379,7 +3382,6 @@
 				7EE9022D13E61BF0008BCDFB /* ActivityCommentTableViewCell.m in Sources */,
 				7E69021A13E76A4100B09802 /* ActivityCreditTableViewCell.m in Sources */,
 				7EB4782813EE2DBE00DA12CB /* MediumUserImageView.m in Sources */,
-				7E42FDEA13EF3A64007B3C26 /* STReloadableTableViewController.m in Sources */,
 				7E146FEE13EF543B00B954C6 /* UserImageDownloadManager.m in Sources */,
 				7E146FF113F07A7500B954C6 /* MediumUserImageButton.m in Sources */,
 				7EC1C65013F456FE0070CE6D /* KeyChainItemWrapper.m in Sources */,

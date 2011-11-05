@@ -15,6 +15,7 @@
 
 @property (nonatomic, assign) BOOL shouldReload;
 @property (nonatomic, assign) BOOL hasHeaders;
+@property (nonatomic, assign) BOOL hasFilterBar;
 @property (nonatomic, assign) BOOL isLoading;
 @property (nonatomic, readonly) UILabel* reloadLabel;
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
