@@ -591,46 +591,6 @@ class StampedAPI(AStampedAPI):
         self._accountDB.removeAPNSToken(authUserId, token)
         return True
     
-    @API_CALL
-    def resetPassword(self, email):
-        email = str(email).lower().strip()
-        if not utils.validate_email(email):
-            msg = "Invalid format for email address"
-            logs.warning(msg)
-            raise InputError(msg)
-
-        # Verify user exists
-        account = self._accountDB.getAccountByEmail(email)
-        if not account or not account.user_id:
-            msg = "User does not exist"
-            logs.warning(msg)
-            raise InputError(msg)
-
-        # Generate random password
-        new_password = auth.generateToken(10)
-
-        # Convert and store new password
-        password = convertPasswordForStorage(new_password)
-        self._accountDB.updatePassword(account.user_id, password)
-
-        # Remove refresh / access tokens
-        self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
-        self._accessTokenDB.removeAccessTokensForUser(account.user_id)
-
-        # Email user
-        msg = {}
-        msg['to'] = email
-        msg['from'] = 'Stamped <noreply@stamped.com>'
-        msg['subject'] = 'Stamped: Reset Password'
-        ### TODO: Update this copy?
-        msg['body'] = 'Your new password is: %s \n\n'% (new_password) + \
-            'To change your password, log in to Stamped and go to ' + \
-            'Profile > Settings > Change Password.' 
-
-        utils.sendEmail(msg, format='text')
-
-        return True
-    
     
     """
     #     #                             

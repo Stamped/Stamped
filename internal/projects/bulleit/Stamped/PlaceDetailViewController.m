@@ -196,6 +196,9 @@
 - (void)setupSectionViews {
   // Information
   // TODO: What if there's no information?
+  if (mapContainerView_.hidden == YES) 
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
+  
   
   [self addSectionWithName:@"Information"];
   CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Information"];

@@ -13,6 +13,7 @@ from StampedAuth import StampedAuth
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoAuthAccessTokenCollection import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
+from db.mongodb.MongoAuthPasswordResetCollection import MongoAuthPasswordResetCollection
 
 class MongoStampedAuth(StampedAuth):
     """
@@ -33,4 +34,8 @@ class MongoStampedAuth(StampedAuth):
     @lazyProperty
     def _refreshTokenDB(self):
         return MongoAuthRefreshTokenCollection()
+
+    @lazyProperty
+    def _passwordResetDB(self):
+        return MongoAuthPasswordResetCollection()
 

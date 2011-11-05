@@ -30,6 +30,13 @@ class AccessToken(Schema):
         self.expires            = SchemaElement(datetime)
         self.timestamp          = TimestampSchema()
 
+class PasswordResetToken(Schema):
+    def setSchema(self):
+        self.token_id           = SchemaElement(basestring)
+        self.user_id            = SchemaElement(basestring)
+        self.expires            = SchemaElement(datetime)
+        self.timestamp          = TimestampSchema()
+
 # ####### #
 # Account #
 # ####### #
