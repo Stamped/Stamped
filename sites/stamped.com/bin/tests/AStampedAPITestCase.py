@@ -18,6 +18,7 @@ CLIENT_SECRET = "august1ftw"
 _accounts  = []
 _test_case = None
 _baseurl   = "http://localhost:18000/v0"
+_baseurl   = "http://www.stamped.com:5000/v0"
 #_baseurl   = "https://MyLoadBalancer-2017429568.us-east-1.elb.amazonaws.com/v0"
 # _baseurl = "https://ec2-107-20-125-151.compute-1.amazonaws.com/v0"
 #_baseurl   = "http://ec2-67-202-38-237.compute-1.amazonaws.com:5000/v0"
@@ -53,7 +54,7 @@ class AStampedAPITestCase(AStampedTestCase):
         'client_secret': 'august1ftw'
     }
 
-    detailedLog = False
+    detailedLog = True
     if _baseurl == 'http://localhost:18000/v0':
         detailedLog = False
     
