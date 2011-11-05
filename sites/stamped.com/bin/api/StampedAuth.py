@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 
 from errors import *
 from Schemas import *
+from auth import convertPasswordForStorage
 
 from AStampedAuth import AStampedAuth
 
@@ -110,6 +111,91 @@ class StampedAuth(AStampedAuth):
             msg = "Invalid password"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
+    
+    def forgotPassword(self, email):
+        email = str(email).lower().strip()
+        if not utils.validate_email(email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Verify user exists
+        account = self._accountDB.getAccountByEmail(email)
+        if not account or not account.user_id:
+            msg = "User does not exist"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Convert and store new password
+        password = convertPasswordForStorage(auth.generateToken(10))
+        self._accountDB.updatePassword(account.user_id, password)
+
+        # Remove refresh / access tokens
+        self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
+        self._accessTokenDB.removeAccessTokensForUser(account.user_id)
+
+        # Generate reset token
+
+
+
+
+        attempt = 1
+        max_attempts = 5
+        expire = 600    # 10 minutes
+            
+        while True:
+            try:
+                rightNow = datetime.utcnow()
+
+                resetToken = PasswordResetToken()
+                resetToken.token_id = auth.generateToken(66)
+                resetToken.user_id = account.user_id
+                resetToken.expires = rightNow + timedelta(seconds=expire)
+                resetToken.timestamp.created = rightNow
+                
+                self._passwordResetDB.addResetToken(resetToken)
+                break
+            except:
+                if attempt >= max_attempts:
+                    ## Add logging
+                    raise 
+                attempt += 1
+
+        baseurl = 'http://www.stamped.com'
+        url = '%s/settings/password/reset/%s' % (baseurl, resetToken.token_id)
+
+
+        # Email user
+        msg = {}
+        msg['to'] = email
+        msg['from'] = 'Stamped <noreply@stamped.com>'
+        msg['subject'] = 'Stamped: Reset Password'
+        ### TODO: Update this copy?
+        msg['body'] = 'Please visit %s to reset your password' % url
+
+        utils.sendEmail(msg, format='text')
+
+        return True
+
+    def verifyPasswordResetToken(self, resetToken):
+        ### Verify Refresh Token
+        try:
+            token = self._passwordResetDB.getResetToken(resetToken)
+            if token.user_id == None:
+                raise
+
+            if token['expires'] > datetime.utcnow():
+                logs.info("Valid reset token for user id: %s" % token.user_id)
+                return token.user_id
+            
+            logs.warning("Invalid reset token... deleting")
+            self._passwordResetDB.removeResetToken(token.token_id)
+            raise
+
+        except:
+            msg = "Invalid reset token"
+            logs.warning(msg)
+            raise AuthError("invalid_token", 401, msg)
 
 
 

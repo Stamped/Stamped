@@ -20,5 +20,7 @@ urlpatterns = patterns('',
     url(R'^privacy-mobile', 'teaser.views.privacy'),
     url(R'^terms-mobile', 'teaser.views.terms'),
     url(R'^feedback-mobile', 'teaser.views.feedback'),
+    url(R'^settings/password/reset/(?P<token>[\w-]{66})$', 'appsettings.views.passwordReset'),
+    url(R'^settings/password/forgot$', 'appsettings.views.passwordForgot'),
     url(R'$', 'teaser.views.index'),
 )

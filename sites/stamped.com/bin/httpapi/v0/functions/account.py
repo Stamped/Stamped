@@ -232,7 +232,7 @@ def reset_password(request):
     client_id   = checkClient(request)
     schema      = parseRequest(HTTPEmail(), request)
 
-    stampedAPI.resetPassword(schema.email)
+    stampedAuth.resetPassword(schema.email)
 
     return transformOutput(True)
 
