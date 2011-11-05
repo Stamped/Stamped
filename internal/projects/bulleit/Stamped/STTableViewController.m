@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "Util.h"
 #import "UIColor+Stamped.h"
 
 static NSString* kPullDownText = @"Pull down to refresh...";
@@ -70,7 +71,7 @@ static const CGFloat kReloadHeight = 60.0;
   lastUpdatedLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
   lastUpdatedLabel_.text = @"Last updated a long time ago";
   [lastUpdatedLabel_ sizeToFit];
-  lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 50, CGRectGetHeight(shelfView_.frame) - 41);
+  lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 49, CGRectGetHeight(shelfView_.frame) - 41);
   lastUpdatedLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   lastUpdatedLabel_.backgroundColor = [UIColor clearColor];
   lastUpdatedLabel_.textColor = [UIColor stampedLightGrayColor];
@@ -128,6 +129,13 @@ static const CGFloat kReloadHeight = 60.0;
                        arrowImageView_.transform = CGAffineTransformIdentity;
                      }
                      completion:nil];
+  } else {
+    CGRect reloadFrame = reloadLabel_.frame;
+    reloadFrame.origin.y = CGRectGetHeight(shelfView_.frame) - 47;
+    reloadLabel_.frame = reloadFrame;
+    reloadLabel_.text = kLoadingText;
+    lastUpdatedLabel_.alpha = 0.0;
+    arrowImageView_.alpha = 0.0;
   }
 }
 
@@ -174,5 +182,9 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)userPulledToReload {}
 
 - (void)reloadData {}
+
+- (void)updateLastUpdatedTo:(NSDate*)date {
+  lastUpdatedLabel_.text = [NSString stringWithFormat:@"Last updated %@", [Util userReadableTimeSinceDate:date]];
+}
 
 @end

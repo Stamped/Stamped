@@ -72,14 +72,13 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   if (delegate.navigationController.navigationBarHidden)
     [delegate.navigationController setNavigationBarHidden:NO animated:YES];
 
   if (!friendsArray_)
     [self loadFriendsFromNetwork];
-
-  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -87,7 +86,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setSettingsButtonShown:YES];
-  [self loadFriendsFromNetwork];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"PeopleLastUpdatedAt"]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -134,6 +133,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   }
   [self.tableView reloadData];
+  NSDate* now = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"PeopleLastUpdatedAt"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  [self updateLastUpdatedTo:now];
   [self setIsLoading:NO];
 }
 

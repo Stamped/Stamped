@@ -23,5 +23,6 @@
 
 - (void)userPulledToReload;
 - (void)reloadData;
+- (void)updateLastUpdatedTo:(NSDate*)date;
 
 @end
