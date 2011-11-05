@@ -119,6 +119,10 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
 
 - (void)initialize {
   self.layer.masksToBounds = NO;
+  
+  BOOL whiteAppearance = NO;
+  if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
+    whiteAppearance = YES;
 
   CGFloat ripplesY = CGRectGetMaxY(self.bounds);
   ripplesLayer_ = [[CALayer alloc] init];
@@ -131,7 +135,8 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   mapLayer_ = [[CALayer alloc] init];
   mapLayer_.frame = CGRectMake(281, 7, 34, 30);
   mapLayer_.contentsGravity = kCAGravityResizeAspect;
-  mapLayer_.contents = (id)[UIImage imageNamed:@"globe_button"].CGImage;
+  NSString* imageName = whiteAppearance ? @"nav_globe_button_ios5" : @"nav_globe_button_ios4";
+  mapLayer_.contents = (id)[UIImage imageNamed:imageName].CGImage;
   mapLayer_.backgroundColor = [UIColor whiteColor].CGColor;
   mapLayer_.opacity = 0.0;
   [self.layer addSublayer:mapLayer_];
@@ -139,7 +144,8 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
   
   settingsButton_ = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
   settingsButton_.frame = CGRectMake(281, 7, 34, 30);
-  [settingsButton_ setImage:[UIImage imageNamed:@"settings_button"] forState:UIControlStateNormal];
+  imageName = whiteAppearance ? @"nav_gear_button_ios5" : @"nav_gear_button_ios4";
+  [settingsButton_ setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
   [settingsButton_ addTarget:self
                       action:@selector(settingsButtonPressed:)
             forControlEvents:UIControlEventTouchUpInside];
@@ -219,11 +225,19 @@ NSString* const kSettingsButtonPressedNotification = @"kkSettingsButtonPressedNo
 
 - (void)auxiliaryButtonTapped {
   if (listButtonShown_) {
-    mapLayer_.contents = (id)[UIImage imageNamed:@"globe_button"].CGImage;
+    NSString* imageName = @"nav_globe_button_ios4";
+    if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
+      imageName = @"nav_globe_button_ios5";
+
+    mapLayer_.contents = (id)[UIImage imageNamed:imageName].CGImage;
     [[NSNotificationCenter defaultCenter] postNotificationName:kListViewButtonPressedNotification
                                                         object:self];
   } else {
-    mapLayer_.contents = (id)[UIImage imageNamed:@"list_button"].CGImage;
+    NSString* imageName = @"nav_list_button_ios4";
+    if ([UINavigationBar conformsToProtocol:@protocol(UIAppearance)])
+      imageName = @"nav_list_button_ios5";
+
+    mapLayer_.contents = (id)[UIImage imageNamed:imageName].CGImage;
     [[NSNotificationCenter defaultCenter] postNotificationName:kMapViewButtonPressedNotification
                                                         object:self];
   }
