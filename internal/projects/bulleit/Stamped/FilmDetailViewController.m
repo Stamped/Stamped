@@ -136,6 +136,8 @@
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesURL]];
   else if (detailedEntity_.itunesShortURL)
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesShortURL]];
+  else if (detailedEntity_.amazonURL)
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.amazonURL]];
 }
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
@@ -150,6 +152,17 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
+    self.mainActionLabel.text = @"Download";
+    self.affiliateLogoView.frame = CGRectOffset(self.affiliateLogoView.frame, 0.0, -3.0);
+    self.affiliateLogoView.image = [UIImage imageNamed:@"logo_itunes"];
+  }
+  else if (detailedEntity_.amazonURL) {
+    self.mainActionButton.hidden = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
+    self.mainActionLabel.text = @"Buy now";
+    self.affiliateLogoView.frame = CGRectOffset(self.affiliateLogoView.frame, 0.0, 2.0);
+    self.affiliateLogoView.image = [UIImage imageNamed:@"logo_amazon"];
   }
     else {
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, 
