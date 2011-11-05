@@ -217,8 +217,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
-  NSLog(@"Objects: %@", objects);
   [[Favorite managedObjectContext] save:NULL];
   [self setIsLoading:NO];
 }

@@ -59,6 +59,8 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
                                              object:nil];
   if ([AccountManager sharedManager].currentUser)
     [self loadFriendsFromNetwork];
+  
+  self.hasHeaders = YES;
 }
 
 - (void)viewDidUnload {
@@ -81,11 +83,11 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setSettingsButtonShown:YES];
   [self loadFriendsFromNetwork];
-  [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -111,7 +113,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 }
 
 - (void)loadFriendsFromNetwork {
-  //[self setIsLoading:YES];
+  [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* userID = [AccountManager sharedManager].currentUser.userID;
@@ -132,8 +134,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   }
   [self.tableView reloadData];
-  //self.tableView.contentOffset = scrollPosition_;
-  //[self setIsLoading:NO];
+  [self setIsLoading:NO];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -144,7 +145,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     return;
   }
   
-  //[self setIsLoading:NO];
+  [self setIsLoading:NO];
 }
 
 #pragma mark - Table view data source.

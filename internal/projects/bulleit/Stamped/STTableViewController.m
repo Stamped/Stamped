@@ -8,29 +8,171 @@
 
 #import "STTableViewController.h"
 
+#import <QuartzCore/QuartzCore.h>
+
+#import "UIColor+Stamped.h"
+
+static NSString* kPullDownText = @"Pull down to refresh...";
+static NSString* kReleaseText = @"Release to refresh...";
+static NSString* kLoadingText = @"Updating...";
+static const CGFloat kReloadHeight = 60.0;
+
 @implementation STTableViewController
 
 @synthesize tableView = tableView_;
-@synthesize shelfImageView = shelfImageView_;
+@synthesize shelfView = shelfView_;
+@synthesize shouldReload = shouldReload_;
+@synthesize hasHeaders = hasHeaders_;
+@synthesize isLoading = isLoading_;
+@synthesize reloadLabel = reloadLabel_;
+@synthesize lastUpdatedLabel = lastUpdatedLabel_;
+@synthesize arrowImageView = arrowImageView_;
+@synthesize spinnerView = spinnerView_;
 
 #pragma mark - UIScrollViewDelegate methods.
 
 - (void)dealloc {
   self.tableView = nil;
-  self.shelfImageView = nil;
+  self.shelfView = nil;
   [super dealloc];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.tableView = nil;
-  self.shelfImageView = nil;
+  self.shelfView = nil;
 }
 
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-  CGRect shelfFrame = shelfImageView_.frame;
-  shelfFrame.origin.y = MAX(-356, -356 - scrollView.contentOffset.y);
-  shelfImageView_.frame = shelfFrame;
+- (void)viewDidLoad {
+  [super viewDidLoad];  
+  arrowImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
+  arrowImageView_.frame = CGRectMake(60, CGRectGetMaxY(shelfView_.bounds) - 58, 18, 40);
+  [shelfView_ addSubview:arrowImageView_];
+  [arrowImageView_ release];
+  
+  spinnerView_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+  spinnerView_.hidesWhenStopped = YES;
+  spinnerView_.center = arrowImageView_.center;
+  [shelfView_ addSubview:spinnerView_];
+  [spinnerView_ release];
+  
+  reloadLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  reloadLabel_.text = kPullDownText;
+  [reloadLabel_ sizeToFit];
+  reloadLabel_.frame = CGRectOffset(reloadLabel_.frame, 78, CGRectGetHeight(shelfView_.frame) - 57);
+  reloadLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+  reloadLabel_.backgroundColor = [UIColor clearColor];
+  reloadLabel_.textColor = [UIColor stampedGrayColor];
+  reloadLabel_.textAlignment = UITextAlignmentCenter;
+  [shelfView_ addSubview:reloadLabel_];
+  [reloadLabel_ release];
+  
+  lastUpdatedLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+  lastUpdatedLabel_.text = @"Last updated a long time ago";
+  [lastUpdatedLabel_ sizeToFit];
+  lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 50, CGRectGetHeight(shelfView_.frame) - 41);
+  lastUpdatedLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
+  lastUpdatedLabel_.backgroundColor = [UIColor clearColor];
+  lastUpdatedLabel_.textColor = [UIColor stampedLightGrayColor];
+  lastUpdatedLabel_.textAlignment = UITextAlignmentCenter;
+  [shelfView_ addSubview:lastUpdatedLabel_];
+  [lastUpdatedLabel_ release];
 }
+
+- (void)setIsLoading:(BOOL)loading {
+  if (isLoading_ == loading)
+    return;
+
+  isLoading_ = loading;
+  shouldReload_ = NO;
+  
+  //arrowImageView_.hidden = loading;
+  if (loading) {
+    [spinnerView_ startAnimating];
+  } else {
+    [spinnerView_ stopAnimating];
+  }
+  
+  if (!loading) {
+    [UIView animateWithDuration:0.2
+                          delay:0
+                        options:UIViewAnimationOptionBeginFromCurrentState | 
+                                UIViewAnimationOptionAllowUserInteraction
+                     animations:^{
+                       CGRect reloadFrame = reloadLabel_.frame;
+                       reloadFrame.origin.y = CGRectGetHeight(shelfView_.frame) - 57;
+                       reloadLabel_.frame = reloadFrame;
+                       reloadLabel_.text = kPullDownText;
+                       lastUpdatedLabel_.alpha = 1.0;
+                       self.tableView.contentInset = UIEdgeInsetsZero;
+                       arrowImageView_.alpha = 1.0;
+                     }
+                     completion:nil];
+    
+    return;
+  }
+  
+  if (self.tableView.contentOffset.y < 0) {
+    [UIView animateWithDuration:0.2
+                          delay:0 
+                        options:UIViewAnimationOptionBeginFromCurrentState | 
+                                UIViewAnimationOptionAllowUserInteraction
+                     animations:^{
+                       CGRect reloadFrame = reloadLabel_.frame;
+                       reloadFrame.origin.y = CGRectGetHeight(shelfView_.frame) - 47;
+                       reloadLabel_.frame = reloadFrame;
+                       reloadLabel_.text = kLoadingText;
+                       lastUpdatedLabel_.alpha = 0.0;
+                       self.tableView.contentInset = UIEdgeInsetsMake(kReloadHeight, 0, 0, 0);
+                       arrowImageView_.alpha = 0.0;
+                       arrowImageView_.transform = CGAffineTransformIdentity;
+                     }
+                     completion:nil];
+  }
+}
+
+#pragma mark - UIScrollView delegate methods
+
+- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  if (isLoading_ && hasHeaders_) {
+    if (scrollView.contentOffset.y >= 0)
+      scrollView.contentInset = UIEdgeInsetsZero;
+    else
+      scrollView.contentInset = UIEdgeInsetsMake(MIN(-scrollView.contentOffset.y, kReloadHeight), 0, 0, 0);
+  }
+  
+  CGRect shelfFrame = shelfView_.frame;
+  shelfFrame.origin.y = MAX(-356, -356 - scrollView.contentOffset.y);
+  shelfView_.frame = shelfFrame;
+  
+  if (isLoading_)
+    return;
+  
+  shouldReload_ = scrollView.contentOffset.y < -kReloadHeight;
+  reloadLabel_.text = shouldReload_ ? kReleaseText : kPullDownText;
+  [UIView animateWithDuration:0.15
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState | 
+   UIViewAnimationOptionAllowUserInteraction
+                   animations:^{
+                     CGAffineTransform transform = shouldReload_ ?
+                         CGAffineTransformMakeRotation(M_PI) : CGAffineTransformIdentity;
+                     arrowImageView_.transform = transform;
+                   }
+                   completion:nil];
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
+  if (shouldReload_) {
+    [self setIsLoading:YES];
+    [self userPulledToReload];
+  }
+}
+
+#pragma mark - To be implemented by subclasses.
+
+- (void)userPulledToReload {}
+
+- (void)reloadData {}
 
 @end

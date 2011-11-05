@@ -154,27 +154,44 @@
 						<float key="IBUISectionHeaderHeight">22</float>
 						<float key="IBUISectionFooterHeight">22</float>
 					</object>
-					<object class="IBUIImageView" id="301396522">
+					<object class="IBUIView" id="969959125">
 						<reference key="NSNextResponder" ref="34597709"/>
 						<int key="NSvFlags">292</int>
+						<object class="NSMutableArray" key="NSSubviews">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBUIImageView" id="301396522">
+								<reference key="NSNextResponder" ref="969959125"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrameSize">{320, 365}</string>
+								<reference key="NSSuperview" ref="969959125"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="873029372"/>
+								<string key="NSReuseIdentifierKey">_NS:366</string>
+								<int key="IBUIContentMode">1</int>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<object class="NSCustomResource" key="IBUIImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">shelf_background.png</string>
+								</object>
+							</object>
+						</object>
 						<string key="NSFrame">{{0, -356}, {320, 365}}</string>
 						<reference key="NSSuperview" ref="34597709"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="873029372"/>
-						<string key="NSReuseIdentifierKey">_NS:366</string>
-						<int key="IBUIContentMode">1</int>
-						<bool key="IBUIUserInteractionEnabled">NO</bool>
-						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<object class="NSCustomResource" key="IBUIImage">
-							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">shelf_background.png</string>
+						<reference key="NSNextKeyView" ref="301396522"/>
+						<string key="NSReuseIdentifierKey">_NS:196</string>
+						<object class="NSColor" key="IBUIBackgroundColor">
+							<int key="NSColorSpace">3</int>
+							<bytes key="NSWhite">MCAwAA</bytes>
 						</object>
+						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 					</object>
 				</object>
 				<string key="NSFrame">{{0, 64}, {320, 367}}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
-				<reference key="NSNextKeyView" ref="301396522"/>
+				<reference key="NSNextKeyView" ref="969959125"/>
 				<string key="NSReuseIdentifierKey">_NS:196</string>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">3</int>
@@ -231,11 +248,11 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">shelfImageView</string>
+						<string key="label">shelfView</string>
 						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="301396522"/>
+						<reference key="destination" ref="969959125"/>
 					</object>
-					<int key="connectionID">44</int>
+					<int key="connectionID">46</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -342,7 +359,7 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="873029372"/>
-							<reference ref="301396522"/>
+							<reference ref="969959125"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -355,9 +372,19 @@
 						<reference key="parent" ref="34597709"/>
 					</object>
 					<object class="IBObjectRecord">
+						<int key="objectID">45</int>
+						<reference key="object" ref="969959125"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="301396522"/>
+						</object>
+						<reference key="parent" ref="34597709"/>
+						<string key="objectName">Shelf View</string>
+					</object>
+					<object class="IBObjectRecord">
 						<int key="objectID">11</int>
 						<reference key="object" ref="301396522"/>
-						<reference key="parent" ref="34597709"/>
+						<reference key="parent" ref="969959125"/>
 					</object>
 				</object>
 			</object>
@@ -384,6 +411,7 @@
 					<string>33.IBPluginDependency</string>
 					<string>36.IBPluginDependency</string>
 					<string>4.IBPluginDependency</string>
+					<string>45.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -406,6 +434,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="unlocalizedProperties">
@@ -420,7 +449,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">44</int>
+			<int key="maxID">46</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -672,12 +701,12 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>shelfImageView</string>
+							<string>shelfView</string>
 							<string>tableView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>UIImageView</string>
+							<string>UIView</string>
 							<string>UITableView</string>
 						</object>
 					</object>
@@ -685,14 +714,14 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>shelfImageView</string>
+							<string>shelfView</string>
 							<string>tableView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBToOneOutletInfo">
-								<string key="name">shelfImageView</string>
-								<string key="candidateClassName">UIImageView</string>
+								<string key="name">shelfView</string>
+								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">tableView</string>
