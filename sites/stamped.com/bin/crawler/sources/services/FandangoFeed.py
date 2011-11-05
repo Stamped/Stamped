@@ -94,6 +94,7 @@ class FandangoFeed(AExternalDumpEntitySource):
             
             # TODO: test f_url
             entity.f_url = "%s" % entry.link
+            entity.f_url = entity.f_url.replace('&m=', '?pid=5348839&m=')
             #print "LINK: %s" % entry.link
             #break
             
