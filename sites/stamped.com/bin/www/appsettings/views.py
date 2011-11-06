@@ -46,15 +46,19 @@ def passwordReset(request, **kwargs):
             password = convertPasswordForStorage(data['password'])
             
             # Store password            
-            self._accountDB.updatePassword(authUserId, password)
+            stampedAuth.updatePassword(authUserId, password)
 
             # Return success
-            response = render_to_response('terms-mobile.html', None)
+            response = render_to_response('password-reset.html', None)
 
         else:
             # Display 'change password' form
             account = stampedAPI.getAccount(authUserId)
-            params = {'email': account.email}
+            params = {
+                'email': account.email, 
+                'token': token,
+                'form': True,
+                }
             response = render_to_response('password-reset.html', params)
 
         return response
