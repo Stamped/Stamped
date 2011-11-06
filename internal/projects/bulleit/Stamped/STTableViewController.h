@@ -9,11 +9,11 @@
 #import <UIKit/UIKit.h>
 
 #import "STStampFilterBar.h"
+#import "STViewController.h"
 
-@interface STTableViewController : UIViewController <UIScrollViewDelegate, STStampFilterBarDelegate>
+@interface STTableViewController : STViewController <UIScrollViewDelegate, STStampFilterBarDelegate>
 
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
-@property (nonatomic, retain) IBOutlet UIView* shelfView;
 @property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
 
 @property (nonatomic, assign) BOOL shouldReload;

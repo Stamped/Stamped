@@ -18,14 +18,9 @@ static NSString* kReleaseText = @"Release to refresh...";
 static NSString* kLoadingText = @"Updating...";
 static const CGFloat kReloadHeight = 60.0;
 
-@interface STTableViewController ()
-@property (nonatomic, assign) CGFloat initialShelfYPosition;
-@end
-
 @implementation STTableViewController
 
 @synthesize tableView = tableView_;
-@synthesize shelfView = shelfView_;
 @synthesize stampFilterBar = stampFilterBar_;
 @synthesize shouldReload = shouldReload_;
 @synthesize hasHeaders = hasHeaders_;
@@ -35,7 +30,6 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize lastUpdatedLabel = lastUpdatedLabel_;
 @synthesize arrowImageView = arrowImageView_;
 @synthesize spinnerView = spinnerView_;
-@synthesize initialShelfYPosition = initialShelfYPosition_;
 @synthesize highlightView = highlightView_;
 
 #pragma mark - UIScrollViewDelegate methods.
@@ -58,50 +52,49 @@ static const CGFloat kReloadHeight = 60.0;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  initialShelfYPosition_ = shelfView_.frame.origin.y;
 
   CGFloat bottomPadding = 0;
   if (hasFilterBar_)
     bottomPadding = 46;
 
   arrowImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
-  arrowImageView_.frame = CGRectMake(60, CGRectGetMaxY(shelfView_.bounds) - 58 - bottomPadding, 18, 40);
-  [shelfView_ addSubview:arrowImageView_];
+  arrowImageView_.frame = CGRectMake(60, CGRectGetMaxY(self.shelfView.bounds) - 58 - bottomPadding, 18, 40);
+  [self.shelfView addSubview:arrowImageView_];
   [arrowImageView_ release];
 
   spinnerView_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
   spinnerView_.hidesWhenStopped = YES;
   spinnerView_.center = arrowImageView_.center;
-  [shelfView_ addSubview:spinnerView_];
+  [self.shelfView addSubview:spinnerView_];
   [spinnerView_ release];
   
   reloadLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
   reloadLabel_.text = kPullDownText;
   [reloadLabel_ sizeToFit];
-  reloadLabel_.frame = CGRectOffset(reloadLabel_.frame, 78, CGRectGetHeight(shelfView_.frame) - 57 - bottomPadding);
+  reloadLabel_.frame = CGRectOffset(reloadLabel_.frame, 78, CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding);
   reloadLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
   reloadLabel_.backgroundColor = [UIColor clearColor];
   reloadLabel_.textColor = [UIColor stampedGrayColor];
   reloadLabel_.textAlignment = UITextAlignmentCenter;
-  [shelfView_ addSubview:reloadLabel_];
+  [self.shelfView addSubview:reloadLabel_];
   [reloadLabel_ release];
   
   lastUpdatedLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
   lastUpdatedLabel_.text = @"Last updated a long time ago";
   [lastUpdatedLabel_ sizeToFit];
-  lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 49, CGRectGetHeight(shelfView_.frame) - 41 - bottomPadding);
+  lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 49, CGRectGetHeight(self.shelfView.frame) - 41 - bottomPadding);
   lastUpdatedLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   lastUpdatedLabel_.backgroundColor = [UIColor clearColor];
   lastUpdatedLabel_.textColor = [UIColor stampedLightGrayColor];
   lastUpdatedLabel_.textAlignment = UITextAlignmentCenter;
-  [shelfView_ addSubview:lastUpdatedLabel_];
+  [self.shelfView addSubview:lastUpdatedLabel_];
   [lastUpdatedLabel_ release];
   
-  highlightView_ = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(shelfView_.frame) - 26, 320, 20)];
+  highlightView_ = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.shelfView.frame) - 26, 320, 20)];
   highlightView_.backgroundColor = [UIColor colorWithRed:0.22 green:0.48 blue:0.85 alpha:1.0];
   highlightView_.alpha = 0;
   highlightView_.userInteractionEnabled = NO;
-  [shelfView_ addSubview:highlightView_];
+  [self.shelfView addSubview:highlightView_];
   [highlightView_ release];
 }
 
@@ -134,7 +127,7 @@ static const CGFloat kReloadHeight = 60.0;
                                 UIViewAnimationOptionAllowUserInteraction
                      animations:^{
                        CGRect reloadFrame = reloadLabel_.frame;
-                       reloadFrame.origin.y = CGRectGetHeight(shelfView_.frame) - 57 - bottomPadding;
+                       reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding;
                        reloadLabel_.frame = reloadFrame;
                        reloadLabel_.text = kPullDownText;
                        lastUpdatedLabel_.alpha = 1.0;
@@ -153,7 +146,7 @@ static const CGFloat kReloadHeight = 60.0;
                                 UIViewAnimationOptionAllowUserInteraction
                      animations:^{
                        CGRect reloadFrame = reloadLabel_.frame;
-                       reloadFrame.origin.y = CGRectGetHeight(shelfView_.frame) - 47 - bottomPadding;
+                       reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 47 - bottomPadding;
                        reloadLabel_.frame = reloadFrame;
                        reloadLabel_.text = kLoadingText;
                        lastUpdatedLabel_.alpha = 0.0;
@@ -164,7 +157,7 @@ static const CGFloat kReloadHeight = 60.0;
                      completion:nil];
   } else {
     CGRect reloadFrame = reloadLabel_.frame;
-    reloadFrame.origin.y = CGRectGetHeight(shelfView_.frame) - 47 - bottomPadding;
+    reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 47 - bottomPadding;
     reloadLabel_.frame = reloadFrame;
     reloadLabel_.text = kLoadingText;
     lastUpdatedLabel_.alpha = 0.0;
@@ -175,6 +168,8 @@ static const CGFloat kReloadHeight = 60.0;
 #pragma mark - UIScrollView delegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  [super scrollViewDidScroll:scrollView];
+
   if (isLoading_ && hasHeaders_) {
     if (scrollView.contentOffset.y >= 0)
       scrollView.contentInset = UIEdgeInsetsZero;
@@ -182,13 +177,9 @@ static const CGFloat kReloadHeight = 60.0;
       scrollView.contentInset = UIEdgeInsetsMake(MIN(-scrollView.contentOffset.y, kReloadHeight), 0, 0, 0);
   }
 
-  CGRect shelfFrame = shelfView_.frame;
-  shelfFrame.origin.y = MAX(-356, initialShelfYPosition_ - scrollView.contentOffset.y);
-  shelfView_.frame = shelfFrame;
-  scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(CGRectGetMaxY(shelfFrame) - 9.0, 0, 0, 0);
-  
-  if (stampFilterBar_ && (stampFilterBar_.searchQuery.length > 0 || stampFilterBar_.filterType != StampFilterTypeNone))
-    highlightView_.alpha = MIN(1.0, (15 + (-shelfFrame.origin.y - 356)) / 15);
+  if (stampFilterBar_ && (stampFilterBar_.searchQuery.length > 0 || stampFilterBar_.filterType != StampFilterTypeNone)) {
+    highlightView_.alpha = MIN(1.0, (15 + (-self.shelfView.frame.origin.y - 356)) / 15);
+  }
   
   if (isLoading_)
     return;

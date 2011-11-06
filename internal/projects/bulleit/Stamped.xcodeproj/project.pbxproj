@@ -49,6 +49,7 @@
 		7E0D4EE31465B58800F81CEC /* STTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE21465B58800F81CEC /* STTableViewController.m */; };
 		7E0D4EE61465F1DB00F81CEC /* shelf_keyline_horiz.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE41465F1DB00F81CEC /* shelf_keyline_horiz.png */; };
 		7E0D4EE71465F1DB00F81CEC /* shelf_keyline_horiz@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE51465F1DB00F81CEC /* shelf_keyline_horiz@2x.png */; };
+		7E0D4EEA14662BED00F81CEC /* STViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0D4EE914662BEC00F81CEC /* STViewController.m */; };
 		7E10061A143E46760079AEDC /* icon1@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E100619143E46760079AEDC /* icon1@2x.png */; };
 		7E10061C143E46880079AEDC /* icon1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E10061B143E46880079AEDC /* icon1.png */; };
 		7E100623143E6C3C0079AEDC /* eSearch_location_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E10061F143E6C3C0079AEDC /* eSearch_location_button.png */; };
@@ -776,6 +777,8 @@
 		7E0D4EE21465B58800F81CEC /* STTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTableViewController.m; sourceTree = "<group>"; };
 		7E0D4EE41465F1DB00F81CEC /* shelf_keyline_horiz.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shelf_keyline_horiz.png; sourceTree = "<group>"; };
 		7E0D4EE51465F1DB00F81CEC /* shelf_keyline_horiz@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "shelf_keyline_horiz@2x.png"; sourceTree = "<group>"; };
+		7E0D4EE814662BEB00F81CEC /* STViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STViewController.h; sourceTree = "<group>"; };
+		7E0D4EE914662BEC00F81CEC /* STViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STViewController.m; sourceTree = "<group>"; };
 		7E100619143E46760079AEDC /* icon1@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "icon1@2x.png"; path = "../icon1@2x.png"; sourceTree = "<group>"; };
 		7E10061B143E46880079AEDC /* icon1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon1.png; path = ../icon1.png; sourceTree = "<group>"; };
 		7E10061F143E6C3C0079AEDC /* eSearch_location_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eSearch_location_button.png; sourceTree = "<group>"; };
@@ -2610,6 +2613,8 @@
 				7EDA5FF213F56D7F00F23B13 /* Authentication */,
 				7E0D4EE11465B58800F81CEC /* STTableViewController.h */,
 				7E0D4EE21465B58800F81CEC /* STTableViewController.m */,
+				7E0D4EE814662BEB00F81CEC /* STViewController.h */,
+				7E0D4EE914662BEC00F81CEC /* STViewController.m */,
 				7E5EB261140C0535007D164F /* STTextField.h */,
 				7E5EB262140C0535007D164F /* STTextField.m */,
 				7E7DDE12145A0AE50058ACA9 /* STToolbar.h */,
@@ -3456,6 +3461,7 @@
 				CB7B23071461B994004C247F /* AboutUsViewController.m in Sources */,
 				CB5CF1591463425A00DC2CBC /* TOSViewController.m in Sources */,
 				7E0D4EE31465B58800F81CEC /* STTableViewController.m in Sources */,
+				7E0D4EEA14662BED00F81CEC /* STViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
