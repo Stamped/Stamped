@@ -86,10 +86,6 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
   return stampsArray_.count;
 }

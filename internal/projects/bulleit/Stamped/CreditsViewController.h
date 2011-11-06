@@ -9,9 +9,11 @@
 #import <UIKit/UIKit.h>
 #import <RestKit/RestKit.h>
 
+#import "STViewController.h"
+
 @class User;
 
-@interface CreditsViewController : UIViewController <RKObjectLoaderDelegate,
+@interface CreditsViewController : STViewController <RKObjectLoaderDelegate,
                                                      UITableViewDelegate,
                                                      UITableViewDataSource>
 

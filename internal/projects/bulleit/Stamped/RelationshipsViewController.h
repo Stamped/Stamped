@@ -9,6 +9,8 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+#import "STViewController.h"
+
 @class User;
 
 typedef enum {
@@ -16,11 +18,14 @@ typedef enum {
   RelationshipTypeFollowers
 } RelationshipType;
 
-@interface RelationshipsViewController : UITableViewController <RKObjectLoaderDelegate> {
+@interface RelationshipsViewController : STViewController <RKObjectLoaderDelegate,
+                                                           UITableViewDelegate,
+                                                           UITableViewDataSource> {
  @private
   RelationshipType relationshipType_;
 }
 
+@property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) User* user;
 
 - (id)initWithRelationship:(RelationshipType)relationship;

@@ -27,6 +27,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 @synthesize peopleArray = peopleArray_;
 @synthesize user = user_;
+@synthesize tableView = tableView_;
 
 - (id)initWithRelationship:(RelationshipType)relationshipType {
   self = [super initWithNibName:@"RelationshipsViewController" bundle:nil];
@@ -39,6 +40,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 - (void)dealloc {
   self.peopleArray = nil;
   self.user = nil;
+  self.tableView = nil;
   [super dealloc];
 }
 
@@ -58,6 +60,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
   [super viewDidUnload];
   self.peopleArray = nil;
   self.user = nil;
+  self.tableView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
