@@ -57,7 +57,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize userPannedMap = userPannedMap_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
-@synthesize stampFilterBar = stampFilterBar_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 
 - (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
@@ -72,8 +71,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.searchQuery = nil;
-  self.stampFilterBar.delegate = nil;
-  self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   [super dealloc];
@@ -149,8 +146,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [self.view addSubview:mapView_];
   [mapView_ release];
 
-  stampFilterBar_.filterType = selectedFilterType_;
-  stampFilterBar_.searchQuery = searchQuery_;
+  self.stampFilterBar.filterType = selectedFilterType_;
+  self.stampFilterBar.searchQuery = searchQuery_;
 
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
   [self loadStampsFromDataStore];
@@ -161,8 +158,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.stampFilterBar.delegate = nil;
-  self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
 }
@@ -484,8 +479,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
                                                       object:scrollView];
-  if (stampFilterBar_.searchQuery.length)
-    [stampFilterBar_.searchField resignFirstResponder];
+  if (self.stampFilterBar.searchQuery.length)
+    [self.stampFilterBar.searchField resignFirstResponder];
 
   [super scrollViewDidScroll:scrollView];
 }

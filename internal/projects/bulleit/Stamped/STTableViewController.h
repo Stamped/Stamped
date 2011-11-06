@@ -8,10 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STTableViewController : UIViewController <UIScrollViewDelegate>
+#import "STStampFilterBar.h"
+
+@interface STTableViewController : UIViewController <UIScrollViewDelegate, STStampFilterBarDelegate>
 
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet UIView* shelfView;
+@property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
 
 @property (nonatomic, assign) BOOL shouldReload;
 @property (nonatomic, assign) BOOL hasHeaders;
@@ -21,6 +24,7 @@
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
 @property (nonatomic, readonly) UIImageView* arrowImageView;
 @property (nonatomic, readonly) UIActivityIndicatorView* spinnerView;
+@property (nonatomic, readonly) UIView* highlightView;
 
 - (void)userPulledToReload;
 - (void)reloadData;

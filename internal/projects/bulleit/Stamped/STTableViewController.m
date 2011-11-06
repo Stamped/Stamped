@@ -26,6 +26,7 @@ static const CGFloat kReloadHeight = 60.0;
 
 @synthesize tableView = tableView_;
 @synthesize shelfView = shelfView_;
+@synthesize stampFilterBar = stampFilterBar_;
 @synthesize shouldReload = shouldReload_;
 @synthesize hasHeaders = hasHeaders_;
 @synthesize hasFilterBar = hasFilterBar_;
@@ -35,12 +36,15 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize arrowImageView = arrowImageView_;
 @synthesize spinnerView = spinnerView_;
 @synthesize initialShelfYPosition = initialShelfYPosition_;
+@synthesize highlightView = highlightView_;
 
 #pragma mark - UIScrollViewDelegate methods.
 
 - (void)dealloc {
   self.tableView = nil;
   self.shelfView = nil;
+  self.stampFilterBar.delegate = nil;
+  self.stampFilterBar = nil;
   [super dealloc];
 }
 
@@ -48,6 +52,8 @@ static const CGFloat kReloadHeight = 60.0;
   [super viewDidUnload];
   self.tableView = nil;
   self.shelfView = nil;
+  self.stampFilterBar.delegate = nil;
+  self.stampFilterBar = nil;
 }
 
 - (void)viewDidLoad {
@@ -90,6 +96,13 @@ static const CGFloat kReloadHeight = 60.0;
   lastUpdatedLabel_.textAlignment = UITextAlignmentCenter;
   [shelfView_ addSubview:lastUpdatedLabel_];
   [lastUpdatedLabel_ release];
+  
+  highlightView_ = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(shelfView_.frame) - 26, 320, 20)];
+  highlightView_.backgroundColor = [UIColor colorWithRed:0.22 green:0.48 blue:0.85 alpha:1.0];
+  highlightView_.alpha = 0;
+  highlightView_.userInteractionEnabled = NO;
+  [shelfView_ addSubview:highlightView_];
+  [highlightView_ release];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -172,8 +185,10 @@ static const CGFloat kReloadHeight = 60.0;
   CGRect shelfFrame = shelfView_.frame;
   shelfFrame.origin.y = MAX(-356, initialShelfYPosition_ - scrollView.contentOffset.y);
   shelfView_.frame = shelfFrame;
-
   scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(CGRectGetMaxY(shelfFrame) - 9.0, 0, 0, 0);
+  
+  if (stampFilterBar_ && (stampFilterBar_.searchQuery.length > 0 || stampFilterBar_.filterType != StampFilterTypeNone))
+    highlightView_.alpha = MIN(1.0, (15 + (-shelfFrame.origin.y - 356)) / 15);
   
   if (isLoading_)
     return;
@@ -198,6 +213,12 @@ static const CGFloat kReloadHeight = 60.0;
     [self userPulledToReload];
   }
 }
+
+#pragma mark - STStampFilterBarDelegate methods.
+
+- (void)stampFilterBar:(STStampFilterBar*)bar
+       didSelectFilter:(StampFilterType)filterType
+              andQuery:(NSString*)query {}
 
 #pragma mark - To be implemented by subclasses.
 
