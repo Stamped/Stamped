@@ -221,7 +221,7 @@ def change_password(request):
 
     stampedAuth.verifyPassword(authUserId, old)
 
-    result      = stampedAPI.updatePassword(authUserId, new)
+    result      = stampedAuth.updatePassword(authUserId, new)
 
     return transformOutput(True)
 

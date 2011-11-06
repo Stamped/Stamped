@@ -534,16 +534,6 @@ class StampedAPI(AStampedAPI):
         return True
 
     @API_CALL
-    def updatePassword(self, authUserId, password):
-        password = convertPasswordForStorage(password)
-        
-        self._accountDB.updatePassword(authUserId, password)
-
-        account = self._accountDB.getAccount(authUserId)
-
-        return True
-
-    @API_CALL
     def updateAlerts(self, authUserId, alerts):
         if isinstance(alerts, SchemaElement):
             alerts = alerts.value
