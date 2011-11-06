@@ -763,6 +763,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">inviteViaEmailButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="603578380"/>
+					</object>
+					<int key="connectionID">85</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="628756118"/>
 						<reference key="destination" ref="372490531"/>
@@ -847,6 +855,15 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">40</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">inviteFriendViaEmail:</string>
+						<reference key="source" ref="603578380"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">7</int>
+					</object>
+					<int key="connectionID">84</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1151,7 +1168,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">83</int>
+			<int key="maxID">85</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1170,9 +1187,11 @@
 							<string>findFromFacebook:</string>
 							<string>findFromStamped:</string>
 							<string>findFromTwitter:</string>
+							<string>inviteFriendViaEmail:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -1193,6 +1212,7 @@
 							<string>findFromFacebook:</string>
 							<string>findFromStamped:</string>
 							<string>findFromTwitter:</string>
+							<string>inviteFriendViaEmail:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1224,6 +1244,10 @@
 								<string key="name">findFromTwitter:</string>
 								<string key="candidateClassName">id</string>
 							</object>
+							<object class="IBActionInfo">
+								<string key="name">inviteFriendViaEmail:</string>
+								<string key="candidateClassName">id</string>
+							</object>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="outlets">
@@ -1232,6 +1256,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>contactsButton</string>
 							<string>facebookButton</string>
+							<string>inviteViaEmailButton</string>
 							<string>nipple</string>
 							<string>searchField</string>
 							<string>signInFacebookActivityIndicator</string>
@@ -1246,6 +1271,7 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIImageView</string>
@@ -1267,6 +1293,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>contactsButton</string>
 							<string>facebookButton</string>
+							<string>inviteViaEmailButton</string>
 							<string>nipple</string>
 							<string>searchField</string>
 							<string>signInFacebookActivityIndicator</string>
@@ -1287,6 +1314,10 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">facebookButton</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">inviteViaEmailButton</string>
 								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">

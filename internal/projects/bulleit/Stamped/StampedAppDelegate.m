@@ -172,7 +172,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"image_url", @"imageURL",
      nil];
   userMapping.primaryKeyAttribute = @"userID";
-  [userMapping mapAttributes:@"bio", @"website", @"location", nil];
+  [userMapping mapAttributes:@"bio", @"website", @"location", @"identifier", nil];
   
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   entityMapping.primaryKeyAttribute = @"entityID";

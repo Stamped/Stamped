@@ -81,6 +81,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @property (nonatomic, copy) NSArray* stampedFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
 @property (nonatomic, copy) NSArray* suggestedFriends;
+@property (nonatomic, copy) NSMutableArray* contactsNotUsingStamped;
 @property (nonatomic, assign) BOOL searchFieldHidden;
 @property (nonatomic, assign) BOOL twitterAuthFailed;
 @end
@@ -96,6 +97,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize stampedFriends = stampedFriends_;
 @synthesize suggestedFriends = suggestedFriends_;
 @synthesize facebookFriends = facebookFriends_;
+@synthesize contactsNotUsingStamped = contactsNotUsingStamped_;
 @synthesize followedUsers = followedUsers_;
 @synthesize contactsButton = contactsButton_;
 @synthesize twitterButton = twitterButton_;
@@ -112,6 +114,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 @synthesize signInTwitterConnectButton = signinTwitterConnectButton_;
 @synthesize signInFacebookConnectButton = signInFacebookConnectButton_;
+@synthesize inviteViaEmailButton = inviteViaEmailButton_;
 
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
@@ -128,6 +131,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.twitterFriends = nil;
   self.contactFriends = nil;
   self.suggestedFriends = nil;
+  self.contactsNotUsingStamped = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
   self.facebookButton = nil;
@@ -142,6 +146,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
+  self.inviteViaEmailButton = nil;
   
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
@@ -180,6 +185,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [self findFromFacebook:self];
   else
     [self findFromStamped:self];
+  
+  inviteViaEmailButton_.enabled = [MFMailComposeViewController canSendMail];
 }
 
 - (void)viewDidUnload {
@@ -191,6 +198,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.facebookButton = nil;
   self.stampedButton = nil;
   self.suggestedFriends = nil;
+  self.contactsNotUsingStamped = nil;
   self.nipple = nil;
   self.searchField = nil;
   self.facebookClient = nil;
@@ -201,13 +209,31 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
+  self.inviteViaEmailButton = nil;
 
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
   [super viewDidUnload];
 }
 
+#pragma mark - MFMailComposeViewControllerDelegate methods.
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+  [self dismissModalViewControllerAnimated:YES];
+}
+
 #pragma mark - Actions
+
+- (IBAction)inviteFriendViaEmail:(id)sender {
+  MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+  vc.mailComposeDelegate = self;
+  [vc setSubject:@"Check out my recommendations on Stamped."];
+  [vc setMessageBody:@"I'm using Stamped, a new way to recommend only what you like best. You should check it out by downloading the iPhone app here:<br/><br/><a href=\"http://stamped.com/download\">stamped.com/download</a>" isHTML:YES];
+  [self presentModalViewController:vc animated:YES];
+  [vc release];
+}
 
 - (IBAction)done:(id)sender {
   UIViewController* vc = nil;
@@ -279,6 +305,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     if (sanitized)
       [sanitizedNumbers addObject:sanitized];
   }
+  self.contactsNotUsingStamped = [NSMutableArray arrayWithArray:(NSArray*)people];
+  NSLog(@"contacts: %@", contactsNotUsingStamped_);
   [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
   [tableView_ reloadData];
 }
@@ -296,7 +324,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
   if (twitterFriends_) {
     [self.tableView reloadData];
-//    return;
   }
 
   GTMOAuthAuthentication* auth = [self createAuthentication];
@@ -641,13 +668,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [self.signInTwitterActivityIndicator startAnimating];
   self.authentication = auth;
   [self fetchCurrentUser];
-
 }
 
 - (void)checkForEndlessSignIn {
   if (![self.facebookClient isSessionValid]) {
     [self.signInFacebookActivityIndicator stopAnimating];
-    self.signInFacebookConnectButton.enabled = YES; 
+    self.signInFacebookConnectButton.enabled = YES;
   }
 }
 
@@ -723,8 +749,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   request.params = [NSDictionary dictionaryWithObject:[followers componentsJoinedByString:@","] forKey:@"q"];
   request.method = RKRequestMethodPOST;
   [request send];
-}  
-  
+}
 
 #pragma mark - Facebook.
 
@@ -999,6 +1024,12 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       self.contactFriends = [[NSSet setWithArray:self.contactFriends] allObjects];
     }
     self.contactFriends = [self.contactFriends sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+    
+    for (User* user in self.contactFriends)
+      NSLog(@"identifier: %@", user.identifier);
+
+      //[self.contactsNotUsingStamped removeObject:user];
+    
     [self.tableView reloadData];
   } else if ([objectLoader.resourcePath isEqualToString:kStampedSearchURI]) {
     self.stampedFriends = objects;

@@ -38,6 +38,7 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic numStamps;
 @dynamic numStampsLeft;
 @dynamic imageURL;
+@dynamic identifier;
 
 - (void)setPrimaryColor:(NSString*)primaryColor {
   [self willChangeValueForKey:@"primaryColor"];
