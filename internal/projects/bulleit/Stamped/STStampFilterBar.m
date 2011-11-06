@@ -233,7 +233,7 @@ static const CGFloat kTopMargin = 7;
   [divider release];
   
   // Search field.
-  searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(380, 10, 250, 30)];
+  searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(380, 11, 250, 30)];
   searchField_.delegate = self;
   searchField_.placeholder = @"Search";
   [scrollView_ addSubview:searchField_];

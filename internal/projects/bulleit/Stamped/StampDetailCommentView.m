@@ -88,13 +88,15 @@
                                 regularExpressionWithPattern:@"@(\\w+)"
                                 options:NSRegularExpressionCaseInsensitive
                                 error:&error];
-  [regex enumerateMatchesInString:comment_.blurb
-                          options:0
-                            range:NSMakeRange(0, comment_.blurb.length)
-                       usingBlock:^(NSTextCheckingResult* match, NSMatchingFlags flags, BOOL* stop){
-    [commentLabel_ addLinkToURL:[NSURL URLWithString:[comment_.blurb substringWithRange:match.range]]
-                      withRange:match.range];
-  }];
+  if (comment_.blurb) {
+    [regex enumerateMatchesInString:comment_.blurb
+                            options:0
+                              range:NSMakeRange(0, comment_.blurb.length)
+                         usingBlock:^(NSTextCheckingResult* match, NSMatchingFlags flags, BOOL* stop){
+      [commentLabel_ addLinkToURL:[NSURL URLWithString:[comment_.blurb substringWithRange:match.range]]
+                        withRange:match.range];
+    }];
+  }
   commentLabel_.textColor = [UIColor stampedBlackColor];
   commentLabel_.numberOfLines = 0;
   stringSize = [commentLabel_ sizeThatFits:CGSizeMake(215, MAXFLOAT)];

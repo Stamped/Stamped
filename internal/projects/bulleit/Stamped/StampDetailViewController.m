@@ -204,7 +204,7 @@ typedef enum {
 
   [self setUpToolbar];
   [self setUpHeader];
-  
+
   if ([[AccountManager sharedManager].currentUser.userID isEqualToString:stamp_.user.userID]) {
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:@"Delete"
                                                                     style:UIBarButtonItemStylePlain
@@ -480,19 +480,20 @@ typedef enum {
   commentLabel.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel.textColor = [UIColor stampedBlackColor];
   commentLabel.text = stamp_.blurb;
-  NSError* error = NULL;
-  NSRegularExpression* regex = [NSRegularExpression
-                                regularExpressionWithPattern:@"@(\\w+)"
-                                options:NSRegularExpressionCaseInsensitive
-                                error:&error];
-  [regex enumerateMatchesInString:stamp_.blurb
-                          options:0
-                            range:NSMakeRange(0, stamp_.blurb.length)
-                       usingBlock:^(NSTextCheckingResult* match, NSMatchingFlags flags, BOOL* stop){
-                         [commentLabel addLinkToURL:[NSURL URLWithString:[stamp_.blurb substringWithRange:match.range]]
-                                           withRange:match.range];
-                       }];
-
+  if (stamp_.blurb.length > 0) {
+    NSError* error = NULL;
+    NSRegularExpression* regex = [NSRegularExpression
+                                  regularExpressionWithPattern:@"@(\\w+)"
+                                  options:NSRegularExpressionCaseInsensitive
+                                  error:&error];
+    [regex enumerateMatchesInString:stamp_.blurb
+                            options:0
+                              range:NSMakeRange(0, stamp_.blurb.length)
+                         usingBlock:^(NSTextCheckingResult* match, NSMatchingFlags flags, BOOL* stop){
+                           [commentLabel addLinkToURL:[NSURL URLWithString:[stamp_.blurb substringWithRange:match.range]]
+                                             withRange:match.range];
+                         }];
+  }
   commentLabel.numberOfLines = 0;
   CGSize stringSize = [stamp_.blurb sizeWithFont:commentFont
                                constrainedToSize:CGSizeMake(210, MAXFLOAT)
