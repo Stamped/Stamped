@@ -763,6 +763,14 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">inviteViaEmailButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="603578380"/>
+					</object>
+					<int key="connectionID">85</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="628756118"/>
 						<reference key="destination" ref="372490531"/>
@@ -1160,7 +1168,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">84</int>
+			<int key="maxID">85</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1248,6 +1256,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>contactsButton</string>
 							<string>facebookButton</string>
+							<string>inviteViaEmailButton</string>
 							<string>nipple</string>
 							<string>searchField</string>
 							<string>signInFacebookActivityIndicator</string>
@@ -1262,6 +1271,7 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIImageView</string>
@@ -1283,6 +1293,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>contactsButton</string>
 							<string>facebookButton</string>
+							<string>inviteViaEmailButton</string>
 							<string>nipple</string>
 							<string>searchField</string>
 							<string>signInFacebookActivityIndicator</string>
@@ -1303,6 +1314,10 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">facebookButton</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">inviteViaEmailButton</string>
 								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
