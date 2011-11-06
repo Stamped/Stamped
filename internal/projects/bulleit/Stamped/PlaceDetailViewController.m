@@ -174,6 +174,13 @@
     mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }
+  
+  if ([self lineCountOfLabel:self.descriptionLabel] == 1) {
+    self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame, 0, -self.descriptionLabel.font.leading/2);
+    self.mainActionsView.frame = CGRectOffset(self.mainActionsView.frame, 0, -self.descriptionLabel.font.leading);
+    self.mapContainerView.frame = CGRectOffset(self.mapContainerView.frame, 0, -self.descriptionLabel.font.leading);
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.descriptionLabel.font.leading);
+  }
 }
 
 - (void)setupMapView {
