@@ -11,6 +11,7 @@
 #import <UIKit/UIKit.h>
 
 #import "TTTAttributedLabel.h"
+#import "STViewController.h"
 #import "StampDetailCommentView.h"
 
 extern NSString* const kRemoveCommentPath;
@@ -19,7 +20,7 @@ extern NSString* const kRemoveStampPath;
 @class UserImageView;
 @class Stamp;
 
-@interface StampDetailViewController : UIViewController <UITextFieldDelegate,
+@interface StampDetailViewController : STViewController <UITextFieldDelegate,
                                                          UIActionSheetDelegate,
                                                          UIScrollViewDelegate,
                                                          RKObjectLoaderDelegate,

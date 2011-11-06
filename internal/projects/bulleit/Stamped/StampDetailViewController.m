@@ -1215,6 +1215,7 @@ typedef enum {
 #pragma mark - UIScrollViewDelegate methods.
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
+  [super scrollViewDidScroll:scrollView];
   for (StampDetailCommentView* view in commentViews_)
     view.editing = NO;
 }
