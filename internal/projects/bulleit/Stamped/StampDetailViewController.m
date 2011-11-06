@@ -1017,7 +1017,6 @@ typedef enum {
 #pragma mark - UIActionSheetDelegate methods.
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-  NSLog(@"Button index: %d", buttonIndex);
   if (actionSheet.tag == StampDetailActionTypeRetrySend) {
     if (buttonIndex == 0) {  // Try again.
       [sendButton_ setBackgroundImage:[UIImage imageNamed:@"green_button_bg"] forState:UIControlStateNormal];

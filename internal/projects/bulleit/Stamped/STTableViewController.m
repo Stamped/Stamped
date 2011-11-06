@@ -172,6 +172,8 @@ static const CGFloat kReloadHeight = 60.0;
   CGRect shelfFrame = shelfView_.frame;
   shelfFrame.origin.y = MAX(-356, initialShelfYPosition_ - scrollView.contentOffset.y);
   shelfView_.frame = shelfFrame;
+
+  scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(CGRectGetMaxY(shelfFrame) - 9.0, 0, 0, 0);
   
   if (isLoading_)
     return;
