@@ -59,14 +59,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize searchQuery = searchQuery_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 
-- (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-  if (self) {
-    self.hasFilterBar = YES;
-  }
-  return self;
-}
-
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -579,7 +571,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [userImageView release];
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
-  pinView.animatesDrop = YES;
   return pinView;
 }
 

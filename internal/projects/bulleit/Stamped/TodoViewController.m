@@ -39,10 +39,13 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 - (void)mapButtonWasPressed:(NSNotification*)notification;
 - (void)listButtonWasPressed:(NSNotification*)notification;
 - (void)mapDisclosureTapped:(id)sender;
+- (void)filterFavorites;
 
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
 @property (nonatomic, readonly) MKMapView* mapView;
 @property (nonatomic, assign) BOOL userPannedMap;
+@property (nonatomic, assign) StampFilterType selectedFilterType;
+@property (nonatomic, copy) NSString* searchQuery;
 @end
 
 @implementation TodoViewController
@@ -51,6 +54,8 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 @synthesize fetchedResultsController = fetchedResultsController_;
 @synthesize mapView = mapView_;
 @synthesize userPannedMap = userPannedMap_;
+@synthesize selectedFilterType = selectedFilterType_;
+@synthesize searchQuery = searchQuery_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -58,6 +63,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   self.delegate = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.searchQuery = nil;
   mapView_ = nil;
   [super dealloc];
 }
@@ -107,6 +113,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   self.delegate = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.searchQuery = nil;
   mapView_ = nil;
 }
 
@@ -161,7 +168,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     return;
 
   userPannedMap_ = NO;
-  //[self.stampFilterBar.searchField resignFirstResponder];
+  [self.stampFilterBar.searchField resignFirstResponder];
   self.tableView.scrollEnabled = NO;
   self.fetchedResultsController.fetchRequest.predicate = [NSPredicate predicateWithFormat:@"entityObject != NIL"];
 
@@ -189,7 +196,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     return;
 
   self.tableView.scrollEnabled = YES;
-  //[self filterStamps];
+  [self filterFavorites];
   [mapView_ removeAnnotations:mapView_.annotations];
   [UIView animateWithDuration:0.5
                    animations:^{ mapView_.alpha = 0.0; }
@@ -238,7 +245,6 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   pinView.rightCalloutAccessoryView = disclosureButton;
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
-  pinView.animatesDrop = YES;
   return pinView;
 }
 
@@ -394,6 +400,68 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
+}
+
+#pragma mark - STStampFilterBarDelegate methods.
+
+- (void)stampFilterBar:(STStampFilterBar*)bar
+       didSelectFilter:(StampFilterType)filterType
+              andQuery:(NSString*)query {
+  self.searchQuery = query;
+  selectedFilterType_ = filterType;
+  [self filterFavorites];
+  
+  [self.tableView reloadData];
+}
+
+#pragma mark - Filter/Search stuff.
+
+- (void)filterFavorites {
+  NSMutableArray* predicates = [NSMutableArray array];
+  [predicates addObject:[NSPredicate predicateWithFormat:@"entityObject != NIL"]];
+  
+  if (searchQuery_.length) {
+    NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
+    for (NSString* term in searchTerms) {
+      if (!term.length)
+        continue;
+      
+      NSPredicate* p = [NSPredicate predicateWithFormat:
+                        @"(entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@)", term, term];
+      [predicates addObject:p];
+    }
+  }
+
+  NSString* filterString = nil;
+  switch (selectedFilterType_) {
+    case StampFilterTypeBook:
+      filterString = @"book";
+      break;
+    case StampFilterTypeFood:
+      filterString = @"food";
+      break;
+    case StampFilterTypeFilm:
+      filterString = @"film";
+      break;
+    case StampFilterTypeMusic:
+      filterString = @"music";
+      break;
+    case StampFilterTypeOther:
+      filterString = @"other";
+      break;
+    default:
+      break;
+  }
+  if (filterString)
+    [predicates addObject:[NSPredicate predicateWithFormat:@"entityObject.category == %@", filterString]];
+  
+  self.fetchedResultsController.fetchRequest.predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+  
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
 }
 
 #pragma mark - Custom methods.

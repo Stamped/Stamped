@@ -24,7 +24,6 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize stampFilterBar = stampFilterBar_;
 @synthesize shouldReload = shouldReload_;
 @synthesize hasHeaders = hasHeaders_;
-@synthesize hasFilterBar = hasFilterBar_;
 @synthesize isLoading = isLoading_;
 @synthesize reloadLabel = reloadLabel_;
 @synthesize lastUpdatedLabel = lastUpdatedLabel_;
@@ -54,7 +53,7 @@ static const CGFloat kReloadHeight = 60.0;
   [super viewDidLoad];
 
   CGFloat bottomPadding = 0;
-  if (hasFilterBar_)
+  if (stampFilterBar_)
     bottomPadding = 46;
 
   arrowImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
@@ -117,7 +116,7 @@ static const CGFloat kReloadHeight = 60.0;
     [spinnerView_ stopAnimating];
   
   CGFloat bottomPadding = 0;
-  if (hasFilterBar_)
+  if (stampFilterBar_)
     bottomPadding = 46;
   
   if (!loading) {
