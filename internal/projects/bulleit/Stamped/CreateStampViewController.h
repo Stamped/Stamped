@@ -11,6 +11,7 @@
 #import "FBConnect.h"
 
 #import "STCreditPickerController.h"
+#import "STViewController.h"
 
 @class Entity;
 @class UserImageView;
@@ -18,15 +19,15 @@
 @class User;
 @class SearchResult;
 
-@interface CreateStampViewController : UIViewController<UITextViewDelegate,
-                                                        RKObjectLoaderDelegate,
-                                                        RKRequestDelegate,
-                                                        FBRequestDelegate,
-                                                        FBSessionDelegate,
-                                                        STCreditPickerControllerDelegate,
-                                                        UINavigationControllerDelegate,
-                                                        UIImagePickerControllerDelegate,
-                                                        UIActionSheetDelegate> {
+@interface CreateStampViewController : STViewController <UITextViewDelegate,
+                                                         RKObjectLoaderDelegate,
+                                                         RKRequestDelegate,
+                                                         FBRequestDelegate,
+                                                         FBSessionDelegate,
+                                                         STCreditPickerControllerDelegate,
+                                                         UINavigationControllerDelegate,
+                                                         UIImagePickerControllerDelegate,
+                                                         UIActionSheetDelegate> {
  @private
   CAGradientLayer* ribbonGradientLayer_;
   CALayer* stampLayer_;
@@ -46,7 +47,6 @@
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
 @property (nonatomic, retain) IBOutlet UIView* ribbonedContainerView;
 @property (nonatomic, retain) IBOutlet UIView* bottomToolbar;
-@property (nonatomic, retain) IBOutlet UIImageView* shelfBackground;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* spinner;
 @property (nonatomic, retain) IBOutlet UIButton* stampItButton;
 @property (nonatomic, retain) IBOutlet STCreditTextField* creditTextField;
