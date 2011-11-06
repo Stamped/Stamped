@@ -62,27 +62,19 @@ static const CGFloat kNumberLabelGutterWidth = 8.f;
   nameLabel_.frame = frame;
   
   frame = valueLabel_.frame;
-  frame.size.width = CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kTextLabelGutterWidth;
+  frame.size.width = CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kTextLabelGutterWidth * 2;
   frame.origin.x = CGRectGetMaxX(nameLabel_.frame) + kTextLabelGutterWidth;
   
-  CGSize valueLabelSize = [valueLabel_.text sizeWithFont:valueLabel_.font 
-                                       constrainedToSize:CGSizeMake(frame.size.width, HUGE_VAL)
-                                           lineBreakMode:UILineBreakModeWordWrap];
-  
-  frame.size = valueLabelSize;
-
-  if (valueLabelSize.height - 15.f > 0.f)
-  {
-    CGFloat newHeight = valueLabel_.frame.origin.y + valueLabelSize.height + 10.f;
-    CGRect viewFrame = self.view.frame;
-    viewFrame.size.height = newHeight;
-    self.view.frame = viewFrame;
-    
-    frame.origin.y = 0.0;
-  }
-  
+  frame.size = [valueLabel_.text sizeWithFont:valueLabel_.font 
+                            constrainedToSize:CGSizeMake(frame.size.width, HUGE_VAL)
+                                lineBreakMode:UILineBreakModeWordWrap];
   valueLabel_.frame = frame;
 
+  NSUInteger lineCt = [self lineCountOfLabel:valueLabel_];
+  if (lineCt > 1)
+    self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, 
+                                 self.view.frame.size.width, lineCt * valueLabel_.font.leading + 10);
+  [self.view setNeedsDisplay];
 }
 
 
@@ -96,27 +88,30 @@ static const CGFloat kNumberLabelGutterWidth = 8.f;
   nameLabel_.contentMode = UIViewContentModeBottomLeft;
   
   frame = valueLabel_.frame;
-  frame.size.width = CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kNumberLabelGutterWidth;
+  frame.size.width = CGRectGetWidth(self.view.frame) - CGRectGetWidth(nameLabel_.frame) - kNumberLabelGutterWidth * 4;
   frame.origin.x = CGRectGetMaxX(nameLabel_.frame) + kNumberLabelGutterWidth;
   
-  CGSize valueLabelSize = [valueLabel_.text sizeWithFont:valueLabel_.font 
-                                       constrainedToSize:CGSizeMake(frame.size.width, HUGE_VAL)
-                                           lineBreakMode:UILineBreakModeWordWrap];
-  frame.size.height = valueLabelSize.height;
-  
-  if (valueLabelSize.height - 15.f > 0.f)
-  {
-    CGFloat newHeight = valueLabel_.frame.origin.y + valueLabelSize.height + 10.f;
-    CGRect viewFrame = self.view.frame;
-    viewFrame.size.height = newHeight;
-    self.view.frame = viewFrame;
-    
-    frame.origin.y = 0.0;
-  }
-  
+  frame.size = [valueLabel_.text sizeWithFont:valueLabel_.font 
+                            constrainedToSize:CGSizeMake(frame.size.width, HUGE_VAL)
+                                lineBreakMode:UILineBreakModeWordWrap];
   valueLabel_.frame = frame;
-  
+
+  NSUInteger lineCt = [self lineCountOfLabel:valueLabel_];
+  if (lineCt > 1) 
+    self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, 
+                                 self.view.frame.size.width, lineCt * valueLabel_.font.leading);
+  [self.view setNeedsDisplay];
 }
+
+- (NSUInteger)lineCountOfLabel:(UILabel *)label {  
+  CGRect frame = label.frame;
+  frame.size.width = label.frame.size.width;
+  frame.size = [label sizeThatFits:frame.size];
+  CGFloat lineHeight = label.font.leading;
+  NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
+  return linesInLabel;
+}
+
 
 
 
