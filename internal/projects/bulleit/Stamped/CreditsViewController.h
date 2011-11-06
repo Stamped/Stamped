@@ -21,6 +21,6 @@
 @property (nonatomic, copy) NSString* screenName;
 @property (nonatomic, retain) User* user;
 
-- (id)initWithUser:(User*)aUser;
+- (id)initWithUser:(User*)user;
 
 @end
