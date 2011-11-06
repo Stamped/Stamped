@@ -165,6 +165,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self.navigationController setNavigationBarHidden:NO animated:animated];
+
   [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
                             animated:animated];
   if (!user_.name)

@@ -38,13 +38,14 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UIImageView* nipple;
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet STSearchField* searchField;
-@property (nonatomic, retain) NSMutableArray* followedUsers;
 @property (nonatomic, retain) IBOutlet UIView* signInTwitterView;
 @property (nonatomic, retain) IBOutlet UIView* signInFacebookView;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInTwitterActivityIndicator;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* signInFacebookActivityIndicator;
 @property (nonatomic, retain) IBOutlet UIButton* signInTwitterConnectButton;
 @property (nonatomic, retain) IBOutlet UIButton* signInFacebookConnectButton;
+
+@property (nonatomic, retain) NSMutableArray* followedUsers;
 
 - (id)initWithFindSource:(FindFriendsSource)source;
 

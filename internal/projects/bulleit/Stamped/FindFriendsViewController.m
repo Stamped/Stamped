@@ -21,6 +21,7 @@
 #import "STSearchField.h"
 #import "StampedAppDelegate.h"
 #import "FriendshipTableViewCell.h"
+#import "ProfileViewController.h"
 #import "Stamp.h"
 #import "SuggestedUserTableViewCell.h"
 #import "Util.h"
@@ -150,20 +151,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - View Lifecycle
 
 - (void)viewWillAppear:(BOOL)animated {
-  [self.navigationController setNavigationBarHidden:YES animated:animated];
-
-  if (self.findSource == FindFriendsSourceStamped)
-    [self findFromStamped:self];
-  else if (self.findSource == FindFriendsSourceContacts)
-    [self findFromContacts:self];
-  else if (self.findSource == FindFriendsSourceTwitter)
-    [self findFromTwitter:self];
-  else if (self.findSource == FindFriendsSourceFacebook)
-    [self findFromFacebook:self];
-  else
-    [self findFromStamped:self];
-  
   [super viewWillAppear:animated];
+  [self.navigationController setNavigationBarHidden:YES animated:animated];
+  [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow 
+                            animated:animated];
 }
 
 - (void)viewDidLoad {
@@ -212,7 +203,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInFacebookConnectButton = nil;
 
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  
+
   [super viewDidUnload];
 }
 
@@ -224,7 +215,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     vc = [(id)self presentingViewController];
   else
     vc = self.parentViewController;
-  
+
   [vc dismissModalViewControllerAnimated:YES];
 }
 
@@ -336,7 +327,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   if (facebookFriends_) {
     [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
     [self.tableView reloadData];
-//    return;
   }
 
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
@@ -459,10 +449,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   return 51.0;
 }
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {
-  return 1;
-}
-
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
   if (self.findSource == FindFriendsSourceContacts)
     return self.contactFriends.count;
@@ -568,6 +554,18 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", suggestedFriends_.count];
   }
   return view;
+}
+
+- (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
+  UITableViewCell* cell = [tableView_ cellForRowAtIndexPath:indexPath];
+  if ([cell isMemberOfClass:[FriendshipTableViewCell class]]) {
+    User* user = [(FriendshipTableViewCell*)cell user];
+    ProfileViewController* vc = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController"
+                                                                        bundle:nil];
+    vc.user = user;
+    [self.navigationController pushViewController:vc animated:YES];
+    [vc release];
+  }
 }
 
 #pragma mark - Private
@@ -837,7 +835,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     }
     resultData = [result objectForKey:@"data"];
   }
-  
+
   // handle callback from request for user's friends.
   if (resultData  &&  resultData.count != 0) {
     NSMutableArray* fbFriendIDs = [NSMutableArray array];
