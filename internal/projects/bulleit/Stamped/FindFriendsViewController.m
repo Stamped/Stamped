@@ -112,6 +112,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 @synthesize signInTwitterConnectButton = signinTwitterConnectButton_;
 @synthesize signInFacebookConnectButton = signInFacebookConnectButton_;
+@synthesize inviteViaEmailButton = inviteViaEmailButton_;
 
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
@@ -142,6 +143,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
+  self.inviteViaEmailButton = nil;
   
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
@@ -180,6 +182,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [self findFromFacebook:self];
   else
     [self findFromStamped:self];
+  
+  inviteViaEmailButton_.enabled = [MFMailComposeViewController canSendMail];
 }
 
 - (void)viewDidUnload {
@@ -201,13 +205,32 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.signInFacebookActivityIndicator = nil;
   self.signInTwitterConnectButton = nil;
   self.signInFacebookConnectButton = nil;
+  self.inviteViaEmailButton = nil;
 
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 
   [super viewDidUnload];
 }
 
+#pragma mark - MFMailComposeViewControllerDelegate methods.
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+  [self dismissModalViewControllerAnimated:YES];
+}
+
+
 #pragma mark - Actions
+
+- (IBAction)inviteFriendViaEmail:(id)sender {
+  MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+  vc.mailComposeDelegate = self;
+  [vc setSubject:@"Check out my recommendations on Stamped."];
+  [vc setMessageBody:@"I'm using Stamped, a new way to recommend only what you like best. You should check it out by downloading the iPhone app here:<br/><br/><a href=\"http://stamped.com/download\">stamped.com/download</a>" isHTML:YES];
+  [self presentModalViewController:vc animated:YES];
+  [vc release];
+}
 
 - (IBAction)done:(id)sender {
   UIViewController* vc = nil;
