@@ -113,7 +113,7 @@
 							<object class="IBUILabel" id="544290402">
 								<reference key="NSNextResponder" ref="1016267558"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{15, 38}, {200, 40}}</string>
+								<string key="NSFrame">{{15, 38}, {242, 40}}</string>
 								<reference key="NSSuperview" ref="1016267558"/>
 								<reference key="NSNextKeyView" ref="513274970"/>
 								<reference key="IBUIBackgroundColor" ref="607888386"/>
@@ -122,13 +122,14 @@
 								<int key="IBUIContentMode">7</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<string key="IBUIText">2401 Harrison Street (@ 20th Street) San Francisco, CA 94110</string>
+								<string type="base64-UTF8" key="IBUIText">MjQwMSBIYXJyaXNvbiBTdHJlZXQgKEAgMjB0aCBTdHJlZXQpIApTYW4gRnJhbmNpc2NvLCBDQSA5NDEx
+MA</string>
 								<reference key="IBUITextColor" ref="23896806"/>
 								<nil key="IBUIHighlightedColor"/>
 								<int key="IBUIBaselineAdjustment">1</int>
 								<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 								<float key="IBUIMinimumFontSize">12</float>
-								<int key="IBUINumberOfLines">2</int>
+								<int key="IBUINumberOfLines">0</int>
 								<int key="IBUILineBreakMode">0</int>
 								<object class="IBUIFontDescription" key="IBUIFontDescription">
 									<string key="name">Helvetica</string>
@@ -382,7 +383,7 @@
 								<int key="NSvFlags">304</int>
 								<object class="NSMutableArray" key="NSSubviews">
 									<bool key="EncodedWithXMLCoder">YES</bool>
-									<object class="IBUIView" id="602268965">
+									<object class="IBUIView" id="468651990">
 										<reference key="NSNextResponder" ref="985904730"/>
 										<int key="NSvFlags">290</int>
 										<string key="NSFrameSize">{320, 1}</string>
@@ -398,7 +399,7 @@
 								</object>
 								<string key="NSFrame">{{0, 274}, {320, 142}}</string>
 								<reference key="NSSuperview" ref="1016267558"/>
-								<reference key="NSNextKeyView" ref="602268965"/>
+								<reference key="NSNextKeyView" ref="468651990"/>
 								<string key="NSReuseIdentifierKey">_NS:180</string>
 								<object class="NSColor" key="IBUIBackgroundColor">
 									<int key="NSColorSpace">3</int>
@@ -761,14 +762,14 @@
 						<reference key="object" ref="985904730"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="602268965"/>
+							<reference ref="468651990"/>
 						</object>
 						<reference key="parent" ref="1016267558"/>
 						<string key="objectName">Main Content Container</string>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">57</int>
-						<reference key="object" ref="602268965"/>
+						<reference key="object" ref="468651990"/>
 						<reference key="parent" ref="985904730"/>
 						<string key="objectName">Gray Line View</string>
 					</object>
