@@ -227,6 +227,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [bar addGestureRecognizer:recognizer];
   [recognizer release];
   [self.scrollView insertSubview:bar atIndex:0];
+  self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width,
+                                           self.scrollView.contentSize.height + bar.bounds.size.height);
   [bar release];
 }
 
@@ -330,7 +332,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  NSLog(@"%@", detailedEntity_);
+//  NSLog(@"%@", detailedEntity_);
+  NSLog(@"num lines: %u", [self lineCountOfLabel:self.descriptionLabel]);
   [super viewDidAppear:animated];
   viewIsVisible_ = YES;
 
@@ -381,6 +384,17 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 #pragma mark - Section / collapsible view management.
+
+- (NSUInteger)lineCountOfLabel:(UILabel *)label {  
+  CGRect frame = label.frame;
+  frame.size.width = label.frame.size.width;
+  frame.size = [label sizeThatFits:frame.size];
+//  label.frame = frame;
+  NSLog(@"frame: %f label: %f", frame.size.width, label.frame.size.width);
+  CGFloat lineHeight = label.font.leading;
+  NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
+  return linesInLabel;
+}
 
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name {
   CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
@@ -471,7 +485,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   newHeight += CGRectGetMinY(self.mainContentView.frame);
 
-  self.scrollView.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);  
+  BOOL shouldScrollDown = NO;
+  if(scrollView_.contentOffset.y != 0 && delta > 0 && !scrollView_.isDragging && !scrollView_.isDecelerating &&
+     scrollView_.contentOffset.y >=  scrollView_.contentSize.height - scrollView_.frame.size.height)
+    shouldScrollDown = YES;
+  NSLog(@"%f", scrollView_.contentOffset.y);    
+  scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);
+  if (shouldScrollDown)
+    self.scrollView.contentOffset = CGPointMake(0, scrollView_.contentSize.height - scrollView_.frame.size.height);
 }
 
 - (CGFloat)contentHeight {
