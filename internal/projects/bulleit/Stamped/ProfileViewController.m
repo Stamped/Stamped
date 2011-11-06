@@ -96,6 +96,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  stampsAreTemporary_ = YES;
   userImageView_.imageURL = user_.profileImageURL;
   userImageView_.enabled = YES;
   [userImageView_ addTarget:self

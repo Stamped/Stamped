@@ -38,7 +38,6 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 }
 
 - (void)dealloc {
-  
   self.tableView = nil;
   self.stampsArray = nil;
   self.screenName = nil;
@@ -48,9 +47,9 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 
 #pragma mark - View lifecycle
 
-- (id)initWithUser:(User*)aUser {
-  user_ = aUser;
-  screenName_ = user_.screenName;
+- (id)initWithUser:(User*)user {
+  self.user = user;
+  self.screenName = user.screenName;
   return [self initWithNibName:@"CreditsViewController" bundle:nil];
 }
 
@@ -64,14 +63,15 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.tableView = nil;
   self.stampsArray = nil;
+  self.user = nil;
   self.screenName = nil;
   self.user = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
   [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
                             animated:animated];
-  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -125,7 +125,6 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   [objectLoader send];
 }
 
-
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
@@ -142,6 +141,5 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
     return;
   }
 }
-
 
 @end

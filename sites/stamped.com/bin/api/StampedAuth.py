@@ -126,16 +126,6 @@ class StampedAuth(AStampedAuth):
             logs.warning(msg)
             raise InputError(msg)
 
-        # Convert and store new password
-        password = convertPasswordForStorage(auth.generateToken(10))
-        self._accountDB.updatePassword(account.user_id, password)
-
-        # Remove refresh / access tokens
-        self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
-        self._accessTokenDB.removeAccessTokensForUser(account.user_id)
-
-        # Generate reset token
-
 
 
 
@@ -196,6 +186,20 @@ class StampedAuth(AStampedAuth):
             msg = "Invalid reset token"
             logs.warning(msg)
             raise AuthError("invalid_token", 401, msg)
+
+    def updatePassword(self, authUserId, password):
+
+        # # Convert and store new password
+        password = convertPasswordForStorage(password)
+        self._accountDB.updatePassword(authUserId, password)
+
+        # # Remove refresh / access tokens
+        self._refreshTokenDB.removeRefreshTokensForUser(authUserId)
+        self._accessTokenDB.removeAccessTokensForUser(authUserId)
+
+        account = self._accountDB.getAccount(authUserId)
+
+        return True
 
 
 

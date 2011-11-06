@@ -65,6 +65,8 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
+                            animated:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
