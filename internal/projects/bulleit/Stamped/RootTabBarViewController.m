@@ -144,7 +144,6 @@
                                                mustDoTabBarItem_,
                                                peopleTabBarItem_,
                                                nil];
-  
   // This will load all views.
   [self ensureCorrectHeightOfViewControllers];
   if (!self.tabBar.selectedItem) {
@@ -155,8 +154,7 @@
 
 - (void)ensureCorrectHeightOfViewControllers {
   for (UIViewController* controller in self.viewControllers) {
-    controller.view.frame =
-        CGRectMake(0, 0, 320, CGRectGetHeight(self.view.frame) - CGRectGetHeight(self.tabBar.frame));
+    controller.view.frame = CGRectMake(0, 0, 320, 367);
   }
 }
 
@@ -308,7 +306,6 @@
 
 - (void)newsCountChanged:(NSNotification*)notification {
   NSNumber* newItemCount = notification.object;
-  NSLog(@"Setting news item count to %@", newItemCount);
   if (self.tabBar.selectedItem != activityTabBarItem_)
     activityTabBarItem_.badgeValue = [newItemCount stringValue];
 }
@@ -356,6 +353,7 @@
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"News";
     activityTabBarItem_.badgeValue = nil;
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];
     self.navigationItem.title = @"To-Do";
@@ -373,8 +371,8 @@
   [self.selectedViewController.view removeFromSuperview];
   [self.selectedViewController viewDidDisappear:NO];
   [newViewController viewWillAppear:NO];
-  [self ensureCorrectHeightOfViewControllers];
   [self.view insertSubview:newViewController.view atIndex:0];
+  [self ensureCorrectHeightOfViewControllers];
   [newViewController viewDidAppear:NO];
   self.selectedViewController = newViewController;
   selectedViewControllerIndex_ = [tabBarItems_ indexOfObject:item];
