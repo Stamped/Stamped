@@ -330,9 +330,10 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  NSLog(@"%@", detailedEntity_);
   [super viewDidAppear:animated];
-  self.categoryImageView.contentMode = UIViewContentModeRight;
   viewIsVisible_ = YES;
+
 }
 
 - (void)viewDidDisappear:(BOOL)animated {

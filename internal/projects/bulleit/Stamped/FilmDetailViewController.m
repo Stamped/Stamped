@@ -114,10 +114,9 @@
   self.imageView.layer.shadowRadius  = 4.0;
   self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
-  self.imageView.frame = CGRectMake(self.imageView.frame.origin.x, self.imageView.frame.origin.y,
-                                    self.imageView.frame.size.width, 144.0);
-  self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-  
+//  CGFloat offset = self.imageView.bounds.size.width - self.imageView.image.size.width;
+//  if (offset > 0)
+//    self.imageView.frame = CGRectOffset(self.imageView.frame, ceilf(offset/2), 0);
   [super viewWillAppear:animated];
 }
 
@@ -171,8 +170,6 @@
 }
 
 - (void)setupSectionViews {
-  NSLog(@"%@", detailedEntity_);
-  
   // Synopsis
   if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
         
