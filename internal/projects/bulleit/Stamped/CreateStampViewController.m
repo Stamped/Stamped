@@ -218,8 +218,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-
-
   [super dealloc];
 }
 

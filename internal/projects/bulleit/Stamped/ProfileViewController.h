@@ -9,10 +9,12 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
+#import "STViewController.h"
+
 @class User;
 @class UserImageView;
 
-@interface ProfileViewController : UIViewController <RKObjectLoaderDelegate,
+@interface ProfileViewController : STViewController <RKObjectLoaderDelegate,
                                                      RKRequestDelegate,
                                                      UITableViewDelegate,
                                                      UITableViewDataSource>
@@ -24,7 +26,6 @@
 @property (nonatomic, retain) IBOutlet UILabel* fullNameLabel;
 @property (nonatomic, retain) IBOutlet UILabel* usernameLocationLabel;
 @property (nonatomic, retain) IBOutlet UILabel* bioLabel;
-@property (nonatomic, retain) IBOutlet UIImageView* shelfImageView;
 @property (nonatomic, retain) IBOutlet UIView* toolbarView;
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet UIButton* followButton;
