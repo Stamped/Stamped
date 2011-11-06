@@ -332,8 +332,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-//  NSLog(@"%@", detailedEntity_);
-  NSLog(@"num lines: %u", [self lineCountOfLabel:self.descriptionLabel]);
+  NSLog(@"%@", detailedEntity_.songs);
   [super viewDidAppear:animated];
   viewIsVisible_ = YES;
 
@@ -390,7 +389,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   frame.size.width = label.frame.size.width;
   frame.size = [label sizeThatFits:frame.size];
 //  label.frame = frame;
-  NSLog(@"frame: %f label: %f", frame.size.width, label.frame.size.width);
   CGFloat lineHeight = label.font.leading;
   NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
   return linesInLabel;
@@ -489,7 +487,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   if(scrollView_.contentOffset.y != 0 && delta > 0 && !scrollView_.isDragging && !scrollView_.isDecelerating &&
      scrollView_.contentOffset.y >=  scrollView_.contentSize.height - scrollView_.frame.size.height)
     shouldScrollDown = YES;
-  NSLog(@"%f", scrollView_.contentOffset.y);    
   scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);
   if (shouldScrollDown)
     self.scrollView.contentOffset = CGPointMake(0, scrollView_.contentSize.height - scrollView_.frame.size.height);

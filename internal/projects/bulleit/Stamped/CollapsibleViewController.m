@@ -188,7 +188,8 @@ int const SPACE_HEIGHT = 10;
       }                           
     }
   }
-  
+  frame.origin = CGPointMake(sectionLabel_.frame.origin.x, [self contentHeight]);
+  newLabel.view.frame = frame;
   newLabel.nameWidth = maxNameLabelWidth;
   
   [self addContent:newLabel forKey:key];
@@ -222,10 +223,22 @@ int const SPACE_HEIGHT = 10;
         }
       }
     }
+    frame.origin = CGPointMake(sectionLabel_.frame.origin.x, [self contentHeight]);
+
+    newLabel.view.frame = frame;
     newLabel.numberWidth = maxNameLabelWidth;
     
     [self addContent:newLabel forKey:[NSString stringWithFormat:@"%d", itemNumber]];
     [newLabel release];
+  }
+  // Ensure that all the items are spaced correctly.
+  itemNumber = 1;
+  for (NSString* value in values) {
+    PairedLabel* itemAbove = [self.contentDict objectForKey:[NSString stringWithFormat:@"%d", itemNumber]];
+    PairedLabel* item = [self.contentDict objectForKey:[NSString stringWithFormat:@"%d", ++itemNumber]];
+    CGRect frame = item.view.frame;
+    frame.origin = CGPointMake(item.view.frame.origin.x, CGRectGetMaxY(itemAbove.view.frame));
+    item.view.frame = frame;
   }
 }
 
@@ -361,6 +374,8 @@ int const SPACE_HEIGHT = 10;
   for (id content in self.contentDict.objectEnumerator) {
     if ([content respondsToSelector:@selector(view)]) {
       contentHeight += ((UIViewController*)content).view.frame.size.height;
+//      if ([content isKindOfClass:[PairedLabel class]])
+//        NSLog(@"\nlabel:%@ \nheight: %f", ((PairedLabel*)content).valueLabel.text, ((UIViewController*)content).view.frame.size.height);
     } else {
       contentHeight += ((UIView*)content).frame.size.height;
     }
