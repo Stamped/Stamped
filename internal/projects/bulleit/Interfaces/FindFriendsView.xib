@@ -358,28 +358,10 @@
 					<object class="IBUITableView" id="628756118">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">274</int>
-						<object class="NSMutableArray" key="NSSubviews">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBUIView" id="513494070">
-								<reference key="NSNextResponder" ref="628756118"/>
-								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{0, 309}, {320, 49}}</string>
-								<reference key="NSSuperview" ref="628756118"/>
-								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="293526433"/>
-								<string key="NSReuseIdentifierKey">_NS:196</string>
-								<object class="NSColor" key="IBUIBackgroundColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MQA</bytes>
-									<reference key="NSCustomColorSpace" ref="1061439930"/>
-								</object>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							</object>
-						</object>
-						<string key="NSFrame">{{0, 102}, {320, 358}}</string>
+						<string key="NSFrame">{{0, 102}, {320, 310}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="513494070"/>
+						<reference key="NSNextKeyView"/>
 						<reference key="IBUIBackgroundColor" ref="375088325"/>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -390,7 +372,6 @@
 						<float key="IBUIRowHeight">51</float>
 						<float key="IBUISectionHeaderHeight">22</float>
 						<float key="IBUISectionFooterHeight">22</float>
-						<reference key="IBUITableFooterView" ref="513494070"/>
 					</object>
 					<object class="IBUIImageView" id="185388920">
 						<reference key="NSNextResponder" ref="191373211"/>
@@ -594,6 +575,7 @@
 								<string key="NSFrame">{{83, 10}, {155, 30}}</string>
 								<reference key="NSSuperview" ref="262149928"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:225</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -915,7 +897,6 @@
 						<reference key="object" ref="628756118"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="513494070"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -1060,12 +1041,6 @@
 						<string key="objectName">Toolbar</string>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">82</int>
-						<reference key="object" ref="513494070"/>
-						<reference key="parent" ref="628756118"/>
-						<string key="objectName">Toolbar placeholder</string>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">83</int>
 						<reference key="object" ref="603578380"/>
 						<reference key="parent" ref="262149928"/>
@@ -1110,7 +1085,6 @@
 					<string>8.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>81.CustomClassName</string>
 					<string>81.IBPluginDependency</string>
-					<string>82.IBPluginDependency</string>
 					<string>83.IBPluginDependency</string>
 					<string>9.IBPluginDependency</string>
 					<string>9.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
@@ -1149,7 +1123,6 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="2"/>
 					<string>STToolbar</string>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
