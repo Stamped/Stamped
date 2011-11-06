@@ -42,6 +42,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   self.tableView = nil;
   self.stampsArray = nil;
   self.screenName = nil;
+  self.user = nil;
   [super dealloc];
 }
 
@@ -64,6 +65,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   self.tableView = nil;
   self.stampsArray = nil;
   self.screenName = nil;
+  self.user = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
