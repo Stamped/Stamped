@@ -15,6 +15,7 @@ const CGFloat kStandardLatLongSpan = 400.0f / 111000.0f;
 
 @implementation STPlaceAnnotation
 @synthesize stamp = stamp_;
+@synthesize entityObject = entityObject_;
 
 - (id)initWithLatitude:(CLLocationDegrees)latitude
              longitude:(CLLocationDegrees)longitude {
@@ -26,16 +27,28 @@ const CGFloat kStandardLatLongSpan = 400.0f / 111000.0f;
   return self;
 }
 
+- (void)dealloc {
+  self.stamp = nil;
+  self.entityObject = nil;
+  [super dealloc];
+}
+
 - (CLLocationCoordinate2D)coordinate {
   return CLLocationCoordinate2DMake(latitude_, longitude_);
 }
 
 - (NSString*)title {
-  return stamp_.entityObject.title;
+  if (stamp_)
+    return stamp_.entityObject.title;
+  
+  return entityObject_.title;
 }
 
 - (NSString*)subtitle {
-  return stamp_.entityObject.subtitle;
+  if (stamp_)
+    return stamp_.entityObject.subtitle;
+
+  return entityObject_.subtitle;
 }
 
 @end

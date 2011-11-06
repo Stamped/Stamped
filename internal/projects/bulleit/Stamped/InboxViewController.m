@@ -80,6 +80,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)mapButtonWasPressed:(NSNotification*)notification {
+  if (!self.view.superview)
+    return;
+
   userPannedMap_ = NO;
   [self.stampFilterBar.searchField resignFirstResponder];
   self.tableView.scrollEnabled = NO;
@@ -105,6 +108,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)listButtonWasPressed:(NSNotification*)notification {
+  if (!self.view.superview)
+    return;
+
   self.tableView.scrollEnabled = YES;
   [self filterStamps];
   [mapView_ removeAnnotations:mapView_.annotations];
