@@ -57,26 +57,23 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize userPannedMap = userPannedMap_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
-@synthesize stampFilterBar = stampFilterBar_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.searchQuery = nil;
-  self.stampFilterBar.delegate = nil;
-  self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   [super dealloc];
 }
 
 - (void)mapButtonWasPressed:(NSNotification*)notification {
-  CGRect mapFrame = mapView_.frame;
-  mapFrame.origin.y = self.tableView.contentOffset.y;
-  mapView_.frame = mapFrame;
-  [self.tableView scrollRectToVisible:mapFrame animated:NO];
+  if (!self.view.superview)
+    return;
+
   userPannedMap_ = NO;
+  [self.stampFilterBar.searchField resignFirstResponder];
   self.tableView.scrollEnabled = NO;
   self.fetchedResultsController.fetchRequest.predicate =
       [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"];
@@ -100,6 +97,9 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)listButtonWasPressed:(NSNotification*)notification {
+  if (!self.view.superview)
+    return;
+
   self.tableView.scrollEnabled = YES;
   [self filterStamps];
   [mapView_ removeAnnotations:mapView_.annotations];
@@ -138,8 +138,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [self.view addSubview:mapView_];
   [mapView_ release];
 
-  stampFilterBar_.filterType = selectedFilterType_;
-  stampFilterBar_.searchQuery = searchQuery_;
+  self.stampFilterBar.filterType = selectedFilterType_;
+  self.stampFilterBar.searchQuery = searchQuery_;
 
   self.tableView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];
   [self loadStampsFromDataStore];
@@ -150,8 +150,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  self.stampFilterBar.delegate = nil;
-  self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
 }
@@ -168,6 +166,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setButtonShown:YES];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"InboxLastUpdatedAt"]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -394,8 +393,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
     [[NSUserDefaults standardUserDefaults] setObject:latestStamp.modified
                                               forKey:@"InboxLatestStampModified"];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"InboxLastUpdatedAt"];
+    NSDate* now = [NSDate date];
+    [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"InboxLastUpdatedAt"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+    [self updateLastUpdatedTo:now];
     [self setIsLoading:NO];
   } else {
     [self loadStampsFromNetwork];
@@ -448,7 +449,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [detailViewController release];
 }
 
-#pragma mark - STReloadableTableView methods.
+#pragma mark - STTableViewController methods.
 
 - (void)userPulledToReload {
   [super userPulledToReload];
@@ -470,8 +471,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   [[NSNotificationCenter defaultCenter] postNotificationName:kInboxTableDidScrollNotification
                                                       object:scrollView];
-  if (stampFilterBar_.searchQuery.length)
-    [stampFilterBar_.searchField resignFirstResponder];
+  if (self.stampFilterBar.searchQuery.length)
+    [self.stampFilterBar.searchField resignFirstResponder];
 
   [super scrollViewDidScroll:scrollView];
 }
@@ -570,7 +571,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [userImageView release];
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
-  pinView.animatesDrop = YES;
   return pinView;
 }
 

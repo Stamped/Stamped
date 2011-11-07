@@ -110,7 +110,7 @@
 
 - (void)setupSectionViews {
   // Tracks
-  if (detailedEntity_.songs) {
+  if (detailedEntity_.songs && ((NSArray*)detailedEntity_.songs).count > 0) {
     if ([detailedEntity_.subcategory isEqualToString:@"artist"]) {
       NSArray* tracksArray = detailedEntity_.songs;
       
@@ -122,8 +122,7 @@
       [section addNumberedListWithValues:tracksArray];
       section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                              [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
-      if (section.contentDict.objectEnumerator.allObjects.count > 0)
-        self.mainContentView.hidden = NO;
+      self.mainContentView.hidden = NO;
     }
     
     else {
@@ -137,13 +136,12 @@
       [section addNumberedListWithValues:tracksArray];
       section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                              [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
-      if (section.contentDict.objectEnumerator.allObjects.count > 0)
-        self.mainContentView.hidden = NO;
+      self.mainContentView.hidden = NO;
     }
   }
   
   // Albums
-  if (detailedEntity_.albums) {
+  if (detailedEntity_.albums && ((NSArray*)detailedEntity_.albums).count > 0) {
     NSArray* albumsArray = detailedEntity_.albums;
     if ([sectionsDict_ objectForKey:@"Top Songs"]) {
       [self addSectionWithName:@"Albums"];
@@ -152,8 +150,7 @@
       section.numLabel.hidden = NO;
       section.numLabel.text = [NSString stringWithFormat:@"(%d)", albumsArray.count];
       section.numLabel.frame = CGRectOffset(section.numLabel.frame, -42.0, 0.0);
-      if (section.contentDict.objectEnumerator.allObjects.count > 0)
-        self.mainContentView.hidden = NO;
+      self.mainContentView.hidden = NO;
     }
     else {
       [self addSectionWithName:@"Albums" previewHeight:136.f];
@@ -164,28 +161,27 @@
       [section addNumberedListWithValues:albumsArray];
       section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
                                              [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
-      if (section.contentDict.objectEnumerator.allObjects.count > 0)
-        self.mainContentView.hidden = NO;
-    }
+      self.mainContentView.hidden = NO;
   }
 
 
   // Details
   if (detailedEntity_.genre || detailedEntity_.releaseDate) {
     
-    [self addSectionWithName:@"Details"];
-    CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Details"];
-    
-    if (detailedEntity_.genre)
+    CollapsibleViewController* section = [self makeSectionWithName:@"Details"];
+      
+    if (detailedEntity_.genre && ![detailedEntity_.genre isEqualToString:@""])
       [section addPairedLabelWithName:@"Genres" value:detailedEntity_.genre forKey:@"genre"]; 
-    if (detailedEntity_.releaseDate)
+    if (detailedEntity_.releaseDate && ![detailedEntity_.releaseDate isEqualToString:@""])
       [section addPairedLabelWithName:@"Release Date" value:detailedEntity_.releaseDate forKey:@"releaseDate"];
 
-    if (section.contentDict.objectEnumerator.allObjects.count > 0)
+    if (section.contentDict.objectEnumerator.allObjects.count > 0) {
+      [self addSection:section];
       self.mainContentView.hidden = NO;
+    }
   }
   
-  if (detailedEntity_.desc) {
+  if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
     [self addSectionWithName:@"iTunes Notes"];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"iTunes Notes"];
     [section addText:detailedEntity_.desc forKey:@"desc"];
@@ -201,6 +197,7 @@
   if (stamps && stamps.count > 0) {
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO; 
+  }
   }
 }
 

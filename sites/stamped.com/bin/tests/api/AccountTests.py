@@ -246,6 +246,7 @@ class StampedAPIAccountChangePassword(StampedAPIAccountTest):
         result = self.handlePOST(path, data)
         self.assertTrue(len(result['token']['access_token']) == 22)
         self.assertTrue(len(result['token']['refresh_token']) == 43)
+        self.token = result['token']
 
 class StampedAPIAccountAlertSettings(StampedAPIAccountTest):
     def test_show_settings(self):

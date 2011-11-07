@@ -92,6 +92,12 @@ class FandangoFeed(AExternalDumpEntitySource):
                     entity.image = link.href.replace('69/103', '375/375').replace('69x103', '375x375')
                     break
             
+            # TODO: test f_url
+            entity.f_url = "%s" % entry.link
+            entity.f_url = entity.f_url.replace('%26m%3d', '%3fpid=5348839%26m%3d')
+            #print "LINK: %s" % entry.link
+            #break
+            
             # attempt to scrape some extra details from fandango's movie page
             url = "http://www.fandango.com/%s_%s/movieoverview" % \
                    (filter(lambda a: a.isalnum(), entity.title.replace(' ', '')), entity.fid)

@@ -27,6 +27,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 
 @synthesize peopleArray = peopleArray_;
 @synthesize user = user_;
+@synthesize tableView = tableView_;
 
 - (id)initWithRelationship:(RelationshipType)relationshipType {
   self = [super initWithNibName:@"RelationshipsViewController" bundle:nil];
@@ -39,16 +40,13 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 - (void)dealloc {
   self.peopleArray = nil;
   self.user = nil;
+  self.tableView = nil;
   [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-}
-
-- (void)userPulledToReload {
-  [self loadRelationshipsFromNetwork];
 }
 
 #pragma mark - View lifecycle
@@ -62,10 +60,13 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
   [super viewDidUnload];
   self.peopleArray = nil;
   self.user = nil;
+  self.tableView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
+                            animated:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -108,7 +109,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
                                                                     selector:@selector(localizedCaseInsensitiveCompare:)];
   self.peopleArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   [self.tableView reloadData];
-  [self setIsLoading:NO];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -118,8 +118,6 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
     [self loadRelationshipsFromNetwork];
     return;
   }
-  
-  [self setIsLoading:NO];
 }
 
 #pragma mark - Table view delegate

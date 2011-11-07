@@ -11,7 +11,7 @@
 #import "STSearchField.h"
 
 static const CGFloat kHorizontalSeparation = 42.0;
-static const CGFloat kTopMargin = 5;
+static const CGFloat kTopMargin = 7;
 
 @interface STStampFilterBar ()
 - (void)initialize;
@@ -78,6 +78,10 @@ static const CGFloat kTopMargin = 5;
   [scrollView_ release];
   [self addFirstPageButtons];
   [self addSecondPageButtons];
+
+  UIImageView* keyline = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"shelf_keyline_horiz"]];
+  [self addSubview:keyline];
+  [keyline release];
   
   self.filterType = StampFilterTypeNone;
 }
@@ -192,7 +196,7 @@ static const CGFloat kTopMargin = 5;
   
   // Divider and search icon.
   UIImageView* divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hdr_separator"]];
-  divider.frame = CGRectOffset(divider.frame, 275, 8);
+  divider.frame = CGRectOffset(divider.frame, 275, 9);
   [scrollView_ addSubview:divider];
   [divider release];
   
@@ -224,12 +228,12 @@ static const CGFloat kTopMargin = 5;
   [scrollView_ addSubview:prevButton];
   
   UIImageView* divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hdr_separator"]];
-  divider.frame = CGRectOffset(divider.frame, 365, 8);
+  divider.frame = CGRectOffset(divider.frame, 365, 9);
   [scrollView_ addSubview:divider];
   [divider release];
   
   // Search field.
-  searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(380, 10, 250, 30)];
+  searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(380, 11, 250, 30)];
   searchField_.delegate = self;
   searchField_.placeholder = @"Search";
   [scrollView_ addSubview:searchField_];

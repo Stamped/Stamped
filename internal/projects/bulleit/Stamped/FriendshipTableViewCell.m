@@ -17,7 +17,6 @@
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [super initWithReuseIdentifier:reuseIdentifier];
   if (self) {
-    self.selectionStyle = UITableViewCellSelectionStyleNone;
     self.disclosureArrowHidden = YES;
     indicator_ = [[UIActivityIndicatorView alloc]
         initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];

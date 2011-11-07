@@ -10,14 +10,12 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STReloadableTableViewController.h"
-#import "STStampFilterBar.h"
+#import "STTableViewController.h"
 
-@interface InboxViewController : STReloadableTableViewController <UIScrollViewDelegate,
-                                                                  RKObjectLoaderDelegate,
-                                                                  MKMapViewDelegate,
-                                                                  NSFetchedResultsControllerDelegate,
-                                                                  STStampFilterBarDelegate>
+
+@interface InboxViewController : STTableViewController <RKObjectLoaderDelegate,
+                                                        MKMapViewDelegate,
+                                                        NSFetchedResultsControllerDelegate>
 @property (nonatomic, readonly) MKMapView* mapView;
-@property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
+
 @end

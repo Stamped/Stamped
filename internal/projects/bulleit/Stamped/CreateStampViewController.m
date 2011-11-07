@@ -112,7 +112,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @synthesize ribbonedContainerView = ribbonedContainerView_;
 @synthesize reasoningTextView = reasoningTextView_;
 @synthesize bottomToolbar = bottomToolbar_;
-@synthesize shelfBackground = shelfBackground_;
 @synthesize spinner = spinner_;
 @synthesize stampItButton = stampItButton_;
 @synthesize creditTextField = creditTextField_;
@@ -198,7 +197,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.reasoningTextView = nil;
   self.ribbonedContainerView = nil;
   self.bottomToolbar = nil;
-  self.shelfBackground = nil;
   self.spinner = nil;
   self.stampItButton = nil;
   self.creditTextField.delegate = nil;
@@ -220,8 +218,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-
-
   [super dealloc];
 }
 
@@ -435,7 +431,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.reasoningTextView = nil;
   self.ribbonedContainerView = nil;
   self.bottomToolbar = nil;
-  self.shelfBackground = nil;
   self.spinner = nil;
   self.stampItButton = nil;
   self.creditTextField.delegate = nil;
@@ -1004,11 +999,11 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     [AccountManager sharedManager].currentUser.numStampsLeft = [NSNumber numberWithUnsignedInteger:--numStampsLeft];
 
     [spinner_ stopAnimating];
-    CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(shelfBackground_.frame));
+    CGAffineTransform topTransform = CGAffineTransformMakeTranslation(0, -CGRectGetHeight(self.shelfView.frame));
     CGAffineTransform bottomTransform = CGAffineTransformMakeTranslation(0, CGRectGetHeight(bottomToolbar_.frame));
     [UIView animateWithDuration:0.2
                      animations:^{ 
-                       shelfBackground_.transform = topTransform;
+                       self.shelfView.transform = topTransform;
                        bottomToolbar_.transform = bottomTransform;
                        stampItButton_.transform = bottomTransform;
                        stampsRemainingLayer_.transform = CATransform3DMakeAffineTransform(bottomTransform);
@@ -1039,7 +1034,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   stampItButton_.hidden = NO;
   [UIView animateWithDuration:0.2
                    animations:^{
-                     shelfBackground_.transform = CGAffineTransformIdentity;
+                     self.shelfView.transform = CGAffineTransformIdentity;
                    }];
 	NSLog(@"Hit error: %@", error);
 }

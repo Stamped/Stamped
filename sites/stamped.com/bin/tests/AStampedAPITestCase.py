@@ -53,7 +53,7 @@ class AStampedAPITestCase(AStampedTestCase):
         'client_secret': 'august1ftw'
     }
 
-    detailedLog = False
+    detailedLog = True
     if _baseurl == 'http://localhost:18000/v0':
         detailedLog = False
     

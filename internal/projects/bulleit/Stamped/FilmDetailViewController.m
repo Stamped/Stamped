@@ -114,10 +114,9 @@
   self.imageView.layer.shadowRadius  = 4.0;
   self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
-  self.imageView.frame = CGRectMake(self.imageView.frame.origin.x, self.imageView.frame.origin.y,
-                                    self.imageView.frame.size.width, 144.0);
-  self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-  
+//  CGFloat offset = self.imageView.bounds.size.width - self.imageView.image.size.width;
+//  if (offset > 0)
+//    self.imageView.frame = CGRectOffset(self.imageView.frame, ceilf(offset/2), 0);
   [super viewWillAppear:animated];
 }
 
@@ -136,6 +135,8 @@
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesURL]];
   else if (detailedEntity_.itunesShortURL)
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.itunesShortURL]];
+  else if (detailedEntity_.amazonURL)
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:detailedEntity_.amazonURL]];
 }
 
 #pragma mark - Content Setup (data retrieval & logic to fill views)
@@ -150,6 +151,17 @@
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
+    self.mainActionLabel.text = @"Download";
+    self.affiliateLogoView.frame = CGRectOffset(self.affiliateLogoView.frame, 0.0, -3.0);
+    self.affiliateLogoView.image = [UIImage imageNamed:@"logo_itunes"];
+  }
+  else if (detailedEntity_.amazonURL) {
+    self.mainActionButton.hidden = NO;
+    self.mainActionLabel.hidden = NO;
+    self.mainActionsView.hidden = NO;
+    self.mainActionLabel.text = @"Buy now";
+    self.affiliateLogoView.frame = CGRectOffset(self.affiliateLogoView.frame, 0.0, 2.0);
+    self.affiliateLogoView.image = [UIImage imageNamed:@"logo_amazon"];
   }
     else {
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, 
@@ -158,8 +170,6 @@
 }
 
 - (void)setupSectionViews {
-  NSLog(@"%@", detailedEntity_);
-  
   // Synopsis
   if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
         

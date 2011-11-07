@@ -174,6 +174,13 @@
     mapContainerView_.frame = CGRectOffset(mapContainerView_.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -CGRectGetHeight(self.mainActionsView.frame));
   }
+  
+  if ([self lineCountOfLabel:self.descriptionLabel] == 1) {
+    self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame, 0, -self.descriptionLabel.font.lineHeight/2);
+    self.mainActionsView.frame = CGRectOffset(self.mainActionsView.frame, 0, -self.descriptionLabel.font.lineHeight);
+    self.mapContainerView.frame = CGRectOffset(self.mapContainerView.frame, 0, -self.descriptionLabel.font.lineHeight);
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.descriptionLabel.font.lineHeight);
+  }
 }
 
 - (void)setupMapView {
@@ -195,59 +202,68 @@
 
 - (void)setupSectionViews {
   // Information
-  // TODO: What if there's no information?
+  if (mapContainerView_.hidden == YES) 
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
   
-  [self addSectionWithName:@"Information"];
-  CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Information"];
+  
+  CollapsibleViewController* section = [self makeSectionWithName:@"Information"];
     
-  if (detailedEntity_.subcategory) {
+  if (detailedEntity_.subcategory && ![detailedEntity_.subcategory isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Category:"
                               value:detailedEntity_.subcategory.capitalizedString
                              forKey:@"subcategory"];
   }
   
-  if (detailedEntity_.cuisine) {
+  if (detailedEntity_.cuisine && ![detailedEntity_.cuisine isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Cuisine:"      
                               value:detailedEntity_.cuisine.capitalizedString
                              forKey:@"cuisine"];
   }
   
-  if (detailedEntity_.neighborhood) {
+  if (detailedEntity_.neighborhood && ![detailedEntity_.neighborhood isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Neighborhood:"
                               value:detailedEntity_.neighborhood
                              forKey:@"neighborhood"];
   }
   
-  if (detailedEntity_.hours) {   
+  if (detailedEntity_.hours && ![detailedEntity_.hours isEqualToString:@""]) {   
     [section addPairedLabelWithName:@"Hours:"
                               value:detailedEntity_.hours
                               forKey:@"hours"];
   }
   
-  if (detailedEntity_.price) {
+  if (detailedEntity_.price && ![detailedEntity_.price isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Price Range:" 
                               value:detailedEntity_.price
                              forKey:@"price"];
   }
   
-  if (detailedEntity_.website) {
+  if (detailedEntity_.website && ![detailedEntity_.website isEqualToString:@""]) {
     [section addPairedLabelWithName:@"Website:"
                               value:detailedEntity_.website
                              forKey:@"website"];
   }
   
+  if (section.contentDict.objectEnumerator.allObjects.count > 0) {
+    [self addSection:section];
+    self.mainContentView.hidden = NO;
+  }
+    
   // Description
   
   if (detailedEntity_.desc) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
     [section addText:detailedEntity_.desc forKey:@"desc"];
+    self.mainContentView.hidden = NO;
   }
   
   NSSet* stamps = entityObject_.stamps;
   
-  if (stamps && stamps.count > 0)
+  if (stamps && stamps.count > 0) {
     [self addSectionStampedBy];  
+    self.mainContentView.hidden = NO;
+  }
 }
 
 

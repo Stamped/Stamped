@@ -20,6 +20,7 @@
 #import "UIColor+Stamped.h"
 #import "StampDetailViewController.h"
 #import "PlaceDetailViewController.h"
+#import "OtherDetailViewController.h"
 #import "Notifications.h"
 #import "Favorite.h"
 #import "User.h"
@@ -43,6 +44,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)setupSectionViews;
 - (void)addSelfAsFavorite;
 - (void)dismissSelf;
+- (void)ensureTitleLabelHeight;
 @end
 
 @implementation EntityDetailViewController
@@ -59,6 +61,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize shelfImageView = shelfImageView_;
 @synthesize addFavoriteButton = addFavoriteButton_;
 @synthesize spinner = spinner_;
+
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -147,6 +150,26 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   // Default does nothing. Override in subclasses.
 }
 
+- (void)ensureTitleLabelHeight {
+  if ([self lineCountOfLabel:self.titleLabel] > 1) {
+    CGFloat newHeight = self.titleLabel.font.lineHeight * 2 + 8;
+    CGFloat delta = newHeight - self.titleLabel.frame.size.height;
+    self.titleLabel.frame = CGRectMake(self.titleLabel.frame.origin.x, self.titleLabel.frame.origin.y,
+                                       self.titleLabel.frame.size.width, newHeight);
+    self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame, 0.0, delta);
+    self.mainActionsView.frame = CGRectOffset(self.mainActionsView.frame, 0.0, delta);
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
+    if ([self isKindOfClass:[PlaceDetailViewController class]] ||
+        [self isKindOfClass:[OtherDetailViewController class]]) {
+      ((PlaceDetailViewController*)self).mapContainerView.frame = CGRectOffset(((PlaceDetailViewController*)self).mapContainerView.frame, 0.0, delta);
+    }
+  }
+  if (titleLabel_.text.length > 60) {
+    self.titleLabel.text = [self.titleLabel.text substringToIndex:55];
+    self.titleLabel.text = [self.titleLabel.text stringByAppendingString:@"…"];
+  }
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -175,6 +198,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   if (entityObject_.favorite.stamp)
     [self addTodoBar];
+  
+  [self ensureTitleLabelHeight];
 }
 
 - (void)addTodoBar {
@@ -227,6 +252,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [bar addGestureRecognizer:recognizer];
   [recognizer release];
   [self.scrollView insertSubview:bar atIndex:0];
+  self.scrollView.contentSize = CGSizeMake(self.scrollView.contentSize.width,
+                                           self.scrollView.contentSize.height + bar.bounds.size.height);
   [bar release];
 }
 
@@ -330,9 +357,10 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  NSLog(@"%@", detailedEntity_);
   [super viewDidAppear:animated];
-  self.categoryImageView.contentMode = UIViewContentModeRight;
   viewIsVisible_ = YES;
+
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -380,6 +408,39 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 #pragma mark - Section / collapsible view management.
+
+- (NSUInteger)lineCountOfLabel:(UILabel *)label {  
+  CGRect frame = label.frame;
+  frame.size.width = label.frame.size.width;
+  frame.size = [label sizeThatFits:frame.size];
+//  label.frame = frame;
+  CGFloat lineHeight = label.font.lineHeight;
+  NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
+  return linesInLabel;
+}
+
+
+// Thanks to cncool. http://stackoverflow.com/questions/389342/how-to-get-the-size-of-a-scaled-uiimage-in-uiimageview
+-(CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView
+{
+  float imageRatio = image.size.width / image.size.height;
+  float viewRatio = imageView.frame.size.width / imageView.frame.size.height;
+  
+  if(imageRatio < viewRatio)
+  {
+    float scale = imageView.frame.size.height / image.size.height;
+    float width = scale * image.size.width;
+    float topLeftX = (imageView.frame.size.width - width) * 0.5;
+    return CGRectMake(topLeftX, 0, width, imageView.frame.size.height);
+  }
+  else
+  {
+    float scale = imageView.frame.size.width / image.size.width;
+    float height = scale * image.size.height;
+    float topLeftY = (imageView.frame.size.height - height) * 0.5;
+    return CGRectMake(0, topLeftY, imageView.frame.size.width, height);
+  }
+}
 
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name {
   CollapsibleViewController* collapsibleVC = [[CollapsibleViewController alloc] 
@@ -457,7 +518,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator) {
     if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame)) {
       [UIView animateWithDuration:0.25
-                       animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta); }];
+                       animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
+                                    [vc moveArrowViewIfOccluded];}];
     }
   }
   
@@ -470,7 +532,13 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   newHeight += CGRectGetMinY(self.mainContentView.frame);
 
-  self.scrollView.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);  
+  BOOL shouldScrollDown = NO;
+  if(scrollView_.contentOffset.y != 0 && delta > 0 && !scrollView_.isDragging && !scrollView_.isDecelerating &&
+     scrollView_.contentOffset.y >=  scrollView_.contentSize.height - scrollView_.frame.size.height)
+    shouldScrollDown = YES;
+  scrollView_.contentSize = CGSizeMake(scrollView_.contentSize.width, newHeight);
+  if (shouldScrollDown)
+    self.scrollView.contentOffset = CGPointMake(0, scrollView_.contentSize.height - scrollView_.frame.size.height);
 }
 
 - (CGFloat)contentHeight {

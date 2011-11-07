@@ -181,8 +181,7 @@
   }
 
   
-  [self addSectionWithName:@"Information"];
-  section = [sectionsDict_ objectForKey:@"Information"];
+  section = [self makeSectionWithName:@"Information"];
   
   if (detailedEntity_.subcategory && ![detailedEntity_.subcategory isEqualToString:@""]) { 
     [section addPairedLabelWithName:@"Category:"
@@ -209,13 +208,17 @@
                              forKey:@"website"];
   }
   
-  if (section.contentDict.objectEnumerator.allObjects.count > 0)
+  if (section.contentDict.objectEnumerator.allObjects.count > 0) {
+    [self addSection:section];
     self.mainContentView.hidden = NO;
+  }
   
   NSSet* stamps = entityObject_.stamps;
   
-  if (stamps && stamps.count > 0)
+  if (stamps && stamps.count > 0) {
     [self addSectionStampedBy];
+    self.mainContentView.hidden = NO;
+  }
 }
 
 

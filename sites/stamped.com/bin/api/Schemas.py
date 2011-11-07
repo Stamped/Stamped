@@ -30,6 +30,13 @@ class AccessToken(Schema):
         self.expires            = SchemaElement(datetime)
         self.timestamp          = TimestampSchema()
 
+class PasswordResetToken(Schema):
+    def setSchema(self):
+        self.token_id           = SchemaElement(basestring)
+        self.user_id            = SchemaElement(basestring)
+        self.expires            = SchemaElement(datetime)
+        self.timestamp          = TimestampSchema()
+
 # ####### #
 # Account #
 # ####### #
@@ -734,6 +741,7 @@ class AwardAnnalsSchema(Schema):
 class FandangoSchema(Schema):
     def setSchema(self):
         self.fid                = SchemaElement(basestring)
+        self.f_url              = SchemaElement(basestring)
 
 class AmazonSchema(Schema):
     def setSchema(self):

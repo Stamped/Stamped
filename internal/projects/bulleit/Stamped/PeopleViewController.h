@@ -9,15 +9,14 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STReloadableTableViewController.h"
+#import "STTableViewController.h"
 
 @class UserImageView;
 
-@interface PeopleViewController : UIViewController <UITableViewDelegate,
-                                                    UITableViewDataSource,
-                                                    RKObjectLoaderDelegate>
+@interface PeopleViewController : STTableViewController <UITableViewDelegate,
+                                                         UITableViewDataSource,
+                                                         RKObjectLoaderDelegate>
 
-@property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet UINavigationController* settingsNavigationController;
 @property (nonatomic, retain) IBOutlet UINavigationController* findFriendsNavigationController;
 

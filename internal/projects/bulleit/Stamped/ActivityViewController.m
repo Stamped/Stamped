@@ -63,6 +63,11 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   self.fetchedResultsController = nil;
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"ActivityLastUpdatedAt"]];
+}
+
 - (void)loadEventsFromDataStore {
   if (!fetchedResultsController_) {
     NSFetchRequest* request = [Event fetchRequest];
@@ -237,8 +242,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"ActivityLastUpdatedAt"];
+  NSDate* now = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"ActivityLastUpdatedAt"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
+  [self updateLastUpdatedTo:now];
   [self setIsLoading:NO];
 }
 
@@ -252,7 +259,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   [self setIsLoading:NO];
 }
 
-#pragma mark - STReloadableTableView methods.
+#pragma mark - STTableViewController methods.
 
 - (void)userPulledToReload {
   [super userPulledToReload];
@@ -266,16 +273,5 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   [self view];
   [self loadEventsFromNetwork];
 }
-
-#pragma mark - UIScrollView delegate methods
-
-- (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-  [super scrollViewDidScroll:scrollView];
-}
-
-- (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
-  [super scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
-}
-
 
 @end

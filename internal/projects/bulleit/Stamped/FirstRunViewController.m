@@ -16,11 +16,13 @@
 #import "Util.h"
 #import "TOSViewController.h"
 #import "WebViewController.h"
+#import "AccountManager.h"
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 500;
 static  NSString* const kStampedTermsURL = @"http://www.stamped.com/terms-mobile.html";
 static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mobile.html";
+static  NSString* const kStampedValidateURI = @"/account/check.json";
 
 @interface FirstRunViewController ()
 - (void)setupBottomView;
@@ -33,6 +35,10 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
 @property (nonatomic, copy) NSString* email;
 @property (nonatomic, copy) NSString* password;
 @property (nonatomic, copy) NSString* phone;
+@property (nonatomic, retain) NSTimer* timer;
+@property (nonatomic, retain) RKRequestQueue* requestQueue;
+@property (nonatomic, retain) UIColor* primaryColor;
+@property (nonatomic, retain) UIColor* secondaryColor;
 @end
 
 @implementation FirstRunViewController
@@ -59,6 +65,15 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
 @synthesize profilePhoto = profilePhoto_;
 @synthesize activityIndicator = activityIndicator_;
 @synthesize delegate = delegate_;
+@synthesize validationButton = validationButton_;
+@synthesize timer = timer_;
+@synthesize requestQueue = requestQueue_;
+@synthesize primaryColor = primaryColor_;
+@synthesize secondaryColor = secondaryColor_;
+@synthesize validationStampView = validationStampView_;
+@synthesize validationStamp1ImageView = validationStamp1ImageView_;
+@synthesize validationStamp2ImageView = validationStamp2ImageView_;
+@synthesize validationCheckImageView = validationCheckImageView_;
 
 @synthesize fullName = fullName_;
 @synthesize username = username_;
@@ -94,6 +109,17 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
   self.signUpUsernameTextField = nil;
   self.userImageView = nil;
   self.activityIndicator = nil;
+  self.validationButton = nil;
+  self.timer = nil;
+  if (requestQueue_)
+    [requestQueue_ cancelAllRequests];
+  self.requestQueue = nil;
+  self.primaryColor = nil;
+  self.secondaryColor = nil;
+  self.validationStampView = nil;
+  self.validationStamp1ImageView = nil;
+  self.validationStamp2ImageView = nil;
+  self.validationCheckImageView = nil;
   [super dealloc];
 }
 
@@ -101,6 +127,13 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  
+  requestQueue_ = [[RKRequestQueue alloc] init];
+  requestQueue_.requestTimeout = 30;
+  requestQueue_.delegate = self;
+  requestQueue_.concurrentRequestsLimit = 1;
+  [requestQueue_ start];
+  
   [self setupBottomView];
   self.cancelButton.alpha = 0.0;
   self.confirmButton.alpha = 0.0;
@@ -131,6 +164,16 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
   self.signUpUsernameTextField = nil;
   self.userImageView = nil;
   self.activityIndicator = nil;
+  self.validationButton = nil;
+  self.timer = nil;
+  [requestQueue_ cancelAllRequests];
+  self.requestQueue = nil;
+  self.primaryColor = nil;
+  self.secondaryColor = nil;
+  self.validationStampView = nil;
+  self.validationStamp1ImageView = nil;
+  self.validationStamp2ImageView = nil;
+  self.validationCheckImageView = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -462,6 +505,19 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
   return YES;
 }
 
+- (IBAction)textFieldEditingChanged:(id)sender {
+  if ([sender isEqual:self.usernameTextField]) {
+    if (timer_)
+      [timer_ invalidate];
+  
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.66
+                                                  target:self
+                                                selector:@selector(validateUsername)
+                                                userInfo:nil
+                                                repeats:NO];
+  }
+}
+
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
   CGFloat xOffset = scrollView.contentOffset.x;
   
@@ -469,6 +525,82 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
     [UIView animateWithDuration:0.35 animations:^{
       [createAccountButton_ setBackgroundImage:[UIImage imageNamed:@"create_account_button_active"] forState:normal];
     }];
+}
+
+#pragma mark - Validation.
+
+- (void) validateUsername {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedValidateURI delegate:self];
+  request.params = [NSDictionary dictionaryWithObjectsAndKeys:self.usernameTextField.text, @"login",
+                                                              kClientID, @"client_id",
+                                                              kClientSecret, @"client_secret", nil];
+  request.method = RKRequestMethodPOST;
+  [requestQueue_ addRequest:request];
+}
+
+#pragma mark - RKRequestDelegate methods.
+
+- (void)request:(RKRequest *)request didLoadResponse:(RKResponse *)response {
+//  NSLog(@"request: %@ loaded response: %@", request.resourcePath, response.bodyAsString);
+  
+  if (response.statusCode == 200) {
+    NSError* err = nil;
+    id body = [response parsedBody:&err];
+    if (err) {
+      NSLog(@"Parse error for response %@: %@", response, err);
+      return;
+    }
+  
+    NSString* primaryColorHex = [body objectForKey:@"color_primary"];
+    NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
+
+    if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) 
+        self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex
+                                                                secondary:secondaryColorHex];
+      if (self.validationStampView.hidden == YES) {
+        self.validationStampView.alpha = 0.0;
+        self.validationStampView.hidden = NO;
+        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
+      }
+  }
+  else {
+    if (self.validationStampView.hidden == NO) {
+      [UIView animateWithDuration:0.4
+                       animations:^{self.validationStampView.alpha = 0.0;}
+                       completion:^(BOOL finished){
+                         self.validationStampView.hidden = YES;
+                         self.validationStampView.alpha = 1.0;
+                       }];
+    }
+  }
+}
+
+- (void)request:(RKRequest *)request didFailLoadWithError:(NSError *)error {
+  NSLog(@"request: %@ hit error: %@", request.resourcePath, error.code);
+}
+
+#pragma mark - RKRequestQueueDelegate methods.
+
+- (void)requestQueue:(RKRequestQueue*)queue willSendRequest:(RKRequest*)request {
+  [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+  if (queue == requestQueue_) {
+    [RKClient sharedClient].requestQueue.suspended = YES;
+  }
+}
+
+- (void)requestQueue:(RKRequestQueue*)queue didLoadResponse:(RKResponse*)response {
+  if (queue == requestQueue_)
+    [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)requestQueue:(RKRequestQueue*)queue didCancelRequest:(RKRequest*)request {
+  if (queue == requestQueue_)
+    [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
+  if (queue == requestQueue_)
+    [RKClient sharedClient].requestQueue.suspended = NO;
 }
 
 

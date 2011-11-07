@@ -31,7 +31,6 @@ static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
-
 @interface StampedAppDelegate ()
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
@@ -45,7 +44,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if !TARGET_IPHONE_SIMULATOR
-//  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
+  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
   [self performRestKitMappings];
   [self customizeAppearance];
@@ -58,7 +57,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                         object:self
                                                       userInfo:apsInfo];
-    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
   }
     
@@ -91,7 +89,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                       object:self
                                                     userInfo:[userInfo objectForKey:@"aps"]];
-  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
   [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 
@@ -174,7 +171,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
      @"image_url", @"imageURL",
      nil];
   userMapping.primaryKeyAttribute = @"userID";
-  [userMapping mapAttributes:@"bio", @"website", @"location", nil];
+  [userMapping mapAttributes:@"bio", @"website", @"location", @"identifier", nil];
   
   RKManagedObjectMapping* entityMapping = [RKManagedObjectMapping mappingForClass:[Entity class]];
   entityMapping.primaryKeyAttribute = @"entityID";

@@ -121,5 +121,7 @@ screen_names = set([
     "terms-mobile",
     "feedback-mobile",
     "mobile",
+    "password",
+    "pw",
 ])
 

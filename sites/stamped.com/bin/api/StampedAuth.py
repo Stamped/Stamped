@@ -5,11 +5,12 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, time, hashlib, random, base64, struct, logs, auth
+import Globals, utils, time, hashlib, random, base64, struct, logs, auth, os
 from datetime import datetime, timedelta
 
 from errors import *
 from Schemas import *
+from auth import convertPasswordForStorage
 
 from AStampedAuth import AStampedAuth
 
@@ -110,6 +111,122 @@ class StampedAuth(AStampedAuth):
             msg = "Invalid password"
             logs.warning(msg)
             raise StampedHTTPError("invalid_credentials", 401, msg)
+    
+    def forgotPassword(self, email):
+        email = str(email).lower().strip()
+        if not utils.validate_email(email):
+            msg = "Invalid format for email address"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        # Verify user exists
+        account = self._accountDB.getAccountByEmail(email)
+        if not account or not account.user_id:
+            msg = "User does not exist"
+            logs.warning(msg)
+            raise InputError(msg)
+
+        attempt = 1
+        max_attempts = 5
+        expire = 600    # 10 minutes
+            
+        while True:
+            try:
+                rightNow = datetime.utcnow()
+
+                resetToken = PasswordResetToken()
+                resetToken.token_id = auth.generateToken(36)
+                resetToken.user_id = account.user_id
+                resetToken.expires = rightNow + timedelta(seconds=expire)
+                resetToken.timestamp.created = rightNow
+                
+                self._passwordResetDB.addResetToken(resetToken)
+                break
+            except:
+                if attempt >= max_attempts:
+                    ## Add logging
+                    raise 
+                attempt += 1
+
+        url = 'http://www.stamped.com/pw/%s' % resetToken.token_id
+        prettyurl = 'http://stamped.com/pw/%s' % resetToken.token_id
+
+        # Email user
+        msg = {}
+        msg['to'] = email
+        msg['from'] = 'Stamped <noreply@stamped.com>'
+        msg['subject'] = 'Stamped: Forgot Password'
+
+        try:
+            base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            path = os.path.join(base, 'alerts', 'templates', 'email_password_forgot.html.j2')
+            template = open(path, 'r')
+        except:
+            ### TODO: Add error logging?
+            raise
+        
+        params = {'url': url, 'prettyurl': prettyurl}
+        msg['body'] = utils.parseTemplate(template, params)
+
+        utils.sendEmail(msg, format='html')
+
+        return True
+
+    def verifyPasswordResetToken(self, resetToken):
+        ### Verify Refresh Token
+        try:
+            token = self._passwordResetDB.getResetToken(resetToken)
+            if token.user_id == None:
+                raise
+
+            if token['expires'] > datetime.utcnow():
+                logs.info("Valid reset token for user id: %s" % token.user_id)
+                return token.user_id
+            
+            logs.warning("Invalid reset token... deleting")
+            self._passwordResetDB.removeResetToken(token.token_id)
+            raise
+
+        except:
+            msg = "Invalid reset token"
+            logs.warning(msg)
+            raise AuthError("invalid_token", 401, msg)
+
+    def updatePassword(self, authUserId, password):
+        
+        account = self._accountDB.getAccount(authUserId)
+
+        # Convert and store new password
+        password = convertPasswordForStorage(password)
+        self._accountDB.updatePassword(authUserId, password)
+
+        # Remove refresh / access tokens
+        self._refreshTokenDB.removeRefreshTokensForUser(authUserId)
+        self._accessTokenDB.removeAccessTokensForUser(authUserId)
+
+        # Send confirmation email
+        msg = {}
+        msg['to'] = account.email
+        msg['from'] = 'Stamped <noreply@stamped.com>'
+        msg['subject'] = 'Stamped: Your Password Has Been Reset'
+
+        try:
+            base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            path = os.path.join(base, 'alerts', 'templates', 'email_password_reset.html.j2')
+            template = open(path, 'r')
+        except:
+            ### TODO: Add error logging?
+            raise
+        
+        params = {
+            'screen_name': account.screen_name, 
+            'email_address': account.email,
+        }
+        msg['body'] = utils.parseTemplate(template, params)
+
+        utils.sendEmail(msg, format='html')
+
+        return True
 
 
 

@@ -32,12 +32,15 @@ const CGFloat kMediumUserImageSize = 41.0;
 @dynamic events;
 @dynamic comments;
 @dynamic credits;
+@dynamic followers;
+@dynamic following;
 @dynamic numCredits;
 @dynamic numFriends;
 @dynamic numFollowers;
 @dynamic numStamps;
 @dynamic numStampsLeft;
 @dynamic imageURL;
+@dynamic identifier;
 
 - (void)setPrimaryColor:(NSString*)primaryColor {
   [self willChangeValueForKey:@"primaryColor"];

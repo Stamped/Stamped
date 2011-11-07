@@ -283,7 +283,6 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [userImageView release];
   pinView.pinColor = MKPinAnnotationColorRed;
   pinView.canShowCallout = YES;
-  pinView.animatesDrop = YES;
   return pinView;
 }
 

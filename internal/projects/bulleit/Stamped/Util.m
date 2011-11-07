@@ -12,7 +12,7 @@
 #import "Entity.h"
 #import "SearchResult.h"
 #import "PlaceDetailViewController.h"
-#import "GenericItemDetailViewController.h"
+//#import "GenericItemDetailViewController.h"
 #import "MusicDetailViewController.h"
 #import "BookDetailViewController.h"
 #import "OtherDetailViewController.h"
@@ -231,7 +231,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
       detailViewController = [[OtherDetailViewController alloc] initWithEntityObject:entityObject];
       break;
     default:
-      detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:entityObject];
+//      detailViewController = [[GenericItemDetailViewController alloc] initWithEntityObject:entityObject];
       break;
   }
 
@@ -257,7 +257,7 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
       detailViewController = [[OtherDetailViewController alloc] initWithSearchResult:searchResult];
       break;
     default:
-      detailViewController = [[GenericItemDetailViewController alloc] initWithSearchResult:searchResult];
+//      detailViewController = [[GenericItemDetailViewController alloc] initWithSearchResult:searchResult];
       break;
   }
 

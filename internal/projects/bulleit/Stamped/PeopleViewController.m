@@ -26,6 +26,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 @interface PeopleViewController ()
 - (void)loadFriendsFromNetwork;
+- (void)loadFriendsFromDataStore;
 - (void)settingsButtonPressed:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* friendsArray;
@@ -34,13 +35,11 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 @implementation PeopleViewController
 
 @synthesize friendsArray = friendsArray_;
-@synthesize tableView = tableView_;
 @synthesize settingsNavigationController = settingsNavigationController_;
 @synthesize findFriendsNavigationController = findFriendsNavigationController_;
 
 - (void)dealloc {
   self.friendsArray = nil;
-  self.tableView = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
   [super dealloc];
@@ -59,36 +58,39 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
                                            selector:@selector(settingsButtonPressed:)
                                                name:kSettingsButtonPressedNotification
                                              object:nil];
-  if ([AccountManager sharedManager].currentUser)
+  if ([AccountManager sharedManager].currentUser) {
     [self loadFriendsFromNetwork];
+    [self loadFriendsFromDataStore];
+  }
+  
+  self.hasHeaders = YES;
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.friendsArray = nil;
-  self.tableView = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [super viewWillAppear:animated];
+  [self loadFriendsFromDataStore];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   if (delegate.navigationController.navigationBarHidden)
     [delegate.navigationController setNavigationBarHidden:NO animated:YES];
 
   if (!friendsArray_)
     [self loadFriendsFromNetwork];
-
-  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setSettingsButtonShown:YES];
-  [self loadFriendsFromNetwork];
-  [super viewDidAppear:animated];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"PeopleLastUpdatedAt"]];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -113,8 +115,17 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   [self loadFriendsFromNetwork];
 }
 
+- (void)loadFriendsFromDataStore {
+  NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
+                                                               ascending:YES 
+                                                                selector:@selector(localizedCaseInsensitiveCompare:)];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  self.friendsArray = [currentUser.following sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+  [self.tableView reloadData];
+}
+
 - (void)loadFriendsFromNetwork {
-  //[self setIsLoading:YES];
+  [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* userMapping = [objectManager.mappingProvider mappingForKeyPath:@"User"];
   NSString* userID = [AccountManager sharedManager].currentUser.userID;
@@ -129,14 +140,21 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
+    User* currentUser = [AccountManager sharedManager].currentUser;
+    [currentUser removeFollowing:currentUser.following];
+    [currentUser addFollowing:[NSSet setWithArray:objects]];
+    [User.managedObjectContext save:NULL];
     NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
                                                                      ascending:YES 
                                                                       selector:@selector(localizedCaseInsensitiveCompare:)];
     self.friendsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
   }
   [self.tableView reloadData];
-  //self.tableView.contentOffset = scrollPosition_;
-  //[self setIsLoading:NO];
+  NSDate* now = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"PeopleLastUpdatedAt"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  [self updateLastUpdatedTo:now];
+  [self setIsLoading:NO];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -147,7 +165,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
     return;
   }
   
-  //[self setIsLoading:NO];
+  [self setIsLoading:NO];
 }
 
 #pragma mark - Table view data source.

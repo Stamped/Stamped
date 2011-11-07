@@ -59,7 +59,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize fullNameLabel = fullNameLabel_;
 @synthesize usernameLocationLabel = usernameLocationLabel_;
 @synthesize bioLabel = bioLabel_;
-@synthesize shelfImageView = shelfImageView_;
 @synthesize toolbarView = toolbarView_;
 @synthesize tableView = tableView_;
 @synthesize user = user_;
@@ -85,7 +84,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.fullNameLabel = nil;
   self.usernameLocationLabel = nil;
   self.bioLabel = nil;
-  self.shelfImageView = nil;
   self.toolbarView = nil;
   self.tableView = nil;
   self.followIndicator = nil;
@@ -98,6 +96,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  stampsAreTemporary_ = YES;
   userImageView_.imageURL = user_.profileImageURL;
   userImageView_.enabled = YES;
   [userImageView_ addTarget:self
@@ -108,7 +107,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   stampLayer_.frame = CGRectMake(57, -10, 61, 61);
   stampLayer_.opacity = 0.95;
   stampLayer_.contents = (id)user_.stampImage.CGImage;
-  [shelfImageView_.superview.layer insertSublayer:stampLayer_ below:shelfImageView_.layer];
+  [userImageView_.superview.layer insertSublayer:stampLayer_ above:userImageView_.layer];
   [stampLayer_ release];
   fullNameLabel_.textColor = [UIColor stampedBlackColor];
   usernameLocationLabel_.textColor = [UIColor stampedLightGrayColor];
@@ -158,7 +157,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.fullNameLabel = nil;
   self.usernameLocationLabel = nil;
   self.bioLabel = nil;
-  self.shelfImageView = nil;
   self.toolbarView = nil;
   self.tableView = nil;
   self.followIndicator = nil;
@@ -168,6 +166,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self.navigationController setNavigationBarHidden:NO animated:animated];
+
   [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
                             animated:animated];
   if (!user_.name)

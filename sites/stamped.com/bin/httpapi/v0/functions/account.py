@@ -221,7 +221,7 @@ def change_password(request):
 
     stampedAuth.verifyPassword(authUserId, old)
 
-    result      = stampedAPI.updatePassword(authUserId, new)
+    result      = stampedAuth.updatePassword(authUserId, new)
 
     return transformOutput(True)
 
@@ -232,7 +232,7 @@ def reset_password(request):
     client_id   = checkClient(request)
     schema      = parseRequest(HTTPEmail(), request)
 
-    stampedAPI.resetPassword(schema.email)
+    stampedAuth.resetPassword(schema.email)
 
     return transformOutput(True)
 

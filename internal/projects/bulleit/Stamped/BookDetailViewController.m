@@ -21,7 +21,9 @@
 @implementation BookDetailViewController
 
 @synthesize imageView = imageView_;
+@synthesize gradientView = gradientView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
+
 
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
@@ -30,6 +32,7 @@
 
 - (void)dealloc {
   self.imageView = nil;
+  self.gradientView = nil;
   self.affiliateLogoView = nil;
   self.mainContentView = nil;
   [super dealloc];
@@ -38,16 +41,23 @@
 #pragma mark - View lifecycle
 
 - (void)showContents {
-  if (!detailedEntity_.author) {
+  if (!detailedEntity_.author || [detailedEntity_.author isEqualToString:@""]) {
     self.descriptionLabel.text = @"book";
   } else {
     self.descriptionLabel.text = [NSString stringWithFormat:@"by %@", detailedEntity_.author];
   }
 
   if (detailedEntity_.image) {
-    self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
                                                    [NSURL URLWithString:detailedEntity_.image]]];
+    CGRect frame = [self frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
+    frame.origin = self.gradientView.frame.origin;
+    CGFloat xOffset = self.gradientView.frame.size.width - frame.size.width;
+    CGFloat yOffset = self.gradientView.frame.size.height - frame.size.height;
+    frame.origin = CGPointMake(frame.origin.x + xOffset/2, frame.origin.y + yOffset/2);
+    self.gradientView.frame = frame;
+    self.gradientView.hidden = NO;
+    self.imageView.hidden = NO;
   }
 
   [self setupMainActionsContainer];
@@ -65,6 +75,7 @@
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.imageView = nil;
+  self.gradientView = nil;
   self.affiliateLogoView = nil;
   self.mainContentView = nil;
 }
@@ -76,9 +87,6 @@
   self.imageView.layer.shadowRadius = 4.0;
   self.imageView.layer.shadowColor = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
-  self.imageView.frame = CGRectMake(self.imageView.frame.origin.x, self.imageView.frame.origin.y,
-                                    self.imageView.frame.size.width, 144.0);
-  self.imageView.contentMode = UIViewContentModeScaleAspectFit;
   
   [super viewWillAppear:animated];
 }
@@ -98,7 +106,7 @@
 #pragma mark - Content Setup (data retrieval & logic to fill views)
 
 - (void)setupMainActionsContainer {
-  if (!detailedEntity_.amazonURL) {
+  if (detailedEntity_.amazonURL) {
     self.mainActionButton.hidden = NO;
     self.mainActionLabel.hidden = NO;
     self.mainActionsView.hidden = NO;
@@ -134,7 +142,7 @@
       [section addPairedLabelWithName:@"Format:" 
                                 value:[NSString stringWithFormat:@"%@, %@ pages", detailedEntity_.format, detailedEntity_.length] 
                                forKey:@"format"];
-    else if (detailedEntity_.format)
+    else if (detailedEntity_.format && ![detailedEntity_.format isEqualToString:@""])
       [section addPairedLabelWithName:@"Format:" 
                                 value:detailedEntity_.format 
                                forKey:@"format"];
@@ -142,19 +150,19 @@
       [section addPairedLabelWithName:@"Length:" 
                                 value:[NSString stringWithFormat:@"%@ pages", detailedEntity_.length] 
                                forKey:@"length"];
-    if (detailedEntity_.publisher)
+    if (detailedEntity_.publisher && ![detailedEntity_.publisher isEqualToString:@""])
       [section addPairedLabelWithName:@"Publisher:" 
                                 value:detailedEntity_.publisher.capitalizedString
                                forKey:@"publisher"];
-    if (detailedEntity_.releaseDate)
+    if (detailedEntity_.releaseDate && ![detailedEntity_.releaseDate isEqualToString:@""])
       [section addPairedLabelWithName:@"Release Date:" 
                                 value:detailedEntity_.releaseDate 
                                forKey:@"releaseDate"];
-    if (detailedEntity_.language)
+    if (detailedEntity_.language && ![detailedEntity_.language isEqualToString:@""])
       [section addPairedLabelWithName:@"Language:" 
                                 value:detailedEntity_.language.capitalizedString
                                forKey:@"language"];
-    if (detailedEntity_.isbn)
+    if (detailedEntity_.isbn && ![detailedEntity_.isbn isEqualToString:@""])
       [section addPairedLabelWithName:@"ISBN:" 
                                 value:detailedEntity_.isbn 
                                forKey:@"isbn"];

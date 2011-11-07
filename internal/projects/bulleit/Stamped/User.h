@@ -17,6 +17,7 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSString* primaryColor;
 @property (nonatomic, retain) NSString* name;
 @property (nonatomic, retain) NSString* imageURL;
+@property (nonatomic, retain) NSString* identifier;
 @property (nonatomic, retain) NSString* userID;
 @property (nonatomic, retain) NSString* website;
 @property (nonatomic, retain) NSString* location;
@@ -27,6 +28,8 @@ extern const CGFloat kMediumUserImageSize;
 @property (nonatomic, retain) NSSet* comments;
 @property (nonatomic, retain) NSSet* events;
 @property (nonatomic, retain) NSSet* credits;
+@property (nonatomic, retain) NSSet* following;
+@property (nonatomic, retain) NSSet* followers;
 @property (nonatomic, retain) NSNumber* numCredits;
 @property (nonatomic, retain) NSNumber* numFollowers;
 @property (nonatomic, retain) NSNumber* numFriends;
@@ -38,6 +41,8 @@ extern const CGFloat kMediumUserImageSize;
 @end
 
 @interface User (CoreDataGeneratedAccessors)
+- (void)addFollowing:(NSSet*)values;
+- (void)removeFollowing:(NSSet*)values;
 - (void)addStampsObject:(NSManagedObject*)value;
 - (void)removeStampsObject:(NSManagedObject*)value;
 - (void)addStamps:(NSSet*)values;

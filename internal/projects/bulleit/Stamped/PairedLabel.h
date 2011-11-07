@@ -19,4 +19,6 @@
 @property (nonatomic, assign) CGFloat nameWidth;
 @property (nonatomic, assign) CGFloat numberWidth;
 
+- (NSUInteger)lineCountOfLabel:(UILabel*)label;
+
 @end

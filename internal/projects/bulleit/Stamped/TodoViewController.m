@@ -18,6 +18,8 @@
 #import "EntityDetailViewController.h"
 #import "Favorite.h"
 #import "Notifications.h"
+#import "STNavigationBar.h"
+#import "STPlaceAnnotation.h"
 #import "StampedAppDelegate.h"
 #import "StampDetailViewController.h"
 #import "TodoTableViewCell.h"
@@ -33,14 +35,27 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 - (void)loadFavoritesFromNetwork;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 - (void)removeFavoriteWithEntityID:(NSString*)entityID;
+- (void)addAnnotationForEntity:(Entity*)entity;
+- (void)mapButtonWasPressed:(NSNotification*)notification;
+- (void)listButtonWasPressed:(NSNotification*)notification;
+- (void)mapDisclosureTapped:(id)sender;
+- (void)filterFavorites;
 
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
+@property (nonatomic, readonly) MKMapView* mapView;
+@property (nonatomic, assign) BOOL userPannedMap;
+@property (nonatomic, assign) StampFilterType selectedFilterType;
+@property (nonatomic, copy) NSString* searchQuery;
 @end
 
 @implementation TodoViewController
 
 @synthesize delegate = delegate_;
 @synthesize fetchedResultsController = fetchedResultsController_;
+@synthesize mapView = mapView_;
+@synthesize userPannedMap = userPannedMap_;
+@synthesize selectedFilterType = selectedFilterType_;
+@synthesize searchQuery = searchQuery_;
 
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -48,6 +63,8 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   self.delegate = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.searchQuery = nil;
+  mapView_ = nil;
   [super dealloc];
 }
 
@@ -70,6 +87,21 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(mapButtonWasPressed:)
+                                               name:kMapViewButtonPressedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(listButtonWasPressed:)
+                                               name:kListViewButtonPressedNotification
+                                             object:nil];
+  mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
+  mapView_.alpha = 0.0;
+  mapView_.delegate = self;
+  [self.view addSubview:mapView_];
+  [mapView_ release];
+  
   [self loadFavoritesFromDataStore];
   [self loadFavoritesFromNetwork];
 }
@@ -77,9 +109,12 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 - (void)viewDidUnload {
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.delegate = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.searchQuery = nil;
+  mapView_ = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -89,10 +124,128 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     [Favorite.managedObjectContext deleteObject:fave];
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+  mapView_.showsUserLocation = NO;
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+  [navBar setButtonShown:NO];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+
+  if (mapView_.alpha > 0)
+    mapView_.showsUserLocation = YES;
+
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
+  [navBar setButtonShown:YES];
+  [self updateLastUpdatedTo:[[NSUserDefaults standardUserDefaults] objectForKey:@"TodoLastUpdatedAt"]];
+}
+
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
   Favorite* fave = [fetchedResultsController_ objectAtIndexPath:indexPath];
   [(TodoTableViewCell*)cell setDelegate:self];
   [(TodoTableViewCell*)cell setFavorite:fave];
+}
+
+#pragma mark - Map Stuff.
+
+- (void)addAnnotationForEntity:(Entity*)entity {
+  NSArray* coordinates = [entity.coordinates componentsSeparatedByString:@","];
+  CGFloat latitude = [(NSString*)[coordinates objectAtIndex:0] floatValue];
+  CGFloat longitude = [(NSString*)[coordinates objectAtIndex:1] floatValue];
+  STPlaceAnnotation* annotation = [[STPlaceAnnotation alloc] initWithLatitude:latitude
+                                                                    longitude:longitude];  
+  annotation.entityObject = entity;
+  [mapView_ addAnnotation:annotation];
+  [annotation release];
+}
+
+- (void)mapButtonWasPressed:(NSNotification*)notification {
+  if (!self.view.superview)
+    return;
+
+  userPannedMap_ = NO;
+  [self.stampFilterBar.searchField resignFirstResponder];
+  self.tableView.scrollEnabled = NO;
+  self.fetchedResultsController.fetchRequest.predicate = [NSPredicate predicateWithFormat:@"entityObject != NIL"];
+
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+  NSArray* favoritesArray = [sectionInfo objects];
+  [UIView animateWithDuration:0.5
+                   animations:^{ mapView_.alpha = 1.0; }
+                   completion:^(BOOL finished) {
+                     mapView_.showsUserLocation = YES;
+                     for (Favorite* f in favoritesArray) {
+                       if (!f.entityObject.coordinates)
+                         continue;
+                       [self addAnnotationForEntity:f.entityObject];
+                     }
+                   }];
+}
+
+- (void)listButtonWasPressed:(NSNotification*)notification {
+  if (!self.view.superview)
+    return;
+
+  self.tableView.scrollEnabled = YES;
+  [self filterFavorites];
+  [mapView_ removeAnnotations:mapView_.annotations];
+  [UIView animateWithDuration:0.5
+                   animations:^{ mapView_.alpha = 0.0; }
+                   completion:^(BOOL finished) { mapView_.showsUserLocation = NO; }];
+}
+
+- (void)mapDisclosureTapped:(id)sender {
+  UIButton* disclosureButton = sender;
+  UIView* view = [disclosureButton superview];
+  while (view && ![view isMemberOfClass:[MKPinAnnotationView class]])
+    view = [view superview];
+  
+  if (!view)
+    return;
+  
+  STPlaceAnnotation* annotation = (STPlaceAnnotation*)[(MKPinAnnotationView*)view annotation];
+  UIViewController* detailViewController = [Util detailViewControllerForEntity:annotation.entityObject];
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  [delegate.navigationController pushViewController:detailViewController animated:YES];
+}
+
+#pragma mark - MKMapViewDelegate Methods
+
+- (void)mapView:(MKMapView*)mapView didUpdateUserLocation:(MKUserLocation*)userLocation {
+  if (!userPannedMap_) {
+    CLLocationCoordinate2D currentLocation = mapView_.userLocation.location.coordinate;
+    MKCoordinateSpan mapSpan = MKCoordinateSpanMake(kStandardLatLongSpan, kStandardLatLongSpan);
+    MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
+    [mapView setRegion:region animated:YES];
+  }
+}
+
+- (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
+  userPannedMap_ = YES;
+}
+
+- (MKAnnotationView*)mapView:(MKMapView*)theMapView viewForAnnotation:(id<MKAnnotation>)annotation {
+  if (![annotation isKindOfClass:[STPlaceAnnotation class]])
+    return nil;
+  
+  MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
+  UIButton* disclosureButton = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+  [disclosureButton addTarget:self
+                       action:@selector(mapDisclosureTapped:)
+             forControlEvents:UIControlEventTouchUpInside];
+  pinView.rightCalloutAccessoryView = disclosureButton;
+  pinView.pinColor = MKPinAnnotationColorRed;
+  pinView.canShowCallout = YES;
+  return pinView;
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate methods.
@@ -217,9 +370,10 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  NSLog(@"Response: %@", objectLoader.response.bodyAsString);
-  NSLog(@"Objects: %@", objects);
-  [[Favorite managedObjectContext] save:NULL];
+  NSDate* now = [NSDate date];
+  [[NSUserDefaults standardUserDefaults] setObject:now forKey:@"TodoLastUpdatedAt"];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+  [self updateLastUpdatedTo:now];
   [self setIsLoading:NO];
 }
 
@@ -248,6 +402,68 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   [detailViewController release];
 }
 
+#pragma mark - STStampFilterBarDelegate methods.
+
+- (void)stampFilterBar:(STStampFilterBar*)bar
+       didSelectFilter:(StampFilterType)filterType
+              andQuery:(NSString*)query {
+  self.searchQuery = query;
+  selectedFilterType_ = filterType;
+  [self filterFavorites];
+  
+  [self.tableView reloadData];
+}
+
+#pragma mark - Filter/Search stuff.
+
+- (void)filterFavorites {
+  NSMutableArray* predicates = [NSMutableArray array];
+  [predicates addObject:[NSPredicate predicateWithFormat:@"entityObject != NIL"]];
+  
+  if (searchQuery_.length) {
+    NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
+    for (NSString* term in searchTerms) {
+      if (!term.length)
+        continue;
+      
+      NSPredicate* p = [NSPredicate predicateWithFormat:
+                        @"(entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@)", term, term];
+      [predicates addObject:p];
+    }
+  }
+
+  NSString* filterString = nil;
+  switch (selectedFilterType_) {
+    case StampFilterTypeBook:
+      filterString = @"book";
+      break;
+    case StampFilterTypeFood:
+      filterString = @"food";
+      break;
+    case StampFilterTypeFilm:
+      filterString = @"film";
+      break;
+    case StampFilterTypeMusic:
+      filterString = @"music";
+      break;
+    case StampFilterTypeOther:
+      filterString = @"other";
+      break;
+    default:
+      break;
+  }
+  if (filterString)
+    [predicates addObject:[NSPredicate predicateWithFormat:@"entityObject.category == %@", filterString]];
+  
+  self.fetchedResultsController.fetchRequest.predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+  
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
+}
+
 #pragma mark - Custom methods.
 
 - (void)loadFavoritesFromNetwork {
@@ -266,12 +482,11 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     [request setPredicate:[NSPredicate predicateWithFormat:@"entityObject != NIL"]];
-    [NSFetchedResultsController deleteCacheWithName:@"FavoriteItems"];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
                                             managedObjectContext:[Favorite managedObjectContext]
                                               sectionNameKeyPath:nil
-                                                       cacheName:@"FavoriteItems"];
+                                                       cacheName:nil];
     self.fetchedResultsController = fetchedResultsController;
     fetchedResultsController.delegate = self;
     [fetchedResultsController release];
