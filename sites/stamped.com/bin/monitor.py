@@ -117,7 +117,7 @@ class Monitor(object):
             self.status[node.id] = node_status
     
     def _try_ping_webServer(self, node):
-        url = 'https://%s/v0/entities/show.json' % node.public_dns
+        url = 'https://%s/v0/temp/ping.json' % node.public_dns
         retries = 0
         
         while retries < 5:
