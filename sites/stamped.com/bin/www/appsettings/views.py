@@ -43,7 +43,7 @@ def passwordReset(request, **kwargs):
                 raise StampedHTTPError('match_failed', 400, "Password match failed")
             
             # Store password            
-            stampedAuth.updatePassword(authUserId, password)
+            stampedAuth.updatePassword(authUserId, data['password'])
 
             # Return success
             response = HttpResponseRedirect('/settings/password/success')
