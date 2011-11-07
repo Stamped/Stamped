@@ -20,6 +20,7 @@
 #import "UIColor+Stamped.h"
 #import "StampDetailViewController.h"
 #import "PlaceDetailViewController.h"
+#import "OtherDetailViewController.h"
 #import "Notifications.h"
 #import "Favorite.h"
 #import "User.h"
@@ -43,6 +44,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)setupSectionViews;
 - (void)addSelfAsFavorite;
 - (void)dismissSelf;
+- (void)ensureTitleLabelHeight;
 @end
 
 @implementation EntityDetailViewController
@@ -59,6 +61,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 @synthesize shelfImageView = shelfImageView_;
 @synthesize addFavoriteButton = addFavoriteButton_;
 @synthesize spinner = spinner_;
+
 
 - (id)initWithEntityObject:(Entity*)entity {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -147,6 +150,27 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   // Default does nothing. Override in subclasses.
 }
 
+- (void)ensureTitleLabelHeight {
+  NSLog(@"title line count: %u", [self lineCountOfLabel:self.titleLabel]);
+  if ([self lineCountOfLabel:self.titleLabel] > 1) {
+    CGFloat newHeight = self.titleLabel.font.lineHeight * 2 + 8;
+    CGFloat delta = newHeight - self.titleLabel.frame.size.height;
+    self.titleLabel.frame = CGRectMake(self.titleLabel.frame.origin.x, self.titleLabel.frame.origin.y,
+                                       self.titleLabel.frame.size.width, newHeight);
+    self.descriptionLabel.frame = CGRectOffset(self.descriptionLabel.frame, 0.0, delta);
+    self.mainActionsView.frame = CGRectOffset(self.mainActionsView.frame, 0.0, delta);
+    self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0.0, delta);
+    if ([self isKindOfClass:[PlaceDetailViewController class]] ||
+        [self isKindOfClass:[OtherDetailViewController class]]) {
+      ((PlaceDetailViewController*)self).mapContainerView.frame = CGRectOffset(((PlaceDetailViewController*)self).mapContainerView.frame, 0.0, delta);
+    }
+  }
+  if (titleLabel_.text.length > 60) {
+    self.titleLabel.text = [self.titleLabel.text substringToIndex:55];
+    self.titleLabel.text = [self.titleLabel.text stringByAppendingString:@"…"];
+  }
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -175,6 +199,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   if (entityObject_.favorite.stamp)
     [self addTodoBar];
+  
+  [self ensureTitleLabelHeight];
 }
 
 - (void)addTodoBar {
@@ -332,7 +358,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-  NSLog(@"%@", detailedEntity_.songs);
+//  NSLog(@"%@", detailedEntity_);
   [super viewDidAppear:animated];
   viewIsVisible_ = YES;
 
@@ -389,7 +415,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   frame.size.width = label.frame.size.width;
   frame.size = [label sizeThatFits:frame.size];
 //  label.frame = frame;
-  CGFloat lineHeight = label.font.leading;
+  CGFloat lineHeight = label.font.lineHeight;
+  NSLog(@"%f %f", label.font.lineHeight, frame.size.height);
   NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
   return linesInLabel;
 }
