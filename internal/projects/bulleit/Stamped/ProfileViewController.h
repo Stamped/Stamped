@@ -17,7 +17,8 @@
 @interface ProfileViewController : STViewController <RKObjectLoaderDelegate,
                                                      RKRequestDelegate,
                                                      UITableViewDelegate,
-                                                     UITableViewDataSource>
+                                                     UITableViewDataSource,
+                                                     NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
 @property (nonatomic, retain) IBOutlet UILabel* creditCountLabel;
