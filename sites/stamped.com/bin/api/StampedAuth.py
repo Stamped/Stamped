@@ -190,7 +190,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid reset token"
             logs.warning(msg)
-            raise AuthError("invalid_token", 401, msg)
+            raise AuthError("invalid_token", msg)
 
     def updatePassword(self, authUserId, password):
         
@@ -275,7 +275,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid refresh token"
             logs.warning(msg)
-            raise AuthError("invalid_token", 401, msg)
+            raise AuthError("invalid_token", msg)
 
         ### Generate Access Token
         token = self.addAccessToken(clientId, token.user_id, refreshToken)
@@ -341,7 +341,7 @@ class StampedAuth(AStampedAuth):
         except:
             msg = "Invalid Access Token"
             logs.warning(msg)
-            raise AuthError("invalid_token", 401, msg)
+            raise AuthError("invalid_token", msg)
     
     def removeAccessToken(self, tokenId):
         return self._accessTokenDB.removeAccessToken(tokenId)
