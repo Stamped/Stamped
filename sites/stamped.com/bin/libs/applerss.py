@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import copy, json, re, urllib, utils
 
-from Schemas    import Entity
+from Schemas    import *
 from pprint     import pprint
 from libs.apple import AppleAPI
 
@@ -81,6 +81,7 @@ class AppleRSS(object):
         else:
             url += format
         
+        # attempt to download feed
         utils.log(url)
         data = utils.getFile(url)
         
@@ -91,15 +92,23 @@ class AppleRSS(object):
             data = json.loads(data)
         except ValueError:
             utils.log(data)
-            return None
+            return []
         
         entries  = data['feed']['entry']
         entities = []
         full     = (2 == transform)
+        #print json.dumps(entries, indent=2)
+        
+        if isinstance(entries, dict):
+            entries = [ entries ]
         
         for entry in entries:
-            entity = self._parse_entity(entry, full=full)
-            entities.append(entity)
+            try:
+                entity = self._parse_entity(entry, full=full)
+                if entity is not None:
+                    entities.append(entity)
+            except:
+                pass
         
         return entities
     
@@ -108,12 +117,13 @@ class AppleRSS(object):
         entity.title = entry['im:name']['label']
         
         details_map = {
-            'artist_display_name' : [ 'im:artist', 'label' ], 
-            'genre' : [ 'category', 'attributes', 'term' ], 
+            'artist_display_name'   : [ 'im:artist', 'label' ], 
+            'artist_id'             : [ 'im:artist', 'attributes', 'href' ], 
+            'genre'                 : [ 'category', 'attributes', 'term' ], 
             'original_release_date' : [ 'im:releaseDate', 'attributes', 'label' ], 
-            'label_studio' : [ 'rights', 'label' ], 
-            'subcategory' : [ 'im:contentType', 'im:contentType', 'attributes', 'term' ], 
-            'album_name' : [ 'im:collection', 'im:name', 'label' ], 
+            'label_studio'          : [ 'rights', 'label' ], 
+            'subcategory'           : [ 'im:contentType', 'im:contentType', 'attributes', 'term' ], 
+            'album_name'            : [ 'im:collection', 'im:name', 'label' ], 
         }
         
         # parse entity details
@@ -127,12 +137,15 @@ class AppleRSS(object):
                 if e is not None:
                     entity[k] = e
             except:
-                utils.printException()
+                pass
         
         try:
             entity.subcategory = self._subcategory_map[entity.subcategory.lower()]
         except:
             return None
+        
+        if entity.artist_id is not None:
+            entity.artist_id = self._get_id(entity.artist_id)
         
         # parse largest image available for this entity
         try:
@@ -234,12 +247,14 @@ class AppleRSS(object):
         
         entity.songs = songs
 
-rss = AppleRSS()
-ret = rss.get_new_releases(limit=1)
+def main():
+    rss = AppleRSS()
+    #ret = rss.get_top_albums(limit=10, transform=2)
+    ret = rss.get_top_songs(limit=10, transform=2)
+    
+    for entity in ret:
+        pprint(entity.value)
 
-for entity in ret:
-    pprint(entity.value)
-
-#results = appleAPI.lookup(id=entity.aid, media='music', entity='allArtist', transform=True)
-#artists = filter(lambda r: r.entity.subcategory == 'artist', results)
+if __name__ == '__main__':
+    main()
 
