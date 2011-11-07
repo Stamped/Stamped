@@ -66,11 +66,14 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
 @synthesize activityIndicator = activityIndicator_;
 @synthesize delegate = delegate_;
 @synthesize validationButton = validationButton_;
-@synthesize validationImageView = validationImageView_;
 @synthesize timer = timer_;
 @synthesize requestQueue = requestQueue_;
 @synthesize primaryColor = primaryColor_;
 @synthesize secondaryColor = secondaryColor_;
+@synthesize validationStampView = validationStampView_;
+@synthesize validationStamp1ImageView = validationStamp1ImageView_;
+@synthesize validationStamp2ImageView = validationStamp2ImageView_;
+@synthesize validationCheckImageView = validationCheckImageView_;
 
 @synthesize fullName = fullName_;
 @synthesize username = username_;
@@ -113,7 +116,10 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   self.requestQueue = nil;
   self.primaryColor = nil;
   self.secondaryColor = nil;
-  self.validationImageView = nil;
+  self.validationStampView = nil;
+  self.validationStamp1ImageView = nil;
+  self.validationStamp2ImageView = nil;
+  self.validationCheckImageView = nil;
   [super dealloc];
 }
 
@@ -164,7 +170,10 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   self.requestQueue = nil;
   self.primaryColor = nil;
   self.secondaryColor = nil;
-  self.validationImageView = nil;
+  self.validationStampView = nil;
+  self.validationStamp1ImageView = nil;
+  self.validationStamp2ImageView = nil;
+  self.validationCheckImageView = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -546,24 +555,22 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
     NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
 
     if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) 
-      [UIView animateWithDuration:0.4 animations:^{
-        self.validationImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex
-                                                                secondary:secondaryColorHex];}];
-    if (self.validationImageView.hidden == YES) {
-      self.validationImageView.alpha = 0.0;
-      self.validationImageView.hidden = NO;
-      [UIView animateWithDuration:0.4 animations:^{self.validationImageView.alpha = 1.0;}];
-    }
+        self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex
+                                                                secondary:secondaryColorHex];
+      if (self.validationStampView.hidden == YES) {
+        self.validationStampView.alpha = 0.0;
+        self.validationStampView.hidden = NO;
+        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
+      }
   }
   else {
-    if (self.validationImageView.hidden == NO) {
+    if (self.validationStampView.hidden == NO) {
       [UIView animateWithDuration:0.4
-                       animations:^{self.validationImageView.alpha = 0.0;}
+                       animations:^{self.validationStampView.alpha = 0.0;}
                        completion:^(BOOL finished){
-                         self.validationImageView.hidden = YES;
-                         self.validationImageView.alpha = 1.0;
-                       }
-       ];
+                         self.validationStampView.hidden = YES;
+                         self.validationStampView.alpha = 1.0;
+                       }];
     }
   }
 }

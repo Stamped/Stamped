@@ -59,7 +59,10 @@ willCreateUserWithName:(NSString*)name
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* activityIndicator;
 @property (nonatomic, assign) id<FirstRunViewControllerDelegate> delegate;
 @property (nonatomic, retain) IBOutlet UIButton* validationButton;
-@property (nonatomic, retain) IBOutlet UIImageView* validationImageView;
+@property (nonatomic, retain) IBOutlet UIView* validationStampView;
+@property (nonatomic, retain) IBOutlet UIImageView* validationStamp1ImageView;
+@property (nonatomic, retain) IBOutlet UIImageView* validationStamp2ImageView;
+@property (nonatomic, retain) IBOutlet UIImageView* validationCheckImageView;
 
 - (IBAction)createAccountButtonPressed:(id)sender;
 - (IBAction)signInButtonPressed:(id)sender;

@@ -326,7 +326,7 @@
 						<string key="NSFrame">{{27, 261}, {266, 31}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="34715250"/>
+						<reference key="NSNextKeyView" ref="509136146"/>
 						<string key="NSReuseIdentifierKey">_NS:294</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -391,13 +391,13 @@
 						<reference key="IBUIFontDescription" ref="843916040"/>
 						<reference key="IBUIFont" ref="835433547"/>
 					</object>
-					<object class="IBUIButton" id="34715250">
+					<object class="IBUIButton" id="509136146">
 						<reference key="NSNextResponder" ref="221051138"/>
 						<int key="NSvFlags">-2147483356</int>
 						<string key="NSFrame">{{271, 266}, {22, 22}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="1059493591"/>
+						<reference key="NSNextKeyView" ref="670562938"/>
 						<string key="NSReuseIdentifierKey">_NS:225</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -415,16 +415,63 @@
 						</object>
 						<reference key="IBUIFont" ref="760459481"/>
 					</object>
-					<object class="IBUIImageView" id="1059493591">
+					<object class="IBUIView" id="670562938">
 						<reference key="NSNextResponder" ref="221051138"/>
 						<int key="NSvFlags">-2147483356</int>
+						<object class="NSMutableArray" key="NSSubviews">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBUIImageView" id="906990150">
+								<reference key="NSNextResponder" ref="670562938"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrameSize">{18, 18}</string>
+								<reference key="NSSuperview" ref="670562938"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="797892496"/>
+								<string key="NSReuseIdentifierKey">_NS:567</string>
+								<reference key="IBUIBackgroundColor" ref="407695596"/>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+							</object>
+							<object class="IBUIImageView" id="797892496">
+								<reference key="NSNextResponder" ref="670562938"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrameSize">{18, 18}</string>
+								<reference key="NSSuperview" ref="670562938"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="639653738"/>
+								<string key="NSReuseIdentifierKey">_NS:567</string>
+								<reference key="IBUIBackgroundColor" ref="407695596"/>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+							</object>
+							<object class="IBUIImageView" id="639653738">
+								<reference key="NSNextResponder" ref="670562938"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrameSize">{18, 18}</string>
+								<reference key="NSSuperview" ref="670562938"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="627645974"/>
+								<string key="NSReuseIdentifierKey">_NS:567</string>
+								<reference key="IBUIBackgroundColor" ref="407695596"/>
+								<int key="IBUIContentMode">4</int>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<object class="NSCustomResource" key="IBUIImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">signin_check</string>
+								</object>
+							</object>
+						</object>
 						<string key="NSFrame">{{275, 268}, {18, 18}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="627645974"/>
-						<string key="NSReuseIdentifierKey">_NS:567</string>
-						<reference key="IBUIBackgroundColor" ref="407695596"/>
-						<bool key="IBUIUserInteractionEnabled">NO</bool>
+						<reference key="NSNextKeyView" ref="906990150"/>
+						<string key="NSReuseIdentifierKey">_NS:196</string>
+						<object class="NSColor" key="IBUIBackgroundColor">
+							<int key="NSColorSpace">3</int>
+							<bytes key="NSWhite">MQA</bytes>
+							<reference key="NSCustomColorSpace" ref="946144153"/>
+						</object>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 					</object>
 				</object>
@@ -901,17 +948,41 @@
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">validationButton</string>
 						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="34715250"/>
+						<reference key="destination" ref="509136146"/>
 					</object>
 					<int key="connectionID">102</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">validationImageView</string>
+						<string key="label">validationStampView</string>
 						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="1059493591"/>
+						<reference key="destination" ref="670562938"/>
 					</object>
-					<int key="connectionID">105</int>
+					<int key="connectionID">110</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">validationStamp1ImageView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="906990150"/>
+					</object>
+					<int key="connectionID">111</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">validationStamp2ImageView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="797892496"/>
+					</object>
+					<int key="connectionID">112</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">validationCheckImageView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="639653738"/>
+					</object>
+					<int key="connectionID">113</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -1187,8 +1258,8 @@
 							<reference ref="608762401"/>
 							<reference ref="259474293"/>
 							<reference ref="627645974"/>
-							<reference ref="34715250"/>
-							<reference ref="1059493591"/>
+							<reference ref="509136146"/>
+							<reference ref="670562938"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Sign in Scroll View</string>
@@ -1299,13 +1370,37 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">99</int>
-						<reference key="object" ref="34715250"/>
+						<reference key="object" ref="509136146"/>
+						<reference key="parent" ref="221051138"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">109</int>
+						<reference key="object" ref="670562938"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="639653738"/>
+							<reference ref="797892496"/>
+							<reference ref="906990150"/>
+						</object>
 						<reference key="parent" ref="221051138"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">104</int>
-						<reference key="object" ref="1059493591"/>
-						<reference key="parent" ref="221051138"/>
+						<reference key="object" ref="906990150"/>
+						<reference key="parent" ref="670562938"/>
+						<string key="objectName">Stamp View 1</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">107</int>
+						<reference key="object" ref="797892496"/>
+						<reference key="parent" ref="670562938"/>
+						<string key="objectName">Stamp View 2</string>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">108</int>
+						<reference key="object" ref="639653738"/>
+						<reference key="parent" ref="670562938"/>
+						<string key="objectName">Check View</string>
 					</object>
 				</object>
 			</object>
@@ -1319,6 +1414,9 @@
 					<string>-2.IBPluginDependency</string>
 					<string>1.IBPluginDependency</string>
 					<string>104.IBPluginDependency</string>
+					<string>107.IBPluginDependency</string>
+					<string>108.IBPluginDependency</string>
+					<string>109.IBPluginDependency</string>
 					<string>12.IBPluginDependency</string>
 					<string>13.IBPluginDependency</string>
 					<string>16.CustomClassName</string>
@@ -1364,6 +1462,9 @@
 					<string>FirstRunViewController</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>UIResponder</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1420,7 +1521,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">105</int>
+			<int key="maxID">113</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1526,7 +1627,10 @@
 							<string>userImageView</string>
 							<string>usernameTextField</string>
 							<string>validationButton</string>
-							<string>validationImageView</string>
+							<string>validationCheckImageView</string>
+							<string>validationStamp1ImageView</string>
+							<string>validationStamp2ImageView</string>
+							<string>validationStampView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1551,6 +1655,9 @@
 							<string>UITextField</string>
 							<string>UIButton</string>
 							<string>UIImageView</string>
+							<string>UIImageView</string>
+							<string>UIImageView</string>
+							<string>UIView</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
@@ -1577,7 +1684,10 @@
 							<string>userImageView</string>
 							<string>usernameTextField</string>
 							<string>validationButton</string>
-							<string>validationImageView</string>
+							<string>validationCheckImageView</string>
+							<string>validationStamp1ImageView</string>
+							<string>validationStamp2ImageView</string>
+							<string>validationStampView</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -1662,8 +1772,20 @@
 								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">validationImageView</string>
+								<string key="name">validationCheckImageView</string>
 								<string key="candidateClassName">UIImageView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">validationStamp1ImageView</string>
+								<string key="candidateClassName">UIImageView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">validationStamp2ImageView</string>
+								<string key="candidateClassName">UIImageView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">validationStampView</string>
+								<string key="candidateClassName">UIView</string>
 							</object>
 						</object>
 					</object>
@@ -1729,6 +1851,7 @@
 				<string>sign_in_button.png</string>
 				<string>sign_in_button_active.png</string>
 				<string>sign_up_header@2x.png</string>
+				<string>signin_check</string>
 				<string>stamp_detail_ripple_bottom@2x.png</string>
 				<string>stamped_logo_large@2x.png</string>
 				<string>top-round-corner-mask@2x.png</string>
@@ -1744,6 +1867,7 @@
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>
 				<string>{502, 38}</string>
+				<string>{16, 16}</string>
 				<string>{620, 7}</string>
 				<string>{372, 372}</string>
 				<string>{640, 4}</string>
