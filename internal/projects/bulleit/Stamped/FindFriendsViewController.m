@@ -21,12 +21,14 @@
 #import "STSearchField.h"
 #import "StampedAppDelegate.h"
 #import "FriendshipTableViewCell.h"
+#import "InviteFriendTableViewCell.h"
 #import "ProfileViewController.h"
 #import "Stamp.h"
 #import "SuggestedUserTableViewCell.h"
 #import "Util.h"
 #import "User.h"
 #import "STOAuthViewController.h"
+#import "UserImageView.h"
 
 static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
 static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
@@ -46,6 +48,7 @@ static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/r
 static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/followers.json";
 static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
+static NSString* const kInvitePath = @"/friendships/invite.json";
 
 @interface FindFriendsViewController ()
 - (void)adjustNippleToView:(UIView*)view;
@@ -55,6 +58,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user;
 - (void)followButtonPressed:(id)sender;
 - (void)unfollowButtonPressed:(id)sender;
+- (void)inviteButtonPressed:(id)sender;
 - (UITableViewCell*)cellFromSubview:(UIView*)view;
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
@@ -72,6 +76,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)connectTwitterFollowers:(NSArray*)followers;
 - (void)connectFacebookFriends:(NSArray*)friends;
 - (void)removeUsersToInviteWithIdentifers:(NSArray*)identifiers;
+- (void)sendInviteRequestToEmail:(NSString*)email;
 
 @property (nonatomic, assign) FindFriendsSource findSource;
 @property (nonatomic, retain) GTMOAuthAuthentication* authentication;
@@ -83,6 +88,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @property (nonatomic, copy) NSArray* facebookFriends;
 @property (nonatomic, copy) NSArray* suggestedFriends;
 @property (nonatomic, retain) NSMutableArray* contactsNotUsingStamped;
+@property (nonatomic, retain) NSMutableArray* invitedContacts;
 @property (nonatomic, assign) BOOL searchFieldHidden;
 @property (nonatomic, assign) BOOL twitterAuthFailed;
 @end
@@ -99,6 +105,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize suggestedFriends = suggestedFriends_;
 @synthesize facebookFriends = facebookFriends_;
 @synthesize contactsNotUsingStamped = contactsNotUsingStamped_;
+@synthesize invitedContacts = invitedContacts_;
 @synthesize followedUsers = followedUsers_;
 @synthesize contactsButton = contactsButton_;
 @synthesize twitterButton = twitterButton_;
@@ -120,7 +127,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (id)initWithFindSource:(FindFriendsSource)source {
   if ((self = [self initWithNibName:@"FindFriendsView" bundle:nil])) {
     self.findSource = source;
-    self.followedUsers = [NSMutableArray array];
   }
   return self;
 }
@@ -133,6 +139,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.contactFriends = nil;
   self.suggestedFriends = nil;
   self.contactsNotUsingStamped = nil;
+  self.invitedContacts = nil;
   self.contactsButton = nil;
   self.twitterButton = nil;
   self.facebookButton = nil;
@@ -165,6 +172,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  self.invitedContacts = [NSMutableArray array];
+
   self.navigationItem.title = @"Add Friends";
   searchFieldHidden_ = YES;
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
@@ -200,6 +209,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.stampedButton = nil;
   self.suggestedFriends = nil;
   self.contactsNotUsingStamped = nil;
+  self.invitedContacts = nil;
   self.nipple = nil;
   self.searchField = nil;
   self.facebookClient = nil;
@@ -414,10 +424,18 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (UITableViewCell*)cellFromSubview:(UIView*)view {
   UIView* superview = view.superview;
   while (superview && (![superview isMemberOfClass:[FriendshipTableViewCell class]] &&
-                       ![superview isMemberOfClass:[SuggestedUserTableViewCell class]])) {
+                       ![superview isMemberOfClass:[SuggestedUserTableViewCell class]] &&
+                       ![superview isMemberOfClass:[InviteFriendTableViewCell class]])) {
     superview = superview.superview;
   }
   return (UITableViewCell*)superview;
+}
+
+- (void)sendInviteRequestToEmail:(NSString*)email {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kInvitePath delegate:nil];
+  request.method = RKRequestMethodPOST;
+  request.params = [NSDictionary dictionaryWithObject:email forKey:@"email"];
+  [request send];
 }
 
 - (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user {
@@ -449,6 +467,17 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [(id)cell unfollowButton].hidden = YES;
   [[(id)cell indicator] startAnimating];
   [self sendRelationshipChangeRequestWithPath:kFriendshipRemovePath forUser:user];
+}
+
+- (void)inviteButtonPressed:(id)sender {
+  UIButton* button = sender;
+
+  button.enabled = NO;
+  InviteFriendTableViewCell* cell = (InviteFriendTableViewCell*)[self cellFromSubview:sender];
+  NSString* email = cell.emailLabel.text;
+  if (![invitedContacts_ containsObject:email])
+    [invitedContacts_ addObject:email];
+  [self sendInviteRequestToEmail:email];
 }
 
 - (void)connectToTwitterButtonPressed:(id)sender {
@@ -509,8 +538,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
     if (findSource_ == FindFriendsSourceContacts && indexPath.section == 1) {
-      cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
-                                     reuseIdentifier:CellIdentifier] autorelease];
+      cell = [[[InviteFriendTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
+      [[(id)cell inviteButton] addTarget:self
+                                  action:@selector(inviteButtonPressed:)
+                        forControlEvents:UIControlEventTouchUpInside];
     } else {
       if (findSource_ == FindFriendsSourceSuggested)
         cell = [[[SuggestedUserTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
@@ -528,7 +559,26 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
   if (findSource_ == FindFriendsSourceContacts && indexPath.section == 1) {
     ABRecordRef person = [contactsNotUsingStamped_ objectAtIndex:indexPath.row];
-    cell.textLabel.text = (NSString*)ABRecordCopyCompositeName(person);
+    InviteFriendTableViewCell* inviteCell = (InviteFriendTableViewCell*)cell;
+    CFStringRef name = ABRecordCopyCompositeName(person);
+    inviteCell.nameLabel.text = (NSString*)name;
+    inviteCell.inviteButton.enabled = YES;
+    CFRelease(name);
+    ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
+    NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
+    CFRelease(emailProperty);
+    if (emails.count > 0) {
+      NSString* email = [emails objectAtIndex:0];
+      inviteCell.emailLabel.text = email;
+      if ([invitedContacts_ containsObject:email])
+        inviteCell.inviteButton.enabled = NO;
+    }
+    [emails release];
+    if (ABPersonHasImageData(person)) {
+      CFDataRef imageData = ABPersonCopyImageData(person);
+      inviteCell.userImageView.imageView.image = [UIImage imageWithData:(NSData*)imageData];
+      CFRelease(imageData);
+    }
   } else {
     NSArray* friends = nil;
     if (self.findSource == FindFriendsSourceTwitter)
@@ -1174,7 +1224,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   CFRelease(addressBook);
   CFRelease(people);
   CFRelease(source);
-  NSLog(@"contacts not using stamped: %d", contactsNotUsingStamped_.count);
 }
 
 #pragma mark - UITextFieldDelegate Methods.
