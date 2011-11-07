@@ -616,7 +616,7 @@ class MediaSchema(Schema):
         self.artwork_url                = SchemaElement(basestring)
         self.mpaa_rating                = SchemaElement(basestring)
         self.genre                      = SchemaElement(basestring)
-        self.artist_id                  = SchemaElement(int)
+        self.artist_id                  = SchemaElement(basestring)
 
 class EntitySourcesSchema(Schema):
     def setSchema(self):
