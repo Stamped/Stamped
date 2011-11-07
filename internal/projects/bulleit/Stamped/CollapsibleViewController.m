@@ -18,6 +18,7 @@
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
 
+
 @implementation CollapsibleViewController
 
 @synthesize headerView = headerView_;
@@ -94,10 +95,10 @@ int const SPACE_HEIGHT = 10;
   self.contentDict = nil;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-  return (interfaceOrientation == UIInterfaceOrientationPortrait);
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+  [self moveArrowViewIfOccluded];
 }
-
 
 #pragma mark - Collapsing and expanding
 
@@ -344,7 +345,7 @@ int const SPACE_HEIGHT = 10;
     self.contentView.frame = contentFrame;
     
     CGRect viewFrame = self.view.frame;
-    viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) -20;
+    viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) - 20;
     self.view.frame = viewFrame;
   }
   
@@ -358,7 +359,7 @@ int const SPACE_HEIGHT = 10;
     self.contentView.frame = contentFrame;
     
     CGRect viewFrame = self.view.frame;
-    viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) +20;
+    viewFrame.size.height = CGRectGetMaxY(self.footerView.frame) + 20;
     self.view.frame = viewFrame;
   }
 }
@@ -382,6 +383,41 @@ int const SPACE_HEIGHT = 10;
   }
 
   return contentHeight;
+}
+
+- (void)moveArrowViewIfOccluded {
+  if (footerLabel_.hidden == NO)
+    return;
+  CGRect convertedArrowFrame = [self.arrowView convertRect:self.arrowView.frame 
+                                                    toView:self.delegate.imageView.superview];
+  CGRect imageViewFrame = self.delegate.imageView.frame;
+  
+  if (CGRectGetMinY(convertedArrowFrame) >= CGRectGetMinY(imageViewFrame) &&
+      CGRectGetMaxY(convertedArrowFrame) <= CGRectGetMaxY(imageViewFrame)) {
+    if (CGRectGetMinX(convertedArrowFrame) >= CGRectGetMinX(imageViewFrame)) {
+      UILabel* label = self.sectionLabel;
+      CGSize size = label.frame.size;
+      size.height = label.frame.size.height;
+      size = [label sizeThatFits:size];
+      CGRect frame = self.sectionLabel.frame;
+      frame.size = CGSizeMake(size.width, frame.size.height);
+      self.sectionLabel.frame = frame;
+      
+      self.arrowView.frame = CGRectMake(CGRectGetMaxX(self.sectionLabel.frame) + 8.0,
+                                        CGRectGetMinY(self.arrowView.frame), 
+                                        CGRectGetWidth(self.arrowView.frame),
+                                        CGRectGetHeight(self.arrowView.frame));
+      if (self.numLabel.hidden == NO)
+        self.arrowView.frame = CGRectOffset(self.arrowView.frame, 8.0, 0.0);
+    }
+  }
+  else {
+    CGRect frame = self.arrowView.frame;
+    CGPoint origin = frame.origin;
+    origin.x = self.view.frame.size.width - frame.size.width;
+    frame.origin = origin;
+    self.arrowView.frame = frame;
+  }
 }
 
 #pragma mark - Touch events

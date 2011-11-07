@@ -151,7 +151,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)ensureTitleLabelHeight {
-  NSLog(@"title line count: %u", [self lineCountOfLabel:self.titleLabel]);
   if ([self lineCountOfLabel:self.titleLabel] > 1) {
     CGFloat newHeight = self.titleLabel.font.lineHeight * 2 + 8;
     CGFloat delta = newHeight - self.titleLabel.frame.size.height;
@@ -416,7 +415,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   frame.size = [label sizeThatFits:frame.size];
 //  label.frame = frame;
   CGFloat lineHeight = label.font.lineHeight;
-  NSLog(@"%f %f", label.font.lineHeight, frame.size.height);
   NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
   return linesInLabel;
 }
@@ -497,7 +495,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator) {
     if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame)) {
       [UIView animateWithDuration:0.25
-                       animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta); }];
+                       animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
+                                    [vc moveArrowViewIfOccluded];}];
     }
   }
   
