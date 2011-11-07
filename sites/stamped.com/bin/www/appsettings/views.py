@@ -64,7 +64,11 @@ def passwordReset(request, **kwargs):
         return response
 
     except Exception as e:
-        logs.begin(stampedAPI._logsDB.addLog)
+        logs.begin(
+            add=stampedAPI._logsDB.addLog, 
+            save=stampedAPI._logsDB.saveLog,
+            requestData=request,
+        )
         logs.request(request)
         logs.warning("500 Error: %s" % e)
         logs.error(500)
@@ -72,11 +76,37 @@ def passwordReset(request, **kwargs):
 
 def passwordForgot(request):
     try:
-        email = 'kevin@stamped.com'
-        stampedAuth.forgotPassword(email)
+        # Check if a form exists with data
+        if request.method == 'POST':
+            # User submitted the form
+            data = request.POST
+
+            # Validate email address
+            email = str(data['forgotemail']).lower().strip()
+            if not utils.validate_email(email):
+                msg = "Invalid format for email address"
+                logs.warning(msg)
+                raise StampedHTTPError('invalid_input', 400, "Invalid email address")
+            
+            # Verify account exists
+            user = stampedAPI.checkAccount(email)
+
+            # Send email
+            stampedAuth.forgotPassword(email)
+
+            # Return success
+            params = {
+                'email': email
+                }
+            response = render_to_response('password-forgot.html', params)
+
+        else:
+            # Display 'submit email' form
+            response = render_to_response('password-forgot.html', None)
+
+        return response
 
     except Exception as e:
-        print 'error'
         logs.begin(
             add=stampedAPI._logsDB.addLog, 
             save=stampedAPI._logsDB.saveLog,
@@ -86,7 +116,6 @@ def passwordForgot(request):
         logs.warning("500 Error: %s" % e)
         logs.error(500)
         logs.save()
-        print 'saved'
         raise Http404
 
     return True
