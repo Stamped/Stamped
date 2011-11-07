@@ -7,7 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+@class STImageView;
+@protocol STImageViewDelegate
+- (void)STImageView:(STImageView*)imageView didLoadImage:(UIImage*)image;
+@end
 
 @interface STImageView : UIImageView
 @property (nonatomic, copy) NSString* imageURL;
+@property (nonatomic, assign) id<STImageViewDelegate> delegate;
 @end

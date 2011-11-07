@@ -582,4 +582,22 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     [vc dismissModalViewControllerAnimated:YES];
 }
 
+#pragma mark - Actions.
+
+- (void)imageViewTapped {
+  ShowImageViewController* controller = [[ShowImageViewController alloc] initWithNibName:@"ShowImageViewController" bundle:nil];
+  if (self.imageView.image)
+    controller.image = self.imageView.image;
+  else if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""])
+    controller.imageURL = detailedEntity_.image;
+  else
+    return;
+  [self.navigationController pushViewController:controller animated:YES];
+  [controller release];
+}
+
+- (void)STImageView:(STImageView *)imageView didLoadImage:(UIImage *)image {
+  // Default does nothing. Override in subclasses.
+}
+  
 @end

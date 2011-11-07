@@ -8,9 +8,9 @@
 
 #import "EntityDetailViewController.h"
 
-@interface BookDetailViewController : EntityDetailViewController
+@interface BookDetailViewController : EntityDetailViewController 
 
-@property (nonatomic, retain) IBOutlet UIImageView* imageView;
+@property (nonatomic, retain) IBOutlet STImageView* imageView;
 @property (nonatomic, retain) IBOutlet UIImageView* gradientView;
 @property (nonatomic, retain) IBOutlet UIImageView* affiliateLogoView;
 

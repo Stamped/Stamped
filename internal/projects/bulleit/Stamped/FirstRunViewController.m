@@ -280,6 +280,8 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
     [self.view addSubview:stampedLogo_];
   
   [activityIndicator_ stopAnimating];
+  [requestQueue_ cancelAllRequests];
+  
   [self setSecondaryButtonsVisible:NO];
   [UIView animateWithDuration:0.2 animations:^{
     animationContentView_.alpha = 1.0;
@@ -287,6 +289,9 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
     if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero) && !editing_ && !signUpScrollView_.superview)
       [signInScrollView_ addSubview:stampedLogo_];
 
+    self.validationStamp1ImageView.image = nil;
+    self.validationStamp2ImageView.image = nil;
+    self.validationStampView.hidden = YES;
     [signInScrollView_ removeFromSuperview];
     [signUpScrollView_ removeFromSuperview];
     usernameTextField_.text = nil;
@@ -555,12 +560,22 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
     NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
 
     if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) 
-        self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex
-                                                                secondary:secondaryColorHex];
       if (self.validationStampView.hidden == YES) {
+        self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
         self.validationStampView.alpha = 0.0;
         self.validationStampView.hidden = NO;
         [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
+      }
+      else if (self.validationStampView.hidden == NO) {
+        self.validationStamp2ImageView.alpha = 0.0;
+        self.validationStamp2ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
+        self.validationStamp2ImageView.hidden = NO;
+        [UIView animateWithDuration:0.4 animations:^{self.validationStamp2ImageView.alpha = 1.0;}
+         completion:^(BOOL finished) {
+           self.validationStamp1ImageView.image = self.validationStamp2ImageView.image;
+           self.validationStamp2ImageView.hidden = YES;
+           self.validationStamp2ImageView.image = nil;
+         }];
       }
   }
   else {
@@ -576,7 +591,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
 }
 
 - (void)request:(RKRequest *)request didFailLoadWithError:(NSError *)error {
-  NSLog(@"request: %@ hit error: %@", request.resourcePath, error.code);
+  NSLog(@"request: %@ hit error: %d", request.resourcePath, error.code);
 }
 
 #pragma mark - RKRequestQueueDelegate methods.
@@ -601,6 +616,11 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
 - (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
   if (queue == requestQueue_)
     [RKClient sharedClient].requestQueue.suspended = NO;
+}
+
+- (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
+  if ([RKClient sharedClient].requestQueue.count == 0 && requestQueue_.count == 0)
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 

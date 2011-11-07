@@ -9,13 +9,17 @@
 #import <RestKit/RestKit.h>
 #import "CollapsibleViewController.h"
 #import "UIColor+Stamped.h"
+#import "STImageView.h"
+#import "ShowImageViewController.h"
 
 @class Entity;
 @class DetailedEntity;
 @class SearchResult;
 @class Stamp;
 
-@interface EntityDetailViewController : UIViewController <RKObjectLoaderDelegate, CollapsibleViewControllerDelegate> {
+@interface EntityDetailViewController : UIViewController <RKObjectLoaderDelegate, 
+                                                          CollapsibleViewControllerDelegate,
+                                                          STImageViewDelegate> {
  @protected
   DetailedEntity* detailedEntity_;
   Entity* entityObject_;
@@ -37,6 +41,7 @@
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
 - (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
 
+
 @property (nonatomic, retain) IBOutlet UIView* mainActionsView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;
@@ -47,6 +52,8 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIView* mainContentView;
 @property (nonatomic, retain) IBOutlet UIImageView* shelfImageView;
+
+- (void)imageViewTapped;
 
 
 @end
