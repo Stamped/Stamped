@@ -73,7 +73,7 @@ static const CGFloat kNumberLabelGutterWidth = 8.f;
   NSUInteger lineCt = [self lineCountOfLabel:valueLabel_];
   if (lineCt > 1)
     self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, 
-                                 self.view.frame.size.width, lineCt * valueLabel_.font.leading + 10);
+                                 self.view.frame.size.width, lineCt * valueLabel_.font.lineHeight + 10);
   [self.view setNeedsDisplay];
 }
 
@@ -99,7 +99,7 @@ static const CGFloat kNumberLabelGutterWidth = 8.f;
   NSUInteger lineCt = [self lineCountOfLabel:valueLabel_];
   if (lineCt > 1) 
     self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, 
-                                 self.view.frame.size.width, lineCt * valueLabel_.font.leading);
+                                 self.view.frame.size.width, lineCt * valueLabel_.font.lineHeight);
   [self.view setNeedsDisplay];
 }
 
@@ -107,7 +107,7 @@ static const CGFloat kNumberLabelGutterWidth = 8.f;
   CGRect frame = label.frame;
   frame.size.width = label.frame.size.width;
   frame.size = [label sizeThatFits:frame.size];
-  CGFloat lineHeight = label.font.leading;
+  CGFloat lineHeight = label.font.lineHeight;
   NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
   return linesInLabel;
 }

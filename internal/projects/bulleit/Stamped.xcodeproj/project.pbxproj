@@ -145,7 +145,6 @@
 		7E49683A1457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968361457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png */; };
 		7E49683B1457654600ACD36B /* hdr_searchIconOnly_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968371457654600ACD36B /* hdr_searchIconOnly_button.png */; };
 		7E49683C1457654600ACD36B /* hdr_searchIconOnly_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968381457654600ACD36B /* hdr_searchIconOnly_button@2x.png */; };
-		7E514A9913C97A9700EEC598 /* GenericItemDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E514A9713C97A9700EEC598 /* GenericItemDetailViewController.m */; };
 		7E514A9A13C97A9700EEC598 /* GenericItemDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A9813C97A9700EEC598 /* GenericItemDetailViewController.xib */; };
 		7E52A58B13FC7DB500209A95 /* camera_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E52A58913FC7DB500209A95 /* camera_button@2x.png */; };
 		7E52A58C13FC7DB500209A95 /* profile_detail_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E52A58A13FC7DB500209A95 /* profile_detail_button@2x.png */; };
@@ -903,8 +902,6 @@
 		7E4968361457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_searchIconOnly_button_selected@2x.png"; sourceTree = "<group>"; };
 		7E4968371457654600ACD36B /* hdr_searchIconOnly_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hdr_searchIconOnly_button.png; sourceTree = "<group>"; };
 		7E4968381457654600ACD36B /* hdr_searchIconOnly_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_searchIconOnly_button@2x.png"; sourceTree = "<group>"; };
-		7E514A9613C97A9700EEC598 /* GenericItemDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericItemDetailViewController.h; sourceTree = "<group>"; };
-		7E514A9713C97A9700EEC598 /* GenericItemDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GenericItemDetailViewController.m; sourceTree = "<group>"; };
 		7E514A9813C97A9700EEC598 /* GenericItemDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = GenericItemDetailViewController.xib; path = ../Interfaces/GenericItemDetailViewController.xib; sourceTree = "<group>"; };
 		7E52A58913FC7DB500209A95 /* camera_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "camera_button@2x.png"; sourceTree = "<group>"; };
 		7E52A58A13FC7DB500209A95 /* profile_detail_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile_detail_button@2x.png"; sourceTree = "<group>"; };
@@ -1819,8 +1816,6 @@
 				CB3725DF141DBC84002A8F96 /* FilmDetailViewController.h */,
 				CB3725E0141DBC85002A8F96 /* FilmDetailViewController.m */,
 				7ED6082D141E861A001C499D /* FilmDetailViewController.xib */,
-				7E514A9613C97A9700EEC598 /* GenericItemDetailViewController.h */,
-				7E514A9713C97A9700EEC598 /* GenericItemDetailViewController.m */,
 				7E514A9813C97A9700EEC598 /* GenericItemDetailViewController.xib */,
 				CB958E8B141E438200BBCCBC /* OtherDetailViewController.h */,
 				CB958E8C141E438200BBCCBC /* OtherDetailViewController.m */,
@@ -3387,7 +3382,6 @@
 				7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */,
 				7EF1105913C906AA0059F9BD /* EntityDetailViewController.m in Sources */,
 				7E76129713C930F50023CCC4 /* PlaceDetailViewController.m in Sources */,
-				7E514A9913C97A9700EEC598 /* GenericItemDetailViewController.m in Sources */,
 				7EE7E35A13CCB2A800FA3B3A /* InboxTableViewCell.m in Sources */,
 				7EE7E35F13CCB3D100FA3B3A /* UserImageView.m in Sources */,
 				7E22679913D4D90F00657A66 /* AccountManager.m in Sources */,
@@ -3612,8 +3606,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3631,6 +3625,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
@@ -3649,8 +3645,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3667,6 +3663,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;

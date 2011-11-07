@@ -48,7 +48,6 @@
 						<int key="NSvFlags">-2147483356</int>
 						<string key="NSFrame">{{150, 208}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<object class="NSColor" key="IBUIBackgroundColor" id="715238449">
 							<int key="NSColorSpace">3</int>
@@ -104,6 +103,8 @@
 								<nil key="IBUIHighlightedColor"/>
 								<int key="IBUIBaselineAdjustment">1</int>
 								<float key="IBUIMinimumFontSize">24</float>
+								<int key="IBUINumberOfLines">0</int>
+								<int key="IBUILineBreakMode">0</int>
 								<object class="IBUIFontDescription" key="IBUIFontDescription">
 									<string key="name">Helvetica</string>
 									<string key="family">Helvetica</string>
