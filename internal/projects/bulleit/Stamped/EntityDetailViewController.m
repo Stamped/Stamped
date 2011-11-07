@@ -357,7 +357,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-//  NSLog(@"%@", detailedEntity_);
+  NSLog(@"%@", detailedEntity_);
   [super viewDidAppear:animated];
   viewIsVisible_ = YES;
 
@@ -417,6 +417,29 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   CGFloat lineHeight = label.font.lineHeight;
   NSUInteger linesInLabel = floor(frame.size.height/lineHeight);
   return linesInLabel;
+}
+
+
+// Thanks to cncool. http://stackoverflow.com/questions/389342/how-to-get-the-size-of-a-scaled-uiimage-in-uiimageview
+-(CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView
+{
+  float imageRatio = image.size.width / image.size.height;
+  float viewRatio = imageView.frame.size.width / imageView.frame.size.height;
+  
+  if(imageRatio < viewRatio)
+  {
+    float scale = imageView.frame.size.height / image.size.height;
+    float width = scale * image.size.width;
+    float topLeftX = (imageView.frame.size.width - width) * 0.5;
+    return CGRectMake(topLeftX, 0, width, imageView.frame.size.height);
+  }
+  else
+  {
+    float scale = imageView.frame.size.width / image.size.width;
+    float height = scale * image.size.height;
+    float topLeftY = (imageView.frame.size.height - height) * 0.5;
+    return CGRectMake(0, topLeftY, imageView.frame.size.width, height);
+  }
 }
 
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name {

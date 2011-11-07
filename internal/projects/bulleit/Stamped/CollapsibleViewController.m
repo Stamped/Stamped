@@ -97,7 +97,7 @@ int const SPACE_HEIGHT = 10;
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-  [self moveArrowViewIfOccluded];
+      [self moveArrowViewIfOccluded];
 }
 
 #pragma mark - Collapsing and expanding

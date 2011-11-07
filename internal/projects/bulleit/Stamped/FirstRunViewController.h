@@ -8,6 +8,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
+#import <RestKit/RestKit.h>
 
 @class UserImageView;
 @class FirstRunViewController;
@@ -33,7 +34,9 @@ willCreateUserWithName:(NSString*)name
                                                       UINavigationControllerDelegate,
                                                       UIImagePickerControllerDelegate,
                                                       UIActionSheetDelegate,
-                                                      UIScrollViewDelegate>
+                                                      UIScrollViewDelegate,
+                                                      RKRequestDelegate,
+                                                      RKRequestQueueDelegate>
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* bottomView;
@@ -55,6 +58,8 @@ willCreateUserWithName:(NSString*)name
 @property (nonatomic, retain) IBOutlet UserImageView* userImageView;
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* activityIndicator;
 @property (nonatomic, assign) id<FirstRunViewControllerDelegate> delegate;
+@property (nonatomic, retain) IBOutlet UIButton* validationButton;
+@property (nonatomic, retain) IBOutlet UIImageView* validationImageView;
 
 - (IBAction)createAccountButtonPressed:(id)sender;
 - (IBAction)signInButtonPressed:(id)sender;
@@ -63,11 +68,12 @@ willCreateUserWithName:(NSString*)name
 - (IBAction)takePhotoButtonPressed:(id)sender;
 - (IBAction)termsButtonPressed:(id)sender;
 - (IBAction)privacyButtonPressed:(id)sender;
+- (IBAction)textFieldEditingChanged:(id)sender;
 
 - (void)signInFailed:(NSString*)reason;
-
 - (void)signUpSucess;
 - (void)signUpFailed:(NSString*)reason;
+- (void)validateUsername;
 
 @end
 

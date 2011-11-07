@@ -15,6 +15,8 @@
 
 extern NSString* const kCurrentUserHasUpdatedNotification;
 extern NSString* const kUserHasLoggedOutNotification;
+static NSString* const kClientID = @"stampedtest";
+static NSString* const kClientSecret = @"august1ftw";
 
 @protocol AccountManagerDelegate
 @required

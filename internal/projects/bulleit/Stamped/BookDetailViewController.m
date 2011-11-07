@@ -21,6 +21,7 @@
 @implementation BookDetailViewController
 
 @synthesize imageView = imageView_;
+@synthesize gradientView = gradientView_;
 @synthesize affiliateLogoView = affiliateLogoView_;
 
 
@@ -31,6 +32,7 @@
 
 - (void)dealloc {
   self.imageView = nil;
+  self.gradientView = nil;
   self.affiliateLogoView = nil;
   self.mainContentView = nil;
   [super dealloc];
@@ -46,9 +48,16 @@
   }
 
   if (detailedEntity_.image) {
-    self.imageView.hidden = NO;
     self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
                                                    [NSURL URLWithString:detailedEntity_.image]]];
+    CGRect frame = [self frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
+    frame.origin = self.gradientView.frame.origin;
+    CGFloat xOffset = self.gradientView.frame.size.width - frame.size.width;
+    CGFloat yOffset = self.gradientView.frame.size.height - frame.size.height;
+    frame.origin = CGPointMake(frame.origin.x + xOffset/2, frame.origin.y + yOffset/2);
+    self.gradientView.frame = frame;
+    self.gradientView.hidden = NO;
+    self.imageView.hidden = NO;
   }
 
   [self setupMainActionsContainer];
@@ -66,6 +75,7 @@
 - (void)viewDidUnload {
   [super viewDidUnload];
   self.imageView = nil;
+  self.gradientView = nil;
   self.affiliateLogoView = nil;
   self.mainContentView = nil;
 }

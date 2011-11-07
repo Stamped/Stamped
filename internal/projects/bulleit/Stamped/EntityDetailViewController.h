@@ -35,6 +35,7 @@
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name;
 - (void)addSection:(CollapsibleViewController*)section;
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
+- (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
 
 @property (nonatomic, retain) IBOutlet UIView* mainActionsView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
