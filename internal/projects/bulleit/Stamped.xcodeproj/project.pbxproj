@@ -331,7 +331,8 @@
 		7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */; };
 		7EB03FD414672B40004F7A1C /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EB03FD314672B40004F7A1C /* MessageUI.framework */; };
 		7EB03FD714673308004F7A1C /* invited_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB03FD514673308004F7A1C /* invited_button@2x.png */; };
-		7EB03FD814673308004F7A1C /* invite_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB03FD614673308004F7A1C /* invite_button@2x.png */; };
+		7EB03FDC1467527C004F7A1C /* InviteFriendTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB03FDB1467527C004F7A1C /* InviteFriendTableViewCell.m */; };
+		7EB03FDE1467897A004F7A1C /* invite_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB03FDD1467897A004F7A1C /* invite_button@2x.png */; };
 		7EB29D8514146586003A8EA3 /* inbox_photo_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */; };
 		7EB4782813EE2DBE00DA12CB /* MediumUserImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */; };
 		7EB8A7D3146491370018E263 /* nav_gear_button_ios4.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EB8A7C7146491370018E263 /* nav_gear_button_ios4.png */; };
@@ -1129,8 +1130,10 @@
 		7EAC166E13C547B6009A600A /* app_launcher_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "app_launcher_icon@2x.png"; sourceTree = "<group>"; };
 		7EB03FD314672B40004F7A1C /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		7EB03FD514673308004F7A1C /* invited_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invited_button@2x.png"; sourceTree = "<group>"; };
-		7EB03FD614673308004F7A1C /* invite_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invite_button@2x.png"; sourceTree = "<group>"; };
 		7EB03FD9146738AB004F7A1C /* StampedModel 11.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 11.xcdatamodel"; sourceTree = "<group>"; };
+		7EB03FDA1467527C004F7A1C /* InviteFriendTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InviteFriendTableViewCell.h; sourceTree = "<group>"; };
+		7EB03FDB1467527C004F7A1C /* InviteFriendTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InviteFriendTableViewCell.m; sourceTree = "<group>"; };
+		7EB03FDD1467897A004F7A1C /* invite_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invite_button@2x.png"; sourceTree = "<group>"; };
 		7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_photo_icon@2x.png"; sourceTree = "<group>"; };
 		7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediumUserImageView.h; sourceTree = "<group>"; };
 		7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediumUserImageView.m; sourceTree = "<group>"; };
@@ -2345,7 +2348,7 @@
 			isa = PBXGroup;
 			children = (
 				7EB03FD514673308004F7A1C /* invited_button@2x.png */,
-				7EB03FD614673308004F7A1C /* invite_button@2x.png */,
+				7EB03FDD1467897A004F7A1C /* invite_button@2x.png */,
 				7ECF3D7D145DE99F00A1CF38 /* invite_friend_button_bg@2x.png */,
 				7E2B7DF0143639D5002BF383 /* contacts_icon_disabled@2x.png */,
 				7E2B7DF1143639D5002BF383 /* contacts_icon@2x.png */,
@@ -2380,6 +2383,8 @@
 				7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */,
 				7ECF3D7F145E00DC00A1CF38 /* SuggestedUserTableViewCell.h */,
 				7ECF3D80145E00DC00A1CF38 /* SuggestedUserTableViewCell.m */,
+				7EB03FDA1467527C004F7A1C /* InviteFriendTableViewCell.h */,
+				7EB03FDB1467527C004F7A1C /* InviteFriendTableViewCell.m */,
 			);
 			name = "Friend Finder";
 			sourceTree = "<group>";
@@ -3338,7 +3343,7 @@
 				7E0D4EE61465F1DB00F81CEC /* shelf_keyline_horiz.png in Resources */,
 				7E0D4EE71465F1DB00F81CEC /* shelf_keyline_horiz@2x.png in Resources */,
 				7EB03FD714673308004F7A1C /* invited_button@2x.png in Resources */,
-				7EB03FD814673308004F7A1C /* invite_button@2x.png in Resources */,
+				7EB03FDE1467897A004F7A1C /* invite_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3475,6 +3480,7 @@
 				CB5CF1591463425A00DC2CBC /* TOSViewController.m in Sources */,
 				7E0D4EE31465B58800F81CEC /* STTableViewController.m in Sources */,
 				7E0D4EEA14662BED00F81CEC /* STViewController.m in Sources */,
+				7EB03FDC1467527C004F7A1C /* InviteFriendTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
