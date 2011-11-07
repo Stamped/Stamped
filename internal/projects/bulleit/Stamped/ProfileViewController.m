@@ -415,7 +415,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     NSArray* results = [Stamp objectsWithFetchRequest:request];
     for (Stamp* s in results)
       s.temporary = [NSNumber numberWithBool:NO];
-    
+
     [Stamp.managedObjectContext save:NULL];
   }
 

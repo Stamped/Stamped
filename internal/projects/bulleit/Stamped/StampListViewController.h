@@ -14,8 +14,12 @@
 
 @class User;
 
-@interface StampListViewController : UIViewController
-    <STStampFilterBarDelegate, RKObjectLoaderDelegate, UITableViewDelegate, UITableViewDataSource, MKMapViewDelegate>
+@interface StampListViewController : UIViewController <STStampFilterBarDelegate,
+                                                       RKObjectLoaderDelegate,
+                                                       UITableViewDelegate,
+                                                       UITableViewDataSource,
+                                                       MKMapViewDelegate,
+                                                       NSFetchedResultsControllerDelegate>
 
 @property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
