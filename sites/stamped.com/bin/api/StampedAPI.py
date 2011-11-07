@@ -2766,7 +2766,9 @@ class StampedAPI(AStampedAPI):
             gref = search_id[9:]
             
             details = self._googlePlaces.getPlaceDetails(gref)
-            entity2 = self._googlePlaces.parseEntity(details, valid=True)
+            entity2 = None
+            if details is not None:
+                entity2 = self._googlePlaces.parseEntity(details, valid=True)
             
             if entity2 is not None:
                 entity = entity2
