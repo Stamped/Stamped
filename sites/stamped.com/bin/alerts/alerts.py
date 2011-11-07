@@ -300,6 +300,9 @@ def runInvites(options):
                 email['from'] = 'Stamped <noreply@stamped.com>'
                 email['subject'] = '%s thinks you have great taste' % user['name']
                 email['invite_id'] = invite.invite_id
+
+                if not IS_PROD:
+                    email['subject'] = 'DEV: %s' % email['subject']
                 
                 params = HTTPUser().importSchema(user).value
                 html = parseTemplate(template, params)
@@ -493,6 +496,8 @@ def sendEmails(queue):
                 except:
                     print 'EMAIL FAILED (activity_id=%s): "To: %s Subject: %s"' % \
                         (msg['activity_id'], msg['to'], msg['subject'])
+        else:
+            print 'SKIPPED: %s' % user
 
 
 def sendPushNotifications(queue):
@@ -523,6 +528,8 @@ def sendPushNotifications(queue):
                     except:
                         print 'MESSAGE FAILED (activity_id=%s): device_id = %s ' % \
                             (msg['activity_id'], msg['device_id'])
+            else:
+                print 'SKIPPED: %s' % user
         c.close()
     except:
         print 'FAIL: %s' % queue
