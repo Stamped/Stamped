@@ -23,6 +23,7 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize tableView = tableView_;
 @synthesize stampFilterBar = stampFilterBar_;
 @synthesize shouldReload = shouldReload_;
+@synthesize disableReload = disableReload_;
 @synthesize hasHeaders = hasHeaders_;
 @synthesize isLoading = isLoading_;
 @synthesize reloadLabel = reloadLabel_;
@@ -56,39 +57,41 @@ static const CGFloat kReloadHeight = 60.0;
   if (stampFilterBar_)
     bottomPadding = 46;
 
-  arrowImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
-  arrowImageView_.frame = CGRectMake(60, CGRectGetMaxY(self.shelfView.bounds) - 58 - bottomPadding, 18, 40);
-  [self.shelfView addSubview:arrowImageView_];
-  [arrowImageView_ release];
+  if (!disableReload_) {
+    arrowImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"refresh_arrow"]];
+    arrowImageView_.frame = CGRectMake(60, CGRectGetMaxY(self.shelfView.bounds) - 58 - bottomPadding, 18, 40);
+    [self.shelfView addSubview:arrowImageView_];
+    [arrowImageView_ release];
 
-  spinnerView_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-  spinnerView_.hidesWhenStopped = YES;
-  spinnerView_.center = arrowImageView_.center;
-  [self.shelfView addSubview:spinnerView_];
-  [spinnerView_ release];
-  
-  reloadLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
-  reloadLabel_.text = kPullDownText;
-  [reloadLabel_ sizeToFit];
-  reloadLabel_.frame = CGRectOffset(reloadLabel_.frame, 78, CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding);
-  reloadLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
-  reloadLabel_.backgroundColor = [UIColor clearColor];
-  reloadLabel_.textColor = [UIColor stampedGrayColor];
-  reloadLabel_.textAlignment = UITextAlignmentCenter;
-  [self.shelfView addSubview:reloadLabel_];
-  [reloadLabel_ release];
-  
-  lastUpdatedLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
-  lastUpdatedLabel_.text = @"Last updated a long time ago";
-  [lastUpdatedLabel_ sizeToFit];
-  lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 49, CGRectGetHeight(self.shelfView.frame) - 41 - bottomPadding);
-  lastUpdatedLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
-  lastUpdatedLabel_.backgroundColor = [UIColor clearColor];
-  lastUpdatedLabel_.textColor = [UIColor stampedLightGrayColor];
-  lastUpdatedLabel_.textAlignment = UITextAlignmentCenter;
-  [self.shelfView addSubview:lastUpdatedLabel_];
-  [lastUpdatedLabel_ release];
-  
+    spinnerView_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    spinnerView_.hidesWhenStopped = YES;
+    spinnerView_.center = arrowImageView_.center;
+    [self.shelfView addSubview:spinnerView_];
+    [spinnerView_ release];
+    
+    reloadLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    reloadLabel_.text = kPullDownText;
+    [reloadLabel_ sizeToFit];
+    reloadLabel_.frame = CGRectOffset(reloadLabel_.frame, 78, CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding);
+    reloadLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
+    reloadLabel_.backgroundColor = [UIColor clearColor];
+    reloadLabel_.textColor = [UIColor stampedGrayColor];
+    reloadLabel_.textAlignment = UITextAlignmentCenter;
+    [self.shelfView addSubview:reloadLabel_];
+    [reloadLabel_ release];
+    
+    lastUpdatedLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
+    lastUpdatedLabel_.text = @"Last updated a long time ago";
+    [lastUpdatedLabel_ sizeToFit];
+    lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 49, CGRectGetHeight(self.shelfView.frame) - 41 - bottomPadding);
+    lastUpdatedLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
+    lastUpdatedLabel_.backgroundColor = [UIColor clearColor];
+    lastUpdatedLabel_.textColor = [UIColor stampedLightGrayColor];
+    lastUpdatedLabel_.textAlignment = UITextAlignmentCenter;
+    [self.shelfView addSubview:lastUpdatedLabel_];
+    [lastUpdatedLabel_ release];
+  }
+
   highlightView_ = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.shelfView.frame) - 26, 320, 20)];
   highlightView_.backgroundColor = [UIColor colorWithRed:0.22 green:0.48 blue:0.85 alpha:1.0];
   highlightView_.alpha = 0;
@@ -104,7 +107,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)setIsLoading:(BOOL)loading {
-  if (isLoading_ == loading)
+  if (isLoading_ == loading || disableReload_)
     return;
 
   isLoading_ = loading;
@@ -180,7 +183,7 @@ static const CGFloat kReloadHeight = 60.0;
     highlightView_.alpha = MIN(1.0, (15 + (-self.shelfView.frame.origin.y - 356)) / 15);
   }
   
-  if (isLoading_)
+  if (isLoading_ || disableReload_)
     return;
   
   shouldReload_ = scrollView.contentOffset.y < -kReloadHeight;

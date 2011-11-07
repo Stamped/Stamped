@@ -10,19 +10,13 @@
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
 
-#import "STStampFilterBar.h"
+#import "STTableViewController.h"
 
 @class User;
 
-@interface StampListViewController : UIViewController <STStampFilterBarDelegate,
-                                                       RKObjectLoaderDelegate,
-                                                       UITableViewDelegate,
-                                                       UITableViewDataSource,
-                                                       MKMapViewDelegate,
-                                                       NSFetchedResultsControllerDelegate>
-
-@property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
-@property (nonatomic, retain) IBOutlet UITableView* tableView;
+@interface StampListViewController : STTableViewController <RKObjectLoaderDelegate,
+                                                            MKMapViewDelegate,
+                                                            NSFetchedResultsControllerDelegate>
 @property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, retain) User* user;
 
