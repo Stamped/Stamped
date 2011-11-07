@@ -60,8 +60,8 @@ class AppleAPICall(object):
             params['term'] = term
         
         url    = self._get_url(params)
-        result = json.loads(utils.getFile(url))
         #utils.log(url)
+        result = json.loads(utils.getFile(url))
         
         #from pprint import pprint
         #pprint(result)
