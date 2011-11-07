@@ -906,6 +906,8 @@
 		7E4968361457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_searchIconOnly_button_selected@2x.png"; sourceTree = "<group>"; };
 		7E4968371457654600ACD36B /* hdr_searchIconOnly_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hdr_searchIconOnly_button.png; sourceTree = "<group>"; };
 		7E4968381457654600ACD36B /* hdr_searchIconOnly_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_searchIconOnly_button@2x.png"; sourceTree = "<group>"; };
+		7E4B8E0C14687D42009A33DD /* StampedModel 13.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 13.xcdatamodel"; sourceTree = "<group>"; };
+		7E4B8E0D14687F78009A33DD /* StampedModel 14.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 14.xcdatamodel"; sourceTree = "<group>"; };
 		7E514A9813C97A9700EEC598 /* GenericItemDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = GenericItemDetailViewController.xib; path = ../Interfaces/GenericItemDetailViewController.xib; sourceTree = "<group>"; };
 		7E52A58913FC7DB500209A95 /* camera_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "camera_button@2x.png"; sourceTree = "<group>"; };
 		7E52A58A13FC7DB500209A95 /* profile_detail_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile_detail_button@2x.png"; sourceTree = "<group>"; };
@@ -3642,8 +3644,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
+				PROVISIONING_PROFILE = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
@@ -3680,8 +3682,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
+				PROVISIONING_PROFILE = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
@@ -3769,6 +3771,8 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7E4B8E0D14687F78009A33DD /* StampedModel 14.xcdatamodel */,
+				7E4B8E0C14687D42009A33DD /* StampedModel 13.xcdatamodel */,
 				7EB0401B1467AFE1004F7A1C /* StampedModel 12.xcdatamodel */,
 				7EB03FD9146738AB004F7A1C /* StampedModel 11.xcdatamodel */,
 				7E99C9B41458816E00B116AC /* StampedModel 10.xcdatamodel */,
@@ -3782,7 +3786,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7EB0401B1467AFE1004F7A1C /* StampedModel 12.xcdatamodel */;
+			currentVersion = 7E4B8E0D14687F78009A33DD /* StampedModel 14.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

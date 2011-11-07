@@ -28,6 +28,7 @@
   self.imageView = nil;
   self.affiliateLogoView = nil;
   self.ratingView = nil;
+  self.imageView.delegate = nil;
   [super dealloc];
 }
 
@@ -82,14 +83,13 @@
 
   }
 
-  if (detailedEntity_.image) {
-    self.imageView.hidden = NO;
-    self.imageView.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:
-                                                   [NSURL URLWithString:detailedEntity_.image]]];
+  if (detailedEntity_.image && ![detailedEntity_.image isEqualToString:@""]) {
+    self.imageView.imageURL = detailedEntity_.image;
+    self.imageView.delegate = self;
+    UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewTapped)];
+    [self.imageView addGestureRecognizer:gr];
+    [gr release];
   }
-
-  [self setupMainActionsContainer];
-  [self setupSectionViews];
 }
 
 - (void)viewDidLoad {
@@ -105,15 +105,11 @@
   self.imageView = nil;
   self.affiliateLogoView = nil;
   self.ratingView = nil;
+  self.imageView.delegate = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   self.affiliateLogoView.image = [UIImage imageNamed:@"logo_fandango"];
-  
-  self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);
-  self.imageView.layer.shadowRadius  = 4.0;
-  self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
-  self.imageView.layer.shadowOpacity = 0.33;
 //  CGFloat offset = self.imageView.bounds.size.width - self.imageView.image.size.width;
 //  if (offset > 0)
 //    self.imageView.frame = CGRectOffset(self.imageView.frame, ceilf(offset/2), 0);
@@ -226,6 +222,23 @@
     [self addSectionStampedBy];
     self.mainContentView.hidden = NO; 
   }
+}
+
+#pragma mark - STImageViewDelegate methods.
+
+- (void)STImageView:(STImageView *)imageView didLoadImage:(UIImage *)image {
+  self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+  self.imageView.layer.backgroundColor = [UIColor clearColor].CGColor;
+  self.imageView.hidden = NO;
+  self.imageView.layer.shadowOffset  = CGSizeMake(0.0, 4.0);
+  self.imageView.layer.shadowRadius  = 4.0;
+  self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
+  self.imageView.layer.shadowOpacity = 0.33;
+  CGRect imageFrame = [self frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
+  self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageFrame].CGPath;
+  
+  [self setupMainActionsContainer];
+  [self setupSectionViews];
 }
 
 

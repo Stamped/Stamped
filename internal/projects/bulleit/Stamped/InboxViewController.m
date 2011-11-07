@@ -76,7 +76,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [self.stampFilterBar.searchField resignFirstResponder];
   self.tableView.scrollEnabled = NO;
   self.fetchedResultsController.fetchRequest.predicate =
-      [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"];
+      [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count > 0)"];
   NSError* error;
 	if (![self.fetchedResultsController performFetch:&error]) {
 		// Update to handle the error appropriately.
@@ -210,7 +210,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     [request setPredicate:
-        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"]];
+        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count > 0)"]];
     [request setFetchBatchSize:20];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
@@ -279,7 +279,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)filterStamps {
   NSMutableArray* predicates = [NSMutableArray array];
-  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO).@count > 0)"]];
+  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count > 0)"]];
 
   if (searchQuery_.length) {
     NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
@@ -437,7 +437,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   if (entity.stamps.count > 0) {
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
     NSArray* sortedStamps = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+    sortedStamps = [sortedStamps filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
     stamp = [sortedStamps lastObject];
   } else {
     stamp = [entity.stamps anyObject];
@@ -492,7 +492,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
   NSArray* stampsArray = [entity.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
 
   annotation.stamp = [stampsArray lastObject];
   

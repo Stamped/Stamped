@@ -24,6 +24,7 @@
 @synthesize imageURL = imageURL_;
 @synthesize downloadData = downloadData_;
 @synthesize connection = connection_;
+@synthesize delegate = delegate_;
 
 - (id)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
@@ -46,6 +47,7 @@
   self.connection = nil;
   self.downloadData = nil;
   self.imageURL = nil;
+  self.delegate = nil;
   [super dealloc];
 }
 
@@ -55,12 +57,14 @@
   self.layer.shadowOpacity = 0.25;
   self.layer.shadowOffset = CGSizeZero;
   self.layer.shadowRadius = 1.0;
-  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+  if (!CGRectIsNull(self.frame) && !CGRectIsEmpty(self.frame))
+    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
 }
 
 - (void)setFrame:(CGRect)frame {
   [super setFrame:frame];
-  self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+  if (!CGRectIsNull(self.frame) && !CGRectIsEmpty(self.frame))
+    self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
 }
 
 - (void)setImageURL:(NSString*)imageURL {
@@ -92,6 +96,9 @@
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
   self.image = [UIImage imageWithData:self.downloadData];
   self.downloadData = nil;
+  if ([self.delegate respondsToSelector:@selector(STImageView:didLoadImage:)]) {
+    [self.delegate STImageView:self didLoadImage:self.image];
+  }
 }
 
 @end
