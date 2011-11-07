@@ -41,6 +41,8 @@ extern const CGFloat kMediumUserImageSize;
 @end
 
 @interface User (CoreDataGeneratedAccessors)
+- (void)addFollowing:(NSSet*)values;
+- (void)removeFollowing:(NSSet*)values;
 - (void)addStampsObject:(NSManagedObject*)value;
 - (void)removeStampsObject:(NSManagedObject*)value;
 - (void)addStamps:(NSSet*)values;
