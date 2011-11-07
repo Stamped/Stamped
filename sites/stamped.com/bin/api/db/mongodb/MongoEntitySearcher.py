@@ -230,6 +230,12 @@ class MongoEntitySearcher(EntitySearcher):
             abbreviation = CityList.state_abbreviations[state]
             if abbreviation not in self._regions:
                 self._regions[abbreviation] = v
+        
+        self._region_suffixes = []
+        
+        for region_name in self._regions:
+            self._region_suffixes.append((' in %s'   % region_name, region_name))
+            self._region_suffixes.append((' near %s' % region_name, region_name))
     
     @lazyProperty
     def _googlePlaces(self):
@@ -280,43 +286,26 @@ class MongoEntitySearcher(EntitySearcher):
             # couldn't possibly contain a location, then ensure that coords is disabled
             coords = None
         else:
-            for region_name in self._regions:
-                if query.endswith(' in ' + region_name) or query.endswith(' near ' + region_name):
-                    region = self._regions[region_name]
-                    query  = query[:-len(region_name)]
-                    
-                    if query.endswith('in '):
-                        query = query[:-3]
-                    elif query.endswith('near '):
-                        query = query[:-5]
-                    
-                    query = query.strip()
-                    input_query = query
-                    
-                    coords = [ region['lat'], region['lng'], ]
-                    original_coords = False
-                    utils.log("[search] using region %s at %s" % (region_name, coords))
-                    break
-            
-            """
             # process 'in' or 'near' location hint
-            for synonym_re in self._near_synonym_res:
-                match = synonym_re.match(query)
-                
-                if match is not None:
-                    groups = match.groups()
-                    region_name = groups[1]
-                    
-                    if region_name in self._regions:
+            if ' in ' in query or ' near ' in query:
+                for suffix in self._region_suffixes:
+                    if query.endswith(suffix[0]):
+                        region_name = suffix[1]
                         region = self._regions[region_name]
-                        query  = groups[0]
+                        query  = query[:-len(region_name)]
+                        
+                        if query.endswith('in '):
+                            query = query[:-3]
+                        elif query.endswith('near '):
+                            query = query[:-5]
+                        
+                        query = query.strip()
                         input_query = query
                         
                         coords = [ region['lat'], region['lng'], ]
                         original_coords = False
                         utils.log("[search] using region %s at %s" % (region_name, coords))
                         break
-            """
         
         # attempt to replace accented characters with their ascii equivalents
         query = unicodedata.normalize('NFKD', unicode(query)).encode('ascii', 'ignore')

@@ -1188,10 +1188,13 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   ABAddressBookRef addressBook = ABAddressBookCreate();
   ABRecordRef source = ABAddressBookCopyDefaultSource(addressBook);
   CFArrayRef people = ABAddressBookCopyArrayOfAllPeopleInSourceWithSortOrdering(addressBook, source, kABPersonSortByFirstName);
-  CFIndex numPeople = ABAddressBookGetPersonCount(addressBook);
-  for (NSUInteger i = 0; i < numPeople; ++i) {
+  NSArray* peopleArray = [NSArray arrayWithArray:(NSArray*)people];
+  for (id p in peopleArray) {
     BOOL addPerson = YES;
-    ABRecordRef person = CFArrayGetValueAtIndex(people, i);
+    ABRecordRef person = p;
+    if (!person)
+      continue;
+
     ABMultiValueRef phoneNumberProperty = ABRecordCopyValue(person, kABPersonPhoneProperty);
     NSArray* phoneNumbers = (NSArray*)ABMultiValueCopyArrayOfAllValues(phoneNumberProperty);
     CFRelease(phoneNumberProperty);

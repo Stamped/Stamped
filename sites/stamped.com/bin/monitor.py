@@ -117,18 +117,17 @@ class Monitor(object):
             self.status[node.id] = node_status
     
     def _try_ping_webServer(self, node):
-        url = 'https://%s/v0/entities/show.json' % node.public_dns
+        url = 'https://%s/v0/temp/ping.json' % node.public_dns
         retries = 0
         
         while retries < 5:
             try:
                 response = urllib2.urlopen(url)
             except urllib2.HTTPError, e:
-                if e.code == 401:
-                    return
-                
-                print url
+                utils.log(url)
                 utils.printException()
+            else:
+                return
             
             retries += 1
             time.sleep(retries * retries)
