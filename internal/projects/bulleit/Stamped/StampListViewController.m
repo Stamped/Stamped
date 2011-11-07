@@ -57,9 +57,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (id)init {
   self = [self initWithNibName:@"StampListViewController" bundle:nil];
-  if (self) {
-    stampsAreTemporary_ = YES;
-  }
+  if (self) {}
   return self;
 }
 
@@ -140,6 +138,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)setStampsAreTemporary:(BOOL)stampsAreTemporary {
   stampsAreTemporary_ = stampsAreTemporary;
   id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+
   for (Stamp* stamp in [sectionInfo objects]) {
     stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
     [stamp.managedObjectContext save:NULL];
