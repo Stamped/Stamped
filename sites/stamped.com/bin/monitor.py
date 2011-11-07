@@ -124,11 +124,10 @@ class Monitor(object):
             try:
                 response = urllib2.urlopen(url)
             except urllib2.HTTPError, e:
-                if e.code == 401:
-                    return
-                
-                print url
+                utils.log(url)
                 utils.printException()
+            else:
+                return
             
             retries += 1
             time.sleep(retries * retries)
