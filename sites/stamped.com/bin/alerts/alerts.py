@@ -15,6 +15,7 @@ from socket import socket
 from errors import Fail
 from HTTPSchemas import *
 
+from libs.EC2Utils import EC2Utils
 from db.mongodb.MongoAlertQueueCollection import MongoAlertQueueCollection
 from db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
@@ -26,6 +27,23 @@ AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'
 
 IPHONE_APN_PUSH_CERT = os.path.join(base, 'apns-dev.pem')
+
+IS_PROD = False
+
+### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
+
+admins = set(['kevin','robby','bart','travis','andybons','jake','edmuki'])
+admin_emails = set([
+    'kevin@stamped.com',
+    'robby@stamped.com',
+    'bart@stamped.com',
+    'travis@stamped.com',
+    'andybons@stamped.com',
+    'jake@stamped.com',
+    'ed@stamped.com',
+])
+admin_tokens = set([])
+
 
 
 def parseCommandLine():
@@ -138,6 +156,12 @@ def runAlerts(options):
             # User
             user = userIds[str(alert['user_id'])]
 
+            # Build admin list
+            if recipient.screen_name in admins:
+                admin_emails.add(recipient.email)
+                for token in recipient.devices.ios_device_tokens:
+                    admin_tokens.add(token)
+
             if send_push:
                 try:
                     # Send push notification
@@ -246,6 +270,7 @@ def runInvites(options):
                 raise
 
             ### TODO: Check if recipient is already a member?
+            ### TODO: Check if user is on email blacklist
 
             user = userIds[str(invite['user_id'])]
             emailAddress = invite.recipient_email
@@ -275,6 +300,9 @@ def runInvites(options):
                 email['from'] = 'Stamped <noreply@stamped.com>'
                 email['subject'] = '%s thinks you have great taste' % user['name']
                 email['invite_id'] = invite.invite_id
+
+                if not IS_PROD:
+                    email['subject'] = 'DEV: %s' % email['subject']
                 
                 params = HTTPUser().importSchema(user).value
                 html = parseTemplate(template, params)
@@ -336,6 +364,9 @@ def _setSubject(user, genre):
     else:
         ### TODO: Add error logging?
         raise
+
+    if not IS_PROD:
+        msg = 'DEV: %s' % msg
 
     return msg
 
@@ -413,6 +444,9 @@ def buildPushNotification(user, activityItem, deviceId):
     elif genre == 'follower':
         msg = '%s is now following you' % (user.screen_name)
 
+    if not IS_PROD:
+        msg = 'DEV: %s' % msg
+
     # Build payload
     content = {
         'aps': {
@@ -449,18 +483,21 @@ def sendEmails(queue):
     limit = 8
 
     for user, emailQueue in queue.iteritems():
-        count = 0
-        emailQueue.reverse()
-        for msg in emailQueue:
-            try:
-                count += 1
-                if count > limit:
-                    print 'LIMIT EXCEEDED (%s)' % count
-                    raise
-                ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format='html')
-            except:
-                print 'EMAIL FAILED (activity_id=%s): "To: %s Subject: %s"' % \
-                    (msg['activity_id'], msg['to'], msg['subject'])
+        if IS_PROD or user in admin_emails:
+            count = 0
+            emailQueue.reverse()
+            for msg in emailQueue:
+                try:
+                    count += 1
+                    if count > limit:
+                        print 'LIMIT EXCEEDED (%s)' % count
+                        raise
+                    ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format='html')
+                except:
+                    print 'EMAIL FAILED (activity_id=%s): "To: %s Subject: %s"' % \
+                        (msg['activity_id'], msg['to'], msg['subject'])
+        else:
+            print 'SKIPPED: %s' % user
 
 
 def sendPushNotifications(queue):
@@ -478,18 +515,21 @@ def sendPushNotifications(queue):
         c.connect((host_name, 2195))
 
         for user, pushQueue in queue.iteritems():
-            count = 0
-            pushQueue.reverse()
-            for msg in pushQueue:
-                try:
-                    count += 1
-                    if count > limit:
-                        print 'LIMIT EXCEEDED (%s)' % count
-                        raise
-                    c.write(msg['payload'])
-                except:
-                    print 'MESSAGE FAILED (activity_id=%s): device_id = %s ' % \
-                        (msg['activity_id'], msg['device_id'])
+            if IS_PROD or user in admin_tokens:
+                count = 0
+                pushQueue.reverse()
+                for msg in pushQueue:
+                    try:
+                        count += 1
+                        if count > limit:
+                            print 'LIMIT EXCEEDED (%s)' % count
+                            raise
+                        c.write(msg['payload'])
+                    except:
+                        print 'MESSAGE FAILED (activity_id=%s): device_id = %s ' % \
+                            (msg['activity_id'], msg['device_id'])
+            else:
+                print 'SKIPPED: %s' % user
         c.close()
     except:
         print 'FAIL: %s' % queue

@@ -637,7 +637,7 @@ class MongoEntitySearcher(EntitySearcher):
         results = sorted(results, key=self._get_entity_weight_func(input_query, prefix), reverse=True)
         
         # limit the number of results returned and remove obvious duplicates
-        results = self._prune_results(results, limit)
+        results = self._prune_results(results, limit, prefix)
         
         # strip out distance from results if not using original (user's) coordinates
         if not original_coords:
@@ -672,7 +672,7 @@ class MongoEntitySearcher(EntitySearcher):
                     utils.printException()
                     pass
     
-    def _prune_results(self, results, limit):
+    def _prune_results(self, results, limit, prefix):
         """ limit the number of results returned and remove obvious duplicates """
         
         #results = results[0: limit]
@@ -707,7 +707,7 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 # TODO: replace with generic *are these two entities equal* function
                 # look at unique indices
-                if isEqual(entity1, entity2):
+                if isEqual(entity1, entity2, prefix):
                     prune.add(j)
                     
                     if keep1 and entity1.entity_id.startswith('T_') and not \

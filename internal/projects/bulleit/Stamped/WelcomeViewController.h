@@ -43,6 +43,8 @@
 - (IBAction)nextButtonPressed:(id)sender;
 - (IBAction)findfromContacts:(id)sender;
 - (IBAction)findFromTwitter:(id)sender;
+- (IBAction)findFromFacebook:(id)sender;
+- (IBAction)findFromStamped:(id)sender;
 - (IBAction)dismissWelcomeView:(id)sender;
 - (IBAction)stampCustomizerButtonPressed:(id)sender;
 - (IBAction)stampButtonPressed:(id)sender;
