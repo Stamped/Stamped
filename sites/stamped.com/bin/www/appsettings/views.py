@@ -14,7 +14,7 @@ from auth import convertPasswordForStorage
 from api.HTTPSchemas import *
 from api.MongoStampedAPI import MongoStampedAPI
 from api.MongoStampedAuth import MongoStampedAuth
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 import datetime
 
@@ -49,7 +49,7 @@ def passwordReset(request, **kwargs):
             stampedAuth.updatePassword(authUserId, password)
 
             # Return success
-            response = render_to_response('password-reset.html', None)
+            response = HttpResponseRedirect('/settings/password/success')
 
         else:
             # Display 'change password' form
@@ -95,10 +95,7 @@ def passwordForgot(request):
             stampedAuth.forgotPassword(email)
 
             # Return success
-            params = {
-                'email': email
-                }
-            response = render_to_response('password-forgot.html', params)
+            response = HttpResponseRedirect('/settings/password/sent')
 
         else:
             # Display 'submit email' form
@@ -119,4 +116,22 @@ def passwordForgot(request):
         raise Http404
 
     return True
+
+def passwordSuccess(request):
+    try:
+        # Return success
+        response = render_to_response('password-reset.html', None)
+        return response
+
+    except Exception as e:
+        raise Http404
+
+def passwordSent(request):
+    try:
+        # Return success
+        response = render_to_response('password-forgot.html', {'email': True})
+        return response
+
+    except Exception as e:
+        raise Http404
 
