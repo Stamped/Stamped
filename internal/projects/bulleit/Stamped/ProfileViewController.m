@@ -38,16 +38,18 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)userImageTapped:(id)sender;
 - (void)editButtonPressed:(id)sender;
 - (void)loadStampsFromNetwork;
+- (void)loadStampsFromDataStore;
 - (void)loadUserInfoFromNetwork;
 - (void)fillInUserData;
 - (void)loadRelationshipData;
 - (void)addStampsRemainingLayer;
 - (void)updateStampsRemainingLayer;
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 
 @property (nonatomic, assign) BOOL stampsAreTemporary;
-@property (nonatomic, copy) NSArray* stampsArray;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
 @property (nonatomic, readonly) CALayer* stampLayer;
+@property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
 @end
 
 @implementation ProfileViewController
@@ -62,13 +64,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize toolbarView = toolbarView_;
 @synthesize tableView = tableView_;
 @synthesize user = user_;
-@synthesize stampsArray = stampsArray_;
 @synthesize followButton = followButton_;
 @synthesize unfollowButton = unfollowButton_;
 @synthesize followIndicator = followIndicator_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
 @synthesize stampLayer = stampLayer_;
+@synthesize fetchedResultsController = fetchedResultsController_;
 
 - (void)didReceiveMemoryWarning {
   [super didReceiveMemoryWarning];  
@@ -89,6 +91,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.followIndicator = nil;
   self.followButton = nil;
   self.unfollowButton = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
   [super dealloc];
 }
 
@@ -144,6 +148,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   toolbarView_.layer.shadowOpacity = 0.2;
   toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
   toolbarView_.alpha = 0.85;
+  [self loadStampsFromDataStore];
   [self loadUserInfoFromNetwork];
 }
 
@@ -162,6 +167,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   self.followIndicator = nil;
   self.followButton = nil;
   self.unfollowButton = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -175,7 +182,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   else
     [self fillInUserData];
 
-  if (!stampsArray_)
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+  if ([sectionInfo numberOfObjects] == 0)
     [self loadStampsFromNetwork];
   if (followButton_.hidden && unfollowButton_.hidden)
     [self loadRelationshipData];
@@ -260,17 +268,65 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [relationshipsViewController release];
 }
 
+#pragma mark - NSFetchedResultsControllerDelegate methods.
+
+- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView beginUpdates];
+}
+
+- (void)controller:(NSFetchedResultsController*)controller 
+   didChangeObject:(id)anObject
+       atIndexPath:(NSIndexPath*)indexPath
+     forChangeType:(NSFetchedResultsChangeType)type
+      newIndexPath:(NSIndexPath*)newIndexPath {
+  
+  UITableView* tableView = self.tableView;
+  
+  switch(type) {
+    case NSFetchedResultsChangeInsert:
+      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeDelete:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeUpdate:
+      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+      break;
+      
+    case NSFetchedResultsChangeMove:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+  }
+}
+
+- (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView endUpdates];
+}
+
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
+  Stamp* stamp = [fetchedResultsController_ objectAtIndexPath:indexPath];
+  if ([cell respondsToSelector:@selector(setStamp:)])
+    [(id)cell setStamp:stamp];
+}
+
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (user_.numStamps.unsignedIntValue > 5 && stampsArray_.count)
-    return self.stampsArray.count + 1;
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:section];
+  NSUInteger numStamps = [sectionInfo numberOfObjects];
+  if (user_.numStamps.unsignedIntValue > 5 && numStamps > 0)
+    return numStamps + 1;
 
-  return stampsArray_.count;
+  return numStamps;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (stampsArray_.count && indexPath.row == stampsArray_.count) {
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:indexPath.section];
+  NSUInteger numStamps = [sectionInfo numberOfObjects];
+  if (numStamps > 0 && indexPath.row == numStamps) {
     UITableViewCell* allStampsCell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                              reuseIdentifier:nil] autorelease];
     UILabel* bodyLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -293,15 +349,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [disclosureImageView release];
     return allStampsCell;
   }
-  
+
   static NSString* CellIdentifier = @"StampCell";
   InboxTableViewCell* cell = (InboxTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   
   if (!cell)
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
 
-  cell.stamp = (Stamp*)[stampsArray_ objectAtIndex:indexPath.row];
-  
+  [self configureCell:cell atIndexPath:indexPath];
+
   return cell;
 }
 
@@ -319,7 +375,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (stampsArray_.count && indexPath.row == stampsArray_.count) {
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:indexPath.section];
+  NSUInteger numStamps = [sectionInfo numberOfObjects];
+  if (numStamps > 0 && indexPath.row == numStamps) {
     StampListViewController* vc = [[StampListViewController alloc] init];
     vc.user = user_;
     vc.stampsAreTemporary = stampsAreTemporary_;
@@ -328,7 +386,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     return;
   }
   
-  Stamp* stamp = [stampsArray_ objectAtIndex:indexPath.row];
+  Stamp* stamp = [fetchedResultsController_ objectAtIndexPath:indexPath];
   StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
 
   [self.navigationController pushViewController:detailViewController animated:YES];
@@ -357,7 +415,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     NSArray* results = [Stamp objectsWithFetchRequest:request];
     for (Stamp* s in results)
       s.temporary = [NSNumber numberWithBool:NO];
-    
+
     [Stamp.managedObjectContext save:NULL];
   }
 
@@ -379,9 +437,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   }
   
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
-    NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-    self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    [self.tableView reloadData];
     self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
   }
 }
@@ -414,8 +469,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)setStampsAreTemporary:(BOOL)stampsAreTemporary {
   stampsAreTemporary_ = stampsAreTemporary;
-
-  for (Stamp* stamp in stampsArray_) {
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+  for (Stamp* stamp in [sectionInfo objects]) {
     stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
     [stamp.managedObjectContext save:NULL];
   }
@@ -527,6 +582,30 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
                                                                    @"1", @"quality",
                                                                    @"5", @"limit", nil];
   [objectLoader send];
+}
+
+- (void)loadStampsFromDataStore {
+  if (!fetchedResultsController_) {
+    NSFetchRequest* request = [Stamp fetchRequest];
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
+    [request setFetchLimit:5];
+    NSFetchedResultsController* fetchedResultsController =
+        [[NSFetchedResultsController alloc] initWithFetchRequest:request
+                                            managedObjectContext:[Stamp managedObjectContext]
+                                              sectionNameKeyPath:nil
+                                                       cacheName:nil];
+    self.fetchedResultsController = fetchedResultsController;
+    fetchedResultsController.delegate = self;
+    [fetchedResultsController release];
+  }
+  
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
 }
 
 @end

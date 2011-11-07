@@ -32,21 +32,19 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)loadStampsFromNetwork;
 - (void)loadStampsFromDataStore;
 - (void)filterStamps;
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 
 @property (nonatomic, readonly) MKMapView* mapView;
 @property (nonatomic, assign) BOOL userPannedMap;
 @property (nonatomic, retain) NSDate* oldestInBatch;
-@property (nonatomic, copy) NSArray* stampsArray;
-@property (nonatomic, copy) NSArray* filteredStampsArray;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
 @property (nonatomic, copy) NSString* searchQuery;
+@property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
 @end
 
 @implementation StampListViewController
 
 @synthesize tableView = tableView_;
-@synthesize stampsArray = stampsArray_;
-@synthesize filteredStampsArray = filteredStampsArray_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize user = user_;
 @synthesize oldestInBatch = oldestInBatch_;
@@ -55,6 +53,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 @synthesize stampFilterBar = stampFilterBar_;
 @synthesize userPannedMap = userPannedMap_;
 @synthesize mapView = mapView_;
+@synthesize fetchedResultsController = fetchedResultsController_;
 
 - (id)init {
   self = [self initWithNibName:@"StampListViewController" bundle:nil];
@@ -66,11 +65,12 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (void)dealloc {
   self.user = nil;
-  self.stampsArray = nil;
   self.tableView = nil;
   self.oldestInBatch = nil;
   self.searchQuery = nil;
   self.stampFilterBar = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
@@ -120,6 +120,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
                                            selector:@selector(listButtonWasPressed:)
                                                name:kListViewButtonPressedNotification
                                              object:nil];
+  [self loadStampsFromDataStore];
   [self loadStampsFromNetwork];
 }
 
@@ -128,6 +129,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   self.tableView = nil;
   self.stampFilterBar = nil;
+  self.fetchedResultsController.delegate = nil;
+  self.fetchedResultsController = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -136,18 +139,28 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (void)setStampsAreTemporary:(BOOL)stampsAreTemporary {
   stampsAreTemporary_ = stampsAreTemporary;
-  
-  for (Stamp* stamp in stampsArray_) {
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+  for (Stamp* stamp in [sectionInfo objects]) {
     stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
     [stamp.managedObjectContext save:NULL];
   }
 }
 
 - (void)filterStamps {
-  if (selectedFilterType_ == StampFilterTypeNone) {
-    // No need to filter.
-    self.filteredStampsArray = [NSArray arrayWithArray:stampsArray_];
-    return;
+  NSMutableArray* predicates = [NSMutableArray array];
+  [predicates addObject:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
+  
+  if (searchQuery_.length) {
+    NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
+    for (NSString* term in searchTerms) {
+      if (!term.length)
+        continue;
+      
+      NSPredicate* p = [NSPredicate predicateWithFormat:
+                        @"((blurb contains[cd] %@) OR (user.screenName contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
+                        term, term, term, term];
+      [predicates addObject:p];
+    }
   }
   
   NSString* filterString = nil;
@@ -171,20 +184,33 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
       NSLog(@"Invalid filter string...");
       break;
   }
-  if (filterString) {
-    NSPredicate* filterPredicate = [NSPredicate predicateWithFormat:@"entityObject.category == %@", filterString];
-    self.filteredStampsArray = [stampsArray_ filteredArrayUsingPredicate:filterPredicate];
-  }
+
+  if (filterString)
+    [predicates addObject:[NSPredicate predicateWithFormat:@"entityObject.category == %@", filterString]];
+  
+  self.fetchedResultsController.fetchRequest.predicate = [NSCompoundPredicate andPredicateWithSubpredicates:predicates];
+  
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
+}
+
+- (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
+  [(InboxTableViewCell*)cell setStamp:(Stamp*)[fetchedResultsController_ objectAtIndexPath:indexPath]];
 }
 
 - (void)mapButtonWasPressed:(NSNotification*)notification {
   userPannedMap_ = NO;
   self.tableView.scrollEnabled = NO;
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
+  NSArray* stampsArray = [sectionInfo objects];
   [UIView animateWithDuration:0.5
                    animations:^{ mapView_.alpha = 1.0; }
                    completion:^(BOOL finished) {
                      mapView_.showsUserLocation = YES;
-                     for (Stamp* s in stampsArray_) {
+                     for (Stamp* s in stampsArray) {
                        if (!s.entityObject.coordinates)
                          continue;
                        [self addAnnotationForStamp:s];
@@ -291,21 +317,18 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 - (void)stampFilterBar:(STStampFilterBar*)bar
        didSelectFilter:(StampFilterType)filterType
               andQuery:(NSString*)query {
-  if (![query isEqualToString:searchQuery_]) {
-    self.searchQuery = query;
-    [self loadStampsFromDataStore];
-  }
-
+  self.searchQuery = query;
   selectedFilterType_ = filterType;
   [self filterStamps];
-  
+
   [self.tableView reloadData];
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  return self.filteredStampsArray.count;
+  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:section];
+  return [sectionInfo numberOfObjects];
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
@@ -315,7 +338,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   if (!cell)
     cell = [[[InboxTableViewCell alloc] initWithReuseIdentifier:CellIdentifier] autorelease];
 
-  cell.stamp = (Stamp*)[filteredStampsArray_ objectAtIndex:indexPath.row];
+  [self configureCell:cell atIndexPath:indexPath];
   
   return cell;
 }
@@ -323,7 +346,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  Stamp* stamp = [filteredStampsArray_ objectAtIndex:indexPath.row];
+  Stamp* stamp = [fetchedResultsController_ objectAtIndexPath:indexPath];
   StampDetailViewController* detailViewController = [[StampDetailViewController alloc] initWithStamp:stamp];
   
   [self.navigationController pushViewController:detailViewController animated:YES];
@@ -334,34 +357,10 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
-    NSMutableArray* toDelete = [NSMutableArray array];
-    NSMutableArray* mutableObjects = [NSMutableArray array];
-    for (Stamp* stamp in objects) {
-      if ([stamp.deleted boolValue]) {
-        [toDelete addObject:stamp];
-      } else {
-        [mutableObjects addObject:stamp];
-      }
-    }
+    self.oldestInBatch = [objects.lastObject modified];
 
-    for (Stamp* stamp in toDelete) {
-      if (stamp.entityObject.stamps.count > 1) {
-        NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-        NSMutableArray* sortedStamps =
-            [NSMutableArray arrayWithArray:[[stamp.entityObject.stamps allObjects] sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]]];
-        [sortedStamps removeObject:stamp];
-        Stamp* latestStamp = [sortedStamps objectAtIndex:0];
-        stamp.entityObject.mostRecentStampDate = latestStamp.created;
-      }
-      [Stamp.managedObjectContext deleteObject:stamp];
-    }
-    [Stamp.managedObjectContext save:NULL];
-    
-    self.oldestInBatch = [mutableObjects.lastObject modified];
-
-    [self loadStampsFromDataStore];
     self.stampsAreTemporary = stampsAreTemporary_;  // Just fire off the setters logic.
-    if (mutableObjects.count < 10 || !self.oldestInBatch) {
+    if (objects.count < 10 || !self.oldestInBatch) {
       self.oldestInBatch = nil;
     } else {
       [self loadStampsFromNetwork];
@@ -394,36 +393,64 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 }
 
 - (void)loadStampsFromDataStore {
-  self.stampsArray = nil;
-  NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];
-
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"user.screenName == %@", user_.screenName];
-  if (searchTerms.count == 1 && searchQuery_.length) {
-    p = [NSPredicate predicateWithFormat:
-         @"(user.screenName == %@) AND ((blurb contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
-         user_.screenName, searchQuery_, searchQuery_, searchQuery_, searchQuery_];
-  } else if (searchTerms.count > 1) {
-    NSMutableArray* subPredicates = [NSMutableArray array];
-    for (NSString* term in searchTerms) {
-      if (!term.length)
-        continue;
-      
-      NSPredicate* p = [NSPredicate predicateWithFormat:
-                        @"(user.screenName == %@) AND ((blurb contains[cd] %@) OR (entityObject.title contains[cd] %@) OR (entityObject.subtitle contains[cd] %@))",
-                        user_.screenName, term, term, term, term];
-      [subPredicates addObject:p];
-    }
-    p = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+  if (!fetchedResultsController_) {
+    NSFetchRequest* request = [Stamp fetchRequest];
+    NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
+    [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
+    NSFetchedResultsController* fetchedResultsController =
+    [[NSFetchedResultsController alloc] initWithFetchRequest:request
+                                        managedObjectContext:[Stamp managedObjectContext]
+                                          sectionNameKeyPath:nil
+                                                   cacheName:nil];
+    self.fetchedResultsController = fetchedResultsController;
+    fetchedResultsController.delegate = self;
+    [fetchedResultsController release];
   }
-  NSFetchRequest* request = [Stamp fetchRequest];
-	NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-	[request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-  [request setPredicate:p];
-	self.stampsArray = [Stamp objectsWithFetchRequest:request];
   
-  [self filterStamps];
-  [self.tableView reloadData];
+  NSError* error;
+  if (![self.fetchedResultsController performFetch:&error]) {
+    // Update to handle the error appropriately.
+    NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+  }
 }
 
+#pragma mark - NSFetchedResultsControllerDelegate methods.
+
+- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView beginUpdates];
+}
+
+- (void)controller:(NSFetchedResultsController*)controller 
+   didChangeObject:(id)anObject
+       atIndexPath:(NSIndexPath*)indexPath
+     forChangeType:(NSFetchedResultsChangeType)type
+      newIndexPath:(NSIndexPath*)newIndexPath {
+  
+  UITableView* tableView = self.tableView;
+  
+  switch(type) {
+    case NSFetchedResultsChangeInsert:
+      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeDelete:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+      
+    case NSFetchedResultsChangeUpdate:
+      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
+      break;
+      
+    case NSFetchedResultsChangeMove:
+      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
+      break;
+  }
+}
+
+- (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
+  [self.tableView endUpdates];
+}
 
 @end

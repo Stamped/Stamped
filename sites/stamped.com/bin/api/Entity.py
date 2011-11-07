@@ -191,14 +191,16 @@ def setFields(entity, detailed=False):
     
     return entity
 
-def isEqual(entity1, entity2):
-    if entity1.subcategory != entity2.subcategory:
+def isEqual(entity1, entity2, prefix=False):
+    if not prefix and entity1.subcategory != entity2.subcategory:
         if not ((entity1.subcategory == 'other' and entity1.googleLocal is not None) or \
                 (entity2.subcategory == 'other' and entity2.googleLocal is not None)):
             return False
     
-    if entity1.simplified_title.lower() != entity2.simplified_title.lower():
+    if entity1.simplified_title != entity2.simplified_title:
         return False
+    elif prefix:
+        return True
     
     if entity1.lat is not None:
         if entity2.lat is None:
