@@ -24,6 +24,8 @@ stampedAuth = MongoStampedAuth()
 def passwordReset(request, **kwargs):
     token  = kwargs.pop('token', None)
 
+    errorMsg = 'An error occurred. Please try again.'
+
     try:
         # Verify token is valid
         authUserId = stampedAuth.verifyPasswordResetToken(token)
@@ -68,9 +70,14 @@ def passwordReset(request, **kwargs):
         logs.request(request)
         logs.warning("500 Error: %s" % e)
         logs.error(500)
-        raise Http404
+        logs.save()
+
+        return render_to_response('password-reset.html', {'error': errorMsg})
 
 def passwordForgot(request):
+
+    errorMsg = 'An error occurred. Please try again.'
+
     try:
         # Check if a form exists with data
         if request.method == 'POST':
@@ -109,7 +116,8 @@ def passwordForgot(request):
         logs.warning("500 Error: %s" % e)
         logs.error(500)
         logs.save()
-        raise Http404
+
+        return render_to_response('password-forgot.html', {'error': errorMsg})
 
     return True
 
