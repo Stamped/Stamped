@@ -52,7 +52,6 @@ def passwordReset(request, **kwargs):
             # Display 'change password' form
             account = stampedAPI.getAccount(authUserId)
             params = {
-                'email': account.email, 
                 'token': token,
                 'form': True,
                 }
