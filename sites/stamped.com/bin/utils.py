@@ -653,3 +653,13 @@ def sendEmail(msg, **kwargs):
     
     return True
 
+def parseTemplate(src, params):
+    try:
+        from jinja2 import Template
+    except ImportError:
+        print "error installing Jinja2"
+        raise
+    
+    source = src.read()
+    template = Template(source)
+    return template.render(params)

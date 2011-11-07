@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, time, hashlib, random, base64, struct, logs, auth
+import Globals, utils, time, hashlib, random, base64, struct, logs, auth, os
 from datetime import datetime, timedelta
 
 from errors import *
@@ -126,9 +126,6 @@ class StampedAuth(AStampedAuth):
             logs.warning(msg)
             raise InputError(msg)
 
-
-
-
         attempt = 1
         max_attempts = 5
         expire = 600    # 10 minutes
@@ -138,7 +135,7 @@ class StampedAuth(AStampedAuth):
                 rightNow = datetime.utcnow()
 
                 resetToken = PasswordResetToken()
-                resetToken.token_id = auth.generateToken(66)
+                resetToken.token_id = auth.generateToken(36)
                 resetToken.user_id = account.user_id
                 resetToken.expires = rightNow + timedelta(seconds=expire)
                 resetToken.timestamp.created = rightNow
@@ -151,19 +148,27 @@ class StampedAuth(AStampedAuth):
                     raise 
                 attempt += 1
 
-        baseurl = 'http://www.stamped.com'
-        url = '%s/settings/password/reset/%s' % (baseurl, resetToken.token_id)
-
+        url = 'http://www.stamped.com/pw/%s' % resetToken.token_id
+        prettyurl = 'http://stamped.com/pw/%s' % resetToken.token_id
 
         # Email user
         msg = {}
         msg['to'] = email
         msg['from'] = 'Stamped <noreply@stamped.com>'
-        msg['subject'] = 'Stamped: Reset Password'
-        ### TODO: Update this copy?
-        msg['body'] = 'Please visit %s to reset your password' % url
+        msg['subject'] = 'Stamped: Forgot Password'
 
-        utils.sendEmail(msg, format='text')
+        try:
+            base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            path = os.path.join(base, 'alerts', 'templates', 'email_password_forgot.html.j2')
+            template = open(path, 'r')
+        except:
+            ### TODO: Add error logging?
+            raise
+        
+        params = {'url': url, 'prettyurl': prettyurl}
+        msg['body'] = utils.parseTemplate(template, params)
+
+        utils.sendEmail(msg, format='html')
 
         return True
 
@@ -188,16 +193,38 @@ class StampedAuth(AStampedAuth):
             raise AuthError("invalid_token", 401, msg)
 
     def updatePassword(self, authUserId, password):
+        
+        account = self._accountDB.getAccount(authUserId)
 
-        # # Convert and store new password
+        # Convert and store new password
         password = convertPasswordForStorage(password)
         self._accountDB.updatePassword(authUserId, password)
 
-        # # Remove refresh / access tokens
+        # Remove refresh / access tokens
         self._refreshTokenDB.removeRefreshTokensForUser(authUserId)
         self._accessTokenDB.removeAccessTokensForUser(authUserId)
 
-        account = self._accountDB.getAccount(authUserId)
+        # Send confirmation email
+        msg = {}
+        msg['to'] = account.email
+        msg['from'] = 'Stamped <noreply@stamped.com>'
+        msg['subject'] = 'Stamped: Your Password Has Been Reset'
+
+        try:
+            base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            path = os.path.join(base, 'alerts', 'templates', 'email_password_reset.html.j2')
+            template = open(path, 'r')
+        except:
+            ### TODO: Add error logging?
+            raise
+        
+        params = {
+            'screen_name': account.screen_name, 
+            'email_address': account.email,
+        }
+        msg['body'] = utils.parseTemplate(template, params)
+
+        utils.sendEmail(msg, format='html')
 
         return True
 

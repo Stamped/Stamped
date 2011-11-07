@@ -31,7 +31,6 @@ static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
-
 @interface StampedAppDelegate ()
 - (void)customizeAppearance;
 - (void)performRestKitMappings;
@@ -45,7 +44,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
 #if !TARGET_IPHONE_SIMULATOR
-//  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
+  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
 #endif
   [self performRestKitMappings];
   [self customizeAppearance];

@@ -26,6 +26,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 @interface PeopleViewController ()
 - (void)loadFriendsFromNetwork;
+- (void)loadFriendsFromDataStore;
 - (void)settingsButtonPressed:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* friendsArray;
@@ -57,8 +58,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
                                            selector:@selector(settingsButtonPressed:)
                                                name:kSettingsButtonPressedNotification
                                              object:nil];
-  if ([AccountManager sharedManager].currentUser)
+  if ([AccountManager sharedManager].currentUser) {
     [self loadFriendsFromNetwork];
+    [self loadFriendsFromDataStore];
+  }
   
   self.hasHeaders = YES;
 }
@@ -73,6 +76,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [self loadFriendsFromDataStore];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   if (delegate.navigationController.navigationBarHidden)
     [delegate.navigationController setNavigationBarHidden:NO animated:YES];
@@ -111,6 +115,15 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   [self loadFriendsFromNetwork];
 }
 
+- (void)loadFriendsFromDataStore {
+  NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
+                                                               ascending:YES 
+                                                                selector:@selector(localizedCaseInsensitiveCompare:)];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  self.friendsArray = [currentUser.following sortedArrayUsingDescriptors:[NSArray arrayWithObject:descriptor]];
+  [self.tableView reloadData];
+}
+
 - (void)loadFriendsFromNetwork {
   [self setIsLoading:YES];
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
@@ -127,6 +140,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
 	if ([objectLoader.resourcePath rangeOfString:kFriendsPath].location != NSNotFound) {
     self.friendsArray = nil;
+    User* currentUser = [AccountManager sharedManager].currentUser;
+    [currentUser removeFollowing:currentUser.following];
+    [currentUser addFollowing:[NSSet setWithArray:objects]];
+    [User.managedObjectContext save:NULL];
     NSSortDescriptor* sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"name"
                                                                      ascending:YES 
                                                                       selector:@selector(localizedCaseInsensitiveCompare:)];

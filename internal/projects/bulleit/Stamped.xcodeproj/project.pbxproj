@@ -1133,6 +1133,7 @@
 		7EB03FDA1467527C004F7A1C /* InviteFriendTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InviteFriendTableViewCell.h; sourceTree = "<group>"; };
 		7EB03FDB1467527C004F7A1C /* InviteFriendTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InviteFriendTableViewCell.m; sourceTree = "<group>"; };
 		7EB03FDD1467897A004F7A1C /* invite_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "invite_button@2x.png"; sourceTree = "<group>"; };
+		7EB0401B1467AFE1004F7A1C /* StampedModel 12.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 12.xcdatamodel"; sourceTree = "<group>"; };
 		7EB29D8414146586003A8EA3 /* inbox_photo_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "inbox_photo_icon@2x.png"; sourceTree = "<group>"; };
 		7EB4782613EE2DBE00DA12CB /* MediumUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediumUserImageView.h; sourceTree = "<group>"; };
 		7EB4782713EE2DBE00DA12CB /* MediumUserImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediumUserImageView.m; sourceTree = "<group>"; };
@@ -3760,6 +3761,7 @@
 		7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				7EB0401B1467AFE1004F7A1C /* StampedModel 12.xcdatamodel */,
 				7EB03FD9146738AB004F7A1C /* StampedModel 11.xcdatamodel */,
 				7E99C9B41458816E00B116AC /* StampedModel 10.xcdatamodel */,
 				7E9EB07E144CAA3B006F887B /* StampedModel 9.xcdatamodel */,
@@ -3772,7 +3774,7 @@
 				7E89C3CE1437F14100547960 /* StampedModel 4.xcdatamodel */,
 				7E2267D313D501CB00657A66 /* StampedModel.xcdatamodel */,
 			);
-			currentVersion = 7EB03FD9146738AB004F7A1C /* StampedModel 11.xcdatamodel */;
+			currentVersion = 7EB0401B1467AFE1004F7A1C /* StampedModel 12.xcdatamodel */;
 			path = StampedModel.xcdatamodeld;
 			sourceTree = SOURCE_ROOT;
 			versionGroupType = wrapper.xcdatamodel;

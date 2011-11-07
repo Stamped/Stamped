@@ -14,13 +14,16 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
+    url(R'^download$', 'teaser.views.download'),
     url(R'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.show'),
     url(R'^(?P<screen_name>[\w-]{1,20})/mobile/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 'sdetail.views.mobile'),
     url(R'^about$', 'teaser.views.about'),
     url(R'^privacy-mobile', 'teaser.views.privacy'),
     url(R'^terms-mobile', 'teaser.views.terms'),
     url(R'^feedback-mobile', 'teaser.views.feedback'),
-    url(R'^settings/password/reset/(?P<token>[\w-]{66})$', 'appsettings.views.passwordReset'),
+    url(R'^pw/(?P<token>[\w-]{36})$', 'appsettings.views.passwordReset'),
     url(R'^settings/password/forgot$', 'appsettings.views.passwordForgot'),
+    url(R'^settings/password/sent$', 'appsettings.views.passwordSent'),
+    url(R'^settings/password/success$', 'appsettings.views.passwordSuccess'),
     url(R'$', 'teaser.views.index'),
 )
