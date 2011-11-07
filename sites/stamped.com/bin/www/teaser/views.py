@@ -8,7 +8,7 @@ __license__   = "TODO"
 
 import init
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 import datetime
 
@@ -66,4 +66,7 @@ def feedback(request):
         return response
     except:
         raise Http404
+
+def download(request):
+    return HttpResponseRedirect('http://www.itunes.com')
     

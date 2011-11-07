@@ -41,12 +41,9 @@ def passwordReset(request, **kwargs):
             if data['password'] != data['confirm']:
                 logs.warning("Password match failed")
                 raise StampedHTTPError('match_failed', 400, "Password match failed")
-
-            # Convert password to hash
-            password = convertPasswordForStorage(data['password'])
             
             # Store password            
-            stampedAuth.updatePassword(authUserId, password)
+            stampedAuth.updatePassword(authUserId, data['password'])
 
             # Return success
             response = HttpResponseRedirect('/settings/password/success')
