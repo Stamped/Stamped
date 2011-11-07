@@ -2130,7 +2130,6 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
-				7EB03FD314672B40004F7A1C /* MessageUI.framework */,
 				7EC0177B13C3754300ABE6E2 /* Stamped */,
 				7EC017A113C3754300ABE6E2 /* StampedTests */,
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
@@ -2151,6 +2150,7 @@
 		7EC0177413C3754300ABE6E2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7EB03FD314672B40004F7A1C /* MessageUI.framework */,
 				7E99C9B81458B4E000B116AC /* Twitter.framework */,
 				7ED608961420F69B001C499D /* AddressBook.framework */,
 				7EC1C65113F459B50070CE6D /* Security.framework */,
