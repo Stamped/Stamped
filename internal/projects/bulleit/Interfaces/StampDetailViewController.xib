@@ -390,6 +390,7 @@
 														<bool key="IBUIAdjustsFontSizeToFit">YES</bool>
 														<float key="IBUIMinimumFontSize">17</float>
 														<object class="IBUITextInputTraits" key="IBUITextInputTraits">
+															<int key="IBUIAutocapitalizationType">2</int>
 															<int key="IBUIKeyboardAppearance">1</int>
 															<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 														</object>
@@ -573,7 +574,7 @@
 										<string key="NSFrame">{{0, 19}, {310, 58}}</string>
 										<reference key="NSSuperview" ref="194365560"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView" ref="109901099"/>
+										<reference key="NSNextKeyView" ref="452184484"/>
 										<string key="NSReuseIdentifierKey">_NS:190</string>
 										<bool key="IBUIClipsSubviews">YES</bool>
 										<bool key="IBUIMultipleTouchEnabled">YES</bool>
@@ -596,7 +597,7 @@
 						<string key="NSFrameSize">{320, 367}</string>
 						<reference key="NSSuperview" ref="880728759"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
+						<reference key="NSNextKeyView" ref="276142279"/>
 						<reference key="IBUIBackgroundColor" ref="124712397"/>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIMultipleTouchEnabled">YES</bool>
@@ -614,7 +615,7 @@
 								<string key="NSFrameSize">{320, 365}</string>
 								<reference key="NSSuperview" ref="109901099"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="452184484"/>
+								<reference key="NSNextKeyView" ref="807260245"/>
 								<string key="NSReuseIdentifierKey">_NS:366</string>
 								<int key="IBUIContentMode">1</int>
 								<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -881,7 +882,7 @@
 				<string key="NSFrame">{{0, 64}, {320, 416}}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
-				<reference key="NSNextKeyView" ref="807260245"/>
+				<reference key="NSNextKeyView" ref="109901099"/>
 				<reference key="IBUIBackgroundColor" ref="124712397"/>
 				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics">
 					<int key="IBUIStatusBarStyle">2</int>

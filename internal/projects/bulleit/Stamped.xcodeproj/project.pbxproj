@@ -3554,7 +3554,7 @@
 					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
 					"\"$(SOURCE_ROOT)/RestKit/Build\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3581,7 +3581,7 @@
 					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
 					"\"$(SOURCE_ROOT)/RestKit/Build\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
@@ -3606,8 +3606,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3625,8 +3625,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				PROVISIONING_PROFILE = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
@@ -3645,8 +3645,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3663,8 +3663,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				PROVISIONING_PROFILE = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "467DE68E-E8A4-46E9-A279-66C9FEF37FBE";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
