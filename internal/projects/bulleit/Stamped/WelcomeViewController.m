@@ -16,6 +16,7 @@
 #import "Notifications.h"
 #import "StampedAppDelegate.h"
 #import "UserImageView.h"
+#import "FindFriendsViewController.h"
 
 static NSString* const kUpdateStampPath = @"/account/customize_stamp.json";
 NSString* const kStampColors[7][2] = {
@@ -228,11 +229,20 @@ NSString* const kStampColors[7][2] = {
   [vc release];
 }
 
-- (IBAction)findfromContacts:(id)sender {  
+- (IBAction)findfromContacts:(id)sender {
+  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromContacts:sender];
   [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
 }
-
 - (IBAction)findFromTwitter:(id)sender {
+  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromTwitter:sender];
+  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+}
+- (IBAction)findFromFacebook:(id)sender {
+  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromFacebook:sender];
+  [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+}
+- (IBAction)findFromStamped:(id)sender {
+  [((FindFriendsViewController*)[self.findFriendsNavigationController.viewControllers objectAtIndex:0]) findFromStamped:sender];
   [self.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
 }
 

@@ -46,7 +46,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)updateStampsRemainingLayer;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 
-@property (nonatomic, assign) BOOL stampsAreTemporary;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
 @property (nonatomic, readonly) CALayer* stampLayer;
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
@@ -100,7 +99,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  stampsAreTemporary_ = YES;
   userImageView_.imageURL = user_.profileImageURL;
   userImageView_.enabled = YES;
   [userImageView_ addTarget:self
@@ -149,6 +147,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   toolbarView_.layer.shadowOffset = CGSizeMake(0, -1);
   toolbarView_.alpha = 0.85;
   [self loadStampsFromDataStore];
+  [self loadStampsFromNetwork];
   [self loadUserInfoFromNetwork];
 }
 
@@ -454,12 +453,15 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if ([request.resourcePath rangeOfString:kFriendshipCheckPath].location != NSNotFound) {
+    User* currentUser = [AccountManager sharedManager].currentUser;
     [followIndicator_ stopAnimating];
     if ([response.bodyAsString isEqualToString:@"false"]) {
       followButton_.hidden = NO;
+      [currentUser addFollowingObject:user_];
       self.stampsAreTemporary = YES;
     } else {
       unfollowButton_.hidden = NO;
+      [currentUser removeFollowingObject:user_];
       self.stampsAreTemporary = NO;
     }
   }
@@ -472,8 +474,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
   for (Stamp* stamp in [sectionInfo objects]) {
     stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
-    [stamp.managedObjectContext save:NULL];
   }
+  [Stamp.managedObjectContext save:NULL];
 }
 
 - (void)addStampsRemainingLayer {

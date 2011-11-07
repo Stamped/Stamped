@@ -242,12 +242,15 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   }
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController"
                                                                                          bundle:nil];
+  User* currentUser = [AccountManager sharedManager].currentUser;
   User* user = nil;
-  if (indexPath.section == 0)
-    user = [AccountManager sharedManager].currentUser;
-  else
+  if (indexPath.section == 0) {
+    user = currentUser;
+    profileViewController.stampsAreTemporary = NO;
+  } else {
     user = [self.friendsArray objectAtIndex:indexPath.row - 1];
-  
+    profileViewController.stampsAreTemporary = [currentUser.following containsObject:user];
+  }
   profileViewController.user = user;
   
   [delegate.navigationController pushViewController:profileViewController animated:YES];
