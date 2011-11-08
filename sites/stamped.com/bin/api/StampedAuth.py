@@ -148,8 +148,8 @@ class StampedAuth(AStampedAuth):
                     raise 
                 attempt += 1
 
-        url = 'http://www.stamped.com/pw/%s' % resetToken.token_id
-        prettyurl = 'http://stamped.com/pw/%s' % resetToken.token_id
+        url = 'https://www.stamped.com/pw/%s' % resetToken.token_id
+        prettyurl = 'https://stamped.com/pw/%s' % resetToken.token_id
 
         # Email user
         msg = {}

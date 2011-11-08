@@ -44,10 +44,10 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)fillInUserData;
 - (void)loadRelationshipData;
 - (void)addStampsRemainingLayer;
-- (void)updateStampsRemainingLayer;
+- (void)updateStampCounterLayer;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
 
-@property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
+@property (nonatomic, readonly) CATextLayer* stampCounterLayer;
 @property (nonatomic, readonly) CALayer* stampLayer;
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
 @end
@@ -68,7 +68,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 @synthesize unfollowButton = unfollowButton_;
 @synthesize followIndicator = followIndicator_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
-@synthesize stampsRemainingLayer = stampsRemainingLayer_;
+@synthesize stampCounterLayer = stampCounterLayer_;
 @synthesize stampLayer = stampLayer_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 
@@ -134,6 +134,29 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [self.navigationItem setRightBarButtonItem:editButton];
     [editButton release];
   }
+  
+  self.highlightView.backgroundColor = [UIColor whiteColor];
+  CAGradientLayer* highlightGradientLayer = [[CAGradientLayer alloc] init];
+  highlightGradientLayer.frame = CGRectMake(0, 0, 320, 20);
+  CGFloat r1, g1, b1, r2, g2, b2;
+  [Util splitHexString:user_.primaryColor toRed:&r1 green:&g1 blue:&b1];
+  
+  if (user_.secondaryColor) {
+    [Util splitHexString:user_.secondaryColor toRed:&r2 green:&g2 blue:&b2];
+  } else {
+    r2 = r1;
+    g2 = g1;
+    b2 = b1;
+  }
+  highlightGradientLayer.colors =
+      [NSArray arrayWithObjects:(id)[UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0].CGColor,
+           (id)[UIColor colorWithRed:r2 green:g2 blue:b2 alpha:1.0].CGColor, nil];
+  
+  highlightGradientLayer.startPoint = CGPointMake(0.0, 0.5);
+  highlightGradientLayer.endPoint = CGPointMake(1.0, 0.5);
+  [self.highlightView.layer addSublayer:highlightGradientLayer];
+  [highlightGradientLayer release];
+  self.highlightView.alpha = 1.0;
   
   CAGradientLayer* toolbarGradient = [[CAGradientLayer alloc] init];
   toolbarGradient.colors = [NSArray arrayWithObjects:
@@ -431,53 +454,63 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - Private methods.
 
 - (void)addStampsRemainingLayer {
-  stampsRemainingLayer_ = [[CATextLayer alloc] init];
-  stampsRemainingLayer_.alignmentMode = kCAAlignmentCenter;
-  stampsRemainingLayer_.frame = CGRectMake(0, 
+  CATextLayer* stampsRemainingLayer = [[CATextLayer alloc] init];
+  stampsRemainingLayer.alignmentMode = kCAAlignmentCenter;
+  stampsRemainingLayer.frame = CGRectMake(0, 
                                            CGRectGetMaxY(self.view.frame) - 30,
                                            CGRectGetWidth(self.view.frame),
                                            CGRectGetHeight(self.view.frame));
-  stampsRemainingLayer_.fontSize = 12;
-  stampsRemainingLayer_.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
-  stampsRemainingLayer_.contentsScale = [[UIScreen mainScreen] scale];
-  stampsRemainingLayer_.shadowColor = [UIColor whiteColor].CGColor;
-  stampsRemainingLayer_.shadowOpacity = 1.0;
-  stampsRemainingLayer_.shadowOffset = CGSizeMake(0, 1);
-  stampsRemainingLayer_.shadowRadius = 0;
-  
-  [self updateStampsRemainingLayer];
-  [self.view.layer addSublayer:stampsRemainingLayer_];
-  [stampsRemainingLayer_ release];
+  stampsRemainingLayer.fontSize = 12;
+  stampsRemainingLayer.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
+  stampsRemainingLayer.contentsScale = [[UIScreen mainScreen] scale];
+  stampsRemainingLayer.shadowColor = [UIColor whiteColor].CGColor;
+  stampsRemainingLayer.shadowOpacity = 1.0;
+  stampsRemainingLayer.shadowOffset = CGSizeMake(0, 1);
+  stampsRemainingLayer.shadowRadius = 0;
+  stampsRemainingLayer.string = @"You have            stamps remaining";
+
+  [self.view.layer addSublayer:stampsRemainingLayer];
+  [stampsRemainingLayer release];
+  UIImage* coloredImage = [Util gradientImage:[UIImage imageNamed:@"stampcount_color"]
+                             withPrimaryColor:user_.primaryColor
+                                    secondary:user_.secondaryColor];
+  UIImageView* colorView = [[UIImageView alloc] initWithImage:coloredImage];
+  colorView.frame = CGRectMake(121, CGRectGetMaxY(self.view.frame) - 41,
+                               CGRectGetWidth(colorView.frame), CGRectGetHeight(colorView.frame));
+  [self.view addSubview:colorView];
+  [colorView release];
+  UIImageView* textureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"stampcount_texture"]];
+  textureView.center = colorView.center;
+  [self.view addSubview:textureView];
+  [textureView release];
+  stampCounterLayer_ = [[CATextLayer alloc] init];
+  stampCounterLayer_.fontSize = 20;
+  stampCounterLayer_.foregroundColor = [UIColor colorWithWhite:0.9 alpha:1].CGColor;
+  stampCounterLayer_.contentsScale = [[UIScreen mainScreen] scale];
+  stampCounterLayer_.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.6].CGColor;
+  stampCounterLayer_.shadowOpacity = 1.0;
+  stampCounterLayer_.shadowOffset = CGSizeMake(0, 2);
+  stampCounterLayer_.shadowRadius = 2;
+  stampCounterLayer_.alignmentMode = kCAAlignmentCenter;
+  CGFontRef font = CGFontCreateWithFontName((CFStringRef)@"TitlingGothicFB-StandardSkyline");
+  stampCounterLayer_.font = font;
+  stampCounterLayer_.frame = CGRectOffset(textureView.frame, 0, 5);
+  CFRelease(font);
+  [self.view.layer addSublayer:stampCounterLayer_];
+  [stampCounterLayer_ release];
+  [self updateStampCounterLayer];
 }
 
-- (void)updateStampsRemainingLayer {
-  if (!stampsRemainingLayer_)
-    return;
+- (void)updateStampCounterLayer {
+  NSNumber* numStamps = [AccountManager sharedManager].currentUser.numStampsLeft;
+  NSString* stampsLeft = numStamps.stringValue;
+  if (numStamps.integerValue > 999)
+    stampsLeft = @"999";
 
-  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
   if (!stampsLeft)
     return;
-
-  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
-  CFIndex numSettings = 1;
-  CTLineBreakMode lineBreakMode = kCTLineBreakByTruncatingTail;
-  CTParagraphStyleSetting settings[1] = {
-    {kCTParagraphStyleSpecifierLineBreakMode, sizeof(lineBreakMode), &lineBreakMode}
-  };
-  CTParagraphStyleRef style = CTParagraphStyleCreate(settings, numSettings);
-  NSString* full = [NSString stringWithFormat:@"You have %@ stamps remaining", stampsLeft];
-  NSMutableAttributedString* string = [[NSMutableAttributedString alloc] initWithString:full];
-  [string setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
-                         (id)style, (id)kCTParagraphStyleAttributeName,
-                         (id)[UIColor stampedDarkGrayColor].CGColor, (id)kCTForegroundColorAttributeName, nil]
-                  range:NSMakeRange(0, full.length)];
-  [string addAttribute:(NSString*)kCTFontAttributeName
-                 value:(id)font 
-                 range:[full rangeOfString:stampsLeft]];
-  CFRelease(font);
-  CFRelease(style);
-  stampsRemainingLayer_.string = string;
-  [string release];
+  
+  stampCounterLayer_.string = stampsLeft;
 }
 
 - (void)loadRelationshipData {
@@ -511,7 +544,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   followerCountLabel_.text = [user_.numFollowers stringValue];
   followingCountLabel_.text = [user_.numFriends stringValue];
   stampLayer_.contents = (id)user_.stampImage.CGImage;
-  [self updateStampsRemainingLayer];
+  [self updateStampCounterLayer];
 }
 
 - (void)loadUserInfoFromNetwork {
@@ -559,6 +592,13 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 		// Update to handle the error appropriately.
 		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
 	}
+}
+
+#pragma mark - UIScrollViewDelegate Methods.
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+  [super scrollViewDidScroll:scrollView];
+  self.highlightView.alpha = MIN(1.0, (15 + (-self.shelfView.frame.origin.y - 356)) / 15);
 }
 
 @end

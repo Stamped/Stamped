@@ -12,7 +12,6 @@
 #import "Entity.h"
 #import "SearchResult.h"
 #import "PlaceDetailViewController.h"
-//#import "GenericItemDetailViewController.h"
 #import "MusicDetailViewController.h"
 #import "BookDetailViewController.h"
 #import "OtherDetailViewController.h"

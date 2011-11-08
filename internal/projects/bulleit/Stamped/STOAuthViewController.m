@@ -39,6 +39,7 @@
   UINavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   if ([navBar respondsToSelector:@selector(setHideLogo:)]) 
     [(id)navBar setHideLogo:YES];
+
   [navBar setNeedsDisplay];
   self.shareButton.hidden = YES;
   [super viewDidLoad];

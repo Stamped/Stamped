@@ -11,5 +11,6 @@
 @interface STViewController : UIViewController <UIScrollViewDelegate>
 
 @property (nonatomic, retain) IBOutlet UIView* shelfView;
+@property (nonatomic, readonly) UIView* highlightView;
 
 @end

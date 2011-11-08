@@ -11,6 +11,7 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "ShowImageViewController.h"
+#import "STViewController.h"
 #import "Util.h"
 
 @class Entity;
@@ -18,7 +19,7 @@
 @class SearchResult;
 @class Stamp;
 
-@interface EntityDetailViewController : UIViewController <RKObjectLoaderDelegate, 
+@interface EntityDetailViewController : STViewController <RKObjectLoaderDelegate, 
                                                           CollapsibleViewControllerDelegate,
                                                           STImageViewDelegate> {
  @protected

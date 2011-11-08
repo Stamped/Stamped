@@ -22,6 +22,7 @@
 #import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
+#import "Util.h"
 
 static NSString* const kFriendsPath = @"/temp/friends.json";
 
@@ -195,11 +196,29 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   if (indexPath.section == 1 && indexPath.row == 0 && friendsArray_ != nil) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                     reuseIdentifier:nil] autorelease];
-    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button_addFriends"]];
-    addFriendsImageView.center = cell.contentView.center;
-    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 0, 3);
-    [cell addSubview:addFriendsImageView];
+    UIImage* addFriendsImage = [UIImage imageNamed:@"addFriends_profilePic"];
+    UIImage* highlightedAddFriendsImage = [Util whiteMaskedImageUsingImage:addFriendsImage];
+    UIImageView* addFriendsImageView = [[UIImageView alloc] initWithImage:addFriendsImage
+                                                         highlightedImage:highlightedAddFriendsImage];
+    addFriendsImageView.frame = CGRectOffset(addFriendsImageView.frame, 10, 5);
+    [cell.contentView addSubview:addFriendsImageView];
     [addFriendsImageView release];
+    UILabel* addFriendsLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    addFriendsLabel.text = @"Add friends";
+    addFriendsLabel.textColor = [UIColor stampedLightGrayColor];
+    addFriendsLabel.highlightedTextColor = [UIColor whiteColor];
+    addFriendsLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:16];
+    [addFriendsLabel sizeToFit];
+    addFriendsLabel.frame = CGRectOffset(addFriendsLabel.frame, CGRectGetMaxX(addFriendsImageView.frame) + 18, 15);
+    [cell.contentView addSubview:addFriendsLabel];
+    [addFriendsLabel release];
+    UIImage* friendIcons = [UIImage imageNamed:@"addFriends_icons"];
+    UIImage* highlightedFriendIcons = [Util whiteMaskedImageUsingImage:friendIcons];
+    UIImageView* iconsImageView = [[UIImageView alloc] initWithImage:friendIcons
+                                                    highlightedImage:highlightedFriendIcons];
+    iconsImageView.frame = CGRectOffset(iconsImageView.frame, 320 - CGRectGetWidth(iconsImageView.frame) - 18, 19);
+    [cell.contentView addSubview:iconsImageView];
+    [iconsImageView release];
     return cell;
   }
 

@@ -24,7 +24,6 @@
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
 @property (nonatomic, readonly) UIImageView* arrowImageView;
 @property (nonatomic, readonly) UIActivityIndicatorView* spinnerView;
-@property (nonatomic, readonly) UIView* highlightView;
 
 - (void)userPulledToReload;
 - (void)reloadData;
