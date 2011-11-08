@@ -1299,6 +1299,8 @@ class StampedAPI(AStampedAPI):
         credit = []
         creditedUserIds = []
         if creditData != None:
+            ### TODO: Filter out non-ASCII data
+
             creditedUsers = self._userDB.lookupUsers(None, creditData)
             
             for creditedUser in creditedUsers:
@@ -1586,6 +1588,8 @@ class StampedAPI(AStampedAPI):
             previouslyCredited = []
             for creditedUser in stamp.credit:
                 previouslyCredited.append(creditedUser.user_id)
+
+            ### TODO: Filter out non-ASCII data
 
             creditedUsers = self._userDB.lookupUsers(None, creditData)
 
@@ -2027,7 +2031,9 @@ class StampedAPI(AStampedAPI):
         # Remove comment
         self._commentDB.removeComment(comment.comment_id)
 
-        ### TODO: Remove activity?
+        # Remove activity?
+        self._activityDB.removeActivity('comment', authUserId, \
+            commentId=comment.ƒcomment_id)
 
         # Increment comment count on stamp
         self._stampDB.updateStampStats( \

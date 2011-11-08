@@ -120,6 +120,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         
     def removeActivity(self, genre, userId, **kwargs):
         stampId     = kwargs.pop('stampId', None)
+        commentId   = kwargs.pop('commentId', None)
         recipientId = kwargs.pop('recipientId', None)
 
         if genre in ['like', 'favorite'] and stampId:
@@ -133,6 +134,13 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             self._collection.remove({
                 'user.user_id': userId,
                 'recipient_id': recipientId,
+                'genre': genre
+            })
+
+        if genre in ['comment'] and commentId:
+            self._collection.remove({
+                'user.user_id': userId,
+                'link.linked_comment_id': commentId,
                 'genre': genre
             })
 
