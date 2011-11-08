@@ -39,6 +39,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
                                         ('timestamp.created', pymongo.DESCENDING)])
         self._collection.ensure_index('user.user_id', unique=False)
         self._collection.ensure_index('link.linked_stamp_id', unique=False)
+        self._collection.ensure_index('link.linked_comment_id', unique=False)
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('recipient_id', pymongo.ASCENDING), \
                                         ('genre', pymongo.ASCENDING)])
@@ -120,6 +121,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
         
     def removeActivity(self, genre, userId, **kwargs):
         stampId     = kwargs.pop('stampId', None)
+        commentId   = kwargs.pop('commentId', None)
         recipientId = kwargs.pop('recipientId', None)
 
         if genre in ['like', 'favorite'] and stampId:
@@ -133,6 +135,13 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
             self._collection.remove({
                 'user.user_id': userId,
                 'recipient_id': recipientId,
+                'genre': genre
+            })
+
+        if genre in ['comment'] and commentId:
+            self._collection.remove({
+                'user.user_id': userId,
+                'link.linked_comment_id': commentId,
                 'genre': genre
             })
 

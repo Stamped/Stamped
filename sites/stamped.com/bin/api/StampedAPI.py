@@ -488,10 +488,13 @@ class StampedAPI(AStampedAPI):
             return False
 
         users = self._userDB.findUsersByTwitter(twitterIds)
+
+        followers = self._friendshipDB.getFollowers(authUserId)
         
         userIds = []
         for user in users:
-            userIds.append(user.user_id)
+            if user.user_id not in followers:
+                userIds.append(user.user_id)
 
         activity                    = Activity()
         activity.genre              = 'friend'
@@ -514,10 +517,13 @@ class StampedAPI(AStampedAPI):
             return False
 
         users = self._userDB.findUsersByFacebook(facebookIds)
+
+        followers = self._friendshipDB.getFollowers(authUserId)
         
         userIds = []
         for user in users:
-            userIds.append(user.user_id)
+            if user.user_id not in followers:
+                userIds.append(user.user_id)
 
         activity                    = Activity()
         activity.genre              = 'friend'
@@ -1299,6 +1305,9 @@ class StampedAPI(AStampedAPI):
         credit = []
         creditedUserIds = []
         if creditData != None:
+
+            ### TODO: Filter out non-ASCII data for credit
+
             creditedUsers = self._userDB.lookupUsers(None, creditData)
             
             for creditedUser in creditedUsers:
@@ -1586,6 +1595,8 @@ class StampedAPI(AStampedAPI):
             previouslyCredited = []
             for creditedUser in stamp.credit:
                 previouslyCredited.append(creditedUser.user_id)
+
+            ### TODO: Filter out non-ASCII data for credit
 
             creditedUsers = self._userDB.lookupUsers(None, creditData)
 
@@ -2027,7 +2038,9 @@ class StampedAPI(AStampedAPI):
         # Remove comment
         self._commentDB.removeComment(comment.comment_id)
 
-        ### TODO: Remove activity?
+        # Remove activity?
+        self._activityDB.removeActivity('comment', authUserId, \
+            commentId=comment.comment_id)
 
         # Increment comment count on stamp
         self._stampDB.updateStampStats( \

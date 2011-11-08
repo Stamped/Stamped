@@ -17,6 +17,7 @@
 @synthesize forwardButton = forwardButton_;
 @synthesize reloadButton = reloadButton_;
 @synthesize shareButton = shareButton_;
+@synthesize toolbar = toolbar_;
 
 - (id)initWithURL:(NSURL*)url {
   self = [self initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -35,6 +36,7 @@
   self.forwardButton = nil;
   self.reloadButton = nil;
   self.shareButton = nil;
+  self.toolbar = nil;
   [super dealloc];
 }
 
@@ -81,6 +83,7 @@
   self.forwardButton = nil;
   self.reloadButton = nil;
   self.shareButton = nil;
+  self.toolbar = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -96,6 +99,21 @@
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   [sheet showInView:self.view];
   return;
+}
+
+- (void)hideToolbar:(BOOL)shouldHide {
+  if (shouldHide && self.toolbar.hidden == NO) {
+    self.toolbar.hidden = YES;
+    CGRect frame = self.webView.frame;
+    frame.size.height += self.toolbar.frame.size.height;
+    self.webView.frame = frame;
+  }
+  else if (self.toolbar.hidden == YES) {
+    self.toolbar.hidden = NO;
+    CGRect frame = self.webView.frame;
+    frame.size.height -= self.toolbar.frame.size.height;
+    self.webView.frame = frame;
+  }
 }
 
 #pragma mark - UIActionSheetDelegate methods.
