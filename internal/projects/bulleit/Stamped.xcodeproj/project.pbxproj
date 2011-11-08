@@ -471,6 +471,10 @@
 		7ED69D531469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D501469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf */; };
 		7ED69D541469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D511469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf */; };
 		7ED69D551469945F00964B3A /* TitlingGothicFB-StandSky.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D521469945F00964B3A /* TitlingGothicFB-StandSky.ttf */; };
+		7ED69D5A1469A09500964B3A /* stampcount_color.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D561469A09500964B3A /* stampcount_color.png */; };
+		7ED69D5B1469A09500964B3A /* stampcount_color@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D571469A09500964B3A /* stampcount_color@2x.png */; };
+		7ED69D5C1469A09500964B3A /* stampcount_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D581469A09500964B3A /* stampcount_texture.png */; };
+		7ED69D5D1469A09500964B3A /* stampcount_texture@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D591469A09500964B3A /* stampcount_texture@2x.png */; };
 		7ED6E11A1403216300D84E03 /* newstamp_btn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1181403216200D84E03 /* newstamp_btn.png */; };
 		7ED6E11B1403216300D84E03 /* newstamp_btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
@@ -1317,6 +1321,10 @@
 		7ED69D501469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = fbDWeRlKQCgbrziKfMsl.ttf; sourceTree = "<group>"; };
 		7ED69D511469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = fbEiMTd1F3B3c35Z4OrK.ttf; sourceTree = "<group>"; };
 		7ED69D521469945F00964B3A /* TitlingGothicFB-StandSky.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TitlingGothicFB-StandSky.ttf"; sourceTree = "<group>"; };
+		7ED69D561469A09500964B3A /* stampcount_color.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stampcount_color.png; sourceTree = "<group>"; };
+		7ED69D571469A09500964B3A /* stampcount_color@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stampcount_color@2x.png"; sourceTree = "<group>"; };
+		7ED69D581469A09500964B3A /* stampcount_texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stampcount_texture.png; sourceTree = "<group>"; };
+		7ED69D591469A09500964B3A /* stampcount_texture@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stampcount_texture@2x.png"; sourceTree = "<group>"; };
 		7ED6E1181403216200D84E03 /* newstamp_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newstamp_btn.png; sourceTree = "<group>"; };
 		7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newstamp_btn@2x.png"; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
@@ -2039,6 +2047,10 @@
 		7E7A674B13F8989200DFD516 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
+				7ED69D561469A09500964B3A /* stampcount_color.png */,
+				7ED69D571469A09500964B3A /* stampcount_color@2x.png */,
+				7ED69D581469A09500964B3A /* stampcount_texture.png */,
+				7ED69D591469A09500964B3A /* stampcount_texture@2x.png */,
 				7E6FFA51140F137400F23A26 /* clear_unfollow_bg@2x.png */,
 				7E6FFA52140F137400F23A26 /* green_follow_bg@2x.png */,
 				7E52A58913FC7DB500209A95 /* camera_button@2x.png */,
@@ -3480,6 +3492,10 @@
 				7ED69D531469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf in Resources */,
 				7ED69D541469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf in Resources */,
 				7ED69D551469945F00964B3A /* TitlingGothicFB-StandSky.ttf in Resources */,
+				7ED69D5A1469A09500964B3A /* stampcount_color.png in Resources */,
+				7ED69D5B1469A09500964B3A /* stampcount_color@2x.png in Resources */,
+				7ED69D5C1469A09500964B3A /* stampcount_texture.png in Resources */,
+				7ED69D5D1469A09500964B3A /* stampcount_texture@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
