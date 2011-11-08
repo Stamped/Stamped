@@ -42,6 +42,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   self.friendsArray = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
 
@@ -82,7 +83,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   if (delegate.navigationController.navigationBarHidden)
     [delegate.navigationController setNavigationBarHidden:NO animated:YES];
 
-  if (!friendsArray_)
+  if (!friendsArray_.count)
     [self loadFriendsFromNetwork];
 }
 
