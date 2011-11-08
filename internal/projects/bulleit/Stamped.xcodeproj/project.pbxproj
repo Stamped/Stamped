@@ -464,6 +464,10 @@
 		7ED60895141FF7CB001C499D /* FriendshipTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */; };
 		7ED608971420F69B001C499D /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED608961420F69B001C499D /* AddressBook.framework */; };
 		7ED69D4614693BA100964B3A /* FriendshipManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED69D4514693BA100964B3A /* FriendshipManager.m */; };
+		7ED69D4C1469878300964B3A /* addFriends_icons.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D481469878300964B3A /* addFriends_icons.png */; };
+		7ED69D4D1469878300964B3A /* addFriends_icons@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D491469878300964B3A /* addFriends_icons@2x.png */; };
+		7ED69D4E1469878300964B3A /* addFriends_profilePic.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D4A1469878300964B3A /* addFriends_profilePic.png */; };
+		7ED69D4F1469878300964B3A /* addFriends_profilePic@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D4B1469878300964B3A /* addFriends_profilePic@2x.png */; };
 		7ED6E11A1403216300D84E03 /* newstamp_btn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1181403216200D84E03 /* newstamp_btn.png */; };
 		7ED6E11B1403216300D84E03 /* newstamp_btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
@@ -1305,6 +1309,10 @@
 		7ED608961420F69B001C499D /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		7ED69D4414693BA100964B3A /* FriendshipManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendshipManager.h; sourceTree = "<group>"; };
 		7ED69D4514693BA100964B3A /* FriendshipManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendshipManager.m; sourceTree = "<group>"; };
+		7ED69D481469878300964B3A /* addFriends_icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = addFriends_icons.png; sourceTree = "<group>"; };
+		7ED69D491469878300964B3A /* addFriends_icons@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "addFriends_icons@2x.png"; sourceTree = "<group>"; };
+		7ED69D4A1469878300964B3A /* addFriends_profilePic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = addFriends_profilePic.png; sourceTree = "<group>"; };
+		7ED69D4B1469878300964B3A /* addFriends_profilePic@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "addFriends_profilePic@2x.png"; sourceTree = "<group>"; };
 		7ED6E1181403216200D84E03 /* newstamp_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newstamp_btn.png; sourceTree = "<group>"; };
 		7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newstamp_btn@2x.png"; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
@@ -2339,6 +2347,7 @@
 				7E100619143E46760079AEDC /* icon1@2x.png */,
 				7E1873D4143A717100A0ECC0 /* icon2.png */,
 				7E1873D2143A716E00A0ECC0 /* icon2@2x.png */,
+				7ED69D471469876D00964B3A /* People */,
 				7EB8A7C6146491230018E263 /* Nav Bar */,
 				7ECF3D82145E26B900A1CF38 /* Tab bar icons */,
 				7EBD0F48145A396A005B385F /* Standard Appearance Images */,
@@ -2562,6 +2571,17 @@
 				7EFDC99F13F865C600589E11 /* PeopleViewController.h */,
 				7EFDC9A013F865C600589E11 /* PeopleViewController.m */,
 				7EFDC9A113F865C600589E11 /* PeopleViewController.xib */,
+			);
+			name = People;
+			sourceTree = "<group>";
+		};
+		7ED69D471469876D00964B3A /* People */ = {
+			isa = PBXGroup;
+			children = (
+				7ED69D481469878300964B3A /* addFriends_icons.png */,
+				7ED69D491469878300964B3A /* addFriends_icons@2x.png */,
+				7ED69D4A1469878300964B3A /* addFriends_profilePic.png */,
+				7ED69D4B1469878300964B3A /* addFriends_profilePic@2x.png */,
 			);
 			name = People;
 			sourceTree = "<group>";
@@ -3452,6 +3472,10 @@
 				CB9C8494146891A400504FEC /* first_run_button_bg_pressed@2x.png in Resources */,
 				CB9C8495146891A400504FEC /* first_run_button_done_bg_pressed@2x.png in Resources */,
 				CB9C84971468964500504FEC /* first_run_bg_welcome@2x.png in Resources */,
+				7ED69D4C1469878300964B3A /* addFriends_icons.png in Resources */,
+				7ED69D4D1469878300964B3A /* addFriends_icons@2x.png in Resources */,
+				7ED69D4E1469878300964B3A /* addFriends_profilePic.png in Resources */,
+				7ED69D4F1469878300964B3A /* addFriends_profilePic@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
