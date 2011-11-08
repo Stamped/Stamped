@@ -179,7 +179,10 @@ static AccountManager* sharedAccountManager_ = nil;
   }
 
   if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    [self.firstRunViewController signInFailed:nil];
+    if (firstRunViewController_)
+      [self.firstRunViewController signInFailed:nil];
+    else
+      [self performSelector:@selector(logout) withObject:self afterDelay:0];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self sendLoginRequest];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
@@ -426,7 +429,6 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)requestQueueWasUnsuspended:(RKRequestQueue*)queue {
   NSLog(@"Request queue unsuspended...");
 }
-
 
 #pragma mark - Logout stuff.
 
