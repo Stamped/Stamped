@@ -561,9 +561,14 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     ABRecordRef person = [contactsNotUsingStamped_ objectAtIndex:indexPath.row];
     InviteFriendTableViewCell* inviteCell = (InviteFriendTableViewCell*)cell;
     CFStringRef name = ABRecordCopyCompositeName(person);
-    inviteCell.nameLabel.text = (NSString*)name;
+    if (name) {
+      inviteCell.nameLabel.text = (NSString*)name;
+      CFRelease(name);
+    } else {
+      inviteCell.nameLabel.text = nil;
+    }
+
     inviteCell.inviteButton.enabled = YES;
-    CFRelease(name);
     ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
     NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
     CFRelease(emailProperty);

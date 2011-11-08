@@ -681,6 +681,7 @@ class AppleSchema(Schema):
         self.export_date        = SchemaElement(basestring)
         self.is_actual_artist   = SchemaElement(bool)
         self.view_url           = SchemaElement(basestring)
+        self.a_popular          = SchemaElement(bool)
         self.match              = AppleMatchSchema()
 
 class AppleMatchSchema(Schema):
