@@ -10,8 +10,6 @@
 
 #import <RestKit/CoreData/CoreData.h>
 
-#import "TestFlight.h"
-
 #import "AccountManager.h"
 #import "DetailedEntity.h"
 #import "Comment.h"
@@ -43,9 +41,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 @synthesize facebook = facebook_;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-#if !TARGET_IPHONE_SIMULATOR
-  [TestFlight takeOff:@"ba4288d07f0c453219caeeba7c5007e8_MTg5MDIyMDExLTA4LTMxIDIyOjUyOjE2LjUyNTk3OA"];
-#endif
   [self performRestKitMappings];
   [self customizeAppearance];
   self.window.rootViewController = self.navigationController;
