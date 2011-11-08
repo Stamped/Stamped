@@ -97,18 +97,19 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return self._convertFromMongo(document)
 
     def updateLinkedAccounts(self, userId, data):
+        logs.debug('DATA: %s' % data)
         fields = {}
-        if 'twitter_id' in data:
+        if 'twitter_id' in data and data['twitter_id']:
             fields['linked_accounts.twitter.twitter_id'] = data['twitter_id']
-        if 'twitter_screen_name' in data:
+        if 'twitter_screen_name' in data and data['twitter_screen_name']:
             fields['linked_accounts.twitter.twitter_screen_name'] =\
                 data['twitter_screen_name']
-        if 'facebook_id' in data:
+        if 'facebook_id' in data and data['facebook_id']:
             fields['linked_accounts.facebook.facebook_id'] = data['facebook_id']
-        if 'facebook_screen_name' in data:
+        if 'facebook_name' in data and data['facebook_name']:
             fields['linked_accounts.facebook.facebook_name'] = \
             data['facebook_name']
-        if 'facebook_screen_name' in data:
+        if 'facebook_screen_name' in data and data['facebook_screen_name']:
             fields['linked_accounts.facebook.facebook_screen_name'] = \
                 data['facebook_screen_name']
         

@@ -15,7 +15,7 @@ from AStampedAPITestCase import *
 
 class StampedAPIAccountTest(AStampedAPITestCase):
     def setUp(self):
-        (self.user, self.token) = self.createAccount()
+        (self.user, self.token) = self.createAccount(name='devbot') 
         self.privacy = False
     
     def tearDown(self):
