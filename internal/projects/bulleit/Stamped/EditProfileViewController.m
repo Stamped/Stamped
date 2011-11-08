@@ -12,6 +12,7 @@
 #import <RestKit/RestKit.h>
 
 #import "AccountManager.h"
+#import "Notifications.h"
 #import "User.h"
 #import "Util.h"
 #import "STImageView.h"
@@ -59,6 +60,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
 }
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.user = nil;
   self.settingsButton = nil;
   self.doneButton = nil;
@@ -99,6 +101,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.settingsButton = nil;
   self.doneButton = nil;
   self.stampImageView = nil;
@@ -129,13 +132,13 @@ static const NSUInteger kMaxPicUploadTries = 3;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-  // Return YES for supported orientations
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 #pragma mark - Actions
 
 - (IBAction)doneButtonPressed:(id)sender {
+  [[NSNotificationCenter defaultCenter] postNotificationName:kUserProfileHasChangedNotification object:nil];
   UIViewController* vc = nil;
   if ([self respondsToSelector:@selector(presentingViewController)]) {
     vc = self.presentingViewController;
@@ -178,6 +181,7 @@ static const NSUInteger kMaxPicUploadTries = 3;
 }
 
 - (IBAction)settingsButtonPressed:(id)sender {
+  [[NSNotificationCenter defaultCenter] postNotificationName:kUserProfileHasChangedNotification object:nil];
   [self.navigationController popViewControllerAnimated:YES];
 }
 

@@ -18,6 +18,7 @@
 #import "STNavigationBar.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+#import "Notifications.h"
 #import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
@@ -28,6 +29,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)loadFriendsFromNetwork;
 - (void)loadFriendsFromDataStore;
 - (void)settingsButtonPressed:(NSNotification*)notification;
+- (void)userProfileHasChanged:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* friendsArray;
 @end
@@ -59,6 +61,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
                                            selector:@selector(settingsButtonPressed:)
                                                name:kSettingsButtonPressedNotification
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(userProfileHasChanged:)
+                                               name:kUserProfileHasChangedNotification
+                                             object:nil];
   if ([AccountManager sharedManager].currentUser) {
     [self loadFriendsFromNetwork];
     [self loadFriendsFromDataStore];
@@ -85,6 +91,8 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
   if (!friendsArray_.count)
     [self loadFriendsFromNetwork];
+  
+  NSLog(@"user: %@", [AccountManager sharedManager].currentUser);
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -261,6 +269,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)settingsButtonPressed:(NSNotification*)notification {
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
+}
+
+- (void)userProfileHasChanged:(NSNotification*)notification {
+  [self.tableView reloadData];
 }
 
 @end

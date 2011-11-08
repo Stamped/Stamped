@@ -109,7 +109,9 @@ static const CGFloat kUserImageSize = 41.0;
   if (user_ != user) {
     [user_ release];
     user_ = [user retain];
-    
+  }
+
+  if (user) {
     customView_.userImageView.imageURL = user.profileImageURL;
     customView_.stampImageView.image = user.stampImage;
     customView_.usernameLabel.text = user.screenName;
