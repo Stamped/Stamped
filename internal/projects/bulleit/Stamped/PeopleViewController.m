@@ -91,8 +91,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
   if (!friendsArray_.count)
     [self loadFriendsFromNetwork];
-  
-  NSLog(@"user: %@", [AccountManager sharedManager].currentUser);
 }
 
 - (void)viewDidAppear:(BOOL)animated {
