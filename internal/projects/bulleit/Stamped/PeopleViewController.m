@@ -235,8 +235,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
 
   if (indexPath.section == 1 && indexPath.row == 0) {
-    FindFriendsViewController* vc = (FindFriendsViewController*)findFriendsNavigationController_.viewControllers.lastObject;
-    vc.followedUsers = [NSMutableArray arrayWithArray:self.friendsArray];
     StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
     [delegate.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
     return;

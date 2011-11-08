@@ -49,8 +49,6 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UIButton* signInFacebookConnectButton;
 @property (nonatomic, retain) IBOutlet UIButton* inviteViaEmailButton;
 
-@property (nonatomic, retain) NSMutableArray* followedUsers;
-
 - (id)initWithFindSource:(FindFriendsSource)source;
 
 - (IBAction)done:(id)sender;

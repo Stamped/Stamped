@@ -95,6 +95,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   [navBar setButtonShown:NO];
+  [navBar setListButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
