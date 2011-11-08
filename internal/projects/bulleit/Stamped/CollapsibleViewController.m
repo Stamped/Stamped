@@ -280,7 +280,7 @@ int const SPACE_HEIGHT = 10;
 - (void)addImagesForStamps:(NSSet*)newStamps {
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
   NSArray* stampsArray = [newStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+  stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
   
   [stamps_ release];
   stamps_ = [stampsArray retain];

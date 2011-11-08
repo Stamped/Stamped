@@ -15,6 +15,7 @@
 #import "AccountManager.h"
 #import "CreditsViewController.h"
 #import "Entity.h"
+#import "FriendshipManager.h"
 #import "EditProfileViewController.h"
 #import "RelationshipsViewController.h"
 #import "Stamp.h"
@@ -270,6 +271,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - NSFetchedResultsControllerDelegate methods.
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
+  NSError* error;
+	if (![self.fetchedResultsController performFetch:&error]) {
+		// Update to handle the error appropriately.
+		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+	}
   [self.tableView reloadData];
 }
 
@@ -376,14 +382,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] + 1];
     followerCountLabel_.text = [user_.numFollowers stringValue];
 
-    // TODO(andybons): Fix this cut&paste.
-    NSFetchRequest* request = [Stamp fetchRequest];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"user.userID == %@", user_.userID]];
-    NSArray* results = [Stamp objectsWithFetchRequest:request];
-    for (Stamp* s in results)
-      s.temporary = [NSNumber numberWithBool:NO];
-
-    [Stamp.managedObjectContext save:NULL];
+    [[FriendshipManager sharedManager] followUser:user_];
   }
 
   if ([objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
@@ -393,14 +392,8 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     followButton_.hidden = NO;
     user_.numFollowers = [NSNumber numberWithInt:[user_.numFollowers intValue] - 1];
     followerCountLabel_.text = [user_.numFollowers stringValue];
-    
-    NSFetchRequest* request = [Stamp fetchRequest];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"user.userID == %@", user_.userID]];
-    NSArray* results = [Stamp objectsWithFetchRequest:request];
-    for (Stamp* s in results)
-      s.temporary = [NSNumber numberWithBool:YES];
 
-    [Stamp.managedObjectContext save:NULL];
+    [[FriendshipManager sharedManager] unfollowUser:user_];
   }
   
   if ([objectLoader.resourcePath rangeOfString:kUserStampsPath].location != NSNotFound) {
@@ -436,15 +429,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 #pragma mark - Private methods.
-
-- (void)setStampsAreTemporary:(BOOL)stampsAreTemporary {
-  stampsAreTemporary_ = stampsAreTemporary;
-  id<NSFetchedResultsSectionInfo> sectionInfo = [[fetchedResultsController_ sections] objectAtIndex:0];
-  for (Stamp* stamp in [sectionInfo objects]) {
-    stamp.temporary = [NSNumber numberWithBool:stampsAreTemporary];
-  }
-  [Stamp.managedObjectContext save:NULL];
-}
 
 - (void)addStampsRemainingLayer {
   stampsRemainingLayer_ = [[CATextLayer alloc] init];

@@ -598,7 +598,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
 
     NSArray* stampsArray = [entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO"]];
+    stampsArray = [stampsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"]];
     customView_.stamps = stampsArray;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];

@@ -389,13 +389,13 @@ typedef enum {
 }
 
 - (void)setupAlsoStampedBy {
-  if (stamp_.entityObject.stamps.count == 1) {
+  NSArray* stampsArray = [self alsoStampedByArray];
+  if (stampsArray.count == 0) {
     alsoStampedByContainer_.hidden = YES;
     return;
   }
   
   alsoStampedByContainer_.hidden = NO;
-  NSArray* stampsArray = [self alsoStampedByArray];
   alsoStampedByScrollView_.contentSize = CGSizeMake(alsoStampedByScrollView_.frame.size.width,
                                                     alsoStampedByScrollView_.frame.size.height);
   CGRect userImgFrame = CGRectMake(0.0, 0.0, 43.0, 43.0);
@@ -435,7 +435,7 @@ typedef enum {
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:YES];
   NSArray* stampsArray = [stamp_.entityObject.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
   NSString* excludedUserID = stamp_.user.userID;
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO AND user.userID != %@", excludedUserID];
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO AND user.userID != %@", excludedUserID];
   return [stampsArray filteredArrayUsingPredicate:p];
 }
 

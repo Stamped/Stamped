@@ -397,10 +397,10 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     [request setPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
     NSFetchedResultsController* fetchedResultsController =
-    [[NSFetchedResultsController alloc] initWithFetchRequest:request
-                                        managedObjectContext:[Stamp managedObjectContext]
-                                          sectionNameKeyPath:nil
-                                                   cacheName:nil];
+        [[NSFetchedResultsController alloc] initWithFetchRequest:request
+                                            managedObjectContext:[Stamp managedObjectContext]
+                                              sectionNameKeyPath:nil
+                                                       cacheName:nil];
     self.fetchedResultsController = fetchedResultsController;
     fetchedResultsController.delegate = self;
     [fetchedResultsController release];

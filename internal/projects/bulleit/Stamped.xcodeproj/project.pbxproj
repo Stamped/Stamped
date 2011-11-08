@@ -463,6 +463,7 @@
 		7ED60874141E8C9E001C499D /* CollapsibleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60873141E8C9E001C499D /* CollapsibleViewController.xib */; };
 		7ED60895141FF7CB001C499D /* FriendshipTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */; };
 		7ED608971420F69B001C499D /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED608961420F69B001C499D /* AddressBook.framework */; };
+		7ED69D4614693BA100964B3A /* FriendshipManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED69D4514693BA100964B3A /* FriendshipManager.m */; };
 		7ED6E11A1403216300D84E03 /* newstamp_btn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1181403216200D84E03 /* newstamp_btn.png */; };
 		7ED6E11B1403216300D84E03 /* newstamp_btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
@@ -1302,6 +1303,8 @@
 		7ED60893141FF7CB001C499D /* FriendshipTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendshipTableViewCell.h; sourceTree = "<group>"; };
 		7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendshipTableViewCell.m; sourceTree = "<group>"; };
 		7ED608961420F69B001C499D /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
+		7ED69D4414693BA100964B3A /* FriendshipManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendshipManager.h; sourceTree = "<group>"; };
+		7ED69D4514693BA100964B3A /* FriendshipManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendshipManager.m; sourceTree = "<group>"; };
 		7ED6E1181403216200D84E03 /* newstamp_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newstamp_btn.png; sourceTree = "<group>"; };
 		7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newstamp_btn@2x.png"; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
@@ -2737,6 +2740,8 @@
 				7EE482F013FACFC300359EEA /* STPlaceAnnotation.m */,
 				7EBBDB541441F4BC00DDEAE9 /* STStampFilterBar.h */,
 				7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */,
+				7ED69D4414693BA100964B3A /* FriendshipManager.h */,
+				7ED69D4514693BA100964B3A /* FriendshipManager.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -3584,6 +3589,7 @@
 				7E0D4EEA14662BED00F81CEC /* STViewController.m in Sources */,
 				7EB03FDC1467527C004F7A1C /* InviteFriendTableViewCell.m in Sources */,
 				7E4B8E881468C310009A33DD /* ActivityFriendTableViewCell.m in Sources */,
+				7ED69D4614693BA100964B3A /* FriendshipManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

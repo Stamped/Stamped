@@ -165,7 +165,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
   if (needToRefetch_) {
     NSError* error;
     if (![self.fetchedResultsController performFetch:&error]) {
@@ -173,7 +172,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
     }
     needToRefetch_ = NO;
+    [self.tableView reloadData];
+    [self.tableView selectRowAtIndexPath:self.selectedIndexPath
+                                animated:NO
+                          scrollPosition:UITableViewScrollPositionNone];
   }
+  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -197,7 +201,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];  
+  [super viewDidDisappear:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
