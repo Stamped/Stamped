@@ -59,6 +59,8 @@ typedef enum {
 - (void)setNumLikes:(NSUInteger)likes;
 - (void)setMainCommentContainerFrame:(CGRect)mainCommentFrame;
 - (void)handlePhotoTap:(UITapGestureRecognizer*)recognizer;
+- (void)keyboardWillAppear:(NSNotification*)notification;
+- (void)keyboardWillDisappear:(NSNotification*)notification;
 - (void)handleUserImageViewTap:(id)sender;
 - (void)renderComments;
 - (void)addComment:(Comment*)comment;
@@ -172,6 +174,7 @@ typedef enum {
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
   [commentTextField_ resignFirstResponder];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 }
 
@@ -181,6 +184,14 @@ typedef enum {
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(keyboardWillAppear:)
+                                               name:UIKeyboardWillShowNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(keyboardWillDisappear:)
+                                               name:UIKeyboardWillHideNotification
+                                             object:nil];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -231,6 +242,7 @@ typedef enum {
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.titleLabel = nil;
   self.categoryImageView = nil;
@@ -755,6 +767,14 @@ typedef enum {
   [profileViewController release];
 }
 
+- (void)handleCommentUserImageViewTap:(NSNotification*)notification {
+  StampDetailCommentView* commentView = notification.object;
+  ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
+  profileViewController.user = commentView.comment.user;
+  [self.navigationController pushViewController:profileViewController animated:YES];
+  [profileViewController release];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
@@ -931,7 +951,7 @@ typedef enum {
   User* user = nil;
   if ([urlString hasPrefix:@"@"]) {
     NSString* screenName = [urlString substringFromIndex:1];
-    user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName.lowercaseString]]; 
+    user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]]; 
   } else if (urlString.length == 24) {
     NSString* userID = url.absoluteString;
     user = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"userID == %@", userID]];
@@ -943,6 +963,56 @@ typedef enum {
   profileViewController.user = user;
   [self.navigationController pushViewController:profileViewController animated:YES];
   [profileViewController release];
+}
+
+#pragma mark - Keyboard notifications.
+
+- (void)keyboardWillAppear:(NSNotification*)notification {
+  if (self.modalViewController)
+    return;
+
+  CGRect keyboardFrame = [[[notification userInfo] valueForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(keyboardFrame);
+  if (!alsoStampedByContainer_.hidden) {
+    CGRect stampedByFrame = alsoStampedByContainer_.frame;
+    stampedByFrame.origin.y = CGRectGetMaxY(activityView_.frame) + 17;
+    alsoStampedByContainer_.frame = stampedByFrame;
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(alsoStampedByContainer_.frame) + 10);
+  } else {
+    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
+                                         CGRectGetMaxY(activityView_.frame) + 10);
+  }
+  
+  CGFloat contentHeight = alsoStampedByContainer_.hidden ?
+      CGRectGetMaxY(activityView_.frame) + 10 : CGRectGetMaxY(alsoStampedByContainer_.frame) + 10;
+
+  [UIView animateWithDuration:0.3
+                        delay:0.0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
+                     scrollView_.contentOffset = CGPointMake(0, contentHeight - scrollHeight);
+                     commentTextField_.frame = CGRectOffset(CGRectInset(commentTextField_.frame, 27, 0), -27, 0);
+                     sendButton_.alpha = 1.0;
+                   }
+                   completion:nil];
+}
+
+- (void)keyboardWillDisappear:(NSNotification*)notification {
+  if (self.modalViewController)
+    return;
+
+  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(bottomToolbar_.frame);
+  [UIView animateWithDuration:0.3
+                        delay:0.0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
+                     commentTextField_.frame = CGRectOffset(CGRectInset(commentTextField_.frame, -27, 0), 27, 0);
+                     sendButton_.alpha = 0.0;
+                   }
+                   completion:nil];
 }
 
 #pragma mark - UIActionSheetDelegate methods.
@@ -1040,45 +1110,6 @@ typedef enum {
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
   sendButton_.enabled = commentTextField_.text.length > 0;
-  CGFloat keyboardHeight = 216;
-  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - keyboardHeight;
-  if (!alsoStampedByContainer_.hidden) {
-    CGRect stampedByFrame = alsoStampedByContainer_.frame;
-    stampedByFrame.origin.y = CGRectGetMaxY(activityView_.frame) + 17;
-    alsoStampedByContainer_.frame = stampedByFrame;
-    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
-                                         CGRectGetMaxY(alsoStampedByContainer_.frame) + 10);
-  } else {
-    scrollView_.contentSize = CGSizeMake(CGRectGetWidth(scrollView_.bounds),
-                                         CGRectGetMaxY(activityView_.frame) + 10);
-  }
-  
-  CGFloat contentHeight = alsoStampedByContainer_.hidden ?
-  CGRectGetMaxY(activityView_.frame) + 10 : CGRectGetMaxY(alsoStampedByContainer_.frame) + 10;
-  
-  [UIView animateWithDuration:0.3
-                        delay:0.0
-                      options:UIViewAnimationOptionBeginFromCurrentState
-                   animations:^{
-                     scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
-                     scrollView_.contentOffset = CGPointMake(0, contentHeight - scrollHeight);
-                     commentTextField_.frame = CGRectOffset(CGRectInset(commentTextField_.frame, 27, 0), -27, 0);
-                     sendButton_.alpha = 1.0;
-                   }
-                   completion:nil];
-}
-
-- (void)textFieldDidEndEditing:(UITextField*)textField {
-  CGFloat scrollHeight = CGRectGetHeight(self.view.frame) - CGRectGetHeight(bottomToolbar_.frame);
-  [UIView animateWithDuration:0.3
-                        delay:0.0
-                      options:UIViewAnimationOptionBeginFromCurrentState
-                   animations:^{
-                     scrollView_.frame = CGRectMake(0, 0, 320, scrollHeight);
-                     commentTextField_.frame = CGRectOffset(CGRectInset(commentTextField_.frame, -27, 0), 27, 0);
-                     sendButton_.alpha = 0.0;
-                   }
-                   completion:nil];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
