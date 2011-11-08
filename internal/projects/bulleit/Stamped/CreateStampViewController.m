@@ -209,7 +209,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.twitterAuth = nil;
   self.twitterClient = nil;
   self.disclosureButton = nil;
-  self.creditPickerController.creditTextField = nil;
   self.creditPickerController.delegate = nil;
   self.creditPickerController = nil;
   self.detailedEntity = nil;
@@ -415,7 +414,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
 - (void)viewDidUnload {
   self.reasoningText = reasoningTextView_.text;
-  self.creditedUserText = self.creditTextField.text;
+  self.creditedUserText = [creditPickerController_.usersSeparatedByCommas stringByReplacingOccurrencesOfString:@"," withString:@" "];
 
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -441,7 +440,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
   self.disclosureButton = nil;
-  self.creditPickerController.creditTextField = nil;
   stampsRemainingLayer_ = nil;
   self.fbClient = nil;
   self.fbButton = nil;
@@ -1074,6 +1072,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 #pragma mark - Twitter methods.
+
 - (GTMOAuthAuthentication*)createAuthentication {
   NSString* myConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
   NSString* myConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
