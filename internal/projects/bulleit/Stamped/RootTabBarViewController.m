@@ -368,6 +368,7 @@
   if (!newViewController || newViewController == self.selectedViewController)
     return;
 
+  // TODO(andybons): iOS 5 child view controllers.
   [self.selectedViewController viewWillDisappear:NO];
   [self.selectedViewController.view removeFromSuperview];
   [self.selectedViewController viewDidDisappear:NO];

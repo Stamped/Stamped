@@ -14,6 +14,7 @@
 @synthesize loadingIndicator = loadingIndicator_;
 @synthesize reloadButton = reloadButton_;
 @synthesize shareButton = shareButton_;
+@synthesize toolbar = toolbar_;
 
 #pragma mark - View lifecycle
 
@@ -21,6 +22,7 @@
   self.loadingIndicator = nil;
   self.reloadButton = nil;
   self.shareButton = nil;
+  self.toolbar = nil;
   [super dealloc];
 }
 
@@ -46,6 +48,7 @@
   self.loadingIndicator = nil;
   self.reloadButton = nil;
   self.shareButton = nil;
+  self.toolbar = nil;
   [super viewDidUnload];
 }
 

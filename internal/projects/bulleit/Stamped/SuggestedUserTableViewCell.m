@@ -40,7 +40,6 @@ static const CGFloat kUserImageSize = 50.0;
 - (id)initWithReuseIdentifier:(NSString*)reuseIdentifier {
   self = [self initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
   if (self) {
-    self.selectionStyle = UITableViewCellSelectionStyleNone;
     self.clipsToBounds = YES;
 
     indicator_ = [[UIActivityIndicatorView alloc]
@@ -107,10 +106,6 @@ static const CGFloat kUserImageSize = 50.0;
     [self.contentView addSubview:unfollowButton_];
   }
   return self;
-}
-
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
-  [super setSelected:selected animated:animated];
 }
 
 - (void)setUser:(User*)user {

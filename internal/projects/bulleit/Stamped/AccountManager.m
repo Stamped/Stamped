@@ -38,6 +38,7 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)refreshTimerFired:(NSTimer*)theTimer;
 - (void)storeCurrentUser:(User*)user;
 - (void)storeOAuthToken:(OAuthToken*)token;
+- (void)appDidBecomeActive:(NSNotification*)notification;
 
 @property (nonatomic, retain) UINavigationController* navController;
 @property (nonatomic, retain) FirstRunViewController* firstRunViewController;
@@ -97,6 +98,10 @@ static AccountManager* sharedAccountManager_ = nil;
     oAuthRequestQueue_.delegate = self;
     oAuthRequestQueue_.concurrentRequestsLimit = 1;
     [oAuthRequestQueue_ start];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(appDidBecomeActive:)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
   }
   return self;
 }
@@ -178,8 +183,12 @@ static AccountManager* sharedAccountManager_ = nil;
     return;
   }
 
-  if ([objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    [self.firstRunViewController signInFailed:nil];
+  if ([objectLoader.response isUnauthorized] &&
+      [objectLoader.resourcePath isEqualToString:kLoginPath]) {
+    if (firstRunViewController_)
+      [self.firstRunViewController signInFailed:nil];
+    else
+      [self performSelector:@selector(logout) withObject:self afterDelay:0];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
     [self sendLoginRequest];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
@@ -402,6 +411,10 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
   if ([RKClient sharedClient].requestQueue.count == 0 && oAuthRequestQueue_.count == 0)
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+  if (queue == oAuthRequestQueue_ && queue.count == 0) {
+    NSLog(@"resuming shared client queue...");
+    [RKClient sharedClient].requestQueue.suspended = NO;
+  }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didLoadResponse:(RKResponse*)response {
@@ -420,13 +433,19 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)requestQueueWasSuspended:(RKRequestQueue*)queue {
-  NSLog(@"Request queue suspended...");
+  if (queue != oAuthRequestQueue_)
+    NSLog(@"Request queue suspended...");
 }
 
 - (void)requestQueueWasUnsuspended:(RKRequestQueue*)queue {
-  NSLog(@"Request queue unsuspended...");
+  if (queue != oAuthRequestQueue_)
+    NSLog(@"Request queue unsuspended...");
 }
 
+- (void)appDidBecomeActive:(NSNotification*)notification {
+  if (oAuthRequestQueue_.count == 0)
+    [RKClient sharedClient].requestQueue.suspended = NO;
+}
 
 #pragma mark - Logout stuff.
 

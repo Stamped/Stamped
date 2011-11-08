@@ -42,6 +42,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   self.stampsArray = nil;
   self.screenName = nil;
   self.user = nil;
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super dealloc];
 }
 

@@ -41,6 +41,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)addAnnotationForEntity:(Entity*)entity;
 - (void)mapUserTapped:(id)sender;
 - (void)mapDisclosureTapped:(id)sender;
+- (void)appDidBecomeActive:(NSNotification*)notification;
 
 - (void)managedObjectContextChanged:(NSNotification*)notification;
 
@@ -49,6 +50,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @property (nonatomic, assign) StampFilterType selectedFilterType;
 @property (nonatomic, copy) NSString* searchQuery;
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
+@property (nonatomic, retain) NSIndexPath* selectedIndexPath;
 
 @end
 
@@ -60,6 +62,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
 @synthesize fetchedResultsController = fetchedResultsController_;
+@synthesize selectedIndexPath = selectedIndexPath_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
@@ -67,6 +70,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   self.searchQuery = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
+  self.selectedIndexPath = nil;
   [super dealloc];
 }
 
@@ -134,6 +138,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
                                            selector:@selector(managedObjectContextChanged:)
                                                name:NSManagedObjectContextObjectsDidChangeNotification
                                              object:[Entity managedObjectContext]];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(appDidBecomeActive:)
+                                               name:UIApplicationDidBecomeActiveNotification
+                                             object:nil];
   mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
   mapView_.alpha = 0.0;
   mapView_.delegate = self;
@@ -157,7 +165,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [super viewWillAppear:animated];
   if (needToRefetch_) {
     NSError* error;
     if (![self.fetchedResultsController performFetch:&error]) {
@@ -165,7 +172,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
     }
     needToRefetch_ = NO;
+    [self.tableView reloadData];
+    [self.tableView selectRowAtIndexPath:self.selectedIndexPath
+                                animated:NO
+                          scrollPosition:UITableViewScrollPositionNone];
   }
+  [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -181,7 +193,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-
+  self.selectedIndexPath = [self.tableView indexPathForSelectedRow];
   mapView_.showsUserLocation = NO;
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
@@ -189,7 +201,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-  [super viewDidDisappear:animated];  
+  [super viewDidDisappear:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -442,7 +454,11 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - NSFetchedResultsControllerDelegate methods.
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
+  self.selectedIndexPath = [self.tableView indexPathForSelectedRow];
   [self.tableView reloadData];
+  [self.tableView selectRowAtIndexPath:self.selectedIndexPath
+                              animated:NO
+                        scrollPosition:UITableViewScrollPositionNone];
 }
 
 #pragma mark - Table view delegate
@@ -555,6 +571,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
+}
+
+- (void)appDidBecomeActive:(NSNotification*)notification {
+  [self.tableView reloadData];
 }
 
 #pragma mark - MKMapViewDelegate Methods

@@ -598,6 +598,7 @@ typedef enum {
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   loading_ = NO;
   self.resultsArray = objects;
+  
   [self reloadTableData];
   self.currentRequest = nil;
 }

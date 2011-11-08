@@ -41,6 +41,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
   self.peopleArray = nil;
   self.user = nil;
   self.tableView = nil;
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [super dealloc];
 }
 
@@ -61,6 +62,7 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
   self.peopleArray = nil;
   self.user = nil;
   self.tableView = nil;
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {

@@ -473,7 +473,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)addSectionStampedBy {
   // Make sure that the current user follows someone who stamped this entity.
-  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO"];
+  NSPredicate* p = [NSPredicate predicateWithFormat:@"temporary == NO AND deleted == NO"];
   NSArray* stamps = [[entityObject_.stamps allObjects] filteredArrayUsingPredicate:p];
   if (stamps.count == 0)
     return;

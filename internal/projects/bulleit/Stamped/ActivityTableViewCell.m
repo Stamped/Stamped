@@ -52,7 +52,8 @@ static const CGFloat kActivityBadgeSize = 21.0;
     [headerTextLayer_ release];
 
     UIImage* disclosureImage = [UIImage imageNamed:@"disclosure_arrow"];
-    disclosureArrowImageView_ = [[UIImageView alloc] initWithFrame:CGRectZero];
+    disclosureArrowImageView_ = [[UIImageView alloc] initWithFrame:CGRectMake(290,
+        (CGRectGetHeight(self.frame) / 2) - (CGRectGetHeight(disclosureArrowImageView_.frame) / 2) - 1, 8, 11)];
     disclosureArrowImageView_.contentMode = UIViewContentModeCenter;
     disclosureArrowImageView_.image = disclosureImage;
     disclosureArrowImageView_.highlightedImage = [Util whiteMaskedImageUsingImage:disclosureImage];

@@ -95,6 +95,7 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   STNavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
   [navBar setButtonShown:NO];
+  [navBar setListButtonShown:NO];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -397,10 +398,10 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     [request setPredicate:[NSPredicate predicateWithFormat:@"deleted == NO AND user.userID == %@", user_.userID]];
     NSFetchedResultsController* fetchedResultsController =
-    [[NSFetchedResultsController alloc] initWithFetchRequest:request
-                                        managedObjectContext:[Stamp managedObjectContext]
-                                          sectionNameKeyPath:nil
-                                                   cacheName:nil];
+        [[NSFetchedResultsController alloc] initWithFetchRequest:request
+                                            managedObjectContext:[Stamp managedObjectContext]
+                                              sectionNameKeyPath:nil
+                                                       cacheName:nil];
     self.fetchedResultsController = fetchedResultsController;
     fetchedResultsController.delegate = self;
     [fetchedResultsController release];

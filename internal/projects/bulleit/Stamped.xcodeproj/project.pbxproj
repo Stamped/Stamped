@@ -145,6 +145,7 @@
 		7E49683A1457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968361457654600ACD36B /* hdr_searchIconOnly_button_selected@2x.png */; };
 		7E49683B1457654600ACD36B /* hdr_searchIconOnly_button.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968371457654600ACD36B /* hdr_searchIconOnly_button.png */; };
 		7E49683C1457654600ACD36B /* hdr_searchIconOnly_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E4968381457654600ACD36B /* hdr_searchIconOnly_button@2x.png */; };
+		7E4B8E881468C310009A33DD /* ActivityFriendTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E4B8E871468C310009A33DD /* ActivityFriendTableViewCell.m */; };
 		7E514A9A13C97A9700EEC598 /* GenericItemDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7E514A9813C97A9700EEC598 /* GenericItemDetailViewController.xib */; };
 		7E52A58B13FC7DB500209A95 /* camera_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E52A58913FC7DB500209A95 /* camera_button@2x.png */; };
 		7E52A58C13FC7DB500209A95 /* profile_detail_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E52A58A13FC7DB500209A95 /* profile_detail_button@2x.png */; };
@@ -462,6 +463,7 @@
 		7ED60874141E8C9E001C499D /* CollapsibleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7ED60873141E8C9E001C499D /* CollapsibleViewController.xib */; };
 		7ED60895141FF7CB001C499D /* FriendshipTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */; };
 		7ED608971420F69B001C499D /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED608961420F69B001C499D /* AddressBook.framework */; };
+		7ED69D4614693BA100964B3A /* FriendshipManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7ED69D4514693BA100964B3A /* FriendshipManager.m */; };
 		7ED6E11A1403216300D84E03 /* newstamp_btn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1181403216200D84E03 /* newstamp_btn.png */; };
 		7ED6E11B1403216300D84E03 /* newstamp_btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
@@ -927,6 +929,8 @@
 		7E4968381457654600ACD36B /* hdr_searchIconOnly_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hdr_searchIconOnly_button@2x.png"; sourceTree = "<group>"; };
 		7E4B8E0C14687D42009A33DD /* StampedModel 13.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 13.xcdatamodel"; sourceTree = "<group>"; };
 		7E4B8E0D14687F78009A33DD /* StampedModel 14.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "StampedModel 14.xcdatamodel"; sourceTree = "<group>"; };
+		7E4B8E861468C310009A33DD /* ActivityFriendTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivityFriendTableViewCell.h; sourceTree = "<group>"; };
+		7E4B8E871468C310009A33DD /* ActivityFriendTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivityFriendTableViewCell.m; sourceTree = "<group>"; };
 		7E514A9813C97A9700EEC598 /* GenericItemDetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = GenericItemDetailViewController.xib; path = ../Interfaces/GenericItemDetailViewController.xib; sourceTree = "<group>"; };
 		7E52A58913FC7DB500209A95 /* camera_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "camera_button@2x.png"; sourceTree = "<group>"; };
 		7E52A58A13FC7DB500209A95 /* profile_detail_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "profile_detail_button@2x.png"; sourceTree = "<group>"; };
@@ -1299,6 +1303,8 @@
 		7ED60893141FF7CB001C499D /* FriendshipTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendshipTableViewCell.h; sourceTree = "<group>"; };
 		7ED60894141FF7CB001C499D /* FriendshipTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendshipTableViewCell.m; sourceTree = "<group>"; };
 		7ED608961420F69B001C499D /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
+		7ED69D4414693BA100964B3A /* FriendshipManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendshipManager.h; sourceTree = "<group>"; };
+		7ED69D4514693BA100964B3A /* FriendshipManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendshipManager.m; sourceTree = "<group>"; };
 		7ED6E1181403216200D84E03 /* newstamp_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newstamp_btn.png; sourceTree = "<group>"; };
 		7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newstamp_btn@2x.png"; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
@@ -2520,6 +2526,8 @@
 				7E806FFE14312ED2003AF77D /* ActivityTodoTableViewCell.m */,
 				7E8070001431327A003AF77D /* ActivityFollowTableViewCell.h */,
 				7E8070011431327A003AF77D /* ActivityFollowTableViewCell.m */,
+				7E4B8E861468C310009A33DD /* ActivityFriendTableViewCell.h */,
+				7E4B8E871468C310009A33DD /* ActivityFriendTableViewCell.m */,
 			);
 			name = Activity;
 			sourceTree = "<group>";
@@ -2732,6 +2740,8 @@
 				7EE482F013FACFC300359EEA /* STPlaceAnnotation.m */,
 				7EBBDB541441F4BC00DDEAE9 /* STStampFilterBar.h */,
 				7EBBDB551441F4BC00DDEAE9 /* STStampFilterBar.m */,
+				7ED69D4414693BA100964B3A /* FriendshipManager.h */,
+				7ED69D4514693BA100964B3A /* FriendshipManager.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -3578,6 +3588,8 @@
 				7E0D4EE31465B58800F81CEC /* STTableViewController.m in Sources */,
 				7E0D4EEA14662BED00F81CEC /* STViewController.m in Sources */,
 				7EB03FDC1467527C004F7A1C /* InviteFriendTableViewCell.m in Sources */,
+				7E4B8E881468C310009A33DD /* ActivityFriendTableViewCell.m in Sources */,
+				7ED69D4614693BA100964B3A /* FriendshipManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3709,8 +3721,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3728,8 +3740,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				PROVISIONING_PROFILE = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
@@ -3748,8 +3760,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3766,8 +3778,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				PROVISIONING_PROFILE = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;

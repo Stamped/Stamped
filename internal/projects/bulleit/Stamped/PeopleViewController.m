@@ -18,6 +18,7 @@
 #import "STNavigationBar.h"
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
+#import "Notifications.h"
 #import "ProfileViewController.h"
 #import "StampedAppDelegate.h"
 #import "SettingsViewController.h"
@@ -28,6 +29,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)loadFriendsFromNetwork;
 - (void)loadFriendsFromDataStore;
 - (void)settingsButtonPressed:(NSNotification*)notification;
+- (void)userProfileHasChanged:(NSNotification*)notification;
 
 @property (nonatomic, copy) NSArray* friendsArray;
 @end
@@ -42,6 +44,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   self.friendsArray = nil;
   self.settingsNavigationController = nil;
   self.findFriendsNavigationController = nil;
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
 }
 
@@ -57,6 +60,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(settingsButtonPressed:)
                                                name:kSettingsButtonPressedNotification
+                                             object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(userProfileHasChanged:)
+                                               name:kUserProfileHasChangedNotification
                                              object:nil];
   if ([AccountManager sharedManager].currentUser) {
     [self loadFriendsFromNetwork];
@@ -76,12 +83,13 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  
   [self loadFriendsFromDataStore];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   if (delegate.navigationController.navigationBarHidden)
     [delegate.navigationController setNavigationBarHidden:NO animated:YES];
 
-  if (!friendsArray_)
+  if (!friendsArray_.count)
     [self loadFriendsFromNetwork];
 }
 
@@ -95,7 +103,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 
 - (void)viewWillDisappear:(BOOL)animated {
   [super viewWillDisappear:animated];
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   STNavigationBar* navBar = (STNavigationBar*)delegate.navigationController.navigationBar;
   [navBar setSettingsButtonShown:NO];
@@ -234,8 +241,6 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
 
   if (indexPath.section == 1 && indexPath.row == 0) {
-    FindFriendsViewController* vc = (FindFriendsViewController*)findFriendsNavigationController_.viewControllers.lastObject;
-    vc.followedUsers = [NSMutableArray arrayWithArray:self.friendsArray];
     StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
     [delegate.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
     return;
@@ -262,6 +267,10 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
 - (void)settingsButtonPressed:(NSNotification*)notification {
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController presentModalViewController:settingsNavigationController_ animated:YES];
+}
+
+- (void)userProfileHasChanged:(NSNotification*)notification {
+  [self.tableView reloadData];
 }
 
 @end
