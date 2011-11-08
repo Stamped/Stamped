@@ -41,6 +41,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)addAnnotationForEntity:(Entity*)entity;
 - (void)mapUserTapped:(id)sender;
 - (void)mapDisclosureTapped:(id)sender;
+- (void)appDidBecomeActive:(NSNotification*)notification;
 
 - (void)managedObjectContextChanged:(NSNotification*)notification;
 
@@ -137,6 +138,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
                                            selector:@selector(managedObjectContextChanged:)
                                                name:NSManagedObjectContextObjectsDidChangeNotification
                                              object:[Entity managedObjectContext]];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(appDidBecomeActive:)
+                                               name:UIApplicationDidBecomeActiveNotification
+                                             object:nil];
   mapView_ = [[MKMapView alloc] initWithFrame:self.view.frame];
   mapView_.alpha = 0.0;
   mapView_.delegate = self;
@@ -562,6 +567,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   [delegate.navigationController pushViewController:detailViewController animated:YES];
   [detailViewController release];
+}
+
+- (void)appDidBecomeActive:(NSNotification*)notification {
+  [self.tableView reloadData];
 }
 
 #pragma mark - MKMapViewDelegate Methods

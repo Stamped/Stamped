@@ -33,6 +33,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (void)loadEventsFromDataStore;
 - (void)loadEventsFromNetwork;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
+- (void)appDidBecomeActive:(NSNotification*)notification;
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
 @property (nonatomic, assign) NSUInteger numRows;
 @end
@@ -45,6 +46,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 #pragma mark - View lifecycle
 
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
@@ -53,12 +55,17 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(appDidBecomeActive:)
+                                               name:UIApplicationDidBecomeActiveNotification
+                                             object:nil];
   [self loadEventsFromDataStore];
   [self loadEventsFromNetwork];
 }
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
@@ -146,6 +153,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   }
 
   numRows_ = numObjects;
+}
+
+- (void)appDidBecomeActive:(NSNotification*)notification {
+  [self.tableView reloadData];
 }
 
 #pragma mark - Table view data source
