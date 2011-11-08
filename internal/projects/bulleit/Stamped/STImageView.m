@@ -96,7 +96,7 @@
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
   self.image = [UIImage imageWithData:self.downloadData];
   self.downloadData = nil;
-  if ([self.delegate respondsToSelector:@selector(STImageView:didLoadImage:)]) {
+  if ([(id)self.delegate respondsToSelector:@selector(STImageView:didLoadImage:)]) {
     [self.delegate STImageView:self didLoadImage:self.image];
   }
 }

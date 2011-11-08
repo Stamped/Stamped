@@ -51,4 +51,5 @@ extern NSString* const kKeychainTwitterToken;
 + (UIViewController*)detailViewControllerForSearchResult:(SearchResult*)searchResult;
 
 + (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum;
++ (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
 @end
