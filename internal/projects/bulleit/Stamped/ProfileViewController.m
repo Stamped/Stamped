@@ -269,45 +269,14 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 #pragma mark - NSFetchedResultsControllerDelegate methods.
 
-- (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
-  [self.tableView beginUpdates];
-}
-
-- (void)controller:(NSFetchedResultsController*)controller 
-   didChangeObject:(id)anObject
-       atIndexPath:(NSIndexPath*)indexPath
-     forChangeType:(NSFetchedResultsChangeType)type
-      newIndexPath:(NSIndexPath*)newIndexPath {
-  
-  UITableView* tableView = self.tableView;
-  
-  switch(type) {
-    case NSFetchedResultsChangeInsert:
-      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-      
-    case NSFetchedResultsChangeDelete:
-      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-      
-    case NSFetchedResultsChangeUpdate:
-      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
-      break;
-      
-    case NSFetchedResultsChangeMove:
-      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-  }
-}
-
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-  [self.tableView endUpdates];
+  [self.tableView reloadData];
 }
 
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
   Stamp* stamp = [fetchedResultsController_ objectAtIndexPath:indexPath];
-  [(id)cell setStamp:stamp];
+  if ([cell respondsToSelector:@selector(setStamp:)])
+    [(id)cell setStamp:stamp];
 }
 
 #pragma mark - Table view data source
@@ -456,11 +425,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     [followIndicator_ stopAnimating];
     if ([response.bodyAsString isEqualToString:@"false"]) {
       followButton_.hidden = NO;
-      [currentUser addFollowingObject:user_];
+      [currentUser removeFollowingObject:user_];
       self.stampsAreTemporary = YES;
     } else {
       unfollowButton_.hidden = NO;
-      [currentUser removeFollowingObject:user_];
+      [currentUser addFollowingObject:user_];
       self.stampsAreTemporary = NO;
     }
   }
@@ -559,7 +528,6 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   followingCountLabel_.text = [user_.numFriends stringValue];
   stampLayer_.contents = (id)user_.stampImage.CGImage;
   [self updateStampsRemainingLayer];
-  [self.tableView reloadData];
 }
 
 - (void)loadUserInfoFromNetwork {
