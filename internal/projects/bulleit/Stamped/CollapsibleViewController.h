@@ -11,9 +11,10 @@
 @class CollapsibleViewController;
 
 @protocol CollapsibleViewControllerDelegate
+@optional
+- (void)callMoveArrowOnCollapsibleViewController:(CollapsibleViewController*)cvc;
 @required
 - (void)collapsibleViewController:(CollapsibleViewController*)collapsibleVC willChangeHeightBy:(CGFloat)delta;
-- (void)callMoveArrowOnCollapsibleViewController:(CollapsibleViewController*)cvc;
 @end
 
 @interface CollapsibleViewController : UIViewController {
@@ -36,6 +37,7 @@
 - (void)expandAnimated;
 - (void)swapArrowImage;
 - (void)moveArrowViewIfBehindImageView:(UIImageView*)view;
+- (void)handleTap:(id)sender;
   
 - (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key;
 - (void)addText:(NSString*)text forKey:(NSString*)key;
@@ -59,6 +61,7 @@
 @property (nonatomic, retain) NSString* expandedFooterText;
 @property (nonatomic, retain) NSMutableDictionary* contentDict;
 @property (nonatomic, assign) BOOL isCollapsed;
+@property (nonatomic, assign) BOOL isSilent;
 @property (nonatomic, assign) CGFloat collapsedHeight;
 @property (nonatomic, retain) NSArray* stamps;
 
