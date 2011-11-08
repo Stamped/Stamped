@@ -90,6 +90,10 @@
     [self.imageView addGestureRecognizer:gr];
     [gr release];
   }
+  else {
+    [self setupMainActionsContainer];
+    [self setupSectionViews];
+  }
 }
 
 - (void)viewDidLoad {

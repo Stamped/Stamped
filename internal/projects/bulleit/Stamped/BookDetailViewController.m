@@ -55,6 +55,10 @@
     [self.gradientView addGestureRecognizer:gr];
     [gr release];
   }
+  else {
+    [self setupMainActionsContainer];
+    [self setupSectionViews];
+  }
 }
 
 - (void)viewDidLoad {
