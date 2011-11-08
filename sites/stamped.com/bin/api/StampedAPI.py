@@ -2033,7 +2033,7 @@ class StampedAPI(AStampedAPI):
 
         # Remove activity?
         self._activityDB.removeActivity('comment', authUserId, \
-            commentId=comment.ƒcomment_id)
+            commentId=comment.comment_id)
 
         # Increment comment count on stamp
         self._stampDB.updateStampStats( \
