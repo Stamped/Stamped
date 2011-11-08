@@ -502,7 +502,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 }
 
 - (void)updateStampCounterLayer {
-  NSString* stampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft stringValue];
+  NSNumber* numStamps = [AccountManager sharedManager].currentUser.numStampsLeft;
+  NSString* stampsLeft = numStamps.stringValue;
+  if (numStamps.integerValue > 999)
+    stampsLeft = @"999";
+
   if (!stampsLeft)
     return;
   
