@@ -38,6 +38,7 @@
 @synthesize expandedFooterText = expandedFooterText_; 
 @synthesize imageView = imageView_;
 @synthesize stamps = stamps_;
+@synthesize isSilent = isSilent_;
 
 int const LABEL_HEIGHT = 20;
 int const IMAGE_HEIGHT = 40;
@@ -47,6 +48,7 @@ int const SPACE_HEIGHT = 10;
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   if (self) {
     isCollapsed_ = YES;
+    isSilent_ = NO;
     collapsedHeight_ = 40.0f;
 
     if ([nibNameOrNil isEqualToString:@"CollapsiblePreviewController"])
@@ -81,6 +83,9 @@ int const SPACE_HEIGHT = 10;
 
 - (void)viewDidLoad {
   self.arrowView.image = [UIImage imageNamed:@"eDetail-arrow-down"];
+  UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+  [self.headerView addGestureRecognizer:gr];
+  [gr release];
 }
 
 - (void)viewDidUnload {
@@ -105,32 +110,58 @@ int const SPACE_HEIGHT = 10;
 #pragma mark - Collapsing and expanding
 
 - (void)collapse {
-  [self.delegate collapsibleViewController:self willChangeHeightBy:collapsedHeight_-self.view.bounds.size.height];
+  if (!self.isSilent)
+    [self.delegate collapsibleViewController:self willChangeHeightBy:collapsedHeight_-self.view.bounds.size.height];
   self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y,
                                self.view.frame.size.width, collapsedHeight_);
-  
-  if (self.footerLabel) {
+  if (self.footerLabel && ![self.footerLabel.text isEqualToString:@""]) {
     self.footerLabel.text = self.collapsedFooterText;
-    CGFloat delta = CGRectGetMinX(self.footerLabel.frame) + [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
+    CGFloat delta = CGRectGetMinX(self.footerLabel.frame) + 
+    [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
     arrowView_.frame = CGRectOffset(arrowView_.frame, delta, 0);
   }
+  if (!isCollapsed_)
+    isCollapsed_ = YES;
 }
 
 - (void)expand {
   CGFloat newHeight = 40.f + [self contentHeight] + SPACE_HEIGHT;
-  if (self.footerView) newHeight += self.footerView.frame.size.height - SPACE_HEIGHT;
-  
-  [self.delegate collapsibleViewController:self willChangeHeightBy:newHeight - self.view.bounds.size.height];
-  
+  if (self.footerView)
+    newHeight += self.footerView.frame.size.height - SPACE_HEIGHT;
+  if (!self.isSilent)
+    [self.delegate collapsibleViewController:self willChangeHeightBy:newHeight - self.view.bounds.size.height];
   self.view.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y,
                                self.view.frame.size.width, newHeight);
-  
-  if (self.footerLabel) {
+  if (self.footerLabel && ![self.footerLabel.text isEqualToString:@""]) {
     self.footerLabel.text = self.expandedFooterText;
     CGFloat delta = CGRectGetMinX(self.footerLabel.frame) + [self.footerLabel.text sizeWithFont:self.footerLabel.font].width - CGRectGetMinX(arrowView_.frame);
     arrowView_.frame = CGRectOffset(arrowView_.frame, delta, 0);
   }
-  isCollapsed_ = NO;
+  if (isCollapsed_)
+    isCollapsed_ = NO;
+}
+
+- (void)collapseAnimated {
+  [UIView animateWithDuration:0.25 
+                   animations:^{[self collapse];
+                                arrowView_.transform = CGAffineTransformMakeRotation(M_PI);}
+                   completion:^(BOOL finished){[self swapArrowImage];}];
+}
+
+- (void)expandAnimated {  
+  [UIView animateWithDuration:0.25
+                   animations:^{[self expand];
+                                arrowView_.transform = CGAffineTransformMakeRotation(M_PI);}
+                   completion:^(BOOL finished){[self swapArrowImage];}];
+}
+
+- (void)setIsCollapsed:(BOOL)collapsed {
+  isCollapsed_ = collapsed;
+  if (isCollapsed_) {
+    [self collapseAnimated];
+  } else {
+    [self expandAnimated];
+  }
 }
 
 // So the shadow always comes from the top edge.
@@ -141,30 +172,6 @@ int const SPACE_HEIGHT = 10;
   } else {
     arrowView_.transform = CGAffineTransformMakeRotation(0);
     arrowView_.image = [UIImage imageNamed:@"eDetail-arrow-up"]; 
-  }
-}
-
-- (void)collapseAnimated {
-  [UIView animateWithDuration:0.25 
-                   animations:^{ [self collapse];
-                                 arrowView_.transform = CGAffineTransformMakeRotation(M_PI);}
-                   completion:^(BOOL finished) { [self swapArrowImage]; } ];
-}
-
-- (void)expandAnimated {  
-  [UIView animateWithDuration:0.25
-                   animations:^{ [self expand];
-                                 arrowView_.transform = CGAffineTransformMakeRotation(M_PI); }
-                   completion:^(BOOL finished) { [self swapArrowImage]; } ];
-}
-
-
-- (void)setIsCollapsed:(BOOL)collapsed {
-  isCollapsed_ = collapsed;
-  if (isCollapsed_) {
-    [self collapseAnimated];
-  } else {
-    [self expandAnimated];
   }
 }
 
@@ -377,8 +384,6 @@ int const SPACE_HEIGHT = 10;
   for (id content in self.contentDict.objectEnumerator) {
     if ([content respondsToSelector:@selector(view)]) {
       contentHeight += ((UIViewController*)content).view.frame.size.height;
-//      if ([content isKindOfClass:[PairedLabel class]])
-//        NSLog(@"\nlabel:%@ \nheight: %f", ((PairedLabel*)content).valueLabel.text, ((UIViewController*)content).view.frame.size.height);
     } else {
       contentHeight += ((UIView*)content).frame.size.height;
     }
@@ -425,15 +430,9 @@ int const SPACE_HEIGHT = 10;
   }
 }
 
-#pragma mark - Touch events
+#pragma mark - Touches
 
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {}
-
-- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {}
-
-- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {}
-
-- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+- (void)handleTap:(id)sender {
   if (self.arrowView.hidden == NO)
     self.isCollapsed = !isCollapsed_;
 }
