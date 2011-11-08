@@ -240,7 +240,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (IBAction)inviteFriendViaEmail:(id)sender {
   MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
   vc.mailComposeDelegate = self;
-  [vc setSubject:@"Check out my recommendations on Stamped."];
+  [vc setSubject:@"Check out Stamped."];
   [vc setMessageBody:@"I'm using Stamped, a new way to recommend only what you like best. You should check it out by downloading the iPhone app here:<br/><br/><a href=\"http://stamped.com/download\">stamped.com/download</a>" isHTML:YES];
   [self presentModalViewController:vc animated:YES];
   [vc release];

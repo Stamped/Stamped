@@ -45,6 +45,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)managedObjectContextChanged:(NSNotification*)notification;
 
 @property (nonatomic, assign) BOOL userPannedMap;
+@property (nonatomic, assign) BOOL needToRefetch;
 @property (nonatomic, assign) StampFilterType selectedFilterType;
 @property (nonatomic, copy) NSString* searchQuery;
 @property (nonatomic, retain) NSFetchedResultsController* fetchedResultsController;
@@ -54,6 +55,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 @implementation InboxViewController
 
 @synthesize mapView = mapView_;
+@synthesize needToRefetch = needToRefetch_;
 @synthesize userPannedMap = userPannedMap_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
@@ -76,7 +78,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   [self.stampFilterBar.searchField resignFirstResponder];
   self.tableView.scrollEnabled = NO;
   self.fetchedResultsController.fetchRequest.predicate =
-      [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count > 0)"];
+      [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"];
   NSError* error;
 	if (![self.fetchedResultsController performFetch:&error]) {
 		// Update to handle the error appropriately.
@@ -156,6 +158,14 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewWillAppear:(BOOL)animated {
   [super viewWillAppear:animated];
+  if (needToRefetch_) {
+    NSError* error;
+    if (![self.fetchedResultsController performFetch:&error]) {
+      // Update to handle the error appropriately.
+      NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+    }
+    needToRefetch_ = NO;
+  }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -189,7 +199,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)managedObjectContextChanged:(NSNotification*)notification {
   NSSet* objects = [NSSet setWithSet:[notification.userInfo objectForKey:NSUpdatedObjectsKey]];
   objects = [objects setByAddingObjectsFromSet:[notification.userInfo objectForKey:NSInsertedObjectsKey]];
-
+  
   NSSet* stamps = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
     return ([obj isMemberOfClass:[Stamp class]] && ![[(Stamp*)obj temporary] boolValue] && ![[(Stamp*)obj deleted] boolValue]);
   }];
@@ -197,11 +207,22 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   for (Stamp* s in stamps) {
     Entity* e = s.entityObject;
     NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
-    NSArray* sortedStamps = [e.stamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-    Stamp* latestStamp = [sortedStamps objectAtIndex:0];
-    if (!e.mostRecentStampDate || [latestStamp.created timeIntervalSinceDate:e.mostRecentStampDate] > 0)
-      e.mostRecentStampDate = latestStamp.created;
+    NSArray* filteredStamps = [[e.stamps allObjects] filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"temporary == NO && deleted == NO"]];
+    filteredStamps = [filteredStamps sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
+    Stamp* latestStamp = [filteredStamps objectAtIndex:0];
+    e.mostRecentStampDate = latestStamp.created;
   }
+  
+  NSSet* allStamps = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
+    if ([obj isMemberOfClass:[Stamp class]]) {
+      *stop = YES;
+      return YES;
+    }
+    return NO;
+  }];
+
+  if (allStamps.count > 0)
+    needToRefetch_ = YES;
 }
 
 - (void)loadStampsFromDataStore {
@@ -210,7 +231,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"mostRecentStampDate" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
     [request setPredicate:
-        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count > 0)"]];
+        [NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"]];
     [request setFetchBatchSize:20];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
@@ -279,7 +300,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)filterStamps {
   NSMutableArray* predicates = [NSMutableArray array];
-  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count > 0)"]];
+  [predicates addObject:[NSPredicate predicateWithFormat:@"(SUBQUERY(stamps, $s, $s.temporary == NO AND $s.deleted == NO).@count != 0)"]];
 
   if (searchQuery_.length) {
     NSArray* searchTerms = [searchQuery_ componentsSeparatedByString:@" "];

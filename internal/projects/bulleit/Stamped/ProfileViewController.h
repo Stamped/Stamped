@@ -34,6 +34,7 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* followIndicator;
 
 @property (nonatomic, retain) User* user;
+@property (nonatomic, assign) BOOL stampsAreTemporary;
 
 - (IBAction)followButtonPressed:(id)sender;
 - (IBAction)unfollowButtonPressed:(id)sender;
