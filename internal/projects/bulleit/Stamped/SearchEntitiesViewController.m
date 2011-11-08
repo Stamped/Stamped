@@ -569,6 +569,7 @@ typedef enum {
       return;
     }
     NSMutableArray* array = [NSMutableArray arrayWithCapacity:10];
+    NSMutableArray* terms = [NSMutableArray array];
     for (NSUInteger i = 0; i < MIN(10, [body count]); ++i) {
       id object = [body objectAtIndex:i];
       SearchResult* result = [[[SearchResult alloc] init] autorelease];
@@ -577,7 +578,10 @@ typedef enum {
       result.subtitle = [object valueForKey:@"subtitle"];
       result.searchID = [object valueForKey:@"search_id"];
       result.entityID = [object valueForKey:@"entity_id"];
-      [array addObject:result];
+      if (![terms containsObject:result.title]) {
+        [array addObject:result];
+        [terms addObject:result.title];
+      }
     }
     if (currentSearchFilter_ != SearchFilterNone) {
       NSPredicate* predicate = [NSPredicate predicateWithFormat:@"category == %@",
@@ -597,8 +601,9 @@ typedef enum {
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   loading_ = NO;
+
   self.resultsArray = objects;
-  
+
   [self reloadTableData];
   self.currentRequest = nil;
 }
