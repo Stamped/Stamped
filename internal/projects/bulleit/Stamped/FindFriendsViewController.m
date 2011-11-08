@@ -137,6 +137,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
+  if ([facebookClient_.sessionDelegate isEqual:self])
+    facebookClient_.sessionDelegate = nil;
   self.authentication = nil;
   self.twitterClient = nil;
   self.twitterFriends = nil;
@@ -212,6 +214,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)viewDidUnload {
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
+  if ([facebookClient_.sessionDelegate isEqual:self])
+    facebookClient_.sessionDelegate = nil;
   self.twitterClient = nil;
   self.twitterFriends = nil;
   self.contactFriends = nil;

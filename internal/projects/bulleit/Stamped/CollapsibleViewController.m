@@ -84,7 +84,7 @@ int const SPACE_HEIGHT = 10;
 - (void)viewDidLoad {
   self.arrowView.image = [UIImage imageNamed:@"eDetail-arrow-down"];
   UITapGestureRecognizer* gr = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
-  [self.headerView addGestureRecognizer:gr];
+  [self.view addGestureRecognizer:gr];
   [gr release];
 }
 
