@@ -45,4 +45,5 @@
   CFRelease(style);
   return [string autorelease];
 }
+
 @end

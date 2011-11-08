@@ -513,12 +513,12 @@ typedef enum {
     NSArray* coordinates = [stamp_.imageDimensions componentsSeparatedByString:@","];
     CGFloat width = [(NSString*)[coordinates objectAtIndex:0] floatValue];
     CGFloat height = [(NSString*)[coordinates objectAtIndex:1] floatValue];
-    
-    stampPhotoView_.frame = CGRectMake(leftPadding,
-                                      CGRectGetMaxY(commentLabel.frame) + 8,
-                                      200, 200 * (height / width));
 
-    mainCommentFrame.size.height += CGRectGetHeight(stampPhotoView_.bounds) + 10;
+    stampPhotoView_.frame = CGRectMake(leftPadding,
+                                       CGRectGetMaxY(commentLabel.frame) + 8,
+                                       200, floorf(200 * (height / width)));
+    CGFloat addedHeight = CGRectGetHeight(stampPhotoView_.bounds);
+    mainCommentFrame.size.height += addedHeight;
     UITapGestureRecognizer* recognizer =
         [[UITapGestureRecognizer alloc] initWithTarget:self
                                                 action:@selector(handlePhotoTap:)];

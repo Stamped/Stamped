@@ -307,8 +307,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath {
   Stamp* stamp = [fetchedResultsController_ objectAtIndexPath:indexPath];
-  if ([cell respondsToSelector:@selector(setStamp:)])
-    [(id)cell setStamp:stamp];
+  [(id)cell setStamp:stamp];
 }
 
 #pragma mark - Table view data source

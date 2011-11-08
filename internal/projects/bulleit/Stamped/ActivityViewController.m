@@ -14,6 +14,7 @@
 #import "AccountManager.h"
 #import "ActivityCommentTableViewCell.h"
 #import "ActivityCreditTableViewCell.h"
+#import "ActivityFriendTableViewCell.h"
 #import "ActivityLikeTableViewCell.h"
 #import "ActivityTodoTableViewCell.h"
 #import "ActivityFollowTableViewCell.h"
@@ -73,7 +74,6 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     NSFetchRequest* request = [Event fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
     [request setSortDescriptors:[NSArray arrayWithObject:descriptor]];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"stamp != NIL"]];
     NSFetchedResultsController* fetchedResultsController =
         [[NSFetchedResultsController alloc] initWithFetchRequest:request
                                             managedObjectContext:[Event managedObjectContext]
@@ -172,6 +172,8 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     reuseIdentifier = @"TodoIdentifier";
   } else if ([event.genre isEqualToString:@"follower"]) {
     reuseIdentifier = @"FollowIdentifier";
+  } else if ([event.genre isEqualToString:@"friend"]) {
+    reuseIdentifier = @"FriendIdentifier";
   }
 
   UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
@@ -186,6 +188,8 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
       cell = [[[ActivityTodoTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
     } else if ([reuseIdentifier isEqualToString:@"FollowIdentifier"]) {
       cell = [[[ActivityFollowTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
+    } else if ([reuseIdentifier isEqualToString:@"FriendIdentifier"]) {
+      cell = [[[ActivityFriendTableViewCell alloc] initWithReuseIdentifier:reuseIdentifier] autorelease];
     }
   }
 
@@ -215,6 +219,11 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     return fmaxf(52.0, stringSize.height + 57);
   } else if ([event.genre isEqualToString:@"restamp"]) {
     return 80.0;
+  } else if ([event.genre isEqualToString:@"friend"]) {
+    CGSize stringSize = [event.subject sizeWithFont:[UIFont fontWithName:@"Helvetica" size:12]
+                                  constrainedToSize:CGSizeMake(210, MAXFLOAT)
+                                      lineBreakMode:UILineBreakModeWordWrap];
+    return fmaxf(52.0, stringSize.height + 57);
   }
 
   return 55.0;
@@ -227,7 +236,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
     return;
 
   UIViewController* detailViewController = nil;
-  if ([event.genre isEqualToString:@"follower"]) {
+  if ([event.genre isEqualToString:@"follower"] || [event.genre isEqualToString:@"friend"]) {
     detailViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController" bundle:nil];
     [(ProfileViewController*)detailViewController setUser:event.user];
   } else {
