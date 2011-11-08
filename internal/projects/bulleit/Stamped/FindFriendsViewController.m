@@ -22,6 +22,7 @@
 #import "STSearchField.h"
 #import "StampedAppDelegate.h"
 #import "FriendshipTableViewCell.h"
+#import "FriendshipManager.h"
 #import "InviteFriendTableViewCell.h"
 #import "ProfileViewController.h"
 #import "Stamp.h"
@@ -450,8 +451,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)followButtonPressed:(id)sender {
   UITableViewCell* cell = [self cellFromSubview:sender];
   User* user = (User*)[(id)cell user];
-  User* currentUser = [AccountManager sharedManager].currentUser;
-  [currentUser addFollowingObject:user];
   [(id)cell indicator].center = [(id)cell followButton].center;
   [(id)cell followButton].hidden = YES;
   [[(id)cell indicator] startAnimating];
@@ -461,8 +460,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)unfollowButtonPressed:(id)sender {
   UITableViewCell* cell = [self cellFromSubview:sender];
   User* user = (User*)[(id)cell user];
-  User* currentUser = [AccountManager sharedManager].currentUser;
-  [currentUser removeFollowingObject:user];
   [(id)cell indicator].center = [(id)cell unfollowButton].center;
   [(id)cell unfollowButton].hidden = YES;
   [[(id)cell indicator] startAnimating];
@@ -1121,13 +1118,16 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   } else if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath] ||
              [objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
     User* user = [objects objectAtIndex:0];
-    NSFetchRequest* request = [Stamp fetchRequest];
-    [request setPredicate:[NSPredicate predicateWithFormat:@"user.userID == %@", user.userID]];
-    NSArray* results = [Stamp objectsWithFetchRequest:request];
-    for (Stamp* s in results)
-      s.temporary = [NSNumber numberWithBool:(objectLoader.resourcePath == kFriendshipRemovePath)];
+    if ([objectLoader.resourcePath isEqualToString:kFriendshipCreatePath])
+      [[FriendshipManager sharedManager] followUser:user];
+    else
+      [[FriendshipManager sharedManager] unfollowUser:user];
 
     for (UITableViewCell* cell in tableView_.visibleCells) {
+      if (![cell isMemberOfClass:[FriendshipTableViewCell class]] &&
+          ![cell isMemberOfClass:[SuggestedUserTableViewCell class]]) {
+        continue;
+      }
       FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
       if (friendCell.user == user) {
         [friendCell.indicator stopAnimating];
@@ -1167,6 +1167,11 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       [objectLoader.resourcePath isEqualToString:kFriendshipRemovePath]) {
     User* currentUser = [AccountManager sharedManager].currentUser;
     for (UITableViewCell* cell in tableView_.visibleCells) {
+      if (![cell isMemberOfClass:[FriendshipTableViewCell class]] &&
+          ![cell isMemberOfClass:[SuggestedUserTableViewCell class]]) {
+        continue;
+      }
+
       FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
       if (friendCell.indicator.isAnimating)
         [friendCell.indicator stopAnimating];
