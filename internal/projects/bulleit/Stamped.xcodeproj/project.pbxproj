@@ -468,6 +468,9 @@
 		7ED69D4D1469878300964B3A /* addFriends_icons@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D491469878300964B3A /* addFriends_icons@2x.png */; };
 		7ED69D4E1469878300964B3A /* addFriends_profilePic.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D4A1469878300964B3A /* addFriends_profilePic.png */; };
 		7ED69D4F1469878300964B3A /* addFriends_profilePic@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D4B1469878300964B3A /* addFriends_profilePic@2x.png */; };
+		7ED69D531469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D501469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf */; };
+		7ED69D541469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D511469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf */; };
+		7ED69D551469945F00964B3A /* TitlingGothicFB-StandSky.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ED69D521469945F00964B3A /* TitlingGothicFB-StandSky.ttf */; };
 		7ED6E11A1403216300D84E03 /* newstamp_btn.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1181403216200D84E03 /* newstamp_btn.png */; };
 		7ED6E11B1403216300D84E03 /* newstamp_btn@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */; };
 		7EDA5FF513F5705300F23B13 /* OAuthToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDA5FF413F5705300F23B13 /* OAuthToken.m */; };
@@ -515,8 +518,6 @@
 		7EFDC9A313F865C600589E11 /* PeopleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFDC9A113F865C600589E11 /* PeopleViewController.xib */; };
 		7EFE8F2813C39FA200324F34 /* InboxViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2613C39FA100324F34 /* InboxViewController.m */; };
 		7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F2713C39FA100324F34 /* InboxViewController.xib */; };
-		7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3213C3AFA300324F34 /* TGLight.otf */; };
-		7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */; };
 		7EFE8FBE13C4B58500324F34 /* RootTabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */; };
 		7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */; };
 		CB0DCB571427AC95009CB682 /* learnmore_star_grey@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB0DCB551427AC95009CB682 /* learnmore_star_grey@2x.png */; };
@@ -1313,6 +1314,9 @@
 		7ED69D491469878300964B3A /* addFriends_icons@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "addFriends_icons@2x.png"; sourceTree = "<group>"; };
 		7ED69D4A1469878300964B3A /* addFriends_profilePic.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = addFriends_profilePic.png; sourceTree = "<group>"; };
 		7ED69D4B1469878300964B3A /* addFriends_profilePic@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "addFriends_profilePic@2x.png"; sourceTree = "<group>"; };
+		7ED69D501469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = fbDWeRlKQCgbrziKfMsl.ttf; sourceTree = "<group>"; };
+		7ED69D511469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = fbEiMTd1F3B3c35Z4OrK.ttf; sourceTree = "<group>"; };
+		7ED69D521469945F00964B3A /* TitlingGothicFB-StandSky.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TitlingGothicFB-StandSky.ttf"; sourceTree = "<group>"; };
 		7ED6E1181403216200D84E03 /* newstamp_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = newstamp_btn.png; sourceTree = "<group>"; };
 		7ED6E1191403216200D84E03 /* newstamp_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "newstamp_btn@2x.png"; sourceTree = "<group>"; };
 		7EDA5FF313F5705300F23B13 /* OAuthToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthToken.h; sourceTree = "<group>"; };
@@ -1372,8 +1376,6 @@
 		7EFE8F2513C39FA100324F34 /* InboxViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = InboxViewController.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7EFE8F2613C39FA100324F34 /* InboxViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = InboxViewController.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		7EFE8F2713C39FA100324F34 /* InboxViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = InboxViewController.xib; path = ../Interfaces/InboxViewController.xib; sourceTree = "<group>"; };
-		7EFE8F3213C3AFA300324F34 /* TGLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = TGLight.otf; path = ../Resources/TGLight.otf; sourceTree = "<group>"; };
-		7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "TitlingGothicFBComp-Reg.otf"; path = "../Resources/TitlingGothicFBComp-Reg.otf"; sourceTree = "<group>"; };
 		7EFE8FBB13C4B58500324F34 /* RootTabBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTabBarViewController.h; sourceTree = "<group>"; };
 		7EFE8FBC13C4B58500324F34 /* RootTabBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTabBarViewController.m; sourceTree = "<group>"; };
 		7EFE8FBD13C4B58500324F34 /* RootTabBarViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = RootTabBarViewController.xib; path = ../Interfaces/RootTabBarViewController.xib; sourceTree = "<group>"; };
@@ -2277,9 +2279,10 @@
 		7EC0177C13C3754300ABE6E2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				7ED69D501469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf */,
+				7ED69D511469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf */,
+				7ED69D521469945F00964B3A /* TitlingGothicFB-StandSky.ttf */,
 				7E2267D213D501CB00657A66 /* StampedModel.xcdatamodeld */,
-				7EFE8F3213C3AFA300324F34 /* TGLight.otf */,
-				7EFE8F3313C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf */,
 				7EC0177D13C3754300ABE6E2 /* Info.plist */,
 				7EC0177E13C3754300ABE6E2 /* InfoPlist.strings */,
 				7EC0178113C3754300ABE6E2 /* Stamped-Prefix.pch */,
@@ -2988,8 +2991,6 @@
 				7EC0178013C3754300ABE6E2 /* InfoPlist.strings in Resources */,
 				7EC0178913C3754300ABE6E2 /* MainWindow.xib in Resources */,
 				7EFE8F2913C39FA200324F34 /* InboxViewController.xib in Resources */,
-				7EFE8F3413C3AFA300324F34 /* TGLight.otf in Resources */,
-				7EFE8F3513C3AFA300324F34 /* TitlingGothicFBComp-Reg.otf in Resources */,
 				7EFE8FBF13C4B58500324F34 /* RootTabBarViewController.xib in Resources */,
 				7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */,
 				7EAC166F13C547B6009A600A /* app_launcher_icon@2x.png in Resources */,
@@ -3476,6 +3477,9 @@
 				7ED69D4D1469878300964B3A /* addFriends_icons@2x.png in Resources */,
 				7ED69D4E1469878300964B3A /* addFriends_profilePic.png in Resources */,
 				7ED69D4F1469878300964B3A /* addFriends_profilePic@2x.png in Resources */,
+				7ED69D531469945F00964B3A /* fbDWeRlKQCgbrziKfMsl.ttf in Resources */,
+				7ED69D541469945F00964B3A /* fbEiMTd1F3B3c35Z4OrK.ttf in Resources */,
+				7ED69D551469945F00964B3A /* TitlingGothicFB-StandSky.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,7 +20,7 @@
 #import "User.h"
 #import "Util.h"
 
-static NSString* const kTitleFontString = @"TGLight";
+static NSString* const kTitleFontString = @"TitlingGothicFBComp-Light";
 static NSString* const kCreateFavoritePath = @"/favorites/create.json";
 static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 static const CGFloat kTitleMaxWidth = 210.0;

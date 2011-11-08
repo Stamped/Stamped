@@ -57,8 +57,9 @@
 	<string>MainWindow</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>TGLight.otf</string>
-		<string>TitlingGothicFBComp-Reg.otf</string>
+		<string>fbEiMTd1F3B3c35Z4OrK.ttf</string>
+		<string>fbDWeRlKQCgbrziKfMsl.ttf</string>
+		<string>TitlingGothicFB-StandSky.ttf</string>
 	</array>
 	<key>UIPrerenderedIcon</key>
 	<true/>

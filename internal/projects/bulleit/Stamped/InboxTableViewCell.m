@@ -26,7 +26,7 @@
 
 NSString* const kInboxTableDidScrollNotification = @"InboxTableDidScrollNotification";
 
-static NSString* const kTitleFontString = @"TGLight";
+static NSString* const kTitleFontString = @"TitlingGothicFBComp-Light";
 static const CGFloat kTitleFontSize = 47.0;
 static NSString* const kUserNameFontString = @"Helvetica-Bold";
 static NSString* const kCommentFontString = @"Helvetica";
