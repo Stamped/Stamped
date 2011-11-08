@@ -87,8 +87,9 @@
 }
 
 - (IBAction)FAQButtonPressed:(id)sender {
-  WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/faq/"]];
+  WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/faq-mobile.html/"]];
   [self.navigationController pushViewController:vc animated:YES];
+  [vc hideToolbar:YES];
   [vc release];
 }
 
@@ -109,6 +110,13 @@
   [vc release];
 }
 
+- (IBAction)feedbackButtonPressed:(id)sender {
+  WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://dev.stamped.com/feedback-mobile.html/"]];
+  [self.navigationController pushViewController:vc animated:YES];
+  vc.webView.scalesPageToFit = YES;
+  vc.shareButton.hidden = YES;
+  [vc release];
+}
 
 
 #pragma mark - UIActionSheetDelegate methods.

@@ -20,5 +20,6 @@
 - (IBAction)aboutUsButtonPressed:(id)sender;
 - (IBAction)FAQButtonPressed:(id)sender;
 - (IBAction)legalButtonPressed:(id)sender;
+- (IBAction)feedbackButtonPressed:(id)sender;
 
 @end
