@@ -19,6 +19,7 @@
 #import "ProfileViewController.h"
 #import "InboxTableViewCell.h"
 #import "UserImageView.h"
+#import "STStampFilterBar.h"
 
 static const CGFloat kMapUserImageSize = 32.0;
 static NSString* const kUserStampsPath = @"/collections/user.json";
@@ -44,29 +45,27 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 
 @implementation StampListViewController
 
-@synthesize tableView = tableView_;
 @synthesize stampsAreTemporary = stampsAreTemporary_;
 @synthesize user = user_;
 @synthesize oldestInBatch = oldestInBatch_;
 @synthesize selectedFilterType = selectedFilterType_;
 @synthesize searchQuery = searchQuery_;
-@synthesize stampFilterBar = stampFilterBar_;
 @synthesize userPannedMap = userPannedMap_;
 @synthesize mapView = mapView_;
 @synthesize fetchedResultsController = fetchedResultsController_;
 
 - (id)init {
   self = [self initWithNibName:@"StampListViewController" bundle:nil];
-  if (self) {}
+  if (self) {
+    self.disableReload = YES;
+  }
   return self;
 }
 
 - (void)dealloc {
   self.user = nil;
-  self.tableView = nil;
   self.oldestInBatch = nil;
   self.searchQuery = nil;
-  self.stampFilterBar = nil;
   self.fetchedResultsController.delegate = nil;
   self.fetchedResultsController = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -80,8 +79,8 @@ static NSString* const kUserStampsPath = @"/collections/user.json";
 #pragma mark - View lifecycle
 
 - (void)viewWillAppear:(BOOL)animated {
-  [tableView_ deselectRowAtIndexPath:tableView_.indexPathForSelectedRow
-                            animated:animated];
+  [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow
+                                animated:animated];
   [super viewWillAppear:animated];
 }
 

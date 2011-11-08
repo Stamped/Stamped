@@ -16,6 +16,7 @@
 @property (nonatomic, retain) IBOutlet UITableView* tableView;
 @property (nonatomic, retain) IBOutlet STStampFilterBar* stampFilterBar;
 
+@property (nonatomic, assign) BOOL disableReload;
 @property (nonatomic, assign) BOOL shouldReload;
 @property (nonatomic, assign) BOOL hasHeaders;
 @property (nonatomic, assign) BOOL isLoading;
