@@ -384,7 +384,10 @@ def _setBody(user, activity, emailAddress):
     params['blurb'] = activity['blurb']
 
     # HTML Encode the bio?
-    params['bio'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
+    if 'bio' not in params:
+        params['bio'] = ''
+    else:
+        params['bio'].replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&#39;')
 
     params['image_url_92'] = params['image_url'].replace('.jpg', '-92x92.jpg')
 
