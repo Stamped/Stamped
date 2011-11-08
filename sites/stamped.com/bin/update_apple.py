@@ -99,7 +99,8 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
         aids.add(entity_id)
         
         utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
-        matcher.addOne(entity)
+        if not options.noop:
+            matcher.addOne(entity)
         
         if entity.artist_id is not None:
             artist_id = int(entity.artist_id)
@@ -115,12 +116,13 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
                 artist_id = int(artist.aid)
                 if artist_id in aids:
                     continue
-                aids.add(artist_id)
                 
+                aids.add(artist_id)
                 appleRSS.parse_artist(artist)
                 
-                utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
-                matcher.addOne(artist)
+                utils.log("%s) %s (%s)" % (artist.subcategory, artist.title, artist.aid))
+                if not options.noop:
+                    matcher.addOne(artist)
 
 if __name__ == '__main__':
     main()
