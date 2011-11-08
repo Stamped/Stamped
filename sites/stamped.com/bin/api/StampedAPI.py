@@ -488,10 +488,13 @@ class StampedAPI(AStampedAPI):
             return False
 
         users = self._userDB.findUsersByTwitter(twitterIds)
+
+        followers = self._friendshipDB.getFollowers(authUserId)
         
         userIds = []
         for user in users:
-            userIds.append(user.user_id)
+            if user.user_id not in followers:
+                userIds.append(user.user_id)
 
         activity                    = Activity()
         activity.genre              = 'friend'
@@ -514,10 +517,13 @@ class StampedAPI(AStampedAPI):
             return False
 
         users = self._userDB.findUsersByFacebook(facebookIds)
+
+        followers = self._friendshipDB.getFollowers(authUserId)
         
         userIds = []
         for user in users:
-            userIds.append(user.user_id)
+            if user.user_id not in followers:
+                userIds.append(user.user_id)
 
         activity                    = Activity()
         activity.genre              = 'friend'
@@ -1299,7 +1305,8 @@ class StampedAPI(AStampedAPI):
         credit = []
         creditedUserIds = []
         if creditData != None:
-            ### TODO: Filter out non-ASCII data
+
+            ### TODO: Filter out non-ASCII data for credit
 
             creditedUsers = self._userDB.lookupUsers(None, creditData)
             
@@ -1589,7 +1596,7 @@ class StampedAPI(AStampedAPI):
             for creditedUser in stamp.credit:
                 previouslyCredited.append(creditedUser.user_id)
 
-            ### TODO: Filter out non-ASCII data
+            ### TODO: Filter out non-ASCII data for credit
 
             creditedUsers = self._userDB.lookupUsers(None, creditData)
 
