@@ -243,6 +243,7 @@ static NSString* const kFriendsPath = @"/temp/friends.json";
   if (indexPath.section == 1 && indexPath.row == 0) {
     StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
     [delegate.navigationController presentModalViewController:findFriendsNavigationController_ animated:YES];
+    [((FindFriendsViewController*)[findFriendsNavigationController_.viewControllers objectAtIndex:0]) didDisplayAsModal]; 
     return;
   }
   ProfileViewController* profileViewController = [[ProfileViewController alloc] initWithNibName:@"ProfileViewController"

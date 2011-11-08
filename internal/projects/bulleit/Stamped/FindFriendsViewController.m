@@ -57,6 +57,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)setSearchFieldHidden:(BOOL)hidden animated:(BOOL)animated;
 - (GTMOAuthAuthentication*)createAuthentication;
 - (void)signInToTwitter;
+- (void)signOutOfTwitter;
+- (void)signInToFacebook;
+- (void)signOutOfFacebook;
 - (void)sendRelationshipChangeRequestWithPath:(NSString*)path forUser:(User*)user;
 - (void)followButtonPressed:(id)sender;
 - (void)unfollowButtonPressed:(id)sender;
@@ -72,7 +75,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)findStampedFriendsFromTwitter:(NSArray*)twitterIDs;
 - (void)findStampedFriendsFromFacebook:(NSArray*)facebookIDs;
 - (void)findStampedFriendsFromEmails:(NSArray*)emails andNumbers:(NSArray*)numbers;
-- (void)signInToFacebook;
 - (void)checkForEndlessSignIn;
 - (void)loadSuggestedUsers;
 - (void)connectTwitterFollowers:(NSArray*)followers;
@@ -133,6 +135,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   self.authentication = nil;
   self.twitterClient = nil;
   self.twitterFriends = nil;
@@ -169,6 +173,13 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [self.tableView reloadData];
 }
 
+- (void)didDisplayAsModal {
+  if (self.findSource == FindFriendsSourceTwitter)
+    [self findFromTwitter:self];
+  else if (self.findSource == FindFriendsSourceFacebook)
+    [self findFromFacebook:self];
+}
+
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.invitedContacts = [NSMutableArray array];
@@ -199,6 +210,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (void)viewDidUnload {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   self.twitterClient = nil;
   self.twitterFriends = nil;
   self.contactFriends = nil;
@@ -221,7 +234,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.signInFacebookConnectButton = nil;
   self.inviteViaEmailButton = nil;
 
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [[NSNotificationCenter defaultCenter] removeObserver:self]; 
 
   [super viewDidUnload];
 }
@@ -258,7 +271,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (IBAction)findFromStamped:(id)sender {
   self.signInTwitterView.hidden = YES;
   self.signInFacebookView.hidden = YES;
-  [self setSearchFieldHidden:NO animated:YES];
+  [self setSearchFieldHidden:NO animated:NO];
   tableView_.hidden = NO;
   self.stampedFriends = nil;
   contactsButton_.selected = NO;
@@ -341,6 +354,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.authentication = auth;
     [self fetchCurrentUser];
   } else {
+    [self signOutOfTwitter];
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = YES;
     self.signInTwitterView.hidden = NO;
@@ -358,11 +372,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [searchField_ resignFirstResponder];
   [self adjustNippleToView:facebookButton_];
   self.findSource = FindFriendsSourceFacebook;
-  
-  if (facebookFriends_) {
-    [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
-    [self.tableView reloadData];
-  }
 
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] 
@@ -371,12 +380,18 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     self.facebookClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
   
+  if (facebookFriends_) {
+    [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
+    [self.tableView reloadData];
+  }
+  
   if (!self.facebookClient.isSessionValid) {
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = NO;
     self.signInTwitterView.hidden = YES;
     return;
   }
+  
   self.signInFacebookView.hidden = YES;
   [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
   [tableView_ reloadData];
@@ -820,6 +835,9 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID {
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:username forKey:@"TwitterUsername"];
+  [defaults synchronize];
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterLinkPath
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
@@ -863,7 +881,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
     [defaults removeObjectForKey:@"FBName"];
-    [defaults removeObjectForKey:@"FBid"];
     
     [defaults synchronize];
     
@@ -877,9 +894,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     }
     self.facebookFriends = nil;
     // If we're watching, fade out the table.
-    if (self.findSource == FindFriendsSourceFacebook) {
+    if (self.findSource == FindFriendsSourceFacebook && self.tableView.hidden == NO) {
       self.searchFieldHidden = YES;
       self.signInFacebookView.hidden = NO;
+      self.signInTwitterView.hidden = YES;
       [UIView animateWithDuration:0.4
                        animations:^{ self.tableView.alpha = 0.0; }
                        completion:^(BOOL finished) {
@@ -895,6 +913,34 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       [self.signInFacebookActivityIndicator stopAnimating];
       self.signInFacebookConnectButton.enabled = YES;
     }
+  }
+}
+
+- (void)signOutOfTwitter {
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
+  [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
+  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"TwitterUsername"];
+  [[NSUserDefaults standardUserDefaults] synchronize]; 
+  self.twitterFriends = nil;
+  // If we're watching, fade out the table.
+  if (self.findSource == FindFriendsSourceTwitter && self.tableView.hidden == NO) {
+    self.searchFieldHidden = YES;
+    self.signInTwitterView.hidden = NO;
+    self.signInFacebookView.hidden = YES;
+    [UIView animateWithDuration:0.4
+                     animations:^{ self.tableView.alpha = 0.0; }
+                     completion:^(BOOL finished) {
+                       [self.signInTwitterActivityIndicator stopAnimating];
+                       self.signInTwitterConnectButton.enabled = YES;
+                       self.tableView.hidden = YES;
+                       self.tableView.alpha = 1.0;
+                     }];
+  }
+  // Otherwise, just make sure the signin view isn't hidden.
+  else {
+    self.signInTwitterView.hidden = NO;
+    [self.signInTwitterActivityIndicator stopAnimating];
+    self.signInTwitterConnectButton.enabled = YES;
   }
 }
 
@@ -917,7 +963,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
-  [defaults setObject:userID forKey:@"FBid"];
   [defaults synchronize];
 }
 
@@ -989,14 +1034,11 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
-    if (response.statusCode == 401) {
-      [self.signInTwitterActivityIndicator stopAnimating];
-      self.signInTwitterConnectButton.enabled = YES;
-    }
-    NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
+    if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound && response.statusCode == 401)
+      [self signOutOfTwitter];
+    NSLog(@"HTTP error for request: %@, response: %d", request.resourcePath, response.statusCode);
     return;
   }
-
   if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
     NSLog(@"Linked Twitter successfully.");
     return;
@@ -1051,6 +1093,26 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   self.signInFacebookConnectButton.enabled = YES;
 }
 
+- (void)requestDidTimeout:(RKRequest *)request {
+  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+    [self signOutOfTwitter];
+  else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
+           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+    [self signOutOfFacebook];
+}
+
+- (void)requestDidCancelLoad:(RKRequest *)request {
+  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+    [self signOutOfTwitter];
+  else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
+           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+    [self signOutOfFacebook];
+}
+
 #pragma mark - RKObjectLoaderDelegate Methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
@@ -1073,6 +1135,11 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                          self.signInTwitterConnectButton.enabled = YES;
                        }];
     }
+    else if (!self.signInTwitterView.hidden) {
+      self.signInTwitterView.hidden = YES;
+      [self.signInTwitterActivityIndicator stopAnimating];
+      self.signInTwitterConnectButton.enabled = YES;
+    }
   }
   else if ([objectLoader.resourcePath isEqualToString:kStampedFacebookFriendsURI]) {
     self.facebookFriends = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:sortDescriptor]];
@@ -1088,7 +1155,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                          self.signInFacebookView.hidden = YES;
                          [self.signInFacebookActivityIndicator stopAnimating];
                          self.signInFacebookConnectButton.enabled = YES;
-                       }];      
+                       }];
+    }
+    else if (!self.signInFacebookView.hidden) {
+      self.signInFacebookView.hidden = YES;
+      [self.signInFacebookActivityIndicator stopAnimating];
+      self.signInFacebookConnectButton.enabled = YES;
     }
   }
   else if ([objectLoader.resourcePath isEqualToString:kStampedPhoneFriendsURI] ||

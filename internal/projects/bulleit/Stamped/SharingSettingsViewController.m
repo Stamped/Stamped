@@ -26,14 +26,27 @@
 -(void)signInToTwitter;
 -(void)signOutOfTwitter;
 -(void)fetchCurrentUser;
+
 -(void)removeFBCredentials;
+-(void)connectFacebookName:(NSString*)name userID:(NSString*)userID;
+-(void)fetchFollowerIDs:(NSString*)userIDString;
+-(void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID;
+-(void)connectTwitterFollowers:(NSArray*)followers;
+-(void)connectFacebookFriends:(NSArray*)friends;
 
 @end
 
 static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
+static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
+static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
 static NSString* const kTwitterSignOutURI = @"/account/end_session.json";
-static NSString* const kStampedLinkedAccountsURI = @"/account/linked_accounts.json";
 static NSString* const kFacebookPermissionsURI = @"/me/permissions";
+static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
+static NSString* const kStampedTwitterRemovePath = @"/account/linked/twitter/remove.json";
+static NSString* const kStampedTwitterFollowersPath = @"/account/linked/twitter/followers.json";
+static NSString* const kStampedFacebookLinkPath = @"/account/linked/facebook/update.json";
+static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/remove.json";
+static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/followers.json";
 
 @implementation SharingSettingsViewController
 
@@ -54,6 +67,8 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 #pragma mark - View lifecycle
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   self.twitterIconView = nil;
   self.fbIconView = nil;
   self.twitterConnectButton = nil;
@@ -78,6 +93,8 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 }
 
 - (void)viewDidUnload {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   self.twitterIconView = nil;
   self.fbIconView = nil;
   self.twitterConnectButton = nil;
@@ -203,15 +220,28 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 #pragma mark - Facebook
 
 - (void)signInToFacebook {
-  self.fbClient.sessionDelegate = self;
-  [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
+  if (!self.fbClient)
+    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+  
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"] 
+      && [defaults objectForKey:@"FBExpirationDateKey"]) {
+    self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+    self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+  }
+  if (!self.fbClient.isSessionValid) {
+    self.fbClient.sessionDelegate = self;
+    [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
+  }
 }
 
 - (void)signOutOfFacebook {
-//  [self.fbClient requestWithGraphPath:kFacebookPermissionsURI andParams:nil andHttpMethod:@"DELETE" andDelegate:self];
-//  [self.fbClient requestWithGraphPath:@"me/permissions" andDelegate:self];
   [self.fbClient logout:self];
   [self removeFBCredentials];
+  // Unlink the Facebook info from the user's account on the backend.
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookRemovePath delegate:self];
+  request.method = RKRequestMethodPOST;
+  [request send];
 }
 
 - (void)removeFBCredentials {
@@ -220,7 +250,6 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
     [defaults removeObjectForKey:@"FBName"];
-    [defaults removeObjectForKey:@"FBID"];
     [defaults synchronize];
     
     // Nil out the session variables to prevent
@@ -245,13 +274,19 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
 - (void)connectFacebookName:(NSString*)name userID:(NSString*)userID {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
-  [defaults setObject:userID forKey:@"FBid"];
   [defaults synchronize];
   
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath
                                                                delegate:self];
   
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}
+
+- (void)connectFacebookFriends:(NSArray*)friends {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookFriendsPath delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:[friends componentsJoinedByString:@","] forKey:@"q"];
   request.method = RKRequestMethodPOST;
   [request send];
 }
@@ -335,7 +370,11 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   [request prepareURLRequest];
   [self.authentication authorizeRequest:request.URLRequest];
   [request send];
-  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"twitterUsername"];
+  // Unlink the Twitter info from the user's account on the backend.
+  RKRequest* unlinkRequest = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterRemovePath delegate:self];
+  unlinkRequest.method = RKRequestMethodPOST;
+  [unlinkRequest send];
+  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"TwitterUsername"];
   [[NSUserDefaults standardUserDefaults] synchronize]; 
 }
 
@@ -343,6 +382,14 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterCurrentUserURI delegate:self];
   request.cachePolicy = RKRequestCachePolicyNone;
   [request prepareURLRequest];
+  [self.authentication authorizeRequest:request.URLRequest];
+  [request send];
+}
+
+- (void)fetchFollowerIDs:(NSString*)userIDString {
+  NSString* path =
+    [kTwitterFollowersURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
+  RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
   [self.authentication authorizeRequest:request.URLRequest];
   [request send];
 }
@@ -364,7 +411,7 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:username forKey:@"TwitterUsername"];
   [defaults synchronize];
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedLinkedAccountsURI
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterLinkPath
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
                     username, @"twitter_screen_name", nil];
@@ -372,21 +419,50 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   [request send];
 }
 
+- (void)connectTwitterFollowers:(NSArray*)followers {
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterFollowersPath delegate:self];
+  request.params = [NSDictionary dictionaryWithObject:[followers componentsJoinedByString:@","] forKey:@"q"];
+  request.method = RKRequestMethodPOST;
+  [request send];
+}
 
 #pragma mark - RKRequestDelegate Methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  [self updateUI];
   if (!response.isOK) {
-    if (response.statusCode == 401) {
+    if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound && response.statusCode == 401)
       [self signOutOfTwitter];
-    }
-    NSLog(@"HTTP error for request: %@, response: %@, code: %d", request.resourcePath, response.bodyAsString, response.statusCode);
+    NSLog(@"HTTP error for request: %@, response: %d", request.resourcePath, response.statusCode);
     [self updateUI];
     return;
   }
-  
-  if ([request.resourcePath isEqualToString:kStampedLinkedAccountsURI]) {
-    NSLog(@"Linked account successfully.");
+  if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
+    NSLog(@"Linked Twitter successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedTwitterRemovePath].location != NSNotFound) {
+    NSLog(@"Unlinked Twitter successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
+    NSLog(@"Linked Twitter followers successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
+    NSLog(@"Linked Facebook successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedFacebookRemovePath].location != NSNotFound) {
+    NSLog(@"Unlinked Facebook successfully.");
+    return;
+  }
+  if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
+    NSLog(@"Linked Facebook friends successfully.");
+    return;
+  }
+  if ([request.resourcePath isEqualToString:kTwitterSignOutURI]) {
+    NSLog(@"Signed out of Twitter.");
     [self updateUI];
     return;
   }
@@ -394,26 +470,44 @@ static NSString* const kFacebookPermissionsURI = @"/me/permissions";
   NSError* err = nil;
   id body = [response parsedBody:&err];
   if (err) {
-    NSLog(@"Parse error for response %@: %@", response, err);
-    [self updateUI];
-    return;
-  }
-  
-  if ([request.resourcePath isEqualToString:kTwitterSignOutURI]) {
-    NSLog(@"Signed out of Twitter.");
-    [self updateUI];
+    NSLog(@"Parse error for request %@ response %@: %@", request.resourcePath, response, err);
     return;
   }
   
   // Response for getting the current user information.
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound) {
     [self connectTwitterUserName:[body objectForKey:@"screen_name"] userID:[body objectForKey:@"id_str"]];
+    [self fetchFollowerIDs:[body objectForKey:@"id_str"]];
+  }
+  // Response for getting Twitter followers. 
+  else if ([request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound) {
+    [self connectTwitterFollowers:[body objectForKey:@"ids"]];
   }
 }
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
   NSLog(@"Error %@ for request %@", error, request.resourcePath);
   [self updateUI];
+}
+
+- (void)requestDidTimeout:(RKRequest *)request {
+  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+    [self signOutOfTwitter];
+  else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
+           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+    [self signOutOfFacebook];
+}
+
+- (void)requestDidCancelLoad:(RKRequest *)request {
+  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+    [self signOutOfTwitter];
+  else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
+           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+    [self signOutOfFacebook];
 }
 
 - (void)setButton:(UIButton *)button connected:(BOOL)connected {

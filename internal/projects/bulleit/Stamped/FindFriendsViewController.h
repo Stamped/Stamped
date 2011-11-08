@@ -60,5 +60,6 @@ typedef enum {
 - (IBAction)findFromFacebook:(id)sender;
 - (IBAction)connectToTwitterButtonPressed:(id)sender;
 - (IBAction)connectToFacebookButtonPressed:(id)sender;
+- (void)didDisplayAsModal;
 
 @end

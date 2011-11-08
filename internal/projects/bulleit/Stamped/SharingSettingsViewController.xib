@@ -269,10 +269,6 @@
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MC41AA</bytes>
 								</object>
-								<object class="NSCustomResource" key="IBUIDisabledImage" id="333942036">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">settings_sharing_button</string>
-								</object>
 								<object class="NSCustomResource" key="IBUISelectedBackgroundImage" id="78558408">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">settings_sharing_button_disconnect</string>
@@ -355,7 +351,6 @@
 								<string key="NSFrame">{{210, 104}, {90, 33}}</string>
 								<reference key="NSSuperview" ref="666428538"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:225</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">8</int>
@@ -368,7 +363,6 @@
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="191813165"/>
-								<reference key="IBUIDisabledImage" ref="333942036"/>
 								<reference key="IBUISelectedBackgroundImage" ref="78558408"/>
 								<reference key="IBUINormalBackgroundImage" ref="620049893"/>
 								<reference key="IBUIFontDescription" ref="155245079"/>
@@ -671,12 +665,12 @@
 				<string key="25.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="27.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="28.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<real value="0.0" key="28.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
+				<real value="3" key="28.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
 				<string key="29.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="30.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="31.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="32.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<real value="0.0" key="32.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
+				<real value="3" key="32.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
 				<string key="4.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="43.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="45.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -779,7 +773,6 @@
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="gradient_background.png">{320, 480}</string>
 			<string key="gray_back_button_bg@2x.png">{138, 60}</string>
-			<string key="settings_sharing_button">{16, 16}</string>
 			<string key="settings_sharing_button_connect">{16, 16}</string>
 			<string key="settings_sharing_button_disconnect">{16, 16}</string>
 			<string key="settings_sharing_facebook_off">{16, 16}</string>
