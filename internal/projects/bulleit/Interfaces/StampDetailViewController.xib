@@ -487,7 +487,7 @@
 									</object>
 									<object class="IBUIView" id="778160476">
 										<reference key="NSNextResponder" ref="749710472"/>
-										<int key="NSvFlags">290</int>
+										<int key="NSvFlags">292</int>
 										<string key="NSFrameSize">{310, 1}</string>
 										<reference key="NSSuperview" ref="749710472"/>
 										<reference key="NSWindow"/>
@@ -1470,12 +1470,6 @@
 						<string key="objectName">Button - Restamp</string>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">116</int>
-						<reference key="object" ref="778160476"/>
-						<reference key="parent" ref="749710472"/>
-						<string key="objectName">White top border</string>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">117</int>
 						<reference key="object" ref="194365560"/>
 						<object class="NSMutableArray" key="children">
@@ -1516,6 +1510,12 @@
 						<int key="objectID">125</int>
 						<reference key="object" ref="762062289"/>
 						<reference key="parent" ref="109901099"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">116</int>
+						<reference key="object" ref="778160476"/>
+						<reference key="parent" ref="749710472"/>
+						<string key="objectName">White top border</string>
 					</object>
 				</object>
 			</object>

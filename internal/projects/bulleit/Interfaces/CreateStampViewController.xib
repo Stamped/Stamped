@@ -310,7 +310,7 @@
 									</object>
 									<object class="IBUIView" id="197977392">
 										<reference key="NSNextResponder" ref="101741781"/>
-										<int key="NSvFlags">266</int>
+										<int key="NSvFlags">290</int>
 										<string key="NSFrame">{{0, -1}, {310, 1}}</string>
 										<reference key="NSSuperview" ref="101741781"/>
 										<reference key="NSWindow"/>
@@ -659,7 +659,6 @@
 						<string key="NSFrame">{{150, 362}, {20, 20}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:948</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -1366,7 +1365,6 @@
 							<string>ribbonedContainerView</string>
 							<string>scrollView</string>
 							<string>shareLabel</string>
-							<string>shelfBackground</string>
 							<string>signInFacebookActivityIndicator</string>
 							<string>signInTwitterActivityIndicator</string>
 							<string>spinner</string>
@@ -1391,7 +1389,6 @@
 							<string>UIView</string>
 							<string>UIScrollView</string>
 							<string>UILabel</string>
-							<string>UIImageView</string>
 							<string>UIActivityIndicatorView</string>
 							<string>UIActivityIndicatorView</string>
 							<string>UIActivityIndicatorView</string>
@@ -1419,7 +1416,6 @@
 							<string>ribbonedContainerView</string>
 							<string>scrollView</string>
 							<string>shareLabel</string>
-							<string>shelfBackground</string>
 							<string>signInFacebookActivityIndicator</string>
 							<string>signInTwitterActivityIndicator</string>
 							<string>spinner</string>
@@ -1485,10 +1481,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">shareLabel</string>
 								<string key="candidateClassName">UILabel</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">shelfBackground</string>
-								<string key="candidateClassName">UIImageView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">signInFacebookActivityIndicator</string>
