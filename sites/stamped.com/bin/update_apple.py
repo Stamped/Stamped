@@ -99,9 +99,11 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
         aids.add(entity_id)
         
         utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
+        entity.a_popular = True
         if not options.noop:
             matcher.addOne(entity)
         
+        # attempt to lookup artist for this entity
         if entity.artist_id is not None:
             artist_id = int(entity.artist_id)
             if artist_id in aids:
@@ -121,6 +123,7 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
                 appleRSS.parse_artist(artist)
                 
                 utils.log("%s) %s (%s)" % (artist.subcategory, artist.title, artist.aid))
+                artist.a_popular = True
                 if not options.noop:
                     matcher.addOne(artist)
 

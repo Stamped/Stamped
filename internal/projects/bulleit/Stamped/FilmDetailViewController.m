@@ -234,7 +234,7 @@
   self.imageView.layer.shadowRadius  = 4.0;
   self.imageView.layer.shadowColor   = [UIColor blackColor].CGColor;
   self.imageView.layer.shadowOpacity = 0.33;
-  CGRect imageFrame = [self frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
+  CGRect imageFrame = [Util frameForImage:self.imageView.image inImageViewAspectFit:self.imageView];
   self.imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageFrame].CGPath;
   
   [self setupMainActionsContainer];

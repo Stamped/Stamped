@@ -14,6 +14,7 @@
 #import "UIColor+Stamped.h"
 #import "Stamp.h"
 #import "User.h"
+#import "Util.h"
 #import "MediumUserImageButton.h"
 #import "StampDetailViewController.h"
 #import "StampedAppDelegate.h"
@@ -97,7 +98,8 @@ int const SPACE_HEIGHT = 10;
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
-      [self moveArrowViewIfOccluded];
+  if (delegate_ && [(id)delegate_ respondsToSelector:@selector(callMoveArrowOnCollapsibleViewController:)])
+    [self.delegate callMoveArrowOnCollapsibleViewController:self];
 }
 
 #pragma mark - Collapsing and expanding
@@ -385,16 +387,19 @@ int const SPACE_HEIGHT = 10;
   return contentHeight;
 }
 
-- (void)moveArrowViewIfOccluded {
-  if (footerLabel_.hidden == NO)
+- (void)moveArrowViewIfBehindImageView:(UIImageView*)imageView {
+  if (footerLabel_ && footerLabel_.text && ![footerLabel_.text isEqualToString:@""])
     return;
-  CGRect convertedArrowFrame = [self.arrowView convertRect:self.arrowView.frame 
-                                                    toView:self.delegate.imageView.superview];
-  CGRect imageViewFrame = self.delegate.imageView.frame;
+
+  CGRect convertedArrowFrame = [self.arrowView convertRect:self.arrowView.frame toView:imageView.superview];
+  CGRect actualImageFrame = [Util frameForImage:imageView.image inImageViewAspectFit:imageView];
+  CGSize offset = CGSizeMake(imageView.frame.size.width-actualImageFrame.size.width,
+                             imageView.frame.size.height-actualImageFrame.size.height);
+  actualImageFrame = CGRectOffset(actualImageFrame, offset.width/2, offset.height/2);
   
-  if (CGRectGetMinY(convertedArrowFrame) >= CGRectGetMinY(imageViewFrame) &&
-      CGRectGetMaxY(convertedArrowFrame) <= CGRectGetMaxY(imageViewFrame)) {
-    if (CGRectGetMinX(convertedArrowFrame) >= CGRectGetMinX(imageViewFrame)) {
+  if (CGRectGetMinY(convertedArrowFrame) >= CGRectGetMinY(actualImageFrame) &&
+      CGRectGetMaxY(convertedArrowFrame) <= CGRectGetMaxY(actualImageFrame)) {
+    if (CGRectGetMinX(convertedArrowFrame) >= CGRectGetMinX(actualImageFrame)) {
       UILabel* label = self.sectionLabel;
       CGSize size = label.frame.size;
       size.height = label.frame.size.height;
