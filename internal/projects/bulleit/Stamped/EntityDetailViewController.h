@@ -11,6 +11,7 @@
 #import "UIColor+Stamped.h"
 #import "STImageView.h"
 #import "ShowImageViewController.h"
+#import "Util.h"
 
 @class Entity;
 @class DetailedEntity;
@@ -39,8 +40,6 @@
 - (CollapsibleViewController*)makeSectionWithName:(NSString*)name;
 - (void)addSection:(CollapsibleViewController*)section;
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
-- (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
-
 
 @property (nonatomic, retain) IBOutlet UIView* mainActionsView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
@@ -52,6 +51,7 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIView* mainContentView;
 @property (nonatomic, retain) IBOutlet UIImageView* shelfImageView;
+@property (nonatomic, retain) IBOutlet UIImageView* imageView;
 
 - (void)imageViewTapped;
 

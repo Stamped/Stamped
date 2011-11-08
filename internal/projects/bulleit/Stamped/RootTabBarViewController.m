@@ -353,6 +353,7 @@
     newViewController = [viewControllers_ objectAtIndex:1];
     self.navigationItem.title = @"News";
     activityTabBarItem_.badgeValue = nil;
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
   } else if (item == mustDoTabBarItem_) {
     newViewController = [viewControllers_ objectAtIndex:2];

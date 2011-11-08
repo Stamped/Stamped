@@ -533,8 +533,6 @@
 		CB4CA26D145F17FB00621D45 /* settings_sharing_facebook_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA268145F17FB00621D45 /* settings_sharing_facebook_off@2x.png */; };
 		CB4CA26E145F17FB00621D45 /* settings_sharing_facebook_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA269145F17FB00621D45 /* settings_sharing_facebook_on@2x.png */; };
 		CB4CA26F145F17FB00621D45 /* settings_sharing_item_bg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA26A145F17FB00621D45 /* settings_sharing_item_bg@2x.png */; };
-		CB4CA274145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA271145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png */; };
-		CB4CA275145F1A2900621D45 /* settings_sharing_button_connect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA272145F1A2900621D45 /* settings_sharing_button_connect@2x.png */; };
 		CB55A86614476D9A00CEB6CC /* add_friends_button_connectfacebook_pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86114476D9A00CEB6CC /* add_friends_button_connectfacebook_pressed@2x.png */; };
 		CB55A86714476D9A00CEB6CC /* add_friends_button_connectfacebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86214476D9A00CEB6CC /* add_friends_button_connectfacebook@2x.png */; };
 		CB55A86814476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */; };
@@ -568,9 +566,7 @@
 		CB5CF1DC146465BD00DC2CBC /* share_disabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF1DA146465BB00DC2CBC /* share_disabled@2x.png */; };
 		CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */; };
 		CB7B22FB14609306004C247F /* sharing_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FA14609306004C247F /* sharing_header@2x.png */; };
-		CB7B23001461A29D004C247F /* settings_sharing_button_connect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FC1461A29D004C247F /* settings_sharing_button_connect@2x.png */; };
 		CB7B23011461A29D004C247F /* settings_sharing_button_bg_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FD1461A29D004C247F /* settings_sharing_button_bg_blue@2x.png */; };
-		CB7B23021461A29D004C247F /* settings_sharing_button_disconnect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FE1461A29D004C247F /* settings_sharing_button_disconnect@2x.png */; };
 		CB7B23071461B994004C247F /* AboutUsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB7B23051461B993004C247F /* AboutUsViewController.m */; };
 		CB7B23081461B994004C247F /* AboutUsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB7B23061461B993004C247F /* AboutUsViewController.xib */; };
 		CB7B230A1461BC44004C247F /* about_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B23091461BC43004C247F /* about_header@2x.png */; };
@@ -2694,12 +2690,12 @@
 				7EE7E35C13CCB2D600FA3B3A /* Inbox */,
 				7E0BC47413E4A07F008CC076 /* Search Entities */,
 				7E47E94C1409C00F00130B32 /* Edit Entity */,
+				7E514AA213C9824D00EEC598 /* Entity Detail */,
 				7E407E96145203A100D7847F /* Credit Picker */,
 				7E42DCBE13DB64D100AF63BE /* Create Stamp */,
 				7E668C2613D8B25300E79E14 /* Stamp Detail */,
 				7E7DDDE0145A00D40058ACA9 /* Web Browser */,
 				7E68B915141AA4F500D55021 /* Show Image */,
-				7E514AA213C9824D00EEC598 /* Entity Detail */,
 				7ED2EF5C13E0DA48007F1AFB /* Activity */,
 				7ED2EF5F13E0DBF8007F1AFB /* Todo */,
 				7ED2EF6D13E0DF83007F1AFB /* People */,
@@ -3358,12 +3354,8 @@
 				CB4CA26D145F17FB00621D45 /* settings_sharing_facebook_off@2x.png in Resources */,
 				CB4CA26E145F17FB00621D45 /* settings_sharing_facebook_on@2x.png in Resources */,
 				CB4CA26F145F17FB00621D45 /* settings_sharing_item_bg@2x.png in Resources */,
-				CB4CA274145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png in Resources */,
-				CB4CA275145F1A2900621D45 /* settings_sharing_button_connect@2x.png in Resources */,
 				CB7B22FB14609306004C247F /* sharing_header@2x.png in Resources */,
-				CB7B23001461A29D004C247F /* settings_sharing_button_connect@2x.png in Resources */,
 				CB7B23011461A29D004C247F /* settings_sharing_button_bg_blue@2x.png in Resources */,
-				CB7B23021461A29D004C247F /* settings_sharing_button_disconnect@2x.png in Resources */,
 				CB7B23081461B994004C247F /* AboutUsViewController.xib in Resources */,
 				CB7B230A1461BC44004C247F /* about_header@2x.png in Resources */,
 				CB7B230C1461BCED004C247F /* settings_about_logocard@2x.png in Resources */,
@@ -3717,8 +3709,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3736,8 +3728,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
+				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
@@ -3756,8 +3748,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3774,8 +3766,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7C660C1B-AC0D-417B-AA75-905A8016C2A3";
+				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
 				SKIP_INSTALL = NO;
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;

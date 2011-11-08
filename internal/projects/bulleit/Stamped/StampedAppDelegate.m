@@ -57,6 +57,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                         object:self
                                                       userInfo:apsInfo];
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
   }
     
@@ -89,6 +90,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
   [[NSNotificationCenter defaultCenter] postNotificationName:kPushNotificationReceivedNotification
                                                       object:self
                                                     userInfo:[userInfo objectForKey:@"aps"]];
+  [[UIApplication sharedApplication] setApplicationIconBadgeNumber:1];
   [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
 }
 

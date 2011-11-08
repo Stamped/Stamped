@@ -60,17 +60,21 @@
   self.peopleArray = nil;
   self.filteredPeopleArray = nil;
   self.pills = nil;
+  creditTextField_.delegate = nil;
+  creditTextField_ = nil;
   creditTableView_.delegate = nil;
   creditTableView_.dataSource = nil;
   [creditTableView_ release];
+  creditTableView_ = nil;
   [super dealloc];
 }
 
 - (void)setCreditTextField:(STCreditTextField*)creditTextField {
   if (creditTextField_ != creditTextField) {
-    creditTextField_.delegate = nil;
     creditTextField_ = creditTextField;
     creditTextField_.delegate = self;
+    [creditTableView_ release];
+    creditTableView_ = nil;
     
     [self decorateTextField];
   }
@@ -130,7 +134,7 @@
   for (NSString* username in people) {
     if (!username.length)
       continue;
-
+    
     [self addPerson:username];
   }
   creditTextField_.text = @"\u200b";
