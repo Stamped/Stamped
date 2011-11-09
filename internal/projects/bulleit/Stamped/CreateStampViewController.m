@@ -185,7 +185,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   if ([fbClient_.sessionDelegate isEqual:self])
-    [fbClient_ ] = nil;
+    fbClient_.sessionDelegate = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self]; 
   self.entityObject = nil;
   self.creditedUser = nil;
