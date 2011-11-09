@@ -479,7 +479,7 @@ typedef enum {
   NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 14, NULL);
   [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
-  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
+  [linkAttributes setValue:(id)[UIColor stampedBlackColor].CGColor
                     forKey:(NSString*)kCTForegroundColorAttributeName];
   CFRelease(font);
   commentLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];

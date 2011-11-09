@@ -1057,7 +1057,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
       [self sendTweetRequest:stamp];
     if (fbButton_.selected)
       [self sendFBRequest:stamp];
-    
+
     stamp.temporary = [NSNumber numberWithBool:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
                                                         object:stamp];
