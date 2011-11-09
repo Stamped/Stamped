@@ -140,6 +140,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   self.confirmButton.titleLabel.textAlignment = UITextAlignmentCenter;
   signUpScrollView_.contentSize = CGRectInset(signUpScrollView_.bounds, 0, 20).size;
   userImageView_.enabled = YES;
+  userImageView_.imageView.image = [UIImage imageNamed:@"welcome_profile_placeholder"];
 }
 
 - (void)viewDidUnload {
@@ -197,7 +198,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
 #pragma mark - Transitions
 
 - (void)setSecondaryButtonsVisible:(BOOL)visible {
-  [UIView animateWithDuration:0.2 animations:^{
+  [UIView animateWithDuration:0.35 animations:^{
     confirmButton_.alpha = visible ? 1.0 : 0.0;
     cancelButton_.alpha = visible ? 1.0 : 0.0;
     createAccountButton_.alpha = visible ? 0.0 : 1.0;
@@ -245,7 +246,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   [self setSecondaryButtonsVisible:YES];
   [self.view insertSubview:signUpScrollView_ atIndex:0];
-  [UIView animateWithDuration:0.2 animations:^{
+  [UIView animateWithDuration:0.35 animations:^{
     animationContentView_.alpha = 0.0;
   }];
 }
@@ -261,7 +262,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   confirmButton_.enabled = NO;
   [self setSecondaryButtonsVisible:YES];
   [self.view insertSubview:signInScrollView_ atIndex:0];
-  [UIView animateWithDuration:0.2 animations:^{
+  [UIView animateWithDuration:0.35 animations:^{
     animationContentView_.alpha = 0.0;
   } completion:^(BOOL finished) {
     if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero))
@@ -283,7 +284,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   [requestQueue_ cancelAllRequests];
   
   [self setSecondaryButtonsVisible:NO];
-  [UIView animateWithDuration:0.2 animations:^{
+  [UIView animateWithDuration:0.35 animations:^{
     animationContentView_.alpha = 1.0;
   } completion:^(BOOL finished) {
     if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero) && !editing_ && !signUpScrollView_.superview)
