@@ -184,8 +184,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 #pragma mark - View lifecycle
 
-- (void)viewDidLoad {
-  
+- (void)viewDidLoad {  
   [super viewDidLoad];
   scrollView_.contentSize = self.view.bounds.size;
   CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];

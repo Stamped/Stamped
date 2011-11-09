@@ -301,6 +301,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (IBAction)findFromContacts:(id)sender {
+  [self adjustNippleToView:self.contactsButton];
   [self setSearchFieldHidden:YES animated:NO];
   self.signInTwitterView.hidden = YES;
   self.signInFacebookView.hidden = YES;
@@ -310,43 +311,46 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   facebookButton_.selected = NO;
   stampedButton_.selected = NO;
   [searchField_ resignFirstResponder];
-  [self adjustNippleToView:self.contactsButton];
   self.findSource = FindFriendsSourceContacts;
   if (contactFriends_) {
     [self.tableView reloadData];
     return;
   }
-  // Fetch the address book 
-  ABAddressBookRef addressBook = ABAddressBookCreate();
-  CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
-  CFIndex numPeople = ABAddressBookGetPersonCount(addressBook);
-  NSMutableArray* allNumbers = [NSMutableArray array];
-  NSMutableArray* allEmails = [NSMutableArray array];
-  for (NSUInteger i = 0; i < numPeople; ++i) {
-    ABRecordRef person = CFArrayGetValueAtIndex(people, i);
-    ABMultiValueRef phoneNumberProperty = ABRecordCopyValue(person, kABPersonPhoneProperty);
-    NSArray* phoneNumbers = (NSArray*)ABMultiValueCopyArrayOfAllValues(phoneNumberProperty);
-    CFRelease(phoneNumberProperty);
-    [allNumbers addObjectsFromArray:phoneNumbers];
-    [phoneNumbers release];
-
-    ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
-    NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
-    CFRelease(emailProperty);
-    [allEmails addObjectsFromArray:emails];
-    [emails release];
-  }
-  CFRelease(addressBook);
-  CFRelease(people);
-  NSMutableArray* sanitizedNumbers = [NSMutableArray array];
-  for (NSString* num in allNumbers) {
-    NSString* sanitized = [Util sanitizedPhoneNumberFromString:num];
-    if (sanitized)
-      [sanitizedNumbers addObject:sanitized];
-  }
-  if ([[RKClient sharedClient] isNetworkAvailable])
-    [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
   [tableView_ reloadData];
+  // Fetch the address book 
+  // Perform this on the next cycle to avoid a hang when tapping the Contacts button.
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_current_queue(), ^{
+    ABAddressBookRef addressBook = ABAddressBookCreate();
+    CFArrayRef people = ABAddressBookCopyArrayOfAllPeople(addressBook);
+    CFIndex numPeople = ABAddressBookGetPersonCount(addressBook);
+    NSMutableArray* allNumbers = [NSMutableArray array];
+    NSMutableArray* allEmails = [NSMutableArray array];
+    for (NSUInteger i = 0; i < numPeople; ++i) {
+      ABRecordRef person = CFArrayGetValueAtIndex(people, i);
+      ABMultiValueRef phoneNumberProperty = ABRecordCopyValue(person, kABPersonPhoneProperty);
+      NSArray* phoneNumbers = (NSArray*)ABMultiValueCopyArrayOfAllValues(phoneNumberProperty);
+      CFRelease(phoneNumberProperty);
+      [allNumbers addObjectsFromArray:phoneNumbers];
+      [phoneNumbers release];
+
+      ABMultiValueRef emailProperty = ABRecordCopyValue(person, kABPersonEmailProperty);
+      NSArray* emails = (NSArray*)ABMultiValueCopyArrayOfAllValues(emailProperty);
+      CFRelease(emailProperty);
+      [allEmails addObjectsFromArray:emails];
+      [emails release];
+    }
+    CFRelease(addressBook);
+    CFRelease(people);
+    NSMutableArray* sanitizedNumbers = [NSMutableArray array];
+    for (NSString* num in allNumbers) {
+      NSString* sanitized = [Util sanitizedPhoneNumberFromString:num];
+      if (sanitized)
+        [sanitizedNumbers addObject:sanitized];
+    }
+    if ([[RKClient sharedClient] isNetworkAvailable])
+      [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
+    [tableView_ reloadData];
+  });
 }
 
 - (IBAction)findFromTwitter:(id)sender {
