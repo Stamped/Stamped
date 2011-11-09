@@ -13,7 +13,8 @@ typedef enum {
   AlertTemplateDefault = 0,
   AlertTemplateOurFault,
   AlertTemplateNoInternet,
-  AlertTemplateTimedOut
+  AlertTemplateTimedOut,
+  AlertTemplateAlreadyStamped,
 } AlertTemplate;
 
 @interface Alerts : NSObject {

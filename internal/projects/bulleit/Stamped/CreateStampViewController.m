@@ -1094,9 +1094,13 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
   if ([objectLoader.resourcePath rangeOfString:kCreateStampPath].location != NSNotFound ||
-      [objectLoader.resourcePath rangeOfString:kCreateEntityPath].location != NSNotFound)
-    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-
+      [objectLoader.resourcePath rangeOfString:kCreateEntityPath].location != NSNotFound) {
+    if (objectLoader.response.statusCode == 403)
+      [[Alerts alertWithTemplate:AlertTemplateAlreadyStamped] show];
+    else 
+      [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  }
+  
   NSLog(@"response: %@", objectLoader.response.bodyAsString);
   [spinner_ stopAnimating];
   stampItButton_.hidden = NO;
