@@ -120,6 +120,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)loadEntityDataFromServer {
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    return;
+  } 
   RKObjectManager* objectManager = [RKObjectManager sharedManager];
   RKObjectMapping* entityMapping = [objectManager.mappingProvider mappingForKeyPath:@"DetailedEntity"];
   RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:kEntityLookupPath
@@ -149,7 +152,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)setupSectionViews {
-  // Default does nothing. Override in subclasses.
+  
+//  if (self.contentHeight < self.scrollView.frame.size.height) {
+//    self.mainContentView.backgroundColor = [UIColor colorWithWhite:0.83 alpha:1.0];
+//    UIImageView* imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_empty_shadow"]];
+//    imageView.frame = CGRectMake(0, self.contentHeight, 320, 320);
+//    [self.mainContentView addSubview:imageView];
+//    [imageView release];
+//  }
 }
 
 - (void)ensureTitleLabelHeight {
@@ -175,6 +185,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
+  
   [super viewDidLoad];
   scrollView_.contentSize = self.view.bounds.size;
   CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
@@ -202,6 +213,15 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     [self addTodoBar];
   
   [self ensureTitleLabelHeight];
+  
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"eDetail_notConnected"]];
+    CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
+    CGFloat yOffset = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(iv.bounds);
+    iv.frame = CGRectMake(floorf(xOffset/2), floorf(0.95 * yOffset/2), iv.bounds.size.width, iv.bounds.size.height);
+    [self.view addSubview:iv];
+    [iv release];
+  }
 }
 
 - (void)addTodoBar {
@@ -406,6 +426,14 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];
     return;
+  }
+  [self.loadingView stopAnimating];
+}
+
+- (void)objectLoaderDidLoadUnexpectedResponse:(RKObjectLoader *)objectLoader {
+  if ([objectLoader.response isUnauthorized]) {
+    [[AccountManager sharedManager] refreshToken];
+    [self loadEntityDataFromServer];
   }
   [self.loadingView stopAnimating];
 }

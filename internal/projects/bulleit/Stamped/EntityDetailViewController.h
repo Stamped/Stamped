@@ -55,6 +55,7 @@
 @property (nonatomic, retain) IBOutlet UIImageView* imageView;
 
 - (void)imageViewTapped;
+//- (void)setupSectionViews;
 
 
 @end

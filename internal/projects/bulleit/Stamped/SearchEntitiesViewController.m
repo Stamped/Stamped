@@ -71,6 +71,7 @@ typedef enum {
 @property (nonatomic, readonly) UIButton* clearFilterButton;
 @property (nonatomic, assign) SearchFilter currentSearchFilter;
 @property (nonatomic, retain) UIView* filterBar;
+@property (nonatomic, retain) UIImageView* notConnectedImageView;
 @end
 
 @implementation SearchEntitiesViewController
@@ -94,6 +95,7 @@ typedef enum {
 @synthesize filterBar = filterBar_;
 @synthesize nearbyImageView = nearbyImageView_;
 @synthesize searchButton = searchButton_;
+@synthesize notConnectedImageView = notConnectedImageView_;
 
 - (void)dealloc {
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
@@ -112,6 +114,7 @@ typedef enum {
   self.searchButton = nil;
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
+  self.notConnectedImageView = nil;
   [super dealloc];
 }
 
@@ -139,6 +142,17 @@ typedef enum {
   [tooltipImageView_ release];
   self.searchingIndicatorCell.selectionStyle = UITableViewCellSelectionStyleNone;
   [self createFilterBar];
+  
+  UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_notConnected"]];
+  CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
+  iv.frame = CGRectOffset(iv.frame, floorf(xOffset/2), 140);
+  self.notConnectedImageView = iv;
+  [self.view addSubview:self.notConnectedImageView];
+  [iv release];
+
+  self.notConnectedImageView.alpha = 0.0;  
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    self.notConnectedImageView.alpha = 1.0;
 }
 
 - (void)createFilterBar {
@@ -242,29 +256,35 @@ typedef enum {
   self.currentRequest = nil;
   tooltipImageView_ = nil;
   clearFilterButton_ = nil;
+  self.notConnectedImageView = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
   [self.navigationController setNavigationBarHidden:YES animated:animated];
+
+  if ([[RKClient sharedClient] isNetworkAvailable])
+    self.notConnectedImageView.alpha = 0.0;
+  else
+    self.notConnectedImageView.alpha = 1.0;
   
   switch (self.searchIntent) {
     case SearchIntentStamp:
       searchField_.placeholder = locationButton_.selected ? @"Search nearby" : @"Find something to stamp";
       break;
     case SearchIntentTodo:
-      self.searchField.placeholder = @"Find something to do...";
+      self.searchField.placeholder = @"Find something to do";
       break;
     default:
       break;
   }
-
   [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
   [super viewDidAppear:animated];
   [self.locationManager startUpdatingLocation];
-  if (self.searchField.text.length == 0 && currentResultType_ != ResultTypeLocal) {
+  if (self.searchField.text.length == 0 && currentResultType_ != ResultTypeLocal &&
+      [[RKClient sharedClient] isNetworkAvailable]) {
     [UIView animateWithDuration:0.3 animations:^{
       tooltipImageView_.alpha = 1.0;
     }];
@@ -295,6 +315,8 @@ typedef enum {
 }
 
 - (IBAction)searchButtonPressed:(id)sender {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
   currentResultType_ = ResultTypeFast;
   searchField_.enabled = YES;
   self.currentSearchFilter = SearchFilterNone;
@@ -325,6 +347,8 @@ typedef enum {
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    return;
   self.currentResultType = ResultTypeLocal;
   self.currentSearchFilter = SearchFilterNone;
   self.resultsArray = nil;
@@ -463,6 +487,8 @@ typedef enum {
 }
 
 - (void)sendFastSearchRequest {
+  if (![[RKClient sharedClient] isNetworkAvailable])
+      return;
   self.currentResultType = ResultTypeFast;
   [[RKClient sharedClient].requestQueue cancelRequest:self.currentRequest];
   NSString* query = self.searchField.text;
@@ -481,6 +507,16 @@ typedef enum {
 }
 
 - (void)sendSearchRequest {
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    self.resultsArray = nil;
+    [self reloadTableData];
+    if (notConnectedImageView_.alpha < 0.1)
+      [UIView animateWithDuration:0.33 animations:^{self.notConnectedImageView.alpha = 1.0;}];
+    return;
+  }
+  if (notConnectedImageView_.alpha > 0.9)
+    [UIView animateWithDuration:0.33 animations:^{self.notConnectedImageView.alpha = 0.0;}];
+  
   [searchField_ resignFirstResponder];
   currentResultType_ = ResultTypeFull;
   switch (currentSearchFilter_) {
@@ -758,7 +794,7 @@ typedef enum {
 - (void)textFieldDidChange:(id)sender {
   if (sender != self.searchField)
     return;
-
+  if ([[RKClient sharedClient] isNetworkAvailable])
   [UIView animateWithDuration:0.3
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction
