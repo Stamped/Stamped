@@ -264,8 +264,10 @@ typedef enum {
 
   if ([[RKClient sharedClient] isNetworkAvailable])
     self.notConnectedImageView.alpha = 0.0;
-  else
+  else {
+    [self resetState];
     self.notConnectedImageView.alpha = 1.0;
+  }
   
   switch (self.searchIntent) {
     case SearchIntentStamp:
