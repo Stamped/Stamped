@@ -121,6 +121,8 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_inbox"]];
   [self.view insertSubview:emptyView atIndex:0];
   [emptyView release];
+  self.tableView.hidden = YES;
+  self.shelfView.hidden = YES;
   self.hideWhenEmpty = YES;
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)

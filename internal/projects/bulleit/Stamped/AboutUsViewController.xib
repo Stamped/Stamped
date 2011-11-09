@@ -228,6 +228,7 @@ DUhlbHZldGljYQ</string>
 						<string key="NSFrame">{{141, 613}, {38, 38}}</string>
 						<reference key="NSSuperview" ref="107088891"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:567</string>
 						<int key="IBUIContentMode">5</int>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -310,6 +311,7 @@ DUhlbHZldGljYQ</string>
 						<string key="NSFrame">{{0, 44}, {320, 416}}</string>
 						<reference key="NSSuperview" ref="1065572797"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:174</string>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIMultipleTouchEnabled">YES</bool>
@@ -361,7 +363,7 @@ DUhlbHZldGljYQ</string>
 						</object>
 						<object class="NSCustomResource" key="IBUINormalBackgroundImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">gray_back_button_bg@2x.png</string>
+							<string key="NSResourceName">gray_back_button_bg.png</string>
 						</object>
 						<object class="IBUIFontDescription" key="IBUIFontDescription">
 							<string key="name">Helvetica-Bold</string>
@@ -653,7 +655,7 @@ DUhlbHZldGljYQ</string>
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="about_header">{16, 16}</string>
 			<string key="gradient_background.png">{320, 480}</string>
-			<string key="gray_back_button_bg@2x.png">{138, 60}</string>
+			<string key="gray_back_button_bg.png">{16, 16}</string>
 			<string key="settings_about_followbutton">{16, 16}</string>
 			<string key="settings_about_followbutton_pressed">{16, 16}</string>
 			<string key="settings_about_logocard">{16, 16}</string>

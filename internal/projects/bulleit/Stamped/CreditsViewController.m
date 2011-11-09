@@ -21,6 +21,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 
 @interface CreditsViewController ()
 - (void)loadStampsFromNetwork;
+- (void)reloadTableData;
 
 @property (nonatomic, copy) NSArray* stampsArray;
 @end
@@ -56,6 +57,12 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  if ([[AccountManager sharedManager].currentUser.userID isEqualToString:user_.userID]) {
+    UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_credits"]];
+    [self.view insertSubview:emptyView atIndex:0];
+    [emptyView release];
+  }
+  self.tableView.hidden = YES;
   [self loadStampsFromNetwork];
 }
 
@@ -131,7 +138,7 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
   NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
 	self.stampsArray = [objects sortedArrayUsingDescriptors:[NSArray arrayWithObject:desc]];
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
@@ -141,6 +148,11 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
     [self loadStampsFromNetwork];
     return;
   }
+}
+
+- (void)reloadTableData {
+  [self.tableView reloadData];
+  self.tableView.hidden = [self.tableView numberOfRowsInSection:0] == 0;
 }
 
 @end

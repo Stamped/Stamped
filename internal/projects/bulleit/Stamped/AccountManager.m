@@ -120,7 +120,8 @@ static AccountManager* sharedAccountManager_ = nil;
   self.navController.navigationBarHidden = YES;
 
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  [delegate.navigationController presentModalViewController:self.navController animated:NO];
+  self.navController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+  [delegate.navigationController presentModalViewController:self.navController animated:YES];
 
   [self.navController release];
   [self.firstRunViewController release];
