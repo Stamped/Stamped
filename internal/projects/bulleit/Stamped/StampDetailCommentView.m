@@ -81,7 +81,7 @@
   commentLabel_.userInteractionEnabled = YES;
   commentLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
   NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
-  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica-Bold", 12, NULL);
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 12, NULL);
   [linkAttributes setValue:(id)font
                     forKey:(NSString*)kCTFontAttributeName];
   [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
