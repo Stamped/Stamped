@@ -219,7 +219,6 @@ static const CGFloat kReloadHeight = 60.0;
     self.tableView.hidden = hidden;
     self.shelfView.hidden = hidden;
   }
-
 }
 
 - (void)updateLastUpdatedTo:(NSDate*)date {

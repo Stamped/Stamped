@@ -64,6 +64,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
   [self loadEventsFromDataStore];
+  [self reloadTableData];
   [self loadEventsFromNetwork];
 }
 
