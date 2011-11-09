@@ -494,6 +494,8 @@
 		7EDD174F146B04EB0003D4F7 /* earn_tip_zeroStamps@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDD1749146B04EB0003D4F7 /* earn_tip_zeroStamps@2x.png */; };
 		7EDD1752146B0A890003D4F7 /* credit_28pt_overlaySolid.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDD1750146B0A890003D4F7 /* credit_28pt_overlaySolid.png */; };
 		7EDD1753146B0A890003D4F7 /* credit_28pt_overlaySolid@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDD1751146B0A890003D4F7 /* credit_28pt_overlaySolid@2x.png */; };
+		7EDD1756146B0C940003D4F7 /* stamp_28pt_solid.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDD1754146B0C940003D4F7 /* stamp_28pt_solid.png */; };
+		7EDD1757146B0C940003D4F7 /* stamp_28pt_solid@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7EDD1755146B0C940003D4F7 /* stamp_28pt_solid@2x.png */; };
 		7EDE38D013C4D9A7003AEE52 /* STNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */; };
 		7EDE38DB13C4EB27003AEE52 /* StampDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EDE38D913C4EB27003AEE52 /* StampDetailViewController.m */; };
 		7EDE38DC13C4EB27003AEE52 /* StampDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7EDE38DA13C4EB27003AEE52 /* StampDetailViewController.xib */; };
@@ -1367,6 +1369,8 @@
 		7EDD1749146B04EB0003D4F7 /* earn_tip_zeroStamps@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "earn_tip_zeroStamps@2x.png"; sourceTree = "<group>"; };
 		7EDD1750146B0A890003D4F7 /* credit_28pt_overlaySolid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = credit_28pt_overlaySolid.png; sourceTree = "<group>"; };
 		7EDD1751146B0A890003D4F7 /* credit_28pt_overlaySolid@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "credit_28pt_overlaySolid@2x.png"; sourceTree = "<group>"; };
+		7EDD1754146B0C940003D4F7 /* stamp_28pt_solid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stamp_28pt_solid.png; sourceTree = "<group>"; };
+		7EDD1755146B0C940003D4F7 /* stamp_28pt_solid@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamp_28pt_solid@2x.png"; sourceTree = "<group>"; };
 		7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNavigationBar.h; sourceTree = "<group>"; };
 		7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNavigationBar.m; sourceTree = "<group>"; };
 		7EDE38D813C4EB27003AEE52 /* StampDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StampDetailViewController.h; sourceTree = "<group>"; };
@@ -2381,6 +2385,8 @@
 		7EC30B3B1401BB9B0047D773 /* Stamps */ = {
 			isa = PBXGroup;
 			children = (
+				7EDD1754146B0C940003D4F7 /* stamp_28pt_solid.png */,
+				7EDD1755146B0C940003D4F7 /* stamp_28pt_solid@2x.png */,
 				7EDD1750146B0A890003D4F7 /* credit_28pt_overlaySolid.png */,
 				7EDD1751146B0A890003D4F7 /* credit_28pt_overlaySolid@2x.png */,
 				7E1D92E913D632DE0022412D /* stamp_shape_textured@2x.png */,
@@ -3593,6 +3599,8 @@
 				7EDD174F146B04EB0003D4F7 /* earn_tip_zeroStamps@2x.png in Resources */,
 				7EDD1752146B0A890003D4F7 /* credit_28pt_overlaySolid.png in Resources */,
 				7EDD1753146B0A890003D4F7 /* credit_28pt_overlaySolid@2x.png in Resources */,
+				7EDD1756146B0C940003D4F7 /* stamp_28pt_solid.png in Resources */,
+				7EDD1757146B0C940003D4F7 /* stamp_28pt_solid@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

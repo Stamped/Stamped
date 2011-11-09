@@ -240,6 +240,23 @@
     earnMore.center = overlayContainer.center;
     [overlayContainer addSubview:earnMore];
     [earnMore release];
+    User* currentUser = [AccountManager sharedManager].currentUser;
+    UIImageView* creditLeft = [[UIImageView alloc] initWithImage:[Util gradientImage:[UIImage imageNamed:@"stamp_28pt_texture"]
+                                                                    withPrimaryColor:currentUser.primaryColor
+                                                                           secondary:currentUser.secondaryColor]];
+    creditLeft.frame = CGRectOffset(creditLeft.frame, 62, 75);
+    [earnMore addSubview:creditLeft];
+    [creditLeft release];
+    UIImageView* creditRight = [[UIImageView alloc] initWithImage:[Util gradientImage:[UIImage imageNamed:@"stamp_28pt_solid"]
+                                                                    withPrimaryColor:currentUser.primaryColor
+                                                                           secondary:currentUser.secondaryColor]];
+    creditRight.frame = CGRectOffset(creditLeft.frame, 14, 0);
+    [earnMore addSubview:creditRight];
+    [creditRight release];
+    UIImageView* creditOverlay = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"credit_28pt_overlaySolid"]];
+    creditOverlay.center = creditRight.center;
+    [earnMore addSubview:creditOverlay];
+    [creditOverlay release];
     UITapGestureRecognizer* recognizer =
         [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(overlayWasTapped:)];
     [overlayContainer addGestureRecognizer:recognizer];
