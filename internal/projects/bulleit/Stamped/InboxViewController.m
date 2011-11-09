@@ -225,15 +225,17 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     e.mostRecentStampDate = latestStamp.created;
   }
   
-  NSSet* allStamps = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
-    if ([obj isMemberOfClass:[Stamp class]]) {
+  NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
+  NSSet* allStampsOrCurrentUser = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
+    if ([obj isMemberOfClass:[Stamp class]] ||
+        ([obj isMemberOfClass:[User class]] && [[(User*)obj userID] isEqualToString:currentUserID])) {
       *stop = YES;
       return YES;
     }
     return NO;
   }];
 
-  if (allStamps.count > 0)
+  if (allStampsOrCurrentUser.count > 0)
     needToRefetch_ = YES;
 }
 
