@@ -10,10 +10,12 @@
 
 #import <CoreLocation/CoreLocation.h>
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/CoreData/CoreData.h>
 
 #import "AccountManager.h"
 #import "CreateStampViewController.h"
 #import "EntityDetailViewController.h"
+#import "EditEntityViewController.h"
 #import "SearchEntitiesAutoSuggestCell.h"
 #import "SearchEntitiesTableViewCell.h"
 #import "STSearchField.h"
@@ -21,6 +23,7 @@
 #import "SearchResult.h"
 #import "UIColor+Stamped.h"
 #import "Util.h"
+#import "DetailedEntity.h"
 
 static NSString* const kNearbyPath = @"/entities/nearby.json";
 static NSString* const kSearchPath = @"/entities/search.json";
@@ -54,6 +57,7 @@ typedef enum {
 
 
 @interface SearchEntitiesViewController ()
+
 - (void)createFilterBar;
 - (void)filterButtonPressed:(id)sender;
 - (void)textFieldDidChange:(id)sender;
@@ -72,7 +76,9 @@ typedef enum {
 @property (nonatomic, assign) SearchFilter currentSearchFilter;
 @property (nonatomic, retain) UIView* filterBar;
 @property (nonatomic, retain) UIImageView* notConnectedImageView;
+
 @end
+
 
 @implementation SearchEntitiesViewController
 
@@ -265,7 +271,7 @@ typedef enum {
   if ([[RKClient sharedClient] isNetworkAvailable])
     self.notConnectedImageView.alpha = 0.0;
   else {
-    [self resetState];
+//    [self resetState];
     self.notConnectedImageView.alpha = 1.0;
   }
   
@@ -410,7 +416,7 @@ typedef enum {
                    animations:^{ clearFilterButton_.alpha = currentSearchFilter_ == SearchFilterNone ? 0 : 1; }
                    completion:nil];
   
-  if (searchField_.text.length)
+  if (searchField_.text.length && [[RKClient sharedClient] isNetworkAvailable])
     [self sendSearchRequest];
 }
 
@@ -426,7 +432,8 @@ typedef enum {
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_))
+  if (currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_) ||
+      self.searchIntent == SearchIntentTodo)
     return [resultsArray_ count];
 
   return [resultsArray_ count] + 1;
@@ -445,9 +452,10 @@ typedef enum {
     return cell;
   }
   
-  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_)
+  if (indexPath.row == [resultsArray_ count] && currentResultType_ == ResultTypeFull && !loading_ &&
+      self.searchIntent != SearchIntentTodo)
     return self.addStampCell;
-  
+    
   if (indexPath.row == 0 && currentResultType_ != ResultTypeFast && loading_)
     return self.searchingIndicatorCell;
   
@@ -756,12 +764,20 @@ typedef enum {
       break;
     }
     case SearchIntentTodo: {
-      EntityDetailViewController* detailViewController = (EntityDetailViewController*)[Util detailViewControllerForSearchResult:result];
+      /* Not using this yet, but it's there in order to facilitate creating entities from adding a todo.
+      if (!result.entityID && !result.searchID) {
+        DetailedEntity* detailedEntity = [DetailedEntity object];
+        detailedEntity.title = result.title;
+        EditEntityViewController* editEntityVC = [[EditEntityViewController alloc] initWithDetailedEntity:detailedEntity];
+        UIViewController* detailViewController = [Util detailViewControllerForEntity:
+      }*/
+      EntityDetailViewController* detailViewController =
+        (EntityDetailViewController*)[Util detailViewControllerForSearchResult:result];
       [detailViewController addToolbar];
       [self.navigationController pushViewController:detailViewController animated:YES];
       break;
     }
-    default:
+    default: 
       break;
   }
 }
