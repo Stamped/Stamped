@@ -479,7 +479,7 @@ typedef enum {
   NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 14, NULL);
   [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
-  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
+  [linkAttributes setValue:(id)[UIColor stampedBlackColor].CGColor
                     forKey:(NSString*)kCTForegroundColorAttributeName];
   CFRelease(font);
   commentLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
@@ -632,7 +632,7 @@ typedef enum {
                                                       options:NSBackwardsSearch]];
   } else {
     NSString* others = nil;
-    if (stamp_.credits.count - 1 == 0)
+    if (stamp_.credits.count - 1 == 1)
       others = @"1 other";
     else
       others = [NSString stringWithFormat:@"%d others", stamp_.credits.count - 1];

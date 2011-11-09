@@ -47,6 +47,9 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 - (void)addStampsRemainingLayer;
 - (void)updateStampCounterLayer;
 - (void)configureCell:(UITableViewCell*)cell atIndexPath:(NSIndexPath*)indexPath;
+- (void)showEarnMoreModal;
+- (void)earnMoreModalTapped:(UIGestureRecognizer*)recognizer;
+- (void)stampCountWasTapped:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) CATextLayer* stampCounterLayer;
 @property (nonatomic, readonly) CALayer* stampLayer;
@@ -528,13 +531,72 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 
 #pragma mark - Private methods.
 
+- (void)showEarnMoreModal {
+  UIView* overlayContainer = [[UIView alloc] initWithFrame:self.view.window.frame];
+  overlayContainer.backgroundColor = [UIColor clearColor];
+  overlayContainer.alpha = 0;
+  UIView* black = [[UIView alloc] initWithFrame:overlayContainer.bounds];
+  black.backgroundColor = [UIColor blackColor];
+  black.alpha = 0.75;
+  [overlayContainer addSubview:black];
+  [black release];
+  UIImageView* earnMore = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"earn_tip_profile"]];
+  earnMore.center = overlayContainer.center;
+  [overlayContainer addSubview:earnMore];
+  [earnMore release];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  UIImageView* creditLeft = [[UIImageView alloc] initWithImage:[Util gradientImage:[UIImage imageNamed:@"stamp_28pt_texture"]
+                                                                  withPrimaryColor:currentUser.primaryColor
+                                                                         secondary:currentUser.secondaryColor]];
+  creditLeft.frame = CGRectOffset(creditLeft.frame, 62, 75);
+  [earnMore addSubview:creditLeft];
+  [creditLeft release];
+  UIImageView* creditRight = [[UIImageView alloc] initWithImage:[Util gradientImage:[UIImage imageNamed:@"stamp_28pt_solid"]
+                                                                   withPrimaryColor:currentUser.primaryColor
+                                                                          secondary:currentUser.secondaryColor]];
+  creditRight.frame = CGRectOffset(creditLeft.frame, 14, 0);
+  [earnMore addSubview:creditRight];
+  [creditRight release];
+  UIImageView* creditOverlay = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"credit_28pt_overlaySolid"]];
+  creditOverlay.center = creditRight.center;
+  [earnMore addSubview:creditOverlay];
+  [creditOverlay release];
+  UITapGestureRecognizer* recognizer =
+      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(earnMoreModalTapped:)];
+  [overlayContainer addGestureRecognizer:recognizer];
+  [recognizer release];
+  [self.view.window addSubview:overlayContainer];
+  [UIView animateWithDuration:0.3 animations:^{
+    overlayContainer.alpha = 1;
+  }];
+  [overlayContainer release];
+}
+
+- (void)earnMoreModalTapped:(UIGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+  
+  [UIView animateWithDuration:0.3 animations:^{
+    recognizer.view.alpha = 0.0;
+  } completion:^(BOOL finished) {
+    [recognizer.view removeFromSuperview];
+  }];
+}
+
+- (void)stampCountWasTapped:(UIGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  [self showEarnMoreModal];
+}
+
 - (void)addStampsRemainingLayer {
   CATextLayer* stampsRemainingLayer = [[CATextLayer alloc] init];
   stampsRemainingLayer.alignmentMode = kCAAlignmentCenter;
   stampsRemainingLayer.frame = CGRectMake(0, 
-                                           CGRectGetMaxY(self.view.frame) - 30,
-                                           CGRectGetWidth(self.view.frame),
-                                           CGRectGetHeight(self.view.frame));
+                                          CGRectGetMaxY(self.view.frame) - 30,
+                                          CGRectGetWidth(self.view.frame),
+                                          CGRectGetHeight(self.view.frame));
   stampsRemainingLayer.fontSize = 12;
   stampsRemainingLayer.foregroundColor = [UIColor stampedDarkGrayColor].CGColor;
   stampsRemainingLayer.contentsScale = [[UIScreen mainScreen] scale];
@@ -556,6 +618,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   [colorView release];
   UIImageView* textureView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"stampcount_texture"]];
   textureView.center = colorView.center;
+  textureView.userInteractionEnabled = YES;
+  UITapGestureRecognizer* recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                               action:@selector(stampCountWasTapped:)];
+  [textureView addGestureRecognizer:recognizer];
+  [recognizer release];
   [self.view addSubview:textureView];
   [textureView release];
   stampCounterLayer_ = [[CATextLayer alloc] init];

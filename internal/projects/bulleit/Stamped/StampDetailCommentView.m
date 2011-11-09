@@ -84,7 +84,7 @@
   CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 12, NULL);
   [linkAttributes setValue:(id)font
                     forKey:(NSString*)kCTFontAttributeName];
-  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
+  [linkAttributes setValue:(id)[UIColor stampedBlackColor].CGColor
                     forKey:(NSString*)kCTForegroundColorAttributeName];
   CFRelease(font);
   commentLabel_.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];

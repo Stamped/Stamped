@@ -490,6 +490,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [(id)cell indicator].center = [(id)cell followButton].center;
   [(id)cell followButton].hidden = YES;
   [[(id)cell indicator] startAnimating];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  [currentUser addFollowingObject:user];
   [self sendRelationshipChangeRequestWithPath:kFriendshipCreatePath forUser:user];
 }
 
@@ -499,6 +501,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [(id)cell indicator].center = [(id)cell unfollowButton].center;
   [(id)cell unfollowButton].hidden = YES;
   [[(id)cell indicator] startAnimating];
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  [currentUser removeFollowingObject:user];
   [self sendRelationshipChangeRequestWithPath:kFriendshipRemovePath forUser:user];
 }
 
@@ -1320,14 +1324,17 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       }
 
       FriendshipTableViewCell* friendCell = (FriendshipTableViewCell*)cell;
-      if (friendCell.indicator.isAnimating)
+      if (friendCell.indicator.isAnimating) {
         [friendCell.indicator stopAnimating];
-      if ([currentUser.following containsObject:friendCell.user]) {
-        [currentUser removeFollowingObject:friendCell.user];
-        friendCell.followButton.hidden = NO;
-      } else {
-        [currentUser addFollowingObject:friendCell.user];
-        friendCell.unfollowButton.hidden = NO;
+        if ([currentUser.following containsObject:friendCell.user]) {
+          [currentUser removeFollowingObject:friendCell.user];
+          friendCell.followButton.hidden = NO;
+          friendCell.unfollowButton.hidden = YES;
+        } else {
+          [currentUser addFollowingObject:friendCell.user];
+          friendCell.followButton.hidden = YES;
+          friendCell.unfollowButton.hidden = NO;
+        }
       }
     }
   }

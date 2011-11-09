@@ -388,17 +388,24 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+  //NSLog(@"objects: %@", objectLoader.response.bodyAsString);
   NSMutableArray* toDelete = [NSMutableArray array];
-  NSMutableArray* mutableObjects = [NSMutableArray array];
   for (Stamp* stamp in objects) {
     if ([stamp.deleted boolValue]) {
       [toDelete addObject:stamp];
     } else {
       stamp.temporary = [NSNumber numberWithBool:NO];
-      [mutableObjects addObject:stamp];
     }
   }
   
+  Stamp* oldestStampInBatch = objects.lastObject;
+  if (oldestStampInBatch.modified) {
+    NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
+    [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
+                                              forKey:@"InboxOldestTimestampInBatch"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+
   for (Stamp* stamp in toDelete) {
     if (stamp.entityObject.stamps.count > 1) {
       NSSortDescriptor* desc = [NSSortDescriptor sortDescriptorWithKey:@"created" ascending:NO];
@@ -408,20 +415,12 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       Stamp* latestStamp = [sortedStamps objectAtIndex:0];
       stamp.entityObject.mostRecentStampDate = latestStamp.created;
     }
-    
+
     [Stamp.managedObjectContext deleteObject:stamp];
   }
   [Stamp.managedObjectContext save:NULL];
 
-  Stamp* oldestStampInBatch = mutableObjects.lastObject;
-  if (oldestStampInBatch.modified) {
-    NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
-    [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
-                                              forKey:@"InboxOldestTimestampInBatch"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-  }
-
-  if (objects.count < 10 || !oldestStampInBatch.modified) {
+  if (objects.count < 10) {
     // Grab latest stamp.
     NSFetchRequest* request = [Stamp fetchRequest];
     NSSortDescriptor* descriptor = [NSSortDescriptor sortDescriptorWithKey:@"modified" ascending:NO];

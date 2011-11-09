@@ -110,9 +110,19 @@ static const CGFloat kActivityBadgeSize = 21.0;
     NSInteger benefit = event.benefit.integerValue;
     if (benefit > 0) {
       NSString* label = @"stamps";
-      if (benefit == 1)
+      UIColor* textColor = [UIColor colorWithRed:164.0 / 255.0
+                                           green:211.0 / 255.0
+                                            blue:139.0 / 255.0
+                                           alpha:1.0];
+      if (benefit == 1) {
         label = @"stamp";
+        textColor = [UIColor colorWithRed:150.0 / 255.0
+                                    green:204.0 / 255.0
+                                     blue:122.0 / 255.0
+                                    alpha:1.0];
+      }
       addedStampsLabel_.text = [NSString stringWithFormat:@"+%d %@", benefit, label];
+      addedStampsLabel_.textColor = textColor;
       [addedStampsLabel_ sizeToFit];
     }
     addedStampsLabel_.hidden = (benefit == 0);
