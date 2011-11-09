@@ -714,7 +714,7 @@ typedef enum {
                                                       delegate:self
                                              cancelButtonTitle:@"Cancel"
                                         destructiveButtonTitle:nil
-                                             otherButtonTitles:@"Copy link...", tweetMsg, nil] autorelease];
+                                             otherButtonTitles:@"Copy link", tweetMsg, nil] autorelease];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   sheet.tag = StampDetailActionTypeShare;
   [sheet showInView:self.view];
