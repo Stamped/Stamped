@@ -32,6 +32,7 @@
 #import "User.h"
 #import "UIColor+Stamped.h"
 #import "STOAuthViewController.h"
+#import "Alerts.h"
 
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kCreateStampPath = @"/stamps/create.json";
@@ -721,6 +722,10 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (IBAction)tweetButtonPressed:(id)sender {
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    tweetButton_.selected = NO;
+    return;
+  }  
   GTMOAuthAuthentication* auth = [self createAuthentication];
   if (tweetButton_.selected == NO &&
       ![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) {
@@ -737,6 +742,10 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (IBAction)fbButtonPressed:(id)sender {
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    fbButton_.selected = NO;
+    return;
+  }
   if (fbButton_.selected == NO && !self.fbClient.isSessionValid) {
     UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Facebook."
                                                         delegate:self
@@ -758,13 +767,18 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (IBAction)saveStampButtonPressed:(id)sender {
+  if (savePhoto_ && self.stampPhoto)
+    UIImageWriteToSavedPhotosAlbum(self.stampPhoto, nil, nil, nil);
+  
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
+    return;
+  }
+  
   stampItButton_.hidden = YES;
   [spinner_ startAnimating];
   [stampItButton_ setNeedsDisplay];
   [spinner_ setNeedsDisplay];
-  
-  if (savePhoto_ && self.stampPhoto)
-    UIImageWriteToSavedPhotosAlbum(self.stampPhoto, nil, nil, nil);
 
   if (detailedEntity_ && !detailedEntity_.entityID) {
     [self sendSaveEntityRequest];
@@ -1079,6 +1093,9 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
   if ([objectLoader.response isUnauthorized])
     [[AccountManager sharedManager] refreshToken];
+  if ([objectLoader.resourcePath rangeOfString:kCreateStampPath].location != NSNotFound ||
+      [objectLoader.resourcePath rangeOfString:kCreateEntityPath].location != NSNotFound)
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
 
   NSLog(@"response: %@", objectLoader.response.bodyAsString);
   [spinner_ stopAnimating];
