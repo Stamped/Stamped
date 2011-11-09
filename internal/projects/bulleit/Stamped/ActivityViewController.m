@@ -55,6 +55,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_news"]];
+  [self.view insertSubview:emptyView atIndex:0];
+  [emptyView release];
+  self.hideWhenEmpty = YES;
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(appDidBecomeActive:)
                                                name:UIApplicationDidBecomeActiveNotification
@@ -112,39 +116,10 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 - (void)controllerWillChangeContent:(NSFetchedResultsController*)controller {
   numRows_ = MAX(numRows_, [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects]);
-  [self.tableView beginUpdates];
-}
-
-- (void)controller:(NSFetchedResultsController*)controller 
-   didChangeObject:(id)anObject
-       atIndexPath:(NSIndexPath*)indexPath
-     forChangeType:(NSFetchedResultsChangeType)type
-      newIndexPath:(NSIndexPath*)newIndexPath {
-
-  UITableView* tableView = self.tableView;
-  
-  switch(type) {
-    case NSFetchedResultsChangeInsert:
-      [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:newIndexPath] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-      
-    case NSFetchedResultsChangeDelete:
-      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-      
-    case NSFetchedResultsChangeUpdate:
-      [self configureCell:[tableView cellForRowAtIndexPath:indexPath] atIndexPath:indexPath];
-      break;
-      
-    case NSFetchedResultsChangeMove:
-      [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
-      [tableView reloadSections:[NSIndexSet indexSetWithIndex:newIndexPath.section] withRowAnimation:UITableViewRowAnimationNone];
-      break;
-  }
 }
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-  [self.tableView endUpdates];
+  [self reloadTableData];
   NSUInteger numObjects = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
   if (numObjects > numRows_) {
     [[NSNotificationCenter defaultCenter]
@@ -156,7 +131,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (void)appDidBecomeActive:(NSNotification*)notification {
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 #pragma mark - Table view data source
