@@ -632,7 +632,7 @@ typedef enum {
                                                       options:NSBackwardsSearch]];
   } else {
     NSString* others = nil;
-    if (stamp_.credits.count - 1 == 0)
+    if (stamp_.credits.count - 1 == 1)
       others = @"1 other";
     else
       others = [NSString stringWithFormat:@"%d others", stamp_.credits.count - 1];
