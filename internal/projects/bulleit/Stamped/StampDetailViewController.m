@@ -476,6 +476,13 @@ typedef enum {
   commentLabel.userInteractionEnabled = YES;
   UIFont* commentFont = [UIFont fontWithName:@"Helvetica" size:14];
   commentLabel.dataDetectorTypes = UIDataDetectorTypeLink;
+  NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 14, NULL);
+  [linkAttributes setValue:(id)font forKey:(NSString*)kCTFontAttributeName];
+  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
+                    forKey:(NSString*)kCTForegroundColorAttributeName];
+  CFRelease(font);
+  commentLabel.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
   commentLabel.font = commentFont;
   commentLabel.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel.textColor = [UIColor stampedBlackColor];
@@ -707,7 +714,7 @@ typedef enum {
                                                       delegate:self
                                              cancelButtonTitle:@"Cancel"
                                         destructiveButtonTitle:nil
-                                             otherButtonTitles:@"Copy link...", tweetMsg, nil] autorelease];
+                                             otherButtonTitles:@"Copy link", tweetMsg, nil] autorelease];
   sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
   sheet.tag = StampDetailActionTypeShare;
   [sheet showInView:self.view];

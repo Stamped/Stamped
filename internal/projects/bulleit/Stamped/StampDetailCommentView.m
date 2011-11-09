@@ -80,6 +80,14 @@
   commentLabel_.delegate = self;
   commentLabel_.userInteractionEnabled = YES;
   commentLabel_.dataDetectorTypes = UIDataDetectorTypeLink;
+  NSMutableDictionary* linkAttributes = [NSMutableDictionary dictionary];
+  CTFontRef font = CTFontCreateWithName((CFStringRef)@"Helvetica", 12, NULL);
+  [linkAttributes setValue:(id)font
+                    forKey:(NSString*)kCTFontAttributeName];
+  [linkAttributes setValue:(id)[UIColor stampedGrayColor].CGColor
+                    forKey:(NSString*)kCTForegroundColorAttributeName];
+  CFRelease(font);
+  commentLabel_.linkAttributes = [NSDictionary dictionaryWithDictionary:linkAttributes];
   commentLabel_.lineBreakMode = UILineBreakModeWordWrap;
   commentLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
   commentLabel_.text = comment_.blurb;

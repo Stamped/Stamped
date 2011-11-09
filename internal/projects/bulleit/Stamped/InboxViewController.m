@@ -118,6 +118,10 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_inbox"]];
+  [self.view insertSubview:emptyView atIndex:0];
+  [emptyView release];
+  self.hideWhenEmpty = YES;
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
@@ -172,7 +176,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
     }
     needToRefetch_ = NO;
-    [self.tableView reloadData];
+    [self reloadTableData];
     [self.tableView selectRowAtIndexPath:self.selectedIndexPath
                                 animated:NO
                           scrollPosition:UITableViewScrollPositionNone];
@@ -225,15 +229,17 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     e.mostRecentStampDate = latestStamp.created;
   }
   
-  NSSet* allStamps = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
-    if ([obj isMemberOfClass:[Stamp class]]) {
+  NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
+  NSSet* allStampsOrCurrentUser = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
+    if ([obj isMemberOfClass:[Stamp class]] ||
+        ([obj isMemberOfClass:[User class]] && [[(User*)obj userID] isEqualToString:currentUserID])) {
       *stop = YES;
       return YES;
     }
     return NO;
   }];
 
-  if (allStamps.count > 0)
+  if (allStampsOrCurrentUser.count > 0)
     needToRefetch_ = YES;
 }
 
@@ -305,7 +311,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   selectedFilterType_ = filterType;
   [self filterStamps];
 
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 #pragma mark - Filter/Search stuff.
@@ -455,7 +461,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
   self.selectedIndexPath = [self.tableView indexPathForSelectedRow];
-  [self.tableView reloadData];
+  [self reloadTableData];
   [self.tableView selectRowAtIndexPath:self.selectedIndexPath
                               animated:NO
                         scrollPosition:UITableViewScrollPositionNone];
@@ -574,7 +580,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)appDidBecomeActive:(NSNotification*)notification {
-  [self.tableView reloadData];
+  [self reloadTableData];
 }
 
 #pragma mark - MKMapViewDelegate Methods

@@ -50,11 +50,6 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-//  if (self.navigationController.navigationBarHidden) {
-//    navBarWasHidden = YES;
-//  }
-//  else
-//    navBarWasHidden = NO;
   [super viewWillAppear:animated];
 }
 
@@ -142,8 +137,8 @@
 
 - (void)webView:(UIWebView*)webView didFailLoadWithError:(NSError*)error {
   [self webViewDidFinishLoad:webView];
-  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp" 
-                                                   message:error.localizedDescription
+  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp"
+                                                   message:@"There was a problem loading this page."
                                                   delegate:nil
                                          cancelButtonTitle:nil
                                          otherButtonTitles:@"OK", nil] autorelease];

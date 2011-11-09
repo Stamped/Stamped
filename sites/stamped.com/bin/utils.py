@@ -648,9 +648,13 @@ def sendEmail(msg, **kwargs):
     
     format = kwargs.pop('format', 'text')
     
-    ses = boto.connect_ses(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
-    ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format=format)
-    
+    try:
+        ses = boto.connect_ses(aws.AWS_ACCESS_KEY_ID, aws.AWS_SECRET_KEY)
+        ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format=format)
+    except Exception as e:
+        logs.warning('EMAIL FAILED: %s' % msg)
+        logs.warning(e)
+
     return True
 
 def parseTemplate(src, params):

@@ -323,6 +323,7 @@
     [self tabBar:self.tabBar didSelectItem:activityTabBarItem_];
   }
   [((ActivityViewController*)[self.viewControllers objectAtIndex:1]) reloadData];
+  [((InboxViewController*)[self.viewControllers objectAtIndex:0]) reloadData];
 }
 
 #pragma mark - AccountManagerDelegate Methods.

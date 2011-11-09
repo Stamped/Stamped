@@ -20,6 +20,7 @@
 @property (nonatomic, assign) BOOL shouldReload;
 @property (nonatomic, assign) BOOL hasHeaders;
 @property (nonatomic, assign) BOOL isLoading;
+@property (nonatomic, assign) BOOL hideWhenEmpty;
 @property (nonatomic, readonly) UILabel* reloadLabel;
 @property (nonatomic, readonly) UILabel* lastUpdatedLabel;
 @property (nonatomic, readonly) UIImageView* arrowImageView;
@@ -27,6 +28,7 @@
 
 - (void)userPulledToReload;
 - (void)reloadData;
+- (void)reloadTableData;
 - (void)updateLastUpdatedTo:(NSDate*)date;
 
 @end
