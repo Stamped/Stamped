@@ -3697,6 +3697,97 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		7E829C90146ACEEE0023C7A6 /* Ad Hoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/Vendor/gtm-oauth/HTTPFetcher",
+					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
+					"\"$(SOURCE_ROOT)/RestKit/Build\"",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = "Ad Hoc";
+		};
+		7E829C91146ACEEE0023C7A6 /* Ad Hoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					armv7,
+					armv6,
+				);
+				"ARCHS[sdk=*]" = (
+					armv7,
+					armv6,
+				);
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/Stamped\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
+				GCC_VERSION = "";
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TestFlightSDK\"",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
+				SKIP_INSTALL = NO;
+				STRIP_INSTALLED_PRODUCT = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = "Ad Hoc";
+		};
+		7E829C92146ACEEE0023C7A6 /* Ad Hoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/Stamped.app/Stamped";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "StampedTests/StampedTests-Prefix.pch";
+				INFOPLIST_FILE = "StampedTests/StampedTests-Info.plist";
+				OTHER_LDFLAGS = (
+					"-framework",
+					SenTestingKit,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUNDLE_LOADER)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = "Ad Hoc";
+		};
 		7EC017AC13C3754400ABE6E2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3767,8 +3858,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3787,8 +3878,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				PROVISIONING_PROFILE = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3808,8 +3899,8 @@
 					armv7,
 					armv6,
 				);
-				CODE_SIGN_IDENTITY = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: JAKE Zien (7U49V4TSSB)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3827,8 +3918,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7BD4CD41-1EEC-436F-B14A-86113B44EA87";
+				PROVISIONING_PROFILE = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3889,6 +3980,7 @@
 			buildConfigurations = (
 				7EC017AC13C3754400ABE6E2 /* Debug */,
 				7EC017AD13C3754400ABE6E2 /* Release */,
+				7E829C90146ACEEE0023C7A6 /* Ad Hoc */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3898,6 +3990,7 @@
 			buildConfigurations = (
 				7EC017AF13C3754400ABE6E2 /* Debug */,
 				7EC017B013C3754400ABE6E2 /* Release */,
+				7E829C91146ACEEE0023C7A6 /* Ad Hoc */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -3907,6 +4000,7 @@
 			buildConfigurations = (
 				7EC017B213C3754400ABE6E2 /* Debug */,
 				7EC017B313C3754400ABE6E2 /* Release */,
+				7E829C92146ACEEE0023C7A6 /* Ad Hoc */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
