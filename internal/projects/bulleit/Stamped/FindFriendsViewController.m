@@ -31,6 +31,8 @@
 #import "User.h"
 #import "STOAuthViewController.h"
 #import "UserImageView.h"
+#import "RootTabBarViewController.h"
+#import "Alerts.h"
 
 static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
 static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
@@ -52,7 +54,7 @@ static NSString* const kFriendshipCreatePath = @"/friendships/create.json";
 static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 static NSString* const kInvitePath = @"/friendships/invite.json";
 
-@interface FindFriendsViewController ()
+@interface FindFriendsViewController () 
 - (void)adjustNippleToView:(UIView*)view;
 - (void)setSearchFieldHidden:(BOOL)hidden animated:(BOOL)animated;
 - (GTMOAuthAuthentication*)createAuthentication;
@@ -175,17 +177,22 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [self.tableView reloadData];
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+  [super viewWillDisappear:animated];
+}
+
 - (void)didDisplayAsModal {
   if (self.findSource == FindFriendsSourceTwitter)
     [self findFromTwitter:self];
   else if (self.findSource == FindFriendsSourceFacebook)
     [self findFromFacebook:self];
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
 }
 
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.invitedContacts = [NSMutableArray array];
-
   self.navigationItem.title = @"Add Friends";
   searchFieldHidden_ = YES;
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
@@ -195,7 +202,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
                                            selector:@selector(checkForEndlessSignIn)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
-  [self loadSuggestedUsers];
+  if ([[RKClient sharedClient] isNetworkAvailable])
+    [self loadSuggestedUsers];
 
   if (self.findSource == FindFriendsSourceStamped)
     [self findFromStamped:self];
@@ -273,6 +281,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (IBAction)findFromStamped:(id)sender {
+  if ([[RKClient sharedClient] isNetworkAvailable]) {
+    if (!suggestedFriends_ || suggestedFriends_.count == 0)
+      [self loadSuggestedUsers];
+  }
   self.signInTwitterView.hidden = YES;
   self.signInFacebookView.hidden = YES;
   [self setSearchFieldHidden:NO animated:NO];
@@ -332,7 +344,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     if (sanitized)
       [sanitizedNumbers addObject:sanitized];
   }
-  [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
+  if ([[RKClient sharedClient] isNetworkAvailable])
+    [self findStampedFriendsFromEmails:allEmails andNumbers:sanitizedNumbers];
   [tableView_ reloadData];
 }
 
@@ -350,14 +363,15 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if (twitterFriends_) {
     [self.tableView reloadData];
   }
-
+    
   GTMOAuthAuthentication* auth = [self createAuthentication];
   if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
                                                  authentication:auth]) {
     self.signInTwitterView.hidden = YES;
     self.authentication = auth;
     [self fetchCurrentUser];
-  } else {
+  } 
+  else if ([[RKClient sharedClient] isNetworkAvailable]) {
     [self signOutOfTwitter];
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = YES;
@@ -385,11 +399,10 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   }
   
   if (facebookFriends_) {
-    [self.facebookClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
     [self.tableView reloadData];
   }
-  
-  if (!self.facebookClient.isSessionValid) {
+
+  if ([[RKClient sharedClient] isNetworkAvailable] && !self.facebookClient.isSessionValid) {
     self.tableView.hidden = YES;
     self.signInFacebookView.hidden = NO;
     self.signInTwitterView.hidden = YES;
@@ -1041,6 +1054,45 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   if (!response.isOK) {
     if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound && response.statusCode == 401)
       [self signOutOfTwitter];
+    if ([request.resourcePath rangeOfString:kFriendshipCreatePath].location != NSNotFound) {
+      // Error catching.
+      switch (response.statusCode) {
+        case 400:
+        case 500: {
+          [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+          break;
+        }
+        case 200: {
+          UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Already Following"
+                                                              message:@""
+                                                             delegate:nil
+                                                    cancelButtonTitle:@"Fair Enough"
+                                                    otherButtonTitles:nil];
+          NSError* err = nil;
+          NSString* username = nil;
+          id body = [response parsedBody:&err];
+          if (!err) {
+            username = [body objectForKey:@"username"];
+          }
+          alertView.title = @"Already Following";
+          if (username)
+            alertView.message = [NSString stringWithFormat: @"You're already following %@.", username];
+          else 
+            alertView.message = @"You're already following that person.";
+          [alertView show];
+          [alertView release];
+          break;
+        }
+        default:
+          break;
+      }
+      return;
+    }
+    if ([request.resourcePath rangeOfString:kFriendshipRemovePath].location != NSNotFound) {
+      [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+      return;
+    }
+    
     NSLog(@"HTTP error for request: %@, response: %d", request.resourcePath, response.statusCode);
     return;
   }
@@ -1091,21 +1143,35 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
-  NSLog(@"Error %@ for request %@", error, request.resourcePath);
   [self.signInTwitterActivityIndicator stopAnimating];
   self.signInTwitterConnectButton.enabled = YES;
   [self.signInFacebookActivityIndicator stopAnimating];
   self.signInFacebookConnectButton.enabled = YES;
+    
+  if ([request.resourcePath rangeOfString:kFriendshipCreatePath].location != NSNotFound ||
+      [request.resourcePath rangeOfString:kFriendshipRemovePath].location != NSNotFound)
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  NSLog(@"Error %@ for request %@", error, request.resourcePath);
+
 }
 
 - (void)requestDidTimeout:(RKRequest *)request {
+  BOOL shouldShowAlert = NO;
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
       [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
+      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
     [self signOutOfTwitter];
+    shouldShowAlert = YES;
+  }
   else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
+           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
     [self signOutOfFacebook];
+    shouldShowAlert = YES;
+  }
+  else if (shouldShowAlert ||
+           [request.resourcePath rangeOfString:kFriendshipCreatePath].location != NSNotFound ||
+           [request.resourcePath rangeOfString:kFriendshipRemovePath].location != NSNotFound)
+    [[Alerts alertWithTemplate:AlertTemplateTimedOut] show];
 }
 
 - (void)requestDidCancelLoad:(RKRequest *)request {

@@ -28,6 +28,7 @@
 #import "UserImageView.h"
 #import "UIColor+Stamped.h"
 #import "Util.h"
+#import "Alerts.h"
 
 static NSString* const kUserStampsPath = @"/collections/user.json";
 static NSString* const kUserLookupPath = @"/users/lookup.json";
@@ -436,6 +437,51 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  if (!response.isOK) {
+    if ([request.resourcePath rangeOfString:kFriendshipCreatePath].location != NSNotFound) {
+      [followIndicator_ stopAnimating];
+      followButton_.hidden = NO;
+      // Error catching.
+      switch (response.statusCode) {
+          break;
+        case 400:
+        case 500: {
+          [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+          break;
+        }
+        case 200: {
+          UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:@"Already Following"
+                                                              message:@""
+                                                             delegate:nil
+                                                    cancelButtonTitle:@"Fair Enough"
+                                                    otherButtonTitles:nil];
+          NSError* err = nil;
+          NSString* username = nil;
+          id body = [response parsedBody:&err];
+          if (!err) {
+            username = [body objectForKey:@"username"];
+          }
+          alertView.title = @"Already Following";
+          if (username)
+            alertView.message = [NSString stringWithFormat: @"You're already following %@.", username];
+          else 
+            alertView.message = @"You're already following that person.";
+          [alertView show];
+          [alertView release];
+          break;
+        }
+        default:
+          break;
+      }
+      return;
+    }
+    if ([request.resourcePath rangeOfString:kFriendshipRemovePath].location != NSNotFound) {
+      [followIndicator_ stopAnimating];
+      unfollowButton_.hidden = NO;
+      [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+      return;
+    }
+  }
   if ([request.resourcePath rangeOfString:kFriendshipCheckPath].location != NSNotFound) {
     User* currentUser = [AccountManager sharedManager].currentUser;
     [followIndicator_ stopAnimating];
@@ -449,6 +495,35 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
       self.stampsAreTemporary = NO;
     }
   }
+}
+
+- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  if ([request.resourcePath rangeOfString:kFriendshipCreatePath].location != NSNotFound) {
+    followButton_.hidden = NO;
+  }
+  else if ([request.resourcePath rangeOfString:kFriendshipRemovePath].location != NSNotFound) {
+    unfollowButton_.hidden = NO;
+  }
+  if (error.code == 2)
+    if (followIndicator_.isAnimating)
+      [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
+  else if ([[RKClient sharedClient] isNetworkAvailable])
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  [followIndicator_ stopAnimating];
+  NSLog(@"Error %@ for request %@", error, request.resourcePath);
+}
+
+- (void)requestDidTimeout:(RKRequest *)request {
+  if ([request.resourcePath rangeOfString:kFriendshipCreatePath].location != NSNotFound) {
+    [followIndicator_ stopAnimating];
+    followButton_.hidden = NO;
+  }
+  else if ([request.resourcePath rangeOfString:kFriendshipRemovePath].location != NSNotFound) {
+    [followIndicator_ stopAnimating];
+    unfollowButton_.hidden = NO;
+  }
+  [[Alerts alertWithTemplate:AlertTemplateTimedOut] show];
+  NSLog(@"Request %@ timed out", request.resourcePath);
 }
 
 #pragma mark - Private methods.

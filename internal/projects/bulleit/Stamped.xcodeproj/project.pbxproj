@@ -621,6 +621,7 @@
 		CBA08CC014229A5D005F2D84 /* tooltip_stampit@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBA08CBB14229A5D005F2D84 /* tooltip_stampit@2x.png */; };
 		CBA08CC114229A5D005F2D84 /* tooltip_taphere@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBA08CBC14229A5D005F2D84 /* tooltip_taphere@2x.png */; };
 		CBACC47E1461C9CA00BF3D0B /* settings_about_watermark@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBACC47D1461C9CA00BF3D0B /* settings_about_watermark@2x.png */; };
+		CBC5C1E3146A4B7300DD305C /* Alerts.m in Sources */ = {isa = PBXBuildFile; fileRef = CBC5C1E2146A4B7200DD305C /* Alerts.m */; };
 		CBC85D1E14679D3D008FAE7B /* book_gradient.png in Resources */ = {isa = PBXBuildFile; fileRef = CBC85D1C14679D3D008FAE7B /* book_gradient.png */; };
 		CBC85D1F14679D3D008FAE7B /* book_gradient@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBC85D1D14679D3D008FAE7B /* book_gradient@2x.png */; };
 		CBC85D401467D3AA008FAE7B /* signin_check.png in Resources */ = {isa = PBXBuildFile; fileRef = CBC85D3E1467D3AA008FAE7B /* signin_check.png */; };
@@ -1492,6 +1493,8 @@
 		CBA08CBB14229A5D005F2D84 /* tooltip_stampit@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tooltip_stampit@2x.png"; sourceTree = "<group>"; };
 		CBA08CBC14229A5D005F2D84 /* tooltip_taphere@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tooltip_taphere@2x.png"; sourceTree = "<group>"; };
 		CBACC47D1461C9CA00BF3D0B /* settings_about_watermark@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_about_watermark@2x.png"; sourceTree = "<group>"; };
+		CBC5C1E1146A4B7100DD305C /* Alerts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Alerts.h; sourceTree = "<group>"; };
+		CBC5C1E2146A4B7200DD305C /* Alerts.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Alerts.m; sourceTree = "<group>"; };
 		CBC85D1C14679D3D008FAE7B /* book_gradient.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = book_gradient.png; sourceTree = "<group>"; };
 		CBC85D1D14679D3D008FAE7B /* book_gradient@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "book_gradient@2x.png"; sourceTree = "<group>"; };
 		CBC85D3E1467D3AA008FAE7B /* signin_check.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = signin_check.png; sourceTree = "<group>"; };
@@ -2698,6 +2701,8 @@
 				7E407E941450A55100D7847F /* SharedRequestDelegate.m */,
 				7E9F80E913F88FA4003D7185 /* UIColor+Stamped.h */,
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
+				CBC5C1E1146A4B7100DD305C /* Alerts.h */,
+				CBC5C1E2146A4B7200DD305C /* Alerts.m */,
 				7E2267D813D52FF500657A66 /* Model */,
 				7E5406D91415507300912463 /* First run */,
 				7E0B622F1439717700A573FA /* Edit Profile */,
@@ -3606,6 +3611,7 @@
 				7EB03FDC1467527C004F7A1C /* InviteFriendTableViewCell.m in Sources */,
 				7E4B8E881468C310009A33DD /* ActivityFriendTableViewCell.m in Sources */,
 				7ED69D4614693BA100964B3A /* FriendshipManager.m in Sources */,
+				CBC5C1E3146A4B7300DD305C /* Alerts.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
