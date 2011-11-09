@@ -1081,6 +1081,9 @@ typedef enum {
         [NSPredicate predicateWithFormat:@"entityObject.entityID == %@", stamp_.entityObject.entityID]];
     fave.complete = [NSNumber numberWithBool:NO];
 
+    stamp_.user.numStamps = [NSNumber numberWithInteger:(stamp_.user.numStamps.integerValue - 1)];
+    stamp_.user.numStampsLeft = [NSNumber numberWithInteger:(stamp_.user.numStampsLeft.integerValue + 1)];
+
     [self sendDeleteStampRequest];
     [Stamp.managedObjectContext deleteObject:stamp_];
     [Stamp.managedObjectContext save:NULL];

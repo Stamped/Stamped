@@ -30,6 +30,7 @@
 - (void)userLoggedOut:(NSNotification*)notification;
 - (void)tooltipTapped:(UITapGestureRecognizer*)recognizer;
 - (void)pushNotificationReceived:(NSNotification*)notification;
+- (void)overlayWasTapped:(UIGestureRecognizer*)recognizer;
 
 @property (nonatomic, readonly) UIImageView* tooltipImageView;
 @property (nonatomic, copy) NSArray* tabBarItems;
@@ -70,8 +71,6 @@
 - (void)didReceiveMemoryWarning {
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
-
-  // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -228,6 +227,32 @@
   [super viewWillAppear:animated];
   [self.selectedViewController viewDidAppear:animated];
 
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstStamp"]) {
+    UIView* overlayContainer = [[UIView alloc] initWithFrame:self.view.window.frame];
+    overlayContainer.backgroundColor = [UIColor clearColor];
+    overlayContainer.alpha = 0;
+    UIView* black = [[UIView alloc] initWithFrame:overlayContainer.bounds];
+    black.backgroundColor = [UIColor blackColor];
+    black.alpha = 0.75;
+    [overlayContainer addSubview:black];
+    [black release];
+    UIImageView* earnMore = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"earn_tip_1stStamp"]];
+    earnMore.center = overlayContainer.center;
+    [overlayContainer addSubview:earnMore];
+    [earnMore release];
+    UITapGestureRecognizer* recognizer =
+        [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(overlayWasTapped:)];
+    [overlayContainer addGestureRecognizer:recognizer];
+    [recognizer release];
+    [self.view.window addSubview:overlayContainer];
+    [UIView animateWithDuration:0.3 animations:^{
+      overlayContainer.alpha = 1;
+    }];
+    [overlayContainer release];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"firstStamp"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
+
   if (![[NSUserDefaults standardUserDefaults] boolForKey:@"hasStamped"]) {
     if (!tooltipImageView_) {
       tooltipImageView_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tooltip_stampit"]];
@@ -295,6 +320,17 @@
   vc.searchIntent = SearchIntentStamp;
   [vc resetState];
   [self presentModalViewController:self.searchStampsNavigationController animated:YES];
+}
+
+- (void)overlayWasTapped:(UIGestureRecognizer*)recognizer {
+  if (recognizer.state != UIGestureRecognizerStateEnded)
+    return;
+
+  [UIView animateWithDuration:0.3 animations:^{
+    recognizer.view.alpha = 0.0;
+  } completion:^(BOOL finished) {
+    [recognizer.view removeFromSuperview];
+  }];
 }
 
 - (void)stampWasCreated:(NSNotification*)notification {

@@ -1030,6 +1030,11 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   if ([fbClient_.sessionDelegate isEqual:self])
     fbClient_.sessionDelegate = nil;
   
+  
+  if ([AccountManager sharedManager].currentUser.numStamps.integerValue == 1) {
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstStamp"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+  }
   StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
   UIViewController* vc = delegate.navigationController;
   if (vc && vc.modalViewController) {
@@ -1058,7 +1063,9 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                                         object:stamp];
 
     stamp.entityObject.favorite.complete = [NSNumber numberWithBool:YES];
-    
+    stamp.user.numStamps = [NSNumber numberWithInteger:(stamp.user.numStamps.integerValue + 1)];
+    stamp.user.numStampsLeft = [NSNumber numberWithInteger:(stamp.user.numStampsLeft.integerValue - 1)];
+
     [stamp.managedObjectContext save:NULL];
     NSUInteger numStampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft unsignedIntegerValue];
     [AccountManager sharedManager].currentUser.numStampsLeft = [NSNumber numberWithUnsignedInteger:--numStampsLeft];
