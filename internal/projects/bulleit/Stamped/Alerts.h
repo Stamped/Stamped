@@ -11,16 +11,20 @@
 
 typedef enum {
   AlertTemplateDefault = 0,
-  AlertTemplateOurFault,
   AlertTemplateNoInternet,
   AlertTemplateTimedOut,
   AlertTemplateAlreadyStamped,
+  AlertTemplateWebViewFail,
+  AlertTemplateInvalidLogin,
+  AlertTemplateInvalidSignup,
+  AlertTemplateFieldRequired,
 } AlertTemplate;
 
 @interface Alerts : NSObject {
   NSDate* lastAlertDate;
 }
 
-+ (UIAlertView*)alertWithTemplate:(AlertTemplate)template;
++ (UIAlertView*)alertWithTemplate:(AlertTemplate)aTemplate;
++ (UIAlertView*)alertWithTemplate:(AlertTemplate)aTemplate delegate:(id)aDelegate;
 
 @end

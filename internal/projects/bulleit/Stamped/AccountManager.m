@@ -16,6 +16,7 @@
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
 #import "Util.h"
+#import "Alerts.h"
 
 NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
 NSString* const kUserHasLoggedOutNotification = @"KUserHasLoggedOutNotification";
@@ -187,7 +188,7 @@ static AccountManager* sharedAccountManager_ = nil;
   if ([objectLoader.response isUnauthorized] &&
       [objectLoader.resourcePath isEqualToString:kLoginPath]) {
     if (firstRunViewController_)
-      [self.firstRunViewController signInFailed:nil];
+      [self.firstRunViewController signInFailed:@"The username or password you entered is incorrect."];
     else
       [self performSelector:@selector(logout) withObject:self afterDelay:0];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {

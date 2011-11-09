@@ -17,6 +17,7 @@
 #import "TOSViewController.h"
 #import "WebViewController.h"
 #import "AccountManager.h"
+#import "Alerts.h"
 
 static const CGFloat kKeyboardOffset = 216;
 static const CGFloat kProfileImageSize = 500;
@@ -212,12 +213,10 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
     [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
     confirmButton_.enabled = YES;
   }
-  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp"
-                                                   message:@"Wrong username and password combination."
-                                                  delegate:nil
-                                         cancelButtonTitle:@"OK"
-                                         otherButtonTitles:nil] autorelease];
-  [alert show];
+  if (!reason)
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  if (reason && ![reason rangeOfString:@"username"].location != NSNotFound)
+    [[Alerts alertWithTemplate:AlertTemplateInvalidLogin] show];
 }
 
 - (void)signUpSucess {
@@ -230,13 +229,13 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   [activityIndicator_ stopAnimating];
   [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   confirmButton_.enabled = YES;
-  NSString* reasoning = @"Please check that all required fields are valid. Sorry. We're working on making this easier.";
-  UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Womp womp"
-                                                  message:reasoning
-                                                 delegate:nil
-                                        cancelButtonTitle:@"OK"
-                                        otherButtonTitles:nil] autorelease];
-  [alert show];
+  if (!reason)
+    [[Alerts alertWithTemplate:AlertTemplateDefault] show];
+  else if (![reason isEqualToString:@""]) {
+    UIAlertView* alert = [Alerts alertWithTemplate:AlertTemplateInvalidSignup];
+    alert.message = reason;
+    [alert show];
+  }
 }
 
 #pragma mark - Nib Actions.
@@ -309,6 +308,10 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
 - (IBAction)confirmButtonPressed:(id)sender {
   if (sender != confirmButton_)
     return;
+  if (![[RKClient sharedClient] isNetworkAvailable]) {
+    [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
+    return;
+  }
   
   confirmButton_.enabled = NO;
   [confirmButton_ setTitle:nil forState:UIControlStateNormal];
@@ -589,6 +592,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
                        }];
     }
   }
+  
 }
 
 - (void)request:(RKRequest *)request didFailLoadWithError:(NSError *)error {
