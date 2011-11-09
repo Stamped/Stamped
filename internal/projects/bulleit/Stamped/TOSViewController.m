@@ -13,8 +13,9 @@
 }
 @end
 
-static  NSString* const kStampedTermsURL = @"http://www.stamped.com/terms-mobile.html";
-static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mobile.html";
+static NSString* const kStampedTermsURL = @"http://www.stamped.com/terms-mobile.html";
+static NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mobile.html";
+static NSString* const kStampedLicensesURL = @"http://www.stamped.com/licenses-mobile.html";
 
 @implementation TOSViewController
 
@@ -89,7 +90,7 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
   
   [termsWebView_ loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:kStampedTermsURL]]];
   [privacyWebView_ loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:kStampedPrivacyURL]]];
-  [licensesWebView_ loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:kStampedTermsURL]]];
+  [licensesWebView_ loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:kStampedLicensesURL]]];
   
   openView_ = termsView_;
 }
