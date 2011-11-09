@@ -12,6 +12,7 @@
 
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UIView* contentView;
+@property (nonatomic, retain) UIViewController* sharingView;
 
 - (IBAction)doneButtonPressed:(id)sender;
 - (IBAction)editProfileButtonPressed:(id)sender;

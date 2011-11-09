@@ -95,6 +95,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @property (nonatomic, readonly) UIView* editingMask;
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
+@property (nonatomic, retain) NSMutableArray* requestsArray;
 @end
 
 @implementation CreateStampViewController
@@ -138,7 +139,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @synthesize creditPickerController = creditPickerController_;
 @synthesize fbButton = fbButton_;
 @synthesize objectToStamp = objectToStamp_;
-
+@synthesize requestsArray = requestsArray_;
 @synthesize signInTwitterActivityIndicator = signInTwitterActivityIndicator_;
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 
@@ -184,7 +185,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   if ([fbClient_.sessionDelegate isEqual:self])
-    fbClient_.sessionDelegate = nil;
+    [fbClient_ ] = nil;
   [[NSNotificationCenter defaultCenter] removeObserver:self]; 
   self.entityObject = nil;
   self.creditedUser = nil;
@@ -222,6 +223,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
+  self.requestsArray = nil;
   [super dealloc];
 }
 
@@ -234,6 +236,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                            selector:@selector(checkForEndlessSignIn)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
+  self.requestsArray = [NSMutableArray array];
   
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
@@ -458,6 +461,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
+  self.requestsArray = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -977,7 +981,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)sendFBRequest:(Stamp*)stamp {
-  NSString* fbID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBid"];
+  NSString* fbID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBID"];
   if (self.fbClient.isSessionValid && fbButton_.selected) {
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    kFacebookAppID, @"app_id",
@@ -1003,6 +1007,15 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)dismissSelf {
+  for (RKRequest* request in requestsArray_) {
+    if ([[RKClient sharedClient].requestQueue containsRequest:request])
+      [[RKClient sharedClient].requestQueue cancelRequest:request];
+  }
+  [requestsArray_ removeAllObjects];
+  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
+  if ([fbClient_.sessionDelegate isEqual:self])
+    fbClient_.sessionDelegate = nil;
+  
   StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
   UIViewController* vc = delegate.navigationController;
   if (vc && vc.modalViewController) {
@@ -1180,6 +1193,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   request.cachePolicy = RKRequestCachePolicyNone;
   [request prepareURLRequest];
   [self.twitterAuth authorizeRequest:request.URLRequest];
+  [requestsArray_ addObject:request];
   [request send];
 }
 
@@ -1188,6 +1202,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [kTwitterFollowersURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
   RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
   [self.twitterAuth authorizeRequest:request.URLRequest];
+  [requestsArray_ addObject:request];
   [request send];
 }
 
@@ -1200,6 +1215,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
                     username, @"twitter_screen_name", nil];
   request.method = RKRequestMethodPOST;
+  [requestsArray_ addObject:request];
   [request send];
 }
 
@@ -1207,12 +1223,15 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterFollowersPath delegate:self];
   request.params = [NSDictionary dictionaryWithObject:[followers componentsJoinedByString:@","] forKey:@"q"];
   request.method = RKRequestMethodPOST;
+  [requestsArray_ addObject:request];
   [request send];
 }  
 
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  if ([requestsArray_ containsObject:request])
+    [requestsArray_ removeObject:request];
   if (!response.isOK) {
     if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound &&
         response.statusCode == 401) {
@@ -1266,6 +1285,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  if ([requestsArray_ containsObject:request])
+    [requestsArray_ removeObject:request];
   if (request.resourcePath == kTwitterUpdateStatusPath) {
     NSLog(@"twitter error: %@", error);
     return;
@@ -1281,6 +1302,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)requestDidTimeout:(RKRequest *)request {
+  if ([requestsArray_ containsObject:request])
+    [requestsArray_ removeObject:request];
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
       [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
       [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
@@ -1291,6 +1314,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)requestDidCancelLoad:(RKRequest *)request {
+  if ([requestsArray_ containsObject:request])
+    [requestsArray_ removeObject:request];
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
       [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
       [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
@@ -1324,7 +1349,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
     [defaults removeObjectForKey:@"FBName"];
-    
+    [defaults removeObjectForKey:@"FBID"];    
     [defaults synchronize];
     
     // Nil out the session variables to prevent
@@ -1344,10 +1369,12 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
   request.method = RKRequestMethodPOST;
+  [requestsArray_ addObject:request];
   [request send];
   
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
+  [defaults setObject:userID forKey:@"FBID"];
   [defaults synchronize];
 }
 
@@ -1356,6 +1383,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObject:[friends componentsJoinedByString:@","] forKey:@"q"];
   request.method = RKRequestMethodPOST;
+  [requestsArray_ addObject:request];
   [request send];
 }
 

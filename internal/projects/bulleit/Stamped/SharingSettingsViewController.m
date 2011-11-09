@@ -255,6 +255,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
     [defaults removeObjectForKey:@"FBName"];
+    [defaults removeObjectForKey:@"FBID"];
     [defaults synchronize];
     
     // Nil out the session variables to prevent
@@ -271,6 +272,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)connectFacebookName:(NSString*)name userID:(NSString*)userID {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
+  [defaults setObject:userID forKey:@"FBID"];
   [defaults synchronize];
   
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath

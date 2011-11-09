@@ -885,7 +885,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
     [defaults removeObjectForKey:@"FBName"];
-    
+    [defaults removeObjectForKey:@"FBID"];
     [defaults synchronize];
     
     // Nil out the session variables to prevent
@@ -967,6 +967,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:name forKey:@"FBName"];
+  [defaults setObject:userID forKey:@"FBID"];
   [defaults synchronize];
 }
 

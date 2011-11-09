@@ -19,6 +19,7 @@
 
 @synthesize scrollView = scrollView_;
 @synthesize contentView = contentView;
+@synthesize sharingView = sharingView_;
 
 - (id)initWithNibName:(NSString*)nibNameOrNil bundle:(NSBundle*)nibBundleOrNil {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -33,6 +34,13 @@
   [super didReceiveMemoryWarning];
 }
 
+- (void)dealloc {
+  self.scrollView = nil;
+  self.contentView = nil;
+  self.sharingView = nil;
+  [super dealloc];
+}
+
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad {
@@ -45,6 +53,7 @@
 - (void)viewDidUnload {
   self.scrollView = nil;
   self.contentView = nil;
+  self.sharingView = nil;
   [super viewDidUnload];
 }
 
@@ -75,9 +84,12 @@
 }
 
 - (IBAction)sharingButtonPressed:(id)sender {
-  SharingSettingsViewController* vc = [[SharingSettingsViewController alloc] init];
-  [self.navigationController pushViewController:vc animated:YES];
-  [vc release];
+  if (!sharingView_) {
+    SharingSettingsViewController* vc = [[SharingSettingsViewController alloc] init];
+    self.sharingView = vc;
+    [vc release];
+  }
+  [self.navigationController pushViewController:self.sharingView animated:YES];
 }
 
 - (IBAction)aboutUsButtonPressed:(id)sender {
