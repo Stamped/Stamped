@@ -3701,7 +3701,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3719,6 +3720,8 @@
 					"-ObjC",
 					"-all_load",
 				);
+				PROVISIONING_PROFILE = "ABA2FF22-F25B-4687-AACA-826C920B46EE";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "ABA2FF22-F25B-4687-AACA-826C920B46EE";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3792,7 +3795,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Andrew Bonventre (6MWFSNU4NE)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3812,6 +3816,8 @@
 					"-ObjC",
 					"-all_load",
 				);
+				PROVISIONING_PROFILE = "AEFEFD82-CC6E-417E-98D3-82D99A219376";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "AEFEFD82-CC6E-417E-98D3-82D99A219376";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3822,7 +3828,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3840,6 +3847,8 @@
 					"-ObjC",
 					"-all_load",
 				);
+				PROVISIONING_PROFILE = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "BDC2EF80-082A-48FA-A3D5-EB00FCEAD8DB";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;

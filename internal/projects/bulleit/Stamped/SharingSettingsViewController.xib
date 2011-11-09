@@ -101,7 +101,7 @@
 						</object>
 						<object class="NSCustomResource" key="IBUINormalBackgroundImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">gray_back_button_bg@2x.png</string>
+							<string key="NSResourceName">gray_back_button_bg.png</string>
 						</object>
 						<object class="IBUIFontDescription" key="IBUIFontDescription">
 							<string key="name">Helvetica-Bold</string>
@@ -269,13 +269,13 @@
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MC41AA</bytes>
 								</object>
-								<object class="NSCustomResource" key="IBUISelectedBackgroundImage" id="78558408">
+								<object class="NSCustomResource" key="IBUISelectedBackgroundImage" id="634677445">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">settings_sharing_button_disconnect</string>
+									<string key="NSResourceName">settings_sharing_button_disconnect.png</string>
 								</object>
-								<object class="NSCustomResource" key="IBUINormalBackgroundImage" id="620049893">
+								<object class="NSCustomResource" key="IBUINormalBackgroundImage" id="1023349624">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">settings_sharing_button_connect</string>
+									<string key="NSResourceName">settings_sharing_button_connect.png</string>
 								</object>
 								<object class="IBUIFontDescription" key="IBUIFontDescription" id="155245079">
 									<int key="type">2</int>
@@ -351,6 +351,7 @@
 								<string key="NSFrame">{{210, 104}, {90, 33}}</string>
 								<reference key="NSSuperview" ref="666428538"/>
 								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:225</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<int key="IBUIContentMode">8</int>
@@ -363,8 +364,8 @@
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="191813165"/>
-								<reference key="IBUISelectedBackgroundImage" ref="78558408"/>
-								<reference key="IBUINormalBackgroundImage" ref="620049893"/>
+								<reference key="IBUISelectedBackgroundImage" ref="634677445"/>
+								<reference key="IBUINormalBackgroundImage" ref="1023349624"/>
 								<reference key="IBUIFontDescription" ref="155245079"/>
 								<reference key="IBUIFont" ref="88628145"/>
 							</object>
@@ -665,12 +666,12 @@
 				<string key="25.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="27.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="28.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<real value="3" key="28.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
+				<real value="0.0" key="28.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
 				<string key="29.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="30.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="31.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="32.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<real value="3" key="32.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
+				<real value="2" key="32.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
 				<string key="4.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="43.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="45.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -772,9 +773,9 @@
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="gradient_background.png">{320, 480}</string>
-			<string key="gray_back_button_bg@2x.png">{138, 60}</string>
-			<string key="settings_sharing_button_connect">{16, 16}</string>
-			<string key="settings_sharing_button_disconnect">{16, 16}</string>
+			<string key="gray_back_button_bg.png">{16, 16}</string>
+			<string key="settings_sharing_button_connect.png">{16, 16}</string>
+			<string key="settings_sharing_button_disconnect.png">{16, 16}</string>
 			<string key="settings_sharing_facebook_off">{16, 16}</string>
 			<string key="settings_sharing_item_bg@2x.png">{620, 130}</string>
 			<string key="settings_sharing_twitter_off">{16, 16}</string>
