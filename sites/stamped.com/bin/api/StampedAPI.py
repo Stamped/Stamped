@@ -2541,6 +2541,9 @@ class StampedAPI(AStampedAPI):
             favCap  = 30
         else:
             favCap  = 20
+
+        # TEMP
+        favCap = 50
         
         limit = self._setLimit(limit, cap=favCap)
         
