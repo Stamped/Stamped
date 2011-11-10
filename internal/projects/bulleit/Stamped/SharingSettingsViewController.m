@@ -18,7 +18,7 @@
 @property (nonatomic, retain) RKClient* twitterClient;
 @property (nonatomic, retain) Facebook* fbClient;
 
--(void)setButton:(UIButton *)button connected:(BOOL)connected;
+
 -(void)updateUI;
 -(void)signInToFacebook;
 -(void)signOutOfFacebook;
@@ -26,6 +26,7 @@
 -(void)signInToTwitter;
 -(void)signOutOfTwitter;
 -(void)fetchCurrentUser;
+//-(void)setButton:(UIButton *)button connected:(BOOL)connected;
 
 -(void)removeFBCredentials;
 -(void)connectFacebookName:(NSString*)name userID:(NSString*)userID;
@@ -324,17 +325,17 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     [self signOutOfFacebook];
 }
 
-- (void)fbDidNotLogin:(BOOL)cancelled {
-  NSLog(@"whoa, no fb login");
-  [self removeFBCredentials];
-}
-
 - (void)fbDidLogin {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[self.fbClient accessToken] forKey:@"FBAccessTokenKey"];
   [defaults setObject:[self.fbClient expirationDate] forKey:@"FBExpirationDateKey"];
   [defaults synchronize];
   [self.fbClient requestWithGraphPath:@"me" andDelegate:self];
+}
+
+- (void)fbDidNotLogin:(BOOL)cancelled {
+  NSLog(@"whoa, no fb login");
+  [self removeFBCredentials];
 }
 
 #pragma mark - Twitter
@@ -533,6 +534,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     [self signOutOfFacebook];
 }
 
+/*
 - (void)setButton:(UIButton *)button connected:(BOOL)connected {
   UIImage* connectImg = [UIImage imageNamed:@"settings_sharing_button_connect"];
   UIImage* disconnectImg = [UIImage imageNamed:@"settings_sharing_button_disconnect"];
@@ -560,5 +562,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
       self.fbIconView.image = [UIImage imageNamed:@"settings_sharing_facebook_off"];
   }
 }
+*/
 
 @end

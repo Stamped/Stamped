@@ -8,7 +8,9 @@
 
 #import "GTMOAuthViewControllerTouch.h"
 
-@interface STOAuthViewController : GTMOAuthViewControllerTouch
+@interface STOAuthViewController : GTMOAuthViewControllerTouch {
+  BOOL navBarWasHidden_;
+}
 
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingIndicator;
 @property (nonatomic, retain) IBOutlet UIButton* reloadButton;

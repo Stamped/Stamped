@@ -301,5 +301,23 @@ NSString* const kKeychainTwitterToken = @"Stamped Twitter";
     return CGRectMake(0, topLeftY, imageView.frame.size.width, height);
   }
 }
+  // Fix for long back button titles overlapping the Stamped logo.
++ (NSString*)truncateTitleForBackButton:(NSString *)title {
+  CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+  if (titleSize.width > 87) {
+    BOOL firstLoop = YES;
+    while (titleSize.width > 87) {
+      if (firstLoop) {
+        firstLoop = NO;
+        title = [[title substringToIndex:title.length - 1] stringByAppendingString:@"…"];
+      }
+      else
+        title = [[title substringToIndex:title.length - 2] stringByAppendingString:@"…"];
+      // -2 because we've already appended the ellipsis.
+      titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+    }
+  }
+  return title;
+}
 
 @end

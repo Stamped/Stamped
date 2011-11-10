@@ -13,6 +13,7 @@
 #import "AccountManager.h"
 #import "PeopleTableViewCell.h"
 #import "ProfileViewController.h"
+#import "Util.h"
 
 
 static NSString* const kFriendsPath = @"/temp/friends.json";
@@ -55,6 +56,17 @@ static NSString* const kFollowersPath = @"/temp/followers.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   [self loadRelationshipsFromNetwork];
+  NSString* title;
+  if (relationshipType_ == RelationshipTypeFollowers)
+    title = @"Followers";
+  else if (relationshipType_ == RelationshipTypeFriends)
+    title = @"Following";
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:title
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
 }
 
 - (void)viewDidUnload {

@@ -50,7 +50,8 @@ static NSString* const kStampedFacebookLinkPath = @"/account/linked/facebook/upd
 static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/remove.json";
 static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/followers.json";
 
-@interface CreateStampViewController ()
+@interface CreateStampViewController () {
+}
 - (void)editorDoneButtonPressed:(id)sender;
 - (void)editorCameraButtonPressed:(id)sender;
 - (void)takePhotoButtonPressed:(id)sender;
@@ -232,7 +233,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  
+  self.navigationItem.title = @"New Stamp";
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(checkForEndlessSignIn)
                                                name:UIApplicationDidBecomeActiveNotification
@@ -481,6 +482,14 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   GTMOAuthAuthentication* auth = [self createAuthentication];
   if (![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) 
     [self signOutOfTwitter];
+  
+  if (!self.fbClient)
+    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
+    self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+    self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+  }
   if (!self.fbClient.isSessionValid)
     [self signOutOfFacebook];
   [super viewWillAppear:animated];
@@ -544,28 +553,26 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                  CGRectGetMaxY(newContainerFrame) + 22,
                                  CGRectGetWidth(shareLabel_.frame),
                                  CGRectGetHeight(shareLabel_.frame));
-  [shareLabel_ setNeedsDisplay];
   tweetButton_.frame = CGRectMake(tweetButton_.frame.origin.x,
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(tweetButton_.frame),
                                   CGRectGetHeight(tweetButton_.frame));
-  [tweetButton_ setNeedsDisplay];
   fbButton_.frame = CGRectMake(fbButton_.frame.origin.x,
-                                  CGRectGetMaxY(newContainerFrame) + 9,
-                                  CGRectGetWidth(fbButton_.frame),
-                                  CGRectGetHeight(fbButton_.frame));
-  [fbButton_ setNeedsDisplay];
-  signInTwitterActivityIndicator_.frame = CGRectMake(signInTwitterActivityIndicator_.frame.origin.x,
-                                  CGRectGetMaxY(newContainerFrame) + 9,
-                                  CGRectGetWidth(signInTwitterActivityIndicator_.frame),
-                                  CGRectGetHeight(signInTwitterActivityIndicator_.frame));
-  [signInTwitterActivityIndicator_ setNeedsDisplay];
-  signInFacebookActivityIndicator_.frame = CGRectMake(signInFacebookActivityIndicator_.frame.origin.x,
-                                                     CGRectGetMaxY(newContainerFrame) + 9,
-                                                     CGRectGetWidth(signInFacebookActivityIndicator_.frame),
-                                                     CGRectGetHeight(signInFacebookActivityIndicator_.frame));
-  [signInFacebookActivityIndicator_ setNeedsDisplay];
+                               CGRectGetMaxY(newContainerFrame) + 9,
+                               CGRectGetWidth(fbButton_.frame),
+                               CGRectGetHeight(fbButton_.frame));
   
+  CGFloat yOffset = floorf((CGRectGetHeight(tweetButton_.frame) - 
+                            CGRectGetHeight(signInFacebookActivityIndicator_.frame)) / 2);
+  signInTwitterActivityIndicator_.frame = CGRectMake(signInTwitterActivityIndicator_.frame.origin.x,
+                                                     CGRectGetMinY(tweetButton_.frame) + yOffset,
+                                                     CGRectGetWidth(signInTwitterActivityIndicator_.frame),
+                                                     CGRectGetHeight(signInTwitterActivityIndicator_.frame));
+  signInFacebookActivityIndicator_.frame = CGRectMake(signInFacebookActivityIndicator_.frame.origin.x,
+                                                      CGRectGetMinY(fbButton_.frame) + yOffset,
+                                                      CGRectGetWidth(signInFacebookActivityIndicator_.frame),
+                                                      CGRectGetHeight(signInFacebookActivityIndicator_.frame));
+  [shareLabel_ setNeedsDisplay];
   [tweetButton_ setNeedsDisplay];
   [fbButton_ setNeedsDisplay];
   [signInTwitterActivityIndicator_ setNeedsDisplay];
@@ -663,7 +670,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                  CGRectGetMaxY(newContainerFrame) + 22,
                                  CGRectGetWidth(shareLabel_.frame),
                                  CGRectGetHeight(shareLabel_.frame));
-  [shareLabel_ setNeedsDisplay];
   tweetButton_.frame = CGRectMake(tweetButton_.frame.origin.x,
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(tweetButton_.frame),
@@ -672,18 +678,22 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(fbButton_.frame),
                                   CGRectGetHeight(fbButton_.frame));
+  
+  CGFloat yOffset = floorf((CGRectGetHeight(tweetButton_.frame) - 
+                            CGRectGetHeight(signInFacebookActivityIndicator_.frame)) / 2);
   signInTwitterActivityIndicator_.frame = CGRectMake(signInTwitterActivityIndicator_.frame.origin.x,
-                               CGRectGetMaxY(newContainerFrame) + 9,
-                               CGRectGetWidth(signInTwitterActivityIndicator_.frame),
-                               CGRectGetHeight(signInTwitterActivityIndicator_.frame));
-  signInTwitterActivityIndicator_.frame = CGRectMake(signInTwitterActivityIndicator_.frame.origin.x,
-                               CGRectGetMaxY(newContainerFrame) + 9,
-                               CGRectGetWidth(signInTwitterActivityIndicator_.frame),
-                               CGRectGetHeight(signInTwitterActivityIndicator_.frame));
+                                                     CGRectGetMinY(tweetButton_.frame) + yOffset,
+                                                     CGRectGetWidth(signInTwitterActivityIndicator_.frame),
+                                                     CGRectGetHeight(signInTwitterActivityIndicator_.frame));
+  signInFacebookActivityIndicator_.frame = CGRectMake(signInFacebookActivityIndicator_.frame.origin.x,
+                                                      CGRectGetMinY(fbButton_.frame) + yOffset,
+                                                      CGRectGetWidth(signInFacebookActivityIndicator_.frame),
+                                                      CGRectGetHeight(signInFacebookActivityIndicator_.frame));
   [tweetButton_ setNeedsDisplay];
   [fbButton_ setNeedsDisplay];
   [signInTwitterActivityIndicator_ setNeedsDisplay];
   [signInFacebookActivityIndicator_ setNeedsDisplay];
+  [shareLabel_ setNeedsDisplay];
 
   CGRect frame =
       CGRectMake(0,
@@ -746,10 +756,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (IBAction)fbButtonPressed:(id)sender {
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
-    fbButton_.selected = NO;
-    return;
-  }
   if (fbButton_.selected == NO && !self.fbClient.isSessionValid) {
     UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Facebook."
                                                         delegate:self
@@ -1201,6 +1207,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"TwitterUsername"];
   [[NSUserDefaults standardUserDefaults] synchronize]; 
   [self.signInTwitterActivityIndicator stopAnimating];
+  if (!signInFacebookActivityIndicator_.isAnimating)
+    self.navigationItem.hidesBackButton = NO;
   self.tweetButton.enabled = YES;
   self.tweetButton.selected = NO;
 }
@@ -1215,6 +1223,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   }
   self.tweetButton.enabled = NO;
   [self.signInTwitterActivityIndicator startAnimating];
+  self.navigationItem.hidesBackButton = YES;
   self.twitterAuth = auth;
   [self fetchCurrentUser];
 }
@@ -1263,14 +1272,16 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if ([requestsArray_ containsObject:request])
     [requestsArray_ removeObject:request];
+  
   if (!response.isOK) {
-    if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound &&
-        response.statusCode == 401) {
+    if (response.statusCode == 401 &&
+        [request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound)
       [self signOutOfTwitter];
-    }
-    NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
+    if (!signInFacebookActivityIndicator_.isAnimating)
+      self.navigationItem.hidesBackButton = NO;
     return;
   }
+  
   if (request.resourcePath == kTwitterUpdateStatusPath) {
     NSLog(@"Tweeted: %@", response.bodyAsString);
   }
@@ -1281,6 +1292,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
     NSLog(@"Linked Twitter followers successfully.");
     [self.signInTwitterActivityIndicator stopAnimating];
+    if (!signInFacebookActivityIndicator_.isAnimating)
+      self.navigationItem.hidesBackButton = NO;
     self.tweetButton.enabled = YES;
     self.tweetButton.selected = YES;
     return;
@@ -1292,6 +1305,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
     NSLog(@"Linked Facebook friends successfully.");
     [self.signInFacebookActivityIndicator stopAnimating];
+    if (!signInTwitterActivityIndicator_.isAnimating)
+      self.navigationItem.hidesBackButton = NO;
     self.fbButton.enabled = YES;
     self.fbButton.selected = YES;
     return;
@@ -1316,13 +1331,13 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
+  NSLog(@"Error %@ for request %@", error, request.resourcePath);
   if ([requestsArray_ containsObject:request])
     [requestsArray_ removeObject:request];
   if (request.resourcePath == kTwitterUpdateStatusPath) {
     NSLog(@"twitter error: %@", error);
     return;
   }
-  NSLog(@"Error %@ for request %@", error, request.resourcePath);
   if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
       [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
       [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
@@ -1389,13 +1404,21 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
       self.fbClient.accessToken = nil;
     if (nil != self.fbClient.expirationDate) 
       self.fbClient.expirationDate = nil;
+    
    [self.signInFacebookActivityIndicator stopAnimating];
+    if (!signInTwitterActivityIndicator_.isAnimating)
+      self.navigationItem.hidesBackButton = NO;
    self.fbButton.enabled = YES;
    self.fbButton.selected = NO;
   }
 }
 
 - (void)connectFacebookName:(NSString*)name userID:(NSString*)userID {
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:name forKey:@"FBName"];
+  [defaults setObject:userID forKey:@"FBID"];
+  [defaults synchronize];
+
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath
                                                                delegate:self];
   request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
@@ -1403,10 +1426,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [requestsArray_ addObject:request];
   [request send];
   
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:name forKey:@"FBName"];
-  [defaults setObject:userID forKey:@"FBID"];
-  [defaults synchronize];
 }
 
 - (void)connectFacebookFriends:(NSArray*)friends {
@@ -1454,7 +1473,10 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   NSLog(@"FB err code: %d", [error code]);
   NSLog(@"FB err message: %@", [error description]);
   [self.signInFacebookActivityIndicator stopAnimating];
+  if (!signInTwitterActivityIndicator_.isAnimating)
+    self.navigationItem.hidesBackButton = NO;
   self.fbButton.enabled = YES;
+  self.fbButton.selected = NO;
   if ([error code] == 10000)
     [self signOutOfFacebook];
 }
@@ -1462,6 +1484,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)fbDidLogin {
   self.fbButton.enabled = NO;
   [self.signInFacebookActivityIndicator startAnimating];
+  self.navigationItem.hidesBackButton = YES;
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[self.fbClient accessToken] forKey:@"FBAccessTokenKey"];
   [defaults setObject:[self.fbClient expirationDate] forKey:@"FBExpirationDateKey"];

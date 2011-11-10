@@ -693,13 +693,19 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       view.leftLabel.text = @"Facebook friends using Stamped";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", facebookFriends_.count];
     }
+  } else if (findSource_ == FindFriendsSourceFacebook && !facebookFriends_) {
+      view.leftLabel.text = @"Finding friends who use Stamped…";
+      view.rightLabel.text = nil;
+  } else if (findSource_ == FindFriendsSourceTwitter && !twitterFriends_) {
+      view.leftLabel.text = @"Finding friends who use Stamped…";
+      view.rightLabel.text = nil;
   } else if (findSource_ == FindFriendsSourceStamped) {
-    view.leftLabel.text = @"Finding friends who use Stamped...";
-    view.rightLabel.text = @"...";
+      view.leftLabel.text = @"Finding friends who use Stamped…";
+      view.rightLabel.text = @"…";
   } else if (findSource_ == FindFriendsSourceSuggested) {
     view.leftLabel.text = @"Suggested Users";
     if (suggestedFriends_.count == 0)
-      view.rightLabel.text = @"...";
+      view.rightLabel.text = @"…";
     else
       view.rightLabel.text = [NSString stringWithFormat:@"%u", suggestedFriends_.count];
   }

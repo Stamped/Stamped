@@ -194,6 +194,10 @@ const CGFloat kKeyboardHeight = 217.0;
   [super viewWillAppear:animated];
 }
 
+- (void)viewWillDisappear:(BOOL)animated  {
+  navBar_.hideLogo = NO; 
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
