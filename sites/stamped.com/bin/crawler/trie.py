@@ -142,6 +142,9 @@ def add_entries(entries, hint, output, scale_factor=1.0):
             key = re.sub('([^a-zA-Z0-9._ -])', '', key)
             key = key.strip()
             
+            if key.startswith('-'):
+                print '"%s"' % (key, )
+            
             output.add(key, scale_factor)
             
             done += 1
@@ -187,7 +190,7 @@ def main():
             for k, v in s[2].iteritems():
                 query[k] = v
         
-        entries = entityDB._collection.find(, fields={'title' : 1})
+        entries = entityDB._collection.find(query, fields={'title' : 1})
         add_entries(entries, s[0], trie, s[1])
     
     print "done constructing trie!"
@@ -198,8 +201,8 @@ def main():
     })
     
     print "pruning tree..."
-    trie.prune(max_depth=15, min_count=importance_threshold)
-    
+    trie.prune(max_depth=17, min_count=importance_threshold)
+
     pprint({
         'num_nodes' : trie.num_nodes(), 
         'max_depth' : trie.max_depth(), 

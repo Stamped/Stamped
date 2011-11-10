@@ -118,12 +118,15 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
   UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_inbox"]];
-  [self.view insertSubview:emptyView atIndex:0];
+  [scrollView addSubview:emptyView];
   [emptyView release];
-  self.tableView.hidden = YES;
-  self.shelfView.hidden = YES;
-  self.hideWhenEmpty = YES;
+  [self.view insertSubview:scrollView atIndex:0];
+  scrollView.delegate = self;
+  scrollView.alwaysBounceVertical = YES;
+  scrollView.contentSize = self.view.frame.size;
+  [scrollView release];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
@@ -178,7 +181,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
       NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
     }
     needToRefetch_ = NO;
-    [self reloadTableData];
+    [self.tableView reloadData];
     [self.tableView selectRowAtIndexPath:self.selectedIndexPath
                                 animated:NO
                           scrollPosition:UITableViewScrollPositionNone];
@@ -231,7 +234,14 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     e.mostRecentStampDate = latestStamp.created;
   }
   
-  NSString* currentUserID = [AccountManager sharedManager].currentUser.userID;
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  BOOL shouldHideShelfAndTable = NO;
+  if (currentUser && currentUser.numStamps.integerValue == 0 && currentUser.following.count == 0)
+    shouldHideShelfAndTable = YES;
+  
+  self.tableView.hidden = shouldHideShelfAndTable;
+
+  NSString* currentUserID = currentUser.userID;
   NSSet* allStampsOrCurrentUser = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
     if ([obj isMemberOfClass:[Stamp class]] ||
         ([obj isMemberOfClass:[User class]] && [[(User*)obj userID] isEqualToString:currentUserID])) {
@@ -313,7 +323,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   selectedFilterType_ = filterType;
   [self filterStamps];
 
-  [self reloadTableData];
+  [self.tableView reloadData];
 }
 
 #pragma mark - Filter/Search stuff.
@@ -462,7 +472,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
   self.selectedIndexPath = [self.tableView indexPathForSelectedRow];
-  [self reloadTableData];
+  [self.tableView reloadData];
   [self.tableView selectRowAtIndexPath:self.selectedIndexPath
                               animated:NO
                         scrollPosition:UITableViewScrollPositionNone];
@@ -581,7 +591,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 }
 
 - (void)appDidBecomeActive:(NSNotification*)notification {
-  [self reloadTableData];
+  [self.tableView reloadData];
 }
 
 #pragma mark - MKMapViewDelegate Methods

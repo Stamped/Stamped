@@ -226,6 +226,8 @@ class StampedAPI(AStampedAPI):
         
         self._inviteDB.join(account.email)
 
+        ### TODO: Send welcome email
+
         return account
     
     @API_CALL
@@ -2539,6 +2541,9 @@ class StampedAPI(AStampedAPI):
             favCap  = 30
         else:
             favCap  = 20
+
+        # TEMP
+        favCap = 50
         
         limit = self._setLimit(limit, cap=favCap)
         

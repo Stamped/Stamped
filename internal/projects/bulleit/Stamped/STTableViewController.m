@@ -30,7 +30,6 @@ static const CGFloat kReloadHeight = 60.0;
 @synthesize lastUpdatedLabel = lastUpdatedLabel_;
 @synthesize arrowImageView = arrowImageView_;
 @synthesize spinnerView = spinnerView_;
-@synthesize hideWhenEmpty = hideWhenEmpty_;
 
 #pragma mark - UIScrollViewDelegate methods.
 
@@ -211,15 +210,6 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)userPulledToReload {}
 
 - (void)reloadData {}
-
-- (void)reloadTableData {
-  [self.tableView reloadData];
-  if (hideWhenEmpty_) {
-    BOOL hidden = [self.tableView numberOfRowsInSection:0] == 0;
-    self.tableView.hidden = hidden;
-    self.shelfView.hidden = hidden;
-  }
-}
 
 - (void)updateLastUpdatedTo:(NSDate*)date {
   lastUpdatedLabel_.text = [NSString stringWithFormat:@"Last updated %@", [Util userReadableTimeSinceDate:date]];

@@ -194,12 +194,6 @@ static const CGFloat kTopMargin = 7;
      forControlEvents:UIControlEventTouchUpInside];
   }
   
-  // Divider and search icon.
-  UIImageView* divider = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"hdr_separator"]];
-  divider.frame = CGRectOffset(divider.frame, 275, 9);
-  [scrollView_ addSubview:divider];
-  [divider release];
-  
   self.searchButton = [UIButton buttonWithType:UIButtonTypeCustom];
   searchButton_.frame = CGRectMake(279, kTopMargin, 40, 40);
   [searchButton_ setImage:[UIImage imageNamed:@"hdr_searchIconOnly_button"]

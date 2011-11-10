@@ -55,16 +55,22 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
   UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_news"]];
-  [self.view insertSubview:emptyView atIndex:0];
+  [scrollView addSubview:emptyView];
   [emptyView release];
-  self.hideWhenEmpty = YES;
+  [self.view insertSubview:scrollView atIndex:0];
+  scrollView.delegate = self;
+  scrollView.alwaysBounceVertical = YES;
+  scrollView.contentSize = self.view.frame.size;
+  [scrollView release];
+
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(appDidBecomeActive:)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
   [self loadEventsFromDataStore];
-  [self reloadTableData];
+  [self.tableView reloadData];
   [self loadEventsFromNetwork];
 }
 
@@ -101,6 +107,9 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 		// Update to handle the error appropriately.
 		NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
 	}
+  
+  NSUInteger numObjects = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
+  self.tableView.hidden = (numObjects == 0);
 }
 
 - (void)loadEventsFromNetwork {
@@ -120,19 +129,20 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-  [self reloadTableData];
+  [self.tableView reloadData];
   NSUInteger numObjects = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
   if (numObjects > numRows_) {
     [[NSNotificationCenter defaultCenter]
         postNotificationName:kNewsItemCountHasChangedNotification
                       object:[NSNumber numberWithUnsignedInteger:numObjects - numRows_]];
   }
+  self.tableView.hidden = (numObjects == 0);
 
   numRows_ = numObjects;
 }
 
 - (void)appDidBecomeActive:(NSNotification*)notification {
-  [self reloadTableData];
+  [self.tableView reloadData];
 }
 
 #pragma mark - Table view data source

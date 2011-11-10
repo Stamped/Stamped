@@ -1080,7 +1080,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
     stamp.entityObject.favorite.complete = [NSNumber numberWithBool:YES];
     stamp.user.numStamps = [NSNumber numberWithInteger:(stamp.user.numStamps.integerValue + 1)];
-    stamp.user.numStampsLeft = [NSNumber numberWithInteger:(stamp.user.numStampsLeft.integerValue - 1)];
 
     [stamp.managedObjectContext save:NULL];
     NSUInteger numStampsLeft = [[AccountManager sharedManager].currentUser.numStampsLeft unsignedIntegerValue];

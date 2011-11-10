@@ -40,7 +40,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if 'screen_name' in document:
             document['screen_name_lower'] = str(document['screen_name']).lower()
         if 'name' in document:
-            document['name_lower'] = str(document['name']).lower()
+            document['name_lower'] = unicode(document['name']).lower()
         
         return document
     
