@@ -31,6 +31,7 @@ from db.mongodb.MongoInvitationCollection   import MongoInvitationCollection
 from db.mongodb.MongoEntitySearcher         import MongoEntitySearcher
 from db.mongodb.MongoTempEntityCollection   import MongoTempEntityCollection
 from db.mongodb.MongoLogsCollection         import MongoLogsCollection
+from db.mongodb.MongoStatsCollection        import MongoStatsCollection
 from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 
@@ -107,6 +108,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _logsDB(self):
         return MongoLogsCollection()
+    
+    @lazyProperty
+    def _statsDB(self):
+        return MongoStatsCollection()
     
     @lazyProperty
     def _tempEntityDB(self):

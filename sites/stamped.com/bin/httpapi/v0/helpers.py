@@ -28,8 +28,9 @@ def handleHTTPRequest(fn):
             print
             
             logs.begin(
-                add=stampedAPI._logsDB.addLog, 
-                save=stampedAPI._logsDB.saveLog,
+                addLog=stampedAPI._logsDB.addLog, 
+                saveLog=stampedAPI._logsDB.saveLog,
+                saveStat=stampedAPI._statsDB.addStat,
                 requestData=request,
             )
             # logs.request(request)

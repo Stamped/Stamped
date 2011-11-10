@@ -18,31 +18,24 @@ class MongoLogsCollection(AMongoCollection):
     
     def addLog(self, logData):
         try:
-            # print 'LOG DATA: %s' % logData
             if 'form' in logData:
+                ### TODO: Is this storing UTF characters?
                 logData['form'] = str(logData['form'])
 
-            # if 'headers' in logData:
-            #     logData['headers'] = str(logData['headers'])#pickle.dumps(logData['headers'])
-
-            return self._collection.insert_one(logData, log=False)
+            return self._collection.insert_one(logData, log=False, safe=False)
         except Exception as e:
             print e
             raise
 
     def saveLog(self, logData, logId=None):
         try:
-            # print 'LOG DATA: %s' % logData
             if 'form' in logData:
                 logData['form'] = str(logData['form'])
-
-            # if 'headers' in logData:
-            #     logData['headers'] = str(logData['headers'])#pickle.dumps(logData['headers'])
 
             if '_id' not in logData and logId:
                 logData['_id'] = logId
 
-            self._collection.save(logData, log=False)
+            self._collection.save(logData, log=False, safe=False)
         except Exception as e:
             print e
             raise
