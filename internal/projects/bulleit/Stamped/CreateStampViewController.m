@@ -549,18 +549,22 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(tweetButton_.frame),
                                   CGRectGetHeight(tweetButton_.frame));
+  [tweetButton_ setNeedsDisplay];
   fbButton_.frame = CGRectMake(fbButton_.frame.origin.x,
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(fbButton_.frame),
                                   CGRectGetHeight(fbButton_.frame));
+  [fbButton_ setNeedsDisplay];
   signInTwitterActivityIndicator_.frame = CGRectMake(signInTwitterActivityIndicator_.frame.origin.x,
                                   CGRectGetMaxY(newContainerFrame) + 9,
                                   CGRectGetWidth(signInTwitterActivityIndicator_.frame),
                                   CGRectGetHeight(signInTwitterActivityIndicator_.frame));
+  [signInTwitterActivityIndicator_ setNeedsDisplay];
   signInFacebookActivityIndicator_.frame = CGRectMake(signInFacebookActivityIndicator_.frame.origin.x,
                                                      CGRectGetMaxY(newContainerFrame) + 9,
                                                      CGRectGetWidth(signInFacebookActivityIndicator_.frame),
                                                      CGRectGetHeight(signInFacebookActivityIndicator_.frame));
+  [signInFacebookActivityIndicator_ setNeedsDisplay];
   
   [tweetButton_ setNeedsDisplay];
   [fbButton_ setNeedsDisplay];

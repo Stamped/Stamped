@@ -42,12 +42,6 @@
                                         delegate:aDelegate
                                cancelButtonTitle:@"OK"
                                otherButtonTitles:nil] autorelease];
-    case AlertTemplateInvalidLogin:
-      return [[[UIAlertView alloc] initWithTitle:@"Couldn't Log In"
-                                         message:@"The username or password you entered is incorrect."
-                                        delegate:aDelegate
-                               cancelButtonTitle:@"OK"
-                               otherButtonTitles:nil] autorelease];
     case AlertTemplateInvalidSignup:
       return [[[UIAlertView alloc] initWithTitle:@"Registration Failed"
                                          message:@"Please check that all your information is valid."
@@ -60,6 +54,12 @@
                                         delegate:aDelegate
                                cancelButtonTitle:@"OK"
                                otherButtonTitles:nil] autorelease];
+    case AlertTemplateInvalidLogin:
+      return [[[UIAlertView alloc] initWithTitle:@"Couldn't Log In"
+                                         message:@"The username and password you entered don't match."
+                                        delegate:aDelegate
+                               cancelButtonTitle:@"Reset password"
+                               otherButtonTitles:@"      Try again      ", nil] autorelease];
     default:
       return nil;
   }

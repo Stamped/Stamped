@@ -35,6 +35,7 @@ willCreateUserWithName:(NSString*)name
                                                       UIImagePickerControllerDelegate,
                                                       UIActionSheetDelegate,
                                                       UIScrollViewDelegate,
+                                                      UIAlertViewDelegate,
                                                       RKRequestDelegate,
                                                       RKRequestQueueDelegate>
 

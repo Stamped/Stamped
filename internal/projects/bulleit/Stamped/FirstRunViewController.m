@@ -24,6 +24,7 @@ static const CGFloat kProfileImageSize = 500;
 static  NSString* const kStampedTermsURL = @"http://www.stamped.com/terms-mobile.html";
 static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mobile.html";
 static  NSString* const kStampedValidateURI = @"/account/check.json";
+static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/settings/password/forgot";
 
 @interface FirstRunViewController ()
 - (void)setupBottomView;
@@ -88,6 +89,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
 }
 
 - (void)dealloc {
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.delegate = nil;
   self.profilePhoto = nil;
   [self.signInScrollView removeFromSuperview];
@@ -148,7 +150,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   [super viewDidUnload];
   [self.signInScrollView removeFromSuperview];
   [self.signUpScrollView removeFromSuperview];
-
+  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
   self.bottomView = nil;
   self.scrollView = nil;
   self.animationContentView = nil;
@@ -216,7 +218,7 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
   if (!reason)
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   if (reason && ![reason rangeOfString:@"username"].location != NSNotFound)
-    [[Alerts alertWithTemplate:AlertTemplateInvalidLogin] show];
+    [[Alerts alertWithTemplate:AlertTemplateInvalidLogin delegate:self] show];
 }
 
 - (void)signUpSucess {
@@ -626,6 +628,25 @@ static  NSString* const kStampedValidateURI = @"/account/check.json";
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
   if ([RKClient sharedClient].requestQueue.count == 0 && requestQueue_.count == 0)
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+}
+
+#pragma mark - UIAlertViewDelegate methods.
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+  if ([alertView.title isEqualToString:[Alerts alertWithTemplate:AlertTemplateInvalidLogin].title])
+    if (buttonIndex == alertView.cancelButtonIndex) {
+      NSURL *url = [NSURL URLWithString:kStampedResetPasswordURL];
+      [[UIApplication sharedApplication] openURL:url];
+      if ([usernameTextField_ isFirstResponder])
+        [usernameTextField_ resignFirstResponder];
+      else if ([passwordTextField_ isFirstResponder])
+        [passwordTextField_ resignFirstResponder];
+      /*
+      WebViewController* wvc = [self.webViewNavigationController.viewControllers objectAtIndex:0];
+      wvc.url = [NSURL URLWithString:kStampedResetPasswordURL];
+      [self presentModalViewController:self.webViewNavigationController animated:YES];
+      wvc.shareButton.hidden = YES;*/
+    }
 }
 
 
