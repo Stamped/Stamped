@@ -553,6 +553,10 @@
 		CB3C9AD2141FE6EB005F837A /* WrappingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = CB3C9AD1141FE6EA005F837A /* WrappingTextView.m */; };
 		CB3E19FF145765B60018D1F6 /* add_friends_button_inactive@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB3E19FE145765B60018D1F6 /* add_friends_button_inactive@2x.png */; };
 		CB4388FA141ABEF90086D1AE /* MusicDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */; };
+		CB467745146B71DF00114474 /* settings_sharing_button_connect.png in Resources */ = {isa = PBXBuildFile; fileRef = CB467741146B71DF00114474 /* settings_sharing_button_connect.png */; };
+		CB467746146B71DF00114474 /* settings_sharing_button_connect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB467742146B71DF00114474 /* settings_sharing_button_connect@2x.png */; };
+		CB467747146B71DF00114474 /* settings_sharing_button_disconnect.png in Resources */ = {isa = PBXBuildFile; fileRef = CB467743146B71DF00114474 /* settings_sharing_button_disconnect.png */; };
+		CB467748146B71DF00114474 /* settings_sharing_button_disconnect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB467744146B71DF00114474 /* settings_sharing_button_disconnect@2x.png */; };
 		CB4CA264145F097600621D45 /* SharingSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB4CA262145F097600621D45 /* SharingSettingsViewController.m */; };
 		CB4CA265145F097600621D45 /* SharingSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA263145F097600621D45 /* SharingSettingsViewController.xib */; };
 		CB4CA26B145F17FB00621D45 /* settings_sharing_twitter_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4CA266145F17FB00621D45 /* settings_sharing_twitter_on@2x.png */; };
@@ -593,7 +597,6 @@
 		CB5CF1DC146465BD00DC2CBC /* share_disabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF1DA146465BB00DC2CBC /* share_disabled@2x.png */; };
 		CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */; };
 		CB7B22FB14609306004C247F /* sharing_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FA14609306004C247F /* sharing_header@2x.png */; };
-		CB7B23011461A29D004C247F /* settings_sharing_button_bg_blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FD1461A29D004C247F /* settings_sharing_button_bg_blue@2x.png */; };
 		CB7B23071461B994004C247F /* AboutUsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB7B23051461B993004C247F /* AboutUsViewController.m */; };
 		CB7B23081461B994004C247F /* AboutUsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB7B23061461B993004C247F /* AboutUsViewController.xib */; };
 		CB7B230A1461BC44004C247F /* about_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B23091461BC43004C247F /* about_header@2x.png */; };
@@ -652,8 +655,6 @@
 		CBCED276146A811D00D188CE /* eDetail_notConnected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBCED274146A811D00D188CE /* eDetail_notConnected@2x.png */; };
 		CBCED279146A90EE00D188CE /* search_notConnected.png in Resources */ = {isa = PBXBuildFile; fileRef = CBCED277146A90EE00D188CE /* search_notConnected.png */; };
 		CBCED27A146A90EE00D188CE /* search_notConnected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBCED278146A90EE00D188CE /* search_notConnected@2x.png */; };
-		CBCED2F5146B139C00D188CE /* settings_sharing_button_connect.png in Resources */ = {isa = PBXBuildFile; fileRef = CBCED2F3146B139C00D188CE /* settings_sharing_button_connect.png */; };
-		CBCED2F6146B139C00D188CE /* settings_sharing_button_disconnect.png in Resources */ = {isa = PBXBuildFile; fileRef = CBCED2F4146B139C00D188CE /* settings_sharing_button_disconnect.png */; };
 		CBD125F914183C9A00CCBDD8 /* CollapsibleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CBD125F714183C9900CCBDD8 /* CollapsibleViewController.m */; };
 		CBD126011418596A00CCBDD8 /* eDetail-arrow-down@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBD125FF1418596A00CCBDD8 /* eDetail-arrow-down@2x.png */; };
 		CBD126021418596A00CCBDD8 /* eDetail-arrow-up@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CBD126001418596A00CCBDD8 /* eDetail-arrow-up@2x.png */; };
@@ -1444,6 +1445,10 @@
 		CB3E19FE145765B60018D1F6 /* add_friends_button_inactive@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_inactive@2x.png"; sourceTree = "<group>"; };
 		CB4388F8141ABEF90086D1AE /* MusicDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicDetailViewController.h; sourceTree = "<group>"; };
 		CB4388F9141ABEF90086D1AE /* MusicDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MusicDetailViewController.m; sourceTree = "<group>"; };
+		CB467741146B71DF00114474 /* settings_sharing_button_connect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings_sharing_button_connect.png; sourceTree = "<group>"; };
+		CB467742146B71DF00114474 /* settings_sharing_button_connect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_connect@2x.png"; sourceTree = "<group>"; };
+		CB467743146B71DF00114474 /* settings_sharing_button_disconnect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings_sharing_button_disconnect.png; sourceTree = "<group>"; };
+		CB467744146B71DF00114474 /* settings_sharing_button_disconnect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_disconnect@2x.png"; sourceTree = "<group>"; };
 		CB4CA261145F097600621D45 /* SharingSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharingSettingsViewController.h; sourceTree = "<group>"; };
 		CB4CA262145F097600621D45 /* SharingSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SharingSettingsViewController.m; sourceTree = "<group>"; };
 		CB4CA263145F097600621D45 /* SharingSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SharingSettingsViewController.xib; sourceTree = "<group>"; };
@@ -1452,8 +1457,6 @@
 		CB4CA268145F17FB00621D45 /* settings_sharing_facebook_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_facebook_off@2x.png"; sourceTree = "<group>"; };
 		CB4CA269145F17FB00621D45 /* settings_sharing_facebook_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_facebook_on@2x.png"; sourceTree = "<group>"; };
 		CB4CA26A145F17FB00621D45 /* settings_sharing_item_bg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_item_bg@2x.png"; sourceTree = "<group>"; };
-		CB4CA271145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_disconnect@2x.png"; sourceTree = "<group>"; };
-		CB4CA272145F1A2900621D45 /* settings_sharing_button_connect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_connect@2x.png"; sourceTree = "<group>"; };
 		CB55A86114476D9A00CEB6CC /* add_friends_button_connectfacebook_pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connectfacebook_pressed@2x.png"; sourceTree = "<group>"; };
 		CB55A86214476D9A00CEB6CC /* add_friends_button_connectfacebook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connectfacebook@2x.png"; sourceTree = "<group>"; };
 		CB55A86314476D9A00CEB6CC /* add_friends_button_connecttwitter_pressed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "add_friends_button_connecttwitter_pressed@2x.png"; sourceTree = "<group>"; };
@@ -1489,8 +1492,6 @@
 		CB65DC34145A44AF00E702D6 /* STOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STOAuthViewController.h; sourceTree = "<group>"; };
 		CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STOAuthViewController.m; sourceTree = "<group>"; };
 		CB7B22FA14609306004C247F /* sharing_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sharing_header@2x.png"; sourceTree = "<group>"; };
-		CB7B22FD1461A29D004C247F /* settings_sharing_button_bg_blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_bg_blue@2x.png"; sourceTree = "<group>"; };
-		CB7B22FE1461A29D004C247F /* settings_sharing_button_disconnect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "settings_sharing_button_disconnect@2x.png"; sourceTree = "<group>"; };
 		CB7B23041461B993004C247F /* AboutUsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutUsViewController.h; sourceTree = "<group>"; };
 		CB7B23051461B993004C247F /* AboutUsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutUsViewController.m; sourceTree = "<group>"; };
 		CB7B23061461B993004C247F /* AboutUsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutUsViewController.xib; sourceTree = "<group>"; };
@@ -1553,8 +1554,6 @@
 		CBCED274146A811D00D188CE /* eDetail_notConnected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eDetail_notConnected@2x.png"; sourceTree = "<group>"; };
 		CBCED277146A90EE00D188CE /* search_notConnected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = search_notConnected.png; sourceTree = "<group>"; };
 		CBCED278146A90EE00D188CE /* search_notConnected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_notConnected@2x.png"; sourceTree = "<group>"; };
-		CBCED2F3146B139C00D188CE /* settings_sharing_button_connect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings_sharing_button_connect.png; sourceTree = "<group>"; };
-		CBCED2F4146B139C00D188CE /* settings_sharing_button_disconnect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings_sharing_button_disconnect.png; sourceTree = "<group>"; };
 		CBD125F614183C9900CCBDD8 /* CollapsibleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollapsibleViewController.h; sourceTree = "<group>"; };
 		CBD125F714183C9900CCBDD8 /* CollapsibleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollapsibleViewController.m; sourceTree = "<group>"; };
 		CBD125FF1418596A00CCBDD8 /* eDetail-arrow-down@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "eDetail-arrow-down@2x.png"; sourceTree = "<group>"; };
@@ -2163,6 +2162,10 @@
 		7E89C3B51437D0D400547960 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				CB467741146B71DF00114474 /* settings_sharing_button_connect.png */,
+				CB467742146B71DF00114474 /* settings_sharing_button_connect@2x.png */,
+				CB467743146B71DF00114474 /* settings_sharing_button_disconnect.png */,
+				CB467744146B71DF00114474 /* settings_sharing_button_disconnect@2x.png */,
 				CB5CF15B1463434900DC2CBC /* legal_header.png */,
 				CB5CF15C1463434900DC2CBC /* legal_header@2x.png */,
 				CB7B230B1461BCED004C247F /* settings_about_logocard@2x.png */,
@@ -2182,13 +2185,7 @@
 				CB4CA268145F17FB00621D45 /* settings_sharing_facebook_off@2x.png */,
 				CB4CA269145F17FB00621D45 /* settings_sharing_facebook_on@2x.png */,
 				CB4CA26A145F17FB00621D45 /* settings_sharing_item_bg@2x.png */,
-				CB4CA272145F1A2900621D45 /* settings_sharing_button_connect@2x.png */,
-				CB4CA271145F1A2900621D45 /* settings_sharing_button_disconnect@2x.png */,
-				CBCED2F3146B139C00D188CE /* settings_sharing_button_connect.png */,
-				CBCED2F4146B139C00D188CE /* settings_sharing_button_disconnect.png */,
 				CB7B22FA14609306004C247F /* sharing_header@2x.png */,
-				CB7B22FD1461A29D004C247F /* settings_sharing_button_bg_blue@2x.png */,
-				CB7B22FE1461A29D004C247F /* settings_sharing_button_disconnect@2x.png */,
 				CB7B23091461BC43004C247F /* about_header@2x.png */,
 				CB7B230D1461C116004C247F /* settings_about_followbutton@2x.png */,
 				CB7B230F1461C24D004C247F /* settings_about_followbutton_pressed@2x.png */,
@@ -3473,7 +3470,6 @@
 				CB4CA26E145F17FB00621D45 /* settings_sharing_facebook_on@2x.png in Resources */,
 				CB4CA26F145F17FB00621D45 /* settings_sharing_item_bg@2x.png in Resources */,
 				CB7B22FB14609306004C247F /* sharing_header@2x.png in Resources */,
-				CB7B23011461A29D004C247F /* settings_sharing_button_bg_blue@2x.png in Resources */,
 				CB7B23081461B994004C247F /* AboutUsViewController.xib in Resources */,
 				CB7B230A1461BC44004C247F /* about_header@2x.png in Resources */,
 				CB7B230C1461BCED004C247F /* settings_about_logocard@2x.png in Resources */,
@@ -3597,10 +3593,12 @@
 				7EDD174F146B04EB0003D4F7 /* earn_tip_zeroStamps@2x.png in Resources */,
 				7EDD1752146B0A890003D4F7 /* credit_28pt_overlaySolid.png in Resources */,
 				7EDD1753146B0A890003D4F7 /* credit_28pt_overlaySolid@2x.png in Resources */,
-				CBCED2F5146B139C00D188CE /* settings_sharing_button_connect.png in Resources */,
-				CBCED2F6146B139C00D188CE /* settings_sharing_button_disconnect.png in Resources */,
 				7EDD1756146B0C940003D4F7 /* stamp_28pt_solid.png in Resources */,
 				7EDD1757146B0C940003D4F7 /* stamp_28pt_solid@2x.png in Resources */,
+				CB467745146B71DF00114474 /* settings_sharing_button_connect.png in Resources */,
+				CB467746146B71DF00114474 /* settings_sharing_button_connect@2x.png in Resources */,
+				CB467747146B71DF00114474 /* settings_sharing_button_disconnect.png in Resources */,
+				CB467748146B71DF00114474 /* settings_sharing_button_disconnect@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

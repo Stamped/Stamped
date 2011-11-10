@@ -117,13 +117,13 @@
 								<nil key="IBUIHighlightedColor"/>
 								<int key="IBUIBaselineAdjustment">1</int>
 								<float key="IBUIMinimumFontSize">10</float>
-								<object class="IBUIFontDescription" key="IBUIFontDescription">
+								<object class="IBUIFontDescription" key="IBUIFontDescription" id="370832776">
 									<string key="name">Helvetica</string>
 									<string key="family">Helvetica</string>
 									<int key="traits">0</int>
 									<double key="pointSize">11</double>
 								</object>
-								<object class="NSFont" key="IBUIFont">
+								<object class="NSFont" key="IBUIFont" id="793992253">
 									<string key="NSName">Helvetica</string>
 									<double key="NSSize">11</double>
 									<int key="NSfFlags">16</int>
@@ -415,19 +415,19 @@
 								</object>
 								<object class="NSCustomResource" key="IBUIHighlightedImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_twitter_highlighted</string>
+									<string key="NSResourceName">share_twitter_highlighted.png</string>
 								</object>
-								<object class="NSCustomResource" key="IBUIDisabledImage" id="1063097962">
+								<object class="NSCustomResource" key="IBUIDisabledImage" id="839845010">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_disabled</string>
+									<string key="NSResourceName">share_disabled.png</string>
 								</object>
 								<object class="NSCustomResource" key="IBUISelectedImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_twitter_on</string>
+									<string key="NSResourceName">share_twitter_on.png</string>
 								</object>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_twitter</string>
+									<string key="NSResourceName">share_twitter.png</string>
 								</object>
 								<object class="IBUIFontDescription" key="IBUIFontDescription" id="572259165">
 									<string key="name">Helvetica-Bold</string>
@@ -444,10 +444,10 @@
 							<object class="IBUILabel" id="878944707">
 								<reference key="NSNextResponder" ref="870662028"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{17, 255}, {42, 21}}</string>
+								<string key="NSFrame">{{16, 254}, {42, 12}}</string>
 								<reference key="NSSuperview" ref="870662028"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="969060622"/>
+								<reference key="NSNextKeyView" ref="128777124"/>
 								<string key="NSReuseIdentifierKey">_NS:311</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<bool key="IBUIClipsSubviews">YES</bool>
@@ -457,10 +457,16 @@
 								<string key="IBUIText">Share:</string>
 								<object class="NSColor" key="IBUITextColor">
 									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC42AA</bytes>
+									<bytes key="NSWhite">MC4zNQA</bytes>
 								</object>
 								<nil key="IBUIHighlightedColor"/>
+								<object class="NSColor" key="IBUIShadowColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MSAwLjQAA</bytes>
+								</object>
+								<string key="IBUIShadowOffset">{0, 1}</string>
 								<int key="IBUIBaselineAdjustment">1</int>
+								<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 								<float key="IBUIMinimumFontSize">10</float>
 								<object class="IBUIFontDescription" key="IBUIFontDescription">
 									<string key="name">Helvetica-Bold</string>
@@ -523,16 +529,16 @@
 								<reference key="IBUINormalTitleShadowColor" ref="604820021"/>
 								<object class="NSCustomResource" key="IBUIHighlightedImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_fb_highlighted</string>
+									<string key="NSResourceName">share_fb_highlighted.png</string>
 								</object>
-								<reference key="IBUIDisabledImage" ref="1063097962"/>
+								<reference key="IBUIDisabledImage" ref="839845010"/>
 								<object class="NSCustomResource" key="IBUISelectedImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_fb_on</string>
+									<string key="NSResourceName">share_fb_on.png</string>
 								</object>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">share_fb</string>
+									<string key="NSResourceName">share_fb.png</string>
 								</object>
 								<reference key="IBUIFontDescription" ref="572259165"/>
 								<reference key="IBUIFont" ref="32402340"/>
@@ -560,6 +566,36 @@
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<int key="IBUIStyle">2</int>
+							</object>
+							<object class="IBUILabel" id="128777124">
+								<reference key="NSNextResponder" ref="870662028"/>
+								<int key="NSvFlags">292</int>
+								<string key="NSFrame">{{16, 267}, {124, 15}}</string>
+								<reference key="NSSuperview" ref="870662028"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView" ref="969060622"/>
+								<string key="NSReuseIdentifierKey">_NS:311</string>
+								<bool key="IBUIOpaque">NO</bool>
+								<bool key="IBUIClipsSubviews">YES</bool>
+								<int key="IBUIContentMode">7</int>
+								<bool key="IBUIUserInteractionEnabled">NO</bool>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<string key="IBUIText">Placeholder copy for now</string>
+								<object class="NSColor" key="IBUITextColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MC42AA</bytes>
+								</object>
+								<nil key="IBUIHighlightedColor"/>
+								<object class="NSColor" key="IBUIShadowColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MSAwLjQAA</bytes>
+								</object>
+								<string key="IBUIShadowOffset">{0, 1}</string>
+								<int key="IBUIBaselineAdjustment">1</int>
+								<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
+								<float key="IBUIMinimumFontSize">10</float>
+								<reference key="IBUIFontDescription" ref="370832776"/>
+								<reference key="IBUIFont" ref="793992253"/>
 							</object>
 						</object>
 						<string key="NSFrameSize">{320, 416}</string>
@@ -983,9 +1019,10 @@
 							<reference ref="110642938"/>
 							<reference ref="822963385"/>
 							<reference ref="969060622"/>
-							<reference ref="878944707"/>
 							<reference ref="174493073"/>
 							<reference ref="1051669184"/>
+							<reference ref="878944707"/>
+							<reference ref="128777124"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -1178,6 +1215,12 @@
 						<reference key="object" ref="926117047"/>
 						<reference key="parent" ref="835933604"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">143</int>
+						<reference key="object" ref="128777124"/>
+						<reference key="parent" ref="870662028"/>
+						<string key="objectName">Share Label</string>
+					</object>
 				</object>
 			</object>
 			<object class="NSMutableDictionary" key="flattenedProperties">
@@ -1208,6 +1251,7 @@
 					<string>136.IBPluginDependency</string>
 					<string>139.IBPluginDependency</string>
 					<string>140.IBPluginDependency</string>
+					<string>143.IBPluginDependency</string>
 					<string>36.IBPluginDependency</string>
 					<string>36.IBUserGuides</string>
 					<string>37.IBPluginDependency</string>
@@ -1240,14 +1284,15 @@
 					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="3"/>
+					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="2"/>
 					<string>STCreditTextField</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="3"/>
+					<real value="0.0"/>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1287,7 +1332,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">142</int>
+			<int key="maxID">143</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1572,13 +1617,13 @@
 				<string>edit_pencil.png</string>
 				<string>gradient_background.png</string>
 				<string>gray_disclosure_arrow.png</string>
-				<string>share_disabled</string>
-				<string>share_fb</string>
-				<string>share_fb_highlighted</string>
-				<string>share_fb_on</string>
-				<string>share_twitter</string>
-				<string>share_twitter_highlighted</string>
-				<string>share_twitter_on</string>
+				<string>share_disabled.png</string>
+				<string>share_fb.png</string>
+				<string>share_fb_highlighted.png</string>
+				<string>share_fb_on.png</string>
+				<string>share_twitter.png</string>
+				<string>share_twitter_highlighted.png</string>
+				<string>share_twitter_on.png</string>
 				<string>shelf_background.png</string>
 				<string>stamp_detail_ripple_bottom</string>
 				<string>stamp_detail_ripple_top</string>
@@ -1590,13 +1635,13 @@
 				<string>{16, 16}</string>
 				<string>{320, 480}</string>
 				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
-				<string>{16, 16}</string>
+				<string>{45, 41}</string>
+				<string>{45, 41}</string>
+				<string>{45, 41}</string>
+				<string>{45, 41}</string>
+				<string>{45, 41}</string>
+				<string>{45, 41}</string>
+				<string>{45, 41}</string>
 				<string>{320, 365}</string>
 				<string>{16, 16}</string>
 				<string>{16, 16}</string>

@@ -214,7 +214,8 @@ typedef enum {
     [rightButton release];
   }
 
-  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:stamp_.entityObject.title
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:
+                                                                        stamp_.entityObject.title]
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil
                                                                 action:nil];
@@ -762,27 +763,6 @@ typedef enum {
 }
 
 - (IBAction)handleEntityTap:(id)sender {
-  // Fix for long back button titles overlapping the Stamped logo.
-  NSString* title = self.navigationItem.backBarButtonItem.title;
-  CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
-  if (titleSize.width > 87) {
-    while (titleSize.width > 87) {
-      if ([title isEqualToString:self.navigationItem.backBarButtonItem.title])
-        title = [[title substringToIndex:title.length - 1] stringByAppendingString:@"…"];
-      else
-        title = [[title substringToIndex:title.length - 2] stringByAppendingString:@"…"];
-        // -2 because we've already appended the ellipsis.
-      titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
-    }
-    NSLog(@"back button text size: %f x %f", titleSize.width, titleSize.height);
-    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:title 
-                                                                   style:UIBarButtonItemStyleBordered
-                                                                  target:nil
-                                                                  action:nil];
-    [self.navigationItem setBackBarButtonItem: backButton];
-    [backButton release];
-  }
-  
   UIViewController* detailViewController = [Util detailViewControllerForEntity:stamp_.entityObject];
   [self.navigationController pushViewController:detailViewController animated:YES];
 }

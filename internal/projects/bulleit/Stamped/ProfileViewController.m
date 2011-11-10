@@ -123,7 +123,7 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
   if (user_.name)
     [self fillInUserData];
 
-  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:user_.screenName
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:[Util truncateTitleForBackButton:user_.screenName]
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil
                                                                 action:nil];

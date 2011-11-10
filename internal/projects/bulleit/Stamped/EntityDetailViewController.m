@@ -186,6 +186,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)viewDidLoad {  
   [super viewDidLoad];
+//  self.navigationItem.title = @"Details";
   scrollView_.contentSize = self.view.bounds.size;
   CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
   backgroundGradient.colors = [NSArray arrayWithObjects:
@@ -218,7 +219,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
     CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
     CGFloat yOffset = CGRectGetHeight(self.view.bounds) - CGRectGetHeight(iv.bounds);
     iv.frame = CGRectMake(floorf(xOffset/2), floorf(0.95 * yOffset/2), iv.bounds.size.width, iv.bounds.size.height);
-    [self.view addSubview:iv];
+    [self.scrollView addSubview:iv];
     [iv release];
   }
 }

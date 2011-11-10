@@ -52,4 +52,5 @@ extern NSString* const kKeychainTwitterToken;
 
 + (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum;
 + (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
++ (NSString*)truncateTitleForBackButton:(NSString*)title;
 @end

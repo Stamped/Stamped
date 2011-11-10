@@ -393,6 +393,7 @@ int const SPACE_HEIGHT = 10;
 }
 
 - (void)moveArrowViewIfBehindImageView:(UIImageView*)imageView {
+  NSLog(@"yo yo");
   if (footerLabel_ && footerLabel_.text && ![footerLabel_.text isEqualToString:@""])
     return;
 

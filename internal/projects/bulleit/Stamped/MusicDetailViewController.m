@@ -64,7 +64,6 @@
   self.mainActionButton.hidden = YES;
   self.mainActionLabel.hidden  = YES;
   self.mainActionsView.hidden  = YES;
-
 }
 
 - (void)viewDidUnload {

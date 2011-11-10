@@ -27,6 +27,7 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  navBarWasHidden_ = self.navigationController.navigationBarHidden;
   self.navigationController.navigationBarHidden = NO;
   UINavigationBar* navBar = self.navigationController.navigationBar;
   if ([navBar respondsToSelector:@selector(setHideLogo:)]) 
@@ -35,12 +36,22 @@
   [super viewWillAppear:animated];
 }
 
-- (void)viewDidLoad {
-  UINavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
+- (void)viewWillDisappear:(BOOL)animated {
+  if (navBarWasHidden_)
+    self.navigationController.navigationBarHidden = YES;
+  UINavigationBar* navBar = self.navigationController.navigationBar;
   if ([navBar respondsToSelector:@selector(setHideLogo:)]) 
-    [(id)navBar setHideLogo:YES];
-
+    [(id)navBar setHideLogo:NO];
   [navBar setNeedsDisplay];
+  [super viewWillAppear:animated]; 
+}
+
+- (void)viewDidLoad {
+    navBarWasHidden_ = self.navigationController.navigationBarHidden;
+//  UINavigationBar* navBar = (STNavigationBar*)self.navigationController.navigationBar;
+//  if ([navBar respondsToSelector:@selector(setHideLogo:)]) 
+//    [(id)navBar setHideLogo:YES];
+//  [navBar setNeedsDisplay];
   self.shareButton.hidden = YES;
   [super viewDidLoad];
 }
