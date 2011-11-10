@@ -596,6 +596,7 @@ class MongoEntitySearcher(EntitySearcher):
             utils.log("%s) %d (%s)" % (key, len(value), input_query))
             
             for result in value:
+                utils.log(result[0].entity_id)
                 _add_result(result)
         
         # aggregate all third-party results
@@ -605,6 +606,7 @@ class MongoEntitySearcher(EntitySearcher):
             for result in value:
                 _add_result(result)
         
+        print len(results)
         # ----------------------- #
         # filter and rank results #
         # ----------------------- #
