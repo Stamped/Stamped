@@ -16,6 +16,7 @@
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
 #import "Util.h"
+#import "Alerts.h"
 
 NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
 NSString* const kUserHasLoggedOutNotification = @"KUserHasLoggedOutNotification";
@@ -187,7 +188,7 @@ static AccountManager* sharedAccountManager_ = nil;
   if ([objectLoader.response isUnauthorized] &&
       [objectLoader.resourcePath isEqualToString:kLoginPath]) {
     if (firstRunViewController_)
-      [self.firstRunViewController signInFailed:nil];
+      [self.firstRunViewController signInFailed:@"The username or password you entered is incorrect."];
     else
       [self performSelector:@selector(logout) withObject:self afterDelay:0];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
@@ -419,18 +420,36 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didLoadResponse:(RKResponse*)response {
-  if (queue == oAuthRequestQueue_)
+  if (queue == oAuthRequestQueue_) {
+    NSLog(@"oAuthRequestQueue responded");
     [RKClient sharedClient].requestQueue.suspended = NO;
+    if (!response.isOK) {
+      if ([response.request.resourcePath rangeOfString:kLoginPath].location != NSNotFound)
+        [firstRunViewController_ signInFailed:nil];
+      if ([response.request.resourcePath rangeOfString:kRegisterPath].location != NSNotFound)
+        [firstRunViewController_ signUpFailed:nil];
+    }
+  }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didCancelRequest:(RKRequest*)request {
   if (queue == oAuthRequestQueue_)
+    NSLog(@"oAuthRequestQueue cancelled");
     [RKClient sharedClient].requestQueue.suspended = NO;
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
-  if (queue == oAuthRequestQueue_)
-    [RKClient sharedClient].requestQueue.suspended = NO;
+  if (queue == oAuthRequestQueue_) {
+    NSLog(@"oAuthRequestQueue failed");
+    if ([request.resourcePath rangeOfString:kLoginPath].location != NSNotFound) {
+      [RKClient sharedClient].requestQueue.suspended = NO;
+      [firstRunViewController_ signInFailed:nil];
+    }
+    if ([request.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
+      [RKClient sharedClient].requestQueue.suspended = NO;
+      [firstRunViewController_ signUpFailed:nil];
+    }
+  }
 }
 
 - (void)requestQueueWasSuspended:(RKRequestQueue*)queue {

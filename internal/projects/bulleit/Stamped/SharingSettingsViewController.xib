@@ -269,11 +269,11 @@
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MC41AA</bytes>
 								</object>
-								<object class="NSCustomResource" key="IBUISelectedBackgroundImage" id="634677445">
+								<object class="NSCustomResource" key="IBUISelectedImage" id="260266419">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">settings_sharing_button_disconnect.png</string>
 								</object>
-								<object class="NSCustomResource" key="IBUINormalBackgroundImage" id="1023349624">
+								<object class="NSCustomResource" key="IBUINormalImage" id="829664760">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">settings_sharing_button_connect.png</string>
 								</object>
@@ -364,8 +364,8 @@
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="191813165"/>
-								<reference key="IBUISelectedBackgroundImage" ref="634677445"/>
-								<reference key="IBUINormalBackgroundImage" ref="1023349624"/>
+								<reference key="IBUISelectedImage" ref="260266419"/>
+								<reference key="IBUINormalImage" ref="829664760"/>
 								<reference key="IBUIFontDescription" ref="155245079"/>
 								<reference key="IBUIFont" ref="88628145"/>
 							</object>
@@ -463,14 +463,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">fbConnectButton</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="202498133"/>
-					</object>
-					<int key="connectionID">37</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">twitterLabel</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="991665588"/>
@@ -508,6 +500,14 @@
 						<reference key="destination" ref="666428538"/>
 					</object>
 					<int key="connectionID">53</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">fbConnectButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="202498133"/>
+					</object>
+					<int key="connectionID">37</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
@@ -641,11 +641,6 @@
 						<reference key="parent" ref="666428538"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">32</int>
-						<reference key="object" ref="202498133"/>
-						<reference key="parent" ref="666428538"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">43</int>
 						<reference key="object" ref="201856794"/>
 						<reference key="parent" ref="666428538"/>
@@ -653,6 +648,11 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">45</int>
 						<reference key="object" ref="819040179"/>
+						<reference key="parent" ref="666428538"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">32</int>
+						<reference key="object" ref="202498133"/>
 						<reference key="parent" ref="666428538"/>
 					</object>
 				</array>
@@ -666,7 +666,7 @@
 				<string key="25.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="27.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="28.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-				<real value="0.0" key="28.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
+				<real value="2" key="28.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
 				<string key="29.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="30.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="31.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -685,7 +685,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">53</int>
+			<int key="maxID">55</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -774,8 +774,8 @@
 		<dictionary class="NSMutableDictionary" key="IBDocument.LastKnownImageSizes">
 			<string key="gradient_background.png">{320, 480}</string>
 			<string key="gray_back_button_bg.png">{16, 16}</string>
-			<string key="settings_sharing_button_connect.png">{16, 16}</string>
-			<string key="settings_sharing_button_disconnect.png">{16, 16}</string>
+			<string key="settings_sharing_button_connect.png">{75, 33}</string>
+			<string key="settings_sharing_button_disconnect.png">{90, 33}</string>
 			<string key="settings_sharing_facebook_off">{16, 16}</string>
 			<string key="settings_sharing_item_bg@2x.png">{620, 130}</string>
 			<string key="settings_sharing_twitter_off">{16, 16}</string>
