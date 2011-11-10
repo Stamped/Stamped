@@ -118,9 +118,15 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
   UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_inbox"]];
-  [self.view insertSubview:emptyView atIndex:0];
+  [scrollView addSubview:emptyView];
   [emptyView release];
+  [self.view insertSubview:scrollView atIndex:0];
+  scrollView.delegate = self;
+  scrollView.alwaysBounceVertical = YES;
+  scrollView.contentSize = self.view.frame.size;
+  [scrollView release];
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(stampWasCreated:)
                                                name:kStampWasCreatedNotification
@@ -234,8 +240,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     shouldHideShelfAndTable = YES;
   
   self.tableView.hidden = shouldHideShelfAndTable;
-  self.shelfView.hidden = shouldHideShelfAndTable;
-  
+
   NSString* currentUserID = currentUser.userID;
   NSSet* allStampsOrCurrentUser = [objects objectsPassingTest:^BOOL(id obj, BOOL* stop) {
     if ([obj isMemberOfClass:[Stamp class]] ||
