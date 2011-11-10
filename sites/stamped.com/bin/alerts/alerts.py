@@ -26,7 +26,8 @@ base = os.path.dirname(os.path.abspath(__file__))
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
 AWS_SECRET_KEY = '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'
 
-IPHONE_APN_PUSH_CERT = os.path.join(base, 'apns-dev.pem')
+IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
+IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
 IS_PROD = False
 
@@ -505,7 +506,7 @@ def sendEmails(queue):
 
 def sendPushNotifications(queue):
     host_name = 'gateway.sandbox.push.apple.com'
-    # host_name = 'gateway.push.apple.com'
+    host_name = 'gateway.push.apple.com'
 
     # Apply rate limit
     limit = 3
@@ -514,7 +515,7 @@ def sendPushNotifications(queue):
         s = socket()
         c = ssl.wrap_socket(s,
                             ssl_version=ssl.PROTOCOL_SSLv3,
-                            certfile=IPHONE_APN_PUSH_CERT)
+                            certfile=IPHONE_APN_PUSH_CERT_PROD)
         c.connect((host_name, 2195))
 
         for user, pushQueue in queue.iteritems():
