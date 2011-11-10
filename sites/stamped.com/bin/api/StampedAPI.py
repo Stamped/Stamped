@@ -226,6 +226,8 @@ class StampedAPI(AStampedAPI):
         
         self._inviteDB.join(account.email)
 
+        ### TODO: Send welcome email
+
         return account
     
     @API_CALL
