@@ -275,7 +275,10 @@ class MongoEntitySearcher(EntitySearcher):
         # transform input query and coords #
         # -------------------------------- #
         
-        input_query = query.strip().lower()
+        input_query = query.lower()
+        if not prefix:
+            input_query = input_query.strip()
+        
         national_query = input_query
         original_coords = True
         
@@ -590,7 +593,7 @@ class MongoEntitySearcher(EntitySearcher):
         
         # aggregate all db results
         for key, value in db_wrapper.iteritems():
-            utils.log("%s) %d" % (key, len(value)))
+            utils.log("%s) %d (%s)" % (key, len(value), input_query))
             
             for result in value:
                 _add_result(result)
