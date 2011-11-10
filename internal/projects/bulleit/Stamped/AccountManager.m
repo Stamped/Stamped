@@ -16,7 +16,6 @@
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
 #import "Util.h"
-#import "Alerts.h"
 
 NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
 NSString* const kUserHasLoggedOutNotification = @"KUserHasLoggedOutNotification";
@@ -187,8 +186,8 @@ static AccountManager* sharedAccountManager_ = nil;
 
   if ([objectLoader.response isUnauthorized] &&
       [objectLoader.resourcePath isEqualToString:kLoginPath]) {
-    if (firstRunViewController_)
-      [self.firstRunViewController signInFailed:@"The username or password you entered is incorrect."];
+    if (firstRunViewController_){  
+      [self.firstRunViewController signInFailed:@"The username or password you entered is incorrect."];}    
     else
       [self performSelector:@selector(logout) withObject:self afterDelay:0];
   } else if ([objectLoader.resourcePath isEqualToString:kRefreshPath]) {
@@ -423,12 +422,6 @@ static AccountManager* sharedAccountManager_ = nil;
   if (queue == oAuthRequestQueue_) {
     NSLog(@"oAuthRequestQueue responded");
     [RKClient sharedClient].requestQueue.suspended = NO;
-    if (!response.isOK) {
-      if ([response.request.resourcePath rangeOfString:kLoginPath].location != NSNotFound)
-        [firstRunViewController_ signInFailed:nil];
-      if ([response.request.resourcePath rangeOfString:kRegisterPath].location != NSNotFound)
-        [firstRunViewController_ signUpFailed:nil];
-    }
   }
 }
 
@@ -441,14 +434,7 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
   if (queue == oAuthRequestQueue_) {
     NSLog(@"oAuthRequestQueue failed");
-    if ([request.resourcePath rangeOfString:kLoginPath].location != NSNotFound) {
-      [RKClient sharedClient].requestQueue.suspended = NO;
-      [firstRunViewController_ signInFailed:nil];
-    }
-    if ([request.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
-      [RKClient sharedClient].requestQueue.suspended = NO;
-      [firstRunViewController_ signUpFailed:nil];
-    }
+    [RKClient sharedClient].requestQueue.suspended = NO;
   }
 }
 
@@ -471,6 +457,19 @@ static AccountManager* sharedAccountManager_ = nil;
 
 - (void)logout {
   [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+  // remove Facebook credentials
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults removeObjectForKey:@"FBAccessTokenKey"];
+  [defaults removeObjectForKey:@"FBExpirationDateKey"];
+  [defaults removeObjectForKey:@"FBName"];
+  [defaults removeObjectForKey:@"FBID"];
+  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
+  if (nil != delegate.facebook.accessToken)
+    delegate.facebook.accessToken = nil;
+  if (nil != delegate.facebook.expirationDate)
+    delegate.facebook.expirationDate = nil;
+  // remove Twitter credentials
+  
   [oAuthRequestQueue_ cancelAllRequests];
   [[RKClient sharedClient].requestQueue cancelAllRequests];
   [passwordKeychainItem_ resetKeychainItem];

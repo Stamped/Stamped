@@ -89,7 +89,13 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)viewDidLoad {
-  self.navigationItem.title = @"Sharing";
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Sharing"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
+
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
   self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, self.scrollView.bounds.size.height + 1);

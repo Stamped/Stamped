@@ -240,7 +240,6 @@
 								<int key="NSvFlags">-2147483356</int>
 								<string key="NSFrame">{{252, 28}, {20, 20}}</string>
 								<reference key="NSSuperview" ref="811322092"/>
-								<reference key="NSNextKeyView"/>
 								<string key="NSReuseIdentifierKey">_NS:824</string>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -354,7 +353,6 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{27, 307}, {266, 31}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:294</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -383,7 +381,7 @@
 					<object class="IBUIButton" id="509136146">
 						<reference key="NSNextResponder" ref="221051138"/>
 						<int key="NSvFlags">-2147483356</int>
-						<string key="NSFrame">{{271, 266}, {22, 22}}</string>
+						<string key="NSFrame">{{264, 266}, {22, 22}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
 						<reference key="NSNextKeyView" ref="670562938"/>
 						<string key="NSReuseIdentifierKey">_NS:225</string>
@@ -447,7 +445,7 @@
 								</object>
 							</object>
 						</object>
-						<string key="NSFrame">{{275, 268}, {18, 18}}</string>
+						<string key="NSFrame">{{266, 268}, {18, 18}}</string>
 						<reference key="NSSuperview" ref="221051138"/>
 						<reference key="NSNextKeyView" ref="906990150"/>
 						<string key="NSReuseIdentifierKey">_NS:196</string>
@@ -698,7 +696,6 @@
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{225, 356}, {75, 14}}</string>
 						<reference key="NSSuperview" ref="1056128844"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:225</string>
 						<reference key="IBUIBackgroundColor" ref="407695596"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -1025,6 +1022,15 @@
 					<int key="connectionID">100</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">textFieldEditingChanged:</string>
+						<reference key="source" ref="259474293"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">19</int>
+					</object>
+					<int key="connectionID">140</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="627645974"/>
@@ -1058,6 +1064,24 @@
 					<int key="connectionID">51</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">textFieldEditingChanged:</string>
+						<reference key="source" ref="972441663"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">19</int>
+					</object>
+					<int key="connectionID">134</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">textFieldEditingChanged:</string>
+						<reference key="source" ref="972441663"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">18</int>
+					</object>
+					<int key="connectionID">135</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="525932296"/>
@@ -1072,6 +1096,24 @@
 						<reference key="destination" ref="372490531"/>
 					</object>
 					<int key="connectionID">56</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">textFieldEditingChanged:</string>
+						<reference key="source" ref="918615380"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">18</int>
+					</object>
+					<int key="connectionID">137</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">textFieldEditingChanged:</string>
+						<reference key="source" ref="918615380"/>
+						<reference key="destination" ref="372490531"/>
+						<int key="IBEventType">19</int>
+					</object>
+					<int key="connectionID">138</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -1492,7 +1534,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">133</int>
+			<int key="maxID">140</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>
