@@ -58,13 +58,12 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
   UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_news"]];
   [self.view insertSubview:emptyView atIndex:0];
   [emptyView release];
-  self.hideWhenEmpty = YES;
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(appDidBecomeActive:)
                                                name:UIApplicationDidBecomeActiveNotification
                                              object:nil];
   [self loadEventsFromDataStore];
-  [self reloadTableData];
+  [self.tableView reloadData];
   [self loadEventsFromNetwork];
 }
 
@@ -120,7 +119,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (void)controllerDidChangeContent:(NSFetchedResultsController*)controller {
-  [self reloadTableData];
+  [self.tableView reloadData];
   NSUInteger numObjects = [[[fetchedResultsController_ sections] objectAtIndex:0] numberOfObjects];
   if (numObjects > numRows_) {
     [[NSNotificationCenter defaultCenter]
@@ -132,7 +131,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 }
 
 - (void)appDidBecomeActive:(NSNotification*)notification {
-  [self reloadTableData];
+  [self.tableView reloadData];
 }
 
 #pragma mark - Table view data source

@@ -64,7 +64,8 @@ static NSString* const kCreditsPath = @"/collections/credit.json";
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
   
-  if ([[AccountManager sharedManager].currentUser.userID isEqualToString:user_.userID]) {
+  User* currentUser = [AccountManager sharedManager].currentUser;
+  if ([currentUser.userID isEqualToString:user_.userID] && currentUser.numCredits.integerValue == 0) {
     UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_credits"]];
     [self.view insertSubview:emptyView atIndex:0];
     [emptyView release];
