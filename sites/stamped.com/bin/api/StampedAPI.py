@@ -1227,11 +1227,17 @@ class StampedAPI(AStampedAPI):
 
             # Add commenting user(s)
             if stamp.comment_preview != None:
+                comments = []
+                
                 for i in xrange(len(stamp.comment_preview)):
                     commentingUser = userIds[stamp.comment_preview[i].user_id]
+                    
                     if commentingUser != 1:
                         stamp.comment_preview[i].user = commentingUser
-
+                        comments.append(stamp.comment_preview[i])
+                
+                stamp.comment_preview = comments
+            
             if authUserId:
                 # Mark as favorited
                 if stamp.entity_id in favorites:
@@ -2669,13 +2675,12 @@ class StampedAPI(AStampedAPI):
         
         activity = []
         for item in activityData:
-            
             try:
-                if item.user.user_id != None and userIds[item.user.user_id] != 1:
+                if item.user.user_id != None:
                     item.user = userIds[item.user.user_id]
-                if item.linked_user_id != None and userIds[item.linked_user_id] != 1:
+                if item.linked_user_id != None:
                     item.linked_user = userIds[item.linked_user_id]
-                if item.linked_stamp_id != None and stampIds[item.linked_stamp_id] != 1:
+                if item.linked_stamp_id != None:
                     item.linked_stamp = stampIds[item.linked_stamp_id]
             except:
                 utils.printException()
