@@ -398,7 +398,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 #pragma mark - RKObjectLoaderDelegate methods.
 
 - (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-  //NSLog(@"objects: %@", objectLoader.response.bodyAsString);
   NSMutableArray* toDelete = [NSMutableArray array];
   for (Stamp* stamp in objects) {
     if ([stamp.deleted boolValue]) {
@@ -410,7 +409,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
   
   Stamp* oldestStampInBatch = objects.lastObject;
   if (oldestStampInBatch.modified) {
-    NSLog(@"Oldest timestamp in batch: %@", oldestStampInBatch.modified);
     [[NSUserDefaults standardUserDefaults] setObject:oldestStampInBatch.modified
                                               forKey:@"InboxOldestTimestampInBatch"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -439,7 +437,6 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
     [request setFetchLimit:1];
     Stamp* latestStamp = [Stamp objectWithFetchRequest:request];
 
-    NSLog(@"Storing latest stamp at time: %@", latestStamp.modified);
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"InboxOldestTimestampInBatch"];
     [[NSUserDefaults standardUserDefaults] setObject:latestStamp.modified
                                               forKey:@"InboxLatestStampModified"];

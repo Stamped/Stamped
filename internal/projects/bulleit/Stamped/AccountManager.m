@@ -141,7 +141,6 @@ static AccountManager* sharedAccountManager_ = nil;
   NSString* screenName = [passwordKeychainItem_ objectForKey:(id)kSecAttrAccount];
   if (screenName.length > 0) {
     self.currentUser = [User objectWithPredicate:[NSPredicate predicateWithFormat:@"screenName == %@", screenName]];
-    NSLog(@"Current user? %@", self.currentUser.screenName);
   } else {
     [self showFirstRunViewController];
     return;
@@ -194,7 +193,6 @@ static AccountManager* sharedAccountManager_ = nil;
     [self sendLoginRequest];
   } else if ([objectLoader.resourcePath rangeOfString:kRegisterPath].location != NSNotFound) {
     [self.firstRunViewController signUpFailed:nil];
-    NSLog(@"Registration error = %@", error);
   }
 }
 
@@ -280,7 +278,6 @@ static AccountManager* sharedAccountManager_ = nil;
 }
 
 - (void)storeCurrentUser:(User*)user {
-  NSLog(@"Storing user %@", user.screenName);
   self.currentUser = user;
   [[NSNotificationCenter defaultCenter] postNotificationName:kCurrentUserHasUpdatedNotification
                                                       object:self];
@@ -317,7 +314,6 @@ static AccountManager* sharedAccountManager_ = nil;
     [passwordKeychainItem_ setObject:username forKey:(id)kSecAttrAccount];
     [passwordKeychainItem_ setObject:password forKey:(id)kSecValueData];
     [self sendLoginRequest];
-    NSLog(@"Sending login request...");
   } else {
     [viewController signInFailed:nil];
   }
@@ -389,7 +385,6 @@ static AccountManager* sharedAccountManager_ = nil;
     }
 
     if ([request.params isKindOfClass:[RKParams class]]) {
-      NSLog(@"Request: %@", request.resourcePath);
       [(RKParams*)request.params setValue:self.authToken.accessToken forParam:@"oauth_token"];
       return;
     }
@@ -405,47 +400,31 @@ static AccountManager* sharedAccountManager_ = nil;
       request.params = nil;
     }
   }
-  if (request.resourcePath)
-    NSLog(@"Request: %@", request.resourcePath);
 }
 
 - (void)requestQueueDidFinishLoading:(RKRequestQueue*)queue {
   if ([RKClient sharedClient].requestQueue.count == 0 && oAuthRequestQueue_.count == 0)
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
   if (queue == oAuthRequestQueue_ && queue.count == 0) {
-    NSLog(@"resuming shared client queue...");
     [RKClient sharedClient].requestQueue.suspended = NO;
   }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didLoadResponse:(RKResponse*)response {
   if (queue == oAuthRequestQueue_) {
-    NSLog(@"oAuthRequestQueue responded");
     [RKClient sharedClient].requestQueue.suspended = NO;
   }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didCancelRequest:(RKRequest*)request {
   if (queue == oAuthRequestQueue_)
-    NSLog(@"oAuthRequestQueue cancelled");
     [RKClient sharedClient].requestQueue.suspended = NO;
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
   if (queue == oAuthRequestQueue_) {
-    NSLog(@"oAuthRequestQueue failed");
     [RKClient sharedClient].requestQueue.suspended = NO;
   }
-}
-
-- (void)requestQueueWasSuspended:(RKRequestQueue*)queue {
-  if (queue != oAuthRequestQueue_)
-    NSLog(@"Request queue suspended...");
-}
-
-- (void)requestQueueWasUnsuspended:(RKRequestQueue*)queue {
-  if (queue != oAuthRequestQueue_)
-    NSLog(@"Request queue unsuspended...");
 }
 
 - (void)appDidBecomeActive:(NSNotification*)notification {

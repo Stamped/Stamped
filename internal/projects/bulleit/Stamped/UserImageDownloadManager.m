@@ -301,7 +301,6 @@ NSString* const kMediumUserImageLoadedNotification = @"kMediumUserImageLoadedNot
     imageCache_ = [[NSMutableDictionary alloc] initWithCapacity:5];
   
   [imageCache_ setObject:image forKey:imageURL];
-  NSLog(@"Notifying for url: %@", imageURL);
   [[NSNotificationCenter defaultCenter]
       postNotificationName:kUserImageLoadedNotification object:imageURL];
   [downloads_ removeObjectForKey:imageURL];

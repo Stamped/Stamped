@@ -598,7 +598,6 @@ typedef enum {
   if ([request.URL.absoluteString rangeOfString:kFastSearchURI].location == NSNotFound)
     return;
 
-  NSLog(@"Fast search url: %@", request.URL.absoluteString);
   if (response.isOK) {
     NSError* err = nil;
     id body = [response parsedBody:&err];

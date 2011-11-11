@@ -582,7 +582,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 }
 
 - (IBAction)textFieldEditingChanged:(id)sender {
-//  NSLog(@"sender: %@", ((UITextField*)sender).text);
   if ([sender isEqual:self.usernameTextField] || 
       [sender isEqual:self.signUpUsernameTextField]) {
     
@@ -666,12 +665,9 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest *)request didLoadResponse:(RKResponse *)response {
-//  NSLog(@"request: %@ code: %d response: %@", request.resourcePath, response.statusCode, response.bodyAsString);
-  
-  if (signInScrollView_.superview) {
-  
+  if (signInScrollView_.superview) {  
     if (response.statusCode == 200) {
-    // valid username & user exists. 
+      // valid username & user exists. 
       usernameValid_ = YES;
       NSError* err = nil;
       id body = [response parsedBody:&err];

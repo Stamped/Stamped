@@ -385,10 +385,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-//  NSLog(@"%@", detailedEntity_);
   [super viewDidAppear:animated];
   viewIsVisible_ = YES;
-
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -426,7 +424,6 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   }
   
 	NSLog(@"Hit error: %@", error);
-  NSLog(@"Query: %@ Response: %@", objectLoader.resourcePath, objectLoader.response.bodyAsString);
   if ([objectLoader.response isUnauthorized]) {
     [[AccountManager sharedManager] refreshToken];
     [self loadEntityDataFromServer];

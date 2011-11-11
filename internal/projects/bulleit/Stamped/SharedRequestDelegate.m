@@ -126,7 +126,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled {
-  NSLog(@"whoa, no fb login");
   [self signOutOfFacebook];
 }
 
@@ -329,31 +328,24 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
-    NSLog(@"Linked Twitter successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedTwitterRemovePath].location != NSNotFound) {
-    NSLog(@"Unlinked Twitter successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
-    NSLog(@"Linked Twitter followers successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
-    NSLog(@"Linked Facebook successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedFacebookRemovePath].location != NSNotFound) {
-    NSLog(@"Unlinked Facebook successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
-    NSLog(@"Linked Facebook friends successfully.");
     return;
   }
   if ([request.resourcePath isEqualToString:kTwitterSignOutURI]) {
-    NSLog(@"Signed out of Twitter.");
     return;
   }
   

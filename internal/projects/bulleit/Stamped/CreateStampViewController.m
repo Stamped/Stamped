@@ -984,7 +984,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     NSString* tweet = [NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp.URL];
     tweet = [tweet stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     tweet = [tweet stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
-    NSLog(@"tweet: %@", tweet);
     NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
     [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
     [self.twitterAuth authorizeRequest:request.URLRequest];
@@ -1026,18 +1025,11 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
       [params setObject:photoURL forKey:@"picture"];
     if (![stamp.blurb isEqualToString:@""])
       [params setObject:[NSString stringWithFormat:@"\"%@\"", stamp.blurb] forKey:@"message"];
-
-
-//    if (self.stampPhoto) {
-//      NSString* photoURL = [NSString stringWithFormat:@"%@%@%@", kStampPhotoURLPath, stamp.stampID, @".jpg"];
-//      [params setObject:photoURL forKey:@"picture"];
-//    }
     
     [self.fbClient requestWithGraphPath:[fbID stringByAppendingString:@"/feed"]
                               andParams:params
                           andHttpMethod:@"POST"
                             andDelegate:nil];
-    NSLog(@"fb request");
   }
 }
 
@@ -1122,8 +1114,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     else 
       [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   }
-  
-  NSLog(@"response: %@", objectLoader.response.bodyAsString);
+
   [spinner_ stopAnimating];
   stampItButton_.hidden = NO;
   [UIView animateWithDuration:0.2

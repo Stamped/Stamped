@@ -794,7 +794,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error {  
   if (error) {
-    NSLog(@"GTMOAuth error = %@", error);
     self.signInTwitterConnectButton.enabled = YES;
     [self.signInTwitterActivityIndicator stopAnimating];    
     return;
@@ -1063,7 +1062,6 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled {
-  NSLog(@"whoa, no fb login");
   [self signOutOfFacebook];
 }
 
@@ -1116,19 +1114,15 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
-    NSLog(@"Linked Twitter successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
-    NSLog(@"Linked Twitter followers successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
-    NSLog(@"Linked Facebook successfully.");
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
-    NSLog(@"Linked Facebook friends successfully.");
     return;
   }
   
