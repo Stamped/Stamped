@@ -144,7 +144,12 @@ class AWSInstance(AInstance):
         else:
             instance_type = INSTANCE_TYPE
         
-        image = self._get_image(instance_type)
+        if 'instance_region' in self.config:
+            instance_region = self.config.instance_region
+        else:
+            instance_region = INSTANCE_REGION
+        
+        image = self._get_image(instance_type, instance_region)
         
         security_groups = self._get_security_groups()
         user_data = self._get_user_data()
@@ -271,8 +276,8 @@ class AWSInstance(AInstance):
         #user_data64 = base64.encodestring(user_data)
         #return user_data64
     
-    def _get_image(self, instance_type):
-        ami = _getAMI(instance_type, INSTANCE_REGION, INSTANCE_OS, INSTANCE_EBS)
+    def _get_image(self, instance_type, instance_region):
+        ami = _getAMI(instance_type, instance_region, INSTANCE_OS, INSTANCE_EBS)
         return self.conn.get_image(ami)
     
     #def __getattr__(self, name):
