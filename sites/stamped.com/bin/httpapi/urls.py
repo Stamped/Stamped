@@ -122,6 +122,10 @@ urlpatterns = patterns('',
     (r'v0/temp/followers.json',         'v0.functions.temp.followers'),
     (r'v0/temp/timeout.json',           'v0.functions.temp.timeout'),
 
+    url(R'^pw/(?P<token>[\w-]{36})$', 'appsettings.views.passwordReset'),
+    url(R'^settings/password/forgot$', 'appsettings.views.passwordForgot'),
+    url(R'^settings/password/sent$', 'appsettings.views.passwordSent'),
+    url(R'^settings/password/success$', 'appsettings.views.passwordSuccess'),
     
     ### DOCS
     # (r'v0/oauth2/$',                    'v0.views.oauth2'),
