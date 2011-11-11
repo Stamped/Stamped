@@ -29,7 +29,8 @@ AWS_SECRET_KEY = 'q2RysVdSHvScrIZtiEOiO2CQ5iOxmk6/RKPS1LvX'
 IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
-IS_PROD = False
+IS_PROD       = False
+USE_PROD_CERT = IS_PROD
 
 ### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
 
@@ -507,16 +508,20 @@ def sendEmails(queue):
 
 def sendPushNotifications(queue):
     host_name = 'gateway.sandbox.push.apple.com'
-    host_name = 'gateway.push.apple.com'
-
+    certificate = IPHONE_APN_PUSH_CERT_DEV
+    
     # Apply rate limit
     limit = 3
-
+    
+    if USE_PROD_CERT:
+        host_name = 'gateway.push.apple.com'
+        certificate = IPHONE_APN_PUSH_CERT_PROD
+    
     try:
         s = socket()
         c = ssl.wrap_socket(s,
                             ssl_version=ssl.PROTOCOL_SSLv3,
-                            certfile=IPHONE_APN_PUSH_CERT_PROD)
+                            certfile=certificate)
         c.connect((host_name, 2195))
 
         for user, pushQueue in queue.iteritems():
