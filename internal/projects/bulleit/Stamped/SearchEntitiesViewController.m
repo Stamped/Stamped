@@ -426,7 +426,7 @@ typedef enum {
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_))
+  if (searchIntent_ == SearchIntentTodo || currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_))
     return [resultsArray_ count];
 
   return [resultsArray_ count] + 1;
