@@ -279,7 +279,6 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (BOOL)application:(UIApplication*)application openURL:(NSURL*)url
   sourceApplication:(NSString*)sourceApplication annotation:(id)annotation {
   if (self.facebook) {
-    NSLog(@"back from fb...");
     return [self.facebook handleOpenURL:url];
   }
   return NO;

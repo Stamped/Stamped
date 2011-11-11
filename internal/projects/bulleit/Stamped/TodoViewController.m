@@ -299,7 +299,7 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
 
 - (float)tableView:(UITableView*)tableView heightForRowAtIndexPath:(NSIndexPath*)indexPath {
   if (indexPath.row == 0)
-    return 50.0;
+    return 64.0;
   else 
     return 82.0;
 }
@@ -308,11 +308,22 @@ static NSString* const kRemoveFavoritePath = @"/favorites/remove.json";
   if (indexPath.row == 0) {
     UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
                                                     reuseIdentifier:nil] autorelease];
-    UIImageView* addTodoImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button_addTodo"]];
-    addTodoImageView.center = cell.contentView.center;
-    addTodoImageView.frame = CGRectOffset(addTodoImageView.frame, 0.0, 4.0);
-    [cell addSubview:addTodoImageView];
+    UIImage* image = [UIImage imageNamed:@"icon_addToDo_button"];
+    UIImage* highlighted = [Util whiteMaskedImageUsingImage:image];
+    UIImageView* addTodoImageView = [[UIImageView alloc] initWithImage:image
+                                                      highlightedImage:highlighted];
+    addTodoImageView.frame = CGRectOffset(addTodoImageView.frame, 15, 21);
+    [cell.contentView addSubview:addTodoImageView];
     [addTodoImageView release];
+    UILabel* addLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    addLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:14];
+    addLabel.textColor = [UIColor stampedLightGrayColor];
+    addLabel.highlightedTextColor = [UIColor whiteColor];
+    addLabel.text = @"Add a to-do";
+    [addLabel sizeToFit];
+    addLabel.frame = CGRectOffset(addLabel.frame, CGRectGetMaxX(addTodoImageView.frame) + 23, 22);
+    [cell.contentView addSubview:addLabel];
+    [addLabel release];
     return cell;
   }
 
