@@ -2668,13 +2668,18 @@ class StampedAPI(AStampedAPI):
         
         activity = []
         for item in activityData:
-
-            if item.user.user_id != None:
-                item.user = userIds[item.user.user_id]
-            if item.linked_user_id != None:
-                item.linked_user = userIds[item.linked_user_id]
-            if item.linked_stamp_id != None:
-                item.linked_stamp = stampIds[item.linked_stamp_id]
+            
+            try:
+                if item.user.user_id != None:
+                    item.user = userIds[item.user.user_id]
+                if item.linked_user_id != None:
+                    item.linked_user = userIds[item.linked_user_id]
+                if item.linked_stamp_id != None:
+                    item.linked_stamp = stampIds[item.linked_stamp_id]
+            except:
+                utils.printException()
+                continue
+            
             activity.append(item)
         
         # Reset activity count
