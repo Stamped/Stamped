@@ -606,7 +606,6 @@ class MongoEntitySearcher(EntitySearcher):
             for result in value:
                 _add_result(result)
         
-        print len(results)
         # ----------------------- #
         # filter and rank results #
         # ----------------------- #

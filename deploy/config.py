@@ -11,11 +11,11 @@ import copy
 
 def getInstances():
     replSetName = 'stamped-dev-01'
-
-    dbCount     = 2
+    
+    dbCount     = 3
     webCount    = 2
     monCount    = 1
-
+    
     ### TEMPLATES
     dbInstance = {
         'roles' : [ 'db', ], 
@@ -27,36 +27,48 @@ def getInstances():
             'diskSize': 8,
             'numDisks': 4,
         },
+        'placement' : None, 
     }
-
+    
     webInstance = {
         'roles' : [ 'webServer', ], 
         'port' : '5000', 
         'replSet' : replSetName, 
+        'instance_type' : 'c1.xlarge', 
+        'placement' : None, 
     }
-
+    
     monInstance = {
         'roles' : [ 'monitor', ], 
         'replSet' : replSetName, 
     }
-
+    
+    placements = [
+        'us-east-1a', 
+        'us-east-1b', 
+        'us-east-1c', 
+    ]
+    
     ### BUILD CONFIG FILE
     config = []
-
+    
+    def _addNode(template, namePrefix, count):
+        instance = template.copy()
+        instance['name'] = '%s%d' % (namePrefix, count)
+        
+        if 'placement' in instance and instance['placement'] is None:
+            instance['placement'] = placements[i % len(placements)]
+        
+        config.append(instance)
+    
     for i in xrange(dbCount):
-        instance = dbInstance.copy()
-        instance['name'] = 'db%d' % i
-        config.append(instance)
-
+        _addNode(dbInstance, 'db', i)
+    
     for i in xrange(webCount):
-        instance = webInstance.copy()
-        instance['name'] = 'api%d' % i
-        config.append(instance)
-
+        _addNode(webInstance, 'api', i)
+    
     for i in xrange(monCount):
-        instance = monInstance.copy()
-        instance['name'] = 'mon%d' % i
-        config.append(instance)
-
+        _addNode(monInstance, 'mon', i)
+    
     return config
 
