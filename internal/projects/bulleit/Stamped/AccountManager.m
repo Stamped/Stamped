@@ -463,6 +463,8 @@ static AccountManager* sharedAccountManager_ = nil;
   [defaults removeObjectForKey:@"FBExpirationDateKey"];
   [defaults removeObjectForKey:@"FBName"];
   [defaults removeObjectForKey:@"FBID"];
+  [defaults removeObjectForKey:@"TwitterUsername"];
+  [defaults synchronize];
   StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
   if (nil != delegate.facebook.accessToken)
     delegate.facebook.accessToken = nil;

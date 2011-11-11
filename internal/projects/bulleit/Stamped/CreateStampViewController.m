@@ -33,6 +33,7 @@
 #import "UIColor+Stamped.h"
 #import "STOAuthViewController.h"
 #import "Alerts.h"
+#import "SharedRequestDelegate.h"
 
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kCreateStampPath = @"/stamps/create.json";
@@ -67,7 +68,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)addStampsRemainingLayer;
 
 - (void)signInToTwitter;
-- (void)signOutOfTwitter;
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error;
@@ -79,7 +79,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)fetchFollowerIDs:(NSString*)userIDString;
 - (void)signInToFacebook;
 - (void)signOutOfFacebook;
-- (void)checkForEndlessSignIn;
 - (GTMOAuthAuthentication*)createAuthentication;
 
 @property (nonatomic, retain) UIImage* stampPhoto;
@@ -97,7 +96,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @property (nonatomic, readonly) UIView* editingMask;
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
-@property (nonatomic, retain) NSMutableArray* requestsArray;
 @end
 
 @implementation CreateStampViewController
@@ -141,7 +139,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @synthesize creditPickerController = creditPickerController_;
 @synthesize fbButton = fbButton_;
 @synthesize objectToStamp = objectToStamp_;
-@synthesize requestsArray = requestsArray_;
 @synthesize signInTwitterActivityIndicator = signInTwitterActivityIndicator_;
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
 
@@ -225,7 +222,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  self.requestsArray = nil;
   [super dealloc];
 }
 
@@ -239,12 +235,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                                                 action:nil];
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
-
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(checkForEndlessSignIn)
-                                               name:UIApplicationDidBecomeActiveNotification
-                                             object:nil];
-  self.requestsArray = [NSMutableArray array];
   
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
@@ -365,9 +355,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   if (self.fbClient.isSessionValid) {
     fbButton_.enabled = YES;
   }
-  if (!self.twitterAuth && !self.fbClient.isSessionValid) {
-    shareLabel_.textColor = [UIColor stampedLightGrayColor];
-  }
+
 
   editingMask_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
   editingMask_.backgroundColor = [UIColor whiteColor];
@@ -469,7 +457,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
-  self.requestsArray = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -486,8 +473,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   
   GTMOAuthAuthentication* auth = [self createAuthentication];
-  if (![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) 
-    [self signOutOfTwitter];
+//  if (![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) 
+//    [self signOutOfTwitter];
   
   if (!self.fbClient)
     self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
@@ -497,7 +484,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
   if (!self.fbClient.isSessionValid)
-    [self signOutOfFacebook];
+//    [self signOutOfFacebook];
   [super viewWillAppear:animated];
 }
 
@@ -1010,6 +997,29 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   }
 }
 
+
+- (void)signInToFacebook {
+  if (!self.fbClient)
+    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+  
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  if ([defaults objectForKey:@"FBAccessTokenKey"] 
+      && [defaults objectForKey:@"FBExpirationDateKey"]) {
+    self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+    self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+  }
+  if (!self.fbClient.isSessionValid) {
+    self.fbClient.sessionDelegate = self;
+    [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
+  }
+}
+
+- (void) fbDidLogin {
+  self.fbButton.selected = YES;
+  self.fbClient.sessionDelegate = [SharedRequestDelegate sharedDelegate];
+  [[SharedRequestDelegate sharedDelegate] fbDidLogin];
+}
+
 - (void)sendFBRequest:(Stamp*)stamp {
   NSString* fbID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBID"];
   if (self.fbClient.isSessionValid && fbButton_.selected) {
@@ -1031,17 +1041,12 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     [self.fbClient requestWithGraphPath:[fbID stringByAppendingString:@"/feed"]
                               andParams:params
                           andHttpMethod:@"POST"
-                            andDelegate:self];
+                            andDelegate:nil];
     NSLog(@"fb request");
   }
 }
 
 - (void)dismissSelf {
-  for (RKRequest* request in requestsArray_) {
-    if ([[RKClient sharedClient].requestQueue containsRequest:request])
-      [[RKClient sharedClient].requestQueue cancelRequest:request];
-  }
-  [requestsArray_ removeAllObjects];
   [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
   if ([fbClient_.sessionDelegate isEqual:self])
     fbClient_.sessionDelegate = nil;
@@ -1208,17 +1213,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [authVC release];
 }
 
-- (void)signOutOfTwitter {
-  [GTMOAuthViewControllerTouch removeParamsFromKeychainForName:kKeychainTwitterToken];
-  [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"TwitterUsername"];
-  [[NSUserDefaults standardUserDefaults] synchronize]; 
-  [self.signInTwitterActivityIndicator stopAnimating];
-  if (!signInFacebookActivityIndicator_.isAnimating)
-    self.navigationItem.hidesBackButton = NO;
-  self.tweetButton.enabled = YES;
-  self.tweetButton.selected = NO;
-}
-
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error {  
@@ -1227,281 +1221,20 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     [self signOutOfTwitter];
     return;
   }
-  self.tweetButton.enabled = NO;
-  [self.signInTwitterActivityIndicator startAnimating];
-  self.navigationItem.hidesBackButton = YES;
   self.twitterAuth = auth;
+  self.tweetButton.selected = YES;
   [self fetchCurrentUser];
 }
 
 - (void)fetchCurrentUser {
-  RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterCurrentUserURI delegate:self];
+  RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterCurrentUserURI delegate:[SharedRequestDelegate sharedDelegate]];
   request.cachePolicy = RKRequestCachePolicyNone;
   [request prepareURLRequest];
   [self.twitterAuth authorizeRequest:request.URLRequest];
-  [requestsArray_ addObject:request];
   [request send];
 }
 
-- (void)fetchFollowerIDs:(NSString*)userIDString {
-  NSString* path =
-  [kTwitterFollowersURI appendQueryParams:[NSDictionary dictionaryWithObjectsAndKeys:@"-1", @"cursor", userIDString, @"user_id", nil]];
-  RKRequest* request = [self.twitterClient requestWithResourcePath:path delegate:self];
-  [self.twitterAuth authorizeRequest:request.URLRequest];
-  [requestsArray_ addObject:request];
-  [request send];
-}
 
-- (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID {
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:username forKey:@"TwitterUsername"];
-  [defaults synchronize];
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterLinkPath
-                                                               delegate:self];
-  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"twitter_id",
-                    username, @"twitter_screen_name", nil];
-  request.method = RKRequestMethodPOST;
-  [requestsArray_ addObject:request];
-  [request send];
-}
-
-- (void)connectTwitterFollowers:(NSArray*)followers {
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedTwitterFollowersPath delegate:self];
-  request.params = [NSDictionary dictionaryWithObject:[followers componentsJoinedByString:@","] forKey:@"q"];
-  request.method = RKRequestMethodPOST;
-  [requestsArray_ addObject:request];
-  [request send];
-}  
-
-#pragma mark - RKRequestDelegate methods.
-
-- (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
-  if ([requestsArray_ containsObject:request])
-    [requestsArray_ removeObject:request];
-  
-  if (!response.isOK) {
-    if (response.statusCode == 401 &&
-        [request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound)
-      [self signOutOfTwitter];
-    if (!signInFacebookActivityIndicator_.isAnimating)
-      self.navigationItem.hidesBackButton = NO;
-    return;
-  }
-  
-  if (request.resourcePath == kTwitterUpdateStatusPath) {
-    NSLog(@"Tweeted: %@", response.bodyAsString);
-  }
-  if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {
-    NSLog(@"Linked Twitter successfully.");
-    return;
-  }
-  if ([request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound) {
-    NSLog(@"Linked Twitter followers successfully.");
-    [self.signInTwitterActivityIndicator stopAnimating];
-    if (!signInFacebookActivityIndicator_.isAnimating)
-      self.navigationItem.hidesBackButton = NO;
-    self.tweetButton.enabled = YES;
-    self.tweetButton.selected = YES;
-    return;
-  }
-  if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound) {
-    NSLog(@"Linked Facebook successfully.");
-    return;
-  }
-  if ([request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound) {
-    NSLog(@"Linked Facebook friends successfully.");
-    [self.signInFacebookActivityIndicator stopAnimating];
-    if (!signInTwitterActivityIndicator_.isAnimating)
-      self.navigationItem.hidesBackButton = NO;
-    self.fbButton.enabled = YES;
-    self.fbButton.selected = YES;
-    return;
-  }
-  
-  NSError* err = nil;
-  id body = [response parsedBody:&err];
-  if (err) {
-    NSLog(@"Parse error for response %@: %@", response, err);
-    return;
-  }
-  
-  // Response for getting the current user information.
-  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound) {
-    [self connectTwitterUserName:[body objectForKey:@"screen_name"] userID:[body objectForKey:@"id_str"]];
-    [self fetchFollowerIDs:[body objectForKey:@"id_str"]];
-  }
-  // Response for getting Twitter followers. 
-  else if ([request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound) {
-    [self connectTwitterFollowers:[body objectForKey:@"ids"]];
-  }
-}
-
-- (void)request:(RKRequest*)request didFailLoadWithError:(NSError*)error {
-  NSLog(@"Error %@ for request %@", error, request.resourcePath);
-  if ([requestsArray_ containsObject:request])
-    [requestsArray_ removeObject:request];
-  if (request.resourcePath == kTwitterUpdateStatusPath) {
-    NSLog(@"twitter error: %@", error);
-    return;
-  }
-  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
-    [self signOutOfTwitter];
-  else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
-    [self signOutOfFacebook];
-}
-
-- (void)requestDidTimeout:(RKRequest *)request {
-  if ([requestsArray_ containsObject:request])
-    [requestsArray_ removeObject:request];
-  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
-    [self signOutOfTwitter];
-  else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
-    [self signOutOfFacebook];
-}
-
-- (void)requestDidCancelLoad:(RKRequest *)request {
-  if ([requestsArray_ containsObject:request])
-    [requestsArray_ removeObject:request];
-  if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound ||
-      [request.resourcePath rangeOfString:kStampedTwitterFollowersPath].location != NSNotFound)
-    [self signOutOfTwitter];
-  else if ([request.resourcePath rangeOfString:kStampedFacebookLinkPath].location != NSNotFound ||
-           [request.resourcePath rangeOfString:kStampedFacebookFriendsPath].location != NSNotFound)
-    [self signOutOfFacebook];
-}
-
-#pragma mark - Facebook.
-
-- (void)signInToFacebook {
-  if (!self.fbClient)
-    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
-  
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:@"FBAccessTokenKey"] 
-      && [defaults objectForKey:@"FBExpirationDateKey"]) {
-    self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-    self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-  }
-  if (!self.fbClient.isSessionValid) {
-    self.fbClient.sessionDelegate = self;
-    [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
-  }
-}
-
-- (void)signOutOfFacebook {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:@"FBAccessTokenKey"]) {
-    [defaults removeObjectForKey:@"FBAccessTokenKey"];
-    [defaults removeObjectForKey:@"FBExpirationDateKey"];
-    [defaults removeObjectForKey:@"FBName"];
-    [defaults removeObjectForKey:@"FBID"];    
-    [defaults synchronize];
-    
-    // Nil out the session variables to prevent
-    // the app from thinking there is a valid session
-    if (nil != self.fbClient.accessToken)
-      self.fbClient.accessToken = nil;
-    if (nil != self.fbClient.expirationDate) 
-      self.fbClient.expirationDate = nil;
-    
-   [self.signInFacebookActivityIndicator stopAnimating];
-    if (!signInTwitterActivityIndicator_.isAnimating)
-      self.navigationItem.hidesBackButton = NO;
-   self.fbButton.enabled = YES;
-   self.fbButton.selected = NO;
-  }
-}
-
-- (void)connectFacebookName:(NSString*)name userID:(NSString*)userID {
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:name forKey:@"FBName"];
-  [defaults setObject:userID forKey:@"FBID"];
-  [defaults synchronize];
-
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookLinkPath
-                                                               delegate:self];
-  request.params = [NSDictionary dictionaryWithObjectsAndKeys:userID, @"facebook_id", name, @"facebook_name", nil];
-  request.method = RKRequestMethodPOST;
-  [requestsArray_ addObject:request];
-  [request send];
-  
-}
-
-- (void)connectFacebookFriends:(NSArray*)friends {
-  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedFacebookFriendsPath
-                                                               delegate:self];
-  request.params = [NSDictionary dictionaryWithObject:[friends componentsJoinedByString:@","] forKey:@"q"];
-  request.method = RKRequestMethodPOST;
-  [requestsArray_ addObject:request];
-  [request send];
-}
-
-- (void)checkForEndlessSignIn {
-  if (!self.fbClient.isSessionValid)
-    [self signOutOfFacebook];
-}
-
-#pragma mark - FBRequestDelegate methods.
-
-- (void)request:(FBRequest*)request didLoad:(id)result {
-  NSArray* resultData;
-  
-  if ([result isKindOfClass:[NSArray class]])
-    result = [result objectAtIndex:0];
-  if ([result isKindOfClass:[NSDictionary class]]) {
-    // handle callback from request for current user info.
-    if ([result objectForKey:@"name"]) {
-      [self connectFacebookName:[result objectForKey:@"name"] userID:[result objectForKey:@"id"]];
-      [self.fbClient requestWithGraphPath:kFacebookFriendsURI andDelegate:self];
-    }
-    resultData = [result objectForKey:@"data"];
-  }
-  
-  // handle callback from request for user's friends.
-  if (resultData  &&  resultData.count != 0) {
-    NSMutableArray* fbFriendIDs = [NSMutableArray array];
-    for (NSDictionary* dict in resultData)
-      [fbFriendIDs addObject:[dict objectForKey:@"id"]];
-    if (fbFriendIDs.count > 0) {
-      [self connectFacebookFriends:fbFriendIDs];
-    }
-  }
-}
-
-- (void)request:(FBRequest*)request didFailWithError:(NSError *)error {
-  NSLog(@"FB err code: %d", [error code]);
-  NSLog(@"FB err message: %@", [error description]);
-  [self.signInFacebookActivityIndicator stopAnimating];
-  if (!signInTwitterActivityIndicator_.isAnimating)
-    self.navigationItem.hidesBackButton = NO;
-  self.fbButton.enabled = YES;
-  self.fbButton.selected = NO;
-  if ([error code] == 10000)
-    [self signOutOfFacebook];
-}
-
-- (void)fbDidLogin {
-  self.fbButton.enabled = NO;
-  [self.signInFacebookActivityIndicator startAnimating];
-  self.navigationItem.hidesBackButton = YES;
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:[self.fbClient accessToken] forKey:@"FBAccessTokenKey"];
-  [defaults setObject:[self.fbClient expirationDate] forKey:@"FBExpirationDateKey"];
-  [defaults synchronize];
-  [self.fbClient requestWithGraphPath:@"me" andDelegate:self];
-}
-
-- (void)fbDidNotLogin:(BOOL)cancelled {
-  NSLog(@"whoa, no fb login");
-  [self signOutOfFacebook];
-}
 
 #pragma mark - UIImagePickerControllerDelegate methods.
 

@@ -38,6 +38,7 @@
 - (void)swapArrowImage;
 - (void)moveArrowViewIfBehindImageView:(UIImageView*)view;
 - (void)handleTap:(id)sender;
+- (void)userImageTapped:(id)sender;
   
 - (void)addPairedLabelWithName:(NSString*)name value:(NSString*)value forKey:(NSString*)key;
 - (void)addText:(NSString*)text forKey:(NSString*)key;

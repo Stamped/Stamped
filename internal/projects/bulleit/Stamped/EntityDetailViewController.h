@@ -52,7 +52,7 @@
 @property (nonatomic, retain) IBOutlet UIActivityIndicatorView* loadingView;
 @property (nonatomic, retain) IBOutlet UIView* mainContentView;
 @property (nonatomic, retain) IBOutlet UIImageView* shelfImageView;
-@property (nonatomic, retain) IBOutlet UIImageView* imageView;
+@property (nonatomic, retain) IBOutlet STImageView* imageView;
 
 - (void)imageViewTapped;
 //- (void)setupSectionViews;

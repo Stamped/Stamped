@@ -106,6 +106,7 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  self.imageView.delegate = nil;
   self.imageView = nil;
   self.affiliateLogoView = nil;
   self.ratingView = nil;

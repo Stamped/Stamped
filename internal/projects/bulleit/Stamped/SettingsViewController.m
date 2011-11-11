@@ -128,7 +128,7 @@
 }
 
 - (IBAction)feedbackButtonPressed:(id)sender {
-  WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://dev.stamped.com/feedback-mobile.html/"]];
+  WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/feedback-mobile.html/"]];
   [self.navigationController pushViewController:vc animated:YES];
   vc.webView.scalesPageToFit = YES;
   vc.shareButton.hidden = YES;

@@ -659,8 +659,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 
   if (findSource_ == FindFriendsSourceTwitter && twitterFriends_) {
     if (twitterFriends_.count == 0) {
-      view.leftLabel.text = @"No Twitter friends are using Stamped right now.";
-      view.rightLabel.text = nil;
+      view.leftLabel.text = @"No Twitter friends are using Stamped.";
+      view.rightLabel.text = @":(";
     } else {
       view.leftLabel.text = @"Twitter friends using Stamped";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", twitterFriends_.count];
@@ -668,8 +668,8 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   } else if (findSource_ == FindFriendsSourceContacts && contactFriends_) {
     if (section == 0) {
       if (contactFriends_.count == 0) {
-        view.leftLabel.text = @"No phone contacts are using Stamped right now.";
-        view.rightLabel.text = nil;
+        view.leftLabel.text = @"No phone contacts are using Stamped.";
+        view.rightLabel.text = @":(";
       } else {
         view.leftLabel.text = @"Phone contacts using Stamped";
         view.rightLabel.text = [NSString stringWithFormat:@"%u", contactFriends_.count];
@@ -684,16 +684,16 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
     }
   } else if (findSource_ == FindFriendsSourceStamped && stampedFriends_) {
     if (stampedFriends_.count == 0) {
-      view.leftLabel.text = @"No friends were found. Sorry :(";
-      view.rightLabel.text = nil;
+      view.leftLabel.text = @"No results.";
+      view.rightLabel.text = @":(";
     } else {
-      view.leftLabel.text = @"Friends using Stamped";
+      view.leftLabel.text = @"Stamped users";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", stampedFriends_.count];
     }
   } else if (findSource_ == FindFriendsSourceFacebook && facebookFriends_) {
     if (facebookFriends_.count == 0) {
-      view.leftLabel.text = @"No Facebook friends are using Stamped right now.";
-      view.rightLabel.text = nil;
+      view.leftLabel.text = @"No Facebook friends are using Stamped.";
+      view.rightLabel.text = @":(";
     } else {
       view.leftLabel.text = @"Facebook friends using Stamped";
       view.rightLabel.text = [NSString stringWithFormat:@"%u", facebookFriends_.count];
@@ -704,15 +704,15 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   } else if (findSource_ == FindFriendsSourceTwitter && !twitterFriends_) {
       view.leftLabel.text = @"Finding friends who use Stamped…";
       view.rightLabel.text = nil;
+  } else if (findSource_ == FindFriendsSourceContacts && !contactFriends_) {
+      view.leftLabel.text = @"Finding friends who use Stamped…";
+      view.rightLabel.text = nil;
   } else if (findSource_ == FindFriendsSourceStamped) {
       view.leftLabel.text = @"Finding friends who use Stamped…";
       view.rightLabel.text = @"…";
   } else if (findSource_ == FindFriendsSourceSuggested) {
     view.leftLabel.text = @"Suggested Users";
-    if (suggestedFriends_.count == 0)
-      view.rightLabel.text = @"…";
-    else
-      view.rightLabel.text = [NSString stringWithFormat:@"%u", suggestedFriends_.count];
+    view.rightLabel.text = @"";
   }
   return view;
 }
@@ -1112,7 +1112,7 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
       return;
     }
     
-    NSLog(@"HTTP error for request: %@, response: %d", request.resourcePath, response.statusCode);
+    NSLog(@"HTTP error for request: %@, response: %@", request.resourcePath, response.bodyAsString);
     return;
   }
   if ([request.resourcePath rangeOfString:kStampedTwitterLinkPath].location != NSNotFound) {

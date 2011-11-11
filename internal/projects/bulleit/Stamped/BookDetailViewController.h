@@ -10,7 +10,7 @@
 
 @interface BookDetailViewController : EntityDetailViewController 
 
-@property (nonatomic, retain) IBOutlet STImageView* imageView;
+//@property (nonatomic, retain) IBOutlet STImageView* imageView;
 @property (nonatomic, retain) IBOutlet UIImageView* gradientView;
 @property (nonatomic, retain) IBOutlet UIImageView* affiliateLogoView;
 

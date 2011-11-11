@@ -24,7 +24,7 @@ static const CGFloat kProfileImageSize = 500;
 static  NSString* const kStampedTermsURL = @"http://www.stamped.com/terms-mobile.html";
 static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mobile.html";
 static  NSString* const kStampedValidateURI = @"/account/check.json";
-static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/settings/password/forgot";
+static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/settings/password/forgot";
 
 @interface FirstRunViewController () 
 - (void)setupBottomView;
