@@ -233,7 +233,13 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  self.navigationItem.title = @"New Stamp";
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"New Stamp"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
+
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(checkForEndlessSignIn)
                                                name:UIApplicationDidBecomeActiveNotification

@@ -26,11 +26,18 @@ static  NSString* const kStampedPrivacyURL = @"http://www.stamped.com/privacy-mo
 static  NSString* const kStampedValidateURI = @"/account/check.json";
 static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/settings/password/forgot";
 
-@interface FirstRunViewController ()
+@interface FirstRunViewController () 
 - (void)setupBottomView;
 - (void)setSecondaryButtonsVisible:(BOOL)visible;
+- (BOOL)stringIsValidEmail:(NSString *)checkString;
+- (BOOL)stringIsValidUsername:(NSString *)checkString;
+- (void)validateUsername;
+- (void)validateEmail;
 
 @property (nonatomic, assign) BOOL editing;
+@property (nonatomic, assign) BOOL usernameValid;
+@property (nonatomic, assign) BOOL emailValid;
+@property (nonatomic, assign) BOOL usernameTaken;
 @property (nonatomic, retain) UIImage* profilePhoto;
 @property (nonatomic, copy) NSString* fullName;
 @property (nonatomic, copy) NSString* username;
@@ -38,6 +45,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 @property (nonatomic, copy) NSString* password;
 @property (nonatomic, copy) NSString* phone;
 @property (nonatomic, retain) NSTimer* timer;
+@property (nonatomic, retain) NSTimer* timer2;
 @property (nonatomic, retain) RKRequestQueue* requestQueue;
 @property (nonatomic, retain) UIColor* primaryColor;
 @property (nonatomic, retain) UIColor* secondaryColor;
@@ -69,6 +77,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 @synthesize delegate = delegate_;
 @synthesize validationButton = validationButton_;
 @synthesize timer = timer_;
+@synthesize timer2 = timer2_;
 @synthesize requestQueue = requestQueue_;
 @synthesize primaryColor = primaryColor_;
 @synthesize secondaryColor = secondaryColor_;
@@ -76,6 +85,9 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 @synthesize validationStamp1ImageView = validationStamp1ImageView_;
 @synthesize validationStamp2ImageView = validationStamp2ImageView_;
 @synthesize validationCheckImageView = validationCheckImageView_;
+@synthesize usernameValid = usernameValid_;
+@synthesize emailValid = emailValid_;
+@synthesize usernameTaken = usernameTaken_;
 
 @synthesize fullName = fullName_;
 @synthesize username = username_;
@@ -114,6 +126,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
   self.activityIndicator = nil;
   self.validationButton = nil;
   self.timer = nil;
+  self.timer2 = nil;
   if (requestQueue_)
     [requestQueue_ cancelAllRequests];
   self.requestQueue = nil;
@@ -170,6 +183,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
   self.activityIndicator = nil;
   self.validationButton = nil;
   self.timer = nil;
+  self.timer2 = nil;
   [requestQueue_ cancelAllRequests];
   self.requestQueue = nil;
   self.primaryColor = nil;
@@ -217,7 +231,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
   }
   if (!reason)
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
-  if (reason && ![reason rangeOfString:@"username"].location != NSNotFound)
+  else if (reason && ![reason rangeOfString:@"username"].location != NSNotFound)
     [[Alerts alertWithTemplate:AlertTemplateInvalidLogin delegate:self] show];
 }
 
@@ -231,7 +245,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
   [activityIndicator_ stopAnimating];
   [confirmButton_ setTitle:@"Join" forState:UIControlStateNormal];
   confirmButton_.enabled = YES;
-  if (!reason)
+  if (!reason) 
     [[Alerts alertWithTemplate:AlertTemplateDefault] show];
   else if (![reason isEqualToString:@""]) {
     UIAlertView* alert = [Alerts alertWithTemplate:AlertTemplateInvalidSignup];
@@ -291,6 +305,8 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
     if (CGPointEqualToPoint(scrollView_.contentOffset, CGPointZero) && !editing_ && !signUpScrollView_.superview)
       [signInScrollView_ addSubview:stampedLogo_];
 
+    usernameValid_ = NO;
+    emailValid_ = NO;
     self.validationStamp1ImageView.image = nil;
     self.validationStamp2ImageView.image = nil;
     self.validationStampView.hidden = YES;
@@ -310,17 +326,62 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 - (IBAction)confirmButtonPressed:(id)sender {
   if (sender != confirmButton_)
     return;
+  
   if (![[RKClient sharedClient] isNetworkAvailable]) {
     [[Alerts alertWithTemplate:AlertTemplateNoInternet] show];
     return;
   }
+  
+  if (signInScrollView_.superview) {
+    if (!usernameValid_) {
+      [[Alerts alertWithTemplate:AlertTemplateInvalidLogin] show];
+      return;
+    }
+  }
+  
+  if (signUpScrollView_.superview) {
+    if (usernameTaken_) {
+      [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
+                                   message:[NSString stringWithFormat:@"Someone has already claimed \"%@\".", signUpUsernameTextField_.text]
+                                  delegate:nil
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      return;
+    }
+    if (!usernameValid_) {
+      [[[[UIAlertView alloc] initWithTitle:@"Invalid Username"
+                                  message:@"Usernames may only include letters, numbers, dashes, and underscores."
+                                 delegate:nil
+                        cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      return;
+    }
+    if (!emailValid_) {
+      [[[[UIAlertView alloc] initWithTitle:@"Invalid Email"
+                                   message:@"Please make sure that you typed your email address correctly."
+                                  delegate:nil
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      return;
+    }
+    if (signUpPasswordTextField_.text.length < 3) {
+      [[[[UIAlertView alloc] initWithTitle:@"Password Too Short"
+                                   message:@"Your password must be at least\n3 characters long."
+                                  delegate:nil
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      return;
+    }
+  }
+
   
   confirmButton_.enabled = NO;
   [confirmButton_ setTitle:nil forState:UIControlStateNormal];
   [activityIndicator_ startAnimating];
   if (signInScrollView_.superview) {
     [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
-  } else if (signUpScrollView_.superview) {
+  } 
+  else if (signUpScrollView_.superview) {
     NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
     [delegate_ viewController:self
        willCreateUserWithName:signUpFullNameTextField_.text
@@ -454,6 +515,10 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
   editing_ = NO;
+  if ([textField isEqual:usernameTextField_] || [textField isEqual:signUpUsernameTextField_])
+    if (textField.text.length > 20)
+      textField.text = [textField.text substringToIndex:19];
+    
   if (textField.superview == signInScrollView_) {
     [UIView animateWithDuration:0.3 
                           delay:0 
@@ -502,7 +567,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
     confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
                               signUpUsernameTextField_.text.length &&
                               signUpEmailTextField_.text.length &&
-                              signUpPasswordTextField_.text.length);
+                              signUpPasswordTextField_.text.length );
   } else if (textField.superview == signInScrollView_) {
     UIView* nextView = [textField.superview viewWithTag:textField.tag + 1];
     if (nextView) {
@@ -517,15 +582,31 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 }
 
 - (IBAction)textFieldEditingChanged:(id)sender {
-  if ([sender isEqual:self.usernameTextField]) {
+//  NSLog(@"sender: %@", ((UITextField*)sender).text);
+  if ([sender isEqual:self.usernameTextField] || 
+      [sender isEqual:self.signUpUsernameTextField]) {
+    
+    if (((UITextField*)sender).text.length > 20)
+      ((UITextField*)sender).text = [((UITextField*)sender).text substringToIndex:19];
+    
     if (timer_)
       [timer_ invalidate];
-  
-    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.66
+    
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                   target:self
                                                 selector:@selector(validateUsername)
                                                 userInfo:nil
-                                                repeats:NO];
+                                                 repeats:NO];
+  }
+  
+  else if ([sender isEqual:self.signUpEmailTextField]) {
+    if (timer2_)
+      [timer2_ invalidate];
+    self.timer2 = [NSTimer scheduledTimerWithTimeInterval:0.5
+                                                   target:self
+                                                 selector:@selector(validateEmail)
+                                                 userInfo:nil
+                                                  repeats:NO];
   }
 }
 
@@ -541,10 +622,43 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 #pragma mark - Validation.
 
 - (void) validateUsername {
+  NSString* text = signInScrollView_.superview ? usernameTextField_.text : signUpUsernameTextField_.text;
+  if (!text || [text isEqualToString:@""])
+    return;
+  
+  if (![self stringIsValidUsername:text]) {
+    if ([text isEqualToString:usernameTextField_.text] && ![self stringIsValidEmail:text]) {      // Sign in username field also accepts email addresses.
+      usernameValid_ = NO;
+      if (self.validationStampView.hidden == NO)
+        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 0.0;}
+                         completion:^(BOOL finished){self.validationStampView.hidden = YES;
+                                                     self.validationStampView.alpha = 1.0;}];
+      return;
+    }
+  }
+  
   RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedValidateURI delegate:self];
-  request.params = [NSDictionary dictionaryWithObjectsAndKeys:self.usernameTextField.text, @"login",
-                                                              kClientID, @"client_id",
-                                                              kClientSecret, @"client_secret", nil];
+  request.params = [NSMutableDictionary dictionaryWithObjectsAndKeys:text, @"login", 
+                                                                     kClientID, @"client_id", 
+                                                                     kClientSecret, @"client_secret", nil];
+  request.method = RKRequestMethodPOST;
+  [requestQueue_ addRequest:request];
+}
+
+- (void) validateEmail {
+  NSString* text = signUpEmailTextField_.text;
+  if (!text || [text isEqualToString:@""])
+    return;
+  
+  if (![self stringIsValidEmail:text]) {
+    emailValid_ = NO;
+    return;
+  }
+  emailValid_ = YES;
+  RKRequest* request = [[RKClient sharedClient] requestWithResourcePath:kStampedValidateURI delegate:self];
+  request.params = [NSMutableDictionary dictionaryWithObjectsAndKeys:text, @"login", 
+                                                                     kClientID, @"client_id", 
+                                                                     kClientSecret, @"client_secret", nil];
   request.method = RKRequestMethodPOST;
   [requestQueue_ addRequest:request];
 }
@@ -552,49 +666,72 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest *)request didLoadResponse:(RKResponse *)response {
-//  NSLog(@"request: %@ loaded response: %@", request.resourcePath, response.bodyAsString);
+//  NSLog(@"request: %@ code: %d response: %@", request.resourcePath, response.statusCode, response.bodyAsString);
   
-  if (response.statusCode == 200) {
-    NSError* err = nil;
-    id body = [response parsedBody:&err];
-    if (err) {
-      NSLog(@"Parse error for response %@: %@", response, err);
-      return;
-    }
+  if (signInScrollView_.superview) {
   
-    NSString* primaryColorHex = [body objectForKey:@"color_primary"];
-    NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
-
-    if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) 
-      if (self.validationStampView.hidden == YES) {
-        self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
-        self.validationStampView.alpha = 0.0;
-        self.validationStampView.hidden = NO;
-        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
+    if (response.statusCode == 200) {
+    // valid username & user exists. 
+      usernameValid_ = YES;
+      NSError* err = nil;
+      id body = [response parsedBody:&err];
+      if (err) {
+        NSLog(@"Parse error for response %@: %@", response, err);
+        return;
       }
-      else if (self.validationStampView.hidden == NO) {
-        self.validationStamp2ImageView.alpha = 0.0;
-        self.validationStamp2ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
-        self.validationStamp2ImageView.hidden = NO;
-        [UIView animateWithDuration:0.4 animations:^{self.validationStamp2ImageView.alpha = 1.0;}
-         completion:^(BOOL finished) {
-           self.validationStamp1ImageView.image = self.validationStamp2ImageView.image;
-           self.validationStamp2ImageView.hidden = YES;
-           self.validationStamp2ImageView.image = nil;
-         }];
+      
+      NSString* primaryColorHex = [body objectForKey:@"color_primary"];
+      NSString* secondaryColorHex = [body objectForKey:@"color_secondary"];
+      
+      if (primaryColorHex && ![primaryColorHex isEqualToString:@""] && ![secondaryColorHex isEqualToString:@""]) {
+        
+        if (self.validationStampView.hidden == YES) {
+          self.validationStamp1ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
+          self.validationStampView.alpha = 0.0;
+          self.validationStampView.hidden = NO;
+          [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 1.0;}];
+        }
+        
+        else if (self.validationStampView.hidden == NO) {
+          self.validationStamp2ImageView.alpha = 0.0;
+          self.validationStamp2ImageView.image = [Util stampImageWithPrimaryColor:primaryColorHex secondary:secondaryColorHex];
+          self.validationStamp2ImageView.hidden = NO;
+          [UIView animateWithDuration:0.4 animations:^{self.validationStamp2ImageView.alpha = 1.0;}
+           completion:^(BOOL finished) {
+             self.validationStamp1ImageView.image = self.validationStamp2ImageView.image;
+             self.validationStamp2ImageView.hidden = YES;
+             self.validationStamp2ImageView.image = nil;
+           }];
+        }
       }
-  }
-  else {
-    if (self.validationStampView.hidden == NO) {
-      [UIView animateWithDuration:0.4
-                       animations:^{self.validationStampView.alpha = 0.0;}
-                       completion:^(BOOL finished){
-                         self.validationStampView.hidden = YES;
-                         self.validationStampView.alpha = 1.0;
-                       }];
+    }  // end response for 200
+    else { 
+      if (self.validationStampView.hidden == NO) {
+        [UIView animateWithDuration:0.4 animations:^{self.validationStampView.alpha = 0.0;}
+                                        completion:^(BOOL finished){self.validationStampView.hidden = YES;
+                                                                    self.validationStampView.alpha = 1.0;}];
+      }
     }
-  }
+  } // end signIn responses
   
+  if (signUpScrollView_.superview) {
+    if (response.statusCode == 200) {
+      usernameValid_ = NO;
+      usernameTaken_ = YES;
+    }
+    else if (response.statusCode == 404) {
+      usernameValid_ = YES;
+      usernameTaken_ = NO;
+    }
+    else if (response.statusCode == 400) {
+      usernameValid_ = NO;
+      usernameTaken_ = NO;
+    }
+    else {
+      usernameValid_ = NO;
+      usernameTaken_ = NO;
+    }
+  } // end signUp responses
 }
 
 - (void)request:(RKRequest *)request didFailLoadWithError:(NSError *)error {
@@ -616,8 +753,9 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didCancelRequest:(RKRequest*)request {
-  if (queue == requestQueue_)
+  if (queue == requestQueue_) {
     [RKClient sharedClient].requestQueue.suspended = NO;
+  }
 }
 
 - (void)requestQueue:(RKRequestQueue*)queue didFailRequest:(RKRequest*)request withError:(NSError*)error {
@@ -647,6 +785,22 @@ static  NSString* const kStampedResetPasswordURL = @"http://dev.stamped.com/sett
       [self presentModalViewController:self.webViewNavigationController animated:YES];
       wvc.shareButton.hidden = YES;*/
     }
+}
+
+#pragma - Regex.
+- (BOOL)stringIsValidEmail:(NSString *)checkString {
+  BOOL stricterFilter = YES; 
+  NSString* stricterFilterString = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+  NSString* laxString = @".+@.+\\.[A-Za-z]{2}[A-Za-z]*";
+  NSString* emailRegex = stricterFilter ? stricterFilterString : laxString;
+  NSPredicate* emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+  return [emailTest evaluateWithObject:checkString];
+}
+
+- (BOOL)stringIsValidUsername:(NSString*)checkString {
+  NSString* filterString = @"[a-zA-Z0-9_-]{1,20}";
+  NSPredicate* usernameTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", filterString];
+  return [usernameTest evaluateWithObject:checkString];  
 }
 
 

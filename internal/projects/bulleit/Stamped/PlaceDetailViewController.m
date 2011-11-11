@@ -251,7 +251,7 @@
     
   // Description
   
-  if (detailedEntity_.desc) {
+  if (detailedEntity_.desc && [detailedEntity_.desc isEqualToString:@""]) {
     [self addSectionWithName:@"Description"];
     section = [sectionsDict_ objectForKey:@"Description"];
     [section addText:detailedEntity_.desc forKey:@"desc"];

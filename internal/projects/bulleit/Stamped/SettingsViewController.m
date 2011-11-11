@@ -47,7 +47,12 @@
   [super viewDidLoad];
   [scrollView_ addSubview:self.contentView];
   scrollView_.contentSize = self.contentView.bounds.size;
-  self.navigationItem.title = @"Settings";
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Settings"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
 }
 
 - (void)viewDidUnload {

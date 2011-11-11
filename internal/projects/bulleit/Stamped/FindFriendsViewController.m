@@ -193,7 +193,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.invitedContacts = [NSMutableArray array];
-  self.navigationItem.title = @"Add Friends";
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Add Friends"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
   searchFieldHidden_ = YES;
   self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
   self.facebookClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;

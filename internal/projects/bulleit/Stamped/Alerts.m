@@ -23,7 +23,7 @@
                                          message:@"Stamped is unable to connect to the internet."
                                         delegate:aDelegate
                                cancelButtonTitle:@"OK"
-                               otherButtonTitles:nil] autorelease];      
+                               otherButtonTitles:nil] autorelease];
     case AlertTemplateTimedOut:
       return [[[UIAlertView alloc] initWithTitle:@"Request Timed Out"
                                          message:@"Stamped couldn't connect.\nPlease try again later."

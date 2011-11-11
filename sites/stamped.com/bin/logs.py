@@ -99,13 +99,14 @@ def warn(msg, *args, **kwargs):
 
 
 # HTTP Log Requests
-def begin(add=None, save=None, requestData=None):
+def begin(addLog=None, saveLog=None, saveStat=None, requestData=None):
     refresh(format='object')
-    localData.output = save
+    localData.saveLog = saveLog
+    localData.saveStat = saveStat
     if requestData:
         request(requestData)
-    if add:
-        localData.log['_id'] = add(localData.log)
+    if addLog:
+        localData.log['_id'] = addLog(localData.log)
 
 def request(request):
     try:
@@ -180,9 +181,16 @@ def save():
     localData.log['finish'] = datetime.datetime.utcnow()
 
     try:
-        if localData.output == None:
+        if localData.saveLog == None:
             raise
-        localData.output(localData.log)
+        localData.saveLog(localData.log)
     except:
         pprint.pprint(localData.log)
+
+    try:
+        if localData.saveStat == None:
+            raise
+        localData.saveStat(localData.log)
+    except:
+        pass
 
