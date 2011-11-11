@@ -119,6 +119,7 @@ static NSString* const kInboxPath = @"/collections/inbox.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+  scrollView.scrollsToTop = NO;
   UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_inbox"]];
   [scrollView addSubview:emptyView];
   [emptyView release];

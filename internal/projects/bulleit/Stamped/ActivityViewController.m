@@ -56,6 +56,7 @@ static NSString* const kActivityLookupPath = @"/activity/show.json";
 - (void)viewDidLoad {
   [super viewDidLoad];
   UIScrollView* scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+  scrollView.scrollsToTop = NO;
   UIImageView* emptyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"empty_news"]];
   [scrollView addSubview:emptyView];
   [emptyView release];
