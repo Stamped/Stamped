@@ -162,6 +162,13 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   userImageView_.imageView.image = [UIImage imageNamed:@"welcome_profile_placeholder"];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+  [activityIndicator_ stopAnimating];
+  [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+  confirmButton_.enabled = YES;
+  [super viewDidAppear:animated];
+}
+
 - (void)viewDidUnload {
   [super viewDidUnload];
   [self.signInScrollView removeFromSuperview];
@@ -699,9 +706,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   
   if (signUpScrollView_.superview) {
     if (response.statusCode == 200) {                 //exists
-      [activityIndicator_ stopAnimating];
-      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
-      confirmButton_.enabled = YES;
       NSString* s = [NSString stringWithFormat:@"\"%@\"", signUpUsernameTextField_.text];
       if ([response.bodyAsString rangeOfString:s].location == NSNotFound) {
         [[[[UIAlertView alloc] initWithTitle:@"Email is Taken"
@@ -710,7 +714,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
                            cancelButtonTitle:@"OK"
                            otherButtonTitles:nil] autorelease] show];
         emailTaken_ = YES;
-        return;
       }
       else {
         [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
@@ -719,8 +722,11 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
                            cancelButtonTitle:@"OK"
                            otherButtonTitles:nil] autorelease] show];
         usernameTaken_ = YES;
-        return;
       }
+      [activityIndicator_ stopAnimating];
+      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+      confirmButton_.enabled = YES;
+      return;
     }
     else if (response.statusCode == 404) {           //available
       if (emailTaken_) {
@@ -741,10 +747,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
       }
       usernameTaken_ = NO;
       if (!emailTaken_ && !usernameTaken_) {  //create an account
-        [activityIndicator_ stopAnimating];
-        [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
-        confirmButton_.enabled = YES;
-        
         NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
         [delegate_ viewController:self
            willCreateUserWithName:signUpFullNameTextField_.text
