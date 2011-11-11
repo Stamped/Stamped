@@ -114,8 +114,14 @@ NSString* const kStampColors[7][2] = {
     [galleryButton setBackgroundImage:[Util stampImageWithPrimaryColor:kStampColors[i][0]
                                                              secondary:kStampColors[i][1]]
                              forState:UIControlStateNormal];
+    
+  
   }
   self.userImageView.imageURL = [AccountManager sharedManager].currentUser.profileImageURL;
+  
+  self.largeStampColorImageView.image = [Util gradientImage:largeStampColorImageView_.image
+                                           withPrimaryColor:@"004AB2" 
+                                                  secondary:@"0057D1"];
 }
 
 - (void)viewDidUnload {

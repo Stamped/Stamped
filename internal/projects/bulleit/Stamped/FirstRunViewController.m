@@ -38,6 +38,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 @property (nonatomic, assign) BOOL usernameValid;
 @property (nonatomic, assign) BOOL emailValid;
 @property (nonatomic, assign) BOOL usernameTaken;
+@property (nonatomic, assign) BOOL emailTaken;
 @property (nonatomic, retain) UIImage* profilePhoto;
 @property (nonatomic, copy) NSString* fullName;
 @property (nonatomic, copy) NSString* username;
@@ -49,6 +50,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 @property (nonatomic, retain) RKRequestQueue* requestQueue;
 @property (nonatomic, retain) UIColor* primaryColor;
 @property (nonatomic, retain) UIColor* secondaryColor;
+
 @end
 
 @implementation FirstRunViewController
@@ -88,6 +90,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 @synthesize usernameValid = usernameValid_;
 @synthesize emailValid = emailValid_;
 @synthesize usernameTaken = usernameTaken_;
+@synthesize emailTaken = emailTaken_;
 
 @synthesize fullName = fullName_;
 @synthesize username = username_;
@@ -334,39 +337,33 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   
   if (signInScrollView_.superview) {
     if (!usernameValid_) {
+      [self validateUsername];
       [[Alerts alertWithTemplate:AlertTemplateInvalidLogin] show];
       return;
     }
   }
   
   if (signUpScrollView_.superview) {
-    if (usernameTaken_) {
-      [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
-                                   message:[NSString stringWithFormat:@"Someone has already claimed \"%@\".", signUpUsernameTextField_.text]
-                                  delegate:nil
-                         cancelButtonTitle:@"OK"
-                         otherButtonTitles:nil] autorelease] show];
-      return;
-    }
-    if (!usernameValid_) {
-      [[[[UIAlertView alloc] initWithTitle:@"Invalid Username"
-                                  message:@"Usernames may only include letters, numbers, dashes, and underscores."
-                                 delegate:nil
-                        cancelButtonTitle:@"OK"
-                         otherButtonTitles:nil] autorelease] show];
-      return;
-    }
-    if (!emailValid_) {
-      [[[[UIAlertView alloc] initWithTitle:@"Invalid Email"
-                                   message:@"Please make sure that you typed your email address correctly."
-                                  delegate:nil
-                         cancelButtonTitle:@"OK"
-                         otherButtonTitles:nil] autorelease] show];
-      return;
-    }
+    usernameValid_ = NO;
+    emailValid_ = NO;
+    usernameTaken_ = YES;
+    emailTaken_ = YES;
+    
     if (signUpPasswordTextField_.text.length < 3) {
       [[[[UIAlertView alloc] initWithTitle:@"Password Too Short"
                                    message:@"Your password must be at least\n3 characters long."
+                                  delegate:nil
+                         cancelButtonTitle:@"OK"
+                         otherButtonTitles:nil] autorelease] show];
+      return;
+    }
+
+    
+    if ([self stringIsValidEmail:signUpEmailTextField_.text])
+      [self validateEmail];
+    else {
+      [[[[UIAlertView alloc] initWithTitle:@"Invalid Email"
+                                   message:@"Please make sure that you typed your email address correctly."
                                   delegate:nil
                          cancelButtonTitle:@"OK"
                          otherButtonTitles:nil] autorelease] show];
@@ -381,16 +378,6 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   if (signInScrollView_.superview) {
     [delegate_ viewController:self didReceiveUsername:usernameTextField_.text password:passwordTextField_.text];
   } 
-  else if (signUpScrollView_.superview) {
-    NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
-    [delegate_ viewController:self
-       willCreateUserWithName:signUpFullNameTextField_.text
-                     username:signUpUsernameTextField_.text
-                     password:signUpPasswordTextField_.text
-                        email:signUpEmailTextField_.text
-                 profileImage:self.profilePhoto
-                  phoneNumber:num];
-  }
 }
 
 - (IBAction)takePhotoButtonPressed:(id)sender {
@@ -711,27 +698,91 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   } // end signIn responses
   
   if (signUpScrollView_.superview) {
-    if (response.statusCode == 200) {
-      usernameValid_ = NO;
-      usernameTaken_ = YES;
+    if (response.statusCode == 200) {                 //exists
+      [activityIndicator_ stopAnimating];
+      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+      confirmButton_.enabled = YES;
+      NSString* s = [NSString stringWithFormat:@"\"%@\"", signUpUsernameTextField_.text];
+      if ([response.bodyAsString rangeOfString:s].location == NSNotFound) {
+        [[[[UIAlertView alloc] initWithTitle:@"Email is Taken"
+                                     message:[NSString stringWithFormat:@"Someone is already using \"%@\".", signUpEmailTextField_.text]
+                                    delegate:nil
+                           cancelButtonTitle:@"OK"
+                           otherButtonTitles:nil] autorelease] show];
+        emailTaken_ = YES;
+        return;
+      }
+      else {
+        [[[[UIAlertView alloc] initWithTitle:@"Username is Taken"
+                                     message:[NSString stringWithFormat:@"Someone has already claimed \"%@\".", signUpUsernameTextField_.text]
+                                    delegate:nil
+                           cancelButtonTitle:@"OK"
+                           otherButtonTitles:nil] autorelease] show];
+        usernameTaken_ = YES;
+        return;
+      }
     }
-    else if (response.statusCode == 404) {
-      usernameValid_ = YES;
+    else if (response.statusCode == 404) {           //available
+      if (emailTaken_) {
+        emailTaken_ = NO;
+        if ([self stringIsValidUsername:signUpUsernameTextField_.text])
+          [self validateUsername];
+        else {
+          [[[[UIAlertView alloc] initWithTitle:@"Invalid Username"
+                                       message:@"Usernames may only include letters, numbers, dashes, and underscores."
+                                      delegate:nil
+                             cancelButtonTitle:@"OK"
+                             otherButtonTitles:nil] autorelease] show];
+          [activityIndicator_ stopAnimating];
+          [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+          confirmButton_.enabled = YES;
+        }
+        return;
+      }
       usernameTaken_ = NO;
+      if (!emailTaken_ && !usernameTaken_) {  //create an account
+        [activityIndicator_ stopAnimating];
+        [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+        confirmButton_.enabled = YES;
+        
+        NSString* num = [Util sanitizedPhoneNumberFromString:signUpPhoneTextField_.text];
+        [delegate_ viewController:self
+           willCreateUserWithName:signUpFullNameTextField_.text
+                         username:signUpUsernameTextField_.text
+                         password:signUpPasswordTextField_.text
+                            email:signUpEmailTextField_.text
+                     profileImage:self.profilePhoto
+                      phoneNumber:num];
+      }
     }
     else if (response.statusCode == 400) {
+      [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
+      [activityIndicator_ stopAnimating];
+      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
       usernameValid_ = NO;
-      usernameTaken_ = NO;
+      usernameTaken_ = YES;
+      emailValid_ = NO;
+      emailTaken_ = YES;
+      return;
     }
     else {
+      [[Alerts alertWithTemplate:AlertTemplateInvalidSignup] show];
+      [activityIndicator_ stopAnimating];
+      [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+      confirmButton_.enabled = YES;
       usernameValid_ = NO;
-      usernameTaken_ = NO;
+      usernameTaken_ = YES;
+      emailValid_ = NO;
+      emailTaken_ = YES;
     }
   } // end signUp responses
 }
 
 - (void)request:(RKRequest *)request didFailLoadWithError:(NSError *)error {
   NSLog(@"request: %@ hit error: %d", request.resourcePath, error.code);
+  [activityIndicator_ stopAnimating];
+  [confirmButton_ setTitle:@"Sign in" forState:UIControlStateNormal];
+  confirmButton_.enabled = YES;
 }
 
 #pragma mark - RKRequestQueueDelegate methods.
