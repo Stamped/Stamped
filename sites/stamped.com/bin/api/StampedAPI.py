@@ -1229,7 +1229,8 @@ class StampedAPI(AStampedAPI):
             if stamp.comment_preview != None:
                 for i in xrange(len(stamp.comment_preview)):
                     commentingUser = userIds[stamp.comment_preview[i].user_id]
-                    stamp.comment_preview[i].user = commentingUser
+                    if commentingUser != 1:
+                        stamp.comment_preview[i].user = commentingUser
 
             if authUserId:
                 # Mark as favorited
@@ -2670,11 +2671,11 @@ class StampedAPI(AStampedAPI):
         for item in activityData:
             
             try:
-                if item.user.user_id != None:
+                if item.user.user_id != None and userIds[item.user.user_id] != 1:
                     item.user = userIds[item.user.user_id]
-                if item.linked_user_id != None:
+                if item.linked_user_id != None and userIds[item.linked_user_id] != 1:
                     item.linked_user = userIds[item.linked_user_id]
-                if item.linked_stamp_id != None:
+                if item.linked_stamp_id != None and stampIds[item.linked_stamp_id] != 1:
                     item.linked_stamp = stampIds[item.linked_stamp_id]
             except:
                 utils.printException()

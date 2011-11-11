@@ -633,7 +633,7 @@ class Schema(SchemaElement):
             data = data.value
         
         if not isinstance(data, dict) and data != None:
-            msg = "Invalid Type (%s)" % data
+            msg = "Invalid Type (data=%s) (type=%s)" % (data, type(data))
             logs.warning(msg)
             logs.warning("Schema: %s" % self)
             raise SchemaTypeError(msg)
