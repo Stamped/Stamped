@@ -145,7 +145,7 @@ typedef enum {
   
   UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_notConnected"]];
   CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
-  iv.frame = CGRectOffset(iv.frame, floorf(xOffset/2), 140);
+  iv.frame = CGRectOffset(iv.frame, floorf(xOffset / 2), 140);
   self.notConnectedImageView = iv;
   [self.view addSubview:self.notConnectedImageView];
   [iv release];

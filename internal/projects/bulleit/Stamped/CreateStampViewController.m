@@ -351,7 +351,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     fbButton_.enabled = YES;
   }
 
-
   editingMask_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
   editingMask_.backgroundColor = [UIColor whiteColor];
   editingMask_.alpha = 0;
@@ -467,18 +466,15 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   
-//  GTMOAuthAuthentication* auth = [self createAuthentication];
-//  if (![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) 
-//    [self signOutOfTwitter];
-  
   if (!self.fbClient)
     self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
     self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
     self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
-  if (!self.fbClient.isSessionValid)
+//  if (!self.fbClient.isSessionValid)
 //    [self signOutOfFacebook];
   [super viewWillAppear:animated];
 }
