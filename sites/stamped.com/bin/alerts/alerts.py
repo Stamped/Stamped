@@ -182,6 +182,7 @@ def runAlerts(options):
                     print 'PUSH COMPLETE'
                 except:
                     print 'PUSH FAILED'
+                    utils.printException()
 
 
             if send_email:
