@@ -53,7 +53,7 @@ def timeout(request):
 @handleHTTPRequest
 @require_http_methods(["GET"])
 def ping(request):
-    return transformOutput(true)
+    return transformOutput(True)
 
 
 
