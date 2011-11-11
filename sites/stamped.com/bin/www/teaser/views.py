@@ -67,6 +67,28 @@ def feedback(request):
     except:
         raise Http404
 
+def licenses(request):
+    try:
+        response = render_to_response('licenses-mobile.html', None)
+
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
+    except:
+        raise Http404
+
+def faq(request):
+    try:
+        response = render_to_response('faq-mobile.html', None)
+
+        response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
+        response['Cache-Control'] = 'max-age=600'
+
+        return response
+    except:
+        raise Http404
+
 def download(request):
     return HttpResponseRedirect('http://www.itunes.com')
-    
+
