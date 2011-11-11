@@ -522,6 +522,8 @@ class AWSDeploymentStack(ADeploymentStack):
         if isinstance(conf['roles'], basestring):
             conf['roles'] = eval(conf['roles'])
         
+        conf['placement'] = 'us-east-1c'
+        
         # create and bootstrap the new instance
         utils.log("[%s] creating instance %s" % (self, conf['name']))
         instance = AWSInstance(self, conf)
