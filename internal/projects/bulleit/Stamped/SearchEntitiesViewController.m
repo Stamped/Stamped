@@ -145,7 +145,7 @@ typedef enum {
   
   UIImageView* iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"search_notConnected"]];
   CGFloat xOffset = CGRectGetWidth(self.view.bounds) - CGRectGetWidth(iv.bounds);
-  iv.frame = CGRectOffset(iv.frame, floorf(xOffset/2), 140);
+  iv.frame = CGRectOffset(iv.frame, floorf(xOffset / 2), 140);
   self.notConnectedImageView = iv;
   [self.view addSubview:self.notConnectedImageView];
   [iv release];
@@ -268,7 +268,7 @@ typedef enum {
     [self resetState];
     self.notConnectedImageView.alpha = 1.0;
   }
-  
+
   switch (self.searchIntent) {
     case SearchIntentStamp:
       searchField_.placeholder = locationButton_.selected ? @"Search nearby" : @"Find something to stamp";
@@ -349,6 +349,16 @@ typedef enum {
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
+  if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
+    UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:nil
+                                                     message:@"Location services aren't available to Stamped. You can enable them within the Settings app."
+                                                    delegate:nil
+                                           cancelButtonTitle:nil
+                                           otherButtonTitles:@"OK", nil] autorelease];
+    [alert show];
+    return;
+  }
+  
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
   self.currentResultType = ResultTypeLocal;
@@ -426,7 +436,7 @@ typedef enum {
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-  if (currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_))
+  if (searchIntent_ == SearchIntentTodo || currentResultType_ == ResultTypeFast || (currentResultType_ == ResultTypeLocal && !loading_))
     return [resultsArray_ count];
 
   return [resultsArray_ count] + 1;

@@ -117,7 +117,10 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
 #pragma mark - Facebook
 
-- (void)fbDidLogin {  
+- (void)fbDidLogin {
+  if (!self.fbClient)
+    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
+
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:[self.fbClient accessToken] forKey:@"FBAccessTokenKey"];
   [defaults setObject:[self.fbClient expirationDate] forKey:@"FBExpirationDateKey"];
@@ -155,7 +158,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)removeFBCredentials {
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"]) {
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
@@ -199,7 +202,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
 - (void)request:(FBRequest*)request didLoad:(id)result {
   NSArray* resultData;
-  
+
   if ([result isKindOfClass:[NSArray class]])
     result = [result objectAtIndex:0];
   if ([result isKindOfClass:[NSDictionary class]]) {
@@ -210,7 +213,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     }
     resultData = [result objectForKey:@"data"];
   }
-  
+
   // handle callback from request for user's friends.
   if (resultData  &&  resultData.count != 0) {
     NSMutableArray* fbFriendIDs = [NSMutableArray array];

@@ -178,7 +178,8 @@ const CGFloat kKeyboardHeight = 217.0;
       segmentedControl_.selectedSegmentIndex = 2;
     }    
     primaryTextField_.text = detailedEntity_.artist;
-    secondaryTextField_.text = [detailedEntity_.albums objectAtIndex:0];
+    if ([(NSArray*)detailedEntity_.albums count] > 0)
+      secondaryTextField_.text = [detailedEntity_.albums objectAtIndex:0];
     selectedCategory_ = STEditCategoryRowMusic;
   } else if ([detailedEntity_.category isEqualToString:@"other"]) {
     [self showOtherView];
@@ -539,7 +540,7 @@ const CGFloat kKeyboardHeight = 217.0;
       } else if (segmentedControl_.selectedSegmentIndex == 1) {
         detailedEntity_.subcategory = @"song";
         detailedEntity_.artist = primaryTextField_.text;
-        detailedEntity_.albums = [NSArray arrayWithObject:(id)secondaryTextField_.text];
+        detailedEntity_.albums = [NSArray arrayWithObjects:(id)secondaryTextField_.text, nil];
         detailedEntity_.subtitle =
             detailedEntity_.artist.length > 0 ? detailedEntity_.artist : @"Song";
       } else {

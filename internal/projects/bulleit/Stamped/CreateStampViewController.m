@@ -351,7 +351,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
     fbButton_.enabled = YES;
   }
 
-
   editingMask_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
   editingMask_.backgroundColor = [UIColor whiteColor];
   editingMask_.alpha = 0;
@@ -467,19 +466,14 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   
-//  GTMOAuthAuthentication* auth = [self createAuthentication];
-//  if (![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) 
-//    [self signOutOfTwitter];
-  
   if (!self.fbClient)
     self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
     self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
     self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
   }
-  if (!self.fbClient.isSessionValid)
-//    [self signOutOfFacebook];
   [super viewWillAppear:animated];
 }
 
@@ -996,7 +990,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   if (!self.fbClient)
     self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
   
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
   if ([defaults objectForKey:@"FBAccessTokenKey"] 
       && [defaults objectForKey:@"FBExpirationDateKey"]) {
     self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
@@ -1008,22 +1002,30 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   }
 }
 
-- (void) fbDidLogin {
+- (void)fbDidLogin {
   self.fbButton.selected = YES;
+  if (!self.fbClient)
+    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
   self.fbClient.sessionDelegate = [SharedRequestDelegate sharedDelegate];
   [[SharedRequestDelegate sharedDelegate] fbDidLogin];
 }
 
 - (void)sendFBRequest:(Stamp*)stamp {
   NSString* fbID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBID"];
+  if (!fbID) {
+    self.fbButton.selected = NO;
+    return;
+  }
+
   if (self.fbClient.isSessionValid && fbButton_.selected) {
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                    kFacebookAppID, @"app_id",
                                    stamp.URL, @"link",
                                    stamp.entityObject.title, @"name", nil];
-      NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampLogoURLPath, stamp.user.primaryColor, stamp.user.secondaryColor, @"-logo-195x195.png"];
-      [params setObject:photoURL forKey:@"picture"];
-    if (![stamp.blurb isEqualToString:@""])
+    NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampLogoURLPath, stamp.user.primaryColor, stamp.user.secondaryColor, @"-logo-195x195.png"];
+    [params setObject:photoURL forKey:@"picture"];
+
+    if (stamp.blurb.length > 0)
       [params setObject:[NSString stringWithFormat:@"\"%@\"", stamp.blurb] forKey:@"message"];
     
     [self.fbClient requestWithGraphPath:[fbID stringByAppendingString:@"/feed"]
