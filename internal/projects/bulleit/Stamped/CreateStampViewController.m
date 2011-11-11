@@ -71,14 +71,9 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error;
-- (void)connectTwitterUserName:(NSString*)username userID:(NSString*)userID;
-- (void)connectTwitterFollowers:(NSArray*)followers;
-- (void)connectFacebookName:(NSString*)name userID:(NSString*)userID;
-- (void)connectFacebookFriends:(NSArray*)friends;
+
 - (void)fetchCurrentUser;
-- (void)fetchFollowerIDs:(NSString*)userIDString;
 - (void)signInToFacebook;
-- (void)signOutOfFacebook;
 - (GTMOAuthAuthentication*)createAuthentication;
 
 @property (nonatomic, retain) UIImage* stampPhoto;
@@ -472,7 +467,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
   
-  GTMOAuthAuthentication* auth = [self createAuthentication];
+//  GTMOAuthAuthentication* auth = [self createAuthentication];
 //  if (![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) 
 //    [self signOutOfTwitter];
   
@@ -1218,7 +1213,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                  error:(NSError*)error {  
   if (error) {
     NSLog(@"GTMOAuth error = %@", error);
-    [self signOutOfTwitter];
     return;
   }
   self.twitterAuth = auth;
