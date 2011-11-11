@@ -268,7 +268,7 @@ typedef enum {
     [self resetState];
     self.notConnectedImageView.alpha = 1.0;
   }
-  
+
   switch (self.searchIntent) {
     case SearchIntentStamp:
       searchField_.placeholder = locationButton_.selected ? @"Search nearby" : @"Find something to stamp";
@@ -349,6 +349,16 @@ typedef enum {
 }
 
 - (IBAction)locationButtonPressed:(id)sender {
+  if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
+    UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:nil
+                                                     message:@"Location services aren't available to Stamped. You can enable them within the Settings app."
+                                                    delegate:nil
+                                           cancelButtonTitle:nil
+                                           otherButtonTitles:@"OK", nil] autorelease];
+    [alert show];
+    return;
+  }
+  
   if (![[RKClient sharedClient] isNetworkAvailable])
     return;
   self.currentResultType = ResultTypeLocal;
