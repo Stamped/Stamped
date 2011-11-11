@@ -71,6 +71,7 @@
 
 - (void)viewDidUnload {
   [super viewDidUnload];
+  self.imageView.delegate = nil;
   self.imageView = nil;
   self.gradientView = nil;
   self.affiliateLogoView = nil;

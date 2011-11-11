@@ -43,7 +43,7 @@
   if ([navBar respondsToSelector:@selector(setHideLogo:)]) 
     [(id)navBar setHideLogo:NO];
   [navBar setNeedsDisplay];
-  [super viewWillAppear:animated]; 
+  [super viewWillDisappear:animated]; 
 }
 
 - (void)viewDidLoad {

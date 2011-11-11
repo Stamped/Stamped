@@ -393,7 +393,6 @@ int const SPACE_HEIGHT = 10;
 }
 
 - (void)moveArrowViewIfBehindImageView:(UIImageView*)imageView {
-  NSLog(@"yo yo");
   if (footerLabel_ && footerLabel_.text && ![footerLabel_.text isEqualToString:@""])
     return;
 
@@ -434,6 +433,15 @@ int const SPACE_HEIGHT = 10;
 #pragma mark - Touches
 
 - (void)handleTap:(id)sender {
+  if (self.stamps.count > 0) {
+    CGPoint loc = [(UITapGestureRecognizer*)sender locationInView:self.view];
+    UIView* subview = [self.view hitTest:loc withEvent:nil];
+    if ([subview isKindOfClass:[MediumUserImageButton class]]) {
+      [self userImageTapped:subview];
+      return;
+    }
+  }
+  
   if (self.arrowView.hidden == NO)
     self.isCollapsed = !isCollapsed_;
 }

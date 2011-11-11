@@ -186,7 +186,12 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
 - (void)viewDidLoad {  
   [super viewDidLoad];
-//  self.navigationItem.title = @"Details";
+  UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"Details"
+                                                                 style:UIBarButtonItemStyleBordered
+                                                                target:nil
+                                                                action:nil];
+  [[self navigationItem] setBackBarButtonItem:backButton];
+  [backButton release];
   scrollView_.contentSize = self.view.bounds.size;
   CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
   backgroundGradient.colors = [NSArray arrayWithObjects:
@@ -519,16 +524,17 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   [collapsibleVC addImagesForStamps:entityObject_.stamps];
   [collapsibleVC expand];
   [collapsibleVC swapArrowImage];
+  if (self.imageView && self.imageView.hidden == NO)
+    [collapsibleVC moveArrowViewIfBehindImageView:self.imageView];
 }
 
 #pragma mark - CollapsibleViewControllerDelegate methods.
 - (void)collapsibleViewController:(CollapsibleViewController*)collapsibleVC willChangeHeightBy:(CGFloat)delta {
   for (CollapsibleViewController* vc in sectionsDict_.objectEnumerator) {
     if (CGRectGetMinY(vc.view.frame) > CGRectGetMinY(collapsibleVC.view.frame)) {
-      [UIView animateWithDuration:0.25
-                       animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
-                                     if (imageView_ != nil && imageView_.hidden == NO)
-                                       [vc moveArrowViewIfBehindImageView:self.imageView];}];
+      [UIView animateWithDuration:0.25 animations:^{ vc.view.frame = CGRectOffset(vc.view.frame, 0, delta);
+                                                     if (self.imageView != nil && self.imageView.hidden == NO)                                        
+                                                         [vc moveArrowViewIfBehindImageView:self.imageView];}];
     }
   }
   
