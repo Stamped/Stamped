@@ -25,7 +25,7 @@
 #import "UserImageDownloadManager.h"
 #import "UIColor+Stamped.h"
 
-static NSString* const kDevDataBaseURL = @"https://www.stamped.com/v0";
+static NSString* const kDevDataBaseURL = @"https://dev.stamped.com/v0";
 static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
