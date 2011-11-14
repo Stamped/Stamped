@@ -84,6 +84,7 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
     
     utils.log("processing feed '%s'" % name)
     
+    feed['transform'] = 2
     albums = appleRSS.get_top_albums(**feed)
     songs  = appleRSS.get_top_songs(**feed)
     
