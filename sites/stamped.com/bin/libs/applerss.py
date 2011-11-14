@@ -167,7 +167,11 @@ class AppleRSS(object):
         entity.aid = self._get_id(entry['id']['label'])
         
         # parse links (view_url, preview_url)
-        for link in entry['link']:
+        links = entry['link']
+        if not isinstance(links, list):
+            links = [ links ]
+        
+        for link in links:
             try:
                 href = link['attributes']['href']
                 
@@ -178,6 +182,8 @@ class AppleRSS(object):
                 else:
                     entity.view_url = href
             except:
+                utils.printException()
+                utils.log(json.dumps(entry['link'], indent=2))
                 pass
         
         # parse song-specific fields

@@ -30,7 +30,7 @@ IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
 IS_PROD       = False
-USE_PROD_CERT = IS_PROD
+USE_PROD_CERT = False
 
 ### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
 
@@ -513,9 +513,11 @@ def sendPushNotifications(queue):
     # Apply rate limit
     limit = 3
     
+    """
     if USE_PROD_CERT:
         host_name = 'gateway.push.apple.com'
         certificate = IPHONE_APN_PUSH_CERT_PROD
+    """
     
     try:
         s = socket()

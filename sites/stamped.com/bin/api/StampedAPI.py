@@ -1067,7 +1067,8 @@ class StampedAPI(AStampedAPI):
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=local, 
-                                                        user=authUserId)
+                                                        user=authUserId, 
+                                                        limit=((page + 1) * limit))
         offset  = limit * page
         results = results[offset : offset + limit]
         
@@ -1090,7 +1091,8 @@ class StampedAPI(AStampedAPI):
                                                         full=full, 
                                                         prefix=prefix, 
                                                         local=True, 
-                                                        user=authUserId)
+                                                        user=authUserId, 
+                                                        limit=((page + 1) * limit))
         offset  = limit * page
         results = results[offset : offset + limit]
         

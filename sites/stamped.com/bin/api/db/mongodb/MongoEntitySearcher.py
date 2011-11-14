@@ -552,6 +552,7 @@ class MongoEntitySearcher(EntitySearcher):
                 if local and abs(result[1]) > 30 :
                     return
                 
+                # filter any custom entities
                 generated_by = entity.generated_by 
                 if generated_by is not None and generated_by != user:
                     return
@@ -596,7 +597,7 @@ class MongoEntitySearcher(EntitySearcher):
             utils.log("%s) %d (%s)" % (key, len(value), input_query))
             
             for result in value:
-                utils.log(result[0].entity_id)
+                #utils.log(result[0].entity_id)
                 _add_result(result)
         
         # aggregate all third-party results

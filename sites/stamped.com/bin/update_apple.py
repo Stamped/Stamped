@@ -100,8 +100,15 @@ def handle_feed(feed, matcher, appleRSS, aids, options):
         
         utils.log("%s) %s (%s)" % (entity.subcategory, entity.title, entity.aid))
         entity.a_popular = True
+        if entity.subcategory == 'album':
+            results = appleRSS._apple.lookup(id=entity.aid, media='music', entity='song', transform=True)
+            results = filter(lambda r: r.entity.subcategory == 'song', results)
+            entity.tracks = list(result.entity.title for result in results)
+        
         if not options.noop:
             matcher.addOne(entity)
+        else:
+            pprint(entity.value)
         
         # attempt to lookup artist for this entity
         if entity.artist_id is not None:
