@@ -151,8 +151,14 @@ def setFields(entity, detailed=False):
     
     elif entity.category == 'film':
         if entity.subcategory == 'movie':
-            if entity.original_release_date != None:
-                entity.subtitle = 'Movie (%s)' % entity.original_release_date
+            original_release_date = entity.original_release_date
+            if original_release_date != None:
+                try:
+                    year = int(original_release_date[0:4])
+                except:
+                    year = original_release_date
+                
+                entity.subtitle = 'Movie (%s)' % year
             else:
                 entity.subtitle = 'Movie'
         elif entity.subcategory == 'tv':

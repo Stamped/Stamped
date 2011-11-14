@@ -192,17 +192,20 @@ class MongoEntitySearcher(EntitySearcher):
     
     def __init__(self, api):
         EntitySearcher.__init__(self)
-        
         self.api = api
+        
         self.entityDB = api._entityDB
         self.placesDB = api._placesEntityDB
         self.tempDB   = api._tempEntityDB
+        self.cacheDB  = api._searchCacheDB
+        
         self._statsSink = api._statsSink
         self._errors    = utils.AttributeDict()
         self._notificationHandler = api._notificationHandler
         
         self.placesDB._collection.ensure_index([("coordinates", pymongo.GEO2D)])
         self.entityDB._collection.ensure_index([("titlel", pymongo.ASCENDING)])
+        self.cacheDB._collection.ensure_index([("query", pymongo.ASCENDING)])
         
         self._init_cities()
     
@@ -265,21 +268,20 @@ class MongoEntitySearcher(EntitySearcher):
                          local=False, 
                          user=None):
         
-        if prefix:
-            assert not full
-        
-        if coords is not None:
-            coords = self._parseCoords(coords)
-        
         # -------------------------------- #
         # transform input query and coords #
         # -------------------------------- #
         
-        input_query = query.lower()
-        if not prefix:
+        if prefix:
+            assert not full
+        else:
             input_query = input_query.strip()
         
-        national_query = input_query
+        if coords is not None:
+            coords = self._parseCoords(coords)
+        
+        input_query     = query.lower()
+        national_query  = input_query
         original_coords = True
         
         query = input_query
@@ -447,9 +449,9 @@ class MongoEntitySearcher(EntitySearcher):
                 
                 if prefix:
                     # limit number of results returned
-                    q_params.append(('num', 50))
+                    q_params.append(('num', 10))
                 else:
-                    q_params.append(('num', 100))
+                    q_params.append(('num', 20))
                 
                 q = SON(q_params)
             except:
@@ -1023,7 +1025,7 @@ class MongoEntitySearcher(EntitySearcher):
         if prefix or len(input_query) <= 3:
             max_results = 100
         else:
-            max_results = 400
+            max_results = 200
         
         entity_query = self._get_entity_query(query)
         db_results = self.entityDB._collection.find(entity_query, output=list, limit=max_results)

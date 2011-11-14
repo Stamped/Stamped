@@ -298,7 +298,7 @@ class OrderedDict(dict, MutableMapping):
             return all(p==q for p, q in  _zip_longest(self.items(), other.items()))
         return dict.__eq__(self, other)
 
-def getFile(url, request=None):
+def getFile(url, request=None, params=None):
     """
         Wrapper around urllib2.urlopen(url).read(), which attempts to increase 
         the success rate by sidestepping server-side issues and usage limits by
@@ -313,7 +313,10 @@ def getFile(url, request=None):
     request = None
     
     if request is None:
-        request = urllib2.Request(url)
+        if params is not None and isinstance(params, dict):
+            params = urllib.urlencode(params)
+        
+        request = urllib2.Request(url, params)
         request.add_header('Accept-encoding', 'gzip')
     
     while True:

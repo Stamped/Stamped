@@ -6,11 +6,13 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import init
-import re, time, utils
+import json, re, time, utils
 
-from Geocoder           import Geocoder
-from gevent.pool        import Pool
 from MongoStampedAPI    import MongoStampedAPI
+from GooglePlaces       import GooglePlaces
+from Geocoder           import Geocoder
+
+from gevent.pool        import Pool
 from optparse           import OptionParser
 from pprint             import pprint
 
@@ -41,6 +43,7 @@ def main():
     stampedAPI = MongoStampedAPI()
     geocoder   = Geocoder()
     entityDB   = stampedAPI._entityDB
+    googlePlaces = GooglePlaces()
     
     rs = entityDB._collection.find({"sources.userGenerated.generated_by" : {"$exists" : True}, "coordinates.lat" : {"$exists" : False}, "details.place.address" : {"$exists" : True}, "details.place.address" : {"$nin" : [ None, "", " ", ", " ]}}, output=list)
     
@@ -51,12 +54,12 @@ def main():
     for result in rs:
         entity = entityDB._convertFromMongo(result)
         
-        pool.spawn(handle_entity, entity, geocoder, entityDB, options)
+        pool.spawn(handle_entity, entity, geocoder, googlePlaces, entityDB, options)
     
     pool.join()
     utils.log("done processing %d entities" % len(rs))
 
-def handle_entity(entity, geocoder, entityDB, options):
+def handle_entity(entity, geocoder, googlePlaces, entityDB, options):
     latLng = geocoder.addressToLatLng(entity.address)
     
     if latLng is None:
@@ -65,6 +68,14 @@ def handle_entity(entity, geocoder, entityDB, options):
     
     entity.lat = latLng[0]
     entity.lng = latLng[1]
+    
+    ret = googlePlaces.addPlaceReport(entity)
+    if ret is not None:
+        ret = json.loads(ret)
+        
+        if ret['status'] == 'OK':
+            entity.gid = ret['id']
+            entity.reference = ret['reference']
     
     if not options.noop:
         entityDB.updateEntity(entity)

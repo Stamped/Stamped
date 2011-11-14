@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import json, logs, string, urllib
+import json, logs, string, urllib, urllib2
 
 from optparse import OptionParser
 from Geocoder import Geocoder
@@ -328,6 +328,35 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
         
         return None
     
+    def addPlaceReport(self, entity):
+        params = {
+            'sensor' : 'false', 
+            'key'    : self._getAPIKey(0, 0), 
+        }
+        
+        post_params = {
+            'location' : {
+                'lat' : entity.lat, 
+                'lng' : entity.lng, 
+            }, 
+            'name' : entity.title, 
+            'accuracy' : 50, 
+            'types' : [ 'shoe_store' ], 
+            'language' : 'en-US', 
+        }
+        
+        url = self._getAPIURL('add', params)
+        #utils.log(url)
+        
+        try:
+            data = json.dumps(post_params)
+            request = urllib2.Request(url, data, {'Content-Type': 'application/json'})
+            request = urllib2.urlopen(request)
+            response = request.read()
+            return response
+        except:
+            return None
+    
     def _getAutocompleteResponse(self, latLng, query, apiKey, optionalParams=None):
         params = {
             'input'  : query, 
@@ -515,6 +544,15 @@ def main():
         # print the prettified, formatted results
         print json.dumps(results, sort_keys=True, indent=2)
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()
+
+g=GooglePlaces()
+from Schemas import Entity
+e=Entity()
+e.title = 'TEST_PLACE_DELETE'
+e.lat = 43.0
+e.lng = -71
+r = g.addPlaceReport(e)
+print r
 
