@@ -1207,7 +1207,13 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             # Add stamp user
             ### TODO: Check that userIds != 1 (i.e. user still exists)?
-            stamp.user = userIds[stamp.user_id]
+            if userIds[stamp.user_id] == 1:
+                msg = 'Unable to match user_id %s for stamp id %s' % \
+                    (stamp.user_id, stamp.stamp_id)
+                logs.warning(msg)
+                continue
+            else:
+                stamp.user = userIds[stamp.user_id]
             
             # Add entity
             if entityIds[stamp.entity_id] == 1:
@@ -2095,8 +2101,13 @@ class StampedAPI(AStampedAPI):
 
         comments = []
         for comment in commentData:
-            comment.user = userIds[comment.user_id]
-            comments.append(comment)
+            if userIds[comment.user_id] == 1:
+                msg = 'Unable to get user_id %s for comment_id %s' % \
+                    (comment.user_id, comment.comment_id)
+                logs.warning(msg)
+            else:
+                comment.user = userIds[comment.user_id]
+                comments.append(comment)
 
         comments = sorted(comments, key=lambda k: k['timestamp']['created'])
             

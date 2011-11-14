@@ -90,5 +90,5 @@ def faq(request):
         raise Http404
 
 def download(request):
-    return HttpResponseRedirect('http://www.itunes.com')
+    return HttpResponseRedirect('http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8')
 
