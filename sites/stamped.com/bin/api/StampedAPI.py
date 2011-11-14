@@ -1205,7 +1205,13 @@ class StampedAPI(AStampedAPI):
         for stamp in stampData:
             # Add stamp user
             ### TODO: Check that userIds != 1 (i.e. user still exists)?
-            stamp.user = userIds[stamp.user_id]
+            if userIds[stamp.user_id] == 1:
+                msg = 'Unable to match user_id %s for stamp id %s' % \
+                    (stamp.user_id, stamp.stamp_id)
+                logs.warning(msg)
+                continue
+            else:
+                stamp.user = userIds[stamp.user_id]
             
             # Add entity
             if entityIds[stamp.entity_id] == 1:
@@ -1227,10 +1233,17 @@ class StampedAPI(AStampedAPI):
 
             # Add commenting user(s)
             if stamp.comment_preview != None:
+                comments = []
+                
                 for i in xrange(len(stamp.comment_preview)):
                     commentingUser = userIds[stamp.comment_preview[i].user_id]
-                    stamp.comment_preview[i].user = commentingUser
-
+                    
+                    if commentingUser != 1:
+                        stamp.comment_preview[i].user = commentingUser
+                        comments.append(stamp.comment_preview[i])
+                
+                stamp.comment_preview = comments
+            
             if authUserId:
                 # Mark as favorited
                 if stamp.entity_id in favorites:
@@ -2086,8 +2099,13 @@ class StampedAPI(AStampedAPI):
 
         comments = []
         for comment in commentData:
-            comment.user = userIds[comment.user_id]
-            comments.append(comment)
+            if userIds[comment.user_id] == 1:
+                msg = 'Unable to get user_id %s for comment_id %s' % \
+                    (comment.user_id, comment.comment_id)
+                logs.warning(msg)
+            else:
+                comment.user = userIds[comment.user_id]
+                comments.append(comment)
 
         comments = sorted(comments, key=lambda k: k['timestamp']['created'])
             
@@ -2668,13 +2686,17 @@ class StampedAPI(AStampedAPI):
         
         activity = []
         for item in activityData:
-
-            if item.user.user_id != None:
-                item.user = userIds[item.user.user_id]
-            if item.linked_user_id != None:
-                item.linked_user = userIds[item.linked_user_id]
-            if item.linked_stamp_id != None:
-                item.linked_stamp = stampIds[item.linked_stamp_id]
+            try:
+                if item.user.user_id != None:
+                    item.user = userIds[item.user.user_id]
+                if item.linked_user_id != None:
+                    item.linked_user = userIds[item.linked_user_id]
+                if item.linked_stamp_id != None:
+                    item.linked_stamp = stampIds[item.linked_stamp_id]
+            except:
+                utils.printException()
+                continue
+            
             activity.append(item)
         
         # Reset activity count
