@@ -31,9 +31,9 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         return User(document, overflow=True)
 
     def _getAllUserIds(self):
-        documentIds = self._collection.find({}, {})
+        documents = self._collection.find({}, {})
         userIds = []
-        for documentId in documentIds:
+        for document in documents:
             userIds.append(self._getStringFromObjectId(document['_id']))
         return userIds
     
