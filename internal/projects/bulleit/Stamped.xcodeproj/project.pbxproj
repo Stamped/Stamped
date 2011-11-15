@@ -596,6 +596,7 @@
 		CB5CF1D8146394E300DC2CBC /* share_fb_highlighted@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF1D4146394E300DC2CBC /* share_fb_highlighted@2x.png */; };
 		CB5CF1DB146465BD00DC2CBC /* share_disabled.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF1D9146465B900DC2CBC /* share_disabled.png */; };
 		CB5CF1DC146465BD00DC2CBC /* share_disabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB5CF1DA146465BB00DC2CBC /* share_disabled@2x.png */; };
+		CB6556271471C56600865AAE /* SocialManager.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6556261471C56600865AAE /* SocialManager.m */; };
 		CB65DC37145A44AF00E702D6 /* STOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */; };
 		CB7B22FB14609306004C247F /* sharing_header@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = CB7B22FA14609306004C247F /* sharing_header@2x.png */; };
 		CB7B23071461B994004C247F /* AboutUsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB7B23051461B993004C247F /* AboutUsViewController.m */; };
@@ -1491,6 +1492,8 @@
 		CB5CF1D4146394E300DC2CBC /* share_fb_highlighted@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_fb_highlighted@2x.png"; sourceTree = "<group>"; };
 		CB5CF1D9146465B900DC2CBC /* share_disabled.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = share_disabled.png; sourceTree = "<group>"; };
 		CB5CF1DA146465BB00DC2CBC /* share_disabled@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "share_disabled@2x.png"; sourceTree = "<group>"; };
+		CB6556251471C56600865AAE /* SocialManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocialManager.h; sourceTree = "<group>"; };
+		CB6556261471C56600865AAE /* SocialManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialManager.m; sourceTree = "<group>"; };
 		CB65DC34145A44AF00E702D6 /* STOAuthViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STOAuthViewController.h; sourceTree = "<group>"; };
 		CB65DC35145A44AF00E702D6 /* STOAuthViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STOAuthViewController.m; sourceTree = "<group>"; };
 		CB7B22FA14609306004C247F /* sharing_header@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sharing_header@2x.png"; sourceTree = "<group>"; };
@@ -2811,6 +2814,8 @@
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				CBC5C1E1146A4B7100DD305C /* Alerts.h */,
 				CBC5C1E2146A4B7200DD305C /* Alerts.m */,
+				CB6556251471C56600865AAE /* SocialManager.h */,
+				CB6556261471C56600865AAE /* SocialManager.m */,
 				7E2267D813D52FF500657A66 /* Model */,
 				7E5406D91415507300912463 /* First run */,
 				7E0B622F1439717700A573FA /* Edit Profile */,
@@ -3750,6 +3755,7 @@
 				7E4B8E881468C310009A33DD /* ActivityFriendTableViewCell.m in Sources */,
 				7ED69D4614693BA100964B3A /* FriendshipManager.m in Sources */,
 				CBC5C1E3146A4B7300DD305C /* Alerts.m in Sources */,
+				CB6556271471C56600865AAE /* SocialManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

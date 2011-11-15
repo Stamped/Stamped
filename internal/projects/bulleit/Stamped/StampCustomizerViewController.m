@@ -107,6 +107,7 @@
   secondaryColorButton_.selected = NO;
   [hueSlider_ setValue:primaryHue_ animated:YES];
   [brightnessSlider_ setValue:primaryBrightness_ animated:YES];
+  [self hueChanged:hueSlider_];
 }
 
 - (void)secondaryColorButtonPressed:(id)sender {
@@ -114,6 +115,7 @@
   primaryColorButton_.selected = NO;
   [hueSlider_ setValue:secondaryHue_ animated:YES];
   [brightnessSlider_ setValue:secondaryBrightness_ animated:YES];
+  [self hueChanged:hueSlider_];
 }
 
 - (void)setColor:(UIColor*)color forButton:(UIButton*)button {

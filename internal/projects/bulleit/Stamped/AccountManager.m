@@ -16,6 +16,7 @@
 #import "KeychainItemWrapper.h"
 #import "OAuthToken.h"
 #import "Util.h"
+#import "SocialManager.h"
 
 NSString* const kCurrentUserHasUpdatedNotification = @"kCurrentUserHasUpdatedNotification";
 NSString* const kUserHasLoggedOutNotification = @"KUserHasLoggedOutNotification";
@@ -437,19 +438,8 @@ static AccountManager* sharedAccountManager_ = nil;
 - (void)logout {
   [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
   // remove Facebook credentials
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  [defaults removeObjectForKey:@"FBAccessTokenKey"];
-  [defaults removeObjectForKey:@"FBExpirationDateKey"];
-  [defaults removeObjectForKey:@"FBName"];
-  [defaults removeObjectForKey:@"FBID"];
-  [defaults removeObjectForKey:@"TwitterUsername"];
-  [defaults synchronize];
-  StampedAppDelegate* delegate = (StampedAppDelegate*)[[UIApplication sharedApplication] delegate];
-  if (nil != delegate.facebook.accessToken)
-    delegate.facebook.accessToken = nil;
-  if (nil != delegate.facebook.expirationDate)
-    delegate.facebook.expirationDate = nil;
-  // remove Twitter credentials
+  [[SocialManager sharedManager] signOutOfFacebook:NO];
+  [[SocialManager sharedManager] signOutOfTwitter:NO];
   
   [oAuthRequestQueue_ cancelAllRequests];
   [[RKClient sharedClient].requestQueue cancelAllRequests];

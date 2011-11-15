@@ -8,11 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
-#import "FBConnect.h"
 
-@interface SharedRequestDelegate : NSObject <RKObjectLoaderDelegate, RKRequestDelegate, FBSessionDelegate, FBRequestDelegate>
+@interface SharedRequestDelegate : NSObject <RKObjectLoaderDelegate>
 
 + (SharedRequestDelegate*)sharedDelegate;
-- (void)fbDidLogin;
 
 @end

@@ -33,6 +33,7 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 - (BOOL)stringIsValidUsername:(NSString *)checkString;
 - (void)validateUsername;
 - (void)validateEmail;
+- (void)accessoryDoneButtonPressed:(id)sender;
 
 @property (nonatomic, assign) BOOL editing;
 @property (nonatomic, assign) BOOL usernameValid;
@@ -160,6 +161,30 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   signUpScrollView_.contentSize = CGRectInset(signUpScrollView_.bounds, 0, 20).size;
   userImageView_.enabled = YES;
   userImageView_.imageView.image = [UIImage imageNamed:@"welcome_profile_placeholder"];
+  
+  UIView* accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+  accessoryView.backgroundColor = [UIColor clearColor];
+  CAGradientLayer* backgroundGradient = [[CAGradientLayer alloc] init];
+  backgroundGradient.frame = CGRectMake(0, 1, 320, 43);
+  backgroundGradient.colors = [NSArray arrayWithObjects:
+                               (id)[UIColor colorWithWhite:0.15 alpha:0.95].CGColor,
+                               (id)[UIColor colorWithWhite:0.30 alpha:0.95].CGColor, nil];
+  [accessoryView.layer addSublayer:backgroundGradient];
+  [backgroundGradient release];
+  UIButton* doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+  doneButton.frame = CGRectMake(248, 4, 69, 38);
+  [doneButton setImage:[UIImage imageNamed:@"done_button"] forState:UIControlStateNormal];
+  doneButton.contentMode = UIViewContentModeScaleAspectFit;
+  [doneButton addTarget:self
+                 action:@selector(accessoryDoneButtonPressed:)
+       forControlEvents:UIControlEventTouchUpInside];
+  [accessoryView addSubview:doneButton];
+  self.signUpFullNameTextField.inputAccessoryView = accessoryView;
+  self.signUpUsernameTextField.inputAccessoryView = accessoryView;
+  self.signUpEmailTextField.inputAccessoryView = accessoryView;
+  self.signUpPasswordTextField.inputAccessoryView = accessoryView;
+  self.signUpPhoneTextField.inputAccessoryView = accessoryView;
+  [accessoryView release];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -418,6 +443,30 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
   [vc release];
 }
 
+- (void)accessoryDoneButtonPressed:(id)sender {
+  if (self.signUpScrollView.superview) {
+    if (signUpFullNameTextField_.editing) 
+      [signUpFullNameTextField_ resignFirstResponder];
+    
+    if (signUpEmailTextField_.editing) 
+      [signUpEmailTextField_ resignFirstResponder];
+    
+    if (signUpPasswordTextField_.editing) 
+      [signUpPasswordTextField_ resignFirstResponder];
+    
+    if (signUpUsernameTextField_.editing) 
+      [signUpUsernameTextField_ resignFirstResponder];
+    
+    if (signUpPhoneTextField_.editing) 
+      [signUpPhoneTextField_ resignFirstResponder];
+
+    confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
+                              signUpUsernameTextField_.text.length &&
+                              signUpEmailTextField_.text.length &&
+                              signUpPasswordTextField_.text.length);
+  }
+}
+
 #pragma mark - UIActionSheetDelegate methods.
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
@@ -505,6 +554,9 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
                      }
                      completion:nil];
   }
+  
+  if (CGRectGetMinY(textField.frame) > 460 - (kKeyboardOffset + 44))         // Scroll down if the field is occluded by the accessory bar.
+    signUpScrollView_.contentOffset = CGPointMake(0, signUpScrollView_.contentSize.height - signUpScrollView_.frame.size.height);
 }
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
@@ -558,10 +610,18 @@ static  NSString* const kStampedResetPasswordURL = @"http://www.stamped.com/sett
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {
   if (textField.superview == signUpScrollView_) {
-    confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
-                              signUpUsernameTextField_.text.length &&
-                              signUpEmailTextField_.text.length &&
-                              signUpPasswordTextField_.text.length );
+    UIView* nextView = [textField.superview viewWithTag:textField.tag + 1];
+    if (nextView) {
+      [nextView becomeFirstResponder];
+      if (CGRectGetMinY(nextView.frame) > 460 - (kKeyboardOffset + 44))         // Scroll down if the field is occluded by the accessory bar.
+        signUpScrollView_.contentOffset = CGPointMake(0, signUpScrollView_.contentSize.height - signUpScrollView_.frame.size.height);
+    }
+    else {
+      confirmButton_.enabled = (signUpFullNameTextField_.text.length &&
+                                signUpUsernameTextField_.text.length &&
+                                signUpEmailTextField_.text.length &&
+                                signUpPasswordTextField_.text.length );
+    }
   } else if (textField.superview == signInScrollView_) {
     UIView* nextView = [textField.superview viewWithTag:textField.tag + 1];
     if (nextView) {

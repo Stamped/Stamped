@@ -8,15 +8,10 @@
 
 #import <RestKit/RestKit.h>
 #import <UIKit/UIKit.h>
-#import "FBConnect.h"
-
-static NSString* const kFacebookAppID = @"297022226980395";
 
 @interface StampedAppDelegate : NSObject <UIApplicationDelegate, RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UIWindow* window;
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;
-@property (nonatomic, retain) Facebook* facebook;
-
 
 @end

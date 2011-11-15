@@ -9,6 +9,7 @@
 #import "STTableViewController.h"
 
 #import <QuartzCore/QuartzCore.h>
+#import <RestKit/RestKit.h>
 
 #import "Util.h"
 #import "UIColor+Stamped.h"
@@ -16,6 +17,7 @@
 static NSString* kPullDownText = @"Pull down to refresh...";
 static NSString* kReleaseText = @"Release to refresh...";
 static NSString* kLoadingText = @"Updating...";
+static NSString* kNotConnectedText = @"Not connected to the internet.";
 static const CGFloat kReloadHeight = 60.0;
 
 @implementation STTableViewController
@@ -69,9 +71,9 @@ static const CGFloat kReloadHeight = 60.0;
     [spinnerView_ release];
     
     reloadLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
-    reloadLabel_.text = kPullDownText;
+    reloadLabel_.text = kNotConnectedText;
     [reloadLabel_ sizeToFit];
-    reloadLabel_.frame = CGRectOffset(reloadLabel_.frame, 78, CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding);
+    reloadLabel_.frame = CGRectOffset(reloadLabel_.frame, 160 - CGRectGetWidth(reloadLabel_.frame) / 2, CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding);
     reloadLabel_.font = [UIFont fontWithName:@"Helvetica-Bold" size:12];
     reloadLabel_.backgroundColor = [UIColor clearColor];
     reloadLabel_.textColor = [UIColor stampedGrayColor];
@@ -82,7 +84,7 @@ static const CGFloat kReloadHeight = 60.0;
     lastUpdatedLabel_ = [[UILabel alloc] initWithFrame:CGRectZero];
     lastUpdatedLabel_.text = @"Last updated a long time ago";
     [lastUpdatedLabel_ sizeToFit];
-    lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 49, CGRectGetHeight(self.shelfView.frame) - 41 - bottomPadding);
+    lastUpdatedLabel_.frame = CGRectOffset(lastUpdatedLabel_.frame, 160 - CGRectGetWidth(lastUpdatedLabel_.frame) / 2, CGRectGetHeight(self.shelfView.frame) - 41 - bottomPadding);
     lastUpdatedLabel_.font = [UIFont fontWithName:@"Helvetica" size:12];
     lastUpdatedLabel_.backgroundColor = [UIColor clearColor];
     lastUpdatedLabel_.textColor = [UIColor stampedLightGrayColor];
@@ -101,11 +103,14 @@ static const CGFloat kReloadHeight = 60.0;
 - (void)setIsLoading:(BOOL)loading {
   if (isLoading_ == loading || disableReload_)
     return;
-
+  if (![[RKClient sharedClient] isNetworkAvailable]) 
+    loading = NO;
+  
+  
   isLoading_ = loading;
   shouldReload_ = NO;
 
-  if (loading)
+  if (loading )
     [spinnerView_ startAnimating];
   else
     [spinnerView_ stopAnimating];
@@ -123,10 +128,16 @@ static const CGFloat kReloadHeight = 60.0;
                        CGRect reloadFrame = reloadLabel_.frame;
                        reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 57 - bottomPadding;
                        reloadLabel_.frame = reloadFrame;
-                       reloadLabel_.text = kPullDownText;
+                       if (![[RKClient sharedClient] isNetworkAvailable]) {
+                         reloadLabel_.text = kNotConnectedText;
+                         arrowImageView_.alpha = 0.0;
+                       }
+                       else {
+                         reloadLabel_.text = kPullDownText;
+                         arrowImageView_.alpha = 1.0;
+                       }
                        lastUpdatedLabel_.alpha = 1.0;
                        self.tableView.contentInset = UIEdgeInsetsZero;
-                       arrowImageView_.alpha = 1.0;
                      }
                      completion:nil];
     
@@ -142,10 +153,13 @@ static const CGFloat kReloadHeight = 60.0;
                        CGRect reloadFrame = reloadLabel_.frame;
                        reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 47 - bottomPadding;
                        reloadLabel_.frame = reloadFrame;
-                       reloadLabel_.text = kLoadingText;
+                       if (![[RKClient sharedClient] isNetworkAvailable])
+                         reloadLabel_.text = kNotConnectedText;
+                       else 
+                         reloadLabel_.text = kLoadingText;
+                       arrowImageView_.alpha = 0.0;
                        lastUpdatedLabel_.alpha = 0.0;
                        self.tableView.contentInset = UIEdgeInsetsMake(kReloadHeight, 0, 0, 0);
-                       arrowImageView_.alpha = 0.0;
                        arrowImageView_.transform = CGAffineTransformIdentity;
                      }
                      completion:nil];
@@ -153,9 +167,15 @@ static const CGFloat kReloadHeight = 60.0;
     CGRect reloadFrame = reloadLabel_.frame;
     reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 47 - bottomPadding;
     reloadLabel_.frame = reloadFrame;
-    reloadLabel_.text = kLoadingText;
+    if (![[RKClient sharedClient] isNetworkAvailable]) {
+      reloadLabel_.text = kNotConnectedText;
+      arrowImageView_.alpha = 0.0;
+    }
+    else {
+      reloadLabel_.text = kLoadingText;
+      arrowImageView_.alpha = 1.0;
+    }
     lastUpdatedLabel_.alpha = 0.0;
-    arrowImageView_.alpha = 0.0;
   }
 }
 
@@ -175,11 +195,17 @@ static const CGFloat kReloadHeight = 60.0;
     self.highlightView.alpha = MIN(1.0, (15 + (-self.shelfView.frame.origin.y - 356)) / 15);
   }
   
+  if (isLoading_ && ![[RKClient sharedClient] isNetworkAvailable])
+    self.isLoading = NO;
+  
   if (isLoading_ || disableReload_)
     return;
   
   shouldReload_ = scrollView.contentOffset.y < -kReloadHeight;
-  reloadLabel_.text = shouldReload_ ? kReleaseText : kPullDownText;
+  if (![[RKClient sharedClient] isNetworkAvailable])
+    reloadLabel_.text = kNotConnectedText;
+  else
+    reloadLabel_.text = shouldReload_ ? kReleaseText : kPullDownText;
   [UIView animateWithDuration:0.15
                         delay:0
                       options:UIViewAnimationOptionBeginFromCurrentState | 
@@ -188,6 +214,10 @@ static const CGFloat kReloadHeight = 60.0;
                      CGAffineTransform transform = shouldReload_ ?
                          CGAffineTransformMakeRotation(M_PI) : CGAffineTransformIdentity;
                      arrowImageView_.transform = transform;
+                     if ([[RKClient sharedClient] isNetworkAvailable] && !isLoading_)
+                       arrowImageView_.alpha = 1.0;
+                     if (![[RKClient sharedClient] isNetworkAvailable])
+                       arrowImageView_.alpha = 0.0;
                    }
                    completion:nil];
 }

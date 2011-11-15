@@ -20,8 +20,6 @@
 #import "Entity.h"
 #import "EntityDetailViewController.h"
 #import "Favorite.h"
-#import "GTMOAuthAuthentication.h"
-#import "GTMOAuthViewControllerTouch.h"
 #import "STNavigationBar.h"
 #import "Notifications.h"
 #import "Stamp.h"
@@ -31,28 +29,17 @@
 #import "Util.h"
 #import "User.h"
 #import "UIColor+Stamped.h"
-#import "STOAuthViewController.h"
 #import "Alerts.h"
-#import "SharedRequestDelegate.h"
+#import "SocialManager.h"
 
 static NSString* const kTwitterUpdateStatusPath = @"/statuses/update.json";
 static NSString* const kCreateStampPath = @"/stamps/create.json";
 static NSString* const kCreateEntityPath = @"/entities/create.json";
 static NSString* const kStampPhotoURLPath = @"http://static.stamped.com/stamps/";
 static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
-static NSString* const kTwitterCurrentUserURI = @"/account/verify_credentials.json";
-static NSString* const kTwitterFriendsURI = @"/friends/ids.json";
-static NSString* const kTwitterFollowersURI = @"/followers/ids.json";
-static NSString* const kFacebookFriendsURI = @"/me/friends";
-static NSString* const kStampedTwitterLinkPath = @"/account/linked/twitter/update.json";
-static NSString* const kStampedTwitterRemovePath = @"/account/linked/twitter/remove.json";
-static NSString* const kStampedTwitterFollowersPath = @"/account/linked/twitter/followers.json";
-static NSString* const kStampedFacebookLinkPath = @"/account/linked/facebook/update.json";
-static NSString* const kStampedFacebookRemovePath = @"/account/linked/facebook/remove.json";
-static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/followers.json";
 
-@interface CreateStampViewController () {
-}
+@interface CreateStampViewController () 
+
 - (void)editorDoneButtonPressed:(id)sender;
 - (void)editorCameraButtonPressed:(id)sender;
 - (void)takePhotoButtonPressed:(id)sender;
@@ -61,20 +48,12 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 - (void)adjustTextViewContentSize;
 - (void)sendSaveStampRequest;
 - (void)sendSaveEntityRequest;
-- (void)sendTweetRequest:(Stamp*)stamp;
 - (void)dismissSelf;
 - (void)addStampPhotoView;
 - (void)restoreViewState;
 - (void)addStampsRemainingLayer;
 
-- (void)signInToTwitter;
-- (void)viewController:(GTMOAuthViewControllerTouch*)authVC
-      finishedWithAuth:(GTMOAuthAuthentication*)auth
-                 error:(NSError*)error;
-
-- (void)fetchCurrentUser;
-- (void)signInToFacebook;
-- (GTMOAuthAuthentication*)createAuthentication;
+- (void)socialNetworksDidChange:(id)sender;
 
 @property (nonatomic, retain) UIImage* stampPhoto;
 @property (nonatomic, retain) UIButton* takePhotoButton;
@@ -85,8 +64,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @property (nonatomic, assign) BOOL savePhoto;
 @property (nonatomic, retain) UIResponder* firstResponder;
 @property (nonatomic, readonly) CATextLayer* stampsRemainingLayer;
-@property (nonatomic, retain) RKClient* twitterClient;
-@property (nonatomic, retain) GTMOAuthAuthentication* twitterAuth;
 @property (nonatomic, retain) id objectToStamp;
 @property (nonatomic, readonly) UIView* editingMask;
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
@@ -99,7 +76,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @synthesize creditedUser = creditedUser_;
 @synthesize newEntity = newEntity_;
 @synthesize detailedEntity = detailedEntity_;
-@synthesize fbClient = fbClient_;
 
 @synthesize scrollView = scrollView_;
 @synthesize titleLabel = titleLabel_;
@@ -127,8 +103,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 @synthesize firstResponder = firstResponder_;
 @synthesize stampsRemainingLayer = stampsRemainingLayer_;
 @synthesize tweetButton = tweetButton_;
-@synthesize twitterAuth = twitterAuth_;
-@synthesize twitterClient = twitterClient_;
 @synthesize shareLabel = shareLabel_;
 @synthesize editingMask = editingMask_;
 @synthesize creditPickerController = creditPickerController_;
@@ -176,11 +150,8 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (void)dealloc {
-  [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
-  if ([fbClient_.sessionDelegate isEqual:self])
-    fbClient_.sessionDelegate = nil;
-  [[NSNotificationCenter defaultCenter] removeObserver:self]; 
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [[[RKClient sharedClient] requestQueue] cancelRequestsWithDelegate:self]; 
   self.entityObject = nil;
   self.creditedUser = nil;
   self.stampPhoto = nil;
@@ -206,14 +177,11 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.backgroundImageView = nil;
   self.takePhotoButton = nil;
   self.deletePhotoButton = nil;
-  self.twitterAuth = nil;
-  self.twitterClient = nil;
   self.disclosureButton = nil;
   self.creditPickerController.delegate = nil;
   self.creditPickerController = nil;
   self.detailedEntity = nil;
   stampsRemainingLayer_ = nil;
-  self.fbClient = nil;
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
@@ -224,6 +192,11 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
 - (void)viewDidLoad {
   [super viewDidLoad];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(socialNetworksDidChange:)
+                                               name:kSocialNetworksChangedNotification
+                                             object:nil];
+  
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"New Stamp"
                                                                  style:UIBarButtonItemStyleBordered
                                                                 target:nil
@@ -231,8 +204,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [[self navigationItem] setBackBarButtonItem:backButton];
   [backButton release];
   
-  self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
-  self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
   User* currentUser = [AccountManager sharedManager].currentUser;
   self.userImageView.imageURL = currentUser.profileImageURL;
   scrollView_.contentSize = self.view.bounds.size;
@@ -336,20 +307,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 
   [self addStampsRemainingLayer];
   [self restoreViewState];
-  // Twitter shit.
-  GTMOAuthAuthentication* auth =
-  [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
-                                               consumerKey:kTwitterConsumerKey
-                                                privateKey:kTwitterConsumerSecret] autorelease];
-  auth.callback = kOAuthCallbackURL;
-  if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
-                                                 authentication:auth]) {
-    self.twitterAuth = auth;
-    tweetButton_.enabled = YES;
-  }
-  if (self.fbClient.isSessionValid) {
-    fbButton_.enabled = YES;
-  }
 
   editingMask_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
   editingMask_.backgroundColor = [UIColor whiteColor];
@@ -422,11 +379,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [[NSNotificationCenter defaultCenter] removeObserver:self]; 
   [super viewDidUnload];
   [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
-  if ([fbClient_.sessionDelegate isEqual:self])
-    fbClient_.sessionDelegate = nil;
-  self.twitterAuth = nil;
-  self.twitterClient = nil;
   self.scrollView = nil;
   self.titleLabel = nil;
   self.detailLabel = nil;
@@ -447,7 +399,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   self.deletePhotoButton = nil;
   self.disclosureButton = nil;
   stampsRemainingLayer_ = nil;
-  self.fbClient = nil;
   self.fbButton = nil;
   self.signInTwitterActivityIndicator = nil;
   self.signInFacebookActivityIndicator = nil;
@@ -465,15 +416,6 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
                                  11 - (46 / 2),
                                  46, 46);
   stampLayer_.transform = CATransform3DMakeScale(15.0, 15.0, 1.0);
-  
-  if (!self.fbClient)
-    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
-
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
-    self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-    self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-  }
   [super viewWillAppear:animated];
 }
 
@@ -718,13 +660,9 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (IBAction)tweetButtonPressed:(id)sender {
-  if (![[RKClient sharedClient] isNetworkAvailable]) {
-    tweetButton_.selected = NO;
-    return;
-  }  
-  GTMOAuthAuthentication* auth = [self createAuthentication];
   if (tweetButton_.selected == NO &&
-      ![GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken authentication:auth]) {
+      ![[SocialManager sharedManager] isSignedInToTwitter]) {
+    // I take a sheet in objective-C.
     UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Twitter."
                                                         delegate:self
                                                cancelButtonTitle:@"Cancel"
@@ -738,7 +676,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
 }
 
 - (IBAction)fbButtonPressed:(id)sender {
-  if (fbButton_.selected == NO && !self.fbClient.isSessionValid) {
+  if (fbButton_.selected == NO && ![[SocialManager sharedManager] isSignedInToFacebook]) {
     UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:@"Stamped isn't connected to Facebook."
                                                         delegate:self
                                                cancelButtonTitle:@"Cancel"
@@ -873,6 +811,31 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [sheet showInView:self.view];
 }
 
+- (void)socialNetworksDidChange:(id)sender {
+  if ([[SocialManager sharedManager] isSignedInToTwitter]) {
+    if (signInTwitterActivityIndicator_.isAnimating) {
+      [signInTwitterActivityIndicator_ stopAnimating];
+      tweetButton_.selected = YES;
+    }
+  }
+  else {
+    tweetButton_.selected = NO;
+  }
+
+  if ([[SocialManager sharedManager] isSignedInToFacebook]) {
+    if (signInFacebookActivityIndicator_.isAnimating) {
+      [signInFacebookActivityIndicator_ stopAnimating];
+      fbButton_.selected = YES;
+    }
+  }
+  else {
+    fbButton_.selected = NO;
+  }  
+  
+  fbButton_.enabled = YES;
+  tweetButton_.enabled = YES;
+}
+
 #pragma mark - UIActionSheetDelegate methods.
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
@@ -892,13 +855,17 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   }
   if ([actionSheet.title rangeOfString:@"Twitter"].location != NSNotFound) {
     if (buttonIndex == 0) {
-      [self signInToTwitter];
+      [[SocialManager sharedManager] signInToTwitter:self.navigationController];
+      tweetButton_.enabled = NO;
+      [signInTwitterActivityIndicator_ startAnimating];
       return;
     }
   }
   if ([actionSheet.title rangeOfString:@"Facebook"].location != NSNotFound) {
     if (buttonIndex == 0) {
-      [self signInToFacebook];
+      [[SocialManager sharedManager] signInToFacebook];
+      fbButton_.enabled = NO;
+      [signInFacebookActivityIndicator_ startAnimating];
       return;
     }
   }
@@ -958,89 +925,9 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   [objectLoader send];
 }
 
-- (void)sendTweetRequest:(Stamp*)stamp {
-  if (self.twitterAuth && tweetButton_.selected) {
-    RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterUpdateStatusPath
-                                                            delegate:nil];
-    request.method = RKRequestMethodPOST;
-    [request.URLRequest setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request.URLRequest setHTTPMethod:@"POST"];
 
-    NSString* blurb = [NSString stringWithFormat:@"%@. \u201c%@\u201d", stamp.entityObject.title, stamp.blurb];
-    if (stamp.blurb.length == 0)
-      blurb = [stamp.entityObject.title stringByAppendingString:@"."];
-
-    NSString* substring = [blurb substringToIndex:MIN(blurb.length, 104)];
-    if (blurb.length > substring.length)
-      blurb = [substring stringByAppendingString:@"..."];
-
-    // Stamped: [blurb] [link]
-    NSString* tweet = [NSString stringWithFormat:@"Stamped: %@ %@", blurb, stamp.URL];
-    tweet = [tweet stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    tweet = [tweet stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];  // FUCK YOU.
-    NSString* body = [NSString stringWithFormat:@"status=%@", tweet];
-    [request.URLRequest setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
-    [self.twitterAuth authorizeRequest:request.URLRequest];
-    [request send];
-  }
-}
-
-
-- (void)signInToFacebook {
-  if (!self.fbClient)
-    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
-  
-  NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:@"FBAccessTokenKey"] 
-      && [defaults objectForKey:@"FBExpirationDateKey"]) {
-    self.fbClient.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-    self.fbClient.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-  }
-  if (!self.fbClient.isSessionValid) {
-    self.fbClient.sessionDelegate = self;
-    [self.fbClient authorize:[[NSArray alloc] initWithObjects:@"offline_access", @"publish_stream", nil]];
-  }
-}
-
-- (void)fbDidLogin {
-  self.fbButton.selected = YES;
-  if (!self.fbClient)
-    self.fbClient = ((StampedAppDelegate*)[UIApplication sharedApplication].delegate).facebook;
-  self.fbClient.sessionDelegate = [SharedRequestDelegate sharedDelegate];
-  [[SharedRequestDelegate sharedDelegate] fbDidLogin];
-}
-
-- (void)sendFBRequest:(Stamp*)stamp {
-  NSString* fbID = [[NSUserDefaults standardUserDefaults] objectForKey:@"FBID"];
-  if (!fbID) {
-    self.fbButton.selected = NO;
-    return;
-  }
-
-  if (self.fbClient.isSessionValid && fbButton_.selected) {
-    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   kFacebookAppID, @"app_id",
-                                   stamp.URL, @"link",
-                                   stamp.entityObject.title, @"name", nil];
-    NSString* photoURL = [NSString stringWithFormat:@"%@%@-%@%@", kStampLogoURLPath, stamp.user.primaryColor, stamp.user.secondaryColor, @"-logo-195x195.png"];
-    [params setObject:photoURL forKey:@"picture"];
-
-    if (stamp.blurb.length > 0)
-      [params setObject:[NSString stringWithFormat:@"\"%@\"", stamp.blurb] forKey:@"message"];
-    
-    [self.fbClient requestWithGraphPath:[fbID stringByAppendingString:@"/feed"]
-                              andParams:params
-                          andHttpMethod:@"POST"
-                            andDelegate:nil];
-  }
-}
 
 - (void)dismissSelf {
-  [twitterClient_.requestQueue cancelRequestsWithDelegate:self];
-  if ([fbClient_.sessionDelegate isEqual:self])
-    fbClient_.sessionDelegate = nil;
-  
-  
   if ([AccountManager sharedManager].currentUser.numStamps.integerValue == 1) {
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstStamp"];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -1064,9 +951,9 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   } else if ([objectLoader.resourcePath isEqualToString:kCreateStampPath]) {
     Stamp* stamp = [Stamp objectWithPredicate:[NSPredicate predicateWithFormat:@"stampID == %@", [object valueForKey:@"stampID"]]];
     if (tweetButton_.selected)
-      [self sendTweetRequest:stamp];
+      [[SocialManager sharedManager] requestTwitterPostWithStamp:stamp];
     if (fbButton_.selected)
-      [self sendFBRequest:stamp];
+      [[SocialManager sharedManager] requestFacebookPostWithStamp:stamp];
 
     stamp.temporary = [NSNumber numberWithBool:NO];
     [[NSNotificationCenter defaultCenter] postNotificationName:kStampWasCreatedNotification
@@ -1160,66 +1047,7 @@ static NSString* const kStampedFacebookFriendsPath = @"/account/linked/facebook/
   takePhotoButton_.enabled = NO;
 }
 
-#pragma mark - Twitter methods.
 
-- (GTMOAuthAuthentication*)createAuthentication {
-  NSString* myConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
-  NSString* myConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
-  
-  if ([myConsumerKey length] == 0 || [myConsumerSecret length] == 0) {
-    return nil;
-  }
-  
-  GTMOAuthAuthentication* auth;
-  auth = [[[GTMOAuthAuthentication alloc] initWithSignatureMethod:kGTMOAuthSignatureMethodHMAC_SHA1
-                                                      consumerKey:myConsumerKey
-                                                       privateKey:myConsumerSecret] autorelease];
-  [auth setServiceProvider:@"Twitter"];
-  [auth setCallback:kOAuthCallbackURL];
-  return auth;
-}
-
-- (void)signInToTwitter {
-  GTMOAuthAuthentication *auth = [self createAuthentication];
-  if (auth == nil) {
-    NSAssert(NO, @"A valid consumer key and consumer secret are required for signing in to Twitter");
-  }
-  
-  STOAuthViewController* authVC =
-  [[STOAuthViewController alloc] initWithScope:kTwitterScope
-                                      language:nil
-                               requestTokenURL:[NSURL URLWithString:kTwitterRequestTokenURL]
-                             authorizeTokenURL:[NSURL URLWithString:kTwitterAuthorizeURL]
-                                accessTokenURL:[NSURL URLWithString:kTwitterAccessTokenURL]
-                                authentication:auth
-                                appServiceName:kKeychainTwitterToken
-                                      delegate:self
-                              finishedSelector:@selector(viewController:finishedWithAuth:error:)];
-  [authVC setBrowserCookiesURL:[NSURL URLWithString:@"http://api.twitter.com/"]];
-  
-  [self.navigationController pushViewController:authVC animated:YES];
-  [authVC release];
-}
-
-- (void)viewController:(GTMOAuthViewControllerTouch*)authVC
-      finishedWithAuth:(GTMOAuthAuthentication*)auth
-                 error:(NSError*)error {  
-  if (error) {
-    NSLog(@"GTMOAuth error = %@", error);
-    return;
-  }
-  self.twitterAuth = auth;
-  self.tweetButton.selected = YES;
-  [self fetchCurrentUser];
-}
-
-- (void)fetchCurrentUser {
-  RKRequest* request = [self.twitterClient requestWithResourcePath:kTwitterCurrentUserURI delegate:[SharedRequestDelegate sharedDelegate]];
-  request.cachePolicy = RKRequestCachePolicyNone;
-  [request prepareURLRequest];
-  [self.twitterAuth authorizeRequest:request.URLRequest];
-  [request send];
-}
 
 
 

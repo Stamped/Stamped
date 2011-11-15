@@ -10,9 +10,7 @@
 #import <RestKit/RestKit.h>
 #import "FBConnect.h"
 
-@interface SharingSettingsViewController : UIViewController <FBSessionDelegate,
-                                                             FBRequestDelegate,
-                                                             RKRequestDelegate>
+@interface SharingSettingsViewController : UIViewController <RKRequestDelegate>
 
 @property (nonatomic, retain) IBOutlet UIImageView* twitterIconView;
 @property (nonatomic, retain) IBOutlet UIImageView* fbIconView;
