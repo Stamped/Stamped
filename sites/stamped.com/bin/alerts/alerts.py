@@ -21,6 +21,9 @@ from db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
 
+from APNSWrapper import APNSNotificationWrapper, APNSNotification
+import binascii
+
 base = os.path.dirname(os.path.abspath(__file__))
 
 AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
@@ -30,7 +33,6 @@ IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
 IS_PROD       = False
-USE_PROD_CERT = False
 
 ### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
 
@@ -46,7 +48,13 @@ admin_emails = set([
 ])
 admin_tokens = set([])
 
+# create wrapper
+if IS_PROD:
+    pem = IPHONE_APN_PUSH_CERT_PROD
+else:
+    pem = IPHONE_APN_PUSH_CERT_DEV
 
+apns_wrapper = APNSNotificationWrapper(pem, not IS_PROD)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
@@ -56,10 +64,18 @@ def parseCommandLine():
     parser.add_option("-l", "--limit", dest="limit", 
         default=0, type="int", help="Limit number of records processed")
     
+    parser.add_option("-n", "--noop", action="store_true", 
+        default=False, help="don't make any actual changes or notifications")
+    
+    parser.add_option("-d", "--db", default=None, type="string", 
+        action="store", dest="db", help="db to connect to for output")
+    
     (options, args) = parser.parse_args()
-
+    
+    if options.db:
+        utils.init_db_config(options.db)
+    
     return options
-
 
 def main():
     lock = os.path.join(base, 'alerts.lock')
@@ -73,7 +89,6 @@ def main():
         print 'BEGIN: %s' % datetime.utcnow()
 
         options = parseCommandLine()
-        options = options.__dict__
         runAlerts(options)
         runInvites(options)
         
@@ -81,6 +96,7 @@ def main():
         print '-' * 40
     except Exception as e:
         print e
+        utils.printException()
         print 'FAIL'
         print '-' * 40
     finally:
@@ -91,25 +107,24 @@ def runAlerts(options):
     alertDB     = MongoAlertQueueCollection()
     accountDB   = MongoAccountCollection()
     activityDB  = MongoActivityCollection()
-
+    
     numAlerts = alertDB.numAlerts()
-    alerts  = alertDB.getAlerts(limit=options['limit'])
-    userIds   = {}
+    alerts  = alertDB.getAlerts(limit=options.limit)
+    userIds = {}
     userEmailQueue = {}
-    userPushQueue = {}
-
+    userPushQueue  = {}
+    
     for alert in alerts:
         userIds[str(alert['user_id'])] = 1
         userIds[str(alert['recipient_id'])] = 1
-        
     
     accounts = accountDB.getAccounts(userIds.keys())
-
+    
     for account in accounts:
         userIds[account.user_id] = account
-
+    
     print 'Number of alerts: %s' % numAlerts
-
+    
     for alert in alerts:
         try:
             print 
@@ -147,28 +162,28 @@ def runAlerts(options):
             else:
                 send_push   = None
                 send_email  = None
-
+            
             # Raise if no settings
             if not send_push and not send_email:
                 raise
-
+            
             # Activity
             activity = activityDB.getActivityItem(alert.activity_id)
-
+            
             # User
             user = userIds[str(alert['user_id'])]
-
+            
             # Build admin list
             if recipient.screen_name in admins:
                 admin_emails.add(recipient.email)
                 for token in recipient.devices.ios_device_tokens:
                     admin_tokens.add(token)
-
+            
             if send_push:
                 try:
                     # Send push notification
                     print 'PUSH'
-
+                    
                     if not recipient.devices.ios_device_tokens:
                         raise
                     print 'DEVICE TOKENS: %s' % recipient.devices.ios_device_tokens
@@ -183,9 +198,7 @@ def runAlerts(options):
                     print 'PUSH COMPLETE'
                 except:
                     print 'PUSH FAILED'
-                    utils.printException()
-
-
+            
             if send_email:
                 try:
                     # Send email
@@ -211,11 +224,13 @@ def runAlerts(options):
 
         except:
             print 'REMOVED'
-            alertDB.removeAlert(alert.alert_id)
+            if not options.noop:
+                alertDB.removeAlert(alert.alert_id)
+            
             continue
-
+    
     print
-
+    
     # Send emails
     if len(userEmailQueue) > 0:
         print '-' * 40
@@ -226,9 +241,9 @@ def runAlerts(options):
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
-        sendEmails(userEmailQueue)
+        sendEmails(userEmailQueue, options)
         print
-
+    
     # Send push notifications
     if len(userPushQueue) > 0:
         print '-' * 40
@@ -240,29 +255,29 @@ def runAlerts(options):
         for k, v in userPushQueue.iteritems():
             print k, len(v)
         print
-        sendPushNotifications(userPushQueue)
+        sendPushNotifications(userPushQueue, options)
         print
 
 
 def runInvites(options):
     inviteDB    = MongoInviteQueueCollection()
     accountDB   = MongoAccountCollection()
-
+    
     numInvites = inviteDB.numInvites()
-    invites  = inviteDB.getInvites(limit=options['limit'])
+    invites  = inviteDB.getInvites(limit=options.limit)
     userIds   = {}
     userEmailQueue = {}
-
+    
     for invite in invites:
         userIds[str(invite['user_id'])] = 1
     
     accounts = accountDB.getAccounts(userIds.keys())
-
+    
     for account in accounts:
         userIds[account.user_id] = account
-
+    
     print 'Number of invitations: %s' % numInvites
-
+    
     for invite in invites:
         try:
             print 
@@ -323,7 +338,9 @@ def runInvites(options):
 
         except:
             print 'REMOVED'
-            inviteDB.removeInvite(invite.invite_id)
+            if not options.noop:
+                inviteDB.removeInvite(invite.invite_id)
+            
             continue
 
     print
@@ -338,7 +355,7 @@ def runInvites(options):
         print
         for k, v in userEmailQueue.iteritems():
             print k, len(v)
-        sendEmails(userEmailQueue)
+        sendEmails(userEmailQueue, options)
         print
 
 
@@ -431,9 +448,10 @@ def buildPushNotification(user, activityItem, deviceId):
     # Set message
     if genre == 'restamp':
         msg = '%s gave you credit' % (user.screen_name)
-
+    
     elif genre == 'like':
-        msg = u'%s \ue057 your stamp' % (user.screen_name)
+        #msg = u'%s \ue057 your stamp' % (user.screen_name)
+        msg = '%s liked your stamp' % (user.screen_name)
     
     elif genre == 'favorite':
         msg = '%s added your stamp as a to-do' % (user.screen_name)
@@ -450,9 +468,12 @@ def buildPushNotification(user, activityItem, deviceId):
     elif genre == 'follower':
         msg = '%s is now following you' % (user.screen_name)
 
-    if not IS_PROD:
-        msg = 'DEV: %s' % msg
-
+    #if not IS_PROD:
+    #    msg = 'DEV: %s' % msg
+    
+    msg = msg.encode('ascii', 'ignore')
+    
+    """
     # Build payload
     content = {
         'aps': {
@@ -460,34 +481,36 @@ def buildPushNotification(user, activityItem, deviceId):
             # 'sound': 'default',
         }
     }
-
+    
     # if user.stats.num_unread_news:
     #     content['aps']['badge'] = user.stats.num_unread_news
-
+    
     s_content = json.dumps(content, separators=(',',':'))
-
+    
     # Format actual notification
     fmt = "!cH32sH%ds" % len(s_content)
     command = '\x00'
-
+    
     payload = struct.pack(fmt, command, 32, binascii.unhexlify(deviceId), \
-                len(s_content), s_content)
-
+                          len(s_content), s_content)
+    """
+    
     result = {
-        'payload': payload,
-        'activity_id': activityItem.activity_id,
+        #'payload': payload, 
+        'payload': msg, 
+        'activity_id': activityItem.activity_id, 
         'device_id': deviceId
     }
-
+    
     return result
 
 
-def sendEmails(queue):
+def sendEmails(queue, options):
     ses = boto.connect_ses(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY)
-
+    
     # Apply rate limit
     limit = 8
-
+    
     for user, emailQueue in queue.iteritems():
         if IS_PROD or user in admin_emails:
             count = 0
@@ -498,6 +521,12 @@ def sendEmails(queue):
                     if count > limit:
                         print 'LIMIT EXCEEDED (%s)' % count
                         raise
+                    
+                    if options.noop:
+                        print 'EMAIL (activity_id=%s): "To: %s Subject: %s"' % \
+                            (msg['activity_id'], msg['to'], msg['subject'])
+                        continue
+                    
                     ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format='html')
                 except:
                     print 'EMAIL FAILED (activity_id=%s): "To: %s Subject: %s"' % \
@@ -506,18 +535,54 @@ def sendEmails(queue):
             print 'SKIPPED: %s' % user
 
 
-def sendPushNotifications(queue):
-    host_name = 'gateway.sandbox.push.apple.com'
-    certificate = IPHONE_APN_PUSH_CERT_DEV
-    
+def sendPushNotifications(queue, options):
     # Apply rate limit
     limit = 3
     
-    """
-    if USE_PROD_CERT:
-        host_name = 'gateway.push.apple.com'
-        certificate = IPHONE_APN_PUSH_CERT_PROD
-    """
+    for user, pushQueue in queue.iteritems():
+        if IS_PROD or user in admin_tokens:
+            count = 0
+            
+            pushQueue.reverse()
+            for msg in pushQueue:
+                count += 1
+                if count > limit:
+                    print 'LIMIT EXCEEDED (%s)' % count
+                
+                if options.noop:
+                    print 'PUSH MSG (activity_id=%s): device_id = %s ' % \
+                        (msg['activity_id'], msg['device_id'])
+                    
+                    #utils.log(msg['payload'])
+                    #utils.log(type(msg['payload']))
+                    continue
+                
+                try:
+                    # create message
+                    message = APNSNotification()
+                    
+                    #deviceId = 'f02e7b4c384e32404645443203dd0b71750e54fe13b5d0a8a434a12a0f5e7a25' # bart
+                    #deviceId = '8b78c702f8c8d5e02c925146d07c28f615283bc862b226343f013b5f8765ba5a' # travis
+                    deviceId = msg['device_id']
+                    
+                    message.token(binascii.unhexlify(deviceId))
+                    payload = msg['payload']
+                    #payload = msg['payload'].encode('ascii', 'ignore')
+                    message.alert(payload)
+                    #message.badge(num_unread_count)
+                    
+                    # add message to tuple and send it to APNS server
+                    apns_wrapper.append(message)
+                except:
+                    print 'PUSH MSG FAILED (activity_id=%s): device_id = %s ' % \
+                        (msg['activity_id'], msg['device_id'])
+                    utils.printException()
+    
+    apns_wrapper.notify()
+    return
+    
+    host_name = 'gateway.sandbox.push.apple.com'
+    certificate = IPHONE_APN_PUSH_CERT_DEV
     
     try:
         s = socket()
@@ -525,7 +590,7 @@ def sendPushNotifications(queue):
                             ssl_version=ssl.PROTOCOL_SSLv3,
                             certfile=certificate)
         c.connect((host_name, 2195))
-
+        
         for user, pushQueue in queue.iteritems():
             if IS_PROD or user in admin_tokens:
                 count = 0

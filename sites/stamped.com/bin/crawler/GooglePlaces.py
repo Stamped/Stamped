@@ -544,9 +544,10 @@ def main():
         # print the prettified, formatted results
         print json.dumps(results, sort_keys=True, indent=2)
 
-#if __name__ == '__main__':
-#    main()
+if __name__ == '__main__':
+    main()
 
+"""
 g=GooglePlaces()
 from Schemas import Entity
 e=Entity()
@@ -555,4 +556,5 @@ e.lat = 43.0
 e.lng = -71
 r = g.addPlaceReport(e)
 print r
+"""
 
