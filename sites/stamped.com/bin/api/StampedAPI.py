@@ -2915,3 +2915,52 @@ class StampedAPI(AStampedAPI):
             utils.printException()
             # don't let error propagate
 
+    def _updateUserStats(self):
+        userIds = self._userDB._getAllUserIds()
+        for userId in userIds:
+            user = userDB.getUser(userId)
+            userData = user.exportSparse()
+            if 'stats' not in userData:
+                continue
+            stats = userData['stats']
+            
+            stats_num_stamps        = stats.pop('num_stamps', 0)
+            stats_num_credits       = stats.pop('num_credits', 0)
+            stats_num_likes_given   = stats.pop('num_likes_given', 0)
+            stats_num_friends       = stats.pop('num_friends', 0)
+            stats_num_followers     = stats.pop('num_followers', 0)
+
+            num_stamps              = self._stampDB.countStamps(userId)
+            num_credits             = self._stampDB.countCredits(userId)
+            num_likes_given         = self._stampDB.countUserLikes(userId)
+            num_friends             = self._friendshipDB.countFriends(userId)
+            num_followers           = self._friendshipDB.countFollowers(userId)
+            
+            if num_stamps != stats_num_stamps:
+                logs.info('num_stamps: old (%s) new (%s)' % \
+                    (stats_num_stamps, num_stamps))
+                self._userDB.updateUserStats(userId, 'num_stamps', num_stamps)
+
+            if num_credits != stats_num_credits:
+                logs.info('num_credits: old (%s) new (%s)' % \
+                    (stats_num_credits, num_credits))
+                self._userDB.updateUserStats(userId, 'num_credits', num_credits)
+
+            if num_likes_given != stats_num_likes_given:
+                logs.info('num_likes_given: old (%s) new (%s)' % \
+                    (stats_num_likes_given, num_likes_given))
+                self._userDB.updateUserStats(userId, 'num_likes_given', num_likes_given)
+
+            if num_friends != stats_num_friends:
+                logs.info('num_friends: old (%s) new (%s)' % \
+                    (stats_num_friends, num_friends))
+                self._userDB.updateUserStats(userId, 'num_friends', num_friends)
+
+            if num_followers != stats_num_followers:
+                logs.info('num_followers: old (%s) new (%s)' % \
+                    (stats_num_followers, num_followers))
+                self._userDB.updateUserStats(userId, 'num_followers', num_followers)
+
+
+
+
