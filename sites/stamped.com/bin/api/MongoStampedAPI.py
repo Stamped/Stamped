@@ -30,7 +30,7 @@ from db.mongodb.MongoActivityCollection     import MongoActivityCollection
 from db.mongodb.MongoInvitationCollection   import MongoInvitationCollection
 from db.mongodb.MongoEntitySearcher         import MongoEntitySearcher
 from db.mongodb.MongoTempEntityCollection   import MongoTempEntityCollection
-from db.mongodb.MongoSearchCacheCollection  import MongSearchCacheCollection
+from db.mongodb.MongoSearchCacheCollection  import MongoSearchCacheCollection
 from db.mongodb.MongoLogsCollection         import MongoLogsCollection
 from db.mongodb.MongoStatsCollection        import MongoStatsCollection
 from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
