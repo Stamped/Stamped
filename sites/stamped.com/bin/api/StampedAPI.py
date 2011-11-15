@@ -1809,7 +1809,7 @@ class StampedAPI(AStampedAPI):
 
         # Update credit stats if credit given
         if stamp.credit != None and len(stamp.credit) > 0:
-            for item in credit:
+            for item in stamp.credit:
                 # Only run if user is flagged as credited
                 if 'user_id' not in item or item.user_id == None:
                     continue
