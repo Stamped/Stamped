@@ -1807,7 +1807,19 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_stamps_left', \
                     None, increment=1)
 
-        ### TODO: Update credit stats if credit given
+        # Update credit stats if credit given
+        if stamp.credit != None and len(stamp.credit) > 0:
+            for item in credit:
+                # Only run if user is flagged as credited
+                if 'user_id' not in item or item.user_id == None:
+                    continue
+
+                # Assign credit
+                self._stampDB.removeCredit(item.user_id, stamp)
+
+                # Update credited user stats
+                self._userDB.updateUserStats(item.user_id, 'num_credits', \
+                    None, increment=-1)
 
         # Update modified timestamp
         stamp.timestamp.modified = datetime.utcnow()
