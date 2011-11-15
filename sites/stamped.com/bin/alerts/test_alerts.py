@@ -5,9 +5,8 @@ from socket import socket
 
 base = os.path.dirname(os.path.abspath(__file__))
 
-IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
+IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
-
 
 host_name = 'gateway.sandbox.push.apple.com'
 #host_name = 'gateway.push.apple.com'
@@ -30,13 +29,13 @@ fmt = "!cH32sH%ds" % len(s_content)
 command = '\x00'
 
 payload = struct.pack(fmt, command, 32, binascii.unhexlify(deviceId), \
-            len(s_content), s_content)
-
+                      len(s_content), s_content)
 
 s = socket()
-c = ssl.wrap_socket(s,
-                    ssl_version=ssl.PROTOCOL_SSLv3,
+c = ssl.wrap_socket(s, 
+                    ssl_version=ssl.PROTOCOL_SSLv3, 
                     certfile=IPHONE_APN_PUSH_CERT_DEV)
 c.connect((host_name, 2195))
 c.write(payload)
 c.close()
+
