@@ -692,9 +692,20 @@ typedef enum {
   CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
   gradientLayer.frame = view.frame;
   gradientLayer.colors =
-      [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.70 alpha:1.0].CGColor,
-                                (id)[UIColor colorWithWhite:0.76 alpha:1.0].CGColor, nil];
-  [view.layer insertSublayer:gradientLayer below:view.leftLabel.layer];
+      [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.69 alpha:0.9].CGColor,
+                                (id)[UIColor colorWithWhite:0.75 alpha:0.9].CGColor, nil];
+  id layerToReplace;
+  for (CALayer* layer in view.layer.sublayers) {
+    if ([layer isKindOfClass:[CAGradientLayer class]]) {
+      layerToReplace = layer;
+      break;
+    }
+  }
+      
+  if (layerToReplace)
+    [view.layer replaceSublayer:layerToReplace with:gradientLayer];
+  else
+    [view.layer insertSublayer:gradientLayer below:view.leftLabel.layer];
   [gradientLayer release];
   if (currentSearchFilter_ == SearchFilterNone ||
       currentSearchFilter_ == SearchFilterFood ||

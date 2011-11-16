@@ -23,8 +23,8 @@
     CAGradientLayer* gradientLayer = [[CAGradientLayer alloc] init];
     gradientLayer.frame = frame;
     gradientLayer.colors =
-      [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.88 alpha:1.0].CGColor,
-       (id)[UIColor colorWithWhite:0.95 alpha:1.0].CGColor, nil];
+      [NSArray arrayWithObjects:(id)[UIColor colorWithWhite:0.87 alpha:0.9].CGColor,
+       (id)[UIColor colorWithWhite:0.94 alpha:0.9].CGColor, nil];
     [self.layer addSublayer:gradientLayer];
     [gradientLayer release];
     
