@@ -19,16 +19,18 @@ def shell(cmd, customEnv=None):
     pp = Popen(cmd, shell=True, stdout=PIPE, env=customEnv)
     delay = 0.01
     
+    """
     while pp.returncode is None:
         time.sleep(delay)
         delay *= 2
         if delay > 1:
             delay = 1
         
-        pp.poll()
+        log(pp.poll())
+    """
     
-    status = pp.wait()
     output = pp.stdout.read().strip()
+    status = pp.wait()
     
     return (output, status)
 
@@ -670,3 +672,72 @@ def parseTemplate(src, params):
     source = src.read()
     template = Template(source)
     return template.render(params)
+
+def runMongoCommand(mongo_cmd, db='stamped', verbose=False):
+    from api.db.mongodb.AMongoCollection import MongoDBConfig
+    
+    cmd_template = "mongo --quiet %s:%s/%s --eval 'printjson(%s);'"
+    cfg = MongoDBConfig.getInstance()
+    cmd = cmd_template % (cfg.host, cfg.port, db, mongo_cmd)
+    
+    if verbose:
+        log(cmd)
+    
+    f=open('.temp.sh', 'w')
+    f.write(cmd)
+    f.close()
+    os.system('chmod +x .temp.sh')
+    
+    cmd = '/bin/bash -c .temp.sh'
+    ret = shell(cmd)
+    
+    try:
+        return json.loads(ret[0])
+    except ValueError:
+        return ret[0]
+
+def get_basic_stats(collection, key):
+    """
+        Returns the mean, standard deviation, max, and min values for the key 
+        across the given collection.
+    """
+    
+    max_value = None
+    min_value = None
+    total = 0
+    
+    for item in collection:
+        value = item[key]
+        total += value
+        
+        if max_value is None or value > max_value:
+            max_value = value
+        
+        if min_value is None or value < min_value:
+            min_value = value
+    
+    count = max(1, len(collection))
+    avg   = total / float(count)
+    
+    total = 0
+    for item in collection:
+        diff = item[key] - avg
+        total += diff * diff
+    
+    std   = math.sqrt(total / float(max(count - 1, 1)))
+    
+    return {
+        'avg' : round_float(avg, 4), 
+        'std' : round_float(std, 4), 
+        'min' : round_float(min_value, 4), 
+        'max' : round_float(max_value, 4), 
+    }
+
+def round_float(f, n):
+    """ Truncates/pads a float f to n decimal places without rounding """
+    try:
+        slen = len('%.*f' % (n, f))
+        return str(f)[:slen]
+    except:
+        return 0
+
