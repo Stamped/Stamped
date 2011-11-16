@@ -2937,26 +2937,31 @@ class StampedAPI(AStampedAPI):
             num_followers           = self._friendshipDB.countFollowers(userId)
             
             if num_stamps != stats_num_stamps:
+                logs.info('user id: %s' % userId)
                 logs.info('num_stamps: old (%s) new (%s)' % \
                     (stats_num_stamps, num_stamps))
                 self._userDB.updateUserStats(userId, 'num_stamps', num_stamps)
 
             if num_credits != stats_num_credits:
+                logs.info('user id: %s' % userId)
                 logs.info('num_credits: old (%s) new (%s)' % \
                     (stats_num_credits, num_credits))
                 self._userDB.updateUserStats(userId, 'num_credits', num_credits)
 
             if num_likes_given != stats_num_likes_given:
+                logs.info('user id: %s' % userId)
                 logs.info('num_likes_given: old (%s) new (%s)' % \
                     (stats_num_likes_given, num_likes_given))
                 self._userDB.updateUserStats(userId, 'num_likes_given', num_likes_given)
 
             if num_friends != stats_num_friends:
+                logs.info('user id: %s' % userId)
                 logs.info('num_friends: old (%s) new (%s)' % \
                     (stats_num_friends, num_friends))
                 self._userDB.updateUserStats(userId, 'num_friends', num_friends)
 
             if num_followers != stats_num_followers:
+                logs.info('user id: %s' % userId)
                 logs.info('num_followers: old (%s) new (%s)' % \
                     (stats_num_followers, num_followers))
                 self._userDB.updateUserStats(userId, 'num_followers', num_followers)
