@@ -47,14 +47,12 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 @property (nonatomic, copy) NSArray* twitterFriends;
 @property (nonatomic, copy) NSArray* facebookFriends;
 
+- (void)checkForEndlessSignIn:(NSNotification*)note;
 - (void)requestTwitterUser;
 - (void)requestTwitterFollowers:(NSString*)userIDString;
 - (void)requestTwitterFriends:(NSString*)userIDString;
-
 - (void)removeTwitterCredentials;
-
 - (void)removeFacebookCredentials;
-
 - (void)requestStampedLinkTwitter:(NSString*)username userID:(NSString*)userID;
 - (void)requestStampedLinkTwitterFollowers:(NSArray*)followers;
 - (void)requestStampedUnlinkTwitter;
@@ -68,6 +66,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 - (void)viewController:(GTMOAuthViewControllerTouch*)authVC
       finishedWithAuth:(GTMOAuthAuthentication*)auth
                  error:(NSError*)error;
+
 
 @end
 
@@ -118,6 +117,10 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   if (self) {
     self.facebookClient = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:nil];
     self.twitterClient = [RKClient clientWithBaseURL:@"http://api.twitter.com/1"];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(checkForEndlessSignIn:)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
   }
   return self;
 }
@@ -354,7 +357,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   return 0;
 }
 
-#pragma mark - FBSessionDelegate methods.
+// FBSessionDelegate methods.
 
 - (void)fbDidLogin {
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
@@ -368,7 +371,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   [self signOutOfFacebook:YES];
 }
 
-#pragma mark - FBRequestDelegate methods.
+// FBRequestDelegate methods.
 
 - (void)request:(FBRequest*)request didLoad:(id)result {
   NSArray* resultData;
@@ -385,14 +388,14 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
   }
   
   // handle callback from request for user's friends.
-  if (resultData  &&  resultData.count != 0) {
+  if (resultData) {
     NSMutableArray* fbFriendIDs = [NSMutableArray array];
-    for (NSDictionary* dict in resultData)
+    for (NSDictionary* dict in resultData) {
       [fbFriendIDs addObject:[dict objectForKey:@"id"]];
-    if (fbFriendIDs.count > 0) {
+    }
       [self requestStampedLinkFacebookFriends:fbFriendIDs];
       [self requestStampedFriendsFromFacebook:fbFriendIDs];
-    }
+    
   }
 }
 
@@ -487,7 +490,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 }
 
 
-#pragma mark - RestKit.
+#pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
   if (!response.isOK) {
@@ -615,6 +618,15 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
     [[NSNotificationCenter defaultCenter] postNotificationName:kTwitterFriendsChangedNotification object:nil];
   if ([objectLoader.resourcePath rangeOfString:kStampedFindFacebookFriendsPath].location != NSNotFound)
     [[NSNotificationCenter defaultCenter] postNotificationName:kFacebookFriendsChangedNotification object:nil];
+  [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
+}
+
+
+#pragma mark - Actions.
+
+// This gets called when the app comes to the foreground, taking care of the case wherein
+// the user returns from facebook and hasn't completed – or cancelled – the login process.
+- (void)checkForEndlessSignIn:(NSNotification *)note {
   [[NSNotificationCenter defaultCenter] postNotificationName:kSocialNetworksChangedNotification object:self];
 }
 

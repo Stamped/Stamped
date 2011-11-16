@@ -101,11 +101,13 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)setIsLoading:(BOOL)loading {
-  if (isLoading_ == loading || disableReload_)
+  if (disableReload_)
     return;
-  if (![[RKClient sharedClient] isNetworkAvailable]) 
+  if (![[RKClient sharedClient] isNetworkAvailable])
     loading = NO;
   
+  if (isLoading_ == loading)
+    return;  
   
   isLoading_ = loading;
   shouldReload_ = NO;
@@ -168,12 +170,11 @@ static const CGFloat kReloadHeight = 60.0;
     reloadFrame.origin.y = CGRectGetHeight(self.shelfView.frame) - 47 - bottomPadding;
     reloadLabel_.frame = reloadFrame;
     if (![[RKClient sharedClient] isNetworkAvailable]) {
-      reloadLabel_.text = kNotConnectedText;
-      arrowImageView_.alpha = 0.0;
+      self.isLoading = NO;
     }
     else {
       reloadLabel_.text = kLoadingText;
-      arrowImageView_.alpha = 1.0;
+      arrowImageView_.alpha = 0.0;
     }
     lastUpdatedLabel_.alpha = 0.0;
   }
