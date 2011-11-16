@@ -505,7 +505,7 @@ class StampedAPI(AStampedAPI):
         activity.linked_user_id     = authUserId
         activity.timestamp.created  = datetime.utcnow()
         
-        self._activityDB.addActivity(userIds, activity, sendAlert=False, checkExists=True)
+        self._activityDB.addActivity(userIds, activity, checkExists=True)
 
         account.twitter_alerts_sent = True
         self._accountDB.updateAccount(account)
@@ -534,7 +534,7 @@ class StampedAPI(AStampedAPI):
         activity.linked_user_id     = authUserId
         activity.timestamp.created  = datetime.utcnow()
         
-        self._activityDB.addActivity(userIds, activity, sendAlert=False, checkExists=True)
+        self._activityDB.addActivity(userIds, activity, checkExists=True)
 
         account.facebook_alerts_sent = True
         self._accountDB.updateAccount(account)
