@@ -68,6 +68,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @property (nonatomic, readonly) UIView* editingMask;
 @property (nonatomic, retain) STCreditPickerController* creditPickerController;
 @property (nonatomic, retain) DetailedEntity* detailedEntity;
+@property (nonatomic, assign) BOOL isSigningInToFB; // Used to handle edge case wherein user doesn't complete fb login.
 @end
 
 @implementation CreateStampViewController
@@ -110,6 +111,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 @synthesize objectToStamp = objectToStamp_;
 @synthesize signInTwitterActivityIndicator = signInTwitterActivityIndicator_;
 @synthesize signInFacebookActivityIndicator = signInFacebookActivityIndicator_;
+@synthesize isSigningInToFB = isSigningInToFB_;
 
 - (id)initWithEntityObject:(Entity*)entityObject {
   self = [super initWithNibName:NSStringFromClass([self class]) bundle:nil];
@@ -196,6 +198,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
                                            selector:@selector(socialNetworksDidChange:)
                                                name:kSocialNetworksChangedNotification
                                              object:nil];
+  isSigningInToFB_ = NO;
   
   UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"New Stamp"
                                                                  style:UIBarButtonItemStyleBordered
@@ -315,6 +318,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   [editingMask_ release];
   
   creditPickerController_.creditTextField = creditTextField_;
+  
+  [tweetButton_ setImage:[UIImage imageNamed:@"share_twitter_highlighted"] 
+                forState:UIControlStateSelected | UIControlStateHighlighted];
+  [fbButton_ setImage:[UIImage imageNamed:@"share_fb_highlighted"] 
+                forState:UIControlStateSelected | UIControlStateHighlighted];
 }
 
 - (void)addStampsRemainingLayer {
@@ -812,28 +820,25 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 }
 
 - (void)socialNetworksDidChange:(id)sender {
-  if ([[SocialManager sharedManager] isSignedInToTwitter]) {
-    if (signInTwitterActivityIndicator_.isAnimating) {
-      [signInTwitterActivityIndicator_ stopAnimating];
+  if ([[SocialManager sharedManager] isSignedInToTwitter])
+    if (signInTwitterActivityIndicator_.isAnimating)
       tweetButton_.selected = YES;
-    }
-  }
-  else {
+  else
     tweetButton_.selected = NO;
-  }
 
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
-    if (signInFacebookActivityIndicator_.isAnimating) {
-      [signInFacebookActivityIndicator_ stopAnimating];
+    if (isSigningInToFB_) {
       fbButton_.selected = YES;
+      isSigningInToFB_ = NO;
     }
   }
-  else {
+  else
     fbButton_.selected = NO;
-  }  
   
-  fbButton_.enabled = YES;
+  [signInTwitterActivityIndicator_ stopAnimating];
+  [signInFacebookActivityIndicator_ stopAnimating];
   tweetButton_.enabled = YES;
+  fbButton_.enabled = YES;
 }
 
 #pragma mark - UIActionSheetDelegate methods.
@@ -863,9 +868,11 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
   }
   if ([actionSheet.title rangeOfString:@"Facebook"].location != NSNotFound) {
     if (buttonIndex == 0) {
-      [[SocialManager sharedManager] signInToFacebook];
+      isSigningInToFB_ = YES;
       fbButton_.enabled = NO;
       [signInFacebookActivityIndicator_ startAnimating];
+      // Give the button time to visually update.
+      [[SocialManager sharedManager] performSelector:@selector(signInToFacebook) withObject:nil afterDelay:0.35];
       return;
     }
   }
