@@ -469,6 +469,9 @@ def buildPushNotification(user, activityItem, deviceId):
     elif genre == 'follower':
         msg = '%s is now following you' % (user.screen_name)
 
+    elif genre == 'friend':
+        msg = 'Your friend %s joined Stamped' % (user.screen_name)
+
     if not IS_PROD:
         msg = 'DEV: %s' % msg
     

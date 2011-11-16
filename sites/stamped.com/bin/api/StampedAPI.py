@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs, re, time, Blacklist, auth
+import os, logs, re, time, Blacklist, auth
 
 from datetime        import datetime
 from errors          import *
@@ -226,7 +226,47 @@ class StampedAPI(AStampedAPI):
         
         self._inviteDB.join(account.email)
 
-        ### TODO: Send welcome email
+        # Send welcome email
+        testEmails = [
+            'testuser@stamped.com', 
+            'devbot@stamped.com', 
+            'usera@stamped.com', 
+            'userb@stamped.com', 
+            'userc@stamped.com',
+            'userd@stamped.com', 
+            'user1@stamped.com', 
+            'user2@stamped.com', 
+            'user3@stamped.com',
+            'user4@stamped.com', 
+            'user5@stamped.com', 
+            'user6@stamped.com', 
+            'user7@stamped.com',
+            'user8@stamped.com', 
+            'mariobatali@stamped.com', 
+            'petertravers@stamped.com', 
+            'rebeccaminkoff@stamped.com',
+            'nymag@stamped.com',
+            'sample123@stamped.com',
+        ]
+
+        if account.email not in testEmails:
+            msg = {}
+            msg['to'] = account.email
+            msg['from'] = 'Stamped <noreply@stamped.com>'
+            msg['subject'] = 'Welcome to Stamped!'
+
+            try:
+                base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
+                template = open(path, 'r')
+            except:
+                ### TODO: Add error logging?
+                raise
+            
+            params = {'screen_name': account.screen_name, 'email_address': account.email}
+            msg['body'] = utils.parseTemplate(template, params)
+
+            utils.sendEmail(msg, format='html')
 
         return account
     
@@ -505,7 +545,7 @@ class StampedAPI(AStampedAPI):
         activity.linked_user_id     = authUserId
         activity.timestamp.created  = datetime.utcnow()
         
-        self._activityDB.addActivity(userIds, activity, sendAlert=False, checkExists=True)
+        self._activityDB.addActivity(userIds, activity, checkExists=True)
 
         account.twitter_alerts_sent = True
         self._accountDB.updateAccount(account)
@@ -534,7 +574,7 @@ class StampedAPI(AStampedAPI):
         activity.linked_user_id     = authUserId
         activity.timestamp.created  = datetime.utcnow()
         
-        self._activityDB.addActivity(userIds, activity, sendAlert=False, checkExists=True)
+        self._activityDB.addActivity(userIds, activity, checkExists=True)
 
         account.facebook_alerts_sent = True
         self._accountDB.updateAccount(account)
@@ -2937,26 +2977,31 @@ class StampedAPI(AStampedAPI):
             num_followers           = self._friendshipDB.countFollowers(userId)
             
             if num_stamps != stats_num_stamps:
+                logs.info('user id: %s' % userId)
                 logs.info('num_stamps: old (%s) new (%s)' % \
                     (stats_num_stamps, num_stamps))
                 self._userDB.updateUserStats(userId, 'num_stamps', num_stamps)
 
             if num_credits != stats_num_credits:
+                logs.info('user id: %s' % userId)
                 logs.info('num_credits: old (%s) new (%s)' % \
                     (stats_num_credits, num_credits))
                 self._userDB.updateUserStats(userId, 'num_credits', num_credits)
 
             if num_likes_given != stats_num_likes_given:
+                logs.info('user id: %s' % userId)
                 logs.info('num_likes_given: old (%s) new (%s)' % \
                     (stats_num_likes_given, num_likes_given))
                 self._userDB.updateUserStats(userId, 'num_likes_given', num_likes_given)
 
             if num_friends != stats_num_friends:
+                logs.info('user id: %s' % userId)
                 logs.info('num_friends: old (%s) new (%s)' % \
                     (stats_num_friends, num_friends))
                 self._userDB.updateUserStats(userId, 'num_friends', num_friends)
 
             if num_followers != stats_num_followers:
+                logs.info('user id: %s' % userId)
                 logs.info('num_followers: old (%s) new (%s)' % \
                     (stats_num_followers, num_followers))
                 self._userDB.updateUserStats(userId, 'num_followers', num_followers)
