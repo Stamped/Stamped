@@ -469,6 +469,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 - (void)addSection:(CollapsibleViewController*)section {
   [sectionsDict_ setObject:section forKey:section.sectionLabel.text];
   [mainContentView_ addSubview:section.view];
+  if (self.imageView && self.imageView.hidden == NO)
+    [section moveArrowViewIfBehindImageView:self.imageView];
 }
 
 - (void)addSectionWithName:(NSString*)name {
@@ -484,6 +486,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
 
   [sectionsDict_ setObject:collapsibleVC forKey:name];
   [mainContentView_ addSubview:collapsibleVC.view];
+  if (self.imageView && self.imageView.hidden == NO)
+    [collapsibleVC moveArrowViewIfBehindImageView:self.imageView];
 }
 
 - (void)addSectionWithName:(NSString*)name previewHeight:(CGFloat)previewHeight {
@@ -499,6 +503,8 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   
   [sectionsDict_ setObject:collapsibleVC forKey:name];
   [mainContentView_ addSubview:collapsibleVC.view];
+  if (self.imageView && self.imageView.hidden == NO)
+    [collapsibleVC moveArrowViewIfBehindImageView:self.imageView];
 }
 
 - (void)addSectionStampedBy {
@@ -508,8 +514,7 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   if (stamps.count == 0)
     return;
   
-  [self addSectionWithName:@"Stamped by"];
-  CollapsibleViewController* collapsibleVC = [sectionsDict_ objectForKey:@"Stamped by"];
+  CollapsibleViewController* collapsibleVC = [self makeSectionWithName:@"Stamped by"];
   
   collapsibleVC.iconView.image = [UIImage imageNamed:@"stamp_12pt_solid"];
   collapsibleVC.iconView.alpha = 0.6;
@@ -519,10 +524,9 @@ static const CGFloat kOneLineDescriptionHeight = 20.0;
   collapsibleVC.iconView.hidden = NO;
   
   [collapsibleVC addImagesForStamps:entityObject_.stamps];
+  [self addSection:collapsibleVC];
   [collapsibleVC expand];
   [collapsibleVC swapArrowImage];
-  if (self.imageView && self.imageView.hidden == NO)
-    [collapsibleVC moveArrowViewIfBehindImageView:self.imageView];
 }
 
 #pragma mark - CollapsibleViewControllerDelegate methods.

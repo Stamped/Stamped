@@ -75,8 +75,8 @@
     return nil;
   
   MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
-  pinView.pinColor = MKPinAnnotationColorRed;
   pinView.animatesDrop = YES;
+  pinView.pinColor = MKPinAnnotationColorRed;
   return pinView;
 }
 
@@ -170,8 +170,9 @@
   
   CollapsibleViewController* section;
   
-  if (mapContainerView_.hidden == YES) 
+  if (mapContainerView_.hidden == YES) {
     self.mainContentView.frame = CGRectOffset(self.mainContentView.frame, 0, -self.mapContainerView.frame.size.height);
+  }
   
   
   if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {

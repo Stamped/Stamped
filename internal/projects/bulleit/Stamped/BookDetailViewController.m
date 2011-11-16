@@ -111,7 +111,6 @@
 - (void) setupSectionViews {
   // Amazon Review
   if (detailedEntity_.desc && ![detailedEntity_.desc isEqualToString:@""]) {
-        
     [self addSectionWithName:@"Amazon Review" previewHeight:118.f];
     CollapsibleViewController* section = [sectionsDict_ objectForKey:@"Amazon Review"];
     section.collapsedFooterText = [NSString stringWithFormat:@"read more"];
@@ -119,9 +118,9 @@
     section.footerLabel.text = section.collapsedFooterText;
     section.imageView = self.imageView;
     [section addWrappingText:detailedEntity_.desc forKey:@"desc"];
-    section.arrowView.frame = CGRectOffset(section.arrowView.frame, 
-                                           [section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 8.0, 0);
-    
+    CGRect frame = section.arrowView.frame;
+    frame.origin = CGPointMake([section.footerLabel.text sizeWithFont:section.footerLabel.font].width + 15.0, section.arrowView.frame.origin.y);
+    section.arrowView.frame = frame;
     self.mainContentView.hidden = NO;
   }
 

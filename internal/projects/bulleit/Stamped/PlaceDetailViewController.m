@@ -82,8 +82,8 @@
     return nil;
 
   MKPinAnnotationView* pinView = [[[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:nil] autorelease];
-  pinView.pinColor = MKPinAnnotationColorRed;
   pinView.animatesDrop = YES;
+  pinView.pinColor = MKPinAnnotationColorRed;
   return pinView;
 }
 
