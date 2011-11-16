@@ -381,6 +381,11 @@ static NSString* const kFriendshipRemovePath = @"/friendships/remove.json";
     StampListViewController* vc = [[StampListViewController alloc] init];
     vc.user = user_;
     vc.stampsAreTemporary = stampsAreTemporary_;
+    UIBarButtonItem* backButton = [[UIBarButtonItem alloc] initWithTitle:@"All Stamps"
+                                                                   style:UIBarButtonItemStyleBordered
+                                                                  target:nil
+                                                                  action:nil];
+    [[vc navigationItem] setBackBarButtonItem:backButton];
     [self.navigationController pushViewController:vc animated:YES];
     [vc release];
     return;
