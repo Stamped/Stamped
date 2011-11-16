@@ -2535,7 +2535,7 @@ class StampedAPI(AStampedAPI):
         ### TODO: Fail gracefully if favorite doesn't exist
         favorite = self._favoriteDB.getFavorite(authUserId, entityId)
 
-        if not favorite.favorite_id:
+        if not favorite or not favorite.favorite_id:
             msg = 'Invalid favorite: %s' % favorite
             logs.warning(msg)
             raise Exception(msg)
