@@ -33,6 +33,7 @@ IPHONE_APN_PUSH_CERT_DEV = os.path.join(base, 'apns-dev.pem')
 IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod.pem')
 
 IS_PROD       = False
+USE_PROD_CERT = False
 
 ### TODO: Add check to see if we're on a prod instance and change IS_PROD to true
 
@@ -49,12 +50,12 @@ admin_emails = set([
 admin_tokens = set([])
 
 # create wrapper
-if IS_PROD:
+if USE_PROD_CERT:
     pem = IPHONE_APN_PUSH_CERT_PROD
 else:
     pem = IPHONE_APN_PUSH_CERT_DEV
 
-apns_wrapper = APNSNotificationWrapper(pem, not IS_PROD)
+apns_wrapper = APNSNotificationWrapper(pem, not USE_PROD_CERT)
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
@@ -444,7 +445,7 @@ def buildEmail(user, recipient, activityItem):
 
 def buildPushNotification(user, activityItem, deviceId):
     genre = activityItem.genre
-
+    
     # Set message
     if genre == 'restamp':
         msg = '%s gave you credit' % (user.screen_name)
@@ -468,8 +469,11 @@ def buildPushNotification(user, activityItem, deviceId):
     elif genre == 'follower':
         msg = '%s is now following you' % (user.screen_name)
 
-    #if not IS_PROD:
-    #    msg = 'DEV: %s' % msg
+    elif genre == 'friend':
+        msg = 'Your friend %s joined Stamped' % (user.screen_name)
+
+    if not IS_PROD:
+        msg = 'DEV: %s' % msg
     
     msg = msg.encode('ascii', 'ignore')
     
@@ -553,7 +557,7 @@ def sendPushNotifications(queue, options):
                     print 'PUSH MSG (activity_id=%s): device_id = %s ' % \
                         (msg['activity_id'], msg['device_id'])
                     
-                    #utils.log(msg['payload'])
+                    utils.log(msg['payload'])
                     #utils.log(type(msg['payload']))
                     continue
                 
@@ -563,11 +567,10 @@ def sendPushNotifications(queue, options):
                     
                     #deviceId = 'f02e7b4c384e32404645443203dd0b71750e54fe13b5d0a8a434a12a0f5e7a25' # bart
                     #deviceId = '8b78c702f8c8d5e02c925146d07c28f615283bc862b226343f013b5f8765ba5a' # travis
-                    deviceId = msg['device_id']
+                    deviceId = str(msg['device_id'])
                     
                     message.token(binascii.unhexlify(deviceId))
-                    payload = msg['payload']
-                    #payload = msg['payload'].encode('ascii', 'ignore')
+                    payload = msg['payload'].encode('ascii', 'ignore')
                     message.alert(payload)
                     #message.badge(num_unread_count)
                     

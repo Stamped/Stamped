@@ -29,6 +29,13 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             document['user_id'] = self._getStringFromObjectId(document['_id'])
             del(document['_id'])
         return User(document, overflow=True)
+
+    def _getAllUserIds(self):
+        documents = self._collection.find({}, {})
+        userIds = []
+        for document in documents:
+            userIds.append(self._getStringFromObjectId(document['_id']))
+        return userIds
     
     ### PUBLIC
     
@@ -42,6 +49,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         screenName = str(screenName).lower()
         document = self._collection.find_one({"screen_name_lower": screenName})
         return self._convertFromMongo(document)
+
     
     def checkScreenNameExists(self, screenName):
         try:

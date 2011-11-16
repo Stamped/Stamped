@@ -92,6 +92,10 @@ class MongoFavoriteCollection(AMongoCollection, AFavoriteDB):
         
         return favorites
 
+    def countFavorites(self, userId):
+        n = self._collection.find({'user_id': userId}).count()
+        return n
+
     def getFavoriteEntityIds(self, userId):
         return self.user_fav_entities_collection.getUserFavoriteEntities(userId)
     
