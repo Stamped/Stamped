@@ -226,7 +226,34 @@ class StampedAPI(AStampedAPI):
         
         self._inviteDB.join(account.email)
 
-        ### TODO: Send welcome email
+        # Send welcome email
+        testEmails = [
+            'testuser@stamped.com', 
+            'devbot@stamped.com', 
+            'usera@stamped.com', 
+            'userb@stamped.com', 
+            'userc@stamped.com',
+            'userd@stamped.com',
+        ]
+
+        if account.email not in testEmails:
+            msg = {}
+            msg['to'] = account.email
+            msg['from'] = 'Stamped <noreply@stamped.com>'
+            msg['subject'] = 'Welcome to Stamped!'
+
+            try:
+                base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
+                template = open(path, 'r')
+            except:
+                ### TODO: Add error logging?
+                raise
+            
+            params = {'screen_name': account.screen_name, 'email_address': account.email}
+            msg['body'] = utils.parseTemplate(template, params)
+
+            utils.sendEmail(msg, format='html')
 
         return account
     
