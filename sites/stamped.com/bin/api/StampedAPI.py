@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs, re, time, Blacklist, auth
+import os, logs, re, time, Blacklist, auth
 
 from datetime        import datetime
 from errors          import *
@@ -233,7 +233,20 @@ class StampedAPI(AStampedAPI):
             'usera@stamped.com', 
             'userb@stamped.com', 
             'userc@stamped.com',
-            'userd@stamped.com',
+            'userd@stamped.com', 
+            'user1@stamped.com', 
+            'user2@stamped.com', 
+            'user3@stamped.com',
+            'user4@stamped.com', 
+            'user5@stamped.com', 
+            'user6@stamped.com', 
+            'user7@stamped.com',
+            'user8@stamped.com', 
+            'mariobatali@stamped.com', 
+            'petertravers@stamped.com', 
+            'rebeccaminkoff@stamped.com',
+            'nymag@stamped.com',
+            'sample123@stamped.com',
         ]
 
         if account.email not in testEmails:
