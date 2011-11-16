@@ -930,6 +930,7 @@ static NSString* const kStampLogoURLPath = @"http://static.stamped.com/logos/";
 - (void)dismissSelf {
   if ([AccountManager sharedManager].currentUser.numStamps.integerValue == 1) {
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstStamp"];
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"hasStamped"];
     [[NSUserDefaults standardUserDefaults] synchronize];
   }
   StampedAppDelegate* delegate = (StampedAppDelegate*)[UIApplication sharedApplication].delegate;
