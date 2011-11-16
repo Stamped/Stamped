@@ -69,6 +69,12 @@ class MongoFriendshipCollection(AFriendshipDB):
             
     def getFollowers(self, userId):
         return self.followers_collection.getFollowers(userId)
+            
+    def countFriends(self, userId):
+        return len(self.friends_collection.getFriends(userId))
+            
+    def countFollowers(self, userId):
+        return len(self.followers_collection.getFollowers(userId))
 
     def approveFriendship(self, friendship):
         ### TODO

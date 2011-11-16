@@ -148,6 +148,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
 
         return stamps
 
+    def countStamps(self, userId):
+        return len(self.user_stamps_collection.getUserStampIds(userId))
+
     def getDeletedStamps(self, stampIds, **kwargs):
         return self.deleted_stamp_collection.getStamps(stampIds, **kwargs)
 
@@ -225,6 +228,9 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         self.credit_givers_collection.removeGiver(creditedUserId, \
                                                     stamp.user.user_id)
 
+    def countCredits(self, userId):
+        return self.credit_received_collection.numCredit(userId)   
+
     def giveLikeCredit(self, stampId):
         self._collection.update(
             {'_id': self._getObjectIdFromString(stampId)}, 
@@ -259,6 +265,12 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         # Return stamp ids that a user has "liked"
         return self.user_likes_collection.getUserLikes(userId) 
 
+    def countStampLikes(self, stampId):
+        return len(self.getStampLikes(stampId))
+
+    def countUserLikes(self, userId):
+        return len(self.getUserLikes(userId))
+
     def checkLike(self, userId, stampId):
         try:
             likes = self.stamp_likes_collection.getStampLikes(stampId) 
@@ -274,7 +286,5 @@ class MongoStampCollection(AMongoCollection, AStampDB):
             documentIds.append(self._getObjectIdFromString(stampId))
         result = self._removeMongoDocuments(documentIds)
 
-        return result
-
-        
+        return result     
             
