@@ -163,17 +163,17 @@ bottom:120px;
 }
 
 /* ENTITY */
-#entity .wrap{
+#entity .wrap {
 background:none
 }
 
-#entity .thanks{
+#entity .thanks {
 margin:0 auto;
 background-position:center center;
 height:83px;
 }
 
-#entity .header{
+#entity .header {
 background:url(http://static.stamped.com/assets/img/tweet_header_ribbon_90pct_noShdw.png) left bottom repeat-x;
 padding-bottom:8px;
 position:relative;
@@ -183,41 +183,25 @@ z-index:10;
 -ms-box-shadow:0 0 7px rgba(0,0,0,0.1);
 -o-box-shadow:0 0 7px rgba(0,0,0,0.1);
 box-shadow:0 0 7px rgba(0,0,0,0.1);
-margin-top:-108px;
 }
 
-#entity .header .inner{
+#entity .header .inner {
 *background:#fff; /* IE7 */
 background:rgba(255,255,255,0.9);
-padding:25px 0 7px;
+padding:11px 0 6px;
 text-align:center;
 
 position:relative;
 z-index:10;
 font-size:14px;
 
-*margin-bottom:115px; /* IE7 */
+*margin-bottom:115px; /* IE7 */ 
 }
 
 #entity .header .container{
 position:relative;
 width:940px;
 margin:0 auto 10px;
-}
-
-#entity .header .signup{
-margin:0 auto 20px;
-text-align:left;
-width:450px;
-}
-
-#entity .header .hide{
-background:url(http://static.stamped.com/assets/img/hide-x.png) right center no-repeat;
-padding-right:15px;
-position:absolute;
-right:0;
-top:0;
-font-size:11px;
 }
 
 #entity .header a{
@@ -234,8 +218,7 @@ left:0;
 top:-150px;
 }
 
-
-#entity .coming-soon{
+#entity .available{
 position:absolute;
 right:130px;
 top:-76px;
@@ -695,7 +678,7 @@ text-align:center;
 margin:30px auto;
 }
 
-#mobile-entity .coming-soon{
+#mobile-entity .available{
 margin:0 auto 25px;
 }
 
@@ -756,8 +739,8 @@ top:auto;
 }
 
 /* MISC */
-.coming-soon{
-background:url(http://static.stamped.com/assets/img/app-store-coming-soon.png) left top no-repeat;
+.available {
+background:url(http://static.stamped.com/assets/img/app-store-available.png) left top no-repeat;
 width:161px;
 height:49px;
 }
