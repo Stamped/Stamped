@@ -740,7 +740,7 @@ top:auto;
 
 /* MISC */
 .available {
-background:url(http://static.stamped.com/assets/img/app-store-available.png) left top no-repeat;
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/app-store-available.png) left top no-repeat;
 width:161px;
 height:49px;
 }
