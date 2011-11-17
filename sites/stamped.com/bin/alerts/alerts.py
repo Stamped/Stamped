@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils
+import Globals, utils, auth
 import os, sys, pymongo, json, struct, ssl, binascii
 import boto
 from optparse import OptionParser
@@ -20,6 +20,7 @@ from db.mongodb.MongoAlertQueueCollection import MongoAlertQueueCollection
 from db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
+from db.mongodb.MongoAuthEmailAlertsCollection import MongoAuthEmailAlertsCollection
 
 from APNSWrapper import APNSNotificationWrapper, APNSNotification
 import binascii
@@ -56,6 +57,14 @@ else:
     pem = IPHONE_APN_PUSH_CERT_DEV
 
 apns_wrapper = APNSNotificationWrapper(pem, not USE_PROD_CERT)
+
+# DB Connections
+alertDB             = MongoAlertQueueCollection()
+accountDB           = MongoAccountCollection()
+activityDB          = MongoActivityCollection()
+emailAlertTokenDB   = MongoAuthEmailAlertsCollection()
+inviteDB            = MongoInviteQueueCollection()
+
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
@@ -105,10 +114,6 @@ def main():
 
 
 def runAlerts(options):
-    alertDB     = MongoAlertQueueCollection()
-    accountDB   = MongoAccountCollection()
-    activityDB  = MongoActivityCollection()
-    
     numAlerts = alertDB.numAlerts()
     alerts  = alertDB.getAlerts(limit=options.limit)
     userIds = {}
@@ -123,6 +128,15 @@ def runAlerts(options):
     
     for account in accounts:
         userIds[account.user_id] = account
+
+    # Get email settings tokens
+    tokens = emailAlertTokenDB.getTokensForUsers(userIds.keys())
+
+    for userId in userIds:
+        if userId not in tokens.keys():
+            token = _setEmailAlertToken(userId)
+            tokens[userId] = token
+
     
     print 'Number of alerts: %s' % numAlerts
     
@@ -208,11 +222,15 @@ def runAlerts(options):
                     if not recipient.email:
                         raise
 
+                    # Add email address
                     if recipient.email not in userEmailQueue:
                         userEmailQueue[recipient.email] = []
 
+                    # Grab settings token
+                    token = tokens[userId]
+
                     # Build email
-                    email = buildEmail(user, recipient, activity)
+                    email = buildEmail(user, recipient, activity, token)
                     userEmailQueue[recipient.email].append(email)
 
                     print 'EMAIL COMPLETE'
@@ -261,9 +279,6 @@ def runAlerts(options):
 
 
 def runInvites(options):
-    inviteDB    = MongoInviteQueueCollection()
-    accountDB   = MongoAccountCollection()
-    
     numInvites = inviteDB.numInvites()
     invites  = inviteDB.getInvites(limit=options.limit)
     userIds   = {}
@@ -360,6 +375,29 @@ def runInvites(options):
         print
 
 
+def _setEmailAlertToken(userId):
+
+    attempt = 1
+    max_attempts = 15
+        
+    while True:
+        try:
+            emailAlertToken = SettingsEmailAlertToken()
+            emailAlertToken.token_id = auth.generateToken(43)
+            emailAlertToken.user_id = userId
+            emailAlertToken.timestamp.created = datetime.utcnow()
+
+            emailAlertTokenDB.addToken(emailAlertToken)
+            break
+        except:
+            if attempt >= max_attempts:
+                ## Add logging here
+                raise
+            attempt += 1
+
+    return emailAlertToken.token_id
+
+
 def _setSubject(user, genre):
 
     if genre == 'restamp':
@@ -391,7 +429,7 @@ def _setSubject(user, genre):
 
     return msg
 
-def _setBody(user, activity, emailAddress):
+def _setBody(user, activity, emailAddress, settingsToken):
 
     try:
         path = os.path.join(base, 'templates', 'email_%s.html.j2' % activity.genre)
@@ -415,6 +453,10 @@ def _setBody(user, activity, emailAddress):
     # Add email address
     params['email_address'] = emailAddress
 
+    # Add settings url
+    settingsUrl = 'http://www.stamped.com/settings/alerts?%s' % settingsToken
+    params['settings_url'] = settingsUrl
+
     html = parseTemplate(template, params)
 
     return html
@@ -432,12 +474,12 @@ def parseTemplate(src, params):
     return template.render(params)
 
 
-def buildEmail(user, recipient, activityItem):
+def buildEmail(user, recipient, activityItem, settingsToken):
     email = {}
     email['to'] = recipient.email
     email['from'] = 'Stamped <noreply@stamped.com>'
     email['subject'] = _setSubject(user, activityItem.genre)
-    email['body'] = _setBody(user, activityItem, recipient.email)
+    email['body'] = _setBody(user, activityItem, recipient.email, settingsToken)
     email['activity_id'] = activityItem.activity_id
 
     return email
