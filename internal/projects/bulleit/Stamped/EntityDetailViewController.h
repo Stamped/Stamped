@@ -42,8 +42,6 @@
 - (void)addSection:(CollapsibleViewController*)section;
 - (NSUInteger)lineCountOfLabel:(UILabel*)label;
 
-
-
 @property (nonatomic, retain) IBOutlet UIView* mainActionsView;
 @property (nonatomic, retain) IBOutlet UIScrollView* scrollView;
 @property (nonatomic, retain) IBOutlet UILabel* titleLabel;

@@ -566,6 +566,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     userImageScrollView_ = [[UIScrollView alloc] initWithFrame:CGRectMake(60, 0, 249, 63)];
     userImageScrollView_.alwaysBounceHorizontal = YES;
     userImageScrollView_.pagingEnabled = YES;
+    userImageScrollView_.scrollsToTop = NO;
     userImageScrollView_.backgroundColor = [UIColor clearColor];
     userImageScrollView_.hidden = YES;
     userImageScrollView_.delegate = self;

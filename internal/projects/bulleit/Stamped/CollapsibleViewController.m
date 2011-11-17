@@ -299,6 +299,7 @@ int const SPACE_HEIGHT = 10;
   scrollView.contentSize = CGSizeMake(scrollView.frame.size.width + 1.0, scrollView.frame.size.height);
   scrollView.showsHorizontalScrollIndicator = NO;
   scrollView.showsVerticalScrollIndicator = NO;
+  scrollView.scrollsToTop = NO;
   scrollView.pagingEnabled = YES;
 
   CGRect userImgFrame = CGRectMake(0.0, 0.0, 43.0, 43.0);
