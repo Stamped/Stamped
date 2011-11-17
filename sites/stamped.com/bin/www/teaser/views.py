@@ -25,7 +25,9 @@ def about(request):
 
 def index(request):
     try:
-        response = render_to_response('index.html', None)
+        autoplay_video = bool(request.GET.get('video', False))
+
+        response = render_to_response('index.html', {'autoplay_video': autoplay_video})
 
         response['Expires'] = (datetime.datetime.utcnow() + datetime.timedelta(minutes=10)).ctime()
         response['Cache-Control'] = 'max-age=600'
