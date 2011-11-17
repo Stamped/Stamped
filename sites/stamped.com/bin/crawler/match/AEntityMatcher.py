@@ -8,12 +8,14 @@ __license__   = "TODO"
 import Globals, utils
 import logs
 
+from MongoDeletedEntityCollection import MongoDeletedEntityCollection
 from AStampedAPI            import AStampedAPI
 from utils                  import abstract, AttributeDict
+from GeocoderEntityProxy    import GeocoderEntityProxy
 from Schemas                import Entity
+from datetime               import datetime
 from pprint                 import pprint
 from errors                 import *
-from GeocoderEntityProxy    import GeocoderEntityProxy
 
 __all__ = [
     "AEntityMatcher", 
@@ -48,6 +50,18 @@ class AEntityMatcher(object):
     @property
     def _stampDB(self):
         return self.stamped_api._stampDB
+    
+    @property
+    def _activityDB(self):
+        return self.stamped_api._activityDB
+    
+    @property
+    def _favoriteDB(self):
+        return self.stamped_api._favoriteDB
+    
+    @lazyProperty
+    def _deletedEntityDB(self):
+        return MongoDeletedEntityCollection()
     
     def addOne(self, entity, force=False, override=False):
         if not force:
@@ -120,7 +134,7 @@ class AEntityMatcher(object):
                     self.dead_entities.add(dupe.entity_id)
                     logs.debug("   %d) removing %s" % (i + 1, dupe.title))
             
-            self.mergeDuplicates(keep, dupes1, override=override)
+            self.resolveDuplicates(keep, dupes1, override=override)
             return keep
         except Fail:
             if 'entity_id' in entity:
@@ -208,8 +222,17 @@ class AEntityMatcher(object):
         else:
             msg = 'error: found %d duplicates which have been stamped' % len(must_keep)
             utils.log(msg)
-            raise InvalidState(msg)
+            
+            must_keep = sorted(must_keep, reverse=True)
+            keep = duplicates.pop(must_keep[0])
+            delete = []
+            
+            for i in must_keep[1:]:
+                delete.append(duplicates.pop(i))
+            
+            self.resolveDuplicates(keep, delete)
         
+        utils.log("HERE1) %s" % len(duplicates))
         return (keep, duplicates)
     
     def _getBestDuplicate(self, duplicates):
@@ -236,7 +259,73 @@ class AEntityMatcher(object):
         keep = duplicates.pop(ishortest)
         return (keep, duplicates)
     
-    def mergeDuplicates(self, keep, duplicates, override=False):
+    def resolveDuplicates(self, entity1, entities_to_delete, override=False):
+        if not isinstance(entities_to_delete, (list, tuple)):
+            entities_to_delete = [ entities_to_delete ]
+        
+        for entity2 in entities_to_delete:
+            # update all stamp references of entity2 with entity1
+            docs = self._stampDB._collection.find({ 
+                'entity.entity_id' : entity2.entity_id }, output=list)
+            
+            if docs is not None and len(docs) > 0:
+                for doc in docs:
+                    item = self._stampDB._convertFromMongo(doc)
+                    entity1.exportSchema(item.entity)
+                    pprint(item.value)
+                    item.timestamp.modified = datetime.utcnow()
+                    
+                    if not self.options.noop:
+                        self._stampDB.update(item)
+            
+            # update all activity references of entity2 with entity1
+            docs = self._activityDB._collection.find({ 
+                'link.linked_entity_id' : entity2.entity_id }, output=list)
+            
+            if docs is not None and len(docs) > 0:
+                for doc in docs:
+                    item = self._activityDB._convertFromMongo(doc)
+                    item.link.linked_entity = entity1
+                    item.link.linked_entity_id = entity1.entity_id
+                    
+                    if not self.options.noop:
+                        self._activityDB.update(item)
+            
+            # update all favorites references of entity2 with entity1
+            docs = self._favoriteDB._collection.find({ 
+                'entity.entity_id' : entity2.entity_id }, output=list)
+            
+            if docs is not None and len(docs) > 0:
+                for doc in docs:
+                    item = self._favoriteDB._convertFromMongo(doc)
+                    entity1.exportSchema(item.entity)
+                    
+                    if not self.options.noop:
+                        self._favoriteDB.update(item)
+            
+            # update all userfaventities references of entity2 with entity1
+            docs = self._favoriteDB.user_fav_entities_collection._collection.find({ 
+                'ref_ids' : entity2.entity_id }, output=list)
+            
+            if docs is not None and len(docs) > 0:
+                for doc in docs:
+                    item = self._favoriteDB.user_fav_entities_collection._convertFromMongo(doc)
+                    refs = item['ref_ids']
+                    
+                    for i in xrange(len(refs)):
+                        ref = refs[i]
+                        
+                        if ref == entity2.entity_id:
+                            refs[i] = entity1.entity_id
+                    
+                    if not self.options.noop:
+                        self._favoriteDB.user_fav_entities_collection.update(item)
+        
+        # merge data from entities to delete into entity1, updating entity1 and removing 
+        # all other entities from the entities and places collections
+        self._mergeDuplicates(keep=entity1, duplicates=entities_to_delete, override=override)
+    
+    def _mergeDuplicates(self, keep, duplicates, override=False):
         numDuplicates = len(duplicates)
         
         assert numDuplicates > 0
@@ -279,10 +368,13 @@ class AEntityMatcher(object):
                 
                 if 'place' in entity:
                     self._placesDB.removeEntity(entity.entity_id)
+                
+                # backup the deleted entity to a collection just in case..
+                self._deletedEntityDB.addEntity(entity)
         
         if wrap['stale']:
             if self.options.verbose:
-                utils.log("[%s] retaining %s:" % (self, keep.title))
+                utils.log("[%s] retaining %s (removed %d):" % (self, keep.title, numDuplicates))
                 pprint(keep.value)
             
             if not self.options.noop:

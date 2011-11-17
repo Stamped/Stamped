@@ -260,6 +260,11 @@ class AMongoCollection(object):
             raise Unavailable("Document not found")
         return document
     
+    def update(self, obj):
+        document = self._convertToMongo(obj)
+        document = self._updateMongoDocument(document)
+        return self._convertFromMongo(document)
+    
     def _updateMongoDocument(self, document):
         document['_id'] = self._collection.save(document, safe=True)
         return document

@@ -69,7 +69,6 @@ class MongoStampCollection(AMongoCollection, AStampDB):
     @lazyProperty
     def deleted_stamp_collection(self):
         return MongoDeletedStampCollection()
-
     
     def addStamp(self, stamp):
         return self._addObject(stamp)
@@ -80,9 +79,7 @@ class MongoStampCollection(AMongoCollection, AStampDB):
         return self._convertFromMongo(document)
     
     def updateStamp(self, stamp):
-        document = self._convertToMongo(stamp)
-        document = self._updateMongoDocument(document)
-        return self._convertFromMongo(document)
+        return self.update(stamp)
     
     def removeStamp(self, stampId):
         documentId = self._getObjectIdFromString(stampId)

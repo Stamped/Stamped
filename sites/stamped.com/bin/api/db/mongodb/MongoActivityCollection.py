@@ -117,8 +117,7 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
 
         if len(alerts):        
             self.alerts_collection.addAlerts(alerts)
-
-        
+    
     def removeActivity(self, genre, userId, **kwargs):
         stampId     = kwargs.pop('stampId', None)
         commentId   = kwargs.pop('commentId', None)
@@ -144,13 +143,10 @@ class MongoActivityCollection(AMongoCollection, AActivityDB):
                 'link.linked_comment_id': commentId,
                 'genre': genre
             })
-
-
+    
     def removeActivityForStamp(self, stampId):
         self._collection.remove({'link.linked_stamp_id': stampId})
-        
+    
     def removeUserActivity(self, userId):
         self._collection.remove({'user.user_id': userId})
-
-
 
