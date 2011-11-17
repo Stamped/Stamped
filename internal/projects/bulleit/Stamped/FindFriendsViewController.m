@@ -321,15 +321,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [self adjustNippleToView:self.twitterButton];
   [searchField_ resignFirstResponder];
   [self setSearchFieldHidden:YES animated:NO];
+  [self.tableView reloadData];
   tableView_.hidden = NO;
   contactsButton_.selected = NO;
   twitterButton_.selected = YES;
   facebookButton_.selected = NO;
   stampedButton_.selected = NO;
-
-  if (twitterFriends_) {
-    [self.tableView reloadData];
-  }
     
   if ([[SocialManager sharedManager] isSignedInToTwitter]) {
     self.signInTwitterView.hidden = YES;
@@ -347,15 +344,12 @@ static NSString* const kInvitePath = @"/friendships/invite.json";
   [self adjustNippleToView:facebookButton_];
   [searchField_ resignFirstResponder];
   [self setSearchFieldHidden:YES animated:NO];
+  [self.tableView reloadData];
   tableView_.hidden = NO;
   contactsButton_.selected = NO;
   twitterButton_.selected = NO;
   facebookButton_.selected = YES;
   stampedButton_.selected = NO;
-  
-  if (facebookFriends_) {
-    [self.tableView reloadData];
-  }
 
   if ([[SocialManager sharedManager] isSignedInToFacebook]) {
     self.signInFacebookView.hidden = YES;

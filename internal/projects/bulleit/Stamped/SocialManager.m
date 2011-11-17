@@ -129,8 +129,12 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 
 - (BOOL)isSignedInToTwitter {
   GTMOAuthAuthentication* auth = [self createAuthentication];
-  return [GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
-                                                    authentication:auth] ? YES :NO;
+  if ([GTMOAuthViewControllerTouch authorizeFromKeychainForName:kKeychainTwitterToken
+                                                 authentication:auth]) {
+    self.authentication = auth;
+    return YES;
+  }
+  return NO;
 }
 
 - (BOOL)isSignedInToFacebook {
@@ -493,6 +497,7 @@ NSString* const kFacebookFriendsChangedNotification = @"kFacebookFriendsChangedN
 #pragma mark - RKRequestDelegate methods.
 
 - (void)request:(RKRequest*)request didLoadResponse:(RKResponse*)response {
+  NSLog(@"%@", response.bodyAsString);
   if (!response.isOK) {
     if ([request.resourcePath rangeOfString:kTwitterCurrentUserURI].location != NSNotFound ||
         [request.resourcePath rangeOfString:kTwitterFollowersURI].location != NSNotFound ||
