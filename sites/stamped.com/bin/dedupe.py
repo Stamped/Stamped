@@ -97,7 +97,7 @@ class EntityDeduper(Greenlet):
         return self.__class__.__name__
 
 def parseCommandLine():
-    usage   = "Usage: %prog [options] query"
+    usage   = "Usage: %prog [options]"
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     

@@ -275,7 +275,7 @@ class MongoEntitySearcher(EntitySearcher):
         if prefix:
             assert not full
         else:
-            input_query = input_query.strip()
+            query = query.strip()
         
         if coords is not None:
             coords = self._parseCoords(coords)
