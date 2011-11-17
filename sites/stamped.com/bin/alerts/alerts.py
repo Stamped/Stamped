@@ -20,7 +20,7 @@ from db.mongodb.MongoAlertQueueCollection import MongoAlertQueueCollection
 from db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
-from db.mongodb.MongoAuthEmailAlertsCollection import MongoAuthEmailAlertsCollection
+from MongoStampedAuth import MongoStampedAuth
 
 from APNSWrapper import APNSNotificationWrapper, APNSNotification
 import binascii
@@ -62,7 +62,6 @@ apns_wrapper = APNSNotificationWrapper(pem, not USE_PROD_CERT)
 alertDB             = MongoAlertQueueCollection()
 accountDB           = MongoAccountCollection()
 activityDB          = MongoActivityCollection()
-emailAlertTokenDB   = MongoAuthEmailAlertsCollection()
 inviteDB            = MongoInviteQueueCollection()
 
 
@@ -114,11 +113,17 @@ def main():
 
 
 def runAlerts(options):
+    stampedAuth = MongoStampedAuth()
+
     numAlerts = alertDB.numAlerts()
     alerts  = alertDB.getAlerts(limit=options.limit)
     userIds = {}
     userEmailQueue = {}
     userPushQueue  = {}
+
+    if len(alerts) == 0:
+        print 'No alerts!'
+        return
     
     for alert in alerts:
         userIds[str(alert['user_id'])] = 1
@@ -130,13 +135,7 @@ def runAlerts(options):
         userIds[account.user_id] = account
 
     # Get email settings tokens
-    tokens = emailAlertTokenDB.getTokensForUsers(userIds.keys())
-
-    for userId in userIds:
-        if userId not in tokens.keys():
-            token = _setEmailAlertToken(userId)
-            tokens[userId] = token
-
+    tokens = stampedAuth.ensureEmailAlertTokensForUsers(userIds.keys())
     
     print 'Number of alerts: %s' % numAlerts
     
@@ -227,7 +226,7 @@ def runAlerts(options):
                         userEmailQueue[recipient.email] = []
 
                     # Grab settings token
-                    token = tokens[userId]
+                    token = tokens[user.user_id]
 
                     # Build email
                     email = buildEmail(user, recipient, activity, token)
@@ -375,29 +374,6 @@ def runInvites(options):
         print
 
 
-def _setEmailAlertToken(userId):
-
-    attempt = 1
-    max_attempts = 15
-        
-    while True:
-        try:
-            emailAlertToken = SettingsEmailAlertToken()
-            emailAlertToken.token_id = auth.generateToken(43)
-            emailAlertToken.user_id = userId
-            emailAlertToken.timestamp.created = datetime.utcnow()
-
-            emailAlertTokenDB.addToken(emailAlertToken)
-            break
-        except:
-            if attempt >= max_attempts:
-                ## Add logging here
-                raise
-            attempt += 1
-
-    return emailAlertToken.token_id
-
-
 def _setSubject(user, genre):
 
     if genre == 'restamp':
@@ -454,7 +430,7 @@ def _setBody(user, activity, emailAddress, settingsToken):
     params['email_address'] = emailAddress
 
     # Add settings url
-    settingsUrl = 'http://www.stamped.com/settings/alerts?%s' % settingsToken
+    settingsUrl = 'http://www.stamped.com/settings/alerts?t=%s' % settingsToken
     params['settings_url'] = settingsUrl
 
     html = parseTemplate(template, params)

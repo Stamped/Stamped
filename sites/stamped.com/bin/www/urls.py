@@ -27,5 +27,6 @@ urlpatterns = patterns('',
     url(R'^settings/password/forgot$', 'appsettings.views.passwordForgot'),
     url(R'^settings/password/sent$', 'appsettings.views.passwordSent'),
     url(R'^settings/password/success$', 'appsettings.views.passwordSuccess'),
+    url(R'^settings/alerts$', 'appsettings.views.alertSettings'),
     url(R'$', 'teaser.views.index'),
 )

@@ -17,6 +17,7 @@ from AStampedAuth import AStampedAuth
 from AAccountDB import AAccountDB
 from AAuthAccessTokenDB import AAuthAccessTokenDB
 from AAuthRefreshTokenDB import AAuthRefreshTokenDB
+from AAuthEmailAlertsDB import AAuthEmailAlertsDB
 
 
 class StampedAuth(AStampedAuth):
@@ -345,7 +346,59 @@ class StampedAuth(AStampedAuth):
     
     def removeAccessToken(self, tokenId):
         return self._accessTokenDB.removeAccessToken(tokenId)
-
-
-
     
+    # ################### #
+    # Email Access Tokens #
+    # ################### #
+
+    def addEmailAlertToken(self, userId):
+        attempt = 1
+        max_attempts = 15
+            
+        while True:
+            try:
+                token = SettingsEmailAlertToken()
+                token.token_id = auth.generateToken(43)
+                token.user_id = userId
+                token.timestamp.created = datetime.utcnow()
+
+                self._emailAlertDB.addToken(token)
+                logs.debug("Email Alert Token Created")
+                break
+            except:
+                if attempt >= max_attempts:
+                    ## Add logging here
+                    raise
+                attempt += 1
+
+        return token.token_id
+
+    def verifyEmailAlertToken(self, tokenId):
+        try:
+            token = self._emailAlertDB.getToken(tokenId)
+            if token.user_id == None:
+                raise
+            return token.user_id
+        except:
+            msg = "Invalid token"
+            logs.warning(msg)
+            raise AuthError("invalid_token", msg)
+
+    def ensureEmailAlertTokensForUsers(self, userIds):
+        tokens = self._emailAlertDB.getTokensForUsers(userIds)
+
+        result = {}
+        for token in tokens:
+            result[token.user_id] = token.token_id
+
+        for userId in userIds:
+            if userId not in result.keys():
+                try:
+                    token = self.addEmailAlertToken(userId)
+                    result[userId] = token
+                except:
+                    logs.warning('UNABLE TO ADD TOKEN FOR USER: %s' % userId)
+                    pass
+        
+        return result
+

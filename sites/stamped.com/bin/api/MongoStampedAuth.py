@@ -14,6 +14,7 @@ from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoAuthAccessTokenCollection import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 from db.mongodb.MongoAuthPasswordResetCollection import MongoAuthPasswordResetCollection
+from db.mongodb.MongoAuthEmailAlertsCollection import MongoAuthEmailAlertsCollection
 
 class MongoStampedAuth(StampedAuth):
     """
@@ -39,3 +40,6 @@ class MongoStampedAuth(StampedAuth):
     def _passwordResetDB(self):
         return MongoAuthPasswordResetCollection()
 
+    @lazyProperty
+    def _emailAlertDB(self):
+        return MongoAuthEmailAlertsCollection()

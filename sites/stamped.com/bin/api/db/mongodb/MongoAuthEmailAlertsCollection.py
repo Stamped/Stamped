@@ -12,11 +12,13 @@ from errors import *
 from Schemas import *
 
 from AMongoCollection import AMongoCollection
+from AAuthEmailAlertsDB import AAuthEmailAlertsDB
 
-class MongoAuthEmailAlertsCollection(AMongoCollection):
+class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='settingsemailalerttokens')
+        AAuthEmailAlertsDB.__init__(self)
 
         self._collection.ensure_index('token_id', unique=True)
 
@@ -56,10 +58,9 @@ class MongoAuthEmailAlertsCollection(AMongoCollection):
 
         data = self._collection.find({"_id": {"$in": query}}).limit(limit)
             
-        result = {}
+        result = []
         for item in data:
-            item = self._convertFromMongo(item)
-            result[item.user_id] = item.token_id
+            result.append(self._convertFromMongo(item))
         return result
     
     def getToken(self, tokenId):
