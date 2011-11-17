@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals, utils
 import logs
 
-from MongoDeletedEntityCollection import MongoDeletedEntityCollection
+#from api.db.mongo.MongoDeletedEntityCollection import MongoDeletedEntityCollection
 from AStampedAPI            import AStampedAPI
-from utils                  import abstract, AttributeDict
+from utils                  import abstract, AttributeDict, lazyProperty
 from GeocoderEntityProxy    import GeocoderEntityProxy
 from Schemas                import Entity
 from datetime               import datetime
