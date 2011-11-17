@@ -250,21 +250,18 @@ class MongoStampedAPI(StampedAPI):
             }, 
         }
         
-        try:
-            # optionally store stats
-            def _store(prefix, stats):
-                for k, v in stats.iteritems():
-                    key = "%s.%s" % (prefix, k)
-                    
-                    if isinstance(v, dict):
-                        _store(key, v)
-                    else:
-                        self._statsSink.time(key, v)
-            
-            if store:
-                _store('stamped.stats', stats)
-        except:
-            utils.printException()
+        # optionally store stats
+        def _store(prefix, stats):
+            for k, v in stats.iteritems():
+                key = "%s.%s" % (prefix, k)
+                
+                if isinstance(v, dict):
+                    _store(key, v)
+                else:
+                    self._statsSink.time(key, v)
+        
+        if store:
+            _store('stamped.stats', stats)
         
         return stats
 
