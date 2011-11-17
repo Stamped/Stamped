@@ -546,13 +546,12 @@ box-shadow:0 0 7px rgba(0,0,0,0.1);
 #entity .header .inner{
 *background:#fff; /* IE7 */
 background:rgba(255,255,255,0.9);
-padding:25px 0 7px;
+padding:10px 0 7px;
 text-align:center;
 
 position:relative;
 z-index:10;
 font-size:14px;
-
 }
 
 #entity .header .container{
@@ -591,9 +590,9 @@ top:-150px;
 }
 
 
-#entity .coming-soon{
+#entity .available{
 position:absolute;
-right:130px;
+right:140px;
 top:-76px;
 }
 
@@ -939,7 +938,7 @@ text-align:center;
 margin:30px auto;
 }
 
-#mobile-entity .coming-soon{
+#mobile-entity .available{
 margin:0 auto 25px;
 }
 
@@ -1000,8 +999,8 @@ top:auto;
 }
 
 /* MISC */
-.coming-soon{
-background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/app-store-coming-soon.png) left top no-repeat;
+.available{
+background:url(http://stamped.com.static.images.s3.amazonaws.com/assets/img/app-store-available.png) left top no-repeat;
 width:161px;
 height:49px;
 }
@@ -1060,5 +1059,4 @@ top:-33px;
 
 .close:hover{
 background-position:left bottom;
-
 }
