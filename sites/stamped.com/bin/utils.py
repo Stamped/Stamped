@@ -60,6 +60,13 @@ def lazyProperty(undecorated):
             return v
     return decorated
 
+stamps
+activity
+favorites
+places
+entities
+userfaveentities
+
 def log(s):
     s = _formatLog(s) + "\n"
     

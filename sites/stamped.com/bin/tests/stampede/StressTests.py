@@ -42,7 +42,7 @@ realisticParams = {
 
 class StressTests(AStampedAPITestCase):
     def setUp(self):
-        self._test = StressTest(self, **baselineParams)
+        self._test = StressTest(self, **realisticParams)
     
     def test_stress(self):
         self._test.run()
