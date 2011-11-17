@@ -63,6 +63,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   NSMutableDictionary* titleAttributes_;
   CGRect stampImageFrame_;
   CGFloat userImageRightMargin_;
+  CGFloat temp_;
 }
 
 - (CGAffineTransform)transformForUserImageAtIndex:(NSUInteger)index;
@@ -272,7 +273,16 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
 
 - (void)drawRect:(CGRect)rect {
   [super drawRect:rect];
+  CGRect tempRect = CGRectMake(CGRectGetMinX(titleLayer_.frame),
+                               CGRectGetMinY(titleLayer_.frame),
+                               temp_,
+                               CGRectGetHeight(titleLayer_.frame));
+
   CGContextRef ctx = UIGraphicsGetCurrentContext();
+  
+  CGContextSetFillColorWithColor(ctx, [UIColor blueColor].CGColor);
+  CGContextFillRect(ctx, tempRect);
+  
   CGContextSaveGState(ctx);
   CGContextTranslateCTM(ctx, titleLayer_.frame.origin.x, titleLayer_.frame.origin.y);
   [titleLayer_ drawInContext:ctx];
@@ -293,11 +303,20 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
     title_ = [title copy];
 
     NSAttributedString* attrString = [self titleAttributedStringWithColor:[UIColor stampedDarkGrayColor]];
+    NSAttributedString* ellipsisString = [[[NSAttributedString alloc] 
+                                           initWithString:@"…" attributes:titleAttributes_] autorelease];
     titleLayer_.string = attrString;
     CTLineRef line = CTLineCreateWithAttributedString((CFAttributedStringRef)attrString);
-    CGFloat ascent, descent, leading, width;
-    width = fmin(kTitleMaxWidth, CTLineGetTypographicBounds(line, &ascent, &descent, &leading));
+    CTLineRef truncatedLine = CTLineCreateTruncatedLine(line, kTitleMaxWidth, kCTLineTruncationEnd, 
+                                                      CTLineCreateWithAttributedString((CFAttributedStringRef)ellipsisString));
+    CFIndex lineGlyphCount = CTLineGetGlyphCount(line);
+    CFIndex truncatedLineGlyphCount = CTLineGetGlyphCount(truncatedLine);
+    CFIndex lastCharIndex = (truncatedLineGlyphCount < lineGlyphCount) ? 
+                                truncatedLineGlyphCount - 1 : lineGlyphCount;
+    CGFloat offset = CTLineGetOffsetForStringIndex(line, lastCharIndex, nil);
+    CGFloat width = fmin(kTitleMaxWidth, offset);
     CFRelease(line);
+    CFRelease(truncatedLine);
     CGRect oldFrame = stampImageFrame_;
     stampImageFrame_ = CGRectMake(userImageRightMargin_ + width - (kStampSize / 2.0),
                                   kStampSize / 2.0,
@@ -456,7 +475,7 @@ static const CGFloat kImageRotations[] = {0.09, -0.08, 0.08, -0.09};
   return self;
 }
 
-- (void)drawRect:(CGRect)rect {
+- (void)drawRect:(CGRect)rect {  
   if (numDots_ == 0)
     return;
 

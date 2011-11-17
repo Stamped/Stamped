@@ -138,7 +138,7 @@
 									</object>
 									<object class="IBUIWebView" id="842738">
 										<reference key="NSNextResponder" ref="6293450"/>
-										<int key="NSvFlags">276</int>
+										<int key="NSvFlags">292</int>
 										<string key="NSFrame">{{15, 40}, {290, 281}}</string>
 										<reference key="NSSuperview" ref="6293450"/>
 										<reference key="NSWindow"/>
@@ -251,7 +251,7 @@
 									</object>
 									<object class="IBUIWebView" id="234779942">
 										<reference key="NSNextResponder" ref="842029821"/>
-										<int key="NSvFlags">276</int>
+										<int key="NSvFlags">292</int>
 										<string key="NSFrame">{{15, 40}, {290, 281}}</string>
 										<reference key="NSSuperview" ref="842029821"/>
 										<reference key="NSWindow"/>
@@ -360,7 +360,7 @@
 									</object>
 									<object class="IBUIWebView" id="71895373">
 										<reference key="NSNextResponder" ref="612608102"/>
-										<int key="NSvFlags">276</int>
+										<int key="NSvFlags">292</int>
 										<string key="NSFrame">{{15, 40}, {290, 281}}</string>
 										<reference key="NSSuperview" ref="612608102"/>
 										<reference key="NSWindow"/>
