@@ -196,7 +196,7 @@ def alertSettings(request, **kwargs):
         logs.save()
 
         ### TODO: CHANGE URL
-        return render_to_response('password-reset.html', {'error': errorMsg})
+        return render_to_response('password-reset.html', {'error': 'FAIL'})
 
 
 @require_http_methods(["POST"])
@@ -241,6 +241,6 @@ def alertSettingsUpdate(request, **kwargs):
         logs.save()
 
         ### TODO: CHANGE URL
-        return render_to_response('password-reset.html', {'error': errorMsg})
+        return render_to_response('password-reset.html', {'error': 'FAIL'})
 
 
