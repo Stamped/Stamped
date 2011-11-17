@@ -64,14 +64,18 @@ stamped.init = function(){
         };
     };
     
-    $('.video-launcher').live('click', function(){    
+    showVideo = function() {
         $('body').append('<div class="shadow"></div><div class="lightbox"><a class="close replaced" href="#">close</a><iframe src="http://player.vimeo.com/video/31275415?title=0&amp;byline=0&amp;portrait=0&amp;color=66a6ff&amp;autoplay=1" width="854" height="482" frameborder="0" webkitAllowFullScreen allowFullScreen></iframe></div>');
         clearInterval(slidechanger);
         $('.shadow, .lightbox').fadeIn('slow');
-         event.preventDefault();
+    };
+    
+    $('.video-launcher').live('click', function(event){    
+        event.preventDefault();
+        showVideo();
     });
     
-    $('.close').live('click', function(){
+    $('.close').live('click', function(event){
         $('.shadow, .lightbox').fadeOut('slow', function(){
             $('.shadow, .lightbox').remove();
         });
