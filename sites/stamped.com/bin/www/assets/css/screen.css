@@ -123,7 +123,7 @@ background:-ms-gradient(linear, left top, right bottom, from(#3cf), to(#911));
 background:-o-gradient(linear, left top, right bottom, from(#3cf), to(#911));
 background:gradient(linear, left top, right bottom, from(#3cf), to(#911));
 width:660px;
-margin:112px auto 0;
+margin:94px auto 0;
 -webkit-box-shadow:0 5px 10px rgba(0,0,0,0.15);
 -moz-box-shadow:0 5px 10px rgba(0,0,0,0.15);
 -ms-box-shadow:0 5px 10px rgba(0,0,0,0.15);
@@ -546,7 +546,7 @@ box-shadow:0 0 7px rgba(0,0,0,0.1);
 #entity .header .inner{
 *background:#fff; /* IE7 */
 background:rgba(255,255,255,0.9);
-padding:25px 0 7px;
+padding:10px 0 7px;
 text-align:center;
 
 position:relative;
@@ -587,7 +587,7 @@ height:200px;
 position:absolute;
 z-index:2;
 left:0;
-top:-150px;
+top:-38px;
 }
 
 
@@ -1060,5 +1060,4 @@ top:-33px;
 
 .close:hover{
 background-position:left bottom;
-
 }
